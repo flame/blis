@@ -18,6 +18,7 @@
 # since its only contents are .a files.
 *.a
 *.so
+*.so.*
 # test executables
 *.x
 *.pexe
@@ -41,4 +42,8 @@ include/*/*.h
 
 # -- misc. --
 
+# BLIS testsuite output file
 output.testsuite
+
+# BLAS test output files
+out.*

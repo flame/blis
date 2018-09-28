@@ -6,7 +6,8 @@ out_root="output"
 
 #sys="blis"
 #sys="stampede"
-sys="lonestar"
+sys="stampede2"
+#sys="lonestar"
 #sys="wahlberg"
 
 # Bind threads to processors.
@@ -29,6 +30,10 @@ elif [ ${sys} = "stampede" ]; then
 
 	# A hack to use libiomp5 with gcc.
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64"
+
+elif [ ${sys} = "stampede2" ]; then
+
+	:
 
 elif [ ${sys} = "lonestar" ]; then
 
@@ -100,6 +105,10 @@ elif [ ${sys} = "stampede" ]; then
 
 	test_impls="openblas mkl asm_blis 3mhw_blis 3m3_blis 3m2_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis 1m_blis"
 	#test_impls="openblas mkl asm_blis"
+
+elif [ ${sys} = "stampede2" ]; then
+
+	test_impls="openblas mkl asm_blis"
 
 elif [ ${sys} = "lonestar" ]; then
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -74,27 +74,27 @@ void bli_ger_int( conj_t  conjx,
 		bli_ger_check( alpha, x, y, a );
 
 	// If A has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *a ) ) return;
+	if ( bli_obj_has_zero_dim( a ) ) return;
 
 	// If x or y has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *x ) ||
-	     bli_obj_has_zero_dim( *y ) ) return;
+	if ( bli_obj_has_zero_dim( x ) ||
+	     bli_obj_has_zero_dim( y ) ) return;
 
 	// Alias the objects, applying conjx and conjy to x and y, respectively.
-	bli_obj_alias_with_conj( conjx, *x, x_local );
-	bli_obj_alias_with_conj( conjy, *y, y_local );
-	bli_obj_alias_to( *a, a_local );
+	bli_obj_alias_with_conj( conjx, x, &x_local );
+	bli_obj_alias_with_conj( conjy, y, &y_local );
+	bli_obj_alias_to( a, &a_local );
 
 	// If matrix A is marked for conjugation, we interpret this as a request
 	// to apply a conjugation to the other operands.
-	if ( bli_obj_has_conj( a_local ) )
+	if ( bli_obj_has_conj( &a_local ) )
 	{
-		bli_obj_toggle_conj( a_local );
+		bli_obj_toggle_conj( &a_local );
 
-		bli_obj_toggle_conj( x_local );
-		bli_obj_toggle_conj( y_local );
+		bli_obj_toggle_conj( &x_local );
+		bli_obj_toggle_conj( &y_local );
 
-		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha ),
+		bli_obj_scalar_init_detached_copy_of( bli_obj_dt( alpha ),
 		                                      BLIS_CONJUGATE,
 		                                      alpha,
 		                                      &alpha_local );
@@ -107,10 +107,10 @@ void bli_ger_int( conj_t  conjx,
 	// If we are about the call a leaf-level implementation, and matrix A
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions.
-	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( a_local ) )
+	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( &a_local ) )
 	{
-		bli_obj_induce_trans( a_local );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a_local );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
 	}
 
 	// Extract the variant number and implementation type.

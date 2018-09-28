@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,16 +32,8 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
-void bla_syr_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* uploa,
-       const f77_int*  m,
-       const f77_int*  incx,
-       const f77_int*  lda
-     );
+#define bla_syr_check bla_her_check
 
 #endif

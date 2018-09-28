@@ -42,11 +42,6 @@ THIS_CONFIG    := knl
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -66,19 +61,27 @@ COPTFLAGS      := -O3
 endif
 
 ifeq ($(DEBUG_TYPE),sde)
-CPPROCFLAGS    += -DBLIS_NO_HBWMALLOC
+# Unconditionally disable use of libmemkind in Intel SDE.
+# Note: The BLIS_DISABLE_MEMKIND macro definition will override
+# (undefine) the BLIS_ENABLE_MEMKIND macro definition.
+CPPROCFLAGS    += -DBLIS_DISABLE_MEMKIND
+# This value is normally set by configure and communicated to make via
+# config.mk, however, the make_defs.mk files (this file) get included
+# after config.mk, so this definition will override that earlier
+# definition.
+MK_ENABLE_MEMKIND := no
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+CKVECFLAGS     := -mavx512f -mavx512pf -mfpmath=sse -march=knl
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xMIC-AVX512
+CKVECFLAGS     := -xMIC-AVX512
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx512f -mavx512pf -mfpmath=sse -march=knl
+CKVECFLAGS     := -mavx512f -mavx512pf -mfpmath=sse -march=knl
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -88,21 +91,25 @@ endif
 # The assembler on OS X won't recognize AVX512 without help.
 ifneq ($(CC_VENDOR),icc)
 ifeq ($(OS_NAME),Darwin)
-CVECFLAGS      += -Wa,-march=knl
+CKVECFLAGS     += -Wa,-march=knl
 endif
 endif
 
-# Override the default value for LDFLAGS.
-LDFLAGS        :=
-
-# Never use libmemkind with Intel SDE.
-ifneq ($(DEBUG_TYPE),sde)
-LDFLAGS        += -lmemkind
+# Flags specific to reference kernels.
+# Note: We use AVX2 for reference kernels instead of AVX-512.
+CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd
+else
+ifeq ($(CC_VENDOR),icc)
+CRVECFLAGS     := -xMIC-AVX512
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd
+else
+$(error gcc, icc, or clang is required for this configuration.)
 endif
-
-# Never use libm with Intel compilers.
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
+endif
 endif
 
 # Store all of the variables here to new variables containing the

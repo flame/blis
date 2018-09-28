@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -124,10 +124,11 @@ void* bli_malloc_align
 	p_byte += ptr_size;
 
 	// Compute the offset to the desired alignment.
-	if ( bli_is_unaligned_to( p_byte, align_size ) )
+	if ( bli_is_unaligned_to( ( siz_t )p_byte, ( siz_t )align_size ) )
 	{
 		align_offset = align_size -
-		               bli_offset_past_alignment( p_byte, align_size );
+		               bli_offset_past_alignment( ( siz_t )p_byte,
+		                                          ( siz_t )align_size );
 	}
 
 	// Advance the pointer using the difference between the alignment

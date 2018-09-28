@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,13 +32,19 @@
 
 */
 
-GEMM_UKR_PROT( double,   d, gemm_knl_asm_12x16 )
+GEMM_UKR_PROT( double,   s, gemm_knl_asm_24x16 )
 GEMM_UKR_PROT( double,   d, gemm_knl_asm_24x8 )
-GEMM_UKR_PROT( double,   d, gemm_knl_asm_30x8 )
-GEMM_UKR_PROT( double,   d, gemm_knl_asm_8x24 )
+
+PACKM_KER_PROT( double,   s, packm_knl_asm_24xk )
+PACKM_KER_PROT( double,   s, packm_knl_asm_16xk )
 
 PACKM_KER_PROT( double,   d, packm_knl_asm_24xk )
 PACKM_KER_PROT( double,   d, packm_knl_asm_8xk )
+
+// unused:
+GEMM_UKR_PROT( double,   d, gemm_knl_asm_12x16 )
+GEMM_UKR_PROT( double,   d, gemm_knl_asm_30x8 )
+GEMM_UKR_PROT( double,   d, gemm_knl_asm_8x24 )
 
 PACKM_KER_PROT( double,   d, packm_knl_asm_30xk )
 

@@ -216,8 +216,8 @@ err_t bli_trsm_small
     // We have to call matrix scaling if alpha != 1.0
     
     // if row major format return. Check this again.
-    if ((bli_obj_row_stride(*a) != 1) ||
-        (bli_obj_row_stride(*b) != 1))
+    if ((bli_obj_row_stride(a) != 1) ||
+        (bli_obj_row_stride(b) != 1))
     {
         return BLIS_INVALID_ROW_STRIDE;
     }
@@ -231,7 +231,7 @@ err_t bli_trsm_small
     }
 
     // A is expected to be triangular in trsm
-    if (!bli_obj_is_upper_or_lower (*a))
+    if (!bli_obj_is_upper_or_lower (a))
     {
 	return BLIS_EXPECTED_TRIANGULAR_OBJECT;
     }
@@ -242,11 +242,11 @@ err_t bli_trsm_small
     // cases, can move the checks with more cases higher up.
     if (side == BLIS_LEFT)
     {
-	if (bli_obj_has_trans(*a))
+	if (bli_obj_has_trans(a))
 	{
 		if (dt == BLIS_DOUBLE)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				//A.'X = B;  A is upper triangular; A has to be transposed; double precision
 #if 0 // planning to implement this in this iteration
@@ -262,7 +262,7 @@ err_t bli_trsm_small
 		}
 		else if (dt == BLIS_FLOAT)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				//A.'X = B;  A is upper triangular; A has to be transposed; single precision
 				//return bli_strsm_small_AutXB(side, alpha, a, b, cntx, cntl);
@@ -278,7 +278,7 @@ err_t bli_trsm_small
 	{
 		if (dt == BLIS_DOUBLE)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				return BLIS_NOT_YET_IMPLEMENTED;
 			}
@@ -291,7 +291,7 @@ err_t bli_trsm_small
 		}
 		else if (dt == BLIS_FLOAT)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				return BLIS_NOT_YET_IMPLEMENTED;
 			}
@@ -305,11 +305,11 @@ err_t bli_trsm_small
     }
     else
     {
-	if (bli_obj_has_trans(*a))
+	if (bli_obj_has_trans(a))
 	{
 		if (dt == BLIS_DOUBLE)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				return BLIS_NOT_YET_IMPLEMENTED;
 			}
@@ -325,7 +325,7 @@ err_t bli_trsm_small
 		}
 		else if (dt == BLIS_FLOAT)
 		{
-			if (bli_obj_is_upper(*a))
+			if (bli_obj_is_upper(a))
 			{
 				return BLIS_NOT_YET_IMPLEMENTED;
 			}
@@ -361,11 +361,11 @@ static err_t bli_dtrsm_small_AlXB (
 				                  )
 {
 
-  int M = bli_obj_length(*b); // number of rows of matrix B
-  int N = bli_obj_width(*b);  // number of columns of matrix B
+  int M = bli_obj_length(b); // number of rows of matrix B
+  int N = bli_obj_width(b);  // number of columns of matrix B
 
-  int lda = bli_obj_col_stride(*a); // column stride of A
-  int ldb = bli_obj_col_stride(*b); // column stride of B
+  int lda = bli_obj_col_stride(a); // column stride of A
+  int ldb = bli_obj_col_stride(b); // column stride of B
 
   int i;
   int j;
@@ -497,19 +497,19 @@ static err_t bli_strsm_small_AlXB (
 {
   obj_t alpha, beta; // gemm parameters
   obj_t Ga, Gb, Gc;  // for GEMM
-  int m = bli_obj_length(*b); // number of rows of matrix B
-  int n = bli_obj_width(*b);  // number of columns of matrix B
+  int m = bli_obj_length(b); // number of rows of matrix B
+  int n = bli_obj_width(b);  // number of columns of matrix B
 
-  int lda = bli_obj_col_stride(*a); // column stride of A
-  int ldb = bli_obj_col_stride(*b); // column stride of B
+  int lda = bli_obj_col_stride(a); // column stride of A
+  int ldb = bli_obj_col_stride(b); // column stride of B
 
-  int rsa = bli_obj_row_stride(*a); // row stride of A
-  int rsb = bli_obj_row_stride(*b); // row stride of B
+  int rsa = bli_obj_row_stride(a); // row stride of A
+  int rsb = bli_obj_row_stride(b); // row stride of B
 
   int i = 0;
   int j;
   int blk_size = 8;
-  int isUnitDiag = bli_obj_has_unit_diag(*a);
+  int isUnitDiag = bli_obj_has_unit_diag(a);
 
   float alphaVal;
   float *L =  a->buffer;
@@ -524,7 +524,7 @@ static err_t bli_strsm_small_AlXB (
   	return BLIS_NOT_YET_IMPLEMENTED;
   }
 
-  alphaVal = *((float *)bli_obj_buffer_for_const(BLIS_FLOAT, *AlphaObj));
+  alphaVal = *((float *)bli_obj_buffer_for_const(BLIS_FLOAT, AlphaObj));
 
   /* Small _GEMM preparation code */
   bli_obj_create( BLIS_FLOAT, 1, 1, 0, 0, &alpha );
@@ -539,9 +539,9 @@ static err_t bli_strsm_small_AlXB (
   bli_obj_create_with_attached_buffer( BLIS_FLOAT, blk_size, n, b->buffer, rsb, ldb, &Gb);
   bli_obj_create_with_attached_buffer( BLIS_FLOAT, blk_size, n, b->buffer, rsb, ldb, &Gc);
 
-  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, Ga );
-  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, Gb );
-  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, Gc );
+  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &Ga );
+  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &Gb );
+  bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &Gc );
 
   //first block of trsm
   Gb.buffer = (void*)(B + i);
@@ -644,17 +644,17 @@ static err_t bli_strsm_small_XAltB(
                                     cntl_t* cntl
 				 )
 {
-  int m = bli_obj_length(*a); // number of rows of matrix B
-  int n = bli_obj_length(*b);  // number of columns of matrix B
+  int m = bli_obj_length(a); // number of rows of matrix B
+  int n = bli_obj_length(b);  // number of columns of matrix B
 
-  int lda = bli_obj_col_stride(*a); // column stride of A
-  int ldb = bli_obj_col_stride(*b); // column stride of B
+  int lda = bli_obj_col_stride(a); // column stride of A
+  int ldb = bli_obj_col_stride(b); // column stride of B
 
-  int rsa = bli_obj_row_stride(*a); // row stride of A
-  int rsb = bli_obj_row_stride(*b); // row stride of B
+  int rsa = bli_obj_row_stride(a); // row stride of A
+  int rsb = bli_obj_row_stride(b); // row stride of B
 
   int i = 0;
-  int isUnitDiag = bli_obj_has_unit_diag(*a);
+  int isUnitDiag = bli_obj_has_unit_diag(a);
 
   float alphaVal;
   float *L =  a->buffer;
@@ -669,7 +669,7 @@ static err_t bli_strsm_small_XAltB(
   	return BLIS_NOT_YET_IMPLEMENTED;
   }
 
-  alphaVal = *((float *)bli_obj_buffer_for_const(BLIS_FLOAT, *AlphaObj));
+  alphaVal = *((float *)bli_obj_buffer_for_const(BLIS_FLOAT, AlphaObj));
  
   if (alphaVal != 1)
   {

@@ -1,6 +1,6 @@
     /* 
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived derived from this software without specific prior written permission.
+      derived derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,7 +26,7 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -52,12 +52,12 @@
 */
 void bli_sgemm_armv8a_asm_8x12
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -65,8 +65,13 @@ void bli_sgemm_armv8a_asm_8x12
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
-	uint64_t k_iter = k / 4;
-	uint64_t k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
 
 __asm__ volatile 
 (
@@ -1059,8 +1064,7 @@ __asm__ volatile
  [rs_c]   "m" (rs_c),   // 7
  [cs_c]   "m" (cs_c),   // 8
  [a_next] "m" (a_next), // 9
- [b_next] "m" (b_next), // 10
- [k]      "m" (k)       // 11
+ [b_next] "m" (b_next) // 10
 :// Register clobber list
  "x0", "x1", "x2","x3","x4",
  "x5", "x6", "x7", "x8",
@@ -1103,12 +1107,12 @@ __asm__ volatile
 */
 void bli_dgemm_armv8a_asm_6x8
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
@@ -1116,8 +1120,12 @@ void bli_dgemm_armv8a_asm_6x8
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
-	uint64_t k_iter = k / 4;
-	uint64_t k_left = k % 4;
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
 
 __asm__ volatile
 (
@@ -2086,18 +2094,6 @@ void bli_cgemm_armv8a_opt_4x4
        cntx_t*    restrict cntx
      )
 {
-	/* Just call the reference implementation. */
-	BLIS_CGEMM_UKERNEL_REF
-	(
-	  k,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c, rs_c, cs_c,
-	  data,
-	  cntx
-	);
 }
 
 void bli_zgemm_armv8a_opt_4x4
@@ -2112,17 +2108,7 @@ void bli_zgemm_armv8a_opt_4x4
        cntx_t*    restrict cntx
      )
 {
-	/* Just call the reference implementation. */
-	BLIS_ZGEMM_UKERNEL_REF
-	(
-	  k,
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c, rs_c, cs_c,
-	  data,
-	  cntx
-	);
 }
+
 #endif
+

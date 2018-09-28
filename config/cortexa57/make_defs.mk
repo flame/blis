@@ -42,11 +42,6 @@ THIS_CONFIG    := cortexa57
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -62,16 +57,20 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a57.cortex-a53
+COPTFLAGS      := -O3 -ftree-vectorize -mtune=cortex-a57
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -march=armv8-a+fp+simd -mcpu=cortex-a57.cortex-a53
+CKVECFLAGS     := -march=armv8-a+fp+simd -mcpu=cortex-a57
 else
 $(error gcc is required for this configuration.)
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

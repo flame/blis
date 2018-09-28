@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -81,6 +81,18 @@ int main( int argc, char** argv )
 
 	uplo = BLIS_LOWER;
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_trsv_blis" );
+#else
+	printf( "data_trv_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0, 0.0 );
+
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
 
@@ -97,10 +109,10 @@ int main( int argc, char** argv )
 		bli_randm( &a );
 		bli_randm( &x );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uplo, a );
-		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, a );
-		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uplo, &a );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 
 		bli_setsc(  (1.0/1.0), 0.0, &alpha );
 
@@ -132,11 +144,11 @@ int main( int argc, char** argv )
 			f77_char uploa  = 'L';
 			f77_char transa = 'N';
 			f77_char diaga  = 'N';
-			f77_int  mm     = bli_obj_length( a );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  incx   = bli_obj_vector_inc( x );
-			double*  ap     = bli_obj_buffer( a );
-			double*  xp     = bli_obj_buffer( x );
+			f77_int  mm     = bli_obj_length( &a );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  incx   = bli_obj_vector_inc( &x );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  xp     = bli_obj_buffer( &x );
 
 			dtrsv_( &uploa,
 			        &transa,
@@ -162,9 +174,9 @@ int main( int argc, char** argv )
 #else
 		printf( "data_trsv_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:3 ) = [ %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
-		        ( unsigned long )m, dtime_save, gflops );
+		        ( unsigned long )m, gflops );
 
 		bli_obj_free( &alpha );
 

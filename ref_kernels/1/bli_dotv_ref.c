@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -71,7 +71,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   effective conjugation of x and then conjugating the resulting dot
 	   product. */ \
 	if ( bli_is_conj( conjy ) ) \
-		bli_toggle_conj( conjx_use ); \
+		bli_toggle_conj( &conjx_use ); \
 \
 	if ( bli_is_conj( conjx_use ) ) \
 	{ \

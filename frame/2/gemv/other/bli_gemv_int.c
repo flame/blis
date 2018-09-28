@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -69,8 +69,8 @@ void bli_gemv_int( trans_t transa,
 	obj_t     x_local;
 
 	// Apply the trans and/or conj parameters to aliases of the objects.
-	bli_obj_alias_with_trans( transa, *a, a_local );
-	bli_obj_alias_with_conj( conjx, *x, x_local );
+	bli_obj_alias_with_trans( transa, a, &a_local );
+	bli_obj_alias_with_conj( conjx, x, &x_local );
 
 	// Check parameters. We use the aliased copy of A so the transa parameter
 	// is taken into account for dimension checking.
@@ -78,10 +78,10 @@ void bli_gemv_int( trans_t transa,
 		bli_gemv_check( alpha, &a_local, &x_local, beta, y );
 
 	// If y has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *y ) ) return;
+	if ( bli_obj_has_zero_dim( y ) ) return;
 
 	// If x has a zero dimension, scale y by beta and return early.
-	if ( bli_obj_has_zero_dim( *x ) )
+	if ( bli_obj_has_zero_dim( x ) )
 	{
 		bli_scalm( beta, y );
 		return;

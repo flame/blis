@@ -1,11 +1,12 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,6 +37,18 @@
 #ifndef BLIS_MEMBRK_H
 #define BLIS_MEMBRK_H
 
+// membrk init
+
+static void bli_membrk_init_mutex( membrk_t* membrk )
+{
+	pthread_mutex_init( &(membrk->mutex), NULL );
+}
+
+static void bli_membrk_finalize_mutex( membrk_t* membrk )
+{
+	pthread_mutex_destroy( &(membrk->mutex) );
+}
+
 // membrk query
 
 static pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
@@ -43,29 +56,24 @@ static pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
 	return &(membrk->pools[ pool_index ]);
 }
 
-static mtx_t* bli_membrk_mutex( membrk_t* membrk )
-{
-	return &(membrk->mutex);
-}
-
-static void* bli_membrk_malloc_fp( membrk_t* membrk )
+static malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
 {
 	return membrk->malloc_fp;
 }
 
-static void* bli_membrk_free_fp( membrk_t* membrk )
+static free_ft bli_membrk_free_fp( membrk_t* membrk )
 {
 	return membrk->free_fp;
 }
 
 // membrk modification
 
-static void bli_membrk_set_malloc_fp( void* malloc_fp, membrk_t* membrk )
+static void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
 {
 	membrk->malloc_fp = malloc_fp;
 }
 
-static void bli_membrk_set_free_fp( void* free_fp, membrk_t* membrk )
+static void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 {
 	membrk->free_fp = free_fp;
 }
@@ -74,18 +82,19 @@ static void bli_membrk_set_free_fp( void* free_fp, membrk_t* membrk )
 
 static void bli_membrk_lock( membrk_t* membrk )
 {
-	bli_mutex_lock( &(membrk->mutex) );
+	pthread_mutex_lock( &(membrk->mutex) );
 }
 
 static void bli_membrk_unlock( membrk_t* membrk )
 {
-	bli_mutex_unlock( &(membrk->mutex) );
+	pthread_mutex_unlock( &(membrk->mutex) );
 }
 
 static void* bli_membrk_malloc( size_t size, membrk_t* membrk )
 {
 	// Call the malloc()-style function in membrk.
-	return ((membrk)->malloc_fp)( size );
+	return ( void* )
+	       ( (membrk)->malloc_fp )( size );
 }
 
 static void bli_membrk_free( void* p, membrk_t* membrk )

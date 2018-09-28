@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -76,12 +76,14 @@ static siz_t bli_mem_size( mem_t* mem )
 
 static bool_t bli_mem_is_alloc( mem_t* mem )
 {
-	return bli_mem_buffer( mem ) != NULL;
+	return ( bool_t )
+	       ( bli_mem_buffer( mem ) != NULL );
 }
 
 static bool_t bli_mem_is_unalloc( mem_t* mem )
 {
-	return bli_mem_buffer( mem ) == NULL;
+	return ( bool_t )
+	       ( bli_mem_buffer( mem ) == NULL );
 }
 
 

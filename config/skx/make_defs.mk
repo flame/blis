@@ -42,11 +42,6 @@ THIS_CONFIG    := skx
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -65,16 +60,16 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xCORE-AVX512
+CKVECFLAGS     := -xCORE-AVX512
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -84,23 +79,28 @@ endif
 # The assembler on OS X won't recognize AVX512 without help
 ifneq ($(CC_VENDOR),icc)
 ifeq ($(OS_NAME),Darwin)
-CVECFLAGS      += -Wa,-march=skylake-avx512
+CKVECFLAGS     += -Wa,-march=skylake-avx512
 endif
 endif
 
-# --- Determine the archiver and related flags ---
-AR             := ar
-ARFLAGS        := cr
-
-# --- Determine the linker and related flags ---
-LINKER         := $(CC)
-SOFLAGS        := -shared
-
-LDFLAGS        :=
-
-ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
-endif 
+# Flags specific to reference kernels.
+# Note: We use AVX2 for reference kernels because, as Jeff Hammond says,
+# reference kernel code "is not going to achieve high enough SIMD utilization
+# to overcome the AVX-512 frequency drop". (Issue #187)
+CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd
+else
+ifeq ($(CC_VENDOR),icc)
+CRVECFLAGS     := -xCORE-AVX2
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd
+else
+$(error gcc, icc, or clang is required for this configuration.)
+endif
+endif
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

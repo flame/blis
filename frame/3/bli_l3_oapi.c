@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -50,27 +50,32 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
-	/* Invoke the operation's "ind" function--its induced method front-end.
-	   This function will call native execution for real domain problems.
-	   For complex problems, it calls the highest priority induced method
-	   that is available (ie: implemented and enabled), and if none are
-	   enabled, it calls native execution. */ \
-	PASTEMAC(opname,ind) \
-	( \
-	  alpha, \
-	  a, \
-	  b, \
-	  beta, \
-	  c, \
-	  cntx  \
-	); \
+	/* Only proceed with an induced method if all operands have the same
+	   (complex) datatype. If any datatypes differ, skip the induced method
+	   chooser function and proceed directly with native execution, which is
+	   where mixed datatype support will be implemented (if at all). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
 }
 
 GENFRONT( gemm )
@@ -89,23 +94,32 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
-	PASTEMAC(opname,ind) \
-	( \
-	  side, \
-	  alpha, \
-	  a, \
-	  b, \
-	  beta, \
-	  c, \
-	  cntx  \
-	); \
+	/* Only proceed with an induced method if all operands have the same
+	   (complex) datatype. If any datatypes differ, skip the induced method
+	   chooser function and proceed directly with native execution, which is
+	   where mixed datatype support will be implemented (if at all). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( side, alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx, rntm ); \
+	} \
 }
 
 GENFRONT( hemm )
@@ -122,21 +136,31 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
-	PASTEMAC(opname,ind) \
-	( \
-	  alpha, \
-	  a, \
-	  beta, \
-	  c, \
-	  cntx  \
-	); \
+	/* Only proceed with an induced method if all operands have the same
+	   (complex) datatype. If any datatypes differ, skip the induced method
+	   chooser function and proceed directly with native execution, which is
+	   where mixed datatype support will be implemented (if at all). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+	     bli_obj_is_complex( c ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( alpha, a, beta, c, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx, rntm ); \
+	} \
 }
 
 GENFRONT( herk )
@@ -152,21 +176,31 @@ void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b  \
-       BLIS_OAPI_CNTX_PARAM  \
+       BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
-	BLIS_OAPI_CNTX_DECL \
+	BLIS_OAPI_EX_DECLS \
 \
-	PASTEMAC(opname,ind) \
-	( \
-	  side, \
-	  alpha, \
-	  a, \
-	  b, \
-	  cntx  \
-	); \
+	/* Only proceed with an induced method if all operands have the same
+	   (complex) datatype. If any datatypes differ, skip the induced method
+	   chooser function and proceed directly with native execution, which is
+	   where mixed datatype support will be implemented (if at all). */ \
+	if ( bli_obj_dt( a ) == bli_obj_dt( b ) && \
+	     bli_obj_is_complex( b ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( side, alpha, a, b, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
+	} \
 }
 
 GENFRONT( trmm )

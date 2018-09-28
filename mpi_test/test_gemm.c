@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -145,17 +145,17 @@ int main( int argc, char** argv )
 		{
 			f77_char transa = 'N';
 			f77_char transb = 'N';
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  bp     = bli_obj_buffer( b );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  bp     = bli_obj_buffer( &b );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dgemm_( &transa,
 			        &transb,
@@ -172,17 +172,17 @@ int main( int argc, char** argv )
 		{
 			f77_char transa = 'N';
 			f77_char transb = 'N';
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			dcomplex*  alphap = bli_obj_buffer( alpha );
-			dcomplex*  ap     = bli_obj_buffer( a );
-			dcomplex*  bp     = bli_obj_buffer( b );
-			dcomplex*  betap  = bli_obj_buffer( beta );
-			dcomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			dcomplex*  alphap = bli_obj_buffer( &alpha );
+			dcomplex*  ap     = bli_obj_buffer( &a );
+			dcomplex*  bp     = bli_obj_buffer( &b );
+			dcomplex*  betap  = bli_obj_buffer( &beta );
+			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			zgemm_( &transa,
 			//zgemm3m_( &transa,

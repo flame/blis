@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_trsv_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -87,42 +89,45 @@ void libblis_test_trsv_check
 
 void libblis_test_trsv_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_normfv( params, &(op->ops->normfv) );
-	libblis_test_subv( params, &(op->ops->subv) );
-	libblis_test_copyv( params, &(op->ops->copyv) );
-	libblis_test_scalv( params, &(op->ops->scalv) );
-	libblis_test_gemv( params, &(op->ops->gemv) );
+	libblis_test_randv( tdata, params, &(op->ops->randv) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_normfv( tdata, params, &(op->ops->normfv) );
+	libblis_test_subv( tdata, params, &(op->ops->subv) );
+	libblis_test_copyv( tdata, params, &(op->ops->copyv) );
+	libblis_test_scalv( tdata, params, &(op->ops->scalv) );
+	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
 }
 
 
 
 void libblis_test_trsv
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l2_over == DISABLE_ALL ) return;
+	     libblis_test_l2_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_trsv_deps( params, op );
+	if ( TRUE ) libblis_test_trsv_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -184,14 +189,14 @@ void libblis_test_trsv_experiment
 	                          sc_str[1], m,    &x_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( x ) )
+	if ( bli_obj_is_real( &x ) )
 		bli_setsc( 2.0,  0.0, &alpha );
 	else
 		bli_setsc( 2.0, -1.0, &alpha );
 
 	// Set the structure and uplo properties of A.
-	bli_obj_set_struc( BLIS_TRIANGULAR, a );
-	bli_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+	bli_obj_set_uplo( uploa, &a );
 
 	// Randomize A, load the diagonal, make it densely triangular.
 	libblis_test_mobj_randomize( params, TRUE, &a );
@@ -203,8 +208,8 @@ void libblis_test_trsv_experiment
 	bli_copyv( &x, &x_save );
 
 	// Apply the remaining parameters.
-	bli_obj_set_conjtrans( transa, a );
-	bli_obj_set_diag( diaga, a );
+	bli_obj_set_conjtrans( transa, &a );
+	bli_obj_set_diag( diaga, &a );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -220,7 +225,7 @@ void libblis_test_trsv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_trsv_check( params, &alpha, &a, &x, &x_save, resid );
@@ -267,13 +272,13 @@ void libblis_test_trsv_check
        double*        resid
      )
 {
-	num_t   dt      = bli_obj_datatype( *x );
-	num_t   dt_real = bli_obj_datatype_proj_to_real( *x );
+	num_t   dt      = bli_obj_dt( x );
+	num_t   dt_real = bli_obj_dt_proj_to_real( x );
 
-	dim_t   m       = bli_obj_vector_dim( *x );
+	dim_t   m       = bli_obj_vector_dim( x );
 
-	uplo_t  uploa   = bli_obj_uplo( *a );
-	trans_t transa  = bli_obj_conjtrans_status( *a );
+	uplo_t  uploa   = bli_obj_uplo( a );
+	trans_t transa  = bli_obj_conjtrans_status( a );
 
 	obj_t   alpha_inv;
 	obj_t   a_local, y;
@@ -311,14 +316,14 @@ void libblis_test_trsv_check
 	bli_obj_create( dt, m, 1, 0, 0, &y );
 	bli_obj_create( dt, m, m, 0, 0, &a_local );
 
-	bli_obj_set_struc( BLIS_TRIANGULAR, a_local );
-	bli_obj_set_uplo( uploa, a_local );
-	bli_obj_toggle_uplo_if_trans( transa, a_local );
+	bli_obj_set_struc( BLIS_TRIANGULAR, &a_local );
+	bli_obj_set_uplo( uploa, &a_local );
+	bli_obj_toggle_uplo_if_trans( transa, &a_local );
 	bli_copym( a, &a_local );
 	bli_mktrim( &a_local );
 
-	bli_obj_set_struc( BLIS_GENERAL, a_local );
-	bli_obj_set_uplo( BLIS_DENSE, a_local );
+	bli_obj_set_struc( BLIS_GENERAL, &a_local );
+	bli_obj_set_uplo( BLIS_DENSE, &a_local );
 
 	bli_gemv( &alpha_inv, &a_local, x, &BLIS_ZERO, &y );
 

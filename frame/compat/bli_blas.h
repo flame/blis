@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,17 +32,18 @@
 
 */
 
+// If the CBLAS compatibility layer was enabled while the BLAS layer
+// was not enabled, we must enable it here.
 #ifdef BLIS_ENABLE_CBLAS
-
-// If the BLAS compatibility layer was not explicitly enabled, we must
-// enable it here.
-#ifndef BLIS_ENABLE_BLAS2BLIS
-#define BLIS_ENABLE_BLAS2BLIS
+#ifndef BLIS_ENABLE_BLAS
+#define BLIS_ENABLE_BLAS
 #endif
-
 #endif // BLIS_ENABLE_CBLAS
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+// Skip prototyping all of the BLAS if the BLAS test drivers are being
+// compiled.
+#ifndef BLIS_VIA_BLASTEST
+#ifdef BLIS_ENABLE_BLAS
 
 
 // -- System headers needed by BLAS compatibility layer --
@@ -52,7 +53,7 @@
 
 // -- Constants --
 
-#define BLIS_MAX_BLAS_FUNC_STR_LENGTH (6+1)
+#define BLIS_MAX_BLAS_FUNC_STR_LENGTH (7+1)
 
 
 // -- Utility macros --
@@ -174,4 +175,5 @@
 #include "bla_trsm_check.h"
 
 
-#endif // BLIS_ENABLE_BLAS2BLIS
+#endif // BLIS_ENABLE_BLAS
+#endif // BLIS_VIA_BLASTEST

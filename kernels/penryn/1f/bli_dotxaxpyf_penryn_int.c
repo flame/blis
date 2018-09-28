@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,16 +26,16 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include "pmmintrin.h"
 #include "blis.h"
 
 
-#include "pmmintrin.h"
 typedef union
 {
     __m128d v;
@@ -60,15 +60,15 @@ void bli_ddotxaxpyf_penryn_int
        double* restrict z, inc_t incz,
        cntx_t* restrict cntx
      )
-{ 
-	double*  restrict alpha_cast = alpha; 
-	double*  restrict beta_cast  = beta; 
-	double*  restrict a_cast     = a; 
-	double*  restrict w_cast     = w; 
-	double*  restrict x_cast     = x; 
-	double*  restrict y_cast     = y; 
-	double*  restrict z_cast     = z; 
-	dim_t             i; 
+{
+	double*  restrict alpha_cast = alpha;
+	double*  restrict beta_cast  = beta;
+	double*  restrict a_cast     = a;
+	double*  restrict w_cast     = w;
+	double*  restrict x_cast     = x;
+	double*  restrict y_cast     = y;
+	double*  restrict z_cast     = z;
+	dim_t             i;
 
 	const dim_t       n_elem_per_reg = 2;
 	const dim_t       n_iter_unroll  = 2;
@@ -102,15 +102,20 @@ void bli_ddotxaxpyf_penryn_int
 	if ( bli_zero_dim1( b_n ) ) return;
 
 	// If the vector lengths are zero, scale y by beta and return.
-	if ( bli_zero_dim1( m ) ) 
-	{ 
-		bli_dscalv( BLIS_NO_CONJUGATE,
-		            b_n,
-		            beta,
-		            y, incy,
-		            cntx );
-		return; 
-	} 
+	if ( bli_zero_dim1( m ) )
+	{
+		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+
+		f
+		(
+		  BLIS_NO_CONJUGATE,
+		  b_n,
+		  beta,
+		  y, incy,
+		  cntx
+		);
+		return;
+	}
 
     m_pre = 0;
 
@@ -121,21 +126,21 @@ void bli_ddotxaxpyf_penryn_int
 		use_ref = TRUE;
 	}
     else if ( inca != 1 || incw != 1 || incx != 1 || incy != 1 || incz != 1 ||
-	          bli_is_unaligned_to( lda*sizeof(double), 16 ) )
+	          bli_is_unaligned_to( ( siz_t )(lda*sizeof(double)), 16 ) )
     {
         use_ref = TRUE;
     }
-	else if ( bli_is_unaligned_to( a, 16 ) ||
-	          bli_is_unaligned_to( w, 16 ) ||
-	          bli_is_unaligned_to( z, 16 ) ||
-	          bli_is_unaligned_to( y, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )a, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )w, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )z, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( a, 16 ) &&
-		     bli_is_unaligned_to( w, 16 ) &&
-		     bli_is_unaligned_to( z, 16 ) &&
-		     bli_is_aligned_to( y, 16 ) ) // Note: y is not affected by a, w, and z being unaligned. 
+		if ( bli_is_unaligned_to( ( siz_t )a, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )w, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )z, 16 ) &&
+		     bli_is_aligned_to( ( siz_t )y, 16 ) ) // Note: y is not affected by a, w, and z being unaligned.
 		{
 			use_ref = FALSE;
 			m_pre   = 1;
@@ -144,7 +149,7 @@ void bli_ddotxaxpyf_penryn_int
 
 	if ( use_ref == TRUE )
 	{
-		ddotxaxpyf_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
+		ddotxaxpyf_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXAXPYF_KER, cntx );
 		f
 		(
 		  conjat,
@@ -186,10 +191,10 @@ void bli_ddotxaxpyf_penryn_int
 	PASTEMAC2(d,d,scals)( *alpha_cast, chi2 );
 	PASTEMAC2(d,d,scals)( *alpha_cast, chi3 );
 
-	PASTEMAC(d,set0s)( rho0 ); 
-	PASTEMAC(d,set0s)( rho1 ); 
-	PASTEMAC(d,set0s)( rho2 ); 
-	PASTEMAC(d,set0s)( rho3 ); 
+	PASTEMAC(d,set0s)( rho0 );
+	PASTEMAC(d,set0s)( rho1 );
+	PASTEMAC(d,set0s)( rho2 );
+	PASTEMAC(d,set0s)( rho3 );
 
 	if ( m_pre == 1 )
 	{
@@ -205,7 +210,7 @@ void bli_ddotxaxpyf_penryn_int
 		rho2 += a2c * w1c;
 		rho3 += a3c * w1c;
 
-		z1c += chi0 * a0c + 
+		z1c += chi0 * a0c +
 		       chi1 * a1c +
 		       chi2 * a2c +
 		       chi3 * a3c;
@@ -319,7 +324,7 @@ void bli_ddotxaxpyf_penryn_int
 			rho2 += a2c * w1c;
 			rho3 += a3c * w1c;
 
-			z1c += chi0 * a0c + 
+			z1c += chi0 * a0c +
 			       chi1 * a1c +
 			       chi2 * a2c +
 			       chi3 * a3c;

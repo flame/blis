@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -97,6 +97,18 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_side( side, &f77_side );
 	bli_param_map_blis_to_netlib_uplo( uploa, &f77_uploa );
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_hemm_blis" );
+#else
+	printf( "data_hemm_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0 );
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -120,8 +132,8 @@ int main( int argc, char** argv )
 		bli_randm( &b );
 		bli_randm( &c );
 
-		bli_obj_set_struc( BLIS_HERMITIAN, a );
-		bli_obj_set_uplo( uploa, a );
+		bli_obj_set_struc( BLIS_HERMITIAN, &a );
+		bli_obj_set_uplo( uploa, &a );
 
 		// Randomize A, make it densely Hermitian, and zero the unstored
 		// triangle to ensure the implementation reads only from the stored
@@ -130,12 +142,12 @@ int main( int argc, char** argv )
 		bli_mkherm( &a );
 		bli_mktrim( &a );
 /*
-		bli_obj_toggle_uplo( a );
-		bli_obj_inc_diag_off( 1, a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_inc_diag_offset( 1, &a );
 		bli_setm( &BLIS_ZERO, &a );
-		bli_obj_inc_diag_off( -1, a );
-		bli_obj_toggle_uplo( a );
-		bli_obj_set_diag( BLIS_NONUNIT_DIAG, a );
+		bli_obj_inc_diag_offset( -1, &a );
+		bli_obj_toggle_uplo( &a );
+		bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 		bli_scalm( &BLIS_TWO, &a );
 		bli_scalm( &BLIS_TWO, &a );
 */
@@ -173,16 +185,16 @@ int main( int argc, char** argv )
 
 		if ( bli_is_float( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			float*   alphap = bli_obj_buffer( alpha );
-			float*   ap     = bli_obj_buffer( a );
-			float*   bp     = bli_obj_buffer( b );
-			float*   betap  = bli_obj_buffer( beta );
-			float*   cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			float*   alphap = bli_obj_buffer( &alpha );
+			float*   ap     = bli_obj_buffer( &a );
+			float*   bp     = bli_obj_buffer( &b );
+			float*   betap  = bli_obj_buffer( &beta );
+			float*   cp     = bli_obj_buffer( &c );
 
 			ssymm_( &f77_side,
 			        &f77_uploa,
@@ -196,16 +208,16 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_double( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  bp     = bli_obj_buffer( b );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  bp     = bli_obj_buffer( &b );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dsymm_( &f77_side,
 			        &f77_uploa,
@@ -219,16 +231,16 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			scomplex*  alphap = bli_obj_buffer( alpha );
-			scomplex*  ap     = bli_obj_buffer( a );
-			scomplex*  bp     = bli_obj_buffer( b );
-			scomplex*  betap  = bli_obj_buffer( beta );
-			scomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  ap     = bli_obj_buffer( &a );
+			scomplex*  bp     = bli_obj_buffer( &b );
+			scomplex*  betap  = bli_obj_buffer( &beta );
+			scomplex*  cp     = bli_obj_buffer( &c );
 
 			chemm_( &f77_side,
 			        &f77_uploa,
@@ -242,16 +254,16 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_dcomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			dcomplex*  alphap = bli_obj_buffer( alpha );
-			dcomplex*  ap     = bli_obj_buffer( a );
-			dcomplex*  bp     = bli_obj_buffer( b );
-			dcomplex*  betap  = bli_obj_buffer( beta );
-			dcomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			dcomplex*  alphap = bli_obj_buffer( &alpha );
+			dcomplex*  ap     = bli_obj_buffer( &a );
+			dcomplex*  bp     = bli_obj_buffer( &b );
+			dcomplex*  betap  = bli_obj_buffer( &beta );
+			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			zhemm_( &f77_side,
 			        &f77_uploa,
@@ -285,10 +297,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_hemm_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )n, dtime_save, gflops );
+		        ( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

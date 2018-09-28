@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -48,8 +48,8 @@ void bli_cntx_init_cortexa9( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_arm_int_4x4, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_arm_int_4x4, FALSE,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv7a_int_4x4, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv7a_int_4x4, FALSE,
 	  cntx
 	);
 

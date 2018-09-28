@@ -1,0 +1,36 @@
+Here are the steps to follow to create a new release (version) of BLIS:
+
+1. Make sure there are no commits that have yet to be pulled into
+   local repository.
+
+   $ git pull
+
+   If there are any commits upstream, merge them as appropriate.
+
+2. Verify that the code builds properly.
+
+   $ ./configure auto; make
+
+3. Verify that the code passes BLIS and BLAS tests:
+
+   $ make check     # short BLIS testsuite + BLAS test drivers
+   $ make testblis  # full BLIS testsuite
+
+4. Draft a new announcement to blis-devel, crediting those who
+   contributed towards this version by browsing 'git log'.
+
+5. Update CREDITS file if 'git log' reveals any new contributors.
+
+6. Update docs/ReleaseNotes.md file with body of finalized announcement.
+
+7. Bump the version number:
+
+   $ ./build/bump-version.sh "0.3.2"
+
+8. Push the new commits and new tag associated with the new version:
+
+   $ git push
+   $ git push --tag
+
+9. Send finalized announcement to blis-devel.
+

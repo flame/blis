@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -49,10 +49,17 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	(
 	  8,
 	  // gemm
+#if 1
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_zen_asm_6x16,       TRUE,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen_asm_6x8,        TRUE,
 	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen_asm_3x8,        TRUE,
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen_asm_3x4,        TRUE,
+#else
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_zen_asm_16x6,       FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen_asm_8x6,        FALSE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen_asm_8x3,        FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen_asm_4x3,        FALSE,
+#endif
 	  // gemmtrsm_l
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_zen_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_6x8,  TRUE,
@@ -108,8 +115,13 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
+#if 1
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
+#else
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    16,     8,     8,     4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     6,     6,     3,     3 );
+#endif
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );

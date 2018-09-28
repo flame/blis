@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -334,7 +334,7 @@ void bli_pool_alloc_block( siz_t   block_size,
 
 	// Advance the pointer to achieve the necessary alignment, if it is not
 	// already aligned.
-	if ( bli_is_unaligned_to( buf_sys, align_size ) )
+	if ( bli_is_unaligned_to( ( siz_t )buf_sys, ( siz_t )align_size ) )
 	{
 		// C99's stdint.h guarantees that a void* can be safely cast to a
 		// uintptr_t and then back to a void*, hence the casting of buf_sys

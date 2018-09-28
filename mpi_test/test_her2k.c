@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -110,8 +110,8 @@ int main( int argc, char** argv )
 		bli_randm( &b );
 		bli_randm( &c );
 
-		bli_obj_set_struc( BLIS_HERMITIAN, c );
-		bli_obj_set_uplo( uplo, c );
+		bli_obj_set_struc( BLIS_HERMITIAN, &c );
+		bli_obj_set_uplo( uplo, &c );
 
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
@@ -149,16 +149,16 @@ int main( int argc, char** argv )
 
 			f77_char uploa  = 'L';
 			f77_char transa = 'N';
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  kk     = bli_obj_width_after_trans( a );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldb    = bli_obj_col_stride( b );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  bp     = bli_obj_buffer( b );
-			double*  betap  = bli_obj_buffer( beta );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  kk     = bli_obj_width_after_trans( &a );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldb    = bli_obj_col_stride( &b );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  bp     = bli_obj_buffer( &b );
+			double*  betap  = bli_obj_buffer( &beta );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dsyr2k_( &uploa,
 			         &transa,

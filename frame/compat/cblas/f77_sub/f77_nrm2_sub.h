@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -39,11 +39,12 @@
 #undef  GENTPROTR2
 #define GENTPROTR2( ftype_x, ftype_r, chx, chr, blasname ) \
 \
-void PASTEF773(chr,chx,blasname,sub)( \
-                                      const f77_int* n, \
-                                      const ftype_x* x, const f77_int* incx, \
-                                      ftype_r* rval  \
-                                    );
+void PASTEF773(chr,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             ftype_r* rval  \
+     );
 
 #ifdef BLIS_ENABLE_CBLAS
 INSERT_GENTPROTR2_BLAS( nrm2 )

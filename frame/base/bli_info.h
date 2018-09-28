@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -54,9 +54,9 @@ gint_t bli_info_get_heap_addr_align_size( void );
 gint_t bli_info_get_heap_stride_align_size( void );
 gint_t bli_info_get_pool_addr_align_size( void );
 gint_t bli_info_get_enable_stay_auto_init( void );
-gint_t bli_info_get_enable_blas2blis( void );
+gint_t bli_info_get_enable_blas( void );
 gint_t bli_info_get_enable_cblas( void );
-gint_t bli_info_get_blas2blis_int_type_size( void );
+gint_t bli_info_get_blas_int_type_size( void );
 gint_t bli_info_get_enable_packbuf_pools( void );
 
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,7 +32,9 @@
 
 */
 
-#include "blis.h"
+// Guard the function definitions so that they are only compiled when
+// #included from files that define the typed API macros.
+#ifdef BLIS_ENABLE_TAPI
 
 //
 // Define BLAS-like interfaces with typed operands.
@@ -41,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -51,16 +53,18 @@ void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
 \
+	BLIS_TAPI_EX_DECLS \
+\
 	dim_t m_y, n_x; \
 \
 	/* Determine the dimensions of y and x. */ \
-	bli_set_dims_with_trans( transa, m, n, m_y, n_x ); \
+	bli_set_dims_with_trans( transa, m, n, &m_y, &n_x ); \
 \
 	/* If y has zero elements, return early. */ \
 	if ( bli_zero_dim1( m_y ) ) return; \
@@ -72,19 +76,20 @@ void PASTEMAC(ch,opname) \
 	   return early. */ \
 	if ( bli_zero_dim1( n_x ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m_y, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_does_notrans( transa ) ) \
@@ -100,18 +105,19 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   transa, \
-	   conjx, \
-	   m, \
-	   n, \
-	   alpha, \
-	   a, rs_a, cs_a, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  transa, \
+	  conjx, \
+	  m, \
+	  n, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
@@ -120,7 +126,7 @@ INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -129,11 +135,13 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -142,7 +150,7 @@ void PASTEMAC(ch,opname) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_row_stored( rs_a, cs_a ) ) f = PASTEMAC(ch,rvarname); \
@@ -150,17 +158,18 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   conjx, \
-	   conjy, \
-	   m, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   y, incy, \
-	   a, rs_a, cs_a, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  conjx, \
+	  conjy, \
+	  m, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  y, incy, \
+	  a, rs_a, cs_a, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
@@ -169,7 +178,7 @@ INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
@@ -179,11 +188,13 @@ void PASTEMAC(ch,opname) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -192,19 +203,20 @@ void PASTEMAC(ch,opname) \
 	   return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -220,19 +232,20 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   uploa, \
-	   conja, \
-	   conjx, \
-	   conjh, /* used by variants to distinguish hemv from symv */ \
-	   m, \
-	   alpha, \
-	   a, rs_a, cs_a, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  uploa, \
+	  conja, \
+	  conjx, \
+	  conjh, /* used by variants to distinguish hemv from symv */ \
+	  m, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC4( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
@@ -242,18 +255,20 @@ INSERT_GENTFUNC_BASIC4( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_v
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
        dim_t    m, \
        ctype_r* alpha, \
        ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       cntx_t*  cntx  \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	ctype alpha_local; \
 \
@@ -269,7 +284,7 @@ void PASTEMAC(ch,opname) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -285,16 +300,17 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   uploa, \
-	   conjx, \
-	   conjh, /* used by variants to distinguish her from syr */ \
-	   m, \
-	   &alpha_local, \
-	   x, incx, \
-	   a, rs_a, cs_a, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  uploa, \
+	  conjx, \
+	  conjh, /* used by variants to distinguish her from syr */ \
+	  m, \
+	  &alpha_local, \
+	  x, incx, \
+	  a, rs_a, cs_a, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -303,18 +319,20 @@ INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
        dim_t    m, \
        ctype*   alpha, \
        ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       cntx_t*  cntx  \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -323,7 +341,7 @@ void PASTEMAC(ch,opname) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -339,16 +357,17 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   uploa, \
-	   conjx, \
-	   conjh, /* used by variants to distinguish her2 from syr2 */ \
-	   m, \
-	   alpha, \
-	   x, incx, \
-	   a, rs_a, cs_a, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  uploa, \
+	  conjx, \
+	  conjh, /* used by variants to distinguish her2 from syr2 */ \
+	  m, \
+	  alpha, \
+	  x, incx, \
+	  a, rs_a, cs_a, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -357,7 +376,7 @@ INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
@@ -366,11 +385,13 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
@@ -379,7 +400,7 @@ void PASTEMAC(ch,opname) \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_is_lower( uploa ) ) \
@@ -395,18 +416,19 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   uploa, \
-	   conjx, \
-	   conjy, \
-	   conjh, \
-	   m, \
-	   alpha, \
-	   x, incx, \
-	   y, incy, \
-	   a, rs_a, cs_a, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  uploa, \
+	  conjx, \
+	  conjy, \
+	  conjh, \
+	  m, \
+	  alpha, \
+	  x, incx, \
+	  y, incy, \
+	  a, rs_a, cs_a, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC4( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
@@ -416,7 +438,7 @@ INSERT_GENTFUNC_BASIC4( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_v
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \
@@ -424,11 +446,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, return early. */ \
 	if ( bli_zero_dim1( m ) ) return; \
@@ -439,19 +463,20 @@ void PASTEMAC(ch,opname) \
 	/* If alpha is zero, set x to zero and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		PASTEMAC(ch,setv) \
+		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
 		  alpha, \
 		  x, incx, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 		return; \
 	} \
 \
 	/* Declare a void function pointer for the current operation. */ \
-	PASTECH2(ch,ftname,_ft) f; \
+	PASTECH2(ch,ftname,_unb_ft) f; \
 \
 	/* Choose the underlying implementation. */ \
 	if ( bli_does_notrans( transa ) ) \
@@ -467,17 +492,22 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the variant chosen above, which loops over a level-1v or
 	   level-1f kernel to implement the current operation. */ \
-	f( \
-	   uploa, \
-	   transa, \
-	   diaga, \
-	   m, \
-	   alpha, \
-	   a, rs_a, cs_a, \
-	   x, incx, \
-	   cntx \
-	 ); \
+	f \
+	( \
+	  uploa, \
+	  transa, \
+	  diaga, \
+	  m, \
+	  alpha, \
+	  a, rs_a, cs_a, \
+	  x, incx, \
+	  cntx \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC3( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )
 INSERT_GENTFUNC_BASIC3( trsv, trmv, trsv_unf_var1, trsv_unf_var2 )
+
+
+#endif
+

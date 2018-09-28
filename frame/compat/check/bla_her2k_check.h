@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,19 +32,50 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
-void bla_her2k_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_char* uploa,
-       const f77_char* transa,
-       const f77_int*  m,
-       const f77_int*  k,
-       const f77_int*  lda,
-       const f77_int*  ldb,
-       const f77_int*  ldc
-     );
+#define bla_her2k_check( dt_str, op_str, uploa, trans, m, k, lda, ldb, ldc ) \
+{ \
+	f77_int info = 0; \
+	f77_int nota, conja; \
+	f77_int lower, upper; \
+	f77_int nrowa; \
+\
+	nota  = PASTEF770(lsame)( trans, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( trans, "C", (ftnlen)1, (ftnlen)1 ); \
+	lower = PASTEF770(lsame)( uploa, "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(lsame)( uploa, "U", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota ) { nrowa = *m; } \
+	else        { nrowa = *k; } \
+\
+	if      ( !lower && !upper ) \
+		info = 1; \
+	else if ( !nota && !conja ) \
+		info = 2; \
+	else if ( *m < 0 ) \
+		info = 3; \
+	else if ( *k < 0 ) \
+		info = 4; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 7; \
+	else if ( *ldb < bli_max( 1, nrowa ) ) \
+		info = 9; \
+	else if ( *ldc < bli_max( 1, *m    ) ) \
+		info = 12; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
 
 #endif

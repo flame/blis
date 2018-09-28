@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,49 +34,57 @@
 
 struct packm_params_s
 {
-	uint64_t    size; // size field must be present and come first.
-	packm_voft  var_func;
-	bszid_t     bmid_m;
-	bszid_t     bmid_n;
-	bool_t      does_invert_diag;
-	bool_t      rev_iter_if_upper;
-	bool_t      rev_iter_if_lower;
-	pack_t      pack_schema;
-	packbuf_t   pack_buf_type;
+	uint64_t      size; // size field must be present and come first.
+	packm_var_oft var_func;
+	bszid_t       bmid_m;
+	bszid_t       bmid_n;
+	bool_t        does_invert_diag;
+	bool_t        rev_iter_if_upper;
+	bool_t        rev_iter_if_lower;
+	pack_t        pack_schema;
+	packbuf_t     pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
 
-#define bli_cntl_packm_params_var_func( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->var_func )
+static packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->var_func;
+}
 
-#define bli_cntl_packm_params_bmid_m( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->bmid_m )
+static bszid_t bli_cntl_packm_params_bmid_m( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_m;
+}
 
-#define bli_cntl_packm_params_bmid_n( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->bmid_n )
+static bszid_t bli_cntl_packm_params_bmid_n( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_n;
+}
 
-#define bli_cntl_packm_params_does_invert_diag( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->does_invert_diag )
+static bool_t bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->does_invert_diag;
+}
 
-#define bli_cntl_packm_params_rev_iter_if_upper( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->rev_iter_if_upper )
+static bool_t bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_upper;
+}
 
-#define bli_cntl_packm_params_rev_iter_if_lower( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->rev_iter_if_lower )
+static bool_t bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_lower;
+}
 
-#define bli_cntl_packm_params_pack_schema( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->pack_schema )
+static pack_t bli_cntl_packm_params_pack_schema( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_schema;
+}
 
-#define bli_cntl_packm_params_pack_buf_type( cntl ) \
-\
-	( ( (packm_params_t*)(cntl)->params )->pack_buf_type )
+static packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_buf_type;
+}
 
 // -----------------------------------------------------------------------------
 

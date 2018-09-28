@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,8 +33,8 @@
 
 */
 
-#include "blis.h"
 #include "immintrin.h"
+#include "blis.h"
 
 /* Union data structure to access AVX registers
    One 256-bit AVX register holds 8 SP elements. */
@@ -103,7 +104,7 @@ void bli_saxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		saxpyv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+		saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
@@ -223,13 +224,6 @@ void bli_saxpyf_zen_int_8
 		a7 += n_elem_per_reg;
 	}
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the m_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
-
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < m_left ; ++i )
 	{
@@ -319,7 +313,7 @@ void bli_daxpyf_zen_int_8
 	// operation as a loop over axpyv.
 	if ( b_n != fuse_fac )
 	{
-		daxpyv_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+		daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
 		for ( i = 0; i < b_n; ++i )
 		{
@@ -438,13 +432,6 @@ void bli_daxpyf_zen_int_8
 		a6 += n_elem_per_reg;
 		a7 += n_elem_per_reg;
 	}
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the m_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
 
 	// If there are leftover iterations, perform them with scalar code.
 	for ( i = 0; i < m_left ; ++i )

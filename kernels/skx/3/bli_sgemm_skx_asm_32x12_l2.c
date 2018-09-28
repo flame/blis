@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-#include "bli_avx512_macros.h"
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define CACHELINE_SIZE 64 //size of cache line in bytes
 
@@ -90,27 +91,27 @@ ahead*/
     KXNORW(K(2), K(0), K(0)) \
     KXNORW(K(3), K(0), K(0)) \
     KXNORW(K(4), K(0), K(0)) \
-    VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
+    VMULPS(ZMM(R1), ZMM(R1), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R1), IMM(1)) \
-    VGATHERQPS(YMM(6) MASK_K(1), MEM(RCX,ZMM(2),8)) \
-    VGATHERQPS(YMM(7) MASK_K(2), MEM(RCX,ZMM(3),8)) \
+    VGATHERQPS(YMM(6) MASK_K(1), MEM(RCX,ZMM(2),1)) \
+    VGATHERQPS(YMM(7) MASK_K(2), MEM(RCX,ZMM(3),1)) \
     VFMADD231PS(YMM(R1), YMM(6), YMM(1)) \
     VFMADD231PS(YMM( 5), YMM(7), YMM(1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(2),8) MASK_K(3), YMM(R1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(3),8) MASK_K(4), YMM( 5)) \
+    VSCATTERQPS(MEM(RCX,ZMM(2),1) MASK_K(3), YMM(R1)) \
+    VSCATTERQPS(MEM(RCX,ZMM(3),1) MASK_K(4), YMM( 5)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     KXNORW(K(3), K(0), K(0)) \
     KXNORW(K(4), K(0), K(0)) \
-    VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
+    VMULPS(ZMM(R2), ZMM(R2), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R2), IMM(1)) \
-    VGATHERQPS(YMM(6) MASK_K(1), MEM(RDX,ZMM(2),8)) \
-    VGATHERQPS(YMM(7) MASK_K(2), MEM(RDX,ZMM(3),8)) \
+    VGATHERQPS(YMM(6) MASK_K(1), MEM(RDX,ZMM(2),1)) \
+    VGATHERQPS(YMM(7) MASK_K(2), MEM(RDX,ZMM(3),1)) \
     VFMADD231PS(YMM(R2), YMM(6), YMM(1)) \
     VFMADD231PS(YMM( 5), YMM(7), YMM(1)) \
-    VSCATTERQPS(MEM(RDX,ZMM(2),8) MASK_K(3), YMM(R2)) \
-    VSCATTERQPS(MEM(RDX,ZMM(3),8) MASK_K(4), YMM( 5)) \
+    VSCATTERQPS(MEM(RDX,ZMM(2),1) MASK_K(3), YMM(R2)) \
+    VSCATTERQPS(MEM(RDX,ZMM(3),1) MASK_K(4), YMM( 5)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
     LEA(RDX, MEM(RDX,RAX,1)) \
@@ -119,27 +120,27 @@ ahead*/
     KXNORW(K(2), K(0), K(0)) \
     KXNORW(K(3), K(0), K(0)) \
     KXNORW(K(4), K(0), K(0)) \
-    VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
+    VMULPS(ZMM(R3), ZMM(R3), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R3), IMM(1)) \
-    VGATHERQPS(YMM(6) MASK_K(1), MEM(RCX,ZMM(2),8)) \
-    VGATHERQPS(YMM(7) MASK_K(2), MEM(RCX,ZMM(3),8)) \
+    VGATHERQPS(YMM(6) MASK_K(1), MEM(RCX,ZMM(2),1)) \
+    VGATHERQPS(YMM(7) MASK_K(2), MEM(RCX,ZMM(3),1)) \
     VFMADD231PS(YMM(R3), YMM(6), YMM(1)) \
     VFMADD231PS(YMM( 5), YMM(7), YMM(1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(2),8) MASK_K(3), YMM(R3)) \
-    VSCATTERQPS(MEM(RCX,ZMM(3),8) MASK_K(4), YMM( 5)) \
+    VSCATTERQPS(MEM(RCX,ZMM(2),1) MASK_K(3), YMM(R3)) \
+    VSCATTERQPS(MEM(RCX,ZMM(3),1) MASK_K(4), YMM( 5)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     KXNORW(K(3), K(0), K(0)) \
     KXNORW(K(4), K(0), K(0)) \
-    VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
+    VMULPS(ZMM(R4), ZMM(R4), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R4), IMM(1)) \
-    VGATHERQPS(YMM(6) MASK_K(1), MEM(RDX,ZMM(2),8)) \
-    VGATHERQPS(YMM(7) MASK_K(2), MEM(RDX,ZMM(3),8)) \
+    VGATHERQPS(YMM(6) MASK_K(1), MEM(RDX,ZMM(2),1)) \
+    VGATHERQPS(YMM(7) MASK_K(2), MEM(RDX,ZMM(3),1)) \
     VFMADD231PS(YMM(R4), YMM(6), YMM(1)) \
     VFMADD231PS(YMM( 5), YMM(7), YMM(1)) \
-    VSCATTERQPS(MEM(RDX,ZMM(2),8) MASK_K(3), YMM(R4)) \
-    VSCATTERQPS(MEM(RDX,ZMM(3),8) MASK_K(4), YMM( 5)) \
+    VSCATTERQPS(MEM(RDX,ZMM(2),1) MASK_K(3), YMM(R4)) \
+    VSCATTERQPS(MEM(RDX,ZMM(3),1) MASK_K(4), YMM( 5)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
     LEA(RDX, MEM(RDX,RAX,1))
@@ -148,34 +149,34 @@ ahead*/
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
-    VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
+    VMULPS(ZMM(R1), ZMM(R1), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R1), IMM(1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(2),8) MASK_K(1), YMM(R1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(3),8) MASK_K(2), YMM( 5)) \
+    VSCATTERQPS(MEM(RCX,ZMM(2),1) MASK_K(1), YMM(R1)) \
+    VSCATTERQPS(MEM(RCX,ZMM(3),1) MASK_K(2), YMM( 5)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
-    VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
+    VMULPS(ZMM(R2), ZMM(R2), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R2), IMM(1)) \
-    VSCATTERQPS(MEM(RDX,ZMM(2),8) MASK_K(1), YMM(R2)) \
-    VSCATTERQPS(MEM(RDX,ZMM(3),8) MASK_K(2), YMM( 5)) \
+    VSCATTERQPS(MEM(RDX,ZMM(2),1) MASK_K(1), YMM(R2)) \
+    VSCATTERQPS(MEM(RDX,ZMM(3),1) MASK_K(2), YMM( 5)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
     LEA(RDX, MEM(RDX,RAX,1)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
-    VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
+    VMULPS(ZMM(R3), ZMM(R3), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R3), IMM(1)) \
-    VSCATTERQPS(MEM(RCX,ZMM(2),8) MASK_K(1), YMM(R3)) \
-    VSCATTERQPS(MEM(RCX,ZMM(3),8) MASK_K(2), YMM( 5)) \
+    VSCATTERQPS(MEM(RCX,ZMM(2),1) MASK_K(1), YMM(R3)) \
+    VSCATTERQPS(MEM(RCX,ZMM(3),1) MASK_K(2), YMM( 5)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
-    VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
+    VMULPS(ZMM(R4), ZMM(R4), ZMM(0)) \
     VEXTRACTF64X4(YMM(5), ZMM(R4), IMM(1)) \
-    VSCATTERQPS(MEM(RDX,ZMM(2),8) MASK_K(1), YMM(R4)) \
-    VSCATTERQPS(MEM(RDX,ZMM(3),8) MASK_K(2), YMM( 5)) \
+    VSCATTERQPS(MEM(RDX,ZMM(2),1) MASK_K(1), YMM(R4)) \
+    VSCATTERQPS(MEM(RDX,ZMM(3),1) MASK_K(2), YMM( 5)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
     LEA(RDX, MEM(RDX,RAX,1))
@@ -265,22 +266,22 @@ ahead*/
 \
     PREFETCH_A_L1(n, 0) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 0)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 1)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 0)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 1)*4)) \
     VFMADD231PS(ZMM( 8), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM( 9), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(10), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(11), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 2)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 3)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 2)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 3)*4)) \
     VFMADD231PS(ZMM(12), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(13), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(14), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(15), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 4)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 5)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 4)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 5)*4)) \
     VFMADD231PS(ZMM(16), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(17), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(18), ZMM(0), ZMM(4)) \
@@ -288,29 +289,29 @@ ahead*/
     \
     PREFETCH_A_L1(n, 1) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 6)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 7)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 6)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 7)*4)) \
     VFMADD231PS(ZMM(20), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(21), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(22), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(23), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 8)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 9)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+ 8)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+ 9)*4)) \
     VFMADD231PS(ZMM(24), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(25), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(26), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(27), ZMM(1), ZMM(4)) \
     \
-    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+10)*8)) \
-    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+11)*8)) \
+    VBROADCASTSS(ZMM(3), MEM(RBX,(12*n+10)*4)) \
+    VBROADCASTSS(ZMM(4), MEM(RBX,(12*n+11)*4)) \
     VFMADD231PS(ZMM(28), ZMM(0), ZMM(3)) \
     VFMADD231PS(ZMM(29), ZMM(1), ZMM(3)) \
     VFMADD231PS(ZMM(30), ZMM(0), ZMM(4)) \
     VFMADD231PS(ZMM(31), ZMM(1), ZMM(4)) \
     \
-    VMOVAPD(ZMM(0), MEM(RAX,(16*n+0)*8)) \
-    VMOVAPD(ZMM(1), MEM(RAX,(16*n+8)*8))
+    VMOVAPD(ZMM(0), MEM(RAX,(32*n+0)*4)) \
+    VMOVAPD(ZMM(1), MEM(RAX,(32*n+16)*4))
 
 //This is an array used for the scatter/gather instructions.
 static int64_t offsets[16] __attribute__((aligned(64))) =
@@ -335,8 +336,7 @@ void bli_sgemm_skx_asm_32x12_l2(
     const int64_t rs_c = rs_c_;
     const int64_t cs_c = cs_c_;
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
 
     VXORPD(YMM(8), YMM(8), YMM(8)) //clear out registers
     VMOVAPD(YMM( 7), YMM(8))
@@ -493,7 +493,7 @@ void bli_sgemm_skx_asm_32x12_l2(
     CMP(RBX, IMM(4))
     JNE(SCATTEREDUPDATE)
 
-        VCOMISD(XMM(1), XMM(7))
+        VCOMISS(XMM(1), XMM(7))
         JE(COLSTORBZ)
 
             UPDATE_C( 8, 9,10,11)
@@ -526,7 +526,7 @@ void bli_sgemm_skx_asm_32x12_l2(
         VPMULLQ(ZMM(2), ZMM(6), ZMM(2))
         VPMULLQ(ZMM(3), ZMM(6), ZMM(3))
 
-        VCOMISD(XMM(1), XMM(7))
+        VCOMISS(XMM(1), XMM(7))
         JE(SCATTERBZ)
 
             UPDATE_C_ROW_SCATTERED( 8, 9,10,11)
@@ -550,6 +550,7 @@ void bli_sgemm_skx_asm_32x12_l2(
 
     VZEROUPPER()
 
+    END_ASM(
     : // output operands
     : // input operands
       [k]         "m" (k),
@@ -568,5 +569,5 @@ void bli_sgemm_skx_asm_32x12_l2(
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
-    );
+    )
 }

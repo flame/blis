@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +39,7 @@
   #include <stdlib.h>
   #include <string.h>
   #include <stdint.h>
+  #include <pthread.h>
   #include "bli_type_defs.h"
   #include "bli_arch.h"
   #include "bli_cpuid.h"
@@ -45,14 +47,39 @@
 
 // -----------------------------------------------------------------------------
 
+// The arch_t id for the currently running hardware. We initialize to -1,
+// which will be overwritten upon calling bli_arch_set_id().
+static arch_t id = -1;
+
 arch_t bli_arch_query_id( void )
 {
-	arch_t id = -1;
+	bli_arch_set_id_once();
 
+	// Simply return the id that was previously cached.
+	return id;
+}
+
+// -----------------------------------------------------------------------------
+
+// A pthread structure used in pthread_once(). pthread_once() is guaranteed to
+// execute exactly once among all threads that pass in this control object.
+static pthread_once_t once_id = PTHREAD_ONCE_INIT;
+
+void bli_arch_set_id_once( void )
+{
+	pthread_once( &once_id, bli_arch_set_id );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_arch_set_id( void )
+{
 	// Architecture families.
 #if defined BLIS_FAMILY_INTEL64 || \
-    defined BLIS_FAMILY_AMD64 || \
-    defined BLIS_FAMILY_X86_64
+    defined BLIS_FAMILY_AMD64   || \
+    defined BLIS_FAMILY_X86_64  || \
+    defined BLIS_FAMILY_ARM64   || \
+    defined BLIS_FAMILY_ARM32
 	id = bli_cpuid_query_id();
 #endif
 
@@ -97,6 +124,9 @@ arch_t bli_arch_query_id( void )
 #ifdef BLIS_FAMILY_CORTEXA57
 	id = BLIS_ARCH_CORTEXA57;
 #endif
+#ifdef BLIS_FAMILY_CORTEXA53
+	id = BLIS_ARCH_CORTEXA53;
+#endif
 #ifdef BLIS_FAMILY_CORTEXA15
 	id = BLIS_ARCH_CORTEXA15;
 #endif
@@ -119,8 +149,6 @@ arch_t bli_arch_query_id( void )
 
 	//printf( "blis_arch_query_id(): id = %u\n", id );
 	//exit(1);
-
-	return id;
 }
 
 // -----------------------------------------------------------------------------
@@ -145,6 +173,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "bulldozer",
 
     "cortexa57",
+    "cortexa53",
     "cortexa15",
     "cortexa9",
 

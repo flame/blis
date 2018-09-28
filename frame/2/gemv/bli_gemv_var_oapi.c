@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,9 +35,9 @@
 #include "blis.h"
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(opname) \
+void PASTEMAC0(varname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -50,32 +50,34 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *a ); \
+	num_t     dt        = bli_obj_dt( a ); \
 \
-	trans_t   transa    = bli_obj_conjtrans_status( *a ); \
-	conj_t    conjx     = bli_obj_conj_status( *x ); \
+	trans_t   transa    = bli_obj_conjtrans_status( a ); \
+	conj_t    conjx     = bli_obj_conj_status( x ); \
 \
-	dim_t     m         = bli_obj_length( *a ); \
-	dim_t     n         = bli_obj_width( *a ); \
+	dim_t     m         = bli_obj_length( a ); \
+	dim_t     n         = bli_obj_width( a ); \
 \
-	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-	inc_t     rs_a      = bli_obj_row_stride( *a ); \
-	inc_t     cs_a      = bli_obj_col_stride( *a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	inc_t     rs_a      = bli_obj_row_stride( a ); \
+	inc_t     cs_a      = bli_obj_col_stride( a ); \
 \
-	void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-	inc_t     incx      = bli_obj_vector_inc( *x ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     incx      = bli_obj_vector_inc( x ); \
 \
-	void*     buf_y     = bli_obj_buffer_at_off( *y ); \
-	inc_t     incy      = bli_obj_vector_inc( *y ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     incy      = bli_obj_vector_inc( y ); \
 \
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha ); \
-	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta ); \
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
+	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, beta ); \
 \
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	bli_call_ft_14 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,_unb,_vft) f = \
+	PASTEMAC(varname,_qfp)( dt ); \
+\
+	f \
 	( \
-	  dt, \
-	  opname, \
 	  transa, \
 	  conjx, \
 	  m, \
@@ -89,9 +91,9 @@ void PASTEMAC0(opname) \
 	); \
 } \
 
-GENFRONT( gemv_unb_var1 )
-GENFRONT( gemv_unb_var2 )
+GENFRONT( gemv, gemv_unb_var1 )
+GENFRONT( gemv, gemv_unb_var2 )
 
-GENFRONT( gemv_unf_var1 )
-GENFRONT( gemv_unf_var2 )
+GENFRONT( gemv, gemv_unf_var1 )
+GENFRONT( gemv, gemv_unf_var2 )
 

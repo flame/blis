@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -82,6 +82,9 @@ CNTX_INIT_PROTS( bulldozer )
 
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
+#endif
+#ifdef BLIS_CONFIG_CORTEXA53
+CNTX_INIT_PROTS( cortexa53 )
 #endif
 #ifdef BLIS_CONFIG_CORTEXA15
 CNTX_INIT_PROTS( cortexa15 )
@@ -164,6 +167,9 @@ CNTX_INIT_PROTS( generic )
 
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
+#endif
+#ifdef BLIS_FAMILY_CORTEXA53
+#include "bli_family_cortexa53.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA15
 #include "bli_family_cortexa15.h"

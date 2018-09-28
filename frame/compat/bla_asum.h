@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -45,7 +45,7 @@ ftype_r PASTEF772(chr,chx,blasname) \
        const ftype_x* x, const f77_int* incx  \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTR2_BLAS( asum )
 #endif
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -47,8 +47,9 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_knl_asm_24x8, FALSE,
+	  2,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_knl_asm_24x16, FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_knl_asm_24x8,  FALSE,
 	  cntx
 	);
 
@@ -61,26 +62,77 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  cntx
 	);
 
+	// Update the context with optimized level-1f kernels.
+	bli_cntx_set_l1f_kers
+	(
+	  4,
+	  // axpyf
+	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
+	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
+	  // dotxf
+	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+	  cntx
+	);
+
+	// Update the context with optimized level-1v kernels.
+	bli_cntx_set_l1v_kers
+	(
+	  10,
+	  // amaxv
+	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
+	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+	  // axpyv
+#if 0
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
+#else
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+#endif
+	  // dotv
+	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
+	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+	  // dotxv
+	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
+	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+	  // scalv
+#if 0
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
+#else
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
+#endif
+	  cntx
+	);
+
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    24,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,     8,    -1,    -1 );
-	bli_blksz_init     ( &blkszs[ BLIS_MC ],    -1,   120,    -1,    -1,
-	                                            -1,   144,    -1,    -1 );
-	bli_blksz_init     ( &blkszs[ BLIS_KC ],    -1,   336,    -1,    -1,  
-	                                            -1,   420,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1, 14400,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    24,    24,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MC ],   240,   120,    -1,    -1,
+	                                           288,   144,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_KC ],   336,   336,    -1,    -1,
+	                                           408,   408,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 14400, 14400,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 5,
+	  BLIS_NAT, 7,
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  // level-1f
+	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
+	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
 	  cntx
 	);
 }

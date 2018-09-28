@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -66,12 +66,13 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n0, \
 	  x0, incx0, \
 	  y0, incy0, \
+	  NULL, \
 	  NULL  \
 	); \
 \
@@ -79,7 +80,7 @@ void PASTEF77(ch,blasname) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( copy, copyv )
 #endif
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -81,6 +81,7 @@ void bli_l3_thread_decorator
        obj_t*      beta,
        obj_t*      c,
        cntx_t*     cntx,
+       rntm_t*     rntm,
        cntl_t*     cntl
      )
 {
@@ -94,11 +95,18 @@ void bli_l3_thread_decorator
 	cntl_t*    cntl_use;
 	thrinfo_t* thread;
 
+	// NOTE: Unlike with the _openmp.c and _pthreads.c variants, we don't
+	// need to alias objects for A, B, and C since they were already aliased
+	// in bli_*_front(). However, we may add aliasing here in the future so
+	// that, with all three (_single.c, _openmp.c, _pthreads.c) implementations
+	// consistently providing local aliases, we can then eliminate aliasing
+	// elsewhere.
+
 	// Create a default control tree for the operation, if needed.
 	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the thread's thrinfo_t structure.
-	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+	bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
 
 	func
 	(
@@ -108,6 +116,7 @@ void bli_l3_thread_decorator
 	  beta,
 	  c,
 	  cntx,
+	  rntm,
 	  cntl_use,
 	  thread
 	);

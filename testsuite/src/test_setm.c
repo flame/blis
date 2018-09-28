@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_setm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -84,36 +86,39 @@ void libblis_test_setm_check
 
 void libblis_test_setm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( params, &(op->ops->randm) );
+	libblis_test_randv( tdata, params, &(op->ops->randm) );
 }
 
 
 
 void libblis_test_setm
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l1m_over == DISABLE_ALL ) return;
+	     libblis_test_l1m_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_setm_deps( params, op );
+	if ( TRUE ) libblis_test_setm_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -183,7 +188,7 @@ void libblis_test_setm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_setm_check( params, &beta, &x, resid );
@@ -225,13 +230,13 @@ void libblis_test_setm_check
        double*        resid
      )
 {
-	num_t dt_x     = bli_obj_datatype( *x );
-	dim_t m_x      = bli_obj_length( *x );
-	dim_t n_x      = bli_obj_width( *x );
-	inc_t rs_x     = bli_obj_row_stride( *x );
-	inc_t cs_x     = bli_obj_col_stride( *x );
-	void* buf_x    = bli_obj_buffer_at_off( *x );
-	void* buf_beta = bli_obj_buffer_for_1x1( dt_x, *beta );
+	num_t dt_x     = bli_obj_dt( x );
+	dim_t m_x      = bli_obj_length( x );
+	dim_t n_x      = bli_obj_width( x );
+	inc_t rs_x     = bli_obj_row_stride( x );
+	inc_t cs_x     = bli_obj_col_stride( x );
+	void* buf_x    = bli_obj_buffer_at_off( x );
+	void* buf_beta = bli_obj_buffer_for_1x1( dt_x, beta );
 	dim_t i, j;
 
 	*resid = 0.0;
@@ -241,7 +246,7 @@ void libblis_test_setm_check
 	// that each element of x is equal to beta.
 	//
 
-	if      ( bli_obj_is_float( *x ) )
+	if      ( bli_obj_is_float( x ) )
 	{
 		float*    beta_cast  = buf_beta;
 		float*    buf_x_cast = buf_x;
@@ -257,7 +262,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else if ( bli_obj_is_double( *x ) )
+	else if ( bli_obj_is_double( x ) )
 	{
 		double*   beta_cast  = buf_beta;
 		double*   buf_x_cast = buf_x;
@@ -273,7 +278,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else if ( bli_obj_is_scomplex( *x ) )
+	else if ( bli_obj_is_scomplex( x ) )
 	{
 		scomplex* beta_cast  = buf_beta;
 		scomplex* buf_x_cast = buf_x;
@@ -289,7 +294,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else // if ( bli_obj_is_dcomplex( *x ) )
+	else // if ( bli_obj_is_dcomplex( x ) )
 	{
 		dcomplex* beta_cast  = buf_beta;
 		dcomplex* buf_x_cast = buf_x;

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,7 +32,9 @@
 
 */
 
-#include "blis.h"
+// Guard the function definitions so that they are only compiled when
+// #included from files that define the typed API macros.
+#ifdef BLIS_ENABLE_TAPI
 
 //
 // Define BLAS-like interfaces with typed operands.
@@ -41,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, auxker ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -50,11 +52,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -73,7 +77,8 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -81,7 +86,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC(ch,auxker) \
+		PASTEMAC2(ch,auxker,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -90,7 +95,8 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -102,7 +108,7 @@ INSERT_GENTFUNC_BASIC( subm, subd )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -111,11 +117,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -134,7 +142,8 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -146,9 +155,9 @@ void PASTEMAC(ch,opname) \
 		ctype* one      = PASTEMAC(ch,1); \
 \
 		if ( bli_does_trans( transx ) ) \
-			bli_negate_diag_offset( diagoffy ); \
+			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC(ch,setd) \
+		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -156,7 +165,8 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  one, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -167,7 +177,7 @@ INSERT_GENTFUNC_BASIC0( copym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -177,11 +187,13 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -204,7 +216,8 @@ void PASTEMAC(ch,opname) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -212,7 +225,7 @@ void PASTEMAC(ch,opname) \
 	if ( bli_is_upper_or_lower( uplox ) && \
 	     bli_is_unit_diag( diagx ) ) \
 	{ \
-		PASTEMAC(ch,axpyd) \
+		PASTEMAC2(ch,axpyd,BLIS_TAPI_EX_SUF) \
 		( \
 		  diagoffx, \
 		  diagx, \
@@ -222,7 +235,8 @@ void PASTEMAC(ch,opname) \
 		  alpha, \
 		  x, rs_x, cs_x, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -233,7 +247,7 @@ INSERT_GENTFUNC_BASIC0( axpym )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -243,11 +257,13 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -260,7 +276,7 @@ void PASTEMAC(ch,opname) \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 \
-		PASTEMAC(ch,setm) \
+		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffx, \
@@ -270,7 +286,8 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 		return; \
 	} \
@@ -288,7 +305,8 @@ void PASTEMAC(ch,opname) \
 	  alpha, \
 	  x, rs_x, cs_x, \
 	  y, rs_y, cs_y, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 \
 	/* When the diagonal of an upper- or lower-stored matrix is unit,
@@ -299,9 +317,9 @@ void PASTEMAC(ch,opname) \
 		doff_t diagoffy = diagoffx; \
 \
 		if ( bli_does_trans( transx ) ) \
-			bli_negate_diag_offset( diagoffy ); \
+			bli_negate_diag_offset( &diagoffy ); \
 \
-		PASTEMAC(ch,setd) \
+		PASTEMAC2(ch,setd,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  diagoffy, \
@@ -309,7 +327,8 @@ void PASTEMAC(ch,opname) \
 		  n, \
 		  alpha, \
 		  y, rs_y, cs_y, \
-		  cntx  \
+		  cntx, \
+		  rntm  \
 		); \
 	} \
 }
@@ -320,7 +339,7 @@ INSERT_GENTFUNC_BASIC0( scal2m )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjalpha, \
        doff_t  diagoffx, \
@@ -329,11 +348,13 @@ void PASTEMAC(ch,opname) \
        dim_t   m, \
        dim_t   n, \
        ctype*  alpha, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       cntx_t* cntx  \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
 	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -352,10 +373,14 @@ void PASTEMAC(ch,opname) \
 	  n, \
 	  alpha, \
 	  x, rs_x, cs_x, \
-	  cntx  \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
 INSERT_GENTFUNC_BASIC0( scalm )
 INSERT_GENTFUNC_BASIC0( setm )
+
+
+#endif
 

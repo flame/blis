@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,15 +34,27 @@
 
 #include "bli_l2_check.h"
 
+// Define function types.
+#include "bli_l2_ft_unb.h"
+
+// Prototype object APIs (expert and non-expert).
+#include "bli_oapi_ex.h"
+#include "bli_l2_oapi.h"
+
+#include "bli_oapi_ba.h"
+#include "bli_l2_oapi.h"
+
+// Prototype typed APIs (expert and non-expert).
+#include "bli_tapi_ex.h"
+#include "bli_l2_tapi.h"
 #include "bli_l2_ft.h"
 
-// Prototype object APIs with and without contexts.
-#include "bli_oapi_w_cntx.h"
-#include "bli_l2_oapi.h"
-#include "bli_oapi_wo_cntx.h"
-#include "bli_l2_oapi.h"
-
+#include "bli_tapi_ba.h"
 #include "bli_l2_tapi.h"
+#include "bli_l2_ft.h"
+
+// Generate function pointer arrays for tapi functions (expert only).
+#include "bli_l2_fpa.h"
 
 // Operation-specific headers
 #include "bli_gemv.h"
@@ -55,3 +67,4 @@
 #include "bli_syr2.h"
 #include "bli_trmv.h"
 #include "bli_trsv.h"
+

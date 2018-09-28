@@ -42,11 +42,6 @@ THIS_CONFIG    := sandybridge
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -65,21 +60,25 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mavx -mfpmath=sse -march=corei7-avx
+CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := -xAVX
+CKVECFLAGS     := -xAVX
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx -mfpmath=sse -march=corei7-avx
+CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
 endif
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

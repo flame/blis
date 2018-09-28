@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -39,9 +39,9 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCDOT
-#define GENTFUNCDOT( ftype, chxy, chc, blis_conjy, blasname, blisname ) \
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjy, blasname, blisname ) \
 \
-void PASTEF772(chxy,blasname,chc) \
+void PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* m, \
        const f77_int* n, \
@@ -66,6 +66,7 @@ void PASTEF772(chxy,blasname,chc) \
 	( \
 	  MKSTR(ch), \
 	  MKSTR(blasname), \
+	  MKSTR(chc), \
 	  m, \
 	  n, \
 	  incx, \
@@ -87,7 +88,7 @@ void PASTEF772(chxy,blasname,chc) \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chxy,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  blis_conjy, \
@@ -97,6 +98,7 @@ void PASTEF772(chxy,blasname,chc) \
 	  x0, incx0, \
 	  y0, incy0, \
 	  (ftype*)a,  rs_a, cs_a, \
+	  NULL, \
 	  NULL  \
 	); \
 \
@@ -104,7 +106,7 @@ void PASTEF772(chxy,blasname,chc) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCDOT_BLAS( ger, ger )
 #endif
 

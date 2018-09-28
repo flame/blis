@@ -42,10 +42,10 @@ THIS_CONFIG    := bgq
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
-CC_VENDOR      := ibm
-endif
+#ifeq ($(CC),)
+#CC             := /bgsys/drivers/ppcfloor/comm/gcc.legacy/bin/mpixlc_r
+#CC_VENDOR      := ibm
+#endif
 
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
@@ -65,13 +65,17 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),ibm)
-CVECFLAGS      := -qarch=qp -qtune=qp -qsimd=auto -qhot=level=1 -qprefetch -qunroll=yes -qnoipa
+CKVECFLAGS     := -qarch=qp -qtune=qp -qsimd=auto -qhot=level=1 -qprefetch -qunroll=yes -qnoipa
 else
 $(error xlc is required for this configuration.)
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Override the default value for LDFLAGS.
 LDFLAGS        := -L/bgsys/drivers/ppcfloor/spi/lib -lSPI -lSPI_cnk -qthreaded -qsmp=omp

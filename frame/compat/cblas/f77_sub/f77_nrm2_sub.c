@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -42,14 +42,18 @@
 #undef  GENTFUNCR2
 #define GENTFUNCR2( ftype_x, ftype_r, chx, chr, blasname, blisname ) \
 \
-void PASTEF773(chr,chx,blasname,sub)( \
-                                      const f77_int* n, \
-                                      const ftype_x* x, const f77_int* incx, \
-                                      ftype_r* rval  \
-                                    ) \
+void PASTEF773(chr,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             ftype_r* rval  \
+     ) \
 { \
-	*rval = PASTEF772(chr,chx,blasname)( n, \
-	                                     x, incx ); \
+	*rval = PASTEF772(chr,chx,blasname) \
+	( \
+	  n, \
+	  x, incx \
+	); \
 }
 
 #ifdef BLIS_ENABLE_CBLAS

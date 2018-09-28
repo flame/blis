@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,20 +44,16 @@
 extern "C" {
 #endif
 
+// NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
+// YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
 
 // -- System headers --
+// NOTE: This header must be included before bli_config_macro_defs.h.
 
 #include "bli_system.h"
 
 
-// -- BLIS configuration definition --
-
-// NOTE: We include bli_config.h first because there might be something
-// defined there that is needed within one of the system headers. A good
-// example: posix_memalign() needs _GNU_SOURCE on GNU systems (I think).
-// 
-// PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS YOU
-// KNOW WHAT YOU ARE DOING.
+// -- configure definitions --
 
 #include "bli_config.h"
 #include "bli_config_macro_defs.h"
@@ -102,6 +98,7 @@ extern "C" {
 #include "bli_func.h"
 #include "bli_mbool.h"
 #include "bli_cntx.h"
+#include "bli_rntm.h"
 #include "bli_gks.h"
 #include "bli_ind.h"
 #include "bli_membrk.h"
@@ -124,6 +121,14 @@ extern "C" {
 #include "bli_info.h"
 #include "bli_arch.h"
 #include "bli_cpuid.h"
+#include "bli_string.h"
+#include "bli_setgetij.h"
+#include "bli_setri.h"
+
+#include "bli_castm.h"
+#include "bli_castv.h"
+#include "bli_projm.h"
+#include "bli_projv.h"
 
 
 // -- Level-0 operations --
@@ -166,6 +171,11 @@ extern "C" {
 #include "bli_util.h"
 
 
+// -- sandbox implementation --
+
+#include "bli_sbox.h"
+
+
 // -- BLAS compatibility layer --
 
 #include "bli_blas.h"
@@ -174,6 +184,10 @@ extern "C" {
 // -- CBLAS compatibility layer --
 
 #include "bli_cblas.h"
+
+// -- Windows definitions
+
+#include "bli_winsys.h"
 
 
 // End extern "C" construct block.

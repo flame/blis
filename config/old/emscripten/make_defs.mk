@@ -54,7 +54,7 @@ CDBGFLAGS      := #-g4
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 COPTFLAGS      := -O2
 CKOPTFLAGS     := -O3
-CVECFLAGS      :=
+CKVECFLAGS     :=
 
 # --- Determine the archiver and related flags ---
 AR             := emar

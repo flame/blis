@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,16 +26,16 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include "pmmintrin.h"
 #include "blis.h"
 
 
-#include "pmmintrin.h"
 typedef union
 {
 	__m128d v;
@@ -94,15 +94,15 @@ void bli_ddotaxpyv_penryn_int
 	{
 		use_ref = TRUE;
 	}
-	else if ( bli_is_unaligned_to( x, 16 ) ||
-	          bli_is_unaligned_to( y, 16 ) ||
-	          bli_is_unaligned_to( z, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )x, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )z, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( x, 16 ) &&
-		     bli_is_unaligned_to( y, 16 ) &&
-		     bli_is_unaligned_to( z, 16 ) )
+		if ( bli_is_unaligned_to( ( siz_t )x, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )y, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )z, 16 ) )
 		{
 			use_ref = FALSE;
 			n_pre   = 1;
@@ -112,7 +112,7 @@ void bli_ddotaxpyv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotaxpyv_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
+		ddotaxpyv_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTAXPYV_KER, cntx );
 
 		f
 		(

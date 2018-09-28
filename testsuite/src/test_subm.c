@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_subm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -86,37 +88,40 @@ void libblis_test_subm_check
 
 void libblis_test_subm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_setm( params, &(op->ops->setm) );
-	libblis_test_normfm( params, &(op->ops->normfm) );
+	libblis_test_setm( tdata, params, &(op->ops->setm) );
+	libblis_test_normfm( tdata, params, &(op->ops->normfm) );
 }
 
 
 
 void libblis_test_subm
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l1m_over == DISABLE_ALL ) return;
+	     libblis_test_l1m_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_subm_deps( params, op );
+	if ( TRUE ) libblis_test_subm_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -179,7 +184,7 @@ void libblis_test_subm_experiment
 	bli_setm( &beta,  &y );
 
 	// Apply the parameters.
-	bli_obj_set_conjtrans( transx, x );
+	bli_obj_set_conjtrans( transx, &x );
 
 	// Disable repeats since bli_copym() is not yet tested.
 	//for ( i = 0; i < n_repeats; ++i )
@@ -193,7 +198,7 @@ void libblis_test_subm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_subm_check( params, &alpha, &beta, &x, &y, resid );
@@ -238,12 +243,12 @@ void libblis_test_subm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *y );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
-	dim_t  m       = bli_obj_length( *y );
-	dim_t  n       = bli_obj_width( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	dim_t  m       = bli_obj_length( y );
+	dim_t  n       = bli_obj_width( y );
 
-	conj_t conjx   = bli_obj_conj_status( *x );
+	conj_t conjx   = bli_obj_conj_status( x );
 
 	obj_t  aminusb;
 	obj_t  alpha_conj;

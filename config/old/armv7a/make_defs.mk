@@ -67,7 +67,7 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mfpu=vfpv3 -marm -march=armv7-a
+CKVECFLAGS     := -mfpu=vfpv3 -marm -march=armv7-a
 else
 $(error gcc is required for this configuration.)
 endif

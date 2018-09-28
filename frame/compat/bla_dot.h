@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -37,16 +37,16 @@
 // Prototype BLAS-to-BLIS interfaces.
 //
 #undef  GENTPROTDOT
-#define GENTPROTDOT( ftype, chxy, chc, blasname ) \
+#define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-ftype PASTEF772(chxy,blasname,chc) \
+ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
        const ftype*   y, const f77_int* incy  \
      );
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTPROTDOT_BLAS( dot )
 
 
@@ -55,6 +55,7 @@ INSERT_GENTPROTDOT_BLAS( dot )
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
+       const float*   sb,
        const float*   x, const f77_int* incx,
        const float*   y, const f77_int* incy
      );

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -52,7 +52,7 @@
 	if ( bli_obj_imag_equals( &beta, &BLIS_ZERO ) && \
 	     !bli_is_gen_stored( rs_c, cs_c ) ) \
 	{ \
-		dt_exec = bli_datatype_proj_to_real( dt_exec ); \
+		dt_exec = bli_dt_proj_to_real( dt_exec ); \
 \
 		if ( bli_is_1e_packed( schema_a ) ) \
 		{ \

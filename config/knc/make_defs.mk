@@ -42,11 +42,6 @@ THIS_CONFIG    := knc
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := icc
-CC_VENDOR      := icc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -65,20 +60,24 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := 
+CKVECFLAGS     := 
 else
 $(error icc is required for this configuration.)
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Override the default value for LDFLAGS.
 LDFLAGS        := -mmic
 
 # Never use libm with Intel compilers.
 ifneq ($(CC_VENDOR),icc)
-LDFLAGS        += -lm
+LDFLAGS        += $(LIBM)
 endif
 
 # Store all of the variables here to new variables containing the

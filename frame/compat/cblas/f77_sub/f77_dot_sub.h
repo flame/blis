@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -37,14 +37,15 @@
 // Prototype CBLAS subroutine wrapper interfaces.
 //
 #undef  GENTPROTDOT
-#define GENTPROTDOT( ftype, chxy, chc, blasname ) \
+#define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \
-void PASTEF773(chxy,blasname,chc,sub)( \
-                                       const f77_int* n, \
-                                       const ftype*   x, const f77_int* incx, \
-                                       const ftype*   y, const f77_int* incy, \
-                                       ftype*   rval  \
-                                     );
+void PASTEF773(ch,blasname,chc,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy, \
+             ftype*   rval  \
+     );
 
 #ifdef BLIS_ENABLE_CBLAS
 INSERT_GENTPROTDOT_BLAS( dot )
@@ -52,16 +53,20 @@ INSERT_GENTPROTDOT_BLAS( dot )
 
 // -- "Black sheep" dot product function prototypes --
 
-void PASTEF772(sds,dot,sub)( const f77_int* n,
-                             const float*  sb,
-                             const float*   x, const f77_int* incx,
-                             const float*   y, const f77_int* incy,
-                             float*   rval
-                           );
+void PASTEF772(sds,dot,sub)
+     (
+       const f77_int* n,
+       const float*  sb,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             float*   rval
+     );
 
-void PASTEF772(ds,dot,sub)( const f77_int* n,
-                            const float*   x, const f77_int* incx,
-                            const float*   y, const f77_int* incy,
-                            double*  rval
-                          );
+void PASTEF772(ds,dot,sub)
+     (
+       const f77_int* n,
+       const float*   x, const f77_int* incx,
+       const float*   y, const f77_int* incy,
+             double*  rval
+     );
 #endif

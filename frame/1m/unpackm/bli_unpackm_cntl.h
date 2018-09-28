@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,8 +34,8 @@
 
 struct unpackm_params_s
 {
-	uint64_t      size; // size field must be present and come first.
-	unpackm_voft  var_func;
+	uint64_t        size; // size field must be present and come first.
+	unpackm_var_oft var_func;
 };
 typedef struct unpackm_params_s unpackm_params_t;
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -38,34 +38,6 @@ void bli_cntx_clear( cntx_t* cntx )
 {
 	// Fill the entire cntx_t structure with zeros.
 	memset( ( void* )cntx, 0, sizeof( cntx_t ) );
-}
-
-// -----------------------------------------------------------------------------
-
-dim_t bli_cntx_get_num_threads_in
-     (
-       cntx_t* cntx,
-       cntl_t* cntl
-     )
-{
-	dim_t n_threads_in = 1;
-
-	for ( ; cntl != NULL; cntl = bli_cntl_sub_node( cntl ) )
-	{
-		bszid_t bszid = bli_cntl_bszid( cntl );
-		dim_t   cur_way;
-
-		// We assume bszid is in {KR,MR,NR,MC,KC,NR} if it is not
-		// BLIS_NO_PART.
-		if ( bszid != BLIS_NO_PART )
-			cur_way = bli_cntx_way_for_bszid( bszid, cntx );
-		else
-			cur_way = 1;
-
-		n_threads_in *= cur_way;
-	}
-
-	return n_threads_in;
 }
 
 // -----------------------------------------------------------------------------
@@ -141,9 +113,9 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the address of the blksz_t object,
 			// - the bszid_t of the multiple we need to associate with
 			//   the blksz_t object.
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			blksz_t* blksz = va_arg( args, blksz_t* );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
+			bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+			blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+			bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -164,11 +136,11 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the scalars we wish to apply to the real blocksizes to
 			//   come up with the induced complex blocksizes (for default
 			//   and maximum blocksizes).
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			blksz_t* blksz = va_arg( args, blksz_t* );
-			bszid_t  bm_id = va_arg( args, bszid_t  );
-			double   dsclr = va_arg( args, double   );
-			double   msclr = va_arg( args, double   );
+			bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+			blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+			bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
+			double   dsclr = ( double   )va_arg( args, double   );
+			double   msclr = ( double   )va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -180,7 +152,7 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
+	cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -369,9 +341,9 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 			// - the scalars we wish to apply to the real blocksizes to
 			//   come up with the induced complex blocksizes (for default
 			//   and maximum blocksizes).
-			bszid_t  bs_id = va_arg( args, bszid_t  );
-			double   dsclr = va_arg( args, double   );
-			double   msclr = va_arg( args, double   );
+			bszid_t  bs_id = ( bszid_t )va_arg( args, bszid_t  );
+			double   dsclr = ( double  )va_arg( args, double   );
+			double   msclr = ( double  )va_arg( args, double   );
 
 			// Store the values in our temporary arrays.
 			bszids[ i ] = bs_id;
@@ -381,7 +353,7 @@ void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx = va_arg( args, cntx_t* );
+	cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -523,10 +495,20 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		// - the kernel function pointer, and
 		// - the kernel function storage preference
 		// that we need to store to the context.
-		const l3ukr_t  ukr_id   = va_arg( args, l3ukr_t );
-		const num_t    ukr_dt   = va_arg( args, num_t   );
-		      void*    ukr_fp   = va_arg( args, void*   );
-		const bool_t   ukr_pref = va_arg( args, bool_t  );
+		// NOTE: The type that we pass into the va_arg() macro for the ukr
+		// preference matters. Using 'bool_t' may cause breakage on 64-bit
+		// systems that define int as 32 bits and long int and pointers as
+		// 64 bits. The problem is that TRUE or FALSE are defined as 1 and
+		// 0, respectively, and when "passed" into the variadic function
+		// they come with no contextual typecast. Thus, default rules of
+		// argument promotion kick in to treat these integer literals as
+		// being of type int. Thus, we need to let va_arg() treat the TRUE
+		// or FALSE value as an int, even if we cast it to and store it
+		// within a bool_t afterwards.
+		const l3ukr_t  ukr_id   = ( l3ukr_t )va_arg( args, l3ukr_t );
+		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ukr_fp   = ( void*   )va_arg( args, void*   );
+		const bool_t   ukr_pref = ( bool_t  )va_arg( args, int     );
 
 		// Store the values in our temporary arrays.
 		ukr_ids[ i ]   = ukr_id;
@@ -536,7 +518,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -544,8 +526,10 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	// -- End variable argument section --
 
 	// Query the context for the addresses of:
+	// - the l3 virtual ukernel func_t array
 	// - the l3 native ukernel func_t array
 	// - the l3 native ukernel preferences array
+	func_t*  cntx_l3_vir_ukrs       = bli_cntx_l3_vir_ukrs_buf( cntx );
 	func_t*  cntx_l3_nat_ukrs       = bli_cntx_l3_nat_ukrs_buf( cntx );
 	mbool_t* cntx_l3_nat_ukrs_prefs = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
 
@@ -565,11 +549,18 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.
+		func_t*       vukrs  = &cntx_l3_vir_ukrs[ ukr_id ];
 		func_t*       ukrs   = &cntx_l3_nat_ukrs[ ukr_id ];
 		mbool_t*      prefs  = &cntx_l3_nat_ukrs_prefs[ ukr_id ];
 
 		// Store the ukernel function pointer and preference values into
-		// the context.
+		// the context. Notice that we redundantly store the native
+		// ukernel address in both the native and virtual ukernel slots
+		// in the context. This is standard practice when creating a
+		// native context. (Induced method contexts will overwrite the
+		// virtual function pointer with the address of the appropriate
+		// virtual ukernel.)
+		bli_func_set_dt( ukr_fp, ukr_dt, vukrs );
 		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
 		bli_mbool_set_dt( ukr_pref, ukr_dt, prefs );
 	}
@@ -625,9 +616,9 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1fkr_t  ker_id   = va_arg( args, l1fkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1fkr_t  ker_id   = ( l1fkr_t )va_arg( args, l1fkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -636,7 +627,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -719,9 +710,9 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1vkr_t  ker_id   = va_arg( args, l1vkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1vkr_t  ker_id   = ( l1vkr_t )va_arg( args, l1vkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -730,7 +721,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -813,9 +804,9 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		// that we need to store to the context.
-		const l1mkr_t  ker_id   = va_arg( args, l1mkr_t );
-		const num_t    ker_dt   = va_arg( args, num_t   );
-		      void*    ker_fp   = va_arg( args, void*   );
+		const l1mkr_t  ker_id   = ( l1mkr_t )va_arg( args, l1mkr_t );
+		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
+		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -824,7 +815,7 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 	}
 
 	// The last argument should be the context pointer.
-	cntx_t* cntx = va_arg( args, cntx_t* );
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
 
 	// Shutdown variable argument environment and clean up stack.
 	va_end( args );
@@ -862,146 +853,6 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 	bli_free_intl( ker_dts );
 	bli_free_intl( ker_fps );
 }
-
-// -----------------------------------------------------------------------------
-
-void bli_cntx_set_thrloop_from_env
-     (
-       opid_t  l3_op,
-       side_t  side,
-       cntx_t* cntx,
-       dim_t   m,
-       dim_t   n,
-       dim_t   k
-     )
-{
-	dim_t jc, pc, ic, jr, ir;
-
-#ifdef BLIS_ENABLE_MULTITHREADING
-
-	int nthread = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
-
-	if ( nthread == -1 )
-	    nthread = bli_thread_get_env( "OMP_NUM_THREADS", -1 );
-
-	if ( nthread < 1 ) nthread = 1;
-
-    bli_partition_2x2( nthread, m*BLIS_DEFAULT_M_THREAD_RATIO,
-                                n*BLIS_DEFAULT_N_THREAD_RATIO, &ic, &jc );
-
-    for ( ir = BLIS_DEFAULT_MR_THREAD_MAX ; ir > 1 ; ir-- )
-    {
-        if ( ic % ir == 0 )
-        {
-            ic /= ir;
-            break;
-        }
-    }
-
-    for ( jr = BLIS_DEFAULT_NR_THREAD_MAX ; jr > 1 ; jr-- )
-    {
-        if ( jc % jr == 0 )
-        {
-            jc /= jr;
-            break;
-        }
-    }
-
-    pc = 1;
-
-    dim_t jc_env = bli_thread_get_env( "BLIS_JC_NT", -1 );
-    dim_t ic_env = bli_thread_get_env( "BLIS_IC_NT", -1 );
-    dim_t jr_env = bli_thread_get_env( "BLIS_JR_NT", -1 );
-    dim_t ir_env = bli_thread_get_env( "BLIS_IR_NT", -1 );
-
-    if (jc_env != -1 || ic_env != -1 || jr_env != -1 || ir_env != -1)
-    {
-        jc = (jc_env == -1 ? 1 : jc_env);
-        ic = (ic_env == -1 ? 1 : ic_env);
-        jr = (jr_env == -1 ? 1 : jr_env);
-        ir = (ir_env == -1 ? 1 : ir_env);
-    }
-
-#else
-
-	jc = 1;
-	pc = 1;
-	ic = 1;
-	jr = 1;
-	ir = 1;
-
-#endif
-
-	if ( l3_op == BLIS_TRMM )
-	{
-		// We reconfigure the paralelism from trmm_r due to a dependency in
-		// the jc loop. (NOTE: This dependency does not exist for trmm3 )
-		if ( bli_is_right( side ) )
-		{
-			bli_cntx_set_thrloop
-			(
-			  1,
-			  pc,
-			  ic,
-			  jr * jc,
-			  ir,
-			  cntx
-			);
-		}
-		else // if ( bli_is_left( side ) )
-		{
-			bli_cntx_set_thrloop
-			(
-			  jc,
-			  pc,
-			  ic,
-			  jr,
-			  ir,
-			  cntx
-			);
-		}
-	}
-	else if ( l3_op == BLIS_TRSM )
-	{
-		if ( bli_is_right( side ) )
-		{
-			bli_cntx_set_thrloop
-			(
-			  1,
-			  1,
-			  ic * pc * jc * ir * jr,
-			  1,
-			  1,
-			  cntx
-			);
-		}
-		else // if ( bli_is_left( side ) )
-		{
-			bli_cntx_set_thrloop
-			(
-			  1,
-			  1,
-			  1,
-			  ic * pc * jc * jr * ir,
-			  1,
-			  cntx
-			);
-		}
-	}
-	else // if ( l3_op == BLIS_TRSM )
-	{
-		bli_cntx_set_thrloop
-		(
-		  jc,
-		  pc,
-		  ic,
-		  jr,
-		  ir,
-		  cntx
-		);
-	}
-}
-
 
 // -----------------------------------------------------------------------------
 

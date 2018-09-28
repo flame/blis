@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,7 +35,7 @@
 #include "blis.h"
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( tname, opname ) \
 \
 void PASTEMAC0(opname) \
      ( \
@@ -49,16 +49,16 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *c ); \
+	num_t     dt        = bli_obj_dt( c ); \
 \
-	dim_t     k         = bli_obj_width( *a ); \
-	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-	void*     buf_b     = bli_obj_buffer_at_off( *b ); \
-	void*     buf_c     = bli_obj_buffer_at_off( *c ); \
-	inc_t     rs_c      = bli_obj_row_stride( *c ); \
-	inc_t     cs_c      = bli_obj_col_stride( *c ); \
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha ); \
-	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, *beta ); \
+	dim_t     k         = bli_obj_width( a ); \
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	void*     buf_b     = bli_obj_buffer_at_off( b ); \
+	void*     buf_c     = bli_obj_buffer_at_off( c ); \
+	inc_t     rs_c      = bli_obj_row_stride( c ); \
+	inc_t     cs_c      = bli_obj_col_stride( c ); \
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
+	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, beta ); \
 \
 	auxinfo_t data; \
 \
@@ -68,11 +68,13 @@ void PASTEMAC0(opname) \
 	bli_auxinfo_set_is_a( 1, &data ); \
 	bli_auxinfo_set_is_b( 1, &data ); \
 \
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	bli_call_ft_10 \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(tname,_ukr,_vft) f = \
+	PASTEMAC(opname,_qfp)( dt ); \
+\
+	f \
 	( \
-	  dt, \
-	  opname, \
 	  k, \
 	  buf_alpha, \
 	  buf_a, \
@@ -84,72 +86,11 @@ void PASTEMAC0(opname) \
 	); \
 } \
 
-GENFRONT( gemm_ukernel )
+GENFRONT( gemm, gemm_ukernel )
 
 
 #undef  GENFRONT
-#define GENFRONT( opname, opnamel, opnameu ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	num_t     dt        = bli_obj_datatype( *c ); \
-\
-	void*     buf_a     = bli_obj_buffer_at_off( *a ); \
-	void*     buf_b     = bli_obj_buffer_at_off( *b ); \
-	void*     buf_c     = bli_obj_buffer_at_off( *c ); \
-	inc_t     rs_c      = bli_obj_row_stride( *c ); \
-	inc_t     cs_c      = bli_obj_col_stride( *c ); \
-\
-	auxinfo_t data; \
-\
-	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
-	bli_auxinfo_set_next_a( buf_a, &data ); \
-	bli_auxinfo_set_next_b( buf_b, &data ); \
-	bli_auxinfo_set_is_a( 1, &data ); \
-	bli_auxinfo_set_is_b( 1, &data ); \
-\
-	/* Invoke the void pointer-based function for the given datatype. */ \
-	if ( bli_obj_is_lower( *a ) ) \
-	{ \
-		bli_call_ft_7 \
-		( \
-		  dt, \
-		  opnamel, \
-		  buf_a, \
-		  buf_b, \
-		  buf_c, rs_c, cs_c, \
-		  &data, \
-		  cntx  \
-		); \
-	} \
-	else /* if ( bli_obj_is_upper( *a ) ) */ \
-	{ \
-		bli_call_ft_7 \
-		( \
-		  dt, \
-		  opnameu, \
-		  buf_a, \
-		  buf_b, \
-		  buf_c, rs_c, cs_c, \
-		  &data, \
-		  cntx  \
-		); \
-	} \
-} \
-
-GENFRONT( trsm_ukernel, trsm_l_ukernel, trsm_u_ukernel )
-
-
-#undef  GENFRONT
-#define GENFRONT( opname, opnamel, opnameu ) \
+#define GENFRONT( tname, opname, opnamel, opnameu ) \
 \
 void PASTEMAC0(opname) \
      ( \
@@ -164,34 +105,37 @@ void PASTEMAC0(opname) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt        = bli_obj_datatype( *c11 ); \
+	num_t     dt        = bli_obj_dt( c11 ); \
 \
-	dim_t     k         = bli_obj_width( *a1x ); \
-	void*     buf_a1x   = bli_obj_buffer_at_off( *a1x ); \
-	void*     buf_a11   = bli_obj_buffer_at_off( *a11 ); \
-	void*     buf_bx1   = bli_obj_buffer_at_off( *bx1 ); \
-	void*     buf_b11   = bli_obj_buffer_at_off( *b11 ); \
-	void*     buf_c11   = bli_obj_buffer_at_off( *c11 ); \
-	inc_t     rs_c      = bli_obj_row_stride( *c11 ); \
-	inc_t     cs_c      = bli_obj_col_stride( *c11 ); \
-	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, *alpha ); \
+	dim_t     k         = bli_obj_width( a1x ); \
+	void*     buf_a1x   = bli_obj_buffer_at_off( a1x ); \
+	void*     buf_a11   = bli_obj_buffer_at_off( a11 ); \
+	void*     buf_bx1   = bli_obj_buffer_at_off( bx1 ); \
+	void*     buf_b11   = bli_obj_buffer_at_off( b11 ); \
+	void*     buf_c11   = bli_obj_buffer_at_off( c11 ); \
+	inc_t     rs_c      = bli_obj_row_stride( c11 ); \
+	inc_t     cs_c      = bli_obj_col_stride( c11 ); \
+	void*     buf_alpha = bli_obj_buffer_for_1x1( dt, alpha ); \
 \
 	auxinfo_t data; \
 \
 	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
-	if ( bli_obj_is_lower( *a11 ) ) \
+	if ( bli_obj_is_lower( a11 ) ) \
 	{ bli_auxinfo_set_next_a( buf_a1x, &data ); } \
-	else /* if ( bli_obj_is_upper( *a11 ) ) */ \
+	else /* if ( bli_obj_is_upper( a11 ) ) */ \
 	{ bli_auxinfo_set_next_a( buf_a11, &data ); } \
 	bli_auxinfo_set_next_b( buf_bx1, &data ); \
 \
 	/* Invoke the void pointer-based function for the given datatype. */ \
-	if ( bli_obj_is_lower( *a11 ) ) \
+	if ( bli_obj_is_lower( a11 ) ) \
 	{ \
-		bli_call_ft_11 \
+		/* Query a type-specific function pointer, except one that uses
+		   void* instead of typed pointers. */ \
+		PASTECH2(tname,_ukr,_vft) f = \
+		PASTEMAC(opnamel,_qfp)( dt ); \
+\
+		f \
 		( \
-		  dt, \
-		  opnamel, \
 		  k, \
 		  buf_alpha, \
 		  buf_a1x, \
@@ -203,12 +147,15 @@ void PASTEMAC0(opname) \
 		  cntx  \
 		); \
 	} \
-	else /* if ( bli_obj_is_upper( *a11 ) ) */ \
+	else /* if ( bli_obj_is_upper( a11 ) ) */ \
 	{ \
-		bli_call_ft_11 \
+		/* Query a type-specific function pointer, except one that uses
+		   void* instead of typed pointers. */ \
+		PASTECH2(tname,_ukr,_vft) f = \
+		PASTEMAC(opnameu,_qfp)( dt ); \
+\
+		f \
 		( \
-		  dt, \
-		  opnameu, \
 		  k, \
 		  buf_alpha, \
 		  buf_a1x, \
@@ -222,5 +169,72 @@ void PASTEMAC0(opname) \
 	} \
 } \
 
-GENFRONT( gemmtrsm_ukernel, gemmtrsm_l_ukernel, gemmtrsm_u_ukernel )
+GENFRONT( gemmtrsm, gemmtrsm_ukernel, gemmtrsm_l_ukernel, gemmtrsm_u_ukernel )
+
+
+#undef  GENFRONT
+#define GENFRONT( tname, opname, opnamel, opnameu ) \
+\
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	num_t     dt        = bli_obj_dt( c ); \
+\
+	void*     buf_a     = bli_obj_buffer_at_off( a ); \
+	void*     buf_b     = bli_obj_buffer_at_off( b ); \
+	void*     buf_c     = bli_obj_buffer_at_off( c ); \
+	inc_t     rs_c      = bli_obj_row_stride( c ); \
+	inc_t     cs_c      = bli_obj_col_stride( c ); \
+\
+	auxinfo_t data; \
+\
+	/* Fill the auxinfo_t struct in case the micro-kernel uses it. */ \
+	bli_auxinfo_set_next_a( buf_a, &data ); \
+	bli_auxinfo_set_next_b( buf_b, &data ); \
+	bli_auxinfo_set_is_a( 1, &data ); \
+	bli_auxinfo_set_is_b( 1, &data ); \
+\
+	/* Invoke the void pointer-based function for the given datatype. */ \
+	if ( bli_obj_is_lower( a ) ) \
+	{ \
+		/* Query a type-specific function pointer, except one that uses
+		   void* instead of typed pointers. */ \
+		PASTECH2(tname,_ukr,_vft) f = \
+		PASTEMAC(opnamel,_qfp)( dt ); \
+\
+		f \
+		( \
+		  buf_a, \
+		  buf_b, \
+		  buf_c, rs_c, cs_c, \
+		  &data, \
+		  cntx  \
+		); \
+	} \
+	else /* if ( bli_obj_is_upper( a ) ) */ \
+	{ \
+		/* Query a type-specific function pointer, except one that uses
+		   void* instead of typed pointers. */ \
+		PASTECH2(tname,_ukr,_vft) f = \
+		PASTEMAC(opnameu,_qfp)( dt ); \
+\
+		f \
+		( \
+		  buf_a, \
+		  buf_b, \
+		  buf_c, rs_c, cs_c, \
+		  &data, \
+		  cntx  \
+		); \
+	} \
+} \
+
+GENFRONT( trsm, trsm_ukernel, trsm_l_ukernel, trsm_u_ukernel )
 

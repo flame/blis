@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,20 +34,26 @@
 
 cntl_t* bli_gemm_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      );
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_gemmbp_cntl_create
      (
-       opid_t family
+       opid_t family,
+       pack_t schema_a,
+       pack_t schema_b
      );
 
+#if 0
 cntl_t* bli_gemmpb_cntl_create
      (
-       opid_t family
+       opid_t family,
      );
+#endif
 
 // -----------------------------------------------------------------------------
 

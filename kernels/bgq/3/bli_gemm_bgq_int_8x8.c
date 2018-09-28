@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -56,16 +56,23 @@
 
 void bli_dgemm_bgq_int_8x8
      (
-       dim_t               k,
+       dim_t               k0,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
+	uint64_t rs_c   = rs_c0;
+	uint64_t cs_c   = cs_c0;
+
     //Registers for storing C.
     //4 4x4 subblocks of C, c00, c01, c10, c11
     //4 registers per subblock: a, b, c, d

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -178,11 +178,23 @@ void bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status )
 
 void bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt )
 {
+	ind_t im;
+
 	if ( !bli_is_complex( dt ) ) return;
 	if ( !bli_opid_is_level3( oper ) ) return;
 
-	bli_l3_ind_oper_set_enable_all( oper, dt, FALSE );
-	bli_l3_ind_oper_set_enable( oper, method, dt, TRUE );
+	for ( im = 0; im < BLIS_NUM_IND_METHODS; ++im )
+	{
+		// Native execution should always stay enabled.
+		if ( im == BLIS_NAT ) continue;
+
+		// When we come upon the requested method, enable it for the given
+		// operation and datatype. Otherwise, disable it.
+		if ( im == method )
+			bli_l3_ind_oper_set_enable( oper, im, dt, TRUE );
+		else
+			bli_l3_ind_oper_set_enable( oper, im, dt, FALSE );
+	}
 }
 
 void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
@@ -202,9 +214,8 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
 
 // -----------------------------------------------------------------------------
 
-#ifdef BLIS_ENABLE_PTHREADS
-static pthread_mutex_t l3_ind_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
+// A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
+static pthread_mutex_t oper_st_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status )
 {
@@ -218,12 +229,8 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t sta
 
 	idt = bli_ind_map_cdt_to_index( dt );
 
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (l3_ind)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_lock( &l3_ind_mutex );
-#endif
+	// Acquire the mutex protecting bli_l3_ind_oper_st.
+	pthread_mutex_lock( &oper_st_mutex );
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -231,9 +238,8 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t sta
 	}
 	// END CRITICAL SECTION
 
-#ifdef BLIS_ENABLE_PTHREADS
-	pthread_mutex_unlock( &l3_ind_mutex );
-#endif
+	// Release the mutex protecting bli_l3_ind_oper_st.
+	pthread_mutex_unlock( &oper_st_mutex );
 }
 
 bool_t bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )

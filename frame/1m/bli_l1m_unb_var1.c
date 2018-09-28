@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -51,7 +51,8 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -68,10 +69,13 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_2m( diagoffx, diagx, transx, \
-	                           uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, incy, ldy, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_2m \
+	( \
+	  diagoffx, diagx, transx, \
+	  uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, &incy, &ldy, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
@@ -79,7 +83,7 @@ void PASTEMAC(ch,opname) \
 	conjx = bli_extract_conj( transx ); \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -164,7 +168,8 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -181,10 +186,13 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_2m( diagoffx, diagx, transx, \
-	                           uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, incy, ldy, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_2m \
+	( \
+	  diagoffx, diagx, transx, \
+	  uplox, m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, &incy, &ldy, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
@@ -192,7 +200,7 @@ void PASTEMAC(ch,opname) \
 	conjx = bli_extract_conj( transx ); \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \
@@ -278,7 +286,8 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -292,15 +301,18 @@ void PASTEMAC(ch,opname) \
 	dim_t    ij0, n_shift; \
 \
 	/* Set various loop parameters. */ \
-	bli_set_dims_incs_uplo_1m( diagoffx, diagx, \
-	                           uplox, m, n, rs_x, cs_x, \
-	                           uplox_eff, n_elem_max, n_iter, incx, ldx, \
-	                           ij0, n_shift ); \
+	bli_set_dims_incs_uplo_1m \
+	( \
+	  diagoffx, diagx, \
+	  uplox, m, n, rs_x, cs_x, \
+	  &uplox_eff, &n_elem_max, &n_iter, &incx, &ldx, \
+	  &ij0, &n_shift \
+	); \
 \
 	if ( bli_is_zeros( uplox_eff ) ) return; \
 \
 	/* Query the kernel needed for this operation. */ \
-	PASTECH2(ch,kername,_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
 \
 	/* Handle dense and upper/lower storage cases separately. */ \
 	if ( bli_is_dense( uplox_eff ) ) \

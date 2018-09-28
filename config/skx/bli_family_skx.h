@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -50,10 +50,10 @@
 #define BLIS_SIMD_SIZE                   64
 #define BLIS_SIMD_NUM_REGISTERS          32
 
-#include <stdlib.h>
+//#include <stdlib.h>
 
-#define BLIS_MALLOC_POOL malloc
-#define BLIS_FREE_POOL free
+//#define BLIS_MALLOC_POOL malloc
+//#define BLIS_FREE_POOL free
 
 
 #if 0

@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -35,7 +35,8 @@
 #include "blis.h"
 #include <assert.h>
 
-#include "bli_avx512_macros.h"
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define UNROLL_K 32
 
@@ -176,7 +177,9 @@
         PREFETCH_B_L2(n)
 
 //This is an array used for the scatter/gather instructions.
-extern int32_t offsets[24];
+static int32_t offsets[32] __attribute__((aligned(64))) =
+    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,
+     16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31};
 
 //#define MONITORS
 //#define LOOPMON
@@ -210,8 +213,8 @@ void bli_dgemm_knl_asm_24x8
     int tlooph, tloopl, blooph, bloopl;
 #endif
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
+
 #ifdef MONITORS
     RDTSC
     MOV(VAR(topl), EAX)
@@ -224,7 +227,7 @@ void bli_dgemm_knl_asm_24x8
     VMOVAPS(ZMM(11), ZMM(8))   MOV(RAX, VAR(a)) //load address of a
     VMOVAPS(ZMM(12), ZMM(8))   MOV(RBX, VAR(b)) //load address of b
     VMOVAPS(ZMM(13), ZMM(8))   MOV(RCX, VAR(c)) //load address of c
-    VMOVAPS(ZMM(14), ZMM(8))
+    VMOVAPS(ZMM(14), ZMM(8))   VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
     VMOVAPS(ZMM(15), ZMM(8))   MOV(RDI, VAR(offsetPtr))
     VMOVAPS(ZMM(16), ZMM(8))   VMOVAPS(ZMM(4), MEM(RDI))
 #if SCATTER_PREFETCH_C
@@ -258,11 +261,6 @@ void bli_dgemm_knl_asm_24x8
     MOV(VAR(midl), EAX)
     MOV(VAR(midh), EDX)
 #endif
-
-    TEST(RSI, RSI)
-    JZ(POSTACCUM)
-    
-    VMOVAPD(ZMM(0), MEM(RBX)) //pre-load b
 
     SUB(RSI, IMM(32))
     JLE(TAIL)
@@ -383,7 +381,7 @@ void bli_dgemm_knl_asm_24x8
     JNZ(MAIN_LOOP)
 
     LABEL(REM_1)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_2)
 
     SUBITER(0,1,0,RAX)
@@ -392,7 +390,7 @@ void bli_dgemm_knl_asm_24x8
     ADD(RBX, IMM( 8*8))
 
     LABEL(REM_2)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_4)
 
     SUBITER(0,1,0,RAX)
@@ -401,7 +399,7 @@ void bli_dgemm_knl_asm_24x8
     ADD(RBX, IMM(2* 8*8))
 
     LABEL(REM_4)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_8)
 
     SUBITER(0,1,0,RAX)
@@ -412,7 +410,7 @@ void bli_dgemm_knl_asm_24x8
     ADD(RBX, IMM(4* 8*8))
 
     LABEL(REM_8)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(REM_16)
 
     SUBITER(0,1,0,RAX     )
@@ -427,7 +425,7 @@ void bli_dgemm_knl_asm_24x8
     ADD(RBX, IMM(8* 8*8))
 
     LABEL(REM_16)
-    SAR1(RDI)
+    SAR(RDI)
     JNC(AFTER_LOOP)
 
     SUBITER( 0,1,0,RAX      )
@@ -535,6 +533,7 @@ void bli_dgemm_knl_asm_24x8
 
     MOV(RDX, RCX)
     ADD(RSI, IMM(32))
+    JZ(POSTACCUM)
 
     LABEL(TAIL_LOOP)
 
@@ -572,7 +571,7 @@ void bli_dgemm_knl_asm_24x8
     JNE(SCATTEREDUPDATE)
 
     VMOVQ(RDX, XMM(1))
-    SAL1(RDX) //shift out sign bit
+    SAL(RDX) //shift out sign bit
     JZ(COLSTORBZ)
 
     UPDATE_C_FOUR_ROWS( 8, 9,10,11)
@@ -604,7 +603,7 @@ void bli_dgemm_knl_asm_24x8
     VPMULLD(ZMM(2), ZMM(3), ZMM(2))
 
     VMOVQ(RDX, XMM(1))
-    SAL1(RDX) //shift out sign bit
+    SAL(RDX) //shift out sign bit
     JZ(SCATTERBZ)
 
     UPDATE_C_ROW_SCATTERED( 8)
@@ -668,6 +667,8 @@ void bli_dgemm_knl_asm_24x8
     MOV(VAR(botl), EAX)
     MOV(VAR(both), EDX)
 #endif
+
+    END_ASM(
     : // output operands
 #ifdef MONITORS
       [topl]  "=m" (topl),
@@ -698,7 +699,7 @@ void bli_dgemm_knl_asm_24x8
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
-    );
+    )
 
 #ifdef LOOPMON
     printf("looptime = \t%d\n", bloopl - tloopl);

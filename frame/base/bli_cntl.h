@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -109,6 +109,14 @@ void bli_cntl_mark_family
 
 // -----------------------------------------------------------------------------
 
+dim_t bli_cntl_calc_num_threads_in
+     (
+       rntm_t* rntm,
+       cntl_t* cntl
+     );
+
+// -----------------------------------------------------------------------------
+
 // cntl_t query (fields only)
 
 static opid_t bli_cntl_family( cntl_t* cntl )
@@ -151,12 +159,14 @@ static mem_t* bli_cntl_pack_mem( cntl_t* cntl )
 
 static bool_t bli_cntl_is_leaf( cntl_t* cntl )
 {
-	return bli_cntl_sub_node( cntl ) == NULL;
+	return ( bool_t )
+	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
 static bool_t bli_cntl_does_part( cntl_t* cntl )
 {
-	return bli_cntl_bszid( cntl ) != BLIS_NO_PART;
+	return ( bool_t )
+	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
 }
 
 // cntl_t modification

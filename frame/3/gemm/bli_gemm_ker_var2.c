@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -36,22 +36,24 @@
 
 #define FUNCPTR_T gemm_fp
 
-typedef void (*FUNCPTR_T)(
-                           pack_t  schema_a,
-                           pack_t  schema_b,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a, inc_t cs_a, inc_t is_a,
-                                      dim_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, inc_t is_b,
-                                      dim_t pd_b, inc_t ps_b,
-                           void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx,
-                           thrinfo_t* thread
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       pack_t  schema_a,
+       pack_t  schema_b,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha,
+       void*   a, inc_t cs_a, inc_t is_a,
+                  dim_t pd_a, inc_t ps_a,
+       void*   b, inc_t rs_b, inc_t is_b,
+                  dim_t pd_b, inc_t ps_b,
+       void*   beta,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
 
@@ -62,34 +64,35 @@ void bli_gemm_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	pack_t    schema_a  = bli_obj_pack_schema( *a );
-	pack_t    schema_b  = bli_obj_pack_schema( *b );
+	pack_t    schema_a  = bli_obj_pack_schema( a );
+	pack_t    schema_b  = bli_obj_pack_schema( b );
 
-	dim_t     m         = bli_obj_length( *c );
-	dim_t     n         = bli_obj_width( *c );
-	dim_t     k         = bli_obj_width( *a );
+	dim_t     m         = bli_obj_length( c );
+	dim_t     n         = bli_obj_width( c );
+	dim_t     k         = bli_obj_width( a );
 
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-	inc_t     is_a      = bli_obj_imag_stride( *a );
-	dim_t     pd_a      = bli_obj_panel_dim( *a );
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
+	void*     buf_a     = bli_obj_buffer_at_off( a );
+	inc_t     cs_a      = bli_obj_col_stride( a );
+	inc_t     is_a      = bli_obj_imag_stride( a );
+	dim_t     pd_a      = bli_obj_panel_dim( a );
+	inc_t     ps_a      = bli_obj_panel_stride( a );
 
-	void*     buf_b     = bli_obj_buffer_at_off( *b );
-	inc_t     rs_b      = bli_obj_row_stride( *b );
-	inc_t     is_b      = bli_obj_imag_stride( *b );
-	dim_t     pd_b      = bli_obj_panel_dim( *b );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
+	void*     buf_b     = bli_obj_buffer_at_off( b );
+	inc_t     rs_b      = bli_obj_row_stride( b );
+	inc_t     is_b      = bli_obj_imag_stride( b );
+	dim_t     pd_b      = bli_obj_panel_dim( b );
+	inc_t     ps_b      = bli_obj_panel_stride( b );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
 	obj_t     scalar_a;
 	obj_t     scalar_b;
@@ -106,8 +109,8 @@ void bli_gemm_ker_var2
 
 	// Grab the addresses of the internal scalar buffers for the scalar
 	// merged above and the scalar attached to C.
-	buf_alpha = bli_obj_internal_scalar_buffer( scalar_b );
-	buf_beta  = bli_obj_internal_scalar_buffer( *c );
+	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
+	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
     // If 1m is being employed on a column- or row-stored matrix with a
     // real-valued beta, we can use the real domain macro-kernel, which
@@ -147,6 +150,7 @@ void bli_gemm_ker_var2
 	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   cntx,
+	   rntm,
 	   thread );
 }
 
@@ -169,6 +173,7 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
+       rntm_t* rntm, \
        thrinfo_t* thread  \
      ) \
 { \
@@ -183,7 +188,7 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the micro-kernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-	                gemm_ukr   = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -192,7 +197,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -295,11 +300,11 @@ void PASTEMAC(ch,varname) \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = gemm_get_next_a_micropanel( caucus, a1, rstep_a ); \
+			a2 = bli_gemm_get_next_a_upanel( caucus, a1, rstep_a ); \
 			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = gemm_get_next_b_micropanel( thread, b1, cstep_b ); \
+				b2 = bli_gemm_get_next_b_upanel( thread, b1, cstep_b ); \
 				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \

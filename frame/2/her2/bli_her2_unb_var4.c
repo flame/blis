@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -53,7 +53,6 @@ void PASTEMAC(ch,varname) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*  two        = PASTEMAC(ch,2); \
 	ctype*  chi1; \
 	ctype*  x2; \
 	ctype*  psi1; \
@@ -112,7 +111,7 @@ void PASTEMAC(ch,varname) \
 	conjh_conjx = bli_apply_conj( conjh, conjx ); \
 	conjh_conjy = bli_apply_conj( conjh, conjy ); \
 \
-	PASTECH(ch,axpyv_ft) kfp_av; \
+	PASTECH(ch,axpyv_ker_ft) kfp_av; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
@@ -164,7 +163,8 @@ void PASTEMAC(ch,varname) \
 \
 		/* gamma11 = gamma11 +      alpha  * chi1 * conj(psi1) \
 		                     + conj(alpha) * psi1 * conj(chi1); */ \
-		PASTEMAC(ch,axpys)( *two, alpha0_chi1_psi1, *gamma11 ); \
+		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
+		PASTEMAC(ch,adds)( alpha0_chi1_psi1, *gamma11 ); \
 \
 		/* For her2, explicitly set the imaginary component of gamma11 to
            zero. */ \

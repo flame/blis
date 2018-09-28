@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -40,6 +40,7 @@ void bli_trsm_front
        obj_t*  a,
        obj_t*  b,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl
      );
 

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,9 +32,6 @@
 
 */
 
-#ifndef BLIS_L2_FT_H
-#define BLIS_L2_FT_H
-
 
 //
 // -- Level-2 function types ---------------------------------------------------
@@ -45,7 +42,7 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -55,8 +52,8 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( gemv )
@@ -66,7 +63,7 @@ INSERT_GENTDEF( gemv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -75,80 +72,97 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( ger )
 
-// hemv (and symv)
+// hemv, symv
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
        conj_t  conjx, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  x, inc_t incx, \
        ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       cntx_t* cntx  \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( hemv )
+INSERT_GENTDEF( symv )
 
-// her (and syr)
+// her
 
 #undef  GENTDEFR
 #define GENTDEFR( ctype, ctype_r, ch, chr, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
-       conj_t   conjh, \
        dim_t    m, \
-       ctype*   alpha, /* complex alpha allows her variants to also perform syr. */ \
+       ctype_r* alpha, \
        ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       cntx_t*  cntx  \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEFR( her )
 
-// her2 (and syr2)
+// syr
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+     ( \
+       uplo_t   uploa, \
+       conj_t   conjx, \
+       dim_t    m, \
+       ctype*   alpha, \
+       ctype*   x, inc_t incx, \
+       ctype*   a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTDEF( syr )
+
+// her2, syr2
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
        conj_t  conjy, \
-       conj_t  conjh, \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  x, inc_t incx, \
        ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       cntx_t* cntx  \
+       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( her2 )
+INSERT_GENTDEF( syr2 )
 
-// trmv (and trsv)
+// trmv, trsv
 
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \
@@ -156,11 +170,10 @@ typedef void (*PASTECH2(ch,opname,tsuf)) \
        dim_t   m, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx, \
-       cntx_t* cntx  \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( trmv )
+INSERT_GENTDEF( trsv )
 
-
-#endif

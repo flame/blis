@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -60,9 +60,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype*          minus_one = PASTEMAC(ch,m1); \
 \
 	PASTECH(ch,gemm_ukr_ft) \
-	              gemm_ukr = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	PASTECH(ch,trsm_ukr_ft) \
-	              trsm_ukr = bli_cntx_get_l3_ukr_dt( dt, trsmkerid, cntx ); \
+	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
 \
 	/* lower: b11 = alpha * b11 - a10 * b01; */ \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \

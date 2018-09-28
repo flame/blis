@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,17 +32,37 @@
 
 */
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 
-void bla_ger_check
-     (
-       const char*     dt_str,
-       const char*     op_str,
-       const f77_int*  m,
-       const f77_int*  n,
-       const f77_int*  lda,
-       const f77_int*  incx,
-       const f77_int*  incy
-     );
+#define bla_ger_check( dt_str, op_str, conj_str, m, n, incx, incy, lda ) \
+{ \
+	f77_int info = 0; \
+\
+	if      ( *m < 0 ) \
+		info = 1; \
+	else if ( *n < 0 ) \
+		info = 2; \
+	else if ( *incx == 0 ) \
+		info = 5; \
+	else if ( *incy == 0 ) \
+		info = 7; \
+	else if ( *lda < bli_max( 1, *m ) ) \
+		info = 9; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		/* We have to append an extra character to denote whether we
+		   are testing geru or gerc. */ \
+		sprintf( func_str, "%s%s%-2s", dt_str, op_str, conj_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
 
 #endif

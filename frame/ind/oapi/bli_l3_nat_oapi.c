@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -52,7 +52,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -60,15 +61,22 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, b, beta, c, cntx, NULL \
+	  alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
 }
 
+// If a sandbox was enabled, do not define bli_gemmnat() since it will be
+// defined in the sandbox environment.
+#ifndef BLIS_ENABLE_SANDBOX
 GENFRONT( gemm, gemm, nat )
+#endif
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
 
@@ -86,7 +94,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -94,11 +103,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, beta, c, cntx, NULL \
+	  side, alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
 }
 
@@ -118,7 +130,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -126,11 +139,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  alpha, a, beta, c, cntx, NULL \
+	  alpha, a, beta, c, cntx, rntm, NULL \
 	); \
 }
 
@@ -149,7 +165,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -157,11 +174,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx, NULL \
+	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
 }
 
@@ -179,7 +199,8 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
@@ -187,11 +208,14 @@ void PASTEMAC(opname,imeth) \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
 \
-	/* Invoke the operation's front end with the appropriate control
-	   tree. */ \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
+	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
 	( \
-	  side, alpha, a, b, cntx, NULL \
+	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
 }
 

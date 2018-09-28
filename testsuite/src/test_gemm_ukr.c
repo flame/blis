@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_gemm_ukr_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -92,44 +94,47 @@ void libblis_test_gemm_ukr_check
 
 void libblis_test_gemm_ukr_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_setv( params, &(op->ops->setv) );
-	libblis_test_normfv( params, &(op->ops->normfv) );
-	libblis_test_subv( params, &(op->ops->subv) );
-	libblis_test_scalv( params, &(op->ops->scalv) );
-	libblis_test_copym( params, &(op->ops->copym) );
-	libblis_test_scalm( params, &(op->ops->scalm) );
-	libblis_test_gemv( params, &(op->ops->gemv) );
+	libblis_test_randv( tdata, params, &(op->ops->randv) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_setv( tdata, params, &(op->ops->setv) );
+	libblis_test_normfv( tdata, params, &(op->ops->normfv) );
+	libblis_test_subv( tdata, params, &(op->ops->subv) );
+	libblis_test_scalv( tdata, params, &(op->ops->scalv) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
+	libblis_test_scalm( tdata, params, &(op->ops->scalm) );
+	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
 }
 
 
 
 void libblis_test_gemm_ukr
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l3ukr_over == DISABLE_ALL ) return;
+	     libblis_test_l3ukr_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_gemm_ukr_deps( params, op );
+	if ( TRUE ) libblis_test_gemm_ukr_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_UKERNEL,
 		                        op_str,
@@ -208,7 +213,7 @@ void libblis_test_gemm_ukr_experiment
 	                          sc_str[0], m, n, &c_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( c ) )
+	if ( bli_obj_is_real( &c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
@@ -261,16 +266,16 @@ void libblis_test_gemm_ukr_experiment
 	// However, it does overwrite the buffer field of packed object with that of
 	// the source object. So, we have to save the buffer address that was
 	// allocated.
-	void* buf_ap = bli_obj_buffer( ap );
-	void* buf_bp = bli_obj_buffer( bp );
+	void* buf_ap = bli_obj_buffer( &ap );
+	void* buf_bp = bli_obj_buffer( &bp );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
-	bli_obj_set_buffer( buf_ap, ap );
-	bli_obj_set_buffer( buf_bp, bp );
+	bli_obj_set_buffer( buf_ap, &ap );
+	bli_obj_set_buffer( buf_bp, &bp );
 
 	// Pack the data from the source objects.
 	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
@@ -292,7 +297,7 @@ void libblis_test_gemm_ukr_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n * k ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_gemm_ukr_check( params, &alpha, &a, &b, &beta, &c, &c_save, resid );
@@ -352,12 +357,12 @@ void libblis_test_gemm_ukr_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *c );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
+	num_t  dt      = bli_obj_dt( c );
+	num_t  dt_real = bli_obj_dt_proj_to_real( c );
 
-	dim_t  m       = bli_obj_length( *c );
-	dim_t  n       = bli_obj_width( *c );
-	dim_t  k       = bli_obj_width( *a );
+	dim_t  m       = bli_obj_length( c );
+	dim_t  n       = bli_obj_width( c );
+	dim_t  k       = bli_obj_width( a );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

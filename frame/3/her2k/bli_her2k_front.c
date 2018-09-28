@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -42,6 +42,7 @@ void bli_her2k_front
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl
      )
 {
@@ -68,22 +69,22 @@ void bli_her2k_front
 	}
 
 	// Alias A, B, and C in case we need to apply transformations.
-	bli_obj_alias_to( *a, a_local );
-	bli_obj_alias_to( *b, b_local );
-	bli_obj_alias_to( *c, c_local );
-	bli_obj_set_as_root( c_local );
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( b, &b_local );
+	bli_obj_alias_to( c, &c_local );
+	bli_obj_set_as_root( &c_local );
 
 	// For her2k, the first and second right-hand "B" operands are simply B'
 	// and A'.
-	bli_obj_alias_to( *b, bh_local );
-	bli_obj_induce_trans( bh_local );
-	bli_obj_toggle_conj( bh_local );
-	bli_obj_alias_to( *a, ah_local );
-	bli_obj_induce_trans( ah_local );
-	bli_obj_toggle_conj( ah_local );
+	bli_obj_alias_to( b, &bh_local );
+	bli_obj_induce_trans( &bh_local );
+	bli_obj_toggle_conj( &bh_local );
+	bli_obj_alias_to( a, &ah_local );
+	bli_obj_induce_trans( &ah_local );
+	bli_obj_toggle_conj( &ah_local );
 
 	// Initialize a conjugated copy of alpha.
-	bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *a ),
+	bli_obj_scalar_init_detached_copy_of( bli_obj_dt( a ),
 	                                      BLIS_CONJUGATE,
 	                                      alpha,
 	                                      &alpha_conj );
@@ -92,24 +93,54 @@ void bli_her2k_front
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_l3_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
-		bli_obj_swap( a_local, bh_local );
-		bli_obj_swap( b_local, ah_local );
+		bli_obj_swap( &a_local, &bh_local );
+		bli_obj_swap( &b_local, &ah_local );
 
-		bli_obj_induce_trans( a_local );
-		bli_obj_induce_trans( bh_local );
-		bli_obj_induce_trans( b_local );
-		bli_obj_induce_trans( ah_local );
+		bli_obj_induce_trans( &a_local );
+		bli_obj_induce_trans( &bh_local );
+		bli_obj_induce_trans( &b_local );
+		bli_obj_induce_trans( &ah_local );
 
-		bli_obj_induce_trans( c_local );
+		bli_obj_induce_trans( &c_local );
 	}
 
-	// Record the threading for each level within the context.
-	bli_cntx_set_thrloop_from_env( BLIS_HER2K, BLIS_LEFT, cntx,
-                                   bli_obj_length( c_local ),
-                                   bli_obj_width( c_local ),
-                                   bli_obj_width( a_local ) );
+	// Parse and interpret the contents of the rntm_t object to properly
+	// set the ways of parallelism for each loop, and then make any
+	// additional modifications necessary for the current operation.
+	bli_rntm_set_ways_for_op
+	(
+	  BLIS_HER2K,
+	  BLIS_LEFT, // ignored for her[2]k/syr[2]k
+	  bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ),
+	  bli_obj_width( &a_local ),
+	  rntm
+	);
+
+	// A sort of hack for communicating the desired pach schemas for A and B
+	// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
+	// bli_l3_cntl_create_if()). This allows us to access the schemas from
+	// the control tree, which hopefully reduces some confusion, particularly
+	// in bli_packm_init().
+	if ( bli_cntx_method( cntx ) == BLIS_NAT )
+	{
+		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
+		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &bh_local );
+		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &b_local );
+		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &ah_local );
+	}
+	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
+	{
+		pack_t schema_a = bli_cntx_schema_a_block( cntx );
+		pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+
+		bli_obj_set_pack_schema( schema_a, &a_local );
+		bli_obj_set_pack_schema( schema_b, &bh_local );
+		bli_obj_set_pack_schema( schema_a, &b_local );
+		bli_obj_set_pack_schema( schema_b, &ah_local );
+	}
 
 	// Invoke herk twice, using beta only the first time.
 
@@ -124,6 +155,7 @@ void bli_her2k_front
 	  beta,
 	  &c_local,
 	  cntx,
+	  rntm,
 	  cntl
 	);
 
@@ -137,6 +169,7 @@ void bli_her2k_front
 	  &BLIS_ONE,
 	  &c_local,
 	  cntx,
+	  rntm,
 	  cntl
 	);
 

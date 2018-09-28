@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -59,10 +59,6 @@ typedef struct cntx_s
 	pack_t    schema_a;
 	pack_t    schema_b;
 	pack_t    schema_c;
-
-	bool_t    anti_pref;
-
-	dim_t*    thrloop;
 
 	membrk_t* membrk;
 } cntx_t;
@@ -126,14 +122,6 @@ static pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 {
 	return cntx->schema_c_panel;
 }
-static bool_t bli_cntx_anti_pref( cntx_t* cntx )
-{
-	return cntx->anti_pref;
-}
-static dim_t* bli_cntx_thrloop( cntx_t* cntx )
-{
-	return cntx->thrloop;
-}
 static membrk_t* bli_cntx_get_membrk( cntx_t* cntx )
 {
 	return cntx->membrk;
@@ -165,10 +153,6 @@ static void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cnt
 {
 	bli_cntx_set_schema_a_block( sa, cntx );
 	bli_cntx_set_schema_b_panel( sb, cntx );
-}
-static void bli_cntx_set_anti_pref( bool_t anti_pref, cntx_t* cntx )
-{
-	cntx->anti_pref = anti_pref;
 }
 static void bli_cntx_set_membrk( membrk_t* membrk, cntx_t* cntx )
 {
@@ -233,27 +217,6 @@ static dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 }
 
 // -----------------------------------------------------------------------------
-
-static func_t* bli_cntx_get_l3_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* funcs;
-
-	if ( bli_cntx_method( (cntx) ) != BLIS_NAT )
-		funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
-	else
-		funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
-
-	func_t* func = &funcs[ ukr_id ];
-
-	return func;
-}
-
-static void* bli_cntx_get_l3_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* func = bli_cntx_get_l3_ukrs( ukr_id, cntx );
-
-	return bli_func_get_dt( dt, func );
-}
 
 static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 {
@@ -410,53 +373,13 @@ static void* bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx
 
 // -----------------------------------------------------------------------------
 
-static dim_t bli_cntx_jc_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_NC ];
-}
-static dim_t bli_cntx_pc_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_KC ];
-}
-static dim_t bli_cntx_ic_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_MC ];
-}
-static dim_t bli_cntx_jr_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_NR ];
-}
-static dim_t bli_cntx_ir_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_MR ];
-}
-static dim_t bli_cntx_pr_way( cntx_t* cntx )
-{
-	return cntx->thrloop[ BLIS_KR ];
-}
-
-static dim_t bli_cntx_way_for_bszid( bszid_t bszid, cntx_t* cntx )
-{
-	return cntx->thrloop[ bszid ];
-}
-
-static dim_t bli_cntx_get_num_threads( cntx_t* cntx )
-{
-	return bli_cntx_jc_way( cntx ) *
-	       bli_cntx_pc_way( cntx ) *
-	       bli_cntx_ic_way( cntx ) *
-	       bli_cntx_jr_way( cntx ) *
-	       bli_cntx_ir_way( cntx );
-}
-
-// -----------------------------------------------------------------------------
-
 static bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return prefs == TRUE;
+	return ( bool_t )
+	       ( prefs == TRUE );
 }
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
@@ -464,109 +387,80 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 	bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return prefs == FALSE;
+	return ( bool_t )
+	       ( prefs == FALSE );
 }
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	const num_t  dt    = bli_obj_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
 	                   = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }
 
 static bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
-}
-
-static bool_t bli_cntx_l3_nat_ukr_eff_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	bool_t r_val = bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
-
-	// If the anti-preference is set, negate the result.
-	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
-
-	return r_val;
-}
-
-static bool_t bli_cntx_l3_nat_ukr_eff_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	bool_t r_val = bli_cntx_l3_nat_ukr_dislikes_storage_of( obj, ukr_id, cntx );
-
-	// If the anti-preference is set, negate the result.
-	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
-
-	return r_val;
+	return ( bool_t )
+	       !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_cntx_l3_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+static bool_t bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
+	// NOTE: This projection to real domain becomes unnecessary if you
+	// set the exec_dt for 1m to the real projection of the storage
+	// datatype.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
 
-static bool_t bli_cntx_l3_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+static bool_t bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
+	// NOTE: This projection to real domain becomes unnecessary if you
+	// set the exec_dt for 1m to the real projection of the storage
+	// datatype.
 	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_datatype_proj_to_real( dt );
+	    dt = bli_dt_proj_to_real( dt );
 
 	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 }
 
-static bool_t bli_cntx_l3_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+static bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_datatype( *obj );
+	// Note that we use the execution datatype, which may differ from the
+	// storage datatype of C (though this would happen in very few situations).
+	const num_t  dt    = bli_obj_exec_dt( obj );
 	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	                   = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	                   = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 	bool_t       r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( *obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( *obj ) && ukr_prefers_cols ) r_val = TRUE;
+	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
 	return r_val;
 }
 
-static bool_t bli_cntx_l3_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+static bool_t bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return !bli_cntx_l3_ukr_prefers_storage_of( obj, ukr_id, cntx );
-}
-
-static bool_t bli_cntx_l3_ukr_eff_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	bool_t r_val = bli_cntx_l3_ukr_prefers_storage_of( obj, ukr_id, cntx );
-
-	// If the anti-preference is set, negate the result.
-	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
-
-	return r_val;
-}
-
-static bool_t bli_cntx_l3_ukr_eff_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	bool_t r_val = bli_cntx_l3_ukr_dislikes_storage_of( obj, ukr_id, cntx );
-
-	// If the anti-preference is set, negate the result.
-	if ( bli_cntx_anti_pref( cntx ) ) r_val = !r_val;
-
-	return r_val;
+	return ( bool_t )
+	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -628,7 +522,7 @@ static void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 
 static void bli_cntx_set_packm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_packm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
 }
@@ -642,19 +536,9 @@ static void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx
 
 static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_unpackm_ker_dt( dt, ker_id, cntx );
+	func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
 
 	bli_func_set_dt( fp, dt, func );
-}
-
-static void bli_cntx_set_thrloop( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, cntx_t* cntx )
-{
-	cntx->thrloop[ BLIS_NC ] = jc;
-	cntx->thrloop[ BLIS_KC ] = pc;
-	cntx->thrloop[ BLIS_MC ] = ic;
-	cntx->thrloop[ BLIS_NR ] = jr;
-	cntx->thrloop[ BLIS_MR ] = ir;
-	cntx->thrloop[ BLIS_KR ] = 1;
 }
 
 // -----------------------------------------------------------------------------
@@ -662,8 +546,6 @@ static void bli_cntx_set_thrloop( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t 
 // Function prototypes
 
 void  bli_cntx_clear( cntx_t* cntx );
-
-dim_t bli_cntx_get_num_threads_in( cntx_t* cntx, cntl_t* cntl );
 
 void  bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
 
@@ -673,13 +555,6 @@ void  bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
 void  bli_cntx_set_l1f_kers( dim_t n_kers, ... );
 void  bli_cntx_set_l1v_kers( dim_t n_kers, ... );
 void  bli_cntx_set_packm_kers( dim_t n_kers, ... );
-
-void  bli_cntx_set_thrloop_from_env( opid_t  l3_op,
-                                     side_t  side,
-                                     cntx_t* cntx,
-                                     dim_t m,
-                                     dim_t n,
-                                     dim_t k );
 
 void  bli_cntx_print( cntx_t* cntx );
 

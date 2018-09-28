@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,8 +56,8 @@ siz_t bli_packm_init
 	bool_t    does_invert_diag;
 	bool_t    rev_iter_if_upper;
 	bool_t    rev_iter_if_lower;
-	//pack_t    pack_schema;
-	packbuf_t pack_buf_type;
+	pack_t    schema;
+	//packbuf_t pack_buf_type;
 	siz_t     size_needed;
 
 	// Check parameters.
@@ -70,8 +70,8 @@ siz_t bli_packm_init
 	does_invert_diag  = bli_cntl_packm_params_does_invert_diag( cntl );
 	rev_iter_if_upper = bli_cntl_packm_params_rev_iter_if_upper( cntl );
 	rev_iter_if_lower = bli_cntl_packm_params_rev_iter_if_lower( cntl );
-	//pack_schema       = bli_cntl_packm_params_pack_schema( cntl );
-	pack_buf_type     = bli_cntl_packm_params_pack_buf_type( cntl );
+	schema            = bli_cntl_packm_params_pack_schema( cntl );
+	//pack_buf_type     = bli_cntl_packm_params_pack_buf_type( cntl );
 
 #if 0
 	// Let us now check to see if the object has already been packed. First
@@ -83,9 +83,9 @@ siz_t bli_packm_init
 	// not important, as long as its packed into contiguous rows or
 	// contiguous columns. A good example of this is packing for matrix
 	// operands in the level-2 operations.
-	if ( bli_obj_pack_schema( *a ) == BLIS_PACKED_UNSPEC )
+	if ( bli_obj_pack_schema( a ) == BLIS_PACKED_UNSPEC )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_to( a, p );
 		return 0;
 	}
 
@@ -97,45 +97,66 @@ siz_t bli_packm_init
 	// already taken place, or does not need to take place, and so that will
 	// be indicated by the pack status). Also, not all combinations of
 	// current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_schema( *a ) == pack_schema )
+	if ( bli_obj_pack_schema( a ) == pack_schema )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_to( a, p );
 		return 0;
 	}
 #endif
 
 	// If the object is marked as being filled with zeros, then we can skip
 	// the packm operation entirely and alias.
-	if ( bli_obj_is_zeros( *a ) )
+	if ( bli_obj_is_zeros( a ) )
 	{
-		bli_obj_alias_to( *a, *p );
+		bli_obj_alias_to( a, p );
 		return 0;
 	}
 
-	// We now ignore the pack_schema field in the control tree and
-	// extract the schema from the context, depending on whether we are
-	// preparing to pack a block of A or panel of B. For A and B, we must
-	// obtain the schema from the context since the induced methods reuse
-	// the same control trees used by native execution, and those induced
-	// methods specify the schema used by the current execution phase
-	// within the context (whereas the control tree does not change).
+#if 0
 	pack_t schema;
 
-	if ( pack_buf_type == BLIS_BUFFER_FOR_A_BLOCK )
+	if ( bli_cntx_method( cntx ) != BLIS_NAT )
 	{
-		schema = bli_cntx_schema_a_block( cntx );
+		// We now ignore the pack_schema field in the control tree and
+		// extract the schema from the context, depending on whether we are
+		// preparing to pack a block of A or panel of B. For A and B, we must
+		// obtain the schema from the context since the induced methods reuse
+		// the same control trees used by native execution, and those induced
+		// methods specify the schema used by the current execution phase
+		// within the context (whereas the control tree does not change).
+
+		if ( pack_buf_type == BLIS_BUFFER_FOR_A_BLOCK )
+		{
+			schema = bli_cntx_schema_a_block( cntx );
+		}
+		else if ( pack_buf_type == BLIS_BUFFER_FOR_B_PANEL )
+		{
+			schema = bli_cntx_schema_b_panel( cntx );
+		}
+		else // if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
+		{
+			schema = bli_cntl_packm_params_pack_schema( cntl );
+		}
 	}
-	else if ( pack_buf_type == BLIS_BUFFER_FOR_B_PANEL )
+	else // ( bli_cntx_method( cntx ) == BLIS_NAT )
 	{
-		schema = bli_cntx_schema_b_panel( cntx );
+		// For native execution, we obtain the schema from the control tree
+		// node. (Notice that it doesn't matter if the pack_buf_type is for
+		// A or B.)
+		schema = bli_cntl_packm_params_pack_schema( cntl );
 	}
-	else // if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
+	// This is no longer needed now that we branch between native and
+	// non-native cases above.
+#if 0
+	if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
 	{
 		// If we get a request to pack C for some reason, it is likely
 		// not part of an induced method, and so it would be safe (and
 		// necessary) to read the pack schema from the control tree.
 		schema = bli_cntl_packm_params_pack_schema( cntl );
 	}
+#endif
+#endif
 
 	// Prepare a few other variables based on properties of the control
 	// tree.
@@ -189,10 +210,10 @@ siz_t bli_packm_init_pack
 {
 	bli_init_once();
 
-	num_t     dt           = bli_obj_datatype( *a );
-	trans_t   transa       = bli_obj_onlytrans_status( *a );
-	dim_t     m_a          = bli_obj_length( *a );
-	dim_t     n_a          = bli_obj_width( *a );
+	num_t     dt           = bli_obj_dt( a );
+	trans_t   transa       = bli_obj_onlytrans_status( a );
+	dim_t     m_a          = bli_obj_length( a );
+	dim_t     n_a          = bli_obj_width( a );
 	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx );
 	dim_t     bmult_m_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx );
 	dim_t     bmult_n_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx );
@@ -207,7 +228,7 @@ siz_t bli_packm_init_pack
 
 
 	// We begin by copying the fields of A.
-	bli_obj_alias_to( *a, *p );
+	bli_obj_alias_to( a, p );
 
 	// Update the dimension fields to explicitly reflect a transposition,
 	// if needed.
@@ -219,13 +240,13 @@ siz_t bli_packm_init_pack
 	// we either toggle the uplo of P.
 	// Finally, if we mark P as dense since we assume that all matrices,
 	// regardless of structure, will be densified.
-	bli_obj_set_dims_with_trans( transa, m_a, n_a, *p );
-	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, *p );
+	bli_obj_set_dims_with_trans( transa, m_a, n_a, p );
+	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, p );
 	if ( bli_does_trans( transa ) )
 	{
-		bli_obj_negate_diag_offset( *p );
-		if ( bli_obj_is_upper_or_lower( *a ) )
-			bli_obj_toggle_uplo( *p );
+		bli_obj_negate_diag_offset( p );
+		if ( bli_obj_is_upper_or_lower( a ) )
+			bli_obj_toggle_uplo( p );
 	}
 
 	// If we are packing micro-panels, mark P as dense. Otherwise, we are
@@ -236,22 +257,22 @@ siz_t bli_packm_init_pack
 	// execute a "lower" or "upper" branch of code.
 	if ( bli_is_panel_packed( schema ) )
 	{
-		bli_obj_set_uplo( BLIS_DENSE, *p );
+		bli_obj_set_uplo( BLIS_DENSE, p );
 	}
 
 	// Reset the view offsets to (0,0).
-	bli_obj_set_offs( 0, 0, *p );
+	bli_obj_set_offs( 0, 0, p );
 
 	// Set the invert diagonal field.
-	bli_obj_set_invert_diag( invert_diag, *p );
+	bli_obj_set_invert_diag( invert_diag, p );
 
 	// Set the pack status of P to the pack schema prescribed in the control
 	// tree node.
-	bli_obj_set_pack_schema( schema, *p );
+	bli_obj_set_pack_schema( schema, p );
 
 	// Set the packing order bits.
-	bli_obj_set_pack_order_if_upper( pack_ord_if_up, *p );
-	bli_obj_set_pack_order_if_lower( pack_ord_if_lo, *p );
+	bli_obj_set_pack_order_if_upper( pack_ord_if_up, p );
+	bli_obj_set_pack_order_if_lower( pack_ord_if_lo, p );
 
 	// Compute the dimensions padded by the dimension multiples. These
 	// dimensions will be the dimensions of the packed matrices, including
@@ -260,15 +281,15 @@ siz_t bli_packm_init_pack
 	// in P) and aligning them to the dimension multiples (typically equal
 	// to register blocksizes). This does waste a little bit of space for
 	// level-2 operations, but that's okay with us.
-	m_p     = bli_obj_length( *p );
-	n_p     = bli_obj_width( *p );
+	m_p     = bli_obj_length( p );
+	n_p     = bli_obj_width( p );
 	m_p_pad = bli_align_dim_to_mult( m_p, bmult_m_def );
 	n_p_pad = bli_align_dim_to_mult( n_p, bmult_n_def );
 
 	// Save the padded dimensions into the packed object. It is important
 	// to save these dimensions since they represent the actual dimensions
 	// of the zero-padded matrix.
-	bli_obj_set_padded_dims( m_p_pad, n_p_pad, *p );
+	bli_obj_set_padded_dims( m_p_pad, n_p_pad, p );
 
 	// Now we prepare to compute strides, align them, and compute the
 	// total number of bytes needed for the packed buffer. The caller
@@ -276,7 +297,7 @@ siz_t bli_packm_init_pack
 	// from the memory allocator.
 
 	// Extract the element size for the packed object.
-	elem_size_p = bli_obj_elem_size( *p );
+	elem_size_p = bli_obj_elem_size( p );
 
 	// Set the row and column strides of p based on the pack schema.
 	if      ( bli_is_row_packed( schema ) &&
@@ -297,7 +318,7 @@ siz_t bli_packm_init_pack
 		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in P.
-		bli_obj_set_strides( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, p );
 
 		// Compute the size of the packed buffer.
 		size_p = m_p_pad * rs_p * elem_size_p;
@@ -320,7 +341,7 @@ siz_t bli_packm_init_pack
 		                              BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
 		// Store the strides in P.
-		bli_obj_set_strides( rs_p, cs_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, p );
 
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
@@ -408,12 +429,12 @@ siz_t bli_packm_init_pack
 		else                                    is_p = 1;
 
 		// Store the strides and panel dimension in P.
-		bli_obj_set_strides( rs_p, cs_p, *p );
-		bli_obj_set_imag_stride( is_p, *p );
-		bli_obj_set_panel_dim( m_panel, *p );
-		bli_obj_set_panel_stride( ps_p, *p );
-		bli_obj_set_panel_length( m_panel, *p );
-		bli_obj_set_panel_width( n_p, *p );
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( m_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_panel, p );
+		bli_obj_set_panel_width( n_p, p );
 
 		// Compute the size of the packed buffer.
 		size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
@@ -501,12 +522,12 @@ siz_t bli_packm_init_pack
 		else                                    is_p = 1;
 
 		// Store the strides and panel dimension in P.
-		bli_obj_set_strides( rs_p, cs_p, *p );
-		bli_obj_set_imag_stride( is_p, *p );
-		bli_obj_set_panel_dim( n_panel, *p );
-		bli_obj_set_panel_stride( ps_p, *p );
-		bli_obj_set_panel_length( m_p, *p );
-		bli_obj_set_panel_width( n_panel, *p );
+		bli_obj_set_strides( rs_p, cs_p, p );
+		bli_obj_set_imag_stride( is_p, p );
+		bli_obj_set_panel_dim( n_panel, p );
+		bli_obj_set_panel_stride( ps_p, p );
+		bli_obj_set_panel_length( m_p, p );
+		bli_obj_set_panel_width( n_panel, p );
 
 		// Compute the size of the packed buffer.
 		size_p = ps_p * ( n_p_pad / n_panel ) * elem_size_p;

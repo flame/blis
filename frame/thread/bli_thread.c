@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +39,9 @@ thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
 thrcomm_t BLIS_SINGLE_COMM           = {};
 
+// The global rntm_t structure, which holds the global thread settings.
+static rntm_t global_rntm;
+
 // -----------------------------------------------------------------------------
 
 void bli_thread_init( void )
@@ -45,6 +49,10 @@ void bli_thread_init( void )
 	bli_thrcomm_init( &BLIS_SINGLE_COMM, 1 );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
+
+	// Read the environment variables and use them to initialize the
+	// global runtime object.
+	bli_thread_init_rntm_from_env( &global_rntm );
 }
 
 void bli_thread_finalize( void )
@@ -203,9 +211,9 @@ siz_t bli_thread_get_range_l2r
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
@@ -223,9 +231,9 @@ siz_t bli_thread_get_range_r2l
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, n, bf,
@@ -243,9 +251,9 @@ siz_t bli_thread_get_range_t2b
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
@@ -263,9 +271,9 @@ siz_t bli_thread_get_range_b2t
        dim_t*     end
      )
 {
-	num_t dt = bli_obj_datatype( *a );
-	dim_t m  = bli_obj_length_after_trans( *a );
-	dim_t n  = bli_obj_width_after_trans( *a );
+	num_t dt = bli_obj_dt( a );
+	dim_t m  = bli_obj_length_after_trans( a );
+	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
 	bli_thread_get_range_sub( thr, m, bf,
@@ -385,8 +393,8 @@ dim_t bli_thread_get_range_width_l
 		// we don't need to try to prune the right side. (Also, we discard
 		// the offset deltas since we don't need to actually index into the
 		// subpartition.)
-		bli_prune_unstored_region_top_l( diagoff_j, m, n_j, offm_inc );
-		//bli_prune_unstored_region_right_l( diagoff_j, m, n_j, offn_inc );
+		bli_prune_unstored_region_top_l( &diagoff_j, &m, &n_j, &offm_inc );
+		//bli_prune_unstored_region_right_l( &diagoff_j, &m, &n_j, &offn_inc );
 
 		// We don't need offm_inc, offn_inc here. These statements should
 		// prevent compiler warnings.
@@ -454,14 +462,14 @@ siz_t bli_find_area_trap_l
 
 	// Prune away any rectangular region above where the diagonal
 	// intersects the left edge of the subpartition, if it exists.
-	bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
+	bli_prune_unstored_region_top_l( &diagoff, &m, &n, &offm_inc );
 
 	// Prune away any rectangular region to the right of where the
 	// diagonal intersects the bottom edge of the subpartition, if
 	// it exists. (This shouldn't ever be needed, since the caller
 	// would presumably have already performed rightward pruning,
 	// but it's here just in case.)
-	bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
+	bli_prune_unstored_region_right_l( &diagoff, &m, &n, &offn_inc );
 
 	( void )offm_inc;
 	( void )offn_inc;
@@ -530,8 +538,8 @@ siz_t bli_thread_get_range_weighted_sub
 		// and then to the right of where the diagonal intersects the bottom,
 		// if it exists. (Also, we discard the offset deltas since we don't
 		// need to actually index into the subpartition.)
-		bli_prune_unstored_region_top_l( diagoff, m, n, offm_inc );
-		bli_prune_unstored_region_right_l( diagoff, m, n, offn_inc );
+		bli_prune_unstored_region_top_l( &diagoff, &m, &n, &offm_inc );
+		bli_prune_unstored_region_right_l( &diagoff, &m, &n, &offn_inc );
 
 		// We don't need offm_inc, offn_inc here. These statements should
 		// prevent compiler warnings.
@@ -598,12 +606,12 @@ siz_t bli_thread_get_range_weighted_sub
 
 		// First, we convert the upper-stored trapezoid to an equivalent
 		// lower-stored trapezoid by rotating it 180 degrees.
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		// Now that the trapezoid is "flipped" in the n dimension, negate
 		// the bool that encodes whether to handle the edge case at the
 		// low (or high) end of the index range.
-		bli_toggle_bool( handle_edge_low );
+		bli_toggle_bool( &handle_edge_low );
 
 		// Compute the appropriate range for the rotated trapezoid.
 		area = bli_thread_get_range_weighted_sub
@@ -618,7 +626,7 @@ siz_t bli_thread_get_range_weighted_sub
 		// unrotated upper-stored trapezoid, map to the correct columns
 		// (relative to the diagonal). This amounts to subtracting the
 		// range from n.
-		bli_reverse_index_direction( *j_start_thr, *j_end_thr, n );
+		bli_reverse_index_direction( n, j_start_thr, j_end_thr );
 	}
 
 	return area;
@@ -646,8 +654,8 @@ siz_t bli_thread_get_range_mdim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( *a ) ) bszid = BLIS_MR;
-		else                                    bszid = BLIS_NR;
+		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
+		else                                   bszid = BLIS_NR;
 	}
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
@@ -705,8 +713,8 @@ siz_t bli_thread_get_range_ndim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( *b ) ) bszid = BLIS_MR;
-		else                                    bszid = BLIS_NR;
+		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
+		else                                   bszid = BLIS_NR;
 	}
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
@@ -757,20 +765,20 @@ siz_t bli_thread_get_range_weighted_l2r
 	// where the total range spans 0 to n-1 with 0 at the left end and
 	// n-1 at the right end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
 		area =
@@ -807,23 +815,23 @@ siz_t bli_thread_get_range_weighted_r2l
 	// where the total range spans 0 to n-1 with 0 at the right end and
 	// n-1 at the left end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		area =
 		bli_thread_get_range_weighted_sub
@@ -859,23 +867,23 @@ siz_t bli_thread_get_range_weighted_t2b
 	// where the total range spans 0 to m-1 with 0 at the top end and
 	// m-1 at the bottom end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_reflect_about_diag( diagoff, uplo, m, n );
+		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 
 		area =
 		bli_thread_get_range_weighted_sub
@@ -911,25 +919,25 @@ siz_t bli_thread_get_range_weighted_b2t
 	// where the total range spans 0 to m-1 with 0 at the bottom end and
 	// m-1 at the top end.
 
-	if ( bli_obj_intersects_diag( *a ) &&
-	     bli_obj_is_upper_or_lower( *a ) )
+	if ( bli_obj_intersects_diag( a ) &&
+	     bli_obj_is_upper_or_lower( a ) )
 	{
-		num_t  dt      = bli_obj_datatype( *a );
-		doff_t diagoff = bli_obj_diag_offset( *a );
-		uplo_t uplo    = bli_obj_uplo( *a );
-		dim_t  m       = bli_obj_length( *a );
-		dim_t  n       = bli_obj_width( *a );
+		num_t  dt      = bli_obj_dt( a );
+		doff_t diagoff = bli_obj_diag_offset( a );
+		uplo_t uplo    = bli_obj_uplo( a );
+		dim_t  m       = bli_obj_length( a );
+		dim_t  n       = bli_obj_width( a );
 		dim_t  bf      = bli_blksz_get_def( dt, bmult );
 
 		// Support implicit transposition.
-		if ( bli_obj_has_trans( *a ) )
+		if ( bli_obj_has_trans( a ) )
 		{
-			bli_reflect_about_diag( diagoff, uplo, m, n );
+			bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 		}
 
-		bli_reflect_about_diag( diagoff, uplo, m, n );
+		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 
-		bli_rotate180_trapezoid( diagoff, uplo );
+		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		area = bli_thread_get_range_weighted_sub
 		(
@@ -1030,9 +1038,9 @@ void bli_partition_2x2( dim_t nthread, dim_t work1, dim_t work2,
 {
     // Partition a number of threads into two factors nt1 and nt2 such that
     // nt1/nt2 ~= work1/work2. There is a fast heuristic algorithm and a
-    // slower optimal algorithm (which minizes |nt1*work2 - nt2*work1|).
+    // slower optimal algorithm (which minimizes |nt1*work2 - nt2*work1|).
 
-    // Return early small prime numbers of threads
+    // Return early small prime numbers of threads.
     if (nthread < 4)
     {
         *nt1 = ( work1 >= work2 ? nthread : 1 );
@@ -1149,112 +1157,6 @@ void bli_partition_2x2( dim_t nthread, dim_t work1, dim_t work2,
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_thread_get_env( const char* env, dim_t fallback )
-{
-	dim_t r_val;
-	char* str;
-
-	// Query the environment variable and store the result in str.
-	str = getenv( env );
-
-	// Set the return value based on the string obtained from getenv().
-	if ( str != NULL )
-	{
-		// If there was no error, convert the string to an integer and
-		// prepare to return that integer.
-		r_val = strtol( str, NULL, 10 );
-	}
-	else
-	{
-		// If there was an error, use the "fallback" as the return value.
-		r_val = fallback;
-	}
-
-	return r_val;
-}
-
-dim_t bli_thread_get_jc_nt( void )
-{
-	return bli_thread_get_env( "BLIS_JC_NT", 1 );
-}
-
-dim_t bli_thread_get_ic_nt( void )
-{
-	return bli_thread_get_env( "BLIS_IC_NT", 1 );
-}
-
-dim_t bli_thread_get_jr_nt( void )
-{
-	return bli_thread_get_env( "BLIS_JR_NT", 1 );
-}
-
-dim_t bli_thread_get_ir_nt( void )
-{
-	return bli_thread_get_env( "BLIS_IR_NT", 1 );
-}
-
-dim_t bli_thread_get_num_threads( void )
-{
-	return bli_thread_get_env( "BLIS_NUM_THREADS", 1 );
-}
-
-void bli_thread_set_env( const char* env, dim_t value )
-{
-	dim_t       r_val;
-	char        value_str[32];
-	const char* fs_32 = "%u";
-	const char* fs_64 = "%lu";
-
-	// Convert the string to an integer, but vary the format specifier
-	// depending on the integer type size.
-	if ( bli_info_get_int_type_size() == 32 ) sprintf( value_str, fs_32, value );
-	else                                      sprintf( value_str, fs_64, value );
-
-	// Set the environment variable using the string we just wrote to via
-	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
-	// value if the environment variable already exists.)
-	r_val = setenv( env, value_str, TRUE );
-
-	// Check the return value in case something went horribly wrong.
-	if ( r_val == -1 )
-	{
-		char err_str[128];
-
-		// Query the human-readable error string corresponding to errno.
-		strerror_r( errno, err_str, 128 );
-
-		// Print the error message.
-		bli_print_msg( err_str, __FILE__, __LINE__ );
-	}
-}
-
-void bli_thread_set_jc_nt( dim_t value )
-{
-	bli_thread_set_env( "BLIS_JC_NT", value );
-}
-
-void bli_thread_set_ic_nt( dim_t value )
-{
-	bli_thread_set_env( "BLIS_IC_NT", value );
-}
-
-void bli_thread_set_jr_nt( dim_t value )
-{
-	bli_thread_set_env( "BLIS_JR_NT", value );
-}
-
-void bli_thread_set_ir_nt( dim_t value )
-{
-	bli_thread_set_env( "BLIS_IR_NT", value );
-}
-
-void bli_thread_set_num_threads( dim_t value )
-{
-	bli_thread_set_env( "BLIS_NUM_THREADS", value );
-}
-
-// -----------------------------------------------------------------------------
-
 dim_t bli_gcd( dim_t x, dim_t y )
 {
 	while ( y != 0 )
@@ -1283,3 +1185,221 @@ dim_t bli_ipow( dim_t base, dim_t power )
 
     return p;
 }
+// -----------------------------------------------------------------------------
+
+dim_t bli_thread_get_env( const char* env, dim_t fallback )
+{
+	dim_t r_val;
+	char* str;
+
+	// Query the environment variable and store the result in str.
+	str = getenv( env );
+
+	// Set the return value based on the string obtained from getenv().
+	if ( str != NULL )
+	{
+		// If there was no error, convert the string to an integer and
+		// prepare to return that integer.
+		r_val = strtol( str, NULL, 10 );
+	}
+	else
+	{
+		// If there was an error, use the "fallback" as the return value.
+		r_val = fallback;
+	}
+
+	return r_val;
+}
+
+#if 0
+void bli_thread_set_env( const char* env, dim_t value )
+{
+	dim_t       r_val;
+	char        value_str[32];
+	const char* fs_32 = "%u";
+	const char* fs_64 = "%lu";
+
+	// Convert the string to an integer, but vary the format specifier
+	// depending on the integer type size.
+	if ( bli_info_get_int_type_size() == 32 ) sprintf( value_str, fs_32, value );
+	else                                      sprintf( value_str, fs_64, value );
+
+	// Set the environment variable using the string we just wrote to via
+	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
+	// value if the environment variable already exists.)
+	r_val = bli_setenv( env, value_str, TRUE );
+
+	// Check the return value in case something went horribly wrong.
+	if ( r_val == -1 )
+	{
+		char err_str[128];
+
+		// Query the human-readable error string corresponding to errno.
+		strerror_r( errno, err_str, 128 );
+
+		// Print the error message.
+		bli_print_msg( err_str, __FILE__, __LINE__ );
+	}
+}
+#endif
+
+// -----------------------------------------------------------------------------
+
+dim_t bli_thread_get_jc_nt( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_jc_ways( &global_rntm );
+}
+
+dim_t bli_thread_get_pc_nt( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_pc_ways( &global_rntm );
+}
+
+dim_t bli_thread_get_ic_nt( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_ic_ways( &global_rntm );
+}
+
+dim_t bli_thread_get_jr_nt( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_jr_ways( &global_rntm );
+}
+
+dim_t bli_thread_get_ir_nt( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_ir_ways( &global_rntm );
+}
+
+dim_t bli_thread_get_num_threads( void )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	return bli_rntm_num_threads( &global_rntm );
+}
+
+// ----------------------------------------------------------------------------
+
+// A mutex to allow synchronous access to global_rntm.
+static pthread_mutex_t global_rntm_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
+{
+	// Acquire the mutex protecting global_rntm.
+	pthread_mutex_lock( &global_rntm_mutex );
+
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
+
+	// Release the mutex protecting global_rntm.
+	pthread_mutex_unlock( &global_rntm_mutex );
+}
+
+void bli_thread_set_num_threads( dim_t n_threads )
+{
+	// Acquire the mutex protecting global_rntm.
+	pthread_mutex_lock( &global_rntm_mutex );
+
+	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
+
+	// Release the mutex protecting global_rntm.
+	pthread_mutex_unlock( &global_rntm_mutex );
+}
+
+// ----------------------------------------------------------------------------
+
+void bli_thread_init_rntm( rntm_t* rntm )
+{
+	// Acquire the mutex protecting global_rntm.
+	pthread_mutex_lock( &global_rntm_mutex );
+
+	*rntm = global_rntm;
+
+	// Release the mutex protecting global_rntm.
+	pthread_mutex_unlock( &global_rntm_mutex );
+}
+
+// ----------------------------------------------------------------------------
+
+void bli_thread_init_rntm_from_env
+     (
+       rntm_t* rntm
+     )
+{
+	// NOTE: We don't need to acquire the global_rntm_mutex here because this
+	// function is only called from bli_thread_init(), which is only called
+	// by bli_init_once().
+
+	dim_t nt;
+	dim_t jc, pc, ic, jr, ir;
+
+#ifdef BLIS_ENABLE_MULTITHREADING
+
+	// Try to read BLIS_NUM_THREADS first.
+	nt = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
+
+	// If BLIS_NUM_THREADS was not set, try to read OMP_NUM_THREADS.
+	if ( nt == -1 )
+		nt = bli_thread_get_env( "OMP_NUM_THREADS", -1 );
+
+	// Read the environment variables for the number of threads (ways
+	// of parallelism) for each individual loop.
+	jc = bli_thread_get_env( "BLIS_JC_NT", -1 );
+	pc = bli_thread_get_env( "BLIS_PC_NT", -1 );
+	ic = bli_thread_get_env( "BLIS_IC_NT", -1 );
+	jr = bli_thread_get_env( "BLIS_JR_NT", -1 );
+	ir = bli_thread_get_env( "BLIS_IR_NT", -1 );
+
+	// If any BLIS_*_NT environment variable was set, then we ignore the
+	// value of BLIS_NUM_THREADS or OMP_NUM_THREADS and use the
+	// BLIS_*_NT values instead (with unset variables being assumed to
+	// contain 1).
+	if ( jc != -1 || pc != -1 || ic != -1 || jr != -1 || ir != -1 )
+	{
+		if ( jc == -1 ) jc = 1;
+		if ( pc == -1 ) pc = 1;
+		if ( ic == -1 ) ic = 1;
+		if ( jr == -1 ) jr = 1;
+		if ( ir == -1 ) ir = 1;
+
+		// Unset the value for nt.
+		nt = -1;
+	}
+
+	// By this time, either nt is set and the ways for each loop
+	// are all unset, OR nt is unset and the ways for each loop
+	// are all set.
+
+#else
+
+	// When multithreading is disabled, always set the rntm_t ways
+	// values to 1.
+	nt = -1;
+	jc = pc = ic = jr = ir = 1;
+
+#endif
+
+	// Save the results back in the runtime object.
+	bli_rntm_set_num_threads_only( nt, rntm );
+	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, rntm );
+
+#if 0
+	printf( "bli_thread_init_rntm_from_env()\n" );
+	bli_rntm_print( rntm );
+#endif
+}
+

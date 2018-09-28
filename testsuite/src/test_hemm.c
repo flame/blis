@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_hemm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -93,45 +95,48 @@ void libblis_test_hemm_check
 
 void libblis_test_hemm_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( params, &(op->ops->randv) );
-	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_setv( params, &(op->ops->setv) );
-	libblis_test_normfv( params, &(op->ops->normfv) );
-	libblis_test_subv( params, &(op->ops->subv) );
-	libblis_test_scalv( params, &(op->ops->scalv) );
-	libblis_test_copym( params, &(op->ops->copym) );
-	libblis_test_scalm( params, &(op->ops->scalm) );
-	libblis_test_gemv( params, &(op->ops->gemv) );
-	libblis_test_hemv( params, &(op->ops->hemv) );
+	libblis_test_randv( tdata, params, &(op->ops->randv) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_setv( tdata, params, &(op->ops->setv) );
+	libblis_test_normfv( tdata, params, &(op->ops->normfv) );
+	libblis_test_subv( tdata, params, &(op->ops->subv) );
+	libblis_test_scalv( tdata, params, &(op->ops->scalv) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
+	libblis_test_scalm( tdata, params, &(op->ops->scalm) );
+	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
+	libblis_test_hemv( tdata, params, &(op->ops->hemv) );
 }
 
 
 
 void libblis_test_hemm
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l3_over == DISABLE_ALL ) return;
+	     libblis_test_l3_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_hemm_deps( params, op );
+	if ( TRUE ) libblis_test_hemm_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -190,7 +195,7 @@ void libblis_test_hemm_experiment
 	bli_obj_scalar_init_detached( datatype, &beta );
 
 	// Create test operands (vectors and/or matrices).
-	bli_set_dim_with_side( side, m, n, mn_side );
+	bli_set_dim_with_side( side, m, n, &mn_side );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
 	                          sc_str[0], mn_side, mn_side, &a );
 	libblis_test_mobj_create( params, datatype, transb,
@@ -201,7 +206,7 @@ void libblis_test_hemm_experiment
 	                          sc_str[2], m,       n,       &c_save );
 
 	// Set alpha and beta.
-	if ( bli_obj_is_real( c ) )
+	if ( bli_obj_is_real( &c ) )
 	{
 		bli_setsc(  1.2,  0.0, &alpha );
 		bli_setsc( -1.0,  0.0, &beta );
@@ -213,8 +218,8 @@ void libblis_test_hemm_experiment
 	}
 
 	// Set the structure and uplo properties of A.
-	bli_obj_set_struc( BLIS_HERMITIAN, a );
-	bli_obj_set_uplo( uploa, a );
+	bli_obj_set_struc( BLIS_HERMITIAN, &a );
+	bli_obj_set_uplo( uploa, &a );
 
 	// Randomize A, make it densely Hermitian, and zero the unstored triangle
 	// to ensure the implementation reads only from the stored region.
@@ -228,8 +233,8 @@ void libblis_test_hemm_experiment
 	bli_copym( &c, &c_save );
 
 	// Apply the remaining parameters.
-	bli_obj_set_conj( conja, a );
-	bli_obj_set_conjtrans( transb, b );
+	bli_obj_set_conj( conja, &a );
+	bli_obj_set_conjtrans( transb, &b );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -245,7 +250,7 @@ void libblis_test_hemm_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * mn_side * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( c ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &c ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_hemm_check( params, side, &alpha, &a, &b, &beta, &c, &c_save, resid );
@@ -301,11 +306,11 @@ void libblis_test_hemm_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *c );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *c );
+	num_t  dt      = bli_obj_dt( c );
+	num_t  dt_real = bli_obj_dt_proj_to_real( c );
 
-	dim_t  m       = bli_obj_length( *c );
-	dim_t  n       = bli_obj_width( *c );
+	dim_t  m       = bli_obj_length( c );
+	dim_t  n       = bli_obj_width( c );
 
 	obj_t  norm;
 	obj_t  t, v, w, z;

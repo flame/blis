@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,16 +26,16 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
+#include "pmmintrin.h"
 #include "blis.h"
 
 
-#include "pmmintrin.h"
 typedef union
 {
     __m128d v;
@@ -56,13 +56,13 @@ void bli_ddotxf_penryn_int
        double* restrict y, inc_t incy,
        cntx_t* restrict cntx
      )
-{ 
-	double*  restrict alpha_cast = alpha; 
-	double*  restrict beta_cast = beta; 
-	double*  restrict a_cast = a; 
-	double*  restrict x_cast = x; 
-	double*  restrict y_cast = y; 
-	dim_t             i; 
+{
+	double*  restrict alpha_cast = alpha;
+	double*  restrict beta_cast = beta;
+	double*  restrict a_cast = a;
+	double*  restrict x_cast = x;
+	double*  restrict y_cast = y;
+	dim_t             i;
 
 	const dim_t       n_elem_per_reg = 2;
 	const dim_t       n_iter_unroll  = 4;
@@ -88,15 +88,20 @@ void bli_ddotxf_penryn_int
 	if ( bli_zero_dim1( b_n ) ) return;
 
 	// If the vector lengths are zero, scale r by beta and return.
-	if ( bli_zero_dim1( m ) ) 
-	{ 
-		bli_dscalv( BLIS_NO_CONJUGATE,
-		            b_n,
-		            beta_cast,
-		            y_cast, incy,
-		            cntx );
-		return; 
-	} 
+	if ( bli_zero_dim1( m ) )
+	{
+		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+
+		f
+		(
+		  BLIS_NO_CONJUGATE,
+		  b_n,
+		  beta_cast,
+		  y_cast, incy,
+		  cntx
+		);
+		return;
+	}
 
     m_pre = 0;
 
@@ -107,19 +112,19 @@ void bli_ddotxf_penryn_int
 		use_ref = TRUE;
 	}
     else if ( inca != 1 || incx != 1 || incy != 1 ||
-	          bli_is_unaligned_to( lda*sizeof(double), 16 ) )
+	          bli_is_unaligned_to( ( siz_t )(lda*sizeof(double)), 16 ) )
     {
         use_ref = TRUE;
     }
-	else if ( bli_is_unaligned_to( a, 16 ) ||
-	          bli_is_unaligned_to( x, 16 ) ||
-	          bli_is_unaligned_to( y, 16 ) )
+	else if ( bli_is_unaligned_to( ( siz_t )a, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )x, 16 ) ||
+	          bli_is_unaligned_to( ( siz_t )y, 16 ) )
 	{
 		use_ref = TRUE;
 
-		if ( bli_is_unaligned_to( a, 16 ) &&
-		     bli_is_unaligned_to( x, 16 ) &&
-		     bli_is_aligned_to( y, 16 ) ) // Note: r is not affected by x and y being unaligned. 
+		if ( bli_is_unaligned_to( ( siz_t )a, 16 ) &&
+		     bli_is_unaligned_to( ( siz_t )x, 16 ) &&
+		     bli_is_aligned_to( ( siz_t )y, 16 ) ) // Note: r is not affected by x and y being unaligned.
 		{
 			use_ref = FALSE;
 			m_pre   = 1;
@@ -129,7 +134,7 @@ void bli_ddotxf_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotxf_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
+		ddotxf_ker_ft f = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_DOTXF_KER, cntx );
 
 		f
 		( conjat,
@@ -156,10 +161,10 @@ void bli_ddotxf_penryn_int
 	x3 = a_cast + 3*lda;
 	y0 = x_cast;
 
-	PASTEMAC(d,set0s)( rho0 ); 
-	PASTEMAC(d,set0s)( rho1 ); 
-	PASTEMAC(d,set0s)( rho2 ); 
-	PASTEMAC(d,set0s)( rho3 ); 
+	PASTEMAC(d,set0s)( rho0 );
+	PASTEMAC(d,set0s)( rho1 );
+	PASTEMAC(d,set0s)( rho2 );
+	PASTEMAC(d,set0s)( rho3 );
 
 	if ( m_pre == 1 )
 	{

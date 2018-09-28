@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -40,6 +40,7 @@ void bli_gemm_blk_var3
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -59,7 +60,7 @@ void bli_gemm_blk_var3
 	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
 
 	// Query dimension in partitioning direction.
-	k_trans = bli_obj_width_after_trans( *a );
+	k_trans = bli_obj_width_after_trans( a );
 
 	// Partition along the k dimension.
 	for ( i = 0; i < k_trans; i += b_alg )
@@ -83,6 +84,7 @@ void bli_gemm_blk_var3
 		  &BLIS_ONE,
 		  c,
 		  cntx,
+		  rntm,
 		  bli_cntl_sub_node( cntl ),
 		  bli_thrinfo_sub_node( thread )
 		);

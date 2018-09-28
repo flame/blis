@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -107,6 +107,18 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_diag( diaga, &f77_diaga );
 
+	// Begin with initializing the last entry to zero so that
+	// matlab allocates space for the entire array once up-front.
+	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+#ifdef BLIS
+	printf( "data_trsm_blis" );
+#else
+	printf( "data_trsm_%s", BLAS );
+#endif
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )0,
+	        ( unsigned long )0, 0.0 );
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -127,10 +139,10 @@ int main( int argc, char** argv )
 		bli_randm( &a );
 		bli_randm( &c );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_conjtrans( transa, a );
-		bli_obj_set_diag( diaga, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_conjtrans( transa, &a );
+		bli_obj_set_diag( diaga, &a );
 
 		// Randomize A, make it densely Hermitian, and zero the unstored
 		// triangle to ensure the implementation reads only from the stored
@@ -171,13 +183,13 @@ int main( int argc, char** argv )
 
 		if ( bli_is_float( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			float*   alphap = bli_obj_buffer( alpha );
-			float*   ap     = bli_obj_buffer( a );
-			float*   cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			float*   alphap = bli_obj_buffer( &alpha );
+			float*   ap     = bli_obj_buffer( &a );
+			float*   cp     = bli_obj_buffer( &c );
 
 			strsm_( &f77_side,
 			        &f77_uploa,
@@ -191,13 +203,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_double( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			double*  alphap = bli_obj_buffer( alpha );
-			double*  ap     = bli_obj_buffer( a );
-			double*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			double*  alphap = bli_obj_buffer( &alpha );
+			double*  ap     = bli_obj_buffer( &a );
+			double*  cp     = bli_obj_buffer( &c );
 
 			dtrsm_( &f77_side,
 			        &f77_uploa,
@@ -211,13 +223,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			scomplex*  alphap = bli_obj_buffer( alpha );
-			scomplex*  ap     = bli_obj_buffer( a );
-			scomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  ap     = bli_obj_buffer( &a );
+			scomplex*  cp     = bli_obj_buffer( &c );
 
 			ctrsm_( &f77_side,
 			        &f77_uploa,
@@ -231,13 +243,13 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_dcomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( c );
-			f77_int  nn     = bli_obj_width( c );
-			f77_int  lda    = bli_obj_col_stride( a );
-			f77_int  ldc    = bli_obj_col_stride( c );
-			dcomplex*  alphap = bli_obj_buffer( alpha );
-			dcomplex*  ap     = bli_obj_buffer( a );
-			dcomplex*  cp     = bli_obj_buffer( c );
+			f77_int  mm     = bli_obj_length( &c );
+			f77_int  nn     = bli_obj_width( &c );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			f77_int  ldc    = bli_obj_col_stride( &c );
+			dcomplex*  alphap = bli_obj_buffer( &alpha );
+			dcomplex*  ap     = bli_obj_buffer( &a );
+			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			ztrsm_( &f77_side,
 			        &f77_uploa,
@@ -271,10 +283,10 @@ int main( int argc, char** argv )
 #else
 		printf( "data_trsm_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu  %10.3e  %6.3f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )n, dtime_save, gflops );
+		        ( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
 

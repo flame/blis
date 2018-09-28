@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -54,7 +54,7 @@ void bli_scalv_int( obj_t*   alpha,
 	FUNCPTR_T f;
 
 	// Return early if one of the matrix operands has a zero dimension.
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	if ( bli_obj_has_zero_dim( x ) ) return;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

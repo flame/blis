@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -83,6 +83,12 @@ GEMM_UKR_PROT( float,    s, gemm_zen_asm_6x16 )
 GEMM_UKR_PROT( double,   d, gemm_zen_asm_6x8 )
 GEMM_UKR_PROT( scomplex, c, gemm_zen_asm_3x8 )
 GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_3x4 )
+
+// gemm (asm d8x6)
+GEMM_UKR_PROT( float,    s, gemm_zen_asm_16x6 )
+GEMM_UKR_PROT( double,   d, gemm_zen_asm_8x6 )
+GEMM_UKR_PROT( scomplex, c, gemm_zen_asm_8x3 )
+GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_4x3 )
 
 // gemmtrsm_l (asm d6x8)
 GEMMTRSM_UKR_PROT( float,    s, gemmtrsm_l_zen_asm_6x16 )

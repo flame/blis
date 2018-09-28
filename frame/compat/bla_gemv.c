@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -87,7 +87,7 @@ void PASTEF77(ch,blasname) \
 \
 	/* Determine the dimensions of x and y so we can adjust the increments,
 	   if necessary.*/ \
-	bli_set_dims_with_trans( blis_transa, m0, n0, m_y, n_x ); \
+	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
 \
 	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
 	   in a peculiar way. In these situations, BLAS returns without performing
@@ -117,7 +117,7 @@ void PASTEF77(ch,blasname) \
 	cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(ch,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_transa, \
 	  BLIS_NO_CONJUGATE, \
@@ -128,6 +128,7 @@ void PASTEF77(ch,blasname) \
 	  x0, incx0, \
 	  (ftype*)beta, \
 	  y0, incy0, \
+	  NULL, \
 	  NULL  \
 	); \
 \
@@ -135,7 +136,7 @@ void PASTEF77(ch,blasname) \
 	bli_finalize_auto(); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS( gemv, gemv )
 #endif
 

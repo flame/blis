@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -170,6 +170,18 @@ static void bli_blksz_scale_max
 	const dim_t val = bli_blksz_get_max( dt, b );
 
 	bli_blksz_set_max( ( val * num ) / den, dt, b );
+}
+
+static void bli_blksz_scale_def_max
+     (
+       dim_t    num,
+       dim_t    den,
+       num_t    dt,
+       blksz_t* b
+     )
+{
+	bli_blksz_scale_def( num, den, dt, b );
+	bli_blksz_scale_max( num, den, dt, b );
 }
 
 // -----------------------------------------------------------------------------

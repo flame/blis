@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,16 +34,32 @@
 
 #include "bli_l1m_check.h"
 
-#include "bli_l1m_ft.h"
-#include "bli_l1m_voft.h"
+// Define kernel function types.
+#include "bli_l1m_ft_ker.h"
 
-// Prototype object APIs with and without contexts.
-#include "bli_oapi_w_cntx.h"
-#include "bli_l1m_oapi.h"
-#include "bli_oapi_wo_cntx.h"
+// Define object function types for variants.
+#include "bli_l1m_oft_var.h"
+
+// Prototype object APIs (expert and non-expert).
+#include "bli_oapi_ex.h"
 #include "bli_l1m_oapi.h"
 
+#include "bli_oapi_ba.h"
+#include "bli_l1m_oapi.h"
+
+// Prototype typed APIs (expert and non-expert).
+#include "bli_tapi_ex.h"
 #include "bli_l1m_tapi.h"
+#include "bli_l1m_ft.h"
+
+#include "bli_tapi_ba.h"
+#include "bli_l1m_tapi.h"
+#include "bli_l1m_ft.h"
+
+// Generate function pointer arrays for tapi functions (expert only).
+#include "bli_l1m_fpa.h"
+
+// Prototype level-1m implementations.
 #include "bli_l1m_unb_var1.h"
 
 // Pack-related

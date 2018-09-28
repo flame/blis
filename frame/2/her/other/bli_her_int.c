@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -73,22 +73,22 @@ void bli_her_int( conj_t  conjh,
 	}
 
 	// If C or x has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *c ) ) return;
-	if ( bli_obj_has_zero_dim( *x ) ) return;
+	if ( bli_obj_has_zero_dim( c ) ) return;
+	if ( bli_obj_has_zero_dim( x ) ) return;
 
 	// Alias the operands in case we need to apply conjugations.
-	bli_obj_alias_to( *x, x_local );
-	bli_obj_alias_to( *c, c_local );
+	bli_obj_alias_to( x, &x_local );
+	bli_obj_alias_to( c, &c_local );
 
 	// If matrix C is marked for conjugation, we interpret this as a request
 	// to apply a conjugation to the other operands.
-	if ( bli_obj_has_conj( c_local ) )
+	if ( bli_obj_has_conj( &c_local ) )
 	{
-		bli_obj_toggle_conj( c_local );
+		bli_obj_toggle_conj( &c_local );
 
 		// Notice that we don't need to conjugate alpha since it is guaranteed
 		// to be real.
-		bli_obj_toggle_conj( x_local );
+		bli_obj_toggle_conj( &x_local );
 	}
 
 	// Extract the variant number and implementation type.

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -45,6 +45,23 @@ void bli_l3_cntl_create_if
        cntl_t** cntl_use
      )
 {
+	// This is part of a hack to support mixed domain in bli_gemm_front().
+	// Sometimes we need to specify a non-standard schema for A and B, and
+	// we decided to transmit them via the schema field in the obj_t's
+	// rather than pass them in as function parameters. Once the values
+	// have been read, we immediately reset them back to their expected
+	// values for unpacked objects. Notice that we do this even if the
+	// caller passed in a custom control tree; that's because we still need
+	// to reset the pack schema of a and b, which were modified by the
+	// operation's _front() function. However, in order for this to work,
+	// the level-3 thread entry function (or omp parallel region) must
+	// alias thread-local copies of objects a and b.
+	pack_t schema_a = bli_obj_pack_schema( a );
+	pack_t schema_b = bli_obj_pack_schema( b );
+
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
+
 	// If the control tree pointer is NULL, we construct a default
 	// tree as a function of the operation family.
 	if ( cntl_orig == NULL )
@@ -53,16 +70,16 @@ void bli_l3_cntl_create_if
 		     family == BLIS_HERK ||
 		     family == BLIS_TRMM )
 		{
-			*cntl_use = bli_gemm_cntl_create( family );
+			*cntl_use = bli_gemm_cntl_create( family, schema_a, schema_b );
 		}
 		else // if ( family == BLIS_TRSM )
 		{
 			side_t side;
 
-			if ( bli_obj_is_triangular( *a ) ) side = BLIS_LEFT;
-			else                               side = BLIS_RIGHT;
+			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
+			else                              side = BLIS_RIGHT;
 
-			*cntl_use = bli_trsm_cntl_create( side );
+			*cntl_use = bli_trsm_cntl_create( side, schema_a, schema_b );
 		}
 	}
 	else

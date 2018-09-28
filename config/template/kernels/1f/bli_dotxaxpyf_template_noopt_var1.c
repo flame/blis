@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -264,7 +264,7 @@ void bli_zdotxaxpyf_template_noopt
 	// toggling the effective conjugation of At and then conjugating the
 	// resulting dot products.
 	if ( bli_is_conj( conjw ) )
-		bli_toggle_conj( conjat_use );
+		bli_toggle_conj( &conjat_use );
 
 
 	// Iterate over the columns of A and elements of w and z to compute:

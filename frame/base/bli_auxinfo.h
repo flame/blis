@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -53,7 +53,7 @@ static void* bli_auxinfo_next_a( auxinfo_t* ai )
 }
 static void* bli_auxinfo_next_b( auxinfo_t* ai )
 {
-	return ai->a_next;
+	return ai->b_next;
 }
 
 static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
@@ -63,6 +63,11 @@ static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
 static inc_t bli_auxinfo_is_b( auxinfo_t* ai )
 {
 	return ai->is_b;
+}
+
+static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
+{
+	return ai->dt_on_output;
 }
 
 
@@ -98,6 +103,11 @@ static void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
 static void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
 {
 	ai->is_b = is;
+}
+
+static void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
+{
+	ai->dt_on_output = dt_on_output;
 }
 
 #endif 

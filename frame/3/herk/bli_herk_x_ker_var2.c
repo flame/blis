@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-static gemm_voft vars[2] =
+static gemm_var_oft vars[2] =
 {
 	bli_herk_l_ker_var2, bli_herk_u_ker_var2,
 };
@@ -45,16 +45,17 @@ void bli_herk_x_ker_var2
        obj_t*  ah,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-	bool_t    uplo;
-	gemm_voft f;
+	bool_t       uplo;
+	gemm_var_oft f;
 
 	// Set a bool based on the uplo field of C's root object.
-	if ( bli_obj_root_is_lower( *c ) ) uplo = 0;
-	else                               uplo = 1;
+	if ( bli_obj_root_is_lower( c ) ) uplo = 0;
+	else                              uplo = 1;
 
 	// Index into the variant array to extract the correct function pointer.
 	f = vars[uplo];
@@ -66,6 +67,7 @@ void bli_herk_x_ker_var2
 	  ah,
 	  c,
 	  cntx,
+	  rntm,
 	  cntl,
 	  thread
 	);

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -54,10 +54,10 @@
 	   to preserve unit stride movement. */ \
 	if ( cs_y == 1 ) \
 	{ \
-		bli_swap_incs( offm_local, offn_local ); \
-		bli_swap_dims( m_local, n_local ); \
-		bli_swap_incs( rs_y1, cs_y1 ); \
-		bli_swap_incs( rs_y2, cs_y2 ); \
+		bli_swap_incs( &offm_local, &offn_local ); \
+		bli_swap_dims( &m_local, &n_local ); \
+		bli_swap_incs( &rs_y1, &cs_y1 ); \
+		bli_swap_incs( &rs_y2, &cs_y2 ); \
 	} \
 \
 	/* Handle 1e and 1r separately. */ \
@@ -116,10 +116,10 @@
 	   to preserve unit stride movement. */ \
 	if ( cs_y == 1 ) \
 	{ \
-		bli_swap_incs( offm_local, offn_local ); \
-		bli_swap_dims( m_local, n_local ); \
-		bli_swap_incs( rs_y1, cs_y1 ); \
-		bli_swap_incs( rs_y2, cs_y2 ); \
+		bli_swap_incs( &offm_local, &offn_local ); \
+		bli_swap_dims( &m_local, &n_local ); \
+		bli_swap_incs( &rs_y1, &cs_y1 ); \
+		bli_swap_incs( &rs_y2, &cs_y2 ); \
 	} \
 \
 	/* Handle 1e and 1r separately. */ \

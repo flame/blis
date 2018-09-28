@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_amaxv_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -90,36 +92,39 @@ void bli_amaxv_test
 
 void libblis_test_amaxv_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randv( params, &(op->ops->randv) );
+	libblis_test_randv( tdata, params, &(op->ops->randv) );
 }
 
 
 
 void libblis_test_amaxv
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l1v_over == DISABLE_ALL ) return;
+	     libblis_test_l1v_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_amaxv_deps( params, op );
+	if ( TRUE ) libblis_test_amaxv_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -184,7 +189,7 @@ void libblis_test_amaxv_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 1.0 * m ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( x ) ) *perf *= 2.0;
+	if ( bli_obj_is_complex( &x ) ) *perf *= 2.0;
 
 	// Perform checks.
 	libblis_test_amaxv_check( params, &x, &index, resid );
@@ -282,18 +287,50 @@ void PASTEMAC(ch,opname) \
      ( \
        dim_t           n, \
        ctype* restrict x, inc_t incx, \
-       dim_t* restrict index, \
-       cntx_t*         cntx  \
+       dim_t* restrict index  \
      ); \
 
 INSERT_GENTPROT_BASIC0( amaxv_test )
+
+
+//
+// Prototype function pointer query interface.
+//
+
+#undef  GENPROT
+#define GENPROT( tname, opname ) \
+\
+PASTECH(tname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt );
+
+GENPROT( amaxv, amaxv_test )
+
+
+//
+// Define function pointer query interfaces.
+//
+
+#undef  GENFRONT
+#define GENFRONT( tname, opname ) \
+\
+GENARRAY_FPA( PASTECH(tname,_vft), \
+              opname ); \
+\
+PASTECH(tname,_vft) \
+PASTEMAC(opname,_qfp)( num_t dt ) \
+{ \
+    return PASTECH(opname,_fpa)[ dt ]; \
+}
+
+GENFRONT( amaxv, amaxv_test )
+
 
 //
 // Define object-based interface for a local amaxv test operation.
 //
 
 #undef  GENFRONT
-#define GENFRONT( opname ) \
+#define GENFRONT( tname, opname ) \
 \
 void PASTEMAC0(opname) \
      ( \
@@ -301,30 +338,32 @@ void PASTEMAC0(opname) \
        obj_t*  index  \
      ) \
 { \
-    num_t     dt        = bli_obj_datatype( *x ); \
+    num_t     dt        = bli_obj_dt( x ); \
 \
-    dim_t     n         = bli_obj_vector_dim( *x ); \
-    void*     buf_x     = bli_obj_buffer_at_off( *x ); \
-    inc_t     incx      = bli_obj_vector_inc( *x ); \
+    dim_t     n         = bli_obj_vector_dim( x ); \
+    void*     buf_x     = bli_obj_buffer_at_off( x ); \
+    inc_t     incx      = bli_obj_vector_inc( x ); \
 \
-    void*     buf_index = bli_obj_buffer_at_off( *index ); \
+    void*     buf_index = bli_obj_buffer_at_off( index ); \
 \
     if ( bli_error_checking_is_enabled() ) \
         bli_amaxv_check( x, index ); \
 \
-    /* Invoke the bli_?amaxv_test() function. */ \
-    bli_call_ft_5 \
-    ( \
-       dt, \
-       amaxv_test, \
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH(tname,_vft) f = \
+	PASTEMAC(opname,_qfp)( dt ); \
+\
+	f \
+	( \
        n, \
        buf_x, incx, \
-       buf_index, \
-       NULL  \
+       buf_index  \
     ); \
 }
 
-GENFRONT( amaxv_test )
+GENFRONT( amaxv, amaxv_test )
+
 
 //
 // Define BLAS-like interfaces with typed operands for a local amaxv test
@@ -340,8 +379,7 @@ void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
-       dim_t*   i_max, \
-       cntx_t*  cntx  \
+       dim_t*   index  \
      ) \
 { \
 	ctype_r* minus_one = PASTEMAC(chr,m1); \
@@ -351,19 +389,19 @@ void PASTEMAC(ch,varname) \
 	ctype_r  chi1_i; \
 	ctype_r  abs_chi1; \
 	ctype_r  abs_chi1_max; \
-	dim_t    i_max_l; \
+	dim_t    index_l; \
 	dim_t    i; \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
 	if ( bli_zero_dim1( n ) ) \
 	{ \
-		PASTEMAC(i,copys)( *zero_i, *i_max ); \
+		PASTEMAC(i,copys)( *zero_i, *index ); \
 		return; \
 	} \
 \
 	/* Initialize the index of the maximum absolute value to zero. */ \
-	PASTEMAC(i,copys)( *zero_i, i_max_l ); \
+	PASTEMAC(i,copys)( *zero_i, index_l ); \
 \
 	/* Initialize the maximum absolute value search candidate with
 	   -1, which is guaranteed to be less than all values we will
@@ -395,13 +433,13 @@ void PASTEMAC(ch,varname) \
 			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
-				i_max_l       = i; \
+				index_l       = i; \
 			} \
 		} \
 	} \
 \
 	/* Store the final index to the output variable. */ \
-	PASTEMAC(i,copys)( i_max_l, *i_max ); \
+	PASTEMAC(i,copys)( index_l, *index ); \
 }
 
 INSERT_GENTFUNCR_BASIC0( amaxv_test )

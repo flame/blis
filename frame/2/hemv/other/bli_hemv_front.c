@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -67,21 +67,21 @@ void bli_hemv_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_a = bli_obj_target_datatype( *a );
-	dt_targ_x = bli_obj_target_datatype( *x );
-	dt_targ_y = bli_obj_target_datatype( *y );
+	dt_targ_a = bli_obj_target_dt( a );
+	dt_targ_x = bli_obj_target_dt( x );
+	dt_targ_y = bli_obj_target_dt( y );
 
 	// Determine whether each operand with unit stride.
-	a_has_unit_inc = ( bli_obj_is_row_stored( *a ) ||
-	                   bli_obj_is_col_stored( *a ) );
-	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
-	y_has_unit_inc = ( bli_obj_vector_inc( *y ) == 1 );
+	a_has_unit_inc = ( bli_obj_is_row_stored( a ) ||
+	                   bli_obj_is_col_stored( a ) );
+	x_has_unit_inc = ( bli_obj_vector_inc( x ) == 1 );
+	y_has_unit_inc = ( bli_obj_vector_inc( y ) == 1 );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
 	// the type union of the target datatypes of a and x to prevent any
 	// unnecessary loss of information during the computation.
-	dt_alpha = bli_datatype_union( dt_targ_a, dt_targ_x );
+	dt_alpha = bli_dt_union( dt_targ_a, dt_targ_x );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,
@@ -109,14 +109,14 @@ void bli_hemv_front
 		// combinations of upper/lower triangular storage and row/column-storage.
 		// The row-stored lower triangular and column-stored upper triangular
 		// trees are identical. Same for the remaining two trees.
-		if ( bli_obj_is_lower( *a ) )
+		if ( bli_obj_is_lower( a ) )
 		{
-			if ( bli_obj_is_row_stored( *a ) ) hemv_cntl = hemv_cntl_bs_ke_lrow_ucol;
+			if ( bli_obj_is_row_stored( a ) ) hemv_cntl = hemv_cntl_bs_ke_lrow_ucol;
 			else                               hemv_cntl = hemv_cntl_bs_ke_lcol_urow;
 		}
-		else // if ( bli_obj_is_upper( *a ) )
+		else // if ( bli_obj_is_upper( a ) )
 		{
-			if ( bli_obj_is_row_stored( *a ) ) hemv_cntl = hemv_cntl_bs_ke_lcol_urow;
+			if ( bli_obj_is_row_stored( a ) ) hemv_cntl = hemv_cntl_bs_ke_lcol_urow;
 			else                               hemv_cntl = hemv_cntl_bs_ke_lrow_ucol;
 		}
 	}
@@ -124,20 +124,20 @@ void bli_hemv_front
 	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-		if ( a_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *a );
-		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-		if ( y_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
+		if ( a_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, a );
+		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, x );
+		if ( y_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, y );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-		if ( bli_obj_is_lower( *a ) )
+		if ( bli_obj_is_lower( a ) )
 		{
-			if ( bli_obj_is_row_tilted( *a ) ) hemv_cntl = hemv_cntl_ge_lrow_ucol;
+			if ( bli_obj_is_row_tilted( a ) ) hemv_cntl = hemv_cntl_ge_lrow_ucol;
 			else                               hemv_cntl = hemv_cntl_ge_lcol_urow;
 		}
-		else // if ( bli_obj_is_upper( *a ) )
+		else // if ( bli_obj_is_upper( a ) )
 		{
-			if ( bli_obj_is_row_tilted( *a ) ) hemv_cntl = hemv_cntl_ge_lcol_urow;
+			if ( bli_obj_is_row_tilted( a ) ) hemv_cntl = hemv_cntl_ge_lcol_urow;
 			else                               hemv_cntl = hemv_cntl_ge_lrow_ucol;
 		}
 	}
@@ -193,11 +193,11 @@ void PASTEMAC(ch,opname) \
 	bli_obj_create_with_attached_buffer( dt, m, 1, x, rs_x, cs_x, &xo ); \
 	bli_obj_create_with_attached_buffer( dt, m, 1, y, rs_y, cs_y, &yo ); \
 \
-	bli_obj_set_uplo( uploa, ao ); \
-	bli_obj_set_conj( conja, ao ); \
-	bli_obj_set_conj( conjx, xo ); \
+	bli_obj_set_uplo( uploa, &ao ); \
+	bli_obj_set_conj( conja, &ao ); \
+	bli_obj_set_conj( conjx, &xo ); \
 \
-	bli_obj_set_struc( BLIS_HERMITIAN, ao ); \
+	bli_obj_set_struc( BLIS_HERMITIAN, &ao ); \
 \
 	PASTEMAC0(opname)( &alphao, \
 	                   &ao, \

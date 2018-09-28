@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,12 +34,25 @@
 
 #include "bli_util_check.h"
 
-// Prototype object APIs with and without contexts.
-#include "bli_oapi_w_cntx.h"
-#include "bli_util_oapi.h"
-#include "bli_oapi_wo_cntx.h"
+// Prototype object APIs (expert and non-expert).
+#include "bli_oapi_ex.h"
 #include "bli_util_oapi.h"
 
+#include "bli_oapi_ba.h"
+#include "bli_util_oapi.h"
+
+// Prototype typed APIs (expert and non-expert).
+#include "bli_tapi_ex.h"
 #include "bli_util_tapi.h"
+#include "bli_util_ft.h"
+
+#include "bli_tapi_ba.h"
+#include "bli_util_tapi.h"
+#include "bli_util_ft.h"
+
+// Generate function pointer arrays for tapi functions (expert only).
+#include "bli_util_fpa.h"
+
+// Prototype level-1m implementations.
 #include "bli_util_unb_var1.h"
 

@@ -54,7 +54,7 @@ CDBGFLAGS      := -g
 CWARNFLAGS     := -Wall -Wno-unused-function -Wfatal-errors
 COPTFLAGS      := -O3
 CKOPTFLAGS     := $(COPTFLAGS) -ffast-math
-CVECFLAGS      :=
+CKVECFLAGS     :=
 
 # --- Determine the archiver and related flags ---
 AR             := pnacl-ar

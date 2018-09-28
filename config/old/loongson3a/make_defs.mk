@@ -67,7 +67,7 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -march=loongson3a
+CKVECFLAGS     := -march=loongson3a
 else
 $(error gcc is required for this configuration.)
 endif

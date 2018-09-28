@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -90,6 +91,8 @@ void bli_error_init_msgs( void )
 	         "Expected second datatype to be real projection of first." );
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_REAL_VALUED_OBJECT),
 	         "Expected real-valued object (ie: if complex, imaginary component equals zero)." );
+	sprintf( bli_error_string_for_code(BLIS_INCONSISTENT_PRECISIONS),
+	         "Expected consistent precisions (both single or both double)." );
 
 	sprintf( bli_error_string_for_code(BLIS_NONCONFORMAL_DIMENSIONS),
 	         "Encountered non-conformal dimensions between objects." );
@@ -195,9 +198,8 @@ void bli_abort( void )
 
 // -----------------------------------------------------------------------------
 
-#ifdef BLIS_ENABLE_PTHREADS
+// A mutex to allow synchronous access to bli_err_chk_level.
 static pthread_mutex_t err_mutex = PTHREAD_MUTEX_INITIALIZER;
-#endif
 
 // Current error checking level.
 static errlev_t bli_err_chk_level = BLIS_FULL_ERROR_CHECKING;
@@ -214,12 +216,8 @@ void bli_error_checking_level_set( errlev_t new_level )
 	e_val = bli_check_valid_error_level( new_level );
 	bli_check_error_code( e_val );
 
-#ifdef BLIS_ENABLE_OPENMP
-	_Pragma( "omp critical (err)" )
-#endif
-#ifdef BLIS_ENABLE_PTHREADS
+	// Acquire the mutex protecting bli_err_chk_level.
 	pthread_mutex_lock( &err_mutex );
-#endif
 
 	// BEGIN CRITICAL SECTION
 	{
@@ -227,9 +225,8 @@ void bli_error_checking_level_set( errlev_t new_level )
 	}
 	// END CRITICAL SECTION
 
-#ifdef BLIS_ENABLE_PTHREADS
+	// Release the mutex protecting bli_err_chk_level.
 	pthread_mutex_unlock( &err_mutex );
-#endif
 }
 
 bool_t bli_error_checking_is_enabled( void )

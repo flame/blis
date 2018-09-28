@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -94,29 +94,31 @@ void PASTEMAC(ch,varname) \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
 		/* y = 0; */ \
-		PASTEMAC(ch,setv) \
+		PASTEMAC2(ch,setv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
 		  zero, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 	else \
 	{ \
 		/* y = beta * y; */ \
-		PASTEMAC(ch,scalv) \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  m, \
 		  beta, \
 		  y, incy, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
-	PASTECH(ch,dotaxpyv_ft) kfp_vf; \
+	PASTECH(ch,dotaxpyv_ker_ft) kfp_vf; \
 \
 	/* Query the context for the kernel function pointer. */ \
 	kfp_vf = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTAXPYV_KER, cntx ); \

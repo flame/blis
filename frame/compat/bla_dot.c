@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -39,9 +39,9 @@
 // Define BLAS-to-BLIS interfaces.
 //
 #undef  GENTFUNCDOT
-#define GENTFUNCDOT( ftype, chxy, chc, blis_conjx, blasname, blisname ) \
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(chxy,blasname,chc) \
+ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -67,7 +67,7 @@ ftype PASTEF772(chxy,blasname,chc) \
 	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Call BLIS interface. */ \
-	PASTEMAC(chxy,blisname) \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
 	( \
 	  blis_conjx, \
 	  BLIS_NO_CONJUGATE, \
@@ -75,6 +75,7 @@ ftype PASTEF772(chxy,blasname,chc) \
 	  x0, incx0, \
 	  y0, incy0, \
 	  &rho, \
+	  NULL, \
 	  NULL  \
 	); \
 \
@@ -84,7 +85,7 @@ ftype PASTEF772(chxy,blasname,chc) \
 	return rho; \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 
 
@@ -95,13 +96,15 @@ INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 float PASTEF77(sd,sdot)
      (
        const f77_int* n,
+       const float*   sb,
        const float*   x, const f77_int* incx,
        const float*   y, const f77_int* incy
      )
 {
-	return ( float )PASTEF77(d,sdot)( n,
-	                                  x, incx,
-	                                  y, incy );
+	float r = ( float )PASTEF77(d,sdot)( n,
+	                                     x, incx,
+	                                     y, incy );
+	return r + *sb;
 }
 
 // Input vectors stored in single precision, computed in double precision,

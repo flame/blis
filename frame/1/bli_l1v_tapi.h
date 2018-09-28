@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -34,53 +34,164 @@
 
 
 //
-// Generate prototypes for level-1v operations.
+// Prototype BLAS-like interfaces with typed operands.
 //
 
-#undef  addv_ker_name
-#define addv_ker_name       addv
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+      ( \
+        conj_t  conjx, \
+        dim_t   n, \
+        ctype*  x, inc_t incx, \
+        ctype*  y, inc_t incy  \
+        BLIS_TAPI_EX_PARAMS  \
+      );
 
-#undef  amaxv_ker_name
-#define amaxv_ker_name      amaxv
-
-#undef  axpbyv_ker_name
-#define axpbyv_ker_name     axpbyv
-
-#undef  axpyv_ker_name
-#define axpyv_ker_name      axpyv
-
-#undef  copyv_ker_name
-#define copyv_ker_name      copyv
-
-#undef  dotv_ker_name
-#define dotv_ker_name       dotv
-
-#undef  dotxv_ker_name
-#define dotxv_ker_name      dotxv
-
-#undef  invertv_ker_name
-#define invertv_ker_name    invertv
-
-#undef  scalv_ker_name
-#define scalv_ker_name      scalv
-
-#undef  scal2v_ker_name
-#define scal2v_ker_name     scal2v
-
-#undef  setv_ker_name
-#define setv_ker_name       setv
-
-#undef  subv_ker_name
-#define subv_ker_name       subv
-
-#undef  swapv_ker_name
-#define swapv_ker_name      swapv
-
-#undef  xpbyv_ker_name
-#define xpbyv_ker_name      xpbyv
+INSERT_GENTPROT_BASIC0( addv )
+INSERT_GENTPROT_BASIC0( copyv )
+INSERT_GENTPROT_BASIC0( subv )
 
 
-// Include the level-1v kernel API template.
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       dim_t*  index  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
 
-#include "bli_l1v_ker.h"
+INSERT_GENTPROT_BASIC0( amaxv )
 
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( axpbyv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( axpyv )
+INSERT_GENTPROT_BASIC0( scal2v )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  rho  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( dotv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  beta, \
+       ctype*  rho  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( dotxv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       dim_t   n, \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( invertv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjalpha, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( scalv )
+INSERT_GENTPROT_BASIC0( setv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( swapv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
+     ); \
+
+INSERT_GENTPROT_BASIC0( xpbyv )

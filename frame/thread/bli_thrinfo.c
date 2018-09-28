@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -102,7 +102,7 @@ void bli_thrinfo_init_single
 
 thrinfo_t* bli_thrinfo_create_for_cntl
      (
-       cntx_t*    cntx,
+       rntm_t*    rntm,
        cntl_t*    cntl_par,
        cntl_t*    cntl_chl,
        thrinfo_t* thread_par
@@ -134,8 +134,8 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	// - the current thread's id within the new communicator,
 	// - the current thread's work id, given the ways of parallelism
 	//   to be obtained within the next loop.
-	child_nt_in   = bli_cntx_get_num_threads_in( cntx, cntl_chl );
-	child_n_way   = bli_cntx_way_for_bszid( bszid_chl, cntx );
+	child_nt_in   = bli_cntl_calc_num_threads_in( rntm, cntl_chl );
+	child_n_way   = bli_rntm_ways_for( bszid_chl, rntm );
 	child_comm_id = parent_comm_id % child_nt_in;
 	child_work_id = child_comm_id / ( child_nt_in / child_n_way );
 
@@ -188,7 +188,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 
 void bli_thrinfo_grow
      (
-       cntx_t*    cntx,
+       rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      )
@@ -201,7 +201,7 @@ void bli_thrinfo_grow
 	// pointer to the (eldest) child.
 	thrinfo_t* thread_child = bli_thrinfo_rgrow
 	(
-	  cntx,
+	  rntm,
 	  cntl,
 	  bli_cntl_sub_node( cntl ),
 	  thread
@@ -213,7 +213,7 @@ void bli_thrinfo_grow
 
 thrinfo_t* bli_thrinfo_rgrow
      (
-       cntx_t*    cntx,
+       rntm_t*    rntm,
        cntl_t*    cntl_par,
        cntl_t*    cntl_cur,
        thrinfo_t* thread_par
@@ -230,7 +230,7 @@ thrinfo_t* bli_thrinfo_rgrow
 		// with cntl_par being the parent.
 		thread_cur = bli_thrinfo_create_for_cntl
 		(
-		  cntx,
+		  rntm,
 		  cntl_par,
 		  cntl_cur,
 		  thread_par
@@ -242,7 +242,7 @@ thrinfo_t* bli_thrinfo_rgrow
 		// thrinfo_t node of that segment.
 		thrinfo_t* thread_seg = bli_thrinfo_rgrow
 		(
-		  cntx,
+		  rntm,
 		  cntl_par,
 		  bli_cntl_sub_node( cntl_cur ),
 		  thread_par
@@ -256,7 +256,7 @@ thrinfo_t* bli_thrinfo_rgrow
 		(
 		  bli_thrinfo_ocomm( thread_seg ),
 		  bli_thread_ocomm_id( thread_seg ),
-		  bli_cntx_get_num_threads_in( cntx, cntl_cur ),
+		  bli_cntl_calc_num_threads_in( rntm, cntl_cur ),
 		  bli_thread_ocomm_id( thread_seg ),
 		  FALSE,
 		  thread_seg

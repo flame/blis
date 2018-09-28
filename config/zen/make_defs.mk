@@ -42,11 +42,6 @@ THIS_CONFIG    := zen
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -65,21 +60,25 @@ else
 COPTFLAGS      := -O3 -fomit-frame-pointer
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-# gcc 6.3 or later:
-#CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=znver1
-# gcc 5.4:
+# gcc 6.0 (clang 4.0) or later:
+#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
+# gcc 4.9 (clang 3.5) or later:
 # possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

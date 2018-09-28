@@ -1,11 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,580 +41,748 @@
 
 // Info query
 
-#define bli_obj_is_float( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_FLOAT_TYPE )
+static num_t bli_obj_dt( obj_t* obj )
+{
+	return ( num_t )
+	       ( obj->info & BLIS_DATATYPE_BITS );
+}
 
-#define bli_obj_is_double( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DOUBLE_TYPE )
+static bool_t bli_obj_is_float( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_FLOAT_TYPE );
+}
 
-#define bli_obj_is_scomplex( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_SCOMPLEX_TYPE )
+static bool_t bli_obj_is_double( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DOUBLE_TYPE );
+}
 
-#define bli_obj_is_dcomplex( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_DCOMPLEX_TYPE )
+static bool_t bli_obj_is_scomplex( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_SCOMPLEX_TYPE );
+}
 
-#define bli_obj_is_int( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_INT_TYPE )
+static bool_t bli_obj_is_dcomplex( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
+}
 
-#define bli_obj_is_const( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) == BLIS_BITVAL_CONST_TYPE )
+static bool_t bli_obj_is_int( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_INT_TYPE );
+}
 
-#define bli_obj_domain( obj ) \
-\
-	(   (obj).info & BLIS_DOMAIN_BIT )
+static bool_t bli_obj_is_const( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
+}
 
-#define bli_obj_is_real( obj ) \
-\
-	( ( (obj).info & BLIS_DOMAIN_BIT ) == BLIS_BITVAL_REAL )
+static dom_t bli_obj_domain( obj_t* obj )
+{
+	return ( dom_t )
+	       ( obj->info & BLIS_DOMAIN_BIT );
+}
 
-#define bli_obj_is_complex( obj ) \
-\
-	( ( (obj).info & BLIS_DOMAIN_BIT ) == BLIS_BITVAL_COMPLEX )
+static prec_t bli_obj_prec( obj_t* obj )
+{
+	return ( prec_t )
+	       ( obj->info & BLIS_PRECISION_BIT );
+}
 
-#define bli_obj_precision( obj ) \
-\
-	(   (obj).info & BLIS_PRECISION_BIT )
+static bool_t bli_obj_is_single_prec( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
+}
 
-#define bli_obj_is_double_precision( obj ) \
-\
-	( ( (obj).info & BLIS_PRECISION_BIT ) == BLIS_BITVAL_DOUBLE_PREC )
+static bool_t bli_obj_is_double_prec( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
+}
 
-#define bli_obj_datatype( obj ) \
-\
-	(   (obj).info & BLIS_DATATYPE_BITS )
+static num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
+{
+	return ( num_t )
+	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
+}
 
-#define bli_obj_datatype_proj_to_real( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) & ~BLIS_BITVAL_COMPLEX )
+static num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
+{
+	return ( num_t )
+	       ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
+}
 
-#define bli_obj_datatype_proj_to_complex( obj ) \
-\
-	( ( (obj).info & BLIS_DATATYPE_BITS ) &  BLIS_BITVAL_COMPLEX )
+static bool_t bli_obj_is_real( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL );
+}
 
-#define bli_obj_target_datatype( obj ) \
-\
-	( ( (obj).info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT )
+static bool_t bli_obj_is_complex( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX );
+}
 
-#define bli_obj_execution_datatype( obj ) \
-\
-	( ( (obj).info & BLIS_EXECUTION_DT_BITS ) >> BLIS_EXECUTION_DT_SHIFT )
+static num_t bli_obj_dt_proj_to_real( obj_t* obj )
+{
+	return ( num_t )
+	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
+}
 
-#define bli_obj_conjtrans_status( obj ) \
-\
-	(   (obj).info & BLIS_CONJTRANS_BITS )
+static num_t bli_obj_dt_proj_to_complex( obj_t* obj )
+{
+	return ( num_t )
+	       ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
+}
 
-#define bli_obj_onlytrans_status( obj ) \
-\
-	(   (obj).info & BLIS_TRANS_BIT )
+static num_t bli_obj_target_dt( obj_t* obj )
+{
+	return ( num_t )
+	       ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
+}
 
-#define bli_obj_has_trans( obj ) \
-\
-	( ( (obj).info  & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS ) \
+static dom_t bli_obj_target_domain( obj_t* obj )
+{
+	return ( dom_t )
+	       ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
 
-#define bli_obj_has_notrans( obj ) \
-\
-	( ( (obj).info  & BLIS_TRANS_BIT ) == BLIS_BITVAL_NO_TRANS ) \
+static prec_t bli_obj_target_prec( obj_t* obj )
+{
+	return ( prec_t )
+	       ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
+}
 
-#define bli_obj_conj_status( obj ) \
-\
-	(   (obj).info & BLIS_CONJ_BIT )
+static num_t bli_obj_exec_dt( obj_t* obj )
+{
+	return ( num_t )
+	       ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
+}
 
-#define bli_obj_has_conj( obj ) \
-\
-	( ( (obj).info  & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ ) \
+static dom_t bli_obj_exec_domain( obj_t* obj )
+{
+	return ( dom_t )
+	       ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
+}
 
-#define bli_obj_has_noconj( obj ) \
-\
-	( ( (obj).info  & BLIS_CONJ_BIT ) == BLIS_BITVAL_NO_CONJ ) \
+static prec_t bli_obj_exec_prec( obj_t* obj )
+{
+	return ( prec_t )
+	       ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
+}
 
-#define bli_obj_uplo( obj ) \
-\
-	(   (obj).info & BLIS_UPLO_BITS ) \
+static trans_t bli_obj_conjtrans_status( obj_t* obj )
+{
+	return ( trans_t )
+	       ( obj->info & BLIS_CONJTRANS_BITS );
+}
 
-#define bli_obj_is_upper( obj ) \
-\
-	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_UPPER )
+static trans_t bli_obj_onlytrans_status( obj_t* obj )
+{
+	return ( trans_t )
+	       ( obj->info & BLIS_TRANS_BIT );
+}
 
-#define bli_obj_is_lower( obj ) \
-\
-	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_LOWER )
+static bool_t bli_obj_has_trans( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_TRANS );
+}
 
-#define bli_obj_is_upper_after_trans( obj ) \
-\
-	( bli_obj_has_trans( (obj) ) ? bli_obj_is_lower( (obj) ) \
-	                             : bli_obj_is_upper( (obj) ) )
+static bool_t bli_obj_has_notrans( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_NO_TRANS );
+}
 
-#define bli_obj_is_lower_after_trans( obj ) \
-\
-	( bli_obj_has_trans( (obj) ) ? bli_obj_is_upper( (obj) ) \
-	                             : bli_obj_is_lower( (obj) ) )
+static conj_t bli_obj_conj_status( obj_t* obj )
+{
+	return ( conj_t )
+	       ( obj->info & BLIS_CONJ_BIT );
+}
 
-#define bli_obj_is_upper_or_lower( obj ) \
-\
-	( bli_obj_is_upper( obj ) || \
-	  bli_obj_is_lower( obj ) )
+static bool_t bli_obj_has_conj( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_CONJ );
+}
 
-#define bli_obj_is_dense( obj ) \
-\
-	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_DENSE )
+static bool_t bli_obj_has_noconj( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_NO_CONJ );
+}
 
-#define bli_obj_is_zeros( obj ) \
-\
-	( ( (obj).info & BLIS_UPLO_BITS ) == BLIS_BITVAL_ZEROS )
+static uplo_t bli_obj_uplo( obj_t* obj )
+{
+	return ( uplo_t )
+	       ( obj->info & BLIS_UPLO_BITS );
+}
 
-#define bli_obj_diag( obj ) \
-\
-	(   (obj).info & BLIS_UNIT_DIAG_BIT )
+static bool_t bli_obj_is_upper( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_UPPER );
+}
 
-#define bli_obj_has_nonunit_diag( obj ) \
-\
-	( ( (obj).info & BLIS_UNIT_DIAG_BIT ) == BLIS_BITVAL_NONUNIT_DIAG )
+static bool_t bli_obj_is_lower( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_LOWER );
+}
 
-#define bli_obj_has_unit_diag( obj ) \
-\
-	( ( (obj).info & BLIS_UNIT_DIAG_BIT ) == BLIS_BITVAL_UNIT_DIAG )
+static bool_t bli_obj_is_upper_or_lower( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_is_upper( obj ) ||
+	         bli_obj_is_lower( obj ) );
+}
 
-#define bli_obj_has_inverted_diag( obj ) \
-\
-	( ( (obj).info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG )
+static bool_t bli_obj_is_dense( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_DENSE );
+}
 
-#define bli_obj_is_pack_rev_if_upper( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER )
+static bool_t bli_obj_is_zeros( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_ZEROS );
+}
 
-#define bli_obj_is_pack_rev_if_lower( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER )
+static diag_t bli_obj_diag( obj_t* obj )
+{
+	return ( diag_t )
+	       ( obj->info & BLIS_UNIT_DIAG_BIT );
+}
 
-#define bli_obj_pack_schema( obj ) \
-\
-	(   (obj).info & BLIS_PACK_SCHEMA_BITS )
+static bool_t bli_obj_has_nonunit_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_diag( obj ) == BLIS_BITVAL_NONUNIT_DIAG );
+}
 
-#define bli_obj_is_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_BIT  ) )
+static bool_t bli_obj_has_unit_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
+}
 
-#define bli_obj_is_row_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
-	                                          BLIS_BITVAL_PACKED_ROWS    ) )
+static bool_t bli_obj_has_inverted_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
+}
 
-#define bli_obj_is_col_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_RC_BIT  ) == ( BLIS_BITVAL_PACKED_UNSPEC ^ \
-	                                          BLIS_BITVAL_PACKED_COLUMNS ) )
+static bool_t bli_obj_is_pack_rev_if_upper( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
+}
 
-#define bli_obj_is_panel_packed( obj ) \
-\
-	( ( (obj).info & BLIS_PACK_PANEL_BIT ) )
+static bool_t bli_obj_is_pack_rev_if_lower( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
+}
 
-#define bli_obj_pack_buffer_type( obj ) \
-\
-	(   (obj).info & BLIS_PACK_BUFFER_BITS )
+static pack_t bli_obj_pack_schema( obj_t* obj )
+{
+	return ( pack_t )
+	       ( obj->info & BLIS_PACK_SCHEMA_BITS );
+}
 
-#define bli_obj_struc( obj ) \
-\
-	(   (obj).info & BLIS_STRUC_BITS )
+static bool_t bli_obj_is_packed( obj_t* obj )
+{
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_BIT );
+}
 
-#define bli_obj_is_general( obj ) \
-\
-	( ( (obj).info & BLIS_STRUC_BITS ) == BLIS_BITVAL_GENERAL )
+static bool_t bli_obj_is_row_packed( obj_t* obj )
+{
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+                                                 BLIS_BITVAL_PACKED_ROWS    );
+}
 
-#define bli_obj_is_hermitian( obj ) \
-\
-	( ( (obj).info & BLIS_STRUC_BITS ) == BLIS_BITVAL_HERMITIAN )
+static bool_t bli_obj_is_col_packed( obj_t* obj )
+{
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+                                                 BLIS_BITVAL_PACKED_COLUMNS );
+}
 
-#define bli_obj_is_symmetric( obj ) \
-\
-	( ( (obj).info & BLIS_STRUC_BITS ) == BLIS_BITVAL_SYMMETRIC )
+static bool_t bli_obj_is_panel_packed( obj_t* obj )
+{
+	return ( bool_t )
+	       ( obj->info & BLIS_PACK_PANEL_BIT );
+}
 
-#define bli_obj_is_triangular( obj ) \
-\
-	( ( (obj).info & BLIS_STRUC_BITS ) == BLIS_BITVAL_TRIANGULAR )
+static packbuf_t bli_obj_pack_buffer_type( obj_t* obj )
+{
+	return ( packbuf_t )
+	       ( obj->info & BLIS_PACK_BUFFER_BITS );
+}
 
-#define bli_obj_is_herm_or_symm( obj ) \
-\
-	( bli_obj_is_hermitian( obj ) || \
-	  bli_obj_is_symmetric( obj ) )
+static struc_t bli_obj_struc( obj_t* obj )
+{
+	return ( struc_t )
+	       ( obj->info & BLIS_STRUC_BITS );
+}
 
+static bool_t bli_obj_is_general( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_GENERAL );
+}
 
+static bool_t bli_obj_is_hermitian( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_HERMITIAN );
+}
+
+static bool_t bli_obj_is_symmetric( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
+}
+
+static bool_t bli_obj_is_triangular( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_struc( obj ) == BLIS_BITVAL_TRIANGULAR );
+}
 
 // Info modification
 
-#define bli_obj_set_conjtrans( conjtrans, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_CONJTRANS_BITS ) | (conjtrans); \
+static void bli_obj_apply_trans( trans_t trans, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info ^ trans );
 }
 
-#define bli_obj_set_onlytrans( trans, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_TRANS_BIT ) | (trans); \
+static void bli_obj_apply_conj( conj_t conj, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info ^ conj );
 }
 
-#define bli_obj_set_conj( conjval, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_CONJ_BIT ) | (conjval); \
+static void bli_obj_set_conjtrans( trans_t trans, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_CONJTRANS_BITS ) | trans;
 }
 
-#define bli_obj_set_uplo( uplo, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_UPLO_BITS ) | (uplo); \
+static void bli_obj_set_onlytrans( trans_t trans, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TRANS_BIT ) | trans;
 }
 
-#define bli_obj_set_diag( diag, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_UNIT_DIAG_BIT ) | (diag); \
+static void bli_obj_set_conj( conj_t conj, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_CONJ_BIT ) | conj;
 }
 
-#define bli_obj_set_invert_diag( inv_diag, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_INVERT_DIAG_BIT ) | (inv_diag); \
+static void bli_obj_set_uplo( uplo_t uplo, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_UPLO_BITS ) | uplo;
 }
 
-#define bli_obj_set_datatype( dt, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_DATATYPE_BITS ) | (dt); \
+static void bli_obj_set_diag( diag_t diag, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag;
 }
 
-#define bli_obj_set_target_datatype( dt, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT ); \
+static void bli_obj_set_invert_diag( invdiag_t invdiag, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag;
 }
 
-#define bli_obj_set_execution_datatype( dt, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_EXECUTION_DT_BITS ) | ( dt << BLIS_EXECUTION_DT_SHIFT ); \
+static void bli_obj_set_dt( num_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_DATATYPE_BITS ) | dt;
 }
 
-#define bli_obj_set_pack_schema( pack, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_PACK_SCHEMA_BITS ) | (pack); \
+static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_DT_BITS ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
-#define bli_obj_set_pack_order_if_upper( packordifup, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | (packordifup); \
+static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
-#define bli_obj_set_pack_order_if_lower( packordiflo, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | (packordiflo); \
+static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_TARGET_PREC_BIT ) | ( dt << BLIS_TARGET_DT_SHIFT );
 }
 
-#define bli_obj_set_pack_buffer_type( packbuf, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_PACK_BUFFER_BITS ) | (packbuf); \
+static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_DT_BITS ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
-#define bli_obj_set_struc( struc, obj ) \
-{ \
-	(obj).info = ( (obj).info & ~BLIS_STRUC_BITS ) | (struc); \
+static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
-#define bli_obj_toggle_trans( obj )\
-{ \
-	(obj).info = ( (obj).info ^ BLIS_TRANS_BIT ); \
+static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_EXEC_PREC_BIT ) | ( dt << BLIS_EXEC_DT_SHIFT );
 }
 
-#define bli_obj_toggle_conj( obj )\
-{ \
-	(obj).info = ( (obj).info ^ BLIS_CONJ_BIT ); \
+static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema;
 }
 
-#define bli_obj_toggle_uplo( obj ) \
-{ \
-	(obj).info = ( (obj).info ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT; \
+static void bli_obj_set_pack_order_if_upper( packord_t ordif, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif;
 }
 
-#define bli_obj_toggle_region_ref( obj ) \
-{ \
-	if      ( bli_obj_is_upper( obj ) ) bli_obj_inc_diag_off( -1, obj ); \
-	else if ( bli_obj_is_lower( obj ) ) bli_obj_inc_diag_off(  1, obj ); \
-\
-	bli_obj_toggle_uplo( obj ); \
+static void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif;
 }
 
-#define bli_obj_toggle_uplo_if_trans( trans, obj ) \
-{ \
-	if ( bli_does_trans( trans ) && ( bli_obj_is_upper_or_lower( obj ) ) ) \
-	{ \
-		bli_obj_toggle_uplo( obj ); \
-		bli_obj_negate_diag_offset( obj ); \
-	} \
+// NOTE: The packbuf_t bitfield in the obj_t is currently unused. Instead,
+// packbuf_t is stored/used from the context in order to support various
+// induced methods. (Though ideally the packbuf_t field would only be
+// present in the control tree).
+static void bli_obj_set_pack_buffer_type( packbuf_t buf_type, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type;
 }
 
-#define bli_obj_apply_trans( trans, obj ) \
-{ \
-	(obj).info = ( (obj).info ^ (trans) ); \
+static void bli_obj_set_struc( struc_t struc, obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info & ~BLIS_STRUC_BITS ) | struc;
 }
 
-#define bli_obj_apply_conj( conjval, obj ) \
-{ \
-	(obj).info = ( (obj).info ^ (conjval) ); \
+static void bli_obj_toggle_trans( obj_t* obj )
+{
+	bli_obj_apply_trans( BLIS_TRANSPOSE, obj );
 }
 
+static void bli_obj_toggle_conj( obj_t* obj )
+{
+	bli_obj_apply_conj( BLIS_CONJUGATE, obj );
+}
+
+static void bli_obj_toggle_uplo( obj_t* obj )
+{
+	obj->info = ( objbits_t )
+	            ( obj->info ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT;
+}
 
 // Root matrix query
 
-#define bli_obj_root( obj ) \
-\
-	((obj).root)
+static obj_t* bli_obj_root( obj_t* obj )
+{
+	return ( obj->root );
+}
 
-#define bli_obj_root_uplo( obj ) \
-\
-	bli_obj_uplo( *bli_obj_root( obj ) )
+static bool_t bli_obj_root_is_general( obj_t* obj )
+{
+	return bli_obj_is_general( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_general( obj ) \
-\
-	bli_obj_is_general( *bli_obj_root( obj ) )
+static bool_t bli_obj_root_is_hermitian( obj_t* obj )
+{
+	return bli_obj_is_hermitian( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_hermitian( obj ) \
-\
-	bli_obj_is_hermitian( *bli_obj_root( obj ) )
+static bool_t bli_obj_root_is_symmetric( obj_t* obj )
+{
+	return bli_obj_is_symmetric( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_symmetric( obj ) \
-\
-	bli_obj_is_symmetric( *bli_obj_root( obj ) )
+static bool_t bli_obj_root_is_triangular( obj_t* obj )
+{
+	return bli_obj_is_triangular( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_triangular( obj ) \
-\
-	bli_obj_is_triangular( *bli_obj_root( obj ) )
+static bool_t bli_obj_root_is_herm_or_symm( obj_t* obj )
+{
+	return bli_obj_is_hermitian( bli_obj_root( obj ) ) ||
+	       bli_obj_is_symmetric( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_herm_or_symm( obj ) \
-\
-	( bli_obj_is_hermitian( *bli_obj_root( obj ) ) || \
-	  bli_obj_is_symmetric( *bli_obj_root( obj ) ) )
+static bool_t bli_obj_root_is_upper( obj_t* obj )
+{
+	return bli_obj_is_upper( bli_obj_root( obj ) );
+}
 
-#define bli_obj_root_is_upper( obj ) \
-\
-	bli_obj_is_upper( *bli_obj_root( obj ) )
-
-#define bli_obj_root_is_lower( obj ) \
-\
-	bli_obj_is_lower( *bli_obj_root( obj ) )
-
+static bool_t bli_obj_root_is_lower( obj_t* obj )
+{
+	return bli_obj_is_lower( bli_obj_root( obj ) );
+}
 
 // Root matrix modification
 
-#define bli_obj_set_as_root( obj )\
-{ \
-	(obj).root = &(obj); \
+static void bli_obj_set_as_root( obj_t* obj )
+{
+	obj->root = obj;
 }
 
+// Diagonal offset query
+
+static doff_t bli_obj_diag_offset( obj_t* obj )
+{
+	return ( doff_t )
+	       ( obj->diag_off );
+}
+
+static doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
+{
+	return ( doff_t )
+	       ( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj )
+	                                  :  bli_obj_diag_offset( obj ) );
+}
+
+// Diagonal offset modification
+
+static void bli_obj_set_diag_offset( doff_t offset, obj_t* obj )
+{
+	obj->diag_off = ( doff_t )offset;
+}
+
+static void bli_obj_negate_diag_offset( obj_t* obj )
+{
+	obj->diag_off = -(obj->diag_off);
+}
+
+static void bli_obj_inc_diag_offset( doff_t offset, obj_t* obj )
+{
+	obj->diag_off += ( doff_t )offset;
+}
 
 // Dimension query
 
-#define bli_obj_length( obj ) \
-\
-	( (obj).dim[BLIS_M] )
-
-#define bli_obj_width( obj ) \
-\
-	( (obj).dim[BLIS_N] )
-
-#define bli_obj_dim( mdim, obj ) \
-\
-	( (obj).dim[mdim] )
-
-#define bli_obj_min_dim( obj ) \
-\
-	( bli_min( bli_obj_length( obj ), \
-	           bli_obj_width( obj ) ) )
-
-#define bli_obj_max_dim( obj ) \
-\
-	( bli_max( bli_obj_length( obj ), \
-	           bli_obj_width( obj ) ) )
-
-#define bli_obj_length_after_trans( obj ) \
-\
-	( bli_obj_has_trans( (obj) ) ? bli_obj_width(  (obj) ) \
-	                             : bli_obj_length( (obj) ) )
-
-#define bli_obj_width_after_trans( obj ) \
-\
-	( bli_obj_has_trans( (obj) ) ? bli_obj_length( (obj) ) \
-	                             : bli_obj_width(  (obj) ) )
-
-#define bli_obj_get_dims_after_trans( obj, dim_m, dim_n ) \
-{ \
-	if ( bli_obj_has_notrans( trans ) ) \
-	{ \
-		dim_m = bli_obj_length( obj ); \
-		dim_n = bli_obj_width( obj ); \
-	} \
-	else \
-	{ \
-		dim_m = bli_obj_width( obj ); \
-		dim_n = bli_obj_length( obj ); \
-	} \
-}
-
-/*
-bli_obj_length_stored( obj )
+static dim_t bli_obj_length( obj_t* obj )
 {
-	if ( lower )
-	{
-		if ( diagoff < 0 ) m_stored = m + diagoff;
-		else               m_stored = m
-	}
-	else if ( upper )
-	{
-		if ( diagoff < 0 ) m_stored = min( m, n - diagoff );
-		else               m_stored = min( m, n - diagoff );
-	}
+	return ( obj->dim[ BLIS_M ] );
 }
-bli_obj_width_stored( obj )
+
+static dim_t bli_obj_width( obj_t* obj )
 {
-	if ( lower )
-	{
-		if ( diagoff < 0 ) n_stored = min( n, m + diagoff );
-		else               n_stored = min( n, m + diagoff );
-	}
-	else if ( upper )
-	{
-		if ( diagoff < 0 ) n_stored = n;
-		else               n_stored = n - diagoff;
-	}
-}
-*/
-// Note: The purpose of these macros is to obtain the length and width
-// of the smallest submatrices of an object that could still encompass
-// the stored data above (if obj is upper) or below (if obj is lower)
-// the diagonal.
-#define bli_obj_length_stored( obj ) \
-\
-	( bli_obj_is_upper( obj ) \
-		? bli_min( bli_obj_length( obj ), \
-		           bli_obj_width( obj )  - bli_obj_diag_offset( obj ) ) \
-		: bli_min( bli_obj_length( obj ), \
-		           bli_obj_length( obj ) + bli_obj_diag_offset( obj ) ) \
-	)
-
-#define bli_obj_width_stored( obj ) \
-\
-	( bli_obj_is_lower( obj ) \
-		? bli_min( bli_obj_width( obj ), \
-		           bli_obj_length( obj ) + bli_obj_diag_offset( obj ) ) \
-		: bli_min( bli_obj_width( obj ), \
-		           bli_obj_width( obj )  - bli_obj_diag_offset( obj ) ) \
-	)
-
-#define bli_obj_length_stored_after_trans( obj ) \
-\
-	( bli_obj_has_trans( obj ) ? bli_obj_width_stored( obj ) \
-	                           : bli_obj_length_stored( obj ) )
-
-#define bli_obj_width_stored_after_trans( obj ) \
-\
-	( bli_obj_has_trans( obj ) ? bli_obj_length_stored( obj ) \
-	                           : bli_obj_width_stored( obj ) )
-
-#define bli_obj_vector_dim( x ) \
-\
-	( bli_obj_length( x ) == 1 ? bli_obj_width( x ) \
-	                           : bli_obj_length( x ) )
-
-#define bli_obj_vector_inc( x ) \
-\
-	( bli_obj_is_1x1( x ) ? 1 : \
-	( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x ) \
-	                           : bli_obj_row_stride( x ) ) \
-	)
-
-#define bli_obj_is_vector( x ) \
-\
-	( bli_obj_length( x ) == 1 || \
-	  bli_obj_width( x )  == 1 )
-
-#define bli_obj_is_row_vector( x ) \
-\
-	( bli_obj_length( x ) == 1 )
-
-#define bli_obj_is_col_vector( x ) \
-\
-	( bli_obj_width( x ) == 1 )
-
-#define bli_obj_has_zero_dim( obj ) \
-\
-	( bli_obj_length( obj ) == 0 || \
-	  bli_obj_width( obj )  == 0 )
-
-#define bli_obj_is_1x1( x ) \
-\
-	( bli_obj_length( x ) == 1 && \
-	  bli_obj_width( x )  == 1 )
-
-
-// Dimension modification
-
-#define bli_obj_set_length( dim_m, obj ) \
-{ \
-	(obj).dim[BLIS_M] = dim_m; \
+	return ( obj->dim[ BLIS_N ] );
 }
 
-#define bli_obj_set_width( dim_n, obj ) \
-{ \
-	(obj).dim[BLIS_N] = dim_n; \
+static dim_t bli_obj_dim( mdim_t mdim, obj_t* obj )
+{
+	return ( obj->dim[ mdim ] );
 }
 
-#define bli_obj_set_dim( mdim, dim_val, obj ) \
-{ \
-	(obj).dim[mdim] = dim_val; \
+static dim_t bli_obj_min_dim( obj_t* obj )
+{
+	return bli_min( bli_obj_length( obj ),
+	                bli_obj_width(  obj ) );
 }
 
-#define bli_obj_set_dims( dim_m, dim_n, obj ) \
-{ \
-	bli_obj_set_length( dim_m, obj ); \
-	bli_obj_set_width( dim_n, obj ); \
+static dim_t bli_obj_max_dim( obj_t* obj )
+{
+	return bli_max( bli_obj_length( obj ),
+	                bli_obj_width(  obj ) );
 }
 
-#define bli_obj_set_dims_with_trans( trans, dim_m, dim_n, obj ) \
-{ \
-	if ( bli_does_notrans( trans ) ) \
-	{ \
-		bli_obj_set_length( dim_m, obj ); \
-		bli_obj_set_width( dim_n, obj ); \
-	} \
-	else \
-	{ \
-		bli_obj_set_length( dim_n, obj ); \
-		bli_obj_set_width( dim_m, obj ); \
-	} \
+static dim_t bli_obj_length_after_trans( obj_t* obj )
+{
+	return ( bli_obj_has_trans( obj ) ? bli_obj_width(  obj )
+	                                  : bli_obj_length( obj ) );
 }
 
+static dim_t bli_obj_width_after_trans( obj_t* obj )
+{
+	return ( bli_obj_has_trans( obj ) ? bli_obj_length( obj )
+	                                  : bli_obj_width(  obj ) );
+}
+
+static bool_t bli_obj_is_1x1( obj_t* x )
+{
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 &&
+	                   bli_obj_width(  x ) == 1 );
+}
 
 // Stride/increment query
 
-#define bli_obj_row_stride( obj ) \
-\
-	( (obj).rs )
+static inc_t bli_obj_row_stride( obj_t* obj )
+{
+	return ( obj->rs );
+}
 
-#define bli_obj_col_stride( obj ) \
-\
-	( (obj).cs )
+static inc_t bli_obj_col_stride( obj_t* obj )
+{
+	return ( obj->cs );
+}
 
-#define bli_obj_imag_stride( obj ) \
-\
-	( (obj).is )
+static inc_t bli_obj_imag_stride( obj_t* obj )
+{
+	return ( obj->is );
+}
 
-#define bli_obj_row_stride_mag( obj ) \
-\
-	( bli_abs( bli_obj_row_stride( obj ) ) )
+static inc_t bli_obj_row_stride_mag( obj_t* obj )
+{
+	return ( bli_abs( obj->rs ) );
+}
 
-#define bli_obj_col_stride_mag( obj ) \
-\
-	( bli_abs( bli_obj_col_stride( obj ) ) )
+static inc_t bli_obj_col_stride_mag( obj_t* obj )
+{
+	return ( bli_abs( obj->cs ) );
+}
 
-#define bli_obj_imag_stride_mag( obj ) \
-\
-	( bli_abs( bli_obj_imag_stride( obj ) ) )
+static inc_t bli_obj_imag_stride_mag( obj_t* obj )
+{
+	return ( bli_abs( obj->is ) );
+}
+
+// Note: The purpose of these functions is to obtain the length and width
+// of the smallest submatrices of an object that could still encompass
+// the stored data above (if obj is upper) or below (if obj is lower)
+// the diagonal.
+static dim_t bli_obj_length_stored( obj_t* obj )
+{
+	return ( dim_t )
+	       ( bli_obj_is_upper( obj )
+	         ? bli_min( bli_obj_length( obj ),
+	                    bli_obj_width( obj )  - bli_obj_diag_offset( obj ) )
+	         : bli_min( bli_obj_length( obj ),
+	                    bli_obj_length( obj ) + bli_obj_diag_offset( obj ) )
+	       );
+}
+
+static dim_t bli_obj_width_stored( obj_t* obj )
+{
+	return ( dim_t )
+	       ( bli_obj_is_lower( obj )
+	         ? bli_min( bli_obj_width( obj ),
+	                    bli_obj_length( obj ) + bli_obj_diag_offset( obj ) )
+	         : bli_min( bli_obj_width( obj ),
+	                    bli_obj_width( obj )  - bli_obj_diag_offset( obj ) )
+	       );
+}
+
+static dim_t bli_obj_length_stored_after_trans( obj_t* obj )
+{
+	return ( bli_obj_has_trans( obj ) ? bli_obj_width_stored(  obj )
+	                                  : bli_obj_length_stored( obj ) );
+}
+
+static dim_t bli_obj_width_stored_after_trans( obj_t* obj )
+{
+	return ( bli_obj_has_trans( obj ) ? bli_obj_length_stored( obj )
+	                                  : bli_obj_width_stored(  obj ) );
+}
+
+static dim_t bli_obj_vector_dim( obj_t* x )
+{
+	return ( bli_obj_length( x ) == 1 ? bli_obj_width(  x )
+	                                  : bli_obj_length( x ) );
+}
+
+static inc_t bli_obj_vector_inc( obj_t* x )
+{
+	return ( bli_obj_is_1x1( x ) ? 1 : \
+	         ( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x )
+	                                    : bli_obj_row_stride( x ) )
+	       );
+}
+
+static bool_t bli_obj_is_vector( obj_t* x )
+{
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 ||
+	                   bli_obj_width(  x ) == 1 );
+}
+
+static bool_t bli_obj_is_row_vector( obj_t* x )
+{
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 1 );
+}
+
+static bool_t bli_obj_is_col_vector( obj_t* x )
+{
+	return ( bool_t )
+	       ( bli_obj_width( x ) == 1 );
+}
+
+static bool_t bli_obj_has_zero_dim( obj_t* x )
+{
+	return ( bool_t )
+	       ( bli_obj_length( x ) == 0 ||
+	                   bli_obj_width(  x ) == 0 );
+}
+
+// Dimension modification
+
+static void bli_obj_set_length( dim_t m, obj_t* obj )
+{
+	obj->dim[ BLIS_M ] = m;
+}
+
+static void bli_obj_set_width( dim_t n, obj_t* obj )
+{
+	obj->dim[ BLIS_N ] = n;
+}
+
+static void bli_obj_set_dim( mdim_t mdim, dim_t dim_val, obj_t* obj )
+{
+	obj->dim[ mdim ] = dim_val;
+}
+
+static void bli_obj_set_dims( dim_t m, dim_t n, obj_t* obj )
+{
+	bli_obj_set_length( m, obj );
+	bli_obj_set_width( n, obj );
+}
+
+static void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, obj_t* obj )
+{
+	//if ( bli_does_notrans( trans ) )
+	if ( ( ~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS )
+	{
+		bli_obj_set_length( m, obj );
+		bli_obj_set_width( n, obj );
+	}
+	else
+	{
+		bli_obj_set_length( n, obj );
+		bli_obj_set_width( m, obj );
+	}
+}
+
+// Stride/increment predicates
 
 //
 // NOTE: The following two macros differ from their non-obj counterparts
@@ -623,320 +791,284 @@ bli_obj_width_stored( obj )
 // objects. But this is okay, since none of the invocations of these
 // "obj" macros are used on packed matrices.
 //
-#define bli_obj_is_row_stored( obj ) \
-\
-	( bli_obj_col_stride_mag( obj ) == 1 )
 
-#define bli_obj_is_col_stored( obj ) \
-\
-	( bli_obj_row_stride_mag( obj ) == 1 )
+static bool_t bli_obj_is_row_stored( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_col_stride_mag( obj ) == 1 );
+}
 
-#define bli_obj_is_gen_stored( obj ) \
-\
-	( bli_obj_row_stride_mag( obj ) != 1 && \
-	  bli_obj_col_stride_mag( obj ) != 1 )
+static bool_t bli_obj_is_col_stored( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) == 1 );
+}
 
-#define bli_obj_is_row_tilted( obj ) \
-\
-	( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) )
+static bool_t bli_obj_is_gen_stored( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) != 1 &&
+	         bli_obj_col_stride_mag( obj ) != 1 );
+}
 
-#define bli_obj_is_col_tilted( obj ) \
-\
-	( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) )
+static bool_t bli_obj_is_row_tilted( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) );
+}
 
+static bool_t bli_obj_is_col_tilted( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) );
+}
 
 // Stride/increment modification
 
-#define bli_obj_set_strides( row_stride, col_stride, obj ) \
-{ \
-	(obj).rs = row_stride; \
-	(obj).cs = col_stride; \
+static void bli_obj_set_strides( inc_t rs, inc_t cs, obj_t* obj )
+{
+	obj->rs = rs;
+	obj->cs = cs;
 }
 
-#define bli_obj_set_imag_stride( imag_stride, obj ) \
-{ \
-	(obj).is = imag_stride; \
+static void bli_obj_set_imag_stride( inc_t is, obj_t* obj )
+{
+	obj->is = is;
 }
-
 
 // Offset query
 
-#define bli_obj_row_off( obj ) \
-\
-	( (obj).off[BLIS_M] )
+static dim_t bli_obj_row_off( obj_t* obj )
+{
+	return ( obj->off[ BLIS_M ] );
+}
 
-#define bli_obj_col_off( obj ) \
-\
-	( (obj).off[BLIS_N] )
+static dim_t bli_obj_col_off( obj_t* obj )
+{
+	return ( obj->off[ BLIS_N ] );
+}
 
-#define bli_obj_off( mdim, obj ) \
-\
-	( (obj).off[mdim] )
-
+static dim_t bli_obj_off( mdim_t mdim, obj_t* obj )
+{
+	return ( obj->off[ mdim ] );
+}
 
 // Offset modification
 
-#define bli_obj_set_off( mdim, offset, obj ) \
-{ \
-	(obj).off[mdim] = offset; \
+static void bli_obj_set_off( mdim_t mdim, dim_t offset, obj_t* obj )
+{
+	obj->off[ mdim ] = offset;
 }
 
-#define bli_obj_set_offs( offset_m, offset_n, obj ) \
-{ \
-	bli_obj_set_off( BLIS_M, offset_m, obj ); \
-	bli_obj_set_off( BLIS_N, offset_n, obj ); \
+static void bli_obj_set_offs( dim_t offm, dim_t offn, obj_t* obj )
+{
+	bli_obj_set_off( BLIS_M, offm, obj );
+	bli_obj_set_off( BLIS_N, offn, obj );
 }
 
-#define bli_obj_inc_off( mdim, offset, obj ) \
-{ \
-	(obj).off[mdim] += offset; \
+static void bli_obj_inc_off( mdim_t mdim, dim_t offset, obj_t* obj )
+{
+	obj->off[ mdim ] += offset;
 }
 
-#define bli_obj_inc_offm( offset, obj ) \
-{ \
-	bli_obj_inc_off( BLIS_M, offset, obj ); \
+static void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
+{
+	bli_obj_inc_off( BLIS_M, offm, obj );
+	bli_obj_inc_off( BLIS_N, offn, obj );
 }
 
-#define bli_obj_inc_offn( offset, obj ) \
-{ \
-	bli_obj_inc_off( BLIS_N, offset, obj ); \
+// Diagonal offset predicates
+
+static bool_t bli_obj_is_strictly_above_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) );
 }
 
-#define bli_obj_inc_offs( offset_m, offset_n, obj ) \
-{ \
-	bli_obj_inc_off( BLIS_M, offset_m, obj ); \
-	bli_obj_inc_off( BLIS_N, offset_n, obj ); \
+static bool_t bli_obj_is_strictly_below_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( doff_t )bli_obj_width( obj ) <= bli_obj_diag_offset( obj ) );
 }
 
-
-
-// Diagonal offset query
-
-#define bli_obj_diag_offset( obj ) \
-\
-	( (obj).diag_off )
-
-#define bli_obj_diag_offset_after_trans( obj ) \
-\
-	( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj ) \
-	                           :  bli_obj_diag_offset( obj ) )
-
-#define bli_obj_has_main_diag( obj ) \
-\
-	( bli_obj_diag_offset( obj ) == 0 )
-
-#define bli_obj_is_strictly_above_diag( obj ) \
-\
-	( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) )
-
-#define bli_obj_is_strictly_below_diag( obj ) \
-\
-	( ( doff_t )bli_obj_width( obj )  <=  bli_obj_diag_offset( obj ) )
-
-#define bli_obj_is_outside_diag( obj ) \
-\
-	( bli_obj_is_strictly_above_diag( obj ) || \
-	  bli_obj_is_strictly_below_diag( obj ) )
-
-#define bli_obj_intersects_diag( obj ) \
-\
-	( !bli_obj_is_strictly_above_diag( obj ) && \
-	  !bli_obj_is_strictly_below_diag( obj ) )
-
-#define bli_obj_is_unstored_subpart( obj ) \
-\
-	( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) || \
-	  ( bli_obj_root_is_upper( obj ) && bli_obj_is_strictly_below_diag( obj ) ) )
-
-
-// Diagonal offset modification
-
-#define bli_obj_set_diag_offset( offset, obj ) \
-{ \
-	(obj).diag_off  = ( doff_t )(offset); \
+static bool_t bli_obj_is_outside_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( bli_obj_is_strictly_above_diag( obj ) ||
+	         bli_obj_is_strictly_below_diag( obj ) );
 }
 
-#define bli_obj_negate_diag_offset( obj ) \
-{ \
-	(obj).diag_off  = -(obj).diag_off; \
+static bool_t bli_obj_intersects_diag( obj_t* obj )
+{
+	return ( bool_t )
+	       ( !bli_obj_is_strictly_above_diag( obj ) &&
+	         !bli_obj_is_strictly_below_diag( obj ) );
 }
 
-#define bli_obj_inc_diag_off( offset, obj ) \
-{ \
-	(obj).diag_off += ( doff_t )(offset); \
+static bool_t bli_obj_is_unstored_subpart( obj_t* obj )
+{
+	return ( bool_t )
+	       ( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) ||
+	         ( bli_obj_root_is_upper( obj ) && bli_obj_is_strictly_below_diag( obj ) ) );
 }
-
 
 // Buffer address query
 
-#define bli_obj_buffer( obj ) \
-\
-	( (obj).buffer )
+static void* bli_obj_buffer( obj_t* obj )
+{
+	return ( obj->buffer );
+}
 
 // Buffer address modification
 
-#define bli_obj_set_buffer( buf, obj ) \
-{ \
-	(obj).buffer = buf; \
+static void bli_obj_set_buffer( void* p, obj_t* obj )
+{
+	obj->buffer = p;
 }
-
 
 // Bufferless scalar field query
 
-#define bli_obj_internal_scalar_buffer( obj ) \
-\
-	&( (obj).scalar )
+static void* bli_obj_internal_scalar_buffer( obj_t* obj )
+{
+	return ( void* )
+	       ( &( obj->scalar ) );
+}
 
 // Bufferless scalar field modification
 
-#define bli_obj_set_internal_scalar( val, obj ) \
-{ \
-	(obj).scalar = val; \
-}
-
-#define bli_obj_copy_internal_scalar( a, b ) \
-{ \
-	(b).scalar = (a).scalar; \
+static void bli_obj_copy_internal_scalar( obj_t* a, obj_t* b )
+{
+	b->scalar = a->scalar;
 }
 
 // Element size query
 
-#define bli_obj_elem_size( obj ) \
-\
-	( (obj).elem_size )
+static siz_t bli_obj_elem_size( obj_t* obj )
+{
+	return ( obj->elem_size );
+}
 
 // Element size modification
 
-#define bli_obj_set_elem_size( size, obj ) \
-{ \
-	(obj).elem_size = size; \
+static void bli_obj_set_elem_size( siz_t size, obj_t* obj )
+{
+	obj->elem_size = size;
 }
 
 // Packed matrix info query
 
-#define bli_obj_padded_length( obj ) \
-\
-	( (obj).m_padded )
+static dim_t bli_obj_padded_length( obj_t* obj )
+{
+	return ( obj->m_padded );
+}
 
-#define bli_obj_padded_width( obj ) \
-\
-	( (obj).n_padded )
+static dim_t bli_obj_padded_width( obj_t* obj )
+{
+	return ( obj->n_padded );
+}
 
 // Packed matrix info modification
 
-#define bli_obj_set_buffer_to_mem( mem_p, obj ) \
-{ \
-	void* buf = bli_mem_buffer( mem_p ); \
-	bli_obj_set_buffer( buf, obj ); \
-} \
-
-#define bli_obj_set_padded_length( m0, obj ) \
-{ \
-    (obj).m_padded = m0; \
+static void bli_obj_set_padded_length( dim_t m, obj_t* obj )
+{
+	obj->m_padded = m;
 }
 
-#define bli_obj_set_padded_width( n0, obj ) \
-{ \
-    (obj).n_padded = n0; \
+static void bli_obj_set_padded_width( dim_t n, obj_t* obj )
+{
+	obj->n_padded = n;
 }
 
-#define bli_obj_set_padded_dims( m0, n0, obj ) \
-{ \
-	bli_obj_set_padded_length( m0, obj ); \
-	bli_obj_set_padded_width( n0, obj ); \
+static void bli_obj_set_padded_dims( dim_t m, dim_t n, obj_t* obj )
+{
+	bli_obj_set_padded_length( m, obj );
+	bli_obj_set_padded_width( n, obj );
 }
-
 
 // Packed panel info query
 
-#define bli_obj_panel_length( obj ) \
-\
-	( (obj).m_panel )
+static dim_t bli_obj_panel_length( obj_t* obj )
+{
+	return ( obj->m_panel );
+}
 
-#define bli_obj_panel_width( obj ) \
-\
-	( (obj).n_panel )
+static dim_t bli_obj_panel_width( obj_t* obj )
+{
+	return ( obj->n_panel );
+}
 
-#define bli_obj_panel_dim( obj ) \
-\
-	( (obj).pd )
+static inc_t bli_obj_panel_dim( obj_t* obj )
+{
+	return ( obj->pd );
+}
 
-#define bli_obj_panel_stride( obj ) \
-\
-	( (obj).ps )
+static inc_t bli_obj_panel_stride( obj_t* obj )
+{
+	return ( obj->ps );
+}
 
 // Packed panel info modification
 
-#define bli_obj_set_panel_length( m0, obj ) \
-{ \
-	(obj).m_panel = m0; \
+static void bli_obj_set_panel_length( dim_t m, obj_t* obj )
+{
+	obj->m_panel = m;
 }
 
-#define bli_obj_set_panel_width( n0, obj ) \
-{ \
-	(obj).n_panel = n0; \
+static void bli_obj_set_panel_width( dim_t n, obj_t* obj )
+{
+	obj->n_panel = n;
 }
 
-#define bli_obj_set_panel_dims( m0, n0, obj ) \
-{ \
-	bli_obj_set_panel_length( m0, obj ); \
-	bli_obj_set_panel_width( n0, obj ); \
+static void bli_obj_set_panel_dims( dim_t m, dim_t n, obj_t* obj )
+{
+	bli_obj_set_panel_length( m, obj );
+	bli_obj_set_panel_width( n, obj );
 }
 
-#define bli_obj_set_panel_dim( panel_dim, obj ) \
-{ \
-	(obj).pd = panel_dim; \
+static void bli_obj_set_panel_dim( inc_t pd, obj_t* obj )
+{
+	obj->pd = pd;
 }
 
-#define bli_obj_set_panel_stride( panel_stride, obj ) \
-{ \
-	(obj).ps = panel_stride; \
+static void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
+{
+	obj->ps = ps;
 }
-
- 
 
 // -- Miscellaneous object macros --
 
-// Make a full alias (shallow copy)
+// Toggle the region referenced (or "stored").
 
-#define bli_obj_alias_to( a, b ) \
-{ \
-	bli_obj_init_full_shallow_copy_of( a, b ); \
+static void bli_obj_toggle_region_ref( obj_t* obj )
+{
+	if      ( bli_obj_is_upper( obj ) ) bli_obj_inc_diag_offset( -1, obj );
+	else if ( bli_obj_is_lower( obj ) ) bli_obj_inc_diag_offset(  1, obj );
+
+	bli_obj_toggle_uplo( obj );
 }
 
-// Check if two objects are aliases of one another
-
-#define bli_obj_is_alias_of( a, b ) \
-\
-	( (b).buffer == (a).buffer )
-
-// Create an alias with a trans value applied.
-// (Note: trans may include a conj component.)
-
-#define bli_obj_alias_with_trans( trans, a, b ) \
-{ \
-	bli_obj_alias_to( a, b ); \
-	bli_obj_apply_trans( trans, b ); \
+static void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
+{
+	//if ( bli_does_trans( trans ) &&
+	if ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS &&
+	     bli_obj_is_upper_or_lower( obj ) )
+	{
+		bli_obj_toggle_uplo( obj );
+		bli_obj_negate_diag_offset( obj );
+	}
 }
 
-// Create an alias with a conj value applied.
+// Initialize object with default properties (info field).
 
-#define bli_obj_alias_with_conj( conja, a, b ) \
-{ \
-	bli_obj_alias_to( a, b ); \
-	bli_obj_apply_conj( conja, b ); \
+static void bli_obj_set_defaults( obj_t* obj )
+{
+	obj->info = 0x0;
+	obj->info = obj->info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL;
 }
 
-
-// Initialize object with default properties (info field)
-
-#define bli_obj_set_defaults( obj ) \
-{ \
-	(obj).info = 0x0; \
-	(obj).info = (obj).info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL; \
-}
-
-// Initializor for global scalar constants
+// Initializors for global scalar constants.
+// NOTE: These must remain cpp macros since they are initializor
+// expressions, not functions.
 
 #define bli_obj_init_const( buffer0 ) \
 { \
@@ -966,106 +1098,203 @@ bli_obj_width_stored( obj )
 	.i =           ( gint_t )val, \
 }
 
-// Submatrix/scalar buffer acquisition
+// Acquire buffer at object's submatrix offset (offset-aware buffer query).
 
-#if 0
-#define BLIS_CONSTANT_SLOT_SIZE  BLIS_MAX_TYPE_SIZE
-#define BLIS_CONSTANT_SIZE       ( 5 * BLIS_CONSTANT_SLOT_SIZE )
-
-#define bli_obj_buffer_for_const( dt, obj ) \
-\
-	( void* )( \
-	           ( ( char* )( bli_obj_buffer( obj ) ) ) + \
-                 ( dim_t )( dt * BLIS_CONSTANT_SLOT_SIZE ) \
+static void* bli_obj_buffer_at_off( obj_t* obj )
+{
+	return ( void* )
+	       (
+	         ( ( char* )( bli_obj_buffer   ( obj ) ) +
+	           ( dim_t )( bli_obj_elem_size( obj ) ) *
+	                      ( bli_obj_col_off( obj ) * bli_obj_col_stride( obj ) +
+	                        bli_obj_row_off( obj ) * bli_obj_row_stride( obj )
+	                      )
 	         )
-#endif
-#define bli_obj_buffer_for_const( dt, obj ) \
-\
-	( dt == BLIS_FLOAT    ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->s) : \
-	  ( dt == BLIS_DOUBLE   ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->d) : \
-	    ( dt == BLIS_SCOMPLEX ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->c) : \
-	      ( dt == BLIS_DCOMPLEX ? ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->z) : \
-	                                ( void * )&((( constdata_t* )bli_obj_buffer( obj ))->i)   \
-	      ) \
-	    ) \
-	  ) \
-	)
+	       );
+}
 
-#define bli_obj_buffer_at_off( obj ) \
-\
-	( void* )( \
-	           ( ( char* )( bli_obj_buffer   ( obj ) ) + \
-                 ( dim_t )( bli_obj_elem_size( obj ) ) * \
-                            ( bli_obj_col_off( obj ) * bli_obj_col_stride( obj ) + \
-                              bli_obj_row_off( obj ) * bli_obj_row_stride( obj ) \
-                            ) \
-               ) \
-	         )
+// Acquire buffer from BLIS_CONSTANT object.
 
-#define bli_obj_buffer_for_1x1( dt, obj ) \
-\
-	( void* )( bli_obj_is_const( obj ) ? ( bli_obj_buffer_for_const( dt, obj ) ) \
-	                                   : ( bli_obj_buffer_at_off( obj ) ) \
-	         )
+static void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
+{
+	void* p;
 
+	if      ( dt == BLIS_FLOAT    ) p = &((( constdata_t* )bli_obj_buffer( obj ))->s);
+	else if ( dt == BLIS_DOUBLE   ) p = &((( constdata_t* )bli_obj_buffer( obj ))->d);
+	else if ( dt == BLIS_SCOMPLEX ) p = &((( constdata_t* )bli_obj_buffer( obj ))->c);
+	else if ( dt == BLIS_DCOMPLEX ) p = &((( constdata_t* )bli_obj_buffer( obj ))->z);
+	else                            p = &((( constdata_t* )bli_obj_buffer( obj ))->i);
 
-// Swap objects
+	return p;
+}
 
-#define bli_obj_swap( a, b ) \
-{ \
-	obj_t t_; \
-	t_ = b; b = a; a = t_; \
+// Acquire buffer from scalar (1x1) object, including BLIS_CONSTANT objects.
+
+static void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
+{
+	return ( void* )
+	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
+	                                 : bli_obj_buffer_at_off( obj )
+	       );
+}
+
+// Make a full alias (shallow copy).
+
+static void bli_obj_alias_to( obj_t* a, obj_t* b )
+{
+	bli_obj_init_full_shallow_copy_of( a, b );
+}
+
+// Check if two objects are aliases of one another.
+
+static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
+{
+	return ( bool_t )
+	       ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
 }
 
 
-// Swap object pointers
+// Create an alias with a trans value applied.
+// (Note: trans may include a conj component.)
 
-#define bli_obj_swap_pointers( a, b ) \
-{ \
-	obj_t* t_; \
-	t_ = b; b = a; a = t_; \
+static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_trans( trans, b );
 }
 
+// Create an alias with a conj value applied.
 
-// If a transposition is needed, induce one: swap dimensions, increments
-// and offsets, and then clear the trans bit.
+static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
+{
+	bli_obj_alias_to( a, b );
+	bli_obj_apply_conj( conja, b );
+}
 
-#define bli_obj_induce_trans( obj ) \
-{ \
-	{ \
-		/* Induce transposition among basic fields. */ \
-		dim_t  m_        = bli_obj_length( obj ); \
-		dim_t  n_        = bli_obj_width( obj ); \
-		inc_t  rs_       = bli_obj_row_stride( obj ); \
-		inc_t  cs_       = bli_obj_col_stride( obj ); \
-		dim_t  offm_     = bli_obj_row_off( obj ); \
-		dim_t  offn_     = bli_obj_col_off( obj ); \
-		doff_t diag_off_ = bli_obj_diag_offset( obj ); \
-\
-		bli_obj_set_dims( n_, m_, obj ); \
-		bli_obj_set_strides( cs_, rs_, obj ); \
-		bli_obj_set_offs( offn_, offm_, obj ); \
-		bli_obj_set_diag_offset( -diag_off_, obj ); \
-\
-		if ( bli_obj_is_upper_or_lower( obj ) ) \
-			bli_obj_toggle_uplo( obj ); \
-\
-		/* Induce transposition among packed fields. */ \
-		dim_t  m_padded_ = bli_obj_padded_length( obj ); \
-		dim_t  n_padded_ = bli_obj_padded_width( obj ); \
-		dim_t  m_panel_  = bli_obj_panel_length( obj ); \
-		dim_t  n_panel_  = bli_obj_panel_width( obj ); \
-\
-		bli_obj_set_padded_dims( n_padded_, m_padded_, obj ); \
-		bli_obj_set_panel_dims( n_panel_, m_panel_, obj ); \
-\
-		/* Note that this macro DOES NOT touch the transposition bit! If
-		   the calling code is using this macro to handle an object whose
-		   transposition bit is set prior to computation, that code needs
-		   to manually clear or toggle the bit, via
-		   bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
-		   respectively. */ \
-	} \
+// Alias only the real part.
+
+static void bli_obj_real_part( obj_t* c, obj_t* r )
+{
+	bli_obj_alias_to( c, r );
+
+	if ( bli_obj_is_complex( c ) )
+	{
+		// Change the datatypes.
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
+		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
+		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
+		bli_obj_set_dt(        dt_stor_r, r );
+		bli_obj_set_target_dt( dt_targ_r, r );
+		bli_obj_set_exec_dt(   dt_exec_r, r );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, r );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, r );
+
+		// Buffer is left unchanged.
+	}
+}
+
+// Alias only the imaginary part.
+
+static void bli_obj_imag_part( obj_t* c, obj_t* i )
+{
+	if ( bli_obj_is_complex( c ) )
+	{
+		bli_obj_alias_to( c, i );
+
+		// Change the datatype.
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
+		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
+		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
+		bli_obj_set_dt(        dt_stor_r, i );
+		bli_obj_set_target_dt( dt_targ_r, i );
+		bli_obj_set_exec_dt(   dt_exec_r, i );
+
+		// Update the element size.
+		siz_t es_c = bli_obj_elem_size( c );
+		bli_obj_set_elem_size( es_c/2, i );
+
+		// Update the strides.
+		inc_t rs_c = bli_obj_row_stride( c );
+		inc_t cs_c = bli_obj_col_stride( c );
+		bli_obj_set_strides( 2*rs_c, 2*cs_c, i );
+
+		// Update the buffer.
+		inc_t is_c = bli_obj_imag_stride( c );
+		char* p    = ( char* )bli_obj_buffer_at_off( c );
+		bli_obj_set_buffer( p + is_c * es_c/2, i );
+	}
+}
+
+// Given a 1x1 object, acquire an address to the buffer depending on whether
+// the object is a BLIS_CONSTANT, and also set a datatype associated with the
+// chosen buffer (possibly using an auxiliary datatype if the object is
+// BLIS_CONSTANT).
+
+static void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* dt, void** buf )
+{
+	if ( bli_obj_is_const( obj ) )
+	{
+		*dt  = dt_aux;
+		*buf = bli_obj_buffer_for_1x1( dt_aux, obj );
+	}
+	else
+	{
+		*dt  = bli_obj_dt( obj );
+		*buf = bli_obj_buffer_at_off( obj );
+	}
+}
+
+// Swap object contents.
+
+static void bli_obj_swap( obj_t* a, obj_t* b )
+{
+	obj_t t = *b; *b = *a; *a = t;
+}
+
+// Induce a transposition on an object: swap dimensions, increments, and
+// offsets, then clear the trans bit.
+
+static void bli_obj_induce_trans( obj_t* obj )
+{
+	// Induce transposition among basic fields.
+	dim_t  m        = bli_obj_length( obj );
+	dim_t  n        = bli_obj_width( obj );
+	inc_t  rs       = bli_obj_row_stride( obj );
+	inc_t  cs       = bli_obj_col_stride( obj );
+	dim_t  offm     = bli_obj_row_off( obj );
+	dim_t  offn     = bli_obj_col_off( obj );
+	doff_t diag_off = bli_obj_diag_offset( obj );
+
+	bli_obj_set_dims( n, m, obj );
+	bli_obj_set_strides( cs, rs, obj );
+	bli_obj_set_offs( offn, offm, obj );
+	bli_obj_set_diag_offset( -diag_off, obj );
+
+	if ( bli_obj_is_upper_or_lower( obj ) )
+		bli_obj_toggle_uplo( obj );
+
+	// Induce transposition among packed fields.
+	dim_t  m_padded = bli_obj_padded_length( obj );
+	dim_t  n_padded = bli_obj_padded_width( obj );
+	dim_t  m_panel  = bli_obj_panel_length( obj );
+	dim_t  n_panel  = bli_obj_panel_width( obj );
+
+	bli_obj_set_padded_dims( n_padded, m_padded, obj );
+	bli_obj_set_panel_dims( n_panel, m_panel, obj );
+
+	// Note that this macro DOES NOT touch the transposition bit! If
+	// the calling code is using this macro to handle an object whose
+	// transposition bit is set prior to computation, that code needs
+	// to manually clear or toggle the bit, via
+	// bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
+	// respectively.
 }
 
 // Sometimes we need to "reflect" a partition because the data we want is
@@ -1074,21 +1303,20 @@ bli_obj_width_stored( obj )
 // and column strides are left unchanged (which, of course, drastically
 // changes the effect of the macro).
 
-#define bli_obj_reflect_about_diag( obj ) \
-{ \
-	{ \
-		dim_t  m_        = bli_obj_length( obj ); \
-		dim_t  n_        = bli_obj_width( obj ); \
-		dim_t  offm_     = bli_obj_row_off( obj ); \
-		dim_t  offn_     = bli_obj_col_off( obj ); \
-		doff_t diag_off_ = bli_obj_diag_offset( obj ); \
-\
-		bli_obj_set_dims( n_, m_, obj ); \
-		bli_obj_set_offs( offn_, offm_, obj ); \
-		bli_obj_set_diag_offset( -diag_off_, obj ); \
-\
-		bli_obj_toggle_trans( obj ); \
-	} \
+static void bli_obj_reflect_about_diag( obj_t* obj )
+{
+	dim_t  m        = bli_obj_length( obj );
+	dim_t  n        = bli_obj_width( obj );
+	dim_t  offm     = bli_obj_row_off( obj );
+	dim_t  offn     = bli_obj_col_off( obj );
+	doff_t diag_off = bli_obj_diag_offset( obj );
+
+	bli_obj_set_dims( n, m, obj );
+	bli_obj_set_offs( offn, offm, obj );
+	bli_obj_set_diag_offset( -diag_off, obj );
+
+	bli_obj_toggle_trans( obj );
 }
+
 
 #endif

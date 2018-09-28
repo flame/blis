@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -64,21 +64,21 @@ void bli_ger_front
 
 
 	// Query the target datatypes of each object.
-	dt_targ_x = bli_obj_target_datatype( *x );
-	dt_targ_y = bli_obj_target_datatype( *y );
-	//dt_targ_a = bli_obj_target_datatype( *a );
+	dt_targ_x = bli_obj_target_dt( x );
+	dt_targ_y = bli_obj_target_dt( y );
+	//dt_targ_a = bli_obj_target_dt( a );
 
 	// Determine whether each operand with unit stride.
-	x_has_unit_inc = ( bli_obj_vector_inc( *x ) == 1 );
-	y_has_unit_inc = ( bli_obj_vector_inc( *y ) == 1 );
-	a_has_unit_inc = ( bli_obj_is_row_stored( *a ) ||
-	                   bli_obj_is_col_stored( *a ) );
+	x_has_unit_inc = ( bli_obj_vector_inc( x ) == 1 );
+	y_has_unit_inc = ( bli_obj_vector_inc( y ) == 1 );
+	a_has_unit_inc = ( bli_obj_is_row_stored( a ) ||
+	                   bli_obj_is_col_stored( a ) );
 
 
 	// Create an object to hold a copy-cast of alpha. Notice that we use
 	// the type union of the target datatypes of x and y to prevent any
 	// unnecessary loss of information during the computation.
-	dt_alpha = bli_datatype_union( dt_targ_x, dt_targ_y );
+	dt_alpha = bli_dt_union( dt_targ_x, dt_targ_y );
 	bli_obj_scalar_init_detached_copy_of( dt_alpha,
 	                                      BLIS_NO_CONJUGATE,
 	                                      alpha,
@@ -93,20 +93,20 @@ void bli_ger_front
 	{
 		// Use different control trees depending on storage of the matrix
 		// operand.
-		if ( bli_obj_is_row_stored( *a ) ) ger_cntl = ger_cntl_bs_ke_row;
+		if ( bli_obj_is_row_stored( a ) ) ger_cntl = ger_cntl_bs_ke_row;
 		else                               ger_cntl = ger_cntl_bs_ke_col;
 	}
 	else
 	{
 		// Mark objects with unit stride as already being packed. This prevents
 		// unnecessary packing from happening within the blocked algorithm.
-		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *x );
-		if ( y_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, *y );
-		if ( a_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, *a );
+		if ( x_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, x );
+		if ( y_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_VECTOR, y );
+		if ( a_has_unit_inc ) bli_obj_set_pack_schema( BLIS_PACKED_UNSPEC, a );
 
 		// Here, we make a similar choice as above, except that (1) we look
 		// at storage tilt, and (2) we choose a tree that performs blocking.
-		if ( bli_obj_is_row_tilted( *a ) ) ger_cntl = ger_cntl_ge_row;
+		if ( bli_obj_is_row_tilted( a ) ) ger_cntl = ger_cntl_ge_row;
 		else                               ger_cntl = ger_cntl_ge_col;
 	}
 
@@ -151,7 +151,7 @@ void PASTEMAC(ch,opname) \
 	inc_t       rs_x, cs_x; \
 	inc_t       rs_y, cs_y; \
 \
-	bli_set_dims_with_trans( BLIS_NO_TRANSPOSE, m, n, m_x, m_y ); \
+	bli_set_dims_with_trans( BLIS_NO_TRANSPOSE, m, n, &m_x, &m_y ); \
 \
 	rs_x = incx; cs_x = m_x * incx; \
 	rs_y = incy; cs_y = m_y * incy; \
@@ -162,8 +162,8 @@ void PASTEMAC(ch,opname) \
 	bli_obj_create_with_attached_buffer( dt, m_y, 1, y, rs_y, cs_y, &yo ); \
 	bli_obj_create_with_attached_buffer( dt, m,   n, a, rs_a, cs_a, &ao ); \
 \
-	bli_obj_set_conj( conjx, xo ); \
-	bli_obj_set_conj( conjy, yo ); \
+	bli_obj_set_conj( conjx, &xo ); \
+	bli_obj_set_conj( conjy, &yo ); \
 \
 	PASTEMAC0(opname)( &alphao, \
 	                   &xo, \

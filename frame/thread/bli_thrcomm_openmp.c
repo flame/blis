@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -214,11 +214,12 @@ void bli_l3_thread_decorator
        obj_t*      beta,
        obj_t*      c,
        cntx_t*     cntx,
+       rntm_t*     rntm,
        cntl_t*     cntl
      )
 {
 	// Query the total number of threads from the context.
-	dim_t       n_threads = bli_cntx_get_num_threads( cntx );
+	dim_t       n_threads = bli_rntm_num_threads( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t*  gl_comm   = bli_thrcomm_create( n_threads );
@@ -231,29 +232,40 @@ void bli_l3_thread_decorator
 	{
 		dim_t      id = omp_get_thread_num();
 
+		obj_t      a_t, b_t, c_t;
 		cntl_t*    cntl_use;
 		thrinfo_t* thread;
 
+		// Alias thread-local copies of A, B, and C. These will be the objects
+		// we pass down the algorithmic function stack. Making thread-local
+		// alaises IS ABSOLUTELY IMPORTANT and MUST BE DONE because each thread
+		// will read the schemas from A and B and then reset the schemas to
+		// their expected unpacked state (in bli_l3_cntl_create_if()).
+		bli_obj_alias_to( a, &a_t );
+		bli_obj_alias_to( b, &b_t );
+		bli_obj_alias_to( c, &c_t );
+
 		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
+		bli_l3_cntl_create_if( family, &a_t, &b_t, &c_t, cntl, &cntl_use );
 
 		// Create the root node of the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+		bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
 
 		func
 		(
 		  alpha,
-		  a,
-		  b,
+		  &a_t,
+		  &b_t,
 		  beta,
-		  c,
+		  &c_t,
 		  cntx,
+		  rntm,
 		  cntl_use,
 		  thread
 		);
 
 		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
+		bli_l3_cntl_free_if( &a_t, &b_t, &c_t, cntl, cntl_use, thread );
 
 #ifdef PRINT_THRINFO
 		threads[id] = thread;

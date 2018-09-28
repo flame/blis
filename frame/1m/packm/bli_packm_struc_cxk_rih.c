@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -175,7 +175,7 @@ void PASTEMAC(ch,varname) \
 		dim_t             n_edge   = n_panel_max; \
 		ctype_r*          p_edge_r = ( ctype_r* )p + (i  )*rs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -185,7 +185,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -197,7 +198,7 @@ void PASTEMAC(ch,varname) \
 		dim_t             n_edge   = n_panel_max - j; \
 		ctype_r*          p_edge_r = ( ctype_r* )p + (j  )*cs_p; \
 \
-		PASTEMAC(chr,setm) \
+		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 		( \
 		  BLIS_NO_CONJUGATE, \
 		  0, \
@@ -207,7 +208,8 @@ void PASTEMAC(ch,varname) \
 		  n_edge, \
 		  zero_r, \
 		  p_edge_r, rs_p, cs_p, \
-		  cntx  \
+		  cntx, \
+		  NULL  \
 		); \
 	} \
 \
@@ -305,10 +307,10 @@ void PASTEMAC(ch,varname) \
 		{ \
 			c = c + diagoffc * ( doff_t )cs_c + \
 			       -diagoffc * ( doff_t )rs_c;  \
-			bli_swap_incs( incc, ldc ); \
+			bli_swap_incs( &incc, &ldc ); \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc ); \
+				bli_toggle_conj( &conjc ); \
 		} \
 \
 		/* Pack the full panel. */ \
@@ -376,7 +378,7 @@ void PASTEMAC(ch,varname) \
 			conjc12    = conjc; \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc12 ); \
+				bli_toggle_conj( &conjc12 ); \
 		} \
 		else /* if ( ( row_stored && bli_is_lower( uploc ) ) || \
 		             ( col_stored && bli_is_upper( uploc ) ) ) */ \
@@ -402,7 +404,7 @@ void PASTEMAC(ch,varname) \
 			conjc12    = conjc; \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc10 ); \
+				bli_toggle_conj( &conjc10 ); \
 		} \
 \
 		/* Pack to p10. For upper storage, this includes the unstored
@@ -568,10 +570,10 @@ void PASTEMAC(ch,varname) \
 			ctype_r* restrict zero_r = PASTEMAC(chr,0); \
 			uplo_t            uplop  = uploc; \
 \
-			bli_toggle_uplo( uplop ); \
-			bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp ); \
+			bli_toggle_uplo( &uplop ); \
+			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
 \
-			PASTEMAC(chr,setm) \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
 			  diagoffp, \
@@ -581,7 +583,8 @@ void PASTEMAC(ch,varname) \
 			  n_panel, \
 			  zero_r, \
 			  p_r, rs_p, cs_p, \
-			  cntx  \
+			  cntx, \
+			  NULL  \
 			); \
 		} \
 	} \

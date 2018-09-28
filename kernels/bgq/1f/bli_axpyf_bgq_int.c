@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -53,15 +53,15 @@ void bli_daxpyf_bgq_int
     if ( bli_zero_dim2( m, b_n ) ) return;
 
 	bool_t            use_ref = FALSE;
-//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, fusefac, inca, incx, incy, bli_is_unaligned_to( ( siz_t )a, 32 ), bli_is_unaligned_to( ( siz_t )y, 32));
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	if ( ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( a, 32 ) || bli_is_unaligned_to( y, 32 ) )
+	if ( ( b_n < fusefac) || inca != 1 || incx != 1 || incy != 1 || bli_is_unaligned_to( ( siz_t )a, 32 ) || bli_is_unaligned_to( ( siz_t )y, 32 ) )
 		use_ref = TRUE;
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{   
-//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to(a, 32), bli_is_unaligned_to( y, 32));
+//        printf("%d\t%d\t%d\t%d\t%d\t%d\n", fusefac, inca, incx, incy, bli_is_unaligned_to( ( siz_t )a, 32 ), bli_is_unaligned_to( ( siz_t )y, 32));
 //        printf("DEFAULTING TO REFERENCE IMPLEMENTATION\n");
 		BLIS_DAXPYF_KERNEL_REF( conja, conjx, m, b_n, alpha, a, inca, lda, x, incx, y, incy, cntx );
 		return;

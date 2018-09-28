@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -57,6 +57,16 @@
 
 // -- Memory allocation --------------------------------------------------------
 
+// hbwmalloc.h provides hbw_malloc() and hbw_free() on systems with
+// libmemkind. But disable use of libmemkind if BLIS_DISABLE_MEMKIND
+// was explicitly defined.
+#ifdef BLIS_DISABLE_MEMKIND
+  #undef BLIS_ENABLE_MEMKIND
+#endif
+#ifdef BLIS_ENABLE_MEMKIND
+  #include <hbwmalloc.h>
+#endif
+
 // Memory allocation functions. These macros define the three types of
 // malloc()-style functions, and their free() counterparts: one for each
 // type of memory to be allocated.
@@ -71,11 +81,25 @@
 // This allocation function is called to allocate memory for blocks within
 // BLIS's internal memory pools.
 #ifndef BLIS_MALLOC_POOL
-#define BLIS_MALLOC_POOL                 malloc
+  // If use of libmemkind was enabled at configure-time, the default
+  // memory allocation function for memory pools should be hbw_malloc()
+  // instead of malloc().
+  #ifdef  BLIS_ENABLE_MEMKIND
+  #define BLIS_MALLOC_POOL               hbw_malloc
+  #else
+  #define BLIS_MALLOC_POOL               malloc
+  #endif
 #endif
 
 #ifndef BLIS_FREE_POOL
-#define BLIS_FREE_POOL                   free
+  // If use of libmemkind was enabled at configure-time, the default
+  // memory deallocation function for memory pools should be hbw_free()
+  // instead of free().
+  #ifdef  BLIS_ENABLE_MEMKIND
+  #define BLIS_FREE_POOL                 hbw_free
+  #else
+  #define BLIS_FREE_POOL                 free
+  #endif
 #endif
 
 // This allocation function is called to allocate memory for internally-

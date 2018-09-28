@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -210,6 +210,19 @@ void bli_param_map_char_to_blis_diag( char diag, diag_t* blis_diag )
 	}
 }
 
+void bli_param_map_char_to_blis_dt( char dt, num_t* blis_dt )
+{
+	if      ( dt == 's' ) *blis_dt = BLIS_FLOAT;
+	else if ( dt == 'd' ) *blis_dt = BLIS_DOUBLE;
+	else if ( dt == 'c' ) *blis_dt = BLIS_SCOMPLEX;
+	else if ( dt == 'z' ) *blis_dt = BLIS_DCOMPLEX;
+	else if ( dt == 'i' ) *blis_dt = BLIS_INT;
+	else
+	{
+		bli_check_error_code( BLIS_INVALID_DATATYPE );
+	}
+}
+
 
 // --- BLIS to BLIS char mappings ----------------------------------------------
 
@@ -262,6 +275,19 @@ void bli_param_map_blis_to_char_diag( diag_t blis_diag, char* diag )
 	else
 	{
 		bli_check_error_code( BLIS_INVALID_DIAG );
+	}
+}
+
+void bli_param_map_blis_to_char_dt( num_t blis_dt, char* dt )
+{
+	if      ( blis_dt == BLIS_FLOAT    ) *dt = 's';
+	else if ( blis_dt == BLIS_DOUBLE   ) *dt = 'd';
+	else if ( blis_dt == BLIS_SCOMPLEX ) *dt = 'c';
+	else if ( blis_dt == BLIS_DCOMPLEX ) *dt = 'z';
+	else if ( blis_dt == BLIS_INT      ) *dt = 'i';
+	else
+	{
+		bli_check_error_code( BLIS_INVALID_DATATYPE );
 	}
 }
 

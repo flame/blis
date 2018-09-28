@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -46,6 +46,7 @@ void PASTEMAC0(opname) \
        obj_t*  b, \
        obj_t*  c, \
        cntx_t* cntx, \
+       rntm_t* rntm, \
        cntl_t* cntl, \
        thrinfo_t* thread  \
      );
@@ -85,6 +86,7 @@ void PASTEMAC(ch,varname) \
        void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
+       rntm_t* rntm, \
        thrinfo_t* thread  \
      );
 

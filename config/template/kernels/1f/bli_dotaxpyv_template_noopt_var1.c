@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -211,7 +211,7 @@ void bli_zdotaxpyv_template_noopt
 	// toggling the effective conjugation of xt and then conjugating the
 	// resulting dot product.
 	if ( bli_is_conj( conjy ) )
-		bli_toggle_conj( conjxt_use );
+		bli_toggle_conj( &conjxt_use );
 
 
 	// Iterate over elements of x, y, and z to compute:

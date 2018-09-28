@@ -38,16 +38,21 @@ CONFIG_MK_INCLUDED := yes
 
 # The version string. This could be the official string or a custom
 # string forced at configure-time.
-VERSION         := @version@
+VERSION           := @version@
+
+# The shared library .so major and minor.build version numbers.
+SO_MAJOR          := @so_version_major@
+SO_MINORB         := @so_version_minorbuild@
+SO_MMB            := $(SO_MAJOR).$(SO_MINORB)
 
 # The name of the configuration family.
-CONFIG_NAME     := @config_name@
+CONFIG_NAME       := @config_name@
 
 # The list of sub-configurations associated with CONFIG_NAME. Each
 # sub-configuration in CONFIG_LIST corresponds to a configuration
 # sub-directory in the 'config' directory. See the 'config_registry'
 # file for the full list of registered configurations.
-CONFIG_LIST     := @config_list@
+CONFIG_LIST       := @config_list@
 
 # This list of kernels needed for the configurations in CONFIG_LIST.
 # Each item in this list corresponds to a sub-directory in the top-level
@@ -55,45 +60,97 @@ CONFIG_LIST     := @config_list@
 # but not always. For example, if configuration X and Y use the same
 # kernel set X, and configuration W uses kernel set Q, and the CONFIG_LIST
 # might contained "X Y Z W", then the KERNEL_LIST would contain "X Z Q".
-KERNEL_LIST     := @kernel_list@
+KERNEL_LIST       := @kernel_list@
 
 # This list contains some number of "kernel:config" pairs, where "config"
 # specifies which configuration's compilation flags (CFLAGS) should be
 # used to compile the source code for the kernel set named "kernel".
-KCONFIG_MAP     := @kconfig_map@
+KCONFIG_MAP       := @kconfig_map@
 
 # The operating system name, which should be either 'Linux' or 'Darwin'.
-OS_NAME         := $(shell uname -s)
+OS_NAME           := @os_name@
 
-# The directory path to the top level of the source distribution.
-# NOTE: We allow the includer to override this value by setting DIST_PATH
-# prior to including this file.
+# Check for whether the operating system is Windows.
+IS_WIN            := @is_win@
+
+# The directory path to the top level of the source distribution. When
+# building in-tree, this path is ".". When building out-of-tree, this path
+# is path used to identify the location of configure. We also allow the
+# includer of config.mk to override this value by setting DIST_PATH prior
+# to including this file. This override option is employed, for example,
+# when common.mk (and therefore config.mk) is included by the Makefile
+# local to the 'testsuite' directory, or the 'test' directory containing
+# individual test drivers.
 ifeq ($(strip $(DIST_PATH)),)
-DIST_PATH       := @dist_path@
+DIST_PATH         := @dist_path@
 endif
 
-# The level of debugging info to generate.
-DEBUG_TYPE      := @debug_type@
-
 # The C compiler.
-CC              := @CC@
+CC_VENDOR         := @CC_VENDOR@
+CC                := @CC@
+
+# The C++ compiler. NOTE: A C++ is typically not needed.
+CXX               := @CXX@
+
+# Static library indexer.
+RANLIB            := @RANLIB@
+
+# Archiver.
+AR                := @AR@
+
+# Preset (required) CFLAGS and LDFLAGS. These variables capture the value
+# of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
+# the value of CFLAGS/LDFLAGS if either was specified on the command line).
+# These flags are used in addition to the flags automatically determined
+# by the build system.
+CFLAGS_PRESET     := @cflags_preset@
+LDFLAGS_PRESET    := @ldflags_preset@
+
+# The level of debugging info to generate.
+DEBUG_TYPE        := @debug_type@
 
 # The requested threading model.
-THREADING_MODEL := @threading_model@
+THREADING_MODEL   := @threading_model@
 
-# The install prefix tell us where to install the libraries and header file
-# directory. Notice that we support the use of DESTDIR so that advanced users
-# may install to a temporary location.
-INSTALL_PREFIX := $(DESTDIR)@install_prefix@
+# The install libdir, includedir, and shareddir values from configure tell
+# us where to install the libraries, header files, and public makefile
+# fragments, respectively. Notice that we support the use of DESTDIR so that
+# advanced users may install to a temporary location.
+INSTALL_LIBDIR    := $(DESTDIR)@install_libdir@
+INSTALL_INCDIR    := $(DESTDIR)@install_incdir@
+INSTALL_SHAREDIR  := $(DESTDIR)@install_sharedir@
 
-# Variables corresponding to other configure-time options.
-BLIS_ENABLE_VERBOSE_MAKE_OUTPUT := @enable_verbose@
-BLIS_ENABLE_STATIC_BUILD        := @enable_static@
-BLIS_ENABLE_DYNAMIC_BUILD       := @enable_dynamic@
+# Whether to output verbose command-line feedback as the Makefile is
+# processed.
+ENABLE_VERBOSE    := @enable_verbose@
 
-# The status of BLAS and CBLAS compatibility layers
-BLIS_ENABLE_BLAS2BLIS := @enable_blas2blis@
-BLIS_ENABLE_CBLAS     := @enable_cblas@
+# Whether we are building out-of-tree.
+BUILDING_OOT      := @configured_oot@
+
+# Whether we need to employ an alternate method for passing object files to
+# ar and/or the linker to work around a small value of ARG_MAX.
+ARG_MAX_HACK      := @enable_arg_max_hack@
+
+# Whether to build the static and shared libraries.
+# Note the "MK_" prefix, which helps differentiate these variables from
+# their corresonding cpp macros that use the BLIS_ prefix.
+MK_ENABLE_STATIC  := @enable_static@
+MK_ENABLE_SHARED  := @enable_shared@
+
+# Whether to enable either the BLAS or CBLAS compatibility layers.
+MK_ENABLE_BLAS    := @enable_blas@
+MK_ENABLE_CBLAS   := @enable_cblas@
+
+# Whether libblis will depend on libmemkind for certain memory allocations.
+MK_ENABLE_MEMKIND := @enable_memkind@
+
+# The name of a sandbox defining an alternative gemm implementation. If empty,
+# no sandbox will be used and the conventional gemm implementation will remain
+# enabled.
+SANDBOX           := @sandbox@
+
+# The name of the pthreads library.
+LIBPTHREAD        := @libpthread@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

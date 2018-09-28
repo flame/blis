@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -35,6 +35,16 @@
 #include "bli_part_check.h"
 
 // -- Matrix partitioning ------------------------------------------------------
+
+void bli_acquire_mpart
+     (
+       dim_t     i,
+       dim_t     j,
+       dim_t     m,
+       dim_t     n,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     );
 
 #undef  GENPROT
 #define GENPROT( opname ) \

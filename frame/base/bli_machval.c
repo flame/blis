@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -51,9 +51,9 @@ static FUNCPTR_T GENARRAY(ftypes,machval);
 void bli_machval( machval_t mval,
                   obj_t*    v )
 {
-	num_t     dt_v  = bli_obj_datatype( *v );
+	num_t     dt_v  = bli_obj_dt( v );
 
-	void*     buf_v = bli_obj_buffer_at_off( *v );
+	void*     buf_v = bli_obj_buffer_at_off( v );
 
 	FUNCPTR_T f;
 
@@ -72,10 +72,11 @@ void bli_machval( machval_t mval,
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype_v, ctype_vr, chv, chvr, opname, varname ) \
 \
-void PASTEMAC(chv,opname)( \
-                           machval_t mval, \
-                           void*     v     \
-                         ) \
+void PASTEMAC(chv,opname) \
+     ( \
+       machval_t mval, \
+       void*     v     \
+     ) \
 { \
 	static ctype_vr pvals[ BLIS_NUM_MACH_PARAMS ]; \
 \

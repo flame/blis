@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -51,7 +51,7 @@ void PASTEF77(chxy,blasname)( \
 	bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 }
 
-#ifdef BLIS_ENABLE_BLAS2BLIS
+#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNCR_BLAS( rotg, rotg, ROTG_KERNEL )
 #endif
 

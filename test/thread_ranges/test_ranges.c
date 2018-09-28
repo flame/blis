@@ -1,10 +1,10 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -62,28 +62,28 @@ int main( int argc, char** argv )
 
 		uploa = BLIS_UPPER;
 		uploa = BLIS_LOWER;
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_diag_offset( -2, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_diag_offset( -2, &a );
 
 		uplob = BLIS_UPPER;
 		uplob = BLIS_LOWER;
-		bli_obj_set_struc( BLIS_TRIANGULAR, b );
-		bli_obj_set_uplo( uplob, b );
-		bli_obj_set_diag_offset( -2, b );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &b );
+		bli_obj_set_uplo( uplob, &b );
+		bli_obj_set_diag_offset( -2, &b );
 
 		uploc = BLIS_UPPER;
 		//uploc = BLIS_LOWER;
 		//uploc = BLIS_ZEROS;
 		//uploc = BLIS_DENSE;
-		bli_obj_set_struc( BLIS_HERMITIAN, c );
-		//bli_obj_set_struc( BLIS_TRIANGULAR, c );
-		bli_obj_set_uplo( uploc, c );
-		bli_obj_set_diag_offset(  1, c );
+		bli_obj_set_struc( BLIS_HERMITIAN, &c );
+		//bli_obj_set_struc( BLIS_TRIANGULAR, &c );
+		bli_obj_set_uplo( uploc, &c );
+		bli_obj_set_diag_offset(  1, &c );
 
-		bli_obj_alias_to( a, aa ); (void)aa;
-		bli_obj_alias_to( b, bb ); (void)bb;
-		bli_obj_alias_to( c, cc ); (void)cc;
+		bli_obj_alias_to( &a, &aa ); (void)aa;
+		bli_obj_alias_to( &b, &bb ); (void)bb;
+		bli_obj_alias_to( &c, &cc ); (void)cc;
 
 		bli_randm( &a );
 		bli_randm( &b );
@@ -132,17 +132,17 @@ int main( int argc, char** argv )
 
 	if ( argc == 13 )
 	{
-		sscanf( argv[1], "%lu", &p_begin );
-		sscanf( argv[2], "%lu", &p_max );
-		sscanf( argv[3], "%lu", &p_inc );
-		sscanf( argv[4], "%ld", &m_input );
-		sscanf( argv[5], "%ld", &n_input );
+		sscanf( argv[1], "%u", &p_begin );
+		sscanf( argv[2], "%u", &p_max );
+		sscanf( argv[3], "%u", &p_inc );
+		sscanf( argv[4], "%d", &m_input );
+		sscanf( argv[5], "%d", &n_input );
 		sscanf( argv[6], "%c",  &uploa_ch );
-		sscanf( argv[7], "%ld", &diagoffa );
-		sscanf( argv[8], "%lu", &bf );
-		sscanf( argv[9], "%lu", &n_way );
+		sscanf( argv[7], "%d", &diagoffa );
+		sscanf( argv[8], "%u", &bf );
+		sscanf( argv[9], "%u", &n_way );
 		sscanf( argv[10], "%c", &part_dim_ch );
-		sscanf( argv[11], "%lu", &go_fwd );
+		sscanf( argv[11], "%u", &go_fwd );
 		sscanf( argv[12], "%c", &out_ch );
 	}
 	else
@@ -222,12 +222,12 @@ int main( int argc, char** argv )
 	}
 
 	printf( "\n" );
-	printf( "  part: %3s   doff: %3ld   bf: %3ld   output: %s\n",
+	printf( "  part: %3s   doff: %3d   bf: %3d   output: %s\n",
 	        ( part_n_dim ? ( go_fwd ? "l2r" : "r2l" )
 	                     : ( go_fwd ? "t2b" : "b2t" ) ),
-	        diagoffa, bf,
+	        ( int )diagoffa, ( int )bf,
             ( out_ch == 'w' ? "width(area)" : "ranges" ) );
-	printf( "              uplo: %3c   nt: %3ld\n", uploa_ch, n_way );
+	printf( "              uplo: %3c   nt: %3u\n", uploa_ch, ( unsigned )n_way );
 	printf( "\n" );
 
 	printf( "             " );
@@ -252,7 +252,7 @@ int main( int argc, char** argv )
 	printf( "%4c x %4c  ", 'm', 'n' );
 	for ( t = t_begin; t != t_stop; t += t_inc )
 	{
-		printf( "%9s %lu  ", "thread", t );
+		printf( "%9s %u  ", "thread", ( unsigned )t );
 	}
 	printf( "\n" );
 	printf( "-------------" );
@@ -274,15 +274,15 @@ int main( int argc, char** argv )
 		
 		bli_obj_create( dt, m, n, 0, 0, &a );
 
-		bli_obj_set_struc( BLIS_TRIANGULAR, a );
-		bli_obj_set_uplo( uploa, a );
-		bli_obj_set_diag_offset( diagoffa, a );
+		bli_obj_set_struc( BLIS_TRIANGULAR, &a );
+		bli_obj_set_uplo( uploa, &a );
+		bli_obj_set_diag_offset( diagoffa, &a );
 
 		bli_randm( &a );
 
 		bli_blksz_init_easy( &bfs, bf, bf, bf, bf );
 
-		printf( "%4lu x %4lu  ", m, n );
+		printf( "%4u x %4u  ", ( unsigned )m, ( unsigned )n );
 
 		for ( t = t_begin; t != t_stop; t += t_inc )
 		{
@@ -300,8 +300,10 @@ int main( int argc, char** argv )
 
 			width = end - start;
 
-			if ( out_ch == 'w' ) printf( "%4lu(%6lu) ", width, area );
-			else                 printf( "[%4lu,%4lu)  ", start, end );
+			if ( out_ch == 'w' ) printf( "%4u(%6u) ", ( unsigned )width,
+			                                            ( unsigned )area );
+			else                 printf( "[%4u,%4u)  ", ( unsigned )start,
+			                                              ( unsigned )end );
 		}
 
 		printf( "\n" );

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -78,7 +78,7 @@ void PASTEMAC(ch,opname) \
 \
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
-		PASTEMAC(ch,scal2m) \
+		PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
 		( \
 		  0, \
 		  BLIS_NONUNIT_DIAG, \
@@ -89,7 +89,10 @@ void PASTEMAC(ch,opname) \
 		  kappa, \
 		  a, inca, lda, \
 		  p, 1,    ldp, \
-		  cntx  \
+		  cntx, \
+		  /* The rntm_t* can safely be NULL as long as it's not used by
+		     scal2m_ex(). */ \
+		  NULL  \
 		); \
 	} \
 }

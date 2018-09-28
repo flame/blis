@@ -1,11 +1,12 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016 Hewlett Packard Enterprise Development LP
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,9 +172,9 @@ typedef dcomplex atom_t;
 // because they also occur in bli_slamch() and bli_dlamch().
 
 // Define f77_int depending on what size of integer was requested.
-#if   BLIS_BLAS2BLIS_INT_TYPE_SIZE == 32
+#if   BLIS_BLAS_INT_TYPE_SIZE == 32
 typedef int32_t   f77_int;
-#elif BLIS_BLAS2BLIS_INT_TYPE_SIZE == 64
+#elif BLIS_BLAS_INT_TYPE_SIZE == 64
 typedef int64_t   f77_int;
 #else
 typedef long int  f77_int;
@@ -210,11 +211,11 @@ typedef dcomplex  f77_dcomplex;
   12 ~ 10  Target numerical datatype
            - 10: domain    (0 == real, 1 == complex)
            - 11: precision (0 == single, 1 == double)
-           - 12: unused
+           - 12: used to encode integer, constant types
   15 ~ 13  Execution numerical datatype
            - 13: domain    (0 == real, 1 == complex)
            - 14: precision (0 == single, 1 == double)
-           - 15: unused
+           - 15: used to encode integer, constant types
   22 ~ 16  Packed type/status
            - 0 0000 00: not packed
            - 1 0000 00: packed (unspecified; by rows, columns, or vector)
@@ -271,7 +272,11 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_SHIFT               8
 #define BLIS_INVERT_DIAG_SHIFT             9
 #define BLIS_TARGET_DT_SHIFT               10
-#define BLIS_EXECUTION_DT_SHIFT            13
+#define   BLIS_TARGET_DOMAIN_SHIFT         10
+#define   BLIS_TARGET_PREC_SHIFT           11
+#define BLIS_EXEC_DT_SHIFT                 13
+#define   BLIS_EXEC_DOMAIN_SHIFT           13
+#define   BLIS_EXEC_PREC_SHIFT             14
 #define BLIS_PACK_SCHEMA_SHIFT             16
 #define   BLIS_PACK_RC_SHIFT               16
 #define   BLIS_PACK_PANEL_SHIFT            17
@@ -299,7 +304,11 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_UNIT_DIAG_BIT                 ( 0x1  << BLIS_UNIT_DIAG_SHIFT )
 #define BLIS_INVERT_DIAG_BIT               ( 0x1  << BLIS_INVERT_DIAG_SHIFT )
 #define BLIS_TARGET_DT_BITS                ( 0x7  << BLIS_TARGET_DT_SHIFT )
-#define BLIS_EXECUTION_DT_BITS             ( 0x7  << BLIS_EXECUTION_DT_SHIFT )
+#define   BLIS_TARGET_DOMAIN_BIT           ( 0x1  << BLIS_TARGET_DOMAIN_SHIFT )
+#define   BLIS_TARGET_PREC_BIT             ( 0x1  << BLIS_TARGET_PREC_SHIFT )
+#define BLIS_EXEC_DT_BITS                  ( 0x7  << BLIS_EXEC_DT_SHIFT )
+#define   BLIS_EXEC_DOMAIN_BIT             ( 0x1  << BLIS_EXEC_DOMAIN_SHIFT )
+#define   BLIS_EXEC_PREC_BIT               ( 0x1  << BLIS_EXEC_PREC_SHIFT )
 #define BLIS_PACK_SCHEMA_BITS              ( 0x7F << BLIS_PACK_SCHEMA_SHIFT )
 #define   BLIS_PACK_RC_BIT                 ( 0x1  << BLIS_PACK_RC_SHIFT )
 #define   BLIS_PACK_PANEL_BIT              ( 0x1  << BLIS_PACK_PANEL_SHIFT )
@@ -824,10 +833,15 @@ typedef enum
 
 // -- Architecture ID type --
 
+// NOTE: This typedef enum must be kept up-to-date with the arch_t
+// string array in bli_arch.c. Whenever values are added/inserted
+// OR if values are rearranged, be sure to update the string array
+// in bli_arch.c.
+
 typedef enum
 {
 	// Intel
-	BLIS_ARCH_SKX     =0,
+	BLIS_ARCH_SKX = 0,
 	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,
@@ -843,6 +857,7 @@ typedef enum
 
 	// ARM
 	BLIS_ARCH_CORTEXA57,
+	BLIS_ARCH_CORTEXA53,
 	BLIS_ARCH_CORTEXA15,
 	BLIS_ARCH_CORTEXA9,
 
@@ -855,7 +870,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 17
+#define BLIS_NUM_ARCHS 18
 
 
 //
@@ -869,6 +884,7 @@ typedef struct
 	void* buf_sys;
 	void* buf_align;
 } pblk_t;
+
 
 // -- Pool type --
 
@@ -884,21 +900,21 @@ typedef struct
 	siz_t   align_size;
 } pool_t;
 
-// -- Mutex object type --
-
-#include "bli_mutex.h"
-#include "bli_malloc.h"
 
 // -- Memory broker object type --
 
+#include <pthread.h>
+#include "bli_malloc.h"
+
 typedef struct membrk_s
 {
-	pool_t    pools[3];
-	mtx_t     mutex;
+	pool_t          pools[3];
+	pthread_mutex_t mutex;
 
-	malloc_ft malloc_fp;
-	free_ft   free_fp;
+	malloc_ft       malloc_fp;
+	free_ft         free_fp;
 } membrk_t;
+
 
 // -- Memory object type --
 
@@ -910,6 +926,7 @@ typedef struct mem_s
 	membrk_t* membrk;
 	siz_t     size;
 } mem_t;
+
 
 // -- Control tree node type --
 
@@ -985,6 +1002,9 @@ typedef struct
 	inc_t  is_a;
 	inc_t  is_b;
 
+	// The type to convert to on output.
+	num_t  dt_on_output;
+
 } auxinfo_t;
 
 
@@ -1040,67 +1060,65 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-#define bli_obj_init_full_shallow_copy_of( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	(b).dim[0]    = (a).dim[0]; \
-	(b).dim[1]    = (a).dim[1]; \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/*(b).pack_mem  = (a).pack_mem;*/ \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).ps        = (a).ps; \
-	(b).pd        = (a).pd; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
+static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+{
+	b->root      = a->root;
+
+	b->off[0]    = a->off[0];
+	b->off[1]    = a->off[1];
+	b->dim[0]    = a->dim[0];
+	b->dim[1]    = a->dim[1];
+	b->diag_off  = a->diag_off;
+
+	b->info      = a->info;
+	b->elem_size = a->elem_size;
+
+	b->buffer    = a->buffer;
+	b->rs        = a->rs;
+	b->cs        = a->cs;
+	b->is        = a->is;
+
+	b->scalar    = a->scalar;
+
+	//b->pack_mem  = a->pack_mem;
+	b->m_padded  = a->m_padded;
+	b->n_padded  = a->n_padded;
+	b->ps        = a->ps;
+	b->pd        = a->pd;
+	b->m_panel   = a->m_panel;
+	b->n_panel   = a->n_panel;
 }
 
-#define bli_obj_init_subpart_from( a, b ) \
-{ \
-	(b).root      = (a).root; \
-\
-	(b).off[0]    = (a).off[0]; \
-	(b).off[1]    = (a).off[1]; \
-	/* Avoid copying m since it will be overwritten. */ \
-	/* Avoid copying n since it will be overwritten. */ \
-	(b).diag_off  = (a).diag_off; \
-\
-	(b).info      = (a).info; \
-	(b).elem_size = (a).elem_size; \
-\
-	(b).buffer    = (a).buffer; \
-	(b).rs        = (a).rs; \
-	(b).cs        = (a).cs; \
-	(b).is        = (a).is; \
-\
-	(b).scalar    = (a).scalar; \
-\
-	/* We want to copy the pack_mem field here because this macro is used
-	   when creating subpartitions, including those of packed objects. In
-	   those situations, we want the subpartition to inherit the pack_mem
-	   field of its parent, as well as other related fields such as the
-	   padded dimensions. */ \
-	/*(b).pack_mem  = (a).pack_mem;*/ \
-	(b).m_padded  = (a).m_padded; \
-	(b).n_padded  = (a).n_padded; \
-	(b).pd        = (a).pd; \
-	(b).ps        = (a).ps; \
-	(b).m_panel   = (a).m_panel; \
-	(b).n_panel   = (a).n_panel; \
+static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+{
+	b->root      = a->root;
+
+	b->off[0]    = a->off[0];
+	b->off[1]    = a->off[1];
+	// Avoid copying m and n since they will be overwritten.
+	//b->dim[0]    = a->dim[0];
+	//b->dim[1]    = a->dim[1];
+	b->diag_off  = a->diag_off;
+
+	b->info      = a->info;
+	b->elem_size = a->elem_size;
+
+	b->buffer    = a->buffer;
+	b->rs        = a->rs;
+	b->cs        = a->cs;
+	b->is        = a->is;
+
+	b->scalar    = a->scalar;
+
+	// Avoid copying pack_mem entry.
+	// FGVZ: You should probably make sure this is right.
+	//b->pack_mem  = a->pack_mem;
+	b->m_padded  = a->m_padded;
+	b->n_padded  = a->n_padded;
+	b->ps        = a->ps;
+	b->pd        = a->pd;
+	b->m_panel   = a->m_panel;
+	b->n_panel   = a->n_panel;
 }
 
 
@@ -1126,12 +1144,18 @@ typedef struct cntx_s
 	pack_t    schema_b_panel;
 	pack_t    schema_c_panel;
 
-	bool_t    anti_pref;
-
-	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-
 	membrk_t* membrk;
 } cntx_t;
+
+
+// -- Runtime type --
+
+typedef struct rntm_s
+{
+	dim_t     num_threads;
+	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+} rntm_t;
 
 
 // -- Error types --
@@ -1175,6 +1199,7 @@ typedef enum
 	BLIS_INCONSISTENT_DATATYPES                = ( -36),
 	BLIS_EXPECTED_REAL_PROJ_OF                 = ( -37),
 	BLIS_EXPECTED_REAL_VALUED_OBJECT           = ( -38),
+	BLIS_INCONSISTENT_PRECISIONS               = ( -39),
 
 	// Dimension-specific errors
 	BLIS_NONCONFORMAL_DIMENSIONS               = ( -40),

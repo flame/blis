@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -46,22 +46,23 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
-		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx ); \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
 		return; \
 	} \
 \
@@ -87,6 +88,10 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
@@ -99,7 +104,7 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx, NULL ); \
+		PASTEMAC(opname,_front)( alpha, a, b, beta_use, c, cntx, rntm, NULL ); \
 	} \
 }
 
@@ -141,22 +146,23 @@ void PASTEMAC(opname,imeth) \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
-		PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx ); \
+		PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx, rntm ); \
 		return; \
 	} \
 \
@@ -166,6 +172,10 @@ void PASTEMAC(opname,imeth) \
 	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
+\
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -179,7 +189,7 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, beta_use, c, cntx, rntm, NULL ); \
 	} \
 }
 
@@ -219,22 +229,23 @@ void PASTEMAC(opname,imeth) \
        obj_t*  a, \
        obj_t*  beta, \
        obj_t*  c, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *c ); \
+	num_t   dt       = bli_obj_dt( c ); \
 	obj_t*  beta_use = beta; \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *c ) ) \
+	if ( bli_obj_is_real( c ) ) \
 	{ \
-		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx ); \
+		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx, rntm ); \
 		return; \
 	} \
 \
@@ -244,6 +255,10 @@ void PASTEMAC(opname,imeth) \
 	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
+\
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -257,7 +272,7 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx, NULL ); \
+		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx, rntm, NULL ); \
 	} \
 }
 
@@ -289,21 +304,22 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *b ); \
+	num_t   dt       = bli_obj_dt( b ); \
 \
 	dim_t   i; \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *b ) ) \
+	if ( bli_obj_is_real( b ) ) \
 	{ \
-		PASTEMAC(opname,nat)( side, alpha, a, b, cntx ); \
+		PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
 		return; \
 	} \
 \
@@ -314,6 +330,10 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
 	{ \
@@ -322,7 +342,7 @@ void PASTEMAC(opname,imeth) \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, rntm, NULL ); \
 	} \
 }
 
@@ -346,19 +366,20 @@ void PASTEMAC(opname,imeth) \
        obj_t*  alpha, \
        obj_t*  a, \
        obj_t*  b, \
-       cntx_t* cntx  \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
      ) \
 { \
 	bli_init_once(); \
 \
 	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_datatype( *b ); \
+	num_t   dt       = bli_obj_dt( b ); \
 \
 	/* If the objects are in the real domain, execute the native
 	   implementation. */ \
-	if ( bli_obj_is_real( *b ) ) \
+	if ( bli_obj_is_real( b ) ) \
 	{ \
-		PASTEMAC(opname,nat)( side, alpha, a, b, cntx ); \
+		PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
 		return; \
 	} \
 \
@@ -369,13 +390,17 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
+	/* Initialize a local runtime with global settings if necessary. */ \
+	rntm_t rntm_l; \
+	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+\
 	{ \
 		/* NOTE: trsm cannot be implemented via any induced method that
 		   needs to execute in stages (e.g. 3mh, 4mh). */ \
 \
 		/* Invoke the operation's front end and request the default control
 		   tree. */ \
-		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, NULL ); \
+		PASTEMAC(opname,_front)( side, alpha, a, b, cntx, rntm, NULL ); \
 	} \
 }
 

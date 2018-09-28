@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived from this software without specific prior written permission.
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    AS IS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -33,9 +33,9 @@
 */
 
 #include "blis.h"
-#include <assert.h>
 
-#include "bli_avx512_macros.h"
+#define BLIS_ASM_SYNTAX_INTEL
+#include "bli_x86_asm_macros.h"
 
 #define A_L1_PREFETCH_DIST 4 //should be multiple of 2
 
@@ -99,32 +99,32 @@ ahead*/
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
-    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(2),8)) \
+    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(2),1)) \
     VFMADD231PD(ZMM(R1), ZMM(6), ZMM(1)) \
-    VSCATTERQPD(MEM(RCX,ZMM(2),8) MASK_K(2), ZMM(R1)) \
+    VSCATTERQPD(MEM(RCX,ZMM(2),1) MASK_K(2), ZMM(R1)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
-    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(3),8)) \
+    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(3),1)) \
     VFMADD231PD(ZMM(R2), ZMM(6), ZMM(1)) \
-    VSCATTERQPD(MEM(RCX,ZMM(3),8) MASK_K(2), ZMM(R2)) \
+    VSCATTERQPD(MEM(RCX,ZMM(3),1) MASK_K(2), ZMM(R2)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
-    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(2),8)) \
+    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(2),1)) \
     VFMADD231PD(ZMM(R3), ZMM(6), ZMM(1)) \
-    VSCATTERQPD(MEM(RCX,ZMM(2),8) MASK_K(2), ZMM(R3)) \
+    VSCATTERQPD(MEM(RCX,ZMM(2),1) MASK_K(2), ZMM(R3)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     KXNORW(K(2), K(0), K(0)) \
     VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
-    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(3),8)) \
+    VGATHERQPD(ZMM(6) MASK_K(1), MEM(RCX,ZMM(3),1)) \
     VFMADD231PD(ZMM(R4), ZMM(6), ZMM(1)) \
-    VSCATTERQPD(MEM(RCX,ZMM(3),8) MASK_K(2), ZMM(R4)) \
+    VSCATTERQPD(MEM(RCX,ZMM(3),1) MASK_K(2), ZMM(R4)) \
 \
     LEA(RCX, MEM(RCX,RAX,1))
 
@@ -132,21 +132,21 @@ ahead*/
 \
     KXNORW(K(1), K(0), K(0)) \
     VMULPD(ZMM(R1), ZMM(R1), ZMM(0)) \
-    VSCATTERQPD(MEM(RCX,ZMM(2),8) MASK_K(1), ZMM(R1)) \
+    VSCATTERQPD(MEM(RCX,ZMM(2),1) MASK_K(1), ZMM(R1)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     VMULPD(ZMM(R2), ZMM(R2), ZMM(0)) \
-    VSCATTERQPD(MEM(RCX,ZMM(3),8) MASK_K(1), ZMM(R2)) \
+    VSCATTERQPD(MEM(RCX,ZMM(3),1) MASK_K(1), ZMM(R2)) \
 \
     LEA(RCX, MEM(RCX,RAX,1)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     VMULPD(ZMM(R3), ZMM(R3), ZMM(0)) \
-    VSCATTERQPD(MEM(RCX,ZMM(2),8) MASK_K(1), ZMM(R3)) \
+    VSCATTERQPD(MEM(RCX,ZMM(2),1) MASK_K(1), ZMM(R3)) \
 \
     KXNORW(K(1), K(0), K(0)) \
     VMULPD(ZMM(R4), ZMM(R4), ZMM(0)) \
-    VSCATTERQPD(MEM(RCX,ZMM(3),8) MASK_K(1), ZMM(R4)) \
+    VSCATTERQPD(MEM(RCX,ZMM(3),1) MASK_K(1), ZMM(R4)) \
 \
     LEA(RCX, MEM(RCX,RAX,1))
 
@@ -306,8 +306,7 @@ void bli_dgemm_skx_asm_16x12_l2(
     const int64_t rs_c = rs_c_;
     const int64_t cs_c = cs_c_;
 
-    __asm__ volatile
-    (
+    BEGIN_ASM()
 
     VXORPD(YMM(8), YMM(8), YMM(8)) //clear out registers
     VMOVAPD(YMM( 7), YMM(8))
@@ -466,6 +465,7 @@ void bli_dgemm_skx_asm_16x12_l2(
     MOV(RAX, VAR(cs_c))
     LEA(RAX, MEM(,RAX,8))
     MOV(RBX, VAR(rs_c))
+    LEA(RBX, MEM(,RBX,8))
 
     // Check if C is column stride. If not, jump to the slow scattered update
     CMP(RBX, IMM(1))
@@ -525,6 +525,7 @@ void bli_dgemm_skx_asm_16x12_l2(
 
     VZEROUPPER()
 
+    END_ASM(
     : // output operands
     : // input operands
       [k]         "m" (k),
@@ -543,5 +544,5 @@ void bli_dgemm_skx_asm_16x12_l2(
       "zmm14", "zmm15", "zmm16", "zmm17", "zmm18", "zmm19", "zmm20", "zmm21",
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
-    );
+    )
 }

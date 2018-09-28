@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -80,29 +80,29 @@ void bli_her2_int( conj_t  conjh,
 	}
 
 	// If C, x, or y has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( *c ) ) return;
-	if ( bli_obj_has_zero_dim( *x ) ) return;
-	if ( bli_obj_has_zero_dim( *y ) ) return;
+	if ( bli_obj_has_zero_dim( c ) ) return;
+	if ( bli_obj_has_zero_dim( x ) ) return;
+	if ( bli_obj_has_zero_dim( y ) ) return;
 
 	// Alias the operands in case we need to apply conjugations.
-	bli_obj_alias_to( *x, x_local );
-	bli_obj_alias_to( *y, y_local );
-	bli_obj_alias_to( *c, c_local );
+	bli_obj_alias_to( x, &x_local );
+	bli_obj_alias_to( y, &y_local );
+	bli_obj_alias_to( c, &c_local );
 
 	// If matrix C is marked for conjugation, we interpret this as a request
 	// to apply a conjugation to the other operands.
-	if ( bli_obj_has_conj( c_local ) )
+	if ( bli_obj_has_conj( &c_local ) )
 	{
-		bli_obj_toggle_conj( c_local );
+		bli_obj_toggle_conj( &c_local );
 
-		bli_obj_toggle_conj( x_local );
-		bli_obj_toggle_conj( y_local );
+		bli_obj_toggle_conj( &x_local );
+		bli_obj_toggle_conj( &y_local );
 
-		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha ),
+		bli_obj_scalar_init_detached_copy_of( bli_obj_dt( alpha ),
 		                                      BLIS_CONJUGATE,
 		                                      alpha,
 		                                      &alpha_local );
-		bli_obj_scalar_init_detached_copy_of( bli_obj_datatype( *alpha_conj ),
+		bli_obj_scalar_init_detached_copy_of( bli_obj_dt( alpha_conj ),
 		                                      BLIS_CONJUGATE,
 		                                      alpha_conj,
 		                                      &alpha_conj_local );

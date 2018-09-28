@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -156,12 +156,16 @@
 #include "bli_gentfunc_macro_defs.h"
 #include "bli_gentprot_macro_defs.h"
 
-#include "bli_obj_macro_defs.h"
+#include "bli_misc_macro_defs.h"
 #include "bli_param_macro_defs.h"
+#include "bli_obj_macro_defs.h"
 #include "bli_complex_macro_defs.h"
 #include "bli_scalar_macro_defs.h"
 #include "bli_error_macro_defs.h"
 #include "bli_blas_macro_defs.h"
+
+#include "bli_oapi_macro_defs.h"
+#include "bli_tapi_macro_defs.h"
 
 
 #endif

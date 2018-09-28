@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -49,7 +49,7 @@ GENFRONT( copysc )
 
 
 //
-// Define BLAS-like interfaces with heterogeneous-typed operands.
+// Prototype BLAS-like interfaces with heterogeneous-typed operands.
 //
 
 #undef  GENTPROT2

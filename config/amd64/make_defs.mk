@@ -42,11 +42,6 @@ THIS_CONFIG    := amd64
 # --- Determine the C compiler and related flags ---
 #
 
-ifeq ($(CC),)
-CC             := gcc
-CC_VENDOR      := gcc
-endif
-
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
@@ -65,17 +60,21 @@ else
 COPTFLAGS      := -O2 -fomit-frame-pointer
 endif
 
+# Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := -mfpmath=sse -mavx -mfma -march=bdver2
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver2
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := -mfpmath=sse -mavx -mfma -march=bdver2
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver2
 else
 $(error gcc or clang are required for this configuration.)
 endif
 endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

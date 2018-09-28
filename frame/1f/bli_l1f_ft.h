@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -32,9 +32,6 @@
 
 */
 
-#ifndef BLIS_L1F_FT_H
-#define BLIS_L1F_FT_H
-
 
 //
 // -- Level-1f function types --------------------------------------------------
@@ -45,17 +42,17 @@
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           n, \
-       ctype* restrict alpha1, \
-       ctype* restrict alpha2, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   n, \
+       ctype*  alpha1, \
+       ctype*  alpha2, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( axpy2v )
@@ -65,17 +62,17 @@ INSERT_GENTDEF( axpy2v )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conja, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conja, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( axpyf )
@@ -85,18 +82,18 @@ INSERT_GENTDEF( axpyf )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjxt, \
-       conj_t          conjx, \
-       conj_t          conjy, \
-       dim_t           m, \
-       ctype* restrict alpha, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict rho, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+       conj_t  conjxt, \
+       conj_t  conjx, \
+       conj_t  conjy, \
+       dim_t   m, \
+       ctype*  alpha, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       ctype*  rho, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( dotaxpyv )
@@ -106,18 +103,18 @@ INSERT_GENTDEF( dotaxpyv )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjat, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       cntx_t*         cntx  \
+       conj_t  conjat, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( dotxf )
@@ -127,27 +124,24 @@ INSERT_GENTDEF( dotxf )
 #undef  GENTDEF
 #define GENTDEF( ctype, ch, opname, tsuf ) \
 \
-typedef void (*PASTECH2(ch,opname,tsuf)) \
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t          conjat, \
-       conj_t          conja, \
-       conj_t          conjw, \
-       conj_t          conjx, \
-       dim_t           m, \
-       dim_t           b_n, \
-       ctype* restrict alpha, \
-       ctype* restrict a, inc_t inca, inc_t lda, \
-       ctype* restrict w, inc_t incw, \
-       ctype* restrict x, inc_t incx, \
-       ctype* restrict beta, \
-       ctype* restrict y, inc_t incy, \
-       ctype* restrict z, inc_t incz, \
-       cntx_t*         cntx  \
+       conj_t  conjat, \
+       conj_t  conja, \
+       conj_t  conjw, \
+       conj_t  conjx, \
+       dim_t   m, \
+       dim_t   b_n, \
+       ctype*  alpha, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  w, inc_t incw, \
+       ctype*  x, inc_t incx, \
+       ctype*  beta, \
+       ctype*  y, inc_t incy, \
+       ctype*  z, inc_t incz  \
+       BLIS_TAPI_EX_PARAMS  \
      );
 
 INSERT_GENTDEF( dotxaxpyf )
 
-
-
-#endif
 

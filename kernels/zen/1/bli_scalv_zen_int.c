@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2016 - 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,8 +33,8 @@
 
 */
 
-#include "blis.h"
 #include "immintrin.h"
+#include "blis.h"
 
 
 /* Union data structure to access AVX registers
@@ -81,8 +82,8 @@ void bli_sscalv_zen_int
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
 	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
-		float*   zero = bli_s0;
-		ssetv_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+		float*       zero = bli_s0;
+		ssetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -140,13 +141,6 @@ void bli_sscalv_zen_int
 		x0 += n_elem_per_reg * n_iter_unroll;
 	}
 
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
-
 	const float alphac = *alpha;
 
 	// If there are leftover iterations, perform them with scalar code.
@@ -187,8 +181,8 @@ void bli_dscalv_zen_int
 	// If alpha is zero, use setv (in case y contains NaN or Inf).
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
-		double*  zero = bli_d0;
-		dsetv_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
+		double*      zero = bli_d0;
+		dsetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
 		(
@@ -245,13 +239,6 @@ void bli_dscalv_zen_int
 
 		x0 += n_elem_per_reg * n_iter_unroll;
 	}
-
-	// Issue vzeroupper instruction to clear upper lanes of ymm registers.
-	// This avoids a performance penalty caused by false dependencies when
-	// transitioning from from AVX to SSE instructions (which may occur
-	// as soon as the n_left cleanup loop below if BLIS is compiled with
-	// -mfpmath=sse).
-	_mm256_zeroupper();
 
 	const double alphac = *alpha;
 

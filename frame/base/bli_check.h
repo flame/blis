@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -62,6 +62,8 @@ err_t bli_check_consistent_object_datatypes( obj_t* a, obj_t* b );
 err_t bli_check_datatype_real_proj_of( num_t dt_c, num_t dt_r );
 err_t bli_check_object_real_proj_of( obj_t* c, obj_t* r );
 err_t bli_check_real_valued_object( obj_t* a );
+err_t bli_check_consistent_precisions( num_t dt_a, num_t dt_b );
+err_t bli_check_consistent_object_precisions( obj_t* a, obj_t* b );
 
 err_t bli_check_conformal_dims( obj_t* a, obj_t* b );
 err_t bli_check_level3_dims( obj_t* a, obj_t* b, obj_t* c );

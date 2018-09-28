@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -36,21 +36,23 @@
 
 #define FUNCPTR_T gemm_fp
 
-typedef void (*FUNCPTR_T)(
-                           doff_t  diagoffa,
-                           pack_t  schema_a,
-                           pack_t  schema_b,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   k,
-                           void*   alpha1,
-                           void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
-                           void*   alpha2,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx,
-                           thrinfo_t* thread
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       doff_t  diagoffa,
+       pack_t  schema_a,
+       pack_t  schema_b,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha1,
+       void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a,
+       void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
+       void*   alpha2,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
 
 static FUNCPTR_T GENARRAY(ftypes,trsm_lu_ker_var2);
 
@@ -61,34 +63,35 @@ void bli_trsm_lu_ker_var2
        obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_execution_datatype( *c );
+	num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	doff_t    diagoffa  = bli_obj_diag_offset( *a );
+	doff_t    diagoffa  = bli_obj_diag_offset( a );
 
-	pack_t    schema_a  = bli_obj_pack_schema( *a );
-	pack_t    schema_b  = bli_obj_pack_schema( *b );
+	pack_t    schema_a  = bli_obj_pack_schema( a );
+	pack_t    schema_b  = bli_obj_pack_schema( b );
 
-	dim_t     m         = bli_obj_length( *c );
-	dim_t     n         = bli_obj_width( *c );
-	dim_t     k         = bli_obj_width( *a );
+	dim_t     m         = bli_obj_length( c );
+	dim_t     n         = bli_obj_width( c );
+	dim_t     k         = bli_obj_width( a );
 
-	void*     buf_a     = bli_obj_buffer_at_off( *a );
-	inc_t     cs_a      = bli_obj_col_stride( *a );
-	dim_t     pd_a      = bli_obj_panel_dim( *a );
-	inc_t     ps_a      = bli_obj_panel_stride( *a );
+	void*     buf_a     = bli_obj_buffer_at_off( a );
+	inc_t     cs_a      = bli_obj_col_stride( a );
+	dim_t     pd_a      = bli_obj_panel_dim( a );
+	inc_t     ps_a      = bli_obj_panel_stride( a );
 
-	void*     buf_b     = bli_obj_buffer_at_off( *b );
-	inc_t     rs_b      = bli_obj_row_stride( *b );
-	dim_t     pd_b      = bli_obj_panel_dim( *b );
-	inc_t     ps_b      = bli_obj_panel_stride( *b );
+	void*     buf_b     = bli_obj_buffer_at_off( b );
+	inc_t     rs_b      = bli_obj_row_stride( b );
+	dim_t     pd_b      = bli_obj_panel_dim( b );
+	inc_t     ps_b      = bli_obj_panel_stride( b );
 
-	void*     buf_c     = bli_obj_buffer_at_off( *c );
-	inc_t     rs_c      = bli_obj_row_stride( *c );
-	inc_t     cs_c      = bli_obj_col_stride( *c );
+	void*     buf_c     = bli_obj_buffer_at_off( c );
+	inc_t     rs_c      = bli_obj_row_stride( c );
+	inc_t     cs_c      = bli_obj_col_stride( c );
 
 	void*     buf_alpha1;
 	void*     buf_alpha2;
@@ -101,7 +104,7 @@ void bli_trsm_lu_ker_var2
 	// be applied to the packed copy of B prior to it being updated by
 	// the trsm subproblem). This scalar may be unit, if for example it
 	// was applied during packing.
-	buf_alpha1 = bli_obj_internal_scalar_buffer( *b );
+	buf_alpha1 = bli_obj_internal_scalar_buffer( b );
 
 	// Grab the address of the internal scalar buffer for the scalar
 	// attached to C. This will be the "beta" scalar used in the gemm-only
@@ -109,7 +112,7 @@ void bli_trsm_lu_ker_var2
 	// the diagonal. We need this separate scalar because it's possible
 	// that the alpha attached to B was reset, if it was applied during
 	// packing.
-	buf_alpha2 = bli_obj_internal_scalar_buffer( *c );
+	buf_alpha2 = bli_obj_internal_scalar_buffer( c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -128,6 +131,7 @@ void bli_trsm_lu_ker_var2
 	   buf_alpha2,
 	   buf_c, rs_c, cs_c,
 	   cntx,
+	   rntm,
 	   thread );
 }
 
@@ -149,6 +153,7 @@ void PASTEMAC(ch,varname) \
        void*   alpha2, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
+       rntm_t* rntm, \
        thrinfo_t* thread  \
      ) \
 { \
@@ -162,9 +167,9 @@ void PASTEMAC(ch,varname) \
 \
 	/* Cast the micro-kernel address to its function pointer type. */ \
 	PASTECH(ch,gemmtrsm_ukr_ft) \
-	               gemmtrsm_ukr = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx ); \
+	               gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_U_UKR, cntx ); \
 	PASTECH(ch,gemm_ukr_ft) \
-	                   gemm_ukr = bli_cntx_get_l3_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -173,7 +178,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -348,7 +353,7 @@ void PASTEMAC(ch,varname) \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = 0; j < n_iter; ++j ) \
 	{ \
-		if( trsm_my_iter( j, thread ) ) { \
+		if( bli_trsm_my_iter( j, thread ) ) { \
 \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -401,7 +406,7 @@ void PASTEMAC(ch,varname) \
 				   panel A12. */ \
 				a11 = a1; \
 				/* a12 = a1 + ( k_a11 * PACKMR ) / off_scl; */ \
-				bli_ptr_add( a12, a1, k_a11 * PACKMR, off_scl ); \
+				a12 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a11 * PACKMR, off_scl ); \
 \
 				/* Compute the addresses of the panel B01 and the block
 				   B11. */ \

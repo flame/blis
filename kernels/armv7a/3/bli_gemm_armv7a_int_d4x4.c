@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -16,7 +16,7 @@
       documentation and/or other materials provided with the distribution.
     - Neither the name of The University of Texas at Austin nor the names
       of its contributors may be used to endorse or promote products
-      derived derived derived from this software without specific prior written permission.
+      derived derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -26,7 +26,7 @@
    SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
    LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-   THEORY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
@@ -37,16 +37,24 @@
 
 void bli_sgemm_armv7a_int_4x4
      (
-       dim_t               k,
+       dim_t               k0,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c, inc_t cs_c,
+       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	uint32_t k_iter = k0 / 4;
+	uint32_t k_left = k0 % 4;
+	uint32_t rs_c   = rs_c0;
+	uint32_t cs_c   = cs_c0;
+	uint32_t i;
+
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
 
@@ -62,10 +70,6 @@ void bli_sgemm_armv7a_int_4x4
 	float32x4_t bv2;
 	float32x4_t bv3;
 	float32x4_t bv4;
-
-	dim_t  k_iter = k/4;
-	dim_t  k_left = k%4;
-	dim_t  i; 
 
 	// Vector for column 0
 	float32x4_t cv0;
@@ -273,11 +277,19 @@ void bli_dgemm_armv7a_int_4x4
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c, inc_t cs_c,
+       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
+	// Typecast local copies of integers in case dim_t and inc_t are a
+	// different size than is expected by load instructions.
+	//uint32_t k_iter = k0 / 4;
+	uint32_t k_left = k % 4;
+	uint32_t rs_c   = rs_c0;
+	uint32_t cs_c   = cs_c0;
+	uint32_t i;
+
 	//void* a_next = bli_auxinfo_next_a( data );
 	//void* b_next = bli_auxinfo_next_b( data );
 
@@ -309,11 +321,6 @@ void bli_dgemm_armv7a_int_4x4
 
 	double* restrict Ap = a + 4;
         double* restrict Bp = b + 4; 
-
-	dim_t  i; 
-	dim_t  k_left;
-
-	k_left  = k % 4;
 
 	c00 = (c + 0*rs_c + 0*cs_c); 
 	c10 = (c + 1*rs_c + 0*cs_c); 

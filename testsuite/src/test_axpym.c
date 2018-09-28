@@ -1,10 +1,11 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +49,7 @@ static thresh_t  thresh[BLIS_NUM_FP_TYPES] = { { 1e-04, 1e-05 },   // warn, pass
 // Local prototypes.
 void libblis_test_axpym_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      );
@@ -87,41 +89,44 @@ void libblis_test_axpym_check
 
 void libblis_test_axpym_deps
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
-	libblis_test_randm( params, &(op->ops->randm) );
-	libblis_test_normfm( params, &(op->ops->normfm) );
-	libblis_test_addm( params, &(op->ops->addm) );
-	libblis_test_subm( params, &(op->ops->subm) );
-	libblis_test_copym( params, &(op->ops->copym) );
-	libblis_test_scalm( params, &(op->ops->scalm) );
+	libblis_test_randm( tdata, params, &(op->ops->randm) );
+	libblis_test_normfm( tdata, params, &(op->ops->normfm) );
+	libblis_test_addm( tdata, params, &(op->ops->addm) );
+	libblis_test_subm( tdata, params, &(op->ops->subm) );
+	libblis_test_copym( tdata, params, &(op->ops->copym) );
+	libblis_test_scalm( tdata, params, &(op->ops->scalm) );
 }
 
 
 
 void libblis_test_axpym
      (
+       thread_data_t* tdata,
        test_params_t* params,
        test_op_t*     op
      )
 {
 
 	// Return early if this test has already been done.
-	if ( op->test_done == TRUE ) return;
+	if ( libblis_test_op_is_done( op ) ) return;
 
 	// Return early if operation is disabled.
 	if ( libblis_test_op_is_disabled( op ) ||
-	     op->ops->l1m_over == DISABLE_ALL ) return;
+	     libblis_test_l1m_is_disabled( op ) ) return;
 
 	// Call dependencies first.
-	if ( TRUE ) libblis_test_axpym_deps( params, op );
+	if ( TRUE ) libblis_test_axpym_deps( tdata, params, op );
 
 	// Execute the test driver for each implementation requested.
-	if ( op->front_seq == ENABLE )
+	//if ( op->front_seq == ENABLE )
 	{
-		libblis_test_op_driver( params,
+		libblis_test_op_driver( tdata,
+		                        params,
 		                        op,
 		                        BLIS_TEST_SEQ_FRONT_END,
 		                        op_str,
@@ -180,7 +185,7 @@ void libblis_test_axpym_experiment
 	                          sc_str[0], m, n, &y_save );
 
 	// Set alpha.
-	if ( bli_obj_is_real( y ) )
+	if ( bli_obj_is_real( &y ) )
 		bli_setsc( -2.0,  0.0, &alpha );
 	else
 		bli_setsc(  0.0, -2.0, &alpha );
@@ -191,7 +196,7 @@ void libblis_test_axpym_experiment
 	bli_copym( &y, &y_save );
 
 	// Apply the parameters.
-	bli_obj_set_conjtrans( transx, x );
+	bli_obj_set_conjtrans( transx, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -207,7 +212,7 @@ void libblis_test_axpym_experiment
 
 	// Estimate the performance of the best experiment repeat.
 	*perf = ( 2.0 * m * n ) / time_min / FLOPS_PER_UNIT_PERF;
-	if ( bli_obj_is_complex( y ) ) *perf *= 4.0;
+	if ( bli_obj_is_complex( &y ) ) *perf *= 4.0;
 
 	// Perform checks.
 	libblis_test_axpym_check( params, &alpha, &x, &y, &y_save, resid );
@@ -254,11 +259,11 @@ void libblis_test_axpym_check
        double*        resid
      )
 {
-	num_t  dt      = bli_obj_datatype( *y );
-	num_t  dt_real = bli_obj_datatype_proj_to_real( *y );
+	num_t  dt      = bli_obj_dt( y );
+	num_t  dt_real = bli_obj_dt_proj_to_real( y );
 
-	dim_t  m       = bli_obj_length( *y );
-	dim_t  n       = bli_obj_width( *y );
+	dim_t  m       = bli_obj_length( y );
+	dim_t  n       = bli_obj_width( y );
 
 	obj_t  x_temp, y_temp;
 	obj_t  norm;

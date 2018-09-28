@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -53,7 +53,7 @@ void bli_ger_blk_var2( obj_t* alpha,
 	bli_obj_init_pack( &y1_pack );
 
 	// Query dimension in partitioning direction.
-	n_trans = bli_obj_width_after_trans( *a );
+	n_trans = bli_obj_width_after_trans( a );
 
 	// Partition along the n dimension.
 	for ( i = 0; i < n_trans; i += b_alg )

@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -106,6 +106,11 @@ void bli_l1m_xy_check
 	e_val = bli_check_floating_object( y );
 	bli_check_error_code( e_val );
 
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( x, y );
+	bli_check_error_code( e_val );
+
 	// Check object dimensions.
 
 	e_val = bli_check_matrix_object( x );
@@ -144,6 +149,11 @@ void bli_l1m_axy_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( y );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( x, y );
 	bli_check_error_code( e_val );
 
 	// Check object dimensions.

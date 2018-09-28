@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -310,10 +310,10 @@ void PASTEMAC(ch,varname) \
 		{ \
 			c = c + diagoffc * ( doff_t )cs_c + \
 			       -diagoffc * ( doff_t )rs_c;  \
-			bli_swap_incs( incc, ldc ); \
+			bli_swap_incs( &incc, &ldc ); \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc ); \
+				bli_toggle_conj( &conjc ); \
 		} \
 \
 		/* Pack the full panel. */ \
@@ -380,7 +380,7 @@ void PASTEMAC(ch,varname) \
 			conjc12    = conjc; \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc12 ); \
+				bli_toggle_conj( &conjc12 ); \
 		} \
 		else /* if ( ( row_stored && bli_is_lower( uploc ) ) || \
 		             ( col_stored && bli_is_upper( uploc ) ) ) */ \
@@ -406,7 +406,7 @@ void PASTEMAC(ch,varname) \
 			conjc12    = conjc; \
 \
 			if ( bli_is_hermitian( strucc ) ) \
-				bli_toggle_conj( conjc10 ); \
+				bli_toggle_conj( &conjc10 ); \
 		} \
 \
 		/* Pack to p10. For upper storage, this includes the unstored
@@ -581,8 +581,8 @@ void PASTEMAC(ch,varname) \
 			doff_t          diagoffp11_0 = 0; \
 			dim_t           p11_0_dim    = panel_dim - 1; \
 \
-			bli_toggle_uplo( uplop ); \
-			bli_shift_diag_offset_to_shrink_uplo( uplop, diagoffp11_0 ); \
+			bli_toggle_uplo( &uplop ); \
+			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp11_0 ); \
 \
 			/* Note that this macro works a little differently than the setm
 			   operation. Here, we pass in the dimensions of only p11, rather

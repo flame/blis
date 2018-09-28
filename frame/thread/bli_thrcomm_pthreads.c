@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -139,6 +139,7 @@ typedef struct thread_data
 	obj_t*     beta;
 	obj_t*     c;
 	cntx_t*    cntx;
+	rntm_t*    rntm;
 	cntl_t*    cntl;
 	dim_t      id;
 	thrcomm_t* gl_comm;
@@ -157,33 +158,45 @@ void* bli_l3_thread_entry( void* data_void )
 	obj_t*         beta     = data->beta;
 	obj_t*         c        = data->c;
 	cntx_t*        cntx     = data->cntx;
+	rntm_t*        rntm     = data->rntm;
 	cntl_t*        cntl     = data->cntl;
 	dim_t          id       = data->id;
 	thrcomm_t*     gl_comm  = data->gl_comm;
 
+	obj_t          a_t, b_t, c_t;
 	cntl_t*        cntl_use;
 	thrinfo_t*     thread;
 
+	// Alias thread-local copies of A, B, and C. These will be the objects
+	// we pass down the algorithmic function stack. Making thread-local
+	// alaises IS ABSOLUTELY IMPORTANT and MUST BE DONE because each thread
+	// will read the schemas from A and B and then reset the schemas to
+	// their expected unpacked state (in bli_l3_cntl_create_if()).
+	bli_obj_alias_to( a, &a_t );
+	bli_obj_alias_to( b, &b_t );
+	bli_obj_alias_to( c, &c_t );
+
 	// Create a default control tree for the operation, if needed.
-	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
+	bli_l3_cntl_create_if( family, &a_t, &b_t, &c_t, cntl, &cntl_use );
 
 	// Create the root node of the current thread's thrinfo_t structure.
-	bli_l3_thrinfo_create_root( id, gl_comm, cntx, cntl_use, &thread );
+	bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
 
 	func
 	(
 	  alpha,
-	  a,
-	  b,
+	  &a_t,
+	  &b_t,
 	  beta,
-	  c,
+	  &c_t,
 	  cntx,
+	  rntm,
 	  cntl_use,
 	  thread
 	);
 
 	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
+	bli_l3_cntl_free_if( &a_t, &b_t, &c_t, cntl, cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_free( thread );
@@ -201,11 +214,12 @@ void bli_l3_thread_decorator
        obj_t*      beta,
        obj_t*      c,
        cntx_t*     cntx,
+       rntm_t*     rntm,
        cntl_t*     cntl
      )
 {
 	// Query the total number of threads from the context.
-	dim_t          n_threads = bli_cntx_get_num_threads( cntx );
+	dim_t          n_threads = bli_rntm_num_threads( rntm );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
@@ -228,6 +242,7 @@ void bli_l3_thread_decorator
 		datas[id].beta    = beta;
 		datas[id].c       = c;
 		datas[id].cntx    = cntx;
+		datas[id].rntm    = rntm;
 		datas[id].cntl    = cntl;
 		datas[id].id      = id;
 		datas[id].gl_comm = gl_comm;

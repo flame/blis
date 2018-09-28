@@ -67,13 +67,13 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 
 ifeq ($(CC_VENDOR),gcc)
-CVECFLAGS      := 
+CKVECFLAGS     := 
 else
 ifeq ($(CC_VENDOR),icc)
-CVECFLAGS      := 
+CKVECFLAGS     := 
 else
 ifeq ($(CC_VENDOR),clang)
-CVECFLAGS      := 
+CKVECFLAGS     := 
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif

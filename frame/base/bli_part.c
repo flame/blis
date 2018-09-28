@@ -1,6 +1,6 @@
 /*
 
-   BLIS    
+   BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
@@ -36,6 +36,49 @@
 
 
 // -- Matrix partitioning ------------------------------------------------------
+
+
+void bli_acquire_mpart
+     (
+       dim_t     i,
+       dim_t     j,
+       dim_t     bm,
+       dim_t     bn,
+       obj_t*    parent,
+       obj_t*    child
+     )
+{
+	// Query the dimensions of the parent object.
+	const dim_t m_par = bli_obj_length( parent );
+	const dim_t n_par = bli_obj_width( parent );
+
+	// If either i or j is already beyond what exists of the parent matrix,
+	// slide them back to the outer dimensions. (What will happen in this
+	// scenario is that bm and bn and/or will be reduced to zero so that the
+	// child matrix does not refer to anything beyond the bounds of the
+	// parent. (Note: This is a safety measure and generally should never
+	// be needed if the caller is passing in sane arguments.)
+	if ( i > m_par ) i = m_par;
+	if ( j > n_par ) j = n_par;
+
+	// If either bm or bn spills out over the edge of the parent matrix,
+	// reduce them so that the child matrix fits within the bounds of the
+	// parent. (Note: This is a safety measure and generally should never
+	// be needed if the caller is passing in sane arguments, though this
+	// code is somewhat more likely to be needed than the code above.)
+	if ( bm > m_par - i ) bm = m_par - i;
+	if ( bn > n_par - j ) bn = n_par - j;
+
+	// Alias the parent object's contents into the child object.
+	bli_obj_alias_to( parent, child );
+
+	// Set the offsets and dimensions of the child object. Note that we
+	// increment, rather than overwrite, the offsets of the child object
+	// in case the parent object already had non-zero offsets (usually
+	// because the parent was itself a child a larger grandparent object).
+	bli_obj_inc_offs( i, j, child );
+	bli_obj_set_dims( bm, bn, child );
+}
 
 
 void bli_acquire_mpart_mdim
@@ -77,7 +120,7 @@ void bli_acquire_mpart_t2b
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.)
-	if ( bli_obj_is_panel_packed( *obj ) )
+	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
 		return;
@@ -91,15 +134,15 @@ void bli_acquire_mpart_t2b
 
 	// Query the m and n dimensions of the object (accounting for
 	// transposition, if indicated).
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		m = bli_obj_length( *obj );
-		n = bli_obj_width( *obj );
+		m = bli_obj_length( obj );
+		n = bli_obj_width( obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		m = bli_obj_width( *obj );
-		n = bli_obj_length( *obj );
+		m = bli_obj_width( obj );
+		n = bli_obj_length( obj );
 	}
 
 
@@ -165,22 +208,22 @@ void bli_acquire_mpart_t2b
 	// stride fields of the parent object. Note that this omits copying view
 	// information because the new partition will have its own dimensions
 	// and offsets.
-	bli_obj_init_subpart_from( *obj, *sub_obj );
+	bli_obj_init_subpart_from( obj, sub_obj );
 
 
 	// Modify offsets and dimensions of requested partition based on
 	// whether it needs to be transposed.
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		bli_obj_set_dims( m_part, n_part, *sub_obj );
-		bli_obj_inc_offs( offm_inc, offn_inc, *sub_obj );
-		bli_obj_inc_diag_off( diag_off_inc, *sub_obj );
+		bli_obj_set_dims( m_part, n_part, sub_obj );
+		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		bli_obj_set_dims( n_part, m_part, *sub_obj );
-		bli_obj_inc_offs( offn_inc, offm_inc, *sub_obj );
-		bli_obj_inc_diag_off( -diag_off_inc, *sub_obj );
+		bli_obj_set_dims( n_part, m_part, sub_obj );
+		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 
@@ -189,8 +232,8 @@ void bli_acquire_mpart_t2b
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( *sub_obj ) && 
-	      bli_obj_is_outside_diag( *sub_obj ) )
+	if ( !bli_obj_root_is_general( sub_obj ) && 
+	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
 		// between uplo properties for the current and root objects...
@@ -208,20 +251,20 @@ void bli_acquire_mpart_t2b
 		// the other side of the diagonal, toggling the transposition bit (and
 		// conjugation bit if the root matrix is Hermitian). Or, if the root
 		// matrix is triangular, the subpartition should be marked as zero.
-		if ( bli_obj_is_unstored_subpart( *sub_obj ) )
+		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( *sub_obj ) )
+			if ( bli_obj_root_is_hermitian( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
-				bli_obj_toggle_conj( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
+				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( *sub_obj ) )
+			else if ( bli_obj_root_is_symmetric( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( *sub_obj ) )
+			else if ( bli_obj_root_is_triangular( sub_obj ) )
 			{
-				bli_obj_set_uplo( BLIS_ZEROS, *sub_obj );
+				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}
 		}
 	}
@@ -240,7 +283,7 @@ void bli_acquire_mpart_b2t
 	dim_t m;
 
 	// Query the dimension in the partitioning direction.
-	m = bli_obj_length_after_trans( *obj );
+	m = bli_obj_length_after_trans( obj );
 
 	// Modify i to account for the fact that we are moving backwards.
 	i = m - i - b;
@@ -288,7 +331,7 @@ void bli_acquire_mpart_l2r
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.)
-	if ( bli_obj_is_panel_packed( *obj ) )
+	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_l2r( req_part, j, b, obj, sub_obj );
 		return;
@@ -302,15 +345,15 @@ void bli_acquire_mpart_l2r
 
 	// Query the m and n dimensions of the object (accounting for
 	// transposition, if indicated).
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		m = bli_obj_length( *obj );
-		n = bli_obj_width( *obj );
+		m = bli_obj_length( obj );
+		n = bli_obj_width( obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		m = bli_obj_width( *obj );
-		n = bli_obj_length( *obj );
+		m = bli_obj_width( obj );
+		n = bli_obj_length( obj );
 	}
 
 
@@ -376,22 +419,22 @@ void bli_acquire_mpart_l2r
 	// stride fields of the parent object. Note that this omits copying view
 	// information because the new partition will have its own dimensions
 	// and offsets.
-	bli_obj_init_subpart_from( *obj, *sub_obj );
+	bli_obj_init_subpart_from( obj, sub_obj );
 
 
 	// Modify offsets and dimensions of requested partition based on
 	// whether it needs to be transposed.
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		bli_obj_set_dims( m_part, n_part, *sub_obj );
-		bli_obj_inc_offs( offm_inc, offn_inc, *sub_obj );
-		bli_obj_inc_diag_off( diag_off_inc, *sub_obj );
+		bli_obj_set_dims( m_part, n_part, sub_obj );
+		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		bli_obj_set_dims( n_part, m_part, *sub_obj );
-		bli_obj_inc_offs( offn_inc, offm_inc, *sub_obj );
-		bli_obj_inc_diag_off( -diag_off_inc, *sub_obj );
+		bli_obj_set_dims( n_part, m_part, sub_obj );
+		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 
@@ -399,8 +442,8 @@ void bli_acquire_mpart_l2r
 	// diagonal), and the subpartition does not intersect the root matrix's
 	// diagonal, then we might need to modify some of the subpartition's
 	// properties, depending on its structure type.
-	if ( !bli_obj_root_is_general( *sub_obj ) && 
-	      bli_obj_is_outside_diag( *sub_obj ) )
+	if ( !bli_obj_root_is_general( sub_obj ) && 
+	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
 		// between uplo properties for the current and root objects...
@@ -418,20 +461,20 @@ void bli_acquire_mpart_l2r
 		// the other side of the diagonal, toggling the transposition bit (and
 		// conjugation bit if the root matrix is Hermitian). Or, if the root
 		// matrix is triangular, the subpartition should be marked as zero.
-		if ( bli_obj_is_unstored_subpart( *sub_obj ) )
+		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( *sub_obj ) )
+			if ( bli_obj_root_is_hermitian( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
-				bli_obj_toggle_conj( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
+				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( *sub_obj ) )
+			else if ( bli_obj_root_is_symmetric( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( *sub_obj ) )
+			else if ( bli_obj_root_is_triangular( sub_obj ) )
 			{
-				bli_obj_set_uplo( BLIS_ZEROS, *sub_obj );
+				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}
 		}
 	}
@@ -450,7 +493,7 @@ void bli_acquire_mpart_r2l
 	dim_t n;
 
 	// Query the dimension in the partitioning direction.
-	n = bli_obj_width_after_trans( *obj );
+	n = bli_obj_width_after_trans( obj );
 
 	// Modify i to account for the fact that we are moving backwards.
 	j = n - j - b;
@@ -482,7 +525,7 @@ void bli_acquire_mpart_tl2br
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.)
-	if ( bli_obj_is_panel_packed( *obj ) )
+	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_tl2br( req_part, ij, b, obj, sub_obj );
 		return;
@@ -496,15 +539,15 @@ void bli_acquire_mpart_tl2br
 
 	// Query the m and n dimensions of the object (accounting for
 	// transposition, if indicated).
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		m = bli_obj_length( *obj );
-		n = bli_obj_width( *obj );
+		m = bli_obj_length( obj );
+		n = bli_obj_width( obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		m = bli_obj_width( *obj );
-		n = bli_obj_length( *obj );
+		m = bli_obj_width( obj );
+		n = bli_obj_length( obj );
 	}
 
 
@@ -613,22 +656,22 @@ void bli_acquire_mpart_tl2br
 	// stride fields of the parent object. Note that this omits copying view
 	// information because the new partition will have its own dimensions
 	// and offsets.
-	bli_obj_init_subpart_from( *obj, *sub_obj );
+	bli_obj_init_subpart_from( obj, sub_obj );
 
 
 	// Modify offsets and dimensions of requested partition based on
 	// whether it needs to be transposed.
-	if ( bli_obj_has_notrans( *obj ) )
+	if ( bli_obj_has_notrans( obj ) )
 	{
-		bli_obj_set_dims( m_part, n_part, *sub_obj );
-		bli_obj_inc_offs( offm_inc, offn_inc, *sub_obj );
-		bli_obj_inc_diag_off( diag_off_inc, *sub_obj );
+		bli_obj_set_dims( m_part, n_part, sub_obj );
+		bli_obj_inc_offs( offm_inc, offn_inc, sub_obj );
+		bli_obj_inc_diag_offset( diag_off_inc, sub_obj );
 	}
-	else // if ( bli_obj_has_trans( *obj ) )
+	else // if ( bli_obj_has_trans( obj ) )
 	{
-		bli_obj_set_dims( n_part, m_part, *sub_obj );
-		bli_obj_inc_offs( offn_inc, offm_inc, *sub_obj );
-		bli_obj_inc_diag_off( -diag_off_inc, *sub_obj );
+		bli_obj_set_dims( n_part, m_part, sub_obj );
+		bli_obj_inc_offs( offn_inc, offm_inc, sub_obj );
+		bli_obj_inc_diag_offset( -diag_off_inc, sub_obj );
 	}
 
 	// If the root matrix is not general (ie: has structure defined by the
@@ -636,7 +679,7 @@ void bli_acquire_mpart_tl2br
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( *sub_obj ) && 
+	if ( !bli_obj_root_is_general( sub_obj ) && 
 	     req_part != BLIS_SUBPART00 &&
 	     req_part != BLIS_SUBPART11 &&
 	     req_part != BLIS_SUBPART22 )
@@ -667,20 +710,20 @@ void bli_acquire_mpart_tl2br
 		// the other side of the diagonal, toggling the transposition bit (and
 		// conjugation bit if the root matrix is Hermitian). Or, if the root
 		// matrix is triangular, the subpartition should be marked as zero.
-		if ( bli_obj_is_unstored_subpart( *sub_obj ) )
+		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( *sub_obj ) )
+			if ( bli_obj_root_is_hermitian( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
-				bli_obj_toggle_conj( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
+				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( *sub_obj ) )
+			else if ( bli_obj_root_is_symmetric( sub_obj ) )
 			{
-				bli_obj_reflect_about_diag( *sub_obj );
+				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( *sub_obj ) )
+			else if ( bli_obj_root_is_triangular( sub_obj ) )
 			{
-				bli_obj_set_uplo( BLIS_ZEROS, *sub_obj );
+				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}
 		}
 	}
@@ -697,7 +740,7 @@ void bli_acquire_mpart_br2tl
      )
 {
 	// Query the dimension of the object.
-	dim_t mn = bli_obj_length( *obj );
+	dim_t mn = bli_obj_length( obj );
 
 	// Modify ij to account for the fact that we are moving backwards.
 	ij = mn - ij - b;
@@ -718,9 +761,9 @@ void bli_acquire_vpart_f2b
        obj_t*    sub_obj
      )
 {
-	if ( bli_obj_is_col_vector( *obj ) )
+	if ( bli_obj_is_col_vector( obj ) )
 		bli_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
-	else // if ( bli_obj_is_row_vector( *obj ) )
+	else // if ( bli_obj_is_row_vector( obj ) )
 		bli_acquire_mpart_l2r( req_part, i, b, obj, sub_obj );
 }
 
@@ -734,9 +777,9 @@ void bli_acquire_vpart_b2f
        obj_t*    sub_obj
      )
 {
-	if ( bli_obj_is_col_vector( *obj ) )
+	if ( bli_obj_is_col_vector( obj ) )
 		bli_acquire_mpart_b2t( req_part, i, b, obj, sub_obj );
-	else // if ( bli_obj_is_row_vector( *obj ) )
+	else // if ( bli_obj_is_row_vector( obj ) )
 		bli_acquire_mpart_r2l( req_part, i, b, obj, sub_obj );
 }
 
@@ -766,9 +809,9 @@ void bli_acquire_vi
        obj_t*    sub_obj
      )
 {
-	if ( bli_obj_is_col_vector( *obj ) )
+	if ( bli_obj_is_col_vector( obj ) )
 		bli_acquire_mpart_t2b( BLIS_SUBPART1, i, 1, obj, sub_obj );
-	else // if ( bli_obj_is_row_vector( *obj ) )
+	else // if ( bli_obj_is_row_vector( obj ) )
 		bli_acquire_mpart_l2r( BLIS_SUBPART1, i, 1, obj, sub_obj );
 }
 
