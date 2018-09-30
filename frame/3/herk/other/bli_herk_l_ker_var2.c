@@ -35,30 +35,32 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T gemm_fp
+#define FUNCPTR_T herk_fp
 
-typedef void (*FUNCPTR_T)(
-                           pack_t  schema_a,
-                           pack_t  schema_b,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a, inc_t cs_a, inc_t is_a,
-                                      dim_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, inc_t is_b,
-                                      dim_t pd_b, inc_t ps_b,
-                           void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx,
-                           rntm_t* rntm,
-                           thrinfo_t* thread
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       doff_t  diagoffc,
+       pack_t  schema_a,
+       pack_t  schema_b,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha,
+       void*   a, inc_t cs_a, inc_t is_a,
+                  dim_t pd_a, inc_t ps_a,
+       void*   b, inc_t rs_b, inc_t is_b,
+                  dim_t pd_b, inc_t ps_b,
+       void*   beta,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
 
-static FUNCPTR_T GENARRAY(ftypes,gemm4mb_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2);
 
 
-void bli_gemm4mb_ker_var2
+void bli_herk_l_ker_var2
      (
        obj_t*  a,
        obj_t*  b,
@@ -70,6 +72,8 @@ void bli_gemm4mb_ker_var2
      )
 {
 	num_t     dt_exec   = bli_obj_exec_dt( c );
+
+	doff_t    diagoffc  = bli_obj_diag_offset( c );
 
 	pack_t    schema_a  = bli_obj_pack_schema( a );
 	pack_t    schema_b  = bli_obj_pack_schema( b );
@@ -117,7 +121,8 @@ void bli_gemm4mb_ker_var2
 	f = ftypes[dt_exec];
 
 	// Invoke the function.
-	f( schema_a,
+	f( diagoffc,
+	   schema_a,
 	   schema_b,
 	   m,
 	   n,
@@ -140,6 +145,7 @@ void bli_gemm4mb_ker_var2
 \
 void PASTEMAC(ch,varname) \
      ( \
+       doff_t  diagoffc, \
        pack_t  schema_a, \
        pack_t  schema_b, \
        dim_t   m, \
@@ -170,7 +176,10 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
-	/* Temporary C buffer for edge cases. */ \
+	/* Temporary C buffer for edge cases. Note that the strides of this
+	   temporary buffer are set so that they match the storage of the
+	   original C matrix. For example, if C is column-stored, ct will be
+	   column-stored as well. */ \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -179,7 +188,6 @@ void PASTEMAC(ch,varname) \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
-	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
 	ctype* restrict c_cast     = c; \
@@ -188,12 +196,12 @@ void PASTEMAC(ch,varname) \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 \
+	doff_t          diagoffc_ij; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
-	dim_t           i, j; \
-	dim_t           ii; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
+	dim_t           i, j, ip; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
@@ -215,6 +223,31 @@ void PASTEMAC(ch,varname) \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
+\
+	/* Safeguard: If the current panel of C is entirely above the diagonal,
+	   it is not stored. So we do nothing. */ \
+	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) return; \
+\
+	/* If there is a zero region above where the diagonal of C intersects
+	   the left edge of the panel, adjust the pointer to C and A and treat
+	   this case as if the diagonal offset were zero. */ \
+	if ( diagoffc < 0 ) \
+	{ \
+		ip       = -diagoffc / MR; \
+		i        = ip * MR; \
+		m        = m - i; \
+		diagoffc = -diagoffc % MR; \
+		c_cast   = c_cast + (i  )*rs_c; \
+		a_cast   = a_cast + (ip )*ps_a; \
+	} \
+\
+	/* If there is a zero region to the right of where the diagonal
+	   of C intersects the bottom of the panel, shrink it to prevent
+	   "no-op" iterations from executing. */ \
+	if ( diagoffc + m < n ) \
+	{ \
+		n = diagoffc + m; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -247,14 +280,14 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
-	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
+	b1 = b_cast; \
+	c1 = c_cast; \
+\
+	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
 	dim_t jr_num_threads = bli_thread_n_way( thread ); \
 	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
 	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
 	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
-\
-	dim_t jr_inc = jr_num_threads; \
-	dim_t ir_inc = ir_num_threads; \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
@@ -262,7 +295,7 @@ void PASTEMAC(ch,varname) \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
-        \
+\
 		b1 = b_cast + j * cstep_b; \
 		c1 = c_cast + j * cstep_c; \
 \
@@ -271,24 +304,7 @@ void PASTEMAC(ch,varname) \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
-		/* In the 4mb method, we execute the ir loop twice: once for b_r
-		   and once for b_i. */ \
-		for ( ii = 0; ii < 2; ++ii ) \
-		{ \
-		ctype* restrict beta_use; \
-\
-		if ( ii == 0 ) \
-		{ \
-			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_RO, &aux ); \
-			beta_use = beta_cast; \
-		} \
-		else \
-		{ \
-			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_IO, &aux ); \
-			beta_use = one; \
-		} \
-\
-		/* Loop over the m dimension (MR rows at a time). */ \
+		/* Interior loop over the m dimension (MR rows at a time). */ \
 		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
 		{ \
 			ctype* restrict a2; \
@@ -296,14 +312,17 @@ void PASTEMAC(ch,varname) \
 			a1  = a_cast + i * rstep_a; \
 			c11 = c1     + i * rstep_c; \
 \
+			/* Compute the diagonal offset for the submatrix at (i,j). */ \
+			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
+\
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			a2 = bli_herk_get_next_a_upanel( caucus, a1, rstep_a ); \
 			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				b2 = bli_herk_get_next_b_upanel( thread, b1, cstep_b ); \
 				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \
@@ -313,25 +332,14 @@ void PASTEMAC(ch,varname) \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
 \
-			/* Handle interior and edge cases separately. */ \
-			if ( m_cur == MR && n_cur == NR ) \
-			{ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c before", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
-				/* Invoke the gemm micro-kernel. */ \
-				gemm_ukr \
-				( \
-				  k, \
-				  alpha_cast, \
-				  a1, \
-				  b1, \
-				  beta_use, \
-				  c11, rs_c, cs_c, \
-				  &aux, \
-				  cntx  \
-				); \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c  after", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
-			} \
-			else \
+			/* If the diagonal intersects the current MR x NR submatrix, we
+			   compute it the temporary buffer and then add in the elements
+			   on or below the diagonal.
+			   Otherwise, if the submatrix is strictly below the diagonal,
+			   we compute and store as we normally would.
+			   And if we're strictly above the diagonal, we do nothing and
+			   continue. */ \
+			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
@@ -346,20 +354,56 @@ void PASTEMAC(ch,varname) \
 				  cntx  \
 				); \
 \
-				/* Scale the bottom edge of C and add the result from above. */ \
-				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-				                        ct,  rs_ct, cs_ct, \
-				                        beta_use, \
-				                        c11, rs_c,  cs_c ); \
+				/* Scale C and add the result to only the stored part. */ \
+				PASTEMAC(ch,xpbys_mxn_l)( diagoffc_ij, \
+				                          m_cur, n_cur, \
+				                          ct,  rs_ct, cs_ct, \
+				                          beta_cast, \
+				                          c11, rs_c,  cs_c ); \
+			} \
+			else if ( bli_is_strictly_below_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
+			{ \
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
+					( \
+					  k, \
+					  alpha_cast, \
+					  a1, \
+					  b1, \
+					  beta_cast, \
+					  c11, rs_c, cs_c, \
+					  &aux, \
+					  cntx  \
+					); \
+				} \
+				else \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
+					( \
+					  k, \
+					  alpha_cast, \
+					  a1, \
+					  b1, \
+					  zero, \
+					  ct, rs_ct, cs_ct, \
+					  &aux, \
+					  cntx  \
+					); \
+\
+					/* Scale the edge of C and add the result. */ \
+					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        beta_cast, \
+					                        c11, rs_c,  cs_c ); \
+				} \
 			} \
 		} \
-		} \
 	} \
-/*printf( "gemm_ker_var3 (4m1b): returning\n" );*/ \
-\
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemm4mb_ker_var2 )
+INSERT_GENTFUNC_BASIC0( herk_l_ker_var2 )
 

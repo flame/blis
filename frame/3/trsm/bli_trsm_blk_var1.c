@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,7 +61,7 @@ void bli_trsm_blk_var1
 	bli_l3_prune_unref_mparts_m( a, b, c, cntl );
 
 	// Determine the current thread's subpartition range.
-	bli_thread_get_range_mdim
+	bli_thread_range_mdim
 	(
 	  direct, thread, a, b, c, cntl, cntx,
       &my_start, &my_end

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,7 +152,7 @@ void PASTEMAC(ch,varname) \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
        rntm_t* rntm, \
-       thrinfo_t* jr_thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t     dt         = PASTEMAC(ch,type); \
@@ -196,7 +197,7 @@ void PASTEMAC(ch,varname) \
 	dim_t           n_cur; \
 	dim_t           k_b0111; \
 	dim_t           off_b0111; \
-	dim_t           i, j; \
+	dim_t           i, j, jb0; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
@@ -325,15 +326,57 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
+\
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	dim_t ir_nt  = bli_thread_n_way( caucus ); \
+	dim_t ir_tid = bli_thread_work_id( caucus ); \
+\
+	dim_t jr_start, jr_end; \
+	dim_t ir_start, ir_end; \
+	dim_t jr_inc,   ir_inc; \
+\
+	/* Note that we partition the 2nd loop into two regions: the triangular
+	   part of C, and the rectangular portion. */ \
+	dim_t n_iter_tri; \
+	dim_t n_iter_rct; \
+\
+	if ( bli_is_strictly_above_diag_n( diagoffb, k, n ) ) \
+	{ \
+		/* If the entire panel of B does not intersect the diagonal, there is
+		   no triangular region, and therefore we can skip the first set of
+		   loops. */ \
+		n_iter_tri = 0; \
+		n_iter_rct = n_iter; \
+	} \
+	else \
+	{ \
+		/* If the panel of B does intersect the diagonal, compute the number of
+		   iterations in the triangular (or trapezoidal) region by dividing NR
+		   into the number of rows in B. (There should never be any remainder
+		   in this division.) The number of iterations in the rectangular region
+		   is computed as the remaining number of iterations in the n dimension. */ \
+		n_iter_tri = ( k + diagoffb ) / NR + ( ( k + diagoffb ) % NR ? 1 : 0 ); \
+		n_iter_rct = n_iter - n_iter_tri; \
+	} \
+\
+	/* Use interleaved (round robin) assignment of micropanels to threads in
+	   the 2nd loop for the initial triangular region of B (if it exists).
+	   NOTE: We don't need to call bli_thread_range_jrir*() here since we
+	   employ a hack that calls for each thread to execute every iteration
+	   of the jr loop but skip all but the pointer increment for iterations
+	   that are not assigned to it. */ \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \
-	thrinfo_t* ir_thread      = bli_thrinfo_sub_node( jr_thread ); \
-	dim_t jr_num_threads      = bli_thread_n_way( jr_thread ); \
-	dim_t jr_thread_id        = bli_thread_work_id( jr_thread ); \
-\
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = 0; j < n_iter_tri; ++j ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -358,7 +401,6 @@ void PASTEMAC(ch,varname) \
 		   by beta. If it is strictly below the diagonal, scale by one.
 		   This allows the current macro-kernel to work for both trmm
 		   and trmm3. */ \
-		if ( bli_intersects_diag_n( diagoffb_j, k, NR ) ) \
 		{ \
 			/* Compute the panel stride for the current diagonal-
 			   intersecting micro-panel. */ \
@@ -366,7 +408,7 @@ void PASTEMAC(ch,varname) \
 			is_b_cur += ( bli_is_odd( is_b_cur ) ? 1 : 0 ); \
 			ps_b_cur  = ( is_b_cur * ss_b_num ) / ss_b_den; \
 \
-			if ( bli_trmm_r_jr_my_iter( j, jr_thread ) ) { \
+			if ( bli_trmm_my_iter( j, thread ) ) { \
 \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
@@ -375,7 +417,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if ( bli_trmm_r_ir_my_iter( i, ir_thread ) ) { \
+				if ( bli_trmm_my_iter( i, caucus ) ) { \
 \
 				ctype* restrict a1_i; \
 				ctype* restrict a2; \
@@ -390,7 +432,7 @@ void PASTEMAC(ch,varname) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -449,30 +491,72 @@ void PASTEMAC(ch,varname) \
 \
 			b1 += ps_b_cur; \
 		} \
-		else if ( bli_is_strictly_above_diag_n( diagoffb_j, k, NR ) ) \
-		{ \
-			if ( bli_trmm_r_jr_my_iter( j, jr_thread ) ) { \
 \
+		c1 += cstep_c; \
+	} \
+\
+	/* If there is no rectangular region, then we're done. */ \
+	if ( n_iter_rct == 0 ) return; \
+\
+	/* Use contiguous assignment of micropanels to threads in both the 2nd and
+	   1st loops the remaining triangular region of B. */ \
+	bli_thread_range_jrir_sl( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_sl( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
+\
+	/* Advance the start and end iteration offsets for the rectangular region
+       by the number of iterations used for the triangular region. */ \
+    jr_start += n_iter_tri; \
+    jr_end   += n_iter_tri; \
+	jb0       = n_iter_tri; \
+\
+	/* Save the resulting value of b1 from the previous loop since it represents
+	   the starting point for the rectangular region. */ \
+	b_cast = b1; \
+\
+	/* Loop over the n dimension (NR columns at a time). */ \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
+	{ \
+		ctype* restrict a1; \
+		ctype* restrict c11; \
+		ctype* restrict b2; \
+\
+		/* NOTE: We must index through b_cast differently since it contains
+		   the starting address of the rectangular region (which is already
+		   n_iter_tri logical iterations through B). */ \
+		b1 = b_cast + (j-jb0) * cstep_b; \
+        c1 = c_cast +  j      * cstep_c; \
+\
+		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
+\
+		/* Initialize our next panel of B to be the current panel of B. */ \
+		b2 = b1; \
+\
+		/* If the current panel of B intersects the diagonal, scale C
+		   by beta. If it is strictly below the diagonal, scale by one.
+		   This allows the current macro-kernel to work for both trmm
+		   and trmm3. */ \
+		{ \
 			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
 			   object. */ \
 			bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
-			for ( i = 0; i < m_iter; ++i ) \
+			for ( i = ir_start; i < ir_end; i += ir_inc ) \
 			{ \
-				if ( bli_trmm_r_ir_my_iter( i, ir_thread ) ) { \
-\
 				ctype* restrict a2; \
+\
+				a1  = a_cast + i * rstep_a; \
+				c11 = c1     + i * rstep_c; \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				a2 = bli_trmm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+				if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) ) \
 				{ \
 					a2 = a_cast; \
-					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+					b2 = bli_trmm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -517,18 +601,11 @@ void PASTEMAC(ch,varname) \
 					                       ct,  rs_ct, cs_ct, \
 					                       c11, rs_c,  cs_c ); \
 				} \
-				} \
-\
-				a1  += rstep_a; \
-				c11 += rstep_c; \
 			} \
-			} \
-\
-			b1 += cstep_b; \
 		} \
-\
-		c1 += cstep_c; \
 	} \
+\
+\
 \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: a1", MR, k_b0111, a1, 1, MR, "%4.1f", "" );*/ \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_ru_ker_var2: b1", k_b0111, NR, b1_i, NR, 1, "%4.1f", "" );*/ \
