@@ -46,6 +46,20 @@ advance in dense linear algebra computation. While BLIS remains a
 work-in-progress, we are excited to continue its development and further
 cultivate its use within the community. 
 
+The BLIS framework is primarily maintained and led by individuals in the
+[Science of High-Performance Computing](http://shpc.ices.utexas.edu/)
+(SHPC) group in the
+[Institute for Computational Engineering and Sciences](https://www.ices.utexas.edu/)
+at [The University of Texas at Austin](https://www.utexas.edu/).
+Please visit the [SHPC](http://shpc.ices.utexas.edu/) website for more
+information about our research group, such as a list of
+[people](http://shpc.ices.utexas.edu/people.html)
+and [collaborators](http://shpc.ices.utexas.edu/collaborators.html),
+[funding sources](http://shpc.ices.utexas.edu/funding.html),
+[publications](http://shpc.ices.utexas.edu/publications.html),
+and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
+
+
 Key Features
 ------------
 
