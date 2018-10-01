@@ -176,10 +176,11 @@ static err_t bli_sgemm_small
     int M = bli_obj_length( c ); // number of rows of Matrix C
     int N = bli_obj_width( c );  // number of columns of Matrix C
     int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    int L = M * N;
 
                                 //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
-    if ((((M * N) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
-        || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((M&N&K)!=0))
+    if ((((L) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
+        || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
 
         int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
@@ -1577,11 +1578,12 @@ static err_t bli_dgemm_small
     int M = bli_obj_length( c ); // number of rows of Matrix C
     int N = bli_obj_width( c );  // number of columns of Matrix C
     int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    int L = M * N;
 
                                 // If alpha is zero, scale by beta and return.
                                 //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
-    if ((((M * N) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
-        || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((M&N&K) != 0))
+    if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
+        || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
 
         int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
