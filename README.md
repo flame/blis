@@ -46,7 +46,7 @@ advance in dense linear algebra computation. While BLIS remains a
 work-in-progress, we are excited to continue its development and further
 cultivate its use within the community. 
 
-The BLIS framework is primarily maintained and led by individuals in the
+The BLIS framework is primarily developed and maintained by individuals in the
 [Science of High-Performance Computing](http://shpc.ices.utexas.edu/)
 (SHPC) group in the
 [Institute for Computational Engineering and Sciences](https://www.ices.utexas.edu/)
