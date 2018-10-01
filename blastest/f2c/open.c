@@ -245,7 +245,12 @@ int fk_open(int seq, int fmt, ftnint n)
 {
 	char nbuf[10];
 	olist a;
-	(void) sprintf(nbuf,"fort.%ld",(long)n);
+	// FGVZ: gcc 7.3 outputs a warning that the integer value corresponding
+	// to the "%ld" format specifier could (in theory) use up 11 bytes in a
+	// string that only allows for five additional bytes. I use the modulo
+	// operator to reassure gcc that the integer will be very small.
+	//(void) sprintf(nbuf,"fort.%ld",(long)n);
+	(void) sprintf(nbuf,"fort.%ld",(long)n % 20);
 	a.oerr=1;
 	a.ounit=n;
 	a.ofnm=nbuf;
