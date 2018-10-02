@@ -36,10 +36,7 @@
 #ifndef BLIS_CONFIGURETIME_CPUID
   #include "blis.h"
 #else
-  #include <stdlib.h>
-  #include <string.h>
-  #include <stdint.h>
-  #include <pthread.h>
+  #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_arch.h"
   #include "bli_cpuid.h"

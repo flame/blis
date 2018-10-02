@@ -903,7 +903,7 @@ typedef struct
 
 // -- Memory broker object type --
 
-#include <pthread.h>
+#include "bli_pthread_wrap.h"
 #include "bli_malloc.h"
 
 typedef struct membrk_s

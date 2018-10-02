@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,18 +32,34 @@
 
 */
 
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_arch.h"
-#include "bli_cpuid.h"
+#ifndef BLIS_PTHREAD_WRAP_H
+#define BLIS_PTHREAD_WRAP_H
 
-int main( int argc, char** argv )
-{
-	arch_t id = bli_cpuid_query_id();
-	char*  s  = bli_arch_string( id );
+#if defined(_MSC_VER) && !defined(BLIS_ENABLE_PTHREADS)
 
-	printf( "%s\n", s );
+typedef SRWLOCK pthread_mutex_t;
+typedef INIT_ONCE pthread_once_t;
+typedef void pthread_mutexattr_t;
 
-	return 0;
-}
+#define PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
+#define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
 
+int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t *attr);
+
+int pthread_mutex_destroy(pthread_mutex_t* mutex);
+
+int pthread_mutex_lock(pthread_mutex_t* mutex);
+
+int pthread_mutex_trylock(pthread_mutex_t* mutex);
+
+int pthread_mutex_unlock(pthread_mutex_t* mutex);
+
+void pthread_once(pthread_once_t* once, void (*init)(void));
+
+#else
+
+#include <pthread.h>
+
+#endif
+
+#endif

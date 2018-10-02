@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,18 +32,53 @@
 
 */
 
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_arch.h"
-#include "bli_cpuid.h"
+#include "blis.h"
 
-int main( int argc, char** argv )
+#if defined(_MSC_VER) && !defined(BLIS_ENABLE_PTHREADS)
+
+int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t *attr)
 {
-	arch_t id = bli_cpuid_query_id();
-	char*  s  = bli_arch_string( id );
-
-	printf( "%s\n", s );
-
-	return 0;
+    if (attr != NULL) return EINVAL;
+    InitializeSRWLock(mutex);
+    return 0;
 }
 
+int pthread_mutex_destroy(pthread_mutex_t* mutex)
+{
+    return 0;
+}
+
+int pthread_mutex_lock(pthread_mutex_t* mutex)
+{
+    AcquireSRWLockExclusive(mutex);
+    return 0;
+}
+
+int pthread_mutex_trylock(pthread_mutex_t* mutex)
+{
+    return TryAcquireSRWLockExclusive(mutex) ? 0 : EBUSY;
+}
+
+int pthread_mutex_unlock(pthread_mutex_t* mutex)
+{
+    ReleaseSRWLockExclusive(mutex);
+    return 0;
+}
+
+static BOOL bli_init_once_wrapper(pthread_once_t* once,
+                                  void* param,
+                                  void** context)
+{
+    (void)once;
+    (void)context;
+    typedef void (*callback)(void);
+    ((callpack)param)();
+    return TRUE;
+}
+
+void pthread_once(pthread_once_t* once, void (*init)(void))
+{
+    InitOnceExecuteOnce(once, bli_init_once_wrapper, init, NULL);
+}
+
+#endif
