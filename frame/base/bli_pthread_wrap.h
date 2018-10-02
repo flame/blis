@@ -90,9 +90,7 @@ int pthread_join(pthread_t thread, void **retval);
 
 #endif
 
-//#ifdef __APPLE__
-//#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
+#if defined(__APPLE__) || defined(_MSC_VER)
 
 typedef void pthread_barrierattr_t;
 

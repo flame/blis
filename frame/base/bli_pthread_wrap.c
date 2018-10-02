@@ -141,7 +141,7 @@ int pthread_join(pthread_t thread, void **retval)
 
 #endif
 
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
+#if defined(__APPLE__) || defined(_MSC_VER)
 
 int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count)
 {
