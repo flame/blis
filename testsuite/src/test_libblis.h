@@ -53,12 +53,7 @@
 #endif
 
 // For pthreads API.
-#include <pthread.h>
-//#ifdef __APPLE__
-//#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
-#include "pthread_barrier.h"
-#endif
+#include "bli_pthread_wrap.h"
 
 //
 // --- Constants and types -----------------------------------------------------
