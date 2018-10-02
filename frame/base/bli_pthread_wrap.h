@@ -35,10 +35,7 @@
 #ifndef BLIS_PTHREAD_WRAP_H
 #define BLIS_PTHREAD_WRAP_H
 
-#include "bli_config.h"
-#include "bli_config_macro_defs.h"
-
-#if defined(_MSC_VER) && !defined(BLIS_ENABLE_PTHREADS)
+#if defined(_MSC_VER)
 
 typedef SRWLOCK pthread_mutex_t;
 typedef void pthread_mutexattr_t;
