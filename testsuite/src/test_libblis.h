@@ -52,9 +52,6 @@
 #include <unistd.h>
 #endif
 
-// For pthreads API.
-#include "bli_pthread_wrap.h"
-
 //
 // --- Constants and types -----------------------------------------------------
 //
