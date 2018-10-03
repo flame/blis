@@ -196,42 +196,90 @@ $ make install
 ```
 Please read the output of `./configure --help` for a full list of configure-time
 options.
-If/when you have time, we *strongly* encourage you to read the detailed walkthrough
-of the build system found in our [Build System](docs/BuildSystem.md) guide.
+If/when you have time, we *strongly* encourage you to read the detailed
+walkthrough of the build system found in our [Build System](docs/BuildSystem.md)
+guide.
 
 Documentation
 -------------
 
-We provide extensive documentation on the BLIS build system, APIs, test infrastructure, and other important topics. All documentation is formatted in markdown and included in the BLIS source distribution (usually in the `docs` directory). Slightly longer descriptions of each document may be found via in the project's [wiki](https://github.com/flame/blis/wiki) section.
+We provide extensive documentation on the BLIS build system, APIs, test
+infrastructure, and other important topics. All documentation is formatted in
+markdown and included in the BLIS source distribution (usually in the `docs`
+directory). Slightly longer descriptions of each document may be found via in
+the project's [wiki](https://github.com/flame/blis/wiki) section.
 
 **Documents for everyone:**
-- **[Build System](https://github.com/flame/blis/blob/master/docs/BuildSystem.md).** This document covers the basics of configuring and building BLIS libraries, as well as related topics.
-- **[Testsuite](https://github.com/flame/blis/blob/master/docs/Testsuite.md).** This document describes how to run BLIS's highly parameterized and configurable test suite, as well as the included BLAS test drivers.
-- **[BLIS Typed API Reference](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md).** Here we document the so-called "typed" (or BLAS-like) API. This is the API that many users who are already familiar with the BLAS will likely want to use. You can find lots of example code for the typed API in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory included in the BLIS source distribution.
-- **[BLIS Object API Reference](https://github.com/flame/blis/blob/master/docs/BLISObjectAPI.md).** Here we document the object API. This is API abstracts away properties of vectors and matrices within `obj_t` structs that can be queried with accessor functions. Many developers and experts prefer this API over the typed API. You can find lots of example code for the object API in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory included in the BLIS source distribution.
-- **[Hardware Support](https://github.com/flame/blis/blob/master/docs/HardwareSupport.md).** This document maintains a table of supported microarchitectures.
-- **[Multithreading](https://github.com/flame/blis/blob/master/docs/Multithreading.md).** This document describes how to use the multithreading features of BLIS.
-- **[Release Notes](https://github.com/flame/blis/blob/master/docs/ReleaseNotes.md).** This document tracks a summary of changes included with each new version of BLIS, along with contributor credits for key features.
-- **[Frequently Asked Questions](https://github.com/flame/blis/blob/master/docs/FAQ.md).** If you have general questions about BLIS, please read this FAQ. If you can't find the answer to your question, please feel free to join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and post a question. We also have a [blis-discuss](http://groups.google.com/group/blis-discuss) mailing list that anyone can post to (even without joining). 
+ * **[Build System](docs/BuildSystem.md).** This document covers the basics of
+configuring and building BLIS libraries, as well as related topics.
+ * **[Testsuite](docs/Testsuite.md).** This document describes how to run
+BLIS's highly parameterized and configurable test suite, as well as the
+included BLAS test drivers.
+ * **[BLIS Typed API Reference](docs/BLISTypedAPI.md).** Here we document the
+so-called "typed" (or BLAS-like) API. This is the API that many users who are
+already familiar with the BLAS will likely want to use. You can find lots of
+example code for the typed API in the [examples/tapi](examples/tapi) directory
+included in the BLIS source distribution.
+ * **[BLIS Object API Reference](docs/BLISObjectAPI.md).** Here we document
+the object API. This is API abstracts away properties of vectors and matrices
+within `obj_t` structs that can be queried with accessor functions. Many
+developers and experts prefer this API over the typed API. You can find lots of
+example code for the object API in the [examples/oapi](examples/oapi) directory
+included in the BLIS source distribution.
+ * **[Hardware Support](docs/HardwareSupport.md).** This document maintains a
+table of supported microarchitectures.
+ * **[Multithreading](docs/Multithreading.md).** This document describes how to
+use the multithreading features of BLIS.
+ * **[Release Notes](docs/ReleaseNotes.md).** This document tracks a summary of
+changes included with each new version of BLIS, along with contributor credits
+for key features.
+ * **[Frequently Asked Questions](docs/FAQ.md).** If you have general questions
+about BLIS, please read this FAQ. If you can't find the answer to your question,
+please feel free to join the [blis-devel](https://groups.google.com/group/blis-devel)
+mailing list and post a question. We also have a
+[blis-discuss](https://groups.google.com/group/blis-discuss) mailing list that
+anyone can post to (even without joining). 
 
 **Documents for github contributors:**
-- **[Contributing bug reports, feature requests, PRs, etc](https://github.com/flame/blis/blob/master/CONTRIBUTING.md).** Interested in contributing to BLIS? Please read this document before getting started. It provides a general overview of how best to report bugs, propose new features, and offer code patches. 
-- **[Coding Conventions](https://github.com/flame/blis/blob/master/docs/CodingConventions.md).** If you are interested or planning on contributing code to BLIS, please read this document so that you can format your code in accordance with BLIS's standards.
+ * **[Contributing bug reports, feature requests, PRs, etc](CONTRIBUTING.md).**
+Interested in contributing to BLIS? Please read this document before getting
+started. It provides a general overview of how best to report bugs, propose new
+features, and offer code patches. 
+ * **[Coding Conventions](docs/CodingConventions.md).** If you are interested or
+planning on contributing code to BLIS, please read this document so that you can
+format your code in accordance with BLIS's standards.
 
 **Documents for BLIS developers:**
-- **[Kernels Guide](https://github.com/flame/blis/blob/master/docs/KernelsHowTo.md).** If you would like to learn more about the types of kernels that BLIS exposes, their semantics, the operations that each kernel accelerates, and various implementation issues, please read this guide.
-- **[Configuration Guide](https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md).** If you would like to learn how to add new sub-configurations or configuration families, or are simply interested in learning how BLIS organizes its configurations and kernel sets, please read this thorough walkthrough of the configuration system.
-- **[Sandbox Guide](https://github.com/flame/blis/blob/master/docs/Sandboxes.md).** If you are interested in learning about using sandboxes in BLIS--that is, providing alternative implementations of the `gemm` operation--please read this document.
+ * **[Kernels Guide](docs/KernelsHowTo.md).** If you would like to learn more
+about the types of kernels that BLIS exposes, their semantics, the operations
+that each kernel accelerates, and various implementation issues, please read
+this guide.
+ * **[Configuration Guide](docs/ConfigurationHowTo.md).** If you would like to
+learn how to add new sub-configurations or configuration families, or are simply
+interested in learning how BLIS organizes its configurations and kernel sets,
+please read this thorough walkthrough of the configuration system.
+ * **[Sandbox Guide](docs/Sandboxes.md).** If you are interested in learning
+about using sandboxes in BLIS--that is, providing alternative implementations
+of the `gemm` operation--please read this document.
 
 External Linux packages
 -----------------------
 
-Generally speaking, we **highly recommend** building from source whenever possible using the latest `git` clone. (Tarballs of each [tagged release](https://github.com/flame/blis/releases) are also available, but are not preferred since they are more difficult to upgrade from than a git clone.)
+Generally speaking, we **highly recommend** building from source whenever
+possible using the latest `git` clone. (Tarballs of each
+[tagged release](https://github.com/flame/blis/releases) are also available, but
+are not preferred since they are more difficult to upgrade from than a git
+clone.)
 
-If you prefer (or need) binary packages, please check out the following offerings available thanks to generous involvement/contributions from two of our community members.
+If you prefer (or need) binary packages, please check out the following offerings
+available thanks to generous involvement/contributions from two of our community
+members.
 
- * Red Hat/Fedora. Dave Love provides rpm packages for x86_64, which he maintains at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
- * Ubuntu/Debian. Nico Schlömer provides apt packages for various architectures, which he maintains at the PPA [launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
+ * Red Hat/Fedora. Dave Love provides rpm packages for x86_64, which he maintains
+at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
+ * Ubuntu/Debian. Nico Schlömer provides apt packages for various architectures,
+which he maintains at the PPA
+[launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
 
 Discussion
 ----------
@@ -239,24 +287,27 @@ Discussion
 You can keep in touch with developers and other users of the project by joining
 one of the following mailing lists:
 
- * [blis-devel](http://groups.google.com/group/blis-devel): Please join and
+ * [blis-devel](https://groups.google.com/group/blis-devel): Please join and
 post to this mailing list if you are a BLIS developer, or if you are trying
 to use BLIS beyond simply linking to it as a BLAS library.
 **Note:** Most of the interesting discussions happen here; don't be afraid to
 join! If you would like to submit a bug report, or discuss a possible bug,
-please consider opening a [new issue](http://github.com/flame/blis/issues) on
+please consider opening a [new issue](https://github.com/flame/blis/issues) on
 github.
 
- * [blis-discuss](http://groups.google.com/group/blis-discuss): Please join and
+ * [blis-discuss](https://groups.google.com/group/blis-discuss): Please join and
 post to this mailing list if you have general questions or feedback regarding
 BLIS. Application developers (end users) may wish to post here, unless they
 have bug reports, in which case they should open a
-[new issue](http://github.com/flame/blis/issues) on github.
+[new issue](https://github.com/flame/blis/issues) on github.
 
 Contributing
 ------------
 
-For information on how to contribute to our project, including preferred [coding conventions](docs/CodingConventions), please refer to the [CONTRIBUTING](CONTRIBUTING.md) file at the top-level of the BLIS source distribution.
+For information on how to contribute to our project, including preferred
+[coding conventions](docs/CodingConventions), please refer to the
+[CONTRIBUTING](CONTRIBUTING.md) file at the top-level of the BLIS source
+distribution.
 
 Citations
 ---------
