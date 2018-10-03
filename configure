@@ -1124,8 +1124,9 @@ get_compiler_version()
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
-	if [ "$cc_vendor" = "icc" -o "$cc_vendor" = "gcc" -o "$cc_vendor" = "clang" ]
-	then
+	if [ "${cc_vendor}" = "icc" -o \
+	     "${cc_vendor}" = "gcc" -o \
+	     "${cc_vendor}" = "clang" ]; then
 		cc_version=$(${cc} -dumpversion)
 	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
@@ -1136,6 +1137,23 @@ get_compiler_version()
 	cc_major=$(echo "${cc_version}" | cut -d. -f1)
 	cc_minor=$(echo "${cc_version}" | cut -d. -f2)
 	cc_revision=$(echo "${cc_version}" | cut -d. -f3)
+
+	# gcc 7 introduced new behavior to -dumpversion whereby only the major
+	# version component is output. However, as part of this change, gcc 7
+	# also introduced a new option, -dumpfullversion, which is guaranteed to
+	# always output the major, minor, and revision numbers. Thus, if we're
+	# using gcc and its version is 7 or later, we re-query and re-parse the
+	# version string.
+	if [ "${cc_vendor}" = "gcc" -a ${cc_major} -ge 7 ]; then
+
+		# Re-query the version number using -dumpfullversion.
+		cc_version=$(${cc} -dumpfullversion)
+
+		# And parse the result.
+		cc_major=$(echo "${cc_version}" | cut -d. -f1)
+		cc_minor=$(echo "${cc_version}" | cut -d. -f2)
+		cc_revision=$(echo "${cc_version}" | cut -d. -f3)
+	fi
 
 	echo "${script_name}: found ${cc_vendor} version ${cc_version} (maj: ${cc_major}, min: ${cc_minor}, rev: ${cc_revision})."
 }
