@@ -74,7 +74,7 @@ static BOOL bli_init_once_wrapper(pthread_once_t* once,
     (void)once;
     (void)context;
     typedef void (*callback)(void);
-    ((callpack)param)();
+    ((callback)param)();
     return TRUE;
 }
 
