@@ -117,7 +117,10 @@ for nc in ${cores_r}; do
 					th="mt"
 				else
 
-					export BLIS_NUM_THREADS=1
+					export BLIS_JC_NT=1
+					export BLIS_IC_NT=1
+					export BLIS_JR_NT=1
+					export BLIS_IR_NT=1
 					export OMP_NUM_THREADS=1
 					out_dir="${out_rootdir}/st"
 					mkdir -p $out_rootdir/st
@@ -181,7 +184,10 @@ for nc in ${cores}; do
 					th="mt"
 				else
 
-					export BLIS_NUM_THREADS=1
+                                        export BLIS_JC_NT=1
+                                        export BLIS_IC_NT=1
+                                        export BLIS_JR_NT=1
+                                        export BLIS_IR_NT=1
 					export OMP_NUM_THREADS=1
 					out_dir="${out_rootdir}/st"
 					th="st"
