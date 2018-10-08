@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -54,7 +55,28 @@ cntl_t* blx_gemmbp_cntl_create
        pack_t schema_b
      )
 {
-	void* macro_kernel_p = blx_gemm_ker_var2;
+	void* macro_kernel_fp;
+	void* packa_fp;
+	void* packb_fp;
+
+#ifdef BLIS_ENABLE_JRIR_SLAB
+
+	// Use the function pointers to the macrokernels that use slab
+	// assignment of micropanels to threads in the jr and ir loops.
+	macro_kernel_fp = blx_gemm_ker_var2sl;
+
+	packa_fp = bli_packm_blk_var1sl;
+	packb_fp = bli_packm_blk_var1sl;
+
+#else // BLIS_ENABLE_JRIR_RR
+
+	// Use the function pointers to the macrokernels that use round-robin
+	// assignment of micropanels to threads in the jr and ir loops.
+	macro_kernel_fp = bli_gemm_ker_var2rr;
+
+	packa_fp = bli_packm_blk_var1rr;
+	packb_fp = bli_packm_blk_var1rr;
+#endif
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = blx_gemm_cntl_create_node
@@ -69,7 +91,7 @@ cntl_t* blx_gemmbp_cntl_create
 	(
 	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
-	  macro_kernel_p,
+	  macro_kernel_fp,
 	  gemm_cntl_bu_ke
 	);
 
@@ -77,7 +99,7 @@ cntl_t* blx_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packa = blx_packm_cntl_create_node
 	(
 	  blx_gemm_packa,  // pack the left-hand operand
-	  bli_packm_blk_var1,
+	  packa_fp,
 	  BLIS_MR,
 	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
@@ -101,7 +123,7 @@ cntl_t* blx_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packb = blx_packm_cntl_create_node
 	(
 	  blx_gemm_packb,  // pack the right-hand operand
-	  bli_packm_blk_var1,
+	  packb_fp,
 	  BLIS_KR,
 	  BLIS_NR,
 	  FALSE,   // do NOT invert diagonal

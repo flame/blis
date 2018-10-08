@@ -792,14 +792,16 @@ static bool_t bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 	       ( i != 0 || n_left == 0 );
 }
 
-static bool_t bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+static bool_t bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
 	return ( bool_t )
-#ifdef BLIS_JRIR_INTERLEAVE
-	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
-#else
 	       ( i == end_iter - 1 );
-#endif
+}
+
+static bool_t bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+{
+	return ( bool_t )
+	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
 }
 
 

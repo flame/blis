@@ -55,10 +55,13 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,trmm_rl_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,trmm_rl_ker_var2rr);
 
+//
+// -- Macrokernel functions for round-robin partitioning -----------------------
+//
 
-void bli_trmm_rl_ker_var2
+void bli_trmm_rl_ker_var2rr
      (
        obj_t*  a,
        obj_t*  b,
@@ -360,12 +363,10 @@ void PASTEMAC(ch,varname) \
 		n_iter_tri = n_iter - n_iter_rct; \
 	} \
 \
-	/* Use contiguous assignment of micropanels to threads in the 2nd loop for
-	   the initial rectangular region of B (if it exists). For both the
-	   rectangular and triangular regions, use contiguous assignment for the
-	   1st loop as well. */ \
-	bli_thread_range_jrir_sl( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
-	bli_thread_range_jrir_sl( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
+	/* Use round-robin assignment of micropanels to threads in the 2nd and 1st
+	   loops for the initial rectangular region of B (if it exists). */ \
+	bli_thread_range_jrir_rr( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_rr( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_start; j < jr_end; j += jr_inc ) \
@@ -399,11 +400,11 @@ void PASTEMAC(ch,varname) \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = bli_trmm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-				if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) ) \
+				if ( bli_is_last_iter_rr( i, m_iter, ir_tid, ir_nt ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = bli_trmm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
+					if ( bli_is_last_iter_rr( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -455,12 +456,12 @@ void PASTEMAC(ch,varname) \
 	/* If there is no triangular region, then we're done. */ \
 	if ( n_iter_tri == 0 ) return; \
 \
-	/* Use interleaved (round robin) assignment of micropanels to threads in
-       the 2nd loop for the remaining triangular region of B (if it exists).
+	/* Use round-robin assignment of micropanels to threads in the 2nd loop
+	   for the remaining triangular region of B (if it exists).
 	   NOTE: We don't need to call bli_thread_range_jrir*() here since we
 	   employ a hack that calls for each thread to execute every iteration
-	   of the jr loop but skip all but the pointer increment for iterations
-	   that are not assigned to it. */ \
+	   of the jr and ir loops but skip all but the pointer increment for
+	   iterations that are not assigned to it. */ \
 \
 	/* Advance the starting b1 and c1 pointers to the positions corresponding
 	   to the start of the triangular region of B. */ \
@@ -522,11 +523,11 @@ void PASTEMAC(ch,varname) \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
+					if ( bli_is_last_iter_rr( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -589,9 +590,9 @@ void PASTEMAC(ch,varname) \
 		c1 += cstep_c; \
 	} \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_rl_ker_var2: a1", MR, k_b1121, a1, 1, MR, "%4.1f", "" );*/ \
-/*PASTEMAC(ch,fprintm)( stdout, "trmm_rl_ker_var2: b1", k_b1121, NR, b1_i, NR, 1, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_rl_ker_var2rr: a1", MR, k_b1121, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_rl_ker_var2rr: b1", k_b1121, NR, b1_i, NR, 1, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC0( trmm_rl_ker_var2 )
+INSERT_GENTFUNC_BASIC0( trmm_rl_ker_var2rr )
 

@@ -56,10 +56,13 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2rr);
 
+//
+// -- Macrokernel functions for round-robin partitioning -----------------------
+//
 
-void bli_gemm_ker_var2
+void bli_gemm_ker_var2rr
      (
        obj_t*  a,
        obj_t*  b,
@@ -117,7 +120,6 @@ void bli_gemm_ker_var2
     // real-valued beta, we can use the real domain macro-kernel, which
 	// eliminates a little overhead associated with the 1m virtual
 	// micro-kernel.
-#if 1
 	if ( bli_is_1m_packed( schema_a ) )
 	{
 		bli_l3_ind_recast_1m_params
@@ -131,7 +133,6 @@ void bli_gemm_ker_var2
 		  rs_c, cs_c
 		);
 	}
-#endif
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -285,8 +286,8 @@ void PASTEMAC(ch,varname) \
 	dim_t jr_inc,   ir_inc; \
 \
 	/* Determine the thread range and increment for each thrinfo_t node. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
-	bli_thread_range_jrir( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
+	bli_thread_range_jrir_rr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_start; j < jr_end; j += jr_inc ) \
@@ -315,11 +316,11 @@ void PASTEMAC(ch,varname) \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
+			if ( bli_is_last_iter_rr( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
+				if ( bli_is_last_iter_rr( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -369,11 +370,11 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 /*
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2rr: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2rr: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2rr: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemm_ker_var2 )
+INSERT_GENTFUNC_BASIC0( gemm_ker_var2rr )
 

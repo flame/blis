@@ -34,31 +34,39 @@
 */
 
 #include "blis.h"
+#include "blix.h"
 
-#define FUNCPTR_T gemm_fp
+// Function pointer type for datatype-specific functions.
+typedef void (*gemm_fp)
+     (
+       pack_t  schema_a,
+       pack_t  schema_b,
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       void*   alpha,
+       void*   a, inc_t cs_a, inc_t is_a,
+                  dim_t pd_a, inc_t ps_a,
+       void*   b, inc_t rs_b, inc_t is_b,
+                  dim_t pd_b, inc_t ps_b,
+       void*   beta,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
 
-typedef void (*FUNCPTR_T)(
-                           pack_t  schema_a,
-                           pack_t  schema_b,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   k,
-                           void*   alpha,
-                           void*   a, inc_t cs_a, inc_t is_a,
-                                      dim_t pd_a, inc_t ps_a,
-                           void*   b, inc_t rs_b, inc_t is_b,
-                                      dim_t pd_b, inc_t ps_b,
-                           void*   beta,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx,
-                           rntm_t* rntm,
-                           thrinfo_t* thread
-                         );
-
-static FUNCPTR_T GENARRAY(ftypes,gemm4mb_ker_var2);
+// Function pointer array for datatype-specific functions.
+static gemm_fp ftypes[BLIS_NUM_FP_TYPES] =
+{
+    PASTECH2(blx_,s,gemm_ker_var2rr),
+    PASTECH2(blx_,c,gemm_ker_var2rr),
+    PASTECH2(blx_,d,gemm_ker_var2rr),
+    PASTECH2(blx_,z,gemm_ker_var2rr)
+};
 
 
-void bli_gemm4mb_ker_var2
+void blx_gemm_ker_var2rr
      (
        obj_t*  a,
        obj_t*  b,
@@ -100,7 +108,7 @@ void bli_gemm4mb_ker_var2
 	void*     buf_alpha;
 	void*     buf_beta;
 
-	FUNCPTR_T f;
+	gemm_fp   f;
 
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
@@ -138,7 +146,7 @@ void bli_gemm4mb_ker_var2
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+void PASTECH2(blx_,ch,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \
@@ -170,7 +178,10 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
-	/* Temporary C buffer for edge cases. */ \
+	/* Temporary C buffer for edge cases. Note that the strides of this
+	   temporary buffer are set so that they match the storage of the
+	   original C matrix. For example, if C is column-stored, ct will be
+	   column-stored as well. */ \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
@@ -179,7 +190,6 @@ void PASTEMAC(ch,varname) \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
 	ctype* restrict zero       = PASTEMAC(ch,0); \
-	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
 	ctype* restrict c_cast     = c; \
@@ -191,7 +201,6 @@ void PASTEMAC(ch,varname) \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
 	dim_t           i, j; \
-	dim_t           ii; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
 	inc_t           rstep_a; \
@@ -247,22 +256,32 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
-	dim_t jr_num_threads = bli_thread_n_way( thread ); \
-	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
-	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
-	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
 \
-	dim_t jr_inc = jr_num_threads; \
-	dim_t ir_inc = ir_num_threads; \
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	dim_t ir_nt  = bli_thread_n_way( caucus ); \
+	dim_t ir_tid = bli_thread_work_id( caucus ); \
+\
+	dim_t jr_start, jr_end; \
+	dim_t ir_start, ir_end; \
+	dim_t jr_inc,   ir_inc; \
+\
+	/* Determine the thread range and increment for each thrinfo_t node. */ \
+	bli_thread_range_jrir_rr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
-        \
+\
 		b1 = b_cast + j * cstep_b; \
 		c1 = c_cast + j * cstep_c; \
 \
@@ -271,25 +290,8 @@ void PASTEMAC(ch,varname) \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
-		/* In the 4mb method, we execute the ir loop twice: once for b_r
-		   and once for b_i. */ \
-		for ( ii = 0; ii < 2; ++ii ) \
-		{ \
-		ctype* restrict beta_use; \
-\
-		if ( ii == 0 ) \
-		{ \
-			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_RO, &aux ); \
-			beta_use = beta_cast; \
-		} \
-		else \
-		{ \
-			bli_auxinfo_set_schema_b( BLIS_PACKED_COL_PANELS_IO, &aux ); \
-			beta_use = one; \
-		} \
-\
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
+		for ( i = ir_start; i < ir_end; i += ir_inc ) \
 		{ \
 			ctype* restrict a2; \
 \
@@ -300,11 +302,11 @@ void PASTEMAC(ch,varname) \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter_rr( i, m_iter, ir_thread_id, ir_num_threads ) ) \
+			if ( bli_is_last_iter_rr( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter_rr( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+				if ( bli_is_last_iter_rr( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -316,7 +318,6 @@ void PASTEMAC(ch,varname) \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \
 			{ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c before", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
@@ -324,12 +325,11 @@ void PASTEMAC(ch,varname) \
 				  alpha_cast, \
 				  a1, \
 				  b1, \
-				  beta_use, \
+				  beta_cast, \
 				  c11, rs_c, cs_c, \
 				  &aux, \
 				  cntx  \
 				); \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c  after", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
 			} \
 			else \
 			{ \
@@ -349,17 +349,25 @@ void PASTEMAC(ch,varname) \
 				/* Scale the bottom edge of C and add the result from above. */ \
 				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
 				                        ct,  rs_ct, cs_ct, \
-				                        beta_use, \
+				                        beta_cast, \
 				                        c11, rs_c,  cs_c ); \
 			} \
 		} \
-		} \
 	} \
-/*printf( "gemm_ker_var3 (4m1b): returning\n" );*/ \
 \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3: a1", MR, k, a1, 1, MR, "%4.1f", "" );*/ \
+/*
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
+*/ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemm4mb_ker_var2 )
+#if 0
+GENTFUNC( float,    s, gemm_ker_var2rr )
+GENTFUNC( double,   d, gemm_ker_var2rr )
+GENTFUNC( scomplex, c, gemm_ker_var2rr )
+GENTFUNC( dcomplex, z, gemm_ker_var2rr )
+#else
+INSERT_GENTFUNC_BASIC0( gemm_ker_var2rr )
+#endif
 

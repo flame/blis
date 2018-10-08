@@ -34,10 +34,10 @@
 */
 
 #include "blis.h"
-#include "blix.h"
 
-// Function pointer type for datatype-specific functions.
-typedef void (*gemm_fp)
+#define FUNCPTR_T gemm_fp
+
+typedef void (*FUNCPTR_T)
      (
        pack_t  schema_a,
        pack_t  schema_b,
@@ -56,17 +56,13 @@ typedef void (*gemm_fp)
        thrinfo_t* thread
      );
 
-// Function pointer array for datatype-specific functions.
-static gemm_fp ftypes[BLIS_NUM_FP_TYPES] =
-{
-    PASTECH2(blx_,s,gemm_ker_var2),
-    PASTECH2(blx_,c,gemm_ker_var2),
-    PASTECH2(blx_,d,gemm_ker_var2),
-    PASTECH2(blx_,z,gemm_ker_var2)
-};
+static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2sl);
 
+//
+// -- Macrokernel functions for slab partitioning ------------------------------
+//
 
-void blx_gemm_ker_var2
+void bli_gemm_ker_var2sl
      (
        obj_t*  a,
        obj_t*  b,
@@ -108,7 +104,7 @@ void blx_gemm_ker_var2
 	void*     buf_alpha;
 	void*     buf_beta;
 
-	gemm_fp   f;
+	FUNCPTR_T f;
 
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
@@ -119,6 +115,24 @@ void blx_gemm_ker_var2
 	// merged above and the scalar attached to C.
 	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( c );
+
+	// If 1m is being employed on a column- or row-stored matrix with a
+	// real-valued beta, we can use the real domain macro-kernel, which
+	// eliminates a little overhead associated with the 1m virtual
+	// micro-kernel.
+	if ( bli_is_1m_packed( schema_a ) )
+	{
+		bli_l3_ind_recast_1m_params
+		(
+		  dt_exec,
+		  schema_a,
+		  c,
+		  m, n, k,
+		  pd_a, ps_a,
+		  pd_b, ps_b,
+		  rs_c, cs_c
+		);
+	}
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -146,7 +160,7 @@ void blx_gemm_ker_var2
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTECH2(blx_,ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \
@@ -272,8 +286,8 @@ void PASTECH2(blx_,ch,varname) \
 	dim_t jr_inc,   ir_inc; \
 \
 	/* Determine the thread range and increment for each thrinfo_t node. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
-	bli_thread_range_jrir( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
+	bli_thread_range_jrir_sl( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_sl( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_start; j < jr_end; j += jr_inc ) \
@@ -302,11 +316,11 @@ void PASTECH2(blx_,ch,varname) \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
 			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
+			if ( bli_is_last_iter_sl( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
 				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
+				if ( bli_is_last_iter_sl( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -356,18 +370,11 @@ void PASTECH2(blx_,ch,varname) \
 	} \
 \
 /*
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
 */ \
 }
 
-#if 0
-GENTFUNC( float,    s, gemm_ker_var2 )
-GENTFUNC( double,   d, gemm_ker_var2 )
-GENTFUNC( scomplex, c, gemm_ker_var2 )
-GENTFUNC( dcomplex, z, gemm_ker_var2 )
-#else
-INSERT_GENTFUNC_BASIC0( gemm_ker_var2 )
-#endif
+INSERT_GENTFUNC_BASIC0( gemm_ker_var2sl )
 

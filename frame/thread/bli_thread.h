@@ -232,8 +232,6 @@ void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 
-//printf( "bli_thread_range_jrir: inlv: th%d: start end inc: %d %d %d\n", (int)bli_thread_work_id( thread ), (int)*start, (int)*end, (int)*inc );
-
 static void bli_thread_range_jrir_rr
      (
        thrinfo_t* thread,
@@ -242,7 +240,7 @@ static void bli_thread_range_jrir_rr
        bool_t     handle_edge_low,
        dim_t*     start,
        dim_t*     end,
-	   dim_t*     inc
+       dim_t*     inc
      )
 {
 	// Use interleaved partitioning of jr/ir loops.
@@ -259,7 +257,7 @@ static void bli_thread_range_jrir_sl
        bool_t     handle_edge_low,
        dim_t*     start,
        dim_t*     end,
-	   dim_t*     inc
+       dim_t*     inc
      )
 {
 	// Use contiguous slab partitioning of jr/ir loops.
@@ -267,6 +265,7 @@ static void bli_thread_range_jrir_sl
 	*inc = 1;
 }
 
+#if 0
 static void bli_thread_range_jrir
      (
        thrinfo_t* thread,
@@ -275,14 +274,13 @@ static void bli_thread_range_jrir
        bool_t     handle_edge_low,
        dim_t*     start,
        dim_t*     end,
-	   dim_t*     inc
+       dim_t*     inc
      )
 {
-//#ifdef BLIS_JRIR_INTERLEAVE
-#if 0
-	bli_thread_range_jrir_rr( thread, n, bf, handle_edge_low, start, end, inc );
-#else
+#ifdef BLIS_ENABLE_JRIR_SLAB
 	bli_thread_range_jrir_sl( thread, n, bf, handle_edge_low, start, end, inc );
+#else
+	bli_thread_range_jrir_rr( thread, n, bf, handle_edge_low, start, end, inc );
 #endif
 }
 
@@ -297,45 +295,30 @@ static void bli_thread_range_weighted_jrir
        bool_t     handle_edge_low,
        dim_t*     start,
        dim_t*     end,
-	   dim_t*     inc
+       dim_t*     inc
      )
 {
-#ifdef BLIS_JRIR_INTERLEAVE
-	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
-	*end   = n;
-#else
+#ifdef BLIS_ENABLE_JRIR_SLAB
+
 	// Use contiguous slab partitioning for jr/ir loops.
 	bli_thread_range_weighted_sub( thread, diagoff, uplo, m, n, bf,
-	                                   handle_edge_low, start, end );
+	                               handle_edge_low, start, end );
 
 	*start = *start / bf; *inc = 1;
 
 	if ( *end % bf ) *end = *end / bf + 1;
 	else             *end = *end / bf;
 
-#endif
+#else
 
-#if 0
-	const dim_t n_way = bli_thread_n_way( thread );
+	// Use interleaved partitioning of jr/ir loops.
+	*start = bli_thread_work_id( thread );
+	*inc   = bli_thread_n_way( thread );
+	*end   = n;
 
-	if ( m * n / n_way > 25000 )
-	{
-		// Use contiguous slab partitioning for jr/ir loops.
-		bli_thread_range_weighted_sub( thread, diagoff, uplo, m, n, bf,
-		                                   handle_edge_low, start, end );
-		*inc = 1;
-	}
-	else
-	{
-		// Use interleaved partitioning of jr/ir loops.
-		*start = bli_thread_work_id( thread );
-		*inc   = n_way; //bli_thread_n_way( thread );
-		*end   = n;
-	}
 #endif
 }
+#endif
 
 #endif
 

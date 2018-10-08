@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,7 +54,28 @@ cntl_t* bli_trsm_l_cntl_create
        pack_t schema_b
      )
 {
-	void* macro_kernel_p = bli_trsm_xx_ker_var2;
+	void* macro_kernel_p;
+	void* packa_fp;
+	void* packb_fp;
+
+#ifdef BLIS_ENABLE_JRIR_SLAB
+
+	// Use the function pointer to the macrokernels that use slab
+	// assignment of micropanels to threads in the jr and ir loops.
+	macro_kernel_p = bli_trsm_xx_ker_var2sl;
+
+	packa_fp = bli_packm_blk_var1sl;
+	packb_fp = bli_packm_blk_var1sl;
+
+#else // BLIS_ENABLE_JRIR_RR
+
+	// Use the function pointer to the macrokernels that use round-robin
+	// assignment of micropanels to threads in the jr and ir loops.
+	macro_kernel_p = bli_trsm_xx_ker_var2rr;
+
+	packa_fp = bli_packm_blk_var1rr;
+	packb_fp = bli_packm_blk_var1rr;
+#endif
 
 	const opid_t family = BLIS_TRSM;
 
@@ -78,7 +100,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  bli_trsm_packa,
-	  bli_packm_blk_var1,
+	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal
@@ -102,7 +124,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  bli_trsm_packb,
-	  bli_packm_blk_var1,
+	  packb_fp,
 	  BLIS_MR,
 	  BLIS_NR,
 	  FALSE,   // do NOT invert diagonal
@@ -140,7 +162,16 @@ cntl_t* bli_trsm_r_cntl_create
        pack_t schema_b
      )
 {
-	void* macro_kernel_p = bli_trsm_xx_ker_var2;
+	// trsm macrokernels are presently disabled for right-side execution,
+	// so it doesn't matter which function pointer we use here (sl or rr).
+	// To be safe, we'll insert an abort() guard to alert the developers
+	// of this should right-side macrokernels ever be re-enabled.
+	void* macro_kernel_p = bli_trsm_xx_ker_var2sl;
+
+	void* packa_fp = bli_packm_blk_var1sl;
+	void* packb_fp = bli_packm_blk_var1sl;
+
+	bli_abort();
 
 	const opid_t family = BLIS_TRSM;
 
@@ -165,7 +196,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  bli_trsm_packa,
-	  bli_packm_blk_var1,
+	  packa_fp,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -189,7 +220,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  bli_trsm_packb,
-	  bli_packm_blk_var1,
+	  packb_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal
