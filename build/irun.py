@@ -215,6 +215,25 @@ def main():
 			search = '%8s' % perf
 			newline = re.sub( str(search), ' %7.2f %7.2f %7.2f %6.2f', line )
 
+			# Search for the column index range that would be present if this were
+			# matlab-compatible output. The index range will typically be 1:n,
+			# where n is the number of columns of data.
+			found_index = False
+			for word in words:
+				if re.match( '1:', word ):
+					index_str = word
+					found_index = True
+					break
+
+			# If we find the column index range, we need to update it to reflect
+			# the replacement of one column of data with four, for a net increase
+			# of columns. We do so via another instance of re.sub() in which we
+			# search for the old index string and replace it with the new one.
+			if found_index:
+				last_col = int(index_str[2]) + 3
+				new_index_str = '1:%1s' % last_col
+				newline = re.sub( index_str, new_index_str, newline )
+
 			# If the quiet flag was not give, output the intermediate results.
 			if not quiet:
 				print( newline % ( float(minp), float(avgp), float(maxp), float(stdp) ) )
