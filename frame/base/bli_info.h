@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +59,13 @@ gint_t bli_info_get_enable_blas( void );
 gint_t bli_info_get_enable_cblas( void );
 gint_t bli_info_get_blas_int_type_size( void );
 gint_t bli_info_get_enable_packbuf_pools( void );
+gint_t bli_info_get_enable_threading( void );
+gint_t bli_info_get_enable_openmp( void );
+gint_t bli_info_get_enable_pthreads( void );
+gint_t bli_info_get_thread_part_jrir_slab( void );
+gint_t bli_info_get_thread_part_jrir_rr( void );
+gint_t bli_info_get_enable_memkind( void );
+gint_t bli_info_get_enable_sandbox( void );
 
 
 // -- Kernel implementation-related --------------------------------------------
