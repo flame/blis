@@ -198,15 +198,15 @@ void bli_rntm_set_ways_from_rntm
 
 		pc = 1;
 
-		bli_partition_2x2( nt, m*BLIS_DEFAULT_M_THREAD_RATIO,
-		                       n*BLIS_DEFAULT_N_THREAD_RATIO, &ic, &jc );
+		bli_partition_2x2( nt, m*BLIS_THREAD_RATIO_M,
+		                       n*BLIS_THREAD_RATIO_N, &ic, &jc );
 
-		for ( ir = BLIS_DEFAULT_MR_THREAD_MAX ; ir > 1 ; ir-- )
+		for ( ir = BLIS_THREAD_MAX_IR ; ir > 1 ; ir-- )
 		{
 			if ( ic % ir == 0 ) { ic /= ir; break; }
 		}
 
-		for ( jr = BLIS_DEFAULT_NR_THREAD_MAX ; jr > 1 ; jr-- )
+		for ( jr = BLIS_THREAD_MAX_JR ; jr > 1 ; jr-- )
 		{
 			if ( jc % jr == 0 ) { jc /= jr; break; }
 		}

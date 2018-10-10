@@ -37,11 +37,11 @@
 
 // -- THREADING PARAMETERS -----------------------------------------------------
 
-#define BLIS_DEFAULT_M_THREAD_RATIO     3
-#define BLIS_DEFAULT_N_THREAD_RATIO     2
+#define BLIS_THREAD_RATIO_M     3
+#define BLIS_THREAD_RATIO_N     2
 
-#define BLIS_DEFAULT_MR_THREAD_MAX      1
-#define BLIS_DEFAULT_NR_THREAD_MAX      4
+#define BLIS_THREAD_MAX_IR      1
+#define BLIS_THREAD_MAX_JR      4
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
