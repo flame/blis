@@ -174,6 +174,10 @@
 #include "bla_trmm_check.h"
 #include "bla_trsm_check.h"
 
+// -- Fortran-compatible APIs to BLIS functions --
+
+#include "b77_thread.h"
+
 
 #endif // BLIS_ENABLE_BLAS
 #endif // BLIS_VIA_BLASTEST

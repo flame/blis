@@ -204,11 +204,7 @@ dim_t bli_thread_get_jr_nt( void );
 dim_t bli_thread_get_ir_nt( void );
 dim_t bli_thread_get_num_threads( void );
 
-void  bli_thread_set_jc_nt( dim_t value );
-void  bli_thread_set_pc_nt( dim_t value );
-void  bli_thread_set_ic_nt( dim_t value );
-void  bli_thread_set_jr_nt( dim_t value );
-void  bli_thread_set_ir_nt( dim_t value );
+void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 void  bli_thread_set_num_threads( dim_t value );
 
 void  bli_thread_init_rntm( rntm_t* rntm );
