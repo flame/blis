@@ -232,18 +232,39 @@ void bli_l3_thread_decorator
 	{
 		dim_t      n_threads_real = omp_get_num_threads();
 		dim_t      id = omp_get_thread_num();
-		
+
+		// Check if the number of OpenMP threads created within this parallel
+		// region is different from the number of threads that were requested
+		// of BLIS. This inequality may trigger when, for example, the
+		// following conditions are satisfied:
+		// - an application is executing an OpenMP parallel region in which
+		//   BLIS is invokved,
+		// - BLIS is configured for multithreading via OpenMP,
+		// - OMP_NUM_THREADS = t > 1,
+		// - the number of threads requested of BLIS (regardless of method)
+		//   is p <= t,
+		// - OpenMP nesting is disabled.
+		// In this situation, the application spawns t threads. Each application
+		// thread calls gemm (for example). Each gemm will attempt to spawn p
+		// threads via OpenMP. However, since nesting is disabled, the OpenMP
+		// implementation finds that t >= p threads are already spawned, and
+		// thus it doesn't spawn *any* additional threads for each gemm.
 		if ( n_threads_real != n_threads )
 		{
+ 			// If the number of threads active in the current region is not
+			// equal to the number requested of BLIS, we then only continue
+			// if the number of threads in the current region is 1. If, for
+			// example, BLIS requested 4 threads but only got 3, then we
+			// abort().
 			if ( id == 0 )
 			{
-	            if ( n_threads_real != 1 )
-	            {
-	                bli_print_msg( "A different number of threads was "
-	                               "created than was requested.",
-	                               __FILE__, __LINE__ );
-	                bli_abort();
-	            }
+				if ( n_threads_real != 1 )
+				{
+					bli_print_msg( "A different number of threads was "
+					               "created than was requested.",
+					               __FILE__, __LINE__ );
+					bli_abort();
+				}
 
 				n_threads = 1;
 				bli_thrcomm_init( gl_comm, 1 );
@@ -251,6 +272,7 @@ void bli_l3_thread_decorator
 				bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 			}
 
+			// Synchronize all threads and continue.
 			_Pragma( "omp barrier" )
 		}
 
