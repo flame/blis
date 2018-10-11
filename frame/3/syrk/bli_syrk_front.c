@@ -46,7 +46,9 @@ void bli_syrk_front
      )
 {
 	bli_init_once();
-
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+        gint_t status = BLIS_FAILURE;
+#endif
 	obj_t   a_local;
 	obj_t   at_local;
 	obj_t   c_local;
@@ -68,6 +70,29 @@ void bli_syrk_front
 	bli_obj_set_as_root( &c_local );
 
 	// For syrk, the right-hand "B" operand is simply A^T.
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+        bli_obj_alias_to( a, &at_local );
+        if (bli_obj_has_trans(a) != 0)
+        {//At*A operation
+                bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &at_local );
+		//call small gemm to perform syrk.
+		//gemm small matrix threshold check is done inside bli_gemm_small() which is good enough for syrk small matrix also.
+                status = bli_gemm_small( alpha, &a_local, &at_local, beta, &c_local, cntx, cntl );
+        }
+        else if ((a->dim[0] <= BLIS_SMALL_MATRIX_A_THRES_M_SYRK && a->dim[1] < BLIS_SMALL_MATRIX_A_THRES_N_SYRK) ||
+		 (a->dim[0] < BLIS_SMALL_MATRIX_A_THRES_M_SYRK && a->dim[1] <= BLIS_SMALL_MATRIX_A_THRES_N_SYRK))
+        {//A*At operation
+                bli_obj_set_conjtrans( BLIS_TRANSPOSE, &at_local );
+		//call small gemm to perform syrk.
+		//Explicit matrix dimension threshold check in this else if section before calling bli_gemm_small() for syrk small matrix also.
+                status = bli_gemm_small( alpha, &a_local, &at_local, beta, &c_local, cntx, cntl );
+        }
+        if ( status == BLIS_SUCCESS )
+        {
+                return;
+        }
+#endif
+
 	bli_obj_alias_to( a, &at_local );
 	bli_obj_induce_trans( &at_local );
 
