@@ -237,9 +237,20 @@ void bli_l3_thread_decorator
 		{
 			if ( id == 0 )
 			{
-				n_threads = n_threads_real;
-				bli_thrcomm_init( gl_comm, n_threads );
+	            if ( n_threads_real != 1 )
+	            {
+	                bli_print_msg( "A different number of threads was "
+	                               "created than was requested.",
+	                               __FILE__, __LINE__ );
+	                bli_abort();
+	            }
+
+				n_threads = 1;
+				bli_thrcomm_init( gl_comm, 1 );
+				bli_rntm_set_num_threads_only( 1, rntm );
+				bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 			}
+
 			_Pragma( "omp barrier" )
 		}
 
