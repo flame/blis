@@ -230,7 +230,18 @@ void bli_l3_thread_decorator
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
+		dim_t      n_threads_real = omp_get_num_threads();
 		dim_t      id = omp_get_thread_num();
+		
+		if ( n_threads_real != n_threads )
+		{
+			if ( id == 0 )
+			{
+				n_threads = n_threads_real;
+				bli_thrcomm_init( gl_comm, n_threads );
+			}
+			_Pragma( "omp barrier" )
+		}
 
 		obj_t      a_t, b_t, c_t;
 		cntl_t*    cntl_use;
