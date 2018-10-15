@@ -169,10 +169,14 @@ performance remain attainable.
  * **A foundation for mixed domain and/or mixed precision operations.** BLIS
 was designed with the hope of one day allowing computation on real and complex
 operands within the same operation. Similarly, we wanted to allow mixing
-operands' floating-point precisions, or both domain and precision.
-While this feature is not yet implemented, we plan to prototype and explore
-the potential for adding mixed domain, mixed precision support to operations
-such as `gemm`. 
+operands' numerical domains, floating-point precisions, or both domain and
+precision, and to optionally compute in a precision different than one or both
+operands' storage precisions. This feature has been implemented for the general
+matrix multiplication (`gemm`) operation, providing 128 different possible type
+combinations, which, when combined with existing transposition, conjugation,
+and storage parameters, enables 55,296 different `gemm` use cases. For more
+details, please see the documentation on [mixed datatype](docs/MixedDatatypes.md)
+support.
 
 Getting Started
 ---------------
@@ -230,6 +234,9 @@ included in the BLIS source distribution.
 table of supported microarchitectures.
  * **[Multithreading](docs/Multithreading.md).** This document describes how to
 use the multithreading features of BLIS.
+ * **[Mixed-Datatype](docs/MixedDatatype.md).** This document provides an
+overview of BLIS's mixed-datatype functionality and provides a brief example
+of how to take advantage of this new code.
  * **[Release Notes](docs/ReleaseNotes.md).** This document tracks a summary of
 changes included with each new version of BLIS, along with contributor credits
 for key features.

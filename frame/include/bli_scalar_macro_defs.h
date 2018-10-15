@@ -140,13 +140,14 @@
 
 #include "bli_axmys.h"
 
-#include "bli_cast.h"
-
 #include "bli_conjs.h"
 
 #include "bli_copys.h"
 #include "bli_copyjs.h"
 #include "bli_copycjs.h"
+
+#include "bli_copynzs.h"
+#include "bli_copyjnzs.h"
 
 #include "bli_dots.h"
 #include "bli_dotjs.h"
@@ -191,8 +192,8 @@
 // Inlined scalar macros in loops
 #include "bli_adds_mxn.h"
 #include "bli_adds_mxn_uplo.h"
-#include "bli_copys_mxn.h"
 #include "bli_set0s_mxn.h"
+#include "bli_copys_mxn.h"
 #include "bli_xpbys_mxn.h"
 #include "bli_xpbys_mxn_uplo.h"
 

@@ -369,6 +369,9 @@ void PASTEMAC(ch,varname) \
 	   "A" matrix is actually contained within B. */ \
 	bli_auxinfo_set_is_b( istep_a, &aux ); \
 \
+	/* Save the desired output datatype (indicating no typecasting). */ \
+	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \

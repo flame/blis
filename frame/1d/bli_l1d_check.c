@@ -103,6 +103,22 @@ GENFRONT( setd )
 GENFRONT( setid )
 
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+     ) \
+{ \
+	bli_l1d_axy_check( beta, x, y ); \
+}
+
+GENFRONT( xpbyd )
+
+
 // -----------------------------------------------------------------------------
 
 void bli_l1d_xy_check

@@ -41,62 +41,473 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-#define bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_ssadds( *(x + _i*rs_x + _j*cs_x), \
-	            *(y + _i*rs_y + _j*cs_y) ); \
+
+// xy = ?s
+
+static void bli_ssadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ssadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_ssadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ssadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dsadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dsadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dsadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dsadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_csadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_csadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_csadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_csadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zsadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zsadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zsadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zsadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_ddadds( *(x + _i*rs_x + _j*cs_x), \
-	            *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?d
+
+static void bli_sdadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sdadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sdadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sdadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_ddadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ddadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_ddadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ddadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cdadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cdadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cdadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cdadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zdadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zdadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zdadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zdadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_ccadds( *(x + _i*rs_x + _j*cs_x), \
-	            *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?c
+
+static void bli_scadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_scadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_scadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_scadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dcadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dcadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dcadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dcadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_ccadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ccadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_ccadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ccadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zcadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zcadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zcadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zcadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_zzadds( *(x + _i*rs_x + _j*cs_x), \
-	            *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?z
+
+static void bli_szadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_szadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dzadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dzadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_czadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_czadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zzadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzadds( *(x + ii + jj*cs_x),
+		            *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zzadds( *(x + ii*rs_x + jj),
+		            *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzadds( *(x + ii*rs_x + jj*cs_x),
+		            *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
 
-#define bli_sadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+
+static void bli_sadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                         float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_dadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_dadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                         double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_cadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_cadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                         scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_zadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_zadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                         dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
+
 
 #endif

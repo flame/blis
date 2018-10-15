@@ -67,7 +67,7 @@ void PASTEF772(chx,cha,blasname) \
 	   that is, we just always sub-optimally implement those cases
 	   by casting alpha to ctype_x (potentially the complex domain) and
 	   using the homogeneous datatype instance according to that type. */ \
-	PASTEMAC2(cha,chx,cast)( (ftype_a*)alpha, alpha_cast ); \
+	PASTEMAC2(cha,chx,copys)( *alpha, alpha_cast ); \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \

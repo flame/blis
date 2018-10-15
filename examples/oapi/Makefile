@@ -127,7 +127,8 @@ TEST_BINS      := 00obj_basic.x \
                   07level1m_diag.x \
                   08level2.x \
                   09level3.x \
-                  10util.x
+                  10util.x \
+                  11gemm_md.x
 
 
 

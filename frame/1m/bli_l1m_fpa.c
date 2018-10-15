@@ -57,4 +57,23 @@ GENFRONT( axpym )
 GENFRONT( scal2m )
 GENFRONT( scalm )
 GENFRONT( setm )
+GENFRONT( xpbym )
+
+//
+// Define function pointer query interfaces for two-datatype operations.
+//
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+GENARRAY_FPA2( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
+               PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
+\
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp2)( num_t dtx, num_t dty ) \
+{ \
+	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa2)[ dtx ][ dty ]; \
+}
+
+GENFRONT( xpbym_md )
 

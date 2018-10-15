@@ -108,7 +108,17 @@ void bli_packm_blk_var1
        thrinfo_t* t
      )
 {
-	num_t     dt_cp      = bli_obj_dt( c );
+#ifdef BLIS_ENABLE_GEMM_MD
+	// Call a different packm implementation when the storage and target
+	// datatypes differ.
+	if ( bli_obj_dt( c ) != bli_obj_target_dt( c ) )
+	{
+		bli_packm_blk_var1_md( c, p, cntx, cntl, t );
+		return;
+	}
+#endif
+
+	num_t     dt_c       = bli_obj_dt( c );
 
 	struc_t   strucc     = bli_obj_struc( c );
 	doff_t    diagoffc   = bli_obj_diag_offset( c );
@@ -155,7 +165,7 @@ void bli_packm_blk_var1
 		// higher-level operation. Thus, we use BLIS_ONE for kappa so
 		// that the underlying packm implementation does not perform
 		// any scaling during packing.
-		buf_kappa = bli_obj_buffer_for_const( dt_cp, &BLIS_ONE );
+		buf_kappa = bli_obj_buffer_for_const( dt_c, &BLIS_ONE );
 	}
 	else // if ( bli_is_ind_packed( schema ) )
 	{
@@ -187,11 +197,10 @@ void bli_packm_blk_var1
 		}
 	
 		// Acquire the buffer to the kappa chosen above.
-		buf_kappa = bli_obj_buffer_for_1x1( dt_cp, kappa_p );
+		buf_kappa = bli_obj_buffer_for_1x1( dt_c, kappa_p );
 	}
 
 
-	// Choose the correct func_t object based on the pack_t schema.
 #if 0
 	if      ( bli_is_4mi_packed( schema ) ) packm_kers = packm_struc_cxk_4mi_kers;
 	else if ( bli_is_3mi_packed( schema ) ||
@@ -208,7 +217,7 @@ void bli_packm_blk_var1
 
 	//func_t* cntx_packm_kers = bli_cntx_get_packm_ukr( cntx );
 
-	//if ( bli_func_is_null_dt( dt_cp, cntx_packm_kers ) )
+	//if ( bli_func_is_null_dt( dt_c, cntx_packm_kers ) )
 	{
 		// If the packm structure-aware kernel func_t in the context is
 		// NULL (which is the default value after the context is created),
@@ -230,11 +239,11 @@ void bli_packm_blk_var1
 #endif
 
 	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker = bli_func_get_dt( dt_cp, packm_kers );
+	packm_ker = bli_func_get_dt( dt_c, packm_kers );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_cp];
+	f = ftypes[dt_c];
 
 	// Invoke the function.
 	f( strucc,
@@ -433,10 +442,10 @@ void PASTEMAC(ch,varname) \
 \
 /*
 if ( row_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_var2: b", m, n, \
+PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", m, n, \
                       c_cast,        rs_c, cs_c, "%4.1f", "" ); \
 if ( col_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
+PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
                       c_cast,        rs_c, cs_c, "%4.1f", "" ); \
 */ \
 \
@@ -603,6 +612,15 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
 			/* NOTE: This value is equivalent to ps_p. */ \
 			p_inc = ps_p; \
 		} \
+\
+/*
+if ( row_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b packed", *m_panel_max, *n_panel_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
+else \
+PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a packed", *m_panel_max, *n_panel_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
+*/ \
 \
 /*
 if ( col_stored ) { \

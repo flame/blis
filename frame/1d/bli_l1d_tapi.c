@@ -387,5 +387,83 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
 
 
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kername, kerid ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  beta, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	ctype*      x1; \
+	ctype*      y1; \
+	conj_t      conjx; \
+	dim_t       n_elem; \
+	dim_t       offx, offy; \
+	inc_t       incx, incy; \
+\
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	if ( bli_is_outside_diag( diagoffx, transx, m, n ) ) return; \
+\
+	/* Determine the distance to the diagonals, the number of diagonal
+	   elements, and the diagonal increments. */ \
+	bli_set_dims_incs_2d \
+	( \
+	  diagoffx, transx, \
+	  m, n, rs_x, cs_x, rs_y, cs_y, \
+	  &offx, &offy, &n_elem, &incx, &incy \
+	); \
+\
+	conjx = bli_extract_conj( transx ); \
+\
+	if ( bli_is_nonunit_diag( diagx ) ) \
+	{ \
+	    x1   = x + offx; \
+	    y1   = y + offy; \
+	} \
+	else /* if ( bli_is_unit_diag( diagx ) ) */ \
+	{ \
+	    /* Simulate a unit diagonal for x with a zero increment over a unit
+	       scalar. */ \
+	    x1   = PASTEMAC(ch,1); \
+	    incx = 0; \
+	    y1   = y + offy; \
+	} \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
+	/* Query the context for the operation's kernel address. */ \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+\
+	/* Invoke the kernel with the appropriate parameters. */ \
+	f( \
+	   conjx, \
+	   n_elem, \
+	   x1, incx, \
+	   beta, \
+	   y1, incy, \
+	   cntx  \
+	 ); \
+}
+
+INSERT_GENTFUNC_BASIC2( xpbyd,  xpbyv,  BLIS_XPBYV_KER )
+
+
 #endif
 

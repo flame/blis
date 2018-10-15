@@ -393,7 +393,9 @@ static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 
 static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_dt( obj );
+	// Note that we use the computation datatype, which may differ from the
+	// storage datatype of C (when performing a mixed datatype operation).
+	const num_t  dt    = bli_obj_comp_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols
@@ -442,9 +444,9 @@ static bool_t bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cnt
 
 static bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	// Note that we use the execution datatype, which may differ from the
-	// storage datatype of C (though this would happen in very few situations).
-	const num_t  dt    = bli_obj_exec_dt( obj );
+	// Note that we use the computation datatype, which may differ from the
+	// storage datatype of C (when performing a mixed datatype operation).
+	const num_t  dt    = bli_obj_comp_dt( obj );
 	const bool_t ukr_prefers_rows
 	                   = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 	const bool_t ukr_prefers_cols

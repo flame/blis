@@ -136,6 +136,20 @@ static void bli_toggle_bool( bool_t* b )
 #define bli_ctype ( BLIS_SCOMPLEX )
 #define bli_ztype ( BLIS_DCOMPLEX )
 
+// return C type for char
+
+#define bli_sctype  float
+#define bli_dctype  double
+#define bli_cctype  scomplex
+#define bli_zctype  dcomplex
+
+// return real proj of C type for char
+
+#define bli_sctyper  float
+#define bli_dctyper  double
+#define bli_cctyper  float
+#define bli_zctyper  double
+
 
 // return default format specifier for char
 

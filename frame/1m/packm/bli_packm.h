@@ -55,3 +55,8 @@
 #include "bli_packm_cxk_rih.h"
 #include "bli_packm_cxk_1er.h"
 
+// Mixed datatype support.
+#ifdef BLIS_ENABLE_GEMM_MD
+#include "bli_packm_md.h"
+#endif
+

@@ -69,6 +69,22 @@ void bli_gemm_ker_var2
        thrinfo_t* thread
      )
 {
+#ifdef BLIS_ENABLE_GEMM_MD
+	// By now, A and B have been packed and cast to the execution precision.
+	// In most cases, such as when storage precision of C differs from the
+	// execution precision, we utilize the mixed datatype code path. However,
+	// a few cases still fall within this kernel, such as mixed domain with
+	// equal precision (ccr, crc, rcc), hence those expressions being disabled
+	// in the conditional below.
+	if ( //( bli_obj_domain( c ) != bli_obj_domain( a ) ) ||
+	     //( bli_obj_domain( c ) != bli_obj_domain( b ) ) ||
+	     ( bli_obj_dt( c ) != bli_obj_exec_dt( c ) ) )
+	{
+		bli_gemm_ker_var2_md( a, b, c, cntx, rntm, cntl, thread );
+		return;
+	}
+#endif
+
 	num_t     dt_exec   = bli_obj_exec_dt( c );
 
 	pack_t    schema_a  = bli_obj_pack_schema( a );
@@ -112,12 +128,12 @@ void bli_gemm_ker_var2
 	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-    // If 1m is being employed on a column- or row-stored matrix with a
-    // real-valued beta, we can use the real domain macro-kernel, which
+	// If 1m is being employed on a column- or row-stored matrix with a
+	// real-valued beta, we can use the real domain macro-kernel, which
 	// eliminates a little overhead associated with the 1m virtual
 	// micro-kernel.
 #if 1
-	if ( bli_is_1m_packed( schema_a ) )
+	if ( bli_cntx_method( cntx ) == BLIS_1M )
 	{
 		bli_l3_ind_recast_1m_params
 		(
@@ -130,6 +146,22 @@ void bli_gemm_ker_var2
 		  rs_c, cs_c
 		);
 	}
+#endif
+
+#ifdef BLIS_ENABLE_GEMM_MD
+	// Tweak parameters in select mixed domain cases cases.
+	bli_gemm_md_ker_var2_recast
+	(
+	  &dt_exec,
+	  bli_obj_dt( a ),
+	  bli_obj_dt( b ),
+	  bli_obj_dt( c ),
+	  &m, &n, &k,
+	  &pd_a, &ps_a,
+	  &pd_b, &ps_b,
+	  c,
+	  &rs_c, &cs_c
+	);
 #endif
 
 	// Index into the type combination array to extract the correct
@@ -267,6 +299,9 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of A and B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
+\
+	/* Save the desired output datatype (indicating no typecasting). */ \
+	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
 	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
 	dim_t jr_num_threads = bli_thread_n_way( thread ); \

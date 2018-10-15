@@ -49,7 +49,8 @@
 \
 	/* If beta is in the real domain, and c is row- or column-stored,
 	   then we may proceed with the optimization. */ \
-	if ( bli_obj_imag_equals( &beta, &BLIS_ZERO ) && \
+	if ( /*bli_obj_imag_equals( &beta, &BLIS_ZERO ) &&*/ \
+	     bli_obj_imag_is_zero( &beta ) && \
 	     !bli_is_gen_stored( rs_c, cs_c ) ) \
 	{ \
 		dt_exec = bli_dt_proj_to_real( dt_exec ); \

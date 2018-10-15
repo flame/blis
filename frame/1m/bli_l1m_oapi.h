@@ -80,3 +80,18 @@ void PASTEMAC(opname,EX_SUF) \
 GENPROT( scalm )
 GENPROT( setm )
 
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_EX_PARAMS  \
+     );
+
+GENPROT( xpbym )
+GENPROT( xpbym_md )
+

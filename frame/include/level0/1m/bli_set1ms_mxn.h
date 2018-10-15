@@ -37,6 +37,18 @@
 
 // set1ms_mxn
 
+#define bli_sset1ms_mxn( schema, offm, offn, m, n, a, y, rs_y, cs_y, ld_y ) \
+{ \
+	/* Include real domain version to facilitate macro-izing mixed-datatype
+	   components of packm. */ \
+}
+
+#define bli_dset1ms_mxn( schema, offm, offn, m, n, a, y, rs_y, cs_y, ld_y ) \
+{ \
+	/* Include real domain version to facilitate macro-izing mixed-datatype
+	   components of packm. */ \
+}
+
 #define bli_cset1ms_mxn( schema, offm, offn, m, n, a, y, rs_y, cs_y, ld_y ) \
 { \
 	inc_t offm_local = offm; \

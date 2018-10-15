@@ -59,7 +59,7 @@ void libblis_test_randm_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          datatype,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -134,7 +134,7 @@ void libblis_test_randm_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          dt,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -148,12 +148,17 @@ void libblis_test_randm_experiment
 	double       time_min  = DBL_MAX;
 	double       time;
 
+	num_t        datatype;
+
 	dim_t        m, n;
 
 	char         x_store;
 
 	obj_t        x;
 
+
+	// Use the datatype of the first char in the datatype combination string.
+	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
 	// Map the dimension specifier to actual dimensions.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
@@ -165,7 +170,7 @@ void libblis_test_randm_experiment
 	x_store = sc_str[0];
 
 	// Create the test objects.
-	libblis_test_mobj_create( params, dt, BLIS_NO_TRANSPOSE, x_store, m, n, &x );
+	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE, x_store, m, n, &x );
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )

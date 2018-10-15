@@ -78,6 +78,19 @@ GENPROT( scalm )
 GENPROT( setm )
 
 
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+    );
+
+GENPROT( xpbym )
+
+
 // -----------------------------------------------------------------------------
 
 void bli_l1m_xy_check

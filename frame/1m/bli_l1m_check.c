@@ -88,6 +88,22 @@ GENFRONT( scalm )
 GENFRONT( setm )
 
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+     ) \
+{ \
+	bli_l1m_axy_check( beta, x, y ); \
+}
+
+GENFRONT( xpbym )
+
+
 // -----------------------------------------------------------------------------
 
 void bli_l1m_xy_check

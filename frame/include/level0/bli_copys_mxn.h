@@ -41,62 +41,470 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-#define bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_sscopys( *(x + _i*rs_x + _j*cs_x), \
-	             *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?s
+
+static void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sscopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sscopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sscopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dscopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dscopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dscopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cscopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cscopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cscopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zscopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zscopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zscopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_ddcopys( *(x + _i*rs_x + _j*cs_x), \
-	             *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?d
+
+static void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sdcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sdcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sdcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ddcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_ddcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_ddcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cdcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cdcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cdcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zdcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zdcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zdcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_cccopys( *(x + _i*rs_x + _j*cs_x), \
-	             *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?c
+
+static void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sccopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sccopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sccopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dccopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dccopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dccopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cccopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cccopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cccopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zccopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zccopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zccopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	dim_t _i, _j; \
-\
-	for ( _j = 0; _j < n; ++_j ) \
-	for ( _i = 0; _i < m; ++_i ) \
-	bli_zzcopys( *(x + _i*rs_x + _j*cs_x), \
-	             *(y + _i*rs_y + _j*cs_y) ); \
+// xy = ?c
+
+static void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_szcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dzcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_czcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzcopys( *(x + ii + jj*cs_x),
+		             *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zzcopys( *(x + ii*rs_x + jj),
+		             *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzcopys( *(x + ii*rs_x + jj*cs_x),
+		             *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
 
-#define bli_scopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_scopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_dcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_dcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_ccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_ccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-#define bli_zcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ) \
-{ \
-	bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y ); \
+static void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
 
 #endif

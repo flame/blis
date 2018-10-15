@@ -59,7 +59,7 @@ void libblis_test_trsm_ukr_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          datatype,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -154,7 +154,7 @@ void libblis_test_trsm_ukr_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          datatype,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -167,6 +167,8 @@ void libblis_test_trsm_ukr_experiment
 
 	double       time_min  = DBL_MAX;
 	double       time;
+
+	num_t        datatype;
 
 	dim_t        m, n;
 
@@ -182,8 +184,12 @@ void libblis_test_trsm_ukr_experiment
 
 	cntx_t*      cntx;
 
+
 	// Query a context.
 	cntx = bli_gks_query_cntx();
+
+	// Use the datatype of the first char in the datatype combination string.
+	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
 	// Fix m and n to MR and NR, respectively.
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );

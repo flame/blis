@@ -42,106 +42,605 @@
 // - The second char encodes the type of b.
 // - The third char encodes the type of y.
 
-#define bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{ \
-	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
-	if ( bli_seq0( *beta ) ) \
-	{ \
-		bli_sscopys_mxn( m, n, \
-		                 x, rs_x, cs_x, \
-		                 y, rs_y, cs_y ); \
-	} \
-	else \
-	{ \
-		dim_t _i, _j; \
-\
-		for ( _j = 0; _j < n; ++_j ) \
-		for ( _i = 0; _i < m; ++_i ) \
-		bli_sssxpbys( *(x + _i*rs_x + _j*cs_x), \
-		              *(beta), \
-		              *(y + _i*rs_y + _j*cs_y) ); \
-	} \
+
+// xby = ?ss
+
+static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            float*    restrict beta,
+                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_seq0( *beta ) )
+	{
+		bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sssxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sssxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sssxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            float*    restrict beta,
+                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_seq0( *beta ) )
+	{
+		bli_dscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dssxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dssxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dssxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            float*    restrict beta,
+                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_seq0( *beta ) )
+	{
+		bli_cscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cssxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cssxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cssxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            float*    restrict beta,
+                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_seq0( *beta ) )
+	{
+		bli_zscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zssxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zssxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zssxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{ \
-	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
-	if ( bli_deq0( *beta ) ) \
-	{ \
-		bli_ddcopys_mxn( m, n, \
-		                 x, rs_x, cs_x, \
-		                 y, rs_y, cs_y ); \
-	} \
-	else \
-	{ \
-		dim_t _i, _j; \
-\
-		for ( _j = 0; _j < n; ++_j ) \
-		for ( _i = 0; _i < m; ++_i ) \
-		bli_dddxpbys( *(x + _i*rs_x + _j*cs_x), \
-		              *(beta), \
-		              *(y + _i*rs_y + _j*cs_y) ); \
-	} \
+// xby = ?dd
+
+static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            double*   restrict beta,
+                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_deq0( *beta ) )
+	{
+		bli_sdcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sddxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sddxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sddxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            double*   restrict beta,
+                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_deq0( *beta ) )
+	{
+		bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dddxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dddxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dddxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            double*   restrict beta,
+                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_deq0( *beta ) )
+	{
+		bli_cdcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cddxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cddxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cddxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            double*   restrict beta,
+                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_deq0( *beta ) )
+	{
+		bli_zdcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zddxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zddxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zddxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{ \
-	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
-	if ( bli_ceq0( *beta ) ) \
-	{ \
-		bli_cccopys_mxn( m, n, \
-		                 x, rs_x, cs_x, \
-		                 y, rs_y, cs_y ); \
-	} \
-	else \
-	{ \
-		dim_t _i, _j; \
-\
-		for ( _j = 0; _j < n; ++_j ) \
-		for ( _i = 0; _i < m; ++_i ) \
-		bli_cccxpbys( *(x + _i*rs_x + _j*cs_x), \
-		              *(beta), \
-		              *(y + _i*rs_y + _j*cs_y) ); \
-	} \
+// xby = ?cc
+
+static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            scomplex* restrict beta,
+                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_ceq0( *beta ) )
+	{
+		bli_sccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sccxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_sccxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_sccxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            scomplex* restrict beta,
+                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_ceq0( *beta ) )
+	{
+		bli_dccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dccxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dccxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dccxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            scomplex* restrict beta,
+                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_ceq0( *beta ) )
+	{
+		bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cccxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_cccxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_cccxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            scomplex* restrict beta,
+                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_ceq0( *beta ) )
+	{
+		bli_zccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zccxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zccxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zccxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
-#define bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{ \
-	/* If beta is zero, overwrite y with x (in case y has infs or NaNs). */ \
-	if ( bli_zeq0( *beta ) ) \
-	{ \
-		bli_zzcopys_mxn( m, n, \
-		                 x, rs_x, cs_x, \
-		                 y, rs_y, cs_y ); \
-	} \
-	else \
-	{ \
-		dim_t _i, _j; \
-\
-		for ( _j = 0; _j < n; ++_j ) \
-		for ( _i = 0; _i < m; ++_i ) \
-		bli_zzzxpbys( *(x + _i*rs_x + _j*cs_x), \
-		              *(beta), \
-		              *(y + _i*rs_y + _j*cs_y) ); \
-	} \
+// xby = ?zz
+
+static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            dcomplex* restrict beta,
+                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_zeq0( *beta ) )
+	{
+		bli_szcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szzxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_szzxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_szzxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            dcomplex* restrict beta,
+                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_zeq0( *beta ) )
+	{
+		bli_dzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzzxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_dzzxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_dzzxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            dcomplex* restrict beta,
+                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_zeq0( *beta ) )
+	{
+		bli_czcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czzxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_czzxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_czzxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
+}
+static void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                            dcomplex* restrict beta,
+                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	// If beta is zero, overwrite y with x (in case y has infs or NaNs).
+	if ( bli_zeq0( *beta ) )
+	{
+		bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
+		return;
+	}
+
+#ifdef BLIS_ENABLE_CR_CASES
+	if ( rs_x == 1 && rs_y == 1 )
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzzxpbys( *(x + ii + jj*cs_x), *beta,
+		              *(y + ii + jj*cs_y) );
+	}
+	else if ( cs_x == 1 && cs_y == 1 )
+	{
+		for ( dim_t ii = 0; ii < m; ++ii )
+		for ( dim_t jj = 0; jj < n; ++jj )
+		bli_zzzxpbys( *(x + ii*rs_x + jj), *beta,
+		              *(y + ii*rs_y + jj) );
+	}
+	else
+#endif
+	{
+		for ( dim_t jj = 0; jj < n; ++jj )
+		for ( dim_t ii = 0; ii < m; ++ii )
+		bli_zzzxpbys( *(x + ii*rs_x + jj*cs_x), *beta,
+		              *(y + ii*rs_y + jj*cs_y) );
+	}
 }
 
 
-#define bli_sxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{\
-	bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+
+static void bli_sxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          float*    restrict beta,
+                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-#define bli_dxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{\
-	bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+static void bli_dxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          double*   restrict beta,
+                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-#define bli_cxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{\
-	bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+static void bli_cxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          scomplex* restrict beta,
+                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-#define bli_zxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ) \
-{\
-	bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y ); \
+static void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+                                                          dcomplex* restrict beta,
+                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
+{
+	bli_zzzxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
+
 
 #endif

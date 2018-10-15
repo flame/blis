@@ -255,6 +255,9 @@ void PASTECH2(blx_,ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
+	/* Save the desired output datatype (indicating no typecasting). */ \
+	bli_auxinfo_set_dt_on_output( dt, &aux ); \
+\
 	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
 	dim_t jr_num_threads = bli_thread_n_way( thread ); \
 	dim_t jr_thread_id   = bli_thread_work_id( thread ); \

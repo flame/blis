@@ -65,6 +65,18 @@ static tname PASTECH(opname,_fpa)[BLIS_NUM_FP_TYPES+1] = \
 
 // -- "Smart" two-operand macro --
 
+#define GENARRAY_FPA2(tname,op) \
+\
+static tname PASTECH(op,_fpa2)[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
+{ \
+	{ ( tname )PASTEMAC2(s,s,op), ( tname )PASTEMAC2(s,c,op), ( tname )PASTEMAC2(s,d,op), ( tname )PASTEMAC2(s,z,op) }, \
+	{ ( tname )PASTEMAC2(c,s,op), ( tname )PASTEMAC2(c,c,op), ( tname )PASTEMAC2(c,d,op), ( tname )PASTEMAC2(c,z,op) }, \
+	{ ( tname )PASTEMAC2(d,s,op), ( tname )PASTEMAC2(d,c,op), ( tname )PASTEMAC2(d,d,op), ( tname )PASTEMAC2(d,z,op) }, \
+	{ ( tname )PASTEMAC2(z,s,op), ( tname )PASTEMAC2(z,c,op), ( tname )PASTEMAC2(z,d,op), ( tname )PASTEMAC2(z,z,op) }  \
+}
+
+// -- "Smart" two-operand macro --
+
 /*
 #define GENARRAY2_VFP(arrayname,op) \
 \

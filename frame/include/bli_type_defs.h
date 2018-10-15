@@ -257,6 +257,10 @@ typedef dcomplex  f77_dcomplex;
            - 1 == Hermitian
            - 2 == symmetric
            - 3 == triangular
+  31 ~ 29  Execution numerical datatype
+           - 29: domain    (0 == real, 1 == complex)
+           - 30: precision (0 == single, 1 == double)
+           - 31: used to encode integer, constant types
 */
 
 #define BLIS_DATATYPE_SHIFT                0
@@ -286,6 +290,9 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_PACK_REV_IF_LOWER_SHIFT       24
 #define BLIS_PACK_BUFFER_SHIFT             25
 #define BLIS_STRUC_SHIFT                   27
+#define BLIS_COMP_DT_SHIFT                 29
+#define   BLIS_COMP_DOMAIN_SHIFT           29
+#define   BLIS_COMP_PREC_SHIFT             30
 
 //
 // -- BLIS info bit field masks ------------------------------------------------
@@ -318,6 +325,9 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_PACK_REV_IF_LOWER_BIT         ( 0x1  << BLIS_PACK_REV_IF_LOWER_SHIFT )
 #define BLIS_PACK_BUFFER_BITS              ( 0x3  << BLIS_PACK_BUFFER_SHIFT )
 #define BLIS_STRUC_BITS                    ( 0x3  << BLIS_STRUC_SHIFT )
+#define BLIS_COMP_DT_BITS                  ( 0x7  << BLIS_COMP_DT_SHIFT )
+#define   BLIS_COMP_DOMAIN_BIT             ( 0x1  << BLIS_COMP_DOMAIN_SHIFT )
+#define   BLIS_COMP_PREC_BIT               ( 0x1  << BLIS_COMP_PREC_SHIFT )
 
 
 //
@@ -603,13 +613,15 @@ typedef enum
 
 typedef enum
 {
-	BLIS_3MH = 0,
+	BLIS_3MH       = 0,
 	BLIS_3M1,
 	BLIS_4MH,
 	BLIS_4M1B,
 	BLIS_4M1A,
 	BLIS_1M,
-	BLIS_NAT
+	BLIS_NAT,
+	BLIS_IND_FIRST = 0,
+	BLIS_IND_LAST  = BLIS_NAT
 } ind_t;
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
@@ -1003,7 +1015,7 @@ typedef struct
 	inc_t  is_b;
 
 	// The type to convert to on output.
-	num_t  dt_on_output;
+	//num_t  dt_on_output;
 
 } auxinfo_t;
 

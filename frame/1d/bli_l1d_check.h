@@ -90,6 +90,19 @@ GENTPROT( setd )
 GENTPROT( setid )
 
 
+#undef  GENTPROT
+#define GENTPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+    );
+
+GENTPROT( xpbyd )
+
+
 // -----------------------------------------------------------------------------
 
 void bli_l1d_xy_check

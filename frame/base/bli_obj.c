@@ -108,6 +108,7 @@ void bli_obj_create_without_buffer
 	bli_obj_set_elem_size( elem_size, obj );
 	bli_obj_set_target_dt( dt, obj );
 	bli_obj_set_exec_dt( dt, obj );
+	bli_obj_set_comp_dt( dt, obj );
 	bli_obj_set_dims( m, n, obj );
 	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_diag_offset( 0, obj );
@@ -115,8 +116,14 @@ void bli_obj_create_without_buffer
 	// Set the internal scalar to 1.0.
 	s = bli_obj_internal_scalar_buffer( obj );
 
-	if      ( bli_is_float( dt )    ) { bli_sset1s( *(( float*    )s) ); }
-	else if ( bli_is_double( dt )   ) { bli_dset1s( *(( double*   )s) ); }
+	// Always writing the imaginary component is needed in mixed-domain
+	// scenarios. Failing to do this can lead to reading uninitialized
+	// memory just before calling the macrokernel (as the internal scalars
+	// for A and B are merged).
+	//if      ( bli_is_float( dt )    ) { bli_sset1s( *(( float*    )s) ); }
+	//else if ( bli_is_double( dt )   ) { bli_dset1s( *(( double*   )s) ); }
+	if      ( bli_is_float( dt )    ) { bli_cset1s( *(( scomplex* )s) ); }
+	else if ( bli_is_double( dt )   ) { bli_zset1s( *(( dcomplex* )s) ); }
 	else if ( bli_is_scomplex( dt ) ) { bli_cset1s( *(( scomplex* )s) ); }
 	else if ( bli_is_dcomplex( dt ) ) { bli_zset1s( *(( dcomplex* )s) ); }
 }

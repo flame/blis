@@ -49,4 +49,13 @@ GENPROT( axpym )
 GENPROT( scal2m )
 GENPROT( scalm )
 GENPROT( setm )
+GENPROT( xpbym )
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp2)( num_t dtx, num_t dty );
+
+GENPROT( xpbym_md )
 

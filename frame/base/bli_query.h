@@ -37,3 +37,5 @@ bool_t bli_obj_equals( obj_t* a,
 
 bool_t bli_obj_imag_equals( obj_t* a,
                             obj_t* b );
+
+bool_t bli_obj_imag_is_zero( obj_t* a );

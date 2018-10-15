@@ -86,6 +86,7 @@ bool_t bli_obj_equals( obj_t* a,
 bool_t bli_obj_imag_equals( obj_t* a,
                             obj_t* b )
 {
+#if 0
 	bool_t r_val = FALSE;
 	num_t  dt_a;
 	num_t  dt_b;
@@ -128,7 +129,51 @@ bool_t bli_obj_imag_equals( obj_t* a,
 			r_val = bli_deq( bli_zimag( *ap_z ), *bp_z );
 		}
 	}
+#endif
+	bool_t r_val = FALSE;
+
+	// The function is not yet implemented for vectors and matrices.
+	if ( !bli_obj_is_1x1( a ) ||
+	     !bli_obj_is_1x1( b ) ||
+	     bli_obj_is_complex( b ) )
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+	double a_r, a_i;
+	double b_r, b_i;
+
+	// Get the real and imaginary parts of a and cast them to local doubles.
+	bli_getsc( a, &a_r, &a_i );
+
+	// Get the value of b and cast to a local double. (Note: the imaginary part
+	// of b is ignored since we know b is real.)
+	bli_getsc( b, &b_r, &b_i );
+
+	// Compare the imaginary part of a to the real part of b.
+	if ( a_i == b_r ) r_val = TRUE;
 
 	return r_val;
 }
+
+bool_t bli_obj_imag_is_zero( obj_t* a )
+{
+	bool_t r_val = TRUE;
+
+	// The function is not yet implemented for vectors and matrices.
+	if ( !bli_obj_is_1x1( a ) )
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+
+	if ( bli_obj_is_complex( a ) )
+	{
+		double a_r, a_i;
+
+		// Get the real and imaginary parts and cast them to local doubles.
+		bli_getsc( a, &a_r, &a_i );
+
+		// Compare the imaginary part of a to double-precision zero.
+		if ( !bli_deq0( a_i ) ) r_val = FALSE;
+	}
+
+	return r_val;
+}
+
 

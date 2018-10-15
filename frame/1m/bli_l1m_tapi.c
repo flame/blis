@@ -382,5 +382,155 @@ INSERT_GENTFUNC_BASIC0( scalm )
 INSERT_GENTFUNC_BASIC0( setm )
 
 
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  beta, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
+	/* If beta is zero, then the operation reduces to copym. */ \
+	if ( PASTEMAC(ch,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC2(ch,copym,_unb_var1) \
+		( \
+		  diagoffx, \
+		  diagx, \
+		  uplox, \
+		  transx, \
+		  m, \
+		  n, \
+		  x, rs_x, cs_x, \
+		  y, rs_y, cs_y, \
+		  cntx, \
+		  rntm  \
+		); \
+\
+		return; \
+	} \
+\
+	/* Invoke the helper variant, which loops over the appropriate kernel
+	   to implement the current operation. */ \
+	PASTEMAC2(ch,opname,_unb_var1) \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  x, rs_x, cs_x, \
+	  beta, \
+	  y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
+	); \
+\
+	/* When the diagonal of an upper- or lower-stored matrix is unit,
+	   we handle it with a separate post-processing step. */ \
+	if ( bli_is_upper_or_lower( uplox ) && \
+	     bli_is_unit_diag( diagx ) ) \
+	{ \
+		PASTEMAC2(ch,xpbyd,BLIS_TAPI_EX_SUF) \
+		( \
+		  diagoffx, \
+		  diagx, \
+		  transx, \
+		  m, \
+		  n, \
+		  x, rs_x, cs_x, \
+		  beta, \
+		  y, rs_y, cs_y, \
+		  cntx, \
+		  rntm  \
+		); \
+	} \
+}
+
+INSERT_GENTFUNC_BASIC0( xpbym )
+
+
+#undef  GENTFUNC2
+#define GENTFUNC2( ctype_x, ctype_y, chx, chy, opname ) \
+\
+void PASTEMAC3(chx,chy,opname,EX_SUF) \
+     ( \
+       doff_t   diagoffx, \
+       diag_t   diagx, \
+       uplo_t   uplox, \
+       trans_t  transx, \
+       dim_t    m, \
+       dim_t    n, \
+       ctype_x* x, inc_t rs_x, inc_t cs_x, \
+       ctype_y* beta, \
+       ctype_y* y, inc_t rs_y, inc_t cs_y  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
+	/* If beta is zero, then the operation reduces to copym. */ \
+	if ( PASTEMAC(chy,eq0)( *beta ) ) \
+	{ \
+		PASTEMAC2(chx,chy,castm) \
+		( \
+		  transx, \
+		  m, \
+		  n, \
+		  x, rs_x, cs_x, \
+		  y, rs_y, cs_y  \
+		); \
+\
+		return; \
+	} \
+\
+	/* Invoke the helper variant, which loops over the appropriate kernel
+	   to implement the current operation. */ \
+	PASTEMAC3(chx,chy,opname,_unb_var1) \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  x, rs_x, cs_x, \
+	  beta, \
+	  y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC2_BASIC0( xpbym_md )
+INSERT_GENTFUNC2_MIXDP0( xpbym_md )
+
+
 #endif
 

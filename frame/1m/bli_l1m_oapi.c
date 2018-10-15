@@ -302,5 +302,141 @@ void PASTEMAC(opname,EX_SUF) \
 GENFRONT( setm )
 
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_OAPI_EX_DECLS \
+\
+	if ( bli_obj_dt( x ) != bli_obj_dt( y ) ) \
+		return bli_xpbym_md( x, beta, y ); \
+\
+	num_t     dt        = bli_obj_dt( x ); \
+\
+	doff_t    diagoffx  = bli_obj_diag_offset( x ); \
+	diag_t    diagx     = bli_obj_diag( x ); \
+	uplo_t    uplox     = bli_obj_uplo( x ); \
+	trans_t   transx    = bli_obj_conjtrans_status( x ); \
+	dim_t     m         = bli_obj_length( y ); \
+	dim_t     n         = bli_obj_width( y ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     rs_x      = bli_obj_row_stride( x ); \
+	inc_t     cs_x      = bli_obj_col_stride( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     rs_y      = bli_obj_row_stride( y ); \
+	inc_t     cs_y      = bli_obj_col_stride( y ); \
+\
+	void*     buf_beta; \
+\
+	obj_t     beta_local; \
+\
+	if ( bli_error_checking_is_enabled() ) \
+	    PASTEMAC(opname,_check)( x, beta, y ); \
+\
+	/* Create local copy-casts of scalars (and apply internal conjugation
+	   as needed). */ \
+	bli_obj_scalar_init_detached_copy_of( dt, BLIS_NO_CONJUGATE, \
+	                                      beta, &beta_local ); \
+	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
+\
+	/* Query a type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
+\
+	f \
+    ( \
+	   diagoffx, \
+	   diagx, \
+	   uplox, \
+	   transx, \
+	   m, \
+	   n, \
+	   buf_x, rs_x, cs_x, \
+	   buf_beta, \
+	   buf_y, rs_y, cs_y, \
+	   cntx, \
+	   rntm  \
+	); \
+}
+
+GENFRONT( xpbym )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  x, \
+       obj_t*  beta, \
+       obj_t*  y  \
+       BLIS_OAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_OAPI_EX_DECLS \
+\
+	num_t     dtx       = bli_obj_dt( x ); \
+	num_t     dty       = bli_obj_dt( y ); \
+\
+	doff_t    diagoffx  = bli_obj_diag_offset( x ); \
+	diag_t    diagx     = bli_obj_diag( x ); \
+	uplo_t    uplox     = bli_obj_uplo( x ); \
+	trans_t   transx    = bli_obj_conjtrans_status( x ); \
+	dim_t     m         = bli_obj_length( y ); \
+	dim_t     n         = bli_obj_width( y ); \
+	void*     buf_x     = bli_obj_buffer_at_off( x ); \
+	inc_t     rs_x      = bli_obj_row_stride( x ); \
+	inc_t     cs_x      = bli_obj_col_stride( x ); \
+	void*     buf_y     = bli_obj_buffer_at_off( y ); \
+	inc_t     rs_y      = bli_obj_row_stride( y ); \
+	inc_t     cs_y      = bli_obj_col_stride( y ); \
+\
+	void*     buf_beta; \
+\
+	obj_t     beta_local; \
+\
+	/* Create local copy-casts of scalars (and apply internal conjugation
+	   as needed). */ \
+	bli_obj_scalar_init_detached_copy_of( dty, BLIS_NO_CONJUGATE, \
+	                                      beta, &beta_local ); \
+	buf_beta = bli_obj_buffer_for_1x1( dty, &beta_local ); \
+\
+	/* Query a (multi) type-specific function pointer, except one that uses
+	   void* instead of typed pointers. */ \
+	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
+	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp2)( dtx, dty ); \
+\
+	f \
+	( \
+	   diagoffx, \
+	   diagx, \
+	   uplox, \
+	   transx, \
+	   m, \
+	   n, \
+	   buf_x, rs_x, cs_x, \
+	   buf_beta, \
+	   buf_y, rs_y, cs_y, \
+	   cntx, \
+	   rntm  \
+	); \
+}
+
+GENFRONT( xpbym_md )
+
+
+
 #endif
 

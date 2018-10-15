@@ -58,11 +58,13 @@ void PASTEMAC(opname,EX_SUF) \
 	BLIS_OAPI_EX_DECLS \
 \
 	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
+	   (complex) datatype, and if that datatype matches the execution
+	   datatype. If any datatypes differ, skip the induced method chooser
+	   function and proceed directly with native execution, which is
 	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
-	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
+	if ( bli_obj_dt( c ) == bli_obj_dt( a ) && \
+	     bli_obj_dt( c ) == bli_obj_dt( b ) && \
+	     bli_obj_dt( c ) == bli_obj_exec_dt( c ) && \
 	     bli_obj_is_complex( c ) ) \
 	{ \
 		/* Invoke the operation's "ind" function--its induced method front-end.

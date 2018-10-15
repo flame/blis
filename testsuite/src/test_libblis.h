@@ -176,6 +176,8 @@ typedef struct
 	unsigned int  n_datatypes;
 	char          datatype_char[ MAX_NUM_DATATYPES + 1 ];
 	num_t         datatype[ MAX_NUM_DATATYPES + 1 ];
+    unsigned int  mixed_domain;
+    unsigned int  mixed_precision;
 	unsigned int  p_first;
 	unsigned int  p_max;
 	unsigned int  p_inc;
@@ -251,6 +253,7 @@ typedef struct test_ops_s
 	test_op_t scal2m;
 	test_op_t setm;
 	test_op_t subm;
+	test_op_t xpbym;
 
 	// level-1f
 	test_op_t axpy2v;
@@ -369,35 +372,42 @@ void carryover( unsigned int* c,
 
 // --- Operation driver ---
 
-void libblis_test_op_driver( thread_data_t* tdata,
-                             test_params_t* params,
-                             test_op_t*     op,
-                             iface_t        iface,
-                             char*          op_str,
-                             char*          p_types,
-                             char*          o_types,
-                             thresh_t*      thresh,
-                             void (*f_exp)  (test_params_t*, // params struct
-                                             test_op_t*,     // op struct
-                                             iface_t,        // iface
-                                             num_t,          // datatype (current datatype)
-                                             char*,          // pc_str (current param string)
-                                             char*,          // sc_str (current storage string)
-                                             unsigned int,   // p_cur (current problem size)
-                                             double*,        // perf
-                                             double* ) );    // residual
+void libblis_test_op_driver
+     (
+       thread_data_t* tdata,
+       test_params_t* params,
+       test_op_t*     op,
+       iface_t        iface,
+       char*          op_str,
+       char*          p_types,
+       char*          o_types,
+       thresh_t*      thresh,
+       void (*f_exp)  (test_params_t*, // params struct
+                       test_op_t*,     // op struct
+                       iface_t,        // iface
+                       char*,          // dc_str (current datatype string)
+                       char*,          // pc_str (current param string)
+                       char*,          // sc_str (current storage string)
+                       unsigned int,   // p_cur (current problem size)
+                       double*,        // perf
+                       double*)        // residual
+     );
 
 // --- Generate experiment string labels ---
 
-void libblis_test_build_function_string( char*        prefix_str,
-                                         ind_t        method,
-                                         char*        ind_str,
-                                         char*        op_str,
-                                         char         dt_char,
-                                         unsigned int n_param_combos,
-                                         char*        pc_str,
-                                         char*        sc_str,
-                                         char*        func_str );
+void libblis_test_build_function_string
+     (
+       char*        prefix_str,
+       ind_t        method,
+       char*        ind_str,
+       char*        op_str,
+       unsigned int is_mixed_dt,
+       char*        dc_str,
+       unsigned int n_param_combos,
+       char*        pc_str,
+       char*        sc_str,
+       char*        funcname_str
+     );
 
 void libblis_test_build_dims_string( test_op_t* op,
                                      dim_t      p_cur,
@@ -465,6 +475,21 @@ int libblis_test_l1f_is_disabled( test_op_t* op );
 int libblis_test_l2_is_disabled( test_op_t* op );
 int libblis_test_l3ukr_is_disabled( test_op_t* op );
 int libblis_test_l3_is_disabled( test_op_t* op );
+int libblis_test_dt_str_has_sp_char( test_params_t* params );
+int libblis_test_dt_str_has_sp_char_str( int n, char* str );
+int libblis_test_dt_str_has_dp_char( test_params_t* params );
+int libblis_test_dt_str_has_dp_char_str( int n, char* str );
+int libblis_test_dt_str_has_rd_char( test_params_t* params );
+int libblis_test_dt_str_has_cd_char( test_params_t* params );
+
+unsigned int libblis_test_count_combos
+     (
+       unsigned int n_operands,
+       char*        spec_str,
+       char**       char_sets
+     );
+char libblis_test_proj_dtchar_to_precchar( char dt_char );
+
 
 //
 // --- Test module headers -----------------------------------------------------
@@ -498,6 +523,7 @@ int libblis_test_l3_is_disabled( test_op_t* op );
 #include "test_scal2m.h"
 #include "test_setm.h"
 #include "test_subm.h"
+#include "test_xpbym.h"
 
 // Level-1f kernels
 #include "test_axpy2v.h"

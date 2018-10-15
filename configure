@@ -191,6 +191,24 @@ print_usage()
 	echo "                 compatibility layer. This automatically enables the"
 	echo "                 BLAS compatibility layer as well."
 	echo " "
+	echo "   --disable-mixed-dt, --enable-mixed-dt"
+	echo " "
+	echo "                 Disable (enabled by default) support for mixing the"
+	echo "                 storage domain and/or storage precision of matrix"
+	echo "                 operands for the gemm operation, as well as support"
+	echo "                 for computing in a precision different from one or."
+	echo "                 both of matrices A and B."
+	echo " "
+	echo "   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem"
+	echo " "
+	echo "                 Disable (enabled by default) support for additional"
+	echo "                 mixed datatype optimizations that require temporarily"
+	echo "                 allocating extra memory--specifically, a single m x n"
+	echo "                 matrix (per application thread) whose storage datatype"
+	echo "                 is equal to the computation datatype. This option may"
+	echo "                 only be enabled when mixed domain/precision support is"
+	echo "                 enabled."
+	echo " "
 	echo "   -s NAME --enable-sandbox=NAME"
 	echo " "
 	echo "                 Enable a separate sandbox implementation of gemm. This"
@@ -1605,6 +1623,8 @@ main()
 	blas_int_type_size=32
 	enable_blas='yes'
 	enable_cblas='no'
+	enable_mixed_dt='yes'
+	enable_mixed_dt_extra_mem='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
 
@@ -1738,6 +1758,18 @@ main()
 						;;
 					disable-cblas)
 						enable_cblas='no'
+						;;
+					enable-mixed-dt)
+						enable_mixed_dt='yes'
+						;;
+					disable-mixed-dt)
+						enable_mixed_dt='no'
+						;;
+					enable-mixed-dt-extra-mem)
+						enable_mixed_dt_extra_mem='yes'
+						;;
+					disable-mixed-dt-extra-mem)
+						enable_mixed_dt_extra_mem='no'
 						;;
 					with-memkind)
 						enable_memkind='yes'
@@ -2414,8 +2446,35 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	
-	# Report integer sizes
+	if [ "x${enable_mixed_dt}" = "xyes" ]; then
+		echo "${script_name}: mixed datatype support is enabled."
+
+		if [ "x${enable_mixed_dt_extra_mem}" = "xyes" ]; then
+			echo "${script_name}: mixed datatype optimizations requiring extra memory are enabled."
+			enable_mixed_dt_extra_mem_01=1
+		else
+			echo "${script_name}: mixed datatype optimizations requiring extra memory are disabled."
+			enable_mixed_dt_extra_mem_01=0
+		fi
+
+		enable_mixed_dt_01=1
+	else
+		echo "${script_name}: mixed datatype support is disabled."
+
+		if [ "x${enable_mixed_dt_extra_mem}" = "xyes" ]; then
+			echo "${script_name}: *** Mixed datatype optimizations requiring extra memory are only"
+			echo "${script_name}: *** available when mixed datatype support is also enabled."
+			echo "${script_name}: *** Please enable mixed datatype support, or disable mixed datatype"
+			echo "${script_name}: *** optimizations requiring extra memory, and re-run configure."
+			exit 1
+		else
+			enable_mixed_dt_extra_mem_01=0
+		fi
+
+		enable_mixed_dt_01=0
+	fi
+
+	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
 		echo "${script_name}: the internal integer size is 32-bit."
 	elif [ "x${int_type_size}" = "x64" ]; then
@@ -2595,6 +2654,8 @@ main()
 		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
 		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
+		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
+		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \

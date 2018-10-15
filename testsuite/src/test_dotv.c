@@ -59,7 +59,7 @@ void libblis_test_dotv_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          datatype,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -140,7 +140,7 @@ void libblis_test_dotv_experiment
        test_params_t* params,
        test_op_t*     op,
        iface_t        iface,
-       num_t          datatype,
+       char*          dc_str,
        char*          pc_str,
        char*          sc_str,
        unsigned int   p_cur,
@@ -154,12 +154,17 @@ void libblis_test_dotv_experiment
 	double       time_min  = DBL_MAX;
 	double       time;
 
+	num_t        datatype;
+
 	dim_t        m;
 
 	conj_t       conjx, conjy, conjconjxy;
 
 	obj_t        x, y, rho;
 
+
+	// Use the datatype of the first char in the datatype combination string.
+	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
 	// Map the dimension specifier to an actual dimension.
 	m = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );

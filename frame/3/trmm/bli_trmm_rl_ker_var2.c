@@ -324,6 +324,9 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( istep_a, &aux ); \
 \
+	/* Save the desired output datatype (indicating no typecasting). */ \
+	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
+\
 	b1 = b_cast; \
 	c1 = c_cast; \
 \

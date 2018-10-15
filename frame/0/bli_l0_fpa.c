@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-GENARRAY_FPA( void*, opname ); \
+GENARRAY_FPA( PASTECH(opname,_vft), opname ); \
 \
 PASTECH(opname,_vft) PASTEMAC(opname,_qfp)( num_t dt ) \
 { \
@@ -63,7 +63,7 @@ GENFRONT( zipsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-GENARRAY_FPA_I( void*, opname ); \
+GENARRAY_FPA_I( PASTECH(opname,_vft), opname ); \
 \
 PASTECH(opname,_vft) PASTEMAC(opname,_qfp)( num_t dt ) \
 { \

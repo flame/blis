@@ -211,13 +211,14 @@ siz_t bli_packm_init_pack
 	bli_init_once();
 
 	num_t     dt           = bli_obj_dt( a );
+	num_t     dt_tar       = bli_obj_target_dt( a );
 	trans_t   transa       = bli_obj_onlytrans_status( a );
 	dim_t     m_a          = bli_obj_length( a );
 	dim_t     n_a          = bli_obj_width( a );
-	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_m, cntx );
-	dim_t     bmult_m_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_m, cntx );
-	dim_t     bmult_n_def  = bli_cntx_get_blksz_def_dt( dt, bmult_id_n, cntx );
-	dim_t     bmult_n_pack = bli_cntx_get_blksz_max_dt( dt, bmult_id_n, cntx );
+	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
+	dim_t     bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
+	dim_t     bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	dim_t     bmult_n_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_n, cntx );
 
 	dim_t     m_p, n_p;
 	dim_t     m_p_pad, n_p_pad;
@@ -229,6 +230,17 @@ siz_t bli_packm_init_pack
 
 	// We begin by copying the fields of A.
 	bli_obj_alias_to( a, p );
+
+	// Typecast the internal scalar value to the target datatype.
+	// NOTE: This must happen BEFORE we change the datatype of P to reflect
+	// the target_dt.
+	if ( dt != dt_tar )
+	{
+		bli_obj_scalar_cast_to( dt_tar, p );
+	}
+
+	// Update the datatype of P to be the target datatype of A.
+	bli_obj_set_dt( dt_tar, p );
 
 	// Update the dimension fields to explicitly reflect a transposition,
 	// if needed.

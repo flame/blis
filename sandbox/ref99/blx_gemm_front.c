@@ -97,19 +97,6 @@ void blx_gemm_front
 		bli_obj_induce_trans( &c_local );
 	}
 
-	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
-	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
-	  rntm
-	);
-
 	{
 		// A sort of hack for communicating the desired pach schemas for A and
 		// B to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
@@ -130,6 +117,19 @@ void blx_gemm_front
 			bli_obj_set_pack_schema( schema_b, &b_local );
 		}
 	}
+
+	// Parse and interpret the contents of the rntm_t object to properly
+	// set the ways of parallelism for each loop, and then make any
+	// additional modifications necessary for the current operation.
+	bli_rntm_set_ways_for_op
+	(
+	  BLIS_GEMM,
+	  BLIS_LEFT, // ignored for gemm
+	  bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ),
+	  bli_obj_width( &a_local ),
+	  rntm
+	);
 
 	// Invoke the internal back-end via the thread handler.
 	blx_gemm_thread

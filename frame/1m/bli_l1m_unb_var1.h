@@ -101,3 +101,46 @@ void PASTEMAC2(ch,opname,_unb_var1) \
 INSERT_GENTPROT_BASIC0( scalm )
 INSERT_GENTPROT_BASIC0( setm )
 
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,_unb_var1) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  beta, \
+       ctype*  y, inc_t rs_y, inc_t cs_y, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+INSERT_GENTPROT_BASIC0( xpbym )
+
+
+#undef  GENTPROT2
+#define GENTPROT2( ctype_x, ctype_y, chx, chy, opname ) \
+\
+void PASTEMAC3(chx,chy,opname,_unb_var1) \
+     ( \
+       doff_t   diagoffx, \
+       diag_t   diagx, \
+       uplo_t   uplox, \
+       trans_t  transx, \
+       dim_t    m, \
+       dim_t    n, \
+       ctype_x* x, inc_t rs_x, inc_t cs_x, \
+       ctype_y* beta, \
+       ctype_y* y, inc_t rs_y, inc_t cs_y, \
+       cntx_t*  cntx, \
+       rntm_t*  rntm  \
+     );
+
+INSERT_GENTPROT2_BASIC0( xpbym_md )
+INSERT_GENTPROT2_MIXDP0( xpbym_md )
+
