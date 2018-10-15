@@ -163,9 +163,6 @@ print_usage()
 	echo "                 incur additional overhead in some (but not all)"
 	echo "                 situations."
 	echo " "
-	echo "   -q, --quiet   Suppress informational output. By default, configure"
-	echo "                 is verbose. (NOTE: -q is not yet implemented)"
-	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
 	echo "                 Set the size (in bits) of internal BLIS integers and"
@@ -212,6 +209,19 @@ print_usage()
 	echo "                 detects the presence of libmemkind, libmemkind is used"
 	echo "                 by default, and otherwise it is not used by default."
 	echo " "
+	echo "   -r METHOD, --thread-part-jrir=METHOD"
+	echo " "
+	echo "                 Request a method of assigning micropanels to threads in"
+	echo "                 the JR and IR loops. Valid options are 'slab' and 'rr'."
+	echo "                 Using 'slab' assigns (as much as possible) contiguous"
+	echo "                 regions of micropanels to each thread while the latter"
+	echo "                 assigns micropanels to threads in a round-robin fashion."
+	echo "                 (NOTE: Specifying this option constitutes a *request*,"
+	echo "                 which may be ignored in select situations if the"
+	echo "                 implementation has a good reason to do so.) The chosen"
+	echo "                 method also applies during the packing of A and B. The"
+	echo "                 default method is 'slab'."
+	echo " "
 	echo "   --force-version=STRING"
 	echo " "
 	echo "                 Force configure to use an arbitrary version string"
@@ -225,6 +235,9 @@ print_usage()
 	echo "                 when debugging certain configuration issues, and/or as"
 	echo "                 a sanity check to make sure these lists are constituted"
 	echo "                 as expected."
+	echo " "
+	echo "   -q, --quiet   Suppress informational output. By default, configure"
+	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
 	echo "   -h, --help    Output this information and quit."
 	echo " "
@@ -1591,6 +1604,9 @@ main()
 	# The threading flag.
 	threading_model='no'
 
+	# The method of assigning micropanels to threads in the JR and JR loops.
+	thread_part_jrir='slab'
+
 	# Option variables.
 	quiet_flag=''
 	show_config_list=''
@@ -1641,7 +1657,7 @@ main()
 	# -- Command line option/argument parsing ----------------------------------
 
 	# Process our command line options.
-	while getopts ":hp:d:s:t:qci:b:-:" opt; do
+	while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
 		case $opt in
 			-)
 				case "$OPTARG" in
@@ -1704,6 +1720,9 @@ main()
 						;;
 					enable-threading=*)
 						threading_model=${OPTARG#*=}
+						;;
+					thread-part-jrir=*)
+						thread_part_jrir=${OPTARG#*=}
 						;;
 					disable-threading)
 						threading_model='no'
@@ -1776,6 +1795,9 @@ main()
 			t)
 				threading_model=$OPTARG
 				;;
+			r)
+				thread_part_jrir=$OPTARG
+				;;
 			i)
 				int_type_size=$OPTARG
 				;;
@@ -1791,7 +1813,7 @@ main()
 		esac
 	done
 	shift $(($OPTIND - 1))
-	
+
 	# Parse environment variables
 	while [ $# -gt 0 ]; do
 		case $1 in
@@ -2351,7 +2373,7 @@ main()
 	elif [ "x${threading_model}" = "xpthreads" ] ||
 	     [ "x${threading_model}" = "xpthread" ] ||
 	     [ "x${threading_model}" = "xposix" ]; then
-		echo "${script_name}: using Pthreads for threading."
+		echo "${script_name}: using POSIX threads for threading."
 		enable_pthreads='yes'
 		enable_pthreads_01=1
 		threading_model="pthreads" # Standardize the value.
@@ -2362,7 +2384,22 @@ main()
 		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
 	fi
-	
+
+	# Check the method of assigning micropanels to threads in the JR and IR
+	# loops.
+	enable_jrir_slab_01=0
+	enable_jrir_rr_01=0
+	if [ "x${thread_part_jrir}" = "xslab" ]; then
+		echo "${script_name}: requesting slab threading in jr and ir loops."
+		enable_jrir_slab_01=1
+	elif [ "x${thread_part_jrir}" = "xrr" ]; then
+		echo "${script_name}: requesting round-robin threading in jr and ir loops."
+		enable_jrir_rr_01=1
+	else
+		echo "${script_name}: *** Unsupported method of thread partitioning in jr and ir loops: ${threading_model}."
+		exit 1
+	fi
+
 	# Convert 'yes' and 'no' flags to booleans.
 	if [ "x${enable_packbuf_pools}" = "xyes" ]; then
 		echo "${script_name}: internal memory pools for packing buffers are enabled."
@@ -2414,7 +2451,7 @@ main()
 		echo "${script_name}: the CBLAS compatibility layer is disabled."
 		enable_cblas_01=0
 	fi
-	
+
 	# Report integer sizes
 	if [ "x${int_type_size}" = "x32" ]; then
 		echo "${script_name}: the internal integer size is 32-bit."
@@ -2590,6 +2627,8 @@ main()
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
+		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
+		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
 		| sed   -e "s/@enable_packbuf_pools@/${enable_packbuf_pools_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
 		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
@@ -2681,7 +2720,7 @@ main()
 
 
 	# -- Mirror source directory hierarchies to object directories -------------
-	
+
 	# Combine the config_list with the config_name and then remove duplicates.
 	config_list_plus_name=$(rm_duplicate_words "${config_list} ${config_name}")
 

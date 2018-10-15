@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,12 +35,12 @@
 
 #include "blis.h"
 
-static gemm_var_oft vars[2] =
+static gemm_var_oft vars_sl[2] =
 {
-	bli_herk_l_ker_var2, bli_herk_u_ker_var2,
+	bli_herk_l_ker_var2sl, bli_herk_u_ker_var2sl,
 };
 
-void bli_herk_x_ker_var2
+void bli_herk_x_ker_var2sl
      (
        obj_t*  a,
        obj_t*  ah,
@@ -58,7 +59,48 @@ void bli_herk_x_ker_var2
 	else                              uplo = 1;
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars[uplo];
+	f = vars_sl[uplo];
+
+	// Call the macrokernel.
+	f
+	(
+	  a,
+	  ah,
+	  c,
+	  cntx,
+	  rntm,
+	  cntl,
+	  thread
+	);
+}
+
+// -----------------------------------------------------------------------------
+
+static gemm_var_oft vars_rr[2] =
+{
+	bli_herk_l_ker_var2rr, bli_herk_u_ker_var2rr,
+};
+
+void bli_herk_x_ker_var2rr
+     (
+       obj_t*  a,
+       obj_t*  ah,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
+{
+	bool_t       uplo;
+	gemm_var_oft f;
+
+	// Set a bool based on the uplo field of C's root object.
+	if ( bli_obj_root_is_lower( c ) ) uplo = 0;
+	else                              uplo = 1;
+
+	// Index into the variant array to extract the correct function pointer.
+	f = vars_rr[uplo];
 
 	// Call the macrokernel.
 	f

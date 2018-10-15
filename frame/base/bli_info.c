@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -89,6 +90,60 @@ gint_t bli_info_get_blas_int_type_size( void ) { return BLIS_BLAS_INT_TYPE_SIZE;
 gint_t bli_info_get_enable_packbuf_pools( void )
 {
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_threading( void )
+{
+	if ( bli_info_get_enable_openmp() ||
+	     bli_info_get_enable_pthreads() ) return 1;
+	else                                  return 0;
+}
+gint_t bli_info_get_enable_openmp( void )
+{
+#ifdef BLIS_ENABLE_OPENMP
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_pthreads( void )
+{
+#ifdef BLIS_ENABLE_PTHREADS
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_thread_part_jrir_slab( void )
+{
+#ifdef BLIS_ENABLE_JRIR_SLAB
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_thread_part_jrir_rr( void )
+{
+#ifdef BLIS_ENABLE_JRIR_RR
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_memkind( void )
+{
+#ifdef BLIS_ENABLE_MEMKIND
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_sandbox( void )
+{
+#ifdef BLIS_ENABLE_SANDBOX
 	return 1;
 #else
 	return 0;

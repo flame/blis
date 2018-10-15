@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,10 +34,10 @@
 */
 
 #include "blis.h"
+#include "blix.h"
 
-#define FUNCPTR_T gemm_fp
-
-typedef void (*FUNCPTR_T)
+// Function pointer type for datatype-specific functions.
+typedef void (*gemm_fp)
      (
        pack_t  schema_a,
        pack_t  schema_b,
@@ -55,10 +56,17 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2);
+// Function pointer array for datatype-specific functions.
+static gemm_fp ftypes[BLIS_NUM_FP_TYPES] =
+{
+    PASTECH2(blx_,s,gemm_ker_var2sl),
+    PASTECH2(blx_,c,gemm_ker_var2sl),
+    PASTECH2(blx_,d,gemm_ker_var2sl),
+    PASTECH2(blx_,z,gemm_ker_var2sl)
+};
 
 
-void bli_gemm_ker_var2
+void blx_gemm_ker_var2sl
      (
        obj_t*  a,
        obj_t*  b,
@@ -100,7 +108,7 @@ void bli_gemm_ker_var2
 	void*     buf_alpha;
 	void*     buf_beta;
 
-	FUNCPTR_T f;
+	gemm_fp   f;
 
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
@@ -111,26 +119,6 @@ void bli_gemm_ker_var2
 	// merged above and the scalar attached to C.
 	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( c );
-
-    // If 1m is being employed on a column- or row-stored matrix with a
-    // real-valued beta, we can use the real domain macro-kernel, which
-	// eliminates a little overhead associated with the 1m virtual
-	// micro-kernel.
-#if 1
-	if ( bli_is_1m_packed( schema_a ) )
-	{
-		bli_l3_ind_recast_1m_params
-		(
-		  dt_exec,
-		  schema_a,
-		  c,
-		  m, n, k,
-		  pd_a, ps_a,
-		  pd_b, ps_b,
-		  rs_c, cs_c
-		);
-	}
-#endif
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -158,7 +146,7 @@ void bli_gemm_ker_var2
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+void PASTECH2(blx_,ch,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \
@@ -268,14 +256,27 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
-	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
-	dim_t jr_num_threads = bli_thread_n_way( thread ); \
-	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
-	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
-	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
+\
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	dim_t ir_nt  = bli_thread_n_way( caucus ); \
+	dim_t ir_tid = bli_thread_work_id( caucus ); \
+\
+	dim_t jr_start, jr_end; \
+	dim_t ir_start, ir_end; \
+	dim_t jr_inc,   ir_inc; \
+\
+	/* Determine the thread range and increment for each thrinfo_t node. */ \
+	bli_thread_range_jrir_sl( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_sl( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -290,7 +291,7 @@ void PASTEMAC(ch,varname) \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
+		for ( i = ir_start; i < ir_end; i += ir_inc ) \
 		{ \
 			ctype* restrict a2; \
 \
@@ -300,12 +301,12 @@ void PASTEMAC(ch,varname) \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_gemm_get_next_a_upanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
+			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter_sl( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter_sl( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -361,5 +362,12 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c,
 */ \
 }
 
-INSERT_GENTFUNC_BASIC0( gemm_ker_var2 )
+#if 0
+GENTFUNC( float,    s, gemm_ker_var2sl )
+GENTFUNC( double,   d, gemm_ker_var2sl )
+GENTFUNC( scomplex, c, gemm_ker_var2sl )
+GENTFUNC( dcomplex, z, gemm_ker_var2sl )
+#else
+INSERT_GENTFUNC_BASIC0( gemm_ker_var2sl )
+#endif
 

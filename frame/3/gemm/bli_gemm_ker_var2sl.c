@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,11 +35,10 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T herk_fp
+#define FUNCPTR_T gemm_fp
 
 typedef void (*FUNCPTR_T)
      (
-       doff_t  diagoffc,
        pack_t  schema_a,
        pack_t  schema_b,
        dim_t   m,
@@ -56,10 +56,13 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var2sl);
 
+//
+// -- Macrokernel functions for slab partitioning ------------------------------
+//
 
-void bli_herk_l_ker_var2
+void bli_gemm_ker_var2sl
      (
        obj_t*  a,
        obj_t*  b,
@@ -71,8 +74,6 @@ void bli_herk_l_ker_var2
      )
 {
 	num_t     dt_exec   = bli_obj_exec_dt( c );
-
-	doff_t    diagoffc  = bli_obj_diag_offset( c );
 
 	pack_t    schema_a  = bli_obj_pack_schema( a );
 	pack_t    schema_b  = bli_obj_pack_schema( b );
@@ -115,13 +116,30 @@ void bli_herk_l_ker_var2
 	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
+	// If 1m is being employed on a column- or row-stored matrix with a
+	// real-valued beta, we can use the real domain macro-kernel, which
+	// eliminates a little overhead associated with the 1m virtual
+	// micro-kernel.
+	if ( bli_is_1m_packed( schema_a ) )
+	{
+		bli_l3_ind_recast_1m_params
+		(
+		  dt_exec,
+		  schema_a,
+		  c,
+		  m, n, k,
+		  pd_a, ps_a,
+		  pd_b, ps_b,
+		  rs_c, cs_c
+		);
+	}
+
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	f = ftypes[dt_exec];
 
 	// Invoke the function.
-	f( diagoffc,
-	   schema_a,
+	f( schema_a,
 	   schema_b,
 	   m,
 	   n,
@@ -144,7 +162,6 @@ void bli_herk_l_ker_var2
 \
 void PASTEMAC(ch,varname) \
      ( \
-       doff_t  diagoffc, \
        pack_t  schema_a, \
        pack_t  schema_b, \
        dim_t   m, \
@@ -195,12 +212,11 @@ void PASTEMAC(ch,varname) \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 \
-	doff_t          diagoffc_ij; \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
+	dim_t           i, j; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           i, j, ip; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
@@ -222,31 +238,6 @@ void PASTEMAC(ch,varname) \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
-\
-	/* Safeguard: If the current panel of C is entirely above the diagonal,
-	   it is not stored. So we do nothing. */ \
-	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) return; \
-\
-	/* If there is a zero region above where the diagonal of C intersects
-	   the left edge of the panel, adjust the pointer to C and A and treat
-	   this case as if the diagonal offset were zero. */ \
-	if ( diagoffc < 0 ) \
-	{ \
-		ip       = -diagoffc / MR; \
-		i        = ip * MR; \
-		m        = m - i; \
-		diagoffc = -diagoffc % MR; \
-		c_cast   = c_cast + (i  )*rs_c; \
-		a_cast   = a_cast + (ip )*ps_a; \
-	} \
-\
-	/* If there is a zero region to the right of where the diagonal
-	   of C intersects the bottom of the panel, shrink it to prevent
-	   "no-op" iterations from executing. */ \
-	if ( diagoffc + m < n ) \
-	{ \
-		n = diagoffc + m; \
-	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -279,17 +270,27 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
 \
-	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
-	dim_t jr_num_threads = bli_thread_n_way( thread ); \
-	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
-	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
-	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	dim_t ir_nt  = bli_thread_n_way( caucus ); \
+	dim_t ir_tid = bli_thread_work_id( caucus ); \
+\
+	dim_t jr_start, jr_end; \
+	dim_t ir_start, ir_end; \
+	dim_t jr_inc,   ir_inc; \
+\
+	/* Determine the thread range and increment for each thrinfo_t node. */ \
+	bli_thread_range_jrir_sl( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir_sl( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -303,26 +304,23 @@ void PASTEMAC(ch,varname) \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
-		/* Interior loop over the m dimension (MR rows at a time). */ \
-		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
+		/* Loop over the m dimension (MR rows at a time). */ \
+		for ( i = ir_start; i < ir_end; i += ir_inc ) \
 		{ \
 			ctype* restrict a2; \
 \
 			a1  = a_cast + i * rstep_a; \
 			c11 = c1     + i * rstep_c; \
 \
-			/* Compute the diagonal offset for the submatrix at (i,j). */ \
-			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
-\
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_herk_get_next_a_upanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
+			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter_sl( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_herk_get_next_b_upanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter_sl( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -331,14 +329,23 @@ void PASTEMAC(ch,varname) \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
 \
-			/* If the diagonal intersects the current MR x NR submatrix, we
-			   compute it the temporary buffer and then add in the elements
-			   on or below the diagonal.
-			   Otherwise, if the submatrix is strictly below the diagonal,
-			   we compute and store as we normally would.
-			   And if we're strictly above the diagonal, we do nothing and
-			   continue. */ \
-			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
+			/* Handle interior and edge cases separately. */ \
+			if ( m_cur == MR && n_cur == NR ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+				  k, \
+				  alpha_cast, \
+				  a1, \
+				  b1, \
+				  beta_cast, \
+				  c11, rs_c, cs_c, \
+				  &aux, \
+				  cntx  \
+				); \
+			} \
+			else \
 			{ \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
@@ -353,56 +360,21 @@ void PASTEMAC(ch,varname) \
 				  cntx  \
 				); \
 \
-				/* Scale C and add the result to only the stored part. */ \
-				PASTEMAC(ch,xpbys_mxn_l)( diagoffc_ij, \
-				                          m_cur, n_cur, \
-				                          ct,  rs_ct, cs_ct, \
-				                          beta_cast, \
-				                          c11, rs_c,  cs_c ); \
-			} \
-			else if ( bli_is_strictly_below_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
-			{ \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  beta_cast, \
-					  c11, rs_c, cs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  zero, \
-					  ct, rs_ct, cs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Scale the edge of C and add the result. */ \
-					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        beta_cast, \
-					                        c11, rs_c,  cs_c ); \
-				} \
+				/* Scale the bottom edge of C and add the result from above. */ \
+				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
+				                        ct,  rs_ct, cs_ct, \
+				                        beta_cast, \
+				                        c11, rs_c,  cs_c ); \
 			} \
 		} \
 	} \
+\
+/*
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2sl: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
+*/ \
 }
 
-INSERT_GENTFUNC_BASIC0( herk_l_ker_var2 )
+INSERT_GENTFUNC_BASIC0( gemm_ker_var2sl )
 

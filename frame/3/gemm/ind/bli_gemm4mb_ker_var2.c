@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -252,6 +253,9 @@ void PASTEMAC(ch,varname) \
 	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
 	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
 \
+	dim_t jr_inc = jr_num_threads; \
+	dim_t ir_inc = ir_num_threads; \
+\
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
 	{ \
@@ -295,12 +299,12 @@ void PASTEMAC(ch,varname) \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_gemm_get_next_a_upanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
+			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter_rr( i, m_iter, ir_thread_id, ir_num_threads ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter_rr( j, n_iter, jr_thread_id, jr_num_threads ) ) \
 					b2 = b_cast; \
 			} \
 \
