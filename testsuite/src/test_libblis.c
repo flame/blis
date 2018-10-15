@@ -851,10 +851,10 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "multithreading                 %s\n", impl_str );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "thread auto-factorization        \n" );
-	libblis_test_fprintf_c( os, "  m dim thread ratio           %d\n", ( int )BLIS_DEFAULT_M_THREAD_RATIO );
-	libblis_test_fprintf_c( os, "  n dim thread ratio           %d\n", ( int )BLIS_DEFAULT_N_THREAD_RATIO );
-	libblis_test_fprintf_c( os, "  jr max threads               %d\n", ( int )BLIS_DEFAULT_NR_THREAD_MAX );
-	libblis_test_fprintf_c( os, "  ir max threads               %d\n", ( int )BLIS_DEFAULT_MR_THREAD_MAX );
+	libblis_test_fprintf_c( os, "  m dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_M );
+	libblis_test_fprintf_c( os, "  n dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_N );
+	libblis_test_fprintf_c( os, "  jr max threads               %d\n", ( int )BLIS_THREAD_MAX_JR );
+	libblis_test_fprintf_c( os, "  ir max threads               %d\n", ( int )BLIS_THREAD_MAX_IR );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "ways of parallelism     nt    jc    pc    ic    jr    ir\n" );
 	libblis_test_fprintf_c( os, "  environment        %5s %5s %5s %5s %5s %5s\n",
