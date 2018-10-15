@@ -190,6 +190,10 @@
 -1 -2    #   dimensions: m n
 ?        #   parameters: transa
 
+1        # xpbym
+-1 -1    #   dimensions: m n
+?        #   parameters: transa
+
 
 # --- Level-1f kernels -----------------------------------------------------
 
