@@ -64,7 +64,9 @@ static pthread_once_t once_id = PTHREAD_ONCE_INIT;
 
 void bli_arch_set_id_once( void )
 {
+#ifndef BLIS_CONFIGURETIME_CPUID
 	pthread_once( &once_id, bli_arch_set_id );
+#endif
 }
 
 // -----------------------------------------------------------------------------
