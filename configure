@@ -965,7 +965,9 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	ldflags="${LIBPTHREAD--lpthread}"
+        if [ $is_win = no ]; then
+	    ldflags="${LIBPTHREAD--lpthread}"
+        fi
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
@@ -2456,6 +2458,10 @@ main()
 	libpthread_esc=$(echo "${LIBPTHREAD--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
+
+        if [ $is_win = yes ]; then
+            libpthread_esc=
+        fi
 
 	# Typically, there are no slashes in the version variable. However,
 	# downstream maintainers (such as those for Debian) may create custom

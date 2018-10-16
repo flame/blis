@@ -134,7 +134,7 @@ int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
 
 int pthread_join(pthread_t thread, void **retval)
 {
-    if (!WaitForSingleObject(thread.handle)) return EAGAIN;
+    if (!WaitForSingleObject(thread.handle, INFINITE)) return EAGAIN;
     if (retval) *retval = thread.retval;
     return 0;
 }
