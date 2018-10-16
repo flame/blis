@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,20 +45,23 @@ typedef void (*FUNCPTR_T)
        dim_t   m,
        dim_t   n,
        dim_t   k,
-       void*   alpha1,
+       void*   alpha,
        void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a,
        void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
-       void*   alpha2,
+       void*   beta,
        void*   c, inc_t rs_c, inc_t cs_c,
        cntx_t* cntx,
        rntm_t* rntm,
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,trsm_ll_ker_var2);
+static FUNCPTR_T GENARRAY(ftypes,trmm_lu_ker_var2sl);
 
+//
+// -- Macrokernel functions for slab partitioning ------------------------------
+//
 
-void bli_trsm_ll_ker_var2
+void bli_trmm_lu_ker_var2sl
      (
        obj_t*  a,
        obj_t*  b,
@@ -93,26 +97,23 @@ void bli_trsm_ll_ker_var2
 	inc_t     rs_c      = bli_obj_row_stride( c );
 	inc_t     cs_c      = bli_obj_col_stride( c );
 
-	void*     buf_alpha1;
-	void*     buf_alpha2;
+	obj_t     scalar_a;
+	obj_t     scalar_b;
+
+	void*     buf_alpha;
+	void*     buf_beta;
 
 	FUNCPTR_T f;
 
-	// Grab the address of the internal scalar buffer for the scalar
-	// attached to B (the non-triangular matrix). This will be the alpha
-	// scalar used in the gemmtrsm subproblems (ie: the scalar that would
-	// be applied to the packed copy of B prior to it being updated by
-	// the trsm subproblem). This scalar may be unit, if for example it
-	// was applied during packing.
-	buf_alpha1 = bli_obj_internal_scalar_buffer( b );
+	// Detach and multiply the scalars attached to A and B.
+	bli_obj_scalar_detach( a, &scalar_a );
+	bli_obj_scalar_detach( b, &scalar_b );
+	bli_mulsc( &scalar_a, &scalar_b );
 
-	// Grab the address of the internal scalar buffer for the scalar
-	// attached to C. This will be the "beta" scalar used in the gemm-only
-	// subproblems that correspond to micro-panels that do not intersect
-	// the diagonal. We need this separate scalar because it's possible
-	// that the alpha attached to B was reset, if it was applied during
-	// packing.
-	buf_alpha2 = bli_obj_internal_scalar_buffer( c );
+	// Grab the addresses of the internal scalar buffers for the scalar
+	// merged above and the scalar attached to C.
+	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
+	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
@@ -125,10 +126,10 @@ void bli_trsm_ll_ker_var2
 	   m,
 	   n,
 	   k,
-	   buf_alpha1,
+	   buf_alpha,
 	   buf_a, cs_a, pd_a, ps_a,
 	   buf_b, rs_b, pd_b, ps_b,
-	   buf_alpha2,
+	   buf_beta,
 	   buf_c, rs_c, cs_c,
 	   cntx,
 	   rntm,
@@ -147,29 +148,28 @@ void PASTEMAC(ch,varname) \
        dim_t   m, \
        dim_t   n, \
        dim_t   k, \
-       void*   alpha1, \
+       void*   alpha, \
        void*   a, inc_t cs_a, dim_t pd_a, inc_t ps_a, \
        void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b, \
-       void*   alpha2, \
+       void*   beta, \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
        rntm_t* rntm, \
        thrinfo_t* thread  \
      ) \
 { \
-	const num_t     dt          = PASTEMAC(ch,type); \
+	const num_t     dt         = PASTEMAC(ch,type); \
 \
 	/* Alias some constants to simpler names. */ \
-	const dim_t     MR          = pd_a; \
-	const dim_t     NR          = pd_b; \
-	const dim_t     PACKMR      = cs_a; \
-	const dim_t     PACKNR      = rs_b; \
+	const dim_t     MR         = pd_a; \
+	const dim_t     NR         = pd_b; \
+	const dim_t     PACKMR     = cs_a; \
+	const dim_t     PACKNR     = rs_b; \
 \
-	/* Cast the micro-kernel address to its function pointer type. */ \
-	PASTECH(ch,gemmtrsm_ukr_ft) \
-	               gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx ); \
+	/* Query the context for the micro-kernel address and cast it to its
+	   function pointer type. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -182,13 +182,13 @@ void PASTEMAC(ch,varname) \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
-	ctype* restrict zero        = PASTEMAC(ch,0); \
-	ctype* restrict minus_one   = PASTEMAC(ch,m1); \
-	ctype* restrict a_cast      = a; \
-	ctype* restrict b_cast      = b; \
-	ctype* restrict c_cast      = c; \
-	ctype* restrict alpha1_cast = alpha1; \
-	ctype* restrict alpha2_cast = alpha2; \
+	ctype* restrict one        = PASTEMAC(ch,1); \
+	ctype* restrict zero       = PASTEMAC(ch,0); \
+	ctype* restrict a_cast     = a; \
+	ctype* restrict b_cast     = b; \
+	ctype* restrict c_cast     = c; \
+	ctype* restrict alpha_cast = alpha; \
+	ctype* restrict beta_cast  = beta; \
 	ctype* restrict b1; \
 	ctype* restrict c1; \
 \
@@ -198,10 +198,8 @@ void PASTEMAC(ch,varname) \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           k_a1011; \
-	dim_t           k_a10; \
-	dim_t           off_a10; \
-	dim_t           off_a11; \
+	dim_t           k_a1112; \
+	dim_t           off_a1112; \
 	dim_t           i, j; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
@@ -237,17 +235,17 @@ void PASTEMAC(ch,varname) \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
-	/* Safeguard: If matrix A is above the diagonal, it is implicitly zero.
-	   So we do nothing. */ \
-	if ( bli_is_strictly_above_diag_n( diagoffa, m, k ) ) return; \
+	/* Safeguard: If the current block of A is entirely below the diagonal,
+	   it is implicitly zero. So we do nothing. */ \
+	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
 \
-	/* Compute k_full as k inflated up to a multiple of MR. This is
-	   needed because some parameter combinations of trsm reduce k
+	/* Compute k_full. For all trmm, k_full is simply k. This is
+	   needed because some parameter combinations of trmm reduce k
 	   to advance past zero regions in the triangular matrix, and
 	   when computing the imaginary stride of B (the non-triangular
 	   matrix), which is used by 4m1/3m1 implementations, we need
 	   this unreduced value of k. */ \
-	k_full = ( k % MR != 0 ? k + MR - ( k % MR ) : k ); \
+	k_full = k; \
 \
 	/* Compute indexing scaling factor for for 4m or 3m. This is
 	   needed because one of the packing register blocksizes (PACKMR
@@ -265,50 +263,41 @@ void PASTEMAC(ch,varname) \
 \
 	/* Compute the storage stride scaling. Usually this is just 1.
 	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. Note that real-only, imag-only, and summed-only
-	   packing formats are not applicable here since trsm is a two-
-	   operand operation only (unlike trmm, which is capable of three-
-	   operand). */ \
-	if ( bli_is_3mi_packed( schema_a ) ) { ss_a_num = 3; ss_a_den = 2; } \
-	else                                 { ss_a_num = 1; ss_a_den = 1; } \
+	   offset by 3/2. And if we are packing real-only, imag-only, or
+	   summed-only, we need to scale the computed panel sizes by 1/2
+	   to compensate for the fact that the pointer arithmetic occurs
+	   in terms of complex elements rather than real elements. */ \
+	if      ( bli_is_3mi_packed( schema_a ) ) { ss_a_num = 3; ss_a_den = 2; } \
+	else if ( bli_is_rih_packed( schema_a ) ) { ss_a_num = 1; ss_a_den = 2; } \
+	else                                      { ss_a_num = 1; ss_a_den = 1; } \
 \
-	/* If there is a zero region above where the diagonal of A intersects the
-	   left edge of the block, adjust the pointer to C and treat this case as
-	   if the diagonal offset were zero. This skips over the region that was
-	   not packed. (Note we assume the diagonal offset is a multiple of MR;
-	   this assumption will hold as long as the cache blocksizes are each a
-	   multiple of MR and NR.) */ \
-	if ( diagoffa < 0 ) \
+	/* If there is a zero region to the left of where the diagonal of A
+	   intersects the top edge of the block, adjust the pointer to B and
+	   treat this case as if the diagonal offset were zero. Note that we
+	   don't need to adjust the pointer to A since packm would have simply
+	   skipped over the region that was not stored. */ \
+	if ( diagoffa > 0 ) \
 	{ \
-		i        = -diagoffa; \
-		m        = m - i; \
+		i        = diagoffa; \
+		k        = k - i; \
 		diagoffa = 0; \
-		c_cast   = c_cast + (i  )*rs_c; \
+		b_cast   = b_cast + ( i * PACKNR ) / off_scl; \
 	} \
 \
-	/* Check the k dimension, which needs to be a multiple of MR. If k
-	   isn't a multiple of MR, we adjust it higher to satisfy the micro-
-	   kernel, which is expecting to perform an MR x MR triangular solve.
-	   This adjustment of k is consistent with what happened when A was
-	   packed: all of its bottom/right edges were zero-padded, and
-	   furthermore, the panel that stores the bottom-right corner of the
-	   matrix has its diagonal extended into the zero-padded region (as
-	   identity). This allows the trsm of that bottom-right panel to
-	   proceed without producing any infs or NaNs that would infect the
-	   "good" values of the corresponding block of B. */ \
-	if ( k % MR != 0 ) k += MR - ( k % MR ); \
-\
-	/* NOTE: We don't need to check that m is a multiple of PACKMR since we
-	   know that the underlying buffer was already allocated to have an m
-	   dimension that is a multiple of PACKMR, with the region between the
-	   last row and the next multiple of MR zero-padded accordingly. */ \
+	/* If there is a zero region below where the diagonal of A intersects the
+	   right side of the block, shrink it to prevent "no-op" iterations from
+	   executing. */ \
+	if ( -diagoffa + k < m ) \
+	{ \
+		m = -diagoffa + k; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
 	                        ct, rs_ct, cs_ct ); \
 \
 	/* Compute number of primary and leftover components of the m and n
-       dimensions. */ \
+	   dimensions. */ \
 	n_iter = n / NR; \
 	n_left = n % NR; \
 \
@@ -339,25 +328,43 @@ void PASTEMAC(ch,varname) \
 	/* Save the imaginary stride of B to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_b( istep_b, &aux ); \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	/*thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );*/ \
+\
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	/*dim_t ir_nt  = bli_thread_n_way( ir_thread ); \
+	dim_t ir_tid = bli_thread_work_id( ir_thread );*/ \
+\
+	dim_t jr_start, jr_end; \
+	/*dim_t ir_start, ir_end;*/ \
+	dim_t jr_inc; \
+\
+	/* Use slab assignment of micropanels to threads in the 2nd loop for
+	   the initial rectangular region of C (if it exists). */ \
+	bli_thread_range_jrir_sl( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/ \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
-		if( bli_trsm_my_iter( j, thread ) ) { \
-\
 		ctype* restrict a1; \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
 \
-		a1  = a_cast; \
-		c11 = c1 + (0  )*rstep_c; \
+		b1 = b_cast + j * cstep_b; \
+		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
+\
+		a1  = a_cast; \
+		c11 = c1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
@@ -366,51 +373,39 @@ void PASTEMAC(ch,varname) \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
-			/* If the current panel of A intersects the diagonal, use a
-			   special micro-kernel that performs a fused gemm and trsm.
-			   If the current panel of A resides below the diagonal, use a
-			   a regular gemm micro-kernel. Otherwise, if it is above the
-			   diagonal, it was not packed (because it is implicitly zero)
-			   and so we do nothing. */ \
+			/* If the current panel of A intersects the diagonal, scale C
+			   by beta. If it is strictly above the diagonal, scale by one.
+			   This allows the current macro-kernel to work for both trmm
+			   and trmm3. */ \
 			if ( bli_intersects_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				ctype* restrict a10; \
-				ctype* restrict a11; \
-				ctype* restrict b01; \
-				ctype* restrict b11; \
+				ctype* restrict b1_i; \
 				ctype* restrict a2; \
 \
-				/* Compute various offsets into and lengths of parts of A. */ \
-				off_a10 = 0; \
-				k_a1011 = diagoffa_i + MR; \
-				k_a10   = k_a1011 - MR; \
-				off_a11 = k_a10; \
+				/* Determine the offset to and length of the panel that was
+				   packed so we can index into the corresponding location in
+				   b1. */ \
+				off_a1112 = diagoffa_i; \
+				k_a1112   = k - off_a1112; \
 \
 				/* Compute the panel stride for the current diagonal-
 				   intersecting micro-panel. */ \
-				is_a_cur  = k_a1011 * PACKMR; \
+				is_a_cur  = k_a1112 * PACKMR; \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
 				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
 \
-				/* Compute the addresses of the panel A10 and the triangular
-				   block A11. */ \
-				a10 = a1; \
-				/* a11 = a1 + ( k_a10 * PACKMR ) / off_scl; */ \
-				a11 = bli_ptr_inc_by_frac( a1, sizeof( ctype ), k_a10 * PACKMR, off_scl ); \
+				/* NOTE: ir loop parallelism disabled for now. */ \
+				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/ \
 \
-				/* Compute the addresses of the panel B01 and the block
-				   B11. */ \
-				b01 = b1 + ( off_a10 * PACKNR ) / off_scl; \
-				b11 = b1 + ( off_a11 * PACKNR ) / off_scl; \
+				b1_i = b1 + ( off_a1112 * PACKNR ) / off_scl; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + ps_a_cur; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				a2 = a1; \
+				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
+					if ( bli_is_last_iter_sl( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -426,15 +421,14 @@ void PASTEMAC(ch,varname) \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
 				{ \
-					/* Invoke the fused gemm/trsm micro-kernel. */ \
-					gemmtrsm_ukr \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
 					( \
-					  k_a10, \
-					  alpha1_cast, \
-					  a10, \
-					  a11, \
-					  b01, \
-					  b11, \
+					  k_a1112, \
+					  alpha_cast, \
+					  a1, \
+					  b1_i, \
+					  beta_cast, \
 					  c11, rs_c, cs_c, \
 					  &aux, \
 					  cntx  \
@@ -442,40 +436,47 @@ void PASTEMAC(ch,varname) \
 				} \
 				else \
 				{ \
-					/* Invoke the fused gemm/trsm micro-kernel. */ \
-					gemmtrsm_ukr \
+					/* Copy edge elements of C to the temporary buffer. */ \
+					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
+					                        c11, rs_c,  cs_c, \
+					                        ct,  rs_ct, cs_ct ); \
+\
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
 					( \
-					  k_a10, \
-					  alpha1_cast, \
-					  a10, \
-					  a11, \
-					  b01, \
-					  b11, \
+					  k_a1112, \
+					  alpha_cast, \
+					  a1, \
+					  b1_i, \
+					  beta_cast, \
 					  ct, rs_ct, cs_ct, \
 					  &aux, \
 					  cntx  \
 					); \
 \
-					/* Copy the result to the bottom edge of C. */ \
+					/* Copy the result to the edge of C. */ \
 					PASTEMAC(ch,copys_mxn)( m_cur, n_cur, \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
+				/*}*/ \
 \
 				a1 += ps_a_cur; \
 			} \
-			else if ( bli_is_strictly_below_diag_n( diagoffa_i, MR, k ) ) \
+			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
+				/* NOTE: ir loop parallelism disabled for now. */ \
+				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/ \
+\
 				ctype* restrict a2; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
-				a2 = a1 + rstep_a; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				a2 = a1; \
+				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					/*if ( bli_is_last_iter( j, n_iter, 0, 1 ) ) */\
-					if ( j + bli_thread_num_threads(thread) >= n_iter ) \
+					if ( bli_is_last_iter_sl( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -495,10 +496,10 @@ void PASTEMAC(ch,varname) \
 					gemm_ukr \
 					( \
 					  k, \
-					  minus_one, \
+					  alpha_cast, \
 					  a1, \
 					  b1, \
-					  alpha2_cast, \
+					  one, \
 					  c11, rs_c, cs_c, \
 					  &aux, \
 					  cntx  \
@@ -510,7 +511,7 @@ void PASTEMAC(ch,varname) \
 					gemm_ukr \
 					( \
 					  k, \
-					  minus_one, \
+					  alpha_cast, \
 					  a1, \
 					  b1, \
 					  zero, \
@@ -520,73 +521,22 @@ void PASTEMAC(ch,varname) \
 					); \
 \
 					/* Add the result to the edge of C. */ \
-					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        alpha2_cast, \
-					                        c11, rs_c,  cs_c ); \
+					PASTEMAC(ch,adds_mxn)( m_cur, n_cur, \
+					                       ct,  rs_ct, cs_ct, \
+					                       c11, rs_c,  cs_c ); \
 				} \
+				/*}*/ \
 \
 				a1 += rstep_a; \
 			} \
 \
 			c11 += rstep_c; \
 		} \
-		} \
-\
-		b1 += cstep_b; \
-		c1 += cstep_c; \
 	} \
 \
-/*
-if ( bli_is_4mi_packed( schema_a ) ){ \
-PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_r before", k, n, \
-                     ( double* )b,    rs_b, 1, "%4.1f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_i before", k, n, \
-                     ( double* )b+72, rs_b, 1, "%4.1f", "" ); \
-}else{ \
-PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_r before", k, n, \
-                     ( double* )b,   2*rs_b, 2, "%4.1f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_i before", k, n, \
-                     ( double* )b+1, 2*rs_b, 2, "%4.1f", "" ); \
-} \
-*/ \
-\
-/*
-PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: a11p_r computed", MR, MR, \
-                     ( double* )a11, 1, PACKMR, "%4.1f", "" ); \
-*/ \
-\
-/*
-if ( bli_is_4mi_packed( schema_a ) ){ \
-PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_r after", k, n, \
-                     ( double* )b,    rs_b, 1, "%4.1f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "trsm4m1_ll_ker_var2: b_i after", k, n, \
-                     ( double* )b+72, rs_b, 1, "%4.1f", "" ); \
-}else{ \
-PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_r after", k, n, \
-                     ( double* )b,   2*rs_b, 2, "%4.1f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "trsmnat_ll_ker_var2: b_i after", k, n, \
-                     ( double* )b+1, 2*rs_b, 2, "%4.1f", "" ); \
-} \
-
-PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: b_r", m, n, \
-                     ( double* )c,    1, cs_c, "%4.1f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "trsm_ll_ker_var2: b_i", m, n, \
-                     ( double* )c + 8*9, 1, cs_c, "%4.1f", "" ); \
-*/ \
-\
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a1 (diag)", MR, k_a1011, a1, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a11 (diag)", MR, MR, a11, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: b1 (diag)", k_a1011, NR, bp_i, NR, 1, "%5.2f", "" );  \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: bp11 (diag)", MR, NR, bp11, NR, 1, "%5.2f", "" );  \
-*/ \
-\
-/*
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: a1 (ndiag)", MR, k, a1, 1, MR, "%5.2f", "" ); \
-PASTEMAC(ch,fprintm)( stdout, "trsm_ll_ker_var2: b1 (ndiag)", k, NR, bp, NR, 1, "%5.2f", "" ); \
-*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2sl: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \
+/*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2sl: b1", k_a1112, NR, b1_i, NR, 1, "%4.1f", "" );*/ \
 }
 
-INSERT_GENTFUNC_BASIC0( trsm_ll_ker_var2 )
+INSERT_GENTFUNC_BASIC0( trmm_lu_ker_var2sl )
 

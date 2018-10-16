@@ -213,8 +213,8 @@ PDEF_MT  := -DP_BEGIN=200 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all-st:      blis-st openblas-st mkl-st
-all-mt:      blis-mt openblas-mt mkl-mt
+all-st:      blis-st openblas-st armpl-st
+all-mt:      blis-mt openblas-mt armpl-mt
 
 blis-st:     blis-gemm-st blis-syrk-st blis-hemm-st blis-trmm-st
 blis-mt:     blis-gemm-mt blis-syrk-mt blis-hemm-mt blis-trmm-mt

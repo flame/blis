@@ -60,8 +60,34 @@ void bli_thread_finalize( void )
 }
 
 // -----------------------------------------------------------------------------
+#if 0
+void bli_thread_range_jrir
+     (
+       thrinfo_t* thread,
+       dim_t      n,
+       dim_t      bf,
+       bool_t     handle_edge_low,
+       dim_t*     start,
+       dim_t*     end,
+	   dim_t*     inc
+     )
+{
+//#ifdef BLIS_JRIR_INTERLEAVE
+#if 1
+	// Use interleaved partitioning of jr/ir loops.
+	*start = bli_thread_work_id( thread );
+	*inc   = bli_thread_n_way( thread );
+	*end   = n;
+#else
+	// Use contiguous slab partitioning for jr/ir loops.
+	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
+	*inc = 1;
+#endif
+}
+#endif
+// -----------------------------------------------------------------------------
 
-void bli_thread_get_range_sub
+void bli_thread_range_sub
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -72,6 +98,9 @@ void bli_thread_get_range_sub
      )
 {
 	dim_t      n_way      = bli_thread_n_way( thread );
+
+	if ( n_way == 1 ) { *start = 0; *end = n; return; }
+
 	dim_t      work_id    = bli_thread_work_id( thread );
 
 	dim_t      all_start  = 0;
@@ -202,7 +231,7 @@ void bli_thread_get_range_sub
 	}
 }
 
-siz_t bli_thread_get_range_l2r
+siz_t bli_thread_range_l2r
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -216,13 +245,13 @@ siz_t bli_thread_get_range_l2r
 	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
-	bli_thread_get_range_sub( thr, n, bf,
-	                          FALSE, start, end );
+	bli_thread_range_sub( thr, n, bf,
+	                      FALSE, start, end );
 
 	return m * ( *end - *start );
 }
 
-siz_t bli_thread_get_range_r2l
+siz_t bli_thread_range_r2l
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -236,13 +265,13 @@ siz_t bli_thread_get_range_r2l
 	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
-	bli_thread_get_range_sub( thr, n, bf,
-	                          TRUE, start, end );
+	bli_thread_range_sub( thr, n, bf,
+	                      TRUE, start, end );
 
 	return m * ( *end - *start );
 }
 
-siz_t bli_thread_get_range_t2b
+siz_t bli_thread_range_t2b
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -256,13 +285,13 @@ siz_t bli_thread_get_range_t2b
 	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
-	bli_thread_get_range_sub( thr, m, bf,
-	                          FALSE, start, end );
+	bli_thread_range_sub( thr, m, bf,
+	                      FALSE, start, end );
 
 	return n * ( *end - *start );
 }
 
-siz_t bli_thread_get_range_b2t
+siz_t bli_thread_range_b2t
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -276,15 +305,15 @@ siz_t bli_thread_get_range_b2t
 	dim_t n  = bli_obj_width_after_trans( a );
 	dim_t bf = bli_blksz_get_def( dt, bmult );
 
-	bli_thread_get_range_sub( thr, m, bf,
-	                          TRUE, start, end );
+	bli_thread_range_sub( thr, m, bf,
+	                      TRUE, start, end );
 
 	return n * ( *end - *start );
 }
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_thread_get_range_width_l
+dim_t bli_thread_range_width_l
      (
        doff_t diagoff_j,
        dim_t  m,
@@ -495,17 +524,17 @@ siz_t bli_find_area_trap_l
 
 // -----------------------------------------------------------------------------
 
-siz_t bli_thread_get_range_weighted_sub
+siz_t bli_thread_range_weighted_sub
      (
-       thrinfo_t* thread,
-       doff_t     diagoff,
-       uplo_t     uplo,
-       dim_t      m,
-       dim_t      n,
-       dim_t      bf,
-       bool_t     handle_edge_low,
-       dim_t*     j_start_thr,
-       dim_t*     j_end_thr
+       thrinfo_t* restrict thread,
+       doff_t              diagoff,
+       uplo_t              uplo,
+       dim_t               m,
+       dim_t               n,
+       dim_t               bf,
+       bool_t              handle_edge_low,
+       dim_t*     restrict j_start_thr,
+       dim_t*     restrict j_end_thr
      )
 {
 	dim_t      n_way   = bli_thread_n_way( thread );
@@ -570,7 +599,7 @@ siz_t bli_thread_get_range_weighted_sub
 			// Compute the width of the jth subpartition, taking the
 			// current diagonal offset into account, if needed.
 			width_j =
-			bli_thread_get_range_width_l
+			bli_thread_range_width_l
 			(
 			  diagoff_j, m, n_left,
 			  j, n_way,
@@ -614,7 +643,7 @@ siz_t bli_thread_get_range_weighted_sub
 		bli_toggle_bool( &handle_edge_low );
 
 		// Compute the appropriate range for the rotated trapezoid.
-		area = bli_thread_get_range_weighted_sub
+		area = bli_thread_range_weighted_sub
 		(
 		  thread, diagoff, uplo, m, n, bf,
 		  handle_edge_low,
@@ -632,7 +661,7 @@ siz_t bli_thread_get_range_weighted_sub
 	return area;
 }
 
-siz_t bli_thread_get_range_mdim
+siz_t bli_thread_range_mdim
      (
        dir_t      direct,
        thrinfo_t* thr,
@@ -678,20 +707,20 @@ siz_t bli_thread_get_range_mdim
 	if ( use_weighted )
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_get_range_weighted_t2b( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_t2b( thr, x, bmult, start, end );
 		else
-			return bli_thread_get_range_weighted_b2t( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_b2t( thr, x, bmult, start, end );
 	}
 	else
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_get_range_t2b( thr, x, bmult, start, end );
+			return bli_thread_range_t2b( thr, x, bmult, start, end );
 		else
-			return bli_thread_get_range_b2t( thr, x, bmult, start, end );
+			return bli_thread_range_b2t( thr, x, bmult, start, end );
 	}
 }
 
-siz_t bli_thread_get_range_ndim
+siz_t bli_thread_range_ndim
      (
        dir_t      direct,
        thrinfo_t* thr,
@@ -737,20 +766,20 @@ siz_t bli_thread_get_range_ndim
 	if ( use_weighted )
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_get_range_weighted_l2r( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_l2r( thr, x, bmult, start, end );
 		else
-			return bli_thread_get_range_weighted_r2l( thr, x, bmult, start, end );
+			return bli_thread_range_weighted_r2l( thr, x, bmult, start, end );
 	}
 	else
 	{
 		if ( direct == BLIS_FWD )
-			return bli_thread_get_range_l2r( thr, x, bmult, start, end );
+			return bli_thread_range_l2r( thr, x, bmult, start, end );
 		else
-			return bli_thread_get_range_r2l( thr, x, bmult, start, end );
+			return bli_thread_range_r2l( thr, x, bmult, start, end );
 	}
 }
 
-siz_t bli_thread_get_range_weighted_l2r
+siz_t bli_thread_range_weighted_l2r
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -782,7 +811,7 @@ siz_t bli_thread_get_range_weighted_l2r
 		}
 
 		area =
-		bli_thread_get_range_weighted_sub
+		bli_thread_range_weighted_sub
 		(
 		  thr, diagoff, uplo, m, n, bf,
 		  FALSE, start, end
@@ -790,7 +819,7 @@ siz_t bli_thread_get_range_weighted_l2r
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_l2r
+		area = bli_thread_range_l2r
 		(
 		  thr, a, bmult,
 		  start, end
@@ -800,7 +829,7 @@ siz_t bli_thread_get_range_weighted_l2r
 	return area;
 }
 
-siz_t bli_thread_get_range_weighted_r2l
+siz_t bli_thread_range_weighted_r2l
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -834,7 +863,7 @@ siz_t bli_thread_get_range_weighted_r2l
 		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
 		area =
-		bli_thread_get_range_weighted_sub
+		bli_thread_range_weighted_sub
 		(
 		  thr, diagoff, uplo, m, n, bf,
 		  TRUE, start, end
@@ -842,7 +871,7 @@ siz_t bli_thread_get_range_weighted_r2l
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_r2l
+		area = bli_thread_range_r2l
 		(
 		  thr, a, bmult,
 		  start, end
@@ -852,7 +881,7 @@ siz_t bli_thread_get_range_weighted_r2l
 	return area;
 }
 
-siz_t bli_thread_get_range_weighted_t2b
+siz_t bli_thread_range_weighted_t2b
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -886,7 +915,7 @@ siz_t bli_thread_get_range_weighted_t2b
 		bli_reflect_about_diag( &diagoff, &uplo, &m, &n );
 
 		area =
-		bli_thread_get_range_weighted_sub
+		bli_thread_range_weighted_sub
 		(
 		  thr, diagoff, uplo, m, n, bf,
 		  FALSE, start, end
@@ -894,7 +923,7 @@ siz_t bli_thread_get_range_weighted_t2b
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_t2b
+		area = bli_thread_range_t2b
 		(
 		  thr, a, bmult,
 		  start, end
@@ -904,7 +933,7 @@ siz_t bli_thread_get_range_weighted_t2b
 	return area;
 }
 
-siz_t bli_thread_get_range_weighted_b2t
+siz_t bli_thread_range_weighted_b2t
      (
        thrinfo_t* thr,
        obj_t*     a,
@@ -939,7 +968,7 @@ siz_t bli_thread_get_range_weighted_b2t
 
 		bli_rotate180_trapezoid( &diagoff, &uplo, &m, &n );
 
-		area = bli_thread_get_range_weighted_sub
+		area = bli_thread_range_weighted_sub
 		(
 		  thr, diagoff, uplo, m, n, bf,
 		  TRUE, start, end
@@ -947,7 +976,7 @@ siz_t bli_thread_get_range_weighted_b2t
 	}
 	else // if dense or zeros
 	{
-		area = bli_thread_get_range_b2t
+		area = bli_thread_range_b2t
 		(
 		  thr, a, bmult,
 		  start, end

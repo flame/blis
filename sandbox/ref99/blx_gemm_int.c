@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,10 +47,10 @@ void blx_gemm_int
        thrinfo_t* thread
      )
 {
-	obj_t     a_local;
-	obj_t     b_local;
-	obj_t     c_local;
-	gemm_voft f;
+	obj_t        a_local;
+	obj_t        b_local;
+	obj_t        c_local;
+	gemm_var_oft f;
 
 	// Alias A, B, and C in case we need to update attached scalars.
 	bli_obj_alias_to( a, &a_local );
