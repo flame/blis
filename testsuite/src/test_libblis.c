@@ -732,18 +732,72 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	// If bli_info_get_int_type_size() returns 32 or 64, the size is forced.
 	// Otherwise, the size is chosen automatically. We query the result of
 	// that automatic choice via sizeof(gint_t).
-/*	
-	if ( bli_info_get_int_type_size() == 32 ||
-	     bli_info_get_int_type_size() == 64 )
-		sprintf( int_type_size_str, "%d", ( int )bli_info_get_int_type_size() );
-	else
-		sprintf( int_type_size_str, "%d", ( int )sizeof(gint_t) * 8 );
-*/
 	if ( bli_info_get_int_type_size() == 32 ||
 	     bli_info_get_int_type_size() == 64 )
 		int_type_size = bli_info_get_int_type_size();
 	else
 		int_type_size = sizeof(gint_t) * 8;
+
+	char impl_str[16];
+	char jrir_str[16];
+
+	// Describe the threading implementation.
+	if      ( bli_info_get_enable_openmp()   ) sprintf( impl_str, "openmp" );
+	else if ( bli_info_get_enable_pthreads() ) sprintf( impl_str, "pthreads" );
+	else    /* threading disabled */           sprintf( impl_str, "disabled" );
+
+	// Describe the status of jrir thread partitioning.
+	if   ( bli_info_get_thread_part_jrir_slab() ) sprintf( jrir_str, "slab" );
+	else /*bli_info_get_thread_part_jrir_rr()*/   sprintf( jrir_str, "round-robin" );
+
+	char nt_str[16];
+	char jc_nt_str[16];
+	char pc_nt_str[16];
+	char ic_nt_str[16];
+	char jr_nt_str[16];
+	char ir_nt_str[16];
+
+	// Query the number of ways of parallelism per loop (and overall) and
+	// convert these values into strings, with "unset" being used if the
+	// value returned was -1 (indicating the environment variable was unset).
+	dim_t nt    = bli_thread_get_num_threads();
+	dim_t jc_nt = bli_thread_get_jc_nt(); 
+	dim_t pc_nt = bli_thread_get_pc_nt(); 
+	dim_t ic_nt = bli_thread_get_ic_nt(); 
+	dim_t jr_nt = bli_thread_get_jr_nt(); 
+	dim_t ir_nt = bli_thread_get_ir_nt(); 
+
+	if (    nt == -1 ) sprintf(    nt_str, "unset" );
+	else               sprintf(    nt_str, "%d", ( int )   nt );
+	if ( jc_nt == -1 ) sprintf( jc_nt_str, "unset" );
+	else               sprintf( jc_nt_str, "%d", ( int )jc_nt );
+	if ( pc_nt == -1 ) sprintf( pc_nt_str, "unset" );
+	else               sprintf( pc_nt_str, "%d", ( int )pc_nt );
+	if ( ic_nt == -1 ) sprintf( ic_nt_str, "unset" );
+	else               sprintf( ic_nt_str, "%d", ( int )ic_nt );
+	if ( jr_nt == -1 ) sprintf( jr_nt_str, "unset" );
+	else               sprintf( jr_nt_str, "%d", ( int )jr_nt );
+	if ( ir_nt == -1 ) sprintf( ir_nt_str, "unset" );
+	else               sprintf( ir_nt_str, "%d", ( int )ir_nt );
+
+	// Set up rntm_t objects for each of the four families:
+	// gemm, herk, trmm, trsm.
+	rntm_t gemm, herk, trmm_l, trmm_r, trsm_l, trsm_r;
+	dim_t  m = 1000, n = 1000, k = 1000;
+
+	bli_thread_init_rntm( &gemm   );
+	bli_thread_init_rntm( &herk   );
+	bli_thread_init_rntm( &trmm_l );
+	bli_thread_init_rntm( &trmm_r );
+	bli_thread_init_rntm( &trsm_l );
+	bli_thread_init_rntm( &trsm_r );
+
+	bli_rntm_set_ways_for_op( BLIS_GEMM, BLIS_LEFT,  m, n, k, &gemm );
+	bli_rntm_set_ways_for_op( BLIS_HERK, BLIS_LEFT,  m, n, k, &herk );
+	bli_rntm_set_ways_for_op( BLIS_TRMM, BLIS_LEFT,  m, n, k, &trmm_l );
+	bli_rntm_set_ways_for_op( BLIS_TRMM, BLIS_RIGHT, m, n, k, &trmm_r );
+	bli_rntm_set_ways_for_op( BLIS_TRSM, BLIS_LEFT,  m, n, k, &trsm_l );
+	bli_rntm_set_ways_for_op( BLIS_TRSM, BLIS_RIGHT, m, n, k, &trsm_r );
 
 	// Output some system parameters.
 	libblis_test_fprintf_c( os, "\n" );
@@ -779,11 +833,61 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "CBLAS compatibility layer        \n" );
 	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_cblas() );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "libmemkind                       \n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_memkind() );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "gemm sandbox                     \n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_sandbox() );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "floating-point types           s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  sizes (bytes)          %7u %7u %7u %7u\n", sizeof(float),
 	                                                                          sizeof(double),
 	                                                                          sizeof(scomplex),
 	                                                                          sizeof(dcomplex) );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "--- BLIS parallelization info ---\n" );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "multithreading                 %s\n", impl_str );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "thread auto-factorization        \n" );
+	libblis_test_fprintf_c( os, "  m dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_M );
+	libblis_test_fprintf_c( os, "  n dim thread ratio           %d\n", ( int )BLIS_THREAD_RATIO_N );
+	libblis_test_fprintf_c( os, "  jr max threads               %d\n", ( int )BLIS_THREAD_MAX_JR );
+	libblis_test_fprintf_c( os, "  ir max threads               %d\n", ( int )BLIS_THREAD_MAX_IR );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "ways of parallelism     nt    jc    pc    ic    jr    ir\n" );
+	libblis_test_fprintf_c( os, "  environment        %5s %5s %5s %5s %5s %5s\n",
+	                                                               nt_str, jc_nt_str, pc_nt_str,
+	                                                            ic_nt_str, jr_nt_str, ir_nt_str );
+	libblis_test_fprintf_c( os, "  gemm   (m,n,k=1000)      %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &gemm ), ( int )bli_rntm_pc_ways( &gemm ),
+	                                ( int )bli_rntm_ic_ways( &gemm ),
+	                                ( int )bli_rntm_jr_ways( &gemm ), ( int )bli_rntm_ir_ways( &gemm ) );
+	libblis_test_fprintf_c( os, "  herk   (m,k=1000)        %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &herk ), ( int )bli_rntm_pc_ways( &herk ),
+	                                ( int )bli_rntm_ic_ways( &herk ),
+	                                ( int )bli_rntm_jr_ways( &herk ), ( int )bli_rntm_ir_ways( &herk ) );
+	libblis_test_fprintf_c( os, "  trmm_l (m,n=1000)        %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &trmm_l ), ( int )bli_rntm_pc_ways( &trmm_l ),
+	                                ( int )bli_rntm_ic_ways( &trmm_l ),
+	                                ( int )bli_rntm_jr_ways( &trmm_l ), ( int )bli_rntm_ir_ways( &trmm_l ) );
+	libblis_test_fprintf_c( os, "  trmm_r (m,n=1000)        %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &trmm_r ), ( int )bli_rntm_pc_ways( &trmm_r ),
+	                                ( int )bli_rntm_ic_ways( &trmm_r ),
+	                                ( int )bli_rntm_jr_ways( &trmm_r ), ( int )bli_rntm_ir_ways( &trmm_r ) );
+	libblis_test_fprintf_c( os, "  trsm_l (m,n=1000)        %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &trsm_l ), ( int )bli_rntm_pc_ways( &trsm_l ),
+	                                ( int )bli_rntm_ic_ways( &trsm_l ),
+	                                ( int )bli_rntm_jr_ways( &trsm_l ), ( int )bli_rntm_ir_ways( &trsm_l ) );
+	libblis_test_fprintf_c( os, "  trsm_r (m,n=1000)        %5d %5d %5d %5d %5d\n",
+	                                ( int )bli_rntm_jc_ways( &trsm_r ), ( int )bli_rntm_pc_ways( &trsm_r ),
+	                                ( int )bli_rntm_ic_ways( &trsm_r ),
+	                                ( int )bli_rntm_jr_ways( &trsm_r ), ( int )bli_rntm_ir_ways( &trsm_r ) );
+	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "thread partitioning              \n" );
+	//libblis_test_fprintf_c( os, "  jc/ic loops                  %s\n", "slab" );
+	libblis_test_fprintf_c( os, "  jr/ir loops                  %s\n", jrir_str );
 	libblis_test_fprintf_c( os, "\n" );
 
 	libblis_test_fprintf_c( os, "\n" );

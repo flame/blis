@@ -101,16 +101,16 @@ bli_rntm_print( rntm );
 		}
 		else if ( l3_op == BLIS_TRSM )
 		{
-			// For trsm_l, we extract all parallelism from the jr loop, and
-			// for trsm_r, we extract all parallelism from the ic loop.
+			// For trsm_l, we extract all parallelism from the jc and jr loops.
+			// For trsm_r, we extract all parallelism from the ic loop.
 			if ( bli_is_left( side ) )
 			{
 				bli_rntm_set_ways_only
 				(
+				  jc,
 				  1,
 				  1,
-				  1,
-				  ic * pc * jc * jr * ir,
+				  ic * pc * jr * ir,
 				  1,
 				  rntm
 				);
@@ -198,15 +198,15 @@ void bli_rntm_set_ways_from_rntm
 
 		pc = 1;
 
-		bli_partition_2x2( nt, m*BLIS_DEFAULT_M_THREAD_RATIO,
-		                       n*BLIS_DEFAULT_N_THREAD_RATIO, &ic, &jc );
+		bli_partition_2x2( nt, m*BLIS_THREAD_RATIO_M,
+		                       n*BLIS_THREAD_RATIO_N, &ic, &jc );
 
-		for ( ir = BLIS_DEFAULT_MR_THREAD_MAX ; ir > 1 ; ir-- )
+		for ( ir = BLIS_THREAD_MAX_IR ; ir > 1 ; ir-- )
 		{
 			if ( ic % ir == 0 ) { ic /= ir; break; }
 		}
 
-		for ( jr = BLIS_DEFAULT_NR_THREAD_MAX ; jr > 1 ; jr-- )
+		for ( jr = BLIS_THREAD_MAX_JR ; jr > 1 ; jr-- )
 		{
 			if ( jc % jr == 0 ) { jc /= jr; break; }
 		}

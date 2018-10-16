@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -290,13 +291,13 @@ int main( int argc, char** argv )
 			thrinfo.work_id = t;
 
 			if      ( part_n_dim && go_fwd )
-				area = bli_thread_get_range_weighted_l2r( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range_weighted_l2r( &thrinfo, &a, &bfs, &start, &end );
 			else if ( part_n_dim && go_bwd )
-				area = bli_thread_get_range_weighted_r2l( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range_weighted_r2l( &thrinfo, &a, &bfs, &start, &end );
 			else if ( part_m_dim && go_fwd )
-				area = bli_thread_get_range_weighted_t2b( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range_weighted_t2b( &thrinfo, &a, &bfs, &start, &end );
 			else // ( part_m_dim && go_bwd )
-				area = bli_thread_get_range_weighted_b2t( &thrinfo, &a, &bfs, &start, &end );
+				area = bli_thread_range_weighted_b2t( &thrinfo, &a, &bfs, &start, &end );
 
 			width = end - start;
 

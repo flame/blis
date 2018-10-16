@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,9 +40,7 @@
 
 #include "bli_packm_part.h"
 
-#include "bli_packm_unb_var1.h"
-
-#include "bli_packm_blk_var1.h"
+#include "bli_packm_var.h"
 
 #include "bli_packm_struc_cxk.h"
 #include "bli_packm_struc_cxk_4mi.h"
