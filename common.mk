@@ -438,7 +438,7 @@ INSTALL    := install -c
 
 # Script for creating a monolithic header file.
 #FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
-FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.py
+FLATTEN_H  := $(PYTHON) $(DIST_PATH)/build/flatten-headers.py
 
 # Default archiver flags.
 ARFLAGS    := cr
