@@ -56,7 +56,7 @@
 	vmovss(xmm1, mem(rcx, r10, 1))
 
 
-void bli_sgemmtrsm_l_zen_asm_6x16
+void bli_sgemmtrsm_l_haswell_asm_6x16
      (
        dim_t               k0,
        float*     restrict alpha,
@@ -810,7 +810,7 @@ void bli_sgemmtrsm_l_zen_asm_6x16
 	vmovlpd(xmm1, mem(rcx, r13, 2)) \
 	vmovhpd(xmm1, mem(rcx, r10, 1))*/
 
-void bli_dgemmtrsm_l_zen_asm_6x8
+void bli_dgemmtrsm_l_haswell_asm_6x8
 (
     dim_t               k0,
     double*    restrict alpha,

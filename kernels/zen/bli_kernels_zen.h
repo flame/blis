@@ -76,32 +76,3 @@ AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
 
-// -- level-3 --
-
-// gemm (asm d6x8)
-GEMM_UKR_PROT( float,    s, gemm_zen_asm_6x16 )
-GEMM_UKR_PROT( double,   d, gemm_zen_asm_6x8 )
-GEMM_UKR_PROT( scomplex, c, gemm_zen_asm_3x8 )
-GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_3x4 )
-
-// gemm (asm d8x6)
-GEMM_UKR_PROT( float,    s, gemm_zen_asm_16x6 )
-GEMM_UKR_PROT( double,   d, gemm_zen_asm_8x6 )
-GEMM_UKR_PROT( scomplex, c, gemm_zen_asm_8x3 )
-GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_4x3 )
-
-// gemmtrsm_l (asm d6x8)
-GEMMTRSM_UKR_PROT( float,    s, gemmtrsm_l_zen_asm_6x16 )
-GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_l_zen_asm_6x8 )
-
-// gemmtrsm_u (asm d6x8)
-GEMMTRSM_UKR_PROT( float,    s, gemmtrsm_u_zen_asm_6x16 )
-GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_zen_asm_6x8 )
-
-
-// gemm (asm d8x6)
-//GEMM_UKR_PROT( float,    s, gemm_zen_asm_16x6 )
-//GEMM_UKR_PROT( double,   d, gemm_zen_asm_8x6 )
-//GEMM_UKR_PROT( scomplex, c, gemm_zen_asm_8x3 )
-//GEMM_UKR_PROT( dcomplex, z, gemm_zen_asm_4x3 )
-
