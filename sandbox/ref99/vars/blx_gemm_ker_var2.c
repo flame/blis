@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -256,16 +257,31 @@ void PASTECH2(blx_,ch,varname) \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
 	/* Save the desired output datatype (indicating no typecasting). */ \
-	bli_auxinfo_set_dt_on_output( dt, &aux ); \
+	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
-	thrinfo_t* caucus    = bli_thrinfo_sub_node( thread ); \
-	dim_t jr_num_threads = bli_thread_n_way( thread ); \
-	dim_t jr_thread_id   = bli_thread_work_id( thread ); \
-	dim_t ir_num_threads = bli_thread_n_way( caucus ); \
-	dim_t ir_thread_id   = bli_thread_work_id( caucus ); \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
+\
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	dim_t ir_nt  = bli_thread_n_way( caucus ); \
+	dim_t ir_tid = bli_thread_work_id( caucus ); \
+\
+	dim_t jr_start, jr_end; \
+	dim_t ir_start, ir_end; \
+	dim_t jr_inc,   ir_inc; \
+\
+	/* Determine the thread range and increment for the 2nd and 1st loops.
+	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	   slab or round-robin partitioning was requested at configure-time. */ \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = jr_thread_id; j < n_iter; j += jr_num_threads ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
 		ctype* restrict a1; \
 		ctype* restrict c11; \
@@ -280,7 +296,7 @@ void PASTECH2(blx_,ch,varname) \
 		b2 = b1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = ir_thread_id; i < m_iter; i += ir_num_threads ) \
+		for ( i = ir_start; i < ir_end; i += ir_inc ) \
 		{ \
 			ctype* restrict a2; \
 \
@@ -290,12 +306,12 @@ void PASTECH2(blx_,ch,varname) \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_gemm_get_next_a_upanel( caucus, a1, rstep_a ); \
-			if ( bli_is_last_iter( i, m_iter, ir_thread_id, ir_num_threads ) ) \
+			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( thread, b1, cstep_b ); \
-				if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \

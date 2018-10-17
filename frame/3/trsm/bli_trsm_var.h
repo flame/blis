@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +59,7 @@ GENPROT( trsm_packa )
 GENPROT( trsm_packb )
 
 GENPROT( trsm_xx_ker_var2 )
+
 GENPROT( trsm_ll_ker_var2 )
 GENPROT( trsm_lu_ker_var2 )
 GENPROT( trsm_rl_ker_var2 )

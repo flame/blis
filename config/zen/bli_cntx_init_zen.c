@@ -49,16 +49,16 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	(
 	  8,
 	  // gemm
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_zen_asm_6x16,       TRUE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen_asm_6x8,        TRUE,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen_asm_3x8,        TRUE,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen_asm_3x4,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
 	  // gemmtrsm_l
-	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_zen_asm_6x16, TRUE,
-	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
 	  // gemmtrsm_u
-	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_zen_asm_6x16, TRUE,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_zen_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
 	  cntx
 	);
 

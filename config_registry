@@ -15,14 +15,14 @@ arm64:       cortexa57 generic
 arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
-skx:         skx/skx/zen
-knl:         knl/knl/zen
+skx:         skx/skx/haswell/zen
+knl:         knl/knl/haswell/zen
 haswell:     haswell/haswell/zen
 sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
-zen:         zen
+zen:         zen/zen/haswell
 excavator:   excavator/piledriver
 steamroller: steamroller/piledriver
 piledriver:  piledriver
@@ -33,6 +33,9 @@ cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a
 cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
+
+# IBM architectures.
+bgq:         bgq
 
 # Generic architectures.
 generic:     generic

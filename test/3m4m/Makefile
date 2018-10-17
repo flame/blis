@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2018, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -200,13 +201,13 @@ STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=100 \
+PDEF_ST  := -DP_BEGIN=96 \
             -DP_END=2000 \
-            -DP_INC=100
+            -DP_INC=96
 
-PDEF_MT  := -DP_BEGIN=200 \
-            -DP_END=10000 \
-            -DP_INC=200
+PDEF_MT  := -DP_BEGIN=192 \
+            -DP_END=3000 \
+            -DP_INC=192
 
 
 
@@ -226,9 +227,6 @@ all-mt:       blis-mt openblas-mt mkl-mt
 blis-st:      blis-gemm-st
 blis-mt:      blis-gemm-mt
 
-blis-nat-st:  blis-gemm-nat-st
-blis-nat-mt:  blis-gemm-nat-mt
-
 openblas-st:  openblas-gemm-st
 openblas-mt:  openblas-gemm-mt
 
@@ -239,6 +237,42 @@ blis-gemm-st: blis-gemm-nat-st \
               blis-gemm-ind-st
 blis-gemm-mt: blis-gemm-nat-mt \
               blis-gemm-ind-mt
+
+blis-nat-st: \
+      test_sgemm_asm_blis_st.x \
+      test_dgemm_asm_blis_st.x \
+      test_cgemm_asm_blis_st.x \
+      test_zgemm_asm_blis_st.x \
+      test_sherk_asm_blis_st.x \
+      test_dherk_asm_blis_st.x \
+      test_cherk_asm_blis_st.x \
+      test_zherk_asm_blis_st.x \
+      test_strmm_asm_blis_st.x \
+      test_dtrmm_asm_blis_st.x \
+      test_ctrmm_asm_blis_st.x \
+      test_ztrmm_asm_blis_st.x \
+      test_strsm_asm_blis_st.x \
+      test_dtrsm_asm_blis_st.x \
+      test_ctrsm_asm_blis_st.x \
+      test_ztrsm_asm_blis_st.x
+
+blis-nat-mt: \
+      test_sgemm_asm_blis_mt.x \
+      test_dgemm_asm_blis_mt.x \
+      test_cgemm_asm_blis_mt.x \
+      test_zgemm_asm_blis_mt.x \
+      test_sherk_asm_blis_mt.x \
+      test_dherk_asm_blis_mt.x \
+      test_cherk_asm_blis_mt.x \
+      test_zherk_asm_blis_mt.x \
+      test_strmm_asm_blis_mt.x \
+      test_dtrmm_asm_blis_mt.x \
+      test_ctrmm_asm_blis_mt.x \
+      test_ztrmm_asm_blis_mt.x \
+      test_strsm_asm_blis_mt.x \
+      test_dtrsm_asm_blis_mt.x \
+      test_ctrsm_asm_blis_mt.x \
+      test_ztrsm_asm_blis_mt.x
 
 blis-gemm-nat-st: \
       test_sgemm_asm_blis_st.x \
@@ -390,28 +424,28 @@ test_c%_1m_blis_mt.o: test_%.c
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_MT) -c $< -o $@
 
 # blis asm
-test_d%_asm_blis_st.o: test_%.c
+test_d%_asm_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_s%_asm_blis_st.o: test_%.c
+test_s%_asm_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_z%_asm_blis_st.o: test_%.c
+test_z%_asm_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_c%_asm_blis_st.o: test_%.c
+test_c%_asm_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
 
-test_d%_asm_blis_mt.o: test_%.c
+test_d%_asm_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_s%_asm_blis_mt.o: test_%.c
+test_s%_asm_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_z%_asm_blis_mt.o: test_%.c
+test_z%_asm_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
-test_c%_asm_blis_mt.o: test_%.c
+test_c%_asm_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
 # openblas

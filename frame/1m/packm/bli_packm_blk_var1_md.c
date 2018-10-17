@@ -146,7 +146,7 @@ void PASTEMAC2(chc,chp,varname) \
 	ctype_p* restrict p_begin; \
 \
 	dim_t             iter_dim; \
-	dim_t             num_iter; \
+	dim_t             n_iter; \
 	dim_t             it, ic, ip; \
 	doff_t            ic_inc, ip_inc; \
 	dim_t             panel_len_full; \
@@ -220,7 +220,7 @@ void PASTEMAC2(chc,chp,varname) \
 	} \
 \
 	/* Compute the total number of iterations we'll need. */ \
-	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
+	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
 	{ \
 		ic_inc = panel_dim_max; \
@@ -229,16 +229,25 @@ void PASTEMAC2(chc,chp,varname) \
 \
 	p_begin = p_cast; \
 \
-/*
-if ( row_stored ) \
-PASTEMAC(chc,fprintm)( stdout, "packm_blk_var1_md: b orig", m, n, \
-                       c_cast,        rs_c, cs_c, "%5.2f", "" ); \
-if ( col_stored ) \
-PASTEMAC(chc,fprintm)( stdout, "packm_blk_var1_md: a orig", m, n, \
-                       c_cast,        rs_c, cs_c, "%5.2f", "" ); \
-*/ \
+	/* Query the number of threads and thread ids from the current thread's
+	   packm thrinfo_t node. */ \
+	const dim_t nt  = bli_thread_n_way( thread ); \
+	const dim_t tid = bli_thread_work_id( thread ); \
 \
-	for ( ic  = 0,      ip  = 0,      it  = 0; it < num_iter; \
+	/* Suppress unused variable warnings when slab partitioning is enabled,
+	   since the slab-based definition of bli_packm_my_iter() does not
+	   actually use tid or nt. */ \
+	( void )nt; ( void )tid; \
+\
+	dim_t it_start, it_end, it_inc; \
+\
+	/* Determine the thread range and increment using the current thread's
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
+	   will depend on whether slab or round-robin partitioning was requested
+	   at configure-time. */ \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+\
+	for ( ic  = 0,      ip  = 0,      it  = 0; it < n_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
@@ -252,7 +261,7 @@ PASTEMAC(chc,fprintm)( stdout, "packm_blk_var1_md: a orig", m, n, \
 			panel_len_i     = panel_len_full; \
 			panel_len_max_i = panel_len_max; \
 \
-			if( packm_thread_my_iter( it, thread ) ) \
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				PASTEMAC2(chc,chp,packm_struc_cxk_md) \
 				( \

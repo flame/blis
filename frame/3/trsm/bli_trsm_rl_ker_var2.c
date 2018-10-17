@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -430,7 +431,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( bli_trsm_my_iter( i, thread ) ){ \
+				if ( bli_trsm_my_iter_rr( i, thread ) ){ \
 \
 				ctype* restrict a11; \
 				ctype* restrict a12; \
@@ -444,12 +445,12 @@ void PASTEMAC(ch,varname) \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
+				/*if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) */\
 				if ( i + bli_thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + ps_b_cur; \
-					if ( bli_is_last_iter( jb, n_iter, 0, 1 ) ) \
+					if ( bli_is_last_iter_rr( jb, n_iter, 0, 1 ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -516,7 +517,7 @@ void PASTEMAC(ch,varname) \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
 			{ \
-				if( bli_trsm_my_iter( i, thread ) ){ \
+				if ( bli_trsm_my_iter_rr( i, thread ) ){ \
 \
 				ctype* restrict a2; \
 \
@@ -524,12 +525,12 @@ void PASTEMAC(ch,varname) \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				/*if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) */\
+				/*if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) */\
 				if ( i + bli_thread_num_threads(thread) >= m_iter ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1 + cstep_b; \
-					if ( bli_is_last_iter( jb, n_iter, 0, 1 ) ) \
+					if ( bli_is_last_iter_rr( jb, n_iter, 0, 1 ) ) \
 						b2 = b_cast; \
 				} \
 \

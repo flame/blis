@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,7 +37,33 @@
 // thrinfo_t macros specific to packm.
 //
 
-#define packm_thread_my_iter( index, thread ) ( index % thread->n_way == thread->work_id % thread->n_way )
+/*
+#define bli_packm_thread_my_iter( index, thread ) \
+\
+	( index % thread->n_way == thread->work_id % thread->n_way )
+*/
+
+#define bli_packm_my_iter_rr( i, start, end, work_id, n_way ) \
+\
+	( i % n_way == work_id % n_way )
+
+#define bli_packm_my_iter_sl( i, start, end, work_id, n_way ) \
+\
+	( start <= i && i < end )
+
+// Define a general-purpose version of bli_packm_my_iter() whose definition
+// depends on whether slab or round-robin partitioning was requested at
+// configure-time.
+#ifdef BLIS_ENABLE_JRIR_SLAB
+
+  #define bli_packm_my_iter bli_packm_my_iter_sl
+
+#else // BLIS_ENABLE_JRIR_RR
+
+  #define bli_packm_my_iter bli_packm_my_iter_rr
+
+#endif
+
 
 //
 // thrinfo_t APIs specific to packm.

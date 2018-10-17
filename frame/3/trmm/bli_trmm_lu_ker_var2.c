@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,7 +152,7 @@ void PASTEMAC(ch,varname) \
        void*   c, inc_t rs_c, inc_t cs_c, \
        cntx_t* cntx, \
        rntm_t* rntm, \
-       thrinfo_t* jr_thread  \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t     dt         = PASTEMAC(ch,type); \
@@ -327,29 +328,45 @@ void PASTEMAC(ch,varname) \
 	/* Save the desired output datatype (indicating no typecasting). */ \
 	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
-	b1 = b_cast; \
-	c1 = c_cast; \
+	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
+	   loop around the microkernel. Here we query the thrinfo_t node for the
+	   1st (ir) loop around the microkernel. */ \
+	/*thrinfo_t* ir_thread = bli_thrinfo_sub_node( thread );*/ \
 \
-	thrinfo_t* ir_thread      = bli_thrinfo_sub_node( jr_thread ); \
-	dim_t jr_num_threads      = bli_thread_n_way( jr_thread ); \
-	dim_t jr_thread_id        = bli_thread_work_id( jr_thread ); \
+	/* Query the number of threads and thread ids for each loop. */ \
+	dim_t jr_nt  = bli_thread_n_way( thread ); \
+	dim_t jr_tid = bli_thread_work_id( thread ); \
+	/*dim_t ir_nt  = bli_thread_n_way( ir_thread ); \
+	dim_t ir_tid = bli_thread_work_id( ir_thread );*/ \
+\
+	dim_t jr_start, jr_end; \
+	/*dim_t ir_start, ir_end;*/ \
+	dim_t jr_inc; \
+\
+	/* Determine the thread range and increment for the 2nd loop.
+	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	   slab or round-robin partitioning was requested at configure-time. \
+	   NOTE: Parallelism in the 1st loop is disabled for now. */ \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/ \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = 0; j < n_iter; ++j ) \
+	for ( j = jr_start; j < jr_end; j += jr_inc ) \
 	{ \
-		if ( bli_trmm_l_jr_my_iter( j, jr_thread ) ) { \
-\
 		ctype* restrict a1; \
 		ctype* restrict c11; \
 		ctype* restrict b2; \
 \
-		a1  = a_cast; \
-		c11 = c1; \
+		b1 = b_cast + j * cstep_b; \
+		c1 = c_cast + j * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
+\
+		a1  = a_cast; \
+		c11 = c1; \
 \
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = 0; i < m_iter; ++i ) \
@@ -379,17 +396,18 @@ void PASTEMAC(ch,varname) \
 				is_a_cur += ( bli_is_odd( is_a_cur ) ? 1 : 0 ); \
 				ps_a_cur  = ( is_a_cur * ss_a_num ) / ss_a_den; \
 \
-				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				/* NOTE: ir loop parallelism disabled for now. */ \
+				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/ \
 \
 				b1_i = b1 + ( off_a1112 * PACKNR ) / off_scl; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -443,23 +461,24 @@ void PASTEMAC(ch,varname) \
 					                        ct,  rs_ct, cs_ct, \
 					                        c11, rs_c,  cs_c ); \
 				} \
-				} \
+				/*}*/ \
 \
 				a1 += ps_a_cur; \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffa_i, MR, k ) ) \
 			{ \
-				if ( bli_trmm_l_ir_my_iter( i, ir_thread ) ) { \
+				/* NOTE: ir loop parallelism disabled for now. */ \
+				/*if ( bli_trmm_my_iter( i, ir_thread ) ) {*/ \
 \
 				ctype* restrict a2; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \
-				if ( bli_is_last_iter( i, m_iter, 0, 1 ) ) \
+				if ( bli_is_last_iter_rr( i, m_iter, 0, 1 ) ) \
 				{ \
 					a2 = a_cast; \
 					b2 = b1; \
-					if ( bli_is_last_iter( j, n_iter, jr_thread_id, jr_num_threads ) ) \
+					if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
 						b2 = b_cast; \
 				} \
 \
@@ -508,17 +527,13 @@ void PASTEMAC(ch,varname) \
 					                       ct,  rs_ct, cs_ct, \
 					                       c11, rs_c,  cs_c ); \
 				} \
-				} \
+				/*}*/ \
 \
 				a1 += rstep_a; \
 			} \
 \
 			c11 += rstep_c; \
 		} \
-		} \
-\
-		b1 += cstep_b; \
-		c1 += cstep_c; \
 	} \
 \
 /*PASTEMAC(ch,fprintm)( stdout, "trmm_lu_ker_var2: a1", MR, k_a1112, a1, 1, MR, "%4.1f", "" );*/ \

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,6 +57,7 @@ void PASTEMAC0(opname) \
 //GENPROT( trmm_blk_var3 )
 
 GENPROT( trmm_xx_ker_var2 )
+
 GENPROT( trmm_ll_ker_var2 )
 GENPROT( trmm_lu_ker_var2 )
 GENPROT( trmm_rl_ker_var2 )

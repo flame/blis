@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,6 +86,10 @@ void bli_trmm_front
 	}
 
 #if 0
+	// NOTE: This case casts right-side trmm in terms of left side. This
+	// reduces the number of macrokernels exercised to two (trmm_ll and
+	// trmm_lu) but can lead to the microkernel being executed with an
+	// output matrix that is stored counter to its output preference.
 
 	// If A is being multiplied from the right, transpose all operands
 	// so that we can perform the computation as if A were being multiplied
@@ -98,6 +103,11 @@ void bli_trmm_front
 	}
 
 #else
+	// NOTE: This case computes right-side trmm natively with trmm_rl and
+	// trmm_ru macrokernels. This code path always gives us the opportunity
+	// to transpose the entire operation so that the effective storage format
+	// of the output matrix matches the microkernel's output preference.
+	// Thus, from a performance perspective, this case is preferred.
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel

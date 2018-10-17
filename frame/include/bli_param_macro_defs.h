@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -638,6 +639,13 @@ static bool_t bli_intersects_diag_n( doff_t diagoff, dim_t m, dim_t n )
 	         !bli_is_strictly_below_diag_n( diagoff, m, n ) );
 }
 
+static bool_t bli_is_outside_diag_n( doff_t diagoff, dim_t m, dim_t n )
+{
+	return ( bool_t )
+	       ( bli_is_strictly_above_diag_n( diagoff, m, n ) ||
+	         bli_is_strictly_below_diag_n( diagoff, m, n ) );
+}
+
 static bool_t bli_is_stored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
 {
 	return ( bool_t )
@@ -784,10 +792,25 @@ static bool_t bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 	       ( i != 0 || n_left == 0 );
 }
 
-static bool_t bli_is_last_iter( dim_t i, dim_t n_iter, dim_t tid, dim_t nth )
+static bool_t bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
 	return ( bool_t )
-	       ( i == n_iter - 1 - ( ( n_iter - tid - 1 ) % nth ) );
+	       ( i == end_iter - 1 );
+}
+
+static bool_t bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+{
+	return ( bool_t )
+	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
+}
+
+static bool_t bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+{
+#ifdef BLIS_ENABLE_JRIR_SLAB
+	return bli_is_last_iter_sl( i, end_iter, tid, nth );
+#else // BLIS_ENABLE_JRIR_RR
+	return bli_is_last_iter_rr( i, end_iter, tid, nth );
+#endif
 }
 
 

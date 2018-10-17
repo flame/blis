@@ -187,6 +187,8 @@ def main():
 		else:
 			filename = git_words[1]
 
+		#my_echo( "-debug---- %s" % filename )
+
 		# Start by opening the file. (We can assume it exists since it
 		# was found by 'git status', so no need to check for existence.)
 		# Read all lines in the file and then close it.
@@ -203,7 +205,7 @@ def main():
 		# If the file does not have any copyright notice in it already, we
 		# assume we don't need to update it.
 		if not has_cr:
-			my_echo( "[skipped] %s" % filename )
+			my_echo( "[nocrline] %s" % filename )
 			continue
 
 		# Check whether the file already has a copyright for the_org. We may
@@ -214,7 +216,7 @@ def main():
 		mod_file_lines = []
 
 		# At this point we know that the file has at least one copyright, and
-		# has_org_cr encodes whether already has a copyright for the_org.
+		# has_org_cr encodes whether it already has a copyright for the_org.
 
 		# We process the files that we know already have copyrights for the_org
 		# differently from the files that do not yet have them.
@@ -240,12 +242,15 @@ def main():
 						repl_line = ' %s, ' % cur_year
 						line_ny = re.sub( find_line, repl_line, line )
 
-						my_echo( "[updated] %s" % filename )
+						my_echo( "[updated ] %s" % filename )
 
 						# Add the updated line to the running list.
 						mod_file_lines += line_ny
 
 					else:
+
+						my_echo( "[up2date ] %s" % filename )
+
 						# Add the unchanged line to the running list.
 						mod_file_lines += line
 							
@@ -262,7 +267,7 @@ def main():
 			# Don't go any further if we're only updating existing copyright
 			# lines.
 			if update_only:
-				my_echo( "[skipped] %s" % filename )
+				my_echo( "[nocrline] %s" % filename )
 				continue
 
 			num_file_lines = len( file_lines )
@@ -313,7 +318,7 @@ def main():
 						mod_file_lines += line
 						mod_file_lines += line_nyno
 
-						my_echo( "[added  ] %s" % filename )
+						my_echo( "[added   ] %s" % filename )
 
 					# endif resnext
 

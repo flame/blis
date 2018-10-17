@@ -51,7 +51,13 @@ THIS_CONFIG    := bgq
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    := -I/bgsys/drivers/ppcfloor -I/bgsys/drivers/ppcfloor/spi/include/kernel/cnk
+ifeq ($(CC_VENDOR),ibm)
 CMISCFLAGS     := -qthreaded -qsmp=omp -qasm=gcc -qkeyword=asm # -qreport -qsource -qlistopt -qlist
+else ifeq ($(CC_VENDOR),clang)
+CMISCFLAGS     := -fopenmp
+else
+$(error xlc or bgclang is required for this configuration.)
+endif
 CPICFLAGS      :=
 CWARNFLAGS     := -w
 
@@ -69,8 +75,6 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),ibm)
 CKVECFLAGS     := -qarch=qp -qtune=qp -qsimd=auto -qhot=level=1 -qprefetch -qunroll=yes -qnoipa
-else
-$(error xlc is required for this configuration.)
 endif
 
 # Flags specific to reference kernels.
@@ -78,7 +82,11 @@ CROPTFLAGS     := $(CKOPTFLAGS)
 CRVECFLAGS     := $(CKVECFLAGS)
 
 # Override the default value for LDFLAGS.
+ifeq ($(CC_VENDOR),ibm)
 LDFLAGS        := -L/bgsys/drivers/ppcfloor/spi/lib -lSPI -lSPI_cnk -qthreaded -qsmp=omp
+else ifeq ($(CC_VENDOR),clang)
+LDFLAGS        := -L/bgsys/drivers/ppcfloor/spi/lib -lSPI -lSPI_cnk -fopenmp
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

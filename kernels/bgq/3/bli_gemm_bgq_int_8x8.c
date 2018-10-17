@@ -39,15 +39,15 @@
 
 
 /*
- * Here is dgemm kernel for QPX. 
+ * Here is dgemm kernel for QPX.
  * Instruction mix was divined by a statement in an email from John Gunnels when asked about the peak performance with a single thread:
  * "Achievable peak can either be:
  * 1) 12.8 GF 8 FMAs cycle * 1.6 GHz
  * 2) 8.53 GF Takes intoo account the instruction mix in DGEMM and the fact that you can only do an FMA or a load/store in a single cycle with just one thread
  * 3) 7.58 GF (2) + the fact that we can only issue 8 instructions in 9 cycles with one thread"
  *
- * Which I have taken to mean: 8.53 GFLOPS implies on average 5.33 flops/cycle. 
- * I know the kernel John uses is 8x8, so 16 flops per loop iteration. 
+ * Which I have taken to mean: 8.53 GFLOPS implies on average 5.33 flops/cycle.
+ * I know the kernel John uses is 8x8, so 16 flops per loop iteration.
  * Thus there must be 24 total instructions per iteration because 16/24 = 5.33.
  *
  * Here, we have 6 loads per iteration. These are executed on a different pipeline from FMAs so
@@ -56,23 +56,16 @@
 
 void bli_dgemm_bgq_int_8x8
      (
-       dim_t               k0,
+       dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
     //Registers for storing C.
     //4 4x4 subblocks of C, c00, c01, c10, c11
     //4 registers per subblock: a, b, c, d
@@ -110,7 +103,7 @@ void bli_dgemm_bgq_int_8x8
 
         a0  = vec_lda ( 0 * sizeof(double), &a[8*i] );
         a1  = vec_lda ( 4 * sizeof(double), &a[8*i] );
-        
+
         c00a    = vec_xmadd ( b0a, a0, c00a );
         c00b    = vec_xxmadd( a0, b0a, c00b );
         c00c    = vec_xmadd ( b0b, a0, c00c );
@@ -131,7 +124,7 @@ void bli_dgemm_bgq_int_8x8
         c11c    = vec_xmadd ( b1b, a1, c11c );
         c11d    = vec_xxmadd( a1, b1b, c11d );
     }
-    
+
     // Create patterns for permuting Cb and Cd
     vector4double pattern = vec_gpci( 01032 );
 
@@ -140,7 +133,7 @@ void bli_dgemm_bgq_int_8x8
     vector4double betav  = vec_lds( 0, ( double* )beta );
     vector4double alphav = vec_lds( 0, ( double* )alpha );
     double ct;
-  
+
     //Macro to update 4 elements of C in a column.
     //REG is the register holding those 4 elements
     //ADDR is the address to write them to
@@ -167,7 +160,7 @@ void bli_dgemm_bgq_int_8x8
     *(ADDR + (OFFSET + 2) * rs_c) = ct; \
     ct = vec_extract( AB, 3 );          \
     *(ADDR + (OFFSET + 3) * rs_c) = ct; \
-}  
+}
     //Update c00 and c10 sub-blocks
     UPDATE( c00a, c, 0 );
     UPDATE( c10a, c, 4 );
@@ -263,7 +256,7 @@ void bli_zgemm_bgq_int_4x4
 
     for( dim_t i = 0; i < k; i++ )
     {
-        
+
         b0 = vec_ld2a( 0 * sizeof(double), &b_d[8*i] );
         b1 = vec_ld2a( 2 * sizeof(double), &b_d[8*i] );
         b2 = vec_ld2a( 4 * sizeof(double), &b_d[8*i] );
@@ -271,7 +264,7 @@ void bli_zgemm_bgq_int_4x4
 
         a0 = vec_lda ( 0 * sizeof(double), &a_d[8*i] );
         a1 = vec_lda ( 4 * sizeof(double), &a_d[8*i] );
-        
+
         c00a    = vec_xmadd ( b0, a0, c00a );
         c00b    = vec_xxcpnmadd( a0, b0, c00b );
         c01a    = vec_xmadd ( b1, a0, c01a );
@@ -308,7 +301,7 @@ void bli_zgemm_bgq_int_4x4
     double alphai = bli_zimag( *alpha );
     double betar  = bli_zreal( *beta );
     double betai  = bli_zimag( *beta );
-    vector4double alphav = vec_splats( 0.0 ); 
+    vector4double alphav = vec_splats( 0.0 );
     vector4double betav = vec_splats( 0.0 );
     alphav = vec_insert( alphar, alphav, 0);
     alphav = vec_insert( alphai, alphav, 1);
@@ -319,7 +312,7 @@ void bli_zgemm_bgq_int_4x4
     betav = vec_insert( betar, betav, 2);
     betav = vec_insert( betai, betav, 3);
     double ct;
-  
+
 
     //Macro to update 2 elements of C in a column.
     //REG1 is the register holding the first partial sum of those 2 elements

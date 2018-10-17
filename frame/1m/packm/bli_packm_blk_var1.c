@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,29 +37,30 @@
 
 #define FUNCPTR_T packm_fp
 
-typedef void (*FUNCPTR_T)(
-                           struc_t strucc,
-                           doff_t  diagoffc,
-                           diag_t  diagc,
-                           uplo_t  uploc,
-                           trans_t transc,
-                           pack_t  schema,
-                           bool_t  invdiag,
-                           bool_t  revifup,
-                           bool_t  reviflo,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   m_max,
-                           dim_t   n_max,
-                           void*   kappa,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   p, inc_t rs_p, inc_t cs_p,
-                                      inc_t is_p,
-                                      dim_t pd_p, inc_t ps_p,
-                           void*   packm_ker,
-                           cntx_t* cntx,
-                           thrinfo_t* thread
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       struc_t strucc,
+       doff_t  diagoffc,
+       diag_t  diagc,
+       uplo_t  uploc,
+       trans_t transc,
+       pack_t  schema,
+       bool_t  invdiag,
+       bool_t  revifup,
+       bool_t  reviflo,
+       dim_t   m,
+       dim_t   n,
+       dim_t   m_max,
+       dim_t   n_max,
+       void*   kappa,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       void*   p, inc_t rs_p, inc_t cs_p,
+                  inc_t is_p,
+                  dim_t pd_p, inc_t ps_p,
+       void*   packm_ker,
+       cntx_t* cntx,
+       thrinfo_t* thread
+     );
 
 static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
@@ -195,7 +197,7 @@ void bli_packm_blk_var1
 			// use BLIS_ONE to indicate no scaling during packing.
 			kappa_p = &BLIS_ONE;
 		}
-	
+
 		// Acquire the buffer to the kappa chosen above.
 		buf_kappa = bli_obj_buffer_for_1x1( dt_c, kappa_p );
 	}
@@ -307,7 +309,7 @@ void PASTEMAC(ch,varname) \
 	ctype* restrict p_begin; \
 \
 	dim_t           iter_dim; \
-	dim_t           num_iter; \
+	dim_t           n_iter; \
 	dim_t           it, ic, ip; \
 	dim_t           ic0, ip0; \
 	doff_t          ic_inc, ip_inc; \
@@ -418,16 +420,16 @@ void PASTEMAC(ch,varname) \
 	else                                    { ss_num = 1; ss_den = 1; } \
 \
 	/* Compute the total number of iterations we'll need. */ \
-	num_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
+	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
 	/* Set the initial values and increments for indices related to C and P
 	   based on whether reverse iteration was requested. */ \
 	if ( ( revifup && bli_is_upper( uploc ) && bli_is_triangular( strucc ) ) || \
 	     ( reviflo && bli_is_lower( uploc ) && bli_is_triangular( strucc ) ) ) \
 	{ \
-		ic0    = (num_iter - 1) * panel_dim_max; \
+		ic0    = (n_iter - 1) * panel_dim_max; \
 		ic_inc = -panel_dim_max; \
-		ip0    = num_iter - 1; \
+		ip0    = n_iter - 1; \
 		ip_inc = -1; \
 	} \
 	else \
@@ -440,16 +442,21 @@ void PASTEMAC(ch,varname) \
 \
 	p_begin = p_cast; \
 \
-/*
-if ( row_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", m, n, \
-                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
-if ( col_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
-                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
-*/ \
+	/* Query the number of threads and thread ids from the current thread's
+	   packm thrinfo_t node. */ \
+	const dim_t nt  = bli_thread_n_way( thread ); \
+	const dim_t tid = bli_thread_work_id( thread ); \
 \
-	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < num_iter; \
+	dim_t it_start, it_end, it_inc; \
+\
+	/* Determine the thread range and increment using the current thread's
+	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
+	   will depend on whether slab or round-robin partitioning was requested
+	   at configure-time. */ \
+	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+\
+	/* Iterate over every logical micropanel in the source matrix. */ \
+	for ( ic  = ic0,    ip  = ip0,    it  = 0; it < n_iter; \
 	      ic += ic_inc, ip += ip_inc, it += 1 ) \
 	{ \
 		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
@@ -514,7 +521,11 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
 			/* We nudge the imaginary stride up by one if it is odd. */ \
 			is_p_use += ( bli_is_odd( is_p_use ) ? 1 : 0 ); \
 \
-			if( packm_thread_my_iter( it, thread ) ) \
+			/* NOTE: We MUST use round-robin partitioning when packing
+			   micropanels of a triangular matrix. Hermitian/symmetric
+			   and general packing may use slab or round-robin, depending
+			   on which was selected at configure-time. */ \
+			if ( bli_packm_my_iter_rr( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				packm_ker_cast( strucc, \
 				                diagoffp_i, \
@@ -553,7 +564,9 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
 \
 			is_p_use = is_p; \
 \
-			if( packm_thread_my_iter( it, thread ) ) \
+			/* The definition of bli_packm_my_iter() will depend on whether slab
+			   or round-robin partitioning was requested at configure-time. */ \
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				packm_ker_cast( strucc, \
 				                diagoffc_i, \
@@ -589,7 +602,9 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
 \
 			is_p_use = is_p; \
 \
-			if( packm_thread_my_iter( it, thread ) ) \
+			/* The definition of bli_packm_my_iter() will depend on whether slab
+			   or round-robin partitioning was requested at configure-time. */ \
+			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
 				packm_ker_cast( BLIS_GENERAL, \
 				                0, \
@@ -613,6 +628,23 @@ PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", m, n, \
 			p_inc = ps_p; \
 		} \
 \
+		p_begin += p_inc; \
+\
+	} \
+}
+
+INSERT_GENTFUNCR_BASIC( packm, packm_blk_var1 )
+
+
+
+/*
+if ( row_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: b", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+if ( col_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m, n, \
+                      c_cast,        rs_c, cs_c, "%4.1f", "" ); \
+*/
 /*
 if ( row_stored ) \
 PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b packed", *m_panel_max, *n_panel_max, \
@@ -671,8 +703,7 @@ bli_thread_obarrier( thread ); \
 	} \
 bli_thread_obarrier( thread ); \
 } \
-*/ \
-\
+*/
 /*
 		if ( bli_is_4mi_packed( schema ) ) { \
 		printf( "packm_var2: is_p_use = %lu\n", is_p_use ); \
@@ -695,18 +726,11 @@ bli_thread_obarrier( thread ); \
 		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" ); \
 		} \
 		} \
-*/ \
-/*
-*/ \
-\
-/*
-*/ \
+*/
 /*
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max, \
 		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
-*/ \
-\
-\
+*/
 /*
 		if ( row_stored ) { \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_max, *n_panel_max, \
@@ -719,9 +743,7 @@ bli_thread_obarrier( thread ); \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max, \
 		                       ( ctype_r* )p_use + is_b, rs_p, cs_p, "%4.1f", "" ); \
 		} \
-*/ \
-\
-\
+*/
 /*
 		if ( col_stored ) { \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_max, *n_panel_max, \
@@ -733,12 +755,4 @@ bli_thread_obarrier( thread ); \
 		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max, \
 		                       ( ctype_r* )p_use + p_inc, rs_p, cs_p, "%4.1f", "" ); \
 		} \
-*/ \
-\
-		p_begin += p_inc; \
-\
-	} \
-}
-
-INSERT_GENTFUNCR_BASIC( packm, packm_blk_var1 )
-
+*/

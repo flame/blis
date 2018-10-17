@@ -4,6 +4,7 @@
 * **[Enabling a sandbox](Sandboxes.md#enabling-a-sandbox)**
 * **[Sandbox rules](Sandboxes.md#sandbox-rules)**
 * **[Caveats](Sandboxes.md#caveats)**
+* **[Known Issues](Sandboxes.md#known-issues)**
 * **[Conclusion](Sandboxes.md#conclusion)**
 
 
@@ -181,6 +182,20 @@ guidance from BLIS developers by opening a
 
 Notwithstanding these limitations, hopefully you still find BLIS sandboxes
 useful!
+
+## Known Issues
+
+* **Mixed datatype support.** Unless you *really* know what you are doing, you
+should probably disable mixed datatype support when using a sandbox. (Mixed
+datatype support can be disabled by configuring with `--disable-mixed-dt`.) The
+BLIS testsuite is smart enough to verify that you've configured BLIS with mixed
+datatype support before allowing you to test with mixed domains/precisions
+enabled in `input.general`. However, if those options *are* enabled and BLIS was
+built with mixed datatype support, then BLIS assumes that the implementation of
+`gemm` will support mixing of datatypes. BLIS *must* assume this, because
+there's no way for it to confirm at runtime that an implementation was written
+to support mixing datatypes. Note that even the `ref99` sandbox included with
+BLIS does not support mixed-datatype computation.
 
 ## Conclusion
 

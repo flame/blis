@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -114,7 +115,8 @@ void bli_gemm_int
 
 		if ( im != BLIS_NAT )
 		{
-			if ( im == BLIS_4M1B && f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
+			if ( im == BLIS_4M1B )
+			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
 		}
 	}
 

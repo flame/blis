@@ -205,6 +205,17 @@ operands and thus fixed; the user may not specify a different computation
 domain, even if the mixed-domain case would reasonably allow for computing
 in either domain.
 
+* **Sandboxes should be used with caution.** When building a `gemm` sandbox in
+BLIS, please consider either (a) disabling mixed datatype support, or (b)
+consciously **never** running the testsuite with mixed domain or precision
+computation enabled. Even the reference `ref99` sandbox implementation in BLIS
+does not support mixing datatypes. If you do choose to enable a sandbox while
+also keeping mixed datatype support enabled in BLIS, make sure that the
+mixing of datatypes is disabled in the testsuite's `input.general` file
+(unless, of course, you decide to implement all mixed datatype cases within
+your sandbox). This issue is also discussed in the documentation for
+[Sandboxes](Sandboxes.md#known-issues).
+
 ## Conclusion
 
 For more information and documentation on BLIS, please visit the [BLIS github page](https://github.com/flame/blis/).

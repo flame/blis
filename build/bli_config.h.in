@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +51,14 @@
 
 #if @enable_pthreads@
 #define BLIS_ENABLE_PTHREADS
+#endif
+
+#if @enable_jrir_slab@
+#define BLIS_ENABLE_JRIR_SLAB
+#endif
+
+#if @enable_jrir_rr@
+#define BLIS_ENABLE_JRIR_RR
 #endif
 
 #if @enable_packbuf_pools@
