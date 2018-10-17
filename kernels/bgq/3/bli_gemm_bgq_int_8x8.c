@@ -56,23 +56,16 @@
 
 void bli_dgemm_bgq_int_8x8
      (
-       dim_t               k0,
+       dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
     //Registers for storing C.
     //4 4x4 subblocks of C, c00, c01, c10, c11
     //4 registers per subblock: a, b, c, d
