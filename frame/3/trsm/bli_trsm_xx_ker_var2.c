@@ -35,13 +35,13 @@
 
 #include "blis.h"
 
-static trsm_var_oft vars_sl[2][2] =
+static trsm_var_oft vars[2][2] =
 {
-	{ bli_trsm_ll_ker_var2sl, bli_trsm_lu_ker_var2sl },
-	{ bli_trsm_rl_ker_var2  , bli_trsm_ru_ker_var2   }
+	{ bli_trsm_ll_ker_var2, bli_trsm_lu_ker_var2 },
+	{ bli_trsm_rl_ker_var2, bli_trsm_ru_ker_var2 }
 };
 
-void bli_trsm_xx_ker_var2sl
+void bli_trsm_xx_ker_var2
      (
        obj_t*  a,
        obj_t*  b,
@@ -73,62 +73,7 @@ void bli_trsm_xx_ker_var2sl
 	}
 
 	// Index into the variant array to extract the correct function pointer.
-	f = vars_sl[side][uplo];
-
-	// Call the macrokernel.
-	f
-	(
-	  a,
-	  b,
-	  c,
-	  cntx,
-	  rntm,
-	  cntl,
-	  thread
-	);
-}
-
-// -----------------------------------------------------------------------------
-
-static trsm_var_oft vars_rr[2][2] =
-{
-	{ bli_trsm_ll_ker_var2rr, bli_trsm_lu_ker_var2rr },
-	{ bli_trsm_rl_ker_var2  , bli_trsm_ru_ker_var2   }
-};
-
-void bli_trsm_xx_ker_var2rr
-     (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
-     )
-{
-	bool_t       side;
-	bool_t       uplo;
-	trsm_var_oft f;
-
-	// Set two bools: one based on the implied side parameter (the structure
-	// of the root object) and one based on the uplo field of the triangular
-	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( a ) )
-	{
-		side = 0;
-		if ( bli_obj_root_is_lower( a ) ) uplo = 0;
-		else                              uplo = 1;
-	}
-	else // if ( bli_obj_root_is_triangular( b ) )
-	{
-		side = 1;
-		if ( bli_obj_root_is_lower( b ) ) uplo = 0;
-		else                              uplo = 1;
-	}
-
-	// Index into the variant array to extract the correct function pointer.
-	f = vars_rr[side][uplo];
+	f = vars[side][uplo];
 
 	// Call the macrokernel.
 	f

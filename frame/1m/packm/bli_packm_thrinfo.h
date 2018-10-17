@@ -51,7 +51,18 @@
 \
 	( start <= i && i < end )
 
+// Define a general-purpose version of bli_packm_my_iter() whose definition
+// depends on whether slab or round-robin partitioning was requested at
+// configure-time.
+#ifdef BLIS_ENABLE_JRIR_SLAB
 
+  #define bli_packm_my_iter bli_packm_my_iter_sl
+
+#else // BLIS_ENABLE_JRIR_RR
+
+  #define bli_packm_my_iter bli_packm_my_iter_rr
+
+#endif
 
 
 //

@@ -56,17 +56,12 @@ void PASTEMAC0(opname) \
 //GENPROT( trmm_blk_var2 )
 //GENPROT( trmm_blk_var3 )
 
-GENPROT( trmm_xx_ker_var2sl )
-GENPROT( trmm_xx_ker_var2rr )
+GENPROT( trmm_xx_ker_var2 )
 
-GENPROT( trmm_ll_ker_var2sl )
-GENPROT( trmm_ll_ker_var2rr )
-GENPROT( trmm_lu_ker_var2sl )
-GENPROT( trmm_lu_ker_var2rr )
-GENPROT( trmm_rl_ker_var2sl )
-GENPROT( trmm_rl_ker_var2rr )
-GENPROT( trmm_ru_ker_var2sl )
-GENPROT( trmm_ru_ker_var2rr )
+GENPROT( trmm_ll_ker_var2 )
+GENPROT( trmm_lu_ker_var2 )
+GENPROT( trmm_rl_ker_var2 )
+GENPROT( trmm_ru_ker_var2 )
 
 
 //
@@ -96,12 +91,8 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( trmm_ll_ker_var2sl )
-INSERT_GENTPROT_BASIC0( trmm_ll_ker_var2rr )
-INSERT_GENTPROT_BASIC0( trmm_lu_ker_var2sl )
-INSERT_GENTPROT_BASIC0( trmm_lu_ker_var2rr )
-INSERT_GENTPROT_BASIC0( trmm_rl_ker_var2sl )
-INSERT_GENTPROT_BASIC0( trmm_rl_ker_var2rr )
-INSERT_GENTPROT_BASIC0( trmm_ru_ker_var2sl )
-INSERT_GENTPROT_BASIC0( trmm_ru_ker_var2rr )
+INSERT_GENTPROT_BASIC0( trmm_ll_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_lu_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_rl_ker_var2 )
+INSERT_GENTPROT_BASIC0( trmm_ru_ker_var2 )
 

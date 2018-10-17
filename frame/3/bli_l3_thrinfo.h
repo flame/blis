@@ -39,26 +39,32 @@
 
 // gemm
 
+// NOTE: The definition of bli_gemm_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_gemm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
 // herk
 
+// NOTE: The definition of bli_herk_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_herk_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_herk_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
 // trmm
 
+// NOTE: The definition of bli_trmm_get_next_?_upanel() does not need to
+// change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
 #define bli_trmm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_trmm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
-#define bli_trmm_my_iter( index, thread ) \
+#define bli_trmm_my_iter_rr( index, thread ) \
 \
 	( index % thread->n_way == thread->work_id % thread->n_way )
 
 // trsm
 
-#define bli_trsm_my_iter( index, thread ) \
+#define bli_trsm_my_iter_rr( index, thread ) \
 \
 	( index % thread->n_way == thread->work_id % thread->n_way )
 

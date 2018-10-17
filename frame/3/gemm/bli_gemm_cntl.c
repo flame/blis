@@ -58,30 +58,15 @@ cntl_t* bli_gemmbp_cntl_create
 	void* packa_fp;
 	void* packb_fp;
 
-#ifdef BLIS_ENABLE_JRIR_SLAB
-
 	// Use the function pointers to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
-	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2sl;
-	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2sl;
-	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2sl;
-	else                            macro_kernel_fp = NULL;
+	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
+	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2;
+	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
+	else /* should never execute */ macro_kernel_fp = NULL;
 
-	packa_fp = bli_packm_blk_var1sl;
-	packb_fp = bli_packm_blk_var1sl;
-
-#else // BLIS_ENABLE_JRIR_RR
-
-	// Use the function pointers to the macrokernels that use round-robin
-	// assignment of micropanels to threads in the jr and ir loops.
-	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2rr;
-	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2rr;
-	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2rr;
-	else                            macro_kernel_fp = NULL;
-
-	packa_fp = bli_packm_blk_var1rr;
-	packb_fp = bli_packm_blk_var1rr;
-#endif
+	packa_fp = bli_packm_blk_var1;
+	packb_fp = bli_packm_blk_var1;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node

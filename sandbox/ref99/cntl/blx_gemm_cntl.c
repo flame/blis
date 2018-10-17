@@ -59,24 +59,10 @@ cntl_t* blx_gemmbp_cntl_create
 	void* packa_fp;
 	void* packb_fp;
 
-#ifdef BLIS_ENABLE_JRIR_SLAB
+	macro_kernel_fp = blx_gemm_ker_var2;
 
-	// Use the function pointers to the macrokernels that use slab
-	// assignment of micropanels to threads in the jr and ir loops.
-	macro_kernel_fp = blx_gemm_ker_var2sl;
-
-	packa_fp = bli_packm_blk_var1sl;
-	packb_fp = bli_packm_blk_var1sl;
-
-#else // BLIS_ENABLE_JRIR_RR
-
-	// Use the function pointers to the macrokernels that use round-robin
-	// assignment of micropanels to threads in the jr and ir loops.
-	macro_kernel_fp = bli_gemm_ker_var2rr;
-
-	packa_fp = bli_packm_blk_var1rr;
-	packb_fp = bli_packm_blk_var1rr;
-#endif
+	packa_fp = bli_packm_blk_var1;
+	packb_fp = bli_packm_blk_var1;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = blx_gemm_cntl_create_node

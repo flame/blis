@@ -49,10 +49,8 @@ void PASTEMAC0(opname) \
        thrinfo_t* t  \
      );
 
-GENPROT( packm_unb_var1   )
-GENPROT( packm_blk_var1   )
-GENPROT( packm_blk_var1sl )
-GENPROT( packm_blk_var1rr )
+GENPROT( packm_unb_var1 )
+GENPROT( packm_blk_var1 )
 
 //
 // Prototype BLAS-like interfaces with void pointer operands.
@@ -108,6 +106,5 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( packm_blk_var1sl )
-INSERT_GENTPROT_BASIC0( packm_blk_var1rr )
+INSERT_GENTPROT_BASIC0( packm_blk_var1 )
 
