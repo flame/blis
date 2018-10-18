@@ -438,7 +438,7 @@ INSTALL    := install -c
 
 # Script for creating a monolithic header file.
 #FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.sh
-FLATTEN_H  := $(DIST_PATH)/build/flatten-headers.py
+FLATTEN_H  := $(PYTHON) $(DIST_PATH)/build/flatten-headers.py
 
 # Default archiver flags.
 ARFLAGS    := cr
@@ -497,9 +497,9 @@ SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
-SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
+SOFLAGS    += build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.

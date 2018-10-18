@@ -60,8 +60,7 @@ GENPROT( gemm_packb )
 
 GENPROT( gemm_ker_var1 )
 
-GENPROT( gemm_ker_var2sl )
-GENPROT( gemm_ker_var2rr )
+GENPROT( gemm_ker_var2 )
 
 // Headers for induced algorithms:
 GENPROT( gemm4mb_ker_var2 ) // 4m1b
@@ -93,8 +92,7 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( gemm_ker_var2sl )
-INSERT_GENTPROT_BASIC0( gemm_ker_var2rr )
+INSERT_GENTPROT_BASIC0( gemm_ker_var2 )
 
 // Headers for induced algorithms:
 INSERT_GENTPROT_BASIC0( gemm4mb_ker_var2 ) // 4m1b

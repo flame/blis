@@ -50,22 +50,22 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  8,
 	  // gemm
 #if 1
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_zen_asm_6x16,       TRUE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen_asm_6x8,        TRUE,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen_asm_3x8,        TRUE,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen_asm_3x4,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
 #else
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_zen_asm_16x6,       FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_zen_asm_8x6,        FALSE,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_zen_asm_8x3,        FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_zen_asm_4x3,        FALSE,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_16x6,       FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_8x6,        FALSE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_8x3,        FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_4x3,        FALSE,
 #endif
 	  // gemmtrsm_l
-	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_zen_asm_6x16, TRUE,
-	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_zen_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
 	  // gemmtrsm_u
-	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_zen_asm_6x16, TRUE,
-	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_zen_asm_6x8,  TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
 	  cntx
 	);
 

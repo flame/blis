@@ -58,8 +58,7 @@ GENPROT( gemm_blk_var3 )
 GENPROT( gemm_packa )
 GENPROT( gemm_packb )
 
-GENPROT( gemm_ker_var2sl )
-GENPROT( gemm_ker_var2rr )
+GENPROT( gemm_ker_var2 )
 
 //
 // Prototype BLAS-like interfaces with void pointer operands.
@@ -87,6 +86,5 @@ void PASTECH2(blx_,ch,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_BASIC0( gemm_ker_var2sl )
-INSERT_GENTPROT_BASIC0( gemm_ker_var2rr )
+INSERT_GENTPROT_BASIC0( gemm_ker_var2 )
 

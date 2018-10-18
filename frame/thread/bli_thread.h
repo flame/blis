@@ -57,19 +57,6 @@ void bli_thread_finalize( void );
 #endif
 
 // Thread range-related prototypes.
-#if 0
-void bli_thread_range_jrir
-     (
-       thrinfo_t* thread,
-       dim_t      n,
-       dim_t      bf,
-       bool_t     handle_edge_low,
-       dim_t*     start,
-       dim_t*     end,
-	   dim_t*     inc
-     );
-#endif
-// -----------------------------------------------------------------------------
 
 void bli_thread_range_sub
      (
@@ -261,7 +248,6 @@ static void bli_thread_range_jrir_sl
 	*inc = 1;
 }
 
-#if 0
 static void bli_thread_range_jrir
      (
        thrinfo_t* thread,
@@ -273,6 +259,9 @@ static void bli_thread_range_jrir
        dim_t*     inc
      )
 {
+	// Define a general-purpose version of bli_thread_range_jrir() whose
+	// definition depends on whether slab or round-robin partitioning was
+	// requested at configure-time.
 #ifdef BLIS_ENABLE_JRIR_SLAB
 	bli_thread_range_jrir_sl( thread, n, bf, handle_edge_low, start, end, inc );
 #else
@@ -280,6 +269,7 @@ static void bli_thread_range_jrir
 #endif
 }
 
+#if 0
 static void bli_thread_range_weighted_jrir
      (
        thrinfo_t* thread,

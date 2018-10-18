@@ -60,32 +60,6 @@ void bli_thread_finalize( void )
 }
 
 // -----------------------------------------------------------------------------
-#if 0
-void bli_thread_range_jrir
-     (
-       thrinfo_t* thread,
-       dim_t      n,
-       dim_t      bf,
-       bool_t     handle_edge_low,
-       dim_t*     start,
-       dim_t*     end,
-	   dim_t*     inc
-     )
-{
-//#ifdef BLIS_JRIR_INTERLEAVE
-#if 1
-	// Use interleaved partitioning of jr/ir loops.
-	*start = bli_thread_work_id( thread );
-	*inc   = bli_thread_n_way( thread );
-	*end   = n;
-#else
-	// Use contiguous slab partitioning for jr/ir loops.
-	bli_thread_range_sub( thread, n, bf, handle_edge_low, start, end );
-	*inc = 1;
-#endif
-}
-#endif
-// -----------------------------------------------------------------------------
 
 void bli_thread_range_sub
      (

@@ -49,7 +49,7 @@ void bli_ddotv_bgq_int
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) ) {
-		PASTEMAC(d,set0s)( rho ); 
+		PASTEMAC(d,set0s)( *rho ); 
 		return; 
 	} 
 	// If there is anything that would interfere with our use of aligned

@@ -116,8 +116,7 @@ void bli_gemm_int
 		if ( im != BLIS_NAT )
 		{
 			if ( im == BLIS_4M1B )
-			if ( f == bli_gemm_ker_var2sl ||
-			     f == bli_gemm_ker_var2rr ) f = bli_gemm4mb_ker_var2;
+			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
 		}
 	}
 

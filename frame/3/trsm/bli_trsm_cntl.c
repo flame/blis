@@ -58,24 +58,12 @@ cntl_t* bli_trsm_l_cntl_create
 	void* packa_fp;
 	void* packb_fp;
 
-#ifdef BLIS_ENABLE_JRIR_SLAB
-
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
-	macro_kernel_p = bli_trsm_xx_ker_var2sl;
+	macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	packa_fp = bli_packm_blk_var1sl;
-	packb_fp = bli_packm_blk_var1sl;
-
-#else // BLIS_ENABLE_JRIR_RR
-
-	// Use the function pointer to the macrokernels that use round-robin
-	// assignment of micropanels to threads in the jr and ir loops.
-	macro_kernel_p = bli_trsm_xx_ker_var2rr;
-
-	packa_fp = bli_packm_blk_var1rr;
-	packb_fp = bli_packm_blk_var1rr;
-#endif
+	packa_fp = bli_packm_blk_var1;
+	packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -162,16 +150,11 @@ cntl_t* bli_trsm_r_cntl_create
        pack_t schema_b
      )
 {
-	// trsm macrokernels are presently disabled for right-side execution,
-	// so it doesn't matter which function pointer we use here (sl or rr).
-	// To be safe, we'll insert an abort() guard to alert the developers
-	// of this should right-side macrokernels ever be re-enabled.
-	void* macro_kernel_p = bli_trsm_xx_ker_var2sl;
+	// NOTE: trsm macrokernels are presently disabled for right-side execution.
+	void* macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	void* packa_fp = bli_packm_blk_var1sl;
-	void* packb_fp = bli_packm_blk_var1sl;
-
-	bli_abort();
+	void* packa_fp = bli_packm_blk_var1;
+	void* packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
