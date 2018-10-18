@@ -42,7 +42,7 @@ int main( int argc, char** argv )
 	inc_t rs, cs;
 	side_t side;
 
-	obj_t a, b, c, d;
+	obj_t a, b, c;
 	obj_t* alpha;
 	obj_t* beta;
 
@@ -299,9 +299,7 @@ int main( int argc, char** argv )
 	// Load the diagonal. By setting the diagonal to something of greater
 	// absolute value than the off-diagonal elements, we increase the odds
 	// that the matrix is not singular (singular matrices have no inverse).
-	bli_obj_create( dt, m, m, 0, 0, &d );
-	bli_setd( &BLIS_TWO, &d );
-	bli_addd( &d, &a );
+	bli_shiftd( &BLIS_TWO, &a );
 
 	bli_printm( "a: randomized (zeros in upper triangle)", &a, "%4.1f", "" );
 	bli_printm( "b: initial value", &b, "%4.1f", "" );
@@ -323,7 +321,6 @@ int main( int argc, char** argv )
 	bli_obj_free( &a );
 	bli_obj_free( &b );
 	bli_obj_free( &c );
-	bli_obj_free( &d );
 
 
 	return 0;

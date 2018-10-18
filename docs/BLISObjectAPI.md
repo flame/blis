@@ -597,7 +597,7 @@ Notes for interpreting function descriptions:
   * **[Level-1v](BLISObjectAPI.md#level-1v-operations)**: Operations on vectors:
     * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [scal2v](BLISObjectAPI.md#scal2v), [scalv](BLISObjectAPI.md#scalv), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
   * **[Level-1d](BLISObjectAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [subd](BLISObjectAPI.md#subd)
+    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISObjectAPI.md#subd)
   * **[Level-1m](BLISObjectAPI.md#level-1m-operations)**: Element-wise operations on matrices:
     * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
   * **[Level-1f](BLISObjectAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
@@ -771,6 +771,8 @@ Perform
 ```
 where `x` is a vector of length _n_, and `alpha` is a scalar.
 
+Observed object properties: `conj?(alpha)`.
+
 ---
 
 #### scal2v
@@ -788,6 +790,8 @@ Perform
 ```
 where `x` and `y` are vectors of length _n_, and `alpha` is a scalar.
 
+Observed object properties: `conj?(alpha)`, `conj?(x)`.
+
 ---
 
 #### setv
@@ -803,6 +807,8 @@ Perform
   x := conj?(alpha)
 ```
 That is, set all elements of an _n_-length vector `x` to scalar `conj?(alpha)`.
+
+Observed object properties: `conj?(alpha)`.
 
 ---
 
@@ -856,6 +862,8 @@ Perform
 ```
 where `x` and `y` are vectors of length _n_.
 
+Observed object properties: `conj?(x)`.
+
 ---
 
 #### swapv
@@ -885,6 +893,8 @@ Perform
 ```
 where `x` and `y` are vectors of length _n_, and `beta` is a scalar.
 
+Observed object properties: `conj?(beta)`, `conj?(x)`.
+
 ---
 
 
@@ -908,6 +918,8 @@ void bli_addd
      );
 ```
 
+Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
+
 ---
 
 #### axpyd
@@ -920,6 +932,8 @@ void bli_axpyd
      );
 ```
 
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `trans?(A)`.
+
 ---
 
 #### copyd
@@ -931,6 +945,8 @@ void bli_copyd
      );
 ```
 
+Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
+
 ---
 
 #### invertd
@@ -940,6 +956,8 @@ void bli_invertd
        obj_t*  a
      );
 ```
+
+Observed object properties: `diagoff(A)`.
 
 ---
 
@@ -951,6 +969,8 @@ void bli_scald
        obj_t*  a
      );
 ```
+
+Observed object properties: `conj?(alpha)`, `diagoff(A)`.
 
 ---
 
@@ -964,6 +984,8 @@ void bli_scal2d
      );
 ```
 
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`, `trans?(A)`.
+
 ---
 
 #### setd
@@ -975,6 +997,8 @@ void bli_setd
      );
 ```
 
+Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`.
+
 ---
 
 #### setid
@@ -985,7 +1009,26 @@ void bli_setid
        obj_t*  a
      );
 ```
-Set the imaginary components of a matrix diagonal to a scalar `alpha`.
+Set the imaginary components of every element along the diagonal of `a`
+to a scalar `alpha`.
+Note that the datatype of `alpha` must be the real projection of the datatype
+of `a`.
+
+Observed object properties: `diagoff(A)`.
+
+---
+
+#### shiftd
+```c
+void bli_shiftd
+     (
+       obj_t*  alpha,
+       obj_t*  a
+     );
+```
+Add a constant value `alpha` to every element along the diagonal of `a`.
+
+Observed object properties: `diagoff(A)`.
 
 ---
 
@@ -997,6 +1040,8 @@ void bli_subd
        obj_t*  b
      );
 ```
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `trans?(A)`.
 
 ---
 

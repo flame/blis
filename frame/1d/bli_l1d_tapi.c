@@ -387,5 +387,63 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
 
 
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, kername, kerid ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       doff_t  diagoffx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_TAPI_EX_DECLS \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	ctype*      x1; \
+	dim_t       n_elem; \
+	dim_t       offx; \
+	inc_t       incx; \
+\
+	if ( bli_zero_dim2( m, n ) ) return; \
+\
+	if ( bli_is_outside_diag( diagoffx, BLIS_NO_TRANSPOSE, m, n ) ) return; \
+\
+	/* Determine the distance to the diagonals, the number of diagonal
+	   elements, and the diagonal increments. */ \
+	bli_set_dims_incs_1d \
+	( \
+	  diagoffx, \
+	  m, n, rs_x, cs_x, \
+	  &offx, &n_elem, &incx \
+	); \
+\
+    x1 = x + offx; \
+\
+	/* Obtain a valid context from the gks if necessary. */ \
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
+	/* Query the context for the operation's kernel address. */ \
+	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_l1v_ker_dt( dt, kerid, cntx ); \
+\
+	/* Invoke the kernel with the appropriate parameters. */ \
+	f( \
+	   BLIS_NO_CONJUGATE, \
+	   n_elem, \
+	   alpha, 0, \
+	   x1, incx, \
+	   cntx  \
+	 ); \
+}
+
+INSERT_GENTFUNC_BASIC2( shiftd, addv, BLIS_ADDV_KER )
+
+
 #endif
 
