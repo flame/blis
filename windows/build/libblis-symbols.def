@@ -917,7 +917,6 @@ bli_gemm_front
 bli_gemmind
 bli_gemmind_get_avail
 bli_gemm_int
-bli_gemm_ker_var1
 bli_gemm_ker_var2
 bli_gemmnat
 bli_gemm_packa
