@@ -429,6 +429,8 @@ bli_csetm_unb_var1
 bli_csetsc
 bli_csetv
 bli_csetv_ex
+bli_cshiftd
+bli_cshiftd_ex
 bli_csqrtsc
 bli_csubd
 bli_csubd_ex
@@ -775,6 +777,8 @@ bli_dsetm_unb_var1
 bli_dsetsc
 bli_dsetv
 bli_dsetv_ex
+bli_dshiftd
+bli_dshiftd_ex
 bli_dsqrtsc
 bli_dsubd
 bli_dsubd_ex
@@ -1554,6 +1558,10 @@ bli_sherk4mh
 bli_sherk_ex
 bli_sherk_l_ker_var2
 bli_sherk_u_ker_var2
+bli_shiftd
+bli_shiftd_check
+bli_shiftd_ex
+bli_shiftd_ex_qfp
 bli_sinvertd
 bli_sinvertd_ex
 bli_sinvertsc
@@ -1651,6 +1659,8 @@ bli_ssetm_unb_var1
 bli_ssetsc
 bli_ssetv
 bli_ssetv_ex
+bli_sshiftd
+bli_sshiftd_ex
 bli_ssqrtsc
 bli_ssubd
 bli_ssubd_ex
@@ -2197,6 +2207,8 @@ bli_zsetm_unb_var1
 bli_zsetsc
 bli_zsetv
 bli_zsetv_ex
+bli_zshiftd
+bli_zshiftd_ex
 bli_zsqrtsc
 bli_zsubd
 bli_zsubd_ex
