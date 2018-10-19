@@ -34,6 +34,20 @@
 
 #include "blis.h"
 
+/*
+   This wrapper API to pthreads is provided so that BLIS applications (such
+   as the BLIS testsuite) can call pthreads functions without worrying about
+   whether the implementation is external, provided via system library, or
+   provided by BLIS. In theory, it shouldn't matter, right? pthreads is
+   pthreads as long as the correct API is provided. However, in the
+   situations where BLIS *does* decide that it needs to provide a pthreads
+   implementation, such as on Windows, providing and exporting the API below
+   means that BLIS does not need to export pthreads symbols. (To be clear:
+   exporting pthreads symbols would work, but it seems ill-advised for BLIS
+   to ever export functionality beyond that of which it advertises itself as
+   providing: namely, BLAS-like and BLAS APIs.)
+*/
+
 // -- pthread_create(), pthread_join() -----------------------------------------
 
 int bli_pthread_create
