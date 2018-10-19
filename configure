@@ -248,6 +248,7 @@ print_usage()
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
+	echo "   PYTHON        Specifies the python interpreter to use."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
@@ -883,32 +884,32 @@ get_cxx_search_list()
 	echo "${list}"
 }
 
-select_cc()
+select_tool()
 {
 	local search_list CC_env the_cc cc
 
-	# This is the list of compilers to search for, and the order in which
-	# to search for them.
+	# This is the list of compilers/tools to search for, and the order in
+	# which to search for them.
 	search_list=$1
 
-	# The environment variable associated with the compiler type we
-	# are searching (e.g. CC, CXX).
+	# The environment variable associated with the compiler/tool type we
+	# are searching (e.g. CC, CXX, PYTHON).
 	CC_env=$2
 
-	# If CC contains something, add it to the beginning of our default
+	# If CC_env contains something, add it to the beginning of our default
 	# search list.
 	if [ -n "${CC_env}" ]; then
 		search_list="${CC_env} ${search_list}"
 	fi
 
-	# Initialize our selected compiler to empty.
+	# Initialize our selected compiler/tool to empty.
 	the_cc=""
 
-	# Try each compiler in the list and select the first one we find that
+	# Try each compiler/tool in the list and select the first one we find that
 	# works.
 	for cc in ${search_list}; do
 
-		# See if the current compiler works and/or is present.
+		# See if the current compiler/tool works and/or is present.
 		${cc} --version > /dev/null 2>&1
 
 		if [ "$?" == 0 ]; then
@@ -917,7 +918,7 @@ select_cc()
 		fi
 	done
 
-	# Return the selected compiler.
+	# Return the selected compiler/tool.
 	echo "${the_cc}"
 }
 
@@ -1087,6 +1088,12 @@ echoerr_unsupportedcc()
 	exit 1
 }
 
+echoerr_unsupportedpython()
+{
+	echoerr "${script_name}: *** Unsupported python version: ${python_version}."
+	exit 1
+}
+
 get_binutils_version()
 {
 	binutil=${AS:-as}
@@ -1117,6 +1124,76 @@ get_binutils_version()
 	bu_revision=$(echo "${bu_version}" | cut -d. -f3)
 
 	echo "${script_name}: found assembler ('as') version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
+}
+
+get_python_search_list()
+{
+	local list
+
+	# For Linux, Darwin (OS X), and generic OSes, prioritize 'python'.
+	list="python python3 python2"
+
+	echo "${list}"
+}
+
+get_python_version()
+{
+	local python vendor_string
+
+	python="${found_python}"
+
+	# Query the python version. This includes the version number along
+	# with other text, such as "Python ".
+	# NOTE: Python seems to echo its version info to stderr, not
+	# stdout, and thus we redirect stderr to stdout and capture that.
+	vendor_string="$(${python} --version 2>&1)"
+
+	# Drop any preceding text and save only the first numbers and what
+	# comes after.
+	python_version=$(echo "${vendor_string}" | sed -e "s/[a-zA-Z_ ]* \([0-9]*\..*\)/\1/g")
+	# Parse the version number into its major, minor, and revision
+	# components.
+	python_major=$(echo "${python_version}" | cut -d. -f1)
+	python_minor=$(echo "${python_version}" | cut -d. -f2)
+	python_revision=$(echo "${python_version}" | cut -d. -f3)
+
+	echo "${script_name}: found python version ${python_version} (maj: ${python_major}, min: ${python_minor}, rev: ${python_revision})."
+}
+
+check_python()
+{
+	local python
+
+	python="${found_python}"
+
+	#
+	# Python requirements
+	#
+	# python1: no versions supported
+	# python2: 2.7+
+	# python3: 3.5+
+	#
+
+	# Python 1.x is unsupported.
+	if [ ${python_major} -eq 1 ]; then
+		echoerr_unsupportedpython
+	fi
+
+	# Python 2.6.x or older is unsupported.
+	if [ ${python_major} -eq 2 ]; then
+		if [ ${python_minor} -lt 7 ]; then
+			echoerr_unsupportedpython
+		fi
+	fi
+
+	# Python 3.4.x or older is unsupported.
+	if [ ${python_major} -eq 3 ]; then
+		if [ ${python_minor} -lt 5 ]; then
+			echoerr_unsupportedpython
+		fi
+	fi
+
+	echo "${script_name}: python ${python_version} appears to be supported."
 }
 
 get_compiler_version()
@@ -1852,16 +1929,45 @@ main()
         is_win=yes
     fi
 
+
+	# -- Find a python interpreter ---------------------------------------------
+
+	# Acquire the python search order. This may vary based on the os found
+	# above.
+	python_search_list=$(get_python_search_list)
+
+	echo "${script_name}: python interpeter search list is: ${python_search_list}."
+
+	# Find a working python interpreter.
+	found_python=$(select_tool "${python_search_list}" "${PYTHON}")
+
+	# If we didn't find any working python interpreters, we print an error
+	# message.
+	if [ -z "${found_python}" ]; then
+		echo "${script_name}: *** Could not find working python interperter! Cannot continue."
+		exit 1
+	fi
+
+	echo "${script_name}: using '${found_python}' python interpreter."
+
+
+	# -- Check the python version ----------------------------------------------
+
+	# Check the python interpreter's version.
+	get_python_version
+	check_python
+
+
 	# -- Find a C compiler -----------------------------------------------------
 
-	# Acquire the compiler search order. This will vary based on the os
-	# found above.
+	# Acquire the compiler search order. This will vary based on the os found
+	# above.
 	cc_search_list=$(get_cc_search_list)
 
 	echo "${script_name}: C compiler search list is: ${cc_search_list}."
 
 	# Find a working C compiler.
-	found_cc=$(select_cc "${cc_search_list}" "${CC}")
+	found_cc=$(select_tool "${cc_search_list}" "${CC}")
 
 	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
@@ -1880,9 +1986,9 @@ main()
 
 	echo "${script_name}: C++ compiler search list is: ${cxx_search_list}."
 
-	# Find a working C++ compiler. NOTE: We can reuse the select_cc()
+	# Find a working C++ compiler. NOTE: We can reuse the select_tool()
 	# function since it is written in a way that is general-purpose.
-	found_cxx=$(select_cc "${cxx_search_list}" "${CXX}")
+	found_cxx=$(select_tool "${cxx_search_list}" "${CXX}")
 
 	# If we didn't find any working C++ compilers, we print an error message.
 	if [ -z "${found_cxx}" ]; then
