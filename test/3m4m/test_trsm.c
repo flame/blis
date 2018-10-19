@@ -41,7 +41,7 @@
 
 int main( int argc, char** argv )
 {
-	obj_t    a, c, d;
+	obj_t    a, c;
 	obj_t    c_save;
 	obj_t    alpha;
 	dim_t    m, n;
@@ -163,11 +163,6 @@ int main( int argc, char** argv )
 		//bli_obj_create( dt, m, n, n, 1, &c );
 		bli_obj_create( dt, m, n, 0, 0, &c_save );
 
-		if ( bli_does_trans( side ) )
-			bli_obj_create( dt, m, m, 0, 0, &d );
-        else
-			bli_obj_create( dt, n, n, 0, 0, &d );
-
 		bli_randm( &a );
 		bli_randm( &c );
 
@@ -179,8 +174,8 @@ int main( int argc, char** argv )
 		bli_randm( &a );
 		bli_mktrim( &a );
 
-		bli_setd( &BLIS_TWO, &d );
-		bli_addd( &d, &a );
+		// Load the diagonal of A to make it more likely to be invertible.
+		bli_shiftd( &BLIS_TWO, &a );
 
 		bli_setsc(  (2.0/1.0), 0.0, &alpha );
 
@@ -328,7 +323,6 @@ int main( int argc, char** argv )
 		bli_obj_free( &a );
 		bli_obj_free( &c );
 		bli_obj_free( &c_save );
-		bli_obj_free( &d );
 	}
 
 	//bli_finalize();

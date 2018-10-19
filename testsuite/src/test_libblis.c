@@ -2291,21 +2291,10 @@ void libblis_test_ceil_pow2( obj_t* alpha )
 
 void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a )
 {
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length( a );
-	dim_t n  = bli_obj_width( a );
-
-	obj_t d;
-
 	// We assume that all elements of a were intialized on interval [-1,1].
 
-	bli_obj_create( dt, m, n, 0, 0, &d );
-
-	// Initialize the diagonal of d to 2.0 and then add the diagonal of a.
-	bli_setd( &BLIS_TWO, &d );
-	bli_addd( &d, a );
-
-	bli_obj_free( &d );
+	// Load the diagonal by 2.0.
+	bli_shiftd( &BLIS_TWO, a );
 }
 
 

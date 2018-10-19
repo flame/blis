@@ -125,3 +125,19 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 
 INSERT_GENTPROTR_BASIC0( setid )
 
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC2(ch,opname,EX_SUF) \
+     ( \
+       doff_t  diagoffx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTPROT_BASIC0( shiftd )
+

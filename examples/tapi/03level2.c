@@ -41,7 +41,6 @@ int main( int argc, char** argv )
 	double* x;
 	double* y;
 	double* b;
-	double* d;
 	double  alpha, beta;
 	dim_t   m, n;
 	inc_t   rs, cs;
@@ -286,10 +285,7 @@ int main( int argc, char** argv )
 	// Load the diagonal. By setting the diagonal to something of greater
 	// absolute value than the off-diagonal elements, we increase the odds
 	// that the matrix is not singular (singular matrices have no inverse).
-	d = malloc( m * m * sizeof( double ) );
-	bli_dsetd( BLIS_NO_CONJUGATE, 0, m, m, &two, d, 1, m );
-	bli_daddd( 0, BLIS_NONUNIT_DIAG, BLIS_NO_TRANSPOSE,
-	           m, m, d, 1, m, a, rs, cs );
+	bli_dshiftd( 0, m, m, &two, a, rs, cs );
 
 	bli_dprintm( "a: randomized (zeros in upper triangle)", m, m, a, rs, cs, "%4.1f", "" );
 	bli_dprintm( "b: intial value", 1, m, b, m, 1, "%4.1f", "" );
