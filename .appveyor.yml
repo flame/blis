@@ -10,7 +10,7 @@ install:
 - call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
 - conda update --yes --quiet conda
 - conda config --add channels conda-forge
-- conda install --yes clangdev posix m2-make pthreads-win32
+- conda install --yes clangdev posix m2-make
 - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
@@ -22,10 +22,10 @@ build_script:
 - set RANLIB=echo
 - set AR=llvm-ar
 - set AS=llvm-as
-- set LIBPTHREAD=-lpthreads
+- set LIBPTHREAD=
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
-- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --enable-threading=pthreads --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --disable-threading --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "source activate && cd /c/projects/blis && make -j4 V=1"
 - bash -lc "source activate && cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip

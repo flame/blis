@@ -126,20 +126,20 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
-	pthread_t*         pthread = bli_malloc_intl( sizeof( pthread_t       ) * nt );
-	thread_data_t*     tdata   = bli_malloc_intl( sizeof( thread_data_t   ) * nt );
+	bli_pthread_t* pthread = bli_malloc_intl( sizeof( bli_pthread_t ) * nt );
+	thread_data_t* tdata   = bli_malloc_intl( sizeof( thread_data_t ) * nt );
 
 	// Allocate a mutex for the threads to share.
-	//pthread_mutex_t*   mutex   = bli_malloc_intl( sizeof( pthread_mutex_t ) );
+	//bli_pthread_mutex_t* mutex   = bli_malloc_intl( sizeof( bli_pthread_mutex_t ) );
 
 	// Allocate a barrier for the threads to share.
-	pthread_barrier_t* barrier = bli_malloc_intl( sizeof( pthread_barrier_t ) );
+	bli_pthread_barrier_t* barrier = bli_malloc_intl( sizeof( bli_pthread_barrier_t ) );
 
 	// Initialize the mutex.
-	//pthread_mutex_init( mutex, NULL );
+	//bli_pthread_mutex_init( mutex, NULL );
 
 	// Initialize the barrier for nt threads.
-	pthread_barrier_init( barrier, NULL, nt );
+	bli_pthread_barrier_init( barrier, NULL, nt );
 
 	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
 	// can spawn all other threads before proceeding with its own computation.
@@ -157,7 +157,7 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 
 		// Spawn additional threads for ids greater than 1.
 		if ( id != 0 )
-			pthread_create( &pthread[id], NULL, libblis_test_thread_entry, &tdata[id] );
+			bli_pthread_create( &pthread[id], NULL, libblis_test_thread_entry, &tdata[id] );
 		else
 			libblis_test_thread_entry( ( void* )(&tdata[0]) );
 	}
@@ -165,14 +165,14 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	// Thread 0 waits for additional threads to finish.
 	for ( unsigned int id = 1; id < nt; id++ )
 	{
-		pthread_join( pthread[id], NULL );
+		bli_pthread_join( pthread[id], NULL );
 	}
 
 	// Destroy the mutex.
-	//pthread_mutex_destroy( mutex );
+	//bli_pthread_mutex_destroy( mutex );
 
 	// Destroy the barrier.
-	pthread_barrier_destroy( barrier );
+	bli_pthread_barrier_destroy( barrier );
 
 	// Free the pthread-related memory.
 	bli_free_intl( pthread );
@@ -2267,9 +2267,9 @@ void libblis_test_op_driver
 					}
 				}
 			}
-	
+
 			// Wait for all other threads so that the output stays organized.
-			pthread_barrier_wait( tdata->barrier );
+			bli_pthread_barrier_wait( tdata->barrier );
 
 			// These statements should only be executed by one thread.
 			if ( tdata->id == 0 )
@@ -2694,21 +2694,10 @@ void libblis_test_ceil_pow2( obj_t* alpha )
 
 void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a )
 {
-	num_t dt = bli_obj_dt( a );
-	dim_t m  = bli_obj_length( a );
-	dim_t n  = bli_obj_width( a );
-
-	obj_t d;
-
 	// We assume that all elements of a were intialized on interval [-1,1].
 
-	bli_obj_create( dt, m, n, 0, 0, &d );
-
-	// Initialize the diagonal of d to 2.0 and then add the diagonal of a.
-	bli_setd( &BLIS_TWO, &d );
-	bli_addd( &d, a );
-
-	bli_obj_free( &d );
+	// Load the diagonal by 2.0.
+	bli_shiftd( &BLIS_TWO, a );
 }
 
 

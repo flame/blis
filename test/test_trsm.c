@@ -144,12 +144,13 @@ int main( int argc, char** argv )
 		bli_obj_set_conjtrans( transa, &a );
 		bli_obj_set_diag( diaga, &a );
 
-		// Randomize A, make it densely Hermitian, and zero the unstored
-		// triangle to ensure the implementation reads only from the stored
-		// region.
+		// Randomize A and zero the unstored triangle to ensure the
+		// implementation reads only from the stored region.
 		bli_randm( &a );
-		bli_mkherm( &a );
 		bli_mktrim( &a );
+
+		// Load the diagonal of A to make it more likely to be invertible.
+		bli_shiftd( &BLIS_TWO, &a );
 
 		bli_setsc(  (2.0/1.0), 1.0, &alpha );
 

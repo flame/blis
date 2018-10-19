@@ -51,5 +51,6 @@ GENPROT( invertd )
 GENPROT( scald )
 GENPROT( setd )
 GENPROT( setid )
+GENPROT( shiftd )
 GENPROT( xpbyd )
 

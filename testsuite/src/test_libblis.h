@@ -52,14 +52,6 @@
 #include <unistd.h>
 #endif
 
-// For pthreads API.
-#include <pthread.h>
-//#ifdef __APPLE__
-//#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
-#if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
-#include "pthread_barrier.h"
-#endif
-
 //
 // --- Constants and types -----------------------------------------------------
 //
@@ -303,13 +295,13 @@ typedef struct
 
 typedef struct thread_data
 {
-	test_params_t*     params;
-	test_ops_t*        ops;
-	unsigned int       nt;
-	unsigned int       id;
-	unsigned int       xc;
-	//pthread_mutex_t*   mutex;
-	pthread_barrier_t* barrier;
+	test_params_t*         params;
+	test_ops_t*            ops;
+	unsigned int           nt;
+	unsigned int           id;
+	unsigned int           xc;
+	//bli_pthread_mutex_t*   mutex;
+	bli_pthread_barrier_t* barrier;
 } thread_data_t;
 
 

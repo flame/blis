@@ -195,7 +195,7 @@ Notes for interpreting function descriptions:
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
     * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [subd](BLISTypedAPI.md#subd)
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISTypedAPI.md#subd), [xpbyd](BLISTypedAPI.md#xpbyd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
     * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
@@ -476,7 +476,7 @@ where `x` and `y` are vectors of length _n_, and `beta` is a scalar.
 
 Level-1d operations perform various level-1 BLAS-like operations on matrix diagonals (hence the _d_).
 
-These operations are similar to their level-1m counterparts, except they only read and update matrix diagonals and therefore do not take any `uplo` arguments. Please see the descriptions for the corresponding level-1m operation for a description of the arguments.
+Most of these operations are similar to level-1m counterparts, except they only read and update matrix diagonals and therefore do not take any `uplo` arguments. Please see the descriptions for the corresponding level-1m operation for a description of the arguments.
 
 ---
 
@@ -593,6 +593,24 @@ void bli_?setd
 ```c
 void bli_?setid
      (
+       doff_t   diagoffa,
+       dim_t    m,
+       dim_t    n,
+       ctype_r* alpha,
+       ctype*   a, inc_t rsa, inc_t csa
+     );
+```
+Set the imaginary components of every element along the diagonal of `a`, as
+specified by `diagoffa`, to a scalar `alpha`.
+Note that the datatype of `alpha` must be the real projection of the datatype
+of `a`.
+
+---
+
+#### shiftd
+```c
+void bli_?shiftd
+     (
        doff_t  diagoffa,
        dim_t   m,
        dim_t   n,
@@ -600,7 +618,8 @@ void bli_?setid
        ctype*  a, inc_t rsa, inc_t csa
      );
 ```
-Set the imaginary components of a matrix diagonal to a scalar `alpha`.
+Add a constant value `alpha` to every element along the diagonal of `a`, as
+specified by `diagoffa`.
 
 ---
 
@@ -614,6 +633,23 @@ void bli_?subd
        dim_t   m,
        dim_t   n,
        ctype*  a, inc_t rsa, inc_t csa,
+       ctype*  b, inc_t rsb, inc_t csb
+     );
+```
+
+---
+
+#### xpbyd
+```c
+void bli_?xpbyd
+     (
+       doff_t  diagoffa,
+       diag_t  diaga,
+       trans_t transa,
+       dim_t   m,
+       dim_t   n,
+       ctype*  a, inc_t rsa, inc_t csa,
+       ctype*  beta,
        ctype*  b, inc_t rsb, inc_t csb
      );
 ```

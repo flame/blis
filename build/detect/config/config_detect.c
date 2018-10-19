@@ -33,11 +33,7 @@
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <pthread.h>
-
+#include "bli_system.h"
 #include "bli_type_defs.h"
 #include "bli_arch.h"
 #include "bli_cpuid.h"

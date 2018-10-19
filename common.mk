@@ -497,9 +497,9 @@ SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
-SOFLAGS    += -Wl,-def:windows/build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += windows/build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
+SOFLAGS    += build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.

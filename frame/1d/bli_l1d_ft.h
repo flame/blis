@@ -131,6 +131,23 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEFR( setid )
 
+// shiftd
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
+     ( \
+       doff_t  diagoffx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  alpha, \
+       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       BLIS_TAPI_EX_PARAMS  \
+     );
+
+INSERT_GENTDEF( shiftd )
+
 // xpbyd
 
 #undef  GENTDEF

@@ -114,6 +114,14 @@ int main( int argc, char** argv )
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a );
 		bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 
+		// Randomize A and zero the unstored triangle to ensure the
+		// implementation reads only from the stored region.
+		bli_randm( &a );
+		bli_mktrim( &a );
+
+		// Load the diagonal of A to make it more likely to be invertible.
+		bli_shiftd( &BLIS_TWO, &a );
+
 		bli_setsc(  (1.0/1.0), 0.0, &alpha );
 
 

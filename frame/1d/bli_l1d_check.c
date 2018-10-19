@@ -101,6 +101,7 @@ void PASTEMAC(opname,_check) \
 GENFRONT( scald )
 GENFRONT( setd )
 GENFRONT( setid )
+GENFRONT( shiftd )
 
 
 #undef  GENFRONT

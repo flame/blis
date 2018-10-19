@@ -266,6 +266,8 @@ print_usage()
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
+	echo "   LIBPTHREAD    Pthreads library to use."
+	echo "   PYTHON        Specifies the python interpreter to use."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
 	echo "   options, e.g.:"
@@ -901,32 +903,32 @@ get_cxx_search_list()
 	echo "${list}"
 }
 
-select_cc()
+select_tool()
 {
 	local search_list CC_env the_cc cc
 
-	# This is the list of compilers to search for, and the order in which
-	# to search for them.
+	# This is the list of compilers/tools to search for, and the order in
+	# which to search for them.
 	search_list=$1
 
-	# The environment variable associated with the compiler type we
-	# are searching (e.g. CC, CXX).
+	# The environment variable associated with the compiler/tool type we
+	# are searching (e.g. CC, CXX, PYTHON).
 	CC_env=$2
 
-	# If CC contains something, add it to the beginning of our default
+	# If CC_env contains something, add it to the beginning of our default
 	# search list.
 	if [ -n "${CC_env}" ]; then
 		search_list="${CC_env} ${search_list}"
 	fi
 
-	# Initialize our selected compiler to empty.
+	# Initialize our selected compiler/tool to empty.
 	the_cc=""
 
-	# Try each compiler in the list and select the first one we find that
+	# Try each compiler/tool in the list and select the first one we find that
 	# works.
 	for cc in ${search_list}; do
 
-		# See if the current compiler works and/or is present.
+		# See if the current compiler/tool works and/or is present.
 		${cc} --version > /dev/null 2>&1
 
 		if [ "$?" == 0 ]; then
@@ -935,7 +937,7 @@ select_cc()
 		fi
 	done
 
-	# Return the selected compiler.
+	# Return the selected compiler/tool.
 	echo "${the_cc}"
 }
 
@@ -995,7 +997,9 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	ldflags="${LIBPTHREAD:--lpthread}"
+	if [ $is_win = no ]; then
+		ldflags="${LIBPTHREAD--lpthread}"
+	fi
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
@@ -1105,6 +1109,12 @@ echoerr_unsupportedcc()
 	exit 1
 }
 
+echoerr_unsupportedpython()
+{
+	echoerr "${script_name}: *** Unsupported python version: ${python_version}."
+	exit 1
+}
+
 get_binutils_version()
 {
 	binutil=${AS:-as}
@@ -1135,6 +1145,76 @@ get_binutils_version()
 	bu_revision=$(echo "${bu_version}" | cut -d. -f3)
 
 	echo "${script_name}: found assembler ('as') version ${bu_version} (maj: ${bu_major}, min: ${bu_minor}, rev: ${bu_revision})."
+}
+
+get_python_search_list()
+{
+	local list
+
+	# For Linux, Darwin (OS X), and generic OSes, prioritize 'python'.
+	list="python python3 python2"
+
+	echo "${list}"
+}
+
+get_python_version()
+{
+	local python vendor_string
+
+	python="${found_python}"
+
+	# Query the python version. This includes the version number along
+	# with other text, such as "Python ".
+	# NOTE: Python seems to echo its version info to stderr, not
+	# stdout, and thus we redirect stderr to stdout and capture that.
+	vendor_string="$(${python} --version 2>&1)"
+
+	# Drop any preceding text and save only the first numbers and what
+	# comes after.
+	python_version=$(echo "${vendor_string}" | sed -e "s/[a-zA-Z_ ]* \([0-9]*\..*\)/\1/g")
+	# Parse the version number into its major, minor, and revision
+	# components.
+	python_major=$(echo "${python_version}" | cut -d. -f1)
+	python_minor=$(echo "${python_version}" | cut -d. -f2)
+	python_revision=$(echo "${python_version}" | cut -d. -f3)
+
+	echo "${script_name}: found python version ${python_version} (maj: ${python_major}, min: ${python_minor}, rev: ${python_revision})."
+}
+
+check_python()
+{
+	local python
+
+	python="${found_python}"
+
+	#
+	# Python requirements
+	#
+	# python1: no versions supported
+	# python2: 2.7+
+	# python3: 3.5+
+	#
+
+	# Python 1.x is unsupported.
+	if [ ${python_major} -eq 1 ]; then
+		echoerr_unsupportedpython
+	fi
+
+	# Python 2.6.x or older is unsupported.
+	if [ ${python_major} -eq 2 ]; then
+		if [ ${python_minor} -lt 7 ]; then
+			echoerr_unsupportedpython
+		fi
+	fi
+
+	# Python 3.4.x or older is unsupported.
+	if [ ${python_major} -eq 3 ]; then
+		if [ ${python_minor} -lt 5 ]; then
+			echoerr_unsupportedpython
+		fi
+	fi
+
+	echo "${script_name}: python ${python_version} appears to be supported."
 }
 
 get_compiler_version()
@@ -1676,199 +1756,199 @@ main()
 
 	# -- Command line option/argument parsing ----------------------------------
 
-	# Process our command line options.
-	while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
-		case $opt in
-			-)
-				case "$OPTARG" in
-					help)
-						print_usage
-						;;
-					quiet)
-						quiet_flag=1
-						;;
-					prefix=*)
-						prefix_flag=1
-						install_prefix_user=${OPTARG#*=}
-						;;
-					libdir=*)
-						libdir_flag=1
-						install_libdir_user=${OPTARG#*=}
-						;;
-					includedir=*)
-						incdir_flag=1
-						install_incdir_user=${OPTARG#*=}
-						;;
-					sharedir=*)
-						sharedir_flag=1
-						install_sharedir_user=${OPTARG#*=}
-						;;
-					enable-debug)
-						debug_flag=1
-						debug_type=noopt
-						;;
-					enable-debug=*)
-						debug_flag=1
-						debug_type=${OPTARG#*=}
-						;;
-					disable-debug)
-						debug_flag=0
-						;;
-					enable-verbose-make)
-						enable_verbose='yes'
-						;;
-					disable-verbose-make)
-						enable_verbose='no'
-						;;
-					enable-arg-max-hack)
-						enable_arg_max_hack='yes'
-						;;
-					disable-arg-max-hack)
-						enable_arg_max_hack='no'
-						;;
-					enable-static)
-						enable_static='yes'
-						;;
-					disable-static)
-						enable_static='no'
-						;;
-					enable-shared)
-						enable_shared='yes'
-						;;
-					disable-shared)
-						enable_shared='no'
-						;;
-					enable-threading=*)
-						threading_model=${OPTARG#*=}
-						;;
-					thread-part-jrir=*)
-						thread_part_jrir=${OPTARG#*=}
-						;;
-					disable-threading)
-						threading_model='no'
-						;;
-					enable-packbuf-pools)
-						enable_packbuf_pools='yes'
-						;;
-					disable-packbuf-pools)
-						enable_packbuf_pools='no'
-						;;
-					enable-sandbox=*)
-						sandbox_flag=1
-						sandbox=${OPTARG#*=}
-						;;
-					disable-sandbox)
-						sandbox_flag=0
-						;;
-					int-size=*)
-						int_type_size=${OPTARG#*=}
-						;;
-					blas-int-size=*)
-						blas_int_type_size=${OPTARG#*=}
-						;;
-					enable-blas)
-						enable_blas='yes'
-						;;
-					disable-blas)
-						enable_blas='no'
-						;;
-					enable-cblas)
-						enable_cblas='yes'
-						;;
-					disable-cblas)
-						enable_cblas='no'
-						;;
-					enable-mixed-dt)
-						enable_mixed_dt='yes'
-						;;
-					disable-mixed-dt)
-						enable_mixed_dt='no'
-						;;
-					enable-mixed-dt-extra-mem)
-						enable_mixed_dt_extra_mem='yes'
-						;;
-					disable-mixed-dt-extra-mem)
-						enable_mixed_dt_extra_mem='no'
-						;;
-					with-memkind)
-						enable_memkind='yes'
-						;;
-					without-memkind)
-						enable_memkind='no'
-						;;
-					force-version=*)
-						force_version=${OPTARG#*=}
-						;;
-					show-config-list)
-						show_config_list=1
-						;;
-					*)
-						print_usage
-						;;
-				esac;;
-			h)
-				print_usage
-				;;
-			p)
-				prefix_flag=1
-				install_prefix_user=$OPTARG
-				;;
-			d)
-				debug_flag=1
-				debug_type=$OPTARG
-				;;
-			s)
-				sandbox_flag=1
-				sandbox=$OPTARG
-				;;
-			q)
-				quiet_flag=1
-				;;
-			t)
-				threading_model=$OPTARG
-				;;
-			r)
-				thread_part_jrir=$OPTARG
-				;;
-			i)
-				int_type_size=$OPTARG
-				;;
-			b)
-				blas_int_type_size=$OPTARG
-				;;
-			c)
-				show_config_list=1
-				;;
-			\?)
-				print_usage
-				;;
-		esac
-	done
-	shift $(($OPTIND - 1))
+	found=true
+	while $found = true; do
 
-	# Parse environment variables
-	while [ $# -gt 0 ]; do
-		case $1 in
-			CC=*)
-				CC=${1#*=}
-				shift
-				;;
-			RANLIB=*)
-				RANLIB=${1#*=}
-				shift
-				;;
-			AR=*)
-				AR=${1#*=}
-				shift
-				;;
-			*=*)
-				print_usage
-				;;
-			*)
-				break
-				;;
-		esac
+		# Process our command line options.
+		unset OPTIND
+		while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
+			case $opt in
+				-)
+					case "$OPTARG" in
+						help)
+							print_usage
+							;;
+						quiet)
+							quiet_flag=1
+							;;
+						prefix=*)
+							prefix_flag=1
+							install_prefix_user=${OPTARG#*=}
+							;;
+						libdir=*)
+							libdir_flag=1
+							install_libdir_user=${OPTARG#*=}
+							;;
+						includedir=*)
+							incdir_flag=1
+							install_incdir_user=${OPTARG#*=}
+							;;
+						sharedir=*)
+							sharedir_flag=1
+							install_sharedir_user=${OPTARG#*=}
+							;;
+						enable-debug)
+							debug_flag=1
+							debug_type=noopt
+							;;
+						enable-debug=*)
+							debug_flag=1
+							debug_type=${OPTARG#*=}
+							;;
+						disable-debug)
+							debug_flag=0
+							;;
+						enable-verbose-make)
+							enable_verbose='yes'
+							;;
+						disable-verbose-make)
+							enable_verbose='no'
+							;;
+						enable-arg-max-hack)
+							enable_arg_max_hack='yes'
+							;;
+						disable-arg-max-hack)
+							enable_arg_max_hack='no'
+							;;
+						enable-static)
+							enable_static='yes'
+							;;
+						disable-static)
+							enable_static='no'
+							;;
+						enable-shared)
+							enable_shared='yes'
+							;;
+						disable-shared)
+							enable_shared='no'
+							;;
+						enable-threading=*)
+							threading_model=${OPTARG#*=}
+							;;
+						thread-part-jrir=*)
+							thread_part_jrir=${OPTARG#*=}
+							;;
+						disable-threading)
+							threading_model='no'
+							;;
+						enable-packbuf-pools)
+							enable_packbuf_pools='yes'
+							;;
+						disable-packbuf-pools)
+							enable_packbuf_pools='no'
+							;;
+						enable-sandbox=*)
+							sandbox_flag=1
+							sandbox=${OPTARG#*=}
+							;;
+						disable-sandbox)
+							sandbox_flag=0
+							;;
+						int-size=*)
+							int_type_size=${OPTARG#*=}
+							;;
+						blas-int-size=*)
+							blas_int_type_size=${OPTARG#*=}
+							;;
+						enable-blas)
+							enable_blas='yes'
+							;;
+						disable-blas)
+							enable_blas='no'
+							;;
+						enable-cblas)
+							enable_cblas='yes'
+							;;
+						disable-cblas)
+							enable_cblas='no'
+							;;
+						enable-mixed-dt)
+							enable_mixed_dt='yes'
+							;;
+						disable-mixed-dt)
+							enable_mixed_dt='no'
+							;;
+						enable-mixed-dt-extra-mem)
+							enable_mixed_dt_extra_mem='yes'
+							;;
+						disable-mixed-dt-extra-mem)
+							enable_mixed_dt_extra_mem='no'
+							;;
+						with-memkind)
+							enable_memkind='yes'
+							;;
+						without-memkind)
+							enable_memkind='no'
+							;;
+						force-version=*)
+							force_version=${OPTARG#*=}
+							;;
+						show-config-list)
+							show_config_list=1
+							;;
+						*)
+							print_usage
+							;;
+					esac;;
+				h)
+					print_usage
+					;;
+				p)
+					prefix_flag=1
+					install_prefix_user=$OPTARG
+					;;
+				d)
+					debug_flag=1
+					debug_type=$OPTARG
+					;;
+				s)
+					sandbox_flag=1
+					sandbox=$OPTARG
+					;;
+				q)
+					quiet_flag=1
+					;;
+				t)
+					threading_model=$OPTARG
+					;;
+				r)
+					thread_part_jrir=$OPTARG
+					;;
+				i)
+					int_type_size=$OPTARG
+					;;
+				b)
+					blas_int_type_size=$OPTARG
+					;;
+				c)
+					show_config_list=1
+					;;
+				\?)
+					print_usage
+					;;
+			esac
+		done
+		shift $(($OPTIND - 1))
+
+		# Parse environment variables
+		found=false
+		while [ $# -gt 0 ]; do
+			case $1 in
+				*=*)
+					var=`expr "$1" : '\([^=]*\)='`
+					value=`expr "$1" : '[^=]*=\(.*\)'`
+					eval $var=\$value
+					export $var
+					shift
+					found=true
+					;;
+				*)
+					break
+					;;
+			esac
+		done
 	done
+
 
 	# -- Check the operating system --------------------------------------------
 
@@ -1876,24 +1956,54 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
-    # Define a single variable off of which we can branch to tell if we are
-    # building for Windows.
-    is_win=no
-    if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
-    then
-        is_win=yes
-    fi
+	# Define a single variable off of which we can branch to tell if we are
+	# building for Windows.
+	is_win=no
+	if [[ $os_name == MSYS* ]] || \
+	   [[ $os_name == MINGW* ]]  || \
+	   [[ $os_name == CYGWIN* ]] ; then
+		is_win=yes
+	fi
+
+
+	# -- Find a python interpreter ---------------------------------------------
+
+	# Acquire the python search order. This may vary based on the os found
+	# above.
+	python_search_list=$(get_python_search_list)
+
+	echo "${script_name}: python interpeter search list is: ${python_search_list}."
+
+	# Find a working python interpreter.
+	found_python=$(select_tool "${python_search_list}" "${PYTHON}")
+
+	# If we didn't find any working python interpreters, we print an error
+	# message.
+	if [ -z "${found_python}" ]; then
+		echo "${script_name}: *** Could not find working python interperter! Cannot continue."
+		exit 1
+	fi
+
+	echo "${script_name}: using '${found_python}' python interpreter."
+
+
+	# -- Check the python version ----------------------------------------------
+
+	# Check the python interpreter's version.
+	get_python_version
+	check_python
+
 
 	# -- Find a C compiler -----------------------------------------------------
 
-	# Acquire the compiler search order. This will vary based on the os
-	# found above.
+	# Acquire the compiler search order. This will vary based on the os found
+	# above.
 	cc_search_list=$(get_cc_search_list)
 
 	echo "${script_name}: C compiler search list is: ${cc_search_list}."
 
 	# Find a working C compiler.
-	found_cc=$(select_cc "${cc_search_list}" "${CC}")
+	found_cc=$(select_tool "${cc_search_list}" "${CC}")
 
 	# If we didn't find any working C compilers, we print an error message.
 	if [ -z "${found_cc}" ]; then
@@ -1912,9 +2022,9 @@ main()
 
 	echo "${script_name}: C++ compiler search list is: ${cxx_search_list}."
 
-	# Find a working C++ compiler. NOTE: We can reuse the select_cc()
+	# Find a working C++ compiler. NOTE: We can reuse the select_tool()
 	# function since it is written in a way that is general-purpose.
-	found_cxx=$(select_cc "${cxx_search_list}" "${CXX}")
+	found_cxx=$(select_tool "${cxx_search_list}" "${CXX}")
 
 	# If we didn't find any working C++ compilers, we print an error message.
 	if [ -z "${found_cxx}" ]; then
@@ -2558,9 +2668,16 @@ main()
 	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
 	# For AR, if the variable is not set, we use a default value of 'ar'.
 	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
-	libpthread_esc=$(echo "${LIBPTHREAD:--lpthread}" | sed 's/\//\\\//g')
+	libpthread_esc=$(echo "${LIBPTHREAD--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
+
+	# For Windows builds, clear the libpthread_esc variable so that
+	# no pthreads library is substituted into config.mk. (Windows builds
+	# employ an implementation of pthreads that is internal to BLIS.)
+	if [ $is_win = yes ]; then
+		libpthread_esc=
+	fi
 
 	# Typically, there are no slashes in the version variable. However,
 	# downstream maintainers (such as those for Debian) may create custom

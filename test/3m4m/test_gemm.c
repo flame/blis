@@ -39,6 +39,27 @@
 
 int main( int argc, char** argv )
 {
+	obj_t    kappa, d;
+	num_t    dtd = BLIS_DCOMPLEX;
+
+	bli_obj_create( dtd, 1, 1, 0, 0, &kappa );
+
+	bli_setsc(  (2.0/1.0), -0.5, &kappa );
+
+	bli_obj_create( dtd, 5, 3, 0, 0, &d );
+	bli_randm( &d );
+
+	bli_printm( "d", &d, "%7.3f", "" );
+
+	bli_shiftd( &kappa, &d );
+
+	bli_printm( "d after", &d, "%7.3f", "" );
+
+	bli_obj_free( &kappa );
+	bli_obj_free( &d );
+
+return 0;
+
 	obj_t    a, b, c;
 	obj_t    c_save;
 	obj_t    alpha, beta;

@@ -88,6 +88,7 @@ void PASTEMAC(opname,_check) \
 GENTPROT( scald )
 GENTPROT( setd )
 GENTPROT( setid )
+GENTPROT( shiftd )
 
 
 #undef  GENTPROT
