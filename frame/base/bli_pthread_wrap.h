@@ -42,47 +42,46 @@ typedef void pthread_mutexattr_t;
 
 #define PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
 
-int pthread_mutex_init(pthread_mutex_t* mutex, const pthread_mutexattr_t *attr);
+int pthread_mutex_init( pthread_mutex_t* mutex, const pthread_mutexattr_t *attr );
 
-int pthread_mutex_destroy(pthread_mutex_t* mutex);
+int pthread_mutex_destroy( pthread_mutex_t* mutex );
 
-int pthread_mutex_lock(pthread_mutex_t* mutex);
+int pthread_mutex_lock( pthread_mutex_t* mutex );
 
-int pthread_mutex_trylock(pthread_mutex_t* mutex);
+int pthread_mutex_trylock( pthread_mutex_t* mutex );
 
-int pthread_mutex_unlock(pthread_mutex_t* mutex);
+int pthread_mutex_unlock( pthread_mutex_t* mutex );
 
 typedef INIT_ONCE pthread_once_t;
 
 #define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
 
-void pthread_once(pthread_once_t* once, void (*init)(void));
+void pthread_once( pthread_once_t* once, void (*init)( void ) );
 
 typedef CONDITION_VARIABLE pthread_cond_t;
 typedef void pthread_condattr_t;
 
 #define PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
 
-int pthread_cond_init(pthread_cond_t* cond, const pthread_condattr_t* attr);
+int pthread_cond_init( pthread_cond_t* cond, const pthread_condattr_t* attr );
 
-int pthread_cond_destroy(pthread_cond_t* cond);
+int pthread_cond_destroy( pthread_cond_t* cond );
 
-int pthread_cond_wait(pthread_cond_t* cond, pthread_mutex_t* mutex);
+int pthread_cond_wait( pthread_cond_t* cond, pthread_mutex_t* mutex );
 
-int pthread_cond_broadcast(pthread_cond_t* cond);
+int pthread_cond_broadcast( pthread_cond_t* cond );
 
 typedef struct
 {
-    HANDLE handle;
-    void* retval;
+	HANDLE handle;
+	void* retval;
 } pthread_t;
 
 typedef void pthread_attr_t;
 
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr,
-                   void* (*start_routine)(void*), void *arg);
+int pthread_create( pthread_t *thread, const pthread_attr_t *attr, void* (*start_routine)( void* ), void *arg );
 
-int pthread_join(pthread_t thread, void **retval);
+int pthread_join( pthread_t thread, void **retval );
 
 #else
 
@@ -96,17 +95,17 @@ typedef void pthread_barrierattr_t;
 
 typedef struct
 {
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    int count;
-    int tripCount;
+	pthread_mutex_t mutex;
+	pthread_cond_t  cond;
+	int             count;
+	int             tripCount;
 } pthread_barrier_t;
 
-int pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count);
+int pthread_barrier_init( pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count );
 
-int pthread_barrier_destroy(pthread_barrier_t *barrier);
+int pthread_barrier_destroy( pthread_barrier_t *barrier );
 
-int pthread_barrier_wait(pthread_barrier_t *barrier);
+int pthread_barrier_wait( pthread_barrier_t *barrier );
 
 #endif // _POSIX_BARRIERS
 

@@ -247,8 +247,8 @@ print_usage()
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
-    echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
-    echo "   LIBPTHREAD    Pthreads library to use."
+	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
+	echo "   LIBPTHREAD    Pthreads library to use."
 	echo "   PYTHON        Specifies the python interpreter to use."
 	echo " "
 	echo "   Environment variables may also be specified as command line"
@@ -979,9 +979,9 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-        if [ $is_win = no ]; then
-	    ldflags="${LIBPTHREAD--lpthread}"
-        fi
+	if [ $is_win = no ]; then
+		ldflags="${LIBPTHREAD--lpthread}"
+	fi
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
@@ -1736,186 +1736,187 @@ main()
 
 	# -- Command line option/argument parsing ----------------------------------
 
-    found=true
-    while $found = true; do
-     
-    	# Process our command line options.
-    	unset OPTIND
+	found=true
+	while $found = true; do
+
+		# Process our command line options.
+		unset OPTIND
 		while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
-    		case $opt in
-    			-)
-    				case "$OPTARG" in
-    					help)
-    						print_usage
-    						;;
-    					quiet)
-    						quiet_flag=1
-    						;;
-    					prefix=*)
-    						prefix_flag=1
-    						install_prefix_user=${OPTARG#*=}
-    						;;
-    					libdir=*)
-    						libdir_flag=1
-    						install_libdir_user=${OPTARG#*=}
-    						;;
-    					includedir=*)
-    						incdir_flag=1
-    						install_incdir_user=${OPTARG#*=}
-    						;;
-    					sharedir=*)
-    						sharedir_flag=1
-    						install_sharedir_user=${OPTARG#*=}
-    						;;
-    					enable-debug)
-    						debug_flag=1
-    						debug_type=noopt
-    						;;
-    					enable-debug=*)
-    						debug_flag=1
-    						debug_type=${OPTARG#*=}
-    						;;
-    					disable-debug)
-    						debug_flag=0
-    						;;
-    					enable-verbose-make)
-    						enable_verbose='yes'
-    						;;
-    					disable-verbose-make)
-    						enable_verbose='no'
-    						;;
-    					enable-arg-max-hack)
-    						enable_arg_max_hack='yes'
-    						;;
-    					disable-arg-max-hack)
-    						enable_arg_max_hack='no'
-    						;;
-    					enable-static)
-    						enable_static='yes'
-    						;;
-    					disable-static)
-    						enable_static='no'
-    						;;
-    					enable-shared)
-    						enable_shared='yes'
-    						;;
-    					disable-shared)
-    						enable_shared='no'
-    						;;
-    					enable-threading=*)
-    						threading_model=${OPTARG#*=}
-    						;;
+			case $opt in
+				-)
+					case "$OPTARG" in
+						help)
+							print_usage
+							;;
+						quiet)
+							quiet_flag=1
+							;;
+						prefix=*)
+							prefix_flag=1
+							install_prefix_user=${OPTARG#*=}
+							;;
+						libdir=*)
+							libdir_flag=1
+							install_libdir_user=${OPTARG#*=}
+							;;
+						includedir=*)
+							incdir_flag=1
+							install_incdir_user=${OPTARG#*=}
+							;;
+						sharedir=*)
+							sharedir_flag=1
+							install_sharedir_user=${OPTARG#*=}
+							;;
+						enable-debug)
+							debug_flag=1
+							debug_type=noopt
+							;;
+						enable-debug=*)
+							debug_flag=1
+							debug_type=${OPTARG#*=}
+							;;
+						disable-debug)
+							debug_flag=0
+							;;
+						enable-verbose-make)
+							enable_verbose='yes'
+							;;
+						disable-verbose-make)
+							enable_verbose='no'
+							;;
+						enable-arg-max-hack)
+							enable_arg_max_hack='yes'
+							;;
+						disable-arg-max-hack)
+							enable_arg_max_hack='no'
+							;;
+						enable-static)
+							enable_static='yes'
+							;;
+						disable-static)
+							enable_static='no'
+							;;
+						enable-shared)
+							enable_shared='yes'
+							;;
+						disable-shared)
+							enable_shared='no'
+							;;
+						enable-threading=*)
+							threading_model=${OPTARG#*=}
+							;;
 						thread-part-jrir=*)
 							thread_part_jrir=${OPTARG#*=}
 							;;
-    					disable-threading)
-    						threading_model='no'
-    						;;
-    					enable-packbuf-pools)
-    						enable_packbuf_pools='yes'
-    						;;
-    					disable-packbuf-pools)
-    						enable_packbuf_pools='no'
-    						;;
-    					enable-sandbox=*)
-    						sandbox_flag=1
-    						sandbox=${OPTARG#*=}
-    						;;
-    					disable-sandbox)
-    						sandbox_flag=0
-    						;;
-    					int-size=*)
-    						int_type_size=${OPTARG#*=}
-    						;;
-    					blas-int-size=*)
-    						blas_int_type_size=${OPTARG#*=}
-    						;;
-    					enable-blas)
-    						enable_blas='yes'
-    						;;
-    					disable-blas)
-    						enable_blas='no'
-    						;;
-    					enable-cblas)
-    						enable_cblas='yes'
-    						;;
-    					disable-cblas)
-    						enable_cblas='no'
-    						;;
-    					with-memkind)
-    						enable_memkind='yes'
-    						;;
-    					without-memkind)
-    						enable_memkind='no'
-    						;;
-    					force-version=*)
-    						force_version=${OPTARG#*=}
-    						;;
-    					show-config-list)
-    						show_config_list=1
-    						;;
-    					*)
-    						print_usage
-    						;;
-    				esac;;
-    			h)
-    				print_usage
-    				;;
-    			p)
-    				prefix_flag=1
-    				install_prefix_user=$OPTARG
-    				;;
-    			d)
-    				debug_flag=1
-    				debug_type=$OPTARG
-    				;;
-    			s)
-    				sandbox_flag=1
-    				sandbox=$OPTARG
-    				;;
-    			q)
-    				quiet_flag=1
-    				;;
-    			t)
-    				threading_model=$OPTARG
-    				;;
+						disable-threading)
+							threading_model='no'
+							;;
+						enable-packbuf-pools)
+							enable_packbuf_pools='yes'
+							;;
+						disable-packbuf-pools)
+							enable_packbuf_pools='no'
+							;;
+						enable-sandbox=*)
+							sandbox_flag=1
+							sandbox=${OPTARG#*=}
+							;;
+						disable-sandbox)
+							sandbox_flag=0
+							;;
+						int-size=*)
+							int_type_size=${OPTARG#*=}
+							;;
+						blas-int-size=*)
+							blas_int_type_size=${OPTARG#*=}
+							;;
+						enable-blas)
+							enable_blas='yes'
+							;;
+						disable-blas)
+							enable_blas='no'
+							;;
+						enable-cblas)
+							enable_cblas='yes'
+							;;
+						disable-cblas)
+							enable_cblas='no'
+							;;
+						with-memkind)
+							enable_memkind='yes'
+							;;
+						without-memkind)
+							enable_memkind='no'
+							;;
+						force-version=*)
+							force_version=${OPTARG#*=}
+							;;
+						show-config-list)
+							show_config_list=1
+							;;
+						*)
+							print_usage
+							;;
+					esac;;
+				h)
+					print_usage
+					;;
+				p)
+					prefix_flag=1
+					install_prefix_user=$OPTARG
+					;;
+				d)
+					debug_flag=1
+					debug_type=$OPTARG
+					;;
+				s)
+					sandbox_flag=1
+					sandbox=$OPTARG
+					;;
+				q)
+					quiet_flag=1
+					;;
+				t)
+					threading_model=$OPTARG
+					;;
 				r)
 					thread_part_jrir=$OPTARG
 					;;
-    			i)
-    				int_type_size=$OPTARG
-    				;;
-    			b)
-    				blas_int_type_size=$OPTARG
-    				;;
-    			c)
-    				show_config_list=1
-    				;;
-    			\?)
-                    print_usage
-                    ;;
-    		esac
-    	done
-    	shift $(($OPTIND - 1))
-    	
-        # Parse environment variables
-        found=false
-        while [ $# -gt 0 ]; do
-            case $1 in
-                *=*)
-                    var=`expr "$1" : '\([^=]*\)='`
-                    value=`expr "$1" : '[^=]*=\(.*\)'`
-                    eval $var=\$value
-                    export $var
-                    shift
-                    found=true
-                    ;;
-                *)
-                    break
-                    ;;
-            esac
-        done
-    done
+				i)
+					int_type_size=$OPTARG
+					;;
+				b)
+					blas_int_type_size=$OPTARG
+					;;
+				c)
+					show_config_list=1
+					;;
+				\?)
+					print_usage
+					;;
+			esac
+		done
+		shift $(($OPTIND - 1))
+
+		# Parse environment variables
+		found=false
+		while [ $# -gt 0 ]; do
+			case $1 in
+				*=*)
+					var=`expr "$1" : '\([^=]*\)='`
+					value=`expr "$1" : '[^=]*=\(.*\)'`
+					eval $var=\$value
+					export $var
+					shift
+					found=true
+					;;
+				*)
+					break
+					;;
+			esac
+		done
+	done
+
 
 	# -- Check the operating system --------------------------------------------
 
@@ -1923,13 +1924,14 @@ main()
 	os_vers=$(uname -r)
 	echo "${script_name}: detected ${os_name} kernel version ${os_vers}."
 
-    # Define a single variable off of which we can branch to tell if we are
-    # building for Windows.
-    is_win=no
-    if  [[ $os_name == MSYS* ]] || [[ $os_name == MINGW* ]]  || [[ $os_name == CYGWIN* ]] ;
-    then
-        is_win=yes
-    fi
+	# Define a single variable off of which we can branch to tell if we are
+	# building for Windows.
+	is_win=no
+	if [[ $os_name == MSYS* ]] || \
+	   [[ $os_name == MINGW* ]]  || \
+	   [[ $os_name == CYGWIN* ]] ; then
+		is_win=yes
+	fi
 
 
 	# -- Find a python interpreter ---------------------------------------------
@@ -2620,9 +2622,12 @@ main()
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
 
-        if [ $is_win = yes ]; then
-            libpthread_esc=
-        fi
+	# For Windows builds, clear the libpthread_esc variable so that
+	# no pthreads library is substituted into config.mk. (Windows builds
+	# employ an implementation of pthreads that is internal to BLIS.)
+	if [ $is_win = yes ]; then
+		libpthread_esc=
+	fi
 
 	# Typically, there are no slashes in the version variable. However,
 	# downstream maintainers (such as those for Debian) may create custom
