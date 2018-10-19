@@ -68,6 +68,7 @@ extern "C" {
 // -- Threading definitions --
 
 #include "bli_thread.h"
+#include "bli_pthread.h"
 
 
 // -- Constant definitions --

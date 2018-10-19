@@ -1351,6 +1351,16 @@ bli_projm_check
 bli_projv
 bli_projv_check
 bli_prune_unref_mparts
+bli_pthread_barrier_destroy
+bli_pthread_barrier_init
+bli_pthread_barrier_wait
+bli_pthread_create
+bli_pthread_join
+bli_pthread_mutex_destroy
+bli_pthread_mutex_init
+bli_pthread_mutex_lock
+bli_pthread_mutex_unlock
+bli_pthread_once
 bli_randm
 bli_randm_check
 bli_randm_ex
