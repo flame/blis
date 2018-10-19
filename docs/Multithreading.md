@@ -15,6 +15,8 @@
     * [The automatic way](Multithreading.md#locally-at-runtime-the-automatic-way)
     * [The manual way](Multithreading.md#locally-at-runtime-the-manual-way)
     * [Using the expert interface](Multithreading.md#locally-at-runtime-using-the-expert-interface)
+* **[Known issues](Multithreading.md#known-issues)**
+* **[Conclusion](Multithreading.md#conclusion)**
 
 
 # Introduction
@@ -219,6 +221,14 @@ bli_gemm_ex( &alpha, &a, &b, &beta, &c, NULL, &rntm );
 Note that `rntm_t` objects may be reused over and over again once they are initialized; there is no need to reinitialize them and re-encode their threading values!
 
 Also, you may pass in `NULL` for the `rntm_t*` parameter of an expert interface. This causes the current global settings to be used.
+
+# Known issues
+
+* **Internal transposition and manual parallelism.** BLIS supports both row- and column-stored matrices (and tensor-like general storage). However, typically the `gemm` microkernel prefers to read and write microtiles of matrix C by rows, or by columns. If the storage of the user-provided matrix C does not match that of the microkernel preference, BLIS logically transpose the entire operation so that by the time the microkernel sees matrix C, it will appear to be stored according to its storage preference. If the caller is employing the automatic style of parallelism, whereby only the total number of threads is specified, this transposition happens *before* the the total number of threads is factored into the various loop-specific ways of parallelism and everything works as expected. However, if the caller employs the manual style of parallelism, the transposition must (by definition) happen *after* the thread factorization is done since, in this situation, the caller has taken responsibility for providing that factorization explicitly.
+
+   This situation could lead to unexpectedly low multithreaded performance. Suppose the user calls `gemm` on a problem with a large m dimension and small k and n dimensions, and explicitly requests parallelism only in the IC loop, but also suppose that the storage of C does not match that of the microkernel's preference. After BLIS transposes the operation internally, the *effective* m dimension will no longer be large; instead, it will be small (because the original m and n dimension will have been swapped). The multithreaded implementation will then proceed to parallelize this small m dimension.
+
+   There are currently no good *and* easy solutions to this problem. Eventually, though, we plan to add support for two microkernels per datatype per configuration--one for use with matrices C that are row-stored, and one for those that are column-stored. This will obviate the logic within BLIS that sometimes induces the operation transposition, and the problem will go away.
 
 # Conclusion
 

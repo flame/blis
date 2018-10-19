@@ -4,7 +4,7 @@
 * **[Enabling a sandbox](Sandboxes.md#enabling-a-sandbox)**
 * **[Sandbox rules](Sandboxes.md#sandbox-rules)**
 * **[Caveats](Sandboxes.md#caveats)**
-* **[Known Issues](Sandboxes.md#known-issues)**
+* **[Known issues](Sandboxes.md#known-issues)**
 * **[Conclusion](Sandboxes.md#conclusion)**
 
 
@@ -183,7 +183,7 @@ guidance from BLIS developers by opening a
 Notwithstanding these limitations, hopefully you still find BLIS sandboxes
 useful!
 
-## Known Issues
+## Known issues
 
 * **Mixed datatype support.** Unless you *really* know what you are doing, you
 should probably disable mixed datatype support when using a sandbox. (Mixed

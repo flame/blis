@@ -6,7 +6,7 @@
   * **[Computation precision](MixedDatatypes.md#computation-precision)**
   * **[Computation domain](MixedDatatypes.md#computation-domain)**
 * **[Performing gemm with mixed datatypes](MixedDatatypes.md#performing-gemm-with-mixed-datatypes)**
-* **[Known Issues](MixedDatatypes.md#known-issues)**
+* **[Known issues](MixedDatatypes.md#known-issues)**
 * **[Conclusion](MixedDatatypes.md#conclusion)**
 
 ## Introduction
@@ -180,7 +180,7 @@ of initializing an matrix object with arbitrary values, please review the
 example code found in the `examples/oapi` directory of the BLIS source
 distribution.
 
-## Known Issues
+## Known issues
 
 While BLIS implements 128 mixed-datatype combinations of `gemm`, there may be
 odd behavior in the current implementation that does not conform to the reader's
