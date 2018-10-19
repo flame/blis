@@ -35,9 +35,12 @@
 #
 # This script regenerates a list of symbols for use when building
 # Windows-compatible DLLs. We assume that this script will be run after
-# targeting 'haswell' at configure-time and building the shared library.
-# (Notice that we also prune out all haswell/zen-related context
-# initialization and reference kernels.)
+# running configure as:
+#
+#   ./configure --enable-cblas haswell
+#
+# and compiling BLIS normally. (Notice that we also prune out all
+# haswell/zen-related context initialization and reference kernels.)
 #
 
 libblis='lib/haswell/libblis.so'
