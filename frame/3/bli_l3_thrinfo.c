@@ -161,7 +161,7 @@ void bli_l3_thrinfo_print_paths
      )
 {
 	dim_t n_threads = bli_thread_num_threads( threads[0] );
-	dim_t gl_comm_id;
+	dim_t gl_id;
 
 	thrinfo_t* jc_info  = threads[0];
 	thrinfo_t* pc_info  = bli_thrinfo_sub_node( jc_info );
@@ -209,49 +209,131 @@ void bli_l3_thrinfo_print_paths
 	( unsigned long )ir_way );
 	printf( "=================================================\n" );
 
-	for ( gl_comm_id = 0; gl_comm_id < n_threads; ++gl_comm_id )
+	dim_t gl_comm_id;
+	dim_t jc_comm_id;
+	dim_t pc_comm_id;
+	dim_t pb_comm_id;
+	dim_t ic_comm_id;
+	dim_t pa_comm_id;
+	dim_t jr_comm_id;
+
+	dim_t jc_work_id;
+	dim_t pc_work_id;
+	dim_t pb_work_id;
+	dim_t ic_work_id;
+	dim_t pa_work_id;
+	dim_t jr_work_id;
+	dim_t ir_work_id;
+
+	for ( gl_id = 0; gl_id < n_threads; ++gl_id )
 	{
-		jc_info = threads[gl_comm_id];
-		pc_info = bli_thrinfo_sub_node( jc_info );
-		pb_info = bli_thrinfo_sub_node( pc_info );
-		ic_info = bli_thrinfo_sub_node( pb_info );
-		pa_info = bli_thrinfo_sub_node( ic_info );
-		jr_info = bli_thrinfo_sub_node( pa_info );
-		ir_info = bli_thrinfo_sub_node( jr_info );
+		jc_info = threads[gl_id];
 
-		dim_t gl_comm_id = bli_thread_ocomm_id( jc_info );
-		dim_t jc_comm_id = bli_thread_ocomm_id( pc_info );
-		dim_t pc_comm_id = bli_thread_ocomm_id( pb_info );
-		dim_t pb_comm_id = bli_thread_ocomm_id( ic_info );
-		dim_t ic_comm_id = bli_thread_ocomm_id( pa_info );
-		dim_t pa_comm_id = bli_thread_ocomm_id( jr_info );
-		dim_t jr_comm_id = bli_thread_ocomm_id( ir_info );
+		// NOTE: We must check each thrinfo_t pointer for NULLness. Certain threads
+		// may not fully build their thrinfo_t structures--specifically when the
+		// dimension being parallelized is not large enough for each thread to have
+		// even one unit of work (where as unit is usually a single micropanel's
+		// width, MR or NR).
+		if ( !jc_info )
+		{
+			gl_comm_id = jc_comm_id = pc_comm_id = pb_comm_id = ic_comm_id = pa_comm_id = jr_comm_id = -1;
+			jc_work_id = pc_work_id = pb_work_id = ic_work_id = pa_work_id = jr_work_id = ir_work_id = -1;
+		}
+		else
+		{
+			gl_comm_id = bli_thread_ocomm_id( jc_info );
+			jc_work_id = bli_thread_work_id( jc_info );
+			pc_info = bli_thrinfo_sub_node( jc_info );
 
-		dim_t jc_work_id = bli_thread_work_id( jc_info );
-		dim_t pc_work_id = bli_thread_work_id( pc_info );
-		dim_t pb_work_id = bli_thread_work_id( pb_info );
-		dim_t ic_work_id = bli_thread_work_id( ic_info );
-		dim_t pa_work_id = bli_thread_work_id( pa_info );
-		dim_t jr_work_id = bli_thread_work_id( jr_info );
-		dim_t ir_work_id = bli_thread_work_id( ir_info );
+			if ( !pc_info )
+			{
+				jc_comm_id = pc_comm_id = pb_comm_id = ic_comm_id = pa_comm_id = jr_comm_id = -1;
+				pc_work_id = pb_work_id = ic_work_id = pa_work_id = jr_work_id = ir_work_id = -1;
+			}
+			else
+			{
+				jc_comm_id = bli_thread_ocomm_id( pc_info );
+				pc_work_id = bli_thread_work_id( pc_info );
+				pb_info = bli_thrinfo_sub_node( pc_info );
+
+				if ( !pb_info )
+				{
+					pc_comm_id = pb_comm_id = ic_comm_id = pa_comm_id = jr_comm_id = -1;
+					pb_work_id = ic_work_id = pa_work_id = jr_work_id = ir_work_id = -1;
+				}
+				else
+				{
+					pc_comm_id = bli_thread_ocomm_id( pb_info );
+					pb_work_id = bli_thread_work_id( pb_info );
+					ic_info = bli_thrinfo_sub_node( pb_info );
+
+					if ( !ic_info )
+					{
+						pb_comm_id = ic_comm_id = pa_comm_id = jr_comm_id = -1;
+						ic_work_id = pa_work_id = jr_work_id = ir_work_id = -1;
+					}
+					else
+					{
+						pb_comm_id = bli_thread_ocomm_id( ic_info );
+						ic_work_id = bli_thread_work_id( ic_info );
+						pa_info = bli_thrinfo_sub_node( ic_info );
+
+						if ( !pa_info )
+						{
+							ic_comm_id = pa_comm_id = jr_comm_id = -1;
+							pa_work_id = jr_work_id = ir_work_id = -1;
+						}
+						else
+						{
+							ic_comm_id = bli_thread_ocomm_id( pa_info );
+							pa_work_id = bli_thread_work_id( pa_info );
+							jr_info = bli_thrinfo_sub_node( pa_info );
+
+							if ( !jr_info )
+							{
+								pa_comm_id = jr_comm_id = -1;
+								jr_work_id = ir_work_id = -1;
+							}
+							else
+							{
+								pa_comm_id = bli_thread_ocomm_id( jr_info );
+								jr_work_id = bli_thread_work_id( jr_info );
+								ir_info = bli_thrinfo_sub_node( jr_info );
+
+								if ( !ir_info )
+								{
+									jr_comm_id = -1;
+									ir_work_id = -1;
+								}
+								else
+								{
+									jr_comm_id = bli_thread_ocomm_id( ir_info );
+									ir_work_id = bli_thread_work_id( ir_info );
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 
 		printf( "            gl   jc   pb   kc   pa   ic   jr  \n" );
-		printf( "comm ids: %4lu %4lu %4lu %4lu %4lu %4lu %4lu\n",
-		( unsigned long )gl_comm_id,
-		( unsigned long )jc_comm_id,
-		( unsigned long )pc_comm_id,
-		( unsigned long )pb_comm_id,
-		( unsigned long )ic_comm_id,
-		( unsigned long )pa_comm_id,
-		( unsigned long )jr_comm_id );
-		printf( "work ids: %4ld %4ld %4lu %4lu %4ld %4ld %4ld\n",
-		( unsigned long )jc_work_id,
-		( unsigned long )pc_work_id,
-		( unsigned long )pb_work_id,
-		( unsigned long )ic_work_id,
-		( unsigned long )pa_work_id,
-		( unsigned long )jr_work_id,
-		( unsigned long )ir_work_id );
+		printf( "comm ids: %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
+		( long )gl_comm_id,
+		( long )jc_comm_id,
+		( long )pc_comm_id,
+		( long )pb_comm_id,
+		( long )ic_comm_id,
+		( long )pa_comm_id,
+		( long )jr_comm_id );
+		printf( "work ids: %4ld %4ld %4ld %4ld %4ld %4ld %4ld\n",
+		( long )jc_work_id,
+		( long )pc_work_id,
+		( long )pb_work_id,
+		( long )ic_work_id,
+		( long )pa_work_id,
+		( long )jr_work_id,
+		( long )ir_work_id );
 		printf( "---------------------------------------\n" );
 	}
 
