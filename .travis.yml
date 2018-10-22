@@ -6,10 +6,14 @@ env:
       secure: "Ty3PM1xGhXwxfJG6YyY9bUZyXzw98ekHxQEqU9VnrMXTZb28IxfocPCXHjL34r9HTGosO5Pmierhal1Cs3ZKE5ZAJqJhCfck+kwlH21Uay5CNYglDtSmy2qxtbbDG4AxpEZ1UKlIZr1pNh/x+pRemSmnMEnQp/E7QJqdkhm4+aMX2bWKyLPtrdL+B9QXLVT2nT6/Fw3i05aBhpcFJpSPfvYX2KoCZYdJOSKcKci4T8nAfP/c0olkz+jAkBZxZFgO9Ptrt/lvHtVPrkh5o29GvHg2i/4vucbsMltoxlV31/2eYpdr17Ngtt41MMVn2fHV4lVhLmENc04nlm084fBtg73T6b8hNy5JlcA44xI/UrPJsQAJ+0A0ds9BbBQKPxOmaF/O8WGXhwiwdKT6DGS9lj05f3S+yZfeNE3pQhLEcvwXLO5SW3VvKXMj0t/lZyG+XCkvFjD7KEPQV4g+BZc2zzD9TwDx3ydn8Uzd6zZlq1erQUzCnODP24wuwfrNP8nqxFYG0VtI8oZW62IC9U2hcnAF5QNXXW3yDYD65k3BHbigfI28gu9iO9G8RxOglR27J7Whdqkqw3AMRaqyHt2tdbz7tM2dLZ0EatT5m8esjC+LP4EshW9C59jP2U9vJ/94YEgOfwiqk8+e6fL/7dJvOumbwu1RclRI9DS88PPYb3Q="
 matrix:
   include:
-  # full testsuite
+  # full testsuite (all tests except for mixed datatype)
   - os: linux
     compiler: gcc
     env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+  # mixed-datatype testsuite (gemm_nn only)
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=MD SDE=0 THR="none" CONF="auto"
   # test x86_64 ukrs with SDE
   - os: linux
     compiler: gcc
@@ -34,13 +38,13 @@ matrix:
   - os: osx
     compiler: clang
     env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
-  # cortexa15 build and test (qemu)
+  # cortexa15 build and fast testsuite (qemu)
   - os: linux
     compiler: arm-linux-gnueabihf-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa15" \
       PACKAGES="gcc-arm-linux-gnueabihf qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/"
-  # cortexa57 build and test (qemu)
+  # cortexa57 build and fast testsuite (qemu)
   - os: linux
     compiler: aarch64-linux-gnu-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa57" \

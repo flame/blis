@@ -52,8 +52,8 @@
         test \
         testblas blastest-f2c blastest-bin blastest-run \
         testblis testsuite testsuite-bin testsuite-run \
-        testblis-fast testsuite-run-fast \
-        check checkblas checkblis checkblis-fast \
+        testblis-fast testblis-md testsuite-run-fast \
+        check checkblas checkblis checkblis-fast checkblis-md \
         install-headers install-libs install-lib-symlinks \
         showconfig \
         clean cleanmk cleanh cleanlib distclean \
@@ -332,6 +332,8 @@ TESTSUITE_CONF_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_GEN)
 TESTSUITE_CONF_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_CONF_OPS)
 TESTSUITE_FAST_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_GEN)
 TESTSUITE_FAST_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_OPS)
+TESTSUITE_MIXD_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_MIXD_GEN)
+TESTSUITE_MIXD_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_MIXD_OPS)
 
 # The locations of the test suite source directory and the local object
 # directory.
@@ -760,6 +762,8 @@ testblis: testsuite
 
 testblis-fast: testsuite-run-fast
 
+testblis-md: testsuite-run-md
+
 testsuite: testsuite-run
 
 testsuite-bin: check-env $(TESTSUITE_BIN)
@@ -811,6 +815,21 @@ else
 	                     > $(TESTSUITE_OUT_FILE)
 endif
 
+# A rule to run the testsuite using the input.*.md files, which
+# run a set of tests designed to only exercise mixed-datatype gemm.
+testsuite-run-md: testsuite-bin
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_MIXD_GEN_PATH) \
+	                   -o $(TESTSUITE_MIXD_OPS_PATH) \
+	                    > $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) (mixed dt) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_MIXD_GEN_PATH) \
+	                    -o $(TESTSUITE_MIXD_OPS_PATH) \
+	                     > $(TESTSUITE_OUT_FILE)
+endif
+
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -821,6 +840,14 @@ endif
 
 # Check the results of the BLIS testsuite (fast).
 checkblis-fast: testsuite-run-fast
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
+else
+	@- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
+endif
+
+# Check the results of the BLIS testsuite (mixed-datatype).
+checkblis-md: testsuite-run-md
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
 else

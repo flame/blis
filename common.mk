@@ -321,6 +321,8 @@ TESTSUITE_CONF_GEN := input.general
 TESTSUITE_CONF_OPS := input.operations
 TESTSUITE_FAST_GEN := input.general.fast
 TESTSUITE_FAST_OPS := input.operations.fast
+TESTSUITE_MIXD_GEN := input.general.mixed
+TESTSUITE_MIXD_OPS := input.operations.mixed
 TESTSUITE_OUT_FILE := output.testsuite
 
 # CHANGELOG file.

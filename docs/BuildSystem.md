@@ -390,9 +390,11 @@ The BLIS `Makefile` implements many `make` targets. The table below lists most o
 | `check`         | Execute `checkblis-fast` and `checkblas` targets.  |
 | `checkblis`     | Execute `testblis` and characterize the results to `stdout`. |
 | `checkblis-fast`| Execute `testblis-fast` and characterize the results to `stdout`. |
+| `checkblis-md`  | Execute `testblis-md` and characterize the results to `stdout`. |
 | `checkblas`     | Execute `testblas` and characterize the results to `stdout`. |
 | `testblis`      | Run the BLIS testsuite with default parameters (runs for 2-8 minutes). |
 | `testblis-fast` | Run the BLIS testsuite with "fast" parameters (runs for a few seconds). |
+| `testblis-md`   | Run the BLIS testsuite for `gemm` with full mixing of datatypes (runs for 10-30 seconds). |
 | `testsuite`     | Same as `testblis`.                                |
 | `testblas`      | Run the BLAS test drivers with default parameters (runs for a few seconds). |
 | `showconfig`    | Show a summary of currently selected `configure` options. |
