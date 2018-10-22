@@ -202,6 +202,11 @@ void bli_thrcomm_tree_barrier( barrier_t* barack )
 
 #endif
 
+// Define a dummy function bli_l3_thread_entry(), which is needed in the
+// pthreads version, so that when building Windows DLLs (with OpenMP enabled
+// or no multithreading) we don't risk having an unresolved symbol.
+void* bli_l3_thread_entry( void* data_void ) { return NULL; }
+
 //#define PRINT_THRINFO
 
 void bli_l3_thread_decorator

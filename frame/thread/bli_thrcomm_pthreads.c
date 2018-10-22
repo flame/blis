@@ -126,8 +126,6 @@ void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 #endif
 
 
-void* bli_l3_thread_entry( void* data_void );
-
 // A data structure to assist in passing operands to additional threads.
 typedef struct thread_data
 {

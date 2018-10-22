@@ -1281,6 +1281,7 @@ bli_l3_prune_unref_mparts_k
 bli_l3_prune_unref_mparts_m
 bli_l3_prune_unref_mparts_n
 bli_l3_thread_decorator
+bli_l3_thread_entry
 bli_l3_thrinfo_create_root
 bli_l3_thrinfo_free
 bli_l3_thrinfo_free_paths

@@ -42,6 +42,10 @@
 #include "bli_thrcomm_pthreads.h"
 
 
+// thread entry point prototype.
+void* bli_l3_thread_entry( void* data_void );
+
+
 // thrcomm_t query (field only)
 
 static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
