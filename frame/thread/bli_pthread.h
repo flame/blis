@@ -44,7 +44,7 @@
 typedef SRWLOCK bli_pthread_mutex_t;
 typedef void bli_pthread_mutexattr_t;
 
-#define PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
+#define BLIS_PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
 
 int bli_pthread_mutex_init( bli_pthread_mutex_t* mutex, const bli_pthread_mutexattr_t *attr );
 
@@ -58,14 +58,14 @@ int bli_pthread_mutex_unlock( bli_pthread_mutex_t* mutex );
 
 typedef INIT_ONCE bli_pthread_once_t;
 
-#define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
+#define BLIS_PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
 
 void bli_pthread_once( bli_pthread_once_t* once, void (*init)( void ) );
 
 typedef CONDITION_VARIABLE bli_pthread_cond_t;
 typedef void bli_pthread_condattr_t;
 
-#define PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
+#define BLIS_PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
 
 int bli_pthread_cond_init( bli_pthread_cond_t* cond, const bli_pthread_condattr_t* attr );
 
