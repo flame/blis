@@ -117,9 +117,35 @@ typedef pthread_t              bli_pthread_t;
 typedef pthread_attr_t         bli_pthread_attr_t;
 typedef pthread_mutex_t        bli_pthread_mutex_t;
 typedef pthread_mutexattr_t    bli_pthread_mutexattr_t;
+typedef pthread_cond_t         bli_pthread_cond_t;
+typedef pthread_condattr_t     bli_pthread_condattr_t;
+typedef pthread_once_t         bli_pthread_once_t;
+
+#if defined(__APPLE__)
+
+// For OS X, we must define the barrier types ourselves since Apple does
+// not implement barriers in their variant of pthreads.
+
+typedef void bli_pthread_barrierattr_t;
+
+typedef struct
+{
+    bli_pthread_mutex_t mutex;
+    bli_pthread_cond_t  cond;
+    int                 count;
+    int                 tripCount;
+} bli_pthread_barrier_t;
+
+#else
+
+// For other non-Windows OSes (primarily Linux), we can define the barrier
+// types in terms of existing pthreads barrier types since we expect they
+// will be provided by the pthreads implementation.
+
 typedef pthread_barrier_t      bli_pthread_barrier_t;
 typedef pthread_barrierattr_t  bli_pthread_barrierattr_t;
-typedef pthread_once_t         bli_pthread_once_t;
+
+#endif
 
 // -- pthreads macros --
 
