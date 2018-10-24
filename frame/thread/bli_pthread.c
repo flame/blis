@@ -206,6 +206,14 @@ int bli_pthread_mutex_lock
 	return pthread_mutex_lock( mutex );
 }
 
+int bli_pthread_mutex_trylock
+     (
+       bli_pthread_mutex_t* mutex
+     )
+{
+	return pthread_mutex_trylock( mutex );
+}
+
 int bli_pthread_mutex_unlock
      (
        bli_pthread_mutex_t* mutex

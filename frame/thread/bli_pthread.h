@@ -187,6 +187,11 @@ int bli_pthread_mutex_lock
        bli_pthread_mutex_t* mutex
      );
 
+int bli_pthread_mutex_trylock
+     (
+       bli_pthread_mutex_t* mutex
+     );
+
 int bli_pthread_mutex_unlock
      (
        bli_pthread_mutex_t* mutex
