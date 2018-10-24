@@ -214,6 +214,42 @@ int bli_pthread_mutex_unlock
 	return pthread_mutex_unlock( mutex );
 }
 
+// -- pthread_cond_*() --
+
+int bli_pthread_cond_init
+     (
+       bli_pthread_cond_t*           cond,
+       const bli_pthread_condattr_t* attr
+     )
+{
+	return pthread_cond_init( cond, attr );
+}
+
+int bli_pthread_cond_destroy
+     (
+       bli_pthread_cond_t* cond
+     )
+{
+	return pthread_cond_destroy( cond );
+}
+
+int bli_pthread_cond_wait
+     (
+       bli_pthread_cond_t*  cond,
+       bli_pthread_mutex_t* mutex
+     )
+{
+	return pthread_cond_wait( cond, mutex );
+}
+
+int bli_pthread_cond_broadcast
+     (
+       bli_pthread_cond_t* cond
+     )
+{
+	return pthread_cond_broadcast( cond );
+}
+
 // -- pthread_once() --
 
 void bli_pthread_once

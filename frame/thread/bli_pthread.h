@@ -150,6 +150,7 @@ typedef pthread_barrierattr_t  bli_pthread_barrierattr_t;
 // -- pthreads macros --
 
 #define BLIS_PTHREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#define BLIS_PTHREAD_COND_INITIALIZER  PTHREAD_COND_INITIALIZER
 #define BLIS_PTHREAD_ONCE_INIT         PTHREAD_ONCE_INIT
 
 // -- pthread_create(), pthread_join() --
@@ -189,6 +190,30 @@ int bli_pthread_mutex_lock
 int bli_pthread_mutex_unlock
      (
        bli_pthread_mutex_t* mutex
+     );
+
+// -- pthread_cond_*() --
+
+int bli_pthread_cond_init
+     (
+       bli_pthread_cond_t*           cond,
+       const bli_pthread_condattr_t* attr
+     );
+
+int bli_pthread_cond_destroy
+     (
+       bli_pthread_cond_t* cond
+     );
+
+int bli_pthread_cond_wait
+     (
+       bli_pthread_cond_t*  cond,
+       bli_pthread_mutex_t* mutex
+     );
+
+int bli_pthread_cond_broadcast
+     (
+       bli_pthread_cond_t* cond
      );
 
 // -- pthread_once_*() --
