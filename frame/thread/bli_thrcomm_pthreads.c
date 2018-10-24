@@ -57,18 +57,18 @@ void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
 	comm->n_threads = n_threads;
-	pthread_barrier_init( &comm->barrier, NULL, n_threads );
+	bli_pthread_barrier_init( &comm->barrier, NULL, n_threads );
 }
 
 void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
-	pthread_barrier_destroy( &comm->barrier );
+	bli_pthread_barrier_destroy( &comm->barrier );
 }
 
 void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 {
-	pthread_barrier_wait( &comm->barrier );
+	bli_pthread_barrier_wait( &comm->barrier );
 }
 
 #else
@@ -82,7 +82,7 @@ void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
 	comm->barrier_threads_arrived = 0;
 
 //#ifdef BLIS_USE_PTHREAD_MUTEX
-//	pthread_mutex_init( &comm->mutex, NULL );
+//	bli_pthread_mutex_init( &comm->mutex, NULL );
 //#endif
 }
 
@@ -90,7 +90,7 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 {
 //#ifdef BLIS_USE_PTHREAD_MUTEX
 //	if ( comm == NULL ) return;
-//	pthread_mutex_destroy( &comm->mutex );
+//	bli_pthread_mutex_destroy( &comm->mutex );
 //#endif
 }
 
@@ -102,9 +102,9 @@ void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 	dim_t my_threads_arrived;
 
 #ifdef BLIS_USE_PTHREAD_MUTEX
-	pthread_mutex_lock( &comm->mutex );
+	bli_pthread_mutex_lock( &comm->mutex );
 	my_threads_arrived = ++(comm->threads_arrived);
-	pthread_mutex_unlock( &comm->mutex );
+	bli_pthread_mutex_unlock( &comm->mutex );
 #else
 	my_threads_arrived = __sync_add_and_fetch(&(comm->threads_arrived), 1);
 #endif
@@ -221,7 +221,7 @@ void bli_l3_thread_decorator
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
-	pthread_t*     pthreads  = bli_malloc_intl( sizeof( pthread_t     ) * n_threads );
+	bli_pthread_t* pthreads  = bli_malloc_intl( sizeof( bli_pthread_t ) * n_threads );
 	thread_data_t* datas     = bli_malloc_intl( sizeof( thread_data_t ) * n_threads );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
@@ -247,7 +247,7 @@ void bli_l3_thread_decorator
 
 		// Spawn additional threads for ids greater than 1.
 		if ( id != 0 )
-			pthread_create( &pthreads[id], NULL, &bli_l3_thread_entry, &datas[id] );
+			bli_pthread_create( &pthreads[id], NULL, &bli_l3_thread_entry, &datas[id] );
 		else
 			bli_l3_thread_entry( ( void* )(&datas[0]) );
 	}
@@ -259,7 +259,7 @@ void bli_l3_thread_decorator
 	// Thread 0 waits for additional threads to finish.
 	for ( dim_t id = 1; id < n_threads; id++ )
 	{
-		pthread_join( pthreads[id], NULL );
+		bli_pthread_join( pthreads[id], NULL );
 	}
 
 	bli_free_intl( pthreads );

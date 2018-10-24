@@ -4,6 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
+   Copyright (C) 2018, Southern Methodist University
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -32,7 +33,85 @@
 
 */
 
-// -- pthread types ------------------------------------------------------------
+#ifndef BLIS_PTHREAD_H
+#define BLIS_PTHREAD_H
+
+#if defined(_MSC_VER)
+
+// This branch defines a pthread-like API, bli_pthread_*(), and implements it
+// in terms of Windows API calls.
+
+typedef SRWLOCK bli_pthread_mutex_t;
+typedef void bli_pthread_mutexattr_t;
+
+#define PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
+
+int bli_pthread_mutex_init( bli_pthread_mutex_t* mutex, const bli_pthread_mutexattr_t *attr );
+
+int bli_pthread_mutex_destroy( bli_pthread_mutex_t* mutex );
+
+int bli_pthread_mutex_lock( bli_pthread_mutex_t* mutex );
+
+int bli_pthread_mutex_trylock( bli_pthread_mutex_t* mutex );
+
+int bli_pthread_mutex_unlock( bli_pthread_mutex_t* mutex );
+
+typedef INIT_ONCE bli_pthread_once_t;
+
+#define PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
+
+void bli_pthread_once( bli_pthread_once_t* once, void (*init)( void ) );
+
+typedef CONDITION_VARIABLE bli_pthread_cond_t;
+typedef void bli_pthread_condattr_t;
+
+#define PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
+
+int bli_pthread_cond_init( bli_pthread_cond_t* cond, const bli_pthread_condattr_t* attr );
+
+int bli_pthread_cond_destroy( bli_pthread_cond_t* cond );
+
+int bli_pthread_cond_wait( bli_pthread_cond_t* cond, bli_pthread_mutex_t* mutex );
+
+int bli_pthread_cond_broadcast( bli_pthread_cond_t* cond );
+typedef struct
+{
+    HANDLE handle;
+    void* retval;
+} bli_pthread_t;
+
+typedef void bli_pthread_attr_t;
+
+int bli_pthread_create( bli_pthread_t *thread, const bli_pthread_attr_t *attr, void* (*start_routine)( void* ), void *arg );
+
+int bli_pthread_join( bli_pthread_t thread, void **retval );
+
+// barrier-related definitions
+
+typedef void bli_pthread_barrierattr_t;
+
+typedef struct
+{
+    bli_pthread_mutex_t mutex;
+    bli_pthread_cond_t  cond;
+    int                 count;
+    int                 tripCount;
+} bli_pthread_barrier_t;
+
+int bli_pthread_barrier_init( bli_pthread_barrier_t *barrier, const bli_pthread_barrierattr_t *attr, unsigned int count );
+
+int bli_pthread_barrier_destroy( bli_pthread_barrier_t *barrier );
+
+int bli_pthread_barrier_wait( bli_pthread_barrier_t *barrier );
+
+#else // !defined(_MSC_VER)
+
+#include <pthread.h>
+
+// This branch defines a pthreads-like API, bli_pthreads_*(), and implements it
+// in terms of the corresponding pthreads_*() types, macros, and function calls. 
+
+// -- pthread types --
 
 typedef pthread_t              bli_pthread_t;
 typedef pthread_attr_t         bli_pthread_attr_t;
@@ -42,7 +121,12 @@ typedef pthread_barrier_t      bli_pthread_barrier_t;
 typedef pthread_barrierattr_t  bli_pthread_barrierattr_t;
 typedef pthread_once_t         bli_pthread_once_t;
 
-// -- pthread_create(), pthread_join() -----------------------------------------
+// -- pthreads macros --
+
+#define BLIS_PTHREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#define BLIS_PTHREAD_ONCE_INIT         PTHREAD_ONCE_INIT
+
+// -- pthread_create(), pthread_join() --
 
 int bli_pthread_create
      (
@@ -58,7 +142,7 @@ int bli_pthread_join
        void**        retval
      );
 
-// -- pthread_mutex_*() --------------------------------------------------------
+// -- pthread_mutex_*() --
 
 int bli_pthread_mutex_init
      (
@@ -81,7 +165,15 @@ int bli_pthread_mutex_unlock
        bli_pthread_mutex_t* mutex
      );
 
-// -- pthread_barrier_*() ------------------------------------------------------
+// -- pthread_once_*() --
+
+void bli_pthread_once
+     (
+       bli_pthread_once_t* once,
+       void              (*init)(void)
+     );
+
+// -- pthread_barrier_*() --
 
 int bli_pthread_barrier_init
      (
@@ -100,10 +192,6 @@ int bli_pthread_barrier_wait
        bli_pthread_barrier_t* barrier
      );
 
-// -- pthread_once_*() ---------------------------------------------------------
+#endif // _MSC_VER
 
-void bli_pthread_once
-     (
-       bli_pthread_once_t* once,
-       void              (*init)(void)
-     );
+#endif // BLIS_PTHREAD_H

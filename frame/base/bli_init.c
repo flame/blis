@@ -98,16 +98,16 @@ void bli_finalize_apis( void )
 // pthread_once() is guaranteed to execute exactly once among all threads that
 // pass in this control object. Thus, we need one for initialization and a
 // separate one for finalization.
-static pthread_once_t once_init     = PTHREAD_ONCE_INIT;
-static pthread_once_t once_finalize = PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_init     = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_once_t once_finalize = BLIS_PTHREAD_ONCE_INIT;
 
 void bli_init_once( void )
 {
-	pthread_once( &once_init, bli_init_apis );
+	bli_pthread_once( &once_init, bli_init_apis );
 }
 
 void bli_finalize_once( void )
 {
-	pthread_once( &once_finalize, bli_finalize_apis );
+	bli_pthread_once( &once_finalize, bli_finalize_apis );
 }
 

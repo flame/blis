@@ -915,16 +915,18 @@ typedef struct
 
 // -- Memory broker object type --
 
-#include "bli_pthread_wrap.h"
+// These headers must be included here (or earlier) because definitions they
+// provide are needed in the membrk_t struct.
+#include "bli_pthread.h"
 #include "bli_malloc.h"
 
 typedef struct membrk_s
 {
-	pool_t          pools[3];
-	pthread_mutex_t mutex;
+	pool_t              pools[3];
+	bli_pthread_mutex_t mutex;
 
-	malloc_ft       malloc_fp;
-	free_ft         free_fp;
+	malloc_ft           malloc_fp;
+	free_ft             free_fp;
 } membrk_t;
 
 

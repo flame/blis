@@ -1299,28 +1299,28 @@ dim_t bli_thread_get_num_threads( void )
 // ----------------------------------------------------------------------------
 
 // A mutex to allow synchronous access to global_rntm.
-static pthread_mutex_t global_rntm_mutex = PTHREAD_MUTEX_INITIALIZER;
+static bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 {
 	// Acquire the mutex protecting global_rntm.
-	pthread_mutex_lock( &global_rntm_mutex );
+	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_ways_only( jc, pc, ic, jr, ir, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
-	pthread_mutex_unlock( &global_rntm_mutex );
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 void bli_thread_set_num_threads( dim_t n_threads )
 {
 	// Acquire the mutex protecting global_rntm.
-	pthread_mutex_lock( &global_rntm_mutex );
+	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
-	pthread_mutex_unlock( &global_rntm_mutex );
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 // ----------------------------------------------------------------------------
@@ -1328,12 +1328,12 @@ void bli_thread_set_num_threads( dim_t n_threads )
 void bli_thread_init_rntm( rntm_t* rntm )
 {
 	// Acquire the mutex protecting global_rntm.
-	pthread_mutex_lock( &global_rntm_mutex );
+	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	*rntm = global_rntm;
 
 	// Release the mutex protecting global_rntm.
-	pthread_mutex_unlock( &global_rntm_mutex );
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
 }
 
 // ----------------------------------------------------------------------------

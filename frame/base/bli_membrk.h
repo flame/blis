@@ -41,12 +41,12 @@
 
 static void bli_membrk_init_mutex( membrk_t* membrk )
 {
-	pthread_mutex_init( &(membrk->mutex), NULL );
+	bli_pthread_mutex_init( &(membrk->mutex), NULL );
 }
 
 static void bli_membrk_finalize_mutex( membrk_t* membrk )
 {
-	pthread_mutex_destroy( &(membrk->mutex) );
+	bli_pthread_mutex_destroy( &(membrk->mutex) );
 }
 
 // membrk query
@@ -82,12 +82,12 @@ static void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 
 static void bli_membrk_lock( membrk_t* membrk )
 {
-	pthread_mutex_lock( &(membrk->mutex) );
+	bli_pthread_mutex_lock( &(membrk->mutex) );
 }
 
 static void bli_membrk_unlock( membrk_t* membrk )
 {
-	pthread_mutex_unlock( &(membrk->mutex) );
+	bli_pthread_mutex_unlock( &(membrk->mutex) );
 }
 
 static void* bli_membrk_malloc( size_t size, membrk_t* membrk )

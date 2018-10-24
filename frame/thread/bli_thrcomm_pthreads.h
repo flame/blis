@@ -41,10 +41,10 @@
 #ifdef BLIS_USE_PTHREAD_BARRIER
 struct thrcomm_s
 {
-	void*             sent_object;
-	dim_t             n_threads;
+	void*                 sent_object;
+	dim_t                 n_threads;
 
-	pthread_barrier_t barrier;
+	bli_pthread_barrier_t barrier;
 };
 #else
 struct thrcomm_s
@@ -53,7 +53,7 @@ struct thrcomm_s
 	dim_t  n_threads;
 
 //#ifdef BLIS_USE_PTHREAD_MUTEX
-//	pthread_mutex_t mutex;
+//	bli_pthread_mutex_t mutex;
 //#endif
 
 	//volatile bool_t  barrier_sense;

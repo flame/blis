@@ -983,6 +983,9 @@ auto_detect()
 	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
 
 	# Locate other headers needed by bli_type_defs.h.
+	bli_pthread_h="bli_pthread.h"
+	bli_pthread_h_filepath=$(find ${dist_path}/frame -name "${bli_pthread_h}")
+	bli_pthread_h_path=${bli_pthread_h_filepath%/${bli_pthread_h}}
 	bli_malloc_h="bli_malloc.h"
 	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
 	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
@@ -1003,13 +1006,16 @@ auto_detect()
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
+	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
+	# pthreads (i.e., barriers).
 	${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
 	      -I${bli_cpuid_h_path} \
 	      -I${bli_arch_h_path} \
 	      -I${bli_typed_h_path} \
+	      -I${bli_pthread_h_path} \
 	      -I${bli_malloc_h_path} \
-	      -std=c99 \
+	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags} \
 	      ${bli_arch_c_filepath} \
 	      ${bli_cpuid_c_filepath} \
