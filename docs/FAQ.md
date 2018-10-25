@@ -41,7 +41,7 @@ project, as well as those we think a new user or developer might ask. If you do 
 
 Initially, BLIS was conceived as simply "BLAS with a more flexible interface". The original BLIS was written as a wrapper layer around BLAS that allowed generalized matrix storage (i.e., separate row and column strides). We also took the opportunity to implement some complex domain features that were missing from the BLAS (mostly related to conjugating input operands). This "proto-BLIS" was deployed in [libflame](http://shpc.ices.utexas.edu/libFLAME.html) to facilitate cleaner implementations of some LAPACK-level operations.
 
-Over time, we wanted more than just a more flexible interface; we wanted an entire framework from which we could build operations in the BLAS as well as those not present within the BLAS. After this new BLIS framework was created, it turned out that the interface improvements were much less interesting (and consequential) than some of the framework's other features, and the fact that it allowed developers to rapidly instantiate new BLAS libraries by optimizing only a small amount of code.
+Over time, we wanted more than just a more flexible interface; we wanted an entire framework from which we could build operations in the BLAS as well as those not present within the BLAS. After this new BLIS framework was created, it turned out that the interface improvements were much less interesting (albeit still of consequence) than some of the framework's other features, and the fact that it allowed developers to rapidly instantiate new BLAS libraries by optimizing only a small amount of code.
 
 ### Why should I use BLIS instead of GotoBLAS / OpenBLAS / ATLAS / MKL / ESSL / ACML / Accelerate?
 
@@ -52,6 +52,7 @@ homepage](https://github.com/flame/blis#key-features). But here are a few reason
   * BLIS supports a superset of BLAS functionality, providing operations omitted from the BLAS as well as some complex domain support that is missing in BLAS operations. BLIS is especially useful to researchers who need to develop and prototype new BLAS-like operations that do not exist in the BLAS.
   * BLIS is backwards compatible with BLAS. BLIS contains a BLAS compatibility layer that allows an application to treat BLIS as if it were a traditional BLAS library.
   * BLIS supports generalized matrix storage, which can be used to express column-major, row-major, and general stride storage.
+  * BLIS supports mixed-datatype computation for general matrix multiplciation `gemm`, and does so while holding the impact on performance to a relative minimum.
   * BLIS is free software, available under a [new/modified/3-clause BSD license](http://opensource.org/licenses/BSD-3-Clause).
 
 ### How is BLIS related to FLAME / `libflame`?
@@ -60,7 +61,7 @@ As explained [above](FAQ.md#why-did-you-create-blis?), BLIS was initially a laye
 
 ### Does BLIS automatically detect my hardware?
 
-On certain architectures, yes. In order to use auto-detection, you must specify `auto` as your configuration when running `configure` (Please see the BLIS [Build System](BuildSystem.md) guide for more info.) A runtime detection option is also available. (Please see the [Configuration Guide](ConfigurationHowTo.md) for a comprehensive walkthrough.)
+On certain architectures (most notably x86_64), yes. In order to use auto-detection, you must specify `auto` as your configuration when running `configure` (Please see the BLIS [Build System](BuildSystem.md) guide for more info.) A runtime detection option is also available. (Please see the [Configuration Guide](ConfigurationHowTo.md) for a comprehensive walkthrough.)
 
 If automatic hardware detection is requested at configure-time and the build process does not recognize your architecture, the `generic` configuration is selected.
 
@@ -119,27 +120,27 @@ Absolutely. Just link your application to BLIS the same way you would link to a 
 
 ### What about CBLAS?
 
-BLIS also contains an optional CBLAS compatibility layer, which leverages the BLAS compatibility layer to help map CBLAS function calls to the corresponding functionality in BLIS. Once BLIS is built with CBLAS support, your application can access CBLAS prototypes via either `cblas.h` or `blis.h`.
+BLIS also contains an optional CBLAS compatibility layer, which leverages the BLAS compatibility layer to help map CBLAS function calls to the corresponding functionality in BLIS. Once BLIS is built with CBLAS support, your application can access CBLAS prototypes via either `cblas.h` or `blis.h`. At the time of this writing, CBLAS support is disabled by default, so be sure to enable it at configure-time. Please see `./configure --help` for the syntax for enabling CBLAS.
 
 ### Can I call the native BLIS API from Fortran-77/90/95/2000/C++/Python?
 
-In principle, BLIS's native (and BLAS-like) [typed API](BLISTypedAPI) can be called from Fortran. However, you must ensure that the size of the integer in BLIS is equal to the size of integer used by your Fortran program/compiler/environment. The size of BLIS integers is set in `bli_config.h`. Please see the [bli\_config.h](ConfigurationHowTo#bli_configh) section of the BLIS [Configuration Guide](ConfigurationHowTo.md) for more details.
+In principle, BLIS's native (and BLAS-like) [typed API](BLISTypedAPI) can be called from Fortran. However, you must ensure that the size of the integer in BLIS is equal to the size of integer used by your Fortran program/compiler/environment. The size of BLIS integers is determined at configure-time. Please see `./configure --help` for the syntax for options related to integer sizes.
 
 As for bindings to other languages, please contact the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
 
 ### Do I need to call initialization/finalization functions before being able to use BLIS from my application?
 
-Originally, BLIS did indeed require the application to explicitly setup (initialize) various internal data structures via `bli_init()`. Likewise, calling `bli_finalize()` was recommended to cleanup (finalize) the library. However, since commit 9804adf, BLIS has implemented self-initialization. These explicit calls to `bli_init()` and `bli_finalize()` are no longer necessary, though experts may still use them in special cases to control the allocation and freeing of resources. This topic is discussed in the BLIS [typed API reference](BLISTypedAPI.md#initialization-and-cleanup).
+Originally, BLIS did indeed require the application to explicitly setup (initialize) various internal data structures via `bli_init()`. Likewise, calling `bli_finalize()` was recommended to cleanup (finalize) the library. However, since commit 9804adf (circa December 2017), BLIS has implemented self-initialization. These explicit calls to `bli_init()` and `bli_finalize()` are no longer necessary, though experts may still use them in special cases to control the allocation and freeing of resources. This topic is discussed in the BLIS [typed API reference](BLISTypedAPI.md#initialization-and-cleanup).
 
 ### Does BLIS support multithreading?
 
 Yes! BLIS supports multithreading (via OpenMP or POSIX threads) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](Multithreading.md) guide.
 
-BLIS can also very easily be made thread-safe so that you can call BLIS from threads within a multithreaded library or application. For more information on making BLIS thread-safe, see the "Multithreading" subsection of the [bli\_config.h](ConfigurationHowTo#bli_configh) header file section in the BLIS [Configuration Guide](ConfigurationHowTo.md).
+BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives is thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
 
 ### Does BLIS support NUMA environments?
 
-No. We have integrated some early foundational support for NUMA *development*, but currently BLIS will execute sub-optimally on NUMA systems. If you are interested in adapting BLIS to a NUMA architecture, please contact us via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
+We have integrated some early foundational support for NUMA *development*, but currently BLIS will execute sub-optimally on NUMA systems. If you are interested in adapting BLIS to a NUMA architecture, please contact us via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
 
 ### Does BLIS work with GPUs?
 
@@ -155,9 +156,11 @@ No. BLIS is a framework for sequential and shared-memory/multicore implementatio
 
 ### Can I build BLIS on Windows / Mac OS X?
 
-BLIS was designed for use in a GNU/Linux environment, however, it should work on other UNIX-like systems as well, such as OS X. System software requirements for UNIX-like systems are discussed in the BLIS [Build System](BuildSystem.md) guide.
+BLIS was designed for use in a GNU/Linux environment. However, we've gone to greath lengths to keep BLIS compatible with other UNIX-like systems as well, such as BSD and OS X. System software requirements for UNIX-like systems are discussed in the BLIS [Build System](BuildSystem.md) guide.
 
-Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows. If you have success and would like to share your experiences, please join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message!
+Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows.
+
+If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". And if you'd like to share your experiences, please join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message!
 
 ### Can I build BLIS as a shared library?
 
@@ -165,7 +168,9 @@ Yes. By default, most configurations output only a static library archive (e.g. 
 
 ### Can I use the mixed domain / mixed precision support in BLIS?
 
-Enabling mixed domain / mixed precision support in BLIS is a long-term goal of ours. In the meantime, if this feature is important to you, please contact us via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and tell us about your application and why you need/want support for BLAS-like operations with mixed-domain/mixed-precision operands. We are interested to hear from you!
+Yes! As of 5fec95b (circa October 2018), BLIS supports mixed-datatype (mixed domain and/or mixed precision) computation via the `gemm` operation. Documentation on utilizing this new functionality is provided via the [MixedDatatype.md](docs/MixedDatatypes.md) document in the source distribution.
+
+If this feature is important or useful to your work, we would love to hear from you. Please contact us via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and tell us about your application and why you need/want support for BLAS-like operations with mixed-domain/mixed-precision operands.
 
 ### Who is involved in the project?
 
@@ -174,15 +179,15 @@ Lots of people! For a full list of those involved, see the
 
 ### Who funded the development of BLIS?
 
-BLIS was primarily funded by grants from [Microsoft](http://www.microsoft.com/),
-[Intel](http://www.intel.com/), [Texas
-Instruments](http://www.ti.com/), and [AMD](http://www.amd.com/), as well as grants from the [National Science Foundation](http://www.nsf.gov/) (Awards CCF-0917167 ACI-1148125/1340293, and CCF-1320112).
+BLIS was primarily funded by grants from [Microsoft](https://www.microsoft.com/),
+[Intel](https://www.intel.com/), [Texas
+Instruments](https://www.ti.com/), [AMD](https://www.amd.com/), [Huawei](https://www.hauwei.com/us/), and [Oracle](https://www.oracle.com/) as well as grants from the [National Science Foundation](http://www.nsf.gov/) (Awards CCF-0917167 ACI-1148125/1340293, and CCF-1320112).
 
 Reminder: _Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation (NSF)._
 
 ### I found a bug. How do I report it?
 
-If you think you've found a bug, we request that you [open an issue](http://github.com/flame/blis/issues). Don't be shy! Really, it's the best and most convenient way for us to track your issues/bugs/concerns. Other discussion that are primarily bug-reports should take place via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list. 
+If you think you've found a bug, we request that you [open an issue](http://github.com/flame/blis/issues). Don't be shy! Really, it's the best and most convenient way for us to track your issues/bugs/concerns. Other discussions that are not primarily bug-reports should take place via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
 
 ### How do I request a new feature?
 
@@ -191,3 +196,4 @@ Feature requests should also be submitted by [opening a new issue](http://github
 ### Where did you get the photo for the BLIS logo / mascot?
 
 The sleeping ["BLIS cat"](https://github.com/flame/blis/blob/master/README.md) photo was taken by Petar Mitchev and is used with his permission.
+

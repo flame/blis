@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.5.0](ReleaseNotes.md#changes-in-050)
 * [Changes in 0.4.1](ReleaseNotes.md#changes-in-041)
 * [Changes in 0.4.0](ReleaseNotes.md#changes-in-040)
 * [Changes in 0.3.2](ReleaseNotes.md#changes-in-032)
@@ -30,6 +31,50 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.5.0
+October 25, 2018
+
+Improvements present in 0.5.0:
+
+Framework:
+- Implemented support for matrix operands of mixed datatypes (domains and precisions) within the `gemm` operation.
+- Added configure-time option to use slab or round-robin partitioning within JR and IR loops of most level-3 operations' macrokernels.
+- Allow parallelism in the JC loop for `trsm_l`, which previously was unnecessarily disabled. (Field Van Zee, Devangi Parikh)
+- Added Fortran-77/90-compatible APIs for some thread-related functions. (Kay Dewhurst)
+- Defined a new level-1d operation `shiftd`, which adds a scalar value to every element along an arbitrary diagonal of a matrix.
+- Patched an issue (#267) that may arise when linking against OpenMP-configured BLIS from which parallelism is requested at runtime and a level-3 operation (e.g. `gemm`) is called from within an OpenMP parallel region of an application where OpenMP nested parallelism is disabled. (Devin Matthews)
+
+Kernels:
+- Imported SkylakeX `dgemm` microkernel from `skx-redux` branch, which contains optimizations (mostly better prefetching on C) over the previous implementation. (Devin Matthews)
+- Renamed/relocated level-3 `zen` microkernels to the `haswell` kernel set. Please see a recent message to blis-devel for more information on this rename [1].
+- BG/Q kernel fixes. (Ye Luo)
+
+Build system:
+- Added support for building Windows DLLs via AppVeyor [2], complete with a built-in implementation of pthreads for Windows, as well as an implementation of the `pthread_barrier_*()` APIs for use on OS X. (Isuru Fernando, Devin Matthews, Mathieu Poumeyrol, Matthew Honnibal)
+- Defined a `cortexa53` sub-configuration, which is similar to `cortexa57` except that it uses slightly different compiler flags. (Mathieu Poumeyrol)
+- Added python version checking to configure script.
+- Added a script to automate the regeneration of the symbols list file (now located in `build/libblis-symbols.def`).
+- Various tweaks in preparation for BLIS's inclusion within Debian. (M. Zhou)
+- Various fixes and cleanups.
+
+Testing:
+- Added tests for `cortexa15` and `cortexa57` in Travis CI. (Mathieu Poumeyrol)
+- Added tests for mixed-datatype `gemm` and the simulation of application-level threading (salt) in Travis CI.
+- Add statistics-collecting `irun.py` script.
+- Include various threading parameters in the initial comment block of testsuite output.
+- Various fixes and cleanups.
+
+Documentation:
+- Added `MixedDatatypes.md` documentation for mixed-datatype `gemm`.
+- Added example code demonstrating use of mixed-datatype `gemm` (object API only).
+- Added description of `shiftd` to `BLISTypedAPI.md` and `BLISObjectAPI.md`.
+- Added "Known issues" sections to `Multithreading.md` and `Sandboxes.md`.
+- Updated `FAQ.md`.
+- Various other documentation updates.
+
+[1] https://groups.google.com/forum/?fromgroups#!topic/blis-devel/pytWRjIzxVY
+[2] https://ci.appveyor.com/project/shpc/blis/
 
 ## Changes in 0.4.1
 August 30, 2018

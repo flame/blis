@@ -13,15 +13,18 @@ Here are the steps to follow to create a new release (version) of BLIS:
 
 3. Verify that the code passes BLIS and BLAS tests:
 
-   $ make check     # short BLIS testsuite + BLAS test drivers
-   $ make testblis  # full BLIS testsuite
+   $ make check           # BLIS testsuite (fast) + BLAS test drivers
+   $ make checkblis       # BLIS testsuite (full ex. mixed-datatype)
+   $ make checkblis-md    # BLIS testsuite (mixed-datatype only)
+   $ make checkblis-salt  # BLIS testsuite (fast + salt)
 
 4. Draft a new announcement to blis-devel, crediting those who
    contributed towards this version by browsing 'git log'.
 
 5. Update CREDITS file if 'git log' reveals any new contributors.
 
-6. Update docs/ReleaseNotes.md file with body of finalized announcement.
+6. Update docs/ReleaseNotes.md file with body of finalized announcement
+   and the date of the release.
 
 7. Bump the version number:
 
