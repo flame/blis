@@ -51,9 +51,11 @@
         flat-header flat-cblas-header \
         test \
         testblas blastest-f2c blastest-bin blastest-run \
-        testblis testsuite testsuite-bin testsuite-run \
-        testblis-fast testblis-md testsuite-run-fast \
-        check checkblas checkblis checkblis-fast checkblis-md \
+        testsuite testsuite-bin \
+        testsuite-run testsuite-run-fast testsuite-run-md testsuite-run-salt \
+        testblis testblis-fast testblis-md testblis-salt \
+        check checkblas \
+        checkblis checkblis-fast checkblis-md checkblis-salt \
         install-headers install-libs install-lib-symlinks \
         showconfig \
         clean cleanmk cleanh cleanlib distclean \
@@ -334,6 +336,8 @@ TESTSUITE_FAST_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_GEN)
 TESTSUITE_FAST_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_FAST_OPS)
 TESTSUITE_MIXD_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_MIXD_GEN)
 TESTSUITE_MIXD_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_MIXD_OPS)
+TESTSUITE_SALT_GEN_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_SALT_GEN)
+TESTSUITE_SALT_OPS_PATH := $(DIST_PATH)/$(TESTSUITE_DIR)/$(TESTSUITE_SALT_OPS)
 
 # The locations of the test suite source directory and the local object
 # directory.
@@ -764,6 +768,8 @@ testblis-fast: testsuite-run-fast
 
 testblis-md: testsuite-run-md
 
+testblis-salt: testsuite-run-salt
+
 testsuite: testsuite-run
 
 testsuite-bin: check-env $(TESTSUITE_BIN)
@@ -830,6 +836,21 @@ else
 	                     > $(TESTSUITE_OUT_FILE)
 endif
 
+# A rule to run the testsuite using the input.*.salt files, which
+# simulates application-level threading across operation tests.
+testsuite-run-salt: testsuite-bin
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_SALT_GEN_PATH) \
+	                   -o $(TESTSUITE_SALT_OPS_PATH) \
+	                    > $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) (salt) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@$(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) -g $(TESTSUITE_SALT_GEN_PATH) \
+	                    -o $(TESTSUITE_SALT_OPS_PATH) \
+	                     > $(TESTSUITE_OUT_FILE)
+endif
+
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -848,6 +869,14 @@ endif
 
 # Check the results of the BLIS testsuite (mixed-datatype).
 checkblis-md: testsuite-run-md
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
+else
+	@- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
+endif
+
+# Check the results of the BLIS testsuite (salt).
+checkblis-salt: testsuite-run-salt
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
 else

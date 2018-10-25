@@ -14,6 +14,10 @@ matrix:
   - os: linux
     compiler: gcc
     env: OOT=0 TEST=MD SDE=0 THR="none" CONF="auto"
+  # salt testsuite (fast set of operations+parameters)
+  - os: linux
+    compiler: gcc
+    env: OOT=0 TEST=SALT SDE=0 THR="none" CONF="auto"
   # test x86_64 ukrs with SDE
   - os: linux
     compiler: gcc

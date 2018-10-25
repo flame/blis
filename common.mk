@@ -323,6 +323,8 @@ TESTSUITE_FAST_GEN := input.general.fast
 TESTSUITE_FAST_OPS := input.operations.fast
 TESTSUITE_MIXD_GEN := input.general.mixed
 TESTSUITE_MIXD_OPS := input.operations.mixed
+TESTSUITE_SALT_GEN := input.general.salt
+TESTSUITE_SALT_OPS := input.operations.salt
 TESTSUITE_OUT_FILE := output.testsuite
 
 # CHANGELOG file.
