@@ -1,16 +1,1258 @@
-commit 10fd614031307c46db3d893528d4e5fc31f490b3 (HEAD -> master, tag: 0.4.1)
+commit be7c57819cfd48adb175d9a480cc9f37928645c1 (HEAD -> master, tag: 0.5.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 25 14:09:40 2018 -0500
+
+    Version file update (0.5.0)
+
+commit 75da7f2a208ad7d26ed9c6d3e10d08b2a1caf9d6 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 25 14:02:41 2018 -0500
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated ReleaseNotes.md in preparation for next version.
+    - Updated docs/FAQ.md to reflect recent developments, and other edits.
+    - Minor updates to RELEASING.
+
+commit 6fbc456fb3f4401ec951a618990f15a84fdfa236
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 25 13:20:25 2018 -0500
+
+    Added SALT testing to Travis CI.
+    
+    Details:
+    - Modified .travis.yml to automatically employ the simulation of
+      application-level threading within the testsuite, with supporting
+      changes to common.mk, the top-level Makefile, and
+      travis/do_testsuite.sh.
+    - Added a new pair of input files to testsuite directory with the
+      '.salt' suffix (similar to those with the '.fast' suffix) for
+      testing application-level threading.
+    - Updated docs/BuildSystem.md to document the new make targets
+      'testblis-salt' and 'checkblis-salt'.
+
+commit 0e27963a6770e6b64f3299ad0613d5df45d8b6ae (origin/win-pthreads, origin/dev, origin/amd, win-pthreads, dev, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 24 12:16:19 2018 -0500
+
+    Add bli_pthread_mutex_trylock().
+    
+    Details:
+    - Added the missing bli_pthread_mutex_trylock() function and prototype
+      to the non-Windows sections of bli_pthread.c and .h. This function
+      isn't needed by BLIS, but I figured why not make the Windows and
+      non-Windows sections consistent with one another.
+
+commit 4b683740c12f83804a51ec610b16ce28607d5c85
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 24 11:56:16 2018 -0500
+
+    Defined bli_pthread_cond_*() and related defs.
+    
+    Details:
+    - Added function definitions for bli_pthread_cond_*() as well as related
+      types and constants to bli_pthread.c, and corresponding prototypes to
+      bli_pthread.h.
+
+commit 4b4f8072b9bb495b3e01d45698b0bad3dac31ba8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 24 11:31:46 2018 -0500
+
+    Define bli_pthreads barrier types on OS X.
+    
+    Details:
+    - Fully define bli_pthreads barrier-related types on OS X. Only typedef
+      those types in terms of pthreads types on non-Windows, non-Apple OSes
+      (i.e. Linux).
+
+commit ad98790dcef6bd9aab7f13d615b987b5daa58757
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 23 20:35:05 2018 -0500
+
+    Fix names of Windows pthread initializer macros.
+    
+    Details:
+    - Renamed the PTHREAD_ initializer macros in the Windows cpp case to use
+      BLIS_ prefixes to match their non-Windows counterparts.
+
+commit 06c23954e6b17219a50c3d37821544a46defaf89
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 23 19:16:54 2018 -0500
+
+    Defined unified bli_pthreads_*() API for all OSes.
+    
+    Details:
+    - Expanded the bli_pthread_*() -> pthread_*() wrappers in
+      frame/thread/bli_pthread.c to include cases for Windows taken from
+      frame/base/bli_pthread_wrap.c. Now, bli_thread_*() is always defined
+      and always used by BLIS and the BLIS testsuite (in lieu of calling
+      pthreads directly, as before). The implementation used in this new
+      API depends on whether we are building for Windows, and to a lesser
+      extent, whether we are building on OS X. For the core API, Windows
+      uses Windows threads, non-Windows (Linux, OS X) uses pthreads.
+      OS X and Windows get barriers implemented in terms of other
+      bli_pthread_*() functions, and Linux gets barriers implemented in
+      terms of pthread_barrier*(). This commit addresses issue #273.
+    - Fixed a bug in the Linux definition of bli_pthread_mutex_unlock(),
+      which was erroneously calling pthread_mutex_lock().
+    - Minor changes to configure so that the auto-detection executable
+      can be built given the above changes (most notably, turning on
+      POSIX extensions via -D_GNU_SOURCE).
+    - Removed temporary play-test code for shiftd that accidentally got
+      committed into test/3m4m/test_gemm.c.
+
+commit eac7d267a017d646a2c5b4fa565f4637ebfd9da7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 22 18:10:59 2018 -0500
+
+    Unconditionally define bli_l3_thread_entry().
+    
+    Details:
+    - Define a dummy bli_l3_thread_entry() function when multithreading is
+      disabled altogether, or enabled via OpenMP. This function was
+      originally necessary when multithreading is enabled via pthreads.
+      By defining the function no matter the threading options given, it is
+      less likely that an AppVeyor Windows build will complain due to a
+      missing symbol in the DLL. (To be clear: AppVeyor was working fine
+      before, but a problem may have arisen if it were switched to an
+      OpenMP build.)
+    - Removed the prototype for bli_l3_thread_entry() from
+      bli_thrcomm_pthreads.c and placed it in bli_thrcomm.h.
+    - Regenerated the symbols list file build/libblis-symbols.def.
+
+commit 4ee986f0a74207f4ca29df077929134725d62b80
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 22 14:09:44 2018 -0500
+
+    Added mixed-datatype testing to Travis CI (#271).
+    
+    Details:
+    - Modified .travis.yml to automatically test the mixed-datatype support
+      of the gemm operation, with supporting changes to common.mk, the
+      top-level Makefile, and travis/do_testsuite.sh.
+    - Added a new pair of input files to testsuite directory with the
+      '.mixed' suffix (similar to those with the '.fast' suffix) for testing
+      mixed-datatype gemm.
+    - Updated docs/BuildSystem.md to document the new make targets
+      'testblis-md' and 'checkblis-md'.
+
+commit c3c6ebc9c6244053d654a9b0c955acb2fef42ee8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Oct 21 18:48:54 2018 -0500
+
+    Fixed thrinfo_t printing for small problems.
+    
+    Details:
+    - Fixed a bug in the code that prints out the communicator and work ids
+      from the various threads' thrinfo_t nodes. This bug manifested when
+      the dimension being parallelized was not large enough such that every
+      thread was assigned actual work (since the minimum amount of work is
+      determined by the register blocksize in the dimension being
+      parallelized). In those cases, the threads that receive no work in
+      that dimension do not finish building their thrinfo_t tree, leaving
+      lower-level nodes non-existent. (The bug itself was usally observed as
+      a segfault when the printing code attempted to dereference all the way
+      down the thrinfo_t tree.) The solution involves explicitly checking
+      each node as it is dereferenced, and if at any time NULL is found, all
+      subsequent communicator and work ids are set to -1.
+
+commit 73a222c0d99dcc221be7dea10eaebf844f31f72e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Oct 20 14:13:04 2018 -0500
+
+    Minor edits to 'configure --help' text.
+
+commit 14f3d5e6df183819a0c393b2661ad15df0786544
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 20:39:35 2018 -0500
+
+    Refresh libblis-symbols.def post-merge 090e4f0.
+
+commit 090e4f08fc2f429a1b2db77b0a6f8276f892a7ac
+Merge: c9be5889 0854e880
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 18:41:10 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 0854e880b0848e0c2e3d0644c93c80b0fd13c0dc
+Merge: 4e38a8d4 343a2715
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 18:05:00 2018 -0500
+
+    Merge pull request #261 from flame/win-pthreads
+    
+    Implement missing pthreads function on Windows
+
+commit c9be5889fbe947c64ef75740662e4d63032f4c35
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 17:42:40 2018 -0500
+
+    Added "Known issues" section to Multithreading.md.
+    
+    Details:
+    - Added known issues section to Multithreading.md.
+    - Trivial changes to MixedDatatypes.md, Sandboxes.md.
+
+commit 343a2715ebee28d250ee41b914abdcd1dc77c344
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 16:59:19 2018 -0500
+
+    Whitespace changes to configure, bli_pthread_wrap.
+    
+    Details:
+    - Mostly whitespace changes (spaces to tabs) to configure and
+      bli_pthread_wrap.c and .h.
+
+commit 3678a1cd518df9447b4b1ea86885eb2ba8abcf6e
+Merge: 85397cd4 4e38a8d4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 16:11:31 2018 -0500
+
+    Merge branch 'master' into win-pthreads
+
+commit 4e38a8d4eebb18ead74e644fac76a4fde8e7f6c6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 15:54:15 2018 -0500
+
+    Implemented python version checking in configure.
+    
+    Details:
+    - Added python version checking to configure script. (Recall that python
+      is needed to execute the flatten-headers.py script.) Minimum versions
+      of python needed are currently as follows:
+        python2: 2.7 or later
+        python3: 3.5 or later
+      The standard search order for python interpeters is:
+        python python3 python2
+      The PYTHON environment variable is also supported and will be checked
+      before the standard search order list.
+    - Updated BuildSystem.md to include: a minimum make version; mention
+      that the C compiler must actually be a C99 compiler; and the caveat
+      that Windows builds do not require pthreads since BLIS can provide
+      an implementation of pthreads internally.
+
+commit 85397cd4fa52f6c4c33f4fb715478c55533c680e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 13:12:43 2018 -0500
+
+    Added explanatory comment to bli_pthread.c.
+    
+    Details:
+    - Added a verbose comment to bli_pthread.c that explains why a bli_
+      wrapper to pthreads APIs is useful.
+
+commit 53c07035ef61cc9b8469636d4d8fa5085f37652d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 19 12:53:03 2018 -0500
+
+    Refresh libblis-symbols.def from bb6df28.
+    
+    Details:
+    - Forgot to regenerate the symbols file after the previous commit
+      (bb6df281) in which shiftd operation was introduced.
+
+commit 473ce54f5fbea4860ac0514e7e8b022c1ea03e63
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 18 19:03:56 2018 -0500
+
+    Added bli_pthread_*() API.
+    
+    Details:
+    - Defined a bli_pthread_*() API so that the testsuite, when being linked
+      against a Windows DLL, will be able to access pthreads functionality
+      without those pthreads functions being explicitly exported by the DLL.
+      Instead, we export the bli_pthread_*() layer, which uses types and
+      functions that are identical to pthreads, but adds a 'bli_' prefix.
+      Only a few basic functions are present in the bli_pthreads_*() API
+      for now. Thanks to Devin Matthews and Isuru Fernando for their help
+      on a related PR (#261) that this commit will hopefully facilitate.
+    - Updated testsuite so that it calls bli_pthread_*() layer instead of
+      pthread_*() functions directly.
+    - Regenerated build/libblis-symbols.def.
+    - Comment updated to build/regen-symbols.sh.
+
+commit bb6df2814fcaa2fa62a549379f61be2f8667a598
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 18 17:11:39 2018 -0500
+
+    Defined a new level-1d operation: shiftd.
+    
+    Details:
+    - Defined a new level-1d operation called 'shiftd', including object and
+      typed APIs. This operation adds a scalar value to every element along
+      an arbitrary diagonal of a matrix. Currently, shiftd is implemented in
+      terms of the addv kernel. (The scalar is passed in as the x vector
+      with an increment of zero.)
+    - Replaced ad-hoc usage of setd and addd (after creating a temporary
+      matrix object) with use of shiftd, which is much more concise, in
+      various test driver files in the testsuite. Similar changes were made
+      to the standalone test drivers and the example code.
+    - Added documentation entries in BLISObjectAPI.md and BLISTypedAPI.md
+      for bli_shiftd() and bli_?shiftd(), respectively.
+    - Added observed object properties to level-1d documentation in
+      BLISObjectAPI.md.
+
+commit 53e0a0c9b38e8525c7224e280342ef56328af567
+Merge: 1c7247b6 ec676799
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 18 14:54:59 2018 -0500
+
+    Merge branch 'master' into win-pthreads
+
+commit ec67679990660a60362a49406595383672812287
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 18 14:27:02 2018 -0500
+
+    Refreshed Windows symbol list; added regen script.
+    
+    Details:
+    - Moved windows/build/libblis-symbols.def to build/libblis-symbols.def.
+      Updated link commands in common.mk accordingly.
+    - Added a new script build/regen-symbols.sh that will regenerate the
+      libblis-symbols.def file in its new location after building a
+      haswell-targeted shared library. Thanks to Isuru Fernando for
+      providing the symbol generation command.
+    - Ran the new script to refresh the symbols file.
+
+commit fdad54ab8eee4a7efd04ec4afb3e6902eb22e60a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 18 12:43:22 2018 -0500
+
+    Removed old symbol from libblis-symbols.def.
+    
+    Details:
+    - Removed bli_gemm_ker_var1() from windows/build/libblis-symbols.def
+      since this function is no longer compiled.
+
+commit 49d3f9fcbb4a75553439f97c099ea48d85763eea
+Merge: 779d64dc 3c527256
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 17 18:00:40 2018 -0500
+
+    Merge branch 'master' into dev
+
+commit 3c52725693d0d7726e1c8fb224f9b1ef786db8b9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 17 14:56:22 2018 -0500
+
+    Renamed/moved l3 zen ukernels to haswell kernel set.
+    
+    Details:
+    - Renamed the microkernels in kernels/zen/3 to kernels/haswell/3 and
+      then updated the file contents to use the 'haswell' infix.
+    - Updated bli_cntx_init_zen.c and bli_cntx_init_haswell.c according to
+      above function renames.
+    - Moved/updated the corresponding prototypes in bli_kernels_zen.h to
+      bli_kernels_haswell.h.
+    - Updated config_registry according to above changes.
+    - NOTE: This rename reflects the fact that haswell microkernels are
+      specifically written to overcome the floating-point latency for FMA
+      instructions on Intel Haswell-like architectures, which can issue two
+      FMA instructions per cycle. These ukernels happen to work fine on AMD
+      Zen-based architectures. However, Zen only issues one FMA per cycle,
+      which, while halving its floating-point throughput, gives it extra
+      flexibility in the design of its microkernels--namely, mr and nr can
+      be smaller and still overcome the floating-point latency for those
+      single-issue cores. A smaller value of mr and nr allows for a larger
+      value of kc, which may be useful in some situations. In the future,
+      we may write such Zen-specific microkernels to take advantage of this
+      additional flexibility.
+
+commit 71c5832d5f5596f25204980803423d08143a4010
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 17 14:11:01 2018 -0500
+
+    Consolidated slab/rr-explicit level-3 macrokernels.
+    
+    Details:
+    - Consolidated the *sl.c and *rr.c level-3 macrokernels into a single
+      file per sl/rr pair, with those files named as they were before
+      c92762e. The consolidation does not take away the *option* of using
+      slab or round-robin assignment of micropanels to threads; it merely
+      *hides* the choice within the definitions of functions such as
+      bli_thread_range_jrir(), bli_packm_my_iter(), and bli_is_last_iter()
+      rather than expose that choice explicitly in the code. The choice of
+      slab or rr is not always hidden, however; there are some cases
+      involving herk and trmm, for example, that require some part of the
+      computation to use rr unconditionally. (The --thread-part-jrir option
+      controls the partitioning in all other cases.)
+    - Note: Originally, the sl and rr macrokernels were separated out for
+      clarity. However, aside from the additional binary code bloat, I later
+      deemed that clarity not worth the price of maintaining the additional
+      (mostly similar) codes.
+
+commit 57eab3a4f0e43099fc2ff189df9fcc0d7801c2cd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 17 11:29:20 2018 -0500
+
+    CREDITS file update.
+
+commit 6722ec21817cbab9d86ee63f00984eb407b5e627
+Author: Ye Luo <xw111luoye@gmail.com>
+Date:   Wed Oct 17 11:26:00 2018 -0500
+
+    Fix bgclang compilation on BGQ (#270)
+    
+    * Fix bgq kernels
+    
+    * Support bgq with bgclang
+
+commit 1c7247b6d146fc728d7c4240e4e069e33f8f8868
+Merge: c1bc5530 6c5a1aaf
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 16 14:44:32 2018 -0500
+
+    Merge branch 'win-pthreads' of github.com:flame/blis into win-pthreads
+
+commit c1bc5530d51bf55b4aa3c35165f6d4452a0fd779
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 16 14:44:10 2018 -0500
+
+    Don't call pthread_once in auto-detect.
+
+commit b9c61d03f542a2e92551ff0595415bec3076ab25
+Merge: 5a1e461f 3612ecac
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 16 14:39:57 2018 -0500
+
+    Merge branch 'nested-omp-patch'
+
+commit 5a1e461ffe09ed200ee2fc7aafccf6dd7e8c0080
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 16 14:21:45 2018 -0500
+
+    Execute flatten-headers.py via $(PYTHON).
+    
+    Details:
+    - Execute build/flatten-headers.py python script via $(PYTHON) in
+      common.mk. This allows distributions that define the current/preferred
+      python interpreter in the PYTHON environment variable to use that
+      interpreter when executing flatten-headers.py. Thanks to Isuru
+      Fernando for this suggestion, and for Dave Love for submitting the
+      initial issue/request.
+
+commit 6c5a1aaff540b19672e91501e894ed695aee322b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 16 10:15:59 2018 -0500
+
+    Fix type in bli_pthread_wrap.c
+
+commit 29e6245816760b1bd4ac738d7d3e11a9d9d13473
+Merge: 0b73209f ed657714
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 16 10:12:25 2018 -0500
+
+    Merge branch 'master' into win-pthreads
+
+commit 0b73209f6b22cc024169146d343627f6999b63d8
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 16 10:02:06 2018 -0500
+
+    Add missing argument to WaitForSingleObject and use $is_win in configure
+    to turn off pthreads.
+
+commit ed65771482a705f7ed028d822489766327b44e76
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 15 17:54:45 2018 -0500
+
+    Fixed merge fail on testsuite threading macros.
+    
+    Details:
+    - Applied the following C preprocessor macro renames
+    
+        BLIS_DEFAULT_MR_THREAD_MAX  -> BLIS_THREAD_MAX_IR
+        BLIS_DEFAULT_NR_THREAD_MAX  -> BLIS_THREAD_MAX_JR
+        BLIS_DEFAULT_M_THREAD_RATIO -> BLIS_THREAD_RATIO_M
+        BLIS_DEFAULT_N_THREAD_RATIO -> BLIS_THREAD_RATIO_N
+    
+      in src/test_libblis.c. This is apparently the result of a failure by
+      git to properly merge the 'master' and 'amd' branches in the previous
+      commit. (The 'master' branch contained a commit, 53a9ab1, in which
+      these same cpp macros were renamed throughout the source distribution.
+
+commit dc5fd898af8c74c2e2a75fc647157da0d04dd922
+Merge: 667d3929 637c2ce7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 15 17:41:35 2018 -0500
+
+    Merge branch 'amd'
+
+commit 779d64dc3091dea6b7530283304e52878151d218
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 15 17:13:18 2018 -0500
+
+    Added entry for xpbym to input.operations.fast.
+    
+    Details:
+    - Forgot to add an entry for the new xpbym operation to
+      input.operations.fast in previous commit.
+
+commit 5fec95b99f61761963834f62a9867f797687813c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 15 16:37:39 2018 -0500
+
+    Implemented mixed-datatype support for gemm.
+    
+    Details:
+    - Implemented support for gemm where A, B, and C may have different
+      storage datatypes, as well as a computational precision (and implied
+      computation domain) that may be different from the storage precision
+      of either A or B. This results in 128 different combinations, all
+      which are implemented within this commit. (For now, the mixed-datatype
+      functionality is only supported via the object API.) If desired, the
+      mixed-datatype support may be disabled at configure-time.
+    - Added a memory-intensive optimization to certain mixed-datatype cases
+      that requires a single m-by-n matrix be allocated (temporarily) per
+      call to gemm. This optimization aims to avoid the overhead involved in
+      repeatedly updating C with general stride, or updating C after a
+      typecast from the computation precision. This memory optimization may
+      be disabled at configure-time (provided that the mixed-datatype
+      support is enabled in the first place).
+    - Added support for testing mixed-datatype combinations to testsuite.
+      The user may test gemm with mixed domains, precisions, both, or
+      neither.
+    - Added a standalone test driver directory for building and running
+      mixed-datatype performance experiments.
+    - Defined a new variation of castm, castnzm, which operates like castm
+      except that imaginary values are not touched when casting a real
+      operand to a complex operand. (By contrast, in these situations castm
+      sets the imaginary components of the destination matrix to zero.)
+    - Defined bli_obj_imag_is_zero() and substituted calls in lieu of all
+      usages of bli_obj_imag_equals() that tested against BLIS_ZERO, and
+      also simplified the implementation of bli_obj_imag_equals().
+    - Fixed bad behavior from bli_obj_is_real() and bli_obj_is_complex()
+      when given BLIS_CONSTANT objects.
+    - Disabled dt_on_output field in auxinfo_t structure as well as all
+      accessor functions. Also commented out all usage of accessor
+      functions within macrokernels. (Typecasting in the microkernel is
+      still feasible, though probably unrealistic for now given the
+      additional complexity required.)
+    - Use void function pointer type (instead of void*) for storing function
+      pointers in bli_l0_fpa.c.
+    - Added documentation for using gemm with mixed datatypes in
+      docs/MixedDatatypes.md and example code in examples/oapi/11gemm_md.c.
+    - Defined level-1d operation xpbyd and level-1m operation xpbym.
+    - Added xpbym test module to testsuite.
+    - Updated frame/include/bli_x86_asm_macros.h with additional macros
+      (courtsey of Devin Matthews).
+
+commit 3612ecac98a9d36c3fcd64154121d420bb69febd (origin/nested-omp-patch)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 11 15:16:41 2018 -0500
+
+    Added comments to nested OpenMP handling code.
+    
+    Details:
+    - Added comments to bli_thrcomm_openmp.c relating to changes made in
+      6ac0c80 and 1064d79.
+
+commit 667d3929ee20e94849b4e25b693b4037b7e3f350
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 11 11:47:57 2018 -0500
+
+    Added Fortran APIs for some thread functions.
+    
+    Details:
+    - Defined Fortran-77 compatible APIs for bli_thread_set_num_threads()
+      and bli_thread_set_ways(). These wrappers are defined in
+      frame/compat/blis/thread/b77_thread.c. Thanks to Kay Dewhurst for
+      suggesting these new interfaces.
+    - Added missing prototype for bli_thread_set_ways() in bli_thread.h and
+      removed prototypes for non-existent functions bli_thread_set_*_nt().
+    - CREDITS file update.
+
+commit 1064d79711f03a0541b92d8b8b9b7e25e04097a5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Oct 11 11:14:25 2018 -0500
+
+    Adjust rntm_t struct as well.
+
+commit 6ac0c805609b85616ddb32e50101c4f9feb25a35
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Oct 11 10:45:07 2018 -0500
+
+    Fix OMP nesting problem.
+    
+    Detect when OpenMP uses fewer threads than requested and correct accordingly, so that we don't wait forever for nonexistent threads. Fixes #267.
+
+commit 53a9ab1c85be14dcfd2560f5b16e898e3e258797
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 10 15:11:09 2018 -0500
+
+    Renamed thread auto-factorization macro constants.
+    
+    Details:
+    - Renamed the following C preprocessor macros whose fallback/default
+      values are specified within frame/include/bli_kernel_macro_defs.h:
+    
+        BLIS_DEFAULT_MR_THREAD_MAX  -> BLIS_THREAD_MAX_IR
+        BLIS_DEFAULT_NR_THREAD_MAX  -> BLIS_THREAD_MAX_JR
+        BLIS_DEFAULT_M_THREAD_RATIO -> BLIS_THREAD_RATIO_M
+        BLIS_DEFAULT_N_THREAD_RATIO -> BLIS_THREAD_RATIO_N
+    
+    - Renamed the above cpp macro overrides within the knl, skx, and zen
+      sub-configurations, as well as invocations of those macros in
+      bli_rntm.c.
+    - Moved config/zen/bli_kernel.h to an 'old' directory as it is no longer
+      used by any code within BLIS.
+
+commit 637c2ce794b0414ba8b25e9a452f7d64f825d63a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 9 17:18:04 2018 -0500
+
+    Updated column index range for irun.py -q.
+    
+    Details:
+    - Forgot to apply the column index range fix in 10f179f to situations
+      when "quiet" mode (-q) is requested. This commit applies the new
+      column index range modifications to the quiet case.
+
+commit e2a59400bdda7ed7ee0ff00edea70c00ed593b6c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Oct 9 15:29:48 2018 -0500
+
+    Allow trsm_l parallelism in the jc loop.
+    
+    Details:
+    - Previously, trsm was consolidating all ways of parallelism into the jr
+      loop. This was unnecessary and to some degree detrimental on some
+      types of hardware. Now, any parallelism bound for the jc loop will be
+      applied to the jc loop, while all other loops' parallelism is funneled
+      to the jr loop. Thanks to Devangi Parikh for helping investigate this
+      issue and suggesting the fix.
+    - NOTE: This change affects only left-side trsm. However, currently
+      right-side trsm is currently implemented in terms of the left-side
+      case, and thus the change effectively applies to both left and right
+      cases.
+
+commit f1dba506c970f14e612580d3c171e7c5ffd0a5fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 8 17:59:41 2018 -0500
+
+    Output threading status/params from testsuite.
+    
+    Details:
+    - Updated testsuite to output various parameters related to parallelism
+      in BLIS. These parameters include:
+      - threading status: disabled, openmp, or pthreads;
+      - thread partitioning for jr/ir loops: slab or rr (round-robin);
+      - ways of parallelism from environment variables, and also actual
+        values used by gemm, herk, trmm_l, trmm_r, trsm_l, and trsm_r for
+        square problems (assuming all dimensions are set to 1000);
+      - automatic thread factorization parameters.
+    - Also output the status of two relatively new configure-time options:
+      libmemkind and the sandbox.
+
+commit 10f179fb13fc1179921a4ef8efdd2174f01e07da
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 8 14:36:38 2018 -0500
+
+    Updated irun.py to use updated column index range.
+    
+    Details:
+    - Updated the irun.py script so that it updates the matlab column index
+      range (if found) to reflect the additional columns of data that are
+      substituted in. Thanks to Devangi Parikh for recognizing and reporting
+      this issue.
+
+commit c244a716c97849dee41f52b5f424116aae1b710b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Oct 7 20:59:40 2018 -0500
+
+    Added missing -r option to configure --help output.
+    
+    Details:
+    - Added inadvertantly-omitted mention of -r option-equivalent to
+      --thread-part-jrir to the output for 'configure --help'. Also made
+      minor edits to the same text.
+
+commit c92762ecdca1eb0b08c8acd583b4739a1e3fbd39
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Oct 7 20:30:32 2018 -0500
+
+    Added option of slab or rr partitioning in jr/ir.
+    
+    Details:
+    - Updated existing macrokernel function names and definitions to
+      explicitly use slab assignment of micropanels to threads, then created
+      duplicate versions of macrokernels that explicitly use round-robin
+      assignment instead of slab. NOTE: As in ac18949, trsm_r macrokernels
+      were not substantially updated in this commit because they are
+      currently disabled in bli_trsm_front.c.
+    - Updated existing packing function (in blk_packm_blk_var1.c) to
+      explicitly use slab partitioning, and then duplicated for round-robin.
+    - Updated control tree initialization to use the appropriate macrokernel
+      and packm function pointers depending on which method (slab or rr) was
+      enabled at configure-time.
+    - Updated configure script to accept new --thread-part-jrir=[slab|rr]
+      option (-m [slab|rr] for short), which allows the user to explicitly
+      request either slab or round-robin assignment (partitioning) of
+      micropanels to threads.
+    - Updated sandbox/ref99 according to above changes.
+    - Minor updates to build/add-copyright.py.
+
+commit 98e01ea04bfe1032e5bd4781043afd84f864a19e
+Merge: ac18949a 541b8a3b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 4 20:44:12 2018 -0500
+
+    Merge branch 'master' into amd
+
+commit 541b8a3b3e9af4078f5e6fb2f9608d681839952a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 4 20:39:06 2018 -0500
+
+    Removed 1h short-circuit from bli_clock_min_diff().
+    
+    Details:
+    - Removed a guard from bli_clock_min_diff() that would return 0 if the
+      time delta was greater than 60 minutes. This was originally intended
+      to disregard extremely large values under the assumption that the
+      user probably didn't intend to run a test that long. However, since
+      it is in bli_clock_min_diff(), it doesn't actually help short-circuit
+      an implementation that is hanging or looping infinitely, since such
+      an implementation would first have to finish before the
+      bli_clock_min_diff() is called. Thanks to Kiran Varaganti for
+      reporting this issue.
+
+commit 8bf30eb4735872388b5317883d99b775a344ce25
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Wed Oct 3 22:22:29 2018 -0400
+
+    Fixed runme.sh in test/studies/thunderx2
+    
+    Details:
+    - Fixed the setting of threads for a single core run.
+
+commit f6f2456ba2afa8f85f43c7c2c90acc439d61d94f
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Wed Oct 3 21:43:46 2018 -0400
+
+    Fixed the Makefile in test/studies/thunderx2
+    
+    Details:
+    - Fixed target for make-all-st and make-all-mt so that the armpl
+      targets are built
+
+commit 743a1a6dec1bd3908f0f15513b501c9bd59715b3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 3 14:40:10 2018 -0500
+
+    Fixed misleading version query from gcc 7+.
+    
+    Details:
+    - gcc 7 introduced new behavior to the -dumpversion option whereby only
+      the major version component is output. However, as part of this
+      change, gcc 7 also introduced a new option, -dumpfullversion, which is
+      guaranteed to always output the major, minor, and revision numbers. If
+      we are using gcc 7 or later, we re-query the version string with this
+      new option and then re-parse the result so as to avoid misleading
+      output from configure (e.g. using gcc 7.3.0 is reported as 7.7.7).
+
+commit de07840ba5672b9d7b2ed2b918974e98c3f249fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 3 13:57:25 2018 -0500
+
+    Whitespace, https updates to README.md.
+    
+    Details:
+    - Reformatted to fit all lines within 80 columns, unless a link is too
+      long to fit on a single line.
+    - Changed some links from http to https.
+
+commit b8dfd82e0d1afda4ee5436662d63515a59b2dee3
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 15:37:12 2018 -0500
+
+    Get pthreads via blis.h in the test driver.
+
+commit d0c0c20b7bd3ecf914b5910a50f618fb7d7aa355
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 15:16:00 2018 -0500
+
+    There seems to be a problem with _POSIX_BARRIERS on Travis.
+
+commit 0904d9e4df0c8a256ac35c491f14a587ebe9fca2
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 15:04:36 2018 -0500
+
+    *Always* use Windows primitives instead of pthreads.
+
+commit 998317d309934cd7129f8c818ea6e5f07534ebc8
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 14:43:24 2018 -0500
+
+    Remove pthreads from appveyor build.
+
+commit 627d0c5bfd4b7b149803587391c93b164c11ced5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 14:40:55 2018 -0500
+
+    Combine the alternative barrier implementation for macOS with the pthread wrapper for Windows. Also implement pthread_{create,join} for Windows.
+
+commit 81d2c064a209df7eca7d6103696ca3a137a7f82e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 11:46:36 2018 -0500
+
+    Add wrapper for basic pthreads functionality (mutex, once) with MSVC.
+
+commit d33f130ea621fca1dccb30631f454d237918eb04
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 2 11:45:43 2018 -0500
+
+    Some configure changes:
+    
+    1) Allow environment variables to be set anywhere in the argument list.
+    2) Allow any environment variable to be set.
+    3) Allow LIBPHTREAD to be set to null without getting defaulted to -lpthread.
+
+commit 9d5f1c4f3bf70c2c0ea84bfa326a0113ae2d176c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 1 17:39:26 2018 -0500
+
+    Patch to avoid gcc warning in blastest/f2c/open.c.
+    
+    Details:
+    - Use the modulo operator to limit the size of an integer that is given
+      to sprintf(). This avoids a warning in some versions of gcc about the
+      integer potentially overflowing the available space in the string into
+      which the integer is being printed.
+
+commit 0c3cd00ba76de607e807f8deb04b1a2ce18ea7a8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 1 16:18:25 2018 -0500
+
+    More README.md updates.
+    
+    Details:
+    - Replaced much of "Getting Started" section with a shortened version of
+      the bullet list of documentation currently shown in the github wiki
+      page. Thanks to Devangi Parikh for her feedback in this change.
+
+commit 8eaf34bd23b30a1857a50d7142ee9811895f24bf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 1 14:29:07 2018 -0500
+
+    Very minor README.md update.
+
+commit 599090e0eb41b2706fa1231fa7b90096f3281678
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 1 14:04:30 2018 -0500
+
+    README.md update.
+    
+    Details:
+    - Added language mentioning SHPC group to Introduction.
+
+commit ac18949a4b9613741b9ea8e5026d8083acef6fe4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Sep 30 18:54:56 2018 -0500
+
+    Multithreading optimizations for l3 macrokernels.
+    
+    Details:
+    - Adjusted the method by which micropanels are assigned to threads in
+      the 2nd (jr) and 1st (ir) loops around the microkernel to (mostly)
+      employ contiguous "slab" partitioning rather than interleaved (round
+      robin) partitioning. The new partitioning schemes and related details
+      for specific families of operations are listed below:
+      - gemm: slab partitioning.
+      - herk: slab partitioning for region corresponding to non-triangular
+              region of C; round robin partitioning for triangular region.
+      - trmm: slab partitioning for region corresponding to non-triangular
+              region of B; round robin partitioning for triangular region.
+              (NOTE: This affects both left- and right-side macrokernels:
+              trmm_ll, trmm_lu, trmm_rl, trmm_ru.)
+      - trsm: slab partitioning.
+              (NOTE: This only affects only left-side macrokernels trsm_ll,
+              trsm_lu; right-side macrokernels were not touched.)
+      Also note that the previous macrokernels were preserved inside of
+      the 'other' directory of each operation family directory (e.g.
+      frame/3/gemm/other, frame/3/herk/other, etc).
+    - Updated gemm macrokernel in sandbox/ref99 in light of above changes
+      and fixed a stale function pointer type in blx_gemm_int.c
+      (gemm_voft -> gemm_var_oft).
+    - Added standalone test drivers in test/3m4m for herk, trmm, and trsm
+      and minor changes to test/3m4m/Makefile.
+    - Updated the arguments and definitions of bli_*_get_next_[ab]_upanel()
+      and bli_trmm_?_?r_my_iter() macros defined in bli_l3_thrinfo.h.
+    - Renamed bli_thread_get_range*() APIs to bli_thread_range*().
+
+commit b952ca8feb6f17f71a4512649c2aa72bdee9c8f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 28 16:12:32 2018 -0500
+
+    CREDITS file update.
+
+commit 7d96fc437ebaa9dd2d7071865b5df16402fadd64
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 28 15:40:45 2018 -0500
+
+    Allow slashes ('/') in version tags.
+    
+    Details:
+    - Updated the configure script to allow slashes in version string. This
+      is needed so that downstream maintainers (such as those for Debian)
+      can create local tags such as "upstream/0.4.1". Thanks to M. Zhou for
+      reporting this issue via PR #256 and providing me the information
+      needed to debug the problem.
+
+commit 5fdddf6f37c64da093c7f59e3a85214e819ae652
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 28 11:25:54 2018 -0500
+
+    Removed 'debian' directory.
+    
+    Details:
+    - Removed the top-level 'debian' directory. This directory is apparently
+      no longer needed (issue #257). Thanks to M. Zhou and Nico Schlömer for
+      their contributions.
+
+commit 60b2650d7406d266feffe232c2d5692a9e3886d0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 24 15:04:45 2018 -0500
+
+    Added statistics-collecting irun.py script.
+    
+    Details:
+    - Added irun.py script to 'build' directory. This irun.py script is a
+      python script for repeatedly invoking a test driver executable, such
+      as those found in test/3m4m, and replace the performance output column
+      with four columns that aggregate statistics. Specifically, the script
+      reports the minimum, average, maximum, and standard deviation for each
+      problem size. This script is useful especially (though not
+      exclusively) when trying to determine the impact of relatively minor
+      changes to the code, or other small optimizations that may be
+      difficult to distinguish from "noise." One way this "noise" manifests
+      is that a test executable may run slightly slower or faster for all
+      problem sizes (and all implementations) tested by the executable over
+      the life of a single execution. The cause of these minor
+      across-the-board pertubations in the overall performance signatures is
+      unknown, though we hypothesize that it may relate to any number of
+      issues such as operating system scheduling, where in memory the
+      program is loaded, or how the CPU clock frequency is throttled at the
+      time of execution. Regardless of the source of these subtle
+      performance anomalies, the statistical properties reported by the
+      irun.py script help the user to more precisely characterize the
+      underlying performance exhibited by any given test driver, which
+      allows him or her to make better judgments about the true difference
+      in performance between two implementations, or minor changes within a
+      single implementation.
+
+commit 807a654888117fb3a27ea36384f1c1c11b882cd5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 20 15:41:05 2018 -0500
+
+    Fixed confusing configure message for libmemkind.
+    
+    Details:
+    - Corrected feedback echoed to user by configure when libmemkind is
+      found but not explicitly requested. In these cases, configure would
+      echo a message that it had received an explicit request to enable
+      libmemkind, which was not accurate, even if the end result was the
+      same--that libmemkind is enabled by default when it is found. Thanks
+      To Devangi Parikh for reporting this issue.
+
+commit 02adab427c779b0aaf38a5877a5f0246b1909e8f
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Thu Sep 20 14:38:50 2018 -0400
+
+    Created a 'thunderx2' subdirectory within test/studies
+    
+    Details:
+    - Created a 'thunderx2' subdirectory within test/studies to house
+      various level-3 test driver used to measure performance on
+      ThunderX2.
+
+commit d7537fb51dac0636591fc7c68261a2322642ab3c
+Merge: dad07245 c03728f1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 12 15:24:20 2018 -0500
+
+    Merge branch 'dev'
+
+commit dad07245dbcfaf35232ec379ba756eb133c361c1
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Wed Sep 12 04:16:58 2018 -0500
+
+    Fixed yet another bug in runme script in test/studies
+    
+    Details:
+    - Fixed another copy-paste bug
+
+commit e669057fe35f2037d8111af687d84a0ecf6d7a2a
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Tue Sep 11 22:29:42 2018 -0500
+
+    Fixed bug in runme script in test/studies
+    
+    Details:
+    - Fixed bug in runme script for skx studies that set the number of
+      threads incorrectly
+
+commit 232fdc3df3e01ae3f86d53767bd14eb93b511e6e
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Mon Sep 10 18:45:50 2018 -0500
+
+    Updated runme script in test/studies.
+    
+    Details:
+    - Updated runme script for skx studies to run multithreading tests
+      on 1 and 2 sockets.
+
+commit c03728f1f45edb5e434db90ab8a77ba0184a682b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 10 17:54:27 2018 -0500
+
+    Various minor cleanups.
+    
+    Details:
+    - Rewrote bli_winsys.c to define bli_setenv() and bli_sleep()
+      unconditionally, but differently for Windows and non-Windows, but
+      then disabled the definition of bli_setenv() entirely since BLIS
+      no longer needs to set environment variables. Updated bli_winsys.h
+      accordingly, and call bli_sleep() from within testsuite instead of
+      sleep() directly.
+    - Use
+        #if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS != 200809L)
+      instead of
+        #if !defined(_POSIX_BARRIERS) || (_POSIX_BARRIERS < 0)
+      when guarding against local definition of pthread barrier in
+      testsuite. (The description for unistd.h implies that _POSIX_BARRIERS
+      should always be set to 200809L when barriers are supported, though I
+      won't be surprised if we encounter a case in the future where it is
+      set to something else such as 1 while still supported.)
+    - Removed old _VERS_CONF_INST definitions and installation rules in
+      top-level Makefile. These are no longer needed because we no longer
+      output libraries with the version and configuration name as
+      substrings.
+    - Comment/whitespace updates in Makefile, config.mk.in, common.mk,
+      configure, bli_extern_defs.h, and test_libblis.h.
+    - Added mention of 1m to README.md and other trivial tweaks.
+
+commit e249a00a82908054ecd307cf602c8801275903e8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 10 16:48:35 2018 -0500
+
+    Imported skx dgemm ukernel from skx-redux branch.
+    
+    Details:
+    - Added the new bli_dgemm_skx_asm_16x14.c microkernel from the skx-redux
+      branch, along with appropriate blocksizes in bli_cntx_init_skx.c and
+      a prototype in bli_kernels_skx.h. (Devin has not yet written the
+      sgemm analague, so for now we will continue using the older sgemm
+      ukernel.)
+    - Updated frame/include/bli_x86_asm_macros.h with a minor change that
+      was present within the skx-redux branch.
+
+commit e93b01ff60bf9742baa5eefd93e208d1219e7a43
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Sun Sep 9 15:57:43 2018 -0500
+
+    Windows DLL support (#246)
+    
+    * Enable shared
+    
+    * Enable rdp
+    
+    * Add support for dll
+    
+    * Use libblis-symbols.def
+    
+    * Fix building dlls
+    
+    * Fix libblis-symbols.def
+    
+    * Fix soname
+    
+    * Fix Makefile error
+    
+    * Fix install target
+    
+    * Fix missing symbols
+    
+    * Add BLIS_MINUS_TWO
+    
+    * Add path to dll
+    
+    * Fix OSX soname
+    
+    * Add declspec for dll
+    
+    * Add -DBLIS_BUILD_DLL
+    
+    * Replace @enable_shared@ in config
+    
+    * switch to auto for now
+    
+    * blis_ -> bli_
+    
+    * Remove BLIS_BUILD_DLL in make check
+    
+    * change auto->haswell
+    
+    * enable_shared_01
+    
+    * Add wno-macro-redefined
+    
+    * print out.cblat3
+    
+    * BLIS_BUILD_DLL -> BLIS_IS_BUILDING_LIBRARY
+    
+    * Use V=1
+    
+    * Remove fpic for windows
+    
+    * Remember LIBPTHREAD
+    
+    * Remove libm for windows
+    
+    * Remember AR
+    
+    * Fix remembering libpthread
+    
+    * Add Wno-maybe-uninitialized in only gcc
+    
+    * Don't do blastest for shared for now
+    
+    * Fix install target
+    
+    And remove unnecessary change
+    
+    * test auto and x86_64
+    
+    * Fix install target again
+    
+    * Use IS_WIN variable
+    
+    * Remove leading dot from LIBBLIS_SO_MAJ_EXT
+    
+    * Make is_win yes/no
+    
+    * Add comments for windows builds
+    
+    * Change if else blocks location
+
+commit 1330d5c4bc3b644ec0af54c3939a5b9f00eacd9c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 7 19:37:59 2018 -0500
+
+    Employ "user" cflags for tl Makefile test targets.
+    
+    Details:
+    - Use get-user-cflags-for() to generate cflags when compiling BLAS test
+      drivers and BLIS testsuite from top-level Makefile. Meant to include
+      these changes in previous commit (4b5437e). Thanks to Isuru Fernando
+      for pointing out this oversight.
+
+commit 4b5437ec7afb2befffffbb83f7872bcb4fc61e51
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 7 17:24:32 2018 -0500
+
+    Define a cpp macro specific to BLIS compilation.
+    
+    Details:
+    - Tweaked the cflags functions in common.mk so that a new preprocessor
+      macro, BLIS_IS_BUILDING_LIBRARY, is defined, but only when BLIS
+      itself is being built. This macro will not be defined when, for
+      example, the testsuite or example code compiles code local to those
+      applications. This was done in part by defining a new cflags function
+      get-user-cflags-for(), which is now the designated function for
+      application Makefiles if they wish to inherit a basic set of CFLAGS
+      from BLIS. (The compiler flags returned are identical to that of
+      get-frame-cflags-for() except that -DBLIS_IS_BUILDING_LIBRARY is
+      omitted.)
+    - Updated all test driver-like makefiles to call get-user-cflags-for()
+      instead of get-frame-cflags-for().
+
+commit cc2cca4f56eb30212a0dce3e5c121e64d9e59560
+Merge: e19e7212 fb81c7fc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 6 17:12:13 2018 -0500
+
+    Merge branch 'dev'
+
+commit e19e7212872da3d464734199193436faa51f0da0
+Merge: 97965b09 b3d0702c
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Thu Sep 6 14:58:49 2018 -0700
+
+    Merge pull request #244 from kali/pthread-barrier-osx
+    
+    add an adhoc impl for pthread_barrier
+
+commit b3d0702cf2ef6dda19a23dd8a677be1b6f73c322
+Merge: 4e7d0670 97965b09
+Author: Jeff Hammond <jeff.science@gmail.com>
+Date:   Thu Sep 6 14:58:23 2018 -0700
+
+    Merge branch 'master' into pthread-barrier-osx
+
+commit 4e7d06700f176a62952d7d51e41fdcbc6b7a9d5f
+Author: Mathieu Poumeyrol <kali@zoy.org>
+Date:   Thu Sep 6 23:48:31 2018 +0200
+
+    second __APPLE__
+
+commit fb81c7fc665d68e6a2add163feb29acc0bce8936
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 6 16:29:39 2018 -0500
+
+    Defined cortexa53 sub-configuration.
+    
+    Details:
+    - Added a new sub-configuration 'cortexa53', which is a mirror image
+      of cortexa57 except that it will use slightly different compiler
+      flags. Thanks to Mathieu Poumeyrol for making this suggestion after
+      discovering that the compiler flags being used by cortexa57 were
+      not working properly in certain OS X environments (the fix to which
+      is currently pending in pull request #245).
+
+commit 24ecc0d94aaa9ab4df1ae6d199c4ec6d7783169f
+Author: Mathieu Poumeyrol <kali@zoy.org>
+Date:   Thu Sep 6 22:10:16 2018 +0200
+
+    use _POSIX_BARRIERS instead of __APPLE__
+
+commit 97965b09059a610db06fb7a22bdfa79c0d37d673
+Author: Mathieu Poumeyrol <kali@users.noreply.github.com>
+Date:   Thu Sep 6 21:10:29 2018 +0200
+
+    cortexa9 and cortexa53 travis build + qemu test (#245)
+
+commit a6802eab7d94b5a9de633c53beca8245b74f5dc6
+Author: Mathieu Poumeyrol <kali@zoy.org>
+Date:   Thu Sep 6 17:16:35 2018 +0200
+
+    reinstantiate test on macos
+
+commit d688a2b7e5a19cba44ea398a99e325e19b8fce50
+Author: Mathieu Poumeyrol <kali@zoy.org>
+Date:   Thu Sep 6 15:25:16 2018 +0200
+
+    add an adhoc impl for pthread_barrier
+
+commit ab9f9e684dc3ffbb70cc45b21c67af5d916919e5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 30 15:14:02 2018 -0500
+
+    CHANGELOG update (0.4.1)
+
+commit 10fd614031307c46db3d893528d4e5fc31f490b3 (tag: 0.4.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Aug 30 15:13:59 2018 -0500
 
     Version file update (0.4.1)
 
-commit 08dd67c4b21244851f8416bd59159bea7a9c5b3d (origin/master, origin/HEAD)
+commit 08dd67c4b21244851f8416bd59159bea7a9c5b3d
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Aug 30 15:12:13 2018 -0500
 
     ReleaseNotes.md update in advance of next version.
 
-commit 4fa4cb0734e7de6505b5d6f1aeef3a5d5c89dcbb (origin/dev, origin/amd, dev, amd)
+commit 4fa4cb0734e7de6505b5d6f1aeef3a5d5c89dcbb
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Aug 29 18:06:41 2018 -0500
 
