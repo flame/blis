@@ -829,7 +829,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "active sub-configuration       %s\n", bli_arch_string( bli_arch_query_id() ) );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "integer type size (bits)       %d\n", ( int )int_type_size );
+	libblis_test_fprintf_c( os, "BLIS integer type size (bits)  %d\n", ( int )int_type_size );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "SIMD number of registers       %d\n", ( int )bli_info_get_simd_num_registers() );
 	libblis_test_fprintf_c( os, "SIMD size (bytes)              %d\n", ( int )bli_info_get_simd_size() );
@@ -846,12 +846,10 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "  obj_t stride                 %d\n", ( int )bli_info_get_heap_stride_align_size() );
 	libblis_test_fprintf_c( os, "  pool block addr              %d\n", ( int )bli_info_get_pool_addr_align_size() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "BLAS compatibility layer         \n" );
-	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_blas() );
+	libblis_test_fprintf_c( os, "BLAS/CBLAS compatibility layers  \n" );
+	libblis_test_fprintf_c( os, "  BLAS API enabled?            %d\n", ( int )bli_info_get_enable_blas() );
+	libblis_test_fprintf_c( os, "  CBLAS API enabled?           %d\n", ( int )bli_info_get_enable_cblas() );
 	libblis_test_fprintf_c( os, "  integer type size (bits)     %d\n", ( int )bli_info_get_blas_int_type_size() );
-	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "CBLAS compatibility layer        \n" );
-	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_cblas() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "libmemkind                       \n" );
 	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_memkind() );

@@ -193,7 +193,7 @@ print_usage()
 	echo "                 Disable (enabled by default) support for mixing the"
 	echo "                 storage domain and/or storage precision of matrix"
 	echo "                 operands for the gemm operation, as well as support"
-	echo "                 for computing in a precision different from one or."
+	echo "                 for computing in a precision different from one or"
 	echo "                 both of matrices A and B."
 	echo " "
 	echo "   --disable-mixed-dt-extra-mem, --enable-mixed-dt-extra-mem"
@@ -2620,18 +2620,25 @@ main()
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
-		echo "${script_name}: the internal integer size is 32-bit."
+		echo "${script_name}: the BLIS API integer size is 32-bit."
 	elif [ "x${int_type_size}" = "x64" ]; then
-		echo "${script_name}: the internal integer size is 64-bit."
+		echo "${script_name}: the BLIS API integer size is 64-bit."
 	else
-		echo "${script_name}: the internal integer size is automatically determined."
+		echo "${script_name}: the BLIS API integer size is automatically determined."
 	fi
 	if [ "x${blas_int_type_size}" = "x32" ]; then
-		echo "${script_name}: the BLAS/CBLAS interface integer size is 32-bit."
+		echo "${script_name}: the BLAS/CBLAS API integer size is 32-bit."
 	elif [ "x${blas_int_type_size}" = "x64" ]; then
-		echo "${script_name}: the BLAS/CBLAS interface integer size is 64-bit."
+		echo "${script_name}: the BLAS/CBLAS API integer size is 64-bit."
 	else
-		echo "${script_name}: the BLAS/CBLAS interface integer size is automatically determined."
+		echo "${script_name}: the BLAS/CBLAS API integer size is automatically determined."
+	fi
+
+	# Disallow the simultaneous use of 64-bit integers in the BLAS and
+	# 32-bit integers in BLIS.
+	if [ "x${blas_int_type_size}" = "x64" -a "x${int_type_size}" = "x32" ]; then
+		echo "${script_name}: *** To avoid the possibility of truncation, we do not allow use of 64-bit integers in the BLAS API with 32-bit integers in BLIS. Please use a different configuration of integers."
+		exit 1
 	fi
 
 	# Check if a sandbox was given.

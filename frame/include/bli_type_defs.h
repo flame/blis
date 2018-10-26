@@ -62,6 +62,17 @@
 
 // -- General-purpose integers --
 
+// If BLAS integers are 64 bits, mandate that BLIS integers also be 64 bits.
+// NOTE: This cpp guard will only meaningfully change BLIS's behavior on
+// systems where the BLIS integer size would have been automatically selected
+// to be 32 bits, since explicit selection of 32 bits is prohibited at
+// configure-time (and explicit or automatic selection of 64 bits is fine
+// and would have had the same result).
+#if BLIS_BLAS_INT_SIZE == 64
+  #undef  BLIS_INT_TYPE_SIZE
+  #define BLIS_INT_TYPE_SIZE 64
+#endif
+
 // Define integer types depending on what size integer was requested.
 #if   BLIS_INT_TYPE_SIZE == 32
 typedef           int32_t  gint_t;

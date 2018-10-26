@@ -13,7 +13,7 @@
 
 This document serves as a guide to users interested in taking advantage of
 BLIS's support for performing the `gemm` operation on operands of differing
-types.
+datatypes (domain and/or precision).
 
 ## Categories of mixed datatypes
 
@@ -182,10 +182,9 @@ distribution.
 
 ## Known issues
 
-While BLIS implements 128 mixed-datatype combinations of `gemm`, there may be
-odd behavior in the current implementation that does not conform to the reader's
-expectations. Below is a list of issues that BLIS developers are aware of in
-the context of mixed-datatype `gemm`. If any of these issues poses a problem for
+There may be odd behavior in the current implementation of mixed-datatype `gemm`
+that does not conform to the reader's expectations. Below is a list of issues
+that BLIS developers are aware of. If any of these issues poses a problem for
 your application, please contact us by
 [opening an issue](https://github.com/flame/blis/issues).
 
