@@ -52,7 +52,7 @@ homepage](https://github.com/flame/blis#key-features). But here are a few reason
   * BLIS supports a superset of BLAS functionality, providing operations omitted from the BLAS as well as some complex domain support that is missing in BLAS operations. BLIS is especially useful to researchers who need to develop and prototype new BLAS-like operations that do not exist in the BLAS.
   * BLIS is backwards compatible with BLAS. BLIS contains a BLAS compatibility layer that allows an application to treat BLIS as if it were a traditional BLAS library.
   * BLIS supports generalized matrix storage, which can be used to express column-major, row-major, and general stride storage.
-  * BLIS supports mixed-datatype computation for general matrix multiplciation `gemm`, and does so while holding the impact on performance to a relative minimum.
+  * BLIS supports mixed-datatype computation for general matrix multiplication `gemm`, and does so while holding the impact on performance to a relative minimum.
   * BLIS is free software, available under a [new/modified/3-clause BSD license](http://opensource.org/licenses/BSD-3-Clause).
 
 ### How is BLIS related to FLAME / `libflame`?
