@@ -6,6 +6,7 @@
   * **[Computation precision](MixedDatatypes.md#computation-precision)**
   * **[Computation domain](MixedDatatypes.md#computation-domain)**
 * **[Performing gemm with mixed datatypes](MixedDatatypes.md#performing-gemm-with-mixed-datatypes)**
+* **[Running the testsuite for gemm with mixed datatypes](MixedDatatypes.md#running-the-testsuite-for-gemm-with-mixed-datatypes)**
 * **[Known issues](MixedDatatypes.md#known-issues)**
 * **[Conclusion](MixedDatatypes.md#conclusion)**
 
@@ -179,6 +180,13 @@ For more examples of using BLIS's object-based API, including methods
 of initializing an matrix object with arbitrary values, please review the
 example code found in the `examples/oapi` directory of the BLIS source
 distribution.
+
+## Running the testsuite for gemm with mixed datatypes
+
+The BLIS testsuite has been retrofitted to test all combinations of datatypes
+for each matrix operand. For more information on enabling mixed-datatype tests
+for the `gemm` operation, please see the explanations of the relevant options
+in the [Testsuite](Testsuite.md) documentation.
 
 ## Known issues
 

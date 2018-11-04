@@ -114,6 +114,8 @@ c       # Vector storage scheme(s) to test:
 sdcz    # Datatype(s) to test:
         #   's' = single real; 'c' = single complex;
         #   'd' = double real; 'z' = double complex
+0       # Test gemm with mixed-domain operands?
+0       # Test gemm with mixed-precision operands?
 100     # Problem size: first to test
 300     # Problem size: maximum to test
 100     # Problem size: increment between experiments
@@ -125,6 +127,9 @@ sdcz    # Datatype(s) to test:
 1       #   4m1a ('1' = enable; '0' = disable)
 1       #   1m   ('1' = enable; '0' = disable)
 1       #   native ('1' = enable; '0' = disable)
+1       # Simulate application-level threading:
+        #   '1' = disable / use one testsuite thread;
+        #   'n' = enable and use n testsuite threads
 1       # Error-checking level:
         #   '0' = disable error checking; '1' = full error checking
 i       # Reaction to test failure:
@@ -150,9 +155,15 @@ _**General stride spacing.**_ This value determines the simulated "inner" stride
 
 _**Datatype(s) to test.**_ This string determines which floating-point datatypes are tested. There are four valid values: `'s'` for single-precision real, `'d'` for double-precision real, `'c'` for single-precision complex, and `'z'` for double-precision complex. You may choose one datatype, or combine more than one. The order of the datatype characters determines the order in which they are tested.
 
+_**Test gemm with mixed-domain operands?**_ This boolean determines whether `gemm` tests are performed that exercise the mixed-domain functionality within BLIS. (In other words, with precision held constant, all combinations of real and complex matrix operands will be tested.) If this option is set to 1 and the mixed-precision option is set to 0, then domain combinations will be varied for the precisions represented by the "Datatype(s) to test" option. If this option and the mixed-precision option are both set to 1, then _all_ datatype combinations will be tested, regardless of the datatypes indicated by the "Datatype(s) to test" option.
+
+_**Test gemm with mixed-precision operands?**_ This boolean determines whether `gemm` tests are performed that exercise the mixed-precision functionality within BLIS. (In other words, with domain held constant, all combinations of supported precisions will be tested.) If this option is set to 1 and the mixed-domain option is set to 0, then precision combinations will be varied for the domains represented by the "Datatype(s) to test" option. If this option and the mixed-domain option are both set to 1, then _all_ datatype combinations will be tested, regardless of the datatypes indicated by the "Datatype(s) to test" option.
+
 _**Problem size.**_ These values determine the first problem size to test, the maximum problem size to test, and the increment between problem sizes. Note that the maximum problem size only bounds the range of problem sizes; it is not guaranteed to be tested. Example: If the initial problem size is 128, the maximum is 1000, and the increment is 64, then the last problem size to be tested will be 960.
 
 _**Complex level-3 implementations to test.**_ With the exception of the switch marked `native`, these switches control whether experimental complex domain implementations are tested (when applicable). These implementations employ induced methods complex matrix multiplication and apply to some (though not all) of the level-3 operations. If you don't know what these are, you can ignore them. The `native` switch corresponds to native execution of complex domain level-3 operations, which we test by default. We also test the `1m` method, since it is the induced method of choice when complex micro-kernels are not available. Note that all of these induced method tests (including `native`) are automatically disabled if the `c` and `z` datatypes are disabled.
+
+_**Simualte application-levle threading.**_ This setting specifies the number of threads the testsuite will spawn, and is meant to allow the user to exercise BLIS as a multithreaded application might if it were to make multiple concurrent calls to BLIS operations. (Note that the threading controlled by this option is orthogonal to, and has no effect on, whatever multithreading may be employed _within_ BLIS, as specified by the environment variables described in the [Multithreading](Multithreading.md) documentation.) When this option is set to 1, the testsuite is run with only one thread. When set to n > 1 threads, the spawned threads will parallelize (in round-robin fashion) the total set of tests specified by the testsuite input files, executing them in roughly the same order as that of a sequential execution.
 
 _**Error-checking level.**_ BLIS supports various "levels" of error checking prior to executing most operations. For now, only two error-checking levels are implemented: fully disabled (`'0'`) and fully enabled (`'1'`). Disabling error-checking may improve performance on some systems for small problem sizes, but generally speaking the cost is negligible.
 

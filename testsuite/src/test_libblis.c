@@ -831,7 +831,7 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "BLIS integer type size (bits)  %d\n", ( int )int_type_size );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "SIMD number of registers       %d\n", ( int )bli_info_get_simd_num_registers() );
+	libblis_test_fprintf_c( os, "Assumed max # of SIMD regs     %d\n", ( int )bli_info_get_simd_num_registers() );
 	libblis_test_fprintf_c( os, "SIMD size (bytes)              %d\n", ( int )bli_info_get_simd_size() );
 	libblis_test_fprintf_c( os, "SIMD alignment (bytes)         %d\n", ( int )bli_info_get_simd_align_size() );
 	libblis_test_fprintf_c( os, "Max stack buffer size (bytes)  %d\n", ( int )bli_info_get_stack_buf_max_size() );
