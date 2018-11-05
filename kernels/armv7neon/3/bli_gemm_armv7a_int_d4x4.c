@@ -35,7 +35,7 @@
 #include "blis.h"
 #include "arm_neon.h"
 
-void bli_sgemm_armv7a_int_4x4
+void bli_sgemm_armv7neon_int_4x4
      (
        dim_t               k0,
        float*     restrict alpha,
@@ -270,7 +270,7 @@ void bli_sgemm_armv7a_int_4x4
 	}
 }
 
-void bli_dgemm_armv7a_int_4x4
+void bli_dgemm_armv7neon_int_4x4
      (
        dim_t               k,
        double*    restrict alpha,

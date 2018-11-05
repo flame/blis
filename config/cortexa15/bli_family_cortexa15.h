@@ -44,14 +44,14 @@
 #if 0
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_SGEMM_UKERNEL             bli_sgemm_armv7a_int_4x4
+#define BLIS_SGEMM_UKERNEL             bli_sgemm_armv7neon_int_4x4
 #define BLIS_DEFAULT_MR_S              4
 #define BLIS_DEFAULT_NR_S              4
 #define BLIS_DEFAULT_MC_S              336 
 #define BLIS_DEFAULT_KC_S              528 
 #define BLIS_DEFAULT_NC_S              4096
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_armv7a_int_4x4
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_armv7neon_int_4x4
 #define BLIS_DEFAULT_MR_D              4
 #define BLIS_DEFAULT_NR_D              4
 #define BLIS_DEFAULT_MC_D              176 

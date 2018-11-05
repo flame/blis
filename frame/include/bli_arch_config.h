@@ -247,8 +247,8 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_KERNELS_ARMV8A
 #include "bli_kernels_armv8a.h"
 #endif
-#ifdef BLIS_KERNELS_ARMV7A
-#include "bli_kernels_armv7a.h"
+#ifdef BLIS_KERNELS_ARMV7NEON
+#include "bli_kernels_armv7neon.h"
 #endif
 #ifdef BLIS_KERNELS_ARM32VFP
 #include "bli_kernels_arm32vfp.h"

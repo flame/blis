@@ -32,10 +32,10 @@
 
 */
 
-GEMM_UKR_PROT( float,    s, gemm_armv7a_asm_4x4 )
-GEMM_UKR_PROT( double,   d, gemm_armv7a_asm_4x4 )
-GEMM_UKR_PROT( scomplex, c, gemm_armv7a_asm_2x2 )
-GEMM_UKR_PROT( dcomplex, z, gemm_armv7a_asm_2x2 )
+GEMM_UKR_PROT( float,    s, gemm_armv7neon_asm_4x4 )
+GEMM_UKR_PROT( double,   d, gemm_armv7neon_asm_4x4 )
+GEMM_UKR_PROT( scomplex, c, gemm_armv7neon_asm_2x2 )
+GEMM_UKR_PROT( dcomplex, z, gemm_armv7neon_asm_2x2 )
 
-GEMM_UKR_PROT( float,    s, gemm_armv7a_int_4x4 )
-GEMM_UKR_PROT( double,   d, gemm_armv7a_int_4x4 )
+GEMM_UKR_PROT( float,    s, gemm_armv7neon_int_4x4 )
+GEMM_UKR_PROT( double,   d, gemm_armv7neon_int_4x4 )

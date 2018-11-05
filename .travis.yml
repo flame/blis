@@ -51,7 +51,6 @@ matrix:
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="armv6vfp" \
       PACKAGES="gcc-arm-linux-gnueabihf qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-arm -cpu cortex-a9 -L /usr/arm-linux-gnueabihf/"
-  # cortexa15 build and test (qemu)
   # cortexa15 build and fast testsuite (qemu)
   - os: linux
     compiler: arm-linux-gnueabihf-gcc
