@@ -67,15 +67,15 @@ fi
 # Complex domain implementations to test.
 if [ ${sys} = "blis" ]; then
 
-	test_impls="openblas asm_blis"
+	test_impls="ad-hoc intern"
 
 elif [ ${sys} = "stampede2" ]; then
 
-	test_impls="openblas asm_blis mkl"
+	test_impls=""
 
 elif [ ${sys} = "lonestar5" ]; then
 
-	test_impls="openblas mkl asm_blis"
+	test_impls=""
 fi
 
 # Datatypes to test.
@@ -102,16 +102,13 @@ for dtc in ${dt_chars}; do
 done
 
 # Threadedness to test.
-threads="mt"
-#threads="st"
+#threads="mt"
+threads="st"
 
-test_impls="openblas"
-
+# Overrides, in case something goes wrong for a subset of tests.
+#test_impls="ad-hoc"
 #dt_combos="ssss sssd ssds sdss dsss ddds dddd"
-#dt_combos="csss csds cdss cdds zsss zsds zdss zdds cssd csdd cdsd cddd zssd zsdd zdsd zddd"
-#dt_combos="cssd csdd cdsd cddd zsss zsds zdss zdds"
-#dt_combos="cdsd cddd zsss zsds zdss zdds"
-#test_impls="asm_blis"
+
 
 # Now perform complex test cases.
 for th in ${threads}; do
@@ -134,11 +131,11 @@ for th in ${threads}; do
 
 					# Unset GOMP_CPU_AFFINITY for OpenBLAS, as it causes the library
 					# to execute sequentially.
-					if [ ${im} = "openblas" ]; then
-						unset GOMP_CPU_AFFINITY
-					else
-						export GOMP_CPU_AFFINITY="0 1 2 3"
-					fi
+					#if [ ${im} = "openblas" ]; then
+					#	unset GOMP_CPU_AFFINITY
+					#else
+					#	export GOMP_CPU_AFFINITY="0 1 2 3"
+					#fi
 				else
 
 					export BLIS_JC_NT=1

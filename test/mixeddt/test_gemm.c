@@ -259,7 +259,8 @@ void blas_gemm_md( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c )
 
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
 	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
-	     bli_obj_dt( c ) == ( num_t )comp_prec )
+	     //bli_obj_dt( c ) == ( num_t )comp_prec )
+	     bli_obj_prec( c ) == comp_prec )
 	{
 		blas_gemm( transa, transb, bli_obj_dt( c ), alpha, a, b, beta, c );
 		return;

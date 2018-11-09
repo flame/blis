@@ -1,4 +1,4 @@
-function r_val = plot_all_md( is_mt )
+function r_val = plot_case_md( mdcase, is_mt )
 
 if is_mt == 1
 	thr_str = 'mt';
@@ -7,7 +7,7 @@ else
 end
 
 if 1
-dt_combos = gen_dt_combos();
+dt_combos = gen_prec_combos( mdcase );
 else
 dt_combos( 1, : ) = [ 'ssss' ];
 dt_combos( 2, : ) = [ 'sssd' ];
@@ -68,14 +68,16 @@ data_gemm_asm_blis_zref( :, : ) = data_gemm_asm_blis( :, : );
 data_gemm_openblas_zref( :, : ) = data_gemm_openblas( :, : );
 
 fig = figure;
-orient( fig, 'landscape' );
-set(gcf,'Position',[0 0 2000 900]);
+orient( fig, 'portrait' );
+%set(gcf,'Position',[0 0 2000 900]);
 set(gcf,'PaperUnits', 'inches');
-set(gcf,'PaperSize', [64 33]);
-set(gcf,'PaperPosition', [0 0 64 33]);
+%set(gcf,'PaperSize', [16 12.4]);
+%set(gcf,'PaperPosition', [0 0 16 12.4]);
+set(gcf,'PaperSize', [14 11.0]);
+set(gcf,'PaperPosition', [0 0 14 11.0]);
 %set(gcf,'PaperPositionMode','auto');
 set(gcf,'PaperPositionMode','manual');
-set(gcf,'PaperOrientation','landscape');
+set(gcf,'PaperOrientation','portrait');
 
 for dti = 1:n_combos
 %for dti = 1:1
@@ -125,19 +127,22 @@ for dti = 1:n_combos
 	                data_gemm_asm_blis_ref, ...
 	                data_gemm_openblas, ...
 	                data_gemm_openblas_ref, ...
-	                is_mt, refch, 8, 16, dti );
+	                is_mt, refch, 4, 4, dti );
 
 end
 
 
-if 0
-set(gcf,'Position',[0 0 2000 900]);
-set(gcf,'PaperUnits', 'inches');
-set(gcf,'PaperSize', [48 22]);
-set(gcf,'PaperPosition', [0 0 48 22]);
-%set(gcf,'PaperPositionMode','auto');         
-set(gcf,'PaperPositionMode','manual');         
-set(gcf,'PaperOrientation','landscape');
-end
-print(gcf, 'gemm_md','-bestfit','-dpdf');
+%if 0
+%set(gcf,'Position',[0 0 2000 900]);
+%set(gcf,'PaperUnits', 'inches');
+%set(gcf,'PaperSize', [48 22]);
+%set(gcf,'PaperPosition', [0 0 48 22]);
+%%set(gcf,'PaperPositionMode','auto');
+%set(gcf,'PaperPositionMode','manual');
+%set(gcf,'PaperOrientation','landscape');
+%end
+
+outfile = sprintf( 'gemm_%s', mdcase );
+
+print(gcf, outfile,'-bestfit','-dpdf');
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
