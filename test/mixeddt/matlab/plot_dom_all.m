@@ -1,4 +1,4 @@
-function r_val = plot_case_all( is_mt )
+function r_val = plot_dom_all( is_mt )
 
 cases( 1, : ) = [ 'rrr' ];
 cases( 2, : ) = [ 'rrc' ];
@@ -15,7 +15,7 @@ for i = 1:n_cases
 
 	thecase = cases( i, : );
 
-	plot_case_md( thecase, is_mt );
+	plot_dom_case( thecase, is_mt );
 end
 
 r_val = 0;

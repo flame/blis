@@ -1,4 +1,4 @@
-function r_val = plot_all_md( is_mt )
+function r_val = plot_dt_all( is_mt )
 
 if is_mt == 1
 	thr_str = 'mt';
@@ -139,5 +139,5 @@ set(gcf,'PaperPosition', [0 0 48 22]);
 set(gcf,'PaperPositionMode','manual');         
 set(gcf,'PaperOrientation','landscape');
 end
-print(gcf, 'gemm_md','-bestfit','-dpdf');
+print(gcf, 'output/gemm_md','-bestfit','-dpdf');
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
