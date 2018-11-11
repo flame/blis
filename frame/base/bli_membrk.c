@@ -209,8 +209,10 @@ void bli_membrk_release
 		// section.)
 		block_size_prev = bli_mem_size( mem );
 
-		// BEGIN CRITICAL SECTION
+		// Acquire the mutex associated with the membrk object.
 		bli_membrk_lock( membrk );
+
+		// BEGIN CRITICAL SECTION
 		{
 
 			// Query the size of the blocks currently in the pool.
@@ -235,8 +237,10 @@ void bli_membrk_release
 			}
 
 		}
-		bli_membrk_unlock( membrk );
 		// END CRITICAL SECTION
+
+		// Release the mutex associated with the membrk object.
+		bli_membrk_unlock( membrk );
 	}
 
 	// Clear the mem_t object so that it appears unallocated. This clears:
