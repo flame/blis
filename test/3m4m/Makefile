@@ -243,6 +243,10 @@ blis-nat-st: \
       test_dgemm_asm_blis_st.x \
       test_cgemm_asm_blis_st.x \
       test_zgemm_asm_blis_st.x \
+      test_shemm_asm_blis_st.x \
+      test_dhemm_asm_blis_st.x \
+      test_chemm_asm_blis_st.x \
+      test_zhemm_asm_blis_st.x \
       test_sherk_asm_blis_st.x \
       test_dherk_asm_blis_st.x \
       test_cherk_asm_blis_st.x \
@@ -261,6 +265,10 @@ blis-nat-mt: \
       test_dgemm_asm_blis_mt.x \
       test_cgemm_asm_blis_mt.x \
       test_zgemm_asm_blis_mt.x \
+      test_shemm_asm_blis_mt.x \
+      test_dhemm_asm_blis_mt.x \
+      test_chemm_asm_blis_mt.x \
+      test_zhemm_asm_blis_mt.x \
       test_sherk_asm_blis_mt.x \
       test_dherk_asm_blis_mt.x \
       test_cherk_asm_blis_mt.x \
