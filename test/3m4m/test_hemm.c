@@ -208,7 +208,7 @@ int main( int argc, char** argv )
 			float*    betap  = bli_obj_buffer( &beta );
 			float*    cp     = bli_obj_buffer( &c );
 
-			shemm_( &f77_side,
+			ssymm_( &f77_side,
 			        &f77_uploa,
 			        &mm,
 			        &nn,
@@ -231,7 +231,7 @@ int main( int argc, char** argv )
 			double*   betap  = bli_obj_buffer( &beta );
 			double*   cp     = bli_obj_buffer( &c );
 
-			dhemm_( &f77_side,
+			dsymm_( &f77_side,
 			        &f77_uploa,
 			        &mm,
 			        &nn,

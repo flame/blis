@@ -242,7 +242,7 @@ int main( int argc, char** argv )
 			f77_int    ldc    = bli_obj_col_stride( &c );
 			float*     alphap = bli_obj_buffer( &alpha );
 			scomplex*  ap     = bli_obj_buffer( &a );
-			scomplex*  betap  = bli_obj_buffer( &beta );
+			float*     betap  = bli_obj_buffer( &beta );
 			scomplex*  cp     = bli_obj_buffer( &c );
 
 			cherk_( &f77_uploc,
@@ -262,7 +262,7 @@ int main( int argc, char** argv )
 			f77_int    ldc    = bli_obj_col_stride( &c );
 			double*    alphap = bli_obj_buffer( &alpha );
 			dcomplex*  ap     = bli_obj_buffer( &a );
-			dcomplex*  betap  = bli_obj_buffer( &beta );
+			double*    betap  = bli_obj_buffer( &beta );
 			dcomplex*  cp     = bli_obj_buffer( &c );
 
 			zherk_( &f77_uploc,
