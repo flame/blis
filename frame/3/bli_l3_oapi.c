@@ -64,7 +64,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   where mixed datatype support will be implemented (if at all). */ \
 	if ( bli_obj_dt( c ) == bli_obj_dt( a ) && \
 	     bli_obj_dt( c ) == bli_obj_dt( b ) && \
-	     bli_obj_dt( c ) == bli_obj_exec_dt( c ) && \
+	     bli_obj_dt( c ) == bli_obj_comp_dt( c ) && \
 	     bli_obj_is_complex( c ) ) \
 	{ \
 		/* Invoke the operation's "ind" function--its induced method front-end.
