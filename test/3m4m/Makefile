@@ -201,9 +201,9 @@ STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=96 \
+PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
-            -DP_INC=96
+            -DP_INC=40
 
 PDEF_MT  := -DP_BEGIN=192 \
             -DP_END=3000 \
@@ -215,34 +215,57 @@ PDEF_MT  := -DP_BEGIN=192 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all:          all-st all-mt
-blis:         blis-st blis-mt
-blis-nat:     blis-nat-st blis-nat-mt
-openblas:     openblas-st openblas-mt
-mkl:          mkl-st mkl-mt
+all:        all-st all-mt
+blis:       blis-st blis-mt
+openblas:   openblas-st openblas-mt
+mkl:        mkl-st mkl-mt
 
-all-st:       blis-st openblas-st mkl-st
-all-mt:       blis-mt openblas-mt mkl-mt
+all-st:     blis-st openblas-st mkl-st
+all-mt:     blis-mt openblas-mt mkl-mt
 
-blis-st:      blis-gemm-st
-blis-mt:      blis-gemm-mt
+blis-st:    blis-nat-st
+blis-mt:    blis-nat-mt
 
-openblas-st:  openblas-gemm-st
-openblas-mt:  openblas-gemm-mt
+blis-ind:   blis-ind-st blis-ind-mt
+blis-nat:   blis-nat-st blis-nat-mt
 
-mkl-st:       mkl-gemm-st
-mkl-mt:       mkl-gemm-mt
+blis-ind-st: \
+      test_cgemm_3mhw_blis_st.x \
+      test_zgemm_3mhw_blis_st.x \
+      test_cgemm_3m1_blis_st.x \
+      test_zgemm_3m1_blis_st.x \
+      test_cgemm_4mhw_blis_st.x \
+      test_zgemm_4mhw_blis_st.x \
+      test_cgemm_4m1b_blis_st.x \
+      test_zgemm_4m1b_blis_st.x \
+      test_cgemm_4m1a_blis_st.x \
+      test_zgemm_4m1a_blis_st.x \
+      test_cgemm_1m_blis_st.x \
+      test_zgemm_1m_blis_st.x
 
-blis-gemm-st: blis-gemm-nat-st \
-              blis-gemm-ind-st
-blis-gemm-mt: blis-gemm-nat-mt \
-              blis-gemm-ind-mt
+blis-ind-mt: \
+      test_cgemm_3mhw_blis_mt.x \
+      test_zgemm_3mhw_blis_mt.x \
+      test_cgemm_3m1_blis_mt.x \
+      test_zgemm_3m1_blis_mt.x \
+      test_cgemm_4mhw_blis_mt.x \
+      test_zgemm_4mhw_blis_mt.x \
+      test_cgemm_4m1b_blis_mt.x \
+      test_zgemm_4m1b_blis_mt.x \
+      test_cgemm_4m1a_blis_mt.x \
+      test_zgemm_4m1a_blis_mt.x \
+      test_cgemm_1m_blis_mt.x \
+      test_zgemm_1m_blis_mt.x
 
 blis-nat-st: \
       test_sgemm_asm_blis_st.x \
       test_dgemm_asm_blis_st.x \
       test_cgemm_asm_blis_st.x \
       test_zgemm_asm_blis_st.x \
+      test_shemm_asm_blis_st.x \
+      test_dhemm_asm_blis_st.x \
+      test_chemm_asm_blis_st.x \
+      test_zhemm_asm_blis_st.x \
       test_sherk_asm_blis_st.x \
       test_dherk_asm_blis_st.x \
       test_cherk_asm_blis_st.x \
@@ -261,6 +284,10 @@ blis-nat-mt: \
       test_dgemm_asm_blis_mt.x \
       test_cgemm_asm_blis_mt.x \
       test_zgemm_asm_blis_mt.x \
+      test_shemm_asm_blis_mt.x \
+      test_dhemm_asm_blis_mt.x \
+      test_chemm_asm_blis_mt.x \
+      test_zhemm_asm_blis_mt.x \
       test_sherk_asm_blis_mt.x \
       test_dherk_asm_blis_mt.x \
       test_cherk_asm_blis_mt.x \
@@ -274,69 +301,94 @@ blis-nat-mt: \
       test_ctrsm_asm_blis_mt.x \
       test_ztrsm_asm_blis_mt.x
 
-blis-gemm-nat-st: \
-      test_sgemm_asm_blis_st.x \
-      test_dgemm_asm_blis_st.x \
-      test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x
-
-blis-gemm-nat-mt: \
-      test_sgemm_asm_blis_mt.x \
-      test_dgemm_asm_blis_mt.x \
-      test_cgemm_asm_blis_mt.x \
-      test_zgemm_asm_blis_mt.x
-
-blis-gemm-ind-st: \
-      test_cgemm_3mhw_blis_st.x \
-      test_zgemm_3mhw_blis_st.x \
-      test_cgemm_3m1_blis_st.x \
-      test_zgemm_3m1_blis_st.x \
-      test_cgemm_4mhw_blis_st.x \
-      test_zgemm_4mhw_blis_st.x \
-      test_cgemm_4m1b_blis_st.x \
-      test_zgemm_4m1b_blis_st.x \
-      test_cgemm_4m1a_blis_st.x \
-      test_zgemm_4m1a_blis_st.x \
-      test_cgemm_1m_blis_st.x \
-      test_zgemm_1m_blis_st.x
-
-blis-gemm-ind-mt: \
-      test_cgemm_3mhw_blis_mt.x \
-      test_zgemm_3mhw_blis_mt.x \
-      test_cgemm_3m1_blis_mt.x \
-      test_zgemm_3m1_blis_mt.x \
-      test_cgemm_4mhw_blis_mt.x \
-      test_zgemm_4mhw_blis_mt.x \
-      test_cgemm_4m1b_blis_mt.x \
-      test_zgemm_4m1b_blis_mt.x \
-      test_cgemm_4m1a_blis_mt.x \
-      test_zgemm_4m1a_blis_mt.x \
-      test_cgemm_1m_blis_mt.x \
-      test_zgemm_1m_blis_mt.x
-
-openblas-gemm-st: \
+openblas-st: \
       test_sgemm_openblas_st.x \
       test_dgemm_openblas_st.x \
       test_cgemm_openblas_st.x \
-      test_zgemm_openblas_st.x
+      test_zgemm_openblas_st.x \
+      test_shemm_openblas_st.x \
+      test_dhemm_openblas_st.x \
+      test_chemm_openblas_st.x \
+      test_zhemm_openblas_st.x \
+      test_sherk_openblas_st.x \
+      test_dherk_openblas_st.x \
+      test_cherk_openblas_st.x \
+      test_zherk_openblas_st.x \
+      test_strmm_openblas_st.x \
+      test_dtrmm_openblas_st.x \
+      test_ctrmm_openblas_st.x \
+      test_ztrmm_openblas_st.x \
+      test_strsm_openblas_st.x \
+      test_dtrsm_openblas_st.x \
+      test_ctrsm_openblas_st.x \
+      test_ztrsm_openblas_st.x
 
-openblas-gemm-mt: \
+openblas-mt: \
       test_sgemm_openblas_mt.x \
       test_dgemm_openblas_mt.x \
       test_cgemm_openblas_mt.x \
-      test_zgemm_openblas_mt.x
+      test_zgemm_openblas_mt.x \
+      test_shemm_openblas_mt.x \
+      test_dhemm_openblas_mt.x \
+      test_chemm_openblas_mt.x \
+      test_zhemm_openblas_mt.x \
+      test_sherk_openblas_mt.x \
+      test_dherk_openblas_mt.x \
+      test_cherk_openblas_mt.x \
+      test_zherk_openblas_mt.x \
+      test_strmm_openblas_mt.x \
+      test_dtrmm_openblas_mt.x \
+      test_ctrmm_openblas_mt.x \
+      test_ztrmm_openblas_mt.x \
+      test_strsm_openblas_mt.x \
+      test_dtrsm_openblas_mt.x \
+      test_ctrsm_openblas_mt.x \
+      test_ztrsm_openblas_mt.x
 
-mkl-gemm-st: \
+mkl-st: \
       test_sgemm_mkl_st.x \
       test_dgemm_mkl_st.x \
       test_cgemm_mkl_st.x \
-      test_zgemm_mkl_st.x
+      test_zgemm_mkl_st.x \
+      test_shemm_mkl_st.x \
+      test_dhemm_mkl_st.x \
+      test_chemm_mkl_st.x \
+      test_zhemm_mkl_st.x \
+      test_sherk_mkl_st.x \
+      test_dherk_mkl_st.x \
+      test_cherk_mkl_st.x \
+      test_zherk_mkl_st.x \
+      test_strmm_mkl_st.x \
+      test_dtrmm_mkl_st.x \
+      test_ctrmm_mkl_st.x \
+      test_ztrmm_mkl_st.x \
+      test_strsm_mkl_st.x \
+      test_dtrsm_mkl_st.x \
+      test_ctrsm_mkl_st.x \
+      test_ztrsm_mkl_st.x
 
-mkl-gemm-mt: \
+mkl-mt: \
       test_sgemm_mkl_mt.x \
       test_dgemm_mkl_mt.x \
       test_cgemm_mkl_mt.x \
-      test_zgemm_mkl_mt.x
+      test_zgemm_mkl_mt.x \
+      test_shemm_mkl_mt.x \
+      test_dhemm_mkl_mt.x \
+      test_chemm_mkl_mt.x \
+      test_zhemm_mkl_mt.x \
+      test_sherk_mkl_mt.x \
+      test_dherk_mkl_mt.x \
+      test_cherk_mkl_mt.x \
+      test_zherk_mkl_mt.x \
+      test_strmm_mkl_mt.x \
+      test_dtrmm_mkl_mt.x \
+      test_ctrmm_mkl_mt.x \
+      test_ztrmm_mkl_mt.x \
+      test_strsm_mkl_mt.x \
+      test_dtrsm_mkl_mt.x \
+      test_ctrsm_mkl_mt.x \
+      test_ztrsm_mkl_mt.x
+
 
 
 

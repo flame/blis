@@ -100,38 +100,6 @@ endif
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 HOME_LIB_PATH  := $(HOME)/flame/lib
-#MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
-#ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
-
-# OpenBLAS
-OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
-OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
-
-# ATLAS
-ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
-                  $(HOME_LIB_PATH)/libatlas.a
-
-# MKL
-MKL_LIB        := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_sequential \
-                  -lpthread -lm -ldl
-#MKLP_LIB       := -L$(MKL_LIB_PATH) \
-#                  -lmkl_intel_thread \
-#                  -lmkl_core \
-#                  -lmkl_intel_ilp64 \
-#                  -L$(ICC_LIB_PATH) \
-#                  -liomp5
-MKLP_LIB       := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_gnu_thread \
-                  -lpthread -lm -ldl -fopenmp
-                  #-L$(ICC_LIB_PATH) \
-                  #-lgomp
 
 
 
@@ -162,42 +130,18 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 
-# Datatypes for A, B, and C.
-#DTA_S     := -DDTA=BLIS_FLOAT
-#DTA_D     := -DDTA=BLIS_DOUBLE
-#DTA_C     := -DDTA=BLIS_SCOMPLEX
-#DTA_Z     := -DDTA=BLIS_DCOMPLEX
-#
-#DTB_S     := -DDTB=BLIS_FLOAT
-#DTB_D     := -DDTB=BLIS_DOUBLE
-#DTB_C     := -DDTB=BLIS_SCOMPLEX
-#DTB_Z     := -DDTB=BLIS_DCOMPLEX
-#
-#DTC_S     := -DDTC=BLIS_FLOAT
-#DTC_D     := -DDTC=BLIS_DOUBLE
-#DTC_C     := -DDTC=BLIS_SCOMPLEX
-#DTC_Z     := -DDTC=BLIS_DCOMPLEX
-#
-#DTX_S     := -DDTC=BLIS_FLOAT
-#DTX_D     := -DDTC=BLIS_DOUBLE
-
 # Which library?
 BLI_DEF  := -DBLIS
 BLA_DEF  := -DBLAS
-
-# Implementation string
-STR_BLI  := -DSTR=\"asm_blis\"
-STR_OBL  := -DSTR=\"openblas\"
-STR_MKL  := -DSTR=\"mkl\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=96 \
-            -DP_END=1200 \
-            -DP_INC=96
+PDEF_ST  := -DP_BEGIN=40 \
+            -DP_END=2000 \
+            -DP_INC=40
 
 PDEF_MT  := -DP_BEGIN=80 \
             -DP_END=4000 \
@@ -232,9 +176,9 @@ get-cdef-x = $(strip $(subst s,-DDTX=BLIS_FLOAT, \
 get-cdefs  = $(call get-cdef-c,$(1)) $(call get-cdef-a,$(1)) $(call get-cdef-b,$(1)) $(call get-cdef-x,$(1))
 
 # Define a function to return the appropriate -DSTR= and -D[BLIS|BLAS] flags.
-get-idefs = $(strip $(subst asm_blis,-DSTR=\"$(1)\" -DBLIS, \
-                    $(subst openblas,-DSTR=\"$(1)\" -DBLAS, \
-                    $(subst      mkl,-DSTR=\"$(1)\" -DBLAS,$(1)))))
+get-idefs = $(strip $(subst intern,-DSTR=\"$(1)\" -DBLIS, \
+                    $(subst ad-hoc,-DSTR=\"$(1)\" -DBLAS, \
+                    $(subst    mkl,-DSTR=\"$(1)\" -DBLAS,$(1)))))
 
 # Enumerate all possible datatype combinations.
 DT_CODES := $(foreach dt0,$(dts),$(foreach dt1,$(dts),$(foreach dt2,$(dts),$(foreach pr,$(prs),$(dt0)_$(dt1)_$(dt2)_$(pr)))))
@@ -243,21 +187,15 @@ DT_CODES := $(foreach dt0,$(dts),$(foreach dt1,$(dts),$(foreach dt2,$(dts),$(for
 DT_COMBOS := $(foreach code,$(DT_CODES),$(call get-cstr,$(code)))
 
 # Build a list of BLIS, OpenBLAS, and MKL executables.
-BLIS_OBJS_ST     := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_asm_blis_st.o)
-BLIS_BINS_ST     := $(patsubst %.o,%.x,$(BLIS_OBJS_ST))
-OPENBLAS_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_openblas_st.o)
-OPENBLAS_BINS_ST := $(patsubst %.o,%.x,$(OPENBLAS_OBJS_ST))
+INTERN_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_intern_st.o)
+INTERN_BINS_ST := $(patsubst %.o,%.x,$(INTERN_OBJS_ST))
+AD_HOC_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad-hoc_st.o)
+AD_HOC_BINS_ST := $(patsubst %.o,%.x,$(AD_HOC_OBJS_ST))
 
-BLIS_OBJS_MT     := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_asm_blis_mt.o)
-BLIS_BINS_MT     := $(patsubst %.o,%.x,$(BLIS_OBJS_MT))
-OPENBLAS_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_openblas_mt.o)
-OPENBLAS_BINS_MT := $(patsubst %.o,%.x,$(OPENBLAS_OBJS_MT))
-
-#MKL_OBJS_ST      := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_mkl_st.o)
-
-#BLIS_OBJS_MT     := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_asm_blis_mt.o)
-#OPENBLAS_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_openblas_mt.o)
-#MKL_OBJS_MT      := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_mkl_mt.o)
+INTERN_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_intern_mt.o)
+INTERN_BINS_MT := $(patsubst %.o,%.x,$(INTERN_OBJS_MT))
+AD_HOC_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad-hoc_mt.o)
+AD_HOC_BINS_MT := $(patsubst %.o,%.x,$(AD_HOC_OBJS_MT))
 
 
 
@@ -265,15 +203,16 @@ OPENBLAS_BINS_MT := $(patsubst %.o,%.x,$(OPENBLAS_OBJS_MT))
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all:         st
+all:       st
 
-st:          blis-st openblas-st
-mt:          blis-mt openblas-mt
+st:        intern-st ad-hoc-st
+mt:        intern-mt ad-hoc-mt
 
-blis-st:      $(BLIS_BINS_ST)
-openblas-st:  $(OPENBLAS_BINS_ST)
-blis-mt:      $(BLIS_BINS_MT)
-openblas-mt:  $(OPENBLAS_BINS_MT)
+intern-st: $(INTERN_BINS_ST)
+ad-hoc-st: $(AD_HOC_BINS_ST)
+intern-mt: $(INTERN_BINS_MT)
+ad-hoc-mt: $(AD_HOC_BINS_MT)
+
 #blis:        test_ssssgemm_asm_blis_st.x \
 #             test_sssdgemm_asm_blis_st.x \
 #             test_ssdsgemm_asm_blis_st.x \
@@ -281,13 +220,6 @@ openblas-mt:  $(OPENBLAS_BINS_MT)
 #             test_dsssgemm_asm_blis_st.x \
 #             test_dddsgemm_asm_blis_st.x \
 #             test_ddddgemm_asm_blis_st.x
-#openblas:    test_ssssgemm_openblas_st.x \
-#             test_sssdgemm_openblas_st.x \
-#             test_ssdsgemm_openblas_st.x \
-#             test_sdssgemm_openblas_st.x \
-#             test_dsssgemm_openblas_st.x \
-#             test_dddsgemm_openblas_st.x \
-#             test_ddddgemm_openblas_st.x
 
 
 # --Object file rules --
@@ -316,7 +248,7 @@ endef
 
 
 # Define the implementations for which we will instantiate compilation rules.
-IMPLS := asm_blis openblas
+IMPLS := intern ad-hoc
 
 # Instantiate the rule function make-st-rule() and make-mt-rule for each
 # implementation in IMPLS and each of the datatype "codes" in DT_CODES.
@@ -334,56 +266,44 @@ $(foreach code,$(DT_CODES),$(eval $(call make-mt-rule,$(code),$(impl)))))
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_openblas_st.x: test_%_openblas_st.o $(LIBBLIS_LINK)
+test_%_ad-hoc_st.x: test_%_ad-hoc_st.o $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER)  $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-	$(RM_F) $<
-else
-	@@echo "Linking $@ to '$(notdir $(OPENBLAS_LIB)) $(LIBBLIS_LINK)'"
-	@$(LINKER) $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-	@$(RM_F) $<
-endif
-
-test_%_openblas_mt.x: test_%_openblas_mt.o $(LIBBLIS_LINK)
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER)  $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-	$(RM_F) $<
-else
-	@@echo "Linking $@ to '$(notdir $(OPENBLAS_LIB)) $(LIBBLIS_LINK)'"
-	@$(LINKER) $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-	@$(RM_F) $<
-endif
-
-#test_%_mkl_st.x: test_%_mkl_st.o $(LIBBLIS_LINK)
-#ifeq ($(ENABLE_VERBOSE),yes)
-#	$(LINKER)  $<       $(MKL_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-#	$(RM_F) $<
-#else
-#	@@echo "Linking $@ to '$(notdir $(MKL_LIB)) $(LIBBLIS_LINK)'"
-#	@$(LINKER) $<       $(MKL_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-#	@$(RM_F) $<
-#endif
-
-#test_%_mkl_mt.x: test_%_mkl_mt.o $(LIBBLIS_LINK)
-#	$(LINKER) $<  $(MKLP_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_blis_st.x: test_%_blis_st.o $(LIBBLIS_LINK)
-ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	$(RM_F) $<
 else
 	@@echo "Linking $@ to '$(LIBBLIS_LINK)'"
-	@$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	@$(LINKER) $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	@$(RM_F) $<
 endif
 
-test_%_blis_mt.x: test_%_blis_mt.o $(LIBBLIS_LINK)
+test_%_ad-hoc_mt.x: test_%_ad-hoc_mt.o $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	$(RM_F) $<
 else
 	@@echo "Linking $@ to '$(LIBBLIS_LINK)'"
-	@$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	@$(LINKER) $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	@$(RM_F) $<
+endif
+
+
+test_%_intern_st.x: test_%_intern_st.o $(LIBBLIS_LINK)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	$(RM_F) $<
+else
+	@@echo "Linking $@ to '$(LIBBLIS_LINK)'"
+	@$(LINKER) $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	@$(RM_F) $<
+endif
+
+test_%_intern_mt.x: test_%_intern_mt.o $(LIBBLIS_LINK)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	$(RM_F) $<
+else
+	@@echo "Linking $@ to '$(LIBBLIS_LINK)'"
+	@$(LINKER) $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	@$(RM_F) $<
 endif
 

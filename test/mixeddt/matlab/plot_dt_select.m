@@ -1,4 +1,4 @@
-function r_val = plot_all_md( is_mt )
+function r_val = plot_dt_select( dom, is_mt )
 
 if is_mt == 1
 	thr_str = 'mt';
@@ -6,16 +6,23 @@ else
 	thr_str = 'st';
 end
 
-if 1
-dt_combos = gen_dt_combos();
+if dom == 'r'
+
+	dt_combos(  1, : ) = [ 'dsss' ];
+	dt_combos(  2, : ) = [ 'sddd' ];
+	dt_combos(  3, : ) = [ 'sdds' ];
+	dt_combos(  4, : ) = [ 'dssd' ];
+	dt_combos(  5, : ) = [ 'ddds' ];
+	dt_combos(  6, : ) = [ 'sssd' ];
+
 else
-dt_combos( 1, : ) = [ 'ssss' ];
-dt_combos( 2, : ) = [ 'sssd' ];
-dt_combos( 3, : ) = [ 'ssds' ];
-dt_combos( 4, : ) = [ 'sdss' ];
-dt_combos( 5, : ) = [ 'dsss' ];
-dt_combos( 6, : ) = [ 'ddds' ];
-dt_combos( 7, : ) = [ 'dddd' ];
+
+	dt_combos(  1, : ) = [ 'csss' ];
+	dt_combos(  2, : ) = [ 'zddd' ];
+	dt_combos(  3, : ) = [ 'ccss' ];
+	dt_combos(  4, : ) = [ 'zzdd' ];
+	dt_combos(  5, : ) = [ 'cscs' ];
+	dt_combos(  6, : ) = [ 'zdzd' ];
 end
 
 n_combos = size(dt_combos,1);
@@ -27,9 +34,7 @@ filetemp_open = '../output_%s_%sgemm_openblas.m';
 % the data files, and finally save the results to different variable names.
 file_blis_sref = sprintf( filetemp_blis, thr_str, 'ssss' );
 file_open_sref = sprintf( filetemp_open, thr_str, 'ssss' );
-%str = sprintf( '  Loading %s', file_blis_sref ); disp(str);
 run( file_blis_sref )
-%str = sprintf( '  Loading %s', file_open_sref ); disp(str);
 run( file_open_sref )
 data_gemm_asm_blis_sref( :, : ) = data_gemm_asm_blis( :, : );
 data_gemm_openblas_sref( :, : ) = data_gemm_openblas( :, : );
@@ -38,9 +43,7 @@ data_gemm_openblas_sref( :, : ) = data_gemm_openblas( :, : );
 % the data files, and finally save the results to different variable names.
 file_blis_dref = sprintf( filetemp_blis, thr_str, 'dddd' );
 file_open_dref = sprintf( filetemp_open, thr_str, 'dddd' );
-%str = sprintf( '  Loading %s', file_blis_dref ); disp(str);
 run( file_blis_dref )
-%str = sprintf( '  Loading %s', file_open_dref ); disp(str);
 run( file_open_dref )
 data_gemm_asm_blis_dref( :, : ) = data_gemm_asm_blis( :, : );
 data_gemm_openblas_dref( :, : ) = data_gemm_openblas( :, : );
@@ -49,9 +52,7 @@ data_gemm_openblas_dref( :, : ) = data_gemm_openblas( :, : );
 % the data files, and finally save the results to different variable names.
 file_blis_cref = sprintf( filetemp_blis, thr_str, 'cccs' );
 file_open_cref = sprintf( filetemp_open, thr_str, 'cccs' );
-%str = sprintf( '  Loading %s', file_blis_cref ); disp(str);
 run( file_blis_cref )
-%str = sprintf( '  Loading %s', file_open_cref ); disp(str);
 run( file_open_cref )
 data_gemm_asm_blis_cref( :, : ) = data_gemm_asm_blis( :, : );
 data_gemm_openblas_cref( :, : ) = data_gemm_openblas( :, : );
@@ -60,22 +61,23 @@ data_gemm_openblas_cref( :, : ) = data_gemm_openblas( :, : );
 % the data files, and finally save the results to different variable names.
 file_blis_zref = sprintf( filetemp_blis, thr_str, 'zzzd' );
 file_open_zref = sprintf( filetemp_open, thr_str, 'zzzd' );
-%str = sprintf( '  Loading %s', file_blis_zref ); disp(str);
 run( file_blis_zref )
-%str = sprintf( '  Loading %s', file_open_zref ); disp(str);
 run( file_open_zref )
 data_gemm_asm_blis_zref( :, : ) = data_gemm_asm_blis( :, : );
 data_gemm_openblas_zref( :, : ) = data_gemm_openblas( :, : );
 
-fig = figure;
-orient( fig, 'landscape' );
-set(gcf,'Position',[0 0 2000 900]);
+%fig = figure;
+fig = figure('Position', [100, 100, 1024, 1300]);
+orient( fig, 'portrait' );
+%set(gcf,'Position',[0 0 2000 900]);
 set(gcf,'PaperUnits', 'inches');
-set(gcf,'PaperSize', [64 33]);
-set(gcf,'PaperPosition', [0 0 64 33]);
-%set(gcf,'PaperPositionMode','auto');         
-set(gcf,'PaperPositionMode','manual');         
-set(gcf,'PaperOrientation','landscape');
+%set(gcf,'PaperSize', [16 12.4]);
+%set(gcf,'PaperPosition', [0 0 16 12.4]);
+set(gcf,'PaperSize', [9 11.0]);
+set(gcf,'PaperPosition', [0 0 9 11.0]);
+%set(gcf,'PaperPositionMode','auto');
+set(gcf,'PaperPositionMode','manual');
+set(gcf,'PaperOrientation','portrait');
 
 for dti = 1:n_combos
 %for dti = 1:1
@@ -88,9 +90,11 @@ for dti = 1:n_combos
 	if combo(4) == 's'
 		data_gemm_asm_blis_ref( :, : ) = data_gemm_asm_blis_sref( :, : );
 		data_gemm_openblas_ref( :, : ) = data_gemm_openblas_sref( :, : );
-	elseif combo(4) == 'd'
+		refch = 's';
+	else %if combo(4) == 'd'
 		data_gemm_asm_blis_ref( :, : ) = data_gemm_asm_blis_dref( :, : );
 		data_gemm_openblas_ref( :, : ) = data_gemm_openblas_dref( :, : );
+		refch = 'd';
 	end
 
 	if ( combo(1) == 'c' || combo(1) == 'z' ) && ...
@@ -99,9 +103,11 @@ for dti = 1:n_combos
 		if combo(4) == 's'
 			data_gemm_asm_blis_ref( :, : ) = data_gemm_asm_blis_cref( :, : );
 			data_gemm_openblas_ref( :, : ) = data_gemm_openblas_cref( :, : );
-		elseif combo(4) == 'd'
+			refch = 'c';
+		else %if combo(4) == 'd'
 			data_gemm_asm_blis_ref( :, : ) = data_gemm_asm_blis_zref( :, : );
 			data_gemm_openblas_ref( :, : ) = data_gemm_openblas_zref( :, : );
+			refch = 'z';
 		end
 	end
 
@@ -121,19 +127,22 @@ for dti = 1:n_combos
 	                data_gemm_asm_blis_ref, ...
 	                data_gemm_openblas, ...
 	                data_gemm_openblas_ref, ...
-	                is_mt, dti );
+	                is_mt, refch, 3, 2, dti );
 
 end
 
 
-if 0
-set(gcf,'Position',[0 0 2000 900]);
-set(gcf,'PaperUnits', 'inches');
-set(gcf,'PaperSize', [48 22]);
-set(gcf,'PaperPosition', [0 0 48 22]);
-%set(gcf,'PaperPositionMode','auto');         
-set(gcf,'PaperPositionMode','manual');         
-set(gcf,'PaperOrientation','landscape');
-end
-print(gcf, 'gemm_md','-bestfit','-dpdf');
+%if 0
+%set(gcf,'Position',[0 0 2000 900]);
+%set(gcf,'PaperUnits', 'inches');
+%set(gcf,'PaperSize', [48 22]);
+%set(gcf,'PaperPosition', [0 0 48 22]);
+%%set(gcf,'PaperPositionMode','auto');
+%set(gcf,'PaperPositionMode','manual');
+%set(gcf,'PaperOrientation','landscape');
+%end
+
+outfile = sprintf( 'output/gemm_select_%c', dom );
+
+print(gcf, outfile,'-bestfit','-dpdf');
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
