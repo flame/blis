@@ -49,7 +49,7 @@
 #define STRINGIFY_(...) #__VA_ARGS__
 #define GET_MACRO_(_1_,_2_,_3_,_4_,NAME,...) NAME
 
-#if (defined(_WIN32) && !defined(__clang__)) || defined(__MIC__)
+#if (defined(_WIN32) && !defined(__clang__) && !defined(__MINGW32__)) || defined(__MIC__)
 
 // Intel-style assembly blocks
 
