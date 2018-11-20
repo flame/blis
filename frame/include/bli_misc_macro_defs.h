@@ -86,7 +86,8 @@ static guint_t bli_round_to_mult( guint_t val, guint_t mult )
 
 // isnan, isinf
 // NOTE: These must remain macros, since isinf() and isnan() are macros
-// (defined in math.h).
+// (defined in math.h) that likely depend on the type of the argument 'a'
+// below.
 
 #define bli_isinf( a )  isinf( a )
 #define bli_isnan( a )  isnan( a )

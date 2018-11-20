@@ -1298,9 +1298,21 @@ char* libblis_test_get_string_for_result( double    resid,
 {
 	char* r_val;
 
-	if      ( resid > thresh[dt].failwarn ) r_val = libblis_test_fail_string;
-	else if ( resid > thresh[dt].warnpass ) r_val = libblis_test_warn_string;
-	else                                    r_val = libblis_test_pass_string;
+	// Before checking against the thresholds, make sure the residual is
+	// neither NaN nor Inf. (Note that bli_isnan() and bli_isinf() are
+	// both simply wrappers to the isnan() and isinf() macros defined
+	// defined in math.h.)
+	if ( bli_isnan( resid ) || bli_isinf( resid ) )
+	{
+		r_val = libblis_test_fail_string;
+	}
+	else
+	{
+		// Check the result against the thresholds.
+		if      ( resid > thresh[dt].failwarn ) r_val = libblis_test_fail_string;
+		else if ( resid > thresh[dt].warnpass ) r_val = libblis_test_warn_string;
+		else                                    r_val = libblis_test_pass_string;
+	}
 
 	return r_val;
 }
