@@ -379,7 +379,11 @@ LIBBLIS            := libblis
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
 else ifeq ($(IS_WIN),yes)
+ifeq ($(CC_VENDOR),gcc)
+SHLIB_EXT          := dll.a
+else
 SHLIB_EXT          := lib
+endif
 else
 SHLIB_EXT          := so
 endif
