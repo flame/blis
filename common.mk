@@ -507,7 +507,7 @@ ifeq ($(IS_WIN),yes)
 ifeq ($(CC_VENDOR),clang)
 SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += -Wl,--export-all-symbols -Wl,--out-implib,$(LIBBLIS).dll.a
+SOFLAGS    += -Wl,--export-all-symbols -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.
