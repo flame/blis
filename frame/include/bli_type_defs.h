@@ -107,12 +107,12 @@ typedef  gint_t  bool_t;
 // interoperability with BLIS.
 #ifndef _DEFINED_DIM_T
 #define _DEFINED_DIM_T
-typedef  gint_t  dim_t;      // dimension type
+typedef   gint_t dim_t;      // dimension type
 #endif
-typedef  gint_t  inc_t;      // increment/stride type
-typedef  gint_t  doff_t;     // diagonal offset type
-typedef guint_t  siz_t;      // byte size type
-typedef guint_t  objbits_t;  // object information bit field
+typedef   gint_t inc_t;      // increment/stride type
+typedef   gint_t doff_t;     // diagonal offset type
+typedef  guint_t siz_t;      // byte size type
+typedef uint32_t objbits_t;  // object information bit field
 
 // -- Real types --
 
@@ -268,12 +268,22 @@ typedef dcomplex  f77_dcomplex;
            - 1 == Hermitian
            - 2 == symmetric
            - 3 == triangular
-  31 ~ 29  Execution numerical datatype
+  31 ~ 29  Computation numerical datatype
            - 29: domain    (0 == real, 1 == complex)
            - 30: precision (0 == single, 1 == double)
            - 31: used to encode integer, constant types
+
+  info2 field description
+
+  bit(s)   purpose
+  -------  -------
+    2 ~ 0  Scalar storage numerical datatype
+           -  0: domain    (0 == real, 1 == complex)
+           -  1: precision (0 == single, 1 == double)
+           -  2: used to encode integer, constant types
 */
 
+// info
 #define BLIS_DATATYPE_SHIFT                0
 #define   BLIS_DOMAIN_SHIFT                0
 #define   BLIS_PRECISION_SHIFT             1
@@ -305,10 +315,16 @@ typedef dcomplex  f77_dcomplex;
 #define   BLIS_COMP_DOMAIN_SHIFT           29
 #define   BLIS_COMP_PREC_SHIFT             30
 
+// info2
+#define BLIS_SCALAR_DT_SHIFT                0
+#define   BLIS_SCALAR_DOMAIN_SHIFT          0
+#define   BLIS_SCALAR_PREC_SHIFT            1
+
 //
 // -- BLIS info bit field masks ------------------------------------------------
 //
 
+// info
 #define BLIS_DATATYPE_BITS                 ( 0x7  << BLIS_DATATYPE_SHIFT )
 #define   BLIS_DOMAIN_BIT                  ( 0x1  << BLIS_DOMAIN_SHIFT )
 #define   BLIS_PRECISION_BIT               ( 0x1  << BLIS_PRECISION_SHIFT )
@@ -339,6 +355,11 @@ typedef dcomplex  f77_dcomplex;
 #define BLIS_COMP_DT_BITS                  ( 0x7  << BLIS_COMP_DT_SHIFT )
 #define   BLIS_COMP_DOMAIN_BIT             ( 0x1  << BLIS_COMP_DOMAIN_SHIFT )
 #define   BLIS_COMP_PREC_BIT               ( 0x1  << BLIS_COMP_PREC_SHIFT )
+
+// info2
+#define BLIS_SCALAR_DT_BITS                ( 0x7  << BLIS_SCALAR_DT_SHIFT )
+#define   BLIS_SCALAR_DOMAIN_BIT           ( 0x1  << BLIS_SCALAR_DOMAIN_SHIFT )
+#define   BLIS_SCALAR_PREC_BIT             ( 0x1  << BLIS_SCALAR_PREC_SHIFT )
 
 
 //
@@ -1062,6 +1083,7 @@ typedef struct obj_s
 	doff_t        diag_off;
 
 	objbits_t     info;
+	objbits_t     info2;
 	siz_t         elem_size;
 
 	void*         buffer;
@@ -1096,6 +1118,7 @@ static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->diag_off  = a->diag_off;
 
 	b->info      = a->info;
+	b->info2     = a->info2;
 	b->elem_size = a->elem_size;
 
 	b->buffer    = a->buffer;
@@ -1126,6 +1149,7 @@ static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->diag_off  = a->diag_off;
 
 	b->info      = a->info;
+	b->info2     = a->info2;
 	b->elem_size = a->elem_size;
 
 	b->buffer    = a->buffer;

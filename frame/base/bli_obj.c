@@ -114,6 +114,7 @@ void bli_obj_create_without_buffer
 	bli_obj_set_diag_offset( 0, obj );
 
 	// Set the internal scalar to 1.0.
+	bli_obj_set_scalar_dt( dt, obj );
 	s = bli_obj_internal_scalar_buffer( obj );
 
 	// Always writing the imaginary component is needed in mixed-domain
@@ -585,45 +586,47 @@ void bli_obj_print
 	fprintf( file, "%s\n", label );
 	fprintf( file, "\n" );
 
-	fprintf( file, " m x n           %lu x %lu\n", ( unsigned long int )bli_obj_length( obj ),
-	                                               ( unsigned long int )bli_obj_width( obj ) );
+	fprintf( file, " m x n           %lu x %lu\n", ( unsigned long )bli_obj_length( obj ),
+	                                               ( unsigned long )bli_obj_width( obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " offm, offn      %lu, %lu\n", ( unsigned long int )bli_obj_row_off( obj ),
-	                                              ( unsigned long int )bli_obj_col_off( obj ) );
+	fprintf( file, " offm, offn      %lu, %lu\n", ( unsigned long )bli_obj_row_off( obj ),
+	                                              ( unsigned long )bli_obj_col_off( obj ) );
 	fprintf( file, " diagoff         %ld\n", ( signed long int )bli_obj_diag_offset( obj ) );
 	fprintf( file, "\n" );
 
 	fprintf( file, " buf             %p\n",  ( void* )bli_obj_buffer( obj ) );
-	fprintf( file, " elem size       %lu\n", ( unsigned long int )bli_obj_elem_size( obj ) );
+	fprintf( file, " elem size       %lu\n", ( unsigned long )bli_obj_elem_size( obj ) );
 	fprintf( file, " rs, cs          %ld, %ld\n", ( signed long int )bli_obj_row_stride( obj ),
 	                                              ( signed long int )bli_obj_col_stride( obj ) );
 	fprintf( file, " is              %ld\n", ( signed long int )bli_obj_imag_stride( obj ) );
-	fprintf( file, " m_padded        %lu\n", ( unsigned long int )bli_obj_padded_length( obj ) );
-	fprintf( file, " n_padded        %lu\n", ( unsigned long int )bli_obj_padded_width( obj ) );
-	fprintf( file, " pd              %lu\n", ( unsigned long int )bli_obj_panel_dim( obj ) );
-	fprintf( file, " ps              %lu\n", ( unsigned long int )bli_obj_panel_stride( obj ) );
+	fprintf( file, " m_padded        %lu\n", ( unsigned long )bli_obj_padded_length( obj ) );
+	fprintf( file, " n_padded        %lu\n", ( unsigned long )bli_obj_padded_width( obj ) );
+	fprintf( file, " pd              %lu\n", ( unsigned long )bli_obj_panel_dim( obj ) );
+	fprintf( file, " ps              %lu\n", ( unsigned long )bli_obj_panel_stride( obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " info            %lX\n", ( unsigned long int )(*obj).info );
-	fprintf( file, " - is complex    %lu\n", ( unsigned long int )bli_obj_is_complex( obj ) );
-	fprintf( file, " - is d. prec    %lu\n", ( unsigned long int )bli_obj_is_double_prec( obj ) );
-	fprintf( file, " - datatype      %lu\n", ( unsigned long int )bli_obj_dt( obj ) );
-	fprintf( file, " - target dt     %lu\n", ( unsigned long int )bli_obj_target_dt( obj ) );
-	fprintf( file, " - exec dt       %lu\n", ( unsigned long int )bli_obj_exec_dt( obj ) );
-	fprintf( file, " - has trans     %lu\n", ( unsigned long int )bli_obj_has_trans( obj ) );
-	fprintf( file, " - has conj      %lu\n", ( unsigned long int )bli_obj_has_conj( obj ) );
-	fprintf( file, " - unit diag?    %lu\n", ( unsigned long int )bli_obj_has_unit_diag( obj ) );
-	fprintf( file, " - struc type    %lu\n", ( unsigned long int )bli_obj_struc( obj ) >> BLIS_STRUC_SHIFT );
-	fprintf( file, " - uplo type     %lu\n", ( unsigned long int )bli_obj_uplo( obj ) >> BLIS_UPLO_SHIFT );
-	fprintf( file, "   - is upper    %lu\n", ( unsigned long int )bli_obj_is_upper( obj ) );
-	fprintf( file, "   - is lower    %lu\n", ( unsigned long int )bli_obj_is_lower( obj ) );
-	fprintf( file, "   - is dense    %lu\n", ( unsigned long int )bli_obj_is_dense( obj ) );
-	fprintf( file, " - pack schema   %lu\n", ( unsigned long int )bli_obj_pack_schema( obj ) >> BLIS_PACK_SCHEMA_SHIFT );
-	fprintf( file, " - packinv diag? %lu\n", ( unsigned long int )bli_obj_has_inverted_diag( obj ) );
-	fprintf( file, " - pack ordifup  %lu\n", ( unsigned long int )bli_obj_is_pack_rev_if_upper( obj ) );
-	fprintf( file, " - pack ordiflo  %lu\n", ( unsigned long int )bli_obj_is_pack_rev_if_lower( obj ) );
-	fprintf( file, " - packbuf type  %lu\n", ( unsigned long int )bli_obj_pack_buffer_type( obj ) >> BLIS_PACK_BUFFER_SHIFT );
+	fprintf( file, " info            %lX\n", ( unsigned long )(*obj).info );
+	fprintf( file, " - is complex    %lu\n", ( unsigned long )bli_obj_is_complex( obj ) );
+	fprintf( file, " - is d. prec    %lu\n", ( unsigned long )bli_obj_is_double_prec( obj ) );
+	fprintf( file, " - datatype      %lu\n", ( unsigned long )bli_obj_dt( obj ) );
+	fprintf( file, " - target dt     %lu\n", ( unsigned long )bli_obj_target_dt( obj ) );
+	fprintf( file, " - exec dt       %lu\n", ( unsigned long )bli_obj_exec_dt( obj ) );
+	fprintf( file, " - comp dt       %lu\n", ( unsigned long )bli_obj_comp_dt( obj ) );
+	fprintf( file, " - scalar dt     %lu\n", ( unsigned long )bli_obj_scalar_dt( obj ) );
+	fprintf( file, " - has trans     %lu\n", ( unsigned long )bli_obj_has_trans( obj ) );
+	fprintf( file, " - has conj      %lu\n", ( unsigned long )bli_obj_has_conj( obj ) );
+	fprintf( file, " - unit diag?    %lu\n", ( unsigned long )bli_obj_has_unit_diag( obj ) );
+	fprintf( file, " - struc type    %lu\n", ( unsigned long )bli_obj_struc( obj ) >> BLIS_STRUC_SHIFT );
+	fprintf( file, " - uplo type     %lu\n", ( unsigned long )bli_obj_uplo( obj ) >> BLIS_UPLO_SHIFT );
+	fprintf( file, "   - is upper    %lu\n", ( unsigned long )bli_obj_is_upper( obj ) );
+	fprintf( file, "   - is lower    %lu\n", ( unsigned long )bli_obj_is_lower( obj ) );
+	fprintf( file, "   - is dense    %lu\n", ( unsigned long )bli_obj_is_dense( obj ) );
+	fprintf( file, " - pack schema   %lu\n", ( unsigned long )bli_obj_pack_schema( obj ) >> BLIS_PACK_SCHEMA_SHIFT );
+	fprintf( file, " - packinv diag? %lu\n", ( unsigned long )bli_obj_has_inverted_diag( obj ) );
+	fprintf( file, " - pack ordifup  %lu\n", ( unsigned long )bli_obj_is_pack_rev_if_upper( obj ) );
+	fprintf( file, " - pack ordiflo  %lu\n", ( unsigned long )bli_obj_is_pack_rev_if_lower( obj ) );
+	fprintf( file, " - packbuf type  %lu\n", ( unsigned long )bli_obj_pack_buffer_type( obj ) >> BLIS_PACK_BUFFER_SHIFT );
 	fprintf( file, "\n" );
 }
 

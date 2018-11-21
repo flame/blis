@@ -121,6 +121,24 @@ void bli_gemm_front
 		}
 	}
 
+	// Next, we handle the possibility of needing to typecast alpha to the
+	// computation datatype and/or beta to the storage datatype of C.
+
+	// Attach alpha to B, and in the process typecast alpha to the target
+	// datatype of the matrix (which in this case is equal to the computation
+	// datatype).
+	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
+
+	// Attach beta to C, and in the process typecast beta to the target
+	// datatype of the matrix (which in this case is equal to the storage
+	// datatype of C).
+	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, beta,  &c_local );
+
+	// Change the alpha and beta pointers to BLIS_ONE since the values have
+	// now been typecast and attached to the matrices above.
+	alpha = &BLIS_ONE;
+	beta  = &BLIS_ONE;
+
 #ifdef BLIS_ENABLE_GEMM_MD
 	// Don't perform the following optimization for ccr or crc cases, as
 	// those cases are sensitive to the ukernel storage preference (ie:
@@ -265,8 +283,12 @@ void bli_gemm_front
 	// we copy/accumulate the result back to C and then release the object.
 	if ( use_ct )
     {
+		obj_t beta_local;
+
+		bli_obj_scalar_detach( &c_local, &beta_local );
+
 		//bli_castnzm( &ct, &c_local );
-		bli_xpbym( &ct, beta, &c_local );
+		bli_xpbym( &ct, &beta_local, &c_local );
 
 		bli_obj_free( &ct );
 	}
