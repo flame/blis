@@ -1,9 +1,20 @@
 environment:
   matrix:
-    - LIB_TYPE: shared
-      CONFIG: x86_64
     - LIB_TYPE: static
       CONFIG: auto
+      CC: gcc
+
+    - LIB_TYPE: shared
+      CONFIG: x86_64
+      CC: clang
+      AR: llvm-ar
+      AS: llvm-as
+
+    - LIB_TYPE: static
+      CONFIG: auto
+      CC: clang
+      AR: llvm-ar
+      AS: llvm-as
 
 install:
 - set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
@@ -14,14 +25,12 @@ install:
 - call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
+- if [%CC%]==[gcc] set "PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;%PATH%"
 
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
 - if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
-- set CC=clang
 - set RANLIB=echo
-- set AR=llvm-ar
-- set AS=llvm-as
 - set LIBPTHREAD=
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
