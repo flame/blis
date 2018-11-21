@@ -34,7 +34,7 @@ build_script:
 - if not [%CBLAS%]==[no] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-cblas"
 - set RANLIB=echo
 - set LIBPTHREAD=
-- set "PATH=%PATH%;C:\blis\lib\%CONFIG%"
+- set "PATH=%PATH%;C:\blis\lib"
 - set "CFLAGS=-Wno-macro-redefined"
 - bash -lc "cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-threading=%THREADING% --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "cd /c/projects/blis && mingw32-make -j4 V=1"
