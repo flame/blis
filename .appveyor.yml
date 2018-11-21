@@ -25,7 +25,8 @@ install:
 - if [%CC%]==[clang] call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 - if [%CC%]==[clang] set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
 - if [%CC%]==[clang] set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
-- if [%CC%]==[gcc] set "PATH=C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1;C:\msys64\bin;%PATH%"
+- if [%CC%]==[gcc] set "PATH=C:\msys64\mingw64\bin;C:\msys64\bin;%PATH%"
+- if [%CC%]==[clang] set "ACTIVATE=source activate &&"
 
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
@@ -34,9 +35,9 @@ build_script:
 - set LIBPTHREAD=
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
-- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --disable-threading --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
-- bash -lc "source activate && cd /c/projects/blis && make -j4 V=1"
-- bash -lc "source activate && cd /c/projects/blis && make install"
+- bash -lc "%ACTIVATE% cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --disable-threading --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "%ACTIVATE% cd /c/projects/blis && make -j4 V=1"
+- bash -lc "%ACTIVATE% cd /c/projects/blis && make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
 - ps: Push-AppveyorArtifact C:\blis.zip
 
