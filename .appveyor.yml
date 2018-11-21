@@ -20,8 +20,8 @@ environment:
       THREADING: openmp
 
 install:
-- if [%CC%]==[gcc] set "PATH=C:\msys64\mingw64\bin;C:\msys64\bin;%PATH%"
-- if [%CC%]==[clang] set "PATH=C:\Program Files\LLVM\bin;C:\msys64\bin;%PATH%"
+- set "PATH=C:\msys64\mingw64\bin;C:\msys64\bin;%PATH%"
+- if [%CC%]==[clang] set "PATH=C:\Program Files\LLVM\bin;%PATH%"
 - if [%CC%]==[clang] call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
 build_script:
