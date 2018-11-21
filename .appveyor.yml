@@ -4,8 +4,9 @@ environment:
       CONFIG: auto
       CC: gcc
       THREADING: pthreads
+      CBLAS: no
 
-    - LIB_TYPE: shared
+    - LIB_TYPE: static
       CONFIG: auto
       CC: clang
       THREADING: no
@@ -30,11 +31,12 @@ install:
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
 - if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
+- if not [%CBLAS%]==[no] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-cblas"
 - set RANLIB=echo
 - set LIBPTHREAD=
-- set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
+- set "PATH=%PATH%;C:\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
-- bash -lc "cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --enable-threading=%THREADING% --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-threading=%THREADING% --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
 - bash -lc "cd /c/projects/blis && mingw32-make -j4 V=1"
 - bash -lc "cd /c/projects/blis && mingw32-make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
