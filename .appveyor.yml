@@ -2,17 +2,17 @@ environment:
   matrix:
     - LIB_TYPE: shared
       CONFIG: auto
+      CC: gcc
+      THREADING: pthreads
+
+    - LIB_TYPE: shared
+      CONFIG: auto
       CC: clang
       THREADING: no
 
     - LIB_TYPE: shared
       CONFIG: x86_64
       CC: clang
-      THREADING: pthreads
-
-    - LIB_TYPE: static
-      CONFIG: auto
-      CC: gcc
       THREADING: pthreads
 
     - LIB_TYPE: static
