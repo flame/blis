@@ -1,15 +1,15 @@
 environment:
   matrix:
-    - LIB_TYPE: static
-      CONFIG: auto
-      CC: gcc
-      THREADING: pthreads
-
     - LIB_TYPE: shared
       CONFIG: x86_64
       CC: clang
       AR: llvm-ar
       AS: llvm-as
+      THREADING: pthreads
+
+    - LIB_TYPE: static
+      CONFIG: auto
+      CC: gcc
       THREADING: pthreads
 
     - LIB_TYPE: static
@@ -21,7 +21,7 @@ environment:
 
 install:
 - if [%CC%]==[gcc] set "PATH=C:\msys64\mingw64\bin;C:\msys64\bin;%PATH%"
-- if [%CC%]==[clang] set "PATH=C:\Program Files\LLVM\bin;C:\msys64\bin;%CPATH%"
+- if [%CC%]==[clang] set "PATH=C:\Program Files\LLVM\bin;C:\msys64\bin;%PATH%"
 - if [%CC%]==[clang] call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
 build_script:
