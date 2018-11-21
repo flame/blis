@@ -36,8 +36,8 @@ build_script:
 - set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
 - set "CFLAGS=-Wno-macro-redefined"
 - bash -lc "%ACTIVATE% cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --disable-threading --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
-- bash -lc "%ACTIVATE% cd /c/projects/blis && m2w64-make -j4 V=1"
-- bash -lc "%ACTIVATE% cd /c/projects/blis && m2w64-make install"
+- bash -lc "%ACTIVATE% cd /c/projects/blis && mingw32-make -j4 V=1"
+- bash -lc "%ACTIVATE% cd /c/projects/blis && mingw32-make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
 - ps: Push-AppveyorArtifact C:\blis.zip
 
