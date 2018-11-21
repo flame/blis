@@ -633,20 +633,20 @@ $(LIBBLIS_SO_PATH): $(MK_BLIS_OBJS)
 ifeq ($(ENABLE_VERBOSE),yes)
 ifeq ($(ARG_MAX_HACK),yes)
 	$(file > $@.in,$^)
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
+	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in $(LDFLAGS)
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
+	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
 	@echo "Dynamically linking $@"
 	@$(file > $@.in,$^)
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in
+	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in $(LDFLAGS)
 	@$(RM_F) $@.in
 else
 	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) $(LDFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $?
+	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
 endif
 endif
 
