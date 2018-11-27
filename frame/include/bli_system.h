@@ -83,11 +83,13 @@
   #define VC_EXTRALEAN
   #include <windows.h>
 
-  // Undefine attribute specifiers in Windows.
-  #define __attribute__(x)
+  #if !defined(__clang__) && !defined(__GNUC__)
+     // Undefine attribute specifiers in Windows.
+     #define __attribute__(x)
 
-  // Undefine restrict.
-  #define restrict
+     // Undefine restrict.
+     #define restrict
+  #endif
 
 #endif
 

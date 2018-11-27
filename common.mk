@@ -379,7 +379,11 @@ LIBBLIS            := libblis
 ifeq ($(OS_NAME),Darwin)
 SHLIB_EXT          := dylib
 else ifeq ($(IS_WIN),yes)
+ifeq ($(CC_VENDOR),gcc)
+SHLIB_EXT          := dll.a
+else
 SHLIB_EXT          := lib
+endif
 else
 SHLIB_EXT          := so
 endif
@@ -503,7 +507,7 @@ ifeq ($(IS_WIN),yes)
 ifeq ($(CC_VENDOR),clang)
 SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += build/libblis-symbols.def -Wl,--out-implib,$(LIBBLIS).dll.a
+SOFLAGS    += -Wl,--export-all-symbols -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.
