@@ -283,7 +283,7 @@ The `gemm` micro-kernel, sometimes simply referred to as "the BLIS micro-kernel"
 
 where `A1` is an _MR x k_ "micro-panel" matrix stored in packed (column-wise) format, `B1` is a _k x NR_ "micro-panel" matrix stored in packed (row-wise) format, `C11` is an _MR x NR_ general matrix stored according to its row and column strides `rsc` and `csc`, and `alpha` and beta are scalars.
 
-_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo).
+_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
 Parameters:
 
@@ -409,7 +409,7 @@ The `trsm_l` and `trsm_u` micro-kernels perform the following operation:
 
 where `A11` is _MR x MR_ and lower (`trsm_l`) or upper (`trsm_u`) triangular, `B11` is _MR x NR_, and `C11` is _MR x NR_.
 
-_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo).
+_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
 Parameters:
 
@@ -529,7 +529,7 @@ The `gemmtrsm_u` micro-kernel performs:
 where `A11` is _MR_ x _MR_ and upper triangular, `A12` is _MR_ x _k_, and `B21` is _k_ x _NR_.
 In both cases, `B11` is _MR_ x _NR_ and `alpha` is a scalar. Here, `inv()` denotes matrix inverse.
 
-_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo).
+_MR_ and _NR_ are the register blocksizes associated with the micro-kernel. They are chosen by the developer when the micro-kernel is written and then encoded into a BLIS configuration, which will reference the micro-kernel when the BLIS framework is instantiated into a library. For more information on setting register blocksizes and related constants, please see the [BLIS developer configuration guide](ConfigurationHowTo.md).
 
 Parameters:
 
