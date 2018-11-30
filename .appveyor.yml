@@ -1,40 +1,51 @@
 environment:
   matrix:
     - LIB_TYPE: shared
-      CONFIG: x86_64
+      CONFIG: auto
+      CC: gcc
+      THREADING: pthreads
+      CBLAS: no
+
     - LIB_TYPE: static
       CONFIG: auto
+      CC: clang
+      THREADING: no
+
+    - LIB_TYPE: shared
+      CONFIG: x86_64
+      CC: clang
+      THREADING: pthreads
+
+    - LIB_TYPE: static
+      CONFIG: auto
+      CC: clang
+      THREADING: openmp
 
 install:
-- set "CONDA_INSTALL_LOCN=C:\\Miniconda36-x64"
-- call %CONDA_INSTALL_LOCN%\Scripts\activate.bat
-- conda update --yes --quiet conda
-- conda config --add channels conda-forge
-- conda install --yes clangdev posix m2-make
-- call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
-- set "LIB=%CONDA_INSTALL_LOCN%\Library\lib;%LIB%"
-- set "CPATH=%CONDA_INSTALL_LOCN%\Library\include;%CPATH%"
+- set "PATH=C:\msys64\mingw64\bin;C:\msys64\bin;%PATH%"
+- if [%CC%]==[clang] set "PATH=C:\Program Files\LLVM\bin;%PATH%"
+- if [%CC%]==[clang] set "AR=llvm-ar"
+- if [%CC%]==[clang] set "AS=llvm-as"
+- if [%CC%]==[clang] call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 
 build_script:
 - if [%LIB_TYPE%]==[shared] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-shared --disable-static"
 - if [%LIB_TYPE%]==[static] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --disable-shared --enable-static"
-- set CC=clang
+- if not [%CBLAS%]==[no] set "CONFIGURE_OPTS=%CONFIGURE_OPTS% --enable-cblas"
 - set RANLIB=echo
-- set AR=llvm-ar
-- set AS=llvm-as
 - set LIBPTHREAD=
-- set "PATH=%PATH%;C:\projects\blis\lib\%CONFIG%"
+- set "PATH=%PATH%;C:\blis\lib"
 - set "CFLAGS=-Wno-macro-redefined"
-- bash -lc "source activate && cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-cblas --disable-threading --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
-- bash -lc "source activate && cd /c/projects/blis && make -j4 V=1"
-- bash -lc "source activate && cd /c/projects/blis && make install"
+- bash -lc "cd /c/projects/blis && ./configure %CONFIGURE_OPTS% --enable-threading=%THREADING% --enable-arg-max-hack --prefix=/c/blis %CONFIG%"
+- bash -lc "cd /c/projects/blis && mingw32-make -j4 V=1"
+- bash -lc "cd /c/projects/blis && mingw32-make install"
 - ps: Compress-Archive -Path C:\blis -DestinationPath C:\blis.zip
 - ps: Push-AppveyorArtifact C:\blis.zip
 
 test_script:
 - if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
 - if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
-- bash -lc "source activate && cd /c/projects/blis && make %TEST_TARGET% -j4 V=1"
+- bash -lc "cd /c/projects/blis && mingw32-make %TEST_TARGET% -j4 V=1"
 
 # Enable this to be able to login to the build worker. You can use the
 # `remmina` program in Ubuntu, use the login information that the line below
