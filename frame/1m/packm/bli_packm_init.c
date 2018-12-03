@@ -236,7 +236,6 @@ siz_t bli_packm_init_pack
 	// change the datatype of P to reflect the target_dt.
 	if ( dt_scalar != dt_tar )
 	{
-
 		bli_obj_scalar_cast_to( dt_tar, p );
 	}
 

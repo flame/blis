@@ -57,15 +57,15 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_EX_DECLS \
 \
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype, and if that datatype matches the execution
-	   datatype. If any datatypes differ, skip the induced method chooser
-	   function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( c ) == bli_obj_dt( a ) && \
-	     bli_obj_dt( c ) == bli_obj_dt( b ) && \
-	     bli_obj_dt( c ) == bli_obj_comp_dt( c ) && \
-	     bli_obj_is_complex( c ) ) \
+	/* Only proceed with an induced method if each of the operands have a
+	   complex storage datatype. NOTE: Allowing precisions to vary while
+	   using 1m, which is what we do here, is unique to gemm; other level-3
+	   operations use 1m only if all storage datatypes are equal (including
+	   the computation datatype). If any operands are real, skip the induced
+	   method chooser function and proceed directly with native execution. */ \
+	if ( bli_obj_is_complex( c ) && \
+	     bli_obj_is_complex( a ) && \
+	     bli_obj_is_complex( b ) ) \
 	{ \
 		/* Invoke the operation's "ind" function--its induced method front-end.
 		   For complex problems, it calls the highest priority induced method

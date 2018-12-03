@@ -546,8 +546,8 @@ void GENBAINAME(cntx_init)
 	}
 
 	// For 1m, we employ an optimization which requires that we copy the native
-	// real domain gemm ukernel function pointers to the corresponding slots in
-	// the virtual gemm ukernel func_t.
+	// real domain gemm ukernel function pointers to the corresponding real
+	// domain slots in the virtual gemm ukernel func_t.
 	if ( method == BLIS_1M )
 	{
 		func_t* gemm_nat_ukrs = bli_cntx_get_l3_nat_ukrs( BLIS_GEMM_UKR, cntx );

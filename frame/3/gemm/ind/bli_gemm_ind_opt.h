@@ -32,48 +32,50 @@
 
 */
 
-#ifndef BLIS_L3_IND_OPT_H
-#define BLIS_L3_IND_OPT_H
+static void bli_gemm_ind_recast_1m_params
+     (
+       num_t* dt_exec,
+       pack_t schema_a,
+       obj_t* c,
+       dim_t* m,
+       dim_t* n,
+       dim_t* k,
+       inc_t* pd_a, inc_t* ps_a,
+       inc_t* pd_b, inc_t* ps_b,
+       inc_t* rs_c, inc_t* cs_c
+     )
+{
+	obj_t beta;
 
-#define bli_l3_ind_recast_1m_params( dt_exec, schema_a, c, \
-                                     m, n, k, \
-                                     pd_a, ps_a, \
-                                     pd_b, ps_b, \
-                                     rs_c, cs_c ) \
-{ \
-	obj_t beta; \
-\
 	/* Detach the beta scalar from c so that we can test its imaginary
-	   component. */ \
-	bli_obj_scalar_detach( c, &beta ); \
-\
+	   component. */
+	bli_obj_scalar_detach( c, &beta );
+
 	/* If beta is in the real domain, and c is row- or column-stored,
-	   then we may proceed with the optimization. */ \
-	if ( /*bli_obj_imag_equals( &beta, &BLIS_ZERO ) &&*/ \
-	     bli_obj_imag_is_zero( &beta ) && \
-	     !bli_is_gen_stored( rs_c, cs_c ) ) \
-	{ \
-		dt_exec = bli_dt_proj_to_real( dt_exec ); \
-\
-		if ( bli_is_1e_packed( schema_a ) ) \
-		{ \
-			m    *= 2; \
-			n    *= 1; \
-			k    *= 2; \
-			pd_a *= 2; ps_a *= 2; \
-			pd_b *= 1; ps_b *= 2; \
-			rs_c *= 1; cs_c *= 2; \
-		} \
-		else /* if ( bli_is_1r_packed( schema_a ) ) */ \
-		{ \
-			m    *= 1; \
-			n    *= 2; \
-			k    *= 2; \
-			pd_a *= 1; ps_a *= 2; \
-			pd_b *= 2; ps_b *= 2; \
-			rs_c *= 2; cs_c *= 1; \
-		} \
-	} \
+	   then we may proceed with the optimization. */
+	if ( bli_obj_imag_is_zero( &beta ) &&
+	     !bli_is_gen_stored( *rs_c, *cs_c ) )
+	{
+		*dt_exec = bli_dt_proj_to_real( *dt_exec );
+
+		if ( bli_is_1e_packed( schema_a ) )
+		{
+			*m    *= 2;
+			*n    *= 1;
+			*k    *= 2;
+			*pd_a *= 2; *ps_a *= 2;
+			*pd_b *= 1; *ps_b *= 2;
+			*rs_c *= 1; *cs_c *= 2;
+		}
+		else /* if ( bli_is_1r_packed( schema_a ) ) */
+		{
+			*m    *= 1;
+			*n    *= 2;
+			*k    *= 2;
+			*pd_a *= 1; *ps_a *= 2;
+			*pd_b *= 2; *ps_b *= 2;
+			*rs_c *= 2; *cs_c *= 1;
+		}
+	}
 }
 
-#endif

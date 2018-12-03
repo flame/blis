@@ -62,9 +62,13 @@ void PASTEMAC2(cha,chp,opname) \
        conj_t            conja, \
        dim_t             m, \
        dim_t             n, \
+       ctype_p* restrict kappa, \
        ctype_a* restrict a, inc_t inca, inc_t lda, \
        ctype_p* restrict p,             inc_t ldp  \
      );
+
+INSERT_GENTPROT2_BASIC0( packm_cxk_1e_md )
+INSERT_GENTPROT2_MIXDP0( packm_cxk_1e_md )
 
 INSERT_GENTPROT2_BASIC0( packm_cxk_1r_md )
 INSERT_GENTPROT2_MIXDP0( packm_cxk_1r_md )

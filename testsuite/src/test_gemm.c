@@ -379,6 +379,8 @@ void libblis_test_gemm_md
 	{
 		bli_setsc(  2.0,  0.0, &alpha );
 		bli_setsc(  1.2,  0.5, &beta );
+		//bli_setsc(  1.0,  0.0, &alpha );
+		//bli_setsc(  1.0,  0.0, &beta );
 	}
 
 	// Randomize A, B, and C, and save C.
@@ -398,7 +400,17 @@ void libblis_test_gemm_md
 
 		time = bli_clock();
 
+#if 0
+bli_printm( "a", &a, "%5.2f", "" );
+bli_printm( "b", &b, "%5.2f", "" );
+bli_printm( "c", &c, "%5.2f", "" );
+bli_printm( "alpha", &alpha, "%5.2f", "" );
+bli_printm( "beta", &beta, "%5.2f", "" );
+#endif
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
+#if 0
+bli_printm( "c after", &c, "%5.2f", "" );
+#endif
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}
@@ -436,7 +448,17 @@ void libblis_test_gemm_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
+#if 0
+bli_printm( "a", a, "%5.2f", "" );
+bli_printm( "b", b, "%5.2f", "" );
+bli_printm( "c", c, "%5.2f", "" );
+bli_printm( "alpha", alpha, "%5.2f", "" );
+bli_printm( "beta", beta, "%5.2f", "" );
+#endif
 		bli_gemm( alpha, a, b, beta, c );
+#if 0
+bli_printm( "c after", c, "%5.2f", "" );
+#endif
 		break;
 
 		default:

@@ -98,28 +98,23 @@ void bli_gemm_front
 		// is adjusted to point to cntx_local.)
 		bli_gemm_md( &a_local, &b_local, beta, &c_local, &cntx_local, &cntx );
 	}
-	else // homogeneous datatypes
+	//else // homogeneous datatypes
 #endif
-	{
-		// A sort of hack for communicating the desired pach schemas for A and
-		// B to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
-		// bli_l3_cntl_create_if()). This allows us to access the schemas from
-		// the control tree, which hopefully reduces some confusion,
-		// particularly in bli_packm_init().
-		if ( bli_cntx_method( cntx ) == BLIS_NAT )
-		{
-			bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
-			bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
-		}
-		else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
-		{
-			pack_t schema_a = bli_cntx_schema_a_block( cntx );
-			pack_t schema_b = bli_cntx_schema_b_panel( cntx );
 
-			bli_obj_set_pack_schema( schema_a, &a_local );
-			bli_obj_set_pack_schema( schema_b, &b_local );
-		}
-	}
+	// Load the pack schemas from the context and embed them into the objects
+	// for A and B. (Native contexts are initialized with the correct pack
+	// schemas, as are contexts for 1m, and if necessary bli_gemm_md() would
+	// have made a copy and modified the schemas, so reading them from the
+	// context should be a safe bet at this point.) This is a sort of hack for
+	// communicating the desired pack schemas for to bli_gemm_cntl_create()
+	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
+	// us to subsequently access the schemas from the control tree, which
+	// hopefully reduces some confusion, particularly in bli_packm_init().
+	const pack_t schema_a = bli_cntx_schema_a_block( cntx );
+	const pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+
+	bli_obj_set_pack_schema( schema_a, &a_local );
+	bli_obj_set_pack_schema( schema_b, &b_local );
 
 	// Next, we handle the possibility of needing to typecast alpha to the
 	// computation datatype and/or beta to the storage datatype of C.

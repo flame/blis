@@ -59,7 +59,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	PASTECH(ch,trsm_ukr_ft) \
 	                ctrsm_vir_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
 \
-	const bool_t      col_pref    = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t      col_pref    = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
 	const dim_t       mr          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -185,12 +185,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			ctype_r* restrict beta11_i  = &PASTEMAC(ch,imag)( *beta11_ri ); \
 			ctype*   restrict beta11_ir = b11_ir + i*rs_b  + j*cs_b; \
 \
-			PASTEMAC2(chr,ch,xpbyris)( *beta11t_r, \
-			                           *beta11t_i, \
-			                           alpha_r, \
-			                           alpha_i, /* alpha_i not referenced */ \
-			                           *beta11_r, \
-			                           *beta11_i ); \
+			PASTEMAC3(ch,chr,ch,xpbyris) \
+			( \
+			  *beta11t_r, \
+			  *beta11t_i, \
+			  alpha_r, \
+			  alpha_i, /* alpha_i not referenced */ \
+			  *beta11_r, \
+			  *beta11_i  \
+			); \
 \
 			PASTEMAC(ch,sets)( -*beta11_i, \
 			                    *beta11_r, *beta11_ir ); \
@@ -217,12 +220,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2; \
 			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2; \
 \
-			PASTEMAC2(chr,ch,xpbyris)( *beta11t_r, \
-			                           *beta11t_i, \
-			                           alpha_r, \
-			                           alpha_i, /* alpha_i not referenced */ \
-			                           *beta11_r, \
-			                           *beta11_i ); \
+			PASTEMAC3(ch,chr,ch,xpbyris) \
+			( \
+			  *beta11t_r, \
+			  *beta11t_i, \
+			  alpha_r, \
+			  alpha_i, /* alpha_i not referenced */ \
+			  *beta11_r, \
+			  *beta11_i  \
+			); \
 		} \
 	} \
 \
