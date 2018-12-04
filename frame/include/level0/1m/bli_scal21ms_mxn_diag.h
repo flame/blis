@@ -50,10 +50,10 @@
 \
 		for ( i = 0; i < min_m_n; ++i ) \
 		{ \
-			bli_scscal21es( *(x        + i*rs_x + i*cs_x), \
-			                *(a), \
-			                *(y_off_ri + i*rs_y + i*cs_y), \
-			                *(y_off_ir + i*rs_y + i*cs_y) ); \
+			bli_cscscal21es( *(a), \
+			                 *(x        + i*rs_x + i*cs_x), \
+			                 *(y_off_ri + i*rs_y + i*cs_y), \
+			                 *(y_off_ir + i*rs_y + i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_1r_packed( schema ) ) */ \
@@ -72,10 +72,10 @@
 \
 		for ( i = 0; i < min_m_n; ++i ) \
 		{ \
-			bli_scscal21rs( *(x        + i*rs_x + i*cs_x), \
-			                *(a), \
-			                *(y_off_r + i*rs_y2 + i*cs_y2), \
-			                *(y_off_i + i*rs_y2 + i*cs_y2) ); \
+			bli_cscscal21rs( *(a), \
+			                 *(x       + i*rs_x  + i*cs_x ), \
+			                 *(y_off_r + i*rs_y2 + i*cs_y2), \
+			                 *(y_off_i + i*rs_y2 + i*cs_y2) ); \
 		} \
 	} \
 }
@@ -93,10 +93,10 @@
 \
 		for ( i = 0; i < min_m_n; ++i ) \
 		{ \
-			bli_dzscal21es( *(x        + i*rs_x + i*cs_x), \
-			                *(a), \
-			                *(y_off_ri + i*rs_y + i*cs_y), \
-			                *(y_off_ir + i*rs_y + i*cs_y) ); \
+			bli_zdzscal21es( *(a), \
+			                 *(x        + i*rs_x + i*cs_x), \
+			                 *(y_off_ri + i*rs_y + i*cs_y), \
+			                 *(y_off_ir + i*rs_y + i*cs_y) ); \
 		} \
 	} \
 	else /* if ( bli_is_1r_packed( schema ) ) */ \
@@ -115,10 +115,10 @@
 \
 		for ( i = 0; i < min_m_n; ++i ) \
 		{ \
-			bli_dzscal21rs( *(x        + i*rs_x + i*cs_x), \
-			                *(a), \
-			                *(y_off_r + i*rs_y2 + i*cs_y2), \
-			                *(y_off_i + i*rs_y2 + i*cs_y2) ); \
+			bli_zdzscal21rs( *(a), \
+			                 *(x       + i*rs_x  + i*cs_x ), \
+			                 *(y_off_r + i*rs_y2 + i*cs_y2), \
+			                 *(y_off_i + i*rs_y2 + i*cs_y2) ); \
 		} \
 	} \
 }

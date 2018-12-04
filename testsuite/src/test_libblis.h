@@ -390,6 +390,7 @@ void libblis_test_op_driver
 void libblis_test_build_function_string
      (
        char*        prefix_str,
+       opid_t       opid,
        ind_t        method,
        char*        ind_str,
        char*        op_str,
@@ -472,7 +473,9 @@ int libblis_test_dt_str_has_sp_char_str( int n, char* str );
 int libblis_test_dt_str_has_dp_char( test_params_t* params );
 int libblis_test_dt_str_has_dp_char_str( int n, char* str );
 int libblis_test_dt_str_has_rd_char( test_params_t* params );
+int libblis_test_dt_str_has_rd_char_str( int n, char* str );
 int libblis_test_dt_str_has_cd_char( test_params_t* params );
+int libblis_test_dt_str_has_cd_char_str( int n, char* str );
 
 unsigned int libblis_test_count_combos
      (

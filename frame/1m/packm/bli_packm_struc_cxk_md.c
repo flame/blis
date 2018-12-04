@@ -86,6 +86,12 @@ void PASTEMAC2(chc,chp,varname) \
 	{ \
 		trans_t transc = ( trans_t )conjc; \
 \
+		/* Sanity check: Make sure that kappa is 1.0. Mixed-datatype alpha
+		   values are never handled when packing for native execution;
+		   instead, they are passed along to the micro-kernel. */ \
+		if ( !PASTEMAC(chp,eq1)( *kappa ) ) \
+			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+\
 		/* NOTE: We ignore kappa for now, since it should be 1.0. */ \
 		PASTEMAC2(chc,chp,castm) \
 		( \
@@ -149,7 +155,7 @@ void PASTEMAC2(chc,chp,varname) \
 			); \
 		} \
 	} \
-	else /* if ( bli_is_1r_packed( schema ) ) */ \
+	else if ( bli_is_1r_packed( schema ) ) \
 	{ \
 		/* NOTE: We ignore kappa for now, since it should be 1.0. */ \
 		PASTEMAC2(chc,chp,packm_cxk_1r_md) \
@@ -157,6 +163,7 @@ void PASTEMAC2(chc,chp,varname) \
 		  conjc, \
 		  panel_dim, \
 		  panel_len, \
+		  kappa, \
 		  c, incc, ldc, \
 		  p,       ldp  \
 		); \
@@ -209,6 +216,72 @@ void PASTEMAC2(chc,chp,varname) \
 			); \
 		} \
 	} \
+	else if ( bli_is_1e_packed( schema ) ) \
+	{ \
+		/* NOTE: We ignore kappa for now, since it should be 1.0. */ \
+		PASTEMAC2(chc,chp,packm_cxk_1e_md) \
+		( \
+		  conjc, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp  \
+		); \
+\
+		if ( m_panel != m_panel_max ) \
+		{ \
+			ctype_p* restrict zero   = PASTEMAC(chp,0); \
+			dim_t             offm   = m_panel; \
+			dim_t             offn   = 0; \
+			dim_t             m_edge = m_panel_max - m_panel; \
+			dim_t             n_edge = n_panel_max; \
+\
+			( void ) zero; \
+			( void ) m_edge; ( void )offm; \
+			( void ) n_edge; ( void )offn; \
+\
+			PASTEMAC(chp,set1ms_mxn) \
+			( \
+			  schema, \
+			  offm, \
+			  offn, \
+			  m_edge, \
+			  n_edge, \
+			  zero, \
+			  p, rs_p, cs_p, ldp  \
+			); \
+		} \
+\
+		if ( n_panel != n_panel_max ) \
+		{ \
+			ctype_p* restrict zero   = PASTEMAC(chp,0); \
+			dim_t             offm   = 0; \
+			dim_t             offn   = n_panel; \
+			dim_t             m_edge = m_panel_max; \
+			dim_t             n_edge = n_panel_max - n_panel; \
+\
+			( void ) zero; \
+			( void ) m_edge; ( void )offm; \
+			( void ) n_edge; ( void )offn; \
+\
+			PASTEMAC(chp,set1ms_mxn) \
+			( \
+			  schema, \
+			  offm, \
+			  offn, \
+			  m_edge, \
+			  n_edge, \
+			  zero, \
+			  p, rs_p, cs_p, ldp  \
+			); \
+		} \
+	} \
+	else \
+	{ \
+		/* Mixed-datatype packing should not occur for any other schemas. */ \
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+	} \
 \
 \
 /*
@@ -235,60 +308,239 @@ void PASTEMAC2(cha,chp,opname) \
        conj_t            conja, \
        dim_t             m, \
        dim_t             n, \
+	   ctype_p* restrict kappa, \
        ctype_a* restrict a, inc_t inca, inc_t lda, \
        ctype_p* restrict p,             inc_t ldp  \
      ) \
 { \
-	const inc_t                   inca2      = 2 * inca; \
-	const inc_t                   lda2       = 2 * lda; \
-	const inc_t                   ldp2       = 2 * ldp; \
+	const inc_t                    inca2    = 2 * inca; \
+	const inc_t                    lda2     = 2 * lda; \
+	const inc_t                    ldp2     = 2 * ldp; \
 \
-	PASTEMAC(cha,ctyper)* restrict alpha1_r   = ( PASTEMAC(cha,ctyper)* )a; \
-	PASTEMAC(cha,ctyper)* restrict alpha1_i   = ( PASTEMAC(cha,ctyper)* )a + 1; \
-	PASTEMAC(chp,ctyper)* restrict pi1_r      = ( PASTEMAC(chp,ctyper)* )p; \
-	PASTEMAC(chp,ctyper)* restrict pi1_i      = ( PASTEMAC(chp,ctyper)* )p + ldp; \
+	PASTEMAC(chp,ctyper)* restrict kappa_r  = ( PASTEMAC(chp,ctyper)* )kappa; \
+	PASTEMAC(chp,ctyper)* restrict kappa_i  = ( PASTEMAC(chp,ctyper)* )kappa + 1; \
+	PASTEMAC(cha,ctyper)* restrict alpha1_r = ( PASTEMAC(cha,ctyper)* )a; \
+	PASTEMAC(cha,ctyper)* restrict alpha1_i = ( PASTEMAC(cha,ctyper)* )a + 1; \
+	PASTEMAC(chp,ctyper)* restrict pi1_r    = ( PASTEMAC(chp,ctyper)* )p; \
+	PASTEMAC(chp,ctyper)* restrict pi1_i    = ( PASTEMAC(chp,ctyper)* )p + ldp; \
+\
+	( void )kappa_i; \
 \
 	dim_t i; \
 \
-	if ( bli_is_conj( conja ) ) \
+	if ( PASTEMAC(chp,eq1)( *kappa ) ) \
 	{ \
-		for ( ; n != 0; --n ) \
+		if ( bli_is_conj( conja ) ) \
 		{ \
-			for ( i = 0; i < m; ++i ) \
+			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC2(cha,chp,copyjris)( *(alpha1_r + i*inca2), \
-				                             *(alpha1_i + i*inca2), \
-				                             *(pi1_r    + i*1), \
-				                             *(pi1_i    + i*1) ); \
-			} \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC2(cha,chp,copyjris) \
+					( \
+					  *(alpha1_r + i*inca2), \
+					  *(alpha1_i + i*inca2), \
+					  *(pi1_r    + i*    1), \
+					  *(pi1_i    + i*    1)  \
+					); \
+				} \
 \
-			alpha1_r += lda2; \
-			alpha1_i += lda2; \
-			pi1_r    += ldp2; \
-			pi1_i    += ldp2; \
+				alpha1_r += lda2; \
+				alpha1_i += lda2; \
+				pi1_r    += ldp2; \
+				pi1_i    += ldp2; \
+			} \
+		} \
+		else \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC2(cha,chp,copyris) \
+					( \
+					  *(alpha1_r + i*inca2), \
+					  *(alpha1_i + i*inca2), \
+					  *(pi1_r    + i*    1), \
+					  *(pi1_i    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_r += lda2; \
+				alpha1_i += lda2; \
+				pi1_r    += ldp2; \
+				pi1_i    += ldp2; \
+			} \
 		} \
 	} \
 	else \
 	{ \
-		for ( ; n != 0; --n ) \
+		if ( bli_is_conj( conja ) ) \
 		{ \
-			for ( i = 0; i < m; ++i ) \
+			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC2(cha,chp,copyris)( *(alpha1_r + i*inca2), \
-				                            *(alpha1_i + i*inca2), \
-				                            *(pi1_r    + i*1), \
-				                            *(pi1_i    + i*1) ); \
-			} \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC3(chp,cha,chp,scal2jris) \
+					( \
+					  *kappa_r, \
+					  *kappa_i, \
+					  *(alpha1_r + i*inca2), \
+					  *(alpha1_i + i*inca2), \
+					  *(pi1_r    + i*    1), \
+					  *(pi1_i    + i*    1)  \
+					); \
+				} \
 \
-			alpha1_r += lda2; \
-			alpha1_i += lda2; \
-			pi1_r    += ldp2; \
-			pi1_i    += ldp2; \
+				alpha1_r += lda2; \
+				alpha1_i += lda2; \
+				pi1_r    += ldp2; \
+				pi1_i    += ldp2; \
+			} \
+		} \
+		else \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC3(chp,cha,chp,scal2ris) \
+					( \
+					  *kappa_r, \
+					  *kappa_i, \
+					  *(alpha1_r + i*inca2), \
+					  *(alpha1_i + i*inca2), \
+					  *(pi1_r    + i*    1), \
+					  *(pi1_i    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_r += lda2; \
+				alpha1_i += lda2; \
+				pi1_r    += ldp2; \
+				pi1_i    += ldp2; \
+			} \
 		} \
 	} \
 }
 
 INSERT_GENTFUNC2_BASIC0( packm_cxk_1r_md )
 INSERT_GENTFUNC2_MIXDP0( packm_cxk_1r_md )
+
+// -----------------------------------------------------------------------------
+
+#undef  GENTFUNC2
+#define GENTFUNC2( ctype_a, ctype_p, cha, chp, opname ) \
+\
+void PASTEMAC2(cha,chp,opname) \
+     ( \
+       conj_t            conja, \
+       dim_t             m, \
+       dim_t             n, \
+	   ctype_p* restrict kappa, \
+       ctype_a* restrict a, inc_t inca, inc_t lda, \
+       ctype_p* restrict p,             inc_t ldp  \
+     ) \
+{ \
+	const inc_t       inca1     = inca; \
+	const inc_t       lda1      = lda; \
+	const inc_t       ldp1      = ldp; \
+\
+	ctype_a* restrict alpha1_ri = ( ctype_a* )a; \
+	ctype_p* restrict pi1_ri    = ( ctype_p* )p; \
+	ctype_p* restrict pi1_ir    = ( ctype_p* )p + ldp1/2; \
+\
+	( void )inca1; \
+\
+	dim_t i; \
+\
+	if ( PASTEMAC(chp,eq1)( *kappa ) ) \
+	{ \
+		if ( bli_is_conj( conja ) ) \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC2(cha,chp,copyj1es) \
+					( \
+					  *(alpha1_ri + i*inca1), \
+					  *(pi1_ri    + i*    1), \
+					  *(pi1_ir    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_ri += lda1; \
+				pi1_ri    += ldp1; \
+				pi1_ir    += ldp1; \
+			} \
+		} \
+		else \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC2(cha,chp,copy1es) \
+					( \
+					  *(alpha1_ri + i*inca1), \
+					  *(pi1_ri    + i*    1), \
+					  *(pi1_ir    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_ri += lda1; \
+				pi1_ri    += ldp1; \
+				pi1_ir    += ldp1; \
+			} \
+		} \
+	} \
+	else \
+	{ \
+		if ( bli_is_conj( conja ) ) \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC3(chp,cha,chp,scal2j1es) \
+					( \
+					  *kappa, \
+					  *(alpha1_ri + i*inca1), \
+					  *(pi1_ri    + i*    1), \
+					  *(pi1_ir    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_ri += lda1; \
+				pi1_ri    += ldp1; \
+				pi1_ir    += ldp1; \
+			} \
+		} \
+		else \
+		{ \
+			for ( ; n != 0; --n ) \
+			{ \
+				for ( i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC3(chp,cha,chp,scal21es) \
+					( \
+					  *kappa, \
+					  *(alpha1_ri + i*inca1), \
+					  *(pi1_ri    + i*    1), \
+					  *(pi1_ir    + i*    1)  \
+					); \
+				} \
+\
+				alpha1_ri += lda1; \
+				pi1_ri    += ldp1; \
+				pi1_ir    += ldp1; \
+			} \
+		} \
+	} \
+}
+
+INSERT_GENTFUNC2_BASIC0( packm_cxk_1e_md )
+INSERT_GENTFUNC2_MIXDP0( packm_cxk_1e_md )
 
 #endif

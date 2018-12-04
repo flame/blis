@@ -122,7 +122,37 @@ void bli_gemm_ker_var2_md
 	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
 	buf_beta  = bli_obj_internal_scalar_buffer( c );
 
-	// Tweak parameters in select mixed domain cases cases.
+#if 0
+	// NOTE: Turns out that this optimization will never be employed since
+	// currently bli_gemm_ker_var2_md() is only called when the storage
+	// datatype of C differs from the execution/computation datatype, and
+	// this optimization would only make sense if they are equal.
+
+	// If 1m is being employed on a column- or row-stored matrix with a
+	// real-valued beta, we can use the real domain macro-kernel, which
+	// eliminates a little overhead associated with the 1m virtual
+	// micro-kernel.
+	if ( bli_cntx_method( cntx ) == BLIS_1M )
+	{
+		// Only employ this optimization if the storage datatype of C is
+		// equal to the execution/computation datatype.
+		if ( dt_c == dt_exec )
+		{
+			bli_gemm_ind_recast_1m_params
+			(
+			  &dt_exec,
+			  schema_a,
+			  c,
+			  &m, &n, &k,
+			  &pd_a, &ps_a,
+			  &pd_b, &ps_b,
+			  &rs_c, &cs_c
+			);
+		}
+	}
+#endif
+
+	// Tweak parameters in select mixed domain cases (rcc, crc, ccr).
 	bli_gemm_md_ker_var2_recast
 	(
 	  &dt_exec,
