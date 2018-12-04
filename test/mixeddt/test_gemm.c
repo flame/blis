@@ -48,14 +48,7 @@ int main( int argc, char** argv )
 	obj_t*   betao;
 	dim_t    m, n, k;
 	dim_t    p;
-	dim_t    p_begin, p_end, p_inc;
-	int      m_input, n_input, k_input;
-	num_t    dta, dtb, dtc, dtx;
-	char     dta_ch, dtb_ch, dtc_ch;
-	char     dtx_ch;
-	int      r, n_repeats;
-	trans_t  transa;
-	trans_t  transb;
+	int      r;
 
 	double   dtime;
 	double   dtime_save;
@@ -66,33 +59,37 @@ int main( int argc, char** argv )
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 3;
+	int n_repeats = 3;
 
-	dta       = DTA;
-	dtb       = DTB;
-	dtc       = DTC;
-	dtx       = DTX;
+	num_t dta = DTA;
+	num_t dtb = DTB;
+	num_t dtc = DTC;
+	num_t dtx = DTX;
+
+	const bool_t a_real    = bli_is_real( dta );
+	const bool_t b_real    = bli_is_real( dtb );
+	const bool_t c_real    = bli_is_real( dtc );
+	const bool_t a_complex = bli_is_complex( dta );
+	const bool_t b_complex = bli_is_complex( dtb );
+	const bool_t c_complex = bli_is_complex( dtc );
 
 	// Extract the precision component of the computation datatype.
 	prec_t comp_prec = bli_dt_prec( dtx );
 
-	( void )dta_ch;
-	( void )dtb_ch;
-	( void )dtc_ch;
-	( void )dtx_ch;
+	dim_t p_begin = P_BEGIN;
+	dim_t p_end   = P_END;
+	dim_t p_inc   = P_INC;
 
-	p_begin   = P_BEGIN;
-	p_end     = P_END;
-	p_inc     = P_INC;
-
-	m_input   = -1;
-	n_input   = -1;
-	k_input   = -1;
-
+	int m_input   = -1;
+	int n_input   = -1;
+	int k_input   = -1;
 
 #if 0
 	k_input = 256;
 #endif
+
+#if 0
+	char dta_ch, dtb_ch, dtc_ch, dtx_ch;
 
 	// Choose the char corresponding to the requested datatype.
 	if      ( bli_is_float( dta ) )    dta_ch = 's';
@@ -113,8 +110,15 @@ int main( int argc, char** argv )
 	if      ( bli_is_float( dtx ) )    dtx_ch = 's';
 	else                               dtx_ch = 'd';
 
-	transa = BLIS_NO_TRANSPOSE;
-	transb = BLIS_NO_TRANSPOSE;
+	( void )dta_ch;
+	( void )dtb_ch;
+	( void )dtc_ch;
+	( void )dtx_ch;
+#endif
+
+	trans_t transa = BLIS_NO_TRANSPOSE;
+	trans_t transb = BLIS_NO_TRANSPOSE;
+
 
 	// Begin with initializing the last entry to zero so that
 	// matlab allocates space for the entire array once up-front.
@@ -129,30 +133,14 @@ int main( int argc, char** argv )
 	        ( unsigned long )0, 0.0 );
 
 	// Adjust the flops scaling based on which domain case is being executed.
-	if      (    bli_is_real( dtc ) &&    bli_is_real( dta ) &&    bli_is_real( dtb ) )
-	flopsmul = 2.0;
-	else if (    bli_is_real( dtc ) &&    bli_is_real( dta ) && bli_is_complex( dtb ) )
-	flopsmul = 2.0;
-	else if (    bli_is_real( dtc ) && bli_is_complex( dta ) &&    bli_is_real( dtb ) )
-	flopsmul = 2.0;
-	else if (    bli_is_real( dtc ) && bli_is_complex( dta ) && bli_is_complex( dtb ) )
-#ifdef BLIS
-	flopsmul = 4.0;
-#else
-	flopsmul = 4.0;  // executes 8.0, but only gets "credit" for 4.0
-#endif
-	else if ( bli_is_complex( dtc ) &&    bli_is_real( dta ) &&    bli_is_real( dtb ) )
-	flopsmul = 2.0;
-	else if ( bli_is_complex( dtc ) &&    bli_is_real( dta ) && bli_is_complex( dtb ) )
-#ifdef BLIS
-	flopsmul = 4.0;
-#else
-	flopsmul = 4.0;  // executes 8.0, but only gets "credit" for 4.0
-#endif
-	else if ( bli_is_complex( dtc ) && bli_is_complex( dta ) &&    bli_is_real( dtb ) )
-	flopsmul = 4.0;
-	else if ( bli_is_complex( dtc ) && bli_is_complex( dta ) && bli_is_complex( dtb ) )
-	flopsmul = 8.0;
+	if      ( c_real    && a_real    && b_real    ) flopsmul = 2.0;
+	else if ( c_real    && a_real    && b_complex ) flopsmul = 2.0;
+	else if ( c_real    && a_complex && b_real    ) flopsmul = 2.0;
+	else if ( c_real    && a_complex && b_complex ) flopsmul = 4.0;
+	else if ( c_complex && a_real    && b_real    ) flopsmul = 2.0;
+	else if ( c_complex && a_real    && b_complex ) flopsmul = 4.0;
+	else if ( c_complex && a_complex && b_real    ) flopsmul = 4.0;
+	else if ( c_complex && a_complex && b_complex ) flopsmul = 8.0;
 
 
 	for ( p = p_begin; p <= p_end; p += p_inc )
@@ -208,7 +196,6 @@ int main( int argc, char** argv )
 			  betao,
 			  &c
 			);
-
 #else
 			blas_gemm_md
 			(
@@ -224,7 +211,6 @@ int main( int argc, char** argv )
 			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
-
 
 			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
