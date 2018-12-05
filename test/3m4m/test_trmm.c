@@ -139,7 +139,7 @@ int main( int argc, char** argv )
 #else
 	printf( "data_%s_%ctrmm_%s",      THR_STR, dt_ch, STR );
 #endif
-	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %7.2f ];\n",
+	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
@@ -177,7 +177,7 @@ int main( int argc, char** argv )
 
 		bli_copym( &c, &c_save );
 	
-#ifdef BLIS
+#if 0 //def BLIS
 		bli_ind_disable_all_dt( dt );
 		bli_ind_enable_dt( ind, dt );
 #endif
@@ -309,7 +309,7 @@ int main( int argc, char** argv )
 #else
 		printf( "data_%s_%ctrmm_%s",      THR_STR, dt_ch, STR );
 #endif
-		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %7.2f ];\n",
+		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )n, gflops );

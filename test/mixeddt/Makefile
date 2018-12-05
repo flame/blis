@@ -143,9 +143,9 @@ PDEF_ST  := -DP_BEGIN=40 \
             -DP_END=2000 \
             -DP_INC=40
 
-PDEF_MT  := -DP_BEGIN=80 \
-            -DP_END=4000 \
-            -DP_INC=80
+PDEF_MT  := -DP_BEGIN=160 \
+            -DP_END=8000 \
+            -DP_INC=160
 
 # Enumerate possible datatypes and computation precisions.
 dts := s d c z
@@ -177,7 +177,7 @@ get-cdefs  = $(call get-cdef-c,$(1)) $(call get-cdef-a,$(1)) $(call get-cdef-b,$
 
 # Define a function to return the appropriate -DSTR= and -D[BLIS|BLAS] flags.
 get-idefs = $(strip $(subst intern,-DSTR=\"$(1)\" -DBLIS, \
-                    $(subst ad-hoc,-DSTR=\"$(1)\" -DBLAS, \
+                    $(subst ad_hoc,-DSTR=\"$(1)\" -DBLAS, \
                     $(subst    mkl,-DSTR=\"$(1)\" -DBLAS,$(1)))))
 
 # Enumerate all possible datatype combinations.
@@ -189,12 +189,12 @@ DT_COMBOS := $(foreach code,$(DT_CODES),$(call get-cstr,$(code)))
 # Build a list of BLIS, OpenBLAS, and MKL executables.
 INTERN_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_intern_st.o)
 INTERN_BINS_ST := $(patsubst %.o,%.x,$(INTERN_OBJS_ST))
-AD_HOC_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad-hoc_st.o)
+AD_HOC_OBJS_ST := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad_hoc_st.o)
 AD_HOC_BINS_ST := $(patsubst %.o,%.x,$(AD_HOC_OBJS_ST))
 
 INTERN_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_intern_mt.o)
 INTERN_BINS_MT := $(patsubst %.o,%.x,$(INTERN_OBJS_MT))
-AD_HOC_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad-hoc_mt.o)
+AD_HOC_OBJS_MT := $(foreach combo,$(DT_COMBOS),test_$(combo)gemm_ad_hoc_mt.o)
 AD_HOC_BINS_MT := $(patsubst %.o,%.x,$(AD_HOC_OBJS_MT))
 
 
@@ -205,13 +205,13 @@ AD_HOC_BINS_MT := $(patsubst %.o,%.x,$(AD_HOC_OBJS_MT))
 
 all:       st
 
-st:        intern-st ad-hoc-st
-mt:        intern-mt ad-hoc-mt
+st:        intern-st ad_hoc-st
+mt:        intern-mt ad_hoc-mt
 
 intern-st: $(INTERN_BINS_ST)
-ad-hoc-st: $(AD_HOC_BINS_ST)
+ad_hoc-st: $(AD_HOC_BINS_ST)
 intern-mt: $(INTERN_BINS_MT)
-ad-hoc-mt: $(AD_HOC_BINS_MT)
+ad_hoc-mt: $(AD_HOC_BINS_MT)
 
 #blis:        test_ssssgemm_asm_blis_st.x \
 #             test_sssdgemm_asm_blis_st.x \
@@ -248,7 +248,7 @@ endef
 
 
 # Define the implementations for which we will instantiate compilation rules.
-IMPLS := intern ad-hoc
+IMPLS := intern ad_hoc
 
 # Instantiate the rule function make-st-rule() and make-mt-rule for each
 # implementation in IMPLS and each of the datatype "codes" in DT_CODES.
@@ -266,7 +266,7 @@ $(foreach code,$(DT_CODES),$(eval $(call make-mt-rule,$(code),$(impl)))))
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_ad-hoc_st.x: test_%_ad-hoc_st.o $(LIBBLIS_LINK)
+test_%_ad_hoc_st.x: test_%_ad_hoc_st.o $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	$(RM_F) $<
@@ -276,7 +276,7 @@ else
 	@$(RM_F) $<
 endif
 
-test_%_ad-hoc_mt.x: test_%_ad-hoc_mt.o $(LIBBLIS_LINK)
+test_%_ad_hoc_mt.x: test_%_ad_hoc_mt.o $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER)  $<  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 	$(RM_F) $<

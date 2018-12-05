@@ -160,7 +160,7 @@ int main( int argc, char** argv )
 
 		bli_copym( &c, &c_save );
 	
-#ifdef BLIS
+#if 0 //def BLIS
 		bli_ind_disable_all_dt( dt );
 		bli_ind_enable_dt( ind, dt );
 #endif
