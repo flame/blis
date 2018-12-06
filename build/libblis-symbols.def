@@ -1013,12 +1013,10 @@ bli_gemm_md_ccc
 bli_gemm_md_ccr
 bli_gemm_md_crc
 bli_gemm_md_crr
-bli_gemm_md_front
 bli_gemm_md_rcc
 bli_gemm_md_rcr
 bli_gemm_md_rrc
 bli_gemm_md_rrr
-bli_gemm_md_zgemm
 bli_gemm_packa
 bli_gemm_packb
 bli_gemm_prune_unref_mparts_k

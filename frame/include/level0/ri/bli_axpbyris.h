@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,127 +37,55 @@
 
 // axpbyris
 
-#define bli_saxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+#define bli_rxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
 { \
-	(yr)        = (ar) * (xr)               + (br) * (yr); \
+    (yr) = (ar) * (xr) + (br) * (yr); \
 }
 
-#define bli_daxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+#define bli_cxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
 { \
-	(yr)        = (ar) * (xr)               + (br) * (yr); \
-}
-
-#define bli_caxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
-    float  yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
+    const __typeof__(yr) yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
+    const __typeof__(yi) yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
     (yr) = yt_r; \
     (yi) = yt_i; \
 }
 
-#define bli_sccaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    float  yt_i = (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+// Notes:
+// - The first char encodes the type of a.
+// - The second char encodes the type of x.
+// - The third char encodes the type of b.
+// - The fourth char encodes the type of y.
 
-#define bli_ccsaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr); \
-    float  yt_i = (ai) * (xr) + (ar) * (xi) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+// -- (axby) = (??ss) ----------------------------------------------------------
 
-#define bli_cscaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    float  yt_i = (ai) * (xr) + (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+#define bli_ssssxpbyris  bli_rxxpbyris
+#define bli_dsssxpbyris  bli_rxxpbyris
+#define bli_csssxpbyris  bli_rxxpbyris
+#define bli_zsssxpbyris  bli_rxxpbyris
 
-#define bli_sscaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    float  yt_i =               (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+#define bli_sdssxpbyris  bli_rxxpbyris
+#define bli_ddssxpbyris  bli_rxxpbyris
+#define bli_cdssxpbyris  bli_rxxpbyris
+#define bli_zdssxpbyris  bli_rxxpbyris
 
-#define bli_cssaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) + (br) * (yr); \
-    float  yt_i = (ai) * (xr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+#define bli_scssxpbyris  bli_rxxpbyris
+#define bli_dcssxpbyris  bli_rxxpbyris
+#define bli_ccssxpbyris  bli_rxxpbyris
+#define bli_zcssxpbyris  bli_rxxpbyris
 
-#define bli_scsaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    float  yt_r = (ar) * (xr) + (br) * (yr); \
-    float  yt_i = (ar) * (xi) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+#define bli_szssxpbyris  bli_rxxpbyris
+#define bli_dzssxpbyris  bli_rxxpbyris
+#define bli_czssxpbyris  bli_rxxpbyris
+#define bli_zzssxpbyris  bli_rxxpbyris
 
-#define bli_zaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-	double yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
-	double yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
-	(yr) = yt_r; \
-	(yi) = yt_i; \
-}
+// NOTE: This series needs to be finished for all other char values for (by), but
+// not until something in BLIS actually needs mixed-datatype axpbyris.
 
-#define bli_dzzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    double yt_i = (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
 
-#define bli_zzdaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr); \
-    double yt_i = (ai) * (xr) + (ar) * (xi) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
-
-#define bli_zdzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    double yt_i = (ai) * (xr) + (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
-
-#define bli_ddzaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) + (br) * (yr) - (bi) * (yi); \
-    double yt_i =               (bi) * (yr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
-
-#define bli_zddaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) + (br) * (yr); \
-    double yt_i = (ai) * (xr) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
-
-#define bli_dzdaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
-{ \
-    double yt_r = (ar) * (xr) + (br) * (yr); \
-    double yt_i = (ar) * (xi) + (br) * (yi); \
-    (yr) = yt_r; \
-    (yi) = yt_i; \
-}
+#define bli_saxpbyris    bli_ssssaxpbyris
+#define bli_daxpbyris    bli_ddddaxpbyris
+#define bli_caxpbyris    bli_ccccaxpbyris
+#define bli_zaxpbyris    bli_zzzzaxpbyris
 
 #endif
 

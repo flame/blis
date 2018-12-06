@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -210,8 +210,8 @@ siz_t bli_packm_init_pack
 {
 	bli_init_once();
 
-	num_t     dt           = bli_obj_dt( a );
 	num_t     dt_tar       = bli_obj_target_dt( a );
+	num_t     dt_scalar    = bli_obj_scalar_dt( a );
 	trans_t   transa       = bli_obj_onlytrans_status( a );
 	dim_t     m_a          = bli_obj_length( a );
 	dim_t     n_a          = bli_obj_width( a );
@@ -232,14 +232,14 @@ siz_t bli_packm_init_pack
 	bli_obj_alias_to( a, p );
 
 	// Typecast the internal scalar value to the target datatype.
-	// NOTE: This must happen BEFORE we change the datatype of P to reflect
-	// the target_dt.
-	if ( dt != dt_tar )
+	// Note that if the typecasting is needed, this must happen BEFORE we
+	// change the datatype of P to reflect the target_dt.
+	if ( dt_scalar != dt_tar )
 	{
 		bli_obj_scalar_cast_to( dt_tar, p );
 	}
 
-	// Update the datatype of P to be the target datatype of A.
+	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_tar, p );
 
 	// Update the dimension fields to explicitly reflect a transposition,

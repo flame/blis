@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -133,22 +133,24 @@ void bli_gemm_ker_var2
 	// real-valued beta, we can use the real domain macro-kernel, which
 	// eliminates a little overhead associated with the 1m virtual
 	// micro-kernel.
+#if 1
 	if ( bli_cntx_method( cntx ) == BLIS_1M )
 	{
-		bli_l3_ind_recast_1m_params
+		bli_gemm_ind_recast_1m_params
 		(
-		  dt_exec,
+		  &dt_exec,
 		  schema_a,
 		  c,
-		  m, n, k,
-		  pd_a, ps_a,
-		  pd_b, ps_b,
-		  rs_c, cs_c
+		  &m, &n, &k,
+		  &pd_a, &ps_a,
+		  &pd_b, &ps_b,
+		  &rs_c, &cs_c
 		);
 	}
+#endif
 
 #ifdef BLIS_ENABLE_GEMM_MD
-	// Tweak parameters in select mixed domain cases cases.
+	// Tweak parameters in select mixed domain cases (rcc, crc, ccr).
 	bli_gemm_md_ker_var2_recast
 	(
 	  &dt_exec,

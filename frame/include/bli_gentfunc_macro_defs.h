@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -447,7 +447,7 @@ GENTFUNC2( dcomplex, scomplex, z, c, tfuncname, varname )
 
 
 
-// -- Basic two-operand with real projection of first operand --
+// -- Basic two-operand with real projection of second operand --
 
 // -- (no auxiliary arguments) --
 
@@ -469,7 +469,7 @@ GENTFUNC2R( dcomplex, dcomplex, double,   z, z, d, tfuncname, varname )
 
 
 
-// -- Mixed domain two-operand with real projection of first operand --
+// -- Mixed domain two-operand with real projection of second operand --
 
 // -- (no auxiliary arguments) --
 
@@ -493,84 +493,83 @@ GENTFUNC2R( dcomplex, double,   double,   z, d, d, tfuncname, varname )
 
 
 
-// -- Mixed precision two-operand with real projection of first operand --
+// -- Mixed precision two-operand with real projection of second operand --
 
 // -- (no auxiliary arguments) --
 
 #define INSERT_GENTFUNC2R_MIX_P0( tfuncname ) \
 \
-GENTFUNC2R( float,    double,   float,    s, d, s, tfuncname ) \
-GENTFUNC2R( float,    dcomplex, float,    s, z, s, tfuncname ) \
+GENTFUNC2R( float,    double,   double,   s, d, d, tfuncname ) \
+GENTFUNC2R( float,    dcomplex, double,   s, z, d, tfuncname ) \
 \
-GENTFUNC2R( double,   float,    double,   d, s, d, tfuncname ) \
-GENTFUNC2R( double,   scomplex, double,   d, c, d, tfuncname ) \
+GENTFUNC2R( double,   float,    float,    d, s, s, tfuncname ) \
+GENTFUNC2R( double,   scomplex, float,    d, c, s, tfuncname ) \
 \
-GENTFUNC2R( scomplex, double,   float,    c, d, s, tfuncname ) \
-GENTFUNC2R( scomplex, dcomplex, float,    c, z, s, tfuncname ) \
+GENTFUNC2R( scomplex, double,   double,   c, d, d, tfuncname ) \
+GENTFUNC2R( scomplex, dcomplex, double,   c, z, d, tfuncname ) \
 \
-GENTFUNC2R( dcomplex, float,    double,   z, s, d, tfuncname ) \
-GENTFUNC2R( dcomplex, scomplex, double,   z, c, d, tfuncname )
+GENTFUNC2R( dcomplex, float,    float,    z, s, s, tfuncname ) \
+GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, tfuncname )
 
 // -- (one auxiliary argument) --
 
 #define INSERT_GENTFUNC2R_MIX_P( tfuncname, varname ) \
 \
-GENTFUNC2R( float,    double,   float,    s, d, s, tfuncname, varname ) \
-GENTFUNC2R( float,    dcomplex, float,    s, z, s, tfuncname, varname ) \
+GENTFUNC2R( float,    double,   double,   s, d, d, tfuncname, varname ) \
+GENTFUNC2R( float,    dcomplex, double,   s, z, d, tfuncname, varname ) \
 \
-GENTFUNC2R( double,   float,    double,   d, s, d, tfuncname, varname ) \
-GENTFUNC2R( double,   scomplex, double,   d, c, d, tfuncname, varname ) \
+GENTFUNC2R( double,   float,    float,    d, s, s, tfuncname, varname ) \
+GENTFUNC2R( double,   scomplex, float,    d, c, s, tfuncname, varname ) \
 \
-GENTFUNC2R( scomplex, double,   float,    c, d, s, tfuncname, varname ) \
-GENTFUNC2R( scomplex, dcomplex, float,    c, z, s, tfuncname, varname ) \
+GENTFUNC2R( scomplex, double,   double,   c, d, d, tfuncname, varname ) \
+GENTFUNC2R( scomplex, dcomplex, double,   c, z, d, tfuncname, varname ) \
 \
-GENTFUNC2R( dcomplex, float,    double,   z, s, d, tfuncname, varname ) \
-GENTFUNC2R( dcomplex, scomplex, double,   z, c, d, tfuncname, varname )
+GENTFUNC2R( dcomplex, float,    float,    z, s, s, tfuncname, varname ) \
+GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, tfuncname, varname )
 
 
 
-// -- Mixed domain/precision (all) two-operand macro with real projection of first operand --
+// -- Mixed domain/precision (all) two-operand macro with real projection of second operand --
 
 // -- (no auxiliary arguments) --
 
 #define INSERT_GENTFUNC2R_MIXDP0( tfuncname ) \
 \
-GENTFUNC2( float,    double,   s, d, tfuncname ) \
-GENTFUNC2( float,    scomplex, s, c, tfuncname ) \
-GENTFUNC2( float,    dcomplex, s, z, tfuncname ) \
+GENTFUNC2R( float,    double,   double,   s, d, d, tfuncname ) \
+GENTFUNC2R( float,    scomplex, float,    s, c, s, tfuncname ) \
+GENTFUNC2R( float,    dcomplex, double,   s, z, d, tfuncname ) \
 \
-GENTFUNC2( double,   float,    d, s, tfuncname ) \
-GENTFUNC2( double,   scomplex, d, c, tfuncname ) \
-GENTFUNC2( double,   dcomplex, d, z, tfuncname ) \
+GENTFUNC2R( double,   float,    float,    d, s, s, tfuncname ) \
+GENTFUNC2R( double,   scomplex, float,    d, c, s, tfuncname ) \
+GENTFUNC2R( double,   dcomplex, double,   d, z, d, tfuncname ) \
 \
-GENTFUNC2( scomplex, float,    c, s, tfuncname ) \
-GENTFUNC2( scomplex, double,   c, d, tfuncname ) \
-GENTFUNC2( scomplex, dcomplex, c, z, tfuncname ) \
+GENTFUNC2R( scomplex, float,    float,    c, s, s, tfuncname ) \
+GENTFUNC2R( scomplex, double,   double,   c, d, d, tfuncname ) \
+GENTFUNC2R( scomplex, dcomplex, double,   c, z, d, tfuncname ) \
 \
-GENTFUNC2( dcomplex, float,    z, s, tfuncname ) \
-GENTFUNC2( dcomplex, double,   z, d, tfuncname ) \
-GENTFUNC2( dcomplex, scomplex, z, c, tfuncname )
-
+GENTFUNC2R( dcomplex, float,    float,    z, s, s, tfuncname ) \
+GENTFUNC2R( dcomplex, double,   double,   z, d, d, tfuncname ) \
+GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, tfuncname ) \
 
 // -- (one auxiliary argument) --
 
 #define INSERT_GENTFUNC2R_MIX_DP( tfuncname, varname ) \
 \
-GENTFUNC2( float,    double,   s, d, tfuncname, varname ) \
-GENTFUNC2( float,    scomplex, s, c, tfuncname, varname ) \
-GENTFUNC2( float,    dcomplex, s, z, tfuncname, varname ) \
+GENTFUNC2R( float,    double,   double,   s, d, d, tfuncname, varname ) \
+GENTFUNC2R( float,    scomplex, float,    s, c, s, tfuncname, varname ) \
+GENTFUNC2R( float,    dcomplex, double,   s, z, d, tfuncname, varname ) \
 \
-GENTFUNC2( double,   float,    d, s, tfuncname, varname ) \
-GENTFUNC2( double,   scomplex, d, c, tfuncname, varname ) \
-GENTFUNC2( double,   dcomplex, d, z, tfuncname, varname ) \
+GENTFUNC2R( double,   float,    float,    d, s, s, tfuncname, varname ) \
+GENTFUNC2R( double,   scomplex, float,    d, c, s, tfuncname, varname ) \
+GENTFUNC2R( double,   dcomplex, double,   d, z, d, tfuncname, varname ) \
 \
-GENTFUNC2( scomplex, float,    c, s, tfuncname, varname ) \
-GENTFUNC2( scomplex, double,   c, d, tfuncname, varname ) \
-GENTFUNC2( scomplex, dcomplex, c, z, tfuncname, varname ) \
+GENTFUNC2R( scomplex, float,    float,    c, s, s, tfuncname, varname ) \
+GENTFUNC2R( scomplex, double,   double,   c, d, d, tfuncname, varname ) \
+GENTFUNC2R( scomplex, dcomplex, double,   c, z, d, tfuncname, varname ) \
 \
-GENTFUNC2( dcomplex, float,    z, s, tfuncname, varname ) \
-GENTFUNC2( dcomplex, double,   z, d, tfuncname, varname ) \
-GENTFUNC2( dcomplex, scomplex, z, c, tfuncname, varname )
+GENTFUNC2R( dcomplex, float,    float,    z, s, s, tfuncname, varname ) \
+GENTFUNC2R( dcomplex, double,   double,   z, d, d, tfuncname, varname ) \
+GENTFUNC2R( dcomplex, scomplex, float,    z, c, s, tfuncname, varname ) \
 
 
 

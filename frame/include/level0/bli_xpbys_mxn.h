@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -43,7 +43,7 @@
 // - The third char encodes the type of y.
 
 
-// xby = ?ss
+// -- (xby) = (?ss) ------------------------------------------------------------
 
 static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
@@ -186,7 +186,7 @@ static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 	}
 }
 
-// xby = ?dd
+// -- (xby) = (?dd) ------------------------------------------------------------
 
 static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
@@ -329,7 +329,7 @@ static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 	}
 }
 
-// xby = ?cc
+// -- (xby) = (?cc) ------------------------------------------------------------
 
 static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
@@ -472,7 +472,7 @@ static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 	}
 }
 
-// xby = ?zz
+// -- (xby) = (?zz) ------------------------------------------------------------
 
 static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,

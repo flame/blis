@@ -15,9 +15,9 @@
 #   - Redistributions in binary form must reproduce the above copyright
 #     notice, this list of conditions and the following disclaimer in the
 #     documentation and/or other materials provided with the distribution.
-#   - Neither the name of The University of Texas at Austin nor the names
-#     of its contributors may be used to endorse or promote products
-#     derived from this software without specific prior written permission.
+#   - Neither the name(s) of the copyright holder(s) nor the names of its
+#     contributors may be used to endorse or promote products derived
+#     from this software without specific prior written permission.
 #
 #  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 #  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -96,8 +96,8 @@ endif
 # BLAS library path(s). This is where the BLAS libraries reside.
 HOME_LIB_PATH  := $(HOME)/flame/lib
 #MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
+MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
+#MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
 #ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
 ACML_LIB_PATH  := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_int64/lib
 ACMLP_LIB_PATH := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_mp_int64/lib
@@ -201,13 +201,13 @@ STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=40 \
-            -DP_END=2000 \
-            -DP_INC=40
+PDEF_ST  := -DP_BEGIN=56 \
+            -DP_END=2800 \
+            -DP_INC=56
 
-PDEF_MT  := -DP_BEGIN=192 \
-            -DP_END=3000 \
-            -DP_INC=192
+PDEF_MT  := -DP_BEGIN=160 \
+            -DP_END=8000 \
+            -DP_INC=160
 
 
 
@@ -398,81 +398,81 @@ $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # blis 3mhw
-test_z%_3mhw_blis_st.o: test_%.c
+test_z%_3mhw_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
 
-test_c%_3mhw_blis_st.o: test_%.c
+test_c%_3mhw_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
 
-test_z%_3mhw_blis_mt.o: test_%.c
+test_z%_3mhw_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
 
-test_c%_3mhw_blis_mt.o: test_%.c
+test_c%_3mhw_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
 
 # blis 3m1
-test_z%_3m1_blis_st.o: test_%.c
+test_z%_3m1_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
 
-test_c%_3m1_blis_st.o: test_%.c
+test_c%_3m1_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
 
-test_z%_3m1_blis_mt.o: test_%.c
+test_z%_3m1_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
 
-test_c%_3m1_blis_mt.o: test_%.c
+test_c%_3m1_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
 
 # blis 4mhw
-test_z%_4mhw_blis_st.o: test_%.c
+test_z%_4mhw_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_ST) -c $< -o $@
 
-test_c%_4mhw_blis_st.o: test_%.c
+test_c%_4mhw_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_ST) -c $< -o $@
 
-test_z%_4mhw_blis_mt.o: test_%.c
+test_z%_4mhw_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_MT) -c $< -o $@
 
-test_c%_4mhw_blis_mt.o: test_%.c
+test_c%_4mhw_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_MT) -c $< -o $@
 
 # blis 4m1b
-test_z%_4m1b_blis_st.o: test_%.c
+test_z%_4m1b_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
 
-test_c%_4m1b_blis_st.o: test_%.c
+test_c%_4m1b_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
 
-test_z%_4m1b_blis_mt.o: test_%.c
+test_z%_4m1b_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
 
-test_c%_4m1b_blis_mt.o: test_%.c
+test_c%_4m1b_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
 
 # blis 4m1a
-test_z%_4m1a_blis_st.o: test_%.c
+test_z%_4m1a_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_ST) -c $< -o $@
 
-test_c%_4m1a_blis_st.o: test_%.c
+test_c%_4m1a_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_ST) -c $< -o $@
 
-test_z%_4m1a_blis_mt.o: test_%.c
+test_z%_4m1a_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_MT) -c $< -o $@
 
-test_c%_4m1a_blis_mt.o: test_%.c
+test_c%_4m1a_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_MT) -c $< -o $@
 
 # blis 1m
-test_z%_1m_blis_st.o: test_%.c
+test_z%_1m_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_ST) -c $< -o $@
 
-test_c%_1m_blis_st.o: test_%.c
+test_c%_1m_blis_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_ST) -c $< -o $@
 
-test_z%_1m_blis_mt.o: test_%.c
+test_z%_1m_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_MT) -c $< -o $@
 
-test_c%_1m_blis_mt.o: test_%.c
+test_c%_1m_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_MT) -c $< -o $@
 
 # blis asm
@@ -501,53 +501,53 @@ test_c%_asm_blis_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
 
 # openblas
-test_d%_openblas_st.o: test_%.c
+test_d%_openblas_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
-test_s%_openblas_st.o: test_%.c
+test_s%_openblas_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
-test_z%_openblas_st.o: test_%.c
+test_z%_openblas_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
-test_c%_openblas_st.o: test_%.c
+test_c%_openblas_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
 
-test_d%_openblas_mt.o: test_%.c
+test_d%_openblas_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
-test_s%_openblas_mt.o: test_%.c
+test_s%_openblas_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
-test_z%_openblas_mt.o: test_%.c
+test_z%_openblas_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
-test_c%_openblas_mt.o: test_%.c
+test_c%_openblas_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
 
 # mkl
-test_d%_mkl_st.o: test_%.c
+test_d%_mkl_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
-test_s%_mkl_st.o: test_%.c
+test_s%_mkl_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
-test_z%_mkl_st.o: test_%.c
+test_z%_mkl_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
-test_c%_mkl_st.o: test_%.c
+test_c%_mkl_st.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
 
-test_d%_mkl_mt.o: test_%.c
+test_d%_mkl_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
-test_s%_mkl_mt.o: test_%.c
+test_s%_mkl_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
-test_z%_mkl_mt.o: test_%.c
+test_z%_mkl_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
-test_c%_mkl_mt.o: test_%.c
+test_c%_mkl_mt.o: test_%.c Makefile
 	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
 
 

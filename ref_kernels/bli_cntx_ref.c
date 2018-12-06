@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -546,8 +546,8 @@ void GENBAINAME(cntx_init)
 	}
 
 	// For 1m, we employ an optimization which requires that we copy the native
-	// real domain gemm ukernel function pointers to the corresponding slots in
-	// the virtual gemm ukernel func_t.
+	// real domain gemm ukernel function pointers to the corresponding real
+	// domain slots in the virtual gemm ukernel func_t.
 	if ( method == BLIS_1M )
 	{
 		func_t* gemm_nat_ukrs = bli_cntx_get_l3_nat_ukrs( BLIS_GEMM_UKR, cntx );

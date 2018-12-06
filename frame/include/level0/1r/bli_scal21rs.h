@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,25 +37,29 @@
 
 // scal21rs
 
-#define bli_cscal21rs( a, x, yr, yi ) \
+#define bli_cscscal21rs( a, x, yr, yi ) \
 { \
-	bli_cscal2ris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), yr, yi ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), bli_sreal(x), bli_simag(x), yr, yi ); \
 }
 
-#define bli_zscal21rs( a, x, yr, yi ) \
+#define bli_cccscal21rs( a, x, yr, yi ) \
 { \
-	bli_zscal2ris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), yr, yi ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), bli_creal(x), bli_cimag(x), yr, yi ); \
 }
 
-#define bli_scscal21rs( a, x, yr, yi ) \
+#define bli_zdzscal21rs( a, x, yr, yi ) \
 { \
-	bli_scscal2ris( bli_sreal(a), bli_simag(a), bli_creal(x), bli_cimag(x), yr, yi ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), bli_dreal(x), bli_dimag(x), yr, yi ); \
 }
 
-#define bli_dzscal21rs( a, x, yr, yi ) \
+#define bli_zzzscal21rs( a, x, yr, yi ) \
 { \
-	bli_dzscal2ris( bli_dreal(a), bli_dimag(a), bli_zreal(x), bli_zimag(x), yr, yi ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), bli_zreal(x), bli_zimag(x), yr, yi ); \
 }
+
+
+#define bli_cscal21rs( a, x, yr, yi ) bli_cccscal21rs( a, x, yr, yi )
+#define bli_zscal21rs( a, x, yr, yi ) bli_zzzscal21rs( a, x, yr, yi )
 
 #endif
 

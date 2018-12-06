@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,43 +37,126 @@
 
 // xpbyjris
 
-#define bli_sxpbyjris( xr, xi, br, bi, yr, yi ) \
+#define bli_rxxpbyjris( xr, xi, br, bi, yr, yi ) \
 { \
-	(yr)        = (xr) + (br) * (yr); \
+	(yr) = (xr) + (br) * (yr); \
 }
 
-#define bli_dxpbyjris( xr, xi, br, bi, yr, yi ) \
+#define bli_cxxpbyjris( xr, xi, br, bi, yr, yi ) \
 { \
-	(yr)        = (xr) + (br) * (yr); \
-}
-
-#define bli_cxpbyjris( xr, xi, br, bi, yr, yi ) \
-{ \
-	float  yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
-	float  yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	const __typeof__(yr) yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
+	const __typeof__(yi) yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
 	(yr) = yt_r; \
 	(yi) = yt_i; \
 }
 
-#define bli_zxpbyjris( xr, xi, br, bi, yr, yi ) \
+#define bli_crxpbyjris( xr, xi, br, bi, yr, yi ) \
 { \
-	double yt_r =  (xr) + (br) * (yr) - (bi) * (yi); \
-	double yt_i = -(xi) + (bi) * (yr) + (br) * (yi); \
+	const __typeof__(yr) yt_r =  (xr) + (br) * (yr); \
+	const __typeof__(yi) yt_i = -(xi) + (br) * (yi); \
 	(yr) = yt_r; \
 	(yi) = yt_i; \
 }
 
-#define bli_scxpbyjris( xr, xi, br, bi, yr, yi ) \
-{ \
-	(yr)        =  (xr) + (br) * (yr); \
-	(yi)        = -(xi) + (br) * (yi); \
-}
+// Notes:
+// - The first char encodes the type of x.
+// - The second char encodes the type of b.
+// - The third char encodes the type of y.
 
-#define bli_dzxpbyjris( xr, xi, br, bi, yr, yi ) \
-{ \
-	(yr)        =  (xr) + (br) * (yr); \
-	(yi)        = -(xi) + (br) * (yi); \
-}
+// -- (xby) = (??s) ------------------------------------------------------------
+
+#define bli_sssxpbyjris  bli_rxxpbyjris
+#define bli_dssxpbyjris  bli_rxxpbyjris
+#define bli_cssxpbyjris  bli_rxxpbyjris
+#define bli_zssxpbyjris  bli_rxxpbyjris
+
+#define bli_sdsxpbyjris  bli_rxxpbyjris
+#define bli_ddsxpbyjris  bli_rxxpbyjris
+#define bli_cdsxpbyjris  bli_rxxpbyjris
+#define bli_zdsxpbyjris  bli_rxxpbyjris
+
+#define bli_scsxpbyjris  bli_rxxpbyjris
+#define bli_dcsxpbyjris  bli_rxxpbyjris
+#define bli_ccsxpbyjris  bli_rxxpbyjris
+#define bli_zcsxpbyjris  bli_rxxpbyjris
+
+#define bli_szsxpbyjris  bli_rxxpbyjris
+#define bli_dzsxpbyjris  bli_rxxpbyjris
+#define bli_czsxpbyjris  bli_rxxpbyjris
+#define bli_zzsxpbyjris  bli_rxxpbyjris
+
+// -- (xby) = (??d) ------------------------------------------------------------
+
+#define bli_ssdxpbyjris  bli_rxxpbyjris
+#define bli_dsdxpbyjris  bli_rxxpbyjris
+#define bli_csdxpbyjris  bli_rxxpbyjris
+#define bli_zsdxpbyjris  bli_rxxpbyjris
+
+#define bli_sddxpbyjris  bli_rxxpbyjris
+#define bli_dddxpbyjris  bli_rxxpbyjris
+#define bli_cddxpbyjris  bli_rxxpbyjris
+#define bli_zddxpbyjris  bli_rxxpbyjris
+
+#define bli_scdxpbyjris  bli_rxxpbyjris
+#define bli_dcdxpbyjris  bli_rxxpbyjris
+#define bli_ccdxpbyjris  bli_rxxpbyjris
+#define bli_zcdxpbyjris  bli_rxxpbyjris
+
+#define bli_szdxpbyjris  bli_rxxpbyjris
+#define bli_dzdxpbyjris  bli_rxxpbyjris
+#define bli_czdxpbyjris  bli_rxxpbyjris
+#define bli_zzdxpbyjris  bli_rxxpbyjris
+
+// -- (xby) = (??c) ------------------------------------------------------------
+
+#define bli_sscxpbyjris  bli_rxxpbyjris
+#define bli_dscxpbyjris  bli_rxxpbyjris
+#define bli_cscxpbyjris  bli_crxpbyjris
+#define bli_zscxpbyjris  bli_crxpbyjris
+
+#define bli_sdcxpbyjris  bli_rxxpbyjris
+#define bli_ddcxpbyjris  bli_rxxpbyjris
+#define bli_cdcxpbyjris  bli_crxpbyjris
+#define bli_zdcxpbyjris  bli_crxpbyjris
+
+#define bli_sccxpbyjris  bli_cxxpbyjris
+#define bli_dccxpbyjris  bli_cxxpbyjris
+#define bli_cccxpbyjris  bli_cxxpbyjris
+#define bli_zccxpbyjris  bli_cxxpbyjris
+
+#define bli_szcxpbyjris  bli_cxxpbyjris
+#define bli_dzcxpbyjris  bli_cxxpbyjris
+#define bli_czcxpbyjris  bli_cxxpbyjris
+#define bli_zzcxpbyjris  bli_cxxpbyjris
+
+// -- (xby) = (??z) ------------------------------------------------------------
+
+#define bli_sszxpbyjris  bli_rxxpbyjris
+#define bli_dszxpbyjris  bli_rxxpbyjris
+#define bli_cszxpbyjris  bli_crxpbyjris
+#define bli_zszxpbyjris  bli_crxpbyjris
+
+#define bli_sdzxpbyjris  bli_rxxpbyjris
+#define bli_ddzxpbyjris  bli_rxxpbyjris
+#define bli_cdzxpbyjris  bli_crxpbyjris
+#define bli_zdzxpbyjris  bli_crxpbyjris
+
+#define bli_sczxpbyjris  bli_cxxpbyjris
+#define bli_dczxpbyjris  bli_cxxpbyjris
+#define bli_cczxpbyjris  bli_cxxpbyjris
+#define bli_zczxpbyjris  bli_cxxpbyjris
+
+#define bli_szzxpbyjris  bli_cxxpbyjris
+#define bli_dzzxpbyjris  bli_cxxpbyjris
+#define bli_czzxpbyjris  bli_cxxpbyjris
+#define bli_zzzxpbyjris  bli_cxxpbyjris
+
+
+
+#define bli_sxpbyjris    bli_sssxpbyjris
+#define bli_dxpbyjris    bli_dddxpbyjris
+#define bli_cxpbyjris    bli_cccxpbyjris
+#define bli_zxpbyjris    bli_zzzxpbyjris
 
 #endif
 

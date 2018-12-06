@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -1225,18 +1225,16 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 #endif
 
 	// If mixed domain or mixed precision was requested, we disable all
-	// induced methods.
+	// induced methods except 1m and native execution.
 	if ( params->mixed_domain || params->mixed_precision )
 	{
 		ind_t im;
 
 		for ( im = BLIS_IND_FIRST; im < BLIS_IND_LAST+1; ++im )
 		{
-			params->ind_enable[ im ] = 0;
+			if ( im != BLIS_1M && im != BLIS_NAT )
+				params->ind_enable[ im ] = 0;
 		}
-
-		// Reenable native execution.
-		params->ind_enable[ BLIS_NAT ] = 1;
 	}
 }
 
@@ -1546,6 +1544,7 @@ void libblis_test_op_driver
 	unsigned int  reaction_to_failure = params->reaction_to_failure;
 
 	num_t         datatype;
+	num_t         dt_check;
 	char          dt_char;
 
 	char*         p_spec_str;
@@ -1796,7 +1795,7 @@ void libblis_test_op_driver
 		// Set the last set of chars in chars_for_cddt to the real domain
 		// charset. This is because the last char will be the computation
 		// precision.
-		//chars_for_cddt[i-1] = libblis_test_rd_chars;
+		chars_for_cddt[i-1] = libblis_test_rd_chars;
 
 		// Compute the total number of datatype combinations to test (which is
 		// simply the product of the string lengths of chars_for_spdt/dpdt[i]).
@@ -1933,10 +1932,11 @@ void libblis_test_op_driver
 
 		// Manually set the computation char to the real projection of the
 		// first char of each combination.
+		int prec_i = n_operands;
 		for ( i = 0; i < n_dt_combos; ++i )
 		{
-			dc_str[i][3] = libblis_test_proj_dtchar_to_precchar( dc_str[i][0] );
-			dc_str[i][4] = '\0';
+			dc_str[i][prec_i]   = libblis_test_proj_dtchar_to_precchar( dc_str[i][0] );
+			dc_str[i][prec_i+1] = '\0';
 		}
 
 #if 0
@@ -2087,6 +2087,7 @@ void libblis_test_op_driver
 		// Loop over the requested datatypes.
 		for ( dci = 0; dci < n_dt_combos; ++dci )
 		//for ( dci = 14; dci < 15; ++dci )
+		//for ( dci = 6; dci < 7; dci += 1 )
 		//for ( dci = 12; dci < 13; ++dci )
 		//for ( dci = 4; dci < 5; ++dci )
 		//for ( dci = 8; dci < 9; ++dci )
@@ -2097,14 +2098,27 @@ void libblis_test_op_driver
 			// We must choose the first operand's dt char since that's the
 			// only operand we know is guaranteed to exist.
 			bli_param_map_char_to_blis_dt( dc_str[dci][0], &datatype );
+			dt_check = datatype;
 
-			// If any of the operands are single precision, ensure that
-			// datatype is also single precision.
 			int has_sp = libblis_test_dt_str_has_sp_char_str( n_operandsp1,
 			                                                  dc_str[dci] );
+			//int has_dp = libblis_test_dt_str_has_dp_char_str( n_operandsp1,
+			//                                                  dc_str[dci] );
+
+			// Notice that we use n_operands here instead of
+			// n_operandsp1 since we only want to chars for the
+			// storage datatypes of the matrix operands, not the
+			// computation precision char.
+			int has_cd_only =
+			!libblis_test_dt_str_has_rd_char_str( n_operands,
+			                                      dc_str[dci] );
+
 			if ( has_sp )
 			{
-				datatype = bli_dt_proj_to_single_prec( datatype );
+				// If any of the operands are single precision, ensure that
+				// dt_check is also single precision so that the residual is
+				// compared to datatype-appropriate thresholds.
+				dt_check = bli_dt_proj_to_single_prec( datatype );
 			}
 
 			// Build a commented column label string.
@@ -2126,10 +2140,10 @@ void libblis_test_op_driver
 			ind_t ind_first = BLIS_NAT;
 			dim_t ind_last  = BLIS_NAT;
 
-			// If the operation is level-3, and the datatype is complex,
+			// If the operation is level-3, and all operand domains are complex,
 			// then we iterate over all induced methods.
-			if ( bli_opid_is_level3( op->opid ) &&
-			     bli_is_complex( datatype ) ) ind_first = 0;
+			if ( bli_opid_is_level3( op->opid ) && has_cd_only )
+				ind_first = 0;
 
 			// Loop over induced methods (or just BLIS_NAT).
 			for ( indi = ind_first; indi <= ind_last; ++indi )
@@ -2141,7 +2155,20 @@ void libblis_test_op_driver
 				// current method and go to the next method.
 				if ( bli_is_real( datatype ) ) { ; }
 				else if ( bli_ind_oper_is_impl( op->opid, indi ) &&
-				          params->ind_enable[ indi ] == 1 ) { ; }
+				          params->ind_enable[ indi ] == 1 )
+				{
+					// If the current induced method is 1m, make sure that
+					// we only proceed for gemm where all operands are stored
+					// in the complex domain. (This prevents 1m from being
+					// executed on mixed-datatype combinations that contain
+					// real domain datatypes.)
+					if ( indi == BLIS_1M )
+					{
+						if ( op->opid == BLIS_GEMM && has_cd_only ) { ; }
+						else { continue; }
+					}
+					else { ; }
+				}
 				else { continue; }
 
 				bli_ind_oper_enable_only( op->opid, indi, datatype );
@@ -2183,17 +2210,14 @@ void libblis_test_op_driver
 
 						// Query the string corresponding to the residual's
 						// position relative to the thresholds.
-						// NOTE: Passing in datatype (ie: the value associated
-						// with dc_str[dci][0]) will work, but just barely, since
-						// the numerical thresholds within precisions should be
-						// the same.
 						pass_str = libblis_test_get_string_for_result( resid,
-						                                               datatype,
+						                                               dt_check,
 						                                               thresh );
 
 						// Build a string unique to the operation, datatype combo,
 						// parameter combo, and storage combo being tested.
 						libblis_test_build_function_string( BLIS_FILEDATA_PREFIX_STR,
+						                                    op->opid,
 						                                    indi,
 						                                    ind_str,
 						                                    op_str,
@@ -2334,6 +2358,7 @@ void libblis_test_op_driver
 void libblis_test_build_function_string
      (
        char*        prefix_str,
+       opid_t       opid,
        ind_t        method,
        char*        ind_str,
        char*        op_str,
@@ -2346,9 +2371,9 @@ void libblis_test_build_function_string
      )
 {
 	// We only print the full datatype combination string if is_mixed_dt
-	// is set and native execution is begin used. Otherwise, we print only
+	// is set and the operation is gemm. Otherwise, we print only
 	// the first char (since they are all the same).
-	if ( is_mixed_dt == TRUE && method == BLIS_NAT )
+	if ( is_mixed_dt == TRUE && opid == BLIS_GEMM )
 		sprintf( funcname_str, "%s_%s%s", prefix_str, dc_str, op_str );
 	else
 		sprintf( funcname_str, "%s_%c%s", prefix_str, dc_str[0], op_str );
@@ -3188,8 +3213,6 @@ int libblis_test_dt_str_has_sp_char_str( int n, char* str )
 	return FALSE;
 }
 
-// ---
-
 int libblis_test_dt_str_has_dp_char( test_params_t* params )
 {
 	return libblis_test_dt_str_has_dp_char_str( params->n_datatypes,
@@ -3211,12 +3234,16 @@ int libblis_test_dt_str_has_dp_char_str( int n, char* str )
 
 int libblis_test_dt_str_has_rd_char( test_params_t* params )
 {
-	int i;
+	return libblis_test_dt_str_has_rd_char_str( params->n_datatypes,
+	                                            params->datatype_char );
+}
 
-	for ( i = 0; i < params->n_datatypes; ++i )
+int libblis_test_dt_str_has_rd_char_str( int n, char* str )
+{
+	for ( int i = 0; i < n; ++i )
 	{
-		if ( params->datatype_char[i] == 's' ||
-		     params->datatype_char[i] == 'd' ) return TRUE;
+		if ( str[i] == 's' ||
+		     str[i] == 'd' ) return TRUE;
 	}
 
 	return FALSE;
@@ -3224,16 +3251,22 @@ int libblis_test_dt_str_has_rd_char( test_params_t* params )
 
 int libblis_test_dt_str_has_cd_char( test_params_t* params )
 {
-	int i;
+	return libblis_test_dt_str_has_cd_char_str( params->n_datatypes,
+	                                            params->datatype_char );
+}
 
-	for ( i = 0; i < params->n_datatypes; ++i )
+int libblis_test_dt_str_has_cd_char_str( int n, char* str )
+{
+	for ( int i = 0; i < n; ++i )
 	{
-		if ( params->datatype_char[i] == 'c' ||
-		     params->datatype_char[i] == 'z' ) return TRUE;
+		if ( str[i] == 'c' ||
+		     str[i] == 'z' ) return TRUE;
 	}
 
 	return FALSE;
 }
+
+// ---
 
 unsigned int libblis_test_count_combos
      (
@@ -3243,9 +3276,8 @@ unsigned int libblis_test_count_combos
      )
 {
 	unsigned int n_combos = 1;
-	int i;
 
-	for ( i = 0; i < n_operands; ++i )
+	for ( int i = 0; i < n_operands; ++i )
 	{
 		if ( spec_str[i] == '?' )
 			n_combos *= strlen( char_sets[i] );

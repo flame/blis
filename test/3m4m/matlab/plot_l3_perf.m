@@ -13,29 +13,19 @@ ax1 = subplot( rows, cols, theid );
 hold( ax1, 'on' );
 end
 
+% Set line properties.
 color_blis = 'k'; lines_blis = '-';  markr_blis = '';
 color_open = 'r'; lines_open = '--'; markr_open = 'o';
 color_mkl  = 'b'; lines_mkl  = '--'; markr_mkl  = '.';
 
+% Compute the peak performance in terms of the number of double flops
+% executable per cycle and the clock rate.
 if opname(1) == 's' || opname(1) == 'c'
 	flopspercycle = dfps * 2;
 else
 	flopspercycle = dfps;
 end
-
-% Determine the final dimension.
-n_points = size( data_blis, 1 );
-x_end = data_blis( n_points, 1 );
-
-if nth == 1
-	titlename     = '%s';
-	yaxisname     = 'GFLOPS';
-	max_perf_core = (flopspercycle * cfreq) * 1;
-else
-	titlename     = '%s';
-	yaxisname     = 'GFLOPS/core';
-	max_perf_core = (flopspercycle * cfreq) * 1;
-end
+max_perf_core = (flopspercycle * cfreq) * 1;
 
 % Adjust title for real domain hemm and herk.
 title_opname = opname;
@@ -46,27 +36,37 @@ if opname(1) == 's' || opname(1) == 'd'
 	end
 end
 
+% Print the title to a string.
+titlename = '%s';
 titlename = sprintf( titlename, title_opname );
 
+% Set the legend strings.
 blis_legend = sprintf( 'BLIS' );
 open_legend = sprintf( 'OpenBLAS' );
 mkl_legend  = sprintf( 'MKL' );
 
-y_scale   = 1.00;
+% Determine the final dimension.
+%n_points = size( data_blis, 1 );
+%x_end = data_blis( n_points, 1 );
 
-%xaxisname = 'problem size (m = n = k)';
-xaxisname = '     m = n = k';
-
-colorflag = '-rgb';
-
+% Set axes range values.
+y_scale = 1.00;
 x_begin = 0;
-
+x_end   = data_blis( size( data_blis, 1 ), 1 );
 y_begin = 0;
 y_end   = max_perf_core * y_scale;
 
+% Set axes names.
+xaxisname = '     m = n = k';
+if nth == 1
+	yaxisname = 'GFLOPS';
+else
+	yaxisname = 'GFLOPS/core';
+end
+
+
 %flopscol = 4;
 flopscol = size( data_blis, 2 );
-
 msize = 5;
 if 1
 fontsize = 13;

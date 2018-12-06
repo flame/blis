@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -88,14 +88,56 @@ void bli_packm_blk_var1_md
 	dim_t     pd_p       = bli_obj_panel_dim( p );
 	inc_t     ps_p       = bli_obj_panel_stride( p );
 
+	obj_t     kappa;
 	void*     buf_kappa;
 
 	FUNCPTR_T f;
 
 
-	// Unconditionally use kappa = 1.0. Thus, we don't support scaling
-	// during packing when mixing datatypes.
-	buf_kappa = bli_obj_buffer_for_const( dt_p, &BLIS_ONE );
+	// Treatment of kappa (ie: packing during scaling) depends on
+	// whether we are executing an induced method.
+	if ( bli_is_nat_packed( schema ) )
+	{
+		// This branch is for native execution, where we assume that
+		// the micro-kernel will always apply the alpha scalar of the
+		// higher-level operation. Thus, we use BLIS_ONE for kappa so
+		// that the underlying packm implementation does not perform
+		// any scaling during packing.
+		buf_kappa = bli_obj_buffer_for_const( dt_p, &BLIS_ONE );
+	}
+	else // if ( bli_is_ind_packed( schema ) )
+	{
+		obj_t* kappa_p;
+
+		// The value for kappa we use will depend on whether the scalar
+		// attached to A has a nonzero imaginary component. If it does,
+		// then we will apply the scalar during packing to facilitate
+		// implementing induced complex domain algorithms in terms of
+		// real domain micro-kernels. (In the aforementioned situation,
+		// applying a real scalar is easy, but applying a complex one is
+		// harder, so we avoid the need altogether with the code below.)
+		if ( bli_obj_scalar_has_nonzero_imag( p ) )
+		{
+			// Detach the scalar.
+			bli_obj_scalar_detach( p, &kappa );
+
+			// Reset the attached scalar (to 1.0).
+			bli_obj_scalar_reset( p );
+
+			kappa_p = &kappa;
+		}
+		else
+		{
+			// If the internal scalar of A has only a real component, then
+			// we will apply it later (in the micro-kernel), and so we will
+			// use BLIS_ONE to indicate no scaling during packing.
+			kappa_p = &BLIS_ONE;
+		}
+
+		// Acquire the buffer to the kappa chosen above.
+		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
+	}
+
 
 	// Index into the type combination array to extract the correct
 	// function pointer.

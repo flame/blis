@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -54,7 +54,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	PASTECH(chr,gemm_ukr_ft) \
 	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool_t      col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t      col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool_t      row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -86,6 +86,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	bool_t            using_ct; \
 \
+/*
+	PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: a", mr, 2*k, \
+	                       a_r, 1, mr, "%5.2f", "" ); \
+	PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: b", 2*k, 2*nr, \
+	                       b_r, 2*nr, 1, "%5.2f", "" ); \
+	PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c after", mr, 2*nr, \
+	                       c_use, rs_c_use, cs_c_use, "%5.2f", "" ); \
+*/ \
 \
 	/* SAFETY CHECK: The higher level implementation should never
 	   allow an alpha with non-zero imaginary component to be passed
@@ -154,12 +162,33 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		dim_t i, j; \
 \
 		/* Accumulate the final result in ct back to c. */ \
-		for ( j = 0; j < nr; ++j ) \
-		for ( i = 0; i < mr; ++i ) \
+		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
-			                    *beta, \
-			                    *(c  + i*rs_c  + j*cs_c ) ); \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
+			{ \
+				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
+				                   *(c  + i*rs_c  + j*cs_c ) ); \
+			} \
+		} \
+		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
+			{ \
+				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
+				                    *(c  + i*rs_c  + j*cs_c ) ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( j = 0; j < nr; ++j ) \
+			for ( i = 0; i < mr; ++i ) \
+			{ \
+				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
+				                    *beta, \
+				                    *(c  + i*rs_c  + j*cs_c ) ); \
+			} \
 		} \
 	} \
 	else \

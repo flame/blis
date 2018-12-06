@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -141,34 +141,6 @@ void bli_gemm_md
 	bli_obj_set_comp_dt( dt_comp, b );
 	bli_obj_set_comp_dt( dt_comp, c );
 
-
-
-#if 0
-	if ( bli_obj_is_single_prec( c ) ) printf( "%% --> s += " );
-	else                               printf( "%% --> d += " );
-	if ( bli_obj_is_single_prec( a ) ) printf( "s " );
-	else                               printf( "d " );
-	if ( bli_obj_is_single_prec( b ) ) printf( "s\n" );
-	else                               printf( "d\n" );
-
-	//if ( bli_obj_is_scomplex( a ) &&
-	//     bli_obj_is_dcomplex( b ) &&
-	//     bli_obj_is_float( c ) )
-	{
-		printf( "bli_gemm_md(): stor precs after:   %d %d %d\n", bli_obj_prec( a ),
-		                                      bli_obj_prec( b ), bli_obj_prec( c ) );
-		printf( "bli_gemm_md(): targ precs after:   %d %d %d\n", bli_obj_target_prec( a ),
-		                               bli_obj_target_prec( b ), bli_obj_target_prec( c ) );
-		printf( "bli_gemm_md(): exec precs after:   %d %d %d\n", bli_obj_exec_prec( a ),
-		                                 bli_obj_exec_prec( b ), bli_obj_exec_prec( c ) );
-		printf( "bli_gemm_md(): stor domain after:  %d %d %d\n", bli_obj_domain( a ),
-		                                    bli_obj_domain( b ), bli_obj_domain( c ) );
-		printf( "bli_gemm_md(): targ domain after:  %d %d %d\n", bli_obj_target_domain( a ),
-		                             bli_obj_target_domain( b ), bli_obj_target_domain( c ) );
-		printf( "bli_gemm_md(): exec domain after:  %d %d %d\n", bli_obj_exec_domain( a ),
-		                               bli_obj_exec_domain( b ), bli_obj_exec_domain( c ) );
-	}
-#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -258,9 +230,7 @@ mddm_t bli_gemm_md_ccr
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_mc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_mc );
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
@@ -361,9 +331,7 @@ mddm_t bli_gemm_md_crc
 	bli_blksz_scale_def_max( 1, 2, BLIS_SCOMPLEX, blksz_nc );
 	bli_blksz_scale_def_max( 1, 2, BLIS_DCOMPLEX, blksz_nc );
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	func_t* l3_vir_ukrs = bli_cntx_get_l3_vir_ukrs( BLIS_GEMM_UKR, *cntx );
@@ -437,15 +405,22 @@ mddm_t bli_gemm_md_rcc
 
 	// Use the 1r pack schema for both A and B with the conjugation
 	// of A or B toggled (to produce ar * br - ai * bi).
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS_1R, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS_1R, b );
+	bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_1R, *cntx );
+	bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_1R, *cntx );
 
 	bli_obj_toggle_conj( b );
 
 	// We also need to copy over the packm kernels from the 1m
 	// context. We query the address of that context here.
-	const num_t dt_comp = bli_obj_dt( a );
-	cntx_t* cntx_1m = bli_gks_query_ind_cntx( BLIS_1M, dt_comp );
+	// NOTE: This is needed for situations where the rcc case does not
+	// involve any casting to different precisions, since currently
+	// bli_packm_blk_var1() is coded to hand off control to
+	// bli_packm_blk_var1_md() only when the storage datatype differs from
+	// the target datatype. (The packm_blk_var1_md() function has "built-in"
+	// support for packing to 1r (and 1e) schemas, whereas the
+	// packm_blk_var1() function relies on packm kernels for packing to 1r.
+	const num_t dt_complex = bli_obj_dt( a );
+	cntx_t* cntx_1m = bli_gks_query_ind_cntx( BLIS_1M, dt_complex );
 
 	func_t* cntx_funcs    = bli_cntx_packm_kers_buf( *cntx );
 	func_t* cntx_1m_funcs = bli_cntx_packm_kers_buf( cntx_1m );
@@ -510,9 +485,7 @@ mddm_t bli_gemm_md_crr
 	}
 #endif
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -550,9 +523,7 @@ mddm_t bli_gemm_md_rcr
 	// Overwrite the complex obj_t with its real-only alias.
 	*a = a_real;
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -590,9 +561,7 @@ mddm_t bli_gemm_md_rrc
 	// Overwrite the complex obj_t with its real-only alias.
 	*b = b_real;
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -622,9 +591,7 @@ mddm_t bli_gemm_md_rrr
 	doms.comp = BLIS_REAL;
 	doms.exec = BLIS_REAL;
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -654,9 +621,7 @@ mddm_t bli_gemm_md_ccc
 	doms.comp = BLIS_COMPLEX;
 	doms.exec = BLIS_COMPLEX;
 
-	// Set the pack schemas of objects A and B for normal execution.
-	bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, a );
-	bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, b );
+	// Use the default pack schemas in the context.
 
 	// Return the computation and execution domains.
 	return doms;
@@ -664,6 +629,7 @@ mddm_t bli_gemm_md_ccc
 
 // -----------------------------------------------------------------------------
 
+#if 0
 void bli_gemm_md_front
      (
        obj_t*  alpha,
@@ -897,5 +863,6 @@ void bli_gemm_md_zgemm
 	}
 #endif
 }
+#endif
 
 #endif

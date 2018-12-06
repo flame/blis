@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -57,15 +57,15 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_EX_DECLS \
 \
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype, and if that datatype matches the execution
-	   datatype. If any datatypes differ, skip the induced method chooser
-	   function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( c ) == bli_obj_dt( a ) && \
-	     bli_obj_dt( c ) == bli_obj_dt( b ) && \
-	     bli_obj_dt( c ) == bli_obj_comp_dt( c ) && \
-	     bli_obj_is_complex( c ) ) \
+	/* Only proceed with an induced method if each of the operands have a
+	   complex storage datatype. NOTE: Allowing precisions to vary while
+	   using 1m, which is what we do here, is unique to gemm; other level-3
+	   operations use 1m only if all storage datatypes are equal (including
+	   the computation datatype). If any operands are real, skip the induced
+	   method chooser function and proceed directly with native execution. */ \
+	if ( bli_obj_is_complex( c ) && \
+	     bli_obj_is_complex( a ) && \
+	     bli_obj_is_complex( b ) ) \
 	{ \
 		/* Invoke the operation's "ind" function--its induced method front-end.
 		   For complex problems, it calls the highest priority induced method

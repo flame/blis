@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -98,28 +98,41 @@ void bli_gemm_front
 		// is adjusted to point to cntx_local.)
 		bli_gemm_md( &a_local, &b_local, beta, &c_local, &cntx_local, &cntx );
 	}
-	else // homogeneous datatypes
+	//else // homogeneous datatypes
 #endif
-	{
-		// A sort of hack for communicating the desired pach schemas for A and
-		// B to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
-		// bli_l3_cntl_create_if()). This allows us to access the schemas from
-		// the control tree, which hopefully reduces some confusion,
-		// particularly in bli_packm_init().
-		if ( bli_cntx_method( cntx ) == BLIS_NAT )
-		{
-			bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
-			bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
-		}
-		else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
-		{
-			pack_t schema_a = bli_cntx_schema_a_block( cntx );
-			pack_t schema_b = bli_cntx_schema_b_panel( cntx );
 
-			bli_obj_set_pack_schema( schema_a, &a_local );
-			bli_obj_set_pack_schema( schema_b, &b_local );
-		}
-	}
+	// Load the pack schemas from the context and embed them into the objects
+	// for A and B. (Native contexts are initialized with the correct pack
+	// schemas, as are contexts for 1m, and if necessary bli_gemm_md() would
+	// have made a copy and modified the schemas, so reading them from the
+	// context should be a safe bet at this point.) This is a sort of hack for
+	// communicating the desired pack schemas for to bli_gemm_cntl_create()
+	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
+	// us to subsequently access the schemas from the control tree, which
+	// hopefully reduces some confusion, particularly in bli_packm_init().
+	const pack_t schema_a = bli_cntx_schema_a_block( cntx );
+	const pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+
+	bli_obj_set_pack_schema( schema_a, &a_local );
+	bli_obj_set_pack_schema( schema_b, &b_local );
+
+	// Next, we handle the possibility of needing to typecast alpha to the
+	// computation datatype and/or beta to the storage datatype of C.
+
+	// Attach alpha to B, and in the process typecast alpha to the target
+	// datatype of the matrix (which in this case is equal to the computation
+	// datatype).
+	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
+
+	// Attach beta to C, and in the process typecast beta to the target
+	// datatype of the matrix (which in this case is equal to the storage
+	// datatype of C).
+	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, beta,  &c_local );
+
+	// Change the alpha and beta pointers to BLIS_ONE since the values have
+	// now been typecast and attached to the matrices above.
+	alpha = &BLIS_ONE;
+	beta  = &BLIS_ONE;
 
 #ifdef BLIS_ENABLE_GEMM_MD
 	// Don't perform the following optimization for ccr or crc cases, as
@@ -265,8 +278,12 @@ void bli_gemm_front
 	// we copy/accumulate the result back to C and then release the object.
 	if ( use_ct )
     {
+		obj_t beta_local;
+
+		bli_obj_scalar_detach( &c_local, &beta_local );
+
 		//bli_castnzm( &ct, &c_local );
-		bli_xpbym( &ct, beta, &c_local );
+		bli_xpbym( &ct, &beta_local, &c_local );
 
 		bli_obj_free( &ct );
 	}

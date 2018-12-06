@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -37,29 +37,199 @@
 
 // scal21es
 
-#define bli_cscal21es( a, x, yri, yir ) \
+// Notes:
+// - The first char encodes the type of a.
+// - The second char encodes the type of x.
+// - The third char encodes the type of y.
+
+// -- (axy) = (??s) ------------------------------------------------------------
+
+#define bli_sssscal21es( a, x, yri, yir ) {}
+#define bli_sdsscal21es( a, x, yri, yir ) {}
+#define bli_scsscal21es( a, x, yri, yir ) {}
+#define bli_szsscal21es( a, x, yri, yir ) {}
+
+#define bli_dssscal21es( a, x, yri, yir ) {}
+#define bli_ddsscal21es( a, x, yri, yir ) {}
+#define bli_dcsscal21es( a, x, yri, yir ) {}
+#define bli_dzsscal21es( a, x, yri, yir ) {}
+
+#define bli_cssscal21es( a, x, yri, yir ) {}
+#define bli_cdsscal21es( a, x, yri, yir ) {}
+#define bli_ccsscal21es( a, x, yri, yir ) {}
+#define bli_czsscal21es( a, x, yri, yir ) {}
+
+#define bli_zssscal21es( a, x, yri, yir ) {}
+#define bli_zdsscal21es( a, x, yri, yir ) {}
+#define bli_zcsscal21es( a, x, yri, yir ) {}
+#define bli_zzsscal21es( a, x, yri, yir ) {}
+
+// -- (axy) = (??d) ------------------------------------------------------------
+
+#define bli_ssdscal21es( a, x, yri, yir ) {}
+#define bli_sddscal21es( a, x, yri, yir ) {}
+#define bli_scdscal21es( a, x, yri, yir ) {}
+#define bli_szdscal21es( a, x, yri, yir ) {}
+
+#define bli_dsdscal21es( a, x, yri, yir ) {}
+#define bli_dddscal21es( a, x, yri, yir ) {}
+#define bli_dcdscal21es( a, x, yri, yir ) {}
+#define bli_dzdscal21es( a, x, yri, yir ) {}
+
+#define bli_csdscal21es( a, x, yri, yir ) {}
+#define bli_cddscal21es( a, x, yri, yir ) {}
+#define bli_ccdscal21es( a, x, yri, yir ) {}
+#define bli_czdscal21es( a, x, yri, yir ) {}
+
+#define bli_zsdscal21es( a, x, yri, yir ) {}
+#define bli_zddscal21es( a, x, yri, yir ) {}
+#define bli_zcdscal21es( a, x, yri, yir ) {}
+#define bli_zzdscal21es( a, x, yri, yir ) {}
+
+// -- (axy) = (??c) ------------------------------------------------------------
+
+#define bli_sscscal21es( a, x, yri, yir ) {}
+#define bli_sdcscal21es( a, x, yri, yir ) {}
+#define bli_sccscal21es( a, x, yri, yir ) \
 { \
-	bli_cscal2ris( bli_creal(a), bli_cimag(a),  bli_creal(x), bli_cimag(x), bli_creal(yri), bli_cimag(yri) ); \
-	bli_cscal2ris( bli_creal(a), bli_cimag(a), -bli_cimag(x), bli_creal(x), bli_creal(yir), bli_cimag(yir) ); \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_szcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
 
-#define bli_zscal21es( a, x, yri, yir ) \
+#define bli_dscscal21es( a, x, yri, yir ) {}
+#define bli_ddcscal21es( a, x, yri, yir ) {}
+#define bli_dccscal21es( a, x, yri, yir ) \
 { \
-	bli_zscal2ris( bli_zreal(a), bli_zimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
-	bli_zscal2ris( bli_zreal(a), bli_zimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_dzcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
 
-#define bli_scscal21es( a, x, yri, yir ) \
+#define bli_cscscal21es( a, x, yri, yir ) \
 { \
-	bli_scscal2ris( bli_sreal(a), bli_simag(a),  bli_creal(x), bli_cimag(x), bli_creal(yri), bli_cimag(yri) ); \
-	bli_scscal2ris( bli_sreal(a), bli_simag(a), -bli_cimag(x), bli_creal(x), bli_creal(yir), bli_cimag(yir) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_sreal(x), bli_simag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_simag(x), bli_sreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_cdcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_dreal(x), bli_dimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_dimag(x), bli_dreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_cccscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_czcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
 
-#define bli_dzscal21es( a, x, yri, yir ) \
+#define bli_zscscal21es( a, x, yri, yir ) \
 { \
-	bli_dzscal2ris( bli_dreal(a), bli_dimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
-	bli_dzscal2ris( bli_dreal(a), bli_dimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_sreal(x), bli_simag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_simag(x), bli_sreal(x), bli_zreal(yir), bli_zimag(yir) ); \
 }
+#define bli_zdcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_dreal(x), bli_dimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_dimag(x), bli_dreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_zccscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_zzcscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+
+// -- (axy) = (??z) ------------------------------------------------------------
+
+#define bli_sszscal21es( a, x, yri, yir ) {}
+#define bli_sdzscal21es( a, x, yri, yir ) {}
+#define bli_sczscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_szzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_sreal(a), bli_simag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+
+#define bli_dszscal21es( a, x, yri, yir ) {}
+#define bli_ddzscal21es( a, x, yri, yir ) {}
+#define bli_dczscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_dzzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_dreal(a), bli_dimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+
+#define bli_cszscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_sreal(x), bli_simag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_simag(x), bli_sreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_cdzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_dreal(x), bli_dimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_dimag(x), bli_dreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_cczscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_czzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_creal(a), bli_cimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+
+#define bli_zszscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_sreal(x), bli_simag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_simag(x), bli_sreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_zdzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_dreal(x), bli_dimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_dimag(x), bli_dreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_zczscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_creal(x), bli_cimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_cimag(x), bli_creal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+#define bli_zzzscal21es( a, x, yri, yir ) \
+{ \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a),  bli_zreal(x), bli_zimag(x), bli_zreal(yri), bli_zimag(yri) ); \
+	bli_cxscal2ris( bli_zreal(a), bli_zimag(a), -bli_zimag(x), bli_zreal(x), bli_zreal(yir), bli_zimag(yir) ); \
+}
+
+
+
+#define bli_cscal21es( a, x, yri, yir ) bli_cccscal21es( a, x, yri, yir )
+#define bli_zscal21es( a, x, yri, yir ) bli_zzzscal21es( a, x, yri, yir )
 
 #endif
 

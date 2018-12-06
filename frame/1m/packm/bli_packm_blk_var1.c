@@ -15,9 +15,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -67,37 +67,37 @@ static FUNCPTR_T GENARRAY(ftypes,packm_blk_var1);
 
 static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 {
-                /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
+    /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
 // 0000 row/col panels
-               { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
-                   bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
+    { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
+        bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
 // 0001 row/col panels: 4m interleaved
-               { { NULL,                      bli_cpackm_struc_cxk_4mi,
-                   NULL,                      bli_zpackm_struc_cxk_4mi,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_4mi,
+        NULL,                      bli_zpackm_struc_cxk_4mi,  } },
 // 0010 row/col panels: 3m interleaved
-               { { NULL,                      bli_cpackm_struc_cxk_3mis,
-                   NULL,                      bli_zpackm_struc_cxk_3mis, } },
+    { { NULL,                      bli_cpackm_struc_cxk_3mis,
+        NULL,                      bli_zpackm_struc_cxk_3mis, } },
 // 0011 row/col panels: 4m separated (NOT IMPLEMENTED)
-               { { NULL,                      NULL,
-                   NULL,                      NULL,                      } },
+    { { NULL,                      NULL,
+        NULL,                      NULL,                      } },
 // 0100 row/col panels: 3m separated
-               { { NULL,                      bli_cpackm_struc_cxk_3mis,
-                   NULL,                      bli_zpackm_struc_cxk_3mis, } },
+    { { NULL,                      bli_cpackm_struc_cxk_3mis,
+        NULL,                      bli_zpackm_struc_cxk_3mis, } },
 // 0101 row/col panels: real only
-               { { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_rih,
+        NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 0110 row/col panels: imaginary only
-               { { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_rih,
+        NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 0111 row/col panels: real+imaginary only
-               { { NULL,                      bli_cpackm_struc_cxk_rih,
-                   NULL,                      bli_zpackm_struc_cxk_rih,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_rih,
+        NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 1000 row/col panels: 1m-expanded (1e)
-               { { NULL,                      bli_cpackm_struc_cxk_1er,
-                   NULL,                      bli_zpackm_struc_cxk_1er,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_1er,
+        NULL,                      bli_zpackm_struc_cxk_1er,  } },
 // 1001 row/col panels: 1m-reordered (1r)
-               { { NULL,                      bli_cpackm_struc_cxk_1er,
-                   NULL,                      bli_zpackm_struc_cxk_1er,  } },
+    { { NULL,                      bli_cpackm_struc_cxk_1er,
+        NULL,                      bli_zpackm_struc_cxk_1er,  } },
 };
 
 
@@ -120,7 +120,7 @@ void bli_packm_blk_var1
 	}
 #endif
 
-	num_t     dt_c       = bli_obj_dt( c );
+	num_t     dt_p       = bli_obj_dt( p );
 
 	struc_t   strucc     = bli_obj_struc( c );
 	doff_t    diagoffc   = bli_obj_diag_offset( c );
@@ -149,7 +149,6 @@ void bli_packm_blk_var1
 	inc_t     ps_p       = bli_obj_panel_stride( p );
 
 	obj_t     kappa;
-	obj_t*    kappa_p;
 	void*     buf_kappa;
 
 	func_t*   packm_kers;
@@ -167,10 +166,12 @@ void bli_packm_blk_var1
 		// higher-level operation. Thus, we use BLIS_ONE for kappa so
 		// that the underlying packm implementation does not perform
 		// any scaling during packing.
-		buf_kappa = bli_obj_buffer_for_const( dt_c, &BLIS_ONE );
+		buf_kappa = bli_obj_buffer_for_const( dt_p, &BLIS_ONE );
 	}
 	else // if ( bli_is_ind_packed( schema ) )
 	{
+		obj_t* kappa_p;
+
 		// The value for kappa we use will depend on whether the scalar
 		// attached to A has a nonzero imaginary component. If it does,
 		// then we will apply the scalar during packing to facilitate
@@ -199,7 +200,7 @@ void bli_packm_blk_var1
 		}
 
 		// Acquire the buffer to the kappa chosen above.
-		buf_kappa = bli_obj_buffer_for_1x1( dt_c, kappa_p );
+		buf_kappa = bli_obj_buffer_for_1x1( dt_p, kappa_p );
 	}
 
 
@@ -241,11 +242,11 @@ void bli_packm_blk_var1
 #endif
 
 	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker = bli_func_get_dt( dt_c, packm_kers );
+	packm_ker = bli_func_get_dt( dt_p, packm_kers );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_c];
+	f = ftypes[dt_p];
 
 	// Invoke the function.
 	f( strucc,

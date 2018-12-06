@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of The University of Texas at Austin nor the names
-      of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -56,7 +56,7 @@ void PASTEMAC2(ch,opname,suf) \
 \
 	PASTECH(chr,gemm_ukr_ft) \
 	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool_t      col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool_t      col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 	const bool_t      row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -88,11 +88,22 @@ void PASTEMAC2(ch,opname,suf) \
 \
 	bool_t            using_ct; \
 \
+	/* This virtual microkernel is used by ccr and crc mixed-domain cases
+	   when any of the following conditions are met:
+	   - beta is complex (ie: has a non-zero imaginary component)
+	   - C is general-stored
+	   - the computation precision differs from the storage of C
+	   If, however, none of the above conditions are met, then the real
+	   domain macrokernel can be (and will be) called instead of calling
+	   the complex macrokernel (and this virtual microkernel). */ \
+\
 /*
-PASTEMAC(d,fprintm)( stdout, "gemm_ukr: a", 2*mr, k, \
-                     a_r, 1, 6, "%5.2f", "" ); \
-PASTEMAC(d,fprintm)( stdout, "gemm_ukr: b", k, nr, \
-                     b_r, 8, 1, "%5.2f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: a", mr, k, \
+                       a_r, 1, mr, "%5.2f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: b", k, nr, \
+                       b_r, nr, 1, "%5.2f", "" ); \
+PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
+                       c_use, rs_c_use, cs_c_use, "%5.2f", "" ); \
 */ \
 \
 	/* SAFETY CHECK: The higher level implementation should never
@@ -123,7 +134,7 @@ PASTEMAC(d,fprintm)( stdout, "gemm_ukr: b", k, nr, \
 	if ( using_ct ) \
 	{ \
 		/* In the atypical cases, we compute the result into temporary
-		   workspace ct and then accumulated it back to c at the end. */ \
+		   workspace ct and then accumulate it back to c at the end. */ \
 \
 		/* Set the strides of ct based on the preference of the underlying
 		   native real domain gemm micro-kernel. Note that we set the ct
@@ -141,6 +152,7 @@ PASTEMAC(d,fprintm)( stdout, "gemm_ukr: b", k, nr, \
 		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
 		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) cs_c_use *= 2; \
 		else                                           rs_c_use *= 2; \
+\
 \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
@@ -176,7 +188,7 @@ PASTEMAC(d,fprintm)( stdout, "gemm_ukr: b", k, nr, \
 				                    *(c  + i*rs_c  + j*cs_c ) ); \
 			} \
 		} \
-		else /*if ( !PASTEMAC(ch,eq1)( *beta ) )*/ \
+		else \
 		{ \
 			for ( j = 0; j < nr; ++j ) \
 			for ( i = 0; i < mr; ++i ) \
