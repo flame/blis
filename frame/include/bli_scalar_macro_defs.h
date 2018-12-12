@@ -118,6 +118,7 @@
 #include "bli_xpbyjris.h"
 
 // Inlined scalar macros in loops
+#include "bli_scal2ris_mxn.h"
 #include "bli_scalris_mxn_uplo.h"
 
 
@@ -206,12 +207,10 @@
 #include "bli_scal2ri3s.h"
 #include "bli_scal2jri3s.h"
 
+#include "bli_scal2ri3s_mxn.h"
+
 
 // -- 4mh/3mh-specific scalar macros --
-
-#include "bli_scal2rihs_mxn_diag.h"
-#include "bli_scal2rihs_mxn_uplo.h"
-#include "bli_setrihs_mxn_diag.h"
 
 // ro
 #include "bli_scal2ros.h"
@@ -225,20 +224,13 @@
 #include "bli_scal2rpis.h"
 #include "bli_scal2jrpis.h"
 
+#include "bli_scal2rihs_mxn.h"
+#include "bli_scal2rihs_mxn_diag.h"
+#include "bli_scal2rihs_mxn_uplo.h"
+#include "bli_setrihs_mxn_diag.h"
+
 
 // -- 1m-specific scalar macros --
-
-#include "bli_invert1ms_mxn_diag.h"
-
-#include "bli_scal1ms_mxn.h"
-
-#include "bli_scal21ms_mxn_diag.h"
-#include "bli_scal21ms_mxn_uplo.h"
-
-#include "bli_set1ms_mxn.h"
-#include "bli_set1ms_mxn_diag.h"
-#include "bli_set1ms_mxn_uplo.h"
-#include "bli_seti01ms_mxn_diag.h"
 
 // 1e
 #include "bli_copy1es.h"
@@ -261,6 +253,20 @@
 
 #include "bli_scal21rs.h"
 #include "bli_scal2j1rs.h"
+
+// 1m (1e or 1r) 
+#include "bli_invert1ms_mxn_diag.h"
+
+#include "bli_scal1ms_mxn.h"
+
+#include "bli_scal21ms_mxn.h"
+#include "bli_scal21ms_mxn_diag.h"
+#include "bli_scal21ms_mxn_uplo.h"
+
+#include "bli_set1ms_mxn.h"
+#include "bli_set1ms_mxn_diag.h"
+#include "bli_set1ms_mxn_uplo.h"
+#include "bli_seti01ms_mxn_diag.h"
 
 
 #endif

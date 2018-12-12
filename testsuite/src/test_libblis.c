@@ -2102,8 +2102,10 @@ void libblis_test_op_driver
 
 			int has_sp = libblis_test_dt_str_has_sp_char_str( n_operandsp1,
 			                                                  dc_str[dci] );
-			//int has_dp = libblis_test_dt_str_has_dp_char_str( n_operandsp1,
-			//                                                  dc_str[dci] );
+			int has_dp = libblis_test_dt_str_has_dp_char_str( n_operandsp1,
+			                                                  dc_str[dci] );
+			int has_samep = (has_sp && !has_dp ) ||
+			                (has_dp && !has_sp );
 
 			// Notice that we use n_operands here instead of
 			// n_operandsp1 since we only want to chars for the
@@ -2164,7 +2166,8 @@ void libblis_test_op_driver
 					// real domain datatypes.)
 					if ( indi == BLIS_1M )
 					{
-						if ( op->opid == BLIS_GEMM && has_cd_only ) { ; }
+						if      ( op->opid == BLIS_GEMM && has_cd_only ) { ; }
+						else if ( has_samep && has_cd_only ) { ; }
 						else { continue; }
 					}
 					else { ; }

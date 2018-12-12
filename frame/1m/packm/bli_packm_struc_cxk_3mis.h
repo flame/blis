@@ -74,7 +74,9 @@ void PASTEMAC(ch,varname) \
        dim_t           m_panel_max, \
        dim_t           n_panel_max, \
        dim_t           panel_dim, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_len_max, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                           inc_t incc, inc_t ldc, \
@@ -104,7 +106,9 @@ void PASTEMAC(ch,varname) \
        dim_t           m_panel_max, \
        dim_t           n_panel_max, \
        dim_t           panel_dim, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_len_max, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                           inc_t incc, inc_t ldc, \

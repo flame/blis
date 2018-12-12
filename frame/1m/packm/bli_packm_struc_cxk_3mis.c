@@ -58,7 +58,9 @@ void PASTEMAC(ch,varname) \
      ) \
 { \
 	dim_t  panel_dim; \
+	dim_t  panel_dim_max; \
 	dim_t  panel_len; \
+	dim_t  panel_len_max; \
 	inc_t  incc, ldc; \
 	inc_t  ldp; \
 \
@@ -69,7 +71,9 @@ void PASTEMAC(ch,varname) \
 	{ \
 		/* Prepare to pack to row-stored column panel. */ \
 		panel_dim     = n_panel; \
+		panel_dim_max = n_panel_max; \
 		panel_len     = m_panel; \
+		panel_len_max = m_panel_max; \
 		incc          = cs_c; \
 		ldc           = rs_c; \
 		ldp           = rs_p; \
@@ -78,7 +82,9 @@ void PASTEMAC(ch,varname) \
 	{ \
 		/* Prepare to pack to column-stored row panel. */ \
 		panel_dim     = m_panel; \
+		panel_dim_max = m_panel_max; \
 		panel_len     = n_panel; \
+		panel_len_max = n_panel_max; \
 		incc          = rs_c; \
 		ldc           = cs_c; \
 		ldp           = cs_p; \
@@ -95,7 +101,9 @@ void PASTEMAC(ch,varname) \
 		( \
 		  conjc, \
 		  panel_dim, \
+		  panel_dim_max, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  c, incc, ldc, \
 		  p, is_p, ldp, \
@@ -118,7 +126,9 @@ void PASTEMAC(ch,varname) \
 		  m_panel_max, \
 		  n_panel_max, \
 		  panel_dim, \
+		  panel_dim_max, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  c, rs_c, cs_c, \
 		     incc, ldc, \
@@ -145,7 +155,9 @@ void PASTEMAC(ch,varname) \
 		  m_panel_max, \
 		  n_panel_max, \
 		  panel_dim, \
+		  panel_dim_max, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  c, rs_c, cs_c, \
 		     incc, ldc, \
@@ -156,13 +168,14 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 \
-	/* The packed memory region was acquired/allocated with "aligned"
-	   dimensions (ie: dimensions that were possibly inflated up to a
-	   multiple). When these dimension are inflated, it creates empty
-	   regions along the bottom and/or right edges of the matrix. If
-	   either region exists, we set them to zero. This allows the
-	   micro-kernel to remain simple since it does not need to support
-	   different register blockings for the edge cases. */ \
+	/* If m_panel < m_panel_max, or n_panel < n_panel_max, we would normally
+	   fill the edge region (the bottom m_panel_max - m_panel rows or right-
+	   side n_panel_max - n_panel columns) of the micropanel with zeros.
+	   However, this responsibility has been moved to the packm microkernel.
+	   This change allows experts to use custom kernels that pack to custom
+	   packing formats when the problem size is not a nice multiple of the
+	   register blocksize. */ \
+/*
 	if ( m_panel != m_panel_max ) \
 	{ \
 		ctype_r* restrict zero_r     = PASTEMAC(chr,0); \
@@ -213,7 +226,9 @@ void PASTEMAC(ch,varname) \
 		  NULL  \
 		); \
 	} \
+*/ \
 \
+/*
 	if ( n_panel != n_panel_max ) \
 	{ \
 		ctype_r* restrict zero_r     = PASTEMAC(chr,0); \
@@ -264,6 +279,7 @@ void PASTEMAC(ch,varname) \
 		  NULL  \
 		); \
 	} \
+*/ \
 \
 \
 	if ( bli_is_triangular( strucc ) ) \
@@ -334,7 +350,9 @@ void PASTEMAC(ch,varname) \
        dim_t           m_panel_max, \
        dim_t           n_panel_max, \
        dim_t           panel_dim, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_len_max, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                           inc_t incc, inc_t ldc, \
@@ -382,7 +400,9 @@ void PASTEMAC(ch,varname) \
 		( \
 		  conjc, \
 		  panel_dim, \
+		  panel_dim_max, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  c, incc, ldc, \
 		  p, is_p, ldp, \
@@ -475,10 +495,16 @@ void PASTEMAC(ch,varname) \
 \
 		/* Pack to p10. For upper storage, this includes the unstored
 		   triangle of c11. */ \
+		/* NOTE: Since we're only packing partial panels here, we pass in
+		   p1x_len as panel_len_max; otherwise, the packm kernel will zero-
+		   fill the columns up to panel_len_max, which is not what we need
+		   or want to happen. */ \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc10, \
 		  p10_dim, \
+		  panel_dim_max, \
+		  p10_len, \
 		  p10_len, \
 		  kappa, \
 		            c10, incc10, ldc10, \
@@ -488,10 +514,16 @@ void PASTEMAC(ch,varname) \
 \
 		/* Pack to p12. For lower storage, this includes the unstored
 		   triangle of c11. */ \
+		/* NOTE: Since we're only packing partial panels here, we pass in
+		   p1x_len as panel_len_max; otherwise, the packm kernel will zero-
+		   fill the columns up to panel_len_max, which is not what we need
+		   or want to happen. */ \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc12, \
 		  p12_dim, \
+		  panel_dim_max, \
+		  p12_len, \
 		  p12_len, \
 		  kappa, \
 		            c12, incc12, ldc12, \
@@ -639,7 +671,9 @@ void PASTEMAC(ch,varname) \
        dim_t           m_panel_max, \
        dim_t           n_panel_max, \
        dim_t           panel_dim, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_len_max, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t rs_c, inc_t cs_c, \
                           inc_t incc, inc_t ldc, \
@@ -653,7 +687,9 @@ void PASTEMAC(ch,varname) \
 	( \
 	  conjc, \
 	  panel_dim, \
+	  panel_dim_max, \
 	  panel_len, \
+	  panel_len_max, \
 	  kappa, \
 	  c, incc, ldc, \
 	  p, is_p, ldp, \

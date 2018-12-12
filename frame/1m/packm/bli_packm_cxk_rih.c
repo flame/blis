@@ -42,15 +42,20 @@ void PASTEMAC(ch,opname) \
        conj_t  conja, \
        pack_t  schema, \
        dim_t   panel_dim, \
+       dim_t   panel_dim_max, \
        dim_t   panel_len, \
+       dim_t   panel_len_max, \
        ctype*  kappa, \
        ctype*  a, inc_t inca, inc_t lda, \
        ctype*  p,             inc_t ldp, \
        cntx_t* cntx  \
      ) \
 { \
+	/* Note that we use panel_dim_max, not panel_dim, to query the packm
+	   kernel function pointer. This means that we always use the same
+	   kernel, even for edge cases. */ \
 	num_t     dt     = PASTEMAC(ch,type); \
-	l1mkr_t   ker_id = panel_dim; \
+	l1mkr_t   ker_id = panel_dim_max; \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \
@@ -61,13 +66,15 @@ void PASTEMAC(ch,opname) \
 \
 	/* If there exists a kernel implementation for the micro-panel dimension
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
-	if ( f != NULL ) \
+	if ( 0 && f != NULL ) \
 	{ \
 		f \
 		( \
 		  conja, \
 		  schema, \
+		  panel_dim, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  a, inca, lda, \
 		  p,       ldp, \
@@ -76,133 +83,66 @@ void PASTEMAC(ch,opname) \
 	} \
 	else \
 	{ \
-		ctype*   restrict kappa_cast = ( ctype*   )kappa; \
-		ctype*   restrict a_r        = ( ctype*   )a; \
-		ctype_r* restrict p_r        = ( ctype_r* )p; \
-		const dim_t       inca1      = inca; \
-		const dim_t       lda1       = lda; \
-		const dim_t       ldp1       = ldp; \
-		dim_t             i, j; \
-\
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
 \
-		if ( bli_is_ro_packed( schema ) ) \
+		PASTEMAC(ch,scal2rihs_mxn) \
+		( \
+		  schema, \
+		  conja, \
+		  panel_dim, \
+		  panel_len, \
+		  kappa, \
+		  a, inca, lda, \
+		  p, 1,    ldp  \
+		); \
+\
+		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
+		if ( panel_dim != panel_dim_max ) \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
+			ctype_r* restrict zero_r   = PASTEMAC(chr,0); \
+			const dim_t       i        = panel_dim; \
+			const dim_t       m_edge   = panel_dim_max - i; \
+			const dim_t       n_edge   = panel_len_max; \
+			ctype_r*          p_edge_r = ( ctype_r* )p + (i  )*1; \
 \
-						PASTEMAC(ch,scal2jros) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
-			else /* if ( bli_is_noconj( conja ) ) */ \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
-\
-						PASTEMAC(ch,scal2ros) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  0, \
+			  BLIS_NONUNIT_DIAG, \
+			  BLIS_DENSE, \
+			  m_edge, \
+			  n_edge, \
+			  zero_r, \
+			  p_edge_r, 1, ldp, \
+			  cntx, \
+			  NULL  \
+			); \
 		} \
-		else if ( bli_is_io_packed( schema ) ) \
+\
+		/* If panel_len < panel_len_max, then we zero those unused columns. */ \
+		if ( panel_len != panel_len_max ) \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
+			ctype_r* restrict zero_r   = PASTEMAC(chr,0); \
+			const dim_t       j        = panel_len; \
+			const dim_t       m_edge   = panel_dim_max; \
+			const dim_t       n_edge   = panel_len_max - j; \
+			ctype_r*          p_edge_r = ( ctype_r* )p + (j  )*ldp; \
 \
-						PASTEMAC(ch,scal2jios) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
-			else /* if ( bli_is_noconj( conja ) ) */ \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
-\
-						PASTEMAC(ch,scal2ios) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
-		} \
-		else /* if ( bli_is_rpi_packed( schema ) ) */ \
-		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
-\
-						PASTEMAC(ch,scal2jrpis) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
-			else /* if ( bli_is_noconj( conja ) ) */ \
-			{ \
-				for ( j = 0; j < panel_len; ++j ) \
-				{ \
-					for ( i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype*   restrict alpha11 = a_r + (i  )*inca1 + (j  )*lda1; \
-						ctype_r* restrict pi11_r  = p_r + (i  )*1     + (j  )*ldp1; \
-\
-						PASTEMAC(ch,scal2rpis) \
-						( \
-						  *kappa_cast, \
-						  *alpha11, \
-						  *pi11_r  \
-						); \
-					} \
-				} \
-			} \
+			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
+			( \
+			  BLIS_NO_CONJUGATE, \
+			  0, \
+			  BLIS_NONUNIT_DIAG, \
+			  BLIS_DENSE, \
+			  m_edge, \
+			  n_edge, \
+			  zero_r, \
+			  p_edge_r, 1, ldp, \
+			  cntx, \
+			  NULL  \
+			); \
 		} \
 	} \
 }

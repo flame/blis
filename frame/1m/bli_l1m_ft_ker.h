@@ -86,7 +86,9 @@ INSERT_GENTDEF( packm )
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
        conj_t           conja, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
@@ -121,7 +123,9 @@ INSERT_GENTDEF( unpackm_cxk )
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
        conj_t           conja, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p, inc_t is_p, inc_t ldp, \
@@ -130,7 +134,6 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
 
 INSERT_GENTDEF( packm_cxk_3mis )
 INSERT_GENTDEF( packm_cxk_4mi )
-
 
 // packm_rih_ker
 // packm_1er_ker
@@ -142,7 +145,9 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
        conj_t           conja, \
        pack_t           schema, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \

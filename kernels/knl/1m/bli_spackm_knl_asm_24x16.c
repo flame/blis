@@ -111,23 +111,30 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 void bli_spackm_knl_asm_16xk
      (
        conj_t           conja,
+       dim_t            cdim_,
        dim_t            n_,
+       dim_t            n_max_,
        void*   restrict kappa_,
        void*   restrict a_, inc_t inca_, inc_t lda_,
        void*   restrict p_,              inc_t ldp_,
-       cntx_t* restrict ctnx
+       cntx_t* restrict cntx
      )
 {
-    (void)conja;
+    const int32_t* offsetPtr = &offsets[0];
 
-    const int32_t * offsetPtr = &offsets[0];
-    float* a = (float*)a_;
-    float* p = (float*)p_;
-    float* kappa = (float*)kappa_;
-    const int64_t n = n_;
-    const int64_t inca = inca_;
-    const int64_t lda = lda_;
-    const int64_t ldp = ldp_;
+    float*        a     = ( float* )a_;
+    float*        p     = ( float* )p_;
+    float*        kappa = ( float* )kappa_;
+    const int64_t cdim  = cdim_;
+    const int64_t mnr   = 16;
+    const int64_t n     = n_;
+    const int64_t n_max = n_max_;
+    const int64_t inca  = inca_;
+    const int64_t lda   = lda_;
+    const int64_t ldp   = ldp_;
+
+    if ( cdim == mnr )
+    {
 
     BEGIN_ASM()
 
@@ -316,28 +323,84 @@ void bli_spackm_knl_asm_16xk
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
           "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
     )
+
+	}
+	else // if ( cdim < mnr )
+	{
+		bli_sscal2m_ex \
+		( \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  ( trans_t )conja, \
+		  cdim, \
+		  n, \
+		  kappa, \
+		  a, inca, lda, \
+		  p, 1,    ldp, \
+		  cntx, \
+		  NULL  \
+		); \
+
+		// if ( cdim < mnr )
+		{
+			const dim_t      i      = cdim;
+			const dim_t      m_edge = mnr - i;
+			const dim_t      n_edge = n_max;
+			float*  restrict p_edge = p + (i  )*1;
+
+			bli_sset0s_mxn
+			(
+			  m_edge,
+			  n_edge,
+			  p_edge, 1, ldp
+			);
+		}
+	}
+
+	if ( n < n_max )
+	{
+		const dim_t      j      = n;
+		const dim_t      m_edge = mnr;
+		const dim_t      n_edge = n_max - j;
+		float*  restrict p_edge = p + (j  )*ldp;
+
+		bli_sset0s_mxn
+		(
+		  m_edge,
+		  n_edge,
+		  p_edge, 1, ldp
+		);
+	}
 }
 
 void bli_spackm_knl_asm_24xk
      (
        conj_t           conja,
+       dim_t            cdim_,
        dim_t            n_,
+       dim_t            n_max_,
        void*   restrict kappa_,
        void*   restrict a_, inc_t inca_, inc_t lda_,
        void*   restrict p_,              inc_t ldp_,
-       cntx_t* restrict ctnx
+       cntx_t* restrict cntx
      )
 {
-    (void)conja;
+    const int32_t* offsetPtr = &offsets[0];
 
-    const int32_t * offsetPtr = &offsets[0];
-    float* a = (float*)a_;
-    float* p = (float*)p_;
-    float* kappa = (float*)kappa_;
-    const int64_t n = n_;
-    const int64_t inca = inca_;
-    const int64_t lda = lda_;
-    const int64_t ldp = ldp_;
+    float*        a     = ( float* )a_;
+    float*        p     = ( float* )p_;
+    float*        kappa = ( float* )kappa_;
+    const int64_t cdim  = cdim_;
+    const int64_t mnr   = 24;
+    const int64_t n     = n_;
+    const int64_t n_max = n_max_;
+    const int64_t inca  = inca_;
+    const int64_t lda   = lda_;
+    const int64_t ldp   = ldp_;
+
+    if ( cdim == mnr )
+    {
 
     BEGIN_ASM()
 
@@ -562,4 +625,53 @@ void bli_spackm_knl_asm_24xk
           "rax", "rbx", "rcx", "rdx", "rdi", "rsi",
           "r8", "r9", "r10", "r11", "r12", "r13", "r14", "memory"
     )
+
+	}
+	else // if ( cdim < mnr )
+	{
+		bli_sscal2m_ex \
+		( \
+		  0, \
+		  BLIS_NONUNIT_DIAG, \
+		  BLIS_DENSE, \
+		  ( trans_t )conja, \
+		  cdim, \
+		  n, \
+		  kappa, \
+		  a, inca, lda, \
+		  p, 1,    ldp, \
+		  cntx, \
+		  NULL  \
+		); \
+
+		// if ( cdim < mnr )
+		{
+			const dim_t      i      = cdim;
+			const dim_t      m_edge = mnr - i;
+			const dim_t      n_edge = n_max;
+			float*  restrict p_edge = p + (i  )*1;
+
+			bli_sset0s_mxn
+			(
+			  m_edge,
+			  n_edge,
+			  p_edge, 1, ldp
+			);
+		}
+	}
+
+	if ( n < n_max )
+	{
+		const dim_t      j      = n;
+		const dim_t      m_edge = mnr;
+		const dim_t      n_edge = n_max - j;
+		float*  restrict p_edge = p + (j  )*ldp;
+
+		bli_sset0s_mxn
+		(
+		  m_edge,
+		  n_edge,
+		  p_edge, 1, ldp
+		);
+	}
 }

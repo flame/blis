@@ -41,15 +41,20 @@ void PASTEMAC(ch,opname) \
      ( \
        conj_t  conja, \
        dim_t   panel_dim, \
+       dim_t   panel_dim_max, \
        dim_t   panel_len, \
+       dim_t   panel_len_max, \
        ctype*  kappa, \
        ctype*  a, inc_t inca, inc_t lda, \
        ctype*  p,             inc_t ldp, \
        cntx_t* cntx  \
      ) \
 { \
+	/* Note that we use panel_dim_max, not panel_dim, to query the packm
+	   kernel function pointer. This means that we always use the same
+	   kernel, even for edge cases. */ \
 	num_t     dt     = PASTEMAC(ch,type); \
-	l1mkr_t   ker_id = panel_dim; \
+	l1mkr_t   ker_id = panel_dim_max; \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \
@@ -62,10 +67,45 @@ void PASTEMAC(ch,opname) \
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
 	if ( f != NULL ) \
 	{ \
+		/* Under normal circumstances, the packm kernel will copy over a
+		   panel_dim x panel_len submatrix of A into P. However, the kernel
+		   now handles zero-filling at edge cases, which typically consist of
+		   the outer (panel_dim_max - panel_dim) rows or columns of the
+		   micropanel. (Note that these rows/columns correspond to values
+		   beyond the edge of matrix A.) The kernel intrinsically knows its
+		   own panel_dim_max, since that corresponds to the kernel's register
+		   blocksize. However, we need to pass in panel_len_max because the
+		   bottom-right edge case of trsm_lu will need all elements above the
+		   extended diagonal and beyond (to the right of) the bottom-right
+		   element to be initialized to zero so the trsm portion of the
+		   computational kernel will operate with zeros for those iterations.
+
+		   As an example, if trsm_lu is executed on a 6x6 matrix, and the
+		   gemmtrsm kernel uses MR = 6, the computation will begin with the
+		   edge case, which is the bottom 2x2 matrix marked with x's. Code
+		   in bli_packm_tri_cxk() will extend the diagonal as identity into
+		   the remaining portion of the micropanel. But before that happens,
+		   the packm kernel must have set the 0's shown below. (Unreferenced
+		   elements are marked with '.'.)
+
+                x x 0 0 0 0
+                . x 0 0 0 0
+                . . 1 0 0 0
+                . . . 1 0 0
+                . . . . 1 0
+                . . . . . 1
+
+           In this case, panel_dim will be 2 because two rows of data are
+           copied from A, panel_len will be 2 because those two rows span
+           two columns of A, and panel_len_max will be 6 because there are a
+           total of 6 columns that can be written to, 4 of which lie beyond
+		   the values copied from A. */ \
 		f \
 		( \
 		  conja, \
+		  panel_dim, \
 		  panel_len, \
+		  panel_len_max, \
 		  kappa, \
 		  a, inca, lda, \
 		  p,       ldp, \
@@ -74,8 +114,6 @@ void PASTEMAC(ch,opname) \
 	} \
 	else \
 	{ \
-		trans_t transa = ( trans_t )conja; \
-\
 		/* Treat the micro-panel as panel_dim x panel_len and column-stored
 		   (unit row stride). */ \
 		PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
@@ -83,7 +121,7 @@ void PASTEMAC(ch,opname) \
 		  0, \
 		  BLIS_NONUNIT_DIAG, \
 		  BLIS_DENSE, \
-		  transa, \
+		  ( trans_t )conja, \
 		  panel_dim, \
 		  panel_len, \
 		  kappa, \
@@ -94,6 +132,38 @@ void PASTEMAC(ch,opname) \
 		     scal2m_ex(). */ \
 		  NULL  \
 		); \
+\
+		/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
+		if ( panel_dim < panel_dim_max ) \
+		{ \
+			const dim_t     i      = panel_dim; \
+			const dim_t     m_edge = panel_dim_max - panel_dim; \
+			const dim_t     n_edge = panel_len_max; \
+			ctype* restrict p_edge = p + (i  )*1; \
+\
+			PASTEMAC(ch,set0s_mxn) \
+			( \
+			  m_edge, \
+			  n_edge, \
+			  p_edge, 1, ldp  \
+			); \
+		} \
+\
+		/* If panel_len < panel_len_max, then we zero those unused columns. */ \
+		if ( panel_len < panel_len_max ) \
+		{ \
+			const dim_t     j      = panel_len; \
+			const dim_t     m_edge = panel_dim_max; \
+			const dim_t     n_edge = panel_len_max - panel_len; \
+			ctype* restrict p_edge = p + (j  )*ldp; \
+\
+			PASTEMAC(ch,set0s_mxn) \
+			( \
+			  m_edge, \
+			  n_edge, \
+			  p_edge, 1, ldp  \
+			); \
+		} \
 	} \
 }
 

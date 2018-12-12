@@ -44,7 +44,9 @@
 void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        void*   restrict kappa, \
        void*   restrict a, inc_t inca, inc_t lda, \
        void*   restrict p,             inc_t ldp, \
@@ -74,7 +76,9 @@ void PASTEMAC(ch,varname) \
 void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        void*   restrict kappa, \
        void*   restrict a, inc_t inca, inc_t lda, \
        void*   restrict p, inc_t is_p, inc_t ldp, \
@@ -89,7 +93,9 @@ void PASTEMAC(ch,varname) \
 void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        void*   restrict kappa, \
        void*   restrict a, inc_t inca, inc_t lda, \
        void*   restrict p, inc_t is_p, inc_t ldp, \
@@ -105,7 +111,9 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        pack_t           schema, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        void*   restrict kappa, \
        void*   restrict a, inc_t inca, inc_t lda, \
        void*   restrict p,             inc_t ldp, \
@@ -121,7 +129,9 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        pack_t           schema, \
+       dim_t            cdim, \
        dim_t            n, \
+       dim_t            n_max, \
        void*   restrict kappa, \
        void*   restrict a, inc_t inca, inc_t lda, \
        void*   restrict p,             inc_t ldp, \

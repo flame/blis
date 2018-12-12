@@ -141,8 +141,6 @@
 #define packm_16xk_ker_name GENARNAME(packm_16xk)
 #undef  packm_24xk_ker_name
 #define packm_24xk_ker_name GENARNAME(packm_24xk)
-#undef  packm_30xk_ker_name
-#define packm_30xk_ker_name GENARNAME(packm_30xk)
 
 #undef  unpackm_2xk_ker_name
 #define unpackm_2xk_ker_name  GENARNAME(unpackm_2xk)
@@ -177,8 +175,6 @@
 #define packm_14xk_3mis_ker_name GENARNAME(packm_14xk_3mis)
 #undef  packm_16xk_3mis_ker_name
 #define packm_16xk_3mis_ker_name GENARNAME(packm_16xk_3mis)
-#undef  packm_30xk_3mis_ker_name
-#define packm_30xk_3mis_ker_name GENARNAME(packm_30xk_3mis)
 
 #undef  packm_2xk_4mi_ker_name
 #define packm_2xk_4mi_ker_name  GENARNAME(packm_2xk_4mi)
@@ -198,8 +194,6 @@
 #define packm_14xk_4mi_ker_name GENARNAME(packm_14xk_4mi)
 #undef  packm_16xk_4mi_ker_name
 #define packm_16xk_4mi_ker_name GENARNAME(packm_16xk_4mi)
-#undef  packm_30xk_4mi_ker_name
-#define packm_30xk_4mi_ker_name GENARNAME(packm_30xk_4mi)
 
 #undef  packm_2xk_rih_ker_name
 #define packm_2xk_rih_ker_name  GENARNAME(packm_2xk_rih)
@@ -217,8 +211,6 @@
 #define packm_14xk_rih_ker_name GENARNAME(packm_14xk_rih)
 #undef  packm_16xk_rih_ker_name
 #define packm_16xk_rih_ker_name GENARNAME(packm_16xk_rih)
-#undef  packm_30xk_rih_ker_name
-#define packm_30xk_rih_ker_name GENARNAME(packm_30xk_rih)
 
 #undef  packm_2xk_1er_ker_name
 #define packm_2xk_1er_ker_name  GENARNAME(packm_2xk_1er)
@@ -236,8 +228,6 @@
 #define packm_14xk_1er_ker_name GENARNAME(packm_14xk_1er)
 #undef  packm_16xk_1er_ker_name
 #define packm_16xk_1er_ker_name GENARNAME(packm_16xk_1er)
-#undef  packm_30xk_1er_ker_name
-#define packm_30xk_1er_ker_name GENARNAME(packm_30xk_1er)
 
 // Include the level-1m kernel API template.
 #include "bli_l1m_ker.h"
@@ -439,7 +429,6 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_ker_name );
 	gen_func_init( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_ker_name );
 	gen_func_init( &funcs[ BLIS_PACKM_24XK_KER ], packm_24xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_ker_name );
 
 	funcs = bli_cntx_unpackm_kers_buf( cntx );
 
@@ -578,7 +567,6 @@ void GENBAINAME(cntx_init)
 		gen_func_init_co( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_rih_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_rih_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_rih_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_rih_ker_name );
 	}
 	else if ( method == BLIS_3M1 )
 	{
@@ -590,7 +578,6 @@ void GENBAINAME(cntx_init)
 		gen_func_init_co( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_3mis_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_3mis_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_3mis_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_3mis_ker_name );
 	}
 	else if ( method == BLIS_4M1A || method == BLIS_4M1B )
 	{
@@ -602,7 +589,6 @@ void GENBAINAME(cntx_init)
 		gen_func_init_co( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_4mi_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_4mi_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_4mi_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_4mi_ker_name );
 	}
 	else if ( method == BLIS_1M )
 	{
@@ -614,7 +600,6 @@ void GENBAINAME(cntx_init)
 		gen_func_init_co( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_1er_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_1er_ker_name );
 		gen_func_init_co( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_1er_ker_name );
 	}
 	else // if ( method == BLIS_NAT )
 	{
@@ -628,7 +613,6 @@ void GENBAINAME(cntx_init)
 		gen_func_init( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_ker_name );
 		gen_func_init( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_ker_name );
 		gen_func_init( &funcs[ BLIS_PACKM_24XK_KER ], packm_24xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_30XK_KER ], packm_30xk_ker_name );
 	}
 
 

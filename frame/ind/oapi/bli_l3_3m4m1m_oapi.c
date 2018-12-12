@@ -88,6 +88,12 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
+	/* 3mh and 4mh change the context for each stage, and so in order to
+	   remain thread-safe, we must make a local copy of the context for
+	   those induced methods. */ \
+	cntx_t cntx_l; \
+	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
+\
 	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
@@ -173,6 +179,12 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
+	/* 3mh and 4mh change the context for each stage, and so in order to
+	   remain thread-safe, we must make a local copy of the context for
+	   those induced methods. */ \
+	cntx_t cntx_l; \
+	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
+\
 	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
 	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
@@ -255,6 +267,12 @@ void PASTEMAC(opname,imeth) \
 	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
+\
+	/* 3mh and 4mh change the context for each stage, and so in order to
+	   remain thread-safe, we must make a local copy of the context for
+	   those induced methods. */ \
+	cntx_t cntx_l; \
+	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
 \
 	/* Initialize a local runtime with global settings if necessary. */ \
 	rntm_t rntm_l; \
