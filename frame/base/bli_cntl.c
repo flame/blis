@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,6 +47,10 @@ cntl_t* bli_cntl_create_node
 	cntl_t* cntl;
 	mem_t*  pack_mem;
 
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_cntl_create_node(): " );
+	#endif
+
 	// Allocate the cntl_t struct.
 	cntl = bli_malloc_intl( sizeof( cntl_t ) );
 
@@ -70,6 +75,10 @@ void bli_cntl_free_node
        cntl_t* cntl
      )
 {
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_cntl_free_node(): " );
+	#endif
+
 	bli_free_intl( cntl );
 }
 
@@ -130,6 +139,10 @@ void bli_cntl_free_w_thrinfo
 	// Free the current node's params field, if it is non-NULL.
 	if ( cntl_params != NULL )
 	{
+		#ifdef ENABLE_MEM_DEBUG
+		printf( "bli_cntl_free_w_thrinfo(): " );
+		#endif
+
 		bli_free_intl( cntl_params );
 	}
 
@@ -139,6 +152,10 @@ void bli_cntl_free_w_thrinfo
 	if ( bli_thread_am_ochief( thread ) )
 	if ( bli_mem_is_alloc( cntl_pack_mem ) )
 	{
+		#ifdef ENABLE_MEM_DEBUG
+		printf( "bli_cntl_free_w_thrinfo(): releasing mem pool block.\n" );
+		#endif
+
 		bli_membrk_release( cntl_pack_mem );
 	}
 

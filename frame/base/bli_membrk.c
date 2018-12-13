@@ -42,12 +42,19 @@ void bli_membrk_init
        membrk_t* membrk
      )
 {
+	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
+	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
+	free_ft     free_fp    = BLIS_FREE_POOL;
+
+	// These fields are used for general-purpose allocation.
+	bli_membrk_set_align_size( align_size, membrk );
+	bli_membrk_set_malloc_fp( malloc_fp, membrk );
+	bli_membrk_set_free_fp( free_fp, membrk );
+
 	bli_membrk_init_mutex( membrk );
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
 	bli_membrk_init_pools( cntx, membrk );
 #endif
-	bli_membrk_set_malloc_fp( bli_malloc_pool, membrk );
-	bli_membrk_set_free_fp( bli_free_pool, membrk );
 }
 
 void bli_membrk_finalize
@@ -57,6 +64,7 @@ void bli_membrk_finalize
 {
 	bli_membrk_set_malloc_fp( NULL, membrk );
 	bli_membrk_set_free_fp( NULL, membrk );
+
 #ifdef BLIS_ENABLE_PACKBUF_POOLS
 	bli_membrk_finalize_pools( membrk );
 #endif
@@ -88,11 +96,12 @@ void bli_membrk_acquire_m
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
-		// For general-use buffer requests, such as those used by level-2
-		// operations, dynamically allocating memory is sufficient.
-		// Note that we use the malloc()-style memory allocation function
-		// that is stored in the membrk_t object.
-		void* buf_sys = bli_membrk_malloc( req_size, membrk );
+		malloc_ft malloc_fp  = bli_membrk_malloc_fp( membrk );
+		siz_t     align_size = bli_membrk_align_size( membrk );
+
+		// For general-use buffer requests, dynamically allocating memory
+		// is assumed to be sufficient.
+		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size );
 
 		// Initialize the mem_t object with:
 		// - the address of the memory block,
@@ -101,8 +110,7 @@ void bli_membrk_acquire_m
 		// - the membrk_t from which the mem_t entry was acquired.
 		// NOTE: We initialize the pool field to NULL since this block did not
 		// come from a memory pool.
-		bli_mem_set_buffer( buf_sys, mem );
-		bli_mem_set_buf_sys( buf_sys, mem );
+		bli_mem_set_buffer( buf, mem );
 		bli_mem_set_buf_type( buf_type, mem );
 		bli_mem_set_pool( NULL, mem );
 		bli_mem_set_size( req_size, mem );
@@ -187,13 +195,12 @@ void bli_membrk_release
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
-		void* buf_sys = bli_mem_buf_sys( mem );
+		free_ft free_fp = bli_membrk_free_fp( membrk );
+		void*   buf     = bli_mem_buffer( mem );
 
 		// For general-use buffers, we dynamically allocate memory, and so
-		// here we need to free.
-		// Note that we use the free()-style memory release function that
-		// is stored in the membrk_t object.
-		bli_membrk_free( buf_sys, membrk );
+		// here we need to free it.
+		bli_ffree_align( free_fp, buf );
 	}
 	else
 	{
@@ -228,7 +235,7 @@ void bli_membrk_release
 			{
 				// Free the pblk_t using the appropriate function in the
 				// pool API.
-				bli_pool_free_block( pblk );
+				bli_pool_free_block( pblk, pool );
 			}
 			else
 			{
@@ -314,8 +321,6 @@ void bli_membrk_init_pools
 	const dim_t index_b      = bli_packbuf_index( BLIS_BUFFER_FOR_B_PANEL );
 	const dim_t index_c      = bli_packbuf_index( BLIS_BUFFER_FOR_C_PANEL );
 
-	const siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
-
 	// Alias the pool addresses to convenient identifiers.
 	pool_t*     pool_a       = bli_membrk_pool( index_a, membrk );
 	pool_t*     pool_b       = bli_membrk_pool( index_b, membrk );
@@ -330,6 +335,19 @@ void bli_membrk_init_pools
 	siz_t       block_size_b = 0;
 	siz_t       block_size_c = 0;
 
+	// For blocks of A and panels of B, start off with block_ptrs arrays that
+	// are of a decent length. For C, we can start off with an empty array.
+	const dim_t block_ptrs_len_a = 80;
+	const dim_t block_ptrs_len_b = 80;
+	const dim_t block_ptrs_len_c = 0;
+
+	// Use the address alignment size designated (at configure-time) for pools.
+	const siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
+
+	// Use the malloc() and free() designated (at configure-time) for pools.
+	malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
+	free_ft   free_fp    = BLIS_FREE_POOL;
+
 	// Determine the block size for each memory pool.
 	bli_membrk_compute_pool_block_sizes( &block_size_a,
 	                                     &block_size_b,
@@ -337,9 +355,12 @@ void bli_membrk_init_pools
 	                                     cntx );
 
 	// Initialize the memory pools for A, B, and C.
-	bli_pool_init( num_blocks_a, block_size_a, align_size, pool_a );
-	bli_pool_init( num_blocks_b, block_size_b, align_size, pool_b );
-	bli_pool_init( num_blocks_c, block_size_c, align_size, pool_c );
+	bli_pool_init( num_blocks_a, block_ptrs_len_a, block_size_a, align_size,
+	               malloc_fp, free_fp, pool_a );
+	bli_pool_init( num_blocks_b, block_ptrs_len_b, block_size_b, align_size,
+	               malloc_fp, free_fp, pool_b );
+	bli_pool_init( num_blocks_c, block_ptrs_len_c, block_size_c, align_size,
+	               malloc_fp, free_fp, pool_c );
 }
 
 void bli_membrk_finalize_pools

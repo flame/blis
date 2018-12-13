@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +39,10 @@
 
 thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 {
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_thrcomm_create(): " );
+	#endif
+
 	thrcomm_t* comm = bli_malloc_intl( sizeof(thrcomm_t) );
 	bli_thrcomm_init( comm, n_threads );
 
@@ -223,63 +228,34 @@ void bli_l3_thread_decorator
        cntl_t*     cntl
      )
 {
-	// Query the total number of threads from the context.
+	// This is part of a hack to support mixed domain in bli_gemm_front().
+	// Sometimes we need to specify a non-standard schema for A and B, and
+	// we decided to transmit them via the schema field in the obj_t's
+	// rather than pass them in as function parameters. Once the values
+	// have been read, we immediately reset them back to their expected
+	// values for unpacked objects.
+	pack_t schema_a = bli_obj_pack_schema( a );
+	pack_t schema_b = bli_obj_pack_schema( b );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
+
+	// Query the total number of threads from the rntm_t object.
 	dim_t       n_threads = bli_rntm_num_threads( rntm );
 
-	// Allcoate a global communicator for the root thrinfo_t structures.
+	// Allocate a global communicator for the root thrinfo_t structures.
 	thrcomm_t*  gl_comm   = bli_thrcomm_create( n_threads );
 
-#ifdef PRINT_THRINFO
-	thrinfo_t** threads   = bli_malloc_intl( n_threads * sizeof( thrinfo_t* ) );
-#endif
+	#ifdef PRINT_THRINFO
+	thrinfo_t** threads = bli_malloc_intl( n_threads * sizeof( thrinfo_t* ) );
+	#endif
+
 
 	_Pragma( "omp parallel num_threads(n_threads)" )
 	{
-		dim_t      n_threads_real = omp_get_num_threads();
-		dim_t      id = omp_get_thread_num();
+		dim_t tid = omp_get_thread_num();
 
-		// Check if the number of OpenMP threads created within this parallel
-		// region is different from the number of threads that were requested
-		// of BLIS. This inequality may trigger when, for example, the
-		// following conditions are satisfied:
-		// - an application is executing an OpenMP parallel region in which
-		//   BLIS is invokved,
-		// - BLIS is configured for multithreading via OpenMP,
-		// - OMP_NUM_THREADS = t > 1,
-		// - the number of threads requested of BLIS (regardless of method)
-		//   is p <= t,
-		// - OpenMP nesting is disabled.
-		// In this situation, the application spawns t threads. Each application
-		// thread calls gemm (for example). Each gemm will attempt to spawn p
-		// threads via OpenMP. However, since nesting is disabled, the OpenMP
-		// implementation finds that t >= p threads are already spawned, and
-		// thus it doesn't spawn *any* additional threads for each gemm.
-		if ( n_threads_real != n_threads )
-		{
- 			// If the number of threads active in the current region is not
-			// equal to the number requested of BLIS, we then only continue
-			// if the number of threads in the current region is 1. If, for
-			// example, BLIS requested 4 threads but only got 3, then we
-			// abort().
-			if ( id == 0 )
-			{
-				if ( n_threads_real != 1 )
-				{
-					bli_print_msg( "A different number of threads was "
-					               "created than was requested.",
-					               __FILE__, __LINE__ );
-					bli_abort();
-				}
-
-				n_threads = 1;
-				bli_thrcomm_init( gl_comm, 1 );
-				bli_rntm_set_num_threads_only( 1, rntm );
-				bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
-			}
-
-			// Synchronize all threads and continue.
-			_Pragma( "omp barrier" )
-		}
+		// Check for a somewhat obscure OpenMP thread-mistmatch issue.
+		bli_l3_thread_decorator_thread_check( n_threads, tid, gl_comm, rntm );
 
 		obj_t      a_t, b_t, c_t;
 		cntl_t*    cntl_use;
@@ -287,18 +263,19 @@ void bli_l3_thread_decorator
 
 		// Alias thread-local copies of A, B, and C. These will be the objects
 		// we pass down the algorithmic function stack. Making thread-local
-		// alaises IS ABSOLUTELY IMPORTANT and MUST BE DONE because each thread
-		// will read the schemas from A and B and then reset the schemas to
-		// their expected unpacked state (in bli_l3_cntl_create_if()).
+		// alaises is highly recommended in case a thread needs to change any
+		// of the properties of an object without affecting other threads'
+		// objects.
 		bli_obj_alias_to( a, &a_t );
 		bli_obj_alias_to( b, &b_t );
 		bli_obj_alias_to( c, &c_t );
 
 		// Create a default control tree for the operation, if needed.
-		bli_l3_cntl_create_if( family, &a_t, &b_t, &c_t, cntl, &cntl_use );
+		bli_l3_cntl_create_if( family, schema_a, schema_b,
+		                       &a_t, &b_t, &c_t, cntl, &cntl_use );
 
 		// Create the root node of the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
+		bli_l3_thrinfo_create_root( tid, gl_comm, rntm, cntl_use, &thread );
 
 		func
 		(
@@ -313,27 +290,83 @@ void bli_l3_thread_decorator
 		  thread
 		);
 
-		// Free the control tree, if one was created locally.
-		bli_l3_cntl_free_if( &a_t, &b_t, &c_t, cntl, cntl_use, thread );
+		// Free the thread's local control tree.
+		bli_l3_cntl_free( cntl_use, thread );
 
-#ifdef PRINT_THRINFO
-		threads[id] = thread;
-#else
+		#ifdef PRINT_THRINFO
+		threads[tid] = thread;
+		#else
 		// Free the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_free( thread );
-#endif
+		#endif
+
 	}
 
 	// We shouldn't free the global communicator since it was already freed
 	// by the global communicator's chief thread in bli_l3_thrinfo_free()
 	// (called above).
 
-
-#ifdef PRINT_THRINFO
+	#ifdef PRINT_THRINFO
 	bli_l3_thrinfo_print_paths( threads );
 	bli_l3_thrinfo_free_paths( threads );
 	exit(1);
-#endif
+	#endif
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_l3_thread_decorator_thread_check
+     (
+       dim_t      n_threads,
+       dim_t      tid,
+       thrcomm_t* gl_comm,
+       rntm_t*    rntm
+     )
+{
+	dim_t n_threads_real = omp_get_num_threads();
+
+	// Check if the number of OpenMP threads created within this parallel
+	// region is different from the number of threads that were requested
+	// of BLIS. This inequality may trigger when, for example, the
+	// following conditions are satisfied:
+	// - an application is executing an OpenMP parallel region in which
+	//   BLIS is invoked,
+	// - BLIS is configured for multithreading via OpenMP,
+	// - OMP_NUM_THREADS = t > 1,
+	// - the number of threads requested of BLIS (regardless of method)
+	//   is p <= t,
+	// - OpenMP nesting is disabled.
+	// In this situation, the application spawns t threads. Each application
+	// thread calls gemm (for example). Each gemm will attempt to spawn p
+	// threads via OpenMP. However, since nesting is disabled, the OpenMP
+	// implementation finds that t >= p threads are already spawned, and
+	// thus it doesn't spawn *any* additional threads for each gemm.
+	if ( n_threads_real != n_threads )
+	{
+		// If the number of threads active in the current region is not
+		// equal to the number requested of BLIS, we then only continue
+		// if the number of threads in the current region is 1. If, for
+		// example, BLIS requested 4 threads but only got 3, then we
+		// abort().
+		if ( tid == 0 )
+		{
+			if ( n_threads_real != 1 )
+			{
+				bli_print_msg( "A different number of threads was "
+				               "created than was requested.",
+				               __FILE__, __LINE__ );
+				bli_abort();
+			}
+
+			//n_threads = 1; // not needed since it has no effect?
+			bli_thrcomm_init( gl_comm, 1 );
+			bli_rntm_set_num_threads_only( 1, rntm );
+			bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
+		}
+
+		// Synchronize all threads and continue.
+		_Pragma( "omp barrier" )
+	}
 }
 
 #endif

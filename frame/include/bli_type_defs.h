@@ -921,12 +921,16 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
+// These headers must be included here (or earlier) because definitions they
+// provide are needed in the pool_t and membrk_t structs.
+#include "bli_pthread.h"
+#include "bli_malloc.h"
+
 // -- Pool block type --
 
 typedef struct
 {
-	void* buf_sys;
-	void* buf_align;
+	void* buf;
 } pblk_t;
 
 
@@ -934,31 +938,33 @@ typedef struct
 
 typedef struct
 {
-	pblk_t* block_ptrs;
-	dim_t   block_ptrs_len;
+	pblk_t*   block_ptrs;
+	dim_t     block_ptrs_len;
 
-	dim_t   top_index;
-	dim_t   num_blocks;
+	dim_t     top_index;
+	dim_t     num_blocks;
 
-	siz_t   block_size;
-	siz_t   align_size;
+	siz_t     block_size;
+	siz_t     align_size;
+
+	malloc_ft malloc_fp;
+	free_ft   free_fp;
+
 } pool_t;
 
 
 // -- Memory broker object type --
-
-// These headers must be included here (or earlier) because definitions they
-// provide are needed in the membrk_t struct.
-#include "bli_pthread.h"
-#include "bli_malloc.h"
 
 typedef struct membrk_s
 {
 	pool_t              pools[3];
 	bli_pthread_mutex_t mutex;
 
+	// These fields are used for general-purpose allocation.
+	siz_t               align_size;
 	malloc_ft           malloc_fp;
 	free_ft             free_fp;
+
 } membrk_t;
 
 

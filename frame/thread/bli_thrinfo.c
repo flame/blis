@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,6 +45,10 @@ thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      )
 {
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_thrinfo_create(): " );
+	#endif
+
     thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
 
     bli_thrinfo_init

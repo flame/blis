@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,6 +41,8 @@
 void bli_l3_cntl_create_if
      (
        opid_t   family,
+       pack_t   schema_a,
+       pack_t   schema_b,
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
@@ -47,13 +50,9 @@ void bli_l3_cntl_create_if
        cntl_t** cntl_use
      );
 
-void bli_l3_cntl_free_if
+void bli_l3_cntl_free
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl_orig,
-       cntl_t* cntl_use,
+       cntl_t*    cntl_use,
        thrinfo_t* thread
      );
 

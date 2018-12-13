@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -88,6 +89,10 @@ void bli_l3_packm
 
 		if ( bli_thread_am_ochief( thread ) )
 		{
+			#ifdef ENABLE_MEM_DEBUG
+			printf( "bli_l3_packm(): acquiring mem pool block\n" );
+			#endif
+
 			// The chief thread acquires a block from the memory broker
 			// and saves the associated mem_t entry to local_mem_s.
 			bli_membrk_acquire_m

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -38,6 +39,8 @@
 void bli_l3_cntl_create_if
      (
        opid_t   family,
+       pack_t   schema_a,
+       pack_t   schema_b,
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
@@ -56,11 +59,11 @@ void bli_l3_cntl_create_if
 	// operation's _front() function. However, in order for this to work,
 	// the level-3 thread entry function (or omp parallel region) must
 	// alias thread-local copies of objects a and b.
-	pack_t schema_a = bli_obj_pack_schema( a );
-	pack_t schema_b = bli_obj_pack_schema( b );
+	//pack_t schema_a = bli_obj_pack_schema( a );
+	//pack_t schema_b = bli_obj_pack_schema( b );
 
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
+	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
+	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
 
 	// If the control tree pointer is NULL, we construct a default
 	// tree as a function of the operation family.
@@ -95,38 +98,28 @@ void bli_l3_cntl_create_if
 	}
 }
 
-void bli_l3_cntl_free_if
+void bli_l3_cntl_free
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl_orig,
-       cntl_t* cntl_use,
+       cntl_t*    cntl_use,
        thrinfo_t* thread
      )
 {
-	// If the control tree pointer is NULL, a default tree would have
-	// been created, so we now must free it.
-	if ( cntl_orig == NULL )
-	{
-		opid_t family = bli_cntl_family( cntl_use );
+	// NOTE: We don't actually need to call separate _cntl_free() functions
+	// for gemm and trsm; it is merely an unnecessary mirroring of behavior
+	// from the _create() side (which must call different functions based
+	// on the family).
 
-		if ( family == BLIS_GEMM ||
-		     family == BLIS_HERK ||
-		     family == BLIS_TRMM )
-		{
-			bli_gemm_cntl_free( cntl_use, thread );
-		}
-		else // if ( family == BLIS_TRSM )
-		{
-			bli_trsm_cntl_free( cntl_use, thread );
-		}
-	}
-	else
+	opid_t family = bli_cntl_family( cntl_use );
+
+	if ( family == BLIS_GEMM ||
+	     family == BLIS_HERK ||
+	     family == BLIS_TRMM )
 	{
-		// If the user provided a control tree, free the copy of it that
-		// was created.
-		bli_cntl_free( cntl_use, thread );
+		bli_gemm_cntl_free( cntl_use, thread );
+	}
+	else // if ( family == BLIS_TRSM )
+	{
+		bli_trsm_cntl_free( cntl_use, thread );
 	}
 }
 

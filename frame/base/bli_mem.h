@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,12 +47,7 @@ static pblk_t* bli_mem_pblk( mem_t* mem )
 
 static void* bli_mem_buffer( mem_t* mem )
 {
-	return bli_pblk_buf_align( bli_mem_pblk( mem ) );
-}
-
-static void* bli_mem_buf_sys( mem_t* mem )
-{
-	return bli_pblk_buf_sys( bli_mem_pblk( mem ) );
+	return bli_pblk_buf( bli_mem_pblk( mem ) );
 }
 
 static packbuf_t bli_mem_buf_type( mem_t* mem )
@@ -96,12 +92,7 @@ static void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 
 static void bli_mem_set_buffer( void* buf, mem_t* mem )
 {
-	bli_pblk_set_buf_align( buf, &(mem->pblk) );
-}
-
-static void bli_mem_set_buf_sys( void* buf, mem_t* mem )
-{
-	bli_pblk_set_buf_sys( buf, &(mem->pblk) );
+	bli_pblk_set_buf( buf, &(mem->pblk) );
 }
 
 static void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
@@ -127,7 +118,6 @@ static void bli_mem_set_size( siz_t size, mem_t* mem )
 static void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
-	bli_mem_set_buf_sys( NULL, mem );
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 	bli_mem_set_membrk( NULL, mem );

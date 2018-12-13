@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -111,6 +112,10 @@ void bli_l3_thrinfo_free
 
 	// Free all children of the current thrinfo_t.
 	bli_l3_thrinfo_free( thrinfo_sub_node );
+
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_l3_thrinfo_free(): " );
+	#endif
 
 	// Free the thrinfo_t struct.
 	bli_free_intl( thread );

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,6 +40,10 @@
 //Constructors and destructors for constructors
 thrcomm_t* bli_thrcomm_create( dim_t n_threads )
 {
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_thrcomm_create(): " );
+	#endif
+
 	thrcomm_t* comm = bli_malloc_intl( sizeof( thrcomm_t ) );
 	bli_thrcomm_init( comm, n_threads );
 	return comm;
@@ -48,6 +53,11 @@ void bli_thrcomm_free( thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	bli_thrcomm_cleanup( comm );
+
+	#ifdef ENABLE_MEM_DEBUG
+	printf( "bli_thrcomm_free(): " );
+	#endif
+
 	bli_free_intl( comm );
 }
 
@@ -90,6 +100,17 @@ void bli_l3_thread_decorator
        cntl_t*     cntl
      )
 {
+	// This is part of a hack to support mixed domain in bli_gemm_front().
+	// Sometimes we need to specify a non-standard schema for A and B, and
+	// we decided to transmit them via the schema field in the obj_t's
+	// rather than pass them in as function parameters. Once the values
+	// have been read, we immediately reset them back to their expected
+	// values for unpacked objects.
+	pack_t schema_a = bli_obj_pack_schema( a );
+	pack_t schema_b = bli_obj_pack_schema( b );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
+	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
+
 	// For sequential execution, we use only one thread.
 	dim_t      n_threads = 1;
 	dim_t      id        = 0;
@@ -108,7 +129,8 @@ void bli_l3_thread_decorator
 	// elsewhere.
 
 	// Create a default control tree for the operation, if needed.
-	bli_l3_cntl_create_if( family, a, b, c, cntl, &cntl_use );
+	bli_l3_cntl_create_if( family, schema_a, schema_b,
+	                       a, b, c, cntl, &cntl_use );
 
 	// Create the root node of the thread's thrinfo_t structure.
 	bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
@@ -126,8 +148,8 @@ void bli_l3_thread_decorator
 	  thread
 	);
 
-	// Free the control tree, if one was created locally.
-	bli_l3_cntl_free_if( a, b, c, cntl, cntl_use, thread );
+	// Free the thread's local control tree.
+	bli_l3_cntl_free( cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
 	bli_l3_thrinfo_free( thread );

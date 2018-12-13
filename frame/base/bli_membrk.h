@@ -56,6 +56,11 @@ static pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
 	return &(membrk->pools[ pool_index ]);
 }
 
+static siz_t bli_membrk_align_size( membrk_t* membrk )
+{
+	return membrk->align_size;
+}
+
 static malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
 {
 	return membrk->malloc_fp;
@@ -67,6 +72,11 @@ static free_ft bli_membrk_free_fp( membrk_t* membrk )
 }
 
 // membrk modification
+
+static void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
+{
+	membrk->align_size = align_size;
+}
 
 static void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
 {
@@ -89,20 +99,6 @@ static void bli_membrk_unlock( membrk_t* membrk )
 {
 	bli_pthread_mutex_unlock( &(membrk->mutex) );
 }
-
-static void* bli_membrk_malloc( size_t size, membrk_t* membrk )
-{
-	// Call the malloc()-style function in membrk.
-	return ( void* )
-	       ( (membrk)->malloc_fp )( size );
-}
-
-static void bli_membrk_free( void* p, membrk_t* membrk )
-{
-	// Call the free()-style function in membrk.
-	((membrk)->free_fp)( p );
-}
-
 
 // -----------------------------------------------------------------------------
 
