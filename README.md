@@ -275,18 +275,20 @@ External Linux packages
 Generally speaking, we **highly recommend** building from source whenever
 possible using the latest `git` clone. (Tarballs of each
 [tagged release](https://github.com/flame/blis/releases) are also available, but
-are not preferred since they are more difficult to upgrade from than a git
-clone.)
+we consider them to be less ideal since they are not as easy to upgrade as
+`git` clones.)
 
-If you prefer (or need) binary packages, please check out the following offerings
-available thanks to generous involvement/contributions from two of our community
-members.
-
- * Red Hat/Fedora. Dave Love provides rpm packages for x86_64, which he maintains
-at [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
- * Ubuntu/Debian. Nico Schlömer provides apt packages for various architectures,
-which he maintains at the PPA
-[launchpad.net](https://launchpad.net/%7Enschloe/+archive/ubuntu/blis-devel).
+That said, some users may prefer binary and/or source packages through their
+Linux distribution. Thanks to generous involvement/contributions from our
+community members, the following BLIS packages are now available:
+- **Debian**. [M. Zhou](https://github.com/cdluminate) has volunteered to
+sponsor and maintain BLIS packages within the Debian Linux distribution. The
+Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
+(Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
+volunteering his time to set up a standalone PPA.)
+- **Red Hat/Fedora**. [Dave Love](https://github.com/loveshack) provides rpm
+packages for x86_64, which he maintains at
+[Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
 
 Discussion
 ----------
