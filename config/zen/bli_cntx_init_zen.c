@@ -117,6 +117,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 
 /*
+<<<<<<< HEAD
 	Multi Instance performance improvement of DGEMM when binded to a CCX
 	In Multi instance each thread runs a sequential DGEMM.
 
