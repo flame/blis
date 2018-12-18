@@ -111,15 +111,36 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
+
+/*
+	Multi Instance performance degradation on different cores
+	a) 	CPU freq 2.6 Ghz
+		DDR4 2400
+		Multi instance mode
+                mc = 240, kc = 512, and nc = 2040
+	
+	b)	CPU freq 2.4Ghz
+		DDR4 2400
+		Multi Instance mode
+		either
+		mc = 240, kc = 512 and nc = 2040 
+			    (or)
+		mc = 390, kc = 512 and nc = 4080
+
+	c)  	Higher frequency(3.1Ghz), single instance mode choose default value
+		mc = 510, kc = 1024 and nc = 4080
+
+*/
+
 #ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
 	// Zen optmized level 3 cache block sizes
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   510,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  1024,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  512,   256,   256 );
 #else
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 #endif
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
