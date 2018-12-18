@@ -1303,6 +1303,9 @@ static bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 {
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
@@ -1314,6 +1317,9 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 
 void bli_thread_set_num_threads( dim_t n_threads )
 {
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
@@ -1327,6 +1333,9 @@ void bli_thread_set_num_threads( dim_t n_threads )
 
 void bli_thread_init_rntm( rntm_t* rntm )
 {
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
