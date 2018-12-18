@@ -1,8 +1,5 @@
 # Contents
 
-## Choosing OpenMP vs pthreads
-## Specifying thread-to-core affinity
-
 * **[Contents](Multithreading.md#contents)**
 * **[Introduction](Multithreading.md#introduction)**
 * **[Enabling multithreading](Multithreading.md#enabling-multithreading)**
