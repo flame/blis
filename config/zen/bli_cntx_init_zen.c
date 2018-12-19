@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -138,27 +139,27 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	// Zen optmized level 3 cache block sizes
 	/************************************************************************
 		Below block sizes of DGEMM, works better in a multi instance mode,
-		for clock frequency of 2.6Ghz and DDR4 clock frequency of 2400Mhz
+		for clock frequency of 2.2GHz and DDR4 clock frequency of 2400MHz
 	************************************************************************/
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  240,   144,    72 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  512,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
 
-        /***********************************************************************************
-                Below block sizes of DGEMM, gives better performance in a multi instance mode,
-                for clock frequency of 2.2Ghz and DDR4 clock frequency of 2400Mhz
-        **************************************************************************************/
-        //bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  390,   144,    72 );
-        //bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  512,   256,   256 );
-        //bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+    /***********************************************************************************
+        Below block sizes of DGEMM, gives better performance in a multi instance mode,
+        for clock frequency of 2.6GHz and DDR4 clock frequency of 2400MHz
+    **************************************************************************************/
+    //bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  390,   144,    72 );
+    //bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  512,   256,   256 );
+    //bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 
-        /******************************************************************************
-                BLIS on single instance mode, gives better perfomance with 
-		below mentioned default block size values
-        ********************************************************************************/
-        // bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  510,   144,    72 );
-        //bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  1024,   256,   256 );
-        //bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+    /******************************************************************************
+        BLIS on single instance mode, gives better perfomance with 
+        below mentioned default block size values
+    ********************************************************************************/
+    //bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  510,   144,    72 );
+    //bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  1024,   256,   256 );
+    //bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 
 #else
 
