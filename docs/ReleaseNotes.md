@@ -1,9 +1,10 @@
 # Release Notes
 
-*Note: For some releases, individual credits are shown in parentheses.*
+*Note: For some releases, credit for individuals' contributions are shown in parentheses.*
 
 ## Contents
 
+* [Changes in 0.5.1](ReleaseNotes.md#changes-in-051)
 * [Changes in 0.5.0](ReleaseNotes.md#changes-in-050)
 * [Changes in 0.4.1](ReleaseNotes.md#changes-in-041)
 * [Changes in 0.4.0](ReleaseNotes.md#changes-in-040)
@@ -31,6 +32,40 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.5.1
+December 18, 2018
+
+Improvements present in 0.5.1:
+
+Framework:
+- Added mixed-precision support to the 1m method implementation.
+- Track internal scalar datatypes in the `obj_t` info bitfield. This allows slightly better handling of scalars during mixed-datatype `gemm` computation.
+- Fixed a bug that allowed execution of 1m with mixed-precision `gemm`, despite such usage not yet being officially supported. (Devangi Parikh)
+- Added missing internal calls to `bli_init_once()` in `bli_thread_set_num_threads()` and `bli_thread_set_ways()`. (Ali Emre Gülcü)
+
+Kernels:
+- Redefined `packm` kernels to handle edge cases and zero-filling, and updated their APIs accordingly. This was needed in order to fully support the use of non-default/non-reference packm kernels. (Devin Matthews)
+
+Build system:
+- Disallow explicit requests to use 64-bit integers in the BLAS API while simultaneously using 32-bit integers in the BLIS API. (Jeff Hammond, Devin Matthews)
+- Fixed an msys2/Windows build failure. (Isuru Fernando, Costas Yamin)
+- Fixed a MinGW build failure. (Isuru Fernando)
+- Disabled `arm32`, `arm64` configuration families since we don't yet have logic to choose the correct context at runtime.
+
+Testing:
+- Make sure the testsuite fails for `NaN`, `Inf` in input operands. (Devin Matthews)
+- Added `hemm` driver to `test/3m4m`.
+- Minor updates to `test/mixeddt` drivers, matlab scripts.
+- Added additional matlab plotting scripts to `test/3m4m`.
+
+Documentation:
+- Updated `docs/Multithreading.md` to include discussion of setting affinity via OpenMP.
+- Updated `docs/Testsuite.md` to include discussion of mixed-datatype settings.
+- Updated `docs/MixedDatatypes.md` to include a brief section on running the testsuite to exercise mixed-datatype functionality, and other minor updates.
+- Fixed broken links in `docs/KernelsHowTo.md`. (Richard Goldschmidt)
+- Spelling fixes in FAQ. (Rhys Ulerich)
+- Updated 3-clause license comment blocks to refer generically to copyright holders rather than just the original copyright holder, UT-Austin.
 
 ## Changes in 0.5.0
 October 25, 2018

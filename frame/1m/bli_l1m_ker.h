@@ -57,7 +57,6 @@ INSERT_GENTPROT_BASIC0( packm_12xk_ker_name )
 INSERT_GENTPROT_BASIC0( packm_14xk_ker_name )
 INSERT_GENTPROT_BASIC0( packm_16xk_ker_name )
 INSERT_GENTPROT_BASIC0( packm_24xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_30xk_ker_name )
 
 
 // native unpackm kernels
@@ -88,7 +87,6 @@ INSERT_GENTPROT_BASIC0( packm_10xk_3mis_ker_name )
 INSERT_GENTPROT_BASIC0( packm_12xk_3mis_ker_name )
 INSERT_GENTPROT_BASIC0( packm_14xk_3mis_ker_name )
 INSERT_GENTPROT_BASIC0( packm_16xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_30xk_3mis_ker_name )
 
 
 // 4mi packm kernels
@@ -104,7 +102,6 @@ INSERT_GENTPROT_BASIC0( packm_10xk_4mi_ker_name )
 INSERT_GENTPROT_BASIC0( packm_12xk_4mi_ker_name )
 INSERT_GENTPROT_BASIC0( packm_14xk_4mi_ker_name )
 INSERT_GENTPROT_BASIC0( packm_16xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_30xk_4mi_ker_name )
 
 
 // rih packm kernels
@@ -120,7 +117,6 @@ INSERT_GENTPROT_BASIC0( packm_10xk_rih_ker_name )
 INSERT_GENTPROT_BASIC0( packm_12xk_rih_ker_name )
 INSERT_GENTPROT_BASIC0( packm_14xk_rih_ker_name )
 INSERT_GENTPROT_BASIC0( packm_16xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_30xk_rih_ker_name )
 
 
 // 1e/1r packm kernels
@@ -136,5 +132,4 @@ INSERT_GENTPROT_BASIC0( packm_10xk_1er_ker_name )
 INSERT_GENTPROT_BASIC0( packm_12xk_1er_ker_name )
 INSERT_GENTPROT_BASIC0( packm_14xk_1er_ker_name )
 INSERT_GENTPROT_BASIC0( packm_16xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_30xk_1er_ker_name )
 

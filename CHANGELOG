@@ -1,10 +1,662 @@
-commit be7c57819cfd48adb175d9a480cc9f37928645c1 (HEAD -> master, tag: 0.5.0)
+commit e0408c3ca3d53bc8e6fedac46ea42c86e06c922d (HEAD -> master, tag: 0.5.1)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 14:56:16 2018 -0600
+
+    Version file update (0.5.1)
+
+commit 3ab231afc9f69d14493908c53c85a84c5fba58aa (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 14:53:37 2018 -0600
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated ReleaseNotes.md in preparation for next version.
+
+commit d1aa87164e1e82347d62aa98793963c5265ef7e7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 14:52:40 2018 -0600
+
+    README.md update (External packages section).
+    
+    Details:
+    - Updated External packages section in anticipation of introducing BLIS
+      into Debian package universe. Thanks to M. Zhou for sponsoring BLIS in
+      Debian.
+
+commit d2b2a0819a2fccad9165bc48c0e172d79a87542c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 17 19:26:35 2018 -0600
+
+    Removed stray sections from Multithreading.md.
+    
+    Details:
+    - Removed unintended section headers from before table of contents.
+
+commit 93d56319f2953cf0e9df1ff2cda90b8e41351b2c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 17 19:17:30 2018 -0600
+
+    Added missing bli_init_once() in bli_thread API.
+    
+    Details:
+    - Fixed an issue with specifying threading globally at runtime via
+      bli_thread_set_num_threads() (the automatic way) or via
+      bli_thread_set_ways() (the manual way), with bli_thread_init_rntm()
+      also affected. These functions were not calling bli_init_once() prior
+      to acting, and therefore their effects on the global rntm_t structure
+      were being wiped out by the eventual call to bli_init_once(), by some
+      other BLIS function. Thanks to Ali Emre Gülcü for reporting the
+      behavior associated with this bug.
+    - Added additional content to docs/Multithreading.md covering topics of
+      choosing between OpenMP and pthreads, and specifying affinity via
+      OpenMP.
+    - CREDITS file update.
+
+commit f808d829c58dc4194cc3ebc3825fbdde12cd3f93
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 12 15:22:59 2018 -0600
+
+    Handle edge cases, zero-filling in packm kernels.
+    
+    Details:
+    - Updated the API and semantics of packm kernels such that they must now
+      handle edge cases, meaning that a c-by-k packm kernel must be able to
+      pack edge cases that are fewer than c rows/columns and be able to
+      zero-fill the remaining elements. They must also be able to zero-fill
+      the equivalent region when copying fewer than k columns/rows (which is
+      needed by trsm). The new packm kernel API is generally:
+    
+        void packm_kernel
+             (
+               conj_t           conja,
+               dim_t            cdim,
+               dim_t            n,
+               dim_t            n_max,
+               ctype*  restrict kappa,
+               ctype*  restrict a, inc_t inca, inc_t lda,
+               ctype*  restrict p,             inc_t ldp,
+               cntx_t* restrict cntx
+             );
+    
+      where cdim and n are the dimensions (short and long, respectively) of
+      the submatrix being copied from the source matrix A, and n_max is the
+      "full" long dimension (corresponding to the k dimension in gemm) of
+      the micropanel. The "full" short dimension (corresponding to the
+      register blocksize MR or NR) is not part of the API because it is
+      known intrinsically by the packm kernel implementation. Thanks to
+      Devin Matthews for prompting us to make this change (#282).
+    - Updated all reference packm kernels in ref_kernels/1m according to
+      above changes, as well as all optimized packm kernels (which only
+      consisted of those for knl).
+    - Bumped the major soname version number in 'so_version' to 2. At first
+      I was considering leaving it unchanged, but I couldn't escape the
+      reality that the packm kernel API is much closer to an expert API
+      than it is some obscure helper function interface within the framework
+      that nobody would ever notice.
+    - Removed reference packm kernels for mr/nr = 30. The only sub-config
+      that would have been using those kernels is knc, which is likely no
+      longer being used by very many people (if any). (This also mostly
+      offset the larger object code footprint incurred by moving the edge-
+      case handling into the individual packm kernels.)
+    - Fixed an obscure race condition for 3mh and 4mh induced methods in
+      which those implementations were modifying the contexts stored in the
+      gks rather than a local copy.
+    - Fixed a minor bug in the testsuite that prevented non-1m-based induced
+      method implementations of trsm from executing.
+
+commit c534da62c0015f91391983da5376c9e091378010
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 5 15:51:05 2018 -0600
+
+    Disabled ARM configuration families in registry.
+    
+    Details:
+    - Disabled (commented out) the arm32 and arm64 configuration families
+      in the config_registry file. Having a configuration family registered
+      only makes sense if BLIS is currently outfitted with runtime hardware
+      detection logic to choose the appropriate sub-configuration. That
+      logic is currently missing for ARM architectures, and thus having the
+      ARM configuration families in the configuration registry only serves
+      to confuse people. Thanks to Devangi Parikh for suggesting this
+      change.
+
+commit 6885051a164628904fad0d8a3b39c82f9a7b193c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 5 14:45:39 2018 -0600
+
+    Generalizations/cleanup to mixeddt matlab scripts.
+    
+    Details:
+    - Parameterized, reorganized, and added comments to matlab scripts in
+      test/mixeddt/matlab.
+    - Reordered some lines of code and added comments to plot_l3_perf.m in
+      test/3m4m/matlab.
+
+commit cbdb0566bf3201a495bbdcb8cb50342fa0098649
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 5 20:06:32 2018 +0000
+
+    Updates to 3m4m, mixeddt test driver files.
+    
+    Details:
+    - Updated 3m4m and mixeddt Makefiles and runme.sh scripts, mostly to
+      port recent changes to the former to the latter.
+    - Disabled (for now) code in 3m4m/test_*.c files that disables all
+      induced methods except for the one that is requested from the
+      Makefile via the IND macro. This is done because usually, we want to
+      test whatever method is enabled automatically for complex datatypes.
+      (That is, when native complex microkernels are missing, we usually
+      want to test performance of 1m.)
+
+commit 0645f239fbdf37ee9d2096ee3bb0e76b3302cfff (origin/dev, dev)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 4 14:31:06 2018 -0600
+
+    Remove UT-Austin from copyright headers' clause 3.
+    
+    Details:
+    - Removed explicit reference to The University of Texas at Austin in the
+      third clause of the license comment blocks of all relevant files and
+      replaced it with a more all-encompassing "copyright holder(s)".
+    - Removed duplicate words ("derived") from a few kernels' license
+      comment blocks.
+    - Homogenized license comment block in kernels/zen/3/bli_gemm_small.c
+      with format of all other comment blocks.
+
+commit 9b688a2d69dd420f4d2582827c5ac87e422cd3bc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 4 13:30:25 2018 -0600
+
+    Refer to color mm algorithm in Multithreading.md.
+
+commit 22384fd2b749aa8cfdfad1084ce5e7dbd4ad2d64
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 4 13:09:04 2018 -0600
+
+    Minor updates to test_gemm.c in test/mixeddt.
+
+commit 2ba3b1780cbca58e43a3948d67bd07e637036125
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 3 19:40:39 2018 -0600
+
+    Removed symbols from libblis-symbols.def.
+    
+    Details:
+    - Removed bli_gemm_md_front() and bli_gemm_md_zgemm() symbols from
+      build/libblis-symbols.def, which will hopefully appease AppVeyor.
+
+commit dcb38c4e59c3395c258799e69bfe2104c578c528
+Merge: dc184095 375eb30b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 3 18:06:19 2018 -0600
+
+    Merge branch 'dev'
+
+commit 375eb30b0a63ac06a363a5f75f283584258db48b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Dec 3 17:49:52 2018 -0600
+
+    Added mixed-precision support to 1m method.
+    
+    Details:
+    - Lifted the constraint that 1m only be used when all operands' storage
+      datatypes (along with the computation datatype) are equal. Now, 1m may
+      be used as long as all operands are stored in the complex domain. This
+      change largely consisted of adding the ability to pack to 1e and 1r
+      formats from one precision to another. It also required adding logic
+      for handling complex values of alpha to bli_packm_blk_var1_md()
+      (similar to the logic in bli_packm_blk_var1()).
+    - Fixed a bug in several virtual microkernels (bli_gemm_md_c2r_ref.c,
+      bli_gemm1m_ref.c, and bli_gemmtrsm1m_ref.c) that resulted in the wrong
+      ukernel output preference field being read. Previously, the preference
+      for the native complex ukernel was being read instead of the pref for
+      the native real domain ukernel. This bug would not manifest if the
+      preference for the native complex ukernel happened to be equal to that
+      of the native real ukernel.
+    - Added support for testing mixed-precision 1m execution via the gemm
+      module of the testsuite.
+    - Tweaked/simplified bli_gemm_front() and bli_gemm_md.c so that pack
+      schemas are always read from the context, rather than trying to
+      sometimes embed them directly to the A and B objects. (They are still
+      embedded, but now uniformly only after reading the schemas from the
+      context.)
+    - Redefined cpp macro bli_l3_ind_recast_1m_params() as a static function
+      and renamed to bli_gemm_ind_recast_1m_params() (since gemm is the only
+      consumer).
+    - Added 1m optimization logic (via bli_gemm_ind_recast_1m_params()) to
+      bli_gemm_ker_var2_md().
+    - Added explicit handling for beta == 1 and beta == 0 in the reference
+      gemm1m virtual microkernel in ref_kernels/ind/bli_gemm1m_ref.c.
+    - Rewrote various level-0 macro defs, including axpyris, axpbyris,
+      scal2ris, and xpbyris (and their conjugating counterparts) to
+      explicitly support three operand types and updated invocations to
+      xpbyris in bli_gemmtrsm1m_ref.c.
+    - Query and use the storage datatype of the packed object instead of the
+      storage datatype of the source object in bli_packm_blk_var1().
+    - Relocated and renamed frame/ind/misc/bli_l3_ind_opt.h to
+      frame/3/gemm/ind/bli_gemm_ind_opt.h.
+    - Various whitespace/comment updates.
+
+commit dc18409551f341125169fe8d4d43ac45e81bdf28
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 28 11:58:40 2018 -0600
+
+    CREDITS file update.
+
+commit ee4d2712963816f84d7e3fdd39d93424e1aaf63d
+Merge: e81c4b56 3d7e8bc3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 28 11:52:57 2018 -0600
+
+    Merge pull request #287 from SuperFluffy/fix_configuration_links
+    
+    Fix configuration links
+
+commit 3d7e8bc3b8e77693152138e75676f71573e5e6cd
+Author: Richard Janis Goldschmidt <janis.beckert@gmail.com>
+Date:   Wed Nov 28 15:56:37 2018 +0100
+
+    Fix configuration links
+
+commit 6a4885f8be9ecd81423ebf2eb6da75d7981c979b
+Merge: 1d8aae22 e81c4b56
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 27 13:22:59 2018 -0600
+
+    Merge branch 'master' into dev
+
+commit e81c4b56660b25a39f8fdc09fbe07459c5bd8e8e
+Merge: 757043ea cfbdb58d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 21 17:00:49 2018 -0600
+
+    Merge pull request #285 from isuruf/pthread
+    
+    Move LDFLAGS to the end
+
+commit cfbdb58de2e44f2e3a3d8b14fceece7aef4b3006
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 14:23:39 2018 -0600
+
+    Move LDFLAGS to the end
+    
+    Otherwise the linker will drop flags like -lpthread
+
+commit 757043eae8630c0a76e9bb04f2cb0bd72439a86a
+Merge: e769bf46 7af8fa01
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 21 13:07:26 2018 -0600
+
+    Merge pull request #283 from isuruf/patch-3
+    
+    Fix MinGW and Cygwin build failures
+
+commit 7af8fa01373b7bb30fa3b1fd110fd201c87ea225
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 02:10:05 2018 -0600
+
+    Fix blis dll path
+
+commit 2acd8dcd23805203a6821358c5e3e09d521fecdf
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 02:02:18 2018 -0600
+
+    Fix install path of dll.a
+
+commit b7b0ad22b151e89e2a6c7782cf4d8d47b4e60734
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:54:44 2018 -0600
+
+    Test mingw
+
+commit bafe521ed0012b7b8814404b78a6c576d8386370
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:54:36 2018 -0600
+
+    Fixes for mingw
+
+commit be831879bd03edcddff8a345161f749ad92215af
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:39:32 2018 -0600
+
+    test gcc shared
+
+commit f6b924648c79c4b1c3d3c7fbf85372680aff8362
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:39:19 2018 -0600
+
+    Don't use .def for gcc
+
+commit ce6e4eae6d5e977e6f699acc9cf239be8ac53771
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:34:56 2018 -0600
+
+    test no threading
+
+commit c9169b4685bfe81bc562cf9128b35a6a9884799b
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:17:36 2018 -0600
+
+    Add mingw64 path
+
+commit 0f753090eaf4264b743a49ce15de97514bcbe112
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:14:52 2018 -0600
+
+    Fix PATH
+
+commit d424470b1f2fa8717fa54c0245b21341504665f6
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 01:04:26 2018 -0600
+
+    Check openmp and pthreads threading
+
+commit c73e7601e58239e2dedec6c9f1b752e949254a42
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:50:33 2018 -0600
+
+    Revert "enable rdp"
+    
+    This reverts commit 368274bcbd0c9232521d14fa28304f35ced0e6d7.
+
+commit 6209b2e6060b89e65f3405c31333af8952dd63c0
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:50:22 2018 -0600
+
+    Remove conda
+
+commit 0b1b344447b8a2fcd635a48f0ce7ce89b2107dc4
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:42:39 2018 -0600
+
+    Fix make name
+
+commit 7a9838983ba8dd32ac9f87712255721542ff561f
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:35:27 2018 -0600
+
+    Use m2w64-make
+
+commit 4c1dedd6a90087807f16353a5d0bcaaade35a7a5
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:28:20 2018 -0600
+
+    No activate on gcc
+
+commit 368274bcbd0c9232521d14fa28304f35ced0e6d7
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Tue Nov 20 23:40:26 2018 -0600
+
+    enable rdp
+
+commit 707a5e7f9b07f554e1e9289dd0ce3b7dc4fded6e
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Tue Nov 20 23:39:31 2018 -0600
+
+    No conda for mingw build
+
+commit 65b0565c0ad9162d4474bd84eabde491fa971538
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Tue Nov 20 23:19:38 2018 -0600
+
+    Check MinGW-w64
+
+commit 9ddffba5847080e0d77d9e6059d05dc4b1d89ba5
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Nov 21 00:23:34 2018 -0600
+
+    Fix MinGW build failure
+    
+    Fixes https://github.com/flame/blis/issues/278
+
+commit 1d8aae220bc52ce8e3a8afaa64b57e5d83480bdc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 20 18:42:07 2018 -0600
+
+    Track internal scalar datatypes.
+    
+    Details:
+    - Added a num_t datatype bitfield to the obj_t in the form of a new
+      info2 field in the obj_t. This change was made primarily so that in
+      the case of mixed-datatype gemm, the alpha scalar would not need to
+      be cast to the storage datatype of B (or A) before then being cast to
+      the computation datatype just before the macrokernel is called. This
+      double-casting regime could result in loss of precision if the storage
+      datatype of B (or A) is less than the computation precision. In
+      practice, it was likely not going to be a big deal since most usage of
+      alpha is for -1.0, 0.0, and 1.0 (or integer multiples thereof), which
+      can all be represented exactly in single or double precision.
+    - The type of objbits_t was changed to uint32_t, so the new format
+      potentially takes up the same space as the previous obj_t definition,
+      assuming no padding inserted by the compiler. Shrinking info to 32
+      bits and spilling over into a second field was chosen over using the
+      high 32 bits of a single 64-bit objbits_t info field because many of
+      the bitwise operations are performed with enums such as num_t, dom_t,
+      and prec_t, which may take on the type of 32-bit ints. It's easier to
+      just keep all of those bitwise operations in 32 bits than perform a
+      million typecasts throughout bli_type_defs.h and bli_obj_macro_defs.h
+      to ensure that the integers are treated as 64-bit for the purposes of
+      the ANDs, ORs, and bitshifts.
+    - Many comment updates.
+    - Thanks to Devin Matthews and Devangi Parikh for their feedback and
+      involvement during this commit cycle.
+
+commit e769bf46b0931d68031af212110484ec98e16908
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 20 16:16:53 2018 -0600
+
+    Tweak testsuite to issue FAIL for Nan, Inf (#279).
+    
+    Details:
+    - Adjusted the definition for libblis_test_get_string_for_result() in
+      testsuite/src/test_libblis.c so that the "FAIL" string is returned if
+      the computed residual contains either NaN or Inf. Previously, a
+      residual containing NaN would result in the selection of the "PASS"
+      string. Thanks to Devin Matthews for reporting this issue (#279).
+    - Expounded on comment for the macro definitions of bli_isnan() and
+      bli_isinf() in bli_misc_macro_defs.h to make it more obvious why they
+      must remain macros.
+
+commit 279deae18fb8b8106161863b46fcb38232314de4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 16 11:34:19 2018 -0600
+
+    Added 4x5 matlab plotting scripts to test/3m4m.
+    
+    Details:
+    - Added a new directory, test/3m4m/matlab, containing matlab scripts for
+      plotting 4x5 panels of performance graphs (using the subplot()
+      function) for gemm, hemm, herk, trmm, and trsm across all four
+      floating-point datatypes. I expect to further refine these scripts as
+      time goes on, but their current state constitutes a good start.
+
+commit 7b02c726650336c12286c8ba166d1d0fdf7601a8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 14 13:49:55 2018 -0600
+
+    CREDITS file update.
+
+commit 84dd298a27033945fa2d3b6e5dce1fe625cd2a0a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 14 13:47:45 2018 -0600
+
+    Patch to fix msys2/Windows build failure (#277).
+    
+    Details:
+    - Expanded cpp guard in frame/include/bli_x86_asm_macros.h to also check
+      __MINGW32__ in addition to _WIN32, __clang__, and __MIC__. Thanks to
+      Isuru Fernando for suggesting this fix, and also to Costas Yamin for
+      originally reporting the issue (#277).
+
+commit 7b5ba7319b3901ad0e6c6b4fa3c1d96b579efbe9
+Merge: ce719f81 52392932
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 14 12:32:01 2018 -0600
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit 52392932dc1ea3c16220cc4e6978efcb2f5f0616
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 13 22:23:38 2018 +0000
+
+    Minor fixes to test/3m4m drivers.
+    
+    Details:
+    - Cleanups to Makefile to allow all test drivers to be built for
+      OpenBLAS and MKL in addition to BLIS.
+    - Fixed copy-paste typos in test_hemm in calls to ssymm_() and dsymm_().
+    - Fixed incorrect types for betap in BLAS cpp macro branch of
+      test_herk.c.
+
+commit 4f12e36a0d0e6df146314b4e50e36c5e7a1af3d3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 13 14:23:12 2018 -0600
+
+    Fixed number of columns in first output line.
+    
+    Details:
+    - In previous commit, forgot to remove output column corresponding to
+      the k dimension.
+
+commit a2e0cdd7debf8109198536d55af05d5631072fb2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 13 14:15:11 2018 -0600
+
+    Added hemm test driver to test/3m4m.
+    
+    Details:
+    - Added a new test_hemm.c test driver to test/3m4m, which was modeled
+      after the driver by the similar name in test. Also updated Makefile
+      so that blis-nat-[sm]t would trigger builds for the new driver.
+
+commit 0f9b53e84b48d8d73a56cc9889eae3595ca58a78
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 13 13:03:15 2018 -0600
+
+    Fixed a bug in high-level mixeddt conditional.
+    
+    Details:
+    - Fixed a bug in frame/3/bli_l3_oapi.c in the conditional that divides
+      use of induced method (1m) execution from native execution. The former
+      was intended to only be used in cases where all storage datatypes are
+      complex and the datatype of C is equal to the computation datatype.
+      (If mixed datatypes are detected, native execution would be used.)
+      However, the code in bli_gemm() was erroneously checking the execution
+      datatype instead of the computation datatype, which at that point is
+      guaranteed to be equal to the storage datatype even if the computation
+      datatype contains a different value. Thanks to Devangi Parikh for
+      helping in isolating this bug.
+
+commit ce719f816d1237f5277527d7f61123e77180be54
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 10 14:48:43 2018 -0600
+
+    More edits to mixeddt matlab scripts.
+    
+    Details:
+    - Renamed scripts in test/mixeddt/matlab:
+        plot_case_all.m -> plot_dom_all.m
+        plot_case_md.m  -> plot_dom_case.m
+        plot_all_md.m   -> plot_dt_all.m
+    - Added plot_dt_select.m in order to plot select graphs for the main
+      body of the mixeddt paper, and added additional related legend
+      handling in plot_gemm_perf.m.
+    - Added test/mixeddt/matlab/output and a .gitkeep file within in order
+      to force git to recognize the directory.
+
+commit bf99e7c14baf45725b698d06ad043b531e3a2763
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 8 18:47:17 2018 -0600
+
+    Minor updates to test/mixeddt driver.
+    
+    Details:
+    - Cleaned up test/mixeddt Makefile in preparation for gathering new
+      data for mixeddt paper, including renaming implementations to
+      "internal" and "ad-hoc" to match the terminology to be used in the
+      paper.
+    - Added new matlab scripts for generating 8 figures, each covering all
+      mixed-precision cases for each mixed-domain case.
+    - Updated the runme.sh script according to changes to Makefile.
+    - Fixed a minor bug in test_gemm.c that may have given incorrect
+      performance in complex, homogeneous storage datatype cases where
+      the computation precision was equal to the storage precisions.
+      (Examples: zzzd, cccs.)
+
+commit 4bbb454bf3c361af9e97bfa394a73d610cd9002a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 3 19:11:01 2018 -0500
+
+    Testsuite docs update for mixed-datatype gemm.
+    
+    Details:
+    - Updated docs/Testsuite.md to include mention of the new mixed-domain
+      and mixed-precision settings, including descriptions.
+    - Updated docs/MixedDatatypes.md to include a brief section on running
+      the testsuite to exercise mixed-datatype functionality, which mostly
+      amounts to a link to the Testsuite.md document.
+    - Minor verbiage change to testsuite output to correct a misleading
+      label associated with the value returned by the query function
+      bli_info_get_simd_num_registers(). (The function does not return the
+      number of SIMD registers present in the hardware, but rather a maximum
+      assumed value for the purposes of allocating temporary microtile
+      workspace on the function stack.)
+
+commit 16401ae922b1285437cf5f6867b2764650a95fb0
+Merge: f19c33af 2d403a15
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 3 19:09:43 2018 -0500
+
+    Merge branch 'dev'
+
+commit 2d403a1535380a2ebe2ae2c0f5ac54ba7564fbeb
+Merge: e90e7f30 4a12979f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 1 20:18:53 2018 -0500
+
+    Merge pull request #275 from RhysU/patch-1
+    
+    Spelling in FAQ
+
+commit 4a12979f65697ed79ba290efd59f4b994ac9429b
+Author: Rhys Ulerich <rhys.ulerich@gmail.com>
+Date:   Thu Nov 1 20:20:59 2018 -0400
+
+    Spelling in FAQ
+
+commit f19c33af4cbe6f5705b96fbf2b8799c3c2bd75c3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 26 17:07:15 2018 -0500
+
+    Disallow 64b BLAS integers + 32b BLIS integers.
+    
+    Details:
+    - Print an error message from configure if the user attempts to
+      explicitly configure BLIS for simultaneous use of 64-bit integers in
+      the BLAS API with 32-bit integers in the BLIS API.
+    - Added cpp macro conditional to bli_type_defs.h to mandate that BLIS
+      integers be 64 bits if the BLAS integers are 64 bits. This and the
+      above item take care of issue #274. Thanks to Devin Matthews and
+      Jeff Hammond for suggesting these safeguards.
+    - Slight reorganization and relabeling (for clarity) of BLAS/CBLAS
+      sections and BLIS integer size line of the testsuite configuration
+      output.
+    - Very minor edits to docs/MixedDatatypes.md.
+
+commit e90e7f309b3f2760a01e8e09a29bf702754fa2b5 (origin/win-pthreads, win-pthreads)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 25 14:09:43 2018 -0500
+
+    CHANGELOG update (0.5.0)
+
+commit be7c57819cfd48adb175d9a480cc9f37928645c1 (tag: 0.5.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 25 14:09:40 2018 -0500
 
     Version file update (0.5.0)
 
-commit 75da7f2a208ad7d26ed9c6d3e10d08b2a1caf9d6 (origin/master, origin/HEAD)
+commit 75da7f2a208ad7d26ed9c6d3e10d08b2a1caf9d6
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 25 14:02:41 2018 -0500
 
@@ -32,7 +684,7 @@ Date:   Thu Oct 25 13:20:25 2018 -0500
     - Updated docs/BuildSystem.md to document the new make targets
       'testblis-salt' and 'checkblis-salt'.
 
-commit 0e27963a6770e6b64f3299ad0613d5df45d8b6ae (origin/win-pthreads, origin/dev, origin/amd, win-pthreads, dev, amd)
+commit 0e27963a6770e6b64f3299ad0613d5df45d8b6ae
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Oct 24 12:16:19 2018 -0500
 
