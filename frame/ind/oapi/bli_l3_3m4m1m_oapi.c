@@ -94,9 +94,11 @@ void PASTEMAC(opname,imeth) \
 	cntx_t cntx_l; \
 	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
 \
-	/* Initialize a local runtime with global settings if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -185,9 +187,11 @@ void PASTEMAC(opname,imeth) \
 	cntx_t cntx_l; \
 	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
 \
-	/* Initialize a local runtime with global settings if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -274,9 +278,11 @@ void PASTEMAC(opname,imeth) \
 	cntx_t cntx_l; \
 	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
 \
-	/* Initialize a local runtime with global settings if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -348,9 +354,11 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime with global settings if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
 \
 	/* Some induced methods execute in multiple "stages". */ \
 	for ( i = 0; i < nstage; ++i ) \
@@ -408,9 +416,11 @@ void PASTEMAC(opname,imeth) \
 	   _cntx_init() function. */ \
 	cntx = bli_gks_query_ind_cntx( ind, dt ); \
 \
-	/* Initialize a local runtime with global settings if necessary. */ \
+	/* Initialize a local runtime with global settings if necessary. Note
+	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); } \
+	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
 \
 	{ \
 		/* NOTE: trsm cannot be implemented via any induced method that
