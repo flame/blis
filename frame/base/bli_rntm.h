@@ -49,7 +49,7 @@ typedef struct rntm_s
 */
 
 //
-// -- rntm_t query -------------------------------------------------------------
+// -- rntm_t query (public API) ------------------------------------------------
 //
 
 static dim_t bli_rntm_num_threads( rntm_t* rntm )
@@ -85,6 +85,20 @@ static dim_t bli_rntm_ir_ways( rntm_t* rntm )
 static dim_t bli_rntm_pr_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KR, rntm );
+}
+
+//
+// -- rntm_t query (internal use only) -----------------------------------------
+//
+
+static pool_t* bli_rntm_sba_pool( rntm_t* rntm )
+{
+	return rntm->sba_pool;
+}
+
+static membrk_t* bli_rntm_membrk( rntm_t* rntm )
+{
+	return rntm->membrk;
 }
 
 static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
@@ -151,6 +165,16 @@ static void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 	bli_rntm_set_pr_ways_only(  1, rntm );
 }
 
+static void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
+{
+	rntm->sba_pool = sba_pool;
+}
+
+static void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
+{
+	rntm->membrk = membrk;
+}
+
 static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
 	bli_rntm_set_num_threads_only( -1, rntm );
@@ -158,6 +182,10 @@ static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 static void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
 	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
+}
+static void bli_rntm_clear_sba_pool( rntm_t* rntm )
+{
+	bli_rntm_set_sba_pool( NULL, rntm );
 }
 
 //
@@ -196,12 +224,15 @@ static void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir,
 // will be in a good state upon return.
 
 #define BLIS_RNTM_INITIALIZER { .num_threads = -1, \
-                                .thrloop = { -1, -1, -1, -1, -1, -1 } } \
+                                .thrloop = { -1, -1, -1, -1, -1, -1 }, \
+                                .sba_pool = NULL } \
 
 static void bli_rntm_init( rntm_t* rntm )
 {
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
+
+	bli_rntm_clear_sba_pool( rntm );
 }
 
 // -----------------------------------------------------------------------------

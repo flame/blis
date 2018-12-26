@@ -84,7 +84,7 @@ int main( int argc, char** argv )
 	libblis_test_thread_decorator( &params, &ops );
 
 	// Finalize libblis.
-	//bli_finalize();
+	bli_finalize();
 
 	// Return peacefully.
 	return 0;
@@ -126,13 +126,25 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	bli_pthread_t* pthread = bli_malloc_intl( sizeof( bli_pthread_t ) * nt );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	thread_data_t* tdata   = bli_malloc_intl( sizeof( thread_data_t ) * nt );
 
 	// Allocate a mutex for the threads to share.
 	//bli_pthread_mutex_t* mutex   = bli_malloc_intl( sizeof( bli_pthread_mutex_t ) );
 
 	// Allocate a barrier for the threads to share.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	bli_pthread_barrier_t* barrier = bli_malloc_intl( sizeof( bli_pthread_barrier_t ) );
 
 	// Initialize the mutex.
@@ -175,8 +187,20 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	bli_pthread_barrier_destroy( barrier );
 
 	// Free the pthread-related memory.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	bli_free_intl( pthread );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	bli_free_intl( tdata );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "libblis_test_thread_decorator(): " );
+	#endif
 	//bli_free_intl( mutex );
 	bli_free_intl( barrier );
 }
@@ -837,8 +861,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "Max stack buffer size (bytes)  %d\n", ( int )bli_info_get_stack_buf_max_size() );
 	libblis_test_fprintf_c( os, "Page size (bytes)              %d\n", ( int )bli_info_get_page_size() );
 	libblis_test_fprintf_c( os, "\n" );
-	libblis_test_fprintf_c( os, "memory pools for pack buffers\n" );
-	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_packbuf_pools() );
+	libblis_test_fprintf_c( os, "memory pools\n" );
+	libblis_test_fprintf_c( os, "  enabled for packing blocks?  %d\n", ( int )bli_info_get_enable_pba_pools() );
+	libblis_test_fprintf_c( os, "  enabled for small blocks?    %d\n", ( int )bli_info_get_enable_sba_pools() );
 	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "memory alignment (bytes)         \n" );
 	libblis_test_fprintf_c( os, "  stack address                %d\n", ( int )bli_info_get_stack_buf_align_size() );
@@ -2589,6 +2614,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 
 
 
+#if 0
 cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
 	bool_t does_inv_diag;
@@ -2600,6 +2626,7 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	// Create a control tree node for the packing operation.
 	cntl_t* cntl = bli_packm_cntl_create_node
 	(
+	  NULL, // we don't need the small block allocator from the runtime.
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
 	  bli_packm_blk_var1,
 	  bmult_id_m,
@@ -2625,7 +2652,7 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	// mem_t entry later on.
 	return cntl;
 }
-
+#endif
 
 
 void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, dim_t m, obj_t* x )

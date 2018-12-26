@@ -61,8 +61,22 @@
 #define BLIS_ENABLE_JRIR_RR
 #endif
 
-#if @enable_packbuf_pools@
-#define BLIS_ENABLE_PACKBUF_POOLS
+#if @enable_pba_pools@
+#define BLIS_ENABLE_PBA_POOLS
+#else
+#define BLIS_DISABLE_PBA_POOLS
+#endif
+
+#if @enable_sba_pools@
+#define BLIS_ENABLE_SBA_POOLS
+#else
+#define BLIS_DISABLE_SBA_POOLS
+#endif
+
+#if @enable_mem_tracing@
+#define BLIS_ENABLE_MEM_TRACING
+#else
+#define BLIS_DISABLE_MEM_TRACING
 #endif
 
 #if @int_type_size@ == 64

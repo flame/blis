@@ -34,32 +34,6 @@
 
 #include "blis.h"
 
-#if 0
-thrinfo_t* bli_packm_thrinfo_create
-     (
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       thrinfo_t* sub_node
-     )
-{
-	thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
-
-	bli_thrinfo_init
-	(
-	  thread,
-	  ocomm, ocomm_id,
-	  n_way,
-	  work_id,
-	  FALSE,
-	  sub_node
-	);
-
-	return thread;
-}
-#endif
-
 void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
@@ -95,14 +69,3 @@ void bli_packm_thrinfo_init_single
 	);
 }
 
-#if 0
-void bli_packm_thrinfo_free
-     (
-       thrinfo_t* thread
-     )
-{
-	if ( thread != NULL &&
-	     thread != &BLIS_PACKM_SINGLE_THREADED )
-		bli_free_intl( thread );
-}
-#endif

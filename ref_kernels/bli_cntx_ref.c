@@ -458,7 +458,7 @@ void GENBARNAME(cntx_init)
 
 	//bli_cntx_set_anti_pref( FALSE, cntx );
 
-	bli_cntx_set_membrk( bli_memsys_global_membrk(), cntx );
+	//bli_cntx_set_membrk( bli_membrk_query(), cntx );
 }
 
 // -----------------------------------------------------------------------------

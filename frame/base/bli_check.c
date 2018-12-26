@@ -776,7 +776,20 @@ err_t bli_check_object_buffer( obj_t* a )
 	return e_val;
 }
 
-// -- Memory allocator checks --------------------------------------------------
+// -- Memory checks ------------------------------------------------------------
+
+err_t bli_check_valid_malloc_buf( void* ptr )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( ptr == NULL )
+		e_val = BLIS_MALLOC_RETURNED_NULL;
+
+	return e_val;
+}
+
+
+// -- Internal memory pool checks ----------------------------------------------
 
 err_t bli_check_valid_packbuf( packbuf_t buf_type )
 {

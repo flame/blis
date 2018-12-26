@@ -148,20 +148,37 @@ print_usage()
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
-	echo "   --disable-packbuf-pools, --enable-packbuf-pools"
+	echo "   --disable-pba-pools, --enable-pba-pools"
+	echo "   --disable-sba-pools, --enable-sba-pools"
 	echo " "
-	echo "                 Disable (enabled by default) use of internal memory"
-	echo "                 pools for managing packing buffers. When disabled,"
-	echo "                 the function specified by BLIS_MALLOC_POOL is called"
-	echo "                 on-demand, whenever a packing buffer is needed, and"
-	echo "                 the buffer is released via the function specified by"
-	echo "                 BLIS_FREE_POOL() when the loop in which it was"
-	echo "                 allocated terminates. When enabled, the memory pools"
-	echo "                 minimize calls to both BLIS_MALLOC_POOL() and"
-	echo "                 BLIS_FREE_POOL(), especially in a multithreaded"
-	echo "                 environment, but does so through a mechanism that may"
-	echo "                 incur additional overhead in some (but not all)"
-	echo "                 situations."
+	echo "                 Disable (enabled by default) use of internal memory pools"
+	echo "                 within the packing block allocator (pba) and/or the small"
+	echo "                 block allocator (sba). The former is used to allocate"
+	echo "                 memory used to pack submatrices while the latter is used"
+	echo "                 to allocate control/thread tree nodes and thread"
+	echo "                 communicators. Both allocations take place in the context"
+	echo "                 of level-3 operations. When the pba is disabled, the"
+	echo "                 malloc()-like function specified by BLIS_MALLOC_POOL is"
+	echo "                 called on-demand whenever a packing block is needed, and"
+	echo "                 when the sba is disabled, the malloc()-like function"
+	echo "                 specified by BLIS_MALLOC_INTL is called whenever a small"
+	echo "                 block is needed, with the two allocators calling free()-"
+	echo "                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,"
+	echo "                 respectively when blocks are released. When enabled,"
+	echo "                 either or both pools are populated via the same functions"
+	echo "                 mentioned previously, and henceforth blocks are checked"
+	echo "                 out and in. The library quickly reaches a state in which"
+	echo "                 it no longer needs to call malloc() or free(), even"
+	echo "                 across many separate level-3 operation invocations."
+	echo " "
+	echo " "
+	echo "   --enable-mem-tracing, --disable-mem-tracing"
+	echo " "
+	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 the allocation and freeing of memory, including the names"
+	echo "                 of the functions that triggered the allocation/freeing."
+	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
+	echo "                 Please use only for informational/debugging purposes."
 	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
@@ -1720,7 +1737,9 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
-	enable_packbuf_pools='yes'
+	enable_pba_pools='yes'
+	enable_sba_pools='yes'
+	enable_mem_tracing='no'
 	int_type_size=0
 	blas_int_type_size=32
 	enable_blas='yes'
@@ -1837,11 +1856,23 @@ main()
 						disable-threading)
 							threading_model='no'
 							;;
-						enable-packbuf-pools)
-							enable_packbuf_pools='yes'
+						enable-pba-pools)
+							enable_pba_pools='yes'
 							;;
-						disable-packbuf-pools)
-							enable_packbuf_pools='no'
+						disable-pba-pools)
+							enable_pba_pools='no'
+							;;
+						enable-sba-pools)
+							enable_sba_pools='yes'
+							;;
+						disable-sba-pools)
+							enable_sba_pools='no'
+							;;
+						enable-mem-tracing)
+							enable_mem_tracing='yes'
+							;;
+						disable-mem-tracing)
+							enable_mem_tracing='no'
 							;;
 						enable-sandbox=*)
 							sandbox_flag=1
@@ -2549,12 +2580,26 @@ main()
 	fi
 
 	# Convert 'yes' and 'no' flags to booleans.
-	if [ "x${enable_packbuf_pools}" = "xyes" ]; then
-		echo "${script_name}: internal memory pools for packing buffers are enabled."
-		enable_packbuf_pools_01=1
+	if [ "x${enable_pba_pools}" = "xyes" ]; then
+		echo "${script_name}: internal memory pools for packing blocks are enabled."
+		enable_pba_pools_01=1
 	else
-		echo "${script_name}: internal memory pools for packing buffers are disabled."
-		enable_packbuf_pools_01=0
+		echo "${script_name}: internal memory pools for packing blocks are disabled."
+		enable_pba_pools_01=0
+	fi
+	if [ "x${enable_sba_pools}" = "xyes" ]; then
+		echo "${script_name}: internal memory pools for small blocks are enabled."
+		enable_sba_pools_01=1
+	else
+		echo "${script_name}: internal memory pools for small blocks are disabled."
+		enable_sba_pools_01=0
+	fi
+	if [ "x${enable_mem_tracing}" = "xyes" ]; then
+		echo "${script_name}: memory tracing output is enabled."
+		enable_mem_tracing_01=1
+	else
+		echo "${script_name}: memory tracing output is disabled."
+		enable_mem_tracing_01=0
 	fi
 	if [ "x${has_memkind}" = "xyes" ]; then
 		if [ "x${enable_memkind}" = "x" ]; then
@@ -2809,7 +2854,9 @@ main()
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
-		| sed   -e "s/@enable_packbuf_pools@/${enable_packbuf_pools_01}/g" \
+		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
+		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
+		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
 		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
 		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \

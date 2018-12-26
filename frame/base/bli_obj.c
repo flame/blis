@@ -48,6 +48,10 @@ void bli_obj_create
 
 	bli_obj_create_without_buffer( dt, m, n, obj );
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_obj_create(): " );
+	#endif
+
 	bli_obj_alloc_buffer( rs, cs, 1, obj );
 }
 
@@ -232,6 +236,10 @@ void bli_obj_create_1x1
 {
 	bli_obj_create_without_buffer( dt, 1, 1, obj );
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_obj_create_1x1(): " );
+	#endif
+
 	bli_obj_alloc_buffer( 1, 1, 1, obj );
 }
 
@@ -277,7 +285,13 @@ void bli_obj_free
 		// is a detached scalar (ie: if the buffer pointer refers to the
 		// address of the internal scalar buffer).
 		if ( bli_obj_buffer( obj ) != bli_obj_internal_scalar_buffer( obj ) )
+		{
+			#ifdef BLIS_ENABLE_MEM_TRACING
+			printf( "bli_obj_free(): " );
+			#endif
+
 			bli_free_user( bli_obj_buffer( obj ) );
+		}
 	}
 }
 

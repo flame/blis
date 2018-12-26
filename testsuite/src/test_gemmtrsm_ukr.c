@@ -320,7 +320,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// allocated.
 	void* buf_ap = bli_obj_buffer( &ap );
 	void* buf_bp = bli_obj_buffer( &bp );
-	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
+	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
@@ -351,8 +351,10 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// know which set of micro-kernels (lower or upper) to choose from.
 	bli_obj_set_uplo( uploa, &a11p );
 
-//bli_printm( "a", &a, "%4.1f", "" );
-//bli_printm( "ap", &ap, "%4.1f", "" );
+#if 0
+bli_printm( "a", &a, "%5.2f", "" );
+bli_printm( "ap", &ap, "%5.2f", "" );
+#endif
 
 	// Repeat the experiment n_repeats times and record results. 
 	for ( i = 0; i < n_repeats; ++i )
@@ -492,6 +494,10 @@ void libblis_test_gemmtrsm_ukr_check
 	libblis_test_vobj_randomize( params, TRUE, &t );
 
 	bli_gemv( &BLIS_ONE, b11, &t, &BLIS_ZERO, &v );
+
+#if 0
+bli_printm( "a11", a11, "%5.2f", "" );
+#endif
 
 	// Restore the diagonal of a11 to its original, un-inverted state
 	// (needed for trsv).

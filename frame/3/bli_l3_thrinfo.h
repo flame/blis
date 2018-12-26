@@ -89,6 +89,7 @@ void bli_l3_thrinfo_init_single
 
 void bli_l3_thrinfo_free
      (
+       rntm_t*    rntm,
        thrinfo_t* thread
      );
 
@@ -112,6 +113,7 @@ void bli_l3_thrinfo_print_paths
 
 void bli_l3_thrinfo_free_paths
      (
+       rntm_t*     rntm,
        thrinfo_t** threads
      );
 

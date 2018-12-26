@@ -44,27 +44,11 @@ void bli_l3_cntl_create_if
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
+       rntm_t*  rntm,
        cntl_t*  cntl_orig,
        cntl_t** cntl_use
      )
 {
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects. Notice that we do this even if the
-	// caller passed in a custom control tree; that's because we still need
-	// to reset the pack schema of a and b, which were modified by the
-	// operation's _front() function. However, in order for this to work,
-	// the level-3 thread entry function (or omp parallel region) must
-	// alias thread-local copies of objects a and b.
-	//pack_t schema_a = bli_obj_pack_schema( a );
-	//pack_t schema_b = bli_obj_pack_schema( b );
-
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
-
 	// If the control tree pointer is NULL, we construct a default
 	// tree as a function of the operation family.
 	if ( cntl_orig == NULL )
@@ -73,7 +57,7 @@ void bli_l3_cntl_create_if
 		     family == BLIS_HERK ||
 		     family == BLIS_TRMM )
 		{
-			*cntl_use = bli_gemm_cntl_create( family, schema_a, schema_b );
+			*cntl_use = bli_gemm_cntl_create( rntm, family, schema_a, schema_b );
 		}
 		else // if ( family == BLIS_TRSM )
 		{
@@ -82,7 +66,7 @@ void bli_l3_cntl_create_if
 			if ( bli_obj_is_triangular( a ) ) side = BLIS_LEFT;
 			else                              side = BLIS_RIGHT;
 
-			*cntl_use = bli_trsm_cntl_create( side, schema_a, schema_b );
+			*cntl_use = bli_trsm_cntl_create( rntm, side, schema_a, schema_b );
 		}
 	}
 	else
@@ -90,7 +74,7 @@ void bli_l3_cntl_create_if
 		// If the user provided a control tree, create a copy and use it
 		// instead (so that threads can use its local tree as a place to
 		// cache things like pack mem_t entries).
-		*cntl_use = bli_cntl_copy( cntl_orig );
+		*cntl_use = bli_cntl_copy( rntm, cntl_orig );
 
 		// Recursively set the family fields of the newly copied control tree
 		// nodes.
@@ -100,6 +84,7 @@ void bli_l3_cntl_create_if
 
 void bli_l3_cntl_free
      (
+       rntm_t*    rntm,
        cntl_t*    cntl_use,
        thrinfo_t* thread
      )
@@ -115,11 +100,11 @@ void bli_l3_cntl_free
 	     family == BLIS_HERK ||
 	     family == BLIS_TRMM )
 	{
-		bli_gemm_cntl_free( cntl_use, thread );
+		bli_gemm_cntl_free( rntm, cntl_use, thread );
 	}
 	else // if ( family == BLIS_TRSM )
 	{
-		bli_trsm_cntl_free( cntl_use, thread );
+		bli_trsm_cntl_free( rntm, cntl_use, thread );
 	}
 }
 

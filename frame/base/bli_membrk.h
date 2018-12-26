@@ -102,34 +102,34 @@ static void bli_membrk_unlock( membrk_t* membrk )
 
 // -----------------------------------------------------------------------------
 
+membrk_t* bli_membrk_query( void );
+
 void bli_membrk_init
      (
-       cntx_t*   cntx,
-       membrk_t* membrk
+       cntx_t*   cntx
      );
 void bli_membrk_finalize
      (
-       membrk_t* membrk
+       void
      );
 
 void bli_membrk_acquire_m
      (
-       membrk_t* membrk,
+       rntm_t*   rntm,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
      );
 
-void bli_membrk_acquire_v
-     (
-       membrk_t* membrk,
-       siz_t     req_size,
-       mem_t*    mem
-     );
-
 void bli_membrk_release
      (
-       mem_t* mem
+       rntm_t* rntm,
+       mem_t*  mem
+     );
+
+void bli_membrk_rntm_set_membrk
+     (
+       rntm_t* rntm
      );
 
 siz_t bli_membrk_pool_size

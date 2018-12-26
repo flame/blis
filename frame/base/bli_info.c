@@ -87,9 +87,17 @@ gint_t bli_info_get_enable_cblas( void )
 #endif
 }
 gint_t bli_info_get_blas_int_type_size( void ) { return BLIS_BLAS_INT_TYPE_SIZE; }
-gint_t bli_info_get_enable_packbuf_pools( void )
+gint_t bli_info_get_enable_pba_pools( void )
 {
-#ifdef BLIS_ENABLE_PACKBUF_POOLS
+#ifdef BLIS_ENABLE_PBA_POOLS
+	return 1;
+#else
+	return 0;
+#endif
+}
+gint_t bli_info_get_enable_sba_pools( void )
+{
+#ifdef BLIS_ENABLE_SBA_POOLS
 	return 1;
 #else
 	return 0;

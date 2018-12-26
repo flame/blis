@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-//#define ENABLE_MEM_DEBUG
+//#define BLIS_ENABLE_MEM_TRACING
 
 // -----------------------------------------------------------------------------
 
@@ -44,19 +44,22 @@ void* bli_malloc_pool( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
 	const size_t    align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
 
-#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_malloc_pool(): size %ld, align size %ld\n",
 	        ( long )size, ( long )align_size );
-#endif
+	fflush( stdout );
+	#endif
 
 	return bli_fmalloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_pool( void* p )
 {
-#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_pool(): freeing block\n" );
-#endif
+	fflush( stdout );
+	#endif
+
 	bli_ffree_align( BLIS_FREE_POOL, p );
 }
 
@@ -67,19 +70,22 @@ void* bli_malloc_user( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_USER;
 	const size_t    align_size = BLIS_HEAP_ADDR_ALIGN_SIZE;
 
-#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_malloc_user(): size %ld, align size %ld\n",
 	        ( long )size, ( long )align_size );
-#endif
+	fflush( stdout );
+	#endif
 
 	return bli_fmalloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_user( void* p )
 {
-#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_user(): freeing block\n" );
-#endif
+	fflush( stdout );
+	#endif
+
 	bli_ffree_align( BLIS_FREE_USER, p );
 }
 
@@ -89,21 +95,19 @@ void* bli_malloc_intl( size_t size )
 {
 	const malloc_ft malloc_fp = BLIS_MALLOC_INTL;
 
-#ifdef ENABLE_MEM_DEBUG
-	printf( "bli_malloc_intl(): size %ld\n",
-	        ( long )size );
-#endif
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_malloc_intl(): size %ld\n", ( long )size );
+	fflush( stdout );
+	#endif
 
 	return bli_fmalloc_noalign( malloc_fp, size );
 }
 
 void* bli_calloc_intl( size_t size )
 {
-#ifdef ENABLE_MEM_DEBUG
-//	printf( "bli_calloc_intl(): allocating block (size %ld)\n",
-//	        ( long )size );
-	printf( "calloc: " );
-#endif
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_calloc_intl(): " );
+	#endif
 
 	void* p = bli_malloc_intl( size );
 
@@ -114,9 +118,11 @@ void* bli_calloc_intl( size_t size )
 
 void bli_free_intl( void* p )
 {
-#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_intl(): freeing block\n" );
-#endif
+	fflush( stdout );
+	#endif
+
 	bli_ffree_noalign( BLIS_FREE_INTL, p );
 }
 

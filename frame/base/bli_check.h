@@ -98,6 +98,8 @@ err_t bli_check_packv_schema_on_unpack( obj_t* a );
 
 err_t bli_check_object_buffer( obj_t* a );
 
+err_t bli_check_valid_malloc_buf( void* ptr );
+
 err_t bli_check_valid_packbuf( packbuf_t buf_type );
 err_t bli_check_if_exhausted_pool( pool_t* pool );
 err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx );

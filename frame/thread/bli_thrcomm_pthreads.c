@@ -37,32 +37,35 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
-thrcomm_t* bli_thrcomm_create( dim_t n_threads )
+thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
 {
-	#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrcomm_create(): " );
 	#endif
 
-	thrcomm_t* comm = bli_malloc_intl( sizeof(thrcomm_t) );
-	bli_thrcomm_init( comm, n_threads );
+	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof(thrcomm_t) );
+
+	bli_thrcomm_init( n_threads, comm );
+
 	return comm;
 }
 
-void bli_thrcomm_free( thrcomm_t* comm )
+void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
+
 	bli_thrcomm_cleanup( comm );
 
-	#ifdef ENABLE_MEM_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrcomm_free(): " );
 	#endif
 
-	bli_free_intl( comm );
+	bli_sba_release( rntm, comm );
 }
 
 #ifdef BLIS_USE_PTHREAD_BARRIER
 
-void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
+void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
@@ -76,14 +79,14 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 	bli_pthread_barrier_destroy( &comm->barrier );
 }
 
-void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
+void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 {
 	bli_pthread_barrier_wait( &comm->barrier );
 }
 
 #else
 
-void bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads)
+void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
@@ -104,7 +107,7 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 //#endif
 }
 
-void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
+void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 {
 #if 0
 	if ( comm == NULL || comm->n_threads == 1 ) return;
@@ -130,7 +133,7 @@ void bli_thrcomm_barrier( thrcomm_t* comm, dim_t t_id )
 		while( *listener == my_sense ) {}
 	}
 #endif
-	bli_thrcomm_barrier_atomic( comm, t_id );
+	bli_thrcomm_barrier_atomic( t_id, comm );
 }
 
 #endif
@@ -151,8 +154,9 @@ typedef struct thread_data
 	cntx_t*    cntx;
 	rntm_t*    rntm;
 	cntl_t*    cntl;
-	dim_t      id;
+	dim_t      tid;
 	thrcomm_t* gl_comm;
+	array_t*   array;
 } thread_data_t;
 
 // Entry point for additional threads
@@ -172,8 +176,21 @@ void* bli_l3_thread_entry( void* data_void )
 	cntx_t*        cntx     = data->cntx;
 	rntm_t*        rntm     = data->rntm;
 	cntl_t*        cntl     = data->cntl;
-	dim_t          id       = data->id;
+	dim_t          tid      = data->tid;
+	array_t*       array    = data->array;
 	thrcomm_t*     gl_comm  = data->gl_comm;
+
+	// Create a thread-local copy of the master thread's rntm_t. This is
+	// necessary since we want each thread to be able to track its own
+	// small block pool_t as it executes down the function stack.
+	rntm_t           rntm_l = *rntm;
+	rntm_t* restrict rntm_p = &rntm_l;
+
+	// Use the thread id to access the appropriate pool_t* within the
+	// array_t, and use it to set the sba_pool field within the rntm_t.
+	// If the pool_t* element within the array_t is NULL, it will first
+	// be allocated/initialized.
+	bli_sba_rntm_set_pool( tid, array, rntm_p );
 
 	obj_t          a_t, b_t, c_t;
 	cntl_t*        cntl_use;
@@ -190,10 +207,10 @@ void* bli_l3_thread_entry( void* data_void )
 
 	// Create a default control tree for the operation, if needed.
 	bli_l3_cntl_create_if( family, schema_a, schema_b,
-	                       &a_t, &b_t, &c_t, cntl, &cntl_use );
+	                       &a_t, &b_t, &c_t, rntm_p, cntl, &cntl_use );
 
 	// Create the root node of the current thread's thrinfo_t structure.
-	bli_l3_thrinfo_create_root( id, gl_comm, rntm, cntl_use, &thread );
+	bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
 
 	func
 	(
@@ -203,16 +220,16 @@ void* bli_l3_thread_entry( void* data_void )
 	  beta,
 	  &c_t,
 	  cntx,
-	  rntm,
+	  rntm_p,
 	  cntl_use,
 	  thread
 	);
 
 	// Free the thread's local control tree.
-	bli_l3_cntl_free( cntl_use, thread );
+	bli_l3_cntl_free( rntm_p, cntl_use, thread );
 
 	// Free the current thread's thrinfo_t structure.
-	bli_l3_thrinfo_free( thread );
+	bli_l3_thrinfo_free( rntm_p, thread );
 
 	return NULL;
 }
@@ -243,39 +260,66 @@ void bli_l3_thread_decorator
 	bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
 
 	// Query the total number of threads from the context.
-	dim_t          n_threads = bli_rntm_num_threads( rntm );
+	const dim_t n_threads = bli_rntm_num_threads( rntm );
+
+	// NOTE: The sba was initialized in bli_init().
+
+	// Check out an array_t from the small block allocator. This is done
+	// with an internal lock to ensure only one application thread accesses
+	// the sba at a time. bli_sba_checkout_array() will also automatically
+	// resize the array_t, if necessary.
+	array_t* restrict array = bli_sba_checkout_array( n_threads );
+
+	// Access the pool_t* for thread 0 and embed it into the rntm. We do
+	// this up-front only so that we have the rntm_t.sba_pool field
+	// initialized and ready for the global communicator creation below.
+	bli_sba_rntm_set_pool( 0, array, rntm );
+
+	// Set the packing block allocator field of the rntm. This will be
+	// inherited by all of the child threads when they make local copies of
+	// the rntm below.
+	bli_membrk_rntm_set_membrk( rntm );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t*     gl_comm   = bli_thrcomm_create( n_threads );
+	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.
-	bli_pthread_t* pthreads  = bli_malloc_intl( sizeof( bli_pthread_t ) * n_threads );
-	thread_data_t* datas     = bli_malloc_intl( sizeof( thread_data_t ) * n_threads );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_l3_thread_decorator().pth: " );
+	#endif
+	bli_pthread_t* pthreads = bli_malloc_intl( sizeof( bli_pthread_t ) * n_threads );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_l3_thread_decorator().pth: " );
+	#endif
+	thread_data_t* datas    = bli_malloc_intl( sizeof( thread_data_t ) * n_threads );
 
 	// NOTE: We must iterate backwards so that the chief thread (thread id 0)
 	// can spawn all other threads before proceeding with its own computation.
-	for ( dim_t id = n_threads - 1; 0 <= id; id-- )
+	for ( dim_t tid = n_threads - 1; 0 <= tid; tid-- )
 	{
 		// Set up thread data for additional threads (beyond thread 0).
-		datas[id].func     = func;
-		datas[id].family   = family;
-		datas[id].schema_a = schema_a;
-		datas[id].schema_b = schema_b;
-		datas[id].alpha    = alpha;
-		datas[id].a        = a;
-		datas[id].b        = b;
-		datas[id].beta     = beta;
-		datas[id].c        = c;
-		datas[id].cntx     = cntx;
-		datas[id].rntm     = rntm;
-		datas[id].cntl     = cntl;
-		datas[id].id       = id;
-		datas[id].gl_comm  = gl_comm;
+		datas[tid].func     = func;
+		datas[tid].family   = family;
+		datas[tid].schema_a = schema_a;
+		datas[tid].schema_b = schema_b;
+		datas[tid].alpha    = alpha;
+		datas[tid].a        = a;
+		datas[tid].b        = b;
+		datas[tid].beta     = beta;
+		datas[tid].c        = c;
+		datas[tid].cntx     = cntx;
+		datas[tid].rntm     = rntm;
+		datas[tid].cntl     = cntl;
+		datas[tid].tid      = tid;
+		datas[tid].gl_comm  = gl_comm;
+		datas[tid].array    = array;
 
 		// Spawn additional threads for ids greater than 1.
-		if ( id != 0 )
-			bli_pthread_create( &pthreads[id], NULL, &bli_l3_thread_entry, &datas[id] );
+		if ( tid != 0 )
+			bli_pthread_create( &pthreads[tid], NULL, &bli_l3_thread_entry, &datas[tid] );
 		else
 			bli_l3_thread_entry( ( void* )(&datas[0]) );
 	}
@@ -285,15 +329,26 @@ void bli_l3_thread_decorator
 	// (called from the thread entry function).
 
 	// Thread 0 waits for additional threads to finish.
-	for ( dim_t id = 1; id < n_threads; id++ )
+	for ( dim_t tid = 1; tid < n_threads; tid++ )
 	{
-		bli_pthread_join( pthreads[id], NULL );
+		bli_pthread_join( pthreads[tid], NULL );
 	}
 
+	// Check the array_t back into the small block allocator. Similar to the
+	// check-out, this is done using a lock embedded within the sba to ensure
+	// mutual exclusion.
+	bli_sba_checkin_array( array );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_l3_thread_decorator().pth: " );
+	#endif
 	bli_free_intl( pthreads );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_l3_thread_decorator().pth: " );
+	#endif
 	bli_free_intl( datas );
 }
-
 
 #endif
 

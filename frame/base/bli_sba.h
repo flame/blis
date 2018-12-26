@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,28 +32,44 @@
 
 */
 
+#ifndef BLIS_SBA_H
+#define BLIS_SBA_H
 
-//
-// Prototype conditional control tree creation functions.
-//
+apool_t* bli_sba_query( void );
 
-void bli_l3_cntl_create_if
+// -----------------------------------------------------------------------------
+
+void bli_sba_init( void );
+void bli_sba_finalize( void );
+
+array_t* bli_sba_checkout_array
      (
-       opid_t   family,
-       pack_t   schema_a,
-       pack_t   schema_b,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   c,
-       rntm_t*  rntm,
-       cntl_t*  cntl_orig,
-       cntl_t** cntl_use
+       const siz_t n_threads
      );
 
-void bli_l3_cntl_free
+void bli_sba_checkin_array
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_use,
-       thrinfo_t* thread
+       array_t* restrict array
      );
+
+void bli_sba_rntm_set_pool
+     (
+       siz_t             index,
+       array_t* restrict array,
+       rntm_t*  restrict rntm
+     );
+
+void* bli_sba_acquire
+     (
+       rntm_t* restrict rntm,
+       siz_t            req_size
+     );
+void bli_sba_release
+     (
+       rntm_t* restrict rntm,
+       void*   restrict block
+     );
+
+
+#endif
 

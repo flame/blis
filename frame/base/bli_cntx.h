@@ -60,7 +60,6 @@ typedef struct cntx_s
 	pack_t    schema_b;
 	pack_t    schema_c;
 
-	membrk_t* membrk;
 } cntx_t;
 */
 
@@ -122,10 +121,6 @@ static pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 {
 	return cntx->schema_c_panel;
 }
-static membrk_t* bli_cntx_get_membrk( cntx_t* cntx )
-{
-	return cntx->membrk;
-}
 
 // -----------------------------------------------------------------------------
 
@@ -153,10 +148,6 @@ static void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cnt
 {
 	bli_cntx_set_schema_a_block( sa, cntx );
 	bli_cntx_set_schema_b_panel( sb, cntx );
-}
-static void bli_cntx_set_membrk( membrk_t* membrk, cntx_t* cntx )
-{
-	cntx->membrk = membrk;
 }
 
 // -----------------------------------------------------------------------------

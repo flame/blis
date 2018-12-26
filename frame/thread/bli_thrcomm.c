@@ -36,18 +36,18 @@
 
 void* bli_thrcomm_bcast
      (
-       thrcomm_t* comm,
        dim_t      id,
-       void*      to_send
+       void*      to_send,
+       thrcomm_t* comm
      )
 {   
 	if ( comm == NULL || comm->n_threads == 1 ) return to_send;
 
 	if ( id == 0 ) comm->sent_object = to_send;
 
-	bli_thrcomm_barrier( comm, id );
+	bli_thrcomm_barrier( id, comm );
 	void* object = comm->sent_object;
-	bli_thrcomm_barrier( comm, id );
+	bli_thrcomm_barrier( id, comm );
 
 	return object;
 }
@@ -71,7 +71,7 @@ void* bli_thrcomm_bcast
 
 #endif
 
-void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
+void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 {
 	// Return early if the comm is NULL or if there is only one
 	// thread participating.

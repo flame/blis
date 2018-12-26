@@ -60,11 +60,6 @@ static pool_t* bli_mem_pool( mem_t* mem )
 	return mem->pool;
 }
 
-static membrk_t* bli_mem_membrk( mem_t* mem )
-{
-	return mem->membrk;
-}
-
 static siz_t bli_mem_size( mem_t* mem )
 {
 	return mem->size;
@@ -105,11 +100,6 @@ static void bli_mem_set_pool( pool_t* pool, mem_t* mem )
 	mem->pool = pool;
 }
 
-static void bli_mem_set_membrk( membrk_t* membrk, mem_t* mem )
-{
-	mem->membrk = membrk;
-}
-
 static void bli_mem_set_size( siz_t size, mem_t* mem )
 {
 	mem->size = size;
@@ -120,7 +110,6 @@ static void bli_mem_clear( mem_t* mem )
 	bli_mem_set_buffer( NULL, mem );
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
-	bli_mem_set_membrk( NULL, mem );
 }
 
 

@@ -36,6 +36,7 @@
 
 cntl_t* bli_unpackm_cntl_create_node
      (
+       rntm_t*   rntm,
        void*     var_func,
        void*     unpackm_var_func,
        cntl_t*   sub_node
@@ -43,6 +44,10 @@ cntl_t* bli_unpackm_cntl_create_node
 {
 	cntl_t*           cntl;
 	unpackm_params_t* params;
+
+	// NOTE: If this function is ever called, figure out whether the
+	// bli_malloc_intl() below needs to be changed to bli_sba_acquire().
+	bli_abort();
 
 	// Allocate an unpackm_params_t struct.
 	params = bli_malloc_intl( sizeof( unpackm_params_t ) );
@@ -57,6 +62,7 @@ cntl_t* bli_unpackm_cntl_create_node
 	// sync with the cntl_t tree.
 	cntl = bli_cntl_create_node
 	(
+	  rntm,
 	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,

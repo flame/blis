@@ -36,12 +36,22 @@
 
 #include "blis.h"
 
+static membrk_t global_membrk;
+
+// -----------------------------------------------------------------------------
+
+membrk_t* bli_membrk_query( void )
+{
+    return &global_membrk;
+}
+
 void bli_membrk_init
      (
-       cntx_t*   cntx,
-       membrk_t* membrk
+       cntx_t* restrict cntx
      )
 {
+	membrk_t* restrict membrk = bli_membrk_query();
+
 	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
 	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
 	free_ft     free_fp    = BLIS_FREE_POOL;
@@ -52,20 +62,22 @@ void bli_membrk_init
 	bli_membrk_set_free_fp( free_fp, membrk );
 
 	bli_membrk_init_mutex( membrk );
-#ifdef BLIS_ENABLE_PACKBUF_POOLS
+#ifdef BLIS_ENABLE_PBA_POOLS
 	bli_membrk_init_pools( cntx, membrk );
 #endif
 }
 
 void bli_membrk_finalize
      (
-       membrk_t* membrk
+       void
      )
 {
+	membrk_t* restrict membrk = bli_membrk_query();
+
 	bli_membrk_set_malloc_fp( NULL, membrk );
 	bli_membrk_set_free_fp( NULL, membrk );
 
-#ifdef BLIS_ENABLE_PACKBUF_POOLS
+#ifdef BLIS_ENABLE_PBA_POOLS
 	bli_membrk_finalize_pools( membrk );
 #endif
 	bli_membrk_finalize_mutex( membrk );
@@ -73,7 +85,7 @@ void bli_membrk_finalize
 
 void bli_membrk_acquire_m
      (
-       membrk_t* membrk,
+       rntm_t*   rntm,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
@@ -82,17 +94,22 @@ void bli_membrk_acquire_m
 	pool_t* pool;
 	pblk_t* pblk;
 	dim_t   pi;
-	siz_t   block_size;
 
-	// If the internal memory pools for pack buffers are disabled, we
-	// spoof the buffer type as BLIS_BUFFER_FOR_GEN_USE to induce the
+	// If the internal memory pools for packing block allocator are disabled,
+	// we spoof the buffer type as BLIS_BUFFER_FOR_GEN_USE to induce the
 	// immediate usage of bli_membrk_malloc().
-#ifndef BLIS_ENABLE_PACKBUF_POOLS
+#ifndef BLIS_ENABLE_PBA_POOLS
 	buf_type = BLIS_BUFFER_FOR_GEN_USE;
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_membrk_acquire_m(): bli_malloc_pool(): size %ld\n",
+	        ( long )req_size );
+	#endif
 #endif
 
-	// Make sure the API is initialized.
-	//assert( membrk ); //??
+	// Query the memory broker from the runtime.
+	membrk_t* membrk = bli_rntm_membrk( rntm );
+
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
@@ -114,7 +131,6 @@ void bli_membrk_acquire_m
 		bli_mem_set_buf_type( buf_type, mem );
 		bli_mem_set_pool( NULL, mem );
 		bli_mem_set_size( req_size, mem );
-		bli_mem_set_membrk( membrk, mem );
 	}
 	else
 	{
@@ -146,18 +162,15 @@ void bli_membrk_acquire_m
 			// the struct's pblk_t field.
 			bli_pool_checkout_block( req_size, pblk, pool );
 
-			// Query the size of the blocks in the pool so we can store it in
-			// the mem_t object. At this point, it is guaranteed to be at
-			// least as large as req_size. (NOTE: We must perform the query
-			// within the critical section to ensure that the pool hasn't
-			// changed.)
-			block_size = bli_pool_block_size( pool );
-
 		}
 		// END CRITICAL SECTION
 
 		// Release the mutex associated with the membrk object.
 		bli_membrk_unlock( membrk );
+
+		// Query the block_size from the pblk_t. This will be at least
+		// req_size, perhaps larger.
+		siz_t block_size = bli_pblk_block_size( pblk );
 
 		// Initialize the mem_t object with:
 		// - the buffer type (a packbuf_t value),
@@ -165,33 +178,37 @@ void bli_membrk_acquire_m
 		// - the size of the contiguous memory block (NOT the size of the
 		//   requested region),
 		// - the membrk_t from which the mem_t entry was acquired.
-		// The actual addresses (system and aligned) are already stored in
-		// the mem_t struct's pblk_t field
+		// The actual (aligned) address is already stored in the mem_t
+		// struct's pblk_t field.
 		bli_mem_set_buf_type( buf_type, mem );
 		bli_mem_set_pool( pool, mem );
 		bli_mem_set_size( block_size, mem );
-		bli_mem_set_membrk( membrk, mem );
 	}
 }
 
 
 void bli_membrk_release
      (
-       mem_t* mem
+       rntm_t* rntm,
+       mem_t*  mem
      )
 {
 	packbuf_t buf_type;
 	pool_t*   pool;
 	pblk_t*   pblk;
-	siz_t     block_size_cur;
-	siz_t     block_size_prev;
-	membrk_t* membrk;
 
-	// Extract the membrk_t address from the mem_t object.
-	membrk = bli_mem_membrk( mem );
+	// Query the memory broker from the runtime.
+	membrk_t* membrk = bli_rntm_membrk( rntm );
 
 	// Extract the buffer type so we know what kind of memory was allocated.
 	buf_type = bli_mem_buf_type( mem );
+
+#ifndef BLIS_ENABLE_PBA_POOLS
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_membrk_release(): bli_free_pool(): size %ld\n",
+	        ( long )bli_mem_size( mem ) );
+	#endif
+#endif
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
@@ -211,37 +228,14 @@ void bli_membrk_release
 		// Extract the address of the pblk_t struct within the mem_t struct.
 		pblk = bli_mem_pblk( mem );
 
-		// Query the size of the blocks that were in the pool at the time
-		// the pblk_t was checked out. (This is used below, in the critical
-		// section.)
-		block_size_prev = bli_mem_size( mem );
-
 		// Acquire the mutex associated with the membrk object.
 		bli_membrk_lock( membrk );
 
 		// BEGIN CRITICAL SECTION
 		{
 
-			// Query the size of the blocks currently in the pool.
-			block_size_cur = bli_pool_block_size( pool );
-
-			// If the block size of the pool has changed since the pblk_t
-			// was checked out, then we need to free the pblk_t rather
-			// than check it back in. Why? Because the pool's block size
-			// has (most likely) increased to meet changing needs (example:
-			// larger cache blocksizes). Thus, the current pblk_t's smaller
-			// allocated size is of no use anymore.
-			if ( block_size_cur != block_size_prev )
-			{
-				// Free the pblk_t using the appropriate function in the
-				// pool API.
-				bli_pool_free_block( pblk, pool );
-			}
-			else
-			{
-				// Check the block back into the pool.
-				bli_pool_checkin_block( pblk, pool );
-			}
+			// Check the block back into the pool.
+			bli_pool_checkin_block( pblk, pool );
 
 		}
 		// END CRITICAL SECTION
@@ -261,6 +255,7 @@ void bli_membrk_release
 }
 
 
+#if 0
 void bli_membrk_acquire_v
      (
        membrk_t* membrk,
@@ -272,6 +267,18 @@ void bli_membrk_acquire_v
 	                      req_size,
 	                      BLIS_BUFFER_FOR_GEN_USE,
 	                      mem );
+}
+#endif
+
+
+void bli_membrk_rntm_set_membrk
+     (
+       rntm_t* rntm
+     )
+{
+	membrk_t* membrk = bli_membrk_query();
+
+	bli_rntm_set_membrk( membrk, rntm );
 }
 
 

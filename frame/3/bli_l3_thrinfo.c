@@ -88,37 +88,11 @@ void bli_l3_thrinfo_init_single
 
 void bli_l3_thrinfo_free
      (
+       rntm_t*    rntm,
        thrinfo_t* thread
      )
 {
-	if ( thread == NULL ||
-	     thread == &BLIS_PACKM_SINGLE_THREADED ||
-	     thread == &BLIS_GEMM_SINGLE_THREADED
-	   ) return;
-
-	thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( thread );
-
-	// Free the communicators, but only if the current thrinfo_t struct
-	// is marked as needing them to be freed. The most common example of
-	// thrinfo_t nodes NOT marked as needing their comms freed are those
-	// associated with packm thrinfo_t nodes.
-	if ( bli_thrinfo_needs_free_comm( thread ) )
-	{
-		// The ochief always frees his communicator, and the ichief free its
-		// communicator if we are at the leaf node.
-		if ( bli_thread_am_ochief( thread ) )
-			bli_thrcomm_free( bli_thrinfo_ocomm( thread ) );
-	}
-
-	// Free all children of the current thrinfo_t.
-	bli_l3_thrinfo_free( thrinfo_sub_node );
-
-	#ifdef ENABLE_MEM_DEBUG
-	printf( "bli_l3_thrinfo_free(): " );
-	#endif
-
-	// Free the thrinfo_t struct.
-	bli_free_intl( thread );
+	bli_thrinfo_free( rntm, thread );
 }
 
 // -----------------------------------------------------------------------------
@@ -149,6 +123,7 @@ void bli_l3_thrinfo_create_root
 	// Create the root thrinfo_t node.
 	*thread = bli_thrinfo_create
 	(
+	  rntm,
 	  gl_comm,
 	  gl_comm_id,
 	  xx_way,
@@ -348,6 +323,7 @@ void bli_l3_thrinfo_print_paths
 
 void bli_l3_thrinfo_free_paths
      (
+       rntm_t*     rntm,
        thrinfo_t** threads
      )
 {
@@ -355,7 +331,7 @@ void bli_l3_thrinfo_free_paths
 	dim_t i;
 
 	for ( i = 0; i < n_threads; ++i )
-		bli_l3_thrinfo_free( threads[i] );
+		bli_l3_thrinfo_free( rntm, threads[i] );
 
 	bli_free_intl( threads );
 }
