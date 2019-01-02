@@ -157,7 +157,7 @@ void* bli_fmalloc_align
 
 	// Check the pointer returned by malloc().
 	if ( bli_error_checking_is_enabled() )
-		bli_fmalloc_align_post_check( p_orig );
+		bli_fmalloc_post_check( p_orig );
 
 	// Advance the pointer by one pointer element.
 	p_byte = p_orig;
@@ -223,7 +223,13 @@ void* bli_fmalloc_noalign
        size_t    size
      )
 {
-	return f( size );
+	void* p = f( size );
+
+	// Check the pointer returned by malloc().
+	if ( bli_error_checking_is_enabled() )
+		bli_fmalloc_post_check( p );
+
+	return p;
 }
 
 void bli_ffree_noalign
@@ -255,7 +261,7 @@ void bli_fmalloc_align_check
 	bli_check_error_code( e_val );
 }
 
-void bli_fmalloc_align_post_check
+void bli_fmalloc_post_check
      (
        void* p
      )
