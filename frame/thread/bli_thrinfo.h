@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -122,12 +123,12 @@ static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 
 static void* bli_thread_obroadcast( thrinfo_t* t, void* p )
 {
-	return bli_thrcomm_bcast( t->ocomm, t->ocomm_id, p );
+	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
 static void bli_thread_obarrier( thrinfo_t* t )
 {
-	bli_thrcomm_barrier( t->ocomm, t->ocomm_id );
+	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
 
 
@@ -137,6 +138,7 @@ static void bli_thread_obarrier( thrinfo_t* t )
 
 thrinfo_t* bli_thrinfo_create
      (
+       rntm_t*    rntm,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
@@ -158,6 +160,12 @@ void bli_thrinfo_init
 
 void bli_thrinfo_init_single
      (
+       thrinfo_t* thread
+     );
+
+void bli_thrinfo_free
+     (
+       rntm_t*    rntm,
        thrinfo_t* thread
      );
 

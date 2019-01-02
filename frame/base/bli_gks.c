@@ -196,9 +196,17 @@ void bli_gks_finalize( void )
 					// If the current context was allocated, free it.
 					if ( gks_id_ind != NULL )
 					{
+						#ifdef BLIS_ENABLE_MEM_TRACING
+						printf( "bli_gks_finalize(): cntx for ind_t %d: ", ( int )ind );
+						#endif
+
 						bli_free_intl( gks_id_ind );
 					}
 				}
+
+				#ifdef BLIS_ENABLE_MEM_TRACING
+				printf( "bli_gks_finalize(): gks for arch_t %d: ", ( int )id );
+				#endif
 
 				// Free the array of BLIS_NUM_IND_METHODS cntx* elements.
 				bli_free_intl( gks_id );
@@ -320,6 +328,10 @@ void bli_gks_register_cntx
 	// to register with an architecture id that has already been registered.
 	if ( gks[ id ] != NULL ) return;
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_gks_register_cntx(): " );
+	#endif
+
 	// At this point, we know the pointer to the array of cntx_t* is NULL and
 	// needs to be allocated. Allocate the memory and initialize it to
 	// zeros/NULL, storing the address of the alloacted memory at the element
@@ -328,6 +340,10 @@ void bli_gks_register_cntx
 
 	// Alias the allocated array for readability.
 	cntx_t** restrict gks_id = gks[ id ];
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_gks_register_cntx(): " );
+	#endif
 
 	// Allocate memory for a single context and store the address at
 	// the element in the gks[ id ] array that is reserved for native

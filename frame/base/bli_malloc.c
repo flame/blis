@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,7 +35,7 @@
 
 #include "blis.h"
 
-//#define ENABLE_DEBUG
+//#define BLIS_ENABLE_MEM_TRACING
 
 // -----------------------------------------------------------------------------
 
@@ -43,20 +44,23 @@ void* bli_malloc_pool( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
 	const size_t    align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
 
-#ifdef ENABLE_DEBUG
-	printf( "bli_malloc_pool(): allocating block (size %ld, align size %ld)\n",
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_malloc_pool(): size %ld, align size %ld\n",
 	        ( long )size, ( long )align_size );
-#endif
+	fflush( stdout );
+	#endif
 
-	return bli_malloc_align( malloc_fp, size, align_size );
+	return bli_fmalloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_pool( void* p )
 {
-#ifdef ENABLE_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_pool(): freeing block\n" );
-#endif
-	bli_free_align( BLIS_FREE_POOL, p );
+	fflush( stdout );
+	#endif
+
+	bli_ffree_align( BLIS_FREE_POOL, p );
 }
 
 // -----------------------------------------------------------------------------
@@ -66,20 +70,23 @@ void* bli_malloc_user( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_USER;
 	const size_t    align_size = BLIS_HEAP_ADDR_ALIGN_SIZE;
 
-#ifdef ENABLE_DEBUG
-	printf( "bli_malloc_user(): allocating block (size %ld, align size %ld)\n",
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_malloc_user(): size %ld, align size %ld\n",
 	        ( long )size, ( long )align_size );
-#endif
+	fflush( stdout );
+	#endif
 
-	return bli_malloc_align( malloc_fp, size, align_size );
+	return bli_fmalloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_user( void* p )
 {
-#ifdef ENABLE_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_user(): freeing block\n" );
-#endif
-	bli_free_align( BLIS_FREE_USER, p );
+	fflush( stdout );
+	#endif
+
+	bli_ffree_align( BLIS_FREE_USER, p );
 }
 
 // -----------------------------------------------------------------------------
@@ -88,20 +95,19 @@ void* bli_malloc_intl( size_t size )
 {
 	const malloc_ft malloc_fp = BLIS_MALLOC_INTL;
 
-#ifdef ENABLE_DEBUG
-	printf( "bli_malloc_intl(): allocating block (size %ld)\n",
-	        ( long )size );
-#endif
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_malloc_intl(): size %ld\n", ( long )size );
+	fflush( stdout );
+	#endif
 
-	return bli_malloc_noalign( malloc_fp, size );
+	return bli_fmalloc_noalign( malloc_fp, size );
 }
 
 void* bli_calloc_intl( size_t size )
 {
-#ifdef ENABLE_DEBUG
-	printf( "bli_calloc_intl(): allocating block (size %ld)\n",
-	        ( long )size );
-#endif
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_calloc_intl(): " );
+	#endif
 
 	void* p = bli_malloc_intl( size );
 
@@ -112,15 +118,17 @@ void* bli_calloc_intl( size_t size )
 
 void bli_free_intl( void* p )
 {
-#ifdef ENABLE_DEBUG
+	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_free_intl(): freeing block\n" );
-#endif
-	bli_free_noalign( BLIS_FREE_INTL, p );
+	fflush( stdout );
+	#endif
+
+	bli_ffree_noalign( BLIS_FREE_INTL, p );
 }
 
 // -----------------------------------------------------------------------------
 
-void* bli_malloc_align
+void* bli_fmalloc_align
      (
        malloc_ft f,
        size_t    size,
@@ -135,7 +143,7 @@ void* bli_malloc_align
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
-		bli_malloc_align_check( f, size, align_size );
+		bli_fmalloc_align_check( f, size, align_size );
 
 	// Return early if zero bytes were requested.
 	if ( size == 0 ) return NULL;
@@ -147,8 +155,9 @@ void* bli_malloc_align
 	// Call the allocation function.
 	p_orig = f( size );
 
-	// If NULL was returned, something is probably very wrong.
-	if ( p_orig == NULL ) bli_abort();
+	// Check the pointer returned by malloc().
+	if ( bli_error_checking_is_enabled() )
+		bli_fmalloc_align_post_check( p_orig );
 
 	// Advance the pointer by one pointer element.
 	p_byte = p_orig;
@@ -175,7 +184,7 @@ void* bli_malloc_align
 	return p_byte;
 }
 
-void bli_free_align
+void bli_ffree_align
      (
        free_ft f,
        void*   p
@@ -208,7 +217,7 @@ void bli_free_align
 
 // -----------------------------------------------------------------------------
 
-void* bli_malloc_noalign
+void* bli_fmalloc_noalign
      (
        malloc_ft f,
        size_t    size
@@ -217,7 +226,7 @@ void* bli_malloc_noalign
 	return f( size );
 }
 
-void bli_free_noalign
+void bli_ffree_noalign
      (
        free_ft f,
        void*   p
@@ -228,7 +237,7 @@ void bli_free_noalign
 
 // -----------------------------------------------------------------------------
 
-void bli_malloc_align_check 
+void bli_fmalloc_align_check
      (
        malloc_ft f,
        size_t    size,
@@ -246,4 +255,16 @@ void bli_malloc_align_check
 	bli_check_error_code( e_val );
 }
 
+void bli_fmalloc_align_post_check
+     (
+       void* p
+     )
+{
+	err_t e_val;
+
+	// Check for valid values from malloc().
+
+	e_val = bli_check_valid_malloc_buf( p );
+	bli_check_error_code( e_val );
+}
 

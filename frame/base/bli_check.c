@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -776,7 +777,20 @@ err_t bli_check_object_buffer( obj_t* a )
 	return e_val;
 }
 
-// -- Memory allocator checks --------------------------------------------------
+// -- Memory checks ------------------------------------------------------------
+
+err_t bli_check_valid_malloc_buf( void* ptr )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( ptr == NULL )
+		e_val = BLIS_MALLOC_RETURNED_NULL;
+
+	return e_val;
+}
+
+
+// -- Internal memory pool checks ----------------------------------------------
 
 err_t bli_check_valid_packbuf( packbuf_t buf_type )
 {

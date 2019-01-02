@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,6 +37,7 @@
 
 cntl_t* bli_packm_cntl_create_node
      (
+       rntm_t*   rntm,
        void*     var_func,
        void*     packm_var_func,
        bszid_t   bmid_m,
@@ -51,8 +53,12 @@ cntl_t* bli_packm_cntl_create_node
 	cntl_t*         cntl;
 	packm_params_t* params;
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_packm_cntl_create_node(): " );
+	#endif
+
 	// Allocate a packm_params_t struct.
-	params = bli_malloc_intl( sizeof( packm_params_t ) );
+	params = bli_sba_acquire( rntm, sizeof( packm_params_t ) );
 
 	// Initialize the packm_params_t struct.
 	params->size              = sizeof( packm_params_t );
@@ -65,12 +71,17 @@ cntl_t* bli_packm_cntl_create_node
 	params->pack_schema       = pack_schema;
 	params->pack_buf_type     = pack_buf_type;
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_packm_cntl_create_node(): " );
+	#endif
+
 	// It's important that we set the bszid field to BLIS_NO_PART to indicate
 	// that no blocksize partitioning is performed. bli_cntl_free() will rely
 	// on this information to know how to step through the thrinfo_t tree in
 	// sync with the cntl_t tree.
 	cntl = bli_cntl_create_node
 	(
+	  rntm,
 	  BLIS_NOID,
 	  BLIS_NO_PART,
 	  var_func,

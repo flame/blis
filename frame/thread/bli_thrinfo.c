@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,6 +37,7 @@
 
 thrinfo_t* bli_thrinfo_create
      (
+       rntm_t*    rntm,
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
@@ -44,7 +46,11 @@ thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      )
 {
-    thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_thrinfo_create(): " );
+	#endif
+
+    thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
 
     bli_thrinfo_init
 	(
@@ -94,11 +100,47 @@ void bli_thrinfo_init_single
 	);
 }
 
+void bli_thrinfo_free
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     )
+{
+	if ( thread == NULL ||
+	     thread == &BLIS_PACKM_SINGLE_THREADED ||
+	     thread == &BLIS_GEMM_SINGLE_THREADED
+	   ) return;
+
+	thrinfo_t* thrinfo_sub_node = bli_thrinfo_sub_node( thread );
+
+	// Free the communicators, but only if the current thrinfo_t struct
+	// is marked as needing them to be freed. The most common example of
+	// thrinfo_t nodes NOT marked as needing their comms freed are those
+	// associated with packm thrinfo_t nodes.
+	if ( bli_thrinfo_needs_free_comm( thread ) )
+	{
+		// The ochief always frees his communicator, and the ichief free its
+		// communicator if we are at the leaf node.
+		if ( bli_thread_am_ochief( thread ) )
+			bli_thrcomm_free( rntm, bli_thrinfo_ocomm( thread ) );
+	}
+
+	// Recursively free all children of the current thrinfo_t.
+	bli_thrinfo_free( rntm, thrinfo_sub_node );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_thrinfo_free(): " );
+	#endif
+
+	// Free the thrinfo_t struct.
+	bli_sba_release( rntm, thread );
+}
+
 // -----------------------------------------------------------------------------
 
 #include "assert.h"
 
-#define BLIS_NUM_STATIC_COMMS 18
+#define BLIS_NUM_STATIC_COMMS 80
 
 thrinfo_t* bli_thrinfo_create_for_cntl
      (
@@ -113,12 +155,12 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 
 	thrinfo_t* thread_chl;
 
-	bszid_t bszid_chl = bli_cntl_bszid( cntl_chl );
+	const bszid_t bszid_chl = bli_cntl_bszid( cntl_chl );
 
-	dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
-	dim_t parent_n_way   = bli_thread_n_way( thread_par );
-	dim_t parent_comm_id = bli_thread_ocomm_id( thread_par );
-	dim_t parent_work_id = bli_thread_work_id( thread_par );
+	const dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
+	const dim_t parent_n_way   = bli_thread_n_way( thread_par );
+	const dim_t parent_comm_id = bli_thread_ocomm_id( thread_par );
+	const dim_t parent_work_id = bli_thread_work_id( thread_par );
 
 	dim_t child_nt_in;
 	dim_t child_comm_id;
@@ -157,7 +199,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	// object and store it in the array element corresponding to the
 	// parent's work id.
 	if ( child_comm_id == 0 )
-		new_comms[ parent_work_id ] = bli_thrcomm_create( child_nt_in );
+		new_comms[ parent_work_id ] = bli_thrcomm_create( rntm, child_nt_in );
 
 	bli_thread_obarrier( thread_par );
 
@@ -165,6 +207,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	// that was created by their chief, as identified by parent_work_id.
 	thread_chl = bli_thrinfo_create
 	(
+	  rntm,
 	  new_comms[ parent_work_id ],
 	  child_comm_id,
 	  child_n_way,
@@ -254,6 +297,7 @@ thrinfo_t* bli_thrinfo_rgrow
 		// freed when thread_seg, or one of its descendents, is freed.
 		thread_cur = bli_thrinfo_create
 		(
+		  rntm,
 		  bli_thrinfo_ocomm( thread_seg ),
 		  bli_thread_ocomm_id( thread_seg ),
 		  bli_cntl_calc_num_threads_in( rntm, cntl_cur ),

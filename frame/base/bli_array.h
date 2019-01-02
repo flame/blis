@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,37 +32,86 @@
 
 */
 
-#ifndef BLIS_THRCOMM_H
-#define BLIS_THRCOMM_H
+#ifndef BLIS_ARRAY_H
+#define BLIS_ARRAY_H
 
-// Include definitions (mostly thrcomm_t) specific to the method of
-// multithreading.
-#include "bli_thrcomm_single.h"
-#include "bli_thrcomm_openmp.h"
-#include "bli_thrcomm_pthreads.h"
+// -- Array type --
 
-
-// thread entry point prototype.
-void* bli_l3_thread_entry( void* data_void );
-
-
-// thrcomm_t query (field only)
-
-static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
+/*
+typedef struct
 {
-	return comm->n_threads;
+	void*     buf;
+
+	siz_t     num_elem;
+	siz_t     elem_size;
+
+} array_t;
+*/
+
+
+// Array entry query
+
+static void* bli_array_buf( array_t* array )
+{
+	return array->buf;
 }
 
+static siz_t bli_array_num_elem( array_t* array )
+{
+	return array->num_elem;
+}
 
-// Thread communicator prototypes.
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
-void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
-void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
-void       bli_thrcomm_cleanup( thrcomm_t* comm );
-void       bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
-void*      bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
+static siz_t bli_array_elem_size( array_t* array )
+{
+	return array->elem_size;
+}
 
-void       bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
+// Array entry modification
+
+static void bli_array_set_buf( void* buf, array_t* array ) \
+{
+	array->buf = buf;
+}
+
+static void bli_array_set_num_elem( siz_t num_elem, array_t* array ) \
+{
+	array->num_elem = num_elem;
+}
+
+static void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
+{
+	array->elem_size = elem_size;
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_array_init
+     (
+       const siz_t       num_elem,
+       const siz_t       elem_size,
+       array_t* restrict array
+     );
+void bli_array_resize
+     (
+       const siz_t       num_elem_new,
+       array_t* restrict array
+     );
+void bli_array_finalize
+     (
+       array_t* restrict array
+     );
+
+void* bli_array_elem
+     (
+       const siz_t       index,
+       array_t* restrict array
+     );
+void bli_array_set_elem
+     (
+       void*    restrict elem,
+       const siz_t       index,
+       array_t* restrict array
+     );
 
 #endif
 

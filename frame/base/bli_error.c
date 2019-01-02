@@ -150,6 +150,9 @@ void bli_error_init_msgs( void )
 	sprintf( bli_error_string_for_code(BLIS_EXPECTED_NONNULL_OBJECT_BUFFER),
 	         "Encountered object with non-zero dimensions containing null buffer." );
 
+	sprintf( bli_error_string_for_code(BLIS_MALLOC_RETURNED_NULL),
+	         "malloc() returned NULL; heap memory is likely exhausted." );
+
 	sprintf( bli_error_string_for_code(BLIS_INVALID_PACKBUF),
 	         "Invalid packbuf_t value." );
 	sprintf( bli_error_string_for_code(BLIS_EXHAUSTED_CONTIG_MEMORY_POOL),

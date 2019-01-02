@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,7 +49,7 @@ typedef struct rntm_s
 */
 
 //
-// -- rntm_t query -------------------------------------------------------------
+// -- rntm_t query (public API) ------------------------------------------------
 //
 
 static dim_t bli_rntm_num_threads( rntm_t* rntm )
@@ -84,6 +85,34 @@ static dim_t bli_rntm_ir_ways( rntm_t* rntm )
 static dim_t bli_rntm_pr_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KR, rntm );
+}
+
+//
+// -- rntm_t query (internal use only) -----------------------------------------
+//
+
+static pool_t* bli_rntm_sba_pool( rntm_t* rntm )
+{
+	return rntm->sba_pool;
+}
+
+static membrk_t* bli_rntm_membrk( rntm_t* rntm )
+{
+	return rntm->membrk;
+}
+
+static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
+{
+	const bool_t nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
+	const bool_t jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
+	const bool_t pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
+	const bool_t ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
+	const bool_t jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
+	const bool_t ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
+	const bool_t pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
+
+	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
+	else                                          return FALSE;
 }
 
 //
@@ -136,6 +165,16 @@ static void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 	bli_rntm_set_pr_ways_only(  1, rntm );
 }
 
+static void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
+{
+	rntm->sba_pool = sba_pool;
+}
+
+static void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
+{
+	rntm->membrk = membrk;
+}
+
 static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
 	bli_rntm_set_num_threads_only( -1, rntm );
@@ -143,6 +182,10 @@ static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 static void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
 	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
+}
+static void bli_rntm_clear_sba_pool( rntm_t* rntm )
+{
+	bli_rntm_set_sba_pool( NULL, rntm );
 }
 
 //
@@ -181,12 +224,15 @@ static void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir,
 // will be in a good state upon return.
 
 #define BLIS_RNTM_INITIALIZER { .num_threads = -1, \
-                                .thrloop = { -1, -1, -1, -1, -1, -1 } } \
+                                .thrloop = { -1, -1, -1, -1, -1, -1 }, \
+                                .sba_pool = NULL } \
 
 static void bli_rntm_init( rntm_t* rntm )
 {
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
+
+	bli_rntm_clear_sba_pool( rntm );
 }
 
 // -----------------------------------------------------------------------------

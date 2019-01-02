@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,7 +45,6 @@ void bli_l3_packm
        thrinfo_t* thread
      )
 {
-	membrk_t* membrk;
 	packbuf_t pack_buf_type;
 	mem_t*    cntl_mem_p;
 	siz_t     size_needed;
@@ -69,9 +69,6 @@ void bli_l3_packm
 	// return early.
 	if ( size_needed == 0 ) return;
 
-	// Query the memory broker from the context.
-	membrk = bli_cntx_get_membrk( cntx );
-
 	// Query the pack buffer type from the control tree node.
 	pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
 
@@ -88,11 +85,15 @@ void bli_l3_packm
 
 		if ( bli_thread_am_ochief( thread ) )
 		{
+			#ifdef BLIS_ENABLE_MEM_TRACING
+			printf( "bli_l3_packm(): acquiring mem pool block\n" );
+			#endif
+
 			// The chief thread acquires a block from the memory broker
 			// and saves the associated mem_t entry to local_mem_s.
 			bli_membrk_acquire_m
 			(
-			  membrk,
+			  rntm,
 			  size_needed,
 			  pack_buf_type,
 			  &local_mem_s
@@ -129,10 +130,14 @@ void bli_l3_packm
 				// The chief thread releases the existing block associated with
 				// the mem_t entry in the control tree, and then re-acquires a
 				// new block, saving the associated mem_t entry to local_mem_s.
-				bli_membrk_release( cntl_mem_p );
+				bli_membrk_release
+				(
+				  rntm,
+				  cntl_mem_p
+				);
 				bli_membrk_acquire_m
 				(
-				  membrk,
+				  rntm,
 				  size_needed,
 				  pack_buf_type,
 				  &local_mem_s

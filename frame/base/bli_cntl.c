@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,6 +37,7 @@
 
 cntl_t* bli_cntl_create_node
      (
+       rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
        void*   var_func,
@@ -46,8 +48,12 @@ cntl_t* bli_cntl_create_node
 	cntl_t* cntl;
 	mem_t*  pack_mem;
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntl_create_node(): " );
+	#endif
+
 	// Allocate the cntl_t struct.
-	cntl = bli_malloc_intl( sizeof( cntl_t ) );
+	cntl = bli_sba_acquire( rntm, sizeof( cntl_t ) );
 
 	bli_cntl_set_family( family, cntl );
 	bli_cntl_set_bszid( bszid, cntl );
@@ -67,10 +73,15 @@ cntl_t* bli_cntl_create_node
 
 void bli_cntl_free_node
      (
+       rntm_t* rntm,
        cntl_t* cntl
      )
 {
-	bli_free_intl( cntl );
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntl_free_node(): " );
+	#endif
+
+	bli_sba_release( rntm, cntl );
 }
 
 void bli_cntl_clear_node
@@ -96,17 +107,19 @@ void bli_cntl_clear_node
 
 void bli_cntl_free
      (
-       cntl_t* cntl,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      )
 {
-	if ( thread != NULL ) bli_cntl_free_w_thrinfo( cntl, thread );
-	else                  bli_cntl_free_wo_thrinfo( cntl );
+	if ( thread != NULL ) bli_cntl_free_w_thrinfo( rntm, cntl, thread );
+	else                  bli_cntl_free_wo_thrinfo( rntm, cntl );
 }
 
 void bli_cntl_free_w_thrinfo
      (
-       cntl_t* cntl,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      )
 {
@@ -124,13 +137,17 @@ void bli_cntl_free_w_thrinfo
 	{
 		// Recursively free all memory associated with the sub-node and its
 		// children.
-		bli_cntl_free_w_thrinfo( cntl_sub_node, thread_sub_node );
+		bli_cntl_free_w_thrinfo( rntm, cntl_sub_node, thread_sub_node );
 	}
 
 	// Free the current node's params field, if it is non-NULL.
 	if ( cntl_params != NULL )
 	{
-		bli_free_intl( cntl_params );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_cntl_free_w_thrinfo(): " );
+		#endif
+
+		bli_sba_release( rntm, cntl_params );
 	}
 
 	// Release the current node's pack mem_t entry back to the memory
@@ -139,15 +156,20 @@ void bli_cntl_free_w_thrinfo
 	if ( bli_thread_am_ochief( thread ) )
 	if ( bli_mem_is_alloc( cntl_pack_mem ) )
 	{
-		bli_membrk_release( cntl_pack_mem );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_cntl_free_w_thrinfo(): releasing mem pool block.\n" );
+		#endif
+
+		bli_membrk_release( rntm, cntl_pack_mem );
 	}
 
 	// Free the current node.
-	bli_cntl_free_node( cntl );
+	bli_cntl_free_node( rntm, cntl );
 }
 
 void bli_cntl_free_wo_thrinfo
      (
+       rntm_t* rntm,
        cntl_t* cntl
      )
 {
@@ -161,13 +183,13 @@ void bli_cntl_free_wo_thrinfo
 	{
 		// Recursively free all memory associated with the sub-node and its
 		// children.
-		bli_cntl_free_wo_thrinfo( cntl_sub_node );
+		bli_cntl_free_wo_thrinfo( rntm, cntl_sub_node );
 	}
 
 	// Free the current node's params field, if it is non-NULL.
 	if ( cntl_params != NULL )
 	{
-		bli_free_intl( cntl_params );
+		bli_sba_release( rntm, cntl_params );
 	}
 
 	// Release the current node's pack mem_t entry back to the memory
@@ -175,17 +197,18 @@ void bli_cntl_free_wo_thrinfo
 	// allocated.
 	if ( bli_mem_is_alloc( cntl_pack_mem ) )
 	{
-		bli_membrk_release( cntl_pack_mem );
+		bli_membrk_release( rntm, cntl_pack_mem );
 	}
 
 	// Free the current node.
-	bli_cntl_free_node( cntl );
+	bli_cntl_free_node( rntm, cntl );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_cntl_copy
      (
+       rntm_t* rntm,
        cntl_t* cntl
      )
 {
@@ -195,6 +218,7 @@ cntl_t* bli_cntl_copy
 	// field.
 	cntl_t* cntl_copy = bli_cntl_create_node
 	(
+      rntm,
 	  bli_cntl_family( cntl ),
 	  bli_cntl_bszid( cntl ),
 	  bli_cntl_var_func( cntl ),
@@ -210,7 +234,7 @@ cntl_t* bli_cntl_copy
 		// struct.
 		uint64_t params_size = bli_cntl_params_size( cntl );
 		void*    params_orig = bli_cntl_params( cntl );
-		void*    params_copy = bli_malloc_intl( ( size_t )params_size );
+		void*    params_copy = bli_sba_acquire( rntm, ( size_t )params_size );
 
 		// Copy the original params struct to the new memory region.
 		memcpy( params_copy, params_orig, params_size );
@@ -225,6 +249,7 @@ cntl_t* bli_cntl_copy
 	{
 		cntl_t* sub_node_copy = bli_cntl_copy
 		(
+		  rntm,
 		  bli_cntl_sub_node( cntl )
 		);
 

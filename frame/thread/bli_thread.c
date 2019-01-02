@@ -46,7 +46,7 @@ static rntm_t global_rntm;
 
 void bli_thread_init( void )
 {
-	bli_thrcomm_init( &BLIS_SINGLE_COMM, 1 );
+	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 

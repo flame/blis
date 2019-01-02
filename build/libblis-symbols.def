@@ -42,10 +42,23 @@ bli_amaxv
 bli_amaxv_check
 bli_amaxv_ex
 bli_amaxv_ex_qfp
+bli_apool_alloc_block
+bli_apool_array_elem
+bli_apool_checkin_array
+bli_apool_checkout_array
+bli_apool_finalize
+bli_apool_free_block
+bli_apool_grow
+bli_apool_init
 bli_arch_query_id
 bli_arch_set_id
 bli_arch_set_id_once
 bli_arch_string
+bli_array_elem
+bli_array_finalize
+bli_array_init
+bli_array_resize
+bli_array_set_elem
 bli_asumv
 bli_asumv_check
 bli_asumv_ex
@@ -129,6 +142,7 @@ bli_ccopym_unb_var1
 bli_ccopyv
 bli_ccopyv_ex
 bli_ccpackm_blk_var1_md
+bli_ccpackm_cxk_1e_md
 bli_ccpackm_cxk_1r_md
 bli_ccpackm_struc_cxk_md
 bli_ccxpbym_md
@@ -151,6 +165,7 @@ bli_cdotxf_ex
 bli_cdotxv
 bli_cdotxv_ex
 bli_cdpackm_blk_var1_md
+bli_cdpackm_cxk_1e_md
 bli_cdpackm_cxk_1r_md
 bli_cdpackm_struc_cxk_md
 bli_cdxpbym_md
@@ -240,6 +255,7 @@ bli_check_valid_datatype
 bli_check_valid_diag
 bli_check_valid_error_level
 bli_check_valid_kc_mod_mult
+bli_check_valid_malloc_buf
 bli_check_valid_mc_mod_mult
 bli_check_valid_nc_mod_mult
 bli_check_valid_packbuf
@@ -453,6 +469,7 @@ bli_csgemm_ker_var2_md
 bli_cshiftd
 bli_cshiftd_ex
 bli_cspackm_blk_var1_md
+bli_cspackm_cxk_1e_md
 bli_cspackm_cxk_1r_md
 bli_cspackm_struc_cxk_md
 bli_csqrtsc
@@ -556,6 +573,7 @@ bli_czcopysc
 bli_czgemm_ker_var2_md
 bli_czipsc
 bli_czpackm_blk_var1_md
+bli_czpackm_cxk_1e_md
 bli_czpackm_cxk_1r_md
 bli_czpackm_struc_cxk_md
 bli_czxpbym_md
@@ -605,6 +623,7 @@ bli_dcopym_unb_var1
 bli_dcopyv
 bli_dcopyv_ex
 bli_dcpackm_blk_var1_md
+bli_dcpackm_cxk_1e_md
 bli_dcpackm_cxk_1r_md
 bli_dcpackm_struc_cxk_md
 bli_dcxpbym_md
@@ -631,6 +650,7 @@ bli_ddotxv
 bli_ddotxv_ex
 bli_ddotxv_zen_int
 bli_ddpackm_blk_var1_md
+bli_ddpackm_cxk_1e_md
 bli_ddpackm_cxk_1r_md
 bli_ddpackm_struc_cxk_md
 bli_ddxpbym_md
@@ -838,6 +858,7 @@ bli_dsgemm_ker_var2_md
 bli_dshiftd
 bli_dshiftd_ex
 bli_dspackm_blk_var1_md
+bli_dspackm_cxk_1e_md
 bli_dspackm_cxk_1r_md
 bli_dspackm_struc_cxk_md
 bli_dsqrtsc
@@ -946,6 +967,7 @@ bli_dzcopysc
 bli_dzgemm_ker_var2_md
 bli_dzipsc
 bli_dzpackm_blk_var1_md
+bli_dzpackm_cxk_1e_md
 bli_dzpackm_cxk_1r_md
 bli_dzpackm_struc_cxk_md
 bli_dzxpbym_md
@@ -958,11 +980,16 @@ bli_error_finalize
 bli_error_init
 bli_error_init_msgs
 bli_error_string_for_code
+bli_ffree_align
+bli_ffree_noalign
 bli_finalize
 bli_finalize_apis
 bli_finalize_auto
 bli_finalize_once
 bli_find_area_trap_l
+bli_fmalloc_align
+bli_fmalloc_align_check
+bli_fmalloc_noalign
 bli_fprintm
 bli_fprintm_check
 bli_fprintm_ex
@@ -971,9 +998,7 @@ bli_fprintv
 bli_fprintv_check
 bli_fprintv_ex
 bli_fprintv_qfp
-bli_free_align
 bli_free_intl
-bli_free_noalign
 bli_free_pool
 bli_free_user
 bli_func_create
@@ -1187,9 +1212,10 @@ bli_info_get_enable_blas
 bli_info_get_enable_cblas
 bli_info_get_enable_memkind
 bli_info_get_enable_openmp
-bli_info_get_enable_packbuf_pools
+bli_info_get_enable_pba_pools
 bli_info_get_enable_pthreads
 bli_info_get_enable_sandbox
+bli_info_get_enable_sba_pools
 bli_info_get_enable_stay_auto_init
 bli_info_get_enable_threading
 bli_info_get_gemm_impl_string
@@ -1264,7 +1290,7 @@ bli_l1v_xi_check
 bli_l1v_xy_check
 bli_l3_basic_check
 bli_l3_cntl_create_if
-bli_l3_cntl_free_if
+bli_l3_cntl_free
 bli_l3_determine_kc
 bli_l3_direct
 bli_l3_ind_oper_enable_only
@@ -1289,17 +1315,13 @@ bli_l3_thrinfo_print_paths
 bli_lcm
 bli_lsame
 bli_machval
-bli_malloc_align
-bli_malloc_align_check
 bli_malloc_intl
-bli_malloc_noalign
 bli_malloc_pool
 bli_malloc_user
 bli_mbool_create
 bli_mbool_free
 bli_mbool_init
 bli_membrk_acquire_m
-bli_membrk_acquire_v
 bli_membrk_compute_pool_block_sizes
 bli_membrk_compute_pool_block_sizes_dt
 bli_membrk_finalize
@@ -1307,9 +1329,10 @@ bli_membrk_finalize_pools
 bli_membrk_init
 bli_membrk_init_pools
 bli_membrk_pool_size
+bli_membrk_query
 bli_membrk_release
+bli_membrk_rntm_set_membrk
 bli_memsys_finalize
-bli_memsys_global_membrk
 bli_memsys_init
 bli_mkherm
 bli_mkherm_check
@@ -1448,11 +1471,16 @@ bli_prune_unref_mparts
 bli_pthread_barrier_destroy
 bli_pthread_barrier_init
 bli_pthread_barrier_wait
+bli_pthread_cond_broadcast
+bli_pthread_cond_destroy
+bli_pthread_cond_init
+bli_pthread_cond_wait
 bli_pthread_create
 bli_pthread_join
 bli_pthread_mutex_destroy
 bli_pthread_mutex_init
 bli_pthread_mutex_lock
+bli_pthread_mutex_trylock
 bli_pthread_mutex_unlock
 bli_pthread_once
 bli_randm
@@ -1505,6 +1533,14 @@ bli_saxpyv
 bli_saxpyv_ex
 bli_saxpyv_zen_int
 bli_saxpyv_zen_int10
+bli_sba_acquire
+bli_sba_checkin_array
+bli_sba_checkout_array
+bli_sba_finalize
+bli_sba_init
+bli_sba_query
+bli_sba_release
+bli_sba_rntm_set_pool
 bli_scal2d
 bli_scal2d_check
 bli_scal2d_ex
@@ -1523,7 +1559,6 @@ bli_scald_ex
 bli_scald_ex_qfp
 bli_scalm
 bli_scalm_check
-bli_scalm_cntl_create_node
 bli_scalm_ex
 bli_scalm_ex_qfp
 bli_scalv
@@ -1543,6 +1578,7 @@ bli_scopym_unb_var1
 bli_scopyv
 bli_scopyv_ex
 bli_scpackm_blk_var1_md
+bli_scpackm_cxk_1e_md
 bli_scpackm_cxk_1r_md
 bli_scpackm_struc_cxk_md
 bli_scxpbym_md
@@ -1569,6 +1605,7 @@ bli_sdotxv
 bli_sdotxv_ex
 bli_sdotxv_zen_int
 bli_sdpackm_blk_var1_md
+bli_sdpackm_cxk_1e_md
 bli_sdpackm_cxk_1r_md
 bli_sdpackm_struc_cxk_md
 bli_sdxpbym_md
@@ -1780,6 +1817,7 @@ bli_ssgemm_ker_var2_md
 bli_sshiftd
 bli_sshiftd_ex
 bli_sspackm_blk_var1_md
+bli_sspackm_cxk_1e_md
 bli_sspackm_cxk_1r_md
 bli_sspackm_struc_cxk_md
 bli_ssqrtsc
@@ -1955,6 +1993,7 @@ bli_szcopysc
 bli_szgemm_ker_var2_md
 bli_szipsc
 bli_szpackm_blk_var1_md
+bli_szpackm_cxk_1e_md
 bli_szpackm_cxk_1r_md
 bli_szpackm_struc_cxk_md
 bli_szxpbym_md
@@ -1997,6 +2036,7 @@ bli_thread_set_ways
 bli_thread_set_ways_
 bli_thrinfo_create
 bli_thrinfo_create_for_cntl
+bli_thrinfo_free
 bli_thrinfo_grow
 bli_thrinfo_init
 bli_thrinfo_init_single
@@ -2166,6 +2206,7 @@ bli_zcopym_unb_var1
 bli_zcopyv
 bli_zcopyv_ex
 bli_zcpackm_blk_var1_md
+bli_zcpackm_cxk_1e_md
 bli_zcpackm_cxk_1r_md
 bli_zcpackm_struc_cxk_md
 bli_zcxpbym_md
@@ -2188,6 +2229,7 @@ bli_zdotxf_ex
 bli_zdotxv
 bli_zdotxv_ex
 bli_zdpackm_blk_var1_md
+bli_zdpackm_cxk_1e_md
 bli_zdpackm_cxk_1r_md
 bli_zdpackm_struc_cxk_md
 bli_zdxpbym_md
@@ -2377,6 +2419,7 @@ bli_zsgemm_ker_var2_md
 bli_zshiftd
 bli_zshiftd_ex
 bli_zspackm_blk_var1_md
+bli_zspackm_cxk_1e_md
 bli_zspackm_cxk_1r_md
 bli_zspackm_struc_cxk_md
 bli_zsqrtsc
@@ -2480,6 +2523,7 @@ bli_zzcopysc
 bli_zzgemm_ker_var2_md
 bli_zzipsc
 bli_zzpackm_blk_var1_md
+bli_zzpackm_cxk_1e_md
 bli_zzpackm_cxk_1r_md
 bli_zzpackm_struc_cxk_md
 bli_zzxpbym_md

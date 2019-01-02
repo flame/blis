@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,37 +32,44 @@
 
 */
 
-#ifndef BLIS_THRCOMM_H
-#define BLIS_THRCOMM_H
+#ifndef BLIS_SBA_H
+#define BLIS_SBA_H
 
-// Include definitions (mostly thrcomm_t) specific to the method of
-// multithreading.
-#include "bli_thrcomm_single.h"
-#include "bli_thrcomm_openmp.h"
-#include "bli_thrcomm_pthreads.h"
+apool_t* bli_sba_query( void );
 
+// -----------------------------------------------------------------------------
 
-// thread entry point prototype.
-void* bli_l3_thread_entry( void* data_void );
+void bli_sba_init( void );
+void bli_sba_finalize( void );
 
+array_t* bli_sba_checkout_array
+     (
+       const siz_t n_threads
+     );
 
-// thrcomm_t query (field only)
+void bli_sba_checkin_array
+     (
+       array_t* restrict array
+     );
 
-static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
-{
-	return comm->n_threads;
-}
+void bli_sba_rntm_set_pool
+     (
+       siz_t             index,
+       array_t* restrict array,
+       rntm_t*  restrict rntm
+     );
 
+void* bli_sba_acquire
+     (
+       rntm_t* restrict rntm,
+       siz_t            req_size
+     );
+void bli_sba_release
+     (
+       rntm_t* restrict rntm,
+       void*   restrict block
+     );
 
-// Thread communicator prototypes.
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
-void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
-void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
-void       bli_thrcomm_cleanup( thrcomm_t* comm );
-void       bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
-void*      bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
-
-void       bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
 
 #endif
 

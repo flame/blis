@@ -921,12 +921,33 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
+// These headers must be included here (or earlier) because definitions they
+// provide are needed in the pool_t and related structs.
+#include "bli_pthread.h"
+#include "bli_malloc.h"
+
+// -- Array type --
+
+typedef struct
+{
+	void*     buf;
+
+	siz_t     num_elem;
+	siz_t     elem_size;
+
+	//malloc_ft malloc_fp;
+	//free_ft   free_fp;
+
+} array_t;
+
+
 // -- Pool block type --
 
 typedef struct
 {
-	void* buf_sys;
-	void* buf_align;
+	void*     buf;
+	siz_t     block_size;
+
 } pblk_t;
 
 
@@ -934,31 +955,45 @@ typedef struct
 
 typedef struct
 {
-	pblk_t* block_ptrs;
-	dim_t   block_ptrs_len;
+	void*     block_ptrs;
+	dim_t     block_ptrs_len;
 
-	dim_t   top_index;
-	dim_t   num_blocks;
+	dim_t     top_index;
+	dim_t     num_blocks;
 
-	siz_t   block_size;
-	siz_t   align_size;
+	siz_t     block_size;
+	siz_t     align_size;
+
+	malloc_ft malloc_fp;
+	free_ft   free_fp;
+
 } pool_t;
 
 
-// -- Memory broker object type --
+// -- small block allocator: Locked pool-of-arrays-of-pools type --
 
-// These headers must be included here (or earlier) because definitions they
-// provide are needed in the membrk_t struct.
-#include "bli_pthread.h"
-#include "bli_malloc.h"
+typedef struct
+{
+	bli_pthread_mutex_t mutex;
+	pool_t              pool;
+
+	siz_t               def_array_len;
+
+} apool_t;
+
+
+// -- packing block allocator: Locked set of pools type --
 
 typedef struct membrk_s
 {
 	pool_t              pools[3];
 	bli_pthread_mutex_t mutex;
 
+	// These fields are used for general-purpose allocation.
+	siz_t               align_size;
 	malloc_ft           malloc_fp;
 	free_ft             free_fp;
+
 } membrk_t;
 
 
@@ -969,7 +1004,6 @@ typedef struct mem_s
 	pblk_t    pblk;
 	packbuf_t buf_type;
 	pool_t*   pool;
-	membrk_t* membrk;
 	siz_t     size;
 } mem_t;
 
@@ -1193,7 +1227,6 @@ typedef struct cntx_s
 	pack_t    schema_b_panel;
 	pack_t    schema_c_panel;
 
-	membrk_t* membrk;
 } cntx_t;
 
 
@@ -1201,8 +1234,17 @@ typedef struct cntx_s
 
 typedef struct rntm_s
 {
+	// "External" fields: these may be queried by the end-user.
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
+	// "Internal" fields: these should not be exposed to the end-user.
+
+	// The small block pool, which is attached in the l3 thread decorator.
+	pool_t*   sba_pool;
+
+	// The packing block allocator, which is attached in the l3 thread decorator.
+	membrk_t* membrk;
 
 } rntm_t;
 
@@ -1290,28 +1332,31 @@ typedef enum
 	// Buffer-specific errors 
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
-	// Memory allocator errors
-	BLIS_INVALID_PACKBUF                       = (-120),
-	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-122),
-	BLIS_INSUFFICIENT_STACK_BUF_SIZE           = (-123),
-	BLIS_ALIGNMENT_NOT_POWER_OF_TWO            = (-124),
-	BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE        = (-125),
+	// Memory errors
+	BLIS_MALLOC_RETURNED_NULL                  = (-120),
+
+	// Internal memory pool errors
+	BLIS_INVALID_PACKBUF                       = (-130),
+	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-131),
+	BLIS_INSUFFICIENT_STACK_BUF_SIZE           = (-132),
+	BLIS_ALIGNMENT_NOT_POWER_OF_TWO            = (-133),
+	BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE        = (-134),
 
 	// Object-related errors
-	BLIS_EXPECTED_OBJECT_ALIAS                 = (-130),
+	BLIS_EXPECTED_OBJECT_ALIAS                 = (-140),
 
 	// Architecture-related errors
-	BLIS_INVALID_ARCH_ID                       = (-140),
+	BLIS_INVALID_ARCH_ID                       = (-150),
 
 	// Blocksize-related errors
-	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-150),
-	BLIS_MC_MAX_NONMULTIPLE_OF_MR              = (-151),
-	BLIS_NC_DEF_NONMULTIPLE_OF_NR              = (-152),
-	BLIS_NC_MAX_NONMULTIPLE_OF_NR              = (-153),
-	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-154),
-	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-155),
+	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),
+	BLIS_MC_MAX_NONMULTIPLE_OF_MR              = (-161),
+	BLIS_NC_DEF_NONMULTIPLE_OF_NR              = (-162),
+	BLIS_NC_MAX_NONMULTIPLE_OF_NR              = (-163),
+	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-164),
+	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-165),
 
-	BLIS_ERROR_CODE_MAX                        = (-160)
+	BLIS_ERROR_CODE_MAX                        = (-170)
 } err_t;
 
 #endif

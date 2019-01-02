@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,6 +61,7 @@ typedef struct cntl_s cntl_t;
 
 cntl_t* bli_cntl_create_node
      (
+       rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
        void*   var_func,
@@ -69,6 +71,7 @@ cntl_t* bli_cntl_create_node
 
 void bli_cntl_free_node
      (
+       rntm_t* rntm,
        cntl_t* cntl
      );
 
@@ -81,23 +84,27 @@ void bli_cntl_clear_node
 
 void bli_cntl_free
      (
-       cntl_t* cntl,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      );
 
 void bli_cntl_free_w_thrinfo
      (
-       cntl_t* cntl,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      );
 
 void bli_cntl_free_wo_thrinfo
      (
-       cntl_t* cntl
+       rntm_t*    rntm,
+       cntl_t*    cntl
      );
 
 cntl_t* bli_cntl_copy
      (
+       rntm_t* rntm,
        cntl_t* cntl
      );
 
