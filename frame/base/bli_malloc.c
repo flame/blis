@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+//#define ENABLE_DEBUG
+
 // -----------------------------------------------------------------------------
 
 void* bli_malloc_pool( size_t size )
@@ -41,11 +43,19 @@ void* bli_malloc_pool( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
 	const size_t    align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
 
+#ifdef ENABLE_DEBUG
+	printf( "bli_malloc_pool(): allocating block (size %ld, align size %ld)\n",
+	        ( long )size, ( long )align_size );
+#endif
+
 	return bli_malloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_pool( void* p )
 {
+#ifdef ENABLE_DEBUG
+	printf( "bli_free_pool(): freeing block\n" );
+#endif
 	bli_free_align( BLIS_FREE_POOL, p );
 }
 
@@ -56,11 +66,19 @@ void* bli_malloc_user( size_t size )
 	const malloc_ft malloc_fp  = BLIS_MALLOC_USER;
 	const size_t    align_size = BLIS_HEAP_ADDR_ALIGN_SIZE;
 
+#ifdef ENABLE_DEBUG
+	printf( "bli_malloc_user(): allocating block (size %ld, align size %ld)\n",
+	        ( long )size, ( long )align_size );
+#endif
+
 	return bli_malloc_align( malloc_fp, size, align_size );
 }
 
 void bli_free_user( void* p )
 {
+#ifdef ENABLE_DEBUG
+	printf( "bli_free_user(): freeing block\n" );
+#endif
 	bli_free_align( BLIS_FREE_USER, p );
 }
 
@@ -70,11 +88,21 @@ void* bli_malloc_intl( size_t size )
 {
 	const malloc_ft malloc_fp = BLIS_MALLOC_INTL;
 
+#ifdef ENABLE_DEBUG
+	printf( "bli_malloc_intl(): allocating block (size %ld)\n",
+	        ( long )size );
+#endif
+
 	return bli_malloc_noalign( malloc_fp, size );
 }
 
 void* bli_calloc_intl( size_t size )
 {
+#ifdef ENABLE_DEBUG
+	printf( "bli_calloc_intl(): allocating block (size %ld)\n",
+	        ( long )size );
+#endif
+
 	void* p = bli_malloc_intl( size );
 
 	memset( p, 0, size );
@@ -84,6 +112,9 @@ void* bli_calloc_intl( size_t size )
 
 void bli_free_intl( void* p )
 {
+#ifdef ENABLE_DEBUG
+	printf( "bli_free_intl(): freeing block\n" );
+#endif
 	bli_free_noalign( BLIS_FREE_INTL, p );
 }
 
