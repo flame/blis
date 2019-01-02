@@ -40,7 +40,7 @@
 **************************************************************************************/
 
 #define INIT4x4 \
-"   vsub.f32        s16 , s16 , s16             \n\t" \
+"   flds            s16, [ r11 ]                \n\t" \
 "   vmov.f32        s17, s16                    \n\t" \
 "   vmov.f32        s18, s16                    \n\t" \
 "   vmov.f32        s19, s16                    \n\t" \
@@ -373,8 +373,8 @@ void bli_sgemm_arm32vfp_asm_4x4
     uint32_t k_left = k0 % 8;
     uint32_t rs_c   = rs_c0;
     uint32_t cs_c   = cs_c0;
-    float _one = 1.0;
-    float *one = &_one;
+    float _zero_one[2] = { 0.0, 1.0 };
+    float *zero_one = &_zero_one[0];
 
 __asm__ volatile (
 " ldr r0,%[k_iter]                  \n\t"
@@ -386,7 +386,7 @@ __asm__ volatile (
 " ldr r6,%[baddr]                   \n\t"
 " ldr r7,%[cs_c]                    \n\t"
 " ldr r8,%[rs_c]                    \n\t"
-" ldr r11,%[one]                    \n\t"
+" ldr r11,%[zero_one]               \n\t"
 " cmp r0,#2                         \n\t"
 " blt K_ITER_LE_TWO                 \n\t" // sgemm_kernel_L4_M4_32
 
@@ -466,7 +466,7 @@ __asm__ volatile (
 
 " flds s0, [ r2 ]                   \n\t" // s0 <- alpha
 
-" flds s1, [ r11 ]                  \n\t" // s1 <- 1.0
+" flds s1, [ r11, #4 ]              \n\t" // s1 <- 1.0
 " vcmpe.f32 s0, s1                  \n\t"
 " vmrs APSR_nzcv, FPSCR             \n\t"
 " beq STORE                         \n\t" 
@@ -510,7 +510,7 @@ __asm__ volatile (
  [rs_c]   "m" (rs_c),   // r8
  [a_next] "m" (a_next), // r9
  [b_next] "m" (b_next), // r10
- [one]    "m" (one)     // r11
+ [zero_one] "m" (zero_one) // r11
 : // Clobber
   "r0",  "r1",  "r2",  "r3",
   "r4",  "r5",  "r6",  "r7",
