@@ -171,7 +171,6 @@ print_usage()
 	echo "                 it no longer needs to call malloc() or free(), even"
 	echo "                 across many separate level-3 operation invocations."
 	echo " "
-	echo " "
 	echo "   --enable-mem-tracing, --disable-mem-tracing"
 	echo " "
 	echo "                 Enable (disable by default) output to stdout that traces"

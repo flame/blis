@@ -397,7 +397,7 @@ pool_t* bli_apool_array_elem
 		// Settle on the parameters to use when initializing the pool_t for
 		// the current index within the array_t.
 		const siz_t num_blocks     = 1;
-		const siz_t block_ptrs_len = 10;
+		const siz_t block_ptrs_len = 25;
 		const siz_t align_size     = 16;
 		malloc_ft   malloc_fp      = BLIS_MALLOC_INTL;
 		free_ft     free_fp        = BLIS_FREE_INTL;

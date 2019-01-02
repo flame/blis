@@ -155,8 +155,9 @@ void* bli_fmalloc_align
 	// Call the allocation function.
 	p_orig = f( size );
 
-	// If NULL was returned, something is probably very wrong.
-	if ( p_orig == NULL ) bli_abort();
+	// Check the pointer returned by malloc().
+	if ( bli_error_checking_is_enabled() )
+		bli_fmalloc_align_post_check( p_orig );
 
 	// Advance the pointer by one pointer element.
 	p_byte = p_orig;
@@ -254,4 +255,16 @@ void bli_fmalloc_align_check
 	bli_check_error_code( e_val );
 }
 
+void bli_fmalloc_align_post_check
+     (
+       void* p
+     )
+{
+	err_t e_val;
+
+	// Check for valid values from malloc().
+
+	e_val = bli_check_valid_malloc_buf( p );
+	bli_check_error_code( e_val );
+}
 
