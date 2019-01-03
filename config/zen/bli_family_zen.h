@@ -46,6 +46,7 @@
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
 
+
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
@@ -56,5 +57,7 @@
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
 
+//This macro will enable  BLIS DGEMM to choose block sizes for a  single instance mode
+#define BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES 	0
 //#endif
 
