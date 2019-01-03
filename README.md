@@ -2,6 +2,20 @@
 
 [![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
 
+Contents
+--------
+
+* **[Introduction](#introduction)**
+* **[What's New](#whats-new)**
+* **[What People Are Saying About BLIS](#what-people-are-saying-about-blis)**
+* **[Key Features](#key-features)**
+* **[Getting Started](#getting-started)**
+* **[Documentation](#documentation)**
+* **[External Linux Packages](#external-linux-packages)**
+* **[Discussion](#discussion)**
+* **[Contributing](#contributing)**
+* **[Citations](#citations)**
+* **[Funding](#funding)**
 
 Introduction
 ------------
@@ -21,12 +35,15 @@ calls](http://www.netlib.org/lapack/lug/node145.html).
 An [object-based API](docs/BLISObjectAPI.md) unique to BLIS is also available.
 
 For a thorough presentation of our framework, please read our
+[ACM Transactions on Mathematical Software (TOMS)](https://toms.acm.org/)
 journal article, ["BLIS: A Framework for Rapidly Instantiating BLAS
-Functionality"](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf).
-For those who just want an executive summary, please see the next section.
+Functionality"](http://dl.acm.org/authorize?N91172).
+For those who just want an executive summary, please see the
+[Key Features](#key-features) section below.
 
-In a follow-up article, ["The BLIS Framework: Experiments in
-Portability"](http://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf),
+In a follow-up article (also in [ACM TOMS](https://toms.acm.org/)),
+["The BLIS Framework: Experiments in
+Portability"](http://dl.acm.org/authorize?N16240),
 we investigate using BLIS to instantiate level-3 BLAS implementations on a
 variety of general-purpose, low-power, and multicore architectures.
 
@@ -59,6 +76,58 @@ and [collaborators](http://shpc.ices.utexas.edu/collaborators.html),
 [publications](http://shpc.ices.utexas.edu/publications.html),
 and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
 
+What's New
+----------
+
+ * **BLIS is now in Debian Unstable!** Thanks to Debian developer-maintainers
+[M. Zhou](https://github.com/cdluminate) and
+[Nico Schlömer](https://github.com/nschloe) for sponsoring our package in Debian.
+Their participation, contributions, and advocacy were key to getting BLIS into
+the second-most popular Linux distribution (behind Ubuntu, which Debian packages
+feed into). The Debian tracker page may be found
+[here](https://tracker.debian.org/pkg/blis).
+
+ * **BLIS now supports mixed-datatype gemm.** The `gemm` operation may now be
+executed on operands of mixed domains and/or mixed precisions. Any combination
+of storage datatype for A, B, and C is now supported, along with a separate
+computation precision that can differ from the storage precision of A and B.
+And even the 1m method now supports mixed-precision computation
+(draft paper forthcoming).
+
+ * **BLIS now implements the 1m method.** Let's face it: writing complex
+assembly `gemm` microkernels for a new architecture is never a priority--and
+now, it almost never needs to be. The 1m method leverages existing real domain
+`gemm` microkernels to implement all complex domain level-3 operations. For
+more details, please see our [ACM TOMS](https://toms.acm.org/) journal article
+submission ([current
+draft](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf)).
+
+What People Are Saying About BLIS
+---------------------------------
+
+*["This is an awesome library."](https://github.com/flame/blis/issues/288#issuecomment-447488637)* ... *["I want to thank you and the blis team for your efforts."](https://github.com/flame/blis/issues/288#issuecomment-448074704)* ([@Lephar](https://github.com/Lephar))
+
+*["Any time somebody outside Intel beats MKL by a nontrivial amount, I report it to the MKL team. It is fantastic for any open-source project to get within 10% of MKL... [T]his is why Intel funds BLIS development."](https://github.com/flame/blis/issues/264#issuecomment-428673275)* ([@jeffhammond](https://github.com/jeffhammond))
+
+*["So BLIS is now a part of Elk."](https://github.com/flame/blis/issues/267#issuecomment-429303902)* ... *["We have found that zgemm applied to a 15000x15000 matrix with multi-threaded BLIS on a 32-core Ryzen 2990WX processor is about twice as fast as MKL"](https://github.com/flame/blis/issues/264#issuecomment-428373946)* ... *["I'm starting to like this a lot."](https://github.com/flame/blis/issues/264#issuecomment-428926191)* ([@jdk2016](https://github.com/jdk2016))
+
+*["I [found] BLIS because I was looking for BLAS operations on C-ordered arrays for NumPy. BLIS has that, but even better is the fact that it's developed in the open using a more modern language than Fortran."](https://github.com/flame/blis/issues/254#issuecomment-423838345)* ([@nschloe](https://github.com/nschloe))
+
+*["The specific reason to have BLIS included [in Linux distributions] is the KNL and SKX [AVX-512] BLAS support, which OpenBLAS doesn't have."](https://github.com/flame/blis/issues/210#issuecomment-393126303)* ([@loveshack](https://github.com/loveshack))
+
+*["All tests pass without errors on OpenBSD. Thanks!"](https://github.com/flame/blis/issues/202#issuecomment-389691543)* ([@ararslan](https://github.com/ararslan))
+
+*["Thank you very much for your great help!... Looking forward to benchmarking."](https://github.com/flame/blis/issues/180#issuecomment-375895449)* ([@mrader1248](https://github.com/mrader1248))
+
+*["Thanks for the beautiful work."](https://github.com/flame/blis/issues/163#issue-286575452)* ([@mmrmo](https://github.com/mmrmo))
+
+*["[M]y software currently uses BLIS for its BLAS interface..."](https://github.com/flame/blis/issues/129#issuecomment-302904805)* ([@ShadenSmith](https://github.com/ShadenSmith))
+
+*["[T]hanks so much for your work on this! Excited to test."](https://github.com/flame/blis/issues/129#issuecomment-341565071)* ... *["[On AMD Excavator], BLIS is competitive to / slightly faster than OpenBLAS for dgemms in my tests."](https://github.com/flame/blis/issues/129#issuecomment-341608673)* ([@iotamudelta](https://github.com/iotamudelta))
+
+*["BLIS provided the only viable option on KNL, whose ecosystem is at present dominated by blackbox toolchains. Thanks again. Keep on this great work."](https://github.com/flame/blis/issues/116#issuecomment-281225101)* ([@heroxbd](https://github.com/heroxbd))
+
+*["I want to definitely try this out..."](https://github.com/flame/blis/issues/12#issuecomment-48086295)* ([@ViralBShah](https://github.com/ViralBShah))
 
 Key Features
 ------------
@@ -176,7 +245,7 @@ matrix multiplication (`gemm`) operation, providing 128 different possible type
 combinations, which, when combined with existing transposition, conjugation,
 and storage parameters, enables 55,296 different `gemm` use cases. For more
 details, please see the documentation on [mixed datatype](docs/MixedDatatypes.md)
-support.
+support (draft paper forthcoming).
 
 Getting Started
 ---------------
@@ -214,32 +283,41 @@ directory). Slightly longer descriptions of each document may be found via in
 the project's [wiki](https://github.com/flame/blis/wiki) section.
 
 **Documents for everyone:**
+
  * **[Build System](docs/BuildSystem.md).** This document covers the basics of
 configuring and building BLIS libraries, as well as related topics.
+
  * **[Testsuite](docs/Testsuite.md).** This document describes how to run
 BLIS's highly parameterized and configurable test suite, as well as the
 included BLAS test drivers.
+
  * **[BLIS Typed API Reference](docs/BLISTypedAPI.md).** Here we document the
 so-called "typed" (or BLAS-like) API. This is the API that many users who are
 already familiar with the BLAS will likely want to use. You can find lots of
 example code for the typed API in the [examples/tapi](examples/tapi) directory
 included in the BLIS source distribution.
+
  * **[BLIS Object API Reference](docs/BLISObjectAPI.md).** Here we document
 the object API. This is API abstracts away properties of vectors and matrices
 within `obj_t` structs that can be queried with accessor functions. Many
 developers and experts prefer this API over the typed API. You can find lots of
 example code for the object API in the [examples/oapi](examples/oapi) directory
 included in the BLIS source distribution.
+
  * **[Hardware Support](docs/HardwareSupport.md).** This document maintains a
 table of supported microarchitectures.
+
  * **[Multithreading](docs/Multithreading.md).** This document describes how to
 use the multithreading features of BLIS.
+
  * **[Mixed-Datatype](docs/MixedDatatype.md).** This document provides an
 overview of BLIS's mixed-datatype functionality and provides a brief example
 of how to take advantage of this new code.
+
  * **[Release Notes](docs/ReleaseNotes.md).** This document tracks a summary of
 changes included with each new version of BLIS, along with contributor credits
 for key features.
+
  * **[Frequently Asked Questions](docs/FAQ.md).** If you have general questions
 about BLIS, please read this FAQ. If you can't find the answer to your question,
 please feel free to join the [blis-devel](https://groups.google.com/group/blis-devel)
@@ -248,23 +326,28 @@ mailing list and post a question. We also have a
 anyone can post to (even without joining). 
 
 **Documents for github contributors:**
+
  * **[Contributing bug reports, feature requests, PRs, etc](CONTRIBUTING.md).**
 Interested in contributing to BLIS? Please read this document before getting
 started. It provides a general overview of how best to report bugs, propose new
 features, and offer code patches. 
+
  * **[Coding Conventions](docs/CodingConventions.md).** If you are interested or
 planning on contributing code to BLIS, please read this document so that you can
 format your code in accordance with BLIS's standards.
 
 **Documents for BLIS developers:**
+
  * **[Kernels Guide](docs/KernelsHowTo.md).** If you would like to learn more
 about the types of kernels that BLIS exposes, their semantics, the operations
 that each kernel accelerates, and various implementation issues, please read
 this guide.
+
  * **[Configuration Guide](docs/ConfigurationHowTo.md).** If you would like to
 learn how to add new sub-configurations or configuration families, or are simply
 interested in learning how BLIS organizes its configurations and kernel sets,
 please read this thorough walkthrough of the configuration system.
+
  * **[Sandbox Guide](docs/Sandboxes.md).** If you are interested in learning
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
@@ -281,12 +364,14 @@ we consider them to be less ideal since they are not as easy to upgrade as
 That said, some users may prefer binary and/or source packages through their
 Linux distribution. Thanks to generous involvement/contributions from our
 community members, the following BLIS packages are now available:
-- **Debian**. [M. Zhou](https://github.com/cdluminate) has volunteered to
+
+ * **Debian**. [M. Zhou](https://github.com/cdluminate) has volunteered to
 sponsor and maintain BLIS packages within the Debian Linux distribution. The
 Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
 (Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
 volunteering his time to set up a standalone PPA.)
-- **Red Hat/Fedora**. [Dave Love](https://github.com/loveshack) provides rpm
+
+ * **Red Hat/Fedora**. [Dave Love](https://github.com/loveshack) provides rpm
 packages for x86_64, which he maintains at
 [Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
 
@@ -417,7 +502,7 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev0.pdf):
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf):
 
 ```
 @article{BLIS6,
@@ -427,7 +512,6 @@ article and derives a [superior induced method](http://www.cs.utexas.edu/users/f
    note        = {submitted}
 }
 ``` 
-
 
 Funding
 -------
