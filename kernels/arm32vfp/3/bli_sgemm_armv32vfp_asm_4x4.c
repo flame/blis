@@ -377,6 +377,10 @@ void bli_sgemm_arm32vfp_asm_4x4
     float *zero_one = &_zero_one[0];
 
 __asm__ volatile (
+" vmrs    r0,FPSCR                 \n\t"
+" bic     r0,r0,#0x00370000        \n\t"
+" vmsr    FPSCR,r0                 \n\t"
+
 " ldr r0,%[k_iter]                  \n\t"
 " ldr r1,%[k_left]                  \n\t"
 " ldr r2,%[alpha]                   \n\t"
@@ -387,6 +391,7 @@ __asm__ volatile (
 " ldr r7,%[cs_c]                    \n\t"
 " ldr r8,%[rs_c]                    \n\t"
 " ldr r11,%[zero_one]               \n\t"
+
 " cmp r0,#2                         \n\t"
 " blt K_ITER_LE_TWO                 \n\t" // sgemm_kernel_L4_M4_32
 
@@ -512,6 +517,7 @@ __asm__ volatile (
  [b_next] "m" (b_next), // r10
  [zero_one] "m" (zero_one) // r11
 : // Clobber
+  "memory", "cc",
   "r0",  "r1",  "r2",  "r3",
   "r4",  "r5",  "r6",  "r7",
   "r8",  "r9", "r10", "r11",
