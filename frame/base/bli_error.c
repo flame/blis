@@ -35,17 +35,6 @@
 
 #include "blis.h"
 
-void bli_error_init( void )
-{
-	bli_error_init_msgs();
-}
-
-void bli_error_finalize( void )
-{
-}
-
-// -----------------------------------------------------------------------------
-
 // Internal array to hold error strings.
 static char bli_error_string[BLIS_MAX_NUM_ERR_MSGS][BLIS_MAX_ERR_MSG_LENGTH] =
 {
@@ -124,10 +113,7 @@ static char bli_error_string[BLIS_MAX_NUM_ERR_MSGS][BLIS_MAX_ERR_MSG_LENGTH] =
 	[-BLIS_KC_MAX_NONMULTIPLE_OF_KR]             = "Maximum KC is non-multiple of KR for one or more datatypes.",
 };
 
-void bli_error_init_msgs( void )
-{
-	// Empty here. All error messages have been initialized above, at compile time.
-}
+// -----------------------------------------------------------------------------
 
 void bli_print_msg( char* str, char* file, guint_t line )
 {

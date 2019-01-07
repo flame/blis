@@ -75,7 +75,6 @@ void bli_finalize_auto( void )
 void bli_init_apis( void )
 {
 	// Initialize various sub-APIs.
-	bli_error_init();
 	bli_gks_init();
 	bli_ind_init();
 	bli_thread_init();
@@ -89,7 +88,6 @@ void bli_finalize_apis( void )
 	bli_thread_finalize();
 	bli_gks_finalize();
 	bli_ind_finalize();
-	bli_error_finalize();
 }
 
 // -----------------------------------------------------------------------------
