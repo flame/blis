@@ -976,9 +976,6 @@ bli_dzxpbym_md_unb_var1
 bli_error_checking_is_enabled
 bli_error_checking_level
 bli_error_checking_level_set
-bli_error_finalize
-bli_error_init
-bli_error_init_msgs
 bli_error_string_for_code
 bli_ffree_align
 bli_ffree_noalign
@@ -990,6 +987,7 @@ bli_find_area_trap_l
 bli_fmalloc_align
 bli_fmalloc_align_check
 bli_fmalloc_noalign
+bli_fmalloc_post_check
 bli_fprintm
 bli_fprintm_check
 bli_fprintm_ex
