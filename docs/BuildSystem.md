@@ -20,7 +20,7 @@ This document describes how to configure, compile, and install a BLIS library on
 
 The BLIS build system was designed for use with GNU/Linux (or some other sane UNIX). Other requirements are:
 
-  * Python (2.7 or later)
+  * Python (2.7 or later for python2; 3.4 or later for python3)
   * GNU `bash` (3.2 or later)
   * GNU `make` (3.81 or later)
   * a working C99 compiler

@@ -1214,7 +1214,13 @@ check_python()
 	#
 	# python1: no versions supported
 	# python2: 2.7+
-	# python3: 3.5+
+	# python3: 3.4+
+	#
+	# NOTE: It's actually unclear whether python 3.0 through 3.3.x would work.
+	# Python 3.5 is the oldest python3 that I have available to test with, and
+	# I only know that 3.4 will work thanks to feedback from Dave Love. So it's
+	# quite possible that some of those "unsupported" python3 versions are
+	# sufficient. -FGVZ
 	#
 
 	# Python 1.x is unsupported.
@@ -1229,9 +1235,9 @@ check_python()
 		fi
 	fi
 
-	# Python 3.4.x or older is unsupported.
+	# Python 3.3.x or older is unsupported.
 	if [ ${python_major} -eq 3 ]; then
-		if [ ${python_minor} -lt 5 ]; then
+		if [ ${python_minor} -lt 4 ]; then
 			echoerr_unsupportedpython
 		fi
 	fi
