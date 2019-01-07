@@ -11,7 +11,7 @@ Contents
 * **[Key Features](#key-features)**
 * **[Getting Started](#getting-started)**
 * **[Documentation](#documentation)**
-* **[External Linux Packages](#external-linux-packages)**
+* **[External GNU/Linux Packages](#external-gnulinux-packages)**
 * **[Discussion](#discussion)**
 * **[Contributing](#contributing)**
 * **[Citations](#citations)**
@@ -352,8 +352,8 @@ please read this thorough walkthrough of the configuration system.
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
 
-External Linux packages
------------------------
+External GNU/Linux packages
+---------------------------
 
 Generally speaking, we **highly recommend** building from source whenever
 possible using the latest `git` clone. (Tarballs of each
@@ -371,9 +371,23 @@ Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
 (Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
 volunteering his time to set up a standalone PPA.)
 
- * **Red Hat/Fedora**. [Dave Love](https://github.com/loveshack) provides rpm
-packages for x86_64, which he maintains at
-[Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/).
+ * **EPEL/Fedora**. There are official BLIS packages in Fedora and EPEL (for
+RHEL7+ and compatible distributions) with versions for 64-bit integers, OpenMP,
+and pthreads, and shims which can be dynamically linked instead of reference
+BLAS. (NOTE: For architectures other than intel64, amd64, and maybe arm64, the
+performance of packaged BLIS will be low because it uses unoptimized generic
+kernels; for those architectures, [OpenBLAS](https://github.com/xianyi/OpenBLAS)
+may be a better solution.) [Dave
+Love](https://github.com/loveshack) provides additional packages for EPEL6 in a
+[Fedora Copr](https://copr.fedorainfracloud.org/coprs/loveshack/blis/), and
+possibly versions more recent than the official repo for other EPEL/Fedora
+releases. The source packages may build on other rpm-based distributions.
+
+ * **OpenSuSE**. The copr referred to above has rpms for some OpenSuSE releases;
+the source rpms may build for others.
+
+ * **GNU Guix**. Guix has BLIS packages, provides builds only for the generic
+target and some specific x86_64 micro-architectures.
 
 Discussion
 ----------
