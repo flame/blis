@@ -46,7 +46,7 @@ apool_t* bli_sba_query( void )
 
 void bli_sba_init( void )
 {
-	bli_apool_init( BLIS_MALLOC_INTL, BLIS_FREE_INTL, &sba );
+	bli_apool_init( &sba );
 }
 
 void bli_sba_finalize( void )

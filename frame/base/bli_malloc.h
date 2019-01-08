@@ -39,8 +39,10 @@ typedef void  (*free_ft)   ( void*  p    );
 
 // -----------------------------------------------------------------------------
 
+#if 0
 void* bli_malloc_pool( size_t size );
 void  bli_free_pool( void* p );
+#endif
 
 void* bli_malloc_intl( size_t size );
 void* bli_calloc_intl( size_t size );

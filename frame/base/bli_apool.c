@@ -36,8 +36,6 @@
 
 void bli_apool_init
      (
-       malloc_ft         malloc_fp,
-       free_ft           free_fp,
        apool_t* restrict apool
      )
 {
@@ -104,7 +102,6 @@ void bli_apool_init
 		bli_apool_alloc_block
 		(
 		  num_elem,
-		  malloc_fp,
 		  &(block_ptrs[i])
 		);
 	}
@@ -121,28 +118,27 @@ void bli_apool_init
 	// and additional blocks are added at the higher end.
 
 	// Initialize the pool_t structure.
+	// NOTE: We don't use the malloc_fp and free_fp fields at the apool_t
+	// level. Nevertheless, we set them to NULL.
 	bli_pool_set_block_ptrs( block_ptrs, pool );
 	bli_pool_set_block_ptrs_len( block_ptrs_len, pool );
 	bli_pool_set_top_index( 0, pool );
 	bli_pool_set_num_blocks( num_blocks, pool );
 	bli_pool_set_block_size( block_size, pool );
 	bli_pool_set_align_size( align_size, pool );
-	bli_pool_set_malloc_fp( malloc_fp, pool );
-	bli_pool_set_free_fp( free_fp, pool );
+	bli_pool_set_malloc_fp( NULL, pool );
+	bli_pool_set_free_fp( NULL, pool );
 }
 
 void bli_apool_alloc_block
      (
        siz_t              num_elem,
-       malloc_ft          malloc_fp,
        array_t** restrict array_p
      )
 {
 	// Since the apool_t is defined as a pool of array_t, we can hard-code
-	// the block_size and align_size parameters. For the align_size, we
-	// use the size of a cache line.
+	// the block_size parameter.
 	const siz_t block_size = sizeof( array_t );
-	//const siz_t align_size = 64;
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_apool_alloc_block(): allocating array_t: " );
@@ -153,7 +149,6 @@ void bli_apool_alloc_block
 	// be recovered when it's time to free the block.
 	array_t* restrict array
 	=
-	//bli_fmalloc_align( malloc_fp, block_size, align_size );
 	bli_malloc_intl( block_size );
 
 	// Initialize an array_t struct within the newly allocated memory region.
@@ -165,7 +160,6 @@ void bli_apool_alloc_block
 
 void bli_apool_free_block
      (
-       free_ft           free_fp,
        array_t* restrict array
      )
 {
@@ -210,7 +204,6 @@ void bli_apool_free_block
 	#endif
 
 	// Free the array.
-	//bli_ffree_align( free_fp, array );
 	bli_free_intl( array );
 }
 
@@ -242,9 +235,6 @@ void bli_apool_finalize
 	// Sanity check: The top_index should be zero.
 	if ( top_index != 0 ) bli_abort();
 
-	// Query the free() function pointer for the pool.
-	free_ft free_fp = bli_pool_free_fp( pool );
-
 	// Free the individual blocks (each an array_t) currently in the pool.
 	for ( dim_t i = 0; i < num_blocks; ++i )
 	{
@@ -254,7 +244,7 @@ void bli_apool_finalize
 		fflush( stdout );
 		#endif
 
-		bli_apool_free_block( free_fp, block_ptrs[i] );
+		bli_apool_free_block( block_ptrs[i] );
 	}
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
@@ -399,8 +389,8 @@ pool_t* bli_apool_array_elem
 		const siz_t num_blocks     = 1;
 		const siz_t block_ptrs_len = 25;
 		const siz_t align_size     = 16;
-		malloc_ft   malloc_fp      = BLIS_MALLOC_INTL;
-		free_ft     free_fp        = BLIS_FREE_INTL;
+		malloc_ft   malloc_fp      = BLIS_MALLOC_POOL;
+		free_ft     free_fp        = BLIS_FREE_POOL;
 
 		// Each small block pool should contain blocks large enough to
 		// accommodate any of the data structures for which they will be
@@ -535,9 +525,6 @@ void bli_apool_grow
 	// Query the current block_ptrs array (which was maybe just resized).
 	array_t** restrict block_ptrs = bli_pool_block_ptrs( pool );
 
-	// Query the malloc() function pointer for the pool.
-	malloc_ft malloc_fp = bli_pool_malloc_fp( pool );
-
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_apool_grow(): growing apool_t (%d -> %d).\n",
 	        ( int )num_blocks_cur, ( int )num_blocks_new );
@@ -550,7 +537,6 @@ void bli_apool_grow
 		bli_apool_alloc_block
 		(
 		  num_elem,
-		  malloc_fp,
 		  &(block_ptrs[i])
 		);
 	}

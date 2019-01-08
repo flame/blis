@@ -96,8 +96,6 @@ static void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
 
 void bli_apool_init
      (
-       malloc_ft         malloc_fp,
-       free_ft           free_fp,
        apool_t* restrict apool
      );
 void bli_apool_finalize
@@ -131,12 +129,10 @@ void bli_apool_grow
 void bli_apool_alloc_block
      (
        siz_t              num_elem,
-       malloc_ft          malloc_fp,
        array_t** restrict array_p
      );
 void bli_apool_free_block
      (
-       free_ft           free_fp,
        array_t* restrict array
      );
 

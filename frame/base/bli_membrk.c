@@ -102,7 +102,7 @@ void bli_membrk_acquire_m
 	buf_type = BLIS_BUFFER_FOR_GEN_USE;
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_membrk_acquire_m(): bli_malloc_pool(): size %ld\n",
+	printf( "bli_membrk_acquire_m(): bli_fmalloc_align(): size %ld\n",
 	        ( long )req_size );
 	#endif
 #endif
@@ -205,7 +205,7 @@ void bli_membrk_release
 
 #ifndef BLIS_ENABLE_PBA_POOLS
 	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_membrk_release(): bli_free_pool(): size %ld\n",
+	printf( "bli_membrk_release(): bli_ffree_align(): size %ld\n",
 	        ( long )bli_mem_size( mem ) );
 	#endif
 #endif

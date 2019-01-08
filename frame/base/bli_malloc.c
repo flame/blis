@@ -39,6 +39,11 @@
 
 // -----------------------------------------------------------------------------
 
+// NOTE: These functions are no longer used. Instead, the relevant sections
+// of code call bli_fmalloc_align() and pass in the desired malloc()-like
+// function, such as BLIS_MALLOC_POOL.
+
+#if 0
 void* bli_malloc_pool( size_t size )
 {
 	const malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
@@ -62,6 +67,7 @@ void bli_free_pool( void* p )
 
 	bli_ffree_align( BLIS_FREE_POOL, p );
 }
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -199,9 +205,9 @@ void bli_ffree_align
 	// does not need to be freed.
 	if ( p == NULL ) return;
 
-	// Since the bli_malloc_pool() function returned the aligned pointer,
-	// we have to first recover the original pointer before we can free
-	// the memory.
+	// Since the bli_fmalloc_align() function returned the aligned pointer,
+	// we have to first recover the original pointer before we can free the
+	// memory.
 
 	// Start by casting the pointer to a byte pointer.
 	p_byte = p;

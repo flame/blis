@@ -926,21 +926,6 @@ typedef enum
 #include "bli_pthread.h"
 #include "bli_malloc.h"
 
-// -- Array type --
-
-typedef struct
-{
-	void*     buf;
-
-	siz_t     num_elem;
-	siz_t     elem_size;
-
-	//malloc_ft malloc_fp;
-	//free_ft   free_fp;
-
-} array_t;
-
-
 // -- Pool block type --
 
 typedef struct
@@ -970,7 +955,19 @@ typedef struct
 } pool_t;
 
 
-// -- small block allocator: Locked pool-of-arrays-of-pools type --
+// -- Array type --
+
+typedef struct
+{
+	void*     buf;
+
+	siz_t     num_elem;
+	siz_t     elem_size;
+
+} array_t;
+
+
+// -- Locked pool-of-arrays-of-pools type --
 
 typedef struct
 {
