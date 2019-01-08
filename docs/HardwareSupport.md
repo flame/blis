@@ -29,7 +29,9 @@ A few remarks / reminders:
 | Intel Sky/Kaby/Coffeelake (AVX/FMA3) | `haswell`              | `sdcz` |  `sd`      |
 | Intel Knights Landing (AVX-512/FMA3) | `knl`                  | `sd`   |            |
 | Intel SkylakeX (AVX-512/FMA3)        | `skx`                  | `sd`   |            |
-| ARMv7 Cortex-A9/A15 (NEON)           | `cortex-a9,-a15`       | `sd`   |            |
+| ARMv7 Cortex-A9 (NEON)               | `cortex-a9`            | `sd`   |            |
+| ARMv7 Cortex-A15 (NEON)              | `cortex-a15`           | `sd`   |            |
+| ARMv8 Cortex-A53 (NEON)              | `cortex-a53`           | `sd`   |            |
 | ARMv8 Cortex-A57 (NEON)              | `cortex-a57`           | `sd`   |            |
 | IBM Blue Gene/Q (QPX int)            | `bgq`                  |  `d`   |            |
 | IBM Power7 (QPX int)                 | `power7`               |  `d`   |            |
