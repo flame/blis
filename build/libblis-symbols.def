@@ -997,7 +997,6 @@ bli_fprintv_check
 bli_fprintv_ex
 bli_fprintv_qfp
 bli_free_intl
-bli_free_pool
 bli_free_user
 bli_func_create
 bli_func_free
@@ -1314,7 +1313,6 @@ bli_lcm
 bli_lsame
 bli_machval
 bli_malloc_intl
-bli_malloc_pool
 bli_malloc_user
 bli_mbool_create
 bli_mbool_free
