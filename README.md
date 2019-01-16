@@ -91,8 +91,10 @@ feed into). The Debian tracker page may be found
 executed on operands of mixed domains and/or mixed precisions. Any combination
 of storage datatype for A, B, and C is now supported, along with a separate
 computation precision that can differ from the storage precision of A and B.
-And even the 1m method now supports mixed-precision computation
-(draft paper forthcoming).
+And even the 1m method now supports mixed-precision computation.
+For more details, please see our [ACM TOMS](https://toms.acm.org/) journal
+article submission ([current
+draft](http://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf)).
 
  * **BLIS now implements the 1m method.** Let's face it: writing complex
 assembly `gemm` microkernels for a new architecture is never a priority--and
@@ -245,7 +247,8 @@ matrix multiplication (`gemm`) operation, providing 128 different possible type
 combinations, which, when combined with existing transposition, conjugation,
 and storage parameters, enables 55,296 different `gemm` use cases. For more
 details, please see the documentation on [mixed datatype](docs/MixedDatatypes.md)
-support (draft paper forthcoming).
+support and/or our [ACM TOMS](https://toms.acm.org/) journal paper on
+mixed-domain/mixed-precision `gemm` ([linked below](#citations)).
 
 Getting Started
 ---------------
@@ -526,6 +529,19 @@ article and derives a [superior induced method](http://www.cs.utexas.edu/users/f
    note        = {submitted}
 }
 ``` 
+
+A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` for
+[mixed-domain and/or mixed-precision](http://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands:
+
+```
+@article{BLIS7,
+   author      = {Field G. {V}an~{Z}ee and Devangi N. Parikh and Robert A. van~de~{G}eijn},
+   title       = {Supporting Mixed-domain Mixed-precision Matrix Multiplication
+within the BLIS Framework},
+   journal     = {ACM Transactions on Mathematical Software},
+   note        = {submitted}
+}
+```
 
 Funding
 -------
