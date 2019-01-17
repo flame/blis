@@ -56,6 +56,8 @@
 // Determine the target operating system.
 #if defined(_WIN32) || defined(__CYGWIN__)
 #define BLIS_OS_WINDOWS 1
+#elif defined(__gnu_hurd__)
+#define BLIS_OS_GNU 1
 #elif defined(__APPLE__) || defined(__MACH__)
 #define BLIS_OS_OSX 1
 #elif defined(__ANDROID__)
