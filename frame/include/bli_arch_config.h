@@ -80,6 +80,9 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+#ifdef BLIS_CONFIG_THUNDERX2
+CNTX_INIT_PROTS( thunderx2 )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57
 CNTX_INIT_PROTS( cortexa57 )
 #endif
