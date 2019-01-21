@@ -2715,15 +2715,16 @@ main()
 	fi
 
 
-	# Variables that contain forward slashes, such as paths, need extra
+	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
 	# characters here so that the sed commands below do the right thing.
-	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
-	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
+	os_name_esc=$(echo          "${os_name}"          | sed 's/\//\\\//g')
+	install_libdir_esc=$(echo   "${install_libdir}"   | sed 's/\//\\\//g')
+	install_incdir_esc=$(echo   "${install_incdir}"   | sed 's/\//\\\//g')
 	install_sharedir_esc=$(echo "${install_sharedir}" | sed 's/\//\\\//g')
-	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
-	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
-	cxx_esc=$(echo "${found_cxx}" | sed 's/\//\\\//g')
+	dist_path_esc=$(echo        "${dist_path}"        | sed 's/\//\\\//g')
+	cc_esc=$(echo               "${found_cc}"         | sed 's/\//\\\//g')
+	cxx_esc=$(echo              "${found_cxx}"        | sed 's/\//\\\//g')
 	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
 
 	# For RANLIB, if the variable is not set, we use a default value of
@@ -2817,7 +2818,7 @@ main()
 		| sed -e "s/@config_list@/${config_list}/g" \
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
-		| sed -e "s/@os_name@/${os_name}/g" \
+		| sed -e "s/@os_name@/${os_name_esc}/g" \
 		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
