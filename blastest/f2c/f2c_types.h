@@ -90,11 +90,15 @@ typedef integer1 logical1;
 #ifdef f2c_i2
 /* for -i2 */
 typedef short flag;
+#ifndef HAVE_BLIS_H // don't re-typedef ftnlen
 typedef short ftnlen;
+#endif
 typedef short ftnint;
 #else
 typedef integer flag;
+#ifndef HAVE_BLIS_H // don't re-typedef ftnlen
 typedef integer ftnlen;
+#endif
 typedef integer ftnint;
 #endif
 
