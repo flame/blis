@@ -209,12 +209,12 @@ void libblis_test_dotaxpyv_experiment
 	}
 	else
 	{
-		bli_setsc(  0.0, -0.8, &alpha );
+		bli_setsc(  0.7, -0.1, &alpha );
 	}
 
 	// Randomize x and z, and save z.
-	libblis_test_vobj_randomize( params, FALSE, &x );
-	libblis_test_vobj_randomize( params, FALSE, &z );
+	libblis_test_vobj_randomize( params, TRUE, &x );
+	libblis_test_vobj_randomize( params, TRUE, &z );
 	bli_copyv( &z, &z_save );
 
 	// Create an alias to x for xt. (Note that it doesn't actually need to be

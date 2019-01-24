@@ -112,6 +112,9 @@ DEBUG_TYPE        := @debug_type@
 # The requested threading model.
 THREADING_MODEL   := @threading_model@
 
+# Whether the compiler supports "#pragma omp simd" via the -fopenmp-simd option.
+PRAGMA_OMP_SIMD   := @pragma_omp_simd@
+
 # The install libdir, includedir, and shareddir values from configure tell
 # us where to install the libraries, header files, and public makefile
 # fragments, respectively. Notice that we support the use of DESTDIR so that

@@ -47,6 +47,8 @@
 
 // -- Level-3 native micro-kernel prototype redefinitions ----------------------
 
+// -- prototypes for completely generic level-3 microkernels --
+
 #undef  gemm_ukr_name
 #define gemm_ukr_name       GENARNAME(gemm)
 #undef  gemmtrsm_l_ukr_name
@@ -58,7 +60,8 @@
 #undef  trsm_u_ukr_name
 #define trsm_u_ukr_name     GENARNAME(trsm_u)
 
-// Include the native micro-kernel API template.
+// Instantiate prototypes for above functions via the native micro-kernel API
+// template.
 #include "bli_l3_ukr.h"
 
 // -- Level-3 virtual micro-kernel prototype redefinitions ---------------------
@@ -117,7 +120,8 @@
 #undef  trsm1m_u_ukr_name
 #define trsm1m_u_ukr_name      GENARNAME(trsm1m_u)
 
-// Include the virtual micro-kernel API template.
+// Instantiate prototypes for above functions via the virtual micro-kernel API
+// template.
 #include "bli_l3_ind_ukr.h"
 
 // -- Level-1m (packm/unpackm) kernel prototype redefinitions ------------------
@@ -230,7 +234,8 @@
 #undef  packm_16xk_1er_ker_name
 #define packm_16xk_1er_ker_name GENARNAME(packm_16xk_1er)
 
-// Include the level-1m kernel API template.
+// Instantiate prototypes for above functions via the level-1m kernel API
+// template.
 #include "bli_l1m_ker.h"
 
 // -- Level-1f kernel prototype redefinitions ----------------------------------
@@ -246,10 +251,13 @@
 #undef  dotxaxpyf_ker_name
 #define dotxaxpyf_ker_name  GENARNAME(dotxaxpyf)
 
-// Include the level-1f kernel API template.
+// Instantiate prototypes for above functions via the level-1f kernel API
+// template.
 #include "bli_l1f_ker.h"
 
 // -- Level-1v kernel prototype redefinitions ----------------------------------
+
+// -- prototypes for completely generic level-1v kernels --
 
 #undef  addv_ker_name
 #define addv_ker_name      GENARNAME(addv)
@@ -280,9 +288,9 @@
 #undef  xpbyv_ker_name
 #define xpbyv_ker_name     GENARNAME(xpbyv)
 
-// Include the level-1v kernel API template.
+// Instantiate prototypes for above functions via the level-1v kernel API
+// template.
 #include "bli_l1v_ker.h"
-
 
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 
@@ -295,6 +303,7 @@
 \
 	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
 	                       PASTEMAC(c,opname), PASTEMAC(z,opname) )
+
 
 
 // -----------------------------------------------------------------------------
@@ -319,16 +328,16 @@ void GENBARNAME(cntx_init)
 
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &blkszs[ BLIS_KR ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    8,    4,    4,    2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    4,    4,    2,    2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  512,  256,  256,  128 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    4,    4,    4,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],   16,    8,    8,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  256,  128,  128,   64 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  256,  256,  256,  256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 4096, 4096, 4096, 4096 );
 	bli_blksz_init_easy( &blkszs[ BLIS_M2 ], 1000, 1000, 1000, 1000 );
 	bli_blksz_init_easy( &blkszs[ BLIS_N2 ], 1000, 1000, 1000, 1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],    8,    4,    4,    2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],    8,    4,    4,    2 );
-	bli_blksz_init_easy( &blkszs[ BLIS_XF ],    8,    4,    4,    2 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],    8,    8,    8,    8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],    6,    6,    6,    6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_XF ],    4,    4,    4,    4 );
 
 	// Initialize the context with the default blocksize objects and their
 	// multiples.
@@ -372,7 +381,7 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
 	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
 
-	bli_mbool_init( &mbools[ BLIS_GEMM_UKR ],       FALSE, FALSE, FALSE, FALSE );
+	bli_mbool_init( &mbools[ BLIS_GEMM_UKR ],       TRUE,  TRUE,  TRUE,  TRUE  );
 	bli_mbool_init( &mbools[ BLIS_GEMMTRSM_L_UKR ], FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_GEMMTRSM_U_UKR ], FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_TRSM_L_UKR ],     FALSE, FALSE, FALSE, FALSE );

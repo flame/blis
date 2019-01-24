@@ -1081,6 +1081,36 @@ has_libmemkind()
 	echo "${rval}"
 }
 
+has_pragma_omp_simd()
+{
+	local main_c main_c_filepath binname rval
+
+	# Path to omp-simd detection source file.
+	main_c="omp_simd_detect.c"
+	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+
+	# Binary executable filename.
+	binname="omp_simd-detect.x"
+
+	# Attempt to compile a simple main() program that contains a
+	# #pragma omp simd.
+	${found_cc} -std=c99 -O3 -march=native -fopenmp-simd \
+	            -o ${binname} ${main_c_filepath} 2> /dev/null
+
+	# Depending on the return code from the compile step above, we set
+	# enable_memkind accordingly.
+	if [ "$?" == 0 ]; then
+	    rval='yes'
+	else
+	    rval='no'
+	fi
+
+	# Remove the executable generated above.
+	rm -f ./${binname}
+
+	echo "${rval}"
+}
+
 echoerr()
 {
 	printf "${script_name}: error: %s\n" "$*" #>&2;
@@ -2423,6 +2453,9 @@ main()
 	# --without-memkind.
 	has_memkind=$(has_libmemkind)
 
+	# Try to determine whether the chosen compiler supports #pragma omp simd.
+	pragma_omp_simd=$(has_pragma_omp_simd)
+
 
 	# -- Prepare variables for subsitution into template files -----------------
 
@@ -2633,6 +2666,11 @@ main()
 		enable_memkind="no"
 		enable_memkind_01=0
 	fi
+	if [ "x${pragma_omp_simd}" = "xyes" ]; then
+		echo "${script_name}: compiler appears to support #pragma omp simd."
+	else
+		echo "${script_name}: compiler appears to not support #pragma omp simd."
+	fi
 	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas_01=1
@@ -2842,6 +2880,7 @@ main()
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		> "${config_mk_out_path}"
 		

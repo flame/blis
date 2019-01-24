@@ -124,6 +124,7 @@ get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call load-var-for,CRVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
                                    $(BUILD_FLAGS) \
                             )
@@ -635,7 +636,6 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CXXLANGFLAGS,$(c))
 CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
-
 # --- Threading flags ---
 
 ifeq ($(CC_VENDOR),gcc)
@@ -678,6 +678,14 @@ ifeq ($(THREADING_MODEL),pthreads)
 CTHREADFLAGS := -pthread
 LDFLAGS      += $(LIBPTHREAD)
 endif
+endif
+
+# --- #pragma omp simd flags (used for reference kernels only) ---
+
+ifeq ($(PRAGMA_OMP_SIMD),yes)
+COMPSIMDFLAGS := -fopenmp-simd
+else
+COMPSIMDFLAGS :=
 endif
 
 
@@ -948,7 +956,8 @@ BLIS_CONFIG_H   := ./bli_config.h
 VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
 
 # Define a C preprocessor flag that is *only* defined when BLIS is being
-# compiled.
+# compiled. (In other words, an application that #includes blis.h will not
+# get this cpp macro.)
 BUILD_FLAGS    := -DBLIS_IS_BUILDING_LIBRARY
 
 

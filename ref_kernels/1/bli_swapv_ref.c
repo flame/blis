@@ -45,30 +45,24 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype* restrict psi1; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	chi1 = x; \
-	psi1 = y; \
 \
 	if ( incx == 1 && incy == 1 ) \
 	{ \
-		for ( i = 0; i < n; ++i ) \
+		_Pragma( "omp simd" ) \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,swaps)( chi1[i], psi1[i] ); \
+			PASTEMAC(ch,swaps)( x[i], y[i] ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,swaps)( *chi1, *psi1 ); \
+			PASTEMAC(ch,swaps)( *x, *y ); \
 \
-			chi1 += incx; \
-			psi1 += incy; \
+			x += incx; \
+			y += incy; \
 		} \
 	} \
 }

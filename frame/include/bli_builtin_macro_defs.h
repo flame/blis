@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,68 +32,28 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_BUILTIN_MACRO_DEFS_H
+#define BLIS_BUILTIN_MACRO_DEFS_H
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       conj_t           conjx, \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
-     ) \
-{ \
-	if ( bli_zero_dim1( n ) ) return; \
-\
-	ctype* restrict chi1 = x; \
-	ctype* restrict psi1 = y; \
-\
-	if ( bli_is_conj( conjx ) ) \
-	{ \
-		if ( incx == 1 && incy == 1 ) \
-		{ \
-			_Pragma( "omp simd" ) \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,addjs)( chi1[i], psi1[i] ); \
-			} \
-		} \
-		else \
-		{ \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,addjs)( *chi1, *psi1 ); \
-\
-				chi1 += incx; \
-				psi1 += incy; \
-			} \
-		} \
-	} \
-	else \
-	{ \
-		if ( incx == 1 && incy == 1 ) \
-		{ \
-			_Pragma( "omp simd" ) \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,adds)( chi1[i], psi1[i] ); \
-			} \
-		} \
-		else \
-		{ \
-			for ( dim_t i = 0; i < n; ++i ) \
-			{ \
-				PASTEMAC(ch,adds)( *chi1, *psi1 ); \
-\
-				chi1 += incx; \
-				psi1 += incy; \
-			} \
-		} \
-	} \
-}
+#if   defined(__ICC) || defined(__INTEL_COMPILER)
 
-INSERT_GENTFUNC_BASIC2( addv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+  // icc
 
+  #define bli_prefetch( addr, rw, loc )
+
+#elif defined(__clang__)
+
+  // clang
+
+  #define bli_prefetch( addr, rw, loc )
+
+#elif defined(__GNUC__)
+
+  // gcc
+
+  #define bli_prefetch( addr, rw, loc ) __builtin_prefetch( addr, rw, loc );
+
+#endif
+
+
+#endif

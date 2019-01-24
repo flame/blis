@@ -57,7 +57,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype_r  abs_chi1; \
 	ctype_r  abs_chi1_max; \
 	dim_t    i_max_l; \
-	dim_t    i; \
 \
 	/* If the vector length is zero, return early. This directly emulates
 	   the behavior of netlib BLAS's i?amax() routines. */ \
@@ -79,7 +78,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		ctype* chi1 = x; \
 \
-		for ( i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
 			/* Get the real and imaginary components of chi1. */ \
 			PASTEMAC2(ch,chr,gets)( *chi1, chi1_r, chi1_i ); \
@@ -109,7 +108,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 	else \
 	{ \
-		for ( i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
 			ctype* chi1 = x + (i  )*incx; \
 \

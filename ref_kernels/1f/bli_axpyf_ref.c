@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, ff ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -51,36 +51,81 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* a1; \
-	ctype* chi1; \
-	ctype* y1; \
-	ctype  alpha_chi1; \
-	dim_t  i; \
+	if ( bli_zero_dim1( m ) ) return; \
 \
-	/* Query the context for the kernel function pointer. */ \
-	const num_t              dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,axpyv_ker_ft) kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
-\
-	for ( i = 0; i < b_n; ++i ) \
+	if ( inca == 1 && incx == 1 && incy == 1 && b_n == ff ) \
 	{ \
-		a1   = a + (0  )*inca + (i  )*lda; \
-		chi1 = x + (i  )*incx; \
-		y1   = y + (0  )*incy; \
+		ctype ax[ ff ]; \
 \
-		PASTEMAC(ch,copycjs)( conjx, *chi1, alpha_chi1 ); \
-		PASTEMAC(ch,scals)( *alpha, alpha_chi1 ); \
+		/* Scale x by alpha, storing to a temporary array ax. */ \
+		if ( bli_is_conj( conjx ) ) \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t j = 0; j < ff; ++j ) \
+				PASTEMAC(ch,scal2js)( *alpha, x[j], ax[j] ); \
+		} \
+		else \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t j = 0; j < ff; ++j ) \
+				PASTEMAC(ch,scal2s)( *alpha, x[j], ax[j] ); \
+		} \
 \
-		kfp_av \
-		( \
-		  conja, \
-		  m, \
-		  &alpha_chi1, \
-		  a1, inca, \
-		  y1, incy, \
-		  cntx  \
-		); \
+		/* Accumulate ff separate axpyv's into y. */ \
+		if ( bli_is_noconj( conja ) ) \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < ff; ++j ) \
+			{ \
+				PASTEMAC(ch,axpys)( ax[j], a[i + j*lda], y[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < ff; ++j ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( ax[j], a[i + j*lda], y[i] ); \
+			} \
+		} \
+	} \
+	else \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,axpyv_ker_ft) kfp_av \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+\
+		for ( dim_t i = 0; i < b_n; ++i ) \
+		{ \
+			ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
+			ctype* restrict chi1 = x + (i  )*incx; \
+			ctype* restrict y1   = y + (0  )*incy; \
+\
+			ctype alpha_chi1; \
+\
+			PASTEMAC(ch,copycjs)( conjx, *chi1, alpha_chi1 ); \
+			PASTEMAC(ch,scals)( *alpha, alpha_chi1 ); \
+\
+			kfp_av \
+			( \
+			  conja, \
+			  m, \
+			  &alpha_chi1, \
+			  a1, inca, \
+			  y1, incy, \
+			  cntx  \
+			); \
+		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC2( axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( float,    s, axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 8 )
+GENTFUNC( double,   d, axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 8 )
+GENTFUNC( scomplex, c, axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 8 )
+GENTFUNC( dcomplex, z, axpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 8 )
 

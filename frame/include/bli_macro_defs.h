@@ -128,6 +128,15 @@
 #define PASTEMAC3_(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
 #define PASTEMAC3(ch1,ch2,ch3,op)  PASTEMAC3_(ch1,ch2,ch3,op)
 
+#define PASTEMAC4_(ch1,ch2,ch3,ch4,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTEMAC4(ch1,ch2,ch3,ch4,op)  PASTEMAC4_(ch1,ch2,ch3,ch4,op)
+
+#define PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op
+#define PASTEMAC5(ch1,ch2,ch3,ch4,ch5,op)  PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op)
+
+#define PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op
+#define PASTEMAC6(ch1,ch2,ch3,ch4,ch5,ch6,op)  PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op)
+
 #define PASTEBLACHK_(op)           bla_ ## op ## _check
 #define PASTEBLACHK(op)            PASTEBLACHK_(op)
 
@@ -163,6 +172,7 @@
 #include "bli_scalar_macro_defs.h"
 #include "bli_error_macro_defs.h"
 #include "bli_blas_macro_defs.h"
+#include "bli_builtin_macro_defs.h"
 
 #include "bli_oapi_macro_defs.h"
 #include "bli_tapi_macro_defs.h"

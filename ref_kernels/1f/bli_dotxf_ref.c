@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, ff ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -52,35 +52,94 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* a1; \
-	ctype* x1; \
-	ctype* psi1; \
-	dim_t  i; \
-\
-	/* Query the context for the kernel function pointer. */ \
-	const num_t              dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,dotxv_ker_ft) kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
-\
-	for ( i = 0; i < b_n; ++i ) \
+	if ( inca == 1 && incx == 1 && incy == 1 && b_n == ff ) \
 	{ \
-		a1   = a + (0  )*inca + (i  )*lda; \
-		x1   = x + (0  )*incx; \
-		psi1 = y + (i  )*incy; \
+		ctype r[ ff ]; \
 \
-		kfp_dv \
-		( \
-		  conjat, \
-		  conjx, \
-		  m, \
-		  alpha, \
-		  a1, inca, \
-		  x1, incx, \
-		  beta, \
-		  psi1, \
-		  cntx  \
-		); \
+		/* If beta is zero, clear y. Otherwise, scale by beta. */ \
+		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( y[i] ); \
+		} \
+		else \
+		{ \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,scals)( *beta, y[i] ); \
+		} \
+\
+		/* If the vectors are empty or if alpha is zero, return early. */ \
+		if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+\
+		/* Initialize r vector to 0. */ \
+		for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( r[i] ); \
+\
+		/* If a must be conjugated, we do so indirectly by first toggling the
+		   effective conjugation of x and then conjugating the resulting dot
+		   products. */ \
+		conj_t conjx_use = conjx; \
+\
+		if ( bli_is_conj( conjat ) ) \
+			bli_toggle_conj( &conjx_use ); \
+\
+		if ( bli_is_noconj( conjx_use ) ) \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t p = 0; p < m; ++p ) \
+			for ( dim_t i = 0; i < ff; ++i ) \
+			{ \
+				PASTEMAC(ch,axpys)( a[p + i*lda], x[p], r[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			_Pragma( "omp simd" ) \
+			for ( dim_t p = 0; p < m; ++p ) \
+			for ( dim_t i = 0; i < ff; ++i ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( a[p + i*lda], x[p], r[i] ); \
+			} \
+		} \
+\
+		if ( bli_is_conj( conjat ) ) \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,conjs)( r[i] ); \
+\
+		for ( dim_t i = 0; i < ff; ++i ) \
+		{ \
+			PASTEMAC(ch,axpys)( *alpha, r[i], y[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,dotxv_ker_ft) kfp_dv \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
+\
+		for ( dim_t i = 0; i < b_n; ++i ) \
+		{ \
+			ctype* restrict a1   = a + (0  )*inca + (i  )*lda; \
+			ctype* restrict x1   = x + (0  )*incx; \
+			ctype* restrict psi1 = y + (i  )*incy; \
+\
+			kfp_dv \
+			( \
+			  conjat, \
+			  conjx, \
+			  m, \
+			  alpha, \
+			  a1, inca, \
+			  x1, incx, \
+			  beta, \
+			  psi1, \
+			  cntx  \
+			); \
+		} \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+//INSERT_GENTFUNC_BASIC2( dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( float,    s, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
+GENTFUNC( double,   d, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
+GENTFUNC( scomplex, c, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
+GENTFUNC( dcomplex, z, dotxf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 6 )
 
