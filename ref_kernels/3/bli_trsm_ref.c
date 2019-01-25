@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#if 1
+#if 0
 
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
