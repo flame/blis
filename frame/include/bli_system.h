@@ -79,7 +79,7 @@
 #elif defined(__bg__)
   #define BLIS_OS_BGP 1
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
-      defined(__bsdi__) || defined(__DragonFly__)
+      defined(__bsdi__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
   #define BLIS_OS_BSD 1
 #elif defined(EMSCRIPTEN)
   #define BLIS_OS_EMSCRIPTEN
