@@ -20,7 +20,7 @@
   * [Level-2 operations](BLISTypedAPI.md#level-2-operations)
   * [Level-3 operations](BLISTypedAPI.md#level-3-operations)
   * [Utility operations](BLISTypedAPI.md#utility-operations)
-  * [Level-3 micro-kernels](BLISTypedAPI.md#level-3-micro-kernels)
+  * [Level-3 microkernels](BLISTypedAPI.md#level-3-microkernels)
 * **[Query function reference](BLISTypedAPI.md#query-function-reference)**
   * [General library information](BLISTypedAPI.md#general-library-information)
   * [Specific configuration](BLISTypedAPI.md#specific-configuration)
@@ -30,7 +30,7 @@
 
 # Introduction
 
-This document summarizes one of the primary native APIs in BLIS--the "typed" API. Here, we also discuss BLIS-specific type definitions, header files, and prototypes to auxiliary functions. This document also includes APIs to key kernels which are used to accelerate and optimize various level-2 and level-3 operations, though the [Kernels Guide](KernelsHowTo.md) goes into more detail, especially for level-3 micro-kernels.
+This document summarizes one of the primary native APIs in BLIS--the "typed" API. Here, we also discuss BLIS-specific type definitions, header files, and prototypes to auxiliary functions. This document also includes APIs to key kernels which are used to accelerate and optimize various level-2 and level-3 operations, though the [Kernels Guide](KernelsHowTo.md) goes into more detail, especially for level-3 microkernels.
 
 There are many functions that BLIS implements that are not listed here, either because they are lower-level functions, or they are considered for use primarily by developers and experts.
 
@@ -128,7 +128,7 @@ The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t
 
 ## Context type
 
-In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_dgemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
 cntx_t* bli_gks_query_cntx( void );
 ```
@@ -1177,7 +1177,7 @@ where `A` is an _m x m_ triangular matrix stored in the lower or upper triangle 
 ## Level-3 operations
 
 Level-3 operations perform various level-3 BLAS-like operations.
-**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
+**Note**: Each All level-3 operations are implemented through a handful of level-3 microkernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
 
 
 ---
@@ -1662,13 +1662,13 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 ---
 
 
-## Level-3 micro-kernels
+## Level-3 microkernels
 
-**Note:** The `*` in level-3 micro-kernel function names shown below reflect that there is no exact naming convention required for the micro-kernels, except that they must begin with `bli_?`. We strongly recommend, however, that the micro-kernel function names include the name of the micro-kernel itself. For example, the `gemm` micro-kernel should be named with the prefix `bli_?gemm_` and the `trsm` micro-kernels should be named with the prefixes `bli_?trsm_l_` (lower triangular) and `bli_?trsm_u_` (upper triangular).
+**Note:** The `*` in level-3 microkernel function names shown below reflect that there is no exact naming convention required for the microkernels, except that they must begin with `bli_?`. We strongly recommend, however, that the microkernel function names include the name of the microkernel itself. For example, the `gemm` microkernel should be named with the prefix `bli_?gemm_` and the `trsm` microkernels should be named with the prefixes `bli_?trsm_l_` (lower triangular) and `bli_?trsm_u_` (upper triangular).
 
 ---
 
-#### gemm micro-kernel
+#### gemm microkernel
 ```c
 void bli_?gemm_*
      (
@@ -1686,14 +1686,14 @@ Perform
 ```
   C11 := beta * C11 + alpha * A1 * B1
 ```
-where `C11` is an _MR x NR_ matrix, `A1` is an _MR x k_ "micro-panel" matrix stored in packed (column-stored) format, `B1` is a _k x NR_ "micro-panel" matrix in packed (row-stored) format, and alpha and beta are scalars. The storage of `C11` is specified by its row and column strides, `rsc` and `csc`.
+where `C11` is an _MR x NR_ matrix, `A1` is an _MR x k_ "micropanel" matrix stored in packed (column-stored) format, `B1` is a _k x NR_ "micropanel" matrix in packed (row-stored) format, and alpha and beta are scalars. The storage of `C11` is specified by its row and column strides, `rsc` and `csc`.
 
-Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemm` microkernel.
 
 
 ---
 
-#### trsm micro-kernels
+#### trsm microkernels
 ```c
 void bli_?trsm_l_*
      (
@@ -1720,11 +1720,11 @@ Perform
 ```
 where `A11` is an _MR x MR_ lower or upper triangular matrix stored in packed (column-stored) format, `B11` is an _MR x NR_ matrix stored in packed (row-stored) format, and `C11` is an _MR x NR_ matrix stored according to row and column strides `rsc` and `csc`.
 
-Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `trsm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `trsm` microkernel.
 
 ---
 
-#### gemmtrsm micro-kernels
+#### gemmtrsm microkernels
 ```c
 void bli_?gemmtrsm_l_*
      (
@@ -1766,7 +1766,7 @@ if `A11` is lower triangular, or
 ```
 if `A11` is upper triangular.
 
-Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemmtrsm` micro-kernel.
+Please see the [Kernel Guide](KernelsHowTo.md) for more information on the `gemmtrsm` microkernel.
 
 
 
@@ -1827,7 +1827,7 @@ gint_t bli_info_get_blas_int_type_size( void );
 
 ### Micro-kernel implementation type query
 
-The following routines allow the caller to obtain a string that identifies the implementation type of each micro-kernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`). 
+The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
 char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
@@ -1838,26 +1838,26 @@ char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
- * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the micro-kernel.
- * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the micro-kernel.
- * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the micro-kernel.
- * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micro-panel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micro-panel of packed matrix B.
- * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that real and imaginary components of the current micro-panels are completely used before proceeding to the next virtual micro-kernel invocation.
+ * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the microkernel.
+ * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the microkernel.
+ * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the microkernel.
+ * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micropanel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micropanel of packed matrix B.
+ * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that real and imaginary components of the current micropanels are completely used before proceeding to the next virtual microkernel invocation.
  * `BLIS_1M`: Implementation based on the 1m method. (This is the default induced method when real domain kernels are present but complex kernels are missing.)
  * `BLIS_NAT`: Implementation based on "native" execution (ie: NOT an induced method).
 
-**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists. 
+**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists.
 
-Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
- * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried micro-kernel is provided by the reference implementation.
- * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried micro-kernel is driven by a the "virtual" micro-kernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
- * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels.
- * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` micro-kernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based micro-kernels because these micro-kernels perform more a triangular inversion, which is not matrix multiplication.
+Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
+ * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried microkernel is provided by the reference implementation.
+ * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried microkernel is driven by a the "virtual" microkernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
+ * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried microkernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a microkernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference microkernels.
+ * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
 
 
 ### Operation implementation type query
 
-The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [micro-kernel implemenation query](BLISTypedAPI.md#micro-kernel-implementation-type-query).
+The following routines allow the caller to obtain a string that identifies the implementation (`ind_t`) that is currently active (ie: implemented and enabled) for each level-3 operation. Possible implementation types are listed in the section above covering [microkernel implemenation query](BLISTypedAPI.md#microkernel-implementation-type-query).
 ```c
 char* bli_info_get_gemm_impl_string( num_t dt );
 char* bli_info_get_hemm_impl_string( num_t dt );

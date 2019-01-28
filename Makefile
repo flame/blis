@@ -354,6 +354,16 @@ MK_TESTSUITE_OBJS       := $(sort \
                             )
 
 # The test suite binary executable filename.
+# NOTE: The TESTSUITE_WRAPPER variable defaults to the empty string if it
+# is not already set, in which case it has no effect lateron when the
+# testsuite binary is executed via lines such as
+#
+#   $(TESTSUITE_WRAPPER) ./$(TESTSUITE_BIN) ... > $(TESTSUITE_OUT_FILE)
+#
+# The reason TESTSUITE_WRAPPER is employed in this way is so that some
+# unusual environments (e.g. ARM) can run the testsuite through some other
+# binary. See .travis.yml for details on how the variable is employed in
+# practice.
 TESTSUITE_BIN           := test_$(LIBBLIS).x
 TESTSUITE_WRAPPER       ?=
 

@@ -12,8 +12,8 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [I understand that BLIS is mostly a tool for developers?](FAQ.md#i-understand-that-blis-is-mostly-a-tool-for-developers)
   * [How do I link against BLIS?](FAQ.md#how-do-i-link-against-blis)
   * [Must I use git? Can I download a tarball?](FAQ.md#must-i-use-git-can-i-download-a-tarball)
-  * [What is a micro-kernel?](FAQ.md#what-is-a-micro-kernel)
-  * [What is a macro-kernel?](FAQ.md#what-is-a-macro-kernel)
+  * [What is a microkernel?](FAQ.md#what-is-a-microkernel)
+  * [What is a macrokernel?](FAQ.md#what-is-a-macrokernel)
   * [What is a context?](FAQ.md#what-is-a-context)
   * [I am used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?](FAQ.md#im-used-to-thinking-in-terms-of-column-majorrow-major-storage-and-leading-dimensions-what-is-a-row-stride--column-stride)
   * [What does it mean when a matrix with general stride is column-tilted or row-tilted?](FAQ.md#what-does-it-mean-when-a-matrix-with-general-stride-is-column-tilted-or-row-tilted)
@@ -47,7 +47,7 @@ Over time, we wanted more than just a more flexible interface; we wanted an enti
 
 BLIS has numerous advantages to existing BLAS implementations. Many of these advantages are summarized on the [BLIS
 homepage](https://github.com/flame/blis#key-features). But here are a few reasons one might choose BLIS over some other implementation of BLAS:
-  * BLIS facilitates high performance while remaining very portable. BLIS isolates performance-sensitive code to a micro-kernel which contains only one loop and which, when optimized, accelerates virtually all level-3 operations. Thus, BLIS serves as a powerful tool for quickly instantiating BLAS on new or experimental hardware architectures, as well as a flexible "laboratory" in which to conduct research and experiments.
+  * BLIS facilitates high performance while remaining very portable. BLIS isolates performance-sensitive code to a microkernel which contains only one loop and which, when optimized, accelerates virtually all level-3 operations. Thus, BLIS serves as a powerful tool for quickly instantiating BLAS on new or experimental hardware architectures, as well as a flexible "laboratory" in which to conduct research and experiments.
   * BLIS provides robust multithreading support, allowing symmetric multicore/many-core parallelism via either OpenMP or POSIX threads. It also computes proper load balance for structured matrix subpartitions, regardless of the location of the diagonal, or whether the subpartition is lower- or upper-stored.
   * BLIS supports a superset of BLAS functionality, providing operations omitted from the BLAS as well as some complex domain support that is missing in BLAS operations. BLIS is especially useful to researchers who need to develop and prototype new BLAS-like operations that do not exist in the BLAS.
   * BLIS is backwards compatible with BLAS. BLIS contains a BLAS compatibility layer that allows an application to treat BLIS as if it were a traditional BLAS library.
@@ -67,7 +67,7 @@ If automatic hardware detection is requested at configure-time and the build pro
 
 ### I understand that BLIS is mostly a tool for developers?
 
-Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and micro-kernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
+Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and microkernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
 
 The good news, however, is that end-users can use BLIS too. Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge. Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
 
@@ -82,19 +82,19 @@ clone](BuildSystem.md#obtaining-blis) command). The reason for this is that it w
 
 Tarballs and zip files may be obtained from the [releases](https://github.com/flame/blis/releases) page.
 
-### What is a micro-kernel?
+### What is a microkernel?
 
-The micro-kernel (usually short for "`gemm` micro-kernel") is the basic unit of level-3 (matrix-matrix) computation within BLIS. It consists of one loop, where each iteration performs a very small outer product to update a very small matrix. The micro-kernel is typically the only piece of code that must be carefully optimized (via vector intrinsics or assembly code) to enable high performance in most of the level-3 operations such as `gemm`, `hemm`, `herk`, and `trmm`.
+The microkernel (usually short for "`gemm` microkernel") is the basic unit of level-3 (matrix-matrix) computation within BLIS. It consists of one loop, where each iteration performs a very small outer product to update a very small matrix. The microkernel is typically the only piece of code that must be carefully optimized (via vector intrinsics or assembly code) to enable high performance in most of the level-3 operations such as `gemm`, `hemm`, `herk`, and `trmm`.
 
-For a more thorough explanation of the micro-kernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm micro-kernel section](KernelsHowTo.md#gemm-micro-kernel) of the BLIS [Kernels Guide](KernelsHowTo.md).
+For a more thorough explanation of the microkernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm microkernel section](KernelsHowTo.md#gemm-microkernel) of the BLIS [Kernels Guide](KernelsHowTo.md).
 
-### What is a macro-kernel?
+### What is a macrokernel?
 
-The macro-kernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macro-kernel is called. The macro-kernel is implemented as two loops around the micro-kernel.
+The macrokernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macrokernel is called. The macrokernel is implemented as two loops around the microkernel.
 
-The macro-kernels in BLIS correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
+The macrokernels in BLIS correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
 
-For more information on macro-kernels, please read our [ACM TOMS papers](https://github.com/flame/blis#citations).
+For more information on macrokernels, please read our [ACM TOMS papers](https://github.com/flame/blis#citations).
 
 ### What is a context?
 

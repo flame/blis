@@ -169,7 +169,23 @@ else
 	@./$(TESTSUITE_BIN) > $(TESTSUITE_OUT_FILE)
 endif
 
+run-fast: $(TESTSUITE_BIN)
+ifeq ($(ENABLE_VERBOSE),yes)
+	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN) -o $(TESTSUITE_FAST_OPS) > $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN) -o $(TESTSUITE_FAST_OPS) > $(TESTSUITE_OUT_FILE)
+endif
+
 check: run
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+else
+	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+endif
+
+check-fast: run-fast
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else
