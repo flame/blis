@@ -63,7 +63,7 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv8-a+fp+simd -mcpu=thunderx2t99
+CKVECFLAGS     := -march=armv8.1-a+fp+simd -mcpu=thunderx2t99
 else
 $(error gcc is required for this configuration.)
 endif
