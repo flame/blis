@@ -2,7 +2,9 @@ function r_val = plot_dom_case( mdcase, ...
                                 cfreq, ...
                                 dflopspercycle, ...
                                 nth, ...
-                                dirpath )
+                                dirpath, ...
+                                dirpath_out, ...
+                                arch_str )
 
 % Create filename "templates" for the files that contain the performance
 % results.
@@ -71,7 +73,8 @@ for dti = 1:n_combos
 	% Grab the current datatype combination.
 	combo = dt_combos( dti, : );
 
-	str = sprintf( 'Plotting %d: %s', dti, combo ); disp(str);
+	%str = sprintf( 'Plotting %d: %s', dti, combo ); disp(str);
+	fprintf( '%d (%s) ', dti, combo );
 
 	if combo(4) == 's'
 		data_gemm_ref( :, : ) = data_gemm_intern_sref( :, : );
@@ -117,6 +120,7 @@ for dti = 1:n_combos
 
 end
 
+fprintf( '\n' );
 
 %if 0
 %set(gcf,'Position',[0 0 2000 900]);
@@ -128,7 +132,8 @@ end
 %set(gcf,'PaperOrientation','landscape');
 %end
 
-outfile = sprintf( 'output/gemm_%s', mdcase );
+outfile = sprintf( '%s/gemm_%s_%s', dirpath_out, mdcase, arch_str );
 
 print(gcf, outfile,'-bestfit','-dpdf');
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
+
