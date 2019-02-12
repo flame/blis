@@ -77,7 +77,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	if ( incx == 1 ) \
 	{ \
-		_Pragma( "omp simd" ) \
+		PRAGMA_SIMD \
 		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
 			PASTEMAC(ch,scals)( alpha_conj, x[i] ); \

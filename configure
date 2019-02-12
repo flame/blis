@@ -2668,8 +2668,10 @@ main()
 	fi
 	if [ "x${pragma_omp_simd}" = "xyes" ]; then
 		echo "${script_name}: compiler appears to support #pragma omp simd."
+		enable_pragma_omp_simd_01=1
 	else
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
+		enable_pragma_omp_simd_01=0
 	fi
 	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
@@ -2909,6 +2911,7 @@ main()
 		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		> "${bli_config_h_out_path}"

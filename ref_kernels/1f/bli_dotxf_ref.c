@@ -82,7 +82,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( bli_is_noconj( conjx_use ) ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t p = 0; p < m; ++p ) \
 			for ( dim_t i = 0; i < ff; ++i ) \
 			{ \
@@ -91,7 +91,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t p = 0; p < m; ++p ) \
 			for ( dim_t i = 0; i < ff; ++i ) \
 			{ \

@@ -60,7 +60,7 @@ void PASTEMAC4(ch,opname,arch,_simd,suf) \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
-	_Pragma( "omp simd" ) \
+	PRAGMA_SIMD \
 	for ( dim_t i = 0; i < mr * nr; ++i ) \
 	{ \
 		PASTEMAC(ch,set0s)( ab[ i ] ); \
@@ -76,7 +76,7 @@ void PASTEMAC4(ch,opname,arch,_simd,suf) \
 	{ \
 		for ( dim_t i = 0; i < mr; ++i ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < nr; ++j ) \
 			{ \
 				PASTEMAC(ch,dots) \
@@ -103,7 +103,7 @@ void PASTEMAC4(ch,opname,arch,_simd,suf) \
 	{ \
 		for ( dim_t i = 0; i < mr; ++i ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < nr; ++j ) \
 			{ \
 				PASTEMAC(ch,dots) \
@@ -120,7 +120,7 @@ void PASTEMAC4(ch,opname,arch,_simd,suf) \
 	} \
 \
 	/* Scale the result in ab by alpha. */ \
-	_Pragma( "omp simd" ) \
+	PRAGMA_SIMD \
 	for ( dim_t i = 0; i < mr * nr; ++i ) \
 	{ \
 		PASTEMAC(ch,scals)( *alpha, ab[ i ] ); \

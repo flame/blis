@@ -68,7 +68,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			if ( bli_is_noconj( conjxt_use ) ) \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
 					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
@@ -77,7 +77,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 			else /* bli_is_conj( conjxt_use ) ) */ \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
 					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
@@ -102,7 +102,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 			if ( bli_is_noconj( conjxt_use ) ) \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
 					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
@@ -111,7 +111,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 			else /* bli_is_conj( conjxt_use ) ) */ \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < m; ++i ) \
 				{ \
 					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \

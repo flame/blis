@@ -57,7 +57,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t     rs_b   = nr; \
 	const inc_t     cs_b   = 1; \
 \
-	_Pragma( "omp simd" ) \
+	PRAGMA_SIMD \
 	for ( dim_t i = 0; i < mr; ++i ) \
 	{ \
 		/* b1 = b1 - a10t * B0; */ \
@@ -117,7 +117,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t     rs_b   = nr; \
 	const inc_t     cs_b   = 1; \
 \
-	_Pragma( "omp simd" ) \
+	PRAGMA_SIMD \
 	for ( dim_t iter = 0; iter < mr; ++iter ) \
 	{ \
 		dim_t i = mr - iter - 1; \

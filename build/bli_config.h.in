@@ -141,6 +141,12 @@
 #define BLIS_DISABLE_MEMKIND
 #endif
 
+#if @enable_pragma_omp_simd@
+#define BLIS_ENABLE_PRAGMA_OMP_SIMD
+#else
+#define BLIS_DISABLE_PRAGMA_OMP_SIMD
+#endif
+
 #if @enable_sandbox@
 #define BLIS_ENABLE_SANDBOX
 #else

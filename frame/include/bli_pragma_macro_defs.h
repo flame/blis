@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,38 +32,51 @@
 
 */
 
-#include "blis.h"
+/*
+  NOTE: The following code is based on [1].
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       dim_t            n, \
-       ctype*  restrict x, inc_t incx, \
-       cntx_t* restrict cntx  \
-     ) \
-{ \
-	if ( bli_zero_dim1( n ) ) return; \
-\
-	if ( incx == 1 ) \
-	{ \
-		PRAGMA_SIMD \
-		for ( dim_t i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,inverts)( x[i] ); \
-		} \
-	} \
-	else \
-	{ \
-		for ( dim_t i = 0; i < n; ++i ) \
-		{ \
-			PASTEMAC(ch,inverts)( *x ); \
-\
-			x += incx; \
-		} \
-	} \
-}
+  [1] https://github.com/jeffhammond/nwchem-tce-triples-kernels/blob/master/src/pragma_vendor.h
+*/
 
-INSERT_GENTFUNC_BASIC2( invertv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+#ifndef BLIS_PRAGMA_MACRO_DEFS_H
+#define BLIS_PRAGMA_MACRO_DEFS_H
 
+// Generally speaking, if BLIS_ENABLE_PRAGMA_OMP_SIMD is set, then we define
+// all instances of PRAGMA_SIMD as _Pragma("omp simd").
+
+#ifdef BLIS_ENABLE_PRAGMA_OMP_SIMD
+  #define PRAGMA_OMP_SIMD _Pragma("omp simd")
+#else
+  #define PRAGMA_OMP_SIMD
+#endif
+
+// Require ISO C99 or later for SIMD-related pragmas.
+#if (( __STDC_VERSION__ >= 199901L ))
+
+  #define GEN_PRAGMA(x) _Pragma(#x)
+
+  #if   defined(__ICC) || defined(__INTEL_COMPILER)
+
+    // Intel icc.
+    //#define PRAGMA_SIMD  GEN_PRAGMA(simd)
+    #define PRAGMA_SIMD  PRAGMA_OMP_SIMD
+
+  #elif defined(__clang__)
+
+    // clang/llvm.
+    #define PRAGMA_SIMD  PRAGMA_OMP_SIMD
+
+  #elif defined(__GNUC__)
+
+    // GNU gcc.
+    #define PRAGMA_SIMD  PRAGMA_OMP_SIMD
+
+  #else
+
+    // Unknown compiler.
+    #define PRAGMA_SIMD
+
+  #endif
+#endif
+
+#endif

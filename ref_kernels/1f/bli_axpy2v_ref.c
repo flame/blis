@@ -61,7 +61,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			if ( bli_is_noconj( conjy ) ) \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
 					PASTEMAC(ch,axpys)( *alphax, x[i], z[i] ); \
@@ -70,7 +70,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 			else /* if ( bli_is_conj( conjy ) ) */ \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
 					PASTEMAC(ch,axpys)( *alphax, x[i], z[i] ); \
@@ -83,7 +83,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			if ( bli_is_noconj( conjy ) ) \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
 					PASTEMAC(ch,copyjs)( x[i], chic ); \
@@ -93,7 +93,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			} \
 			else /* if ( bli_is_conj( conjy ) ) */ \
 			{ \
-				_Pragma( "omp simd" ) \
+				PRAGMA_SIMD \
 				for ( dim_t i = 0; i < n; ++i ) \
 				{ \
 					PASTEMAC(ch,copyjs)( x[i], chic ); \

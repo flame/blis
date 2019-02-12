@@ -92,7 +92,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
 				PASTEMAC(ch,scal2js)( *alpha, x[i], y[i] ); \
@@ -113,7 +113,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
 				PASTEMAC(ch,scal2s)( *alpha, x[i], y[i] ); \

@@ -66,6 +66,11 @@ extern "C" {
 #include "bli_macro_defs.h"
 
 
+// -- pragma definitions --
+
+#include "bli_pragma_macro_defs.h"
+
+
 // -- Threading definitions --
 
 #include "bli_thread.h"

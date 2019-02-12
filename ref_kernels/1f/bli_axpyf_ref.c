@@ -60,13 +60,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* Scale x by alpha, storing to a temporary array ax. */ \
 		if ( bli_is_conj( conjx ) ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < ff; ++j ) \
 				PASTEMAC(ch,scal2js)( *alpha, x[j], ax[j] ); \
 		} \
 		else \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t j = 0; j < ff; ++j ) \
 				PASTEMAC(ch,scal2s)( *alpha, x[j], ax[j] ); \
 		} \
@@ -74,7 +74,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* Accumulate ff separate axpyv's into y. */ \
 		if ( bli_is_noconj( conja ) ) \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < m; ++i ) \
 			for ( dim_t j = 0; j < ff; ++j ) \
 			{ \
@@ -83,7 +83,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			_Pragma( "omp simd" ) \
+			PRAGMA_SIMD \
 			for ( dim_t i = 0; i < m; ++i ) \
 			for ( dim_t j = 0; j < ff; ++j ) \
 			{ \
