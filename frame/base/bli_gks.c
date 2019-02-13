@@ -161,6 +161,11 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_bgq_ref,
 		                                              bli_cntx_init_bgq_ind );
 #endif
+#ifdef BLIS_CONFIG_POWER9
+                bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
+                                                              bli_cntx_init_power9_ref,
+                                                              bli_cntx_init_power9_ind );
+#endif
 
 		// Generic architectures
 #ifdef BLIS_CONFIG_GENERIC

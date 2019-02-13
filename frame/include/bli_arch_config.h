@@ -104,6 +104,9 @@ CNTX_INIT_PROTS( power7 )
 #ifdef BLIS_CONFIG_BGQ
 CNTX_INIT_PROTS( bgq )
 #endif
+#ifdef BLIS_CONFIG_POWER9
+CNTX_INIT_PROTS( power9 )
+#endif
 
 // -- Generic --
 
@@ -189,7 +192,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_BGQ
 #include "bli_family_bgq.h"
 #endif
-
+#ifdef BLIS_FAMILY_POWER9
+#include "bli_family_power9.h"
+#endif
 // -- Generic --
 
 #ifdef BLIS_FAMILY_GENERIC

@@ -909,13 +909,14 @@ typedef enum
 	// IBM/Power
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
+	BLIS_ARCH_POWER9,
 
 	// Generic architecture/configuration
 	BLIS_ARCH_GENERIC
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 19
+#define BLIS_NUM_ARCHS 20
 
 
 //
