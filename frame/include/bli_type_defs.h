@@ -907,6 +907,7 @@ typedef enum
 	BLIS_ARCH_CORTEXA9,
 
 	// IBM/Power
+	BLIS_ARCH_POWER9,
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
@@ -915,7 +916,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 19
+#define BLIS_NUM_ARCHS 20
 
 
 //

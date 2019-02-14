@@ -151,6 +151,11 @@ void bli_gks_init( void )
 #endif
 
 		// IBM architectures
+#ifdef BLIS_CONFIG_POWER9
+		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
+		                                              bli_cntx_init_power9_ref,
+		                                              bli_cntx_init_power9_ind );
+#endif
 #ifdef BLIS_CONFIG_POWER7
 		bli_gks_register_cntx( BLIS_ARCH_POWER7,      bli_cntx_init_power7,
 		                                              bli_cntx_init_power7_ref,

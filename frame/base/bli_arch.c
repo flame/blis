@@ -143,6 +143,9 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_BGQ
 	id = BLIS_ARCH_BGQ;
 #endif
+#ifdef BLIS_FAMILY_POWER9
+        id = BLIS_ARCH_POWER9;
+#endif
 
 	// Generic microarchitecture.
 #ifdef BLIS_FAMILY_GENERIC
@@ -182,6 +185,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
 
     "power7",
     "bgq",
+    "power9",
 
     "generic"
 };
