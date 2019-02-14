@@ -38,7 +38,8 @@ cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
 # IBM architectures.
-bgq:         bgq
 power9:	     power9/generic
+bgq:         bgq
+
 # Generic architectures.
 generic:     generic

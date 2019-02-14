@@ -907,9 +907,9 @@ typedef enum
 	BLIS_ARCH_CORTEXA9,
 
 	// IBM/Power
+	BLIS_ARCH_POWER9,
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
-	BLIS_ARCH_POWER9,
 
 	// Generic architecture/configuration
 	BLIS_ARCH_GENERIC
