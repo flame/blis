@@ -10,6 +10,7 @@ bli_acquire_mpart_br2tl
 bli_acquire_mpart_l2r
 bli_acquire_mpart_l2r_check
 bli_acquire_mpart_mdim
+bli_acquire_mpart_mndim
 bli_acquire_mpart_ndim
 bli_acquire_mpart_r2l
 bli_acquire_mpart_t2b
@@ -1306,9 +1307,9 @@ bli_l3_thread_entry
 bli_l3_thrinfo_create_root
 bli_l3_thrinfo_free
 bli_l3_thrinfo_free_paths
-bli_l3_thrinfo_init
 bli_l3_thrinfo_init_single
-bli_l3_thrinfo_print_paths
+bli_l3_thrinfo_print_gemm_paths
+bli_l3_thrinfo_print_trsm_paths
 bli_lcm
 bli_lsame
 bli_machval
@@ -2032,11 +2033,13 @@ bli_thread_set_ways
 bli_thread_set_ways_
 bli_thrinfo_create
 bli_thrinfo_create_for_cntl
+bli_thrinfo_create_for_cntl_prenode
 bli_thrinfo_free
 bli_thrinfo_grow
 bli_thrinfo_init
 bli_thrinfo_init_single
 bli_thrinfo_rgrow
+bli_thrinfo_rgrow_prenode
 bli_trmm
 bli_trmm1m
 bli_trmm3
