@@ -52,6 +52,9 @@ void bli_trsm_int
 	obj_t        c_local;
 	trsm_var_oft f;
 
+	// Return early if the current control tree node is NULL.
+	if ( bli_cntl_is_null( cntl ) ) return;
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );

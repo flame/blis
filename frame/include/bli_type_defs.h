@@ -594,10 +594,10 @@ typedef enum
 	BLIS_SUBPART0,
 	BLIS_SUBPART1,
 	BLIS_SUBPART2,
-	BLIS_SUBPART1T,
+	BLIS_SUBPART1AND0,
+	BLIS_SUBPART1AND2,
+	BLIS_SUBPART1A,
 	BLIS_SUBPART1B,
-	BLIS_SUBPART1L,
-	BLIS_SUBPART1R,
 	BLIS_SUBPART00,
 	BLIS_SUBPART10,
 	BLIS_SUBPART20,
@@ -1015,6 +1015,7 @@ struct cntl_s
 	opid_t         family;
 	bszid_t        bszid;
 	void*          var_func;
+	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
 
 	// Optional fields (needed only by some operations such as packm).

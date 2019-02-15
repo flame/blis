@@ -123,7 +123,13 @@ void bli_pool_finalize
 	const siz_t top_index = bli_pool_top_index( pool );
 
 	// Sanity check: The top_index should be zero.
-	if ( top_index != 0 ) bli_abort();
+	if ( top_index != 0 )
+	{
+		printf( "bli_pool_finalize(): final top_index == %d (expected 0); block_size: %d.\n",
+		        ( int )top_index, ( int )bli_pool_block_size( pool ) );
+		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
+		bli_abort();
+	}
 
 	// Query the free() function pointer for the pool.
 	free_ft free_fp = bli_pool_free_fp( pool );

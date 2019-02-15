@@ -47,15 +47,11 @@ void bli_gemm_blk_var2
      )
 {
 	obj_t b1, c1;
-
-	dir_t direct;
-
-	dim_t i;
-	dim_t b_alg;
 	dim_t my_start, my_end;
+	dim_t b_alg;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_l3_direct( a, b, c, cntl );
+	dir_t direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
 	bli_l3_prune_unref_mparts_n( a, b, c, cntl );
@@ -68,7 +64,7 @@ void bli_gemm_blk_var2
 	);
 
 	// Partition along the n dimension.
-	for ( i = my_start; i < my_end; i += b_alg )
+	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_determine_blocksize( direct, i, my_end, b,

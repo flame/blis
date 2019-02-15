@@ -51,22 +51,6 @@ void bli_acquire_mpart
 \
 void PASTEMAC0( opname ) \
      ( \
-       dir_t     direct, \
-       subpart_t req_part, \
-       dim_t     i, \
-       dim_t     b, \
-       obj_t*    obj, \
-       obj_t*    sub_obj \
-     );
-
-GENPROT( acquire_mpart_mdim )
-GENPROT( acquire_mpart_ndim )
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0( opname ) \
-     ( \
        subpart_t req_part, \
        dim_t     i, \
        dim_t     b, \
@@ -81,7 +65,38 @@ GENPROT( acquire_mpart_r2l )
 GENPROT( acquire_mpart_tl2br )
 GENPROT( acquire_mpart_br2tl )
 
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0( opname ) \
+     ( \
+       dir_t     direct, \
+       subpart_t req_part, \
+       dim_t     i, \
+       dim_t     b, \
+       obj_t*    obj, \
+       obj_t*    sub_obj \
+     );
+
+GENPROT( acquire_mpart_mdim )
+GENPROT( acquire_mpart_ndim )
+GENPROT( acquire_mpart_mndim )
+
+
 // -- Vector partitioning ------------------------------------------------------
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0( opname ) \
+     ( \
+       subpart_t req_part, \
+       dim_t     i, \
+       dim_t     b, \
+       obj_t*    obj, \
+       obj_t*    sub_obj \
+     );
 
 GENPROT( acquire_vpart_f2b )
 GENPROT( acquire_vpart_b2f )
