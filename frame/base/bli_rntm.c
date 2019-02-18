@@ -108,8 +108,8 @@ bli_rntm_print( rntm );
 				(
 				  jc,
 				  1,
-				  ic,
-				  jr,
+				  ic * pc,
+				  jr * ir,
 				  1,
 				  rntm
 				);
