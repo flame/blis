@@ -75,7 +75,7 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-loop-optimizations
 else
 CRVECFLAGS     := $(CKVECFLAGS)
 endif
