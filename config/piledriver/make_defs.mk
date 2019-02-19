@@ -57,16 +57,16 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mfpmath=sse -mavx -mfma -mno-fma4 -march=bdver2
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver2 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mfpmath=sse -mavx -mfma -mno-fma4 -march=bdver2
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma -march=bdver2 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif
