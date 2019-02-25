@@ -863,8 +863,10 @@ typedef enum
 	BLIS_MC,
 	BLIS_KC,
 	BLIS_NC,
+
 	BLIS_M2, // level-2 blocksize in m dimension
 	BLIS_N2, // level-2 blocksize in n dimension
+
 	BLIS_AF, // level-1f axpyf fusing factor
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
@@ -1139,6 +1141,71 @@ typedef struct obj_s
 	dim_t         n_panel;  // n dimension of a "full" panel
 } obj_t;
 
+// Pre-initializors. Things that must be set afterwards:
+// - root object pointer
+// - info bitfields: dt, target_dt, exec_dt, comp_dt
+// - info2 bitfields: scalar_dt
+// - elem_size
+// - dims, strides
+// - buffer
+// - internal scalar buffer (must always set imaginary component)
+
+#define BLIS_OBJECT_INITIALIZER \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 0, 0 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( float ), /* this is changed later. */ \
+\
+	.buffer    = NULL, \
+	.rs        = 0, \
+	.cs        = 0, \
+	.is        = 1,  \
+\
+	.scalar    = { 0.0, 0.0 }, \
+\
+	.m_padded  = 0, \
+	.n_padded  = 0, \
+	.ps        = 0, \
+	.pd        = 0, \
+	.m_panel   = 0, \
+	.n_panel   = 0  \
+}
+
+#define BLIS_OBJECT_INITIALIZER_1X1 \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 1, 1 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( float ), /* this is changed later. */ \
+\
+	.buffer    = NULL, \
+	.rs        = 0, \
+	.cs        = 0, \
+	.is        = 1,  \
+\
+	.scalar    = { 0.0, 0.0 }, \
+\
+	.m_padded  = 0, \
+	.n_padded  = 0, \
+	.ps        = 0, \
+	.pd        = 0, \
+	.m_panel   = 0, \
+	.n_panel   = 0  \
+}
+
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
@@ -1203,6 +1270,39 @@ static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->pd        = a->pd;
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
+}
+
+// Initializors for global scalar constants.
+// NOTE: These must remain cpp macros since they are initializor
+// expressions, not functions.
+
+#define bli_obj_init_const( buffer0 ) \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 1, 1 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
+	                   BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( constdata_t ), \
+\
+	.buffer    = buffer0, \
+	.rs        = 1, \
+	.cs        = 1, \
+	.is        = 1  \
+}
+
+#define bli_obj_init_constdata( val ) \
+{ \
+	.s =           ( float  )val, \
+	.d =           ( double )val, \
+	.c = { .real = ( float  )val, .imag = 0.0f }, \
+	.z = { .real = ( double )val, .imag = 0.0 }, \
+	.i =           ( gint_t )val, \
 }
 
 

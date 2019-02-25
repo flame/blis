@@ -132,10 +132,34 @@ static dom_t bli_dt_domain( num_t dt )
 	       ( dt & BLIS_DOMAIN_BIT );
 }
 
+static bool_t bli_dt_dom_is_real( num_t dt )
+{
+	return ( bool_t )
+	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_REAL );
+}
+
+static bool_t bli_dt_dom_is_complex( num_t dt )
+{
+	return ( bool_t )
+	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_COMPLEX );
+}
+
 static prec_t bli_dt_prec( num_t dt )
 {
 	return ( prec_t )
 	       ( dt & BLIS_PRECISION_BIT );
+}
+
+static bool_t bli_dt_prec_is_single( num_t dt )
+{
+	return ( bool_t )
+	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_SINGLE_PREC );
+}
+
+static bool_t bli_dt_prec_is_double( num_t dt )
+{
+	return ( bool_t )
+	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_DOUBLE_PREC );
 }
 
 static num_t bli_dt_proj_to_real( num_t dt )

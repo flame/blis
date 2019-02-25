@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1127,6 +1128,55 @@ static void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
 	obj->ps = ps;
 }
 
+// -- Initialization-related macros --
+
+// Finish the initialization started by the matrix-specific static initializer
+// (e.g. BLIS_OBJECT_PREINITIALIZER)
+// NOTE: This is intended only for use in the BLAS compatibility API and typed
+// BLIS API.
+
+static void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t rs, inc_t cs, obj_t* obj )
+{
+	bli_obj_set_as_root( obj );
+
+	bli_obj_set_dt( dt, obj );
+	bli_obj_set_target_dt( dt, obj );
+	bli_obj_set_exec_dt( dt, obj );
+	bli_obj_set_comp_dt( dt, obj );
+
+	bli_obj_set_dims( m, n, obj );
+	bli_obj_set_strides( rs, cs, obj );
+
+	siz_t elem_size = sizeof( float );
+	if ( bli_dt_prec_is_double( dt ) ) elem_size *= 2;
+	if ( bli_dt_dom_is_complex( dt ) ) elem_size *= 2;
+	bli_obj_set_elem_size( elem_size, obj );
+
+	bli_obj_set_buffer( p, obj );
+
+	bli_obj_set_scalar_dt( dt, obj );
+	void* restrict s = bli_obj_internal_scalar_buffer( obj );
+
+	if      ( bli_dt_prec_is_single( dt ) ) { (( scomplex* )s)->real = 1.0F;
+	                                          (( scomplex* )s)->imag = 0.0F; }
+	else if ( bli_dt_prec_is_double( dt ) ) { (( dcomplex* )s)->real = 1.0;
+	                                          (( dcomplex* )s)->imag = 0.0; }
+}
+
+// Finish the initialization started by the 1x1-specific static initializer
+// (e.g. BLIS_OBJECT_PREINITIALIZER_1X1)
+// NOTE: This is intended only for use in the BLAS compatibility API and typed
+// BLIS API.
+
+static void bli_obj_init_finish_1x1( num_t dt, void* p, obj_t* obj )
+{
+	bli_obj_set_as_root( obj );
+
+	bli_obj_set_dt( dt, obj );
+
+	bli_obj_set_buffer( p, obj );
+}
+
 // -- Miscellaneous object macros --
 
 // Toggle the region referenced (or "stored").
@@ -1156,38 +1206,6 @@ static void bli_obj_set_defaults( obj_t* obj )
 {
 	obj->info = 0x0;
 	obj->info = obj->info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL;
-}
-
-// Initializors for global scalar constants.
-// NOTE: These must remain cpp macros since they are initializor
-// expressions, not functions.
-
-#define bli_obj_init_const( buffer0 ) \
-{ \
-	.root      = NULL, \
-\
-	.off       = { 0, 0 }, \
-	.dim       = { 1, 1 }, \
-	.diag_off  = 0, \
-\
-	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
-	                   BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.elem_size = sizeof( constdata_t ), \
-\
-	.buffer    = buffer0, \
-	.rs        = 1, \
-	.cs        = 1, \
-	.is        = 1  \
-}
-
-#define bli_obj_init_constdata( val ) \
-{ \
-	.s =           ( float  )val, \
-	.d =           ( double )val, \
-	.c = { .real = ( float  )val, .imag = 0.0f }, \
-	.z = { .real = ( double )val, .imag = 0.0 }, \
-	.i =           ( gint_t )val, \
 }
 
 // Acquire buffer at object's submatrix offset (offset-aware buffer query).
