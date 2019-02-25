@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -98,61 +99,8 @@ void bli_param_map_blis_to_netlib_machval( machval_t machval, char* blas_machval
 
 // --- BLAS/LAPACK to BLIS mappings --------------------------------------------
 
-void bli_param_map_netlib_to_blis_side( char side, side_t* blis_side )
-{
-	if      ( side == 'l' || side == 'L' ) *blis_side = BLIS_LEFT;
-	else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
-	else
-	{
-		// Instead of reporting an error to the framework, default to
-		// an arbitrary value. This is needed because this function is
-		// called by the BLAS compatibility layer AFTER it has already
-		// checked errors and called xerbla(). If the application wants
-		// to override the BLAS compatibility layer's xerbla--which
-		// responds to errors with abort()--we need to also NOT call
-		// abort() here, since either way it has already been dealt
-		// with.
-		//bli_check_error_code( BLIS_INVALID_SIDE );
-		*blis_side = BLIS_LEFT;
-	}
-}
-
-void bli_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
-{
-	if      ( uplo == 'l' || uplo == 'L' ) *blis_uplo = BLIS_LOWER;
-	else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		//bli_check_error_code( BLIS_INVALID_UPLO );
-		*blis_uplo = BLIS_LOWER;
-	}
-}
-
-void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans )
-{
-	if      ( trans == 'n' || trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
-	else if ( trans == 't' || trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
-	else if ( trans == 'c' || trans == 'C' ) *blis_trans = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		//bli_check_error_code( BLIS_INVALID_TRANS );
-		*blis_trans = BLIS_NO_TRANSPOSE;
-	}
-}
-
-void bli_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
-{
-	if      ( diag == 'n' || diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
-	else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		//bli_check_error_code( BLIS_INVALID_DIAG );
-		*blis_diag = BLIS_NONUNIT_DIAG;
-	}
-}
+// NOTE: These functions were converted into static functions. Please see this
+// file's corresponding header for those definitions.
 
 
 // --- BLIS char to BLIS mappings ----------------------------------------------

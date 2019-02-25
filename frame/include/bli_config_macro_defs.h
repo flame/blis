@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,11 +46,11 @@
 // internally within BLIS as well as those exposed in the native BLAS-like BLIS
 // interface.
 #ifndef BLIS_INT_TYPE_SIZE
-#ifdef BLIS_ARCH_64
-#define BLIS_INT_TYPE_SIZE               64
-#else
-#define BLIS_INT_TYPE_SIZE               32
-#endif
+  #ifdef BLIS_ARCH_64
+    #define BLIS_INT_TYPE_SIZE 64
+  #else
+    #define BLIS_INT_TYPE_SIZE 32
+  #endif
 #endif
 
 
@@ -157,7 +158,19 @@
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
 #ifndef BLIS_BLAS_INT_TYPE_SIZE
-#define BLIS_BLAS_INT_TYPE_SIZE     32
+  #define BLIS_BLAS_INT_TYPE_SIZE 32
+#endif
+
+// By default, the level-3 BLAS routines are implemented by directly calling
+// the BLIS object API. Alternatively, they may first call the typed BLIS
+// API, which will then call the object API.
+//#define BLIS_BLAS3_CALLS_TAPI
+#ifdef BLIS_BLAS3_CALLS_TAPI
+  #undef  BLIS_BLAS3_CALLS_OAPI
+#else
+  // Default behavior is to call object API directly.
+  #undef  BLIS_BLAS3_CALLS_OAPI // In case user explicitly enabled.
+  #define BLIS_BLAS3_CALLS_OAPI
 #endif
 
 
