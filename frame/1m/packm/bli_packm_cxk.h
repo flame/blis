@@ -36,7 +36,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t  conja, \
        pack_t  schema, \

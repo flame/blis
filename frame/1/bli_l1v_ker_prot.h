@@ -39,7 +39,7 @@
 
 #define ADDV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
       ( \
         conj_t           conjx, \
         dim_t            n, \
@@ -51,7 +51,7 @@ void PASTEMAC(ch,opname) \
 
 #define AMAXV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
@@ -62,7 +62,7 @@ void PASTEMAC(ch,opname) \
 
 #define AXPBYV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        dim_t            n, \
@@ -76,7 +76,7 @@ void PASTEMAC(ch,opname) \
 
 #define AXPYV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        dim_t            n, \
@@ -89,7 +89,7 @@ void PASTEMAC(ch,opname) \
 
 #define COPYV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
       ( \
         conj_t           conjx, \
         dim_t            n, \
@@ -101,7 +101,7 @@ void PASTEMAC(ch,opname) \
 
 #define DOTV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        conj_t           conjy, \
@@ -115,7 +115,7 @@ void PASTEMAC(ch,opname) \
 
 #define DOTXV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        conj_t           conjy, \
@@ -131,7 +131,7 @@ void PASTEMAC(ch,opname) \
 
 #define INVERTV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
@@ -141,7 +141,7 @@ void PASTEMAC(ch,opname) \
 
 #define SCALV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjalpha, \
        dim_t            n, \
@@ -153,7 +153,7 @@ void PASTEMAC(ch,opname) \
 
 #define SCAL2V_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        dim_t            n, \
@@ -166,7 +166,7 @@ void PASTEMAC(ch,opname) \
 
 #define SETV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjalpha, \
        dim_t            n, \
@@ -178,7 +178,7 @@ void PASTEMAC(ch,opname) \
 
 #define SUBV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
       ( \
         conj_t           conjx, \
         dim_t            n, \
@@ -190,7 +190,7 @@ void PASTEMAC(ch,opname) \
 
 #define SWAPV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
@@ -201,7 +201,7 @@ void PASTEMAC(ch,opname) \
 
 #define XPBYV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        dim_t            n, \

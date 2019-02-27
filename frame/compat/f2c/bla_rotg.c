@@ -45,7 +45,7 @@
 
 static bla_real sc_b4 = 1.f;
 
-/* Subroutine */ int PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(s,rotg)(bla_real *sa, bla_real *sb, bla_real *c__, bla_real *s)
 {
     /* System generated locals */
     bla_real r__1, r__2;
@@ -105,7 +105,7 @@ L20:
 
 static bla_double dc_b4 = 1.;
 
-/* Subroutine */ int PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(d,rotg)(bla_double *da, bla_double *db, bla_double *c__, bla_double *s)
 {
     /* System generated locals */
     bla_double d__1, d__2;
@@ -161,7 +161,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(c,rotg)(bla_scomplex *ca, bla_scomplex *cb, bla_real *c__, bla_scomplex *s)
 {
     /* System generated locals */
     bla_real r__1, r__2;
@@ -211,7 +211,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(z,rotg)(bla_dcomplex *ca, bla_dcomplex *cb, bla_double *c__, bla_dcomplex *s)
 {
     /* System generated locals */
     bla_double d__1, d__2;

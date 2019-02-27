@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname, imeth ) \
 \
-void PASTEMAC(opname,imeth) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,imeth) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -77,7 +77,7 @@ GENFRONT( syr2k, ind )
 #undef  GENFRONT
 #define GENFRONT( opname, imeth ) \
 \
-void PASTEMAC(opname,imeth) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,imeth) \
      ( \
        side_t  side, \
        obj_t*  alpha, \
@@ -113,7 +113,7 @@ GENFRONT( trmm3, ind )
 #undef  GENFRONT
 #define GENFRONT( opname, imeth ) \
 \
-void PASTEMAC(opname,imeth) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,imeth) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -146,7 +146,7 @@ GENFRONT( syrk, ind )
 #undef  GENFRONT
 #define GENFRONT( opname, imeth ) \
 \
-void PASTEMAC(opname,imeth) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,imeth) \
      ( \
        side_t  side, \
        obj_t*  alpha, \

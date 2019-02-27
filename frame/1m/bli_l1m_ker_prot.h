@@ -41,7 +41,7 @@
 
 #define PACKM_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        pack_t           schema, \
@@ -59,7 +59,7 @@ void PASTEMAC(ch,varname) \
 
 #define UNPACKM_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        dim_t            n, \
@@ -74,7 +74,7 @@ void PASTEMAC(ch,varname) \
 
 #define PACKM_3MIS_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        dim_t            cdim, \
@@ -91,7 +91,7 @@ void PASTEMAC(ch,varname) \
 
 #define PACKM_4MI_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        dim_t            cdim, \
@@ -108,7 +108,7 @@ void PASTEMAC(ch,varname) \
 
 #define PACKM_RIH_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        pack_t           schema, \
@@ -126,7 +126,7 @@ void PASTEMAC(ch,varname) \
 
 #define PACKM_1ER_KER_PROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        pack_t           schema, \

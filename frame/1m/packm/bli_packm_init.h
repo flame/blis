@@ -32,7 +32,7 @@
 
 */
 
-siz_t bli_packm_init
+BLIS_EXPORT_BLIS siz_t bli_packm_init
      (
        obj_t*  a,
        obj_t*  p,

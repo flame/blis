@@ -13,7 +13,7 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_dcopy( f77_int N, const double *X,
+void BLIS_EXPORT_BLAS cblas_dcopy( f77_int N, const double *X,
                       f77_int incX, double *Y, f77_int incY)
 {
 #ifdef F77_INT

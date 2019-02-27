@@ -39,7 +39,7 @@
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_c, ctype_p, chc, chp, varname ) \
 \
-void PASTEMAC2(chc,chp,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
      ( \
        conj_t            conjc, \
        pack_t            schema, \
@@ -313,7 +313,7 @@ INSERT_GENTFUNC2_MIXDP0( packm_struc_cxk_md )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_a, ctype_p, cha, chp, opname ) \
 \
-void PASTEMAC2(cha,chp,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cha,chp,opname) \
      ( \
        conj_t            conja, \
        dim_t             m, \
@@ -440,7 +440,7 @@ INSERT_GENTFUNC2_MIXDP0( packm_cxk_1r_md )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_a, ctype_p, cha, chp, opname ) \
 \
-void PASTEMAC2(cha,chp,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cha,chp,opname) \
      ( \
        conj_t            conja, \
        dim_t             m, \

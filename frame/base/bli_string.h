@@ -32,4 +32,4 @@
 
 */
 
-void bli_string_mkupper( char* s );
+BLIS_EXPORT_BLIS void bli_string_mkupper( char* s );

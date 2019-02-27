@@ -32,7 +32,7 @@
 
 */
 
-void bli_trsm_int
+BLIS_EXPORT_BLIS void bli_trsm_int
      (
        obj_t*  alpha,
        obj_t*  a,

@@ -43,7 +43,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -116,7 +116,7 @@ GENFRONT( gemv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -182,7 +182,7 @@ GENFRONT( ger )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -256,7 +256,7 @@ GENFRONT( symv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -317,7 +317,7 @@ GENFRONT( syr )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -384,7 +384,7 @@ GENFRONT( syr2 )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \

@@ -36,7 +36,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        trans_t transa, \
        trans_t transb, \
@@ -63,7 +63,7 @@ INSERT_GENTPROT_BASIC0( gemm1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -90,7 +90,7 @@ INSERT_GENTPROT_BASIC0( hemm1m )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -116,7 +116,7 @@ INSERT_GENTPROTR_BASIC0( her2k1m )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -140,7 +140,7 @@ INSERT_GENTPROTR_BASIC0( herk1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -167,7 +167,7 @@ INSERT_GENTPROT_BASIC0( symm1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -193,7 +193,7 @@ INSERT_GENTPROT_BASIC0( syr2k1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -217,7 +217,7 @@ INSERT_GENTPROT_BASIC0( syrk1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -245,7 +245,7 @@ INSERT_GENTPROT_BASIC0( trmm31m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -268,7 +268,7 @@ INSERT_GENTPROT_BASIC0( trmm1m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        side_t  side, \
        uplo_t  uploa, \

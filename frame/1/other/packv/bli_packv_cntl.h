@@ -56,7 +56,7 @@ typedef struct packv_params_s packv_params_t;
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_packv_cntl_obj_create
+BLIS_EXPORT_BLIS cntl_t* bli_packv_cntl_obj_create
      (
        void_fp   var_func,
        void_fp   packv_var_func,

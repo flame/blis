@@ -32,7 +32,7 @@
 
 */
 
-void bli_packv_check
+BLIS_EXPORT_BLIS void bli_packv_check
      (
        obj_t*  c,
        obj_t*  p,

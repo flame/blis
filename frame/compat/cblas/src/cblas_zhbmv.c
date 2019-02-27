@@ -11,7 +11,7 @@
 #include "cblas_f77.h"
 #include <stdio.h>
 #include <stdlib.h>
-void cblas_zhbmv(enum CBLAS_ORDER order,
+void BLIS_EXPORT_BLAS cblas_zhbmv(enum CBLAS_ORDER order,
                  enum CBLAS_UPLO Uplo,f77_int N,f77_int K,
                  const void *alpha, const void  *A, f77_int lda,
                  const void  *X, f77_int incX, const void *beta,

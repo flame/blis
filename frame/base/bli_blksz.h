@@ -238,20 +238,20 @@ BLIS_EXPORT_BLIS void bli_blksz_reduce_dt_to
      );
 #endif
 
-void bli_blksz_reduce_def_to
+BLIS_EXPORT_BLIS void bli_blksz_reduce_def_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz
      );
 
-void bli_blksz_reduce_max_to
+BLIS_EXPORT_BLIS void bli_blksz_reduce_max_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz
      );
 // -----------------------------------------------------------------------------
 
-dim_t bli_determine_blocksize
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize
      (
        dir_t   direct,
        dim_t   i,
@@ -261,7 +261,7 @@ dim_t bli_determine_blocksize
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_f
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f
      (
        dim_t   i,
        dim_t   dim,
@@ -270,7 +270,7 @@ dim_t bli_determine_blocksize_f
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_b
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_b
      (
        dim_t   i,
        dim_t   dim,
@@ -281,7 +281,7 @@ dim_t bli_determine_blocksize_b
 
 #ifdef AOCL_BLIS_ZEN
 
-dim_t bli_determine_blocksize_trsm
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm
      (
        dir_t   direct,
        dim_t   i,
@@ -291,7 +291,7 @@ dim_t bli_determine_blocksize_trsm
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_trsm_f
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm_f
      (
        dim_t   i,
        dim_t   dim,
@@ -300,7 +300,7 @@ dim_t bli_determine_blocksize_trsm_f
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_trsm_b
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm_b
      (
        dim_t   i,
        dim_t   dim,
@@ -312,6 +312,7 @@ dim_t bli_determine_blocksize_trsm_b
 #endif
 
 dim_t bli_determine_blocksize_f_sub
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f_sub
      (
        dim_t  i,
        dim_t  dim,
@@ -319,7 +320,7 @@ dim_t bli_determine_blocksize_f_sub
        dim_t  b_max
      );
 
-dim_t bli_determine_blocksize_b_sub
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_b_sub
      (
        dim_t  i,
        dim_t  dim,

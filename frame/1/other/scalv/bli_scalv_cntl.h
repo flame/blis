@@ -45,7 +45,7 @@ void      bli_scalv_cntl_init( void );
 void      bli_scalv_cntl_finalize( void );
 scalv_t* bli_scalv_cntl_obj_create( impl_t       impl_type,
                                     varnum_t     var_num );
-void bli_scalv_cntl_obj_init( scalv_t*   cntl,
+BLIS_EXPORT_BLIS void bli_scalv_cntl_obj_init( scalv_t*   cntl,
                               impl_t     impl_type,
                               varnum_t   var_num );
 

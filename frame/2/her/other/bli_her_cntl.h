@@ -57,7 +57,7 @@ her_t* bli_her_cntl_obj_create( impl_t     impl_type,
                                 ger_t*     sub_ger,
                                 her_t*     sub_her,
                                 unpackm_t* sub_unpackm_c11 );
-void bli_her_cntl_obj_init( her_t*     cntl,
+BLIS_EXPORT_BLIS void bli_her_cntl_obj_init( her_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
                             bszid_t    bszid,

@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  asum  \
@@ -56,7 +56,7 @@ GENFRONT( asumv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      ) \
@@ -72,7 +72,7 @@ GENFRONT( mktrim )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -89,7 +89,7 @@ GENFRONT( normiv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -106,7 +106,7 @@ GENFRONT( normim )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        FILE*  file, \
        char*  s1, \
@@ -125,7 +125,7 @@ GENFRONT( fprintm )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      ) \
@@ -142,7 +142,7 @@ GENFRONT( randnm )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  scale, \

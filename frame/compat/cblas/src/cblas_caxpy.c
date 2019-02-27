@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_caxpy( f77_int N, const void *alpha, const void *X,
+void BLIS_EXPORT_BLAS cblas_caxpy( f77_int N, const void *alpha, const void *X,
                        f77_int incX, void *Y, f77_int incY)
 {
 #ifdef F77_INT

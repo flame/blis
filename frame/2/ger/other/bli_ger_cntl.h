@@ -59,7 +59,7 @@ ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
                                 packm_t*   sub_packm_a,
                                 ger_t*     sub_ger,
                                 unpackm_t* sub_unpackm_a );
-void bli_ger_cntl_obj_init( ger_t*     cntl,
+BLIS_EXPORT_BLIS void bli_ger_cntl_obj_init( ger_t*     cntl,
                             impl_t     impl_type,
                             varnum_t   var_num,
                             bszid_t    bszid,
