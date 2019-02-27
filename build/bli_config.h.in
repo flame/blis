@@ -159,7 +159,28 @@
 #define BLIS_DISABLE_SHARED
 #endif
 
-#define BLIS_EXPORT_BLAS
+#if !defined(BLIS_ENABLE_SHARED)
+    #define BLIS_EXPORT
+#else
+    #if defined(_WIN32) || defined(__CYGWIN__)
+        #ifdef BLIS_IS_BUILDING_LIBRARY
+            #define BLIS_EXPORT __declspec(dllexport)
+        #else
+            #define BLIS_EXPORT __declspec(dllimport)
+        #endif
+    #elif defined(__GNUC__) && __GNUC__ >= 4
+        #define BLIS_EXPORT __attribute__ ((visibility ("default")))
+    #else
+        #define BLIS_EXPORT
+    #endif
+#endif
+
+#if @enable_export_blis_functions@
+#define BLIS_EXPORT_BLIS BLIS_EXPORT
+#else
 #define BLIS_EXPORT_BLIS
+#endif
+
+#define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 #endif
