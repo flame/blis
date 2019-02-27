@@ -46,7 +46,7 @@ typedef struct unpackm_params_s unpackm_params_t;
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_unpackm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_unpackm_cntl_create_node
      (
        rntm_t*   rntm,
        void*     var_func,

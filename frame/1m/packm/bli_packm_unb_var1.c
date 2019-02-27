@@ -125,7 +125,7 @@ void bli_packm_unb_var1
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        struc_t strucc, \
        doff_t  diagoffc, \

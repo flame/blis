@@ -51,31 +51,31 @@
 #ifndef BLIS_CPUID_H
 #define BLIS_CPUID_H
 
-arch_t   bli_cpuid_query_id( void );
+BLIS_EXPORT_BLIS arch_t    bli_cpuid_query_id( void );
 
 // Intel
-bool_t   bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
-bool_t   bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
-bool_t   bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
 
 // ARM
-bool_t   bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
-bool_t   bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
-bool_t   bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
-bool_t   bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
-bool_t   bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
+BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
-uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
+BLIS_EXPORT_BLIS uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
 
 // -----------------------------------------------------------------------------
 

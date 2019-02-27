@@ -37,7 +37,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, tname, kerid ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -76,7 +76,7 @@ INSERT_GENTFUNC_BASIC2( gemm_ukernel, gemm, BLIS_GEMM_UKR )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, tname, kerid ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -118,7 +118,7 @@ INSERT_GENTFUNC_BASIC2( gemmtrsm_u_ukernel, gemmtrsm, BLIS_GEMMTRSM_U_UKR )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, tname, kerid ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*     restrict a, \
        ctype*     restrict b, \

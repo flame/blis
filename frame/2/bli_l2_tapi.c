@@ -43,7 +43,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -126,7 +126,7 @@ INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -178,7 +178,7 @@ INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
@@ -255,7 +255,7 @@ INSERT_GENTFUNC_BASIC4( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_v
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
@@ -319,7 +319,7 @@ INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
@@ -376,7 +376,7 @@ INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, conjh, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
@@ -438,7 +438,7 @@ INSERT_GENTFUNC_BASIC4( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_v
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, ftname, rvarname, cvarname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \

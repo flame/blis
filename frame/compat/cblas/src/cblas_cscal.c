@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_cscal( f77_int N, const void *alpha, void *X, 
+void BLIS_EXPORT_BLAS cblas_cscal( f77_int N, const void *alpha, void *X, 
                        f77_int incX)
 {
 #ifdef F77_INT

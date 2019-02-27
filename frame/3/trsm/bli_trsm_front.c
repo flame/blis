@@ -35,9 +35,7 @@
 
 #include "blis.h"
 
-//#define PRINT_SMALL_TRSM_INFO
-
-void bli_trsm_front
+BLIS_EXPORT_BLIS void bli_trsm_front
      (
        side_t  side,
        obj_t*  alpha,

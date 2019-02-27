@@ -11,7 +11,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_saxpy( f77_int N, float alpha, const float *X,
+void BLIS_EXPORT_BLAS cblas_saxpy( f77_int N, float alpha, const float *X,
                        f77_int incX, float *Y, f77_int incY)
 {
 #ifdef F77_INT

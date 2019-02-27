@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  asum  \
@@ -53,7 +53,7 @@ GENPROT( asumv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  a  \
        BLIS_OAPI_EX_PARAMS  \
@@ -67,7 +67,7 @@ GENPROT( mktrim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -82,7 +82,7 @@ GENPROT( normiv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -97,7 +97,7 @@ GENPROT( normim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        FILE*   file, \
        char*   s1, \
@@ -114,7 +114,7 @@ GENPROT( fprintm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        char*   s1, \
        obj_t*  x, \
@@ -130,7 +130,7 @@ GENPROT( printm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
@@ -143,7 +143,7 @@ GENPROT( randnv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
@@ -156,7 +156,7 @@ GENPROT( randnm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  scale, \

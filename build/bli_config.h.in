@@ -159,4 +159,7 @@
 #define BLIS_DISABLE_SHARED
 #endif
 
+#define BLIS_EXPORT_BLAS
+#define BLIS_EXPORT_BLIS
+
 #endif

@@ -58,15 +58,15 @@
 // Prototype-generating macro for bli_cntx_init_<arch>*() functions.
 #define CNTX_INIT_PROTS( archname ) \
 \
-void PASTEMAC(cntx_init_,archname) \
+BLIS_EXPORT_BLIS void PASTEMAC(cntx_init_,archname) \
      ( \
        cntx_t* cntx \
      ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cntx_init_,archname,BLIS_REF_SUFFIX) \
      ( \
        cntx_t* cntx \
      ); \
-void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cntx_init_,archname,BLIS_IND_SUFFIX) \
      ( \
        ind_t   method, \
        num_t   dt, \

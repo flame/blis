@@ -301,7 +301,7 @@ cntl_t* bli_trsm_r_cntl_create
 	return trsm_cntl_vl_mm;
 }
 
-void bli_trsm_cntl_free
+BLIS_EXPORT_BLIS void bli_trsm_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,

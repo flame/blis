@@ -102,18 +102,18 @@ static void bli_membrk_unlock( membrk_t* membrk )
 
 // -----------------------------------------------------------------------------
 
-membrk_t* bli_membrk_query( void );
+BLIS_EXPORT_BLIS membrk_t* bli_membrk_query( void );
 
-void bli_membrk_init
+BLIS_EXPORT_BLIS void bli_membrk_init
      (
        cntx_t*   cntx
      );
-void bli_membrk_finalize
+BLIS_EXPORT_BLIS void bli_membrk_finalize
      (
        void
      );
 
-void bli_membrk_acquire_m
+BLIS_EXPORT_BLIS void bli_membrk_acquire_m
      (
        rntm_t*   rntm,
        siz_t     req_size,
@@ -121,18 +121,18 @@ void bli_membrk_acquire_m
        mem_t*    mem
      );
 
-void bli_membrk_release
+BLIS_EXPORT_BLIS void bli_membrk_release
      (
        rntm_t* rntm,
        mem_t*  mem
      );
 
-void bli_membrk_rntm_set_membrk
+BLIS_EXPORT_BLIS void bli_membrk_rntm_set_membrk
      (
        rntm_t* rntm
      );
 
-siz_t bli_membrk_pool_size
+BLIS_EXPORT_BLIS siz_t bli_membrk_pool_size
      (
        membrk_t* membrk,
        packbuf_t buf_type
@@ -140,24 +140,24 @@ siz_t bli_membrk_pool_size
 
 // ----------------------------------------------------------------------------
 
-void bli_membrk_init_pools
+BLIS_EXPORT_BLIS void bli_membrk_init_pools
      (
        cntx_t*   cntx,
        membrk_t* membrk
      );
-void bli_membrk_finalize_pools
+BLIS_EXPORT_BLIS void bli_membrk_finalize_pools
      (
        membrk_t* membrk
      );
 
-void bli_membrk_compute_pool_block_sizes
+BLIS_EXPORT_BLIS void bli_membrk_compute_pool_block_sizes
      (
        siz_t*  bs_a,
        siz_t*  bs_b,
        siz_t*  bs_c,
        cntx_t* cntx
      );
-void bli_membrk_compute_pool_block_sizes_dt
+BLIS_EXPORT_BLIS void bli_membrk_compute_pool_block_sizes_dt
      (
        num_t   dt,
        siz_t*  bs_a,

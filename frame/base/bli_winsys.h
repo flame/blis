@@ -33,5 +33,5 @@
 */
 
 //int  bli_setenv( const char *name, const char *value, int overwrite );
-void bli_sleep( unsigned int secs );
+BLIS_EXPORT_BLIS void bli_sleep( unsigned int secs );
 

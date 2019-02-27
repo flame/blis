@@ -37,7 +37,7 @@
 
 static const char OPT_MARKER = '-';
 
-void bli_getopt_init_state( int opterr, getopt_t* state )
+BLIS_EXPORT_BLIS void bli_getopt_init_state( int opterr, getopt_t* state )
 {
 	state->optarg = NULL;
 	state->optind = 1;

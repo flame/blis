@@ -156,7 +156,7 @@ static void bli_thread_obarrier( thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-thrinfo_t* bli_thrinfo_create
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
      (
        rntm_t*    rntm,
        thrcomm_t* ocomm,
@@ -168,7 +168,7 @@ thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init
+BLIS_EXPORT_BLIS void bli_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -180,12 +180,12 @@ void bli_thrinfo_init
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init_single
+BLIS_EXPORT_BLIS void bli_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
-void bli_thrinfo_free
+BLIS_EXPORT_BLIS void bli_thrinfo_free
      (
        rntm_t*    rntm,
        thrinfo_t* thread

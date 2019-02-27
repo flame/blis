@@ -11,7 +11,7 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_zher2k(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+void BLIS_EXPORT_BLAS cblas_zher2k(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
                   enum CBLAS_TRANSPOSE Trans, f77_int N, f77_int K,
                   const void *alpha, const void *A, f77_int lda,
                   const void *B, f77_int ldb, double beta,

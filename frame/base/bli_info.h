@@ -36,37 +36,37 @@
 
 // -- General library information ----------------------------------------------
 
-char* bli_info_get_version_str( void );
-char* bli_info_get_int_type_size_str( void );
+BLIS_EXPORT_BLIS char* bli_info_get_version_str( void );
+BLIS_EXPORT_BLIS char* bli_info_get_int_type_size_str( void );
 
 
 // -- General configuration-related --------------------------------------------
 
-gint_t bli_info_get_int_type_size( void );
-gint_t bli_info_get_num_fp_types( void );
-gint_t bli_info_get_max_type_size( void );
-gint_t bli_info_get_page_size( void );
-gint_t bli_info_get_simd_num_registers( void );
-gint_t bli_info_get_simd_size( void );
-gint_t bli_info_get_simd_align_size( void );
-gint_t bli_info_get_stack_buf_max_size( void );
-gint_t bli_info_get_stack_buf_align_size( void );
-gint_t bli_info_get_heap_addr_align_size( void );
-gint_t bli_info_get_heap_stride_align_size( void );
-gint_t bli_info_get_pool_addr_align_size( void );
-gint_t bli_info_get_enable_stay_auto_init( void );
-gint_t bli_info_get_enable_blas( void );
-gint_t bli_info_get_enable_cblas( void );
-gint_t bli_info_get_blas_int_type_size( void );
-gint_t bli_info_get_enable_pba_pools( void );
-gint_t bli_info_get_enable_sba_pools( void );
-gint_t bli_info_get_enable_threading( void );
-gint_t bli_info_get_enable_openmp( void );
-gint_t bli_info_get_enable_pthreads( void );
-gint_t bli_info_get_thread_part_jrir_slab( void );
-gint_t bli_info_get_thread_part_jrir_rr( void );
-gint_t bli_info_get_enable_memkind( void );
-gint_t bli_info_get_enable_sandbox( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_int_type_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_num_fp_types( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_max_type_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_page_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_simd_num_registers( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_simd_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_simd_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_stack_buf_max_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_stack_buf_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_heap_addr_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_heap_stride_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_stay_auto_init( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_blas( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_cblas( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_blas_int_type_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_pba_pools( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sba_pools( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_threading( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_openmp( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_pthreads( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_slab( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_rr( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_memkind( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sandbox( void );
 
 
 // -- Kernel implementation-related --------------------------------------------
@@ -74,23 +74,23 @@ gint_t bli_info_get_enable_sandbox( void );
 
 // -- Level-3 kernel definitions --
 
-char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
-char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_gemmtrsm_l_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_gemmtrsm_u_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt );
 
 
 // -- BLIS implementation query (level-3) --------------------------------------
 
-char* bli_info_get_gemm_impl_string( num_t dt );
-char* bli_info_get_hemm_impl_string( num_t dt );
-char* bli_info_get_herk_impl_string( num_t dt );
-char* bli_info_get_her2k_impl_string( num_t dt );
-char* bli_info_get_symm_impl_string( num_t dt );
-char* bli_info_get_syrk_impl_string( num_t dt );
-char* bli_info_get_syr2k_impl_string( num_t dt );
-char* bli_info_get_trmm_impl_string( num_t dt );
-char* bli_info_get_trmm3_impl_string( num_t dt );
-char* bli_info_get_trsm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_gemm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_hemm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_herk_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_her2k_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_symm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_syrk_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_syr2k_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_trmm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_trmm3_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_trsm_impl_string( num_t dt );
 

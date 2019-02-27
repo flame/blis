@@ -153,10 +153,10 @@
 #define STRINGIFY_INT( s )         MKSTR( s )
 
 // Fortran-77 name-mangling macros.
-#define PASTEF770(name)                            name ## _
-#define PASTEF77(ch1,name)           ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)      ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEF770(name)                                      name ## _
+#define PASTEF77(ch1,name)                     ch1        ## name ## _
+#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
 
 // -- Include other groups of macros
 

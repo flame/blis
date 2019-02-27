@@ -36,11 +36,11 @@
 
 // --- BLIS to BLAS/LAPACK mappings --------------------------------------------
 
-void bli_param_map_blis_to_netlib_side( side_t side, char* blas_side );
-void bli_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo );
-void bli_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans );
-void bli_param_map_blis_to_netlib_diag( diag_t diag, char* blas_diag );
-void bli_param_map_blis_to_netlib_machval( machval_t machval, char* blas_machval );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_side( side_t side, char* blas_side );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_uplo( uplo_t uplo, char* blas_uplo );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_trans( trans_t trans, char* blas_trans );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_diag( diag_t diag, char* blas_diag );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_machval( machval_t machval, char* blas_machval );
 
 
 // --- BLAS/LAPACK to BLIS mappings --------------------------------------------
@@ -107,20 +107,20 @@ static void bli_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
 
 // --- BLIS char to BLIS mappings ----------------------------------------------
 
-void bli_param_map_char_to_blis_side( char side, side_t* blis_side );
-void bli_param_map_char_to_blis_uplo( char uplo, uplo_t* blis_uplo );
-void bli_param_map_char_to_blis_trans( char trans, trans_t* blis_trans );
-void bli_param_map_char_to_blis_conj( char conj, conj_t* blis_conj );
-void bli_param_map_char_to_blis_diag( char diag, diag_t* blis_diag );
-void bli_param_map_char_to_blis_dt( char dt, num_t* blis_dt );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_side( char side, side_t* blis_side );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_uplo( char uplo, uplo_t* blis_uplo );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_trans( char trans, trans_t* blis_trans );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_conj( char conj, conj_t* blis_conj );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_diag( char diag, diag_t* blis_diag );
+BLIS_EXPORT_BLIS void bli_param_map_char_to_blis_dt( char dt, num_t* blis_dt );
 
 
 // --- BLIS to BLIS char mappings ----------------------------------------------
 
-void bli_param_map_blis_to_char_side( side_t blis_side, char* side );
-void bli_param_map_blis_to_char_uplo( uplo_t blis_uplo, char* uplo );
-void bli_param_map_blis_to_char_trans( trans_t blis_trans, char* trans );
-void bli_param_map_blis_to_char_conj( conj_t blis_conj, char* conj );
-void bli_param_map_blis_to_char_diag( diag_t blis_diag, char* diag );
-void bli_param_map_blis_to_char_dt( num_t blis_dt, char* dt );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_side( side_t blis_side, char* side );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_uplo( uplo_t blis_uplo, char* uplo );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_trans( trans_t blis_trans, char* trans );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_conj( conj_t blis_conj, char* conj );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_diag( diag_t blis_diag, char* diag );
+BLIS_EXPORT_BLIS void bli_param_map_blis_to_char_dt( num_t blis_dt, char* dt );
 

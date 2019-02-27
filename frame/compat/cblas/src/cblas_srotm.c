@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_srotm( f77_int N, float *X, f77_int incX, float *Y, 
+void BLIS_EXPORT_BLAS cblas_srotm( f77_int N, float *X, f77_int incX, float *Y, 
                        f77_int incY, const float *P)
 {
 #ifdef F77_INT

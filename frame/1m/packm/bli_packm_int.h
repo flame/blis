@@ -32,7 +32,7 @@
 
 */
 
-void bli_packm_int
+BLIS_EXPORT_BLIS void bli_packm_int
      (
        obj_t*  a,
        obj_t*  p,

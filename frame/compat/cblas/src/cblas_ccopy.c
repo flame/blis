@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_ccopy( f77_int N, const void *X,
+void BLIS_EXPORT_BLAS cblas_ccopy( f77_int N, const void *X,
                       f77_int incX, void *Y, f77_int incY)
 {
 #ifdef F77_INT

@@ -40,7 +40,7 @@
 #define GENPROT( opname ) \
 \
 PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
+BLIS_EXPORT_BLIS PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
 GENPROT( asumv )
 GENPROT( mkherm )
@@ -67,7 +67,7 @@ GENPROT( sumsqv )
 #define GENPROT( opname ) \
 \
 PASTECH(opname,_vft) \
-PASTEMAC(opname,_qfp)( num_t dt );
+BLIS_EXPORT_BLIS PASTEMAC(opname,_qfp)( num_t dt );
 
 GENPROT( fprintv )
 GENPROT( fprintm )

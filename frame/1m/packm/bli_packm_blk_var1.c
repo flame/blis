@@ -276,7 +276,7 @@ void bli_packm_blk_var1
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        struc_t strucc, \
        doff_t  diagoffc, \

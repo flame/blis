@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_srotg(  float *a, float *b, float *c, float *s)
+void BLIS_EXPORT_BLAS cblas_srotg(  float *a, float *b, float *c, float *s)
 {
    F77_srotg(a,b,c,s);    
 }
