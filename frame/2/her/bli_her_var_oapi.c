@@ -37,7 +37,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname, varname ) \
 \
-void PASTEMAC0(varname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(varname) \
      ( \
        conj_t  conjh, \
        obj_t*  alpha, \

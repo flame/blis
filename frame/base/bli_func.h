@@ -70,7 +70,7 @@ BLIS_INLINE void bli_func_copy_dt
 
 // -----------------------------------------------------------------------------
 
-func_t* bli_func_create
+BLIS_EXPORT_BLIS func_t* bli_func_create
      (
        void_fp ptr_s,
        void_fp ptr_d,
@@ -78,7 +78,7 @@ func_t* bli_func_create
        void_fp ptr_z
      );
 
-void bli_func_init
+BLIS_EXPORT_BLIS void bli_func_init
      (
        func_t* f,
        void_fp ptr_s,
@@ -87,12 +87,12 @@ void bli_func_init
        void_fp ptr_z
      );
 
-void bli_func_init_null
+BLIS_EXPORT_BLIS void bli_func_init_null
      (
        func_t* f
      );
 
-void bli_func_free( func_t* f );
+BLIS_EXPORT_BLIS void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 

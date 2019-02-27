@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        obj_t*  absq  \
@@ -81,7 +81,7 @@ GENFRONT( normfsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        obj_t*  psi  \
@@ -120,7 +120,7 @@ GENFRONT( subsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi  \
      ) \
@@ -153,7 +153,7 @@ GENFRONT( invertsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        obj_t*  psi  \
@@ -186,7 +186,7 @@ GENFRONT( sqrtsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        double* zeta_r, \
@@ -230,7 +230,7 @@ GENFRONT( getsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        double  zeta_r, \
        double  zeta_i, \
@@ -264,7 +264,7 @@ GENFRONT( setsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        obj_t*  zeta_r, \
@@ -307,7 +307,7 @@ GENFRONT( unzipsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  zeta_r, \
        obj_t*  zeta_i, \

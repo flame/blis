@@ -37,7 +37,7 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
@@ -274,7 +274,7 @@ INSERT_GENTFUNCCO_BASIC( packm_struc_cxk_1er, packm_cxk_1er )
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
@@ -520,7 +520,7 @@ INSERT_GENTFUNCCO_BASIC( packm_herm_cxk_1er, packm_cxk_1er )
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffp, \

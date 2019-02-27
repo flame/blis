@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -54,7 +54,7 @@ GENTPROT( subd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -68,7 +68,7 @@ GENTPROT( scal2d )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
     );
@@ -79,7 +79,7 @@ GENTPROT( invertd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
@@ -94,7 +94,7 @@ GENTPROT( shiftd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  beta, \
@@ -106,25 +106,25 @@ GENTPROT( xpbyd )
 
 // -----------------------------------------------------------------------------
 
-void bli_l1d_xy_check
+BLIS_EXPORT_BLIS void bli_l1d_xy_check
      (
        obj_t*  x,
        obj_t*  y 
      );
 
-void bli_l1d_axy_check
+BLIS_EXPORT_BLIS void bli_l1d_axy_check
      (
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  y 
      );
 
-void bli_l1d_x_check
+BLIS_EXPORT_BLIS void bli_l1d_x_check
      (
        obj_t*  x 
      );
 
-void bli_l1d_ax_check
+BLIS_EXPORT_BLIS void bli_l1d_ax_check
      (
        obj_t*  alpha,
        obj_t*  x 

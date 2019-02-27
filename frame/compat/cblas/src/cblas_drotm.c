@@ -2,7 +2,7 @@
 #ifdef BLIS_ENABLE_CBLAS
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_drotm( f77_int N, double *X, f77_int incX, double *Y, 
+void BLIS_EXPORT_BLAS cblas_drotm( f77_int N, double *X, f77_int incX, double *Y, 
                        f77_int incY, const double *P)
 {
 #ifdef F77_INT

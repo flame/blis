@@ -32,13 +32,13 @@
 
 */
 
-void bli_projm_check
+BLIS_EXPORT_BLIS void bli_projm_check
      (
        obj_t* a,
        obj_t* b
      );
 
-void bli_projv_check
+BLIS_EXPORT_BLIS void bli_projv_check
      (
        obj_t* x,
        obj_t* y

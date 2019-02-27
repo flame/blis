@@ -364,7 +364,7 @@ BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
        rntm_t* rntm
      );
 
-void bli_rntm_set_ways_from_rntm
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_from_rntm
      (
        dim_t   m,
        dim_t   n,

@@ -126,7 +126,7 @@ void bli_gemm_ker_var5( obj_t*  a,
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, ukrtype ) \
 \
-void PASTEMAC(ch,varname)( \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \

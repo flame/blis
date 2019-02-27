@@ -88,7 +88,7 @@ err_t bli_setijm
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        double         ar, \
        double         ai, \
@@ -182,7 +182,7 @@ err_t bli_getijm
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t          i, \
        dim_t          j, \

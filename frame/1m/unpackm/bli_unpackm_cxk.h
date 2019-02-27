@@ -36,7 +36,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjp, \
        dim_t   panel_dim, \

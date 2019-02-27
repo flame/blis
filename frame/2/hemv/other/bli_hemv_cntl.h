@@ -67,7 +67,7 @@ hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
                                   gemv_t*    sub_gemv_t_cp,
                                   hemv_t*    sub_hemv,
                                   unpackv_t* sub_unpackv_y1 );
-void bli_hemv_cntl_obj_init( hemv_t*    cntl,
+BLIS_EXPORT_BLIS void bli_hemv_cntl_obj_init( hemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

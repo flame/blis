@@ -43,7 +43,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -90,7 +90,7 @@ GENFRONT( subv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  index  \
@@ -133,7 +133,7 @@ GENFRONT( amaxv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -197,7 +197,7 @@ GENFRONT( axpbyv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -255,7 +255,7 @@ GENFRONT( scal2v )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  y, \
@@ -305,7 +305,7 @@ GENFRONT( dotv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -374,7 +374,7 @@ GENFRONT( dotxv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
@@ -413,7 +413,7 @@ GENFRONT( invertv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
@@ -467,7 +467,7 @@ GENFRONT( setv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -510,7 +510,7 @@ GENFRONT( swapv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  beta, \

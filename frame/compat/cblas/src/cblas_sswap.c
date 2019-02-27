@@ -12,7 +12,7 @@
 */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_sswap( f77_int N, float *X, f77_int incX, float *Y,
+void BLIS_EXPORT_BLAS cblas_sswap( f77_int N, float *X, f77_int incX, float *Y,
                        f77_int incY)
 {
 #ifdef F77_INT

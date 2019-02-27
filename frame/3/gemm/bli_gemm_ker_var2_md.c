@@ -192,7 +192,7 @@ void bli_gemm_ker_var2_md
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_c, ctype_e, chc, che, varname ) \
 \
-void PASTEMAC2(chc,che,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(chc,che,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \

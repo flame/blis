@@ -48,8 +48,8 @@
 #include "bli_cntx_ind_stage.h"
 
 
-void   bli_ind_init( void );
-void   bli_ind_finalize( void );
+BLIS_EXPORT_BLIS void   bli_ind_init( void );
+BLIS_EXPORT_BLIS void   bli_ind_finalize( void );
 
 BLIS_EXPORT_BLIS void    bli_ind_enable( ind_t method );
 BLIS_EXPORT_BLIS void    bli_ind_disable( ind_t method );
@@ -67,8 +67,8 @@ BLIS_EXPORT_BLIS void_fp bli_ind_oper_get_avail( opid_t oper, num_t dt );
 BLIS_EXPORT_BLIS ind_t   bli_ind_oper_find_avail( opid_t oper, num_t dt );
 BLIS_EXPORT_BLIS char*   bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
 
-char*  bli_ind_get_impl_string( ind_t method );
-num_t  bli_ind_map_cdt_to_index( num_t dt );
+BLIS_EXPORT_BLIS char*   bli_ind_get_impl_string( ind_t method );
+BLIS_EXPORT_BLIS num_t   bli_ind_map_cdt_to_index( num_t dt );
 
 
 #endif

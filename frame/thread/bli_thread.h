@@ -58,8 +58,8 @@
 #include "bli_l3_sup_decor.h"
 
 // Initialization-related prototypes.
-void bli_thread_init( void );
-void bli_thread_finalize( void );
+BLIS_EXPORT_BLIS void bli_thread_init( void );
+BLIS_EXPORT_BLIS void bli_thread_finalize( void );
 
 #ifdef _MSC_VER
 #define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
@@ -81,7 +81,7 @@ void bli_thread_range_sub
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-siz_t PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS siz_t PASTEMAC0( opname ) \
      ( \
        dir_t      direct, \
        thrinfo_t* thr, \
@@ -100,7 +100,7 @@ GENPROT( thread_range_ndim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-siz_t PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS siz_t PASTEMAC0( opname ) \
      ( \
        thrinfo_t* thr, \
        obj_t*     a, \
@@ -120,7 +120,7 @@ GENPROT( thread_range_weighted_t2b )
 GENPROT( thread_range_weighted_b2t )
 
 
-dim_t bli_thread_range_width_l
+BLIS_EXPORT_BLIS dim_t bli_thread_range_width_l
      (
        doff_t diagoff_j,
        dim_t  m,
@@ -132,13 +132,13 @@ dim_t bli_thread_range_width_l
        double area_per_thr,
        bool   handle_edge_low
      );
-siz_t bli_find_area_trap_l
+BLIS_EXPORT_BLIS siz_t bli_find_area_trap_l
      (
        dim_t  m,
        dim_t  n,
        doff_t diagoff
      );
-siz_t bli_thread_range_weighted_sub
+BLIS_EXPORT_BLIS siz_t bli_thread_range_weighted_sub
      (
        thrinfo_t* restrict thread,
        doff_t              diagoff,
@@ -161,9 +161,9 @@ typedef struct
     dim_t f;
 } bli_prime_factors_t;
 
-void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
+BLIS_EXPORT_BLIS void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
 
-dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
+BLIS_EXPORT_BLIS dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
 
 void bli_thread_partition_2x2
      (
@@ -176,9 +176,9 @@ void bli_thread_partition_2x2
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_gcd( dim_t x, dim_t y );
-dim_t bli_lcm( dim_t x, dim_t y );
-dim_t bli_ipow( dim_t base, dim_t power );
+BLIS_EXPORT_BLIS dim_t bli_gcd( dim_t x, dim_t y );
+BLIS_EXPORT_BLIS dim_t bli_lcm( dim_t x, dim_t y );
+BLIS_EXPORT_BLIS dim_t bli_ipow( dim_t base, dim_t power );
 
 // -----------------------------------------------------------------------------
 
@@ -192,7 +192,7 @@ BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
 BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
 
-void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 

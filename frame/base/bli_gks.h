@@ -38,7 +38,7 @@
 void    bli_gks_init( void );
 void    bli_gks_finalize( void );
 
-void    bli_gks_init_index( void );
+BLIS_EXPORT_BLIS void    bli_gks_init_index( void );
 
 cntx_t* bli_gks_lookup_nat_cntx( arch_t id );
 cntx_t* bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );

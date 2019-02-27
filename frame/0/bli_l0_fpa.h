@@ -40,7 +40,7 @@
 #define GENPROT( opname ) \
 \
 PASTECH(opname,_vft) \
-PASTEMAC(opname,_qfp)( num_t dt );
+BLIS_EXPORT_BLIS BLIS_EXPORT_BLIS PASTEMAC(opname,_qfp)( num_t dt );
 
 GENPROT( absqsc )
 GENPROT( normfsc )

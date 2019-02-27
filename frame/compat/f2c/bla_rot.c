@@ -41,7 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(s,rot)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
 {
     /* System generated locals */
     bla_integer i__1;
@@ -109,7 +109,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(d,rot)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
 {
     /* System generated locals */
     bla_integer i__1;
@@ -177,7 +177,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(cs,rot)(const bla_integer *n, bla_scomplex *cx, const bla_integer *incx, bla_scomplex *cy, const bla_integer *incy, const bla_real *c__, const bla_real *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;
@@ -270,7 +270,7 @@ L20:
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
+/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(zd,rot)(const bla_integer *n, bla_dcomplex *zx, const bla_integer *incx, bla_dcomplex *zy, const bla_integer *incy, const bla_double *c__, const bla_double *s)
 {
     /* System generated locals */
     bla_integer i__1, i__2, i__3, i__4;

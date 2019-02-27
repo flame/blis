@@ -53,7 +53,7 @@ static void_fp bli_cntx_ind_stage_fp[BLIS_NUM_IND_METHODS] =
 // Execute the context initialization/finalization function associated
 // with a given induced method.
 
-void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx )
 {
 	cntx_stage_ft func = bli_cntx_ind_stage_fp[ method ];
 
@@ -69,7 +69,7 @@ void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx )
 {
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
@@ -91,13 +91,13 @@ void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx )
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx )
 {
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
@@ -124,25 +124,25 @@ void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx )
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx )
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_1m_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_1m_stage( dim_t stage, cntx_t* cntx )
 {
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_nat_stage( dim_t stage, cntx_t* cntx )
+BLIS_EXPORT_BLIS void bli_cntx_nat_stage( dim_t stage, cntx_t* cntx )
 {
 }
 
