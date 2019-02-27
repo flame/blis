@@ -141,14 +141,6 @@ print_usage()
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
 	echo " "
-	echo "   --enable-export-blis-functions, --disable-export-blis-functions"
-	echo " "
-	echo "                 Disable (enabled by default) exporting blis functions"
-	echo "                 in the shared library. If the compiler exports by default,"
-	echo "                 flag for hiding the symbols (-fvisibility=hidden) has to"
-	echo "                 be given to CFLAGS. If BLAS/CBLAS is enabled, they will"
-	echo "                 be exported irrespective of the value here."
-	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model"
@@ -1780,7 +1772,6 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
-	enable_export_blis_functions='yes'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
 	enable_mem_tracing='no'
@@ -1890,12 +1881,6 @@ main()
 							;;
 						disable-shared)
 							enable_shared='no'
-							;;
-						enable-export-blis-functions)
-							enable_export_blis_functions='yes'
-							;;
-						disable-export-blis-functions)
-							enable_export_blis_functions='no'
 							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
@@ -2722,13 +2707,6 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
-	if [ "x${enable_export_blis_functions}" = "xyes" ]; then
-		echo "${script_name}: blis functions are exported."
-		enable_export_blis_functions_01=1
-	else
-		echo "${script_name}: blis functions are not exported."
-		enable_export_blis_functions_01=0
-	fi
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
@@ -2936,7 +2914,6 @@ main()
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
-		| sed   -e "s/@enable_export_blis_functions@/${enable_export_blis_functions_01}/g" \
 		> "${bli_config_h_out_path}"
 
 

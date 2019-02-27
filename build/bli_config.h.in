@@ -175,12 +175,7 @@
     #endif
 #endif
 
-#if @enable_export_blis_functions@
 #define BLIS_EXPORT_BLIS BLIS_EXPORT
-#else
-#define BLIS_EXPORT_BLIS
-#endif
-
 #define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 #endif
