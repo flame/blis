@@ -147,7 +147,7 @@ print_usage()
 	echo "                 in the shared library. If the compiler exports by default,"
 	echo "                 flag for hiding the symbols (-fvisibility=hidden) has to"
 	echo "                 be given to CFLAGS. If BLAS/CBLAS is enabled, they will"
-    echo "                 be exported irrespective of the value here."
+	echo "                 be exported irrespective of the value here."
 	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
