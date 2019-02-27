@@ -32,5 +32,5 @@
 
 */
 
-void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
+BLIS_EXPORT_BLIS void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
                              obj_t* s, mdim_t mdim_s );

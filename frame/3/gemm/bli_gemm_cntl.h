@@ -33,7 +33,7 @@
 
 */
 
-cntl_t* bli_gemm_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_gemm_cntl_create
      (
        rntm_t* rntm,
        opid_t  family,
@@ -43,7 +43,7 @@ cntl_t* bli_gemm_cntl_create
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_gemmbp_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_gemmbp_cntl_create
      (
        rntm_t* rntm,
        opid_t  family,
@@ -52,7 +52,7 @@ cntl_t* bli_gemmbp_cntl_create
      );
 
 #if 0
-cntl_t* bli_gemmpb_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_gemmpb_cntl_create
      (
        opid_t family,
      );
@@ -60,7 +60,7 @@ cntl_t* bli_gemmpb_cntl_create
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm_cntl_free
+BLIS_EXPORT_BLIS void bli_gemm_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
@@ -69,7 +69,7 @@ void bli_gemm_cntl_free
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_gemm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_gemm_cntl_create_node
      (
        rntm_t* rntm,
        opid_t  family,

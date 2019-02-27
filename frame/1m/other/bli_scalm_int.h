@@ -32,7 +32,7 @@
 
 */
 
-void bli_scalm_int( obj_t*   alpha,
+BLIS_EXPORT_BLIS void bli_scalm_int( obj_t*   alpha,
                     obj_t*   x,
                     cntx_t*  cntx,
                     scalm_t* cntl );

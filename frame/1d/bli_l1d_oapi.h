@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -55,7 +55,7 @@ GENTPROT( subd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -70,7 +70,7 @@ GENTPROT( scal2d )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
@@ -82,7 +82,7 @@ GENTPROT( invertd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
@@ -98,7 +98,7 @@ GENTPROT( shiftd )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x, \
        obj_t*  beta, \

@@ -538,18 +538,18 @@ static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cnt
 
 // Function prototypes
 
-void  bli_cntx_clear( cntx_t* cntx );
+BLIS_EXPORT_BLIS void  bli_cntx_clear( cntx_t* cntx );
 
-void  bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
 
-void  bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... );
 
-void  bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
-void  bli_cntx_set_l1f_kers( dim_t n_kers, ... );
-void  bli_cntx_set_l1v_kers( dim_t n_kers, ... );
-void  bli_cntx_set_packm_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_l1f_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_l1v_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void  bli_cntx_set_packm_kers( dim_t n_kers, ... );
 
-void  bli_cntx_print( cntx_t* cntx );
+BLIS_EXPORT_BLIS void  bli_cntx_print( cntx_t* cntx );
 
 
 #endif

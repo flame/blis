@@ -35,7 +35,7 @@
 #undef  GENTPROT2
 #define GENTPROT2( ctype_c, ctype_p, chc, chp, varname ) \
 \
-void PASTEMAC2(chc,chp,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
      ( \
        conj_t            conjc, \
        pack_t            schema, \
@@ -57,7 +57,7 @@ INSERT_GENTPROT2_MIXDP0( packm_struc_cxk_md )
 #undef  GENTPROT2
 #define GENTPROT2( ctype_a, ctype_p, cha, chp, opname ) \
 \
-void PASTEMAC2(cha,chp,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cha,chp,opname) \
      ( \
        conj_t            conja, \
        dim_t             m, \

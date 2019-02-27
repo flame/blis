@@ -140,7 +140,7 @@ void bli_trsm_ll_ker_var2
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        doff_t  diagoffa, \
        pack_t  schema_a, \

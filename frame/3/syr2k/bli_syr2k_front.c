@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_syr2k_front
+BLIS_EXPORT_BLIS void bli_syr2k_front
      (
        obj_t*  alpha,
        obj_t*  a,

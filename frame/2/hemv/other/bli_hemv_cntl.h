@@ -52,9 +52,9 @@ typedef struct hemv_s hemv_t;
 
 #define bli_cntl_sub_hemv( cntl )      cntl->sub_hemv
 
-void    bli_hemv_cntl_init( void );
-void    bli_hemv_cntl_finalize( void );
-hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
+BLIS_EXPORT_BLIS void     bli_hemv_cntl_init( void );
+BLIS_EXPORT_BLIS void     bli_hemv_cntl_finalize( void );
+BLIS_EXPORT_BLIS hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,
                                   scalv_t*   sub_scalv,
@@ -67,7 +67,7 @@ hemv_t* bli_hemv_cntl_obj_create( impl_t     impl_type,
                                   gemv_t*    sub_gemv_t_cp,
                                   hemv_t*    sub_hemv,
                                   unpackv_t* sub_unpackv_y1 );
-void bli_hemv_cntl_obj_init( hemv_t*    cntl,
+BLIS_EXPORT_BLIS void bli_hemv_cntl_obj_init( hemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

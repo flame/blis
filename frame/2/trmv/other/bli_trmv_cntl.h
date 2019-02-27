@@ -48,9 +48,9 @@ typedef struct trmv_s trmv_t;
 
 #define bli_cntl_sub_trmv( cntl )      cntl->sub_trmv
 
-void    bli_trmv_cntl_init( void );
-void    bli_trmv_cntl_finalize( void );
-trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
+BLIS_EXPORT_BLIS void     bli_trmv_cntl_init( void );
+BLIS_EXPORT_BLIS void     bli_trmv_cntl_finalize( void );
+BLIS_EXPORT_BLIS trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,
                                   packm_t*   sub_packm_a11,
@@ -59,7 +59,7 @@ trmv_t* bli_trmv_cntl_obj_create( impl_t     impl_type,
                                   gemv_t*    sub_gemv_cp,
                                   trmv_t*    sub_trmv,
                                   unpackv_t* sub_unpackv_x1 );
-void bli_trmv_cntl_obj_init( trmv_t*    cntl,
+BLIS_EXPORT_BLIS void bli_trmv_cntl_obj_init( trmv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,
