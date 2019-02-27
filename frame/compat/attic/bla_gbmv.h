@@ -39,7 +39,7 @@
 #undef  GENTPROT
 #define GENTPROT( ftype, ch, blasname ) \
 \
-void PASTEF77(ch,blasname)( \
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname)( \
                             f77_char* transa, \
                             f77_int*  m, \
                             f77_int*  n, \

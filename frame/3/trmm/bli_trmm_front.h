@@ -32,7 +32,7 @@
 
 */
 
-void bli_trmm_front
+BLIS_EXPORT_BLIS void bli_trmm_front
      (
        side_t  side,
        obj_t*  alpha,

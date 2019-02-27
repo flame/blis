@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        trans_t transb, \
@@ -61,7 +61,7 @@ INSERT_GENTPROT_BASIC0( gemm )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -84,7 +84,7 @@ INSERT_GENTPROT_BASIC0( symm )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -103,7 +103,7 @@ INSERT_GENTPROTR_BASIC0( herk )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -124,7 +124,7 @@ INSERT_GENTPROTR_BASIC0( her2k )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -143,7 +143,7 @@ INSERT_GENTPROT_BASIC0( syrk )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -164,7 +164,7 @@ INSERT_GENTPROT_BASIC0( syr2k )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -187,7 +187,7 @@ INSERT_GENTPROT_BASIC0( trmm3 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \

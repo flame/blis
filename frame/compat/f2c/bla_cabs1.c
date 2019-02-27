@@ -41,7 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ bla_real PASTEF77(s,cabs1)(bla_scomplex *z)
+/* Subroutine */ bla_real BLIS_EXPORT_BLAS PASTEF77(s,cabs1)(bla_scomplex *z)
 {
     return bli_fabs( bli_creal( *z ) ) +
            bli_fabs( bli_cimag( *z ) );
@@ -52,7 +52,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ bla_double PASTEF77(d,cabs1)(bla_dcomplex *z)
+/* Subroutine */ bla_double BLIS_EXPORT_BLAS PASTEF77(d,cabs1)(bla_dcomplex *z)
 {
     return bli_fabs( bli_zreal( *z ) ) +
            bli_fabs( bli_zimag( *z ) );

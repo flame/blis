@@ -49,8 +49,8 @@ typedef struct her2_s her2_t;
 
 #define bli_cntl_sub_her2( cntl )      cntl->sub_her2
 
-void    bli_her2_cntl_init( void );
-void    bli_her2_cntl_finalize( void );
+BLIS_EXPORT_BLIS void     bli_her2_cntl_init( void );
+BLIS_EXPORT_BLIS void     bli_her2_cntl_finalize( void );
 her2_t* bli_her2_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,
@@ -61,7 +61,7 @@ her2_t* bli_her2_cntl_obj_create( impl_t     impl_type,
                                   ger_t*     sub_ger_cp,
                                   her2_t*    sub_her2,
                                   unpackm_t* sub_unpackm_c11 );
-void bli_her2_cntl_obj_init( her2_t*    cntl,
+BLIS_EXPORT_BLIS void bli_her2_cntl_obj_init( her2_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

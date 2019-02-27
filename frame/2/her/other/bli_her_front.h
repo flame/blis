@@ -32,7 +32,7 @@
 
 */
 
-void bli_her_front
+BLIS_EXPORT_BLIS void bli_her_front
      (
        obj_t*  alpha,
        obj_t*  x,
@@ -43,7 +43,7 @@ void bli_her_front
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        conj_t   conjx, \

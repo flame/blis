@@ -56,7 +56,7 @@ static pool_t* bli_apool_pool( apool_t* apool )
 	return &(apool->pool);
 }
 
-static bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
+static  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 {
 	return &(apool->mutex);
 }
@@ -94,44 +94,44 @@ static void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
 
 // -----------------------------------------------------------------------------
 
-void bli_apool_init
+BLIS_EXPORT_BLIS void bli_apool_init
      (
        apool_t* restrict apool
      );
-void bli_apool_finalize
+BLIS_EXPORT_BLIS void bli_apool_finalize
      (
        apool_t* restrict apool
      );
 
-array_t* bli_apool_checkout_array
+BLIS_EXPORT_BLIS array_t* bli_apool_checkout_array
      (
        siz_t             n_threads,
        apool_t* restrict apool
      );
-void bli_apool_checkin_array
+BLIS_EXPORT_BLIS void bli_apool_checkin_array
      (
        array_t* restrict array,
        apool_t* restrict apool
      );
 
-pool_t* bli_apool_array_elem
+BLIS_EXPORT_BLIS pool_t* bli_apool_array_elem
      (
        siz_t             index,
        array_t* restrict array
      );
 
-void bli_apool_grow
+BLIS_EXPORT_BLIS void bli_apool_grow
      (
        siz_t             num_blocks_add,
        apool_t* restrict apool
      );
 
-void bli_apool_alloc_block
+BLIS_EXPORT_BLIS void bli_apool_alloc_block
      (
        siz_t              num_elem,
        array_t** restrict array_p
      );
-void bli_apool_free_block
+BLIS_EXPORT_BLIS void bli_apool_free_block
      (
        array_t* restrict array
      );

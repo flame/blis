@@ -40,7 +40,7 @@
 #define GENPROT( tname, opname ) \
 \
 PASTECH2(tname,_ukr,_vft) \
-PASTEMAC(opname,_qfp)( num_t dt );
+BLIS_EXPORT_BLIS PASTEMAC(opname,_qfp)( num_t dt );
 
 GENPROT( gemm,     gemm_ukernel )
 GENPROT( gemmtrsm, gemmtrsm_l_ukernel )

@@ -136,7 +136,7 @@ static void bli_thread_obarrier( thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-thrinfo_t* bli_thrinfo_create
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
      (
        rntm_t*    rntm,
        thrcomm_t* ocomm,
@@ -147,7 +147,7 @@ thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init
+BLIS_EXPORT_BLIS void bli_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -158,12 +158,12 @@ void bli_thrinfo_init
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init_single
+BLIS_EXPORT_BLIS void bli_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
-void bli_thrinfo_free
+BLIS_EXPORT_BLIS void bli_thrinfo_free
      (
        rntm_t*    rntm,
        thrinfo_t* thread
@@ -171,7 +171,7 @@ void bli_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_create_for_cntl
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
@@ -179,14 +179,14 @@ thrinfo_t* bli_thrinfo_create_for_cntl
        thrinfo_t* thread_par
      );
 
-void bli_thrinfo_grow
+BLIS_EXPORT_BLIS void bli_thrinfo_grow
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-thrinfo_t* bli_thrinfo_rgrow
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,

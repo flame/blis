@@ -46,34 +46,34 @@ typedef void bli_pthread_mutexattr_t;
 
 #define BLIS_PTHREAD_MUTEX_INITIALIZER SRWLOCK_INIT
 
-int bli_pthread_mutex_init( bli_pthread_mutex_t* mutex, const bli_pthread_mutexattr_t *attr );
+BLIS_EXPORT_BLIS int bli_pthread_mutex_init( bli_pthread_mutex_t* mutex, const bli_pthread_mutexattr_t *attr );
 
-int bli_pthread_mutex_destroy( bli_pthread_mutex_t* mutex );
+BLIS_EXPORT_BLIS int bli_pthread_mutex_destroy( bli_pthread_mutex_t* mutex );
 
-int bli_pthread_mutex_lock( bli_pthread_mutex_t* mutex );
+BLIS_EXPORT_BLIS int bli_pthread_mutex_lock( bli_pthread_mutex_t* mutex );
 
-int bli_pthread_mutex_trylock( bli_pthread_mutex_t* mutex );
+BLIS_EXPORT_BLIS int bli_pthread_mutex_trylock( bli_pthread_mutex_t* mutex );
 
-int bli_pthread_mutex_unlock( bli_pthread_mutex_t* mutex );
+BLIS_EXPORT_BLIS int bli_pthread_mutex_unlock( bli_pthread_mutex_t* mutex );
 
 typedef INIT_ONCE bli_pthread_once_t;
 
 #define BLIS_PTHREAD_ONCE_INIT INIT_ONCE_STATIC_INIT
 
-void bli_pthread_once( bli_pthread_once_t* once, void (*init)( void ) );
+BLIS_EXPORT_BLIS void bli_pthread_once( bli_pthread_once_t* once, void (*init)( void ) );
 
 typedef CONDITION_VARIABLE bli_pthread_cond_t;
 typedef void bli_pthread_condattr_t;
 
 #define BLIS_PTHREAD_COND_INITIALIZER CONDITION_VARIABLE_INIT
 
-int bli_pthread_cond_init( bli_pthread_cond_t* cond, const bli_pthread_condattr_t* attr );
+BLIS_EXPORT_BLIS int bli_pthread_cond_init( bli_pthread_cond_t* cond, const bli_pthread_condattr_t* attr );
 
-int bli_pthread_cond_destroy( bli_pthread_cond_t* cond );
+BLIS_EXPORT_BLIS int bli_pthread_cond_destroy( bli_pthread_cond_t* cond );
 
-int bli_pthread_cond_wait( bli_pthread_cond_t* cond, bli_pthread_mutex_t* mutex );
+BLIS_EXPORT_BLIS int bli_pthread_cond_wait( bli_pthread_cond_t* cond, bli_pthread_mutex_t* mutex );
 
-int bli_pthread_cond_broadcast( bli_pthread_cond_t* cond );
+BLIS_EXPORT_BLIS int bli_pthread_cond_broadcast( bli_pthread_cond_t* cond );
 typedef struct
 {
     HANDLE handle;
@@ -82,9 +82,9 @@ typedef struct
 
 typedef void bli_pthread_attr_t;
 
-int bli_pthread_create( bli_pthread_t *thread, const bli_pthread_attr_t *attr, void* (*start_routine)( void* ), void *arg );
+BLIS_EXPORT_BLIS int bli_pthread_create( bli_pthread_t *thread, const bli_pthread_attr_t *attr, void* (*start_routine)( void* ), void *arg );
 
-int bli_pthread_join( bli_pthread_t thread, void **retval );
+BLIS_EXPORT_BLIS int bli_pthread_join( bli_pthread_t thread, void **retval );
 
 // barrier-related definitions
 
@@ -98,11 +98,11 @@ typedef struct
     int                 tripCount;
 } bli_pthread_barrier_t;
 
-int bli_pthread_barrier_init( bli_pthread_barrier_t *barrier, const bli_pthread_barrierattr_t *attr, unsigned int count );
+BLIS_EXPORT_BLIS int bli_pthread_barrier_init( bli_pthread_barrier_t *barrier, const bli_pthread_barrierattr_t *attr, unsigned int count );
 
-int bli_pthread_barrier_destroy( bli_pthread_barrier_t *barrier );
+BLIS_EXPORT_BLIS int bli_pthread_barrier_destroy( bli_pthread_barrier_t *barrier );
 
-int bli_pthread_barrier_wait( bli_pthread_barrier_t *barrier );
+BLIS_EXPORT_BLIS int bli_pthread_barrier_wait( bli_pthread_barrier_t *barrier );
 
 #else // !defined(_MSC_VER)
 
@@ -155,7 +155,7 @@ typedef pthread_barrierattr_t  bli_pthread_barrierattr_t;
 
 // -- pthread_create(), pthread_join() --
 
-int bli_pthread_create
+BLIS_EXPORT_BLIS int bli_pthread_create
      (
        bli_pthread_t*            thread,
        const bli_pthread_attr_t* attr,
@@ -163,7 +163,7 @@ int bli_pthread_create
        void*                     arg
      );
 
-int bli_pthread_join
+BLIS_EXPORT_BLIS int bli_pthread_join
      (
        bli_pthread_t thread,
        void**        retval
@@ -171,59 +171,59 @@ int bli_pthread_join
 
 // -- pthread_mutex_*() --
 
-int bli_pthread_mutex_init
+BLIS_EXPORT_BLIS int bli_pthread_mutex_init
      (
        bli_pthread_mutex_t*           mutex,
        const bli_pthread_mutexattr_t* attr
      );
 
-int bli_pthread_mutex_destroy
+BLIS_EXPORT_BLIS int bli_pthread_mutex_destroy
      (
        bli_pthread_mutex_t* mutex
      );
 
-int bli_pthread_mutex_lock
+BLIS_EXPORT_BLIS int bli_pthread_mutex_lock
      (
        bli_pthread_mutex_t* mutex
      );
 
-int bli_pthread_mutex_trylock
+BLIS_EXPORT_BLIS int bli_pthread_mutex_trylock
      (
        bli_pthread_mutex_t* mutex
      );
 
-int bli_pthread_mutex_unlock
+BLIS_EXPORT_BLIS int bli_pthread_mutex_unlock
      (
        bli_pthread_mutex_t* mutex
      );
 
 // -- pthread_cond_*() --
 
-int bli_pthread_cond_init
+BLIS_EXPORT_BLIS int bli_pthread_cond_init
      (
        bli_pthread_cond_t*           cond,
        const bli_pthread_condattr_t* attr
      );
 
-int bli_pthread_cond_destroy
+BLIS_EXPORT_BLIS int bli_pthread_cond_destroy
      (
        bli_pthread_cond_t* cond
      );
 
-int bli_pthread_cond_wait
+BLIS_EXPORT_BLIS int bli_pthread_cond_wait
      (
        bli_pthread_cond_t*  cond,
        bli_pthread_mutex_t* mutex
      );
 
-int bli_pthread_cond_broadcast
+BLIS_EXPORT_BLIS int bli_pthread_cond_broadcast
      (
        bli_pthread_cond_t* cond
      );
 
 // -- pthread_once_*() --
 
-void bli_pthread_once
+BLIS_EXPORT_BLIS void bli_pthread_once
      (
        bli_pthread_once_t* once,
        void              (*init)(void)
@@ -231,19 +231,19 @@ void bli_pthread_once
 
 // -- pthread_barrier_*() --
 
-int bli_pthread_barrier_init
+BLIS_EXPORT_BLIS int bli_pthread_barrier_init
      (
        bli_pthread_barrier_t*           barrier,
        const bli_pthread_barrierattr_t* attr,
        unsigned int                     count
      );
 
-int bli_pthread_barrier_destroy
+BLIS_EXPORT_BLIS int bli_pthread_barrier_destroy
      (
        bli_pthread_barrier_t* barrier
      );
 
-int bli_pthread_barrier_wait
+BLIS_EXPORT_BLIS int bli_pthread_barrier_wait
      (
        bli_pthread_barrier_t* barrier
      );

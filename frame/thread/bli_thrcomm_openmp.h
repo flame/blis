@@ -74,12 +74,12 @@ typedef struct thrcomm_s thrcomm_t;
 
 // Prototypes specific to tree barriers.
 #ifdef BLIS_TREE_BARRIER
-barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index );
-void       bli_thrcomm_tree_barrier_free( barrier_t* barrier );
-void       bli_thrcomm_tree_barrier( barrier_t* barack );
+BLIS_EXPORT_BLIS barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index );
+BLIS_EXPORT_BLIS void        bli_thrcomm_tree_barrier_free( barrier_t* barrier );
+BLIS_EXPORT_BLIS void        bli_thrcomm_tree_barrier( barrier_t* barack );
 #endif
 
-void bli_l3_thread_decorator_thread_check
+BLIS_EXPORT_BLIS void bli_l3_thread_decorator_thread_check
      (
        dim_t      n_threads,
        dim_t      tid,

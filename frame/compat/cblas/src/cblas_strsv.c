@@ -9,7 +9,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_strsv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+void BLIS_EXPORT_BLAS cblas_strsv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_DIAG Diag,
                  f77_int N, const float  *A, f77_int lda, float  *X,
                  f77_int incX)

@@ -41,7 +41,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -73,7 +73,7 @@ GENPROT( gemm4mb_ker_var2 ) // 4m1b
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \

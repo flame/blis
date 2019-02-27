@@ -32,7 +32,7 @@
 
 */
 
-void bli_ger_int( conj_t  conjx,
+BLIS_EXPORT_BLIS void bli_ger_int( conj_t  conjx,
                   conj_t  conjy,
                   obj_t*  alpha,
                   obj_t*  x,

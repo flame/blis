@@ -32,4 +32,4 @@
 
 */
 
-bla_real bli_slamch( bla_character* cmach, ftnlen cmach_len );
+BLIS_EXPORT_BLIS bla_real bli_slamch( bla_character* cmach, ftnlen cmach_len );

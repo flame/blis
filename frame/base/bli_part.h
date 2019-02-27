@@ -36,7 +36,7 @@
 
 // -- Matrix partitioning ------------------------------------------------------
 
-void bli_acquire_mpart
+BLIS_EXPORT_BLIS void bli_acquire_mpart
      (
        dim_t     i,
        dim_t     j,
@@ -49,7 +49,7 @@ void bli_acquire_mpart
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
        dir_t     direct, \
        subpart_t req_part, \
@@ -65,7 +65,7 @@ GENPROT( acquire_mpart_ndim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
        subpart_t req_part, \
        dim_t     i, \
@@ -88,7 +88,7 @@ GENPROT( acquire_vpart_b2f )
 
 // -- Scalar acquisition -------------------------------------------------------
 
-void bli_acquire_mij
+BLIS_EXPORT_BLIS void bli_acquire_mij
      (
        dim_t     i,
        dim_t     j,
@@ -96,7 +96,7 @@ void bli_acquire_mij
        obj_t*    sub_obj
      );
 
-void bli_acquire_vi
+BLIS_EXPORT_BLIS void bli_acquire_vi
      (
        dim_t     i,
        obj_t*    obj,

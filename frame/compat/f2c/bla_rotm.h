@@ -34,7 +34,7 @@
 
 #ifdef BLIS_ENABLE_BLAS
 
-int PASTEF77(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *sparam);
-int PASTEF77(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *dparam);
+BLIS_EXPORT_BLAS int PASTEF77(s,rotm)(const bla_integer *n, bla_real *sx, const bla_integer *incx, bla_real *sy, const bla_integer *incy, const bla_real *sparam);
+BLIS_EXPORT_BLAS int PASTEF77(d,rotm)(const bla_integer *n, bla_double *dx, const bla_integer *incx, bla_double *dy, const bla_integer *incy, const bla_double *dparam);
 
 #endif

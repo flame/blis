@@ -59,7 +59,7 @@ typedef struct cntl_s cntl_t;
 
 // -- Control tree prototypes --
 
-cntl_t* bli_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
      (
        rntm_t* rntm,
        opid_t  family,
@@ -69,46 +69,46 @@ cntl_t* bli_cntl_create_node
        cntl_t* sub_node
      );
 
-void bli_cntl_free_node
+BLIS_EXPORT_BLIS void bli_cntl_free_node
      (
        rntm_t* rntm,
        cntl_t* cntl
      );
 
-void bli_cntl_clear_node
+BLIS_EXPORT_BLIS void bli_cntl_clear_node
      (
        cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
 
-void bli_cntl_free
+BLIS_EXPORT_BLIS void bli_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-void bli_cntl_free_w_thrinfo
+BLIS_EXPORT_BLIS void bli_cntl_free_w_thrinfo
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-void bli_cntl_free_wo_thrinfo
+BLIS_EXPORT_BLIS void bli_cntl_free_wo_thrinfo
      (
        rntm_t*    rntm,
        cntl_t*    cntl
      );
 
-cntl_t* bli_cntl_copy
+BLIS_EXPORT_BLIS cntl_t* bli_cntl_copy
      (
        rntm_t* rntm,
        cntl_t* cntl
      );
 
-void bli_cntl_mark_family
+BLIS_EXPORT_BLIS void bli_cntl_mark_family
      (
        opid_t  family,
        cntl_t* cntl
@@ -116,7 +116,7 @@ void bli_cntl_mark_family
 
 // -----------------------------------------------------------------------------
 
-dim_t bli_cntl_calc_num_threads_in
+BLIS_EXPORT_BLIS dim_t bli_cntl_calc_num_threads_in
      (
        rntm_t* rntm,
        cntl_t* cntl

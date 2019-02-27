@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_trmm3_front
+BLIS_EXPORT_BLIS void bli_trmm3_front
      (
        side_t  side,
        obj_t*  alpha,
