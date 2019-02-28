@@ -5,19 +5,12 @@ exec_root="test"
 out_root="output"
 
 #sys="blis"
-#sys="stampede"
 #sys="stampede2"
-#sys="lonestar5"
-sys="ul252"
+sys="lonestar5"
+#sys="ul252"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
-#export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15"
-#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7"
-#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7"
-#export GOMP_CPU_AFFINITY="0 2 4 6 1 3 5 7"
-#export GOMP_CPU_AFFINITY="0 4 1 5 2 6 3 7"
-#export GOMP_CPU_AFFINITY="0 1 4 5 8 9 12 13 16 17 20 21 24 25 28 29 32 33 36 37 40 41 44 45"
 #export GOMP_CPU_AFFINITY="0 2 4 6 8 10 12 14 16 18 20 22 1 3 5 7 9 11 13 15 17 19 21 23"
 
 # Modify LD_LIBRARY_PATH.
@@ -36,25 +29,30 @@ elif [ ${sys} = "stampede2" ]; then
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
 
-	jc_nt=4 # 5th loop
+	jc_nt=4  # 5th loop
 	ic_nt=12 # 3rd loop
-	jr_nt=1 # 2nd loop
-	ir_nt=1 # 1st loop
+	jr_nt=1  # 2nd loop
+	ir_nt=1  # 1st loop
 	nt=48
 
 elif [ ${sys} = "lonestar5" ]; then
 
-	echo "Need to set GOMP_CPU_AFFINITY."
-	exit 1
+	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23"
 
 	# A hack to use libiomp5 with gcc.
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
+	#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
 
-	jc_nt=2 # 5th loop
-	ic_nt=12 # 3rd loop
-	jr_nt=1 # 2nd loop
-	ir_nt=1 # 1st loop
-	nt=24
+	# runner-up:
+	#jc_nt=6  # 5th loop
+	#ic_nt=4 # 3rd loop
+	#jr_nt=1  # 2nd loop
+
+	jc_nt=2  # 5th loop
+	ic_nt=3 # 3rd loop
+	jr_nt=2  # 2nd loop
+
+	ir_nt=1  # 1st loop
+	nt=12
 
 elif [ ${sys} = "ul252" ]; then
 
@@ -62,14 +60,16 @@ elif [ ${sys} = "ul252" ]; then
 	#export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103"
 	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51"
 
-	#jc_nt=4 # 5th loop
-	jc_nt=2 # 5th loop
+	#jc_nt=4  # 5th loop
+	jc_nt=2  # 5th loop
 	ic_nt=13 # 3rd loop
-	jr_nt=1 # 2nd loop
-	ir_nt=1 # 1st loop
+	jr_nt=1  # 2nd loop
+	ir_nt=1  # 1st loop
 	#nt=52
 	nt=26
 fi
+
+echo "Setting BLIS threading params for ${sys}: jc${jc_nt}ic${ic_nt}jr${jr_nt}."
 
 # Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
 # restore the value.
@@ -82,6 +82,8 @@ threads_r="mt"
 #threads_r="st"
 
 # Datatypes to test.
+dts=""
+dts_r=""
 dts="z c"
 dts_r="d s"
 
@@ -94,11 +96,24 @@ test_ops_r="${l3_ops}"
 #test_impls="3mhw_blis 3m1_blis 4mhw_blis 4m1b_blis 4m1a_blis 1m_blis"
 #test_impls="openblas mkl asm_blis"
 
+# Implementations to test.
+impls="allasm"
 
-# Real domain implementations to test.
-test_impls_r="openblas asm_blis mkl"
-test_impls="openblas asm_blis mkl"
-#test_impls_r="asm_blis openblas"
+if [ ${impls} = "allasm" ]; then
+
+	test_impls_r="openblas asm_blis mkl"
+	test_impls="openblas asm_blis mkl"
+
+elif [ ${impls} = "comp" ]; then
+
+	test_impls_r="openblas mkl"
+	test_impls="openblas mkl"
+
+elif [ ${impls} = "blis" ]; then
+
+	test_impls_r="asm_blis"
+	test_impls="asm_blis"
+fi
 
 # First perform real test cases.
 for th in ${threads_r}; do
@@ -118,13 +133,14 @@ for th in ${threads_r}; do
 					export BLIS_IR_NT=${ir_nt}
 					export OPENBLAS_NUM_THREADS=${nt}
 					export MKL_NUM_THREADS=${nt}
+					export nt_use=${nt}
 
 					# Unset GOMP_CPU_AFFINITY for OpenBLAS.
 					if [ ${im} = "openblas" ]; then
 
 						unset GOMP_CPU_AFFINITY
 					else
-						export GOMP_CPU_AFFINITY=${GOMP_CPU_AFFINITYsave}
+						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
 					fi
 				else
 
@@ -134,6 +150,7 @@ for th in ${threads_r}; do
 					export BLIS_IR_NT=1
 					export OPENBLAS_NUM_THREADS=1
 					export MKL_NUM_THREADS=1
+					export nt_use=1
 				fi
 
 				# Construct the name of the test executable.
@@ -142,7 +159,7 @@ for th in ${threads_r}; do
 				# Construct the name of the output file.
 				out_file="${out_root}_${th}_${dt}${op}_${im}.m"
 
-				echo "Running (nt = ${nt}) ./${exec_name} > ${out_file}"
+				echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
 
 				# Run executable.
 				./${exec_name} > ${out_file}
@@ -172,13 +189,14 @@ for th in ${threads}; do
 					export BLIS_IR_NT=${ir_nt}
 					export OPENBLAS_NUM_THREADS=${nt}
 					export MKL_NUM_THREADS=${nt}
+					export nt_use=${nt}
 
 					# Unset GOMP_CPU_AFFINITY for OpenBLAS.
 					if [ ${im} = "openblas" ]; then
 
 						unset GOMP_CPU_AFFINITY
 					else
-						export GOMP_CPU_AFFINITY=${GOMP_CPU_AFFINITYsave}
+						export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
 					fi
 				else
 
@@ -188,6 +206,7 @@ for th in ${threads}; do
 					export BLIS_IR_NT=1
 					export OPENBLAS_NUM_THREADS=1
 					export MKL_NUM_THREADS=1
+					export nt_use=1
 				fi
 
 				# Construct the name of the test executable.
@@ -196,7 +215,7 @@ for th in ${threads}; do
 				# Construct the name of the output file.
 				out_file="${out_root}_${th}_${dt}${op}_${im}.m"
 
-				echo "Running (nt = ${nt}) ./${exec_name} > ${out_file}"
+				echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
 
 				# Run executable.
 				./${exec_name} > ${out_file}
