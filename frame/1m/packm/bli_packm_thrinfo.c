@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-void bli_packm_thrinfo_init
+BLIS_EXPORT_BLIS void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -57,7 +57,7 @@ void bli_packm_thrinfo_init
 	);
 }
 
-void bli_packm_thrinfo_init_single
+BLIS_EXPORT_BLIS void bli_packm_thrinfo_init_single
      (
        thrinfo_t* thread
      )

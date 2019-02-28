@@ -961,7 +961,7 @@ static bool_t bli_is_nonnull( void* p )
 // argument.
 
 static
-void bli_set_dims_incs_uplo_1m
+void  bli_set_dims_incs_uplo_1m
      (
        doff_t  diagoffa, diag_t diaga,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -1056,7 +1056,7 @@ void bli_set_dims_incs_uplo_1m
 // argument (without column-wise stride optimization).
 
 static
-void bli_set_dims_incs_uplo_1m_noswap
+void  bli_set_dims_incs_uplo_1m_noswap
      (
        doff_t  diagoffa, diag_t diaga,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -1142,7 +1142,7 @@ void bli_set_dims_incs_uplo_1m_noswap
 // Set dimensions and increments for TWO matrix arguments.
 
 static
-void bli_set_dims_incs_2m
+void  bli_set_dims_incs_2m
      (
        trans_t transa,
        dim_t  m,      dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -1178,7 +1178,7 @@ void bli_set_dims_incs_2m
 // arguments.
 
 static
-void bli_set_dims_incs_uplo_2m
+void  bli_set_dims_incs_uplo_2m
      (
        doff_t  diagoffa, diag_t diaga, trans_t transa,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -1286,7 +1286,7 @@ void bli_set_dims_incs_uplo_2m
 // on the diagonal.
 
 static
-void bli_set_dims_incs_1d
+void  bli_set_dims_incs_1d
      (
        doff_t diagoffx,
        dim_t  m,    dim_t  n,      inc_t  rs_x, inc_t  cs_x,
@@ -1310,7 +1310,7 @@ void bli_set_dims_incs_1d
 // Set dimensions, increments, etc for TWO matrix arguments when operating
 // on diagonals.
 static
-void bli_set_dims_incs_2d
+void  bli_set_dims_incs_2d
      (
        doff_t diagoffx, trans_t transx,
        dim_t  m, dim_t  n, inc_t  rs_x, inc_t  cs_x,

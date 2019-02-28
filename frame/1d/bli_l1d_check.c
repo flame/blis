@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -58,7 +58,7 @@ GENFRONT( subd )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -75,7 +75,7 @@ GENFRONT( scal2d )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      ) \
@@ -89,7 +89,7 @@ GENFRONT( invertd )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
@@ -107,7 +107,7 @@ GENFRONT( shiftd )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  beta, \

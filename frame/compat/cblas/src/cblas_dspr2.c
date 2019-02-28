@@ -9,7 +9,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_dspr2(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+void BLIS_EXPORT_BLAS cblas_dspr2(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
                 f77_int N, const double  alpha, const double  *X,
                 f77_int incX, const double  *Y, f77_int incY, double  *A)
 {

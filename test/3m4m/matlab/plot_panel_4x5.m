@@ -1,7 +1,9 @@
 function r_val = plot_panel_4x5( cfreq, ...
                                  dflopspercycle, ...
                                  nth, ...
-                                 dirpath )
+                                 dirpath, ...
+                                 arch_str, ...
+                                 vend_str )
 
 %cfreq = 1.8;
 %dflopspercycle = 32;
@@ -74,20 +76,20 @@ for opi = 1:n_opnames
 	% Construct variable names for the variables in the data files.
 	var_blis = sprintf( vartemp, thr_str, opname, 'asm_blis' );
 	var_open = sprintf( vartemp, thr_str, opname, 'openblas' );
-	var_mkl  = sprintf( vartemp, thr_str, opname, 'mkl' );
+	var_vend = sprintf( vartemp, thr_str, opname, 'mkl' );
 
 	% Use eval() to instantiate the variable names constructed above,
 	% copying each to a simplified name.
 	data_blis = eval( var_blis ); % e.g. data_st_sgemm_asm_blis( :, : );
 	data_open = eval( var_open ); % e.g. data_st_sgemm_openblas( :, : );
-	data_mkl  = eval( var_mkl  ); % e.g. data_st_sgemm_mkl( :, : );
+	data_vend = eval( var_vend ); % e.g. data_st_sgemm_mkl( :, : );
 
 	% Plot one result in an m x n grid of plots, via the subplot()
 	% function.
 	plot_l3_perf( opname, ...
 	              data_blis, ...
 	              data_open, ...
-	              data_mkl, ...
+	              data_vend, vend_str, ...
 	              nth, ...
 	              4, 5, ...
 	              cfreq, ...
@@ -97,9 +99,9 @@ for opi = 1:n_opnames
 end
 
 % Construct the name of the file to which we will output the graph.
-outfile = sprintf( 'l3_perf_panel_nt%d', nth );
+outfile = sprintf( 'l3_perf_%s_nt%d', arch_str, nth );
 
 % Output the graph to pdf format.
-print(gcf, outfile,'-bestfit','-dpdf');
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
+print(gcf, outfile,'-bestfit','-dpdf');
 

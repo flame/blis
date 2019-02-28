@@ -32,7 +32,7 @@
 
 */
 
-err_t bli_setijm
+BLIS_EXPORT_BLIS err_t bli_setijm
      (
        double  ar,
        double  ai,
@@ -44,7 +44,7 @@ err_t bli_setijm
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        double         ar, \
        double         ai, \
@@ -57,7 +57,7 @@ INSERT_GENTPROT_BASIC0( setijm )
 
 // -----------------------------------------------------------------------------
 
-err_t bli_getijm
+BLIS_EXPORT_BLIS err_t bli_getijm
       (
         dim_t   i,
         dim_t   j,
@@ -69,7 +69,7 @@ err_t bli_getijm
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        dim_t          i, \
        dim_t          j, \

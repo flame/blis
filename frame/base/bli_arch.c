@@ -36,6 +36,7 @@
 #ifndef BLIS_CONFIGURETIME_CPUID
   #include "blis.h"
 #else
+  #define BLIS_EXPORT_BLIS
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_arch.h"

@@ -81,7 +81,7 @@ void bli_unpackv_unb_var1( obj_t*     p,
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        dim_t   m, \
        void*   p, inc_t incp, \

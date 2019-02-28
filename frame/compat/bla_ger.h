@@ -39,7 +39,7 @@
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, chxy, chc, blasname ) \
 \
-void PASTEF772(chxy,blasname,chc) \
+BLIS_EXPORT_BLAS void PASTEF772(chxy,blasname,chc) \
      ( \
        const f77_int* m, \
        const f77_int* n, \

@@ -11,7 +11,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_cdotu_sub( f77_int N, const void *X,
+void BLIS_EXPORT_BLAS cblas_cdotu_sub( f77_int N, const void *X,
                      f77_int incX, const void *Y, f77_int incY,void *dotu)
 {
 #ifdef F77_INT

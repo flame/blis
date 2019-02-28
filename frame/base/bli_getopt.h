@@ -40,7 +40,7 @@ typedef struct getopt_s
 	int   optopt;
 } getopt_t;
 
-void bli_getopt_init_state( int opterr, getopt_t* state );
+BLIS_EXPORT_BLIS void bli_getopt_init_state( int opterr, getopt_t* state );
 
-int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* state );
+BLIS_EXPORT_BLIS int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* state );
 

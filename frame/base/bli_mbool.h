@@ -50,7 +50,7 @@ static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
 
 // -----------------------------------------------------------------------------
 
-mbool_t* bli_mbool_create
+BLIS_EXPORT_BLIS mbool_t* bli_mbool_create
      (
        bool_t b_s,
        bool_t b_d,
@@ -58,7 +58,7 @@ mbool_t* bli_mbool_create
        bool_t b_z
      );
 
-void bli_mbool_init
+BLIS_EXPORT_BLIS void bli_mbool_init
      (
        mbool_t* b,
        bool_t   b_s,
@@ -67,5 +67,5 @@ void bli_mbool_init
        bool_t   b_z
      );
 
-void bli_mbool_free( mbool_t* b );
+BLIS_EXPORT_BLIS void bli_mbool_free( mbool_t* b );
 

@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjchi, \
        ctype*  chi, \
@@ -64,7 +64,7 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjchi, \
        ctype*  chi  \
@@ -85,7 +85,7 @@ INSERT_GENTFUNC_BASIC( invertsc, inverts )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, kername ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjchi, \
        ctype*  chi, \
@@ -114,7 +114,7 @@ INSERT_GENTFUNC_BASIC( mulsc, scals )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*   chi, \
        ctype_r* absq  \
@@ -143,7 +143,7 @@ INSERT_GENTFUNCR_BASIC0( absqsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*   chi, \
        ctype_r* norm  \
@@ -161,7 +161,7 @@ INSERT_GENTFUNCR_BASIC0( normfsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*  chi, \
        ctype*  psi  \
@@ -179,7 +179,7 @@ INSERT_GENTFUNC_BASIC0( sqrtsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*  chi, \
        double* zeta_r, \
@@ -197,7 +197,7 @@ INSERT_GENTFUNC_BASIC0( getsc )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        double  zeta_r, \
        double  zeta_i, \
@@ -215,7 +215,7 @@ INSERT_GENTFUNC_BASIC0( setsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype*   chi, \
        ctype_r* zeta_r, \
@@ -233,7 +233,7 @@ INSERT_GENTFUNCR_BASIC0( unzipsc )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        ctype_r* zeta_r, \
        ctype_r* zeta_i, \

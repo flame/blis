@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        conj_t  conjh, \
        obj_t*  alpha, \
@@ -64,7 +64,7 @@ GENPROT( her_unb_var2 )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
-void PASTEMAC(ch,varname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
      ( \
        uplo_t  uplo, \
        conj_t  conjx, \

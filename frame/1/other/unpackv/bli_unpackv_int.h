@@ -32,13 +32,13 @@
 
 */
 
-void bli_unpackv_int( obj_t*     p,
+BLIS_EXPORT_BLIS void bli_unpackv_int( obj_t*     p,
                       obj_t*     a,
                       cntx_t*    cntx,
                       unpackv_t* cntl );
 
 /*
-void bli_unpackv_init_cast( obj_t*  p,
+BLIS_EXPORT_BLIS void bli_unpackv_init_cast( obj_t*  p,
                             obj_t*  a,
                             obj_t*  c );
 */

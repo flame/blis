@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_castm_check
+BLIS_EXPORT_BLIS void bli_castm_check
      (
        obj_t* a,
        obj_t* b
@@ -80,7 +80,7 @@ void bli_castm_check
 	bli_check_error_code( e_val );
 }
 
-void bli_castv_check
+BLIS_EXPORT_BLIS void bli_castv_check
      (
        obj_t* x,
        obj_t* y

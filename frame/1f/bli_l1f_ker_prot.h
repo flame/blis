@@ -39,7 +39,7 @@
 
 #define AXPY2V_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjx, \
        conj_t           conjy, \
@@ -55,7 +55,7 @@ void PASTEMAC(ch,opname) \
 
 #define AXPYF_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conja, \
        conj_t           conjx, \
@@ -71,7 +71,7 @@ void PASTEMAC(ch,opname) \
 
 #define DOTAXPYV_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjxt, \
        conj_t           conjx, \
@@ -88,7 +88,7 @@ void PASTEMAC(ch,opname) \
 
 #define DOTXAXPYF_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjat, \
        conj_t           conja, \
@@ -109,7 +109,7 @@ void PASTEMAC(ch,opname) \
 
 #define DOTXF_KER_PROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        conj_t           conjat, \
        conj_t           conjx, \
