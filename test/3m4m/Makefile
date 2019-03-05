@@ -46,8 +46,6 @@
 #
 
 .PHONY: all \
-        blis-gemm-st openblas-gemm-st mkl-gemm-st acml-gemm-st \
-        blis-gemm-mt openblas-gemm-mt mkl-gemm-mt acml-gemm-mt \
         clean cleanx
 
 
@@ -94,21 +92,19 @@ endif
 #BLIS_LIB       := $(BLIS_LIB_PATH)/libblis.a
 
 # BLAS library path(s). This is where the BLAS libraries reside.
-HOME_LIB_PATH  := $(HOME)/flame/lib
-#MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-#MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
+HOME_LIB_PATH   := $(HOME)/flame/lib
+#VENDOR_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
+MKL_LIB_PATH := $(HOME)/intel/mkl/lib/intel64
+#VENDOR_LIB_PATH := ${MKLROOT}/lib/intel64
 #ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
-ACML_LIB_PATH  := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_int64/lib
-ACMLP_LIB_PATH := $(HOME_LIB_PATH)/acml/5.3.1/gfortran64_fma4_mp_int64/lib
 
 # OpenBLAS
 OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
 OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
 # ATLAS
-ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
-                  $(HOME_LIB_PATH)/libatlas.a
+#ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
+#                  $(HOME_LIB_PATH)/libatlas.a
 
 # MKL
 MKL_LIB        := -L$(MKL_LIB_PATH) \
@@ -130,12 +126,28 @@ MKLP_LIB       := -L$(MKL_LIB_PATH) \
                   #-L$(ICC_LIB_PATH) \
                   #-lgomp
 
-# ACML
-ACML_LIB       := -L$(ACML_LIB_PATH) \
-                  -lgfortran -lm -lrt -ldl -lacml
-ACMLP_LIB      := -L$(ACMLP_LIB_PATH) \
-                  -lgfortran -lm -lrt -ldl -lacml_mp
+VENDOR_LIB     := $(MKL_LIB)
+VENDORP_LIB    := $(MKLP_LIB)
 
+
+#
+# --- Problem size definitions -------------------------------------------------
+#
+
+# Single core (single-threaded)
+PS_BEGIN := 40
+PS_MAX   := 2000
+PS_INC   := 40
+
+# Single-socket (multithreaded)
+P1_BEGIN := 120
+P1_MAX   := 6000
+P1_INC   := 120
+
+# Dual-socket (multithreaded)
+P2_BEGIN := 160
+P2_MAX   := 8000
+P2_INC   := 160
 
 
 #
@@ -165,12 +177,6 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 
-# Datatype
-DT_S     := -DDT=BLIS_FLOAT
-DT_D     := -DDT=BLIS_DOUBLE
-DT_C     := -DDT=BLIS_SCOMPLEX
-DT_Z     := -DDT=BLIS_DCOMPLEX
-
 # Which library?
 BLI_DEF  := -DBLIS
 BLA_DEF  := -DBLAS
@@ -185,29 +191,25 @@ D1M      := -DIND=BLIS_1M
 DNAT     := -DIND=BLIS_NAT
 
 # Implementation string
-STR_3MHW := -DSTR=\"3mhw\"
-STR_3M1  := -DSTR=\"3m1\"
-STR_4MHW := -DSTR=\"4mhw\"
-STR_4M1B := -DSTR=\"4m1b\"
-STR_4M1A := -DSTR=\"4m1a\"
-STR_1M   := -DSTR=\"1m\"
-STR_NAT  := -DSTR=\"asm\"
+#STR_3MHW := -DSTR=\"3mhw\"
+#STR_3M1  := -DSTR=\"3m1\"
+#STR_4MHW := -DSTR=\"4mhw\"
+#STR_4M1B := -DSTR=\"4m1b\"
+#STR_4M1A := -DSTR=\"4m1a\"
+#STR_1M   := -DSTR=\"1m\"
+STR_NAT  := -DSTR=\"asm_blis\"
 STR_OBL  := -DSTR=\"openblas\"
-STR_MKL  := -DSTR=\"mkl\"
-STR_ACML := -DSTR=\"acml\"
+STR_VEN  := -DSTR=\"vendor\"
 
 # Single or multithreaded string
 STR_ST   := -DTHR_STR=\"st\"
-STR_MT   := -DTHR_STR=\"mt\"
+STR_1S   := -DTHR_STR=\"1s\"
+STR_2S   := -DTHR_STR=\"2s\"
 
 # Problem size specification
-PDEF_ST  := -DP_BEGIN=56 \
-            -DP_END=2800 \
-            -DP_INC=56
-
-PDEF_MT  := -DP_BEGIN=160 \
-            -DP_END=8000 \
-            -DP_INC=160
+PDEF_ST  := -DP_BEGIN=$(PS_BEGIN)  -DP_INC=$(PS_INC)  -DP_MAX=$(PS_MAX)
+PDEF_1S  := -DP_BEGIN=$(P1_BEGIN) -DP_INC=$(P1_INC) -DP_MAX=$(P1_MAX)
+PDEF_2S  := -DP_BEGIN=$(P2_BEGIN) -DP_INC=$(P2_INC) -DP_MAX=$(P2_MAX)
 
 
 
@@ -215,340 +217,129 @@ PDEF_MT  := -DP_BEGIN=160 \
 # --- Targets/rules ------------------------------------------------------------
 #
 
-all:        all-st all-mt
-blis:       blis-st blis-mt
-openblas:   openblas-st openblas-mt
-mkl:        mkl-st mkl-mt
+all:        all-st all-1s all-2s
+blis:       blis-st blis-1s blis-2s
+openblas:   openblas-st openblas-1s openblas-2s
+vendor:     vendor-st vendor-1s vendor-2s
+mkl:        vendor
+armpl:      vendor
 
 all-st:     blis-st openblas-st mkl-st
-all-mt:     blis-mt openblas-mt mkl-mt
+all-1s:     blis-1s openblas-1s mkl-1s
+all-2s:     blis-2s openblas-2s mkl-2s
 
 blis-st:    blis-nat-st
-blis-mt:    blis-nat-mt
+blis-1s:    blis-nat-1s
+blis-2s:    blis-nat-2s
 
-blis-ind:   blis-ind-st blis-ind-mt
-blis-nat:   blis-nat-st blis-nat-mt
+#blis-ind:   blis-ind-st blis-ind-mt
+blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
 
-blis-ind-st: \
-      test_cgemm_3mhw_blis_st.x \
-      test_zgemm_3mhw_blis_st.x \
-      test_cgemm_3m1_blis_st.x \
-      test_zgemm_3m1_blis_st.x \
-      test_cgemm_4mhw_blis_st.x \
-      test_zgemm_4mhw_blis_st.x \
-      test_cgemm_4m1b_blis_st.x \
-      test_zgemm_4m1b_blis_st.x \
-      test_cgemm_4m1a_blis_st.x \
-      test_zgemm_4m1a_blis_st.x \
-      test_cgemm_1m_blis_st.x \
-      test_zgemm_1m_blis_st.x
+# Define the datatypes, operations, and implementations.
+DTS   := s d c z
+OPS   := gemm hemm herk trmm trsm
+IMPLS := asm_blis openblas vendor
 
-blis-ind-mt: \
-      test_cgemm_3mhw_blis_mt.x \
-      test_zgemm_3mhw_blis_mt.x \
-      test_cgemm_3m1_blis_mt.x \
-      test_zgemm_3m1_blis_mt.x \
-      test_cgemm_4mhw_blis_mt.x \
-      test_zgemm_4mhw_blis_mt.x \
-      test_cgemm_4m1b_blis_mt.x \
-      test_zgemm_4m1b_blis_mt.x \
-      test_cgemm_4m1a_blis_mt.x \
-      test_zgemm_4m1a_blis_mt.x \
-      test_cgemm_1m_blis_mt.x \
-      test_zgemm_1m_blis_mt.x
+# Define functions to construct object filenames from the datatypes and
+# operations given an implementation. We define one function for single-
+# threaded, single-socket, and dual-socket filenames.
+get-st-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(PS_MAX)_$(1)_st.o))
+get-1s-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(P1_MAX)_$(1)_1s.o))
+get-2s-objs = $(foreach dt,$(DTS),$(foreach op,$(OPS),test_$(dt)$(op)_$(P2_MAX)_$(1)_2s.o))
 
-blis-nat-st: \
-      test_sgemm_asm_blis_st.x \
-      test_dgemm_asm_blis_st.x \
-      test_cgemm_asm_blis_st.x \
-      test_zgemm_asm_blis_st.x \
-      test_shemm_asm_blis_st.x \
-      test_dhemm_asm_blis_st.x \
-      test_chemm_asm_blis_st.x \
-      test_zhemm_asm_blis_st.x \
-      test_sherk_asm_blis_st.x \
-      test_dherk_asm_blis_st.x \
-      test_cherk_asm_blis_st.x \
-      test_zherk_asm_blis_st.x \
-      test_strmm_asm_blis_st.x \
-      test_dtrmm_asm_blis_st.x \
-      test_ctrmm_asm_blis_st.x \
-      test_ztrmm_asm_blis_st.x \
-      test_strsm_asm_blis_st.x \
-      test_dtrsm_asm_blis_st.x \
-      test_ctrsm_asm_blis_st.x \
-      test_ztrsm_asm_blis_st.x
+# Construct object and binary names for single-threaded, single-socket, and
+# dual-socket files for BLIS, OpenBLAS, and a vendor library (e.g. MKL).
+BLIS_NAT_ST_OBJS := $(call get-st-objs,asm_blis)
+BLIS_NAT_ST_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_ST_OBJS))
+BLIS_NAT_1S_OBJS := $(call get-1s-objs,asm_blis)
+BLIS_NAT_1S_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_1S_OBJS))
+BLIS_NAT_2S_OBJS := $(call get-2s-objs,asm_blis)
+BLIS_NAT_2S_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_2S_OBJS))
 
-blis-nat-mt: \
-      test_sgemm_asm_blis_mt.x \
-      test_dgemm_asm_blis_mt.x \
-      test_cgemm_asm_blis_mt.x \
-      test_zgemm_asm_blis_mt.x \
-      test_shemm_asm_blis_mt.x \
-      test_dhemm_asm_blis_mt.x \
-      test_chemm_asm_blis_mt.x \
-      test_zhemm_asm_blis_mt.x \
-      test_sherk_asm_blis_mt.x \
-      test_dherk_asm_blis_mt.x \
-      test_cherk_asm_blis_mt.x \
-      test_zherk_asm_blis_mt.x \
-      test_strmm_asm_blis_mt.x \
-      test_dtrmm_asm_blis_mt.x \
-      test_ctrmm_asm_blis_mt.x \
-      test_ztrmm_asm_blis_mt.x \
-      test_strsm_asm_blis_mt.x \
-      test_dtrsm_asm_blis_mt.x \
-      test_ctrsm_asm_blis_mt.x \
-      test_ztrsm_asm_blis_mt.x
+OPENBLAS_ST_OBJS := $(call get-st-objs,openblas)
+OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
+OPENBLAS_1S_OBJS := $(call get-1s-objs,openblas)
+OPENBLAS_1S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_1S_OBJS))
+OPENBLAS_2S_OBJS := $(call get-2s-objs,openblas)
+OPENBLAS_2S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_2S_OBJS))
 
-openblas-st: \
-      test_sgemm_openblas_st.x \
-      test_dgemm_openblas_st.x \
-      test_cgemm_openblas_st.x \
-      test_zgemm_openblas_st.x \
-      test_shemm_openblas_st.x \
-      test_dhemm_openblas_st.x \
-      test_chemm_openblas_st.x \
-      test_zhemm_openblas_st.x \
-      test_sherk_openblas_st.x \
-      test_dherk_openblas_st.x \
-      test_cherk_openblas_st.x \
-      test_zherk_openblas_st.x \
-      test_strmm_openblas_st.x \
-      test_dtrmm_openblas_st.x \
-      test_ctrmm_openblas_st.x \
-      test_ztrmm_openblas_st.x \
-      test_strsm_openblas_st.x \
-      test_dtrsm_openblas_st.x \
-      test_ctrsm_openblas_st.x \
-      test_ztrsm_openblas_st.x
+VENDOR_ST_OBJS   := $(call get-st-objs,vendor)
+VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
+VENDOR_1S_OBJS   := $(call get-1s-objs,vendor)
+VENDOR_1S_BINS   := $(patsubst %.o,%.x,$(VENDOR_1S_OBJS))
+VENDOR_2S_OBJS   := $(call get-2s-objs,vendor)
+VENDOR_2S_BINS   := $(patsubst %.o,%.x,$(VENDOR_2S_OBJS))
 
-openblas-mt: \
-      test_sgemm_openblas_mt.x \
-      test_dgemm_openblas_mt.x \
-      test_cgemm_openblas_mt.x \
-      test_zgemm_openblas_mt.x \
-      test_shemm_openblas_mt.x \
-      test_dhemm_openblas_mt.x \
-      test_chemm_openblas_mt.x \
-      test_zhemm_openblas_mt.x \
-      test_sherk_openblas_mt.x \
-      test_dherk_openblas_mt.x \
-      test_cherk_openblas_mt.x \
-      test_zherk_openblas_mt.x \
-      test_strmm_openblas_mt.x \
-      test_dtrmm_openblas_mt.x \
-      test_ctrmm_openblas_mt.x \
-      test_ztrmm_openblas_mt.x \
-      test_strsm_openblas_mt.x \
-      test_dtrsm_openblas_mt.x \
-      test_ctrsm_openblas_mt.x \
-      test_ztrsm_openblas_mt.x
+# Define some targets associated with the above object/binary files.
+blis-nat-st: $(BLIS_NAT_ST_BINS)
+blis-nat-1s: $(BLIS_NAT_1S_BINS)
+blis-nat-2s: $(BLIS_NAT_2S_BINS)
 
-mkl-st: \
-      test_sgemm_mkl_st.x \
-      test_dgemm_mkl_st.x \
-      test_cgemm_mkl_st.x \
-      test_zgemm_mkl_st.x \
-      test_shemm_mkl_st.x \
-      test_dhemm_mkl_st.x \
-      test_chemm_mkl_st.x \
-      test_zhemm_mkl_st.x \
-      test_sherk_mkl_st.x \
-      test_dherk_mkl_st.x \
-      test_cherk_mkl_st.x \
-      test_zherk_mkl_st.x \
-      test_strmm_mkl_st.x \
-      test_dtrmm_mkl_st.x \
-      test_ctrmm_mkl_st.x \
-      test_ztrmm_mkl_st.x \
-      test_strsm_mkl_st.x \
-      test_dtrsm_mkl_st.x \
-      test_ctrsm_mkl_st.x \
-      test_ztrsm_mkl_st.x
+openblas-st: $(OPENBLAS_ST_BINS)
+openblas-1s: $(OPENBLAS_1S_BINS)
+openblas-2s: $(OPENBLAS_2S_BINS)
 
-mkl-mt: \
-      test_sgemm_mkl_mt.x \
-      test_dgemm_mkl_mt.x \
-      test_cgemm_mkl_mt.x \
-      test_zgemm_mkl_mt.x \
-      test_shemm_mkl_mt.x \
-      test_dhemm_mkl_mt.x \
-      test_chemm_mkl_mt.x \
-      test_zhemm_mkl_mt.x \
-      test_sherk_mkl_mt.x \
-      test_dherk_mkl_mt.x \
-      test_cherk_mkl_mt.x \
-      test_zherk_mkl_mt.x \
-      test_strmm_mkl_mt.x \
-      test_dtrmm_mkl_mt.x \
-      test_ctrmm_mkl_mt.x \
-      test_ztrmm_mkl_mt.x \
-      test_strsm_mkl_mt.x \
-      test_dtrsm_mkl_mt.x \
-      test_ctrsm_mkl_mt.x \
-      test_ztrsm_mkl_mt.x
+vendor-st: $(VENDOR_ST_BINS)
+vendor-1s: $(VENDOR_1S_BINS)
+vendor-2s: $(VENDOR_2S_BINS)
 
+mkl-st: vendor-st
+mkl-1s: vendor-1s
+mkl-2s: vendor-2s
 
+armpl-st: vendor-st
+armpl-1s: vendor-1s
+armpl-2s: vendor-2s
+
+# Mark the object files as intermediate so that make will remove them
+# automatically after building the binaries on which they depend.
+.INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(OPENBLAS_ST_OBJS) $(VENDOR_ST_OBJS)
+.INTERMEDIATE: $(BLIS_NAT_1S_OBJS) $(OPENBLAS_1S_OBJS) $(VENDOR_1S_OBJS)
+.INTERMEDIATE: $(BLIS_NAT_2S_OBJS) $(OPENBLAS_2S_OBJS) $(VENDOR_2S_OBJS)
 
 
 # --Object file rules --
 
-$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+#$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
+#	$(CC) $(CFLAGS) -c $< -o $@
 
-# blis 3mhw
-test_z%_3mhw_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
+# A function to return the datatype cpp macro def from the datatype
+# character.
+get-dt-cpp = -DDT=bli_$(1)type
 
-test_c%_3mhw_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_ST) -c $< -o $@
+# A function to return other cpp macros that help the test driver
+# identify the implementation.
+get-bl-cpp = $(strip \
+             $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
+             $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
+                                              $(STR_VEN) $(BLA_DEF))))
 
-test_z%_3mhw_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
+define make-st-rule
+test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
+	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_ST) -c $$< -o $$@
+endef
 
-test_c%_3mhw_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3MHW) $(STR_3MHW) $(STR_MT) -c $< -o $@
+define make-1s-rule
+test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
+	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_1S) -c $$< -o $$@
+endef
 
-# blis 3m1
-test_z%_3m1_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+define make-2s-rule
+test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
+	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_2S) -c $$< -o $$@
+endef
 
-test_c%_3m1_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_ST) -c $< -o $@
+$(foreach dt,$(DTS), \
+$(foreach op,$(OPS), \
+$(foreach im,$(IMPLS),$(eval $(call make-st-rule,$(dt),$(op),$(im))))))
 
-test_z%_3m1_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
+$(foreach dt,$(DTS), \
+$(foreach op,$(OPS), \
+$(foreach im,$(IMPLS),$(eval $(call make-1s-rule,$(dt),$(op),$(im))))))
 
-test_c%_3m1_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D3M1)  $(STR_3M1)  $(STR_MT) -c $< -o $@
-
-# blis 4mhw
-test_z%_4mhw_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_ST) -c $< -o $@
-
-test_c%_4mhw_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_ST) -c $< -o $@
-
-test_z%_4mhw_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_MT) -c $< -o $@
-
-test_c%_4mhw_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4MHW) $(STR_4MHW) $(STR_MT) -c $< -o $@
-
-# blis 4m1b
-test_z%_4m1b_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
-
-test_c%_4m1b_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_ST) -c $< -o $@
-
-test_z%_4m1b_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
-
-test_c%_4m1b_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1B) $(STR_4M1B) $(STR_MT) -c $< -o $@
-
-# blis 4m1a
-test_z%_4m1a_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_ST) -c $< -o $@
-
-test_c%_4m1a_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_ST) -c $< -o $@
-
-test_z%_4m1a_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_MT) -c $< -o $@
-
-test_c%_4m1a_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D4M1A) $(STR_4M1A) $(STR_MT) -c $< -o $@
-
-# blis 1m
-test_z%_1m_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_ST) -c $< -o $@
-
-test_c%_1m_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_ST) -c $< -o $@
-
-test_z%_1m_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_MT) -c $< -o $@
-
-test_c%_1m_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(D1M) $(STR_1M) $(STR_MT) -c $< -o $@
-
-# blis asm
-test_d%_asm_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
-
-test_s%_asm_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
-
-test_z%_asm_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
-
-test_c%_asm_blis_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_ST) -c $< -o $@
-
-test_d%_asm_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
-
-test_s%_asm_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
-
-test_z%_asm_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
-
-test_c%_asm_blis_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLI_DEF) $(DNAT)  $(STR_NAT)  $(STR_MT) -c $< -o $@
-
-# openblas
-test_d%_openblas_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
-
-test_s%_openblas_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
-
-test_z%_openblas_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
-
-test_c%_openblas_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_ST) -c $< -o $@
-
-test_d%_openblas_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
-
-test_s%_openblas_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
-
-test_z%_openblas_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
-
-test_c%_openblas_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_OBL)  $(STR_MT) -c $< -o $@
-
-# mkl
-test_d%_mkl_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
-
-test_s%_mkl_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
-
-test_z%_mkl_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
-
-test_c%_mkl_st.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_ST) -c $< -o $@
-
-test_d%_mkl_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_D) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
-
-test_s%_mkl_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_S) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
-
-test_z%_mkl_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_Z) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
-
-test_c%_mkl_mt.o: test_%.c Makefile
-	$(CC) $(CFLAGS) $(PDEF_MT) $(DT_C) $(BLA_DEF) $(DNAT)  $(STR_MKL)  $(STR_MT) -c $< -o $@
+$(foreach dt,$(DTS), \
+$(foreach op,$(OPS), \
+$(foreach im,$(IMPLS),$(eval $(call make-2s-rule,$(dt),$(op),$(im))))))
 
 
 # -- Executable file rules --
@@ -558,23 +349,34 @@ test_c%_mkl_mt.o: test_%.c Makefile
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_openblas_st.x: test_%_openblas_st.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_%_$(PS_MAX)_openblas_st.x: test_%_$(PS_MAX)_openblas_st.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_openblas_mt.x: test_%_openblas_mt.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_%_$(P1_MAX)_openblas_1s.x: test_%_$(P1_MAX)_openblas_1s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_mkl_st.x: test_%_mkl_st.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(MKL_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_mkl_mt.x: test_%_mkl_mt.o $(LIBBLIS_LINK)
-	$(LINKER) $<  $(MKLP_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
-test_%_blis_st.x: test_%_blis_st.o $(LIBBLIS_LINK)
-	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(VENDOR_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_blis_mt.x: test_%_blis_mt.o $(LIBBLIS_LINK)
-	$(LINKER) $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+test_%_$(P1_MAX)_vendor_1s.x:   test_%_$(P1_MAX)_vendor_1s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_vendor_2s.x:   test_%_$(P2_MAX)_vendor_2s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+test_%_$(PS_MAX)_asm_blis_st.x: test_%_$(PS_MAX)_asm_blis_st.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_asm_blis_1s.x: test_%_$(P1_MAX)_asm_blis_1s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_asm_blis_2s.x: test_%_$(P2_MAX)_asm_blis_2s.o $(LIBBLIS_LINK)
+	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 
 # -- Clean rules --
