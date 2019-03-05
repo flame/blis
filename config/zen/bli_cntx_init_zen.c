@@ -117,18 +117,6 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 
 /*
-<<<<<<< HEAD
-	Multi Instance performance improvement of DGEMM when binded to a CCX
-	In Multi instance each thread runs a sequential DGEMM.
-
-	a) 	If BLIS is run in a multi instance mode with 
-		CPU freq 2.6/2.2 Ghz
-		DDR4 clock frequency 2400Mhz
-                mc = 240, kc = 512, and nc = 2040
-		has better performance on EPYC server, over the default block sizes.
-
-	b)  	If BLIS is run in Single Instance mode 
-=======
 	Multi Instance performance degradation on different cores
 	a) 	CPU freq 2.6 Ghz
 		DDR4 2400
@@ -144,7 +132,6 @@ void bli_cntx_init_zen( cntx_t* cntx )
 		mc = 390, kc = 512 and nc = 4080
 
 	c)  	Higher frequency(3.1Ghz), single instance mode choose default value
->>>>>>> Fix on EPYC machine for multi instance performance issue,
 		mc = 510, kc = 1024 and nc = 4080
 
 */
