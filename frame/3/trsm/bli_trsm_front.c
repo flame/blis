@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +35,8 @@
 
 #include "blis.h"
 
+//#define PRINT_SMALL_TRSM_INFO
+
 void bli_trsm_front
      (
        side_t  side,
@@ -50,6 +53,47 @@ void bli_trsm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
+ 
+
+#ifdef PRINT_SMALL_TRSM_INFO
+        printf("Side:: %c\n", side ? 'R' : 'L');
+        if (bli_obj_datatype(*a) == BLIS_FLOAT)
+                        printf("Alpha:: %9.2e\n", *((float *)bli_obj_buffer_for_const(BLIS_FLOAT, *alpha)));
+        else if (bli_obj_datatype(*a) == BLIS_DOUBLE)
+                        printf("Alpha is double:: %9.2e\n", *((double *)bli_obj_buffer_for_const(BLIS_DOUBLE, *alpha)));
+        else
+                        printf("Unsupported datatype for Alpha\n");
+
+        printf("A:: M = %d, N = %d, elem_size = %d, row_off = %ld, col_off = %ld, rs = %d, cs = %d, trans = %c, TRIANG = %c, unit diag = %c\n", a->dim[0], a->dim[1], bli_obj_elem_size(*a ), bli_obj_row_off(*a), bli_obj_col_off(*a), a->rs, a->cs, bli_obj_has_trans(*a) ? 'Y' : 'N', bli_obj_is_upper(*a) ? 'U' : bli_obj_is_lower(*a) ? 'L' : 'N', bli_obj_has_unit_diag(*a) ? 'Y' : 'N');
+#ifdef PRINT_SMALL_TRSM
+        //bli_printm("a", a, "%4.1f", "");
+#endif
+        printf("B:: M = %d, N = %d, elem_size = %d, row_off = %ld, col_off = %ld, rs = %d, cs = %d, trans = %c\n", b->dim[0], b->dim[1], bli_obj_elem_size(*a ), bli_obj_row_off(*a), bli_obj_col_off(*a), b->rs, b->cs, bli_obj_has_trans(*b) ? 'Y' : 'N');
+#ifdef PRINT_SMALL_TRSM
+        //bli_printm("b", b, "%4.1f", "");
+#endif
+        fflush(stdout);
+#endif
+#if 0
+for (i = 0; i < m; i++) //no. of cols of B
+{
+	for (j = 0; j < n; j++) //no. of rows of B
+	{
+		B[i*n + j] = 1001 + j + (i*n);
+	}
+}
+for (i = 0; i < m; i++) //no. of cols of B
+{
+	for (j = i; j < m; j++) //no. of rows of B
+	{
+		L[i*m + j] = 2001 + j + (i*m);
+	}
+}
+#endif
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+        gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
+        if ( status == BLIS_SUCCESS ) return;
+#endif
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
