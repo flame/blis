@@ -99,7 +99,7 @@ vend_ln  = line( x_axis( :, 1 ), data_vend( :, flopscol ) / nth, ...
 xlim( ax1, [x_begin x_end] );
 ylim( ax1, [y_begin y_end] );
 
-if x_end == 10000 || x_end == 8000
+if x_end == 10000 || x_end == 8000 || x_end == 6000
 	x_tick2 = x_end - 2000;
 	x_tick1 = x_tick2/2;
 	xticks( ax1, [ x_tick1 x_tick2 ] );

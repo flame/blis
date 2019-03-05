@@ -46,7 +46,7 @@ int main( int argc, char** argv )
 	obj_t    alpha;
 	dim_t    m, n;
 	dim_t    p;
-	dim_t    p_begin, p_end, p_inc;
+	dim_t    p_begin, p_max, p_inc;
 	int      m_input, n_input;
 	ind_t    ind;
 	num_t    dt;
@@ -76,7 +76,7 @@ int main( int argc, char** argv )
 	ind     = IND;
 
 	p_begin = P_BEGIN;
-	p_end   = P_END;
+	p_max   = P_MAX;
 	p_inc   = P_INC;
 
 	m_input = -1;
@@ -133,19 +133,16 @@ int main( int argc, char** argv )
 
 	// Begin with initializing the last entry to zero so that
 	// matlab allocates space for the entire array once up-front.
-	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
-#ifdef BLIS
-	printf( "data_%s_%ctrsm_%s_blis", THR_STR, dt_ch, STR );
-#else
-	printf( "data_%s_%ctrsm_%s",      THR_STR, dt_ch, STR );
-#endif
+	for ( p = p_begin; p + p_inc <= p_max; p += p_inc ) ;
+
+	printf( "data_%s_%ctrsm_%s", THR_STR, dt_ch, STR );
 	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
 
 
-	for ( p = p_begin; p <= p_end; p += p_inc )
+	for ( p = p_begin; p <= p_max; p += p_inc )
 	{
 
 		if ( m_input < 0 ) m = p / ( dim_t )abs(m_input);
@@ -192,9 +189,7 @@ int main( int argc, char** argv )
 		{
 			bli_copym( &c_save, &c );
 
-
 			dtime = bli_clock();
-
 
 #ifdef PRINT
 			bli_printm( "a", &a, "%4.1f", "" );
@@ -210,93 +205,92 @@ int main( int argc, char** argv )
 
 #else
 
-		if ( bli_is_float( dt ) )
-		{
-			f77_int   mm     = bli_obj_length( &c );
-			f77_int   kk     = bli_obj_width( &c );
-			f77_int   lda    = bli_obj_col_stride( &a );
-			f77_int   ldc    = bli_obj_col_stride( &c );
-			float*    alphap = bli_obj_buffer( &alpha );
-			float*    ap     = bli_obj_buffer( &a );
-			float*    cp     = bli_obj_buffer( &c );
+			if ( bli_is_float( dt ) )
+			{
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				float*    alphap = bli_obj_buffer( &alpha );
+				float*    ap     = bli_obj_buffer( &a );
+				float*    cp     = bli_obj_buffer( &c );
 
-			strsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &kk,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_double( dt ) )
-		{
-			f77_int   mm     = bli_obj_length( &c );
-			f77_int   kk     = bli_obj_width( &c );
-			f77_int   lda    = bli_obj_col_stride( &a );
-			f77_int   ldc    = bli_obj_col_stride( &c );
-			double*   alphap = bli_obj_buffer( &alpha );
-			double*   ap     = bli_obj_buffer( &a );
-			double*   cp     = bli_obj_buffer( &c );
+				strsm_( &f77_side,
+						&f77_uploa,
+						&f77_transa,
+						&f77_diaga,
+						&mm,
+						&kk,
+						alphap,
+						ap, &lda,
+						cp, &ldc );
+			}
+			else if ( bli_is_double( dt ) )
+			{
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				double*   alphap = bli_obj_buffer( &alpha );
+				double*   ap     = bli_obj_buffer( &a );
+				double*   cp     = bli_obj_buffer( &c );
 
-			dtrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &kk,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_scomplex( dt ) )
-		{
-			f77_int   mm     = bli_obj_length( &c );
-			f77_int   kk     = bli_obj_width( &c );
-			f77_int   lda    = bli_obj_col_stride( &a );
-			f77_int   ldc    = bli_obj_col_stride( &c );
-			scomplex* alphap = bli_obj_buffer( &alpha );
-			scomplex* ap     = bli_obj_buffer( &a );
-			scomplex* cp     = bli_obj_buffer( &c );
+				dtrsm_( &f77_side,
+						&f77_uploa,
+						&f77_transa,
+						&f77_diaga,
+						&mm,
+						&kk,
+						alphap,
+						ap, &lda,
+						cp, &ldc );
+			}
+			else if ( bli_is_scomplex( dt ) )
+			{
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				scomplex* alphap = bli_obj_buffer( &alpha );
+				scomplex* ap     = bli_obj_buffer( &a );
+				scomplex* cp     = bli_obj_buffer( &c );
 
-			ctrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &kk,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_dcomplex( dt ) )
-		{
-			f77_int    mm     = bli_obj_length( &c );
-			f77_int    kk     = bli_obj_width( &c );
-			f77_int    lda    = bli_obj_col_stride( &a );
-			f77_int    ldc    = bli_obj_col_stride( &c );
-			dcomplex*  alphap = bli_obj_buffer( &alpha );
-			dcomplex*  ap     = bli_obj_buffer( &a );
-			dcomplex*  cp     = bli_obj_buffer( &c );
+				ctrsm_( &f77_side,
+						&f77_uploa,
+						&f77_transa,
+						&f77_diaga,
+						&mm,
+						&kk,
+						alphap,
+						ap, &lda,
+						cp, &ldc );
+			}
+			else if ( bli_is_dcomplex( dt ) )
+			{
+				f77_int    mm     = bli_obj_length( &c );
+				f77_int    kk     = bli_obj_width( &c );
+				f77_int    lda    = bli_obj_col_stride( &a );
+				f77_int    ldc    = bli_obj_col_stride( &c );
+				dcomplex*  alphap = bli_obj_buffer( &alpha );
+				dcomplex*  ap     = bli_obj_buffer( &a );
+				dcomplex*  cp     = bli_obj_buffer( &c );
 
-			ztrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &kk,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
+				ztrsm_( &f77_side,
+						&f77_uploa,
+						&f77_transa,
+						&f77_diaga,
+						&mm,
+						&kk,
+						alphap,
+						ap, &lda,
+						cp, &ldc );
+			}
 #endif
 
 #ifdef PRINT
 			bli_printm( "c after", &c, "%4.1f", "" );
 			exit(1);
 #endif
-
 
 			dtime_save = bli_clock_min_diff( dtime_save, dtime );
 		}
@@ -308,11 +302,7 @@ int main( int argc, char** argv )
 
 		if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
-#ifdef BLIS
-		printf( "data_%s_%ctrsm_%s_blis", THR_STR, dt_ch, STR );
-#else
-		printf( "data_%s_%ctrsm_%s",      THR_STR, dt_ch, STR );
-#endif
+		printf( "data_%s_%ctrsm_%s", THR_STR, dt_ch, STR );
 		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
