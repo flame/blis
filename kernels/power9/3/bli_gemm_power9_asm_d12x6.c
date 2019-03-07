@@ -59,56 +59,56 @@ void bli_dgemm_power9_asm_12x6
 	__asm__ volatile
 	(
 	"                                            \n\t"
-	"                                            \n\t"
-	"                                            \n\t"
-  "                                            \n\t"
-  "ld                r26, %6                   \n\t" // load C
-  "                                            \n\t"
-  "ld                r28, %2                   \n\t" // load A
-	"ld                r27, %3                   \n\t" // load B
-  "                                            \n\t"
-  "                                            \n\t" 
-  "lxv               0, 0(r26)                 \n\t" // load elems of C 
-  "lxv               1, 1(r26)                 \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "li                r4, %1                    \n\t" // load k_iter
-  "mtctr             r4                        \n\t"
-  "loop:                                       \n\t"
-  "                                            \n\t"
-  "lxv               36, 0(r28)                \n\t" // load col of a
-  "lxv               37, 1(r28)                \n\t" // load col of a
-  "                                            \n\t"
-  "lxvdsx            47, 0, r27                \n\t" // broadcast b
-  "addi              r27,r27,8                 \n\t" // inc b
-  "                                            \n\t"
-  "xvmaddadp         0,36,47                   \n\t"
-  "xvmaddadp         1,37,47                   \n\t"
-  "                                            \n\t"
-  "lxvdsx            47, 0, r27                \n\t" // broadcast b
-  "addi              r27,r27,8                 \n\t" // inc b
-  "                                            \n\t"
-  "xvmaddadp         0,36,47                   \n\t"
-  "xvmaddadp         1,37,47                   \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "addi              r28,r28,32                \n\t" // move A forward
-  "bdnz loop                                   \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
-  "li                r5,16                     \n\t" // use as offset
-  "                                            \n\t"
-  "stxvd2x           0,0,r26                   \n\t" // store c back into memory 
-  "stxvd2x           1,r5,r26                  \n\t"
-  "                                            \n\t"
-  "                                            \n\t"
+	"ld                r26, %6                   \n\t"
+	// "                                            \n\t"
+  // "                                            \n\t"
+  // "ld                r26, %6                   \n\t" // load C
+  // "                                            \n\t"
+  // "ld                r28, %2                   \n\t" // load A
+	// "ld                r27, %3                   \n\t" // load B
+  // "                                            \n\t"
+  // "                                            \n\t" 
+  // "lxv               0, 0(r26)                 \n\t" // load elems of C 
+  // "lxv               1, 1(r26)                 \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "li                r4, %1                    \n\t" // load k_iter
+  // "mtctr             r4                        \n\t"
+  // "loop:                                       \n\t"
+  // "                                            \n\t"
+  // "lxv               36, 0(r28)                \n\t" // load col of a
+  // "lxv               37, 1(r28)                \n\t" // load col of a
+  // "                                            \n\t"
+  // "lxvdsx            47, 0, r27                \n\t" // broadcast b
+  // "addi              r27,r27,8                 \n\t" // inc b
+  // "                                            \n\t"
+  // "xvmaddadp         0,36,47                   \n\t"
+  // "xvmaddadp         1,37,47                   \n\t"
+  // "                                            \n\t"
+  // "lxvdsx            47, 0, r27                \n\t" // broadcast b
+  // "addi              r27,r27,8                 \n\t" // inc b
+  // "                                            \n\t"
+  // "xvmaddadp         0,36,47                   \n\t"
+  // "xvmaddadp         1,37,47                   \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "addi              r28,r28,32                \n\t" // move A forward
+  // "bdnz loop                                   \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
+  // "li                r5,16                     \n\t" // use as offset
+  // "                                            \n\t"
+  // "stxvd2x           0,0,r26                   \n\t" // store c back into memory 
+  // "stxvd2x           1,r5,r26                  \n\t"
+  // "                                            \n\t"
+  // "                                            \n\t"
   
 
 
