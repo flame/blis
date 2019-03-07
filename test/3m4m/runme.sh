@@ -5,10 +5,10 @@ exec_root="test"
 out_root="output"
 delay=0.1
 
-#sys="blis"
+sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
-sys="ul252"
+#sys="ul252"
 #sys="ul264"
 
 # Bind threads to processors.
@@ -20,15 +20,16 @@ if [ ${sys} = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0 1 2 3"
 
-	threads="jc2ic2jr1_4000
-	         jc2ic2jr1_6000"
+	threads="jc1ic1jr1_2400
+	         jc2ic2jr1_4000"
 
 elif [ ${sys} = "stampede2" ]; then
 
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
 
-	threads="jc4ic6jr1_6000
+	threads="jc1ic1jr1_2400
+	         jc4ic6jr1_6000
 	         jc4ic12jr1_8000"
 
 elif [ ${sys} = "lonestar5" ]; then
@@ -38,7 +39,8 @@ elif [ ${sys} = "lonestar5" ]; then
 	# A hack to use libiomp5 with gcc.
 	#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
 
-	threads="jc2ic3jr2_6000
+	threads="jc1ic1jr1_2400
+	         jc2ic3jr2_6000
 	         jc4ic3jr2_8000"
 
 elif [ ${sys} = "ul252" ]; then
@@ -55,7 +57,8 @@ elif [ ${sys} = "ul264" ]; then
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63"
 
-	threads="jc1ic8jr4_6000
+	threads="jc1ic1jr1_2400
+	         jc1ic8jr4_6000
 	         jc2ic8jr4_8000"
 
 fi
