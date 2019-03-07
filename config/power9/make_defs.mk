@@ -64,6 +64,8 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     :=
+ifeq ($(CC_VENDOR),xlc)
+CKVECFLAGS     :=
 else
 $(error gcc is required for this configuration.)
 endif
