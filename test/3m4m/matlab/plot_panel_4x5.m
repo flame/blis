@@ -32,19 +32,19 @@ ops( 5, : ) = 'trsm';
 opnames = gen_opnames( ops, dts );
 n_opnames = size( opnames, 1 );
 
-%fig = figure;
-%fig = figure('Position', [100, 100, 1600, 1200]);
 fig = figure('Position', [100, 100, 2000, 1500]);
 orient( fig, 'portrait' );
-%set(gcf,'Position',[0 0 2000 900]);
 set(gcf,'PaperUnits', 'inches');
-%set(gcf,'PaperSize', [16 12.4]);
-%set(gcf,'PaperPosition', [0 0 16 12.4]);
-set(gcf,'PaperSize', [11 15.0]);
-set(gcf,'PaperPosition', [0 0 11 15.0]);
-%set(gcf,'PaperPositionMode','auto');
-set(gcf,'PaperPositionMode','manual');
+if 1 == 1 % matlab
+	set(gcf,'PaperSize', [11 15.0]);
+	set(gcf,'PaperPosition', [0 0 11 15.0]);
+	set(gcf,'PaperPositionMode','manual');
+else % octave 4.x
+   set(gcf,'PaperSize', [15 19.0]);
+   set(gcf,'PaperPositionMode','auto');
+end
 set(gcf,'PaperOrientation','landscape');
+
 
 % Iterate over the list of datatype-specific operation names.
 for opi = 1:n_opnames
@@ -94,7 +94,7 @@ for opi = 1:n_opnames
 end
 
 % Construct the name of the file to which we will output the graph.
-outfile = sprintf( 'l3_perf_%s_nt%d', arch_str, nth );
+outfile = sprintf( 'l3_perf_%s_nt%d.pdf', arch_str, nth );
 
 % Output the graph to pdf format.
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
