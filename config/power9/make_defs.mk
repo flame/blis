@@ -64,10 +64,13 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=power9 -mtune=power9
+else
 ifeq ($(CC_VENDOR),IBM)
 CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9
 else
+$(info $(CC_VENDOR))
 $(error gcc is required for this configuration.)
+endif
 endif
 
 # Flags specific to reference kernels.
