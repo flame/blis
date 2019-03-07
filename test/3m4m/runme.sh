@@ -8,8 +8,8 @@ delay=0.1
 #sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
-#sys="ul252"
-sys="ul264"
+sys="ul252"
+#sys="ul264"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
@@ -46,7 +46,8 @@ elif [ ${sys} = "ul252" ]; then
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51"
 
-	threads="jc2ic13jr1_6000
+	threads="jc1ic1jr1_2400
+	         jc2ic13jr1_6000
 	         jc4ic13jr1_8000"
 
 elif [ ${sys} = "ul264" ]; then
@@ -64,7 +65,6 @@ test_dts="d s z c"
 
 # Operations to test.
 test_ops="gemm hemm herk trmm trsm"
-test_ops="gemm"
 
 # Implementations to test.
 impls="all"
@@ -185,7 +185,7 @@ for th in ${threads}; do
 				echo "Running ./${exec_name} > ${out_file}"
 
 				# Run executable.
-				#./${exec_name} > ${out_file}
+				./${exec_name} > ${out_file}
 
 				sleep ${delay}
 

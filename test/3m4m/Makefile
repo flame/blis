@@ -135,9 +135,9 @@ VENDORP_LIB    := $(MKLP_LIB)
 #
 
 # Single core (single-threaded)
-PS_BEGIN := 40
-PS_MAX   := 2000
-PS_INC   := 40
+PS_BEGIN := 48
+PS_MAX   := 2400
+PS_INC   := 48
 
 # Single-socket (multithreaded)
 P1_BEGIN := 120
