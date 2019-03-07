@@ -448,16 +448,16 @@ void libblis_test_gemm_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-#if 0
-bli_printm( "a", a, "%5.2f", "" );
-bli_printm( "b", b, "%5.2f", "" );
-bli_printm( "c", c, "%5.2f", "" );
+#if 1
 bli_printm( "alpha", alpha, "%5.2f", "" );
 bli_printm( "beta", beta, "%5.2f", "" );
+bli_printm( "a", a, "%6.3f", "" );
+bli_printm( "b", b, "%6.3f", "" );
+bli_printm( "c", c, "%6.3f", "" );
 #endif
 		bli_gemm( alpha, a, b, beta, c );
-#if 0
-bli_printm( "c after", c, "%5.2f", "" );
+#if 1
+bli_printm( "c after", c, "%6.3f", "" );
 #endif
 		break;
 
