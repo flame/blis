@@ -63,9 +63,9 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=
+CKVECFLAGS     := -mcpu=power9 -mtune=power9
 ifeq ($(CC_VENDOR),IBM)
-CKVECFLAGS     :=
+CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9
 else
 $(error gcc is required for this configuration.)
 endif
