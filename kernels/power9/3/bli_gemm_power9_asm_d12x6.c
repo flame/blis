@@ -62,7 +62,7 @@ void bli_dgemm_power9_asm_12x6
 	"ld                %%r26, %6                    \n\t"
   "li                %%r27, 1                     \n\t"
   "lxv               %%v0,  4(%%r26)              \n\t" 
-  "std               %%r27, 4(%%r26)              \n\t"
+  "std               %%r27, 16(%%r26)              \n\t"
 	// "                                            \n\t"
   // "                                            \n\t"
   // "ld                r26, %6                   \n\t" // load C
