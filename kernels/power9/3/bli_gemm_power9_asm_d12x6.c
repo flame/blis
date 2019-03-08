@@ -58,9 +58,10 @@ void bli_dgemm_power9_asm_12x6
 
 	__asm__ volatile
 	(
-	"                                              \n\t"
-  "li                %%r27, 1                      \n\t" 
-  "stw               %%r27, 0(%6) \n\t"
+	"                                               \n\t"
+	"ld                %%r26, %6                    \n\t"
+  "li                %%r27, 1                     \n\t" 
+  "std               %%r27, 4(%%r26)              \n\t"
 	// "                                            \n\t"
   // "                                            \n\t"
   // "ld                r26, %6                   \n\t" // load C
