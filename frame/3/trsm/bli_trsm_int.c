@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_trsm_int
+BLIS_EXPORT_BLIS void bli_trsm_int
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -51,6 +51,9 @@ void bli_trsm_int
 	obj_t        b_local;
 	obj_t        c_local;
 	trsm_var_oft f;
+
+	// Return early if the current control tree node is NULL.
+	if ( bli_cntl_is_null( cntl ) ) return;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

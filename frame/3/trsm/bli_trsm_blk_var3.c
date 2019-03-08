@@ -46,24 +46,19 @@ void bli_trsm_blk_var3
      )
 {
 	obj_t a1, b1;
-
-	dir_t direct;
-
-	dim_t i;
 	dim_t b_alg;
-	dim_t k_trans;
 
 	// Determine the direction in which to partition (forwards or backwards).
-	direct = bli_l3_direct( a, b, c, cntl );
+	dir_t direct = bli_l3_direct( a, b, c, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
 	bli_l3_prune_unref_mparts_k( a, b, c, cntl );
 
 	// Query dimension in partitioning direction.
-	k_trans = bli_obj_width_after_trans( a );
+	dim_t k_trans = bli_obj_width_after_trans( a );
 
 	// Partition along the k dimension.
-	for ( i = 0; i < k_trans; i += b_alg )
+	for ( dim_t i = 0; i < k_trans; i += b_alg )
 	{
 		// Determine the current algorithmic blocksize.
 		b_alg = bli_trsm_determine_kc( direct, i, k_trans, a, b,

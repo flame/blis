@@ -33,7 +33,7 @@
 
 */
 
-cntl_t* bli_trsm_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_trsm_cntl_create
      (
        rntm_t* rntm,
        side_t  side,
@@ -41,21 +41,21 @@ cntl_t* bli_trsm_cntl_create
        pack_t  schema_b
      );
 
-cntl_t* bli_trsm_l_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_trsm_l_cntl_create
      (
        rntm_t* rntm,
        pack_t  schema_a,
        pack_t  schema_b
      );
 
-cntl_t* bli_trsm_r_cntl_create
+BLIS_EXPORT_BLIS cntl_t* bli_trsm_r_cntl_create
      (
        rntm_t* rntm,
        pack_t  schema_a,
        pack_t  schema_b
      );
 
-void bli_trsm_cntl_free
+BLIS_EXPORT_BLIS void bli_trsm_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
@@ -64,7 +64,7 @@ void bli_trsm_cntl_free
 
 // -----------------------------------------------------------------------------
 
-cntl_t* bli_trsm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_trsm_cntl_create_node
      (
        rntm_t* rntm,
        opid_t  family,

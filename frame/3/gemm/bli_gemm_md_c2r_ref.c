@@ -39,7 +39,7 @@
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, suf ) \
 \
-void PASTEMAC2(ch,opname,suf) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,suf) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \

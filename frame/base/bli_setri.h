@@ -34,13 +34,13 @@
 
 // -- setr ---------------------------------------------------------------------
 
-void bli_setrm
+BLIS_EXPORT_BLIS void bli_setrm
      (
        obj_t* alpha,
        obj_t* b
      );
 
-void bli_setrv
+BLIS_EXPORT_BLIS void bli_setrv
      (
        obj_t* alpha,
        obj_t* x
@@ -48,13 +48,13 @@ void bli_setrv
 
 // -- seti ---------------------------------------------------------------------
 
-void bli_setim
+BLIS_EXPORT_BLIS void bli_setim
      (
        obj_t* alpha,
        obj_t* b
      );
 
-void bli_setiv
+BLIS_EXPORT_BLIS void bli_setiv
      (
        obj_t* alpha,
        obj_t* x

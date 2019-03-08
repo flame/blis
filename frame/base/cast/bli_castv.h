@@ -36,7 +36,7 @@
 // Prototype object-based interface.
 //
 
-void bli_castv
+BLIS_EXPORT_BLIS void bli_castv
      (
        obj_t* x,
        obj_t* y
@@ -49,7 +49,7 @@ void bli_castv
 #undef  GENTPROT2
 #define GENTPROT2( ctype_x, ctype_y, chx, chy, opname ) \
 \
-void PASTEMAC2(chx,chy,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,opname) \
      ( \
        conj_t  conjx, \
        dim_t   n, \
@@ -64,7 +64,7 @@ INSERT_GENTPROT2_MIXDP0( castv )
 // Prototype object-based _check() function.
 //
 
-void bli_castv_check
+BLIS_EXPORT_BLIS void bli_castv_check
      (
        obj_t* x,
        obj_t* y

@@ -32,14 +32,14 @@
 
 */
 
-void bli_packm_init_check
+BLIS_EXPORT_BLIS void bli_packm_init_check
      (
        obj_t*  a,
        obj_t*  p,
        cntx_t* cntx
      );
 
-void bli_packm_int_check
+BLIS_EXPORT_BLIS void bli_packm_int_check
      (
        obj_t*  a,
        obj_t*  p,

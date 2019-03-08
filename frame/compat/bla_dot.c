@@ -41,7 +41,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \
-ftype PASTEF772(ch,blasname,chc) \
+BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* n, \
        const ftype*   x, const f77_int* incx, \
@@ -93,7 +93,7 @@ INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in single precision.
-float PASTEF77(sd,sdot)
+BLIS_EXPORT_BLAS float PASTEF77(sd,sdot)
      (
        const f77_int* n,
        const float*   sb,
@@ -109,7 +109,7 @@ float PASTEF77(sd,sdot)
 
 // Input vectors stored in single precision, computed in double precision,
 // with result returned in double precision.
-double PASTEF77(d,sdot)
+BLIS_EXPORT_BLAS double PASTEF77(d,sdot)
      (
        const f77_int* n,
        const float*   x, const f77_int* incx,

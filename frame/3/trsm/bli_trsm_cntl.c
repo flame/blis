@@ -69,7 +69,48 @@ cntl_t* bli_trsm_l_cntl_create
 
 	const opid_t family = BLIS_TRSM;
 
-	// Create two nodes for the macro-kernel.
+	//
+	// Create nodes for packing A and the macro-kernel (gemm branch).
+	//
+
+	cntl_t* gemm_cntl_bu_ke = bli_trsm_cntl_create_node
+	(
+	  rntm,    // the thread's runtime structure
+	  family,  // the operation family
+	  BLIS_MR, // needed for bli_thrinfo_rgrow()
+	  NULL,    // variant function pointer not used
+	  NULL     // no sub-node; this is the leaf of the tree.
+	);
+
+	cntl_t* gemm_cntl_bp_bu = bli_trsm_cntl_create_node
+	(
+	  rntm,
+	  family,
+	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  macro_kernel_p,
+	  gemm_cntl_bu_ke
+	);
+
+	// Create a node for packing matrix A.
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	(
+	  rntm,
+	  bli_trsm_packa, // trsm operation's packm function for A.
+	  packa_fp,
+	  BLIS_MR,
+	  BLIS_MR,
+	  TRUE,    // do NOT invert diagonal
+	  TRUE,    // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  gemm_cntl_bp_bu
+	);
+
+	//
+	// Create nodes for packing A and the macro-kernel (trsm branch).
+	//
+
 	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
 	(
 	  rntm,    // the thread's runtime structure
@@ -92,7 +133,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa,
+	  bli_trsm_packa, // trsm operation's packm function for A.
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
@@ -104,15 +145,23 @@ cntl_t* bli_trsm_l_cntl_create
 	  trsm_cntl_bp_bu
 	);
 
+	// -------------------------------------------------------------------------
+
 	// Create a node for partitioning the m dimension by MC.
+	// NOTE: We attach the gemm sub-tree as the main branch.
 	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
 	(
 	  rntm,
 	  family,
 	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  trsm_cntl_packa
+	  gemm_cntl_packa
 	);
+
+	// Attach the trsm sub-tree as the auxiliary "prenode" branch.
+	bli_cntl_set_sub_prenode( trsm_cntl_packa, trsm_cntl_op_bp );
+
+	// -------------------------------------------------------------------------
 
 	// Create a node for packing matrix B.
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
@@ -252,7 +301,7 @@ cntl_t* bli_trsm_r_cntl_create
 	return trsm_cntl_vl_mm;
 }
 
-void bli_trsm_cntl_free
+BLIS_EXPORT_BLIS void bli_trsm_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,

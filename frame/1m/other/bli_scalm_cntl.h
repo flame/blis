@@ -33,7 +33,7 @@
 */
 
 
-cntl_t* bli_scalm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_scalm_cntl_create_node
      (
        void*   var_func,
        cntl_t* sub_node

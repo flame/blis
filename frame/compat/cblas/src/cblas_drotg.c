@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_drotg(  double *a, double *b, double *c, double *s)
+void BLIS_EXPORT_BLAS cblas_drotg(  double *a, double *b, double *c, double *s)
 {
    F77_drotg(a,b,c,s);    
 }

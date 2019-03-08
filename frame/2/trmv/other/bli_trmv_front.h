@@ -32,7 +32,7 @@
 
 */
 
-void bli_trmv_front
+BLIS_EXPORT_BLIS void bli_trmv_front
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -43,7 +43,7 @@ void bli_trmv_front
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploa, \
        trans_t  transa, \

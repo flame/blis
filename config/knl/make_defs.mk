@@ -99,7 +99,7 @@ endif
 # Note: We use AVX2 for reference kernels instead of AVX-512.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd
+CRVECFLAGS     := -march=knl -mno-avx512f -mno-avx512pf -mno-avx512er -mno-avx512cd -funsafe-math-optimizations
 else
 ifeq ($(CC_VENDOR),icc)
 CRVECFLAGS     := -xMIC-AVX512

@@ -81,9 +81,8 @@ void bli_acquire_mpart
 }
 
 
-void bli_acquire_mpart_mdim
+void bli_acquire_mpart_t2b
      (
-       dir_t     direct,
        subpart_t req_part,
        dim_t     i,
        dim_t     b,
@@ -91,15 +90,26 @@ void bli_acquire_mpart_mdim
        obj_t*    sub_obj
      )
 {
-	if ( direct == BLIS_FWD )
-		bli_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
-	else
-		bli_acquire_mpart_b2t( req_part, i, b, obj, sub_obj );
+	bli_acquire_mpart_mdim( BLIS_FWD, req_part, i, b, obj, sub_obj );
 }
 
 
-void bli_acquire_mpart_t2b
+void bli_acquire_mpart_b2t
      (
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     )
+{
+	bli_acquire_mpart_mdim( BLIS_BWD, req_part, i, b, obj, sub_obj );
+}
+
+
+void bli_acquire_mpart_mdim
+     (
+       dir_t     direct,
        subpart_t req_part,
        dim_t     i,
        dim_t     b,
@@ -114,6 +124,18 @@ void bli_acquire_mpart_t2b
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
 	doff_t diag_off_inc;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate i.
+	if ( direct == BLIS_BWD )
+	{
+		// Query the dimension in the partitioning direction.
+		dim_t m = bli_obj_length_after_trans( obj );
+
+		// Modify i to account for the fact that we are moving backwards.
+		i = m - i - b;
+	}
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -151,9 +173,22 @@ void bli_acquire_mpart_t2b
 	if ( b > m - i ) b = m - i;
 
 
+	// Support SUBPART1B (behind SUBPART1) and SUBPART1A (ahead of SUBPART1),
+	// to refer to subpartitions 0 and 2 when moving forward, and 2 and 0 when
+	// moving backward.
+	subpart_t subpart0_alias;
+	subpart_t subpart2_alias;
+
+	if ( direct == BLIS_FWD ) { subpart0_alias = BLIS_SUBPART1B;
+	                            subpart2_alias = BLIS_SUBPART1A; }
+	else                      { subpart0_alias = BLIS_SUBPART1A;
+	                            subpart2_alias = BLIS_SUBPART1B; }
+
+
 	// Compute offset increments and dimensions based on which
 	// subpartition is being requested, assuming no transposition.
-	if      ( req_part == BLIS_SUBPART0 )
+	if      ( req_part == BLIS_SUBPART0 ||
+	          req_part == subpart0_alias )
 	{
 		// A0 (offm,offn) unchanged.
 		// A0 is i x n.
@@ -162,10 +197,10 @@ void bli_acquire_mpart_t2b
 		m_part   = i;
 		n_part   = n;
 	}
-	else if ( req_part == BLIS_SUBPART1T )
+	else if ( req_part == BLIS_SUBPART1AND0 )
 	{
-		// A1T (offm,offn) unchanged.
-		// A1T is (i+b) x n.
+		// A1+A0 (offm,offn) unchanged.
+		// A1+A0 is (i+b) x n.
 		offm_inc = 0;
 		offn_inc = 0;
 		m_part   = i + b;
@@ -180,16 +215,17 @@ void bli_acquire_mpart_t2b
 		m_part   = b;
 		n_part   = n;
 	}
-	else if ( req_part == BLIS_SUBPART1B )
+	else if ( req_part == BLIS_SUBPART1AND2 )
 	{
-		// A1B (offm,offn) += (i,0).
-		// A1B is (m-i) x n.
+		// A1+A2 (offm,offn) += (i,0).
+		// A1+A2 is (m-i) x n.
 		offm_inc = i;
 		offn_inc = 0;
 		m_part   = m - i;
 		n_part   = n;
 	}
-	else // if ( req_part == BLIS_SUBPART2 )
+	else if ( req_part == BLIS_SUBPART2 ||
+	          req_part == subpart2_alias )
 	{
 		// A2 (offm,offn) += (i+b,0).
 		// A2 is (m-i-b) x n.
@@ -271,7 +307,7 @@ void bli_acquire_mpart_t2b
 }
 
 
-void bli_acquire_mpart_b2t
+void bli_acquire_mpart_l2r
      (
        subpart_t req_part,
        dim_t     i,
@@ -280,37 +316,26 @@ void bli_acquire_mpart_b2t
        obj_t*    sub_obj
      )
 {
-	dim_t m;
+	bli_acquire_mpart_ndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
+}
 
-	// Query the dimension in the partitioning direction.
-	m = bli_obj_length_after_trans( obj );
 
-	// Modify i to account for the fact that we are moving backwards.
-	i = m - i - b;
-
-	bli_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
+void bli_acquire_mpart_r2l
+     (
+       subpart_t req_part,
+       dim_t     j,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     )
+{
+	bli_acquire_mpart_ndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
 }
 
 
 void bli_acquire_mpart_ndim
      (
        dir_t     direct,
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
-     )
-{
-	if ( direct == BLIS_FWD )
-		bli_acquire_mpart_l2r( req_part, i, b, obj, sub_obj );
-	else
-		bli_acquire_mpart_r2l( req_part, i, b, obj, sub_obj );
-}
-
-
-void bli_acquire_mpart_l2r
-     (
        subpart_t req_part,
        dim_t     j,
        dim_t     b,
@@ -325,6 +350,18 @@ void bli_acquire_mpart_l2r
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
 	doff_t diag_off_inc;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate j.
+	if ( direct == BLIS_BWD )
+	{
+		// Query the dimension in the partitioning direction.
+		dim_t n = bli_obj_width_after_trans( obj );
+
+		// Modify i to account for the fact that we are moving backwards.
+		j = n - j - b;
+	}
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -362,9 +399,22 @@ void bli_acquire_mpart_l2r
 	if ( b > n - j ) b = n - j;
 
 
+	// Support SUBPART1B (behind SUBPART1) and SUBPART1A (ahead of SUBPART1),
+	// to refer to subpartitions 0 and 2 when moving forward, and 2 and 0 when
+	// moving backward.
+	subpart_t subpart0_alias;
+	subpart_t subpart2_alias;
+
+	if ( direct == BLIS_FWD ) { subpart0_alias = BLIS_SUBPART1B;
+	                            subpart2_alias = BLIS_SUBPART1A; }
+	else                      { subpart0_alias = BLIS_SUBPART1A;
+	                            subpart2_alias = BLIS_SUBPART1B; }
+
+
 	// Compute offset increments and dimensions based on which
 	// subpartition is being requested, assuming no transposition.
-	if      ( req_part == BLIS_SUBPART0 )
+	if      ( req_part == BLIS_SUBPART0 ||
+	          req_part == subpart0_alias )
 	{
 		// A0 (offm,offn) unchanged.
 		// A0 is m x j.
@@ -373,10 +423,10 @@ void bli_acquire_mpart_l2r
 		m_part   = m;
 		n_part   = j;
 	}
-	else if ( req_part == BLIS_SUBPART1L )
+	else if ( req_part == BLIS_SUBPART1AND0 )
 	{
-		// A1L (offm,offn) unchanged.
-		// A1L is m x (j+b).
+		// A1+A0 (offm,offn) unchanged.
+		// A1+A0 is m x (j+b).
 		offm_inc = 0;
 		offn_inc = 0;
 		m_part   = m;
@@ -391,16 +441,17 @@ void bli_acquire_mpart_l2r
 		m_part   = m;
 		n_part   = b;
 	}
-	else if ( req_part == BLIS_SUBPART1R )
+	else if ( req_part == BLIS_SUBPART1AND2 )
 	{
-		// A1R (offm,offn) += (0,j).
-		// A1R is m x (n-j).
+		// A1+A2 (offm,offn) += (0,j).
+		// A1+A2 is m x (n-j).
 		offm_inc = 0;
 		offn_inc = j;
 		m_part   = m;
 		n_part   = n - j;
 	}
-	else // if ( req_part == BLIS_SUBPART2 )
+	else if ( req_part == BLIS_SUBPART2 ||
+	          req_part == subpart2_alias )
 	{
 		// A2 (offm,offn) += (0,j+b).
 		// A2 is m x (n-j-b).
@@ -481,7 +532,20 @@ void bli_acquire_mpart_l2r
 }
 
 
-void bli_acquire_mpart_r2l
+void bli_acquire_mpart_tl2br
+     (
+       subpart_t req_part,
+       dim_t     i,
+       dim_t     b,
+       obj_t*    obj,
+       obj_t*    sub_obj
+     )
+{
+	bli_acquire_mpart_mndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
+}
+
+
+void bli_acquire_mpart_br2tl
      (
        subpart_t req_part,
        dim_t     j,
@@ -490,20 +554,13 @@ void bli_acquire_mpart_r2l
        obj_t*    sub_obj
      )
 {
-	dim_t n;
-
-	// Query the dimension in the partitioning direction.
-	n = bli_obj_width_after_trans( obj );
-
-	// Modify i to account for the fact that we are moving backwards.
-	j = n - j - b;
-
-	bli_acquire_mpart_l2r( req_part, j, b, obj, sub_obj );
+	bli_acquire_mpart_mndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
 }
 
 
-void bli_acquire_mpart_tl2br
+void bli_acquire_mpart_mndim
      (
+       dir_t     direct,
        subpart_t req_part,
        dim_t     ij,
        dim_t     b,
@@ -519,6 +576,18 @@ void bli_acquire_mpart_tl2br
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
 	doff_t diag_off_inc;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate ij.
+	if ( direct == BLIS_BWD )
+	{
+		// Query the dimension of the object.
+		dim_t mn = bli_obj_length( obj );
+
+		// Modify ij to account for the fact that we are moving backwards.
+		ij = mn - ij - b;
+	}
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -730,25 +799,6 @@ void bli_acquire_mpart_tl2br
 }
 
 
-void bli_acquire_mpart_br2tl
-     (
-       subpart_t req_part,
-       dim_t     ij,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
-     )
-{
-	// Query the dimension of the object.
-	dim_t mn = bli_obj_length( obj );
-
-	// Modify ij to account for the fact that we are moving backwards.
-	ij = mn - ij - b;
-
-	bli_acquire_mpart_tl2br( req_part, ij, b, obj, sub_obj );
-}
-
-
 // -- Vector partitioning ------------------------------------------------------
 
 
@@ -762,9 +812,9 @@ void bli_acquire_vpart_f2b
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
-		bli_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
+		bli_acquire_mpart_mdim( BLIS_FWD, req_part, i, b, obj, sub_obj );
 	else // if ( bli_obj_is_row_vector( obj ) )
-		bli_acquire_mpart_l2r( req_part, i, b, obj, sub_obj );
+		bli_acquire_mpart_ndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
 }
 
 
@@ -778,9 +828,9 @@ void bli_acquire_vpart_b2f
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
-		bli_acquire_mpart_b2t( req_part, i, b, obj, sub_obj );
+		bli_acquire_mpart_mdim( BLIS_BWD, req_part, i, b, obj, sub_obj );
 	else // if ( bli_obj_is_row_vector( obj ) )
-		bli_acquire_mpart_r2l( req_part, i, b, obj, sub_obj );
+		bli_acquire_mpart_ndim( BLIS_BWD, req_part, i, b, obj, sub_obj );
 }
 
 
@@ -797,8 +847,8 @@ void bli_acquire_mij
 {
 	obj_t tmp_obj;
 
-	bli_acquire_mpart_l2r( BLIS_SUBPART1, j, 1,      obj, &tmp_obj );
-	bli_acquire_mpart_t2b( BLIS_SUBPART1, i, 1, &tmp_obj,  sub_obj );
+	bli_acquire_mpart_ndim( BLIS_FWD, BLIS_SUBPART1, j, 1,      obj, &tmp_obj );
+	bli_acquire_mpart_mdim( BLIS_FWD, BLIS_SUBPART1, i, 1, &tmp_obj,  sub_obj );
 }
 
 
@@ -810,8 +860,8 @@ void bli_acquire_vi
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
-		bli_acquire_mpart_t2b( BLIS_SUBPART1, i, 1, obj, sub_obj );
+		bli_acquire_mpart_mdim( BLIS_FWD, BLIS_SUBPART1, i, 1, obj, sub_obj );
 	else // if ( bli_obj_is_row_vector( obj ) )
-		bli_acquire_mpart_l2r( BLIS_SUBPART1, i, 1, obj, sub_obj );
+		bli_acquire_mpart_ndim( BLIS_FWD, BLIS_SUBPART1, i, 1, obj, sub_obj );
 }
 

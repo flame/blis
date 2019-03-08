@@ -58,6 +58,11 @@ struct thrinfo_s
 	// to false.
 	bool_t             free_comm;
 
+	// The bszid_t to help identify the node. This is mostly only useful when
+	// debugging or tracing the allocation and release of thrinfo_t nodes.
+	bszid_t            bszid;
+
+	struct thrinfo_s*  sub_prenode;
 	struct thrinfo_s*  sub_node;
 };
 typedef struct thrinfo_s thrinfo_t;
@@ -100,9 +105,19 @@ static bool_t bli_thrinfo_needs_free_comm( thrinfo_t* t )
 	return t->free_comm;
 }
 
+static dim_t bli_thread_bszid( thrinfo_t* t )
+{
+	return t->bszid;
+}
+
 static thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
 {
 	return t->sub_node;
+}
+
+static thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
+{
+	return t->sub_prenode;
 }
 
 // thrinfo_t query (complex)
@@ -117,6 +132,11 @@ static bool_t bli_thread_am_ochief( thrinfo_t* t )
 static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 {
 	t->sub_node = sub_node;
+}
+
+static void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
+{
+	t->sub_prenode = sub_prenode;
 }
 
 // other thrinfo_t-related functions
@@ -136,7 +156,7 @@ static void bli_thread_obarrier( thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-thrinfo_t* bli_thrinfo_create
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
      (
        rntm_t*    rntm,
        thrcomm_t* ocomm,
@@ -144,10 +164,11 @@ thrinfo_t* bli_thrinfo_create
        dim_t      n_way,
        dim_t      work_id, 
        bool_t     free_comm,
+       bszid_t    bszid,
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init
+BLIS_EXPORT_BLIS void bli_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -155,15 +176,16 @@ void bli_thrinfo_init
        dim_t      n_way,
        dim_t      work_id, 
        bool_t     free_comm,
+       bszid_t    bszid,
        thrinfo_t* sub_node
      );
 
-void bli_thrinfo_init_single
+BLIS_EXPORT_BLIS void bli_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
-void bli_thrinfo_free
+BLIS_EXPORT_BLIS void bli_thrinfo_free
      (
        rntm_t*    rntm,
        thrinfo_t* thread
@@ -171,7 +193,22 @@ void bli_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_create_for_cntl
+BLIS_EXPORT_BLIS void bli_thrinfo_grow
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_cur,
+       thrinfo_t* thread_par
+     );
+
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
@@ -179,19 +216,38 @@ thrinfo_t* bli_thrinfo_create_for_cntl
        thrinfo_t* thread_par
      );
 
-void bli_thrinfo_grow
-     (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-thrinfo_t* bli_thrinfo_rgrow
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow_prenode
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
        cntl_t*    cntl_cur,
        thrinfo_t* thread_par
      );
+
+BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl_prenode
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl_par,
+       cntl_t*    cntl_chl,
+       thrinfo_t* thread_par
+     );
+
+// -----------------------------------------------------------------------------
+
+#if 0
+void bli_thrinfo_grow_tree
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+void bli_thrinfo_grow_tree_ic
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+#endif
 
 #endif

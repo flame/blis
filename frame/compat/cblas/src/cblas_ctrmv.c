@@ -9,7 +9,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void cblas_ctrmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+void BLIS_EXPORT_BLAS cblas_ctrmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_DIAG Diag,
                  f77_int N, const void  *A, f77_int lda,
                  void  *X, f77_int incX)

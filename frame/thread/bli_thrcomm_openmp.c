@@ -317,6 +317,7 @@ void bli_l3_thread_decorator
 		// Create the root node of the current thread's thrinfo_t structure.
 		bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
 
+#if 1
 		func
 		(
 		  alpha,
@@ -329,6 +330,14 @@ void bli_l3_thread_decorator
 		  cntl_use,
 		  thread
 		);
+#else
+		bli_thrinfo_grow_tree
+		(
+		  rntm_p,
+		  cntl_use,
+		  thread
+		);
+#endif
 
 		// Free the thread's local control tree.
 		bli_l3_cntl_free( rntm_p, cntl_use, thread );
@@ -346,9 +355,9 @@ void bli_l3_thread_decorator
 	// (called above).
 
 	#ifdef PRINT_THRINFO
-	bli_l3_thrinfo_print_paths( threads );
+	if ( family != BLIS_TRSM ) bli_l3_thrinfo_print_gemm_paths( threads );
+	else                       bli_l3_thrinfo_print_trsm_paths( threads );
 	exit(1);
-	//bli_l3_thrinfo_free_paths( rntm_p, threads );
 	#endif
 
 	// Check the array_t back into the small block allocator. Similar to the
@@ -414,4 +423,3 @@ void bli_l3_thread_decorator_thread_check
 }
 
 #endif
-

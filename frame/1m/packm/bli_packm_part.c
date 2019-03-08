@@ -38,7 +38,7 @@
 // -- Matrix partitioning ------------------------------------------------------
 
 
-void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
+BLIS_EXPORT_BLIS void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
                                   dim_t     i,
                                   dim_t     b,
                                   obj_t*    obj,
@@ -110,7 +110,7 @@ void bli_packm_acquire_mpart_t2b( subpart_t requested_part,
 
 
 
-void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
+BLIS_EXPORT_BLIS void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
                                   dim_t     j,
                                   dim_t     b,
                                   obj_t*    obj,
@@ -186,7 +186,7 @@ void bli_packm_acquire_mpart_l2r( subpart_t requested_part,
 
 
 
-void bli_packm_acquire_mpart_tl2br( subpart_t requested_part,
+BLIS_EXPORT_BLIS void bli_packm_acquire_mpart_tl2br( subpart_t requested_part,
                                     dim_t     ij,
                                     dim_t     b,
                                     obj_t*    obj,

@@ -78,7 +78,11 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
 CRVECFLAGS     := $(CKVECFLAGS)
+else
+CRVECFLAGS     := $(CKVECFLAGS)
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.
