@@ -47,9 +47,9 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_gemm_power9_asm_d12x6,  FALSE,
-	  cntx
+	  12,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,  TRUE,
+		cntx
 	);
 /*
 	// Initialize level-3 blocksize objects with architecture-specific values.
