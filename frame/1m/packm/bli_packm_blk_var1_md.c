@@ -57,7 +57,7 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY2_ALL(ftypes,packm_blk_var1_md);
 
 
-BLIS_EXPORT_BLIS void bli_packm_blk_var1_md
+void bli_packm_blk_var1_md
      (
        obj_t*   c,
        obj_t*   p,
@@ -164,7 +164,7 @@ BLIS_EXPORT_BLIS void bli_packm_blk_var1_md
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_c, ctype_p, chc, chp, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
+void PASTEMAC2(chc,chp,varname) \
      ( \
        trans_t transc, \
        pack_t  schema, \

@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-BLIS_EXPORT_BLIS void bli_unpackm_int_check
+void bli_unpackm_int_check
      (
        obj_t*  p,
        obj_t*  a,
