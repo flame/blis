@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void BLIS_EXPORT_BLAS cblas_sspmv(enum CBLAS_ORDER order,
+void cblas_sspmv(enum CBLAS_ORDER order,
                  enum CBLAS_UPLO Uplo, f77_int N,
                  float alpha, const float  *AP,
                  const float  *X, f77_int incX, float beta,

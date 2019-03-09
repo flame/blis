@@ -41,7 +41,7 @@
 #undef  GENTFUNCSCAL
 #define GENTFUNCSCAL( ftype_x, ftype_a, chx, cha, blasname, blisname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF772(chx,cha,blasname) \
+void PASTEF772(chx,cha,blasname) \
      ( \
        const f77_int* n, \
        const ftype_a* alpha, \

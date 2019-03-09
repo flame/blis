@@ -41,7 +41,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-BLIS_EXPORT_BLAS f77_int PASTEF772(i,chx,blasname) \
+f77_int PASTEF772(i,chx,blasname) \
      ( \
        const f77_int* n, \
        const ftype_x* x, const f77_int* incx  \
