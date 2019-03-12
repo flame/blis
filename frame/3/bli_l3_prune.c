@@ -56,7 +56,7 @@ void bli_l3_prune_unref_mparts_m
 #undef  GENFRONT
 #define GENFRONT( dim ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(l3_prune_unref_mparts_,dim) \
+void PASTEMAC(l3_prune_unref_mparts_,dim) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -82,7 +82,7 @@ GENFRONT( k )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
+void PASTEMAC(opname,_prune_unref_mparts_m) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -91,7 +91,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
 { \
 	/* No pruning is necessary for gemm. */ \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
+void PASTEMAC(opname,_prune_unref_mparts_n) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -100,7 +100,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
 { \
 	/* No pruning is necessary for gemm. */ \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_k) \
+void PASTEMAC(opname,_prune_unref_mparts_k) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -117,7 +117,7 @@ GENFRONT( gemm )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
+void PASTEMAC(opname,_prune_unref_mparts_m) \
      ( \
        obj_t*  a, \
        obj_t*  ah, \
@@ -129,7 +129,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
 	   subpartition of A accordingly. */ \
 	bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M ); \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
+void PASTEMAC(opname,_prune_unref_mparts_n) \
      ( \
        obj_t*  a, \
        obj_t*  ah, \
@@ -141,7 +141,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
 	   subpartition of Ah accordingly. */ \
 	bli_prune_unref_mparts( c, BLIS_N, ah, BLIS_N ); \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_k) \
+void PASTEMAC(opname,_prune_unref_mparts_k) \
      ( \
        obj_t*  a, \
        obj_t*  ah, \
@@ -159,7 +159,7 @@ GENFRONT( herk )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
+void PASTEMAC(opname,_prune_unref_mparts_m) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -171,7 +171,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_m) \
 	   subpartition of C accordingly. */ \
 	bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M ); \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
+void PASTEMAC(opname,_prune_unref_mparts_n) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -183,7 +183,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_n) \
 	   subpartition of C accordingly. */ \
 	bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N ); \
 } \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_prune_unref_mparts_k) \
+void PASTEMAC(opname,_prune_unref_mparts_k) \
      ( \
        obj_t*  a, \
        obj_t*  b, \

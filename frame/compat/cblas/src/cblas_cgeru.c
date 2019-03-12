@@ -9,7 +9,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void BLIS_EXPORT_BLAS cblas_cgeru(enum CBLAS_ORDER order, f77_int M, f77_int N,
+void cblas_cgeru(enum CBLAS_ORDER order, f77_int M, f77_int N,
                  const void *alpha, const void *X, f77_int incX,
                  const void *Y, f77_int incY, void *A, f77_int lda)
 {

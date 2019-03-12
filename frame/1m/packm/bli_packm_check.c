@@ -35,7 +35,7 @@
 #include "blis.h"
 
 
-BLIS_EXPORT_BLIS void bli_packm_init_check
+void bli_packm_init_check
      (
        obj_t*  a,
        obj_t*  p,
@@ -57,7 +57,7 @@ BLIS_EXPORT_BLIS void bli_packm_init_check
 	//bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_packm_int_check
+void bli_packm_int_check
      (
        obj_t*  a,
        obj_t*  p,

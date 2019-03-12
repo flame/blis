@@ -41,7 +41,7 @@
 #undef  GENTFUNCR2
 #define GENTFUNCR2( ftype_xy, ftype_r, chxy, chr, blasname, blisname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF772(chxy,chr,blasname)( \
+void PASTEF772(chxy,chr,blasname)( \
                                    f77_int*  n, \
                                    ftype_xy* x, f77_int* incx, \
                                    ftype_xy* y, f77_int* incy, \

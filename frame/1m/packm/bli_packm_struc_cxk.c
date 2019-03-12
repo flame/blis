@@ -37,7 +37,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
@@ -278,7 +278,7 @@ INSERT_GENTFUNC_BASIC( packm_struc_cxk, packm_cxk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
@@ -532,7 +532,7 @@ INSERT_GENTFUNC_BASIC( packm_herm_cxk, packm_cxk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffp, \

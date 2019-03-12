@@ -41,7 +41,7 @@
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjy, blasname, blisname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF772(ch,blasname,chc) \
+void PASTEF772(ch,blasname,chc) \
      ( \
        const f77_int* m, \
        const f77_int* n, \
