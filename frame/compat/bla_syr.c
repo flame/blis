@@ -41,7 +41,7 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ftype, ch, blasname, blisname ) \
 \
-BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+void PASTEF77(ch,blasname) \
      ( \
        const f77_char* uploa, \
        const f77_int*  m, \

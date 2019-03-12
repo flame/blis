@@ -72,7 +72,7 @@ void bli_machval( machval_t mval,
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype_v, ctype_vr, chv, chvr, opname, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(chv,opname) \
+void PASTEMAC(chv,opname) \
      ( \
        machval_t mval, \
        void*     v     \

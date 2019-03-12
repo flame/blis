@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-BLIS_EXPORT_BLIS void bli_projm_check
+void bli_projm_check
      (
        obj_t* a,
        obj_t* b
@@ -73,7 +73,7 @@ BLIS_EXPORT_BLIS void bli_projm_check
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_projv_check
+void bli_projv_check
      (
        obj_t* x,
        obj_t* y

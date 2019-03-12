@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-BLIS_EXPORT_BLIS void bli_trsm_int
+void bli_trsm_int
      (
        obj_t*  alpha,
        obj_t*  a,

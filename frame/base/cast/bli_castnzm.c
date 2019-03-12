@@ -54,7 +54,7 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,castnzm);
 // Define object-based interface.
 //
 
-BLIS_EXPORT_BLIS void bli_castnzm
+void bli_castnzm
      (
        obj_t* a,
        obj_t* b
@@ -115,7 +115,7 @@ BLIS_EXPORT_BLIS void bli_castnzm
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_a, ctype_b, cha, chb, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(cha,chb,opname) \
+void PASTEMAC2(cha,chb,opname) \
      ( \
        trans_t        transa, \
        dim_t          m, \
@@ -219,7 +219,7 @@ INSERT_GENTFUNC2_MIXDP0( castnzm )
 // Define object-based _check() function.
 //
 
-BLIS_EXPORT_BLIS void bli_castnzm_check
+void bli_castnzm_check
      (
        obj_t* a,
        obj_t* b

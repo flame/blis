@@ -254,7 +254,7 @@ cntl_t* bli_gemmpb_cntl_create
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_gemm_cntl_free
+void bli_gemm_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,

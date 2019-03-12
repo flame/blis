@@ -43,7 +43,7 @@
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -87,7 +87,7 @@ INSERT_GENTFUNCR_BASIC0( asumv_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        uplo_t  uploa, \
        dim_t   m, \
@@ -143,7 +143,7 @@ INSERT_GENTFUNCR_BASIC0( mkherm_unb_var1 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        uplo_t  uploa, \
        dim_t   m, \
@@ -185,7 +185,7 @@ INSERT_GENTFUNC_BASIC0( mksymm_unb_var1 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        uplo_t  uploa, \
        dim_t   m, \
@@ -230,7 +230,7 @@ INSERT_GENTFUNC_BASIC0( mktrim_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -268,7 +268,7 @@ INSERT_GENTFUNCR_BASIC0( norm1v_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -321,7 +321,7 @@ GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
 #if 0 //defined(FE_OVERFLOW) && !defined(__APPLE__)
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -400,7 +400,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
 #else
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -446,7 +446,7 @@ GENTFUNCR( double,  double, d, d, normfv_unb_var1, sumsqv_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -492,7 +492,7 @@ INSERT_GENTFUNCR_BASIC0( normiv_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
@@ -656,7 +656,7 @@ INSERT_GENTFUNCR_BASIC( norm1m_unb_var1, norm1v_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
@@ -823,7 +823,7 @@ INSERT_GENTFUNCR_BASIC( normfm_unb_var1, sumsqv_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
@@ -865,7 +865,7 @@ INSERT_GENTFUNCR_BASIC( normim_unb_var1, norm1m_unb_var1 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        FILE*  file, \
        char*  s1, \
@@ -902,7 +902,7 @@ INSERT_GENTFUNC_BASIC0_I( fprintv )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        FILE*  file, \
        char*  s1, \
@@ -944,7 +944,7 @@ INSERT_GENTFUNC_BASIC0_I( fprintm )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, randmac ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t   n, \
        ctype*  x, inc_t incx, \
@@ -972,7 +972,7 @@ INSERT_GENTFUNC_BASIC( randnv_unb_var1, randnp2s )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname, kername ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t  diagoffx, \
        uplo_t  uplox, \
@@ -1128,7 +1128,7 @@ INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv_unb_var1 )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \

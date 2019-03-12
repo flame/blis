@@ -163,7 +163,7 @@ void bli_symv_front
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
