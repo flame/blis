@@ -7,7 +7,7 @@
 #include "cblas.h"
 #include "cblas_f77.h"
 
-void BLIS_EXPORT_BLAS cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
+void cblas_xerbla(f77_int info, const char *rout, const char *form, ...)
 {
    extern int RowMajorStrg;
    char empty[1] = "";
