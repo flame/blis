@@ -94,44 +94,44 @@ static void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_apool_init
+void bli_apool_init
      (
        apool_t* restrict apool
      );
-BLIS_EXPORT_BLIS void bli_apool_finalize
+void bli_apool_finalize
      (
        apool_t* restrict apool
      );
 
-BLIS_EXPORT_BLIS array_t* bli_apool_checkout_array
+array_t* bli_apool_checkout_array
      (
        siz_t             n_threads,
        apool_t* restrict apool
      );
-BLIS_EXPORT_BLIS void bli_apool_checkin_array
+void bli_apool_checkin_array
      (
        array_t* restrict array,
        apool_t* restrict apool
      );
 
-BLIS_EXPORT_BLIS pool_t* bli_apool_array_elem
+pool_t* bli_apool_array_elem
      (
        siz_t             index,
        array_t* restrict array
      );
 
-BLIS_EXPORT_BLIS void bli_apool_grow
+void bli_apool_grow
      (
        siz_t             num_blocks_add,
        apool_t* restrict apool
      );
 
-BLIS_EXPORT_BLIS void bli_apool_alloc_block
+void bli_apool_alloc_block
      (
        siz_t              num_elem,
        array_t** restrict array_p
      );
-BLIS_EXPORT_BLIS void bli_apool_free_block
+void bli_apool_free_block
      (
        array_t* restrict array
      );

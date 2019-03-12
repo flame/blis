@@ -89,7 +89,7 @@ GENPROT( acquire_mpart_mndim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0( opname ) \
+BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
        subpart_t req_part, \
        dim_t     i, \

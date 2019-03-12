@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS dim_t bli_l3_determine_kc
+dim_t bli_l3_determine_kc
       (
         dir_t   direct,
         dim_t   i,
@@ -48,7 +48,7 @@ BLIS_EXPORT_BLIS dim_t bli_l3_determine_kc
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS dim_t PASTEMAC0(opname) \
+dim_t PASTEMAC0(opname) \
       ( \
          dir_t   direct, \
          dim_t   i, \
@@ -68,7 +68,7 @@ GENPROT( trsm_determine_kc )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS dim_t PASTEMAC0(opname) \
+dim_t PASTEMAC0(opname) \
       ( \
          dim_t   i, \
          dim_t   dim, \

@@ -41,7 +41,7 @@ typedef struct mddm_s
 	dom_t exec;
 } mddm_t;
 
-BLIS_EXPORT_BLIS void bli_gemm_md
+void bli_gemm_md
      (
        obj_t*   a,
        obj_t*   b,
@@ -50,18 +50,18 @@ BLIS_EXPORT_BLIS void bli_gemm_md
        cntx_t*  cntx_local,
        cntx_t** cntx
      );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
-BLIS_EXPORT_BLIS mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
+mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx_l, cntx_t** cntx );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_gemm_md_front
+void bli_gemm_md_front
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -73,7 +73,7 @@ BLIS_EXPORT_BLIS void bli_gemm_md_front
        cntl_t* cntl
      );
 
-BLIS_EXPORT_BLIS void bli_gemm_md_zgemm
+void bli_gemm_md_zgemm
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -283,7 +283,7 @@ static void bli_gemm_md_ker_var2_recast
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+void PASTEMAC0(opname) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -303,7 +303,7 @@ GENPROT( gemm_ker_var2_md )
 #undef  GENTPROT2
 #define GENTPROT2( ctype_c, ctype_e, chc, che, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chc,che,varname) \
+void PASTEMAC2(chc,che,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \

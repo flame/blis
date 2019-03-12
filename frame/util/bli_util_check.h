@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  asum  \
@@ -52,7 +52,7 @@ GENPROT( asumv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      );
@@ -65,7 +65,7 @@ GENPROT( mktrim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -79,7 +79,7 @@ GENPROT( normiv )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  norm  \
@@ -93,7 +93,7 @@ GENPROT( normim )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        FILE*  file, \
        char*  s1, \
@@ -109,7 +109,7 @@ GENPROT( fprintm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      );
@@ -123,7 +123,7 @@ GENPROT( randnm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  scale, \
@@ -135,36 +135,36 @@ GENPROT( sumsqv )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_utilv_xi_check
+void bli_utilv_xi_check
      (
        obj_t*  x,
        obj_t*  index
      );
 
-BLIS_EXPORT_BLIS void bli_utilv_xa_check
+void bli_utilv_xa_check
      (
        obj_t*  x,
        obj_t*  asum
      );
 
-BLIS_EXPORT_BLIS void bli_utilm_mkhst_check
+void bli_utilm_mkhst_check
      (
        obj_t*  a
      );
 
-BLIS_EXPORT_BLIS void bli_utilv_norm_check
+void bli_utilv_norm_check
      (
        obj_t*  x,
        obj_t*  norm
      );
 
-BLIS_EXPORT_BLIS void bli_utilm_norm_check
+void bli_utilm_norm_check
      (
        obj_t*  x,
        obj_t*  norm
      );
 
-BLIS_EXPORT_BLIS void bli_utilm_fprint_check
+void bli_utilm_fprint_check
      (
        FILE*  file,
        char*  s1,
@@ -173,12 +173,12 @@ BLIS_EXPORT_BLIS void bli_utilm_fprint_check
        char*  s2
      );
 
-BLIS_EXPORT_BLIS void bli_utilm_rand_check
+void bli_utilm_rand_check
      (
        obj_t* x
      );
 
-BLIS_EXPORT_BLIS void bli_utilv_sumsqv_check
+void bli_utilv_sumsqv_check
      (
        obj_t*  x,
        obj_t*  scale,

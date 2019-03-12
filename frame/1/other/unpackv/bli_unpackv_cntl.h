@@ -45,11 +45,11 @@ typedef struct unpackv_s unpackv_t;
 #define bli_cntl_sub_unpackv_y( cntl )    cntl->sub_unpackv_y
 #define bli_cntl_sub_unpackv_y1( cntl )   cntl->sub_unpackv_y1
 
-BLIS_EXPORT_BLIS void      bli_unpackv_cntl_init( void );
-BLIS_EXPORT_BLIS void      bli_unpackv_cntl_finalize( void );
-BLIS_EXPORT_BLIS unpackv_t* bli_unpackv_cntl_obj_create( impl_t     impl_type,
+void      bli_unpackv_cntl_init( void );
+void      bli_unpackv_cntl_finalize( void );
+unpackv_t* bli_unpackv_cntl_obj_create( impl_t     impl_type,
                                         varnum_t   var_num );
-BLIS_EXPORT_BLIS void bli_unpackv_cntl_obj_init( unpackv_t* cntl,
+void bli_unpackv_cntl_obj_init( unpackv_t* cntl,
                                 impl_t     impl_type,
                                 varnum_t   var_num );
 

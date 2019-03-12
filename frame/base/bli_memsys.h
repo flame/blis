@@ -39,8 +39,8 @@
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_memsys_init( void );
-BLIS_EXPORT_BLIS void bli_memsys_finalize( void );
+void bli_memsys_init( void );
+void bli_memsys_finalize( void );
 
 
 #endif

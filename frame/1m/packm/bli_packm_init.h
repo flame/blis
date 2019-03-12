@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS siz_t bli_packm_init
+siz_t bli_packm_init
      (
        obj_t*  a,
        obj_t*  p,
@@ -40,7 +40,7 @@ BLIS_EXPORT_BLIS siz_t bli_packm_init
        cntl_t* cntl
      );
 
-BLIS_EXPORT_BLIS siz_t bli_packm_init_pack
+siz_t bli_packm_init_pack
      (
        invdiag_t invert_diag,
        pack_t    schema,
