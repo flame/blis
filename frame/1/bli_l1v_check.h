@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  y  \
@@ -55,7 +55,7 @@ GENTPROT( swapv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  index  \
@@ -67,7 +67,7 @@ GENTPROT( amaxv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -81,7 +81,7 @@ GENTPROT( axpbyv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -95,7 +95,7 @@ GENTPROT( scal2v )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  y, \
@@ -108,7 +108,7 @@ GENTPROT( dotv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x, \
@@ -123,7 +123,7 @@ GENTPROT( dotxv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x  \
      );
@@ -134,7 +134,7 @@ GENTPROT( invertv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  x  \
@@ -147,7 +147,7 @@ GENTPROT( setv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  x, \
        obj_t*  beta, \
@@ -160,27 +160,27 @@ GENTPROT( xpbyv )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_l1v_xy_check
+void bli_l1v_xy_check
      (
        obj_t*  x,
        obj_t*  y 
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_axy_check
+void bli_l1v_axy_check
      (
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  y 
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_xby_check
+void bli_l1v_xby_check
      (
        obj_t*  x,
        obj_t*  beta,
        obj_t*  y
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_axby_check
+void bli_l1v_axby_check
      (
        obj_t*  alpha,
        obj_t*  x,
@@ -188,7 +188,7 @@ BLIS_EXPORT_BLIS void bli_l1v_axby_check
        obj_t*  y
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_dot_check
+void bli_l1v_dot_check
      (
        obj_t*  alpha,
        obj_t*  x,
@@ -197,18 +197,18 @@ BLIS_EXPORT_BLIS void bli_l1v_dot_check
        obj_t*  rho 
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_x_check
+void bli_l1v_x_check
      (
        obj_t*  x 
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_ax_check
+void bli_l1v_ax_check
      (
        obj_t*  alpha,
        obj_t*  x 
      );
 
-BLIS_EXPORT_BLIS void bli_l1v_xi_check
+void bli_l1v_xi_check
      (
        obj_t*  x,
        obj_t*  index

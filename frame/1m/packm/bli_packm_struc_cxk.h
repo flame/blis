@@ -35,7 +35,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffp, \
@@ -62,7 +62,7 @@ INSERT_GENTPROT_BASIC0( packm_struc_cxk )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
@@ -92,7 +92,7 @@ INSERT_GENTPROT_BASIC0( packm_herm_cxk )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \

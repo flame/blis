@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_packv_init
+void bli_packv_init
      (
        obj_t*   a,
        obj_t*   p,
@@ -40,7 +40,7 @@ BLIS_EXPORT_BLIS void bli_packv_init
        packv_t* cntl
      );
 
-BLIS_EXPORT_BLIS siz_t bli_packv_init_pack
+siz_t bli_packv_init_pack
      (
        pack_t   pack_schema,
        bszid_t  bmult_id,

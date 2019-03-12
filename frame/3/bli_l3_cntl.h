@@ -38,7 +38,7 @@
 // Prototype conditional control tree creation functions.
 //
 
-BLIS_EXPORT_BLIS void bli_l3_cntl_create_if
+void bli_l3_cntl_create_if
      (
        opid_t   family,
        pack_t   schema_a,
@@ -51,7 +51,7 @@ BLIS_EXPORT_BLIS void bli_l3_cntl_create_if
        cntl_t** cntl_use
      );
 
-BLIS_EXPORT_BLIS void bli_l3_cntl_free
+void bli_l3_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl_use,

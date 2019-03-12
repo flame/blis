@@ -35,36 +35,36 @@
 #ifndef BLIS_SBA_H
 #define BLIS_SBA_H
 
-BLIS_EXPORT_BLIS apool_t* bli_sba_query( void );
+apool_t* bli_sba_query( void );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_sba_init( void );
-BLIS_EXPORT_BLIS void bli_sba_finalize( void );
+void bli_sba_init( void );
+void bli_sba_finalize( void );
 
-BLIS_EXPORT_BLIS array_t* bli_sba_checkout_array
+array_t* bli_sba_checkout_array
      (
        const siz_t n_threads
      );
 
-BLIS_EXPORT_BLIS void bli_sba_checkin_array
+void bli_sba_checkin_array
      (
        array_t* restrict array
      );
 
-BLIS_EXPORT_BLIS void bli_sba_rntm_set_pool
+void bli_sba_rntm_set_pool
      (
        siz_t             index,
        array_t* restrict array,
        rntm_t*  restrict rntm
      );
 
-BLIS_EXPORT_BLIS void* bli_sba_acquire
+void* bli_sba_acquire
      (
        rntm_t* restrict rntm,
        siz_t            req_size
      );
-BLIS_EXPORT_BLIS void bli_sba_release
+void bli_sba_release
      (
        rntm_t* restrict rntm,
        void*   restrict block

@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_packv_unb_var1( obj_t*   c,
+void bli_packv_unb_var1( obj_t*   c,
                          obj_t*   p,
                          cntx_t*  cntx,
                          packv_t* cntl );
@@ -40,7 +40,7 @@ BLIS_EXPORT_BLIS void bli_packv_unb_var1( obj_t*   c,
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t   m, \
        void*   c, inc_t incc, \

@@ -32,13 +32,13 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_castm_check
+void bli_castm_check
      (
        obj_t* a,
        obj_t* b
      );
 
-BLIS_EXPORT_BLIS void bli_castv_check
+void bli_castv_check
      (
        obj_t* x,
        obj_t* y

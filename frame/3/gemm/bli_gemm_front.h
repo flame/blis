@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_gemm_front
+void bli_gemm_front
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -44,7 +44,7 @@ BLIS_EXPORT_BLIS void bli_gemm_front
        cntl_t* cntl
      );
 
-BLIS_EXPORT_BLIS err_t bli_gemm_small
+err_t bli_gemm_small
      (
        obj_t*  alpha,
        obj_t*  a,

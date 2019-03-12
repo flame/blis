@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+void PASTEMAC0(opname) \
      ( \
        obj_t*   c, \
        obj_t*   p, \
@@ -59,7 +59,7 @@ GENPROT( packm_blk_var1 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t strucc, \
        doff_t  diagoffc, \
@@ -81,7 +81,7 @@ INSERT_GENTPROT_BASIC0( packm_unb_var1 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        struc_t strucc, \
        doff_t  diagoffc, \

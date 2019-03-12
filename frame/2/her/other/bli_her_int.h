@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_her_int( conj_t  conjh,
+void bli_her_int( conj_t  conjh,
                   obj_t*  alpha,
                   obj_t*  x,
                   obj_t*  c,

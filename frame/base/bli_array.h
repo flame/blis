@@ -85,28 +85,28 @@ static void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_array_init
+void bli_array_init
      (
        const siz_t       num_elem,
        const siz_t       elem_size,
        array_t* restrict array
      );
-BLIS_EXPORT_BLIS void bli_array_resize
+void bli_array_resize
      (
        const siz_t       num_elem_new,
        array_t* restrict array
      );
-BLIS_EXPORT_BLIS void bli_array_finalize
+void bli_array_finalize
      (
        array_t* restrict array
      );
 
-BLIS_EXPORT_BLIS void* bli_array_elem
+void* bli_array_elem
      (
        const siz_t       index,
        array_t* restrict array
      );
-BLIS_EXPORT_BLIS void bli_array_set_elem
+void bli_array_set_elem
      (
        void*    restrict elem,
        const siz_t       index,

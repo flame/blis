@@ -33,7 +33,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_l3_packm
+void bli_l3_packm
      (
        obj_t*  x,
        obj_t*  x_pack,

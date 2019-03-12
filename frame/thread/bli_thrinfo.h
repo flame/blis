@@ -156,7 +156,7 @@ static void bli_thread_obarrier( thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
+thrinfo_t* bli_thrinfo_create
      (
        rntm_t*    rntm,
        thrcomm_t* ocomm,
@@ -168,7 +168,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_init
+void bli_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -180,12 +180,12 @@ BLIS_EXPORT_BLIS void bli_thrinfo_init
        thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_init_single
+void bli_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_free
+void bli_thrinfo_free
      (
        rntm_t*    rntm,
        thrinfo_t* thread
@@ -193,14 +193,14 @@ BLIS_EXPORT_BLIS void bli_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_thrinfo_grow
+void bli_thrinfo_grow
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow
+thrinfo_t* bli_thrinfo_rgrow
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
@@ -208,7 +208,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow
        thrinfo_t* thread_par
      );
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl
+thrinfo_t* bli_thrinfo_create_for_cntl
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
@@ -216,7 +216,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl
        thrinfo_t* thread_par
      );
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow_prenode
+thrinfo_t* bli_thrinfo_rgrow_prenode
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
@@ -224,7 +224,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_rgrow_prenode
        thrinfo_t* thread_par
      );
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create_for_cntl_prenode
+thrinfo_t* bli_thrinfo_create_for_cntl_prenode
      (
        rntm_t*    rntm,
        cntl_t*    cntl_par,
