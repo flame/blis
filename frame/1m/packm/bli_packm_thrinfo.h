@@ -70,7 +70,7 @@
 //
 
 #if 0
-BLIS_EXPORT_BLIS thrinfo_t* bli_packm_thrinfo_create
+thrinfo_t* bli_packm_thrinfo_create
      (
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
@@ -80,7 +80,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_packm_thrinfo_create
      );
 #endif
 
-BLIS_EXPORT_BLIS void bli_packm_thrinfo_init
+void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -91,13 +91,13 @@ BLIS_EXPORT_BLIS void bli_packm_thrinfo_init
        thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_packm_thrinfo_init_single
+void bli_packm_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
 #if 0
-BLIS_EXPORT_BLIS void bli_packm_thrinfo_free
+void bli_packm_thrinfo_free
      (
        thrinfo_t* thread
      );

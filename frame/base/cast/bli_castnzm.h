@@ -65,7 +65,7 @@ INSERT_GENTPROT2_MIXDP0( castnzm )
 // Prototype object-based _check() function.
 //
 
-BLIS_EXPORT_BLIS void bli_castnzm_check
+void bli_castnzm_check
      (
        obj_t* a,
        obj_t* b

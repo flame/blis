@@ -76,7 +76,7 @@ bool bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
-BLIS_EXPORT_BLIS uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
+uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
 
 // -----------------------------------------------------------------------------
 

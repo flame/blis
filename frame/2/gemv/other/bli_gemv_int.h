@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_gemv_int
+void bli_gemv_int
      (
        trans_t transa,
        conj_t  conjx,

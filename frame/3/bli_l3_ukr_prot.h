@@ -38,7 +38,7 @@
 
 #define GEMM_UKR_PROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -53,7 +53,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
 
 #define GEMMTRSM_UKR_PROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -69,7 +69,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
 
 #define TRSM_UKR_PROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        ctype*     restrict a, \
        ctype*     restrict b, \

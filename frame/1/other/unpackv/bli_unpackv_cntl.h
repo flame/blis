@@ -49,7 +49,7 @@ void      bli_unpackv_cntl_init( void );
 void      bli_unpackv_cntl_finalize( void );
 unpackv_t* bli_unpackv_cntl_obj_create( impl_t     impl_type,
                                         varnum_t   var_num );
-BLIS_EXPORT_BLIS void bli_unpackv_cntl_obj_init( unpackv_t* cntl,
+void bli_unpackv_cntl_obj_init( unpackv_t* cntl,
                                 impl_t     impl_type,
                                 varnum_t   var_num );
 

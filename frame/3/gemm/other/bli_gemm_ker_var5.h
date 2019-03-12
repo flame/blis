@@ -36,7 +36,7 @@
 //
 // Prototype object-based interface.
 //
-BLIS_EXPORT_BLIS void bli_gemm_ker_var5( obj_t*  a,
+void bli_gemm_ker_var5( obj_t*  a,
                         obj_t*  b,
                         obj_t*  c,
                         cntx_t* cntx,
@@ -50,7 +50,7 @@ BLIS_EXPORT_BLIS void bli_gemm_ker_var5( obj_t*  a,
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname)( \
+void PASTEMAC(ch,varname)( \
                            dim_t   m, \
                            dim_t   n, \
                            dim_t   k, \
