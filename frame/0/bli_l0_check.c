@@ -41,7 +41,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        obj_t*  psi  \
@@ -61,7 +61,7 @@ GENFRONT( subsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi  \
      ) \
@@ -75,7 +75,7 @@ GENFRONT( invertsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        obj_t*  norm  \

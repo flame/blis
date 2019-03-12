@@ -41,7 +41,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(d,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
+/* Subroutine */ int PASTEF77(d,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_double *alpha, const bla_double *a, const bla_integer *lda, const bla_double *x, const bla_integer *incx, const bla_double *beta, bla_double *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -50,9 +50,9 @@
     bla_integer info;
     bla_double temp1, temp2;
     bla_integer i__, j, l;
-    //extern bla_logical BLIS_EXPORT_BLAS PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kplus1, ix, iy, jx, jy, kx, ky;
-    //extern /* Subroutine */ int BLIS_EXPORT_BLAS PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */
@@ -392,7 +392,7 @@
 	-lf2c -lm   (in that order)
 */
 
-/* Subroutine */ int BLIS_EXPORT_BLAS PASTEF77(s,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
+/* Subroutine */ int PASTEF77(s,sbmv)(const bla_character *uplo, const bla_integer *n, const bla_integer *k, const bla_real *alpha, const bla_real *a, const bla_integer *lda, const bla_real *x, const bla_integer *incx, const bla_real *beta, bla_real *y, const bla_integer *incy)
 {
     /* System generated locals */
     bla_integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
@@ -401,9 +401,9 @@
     bla_integer info;
     bla_real temp1, temp2;
     bla_integer i__, j, l;
-    //extern bla_logical BLIS_EXPORT_BLAS PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
+    //extern bla_logical PASTEF770(lsame)(bla_character *, bla_character *, ftnlen, ftnlen);
     bla_integer kplus1, ix, iy, jx, jy, kx, ky;
-    //extern /* Subroutine */ int BLIS_EXPORT_BLAS PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
+    //extern /* Subroutine */ int PASTEF770(xerbla)(bla_character *, bla_integer *, ftnlen);
 
 /*     .. Scalar Arguments .. */
 /*     .. Array Arguments .. */

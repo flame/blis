@@ -11,7 +11,7 @@
 
 #include "cblas.h"
 #include "cblas_f77.h"
-void BLIS_EXPORT_BLAS cblas_dspr(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+void cblas_dspr(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
                 f77_int N, double alpha, const double *X,
                 f77_int incX, double *Ap)
 {

@@ -44,7 +44,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        trans_t transb, \
@@ -105,7 +105,7 @@ INSERT_GENTFUNC_BASIC0( gemmt )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -172,7 +172,7 @@ INSERT_GENTFUNC_BASIC( symm, BLIS_SYMMETRIC )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -229,7 +229,7 @@ INSERT_GENTFUNCR_BASIC0( herk )
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploc, \
        trans_t  transa, \
@@ -294,7 +294,7 @@ INSERT_GENTFUNCR_BASIC0( her2k )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -350,7 +350,7 @@ INSERT_GENTFUNC_BASIC0( syrk )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploc, \
        trans_t transa, \
@@ -414,7 +414,7 @@ INSERT_GENTFUNC_BASIC0( syr2k )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \
@@ -482,7 +482,7 @@ INSERT_GENTFUNC_BASIC0( trmm3 )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
+void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        side_t  side, \
        uplo_t  uploa, \

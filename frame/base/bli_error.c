@@ -143,7 +143,7 @@ errlev_t bli_error_checking_level( void )
 	return bli_err_chk_level;
 }
 
-BLIS_EXPORT_BLIS void bli_error_checking_level_set( errlev_t new_level )
+void bli_error_checking_level_set( errlev_t new_level )
 {
 	err_t e_val;
 
