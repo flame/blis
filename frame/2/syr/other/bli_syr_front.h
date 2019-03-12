@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_syr_front
+void bli_syr_front
      (
        obj_t*  alpha,
        obj_t*  x,
@@ -43,7 +43,7 @@ BLIS_EXPORT_BLIS void bli_syr_front
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        conj_t   conjx, \

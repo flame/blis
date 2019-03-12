@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_packm_blk_var1_md
+void bli_packm_blk_var1_md
      (
        obj_t*   c,
        obj_t*   p,
@@ -45,7 +45,7 @@ BLIS_EXPORT_BLIS void bli_packm_blk_var1_md
 #undef  GENTPROT2
 #define GENTPROT2( ctype_c, ctype_p, chc, chp, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chc,chp,varname) \
+void PASTEMAC2(chc,chp,varname) \
      ( \
        trans_t transc, \
        pack_t  schema, \

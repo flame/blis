@@ -44,21 +44,21 @@ BLIS_EXPORT_BLIS void* bli_malloc_pool( size_t size );
 BLIS_EXPORT_BLIS void   bli_free_pool( void* p );
 #endif
 
-BLIS_EXPORT_BLIS void* bli_malloc_intl( size_t size );
-BLIS_EXPORT_BLIS void* bli_calloc_intl( size_t size );
-BLIS_EXPORT_BLIS void  bli_free_intl( void* p );
+void* bli_malloc_intl( size_t size );
+void* bli_calloc_intl( size_t size );
+void  bli_free_intl( void* p );
 
 BLIS_EXPORT_BLIS void* bli_malloc_user( size_t size );
 BLIS_EXPORT_BLIS void  bli_free_user( void* p );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void* bli_fmalloc_align( malloc_ft f, size_t size, size_t align_size );
-BLIS_EXPORT_BLIS void  bli_ffree_align( free_ft f, void* p );
+void* bli_fmalloc_align( malloc_ft f, size_t size, size_t align_size );
+void  bli_ffree_align( free_ft f, void* p );
 
-BLIS_EXPORT_BLIS void* bli_fmalloc_noalign( malloc_ft f, size_t size );
-BLIS_EXPORT_BLIS void  bli_ffree_noalign( free_ft f, void* p );
+void* bli_fmalloc_noalign( malloc_ft f, size_t size );
+void  bli_ffree_noalign( free_ft f, void* p );
 
-BLIS_EXPORT_BLIS void  bli_fmalloc_align_check( malloc_ft f, size_t size, size_t align_size );
-BLIS_EXPORT_BLIS void  bli_fmalloc_post_check( void* p );
+void  bli_fmalloc_align_check( malloc_ft f, size_t size, size_t align_size );
+void  bli_fmalloc_post_check( void* p );
 

@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -58,7 +58,7 @@ GENPROT( syr2k )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        side_t  side, \
        obj_t*  alpha, \
@@ -78,7 +78,7 @@ GENPROT( trsm )
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -93,7 +93,7 @@ GENPROT( syrk )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_gemm_basic_check
+void bli_gemm_basic_check
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -103,7 +103,7 @@ BLIS_EXPORT_BLIS void bli_gemm_basic_check
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS void bli_hemm_basic_check
+void bli_hemm_basic_check
      (
        side_t  side,
        obj_t*  alpha,
@@ -114,7 +114,7 @@ BLIS_EXPORT_BLIS void bli_hemm_basic_check
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS void bli_herk_basic_check
+void bli_herk_basic_check
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -124,7 +124,7 @@ BLIS_EXPORT_BLIS void bli_herk_basic_check
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS void bli_her2k_basic_check
+void bli_her2k_basic_check
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -136,7 +136,7 @@ BLIS_EXPORT_BLIS void bli_her2k_basic_check
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS void bli_l3_basic_check
+void bli_l3_basic_check
      (
        obj_t*  alpha,
        obj_t*  a,

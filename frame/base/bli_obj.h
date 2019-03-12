@@ -104,7 +104,7 @@ BLIS_EXPORT_BLIS void bli_obj_free
        obj_t* obj
      );
 
-BLIS_EXPORT_BLIS void bli_adjust_strides
+void bli_adjust_strides
      (
        dim_t  m,
        dim_t  n,

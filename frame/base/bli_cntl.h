@@ -117,7 +117,7 @@ BLIS_EXPORT_BLIS void bli_cntl_mark_family
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS dim_t bli_cntl_calc_num_threads_in
+dim_t bli_cntl_calc_num_threads_in
      (
        rntm_t* rntm,
        cntl_t* cntl

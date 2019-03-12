@@ -36,7 +36,7 @@
 #undef  GENPROT
 #define GENPROT( dim ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(l3_prune_unref_mparts_,dim) \
+void PASTEMAC(l3_prune_unref_mparts_,dim) \
      ( \
        obj_t*  a, \
        obj_t*  b, \
@@ -53,7 +53,7 @@ GENPROT( k )
 #undef  GENPROT
 #define GENPROT( opname, dim ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(opname,_prune_unref_mparts_,dim) \
+void PASTEMAC2(opname,_prune_unref_mparts_,dim) \
      ( \
        obj_t*  a, \
        obj_t*  b, \

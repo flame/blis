@@ -186,7 +186,7 @@ BLIS_INLINE void bli_thread_barrier( thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
+thrinfo_t* bli_thrinfo_create
      (
        rntm_t*    rntm,
        thrcomm_t* ocomm,
@@ -198,7 +198,7 @@ BLIS_EXPORT_BLIS thrinfo_t* bli_thrinfo_create
        thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_init
+void bli_thrinfo_init
      (
        thrinfo_t* thread,
        thrcomm_t* ocomm,
@@ -210,12 +210,12 @@ BLIS_EXPORT_BLIS void bli_thrinfo_init
        thrinfo_t* sub_node
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_init_single
+void bli_thrinfo_init_single
      (
        thrinfo_t* thread
      );
 
-BLIS_EXPORT_BLIS void bli_thrinfo_free
+void bli_thrinfo_free
      (
        rntm_t*    rntm,
        thrinfo_t* thread

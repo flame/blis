@@ -61,7 +61,7 @@ trsv_t* bli_trsv_cntl_obj_create( impl_t     impl_type,
                                   gemv_t*    sub_gemv_cp,
                                   trsv_t*    sub_trsv,
                                   unpackv_t* sub_unpackv_x1 );
-BLIS_EXPORT_BLIS void bli_trsv_cntl_obj_init( trsv_t*    cntl,
+void bli_trsv_cntl_obj_init( trsv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

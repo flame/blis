@@ -65,7 +65,7 @@ gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   packv_t*   sub_packv_y,
                                   gemv_t*    sub_gemv,
                                   unpackv_t* sub_unpackv_y );
-BLIS_EXPORT_BLIS void bli_gemv_cntl_obj_init( gemv_t*    cntl,
+void bli_gemv_cntl_obj_init( gemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

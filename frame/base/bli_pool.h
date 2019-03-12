@@ -215,7 +215,7 @@ BLIS_INLINE void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_pool_init
+void bli_pool_init
      (
        siz_t            num_blocks,
        siz_t            block_ptrs_len,
@@ -226,11 +226,11 @@ BLIS_EXPORT_BLIS void bli_pool_init
        free_ft          free_fp,
        pool_t* restrict pool
      );
-BLIS_EXPORT_BLIS void bli_pool_finalize
+void bli_pool_finalize
      (
        pool_t* restrict pool
      );
-BLIS_EXPORT_BLIS void bli_pool_reinit
+void bli_pool_reinit
      (
        siz_t            num_blocks_new,
        siz_t            block_ptrs_len_new,
@@ -240,30 +240,30 @@ BLIS_EXPORT_BLIS void bli_pool_reinit
        pool_t* restrict pool
      );
 
-BLIS_EXPORT_BLIS void bli_pool_checkout_block
+void bli_pool_checkout_block
      (
        siz_t            req_size,
        pblk_t* restrict block,
        pool_t* restrict pool
      );
-BLIS_EXPORT_BLIS void bli_pool_checkin_block
+void bli_pool_checkin_block
      (
        pblk_t* restrict block,
        pool_t* restrict pool
      );
 
-BLIS_EXPORT_BLIS void bli_pool_grow
+void bli_pool_grow
      (
        siz_t            num_blocks_add,
        pool_t* restrict pool
      );
-BLIS_EXPORT_BLIS void bli_pool_shrink
+void bli_pool_shrink
      (
        siz_t            num_blocks_sub,
        pool_t* restrict pool
      );
 
-BLIS_EXPORT_BLIS void bli_pool_alloc_block
+void bli_pool_alloc_block
      (
        siz_t            block_size,
        siz_t            align_size,
@@ -271,18 +271,18 @@ BLIS_EXPORT_BLIS void bli_pool_alloc_block
        malloc_ft        malloc_fp,
        pblk_t* restrict block
      );
-BLIS_EXPORT_BLIS void bli_pool_free_block
+void bli_pool_free_block
      (
        siz_t            offset_size,
        free_ft          free_fp,
        pblk_t* restrict block
      );
 
-BLIS_EXPORT_BLIS void bli_pool_print
+void bli_pool_print
      (
        pool_t* restrict pool
      );
-BLIS_EXPORT_BLIS void bli_pblk_print
+void bli_pblk_print
      (
        pblk_t* restrict pblk
      );
