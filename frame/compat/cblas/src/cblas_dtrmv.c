@@ -11,7 +11,7 @@
  
 #include "cblas.h"
 #include "cblas_f77.h"
-void BLIS_EXPORT_BLAS cblas_dtrmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
+void cblas_dtrmv(enum CBLAS_ORDER order, enum CBLAS_UPLO Uplo,
                  enum CBLAS_TRANSPOSE TransA, enum CBLAS_DIAG Diag,
                  f77_int N, const double  *A, f77_int lda,
                  double  *X, f77_int incX)

@@ -43,7 +43,7 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
+void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alphax, \
        obj_t*  alphay, \
@@ -113,7 +113,7 @@ GENFRONT( axpy2v )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
+void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -182,7 +182,7 @@ GENFRONT( axpyf )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
+void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  xt, \
@@ -251,7 +251,7 @@ GENFRONT( dotaxpyv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
+void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  at, \
@@ -340,7 +340,7 @@ GENFRONT( dotxaxpyf )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
+void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \

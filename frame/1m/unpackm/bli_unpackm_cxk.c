@@ -37,7 +37,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjp, \
        dim_t   panel_dim, \

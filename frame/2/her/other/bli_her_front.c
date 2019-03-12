@@ -137,7 +137,7 @@ void bli_her_front
 #undef  GENTFUNCR
 #define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        uplo_t   uploc, \
        conj_t   conjx, \

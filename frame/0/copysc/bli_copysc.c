@@ -55,7 +55,7 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
+void PASTEMAC0(opname) \
      ( \
        obj_t*  chi, \
        obj_t*  psi  \
@@ -103,7 +103,7 @@ GENFRONT( copysc )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,varname) \
+void PASTEMAC2(chx,chy,varname) \
      ( \
        conj_t conjchi, \
        void*  chi, \

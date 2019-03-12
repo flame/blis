@@ -249,7 +249,7 @@ void bli_ffree_noalign
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_fmalloc_align_check
+void bli_fmalloc_align_check
      (
        malloc_ft f,
        size_t    size,

@@ -50,7 +50,7 @@ typedef void (*FUNCPTR_T)(
 static FUNCPTR_T GENARRAY(ftypes,unpackm_unb_var1);
 
 
-BLIS_EXPORT_BLIS void bli_unpackm_unb_var1
+void bli_unpackm_unb_var1
      (
        obj_t*  p,
        obj_t*  c,
@@ -98,7 +98,7 @@ BLIS_EXPORT_BLIS void bli_unpackm_unb_var1
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname)( \
+void PASTEMAC(ch,varname)( \
                            doff_t  diagoffp, \
                            uplo_t  uplop, \
                            trans_t transp, \

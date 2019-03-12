@@ -160,7 +160,7 @@ void bli_gemm_ker_var2sl
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        pack_t  schema_a, \
        pack_t  schema_b, \

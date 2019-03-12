@@ -143,7 +143,7 @@ void bli_herk_l_ker_var2
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t  diagoffc, \
        pack_t  schema_a, \
