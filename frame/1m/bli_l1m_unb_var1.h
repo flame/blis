@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,_unb_var1) \
+void PASTEMAC2(ch,opname,_unb_var1) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -62,7 +62,7 @@ INSERT_GENTPROT_BASIC0( subm )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,_unb_var1) \
+void PASTEMAC2(ch,opname,_unb_var1) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -84,7 +84,7 @@ INSERT_GENTPROT_BASIC0( scal2m )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,_unb_var1) \
+void PASTEMAC2(ch,opname,_unb_var1) \
      ( \
        conj_t  conjalpha, \
        doff_t  diagoffx, \
@@ -105,7 +105,7 @@ INSERT_GENTPROT_BASIC0( setm )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,_unb_var1) \
+void PASTEMAC2(ch,opname,_unb_var1) \
      ( \
        doff_t  diagoffx, \
        diag_t  diagx, \
@@ -126,7 +126,7 @@ INSERT_GENTPROT_BASIC0( xpbym )
 #undef  GENTPROT2
 #define GENTPROT2( ctype_x, ctype_y, chx, chy, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC3(chx,chy,opname,_unb_var1) \
+void PASTEMAC3(chx,chy,opname,_unb_var1) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
