@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*   c, \
        obj_t*   p, \
