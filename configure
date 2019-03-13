@@ -110,13 +110,6 @@ print_usage()
 	echo "                 SHAREDIR refers to a directory that does not exist, it"
 	echo "                 will be created."
 	echo " "
-	echo "   -d DEBUG, --enable-debug[=DEBUG]"
-	echo " "
-	echo "                 Enable debugging symbols in the library. If argument"
-	echo "                 DEBUG is given as 'opt', then optimization flags are"
-	echo "                 kept in the framework, otherwise optimization is"
-	echo "                 turned off."
-	echo " "
 	echo "   --enable-verbose-make, --disable-verbose-make"
 	echo " "
 	echo "                 Enable (disabled by default) verbose compilation output"
@@ -129,6 +122,13 @@ print_usage()
 	echo "                 even if the command plus command line arguments exceeds"
 	echo "                 the operating system limit (ARG_MAX)."
 	echo " "
+	echo "   -d DEBUG, --enable-debug[=DEBUG]"
+	echo " "
+	echo "                 Enable debugging symbols in the library. If argument"
+	echo "                 DEBUG is given as 'opt', then optimization flags are"
+	echo "                 kept in the framework, otherwise optimization is"
+	echo "                 turned off."
+	echo " "
 	echo "   --disable-static, --enable-static"
 	echo " "
 	echo "                 Disable (enabled by default) building BLIS as a static"
@@ -140,6 +140,20 @@ print_usage()
 	echo "                 Disable (enabled by default) building BLIS as a shared"
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
+	echo " "
+	echo "   --enable-export-all, --disable-export-all"
+	echo " "
+	echo "                 Enable (disabled by default) the exporting of all shared"
+	echo "                 library symbols in BLIS, even those that were intended"
+	echo "                 for internal use only. By default, only functions and"
+	echo "                 variables that belong to public APIs are exported in"
+	echo "                 shared libraries. Note that the public APIs encompass all"
+	echo "                 functions that almost any user would ever want to call,"
+	echo "                 including the BLAS/CBLAS compatibility APIs as well as"
+	echo "                 the basic and expert interfaces to the typed and object"
+	echo "                 APIs that are unique to BLIS. Also note that enabling"
+	echo "                 this option will have no effect in some environments,"
+	echo "                 such as when compiling with clang on Windows."
 	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
@@ -1772,6 +1786,7 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
+	enable_export_all='no'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
 	enable_mem_tracing='no'
@@ -1881,6 +1896,12 @@ main()
 							;;
 						disable-shared)
 							enable_shared='no'
+							;;
+						enable-export-all)
+							enable_export_all='yes'
+							;;
+						disable-export-all)
+							enable_export_all='no'
 							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
@@ -2573,6 +2594,19 @@ main()
 		exit 1
 	fi
 
+	# Check if the "enable export all" flag was specified.
+	if [ "x${enable_export_all}" = "xyes" ]; then
+		if [ "x${enable_shared}" = "xyes" ]; then
+			echo "${script_name}: exporting all symbols within shared library."
+		else
+			echo "${script_name}: ignoring request to export all symbols within shared library."
+		fi
+	else
+		if [ "x${enable_shared}" = "xyes" ]; then
+			echo "${script_name}: exporting only public symbols within shared library."
+		fi
+	fi
+
 	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
@@ -2879,6 +2913,7 @@ main()
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed -e "s/@enable_export_all@/${enable_export_all}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
