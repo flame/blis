@@ -643,6 +643,8 @@ endif
 endif
 
 # Determine default export behavior / visibility of symbols for icc.
+# NOTE: The Windows branches have been omitted since we currently make no
+# effort to support Windows builds via icc (only gcc/clang via AppVeyor).
 ifeq ($(CC_VENDOR),icc)
 ifeq ($(ENABLE_EXPORT_ALL),yes)
 # Export all symbols by default.
@@ -669,13 +671,12 @@ CMISCFLAGS :=
 endif
 else # ifeq ($(IS_WIN),no)
 ifeq ($(ENABLE_EXPORT_ALL),yes)
-# NOTE: Not sure if clang on Linux/BSD/OSX supports exporting all symbols by
-# default.
-CMISCFLAGS :=
+# Export all symbols by default.
+CMISCFLAGS := -fvisibility=default
 else
-# NOTE: Not sure if clang on Linux/BSD/OSX supports hiding all symbols by
-# default.
-CMISCFLAGS :=
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+CMISCFLAGS := -fvisibility=hidden
 endif
 endif
 endif
