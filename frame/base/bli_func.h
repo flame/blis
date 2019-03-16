@@ -70,7 +70,7 @@ static void bli_func_copy_dt
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS func_t* bli_func_create
+func_t* bli_func_create
      (
        void* ptr_s,
        void* ptr_d,
@@ -78,7 +78,7 @@ BLIS_EXPORT_BLIS func_t* bli_func_create
        void* ptr_z
      );
 
-BLIS_EXPORT_BLIS void bli_func_init
+void bli_func_init
      (
        func_t* f,
        void*   ptr_s,
@@ -87,16 +87,16 @@ BLIS_EXPORT_BLIS void bli_func_init
        void*   ptr_z
      );
 
-BLIS_EXPORT_BLIS void bli_func_init_null
+void bli_func_init_null
      (
        func_t* f
      );
 
-BLIS_EXPORT_BLIS void bli_func_free( func_t* f );
+void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS bool_t bli_func_is_null_dt( num_t   dt,
+bool_t bli_func_is_null_dt( num_t   dt,
                             func_t* f );
-BLIS_EXPORT_BLIS bool_t bli_func_is_null( func_t* f );
+bool_t bli_func_is_null( func_t* f );
 

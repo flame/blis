@@ -54,9 +54,9 @@ typedef struct gemv_s gemv_t;
 #define bli_cntl_sub_gemv_t_rp( cntl )  cntl->sub_gemv_t_rp
 #define bli_cntl_sub_gemv_t_cp( cntl )  cntl->sub_gemv_t_cp
 
-BLIS_EXPORT_BLIS void     bli_gemv_cntl_init( void );
-BLIS_EXPORT_BLIS void     bli_gemv_cntl_finalize( void );
-BLIS_EXPORT_BLIS gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
+void     bli_gemv_cntl_init( void );
+void     bli_gemv_cntl_finalize( void );
+gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,
                                   scalv_t*   sub_scalv,
@@ -65,7 +65,7 @@ BLIS_EXPORT_BLIS gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   packv_t*   sub_packv_y,
                                   gemv_t*    sub_gemv,
                                   unpackv_t* sub_unpackv_y );
-BLIS_EXPORT_BLIS void bli_gemv_cntl_obj_init( gemv_t*    cntl,
+void bli_gemv_cntl_obj_init( gemv_t*    cntl,
                              impl_t     impl_type,
                              varnum_t   var_num,
                              bszid_t    bszid,

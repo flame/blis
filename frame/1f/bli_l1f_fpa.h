@@ -40,7 +40,7 @@
 #define GENPROT( opname ) \
 \
 PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-BLIS_EXPORT_BLIS PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
+PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt );
 
 GENPROT( axpy2v )
 GENPROT( axpyf )

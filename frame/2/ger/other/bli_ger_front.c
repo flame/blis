@@ -129,7 +129,7 @@ void bli_ger_front
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \

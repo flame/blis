@@ -38,7 +38,7 @@ BLIS_EXPORT_BLIS void bli_projm
        obj_t* b
      );
 
-BLIS_EXPORT_BLIS void bli_projm_check
+void bli_projm_check
      (
        obj_t* a,
        obj_t* b

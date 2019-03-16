@@ -32,7 +32,7 @@
 
 */
 
-BLIS_EXPORT_BLIS dir_t bli_l3_direct
+dir_t bli_l3_direct
      (
        obj_t*  a,
        obj_t*  b,
@@ -45,7 +45,7 @@ BLIS_EXPORT_BLIS dir_t bli_l3_direct
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-BLIS_EXPORT_BLIS dir_t PASTEMAC0(opname) \
+dir_t PASTEMAC0(opname) \
       ( \
          obj_t*  a, \
          obj_t*  b, \

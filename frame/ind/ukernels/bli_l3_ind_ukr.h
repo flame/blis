@@ -41,7 +41,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -64,7 +64,7 @@ INSERT_GENTPROT_BASIC0( gemm1m_ukr_name )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
        ctype*     restrict alpha, \
@@ -88,7 +88,7 @@ INSERT_GENTPROT_BASIC0( gemmtrsm1m_u_ukr_name )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        ctype*     restrict a, \
        ctype*     restrict b, \

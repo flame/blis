@@ -39,8 +39,7 @@
 //
 // Prototype object-based interface.
 //
-BLIS_EXPORT_BLIS void bli_machval( machval_t mval,
-                  obj_t*    v );
+BLIS_EXPORT_BLIS void bli_machval( machval_t mval, obj_t* v );
 
 
 //

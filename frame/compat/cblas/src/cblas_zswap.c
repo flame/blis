@@ -10,7 +10,7 @@
  */
 #include "cblas.h"
 #include "cblas_f77.h"
-void BLIS_EXPORT_BLAS cblas_zswap( f77_int N, void  *X, f77_int incX, void  *Y,
+void cblas_zswap( f77_int N, void  *X, f77_int incX, void  *Y,
                        f77_int incY)
 {
 #ifdef F77_INT

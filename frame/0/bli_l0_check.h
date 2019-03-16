@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        obj_t*  psi  \
@@ -57,7 +57,7 @@ GENTPROT( subsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi  \
      );
@@ -68,7 +68,7 @@ GENTPROT( invertsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        obj_t*  absq  \
@@ -81,7 +81,7 @@ GENTPROT( normfsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        double* zeta_r, \
@@ -94,7 +94,7 @@ GENTPROT( getsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        double  zeta_r, \
        double  zeta_i, \
@@ -107,7 +107,7 @@ GENTPROT( setsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  chi, \
        obj_t*  zeta_r, \
@@ -120,7 +120,7 @@ GENTPROT( unzipsc )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(opname,_check) \
+void PASTEMAC(opname,_check) \
      ( \
        obj_t*  zeta_r, \
        obj_t*  zeta_i, \
@@ -132,18 +132,18 @@ GENTPROT( zipsc )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_l0_xsc_check
+void bli_l0_xsc_check
      (
        obj_t*  chi
      );
 
-BLIS_EXPORT_BLIS void bli_l0_xxsc_check
+void bli_l0_xxsc_check
      (
        obj_t*  chi,
        obj_t*  psi 
      );
 
-BLIS_EXPORT_BLIS void bli_l0_xx2sc_check
+void bli_l0_xx2sc_check
      (
        obj_t*  chi,
        obj_t*  norm 

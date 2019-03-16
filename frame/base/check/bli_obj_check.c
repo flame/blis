@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-BLIS_EXPORT_BLIS void bli_obj_create_check( num_t  dt,
+void bli_obj_create_check( num_t  dt,
                            dim_t  m,
                            dim_t  n,
                            inc_t  rs,
@@ -53,7 +53,7 @@ BLIS_EXPORT_BLIS void bli_obj_create_check( num_t  dt,
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_create_without_buffer_check( num_t  dt,
+void bli_obj_create_without_buffer_check( num_t  dt,
                                           dim_t  m,
                                           dim_t  n,
                                           obj_t* obj )
@@ -67,7 +67,7 @@ BLIS_EXPORT_BLIS void bli_obj_create_without_buffer_check( num_t  dt,
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_alloc_buffer_check( inc_t  rs,
+void bli_obj_alloc_buffer_check( inc_t  rs,
                                  inc_t  cs,
                                  inc_t  is,
                                  obj_t* obj )
@@ -83,7 +83,7 @@ BLIS_EXPORT_BLIS void bli_obj_alloc_buffer_check( inc_t  rs,
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_attach_buffer_check( void*  p,
+void bli_obj_attach_buffer_check( void*  p,
                                   inc_t  rs,
                                   inc_t  cs,
                                   inc_t  is,
@@ -109,7 +109,7 @@ BLIS_EXPORT_BLIS void bli_obj_attach_buffer_check( void*  p,
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_create_scalar_check( num_t  dt,
+void bli_obj_create_scalar_check( num_t  dt,
                                   obj_t* obj )
 {
 	err_t e_val;
@@ -121,7 +121,7 @@ BLIS_EXPORT_BLIS void bli_obj_create_scalar_check( num_t  dt,
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_free_check( obj_t* obj )
+void bli_obj_free_check( obj_t* obj )
 {
 	//err_t e_val;
 
@@ -131,7 +131,7 @@ BLIS_EXPORT_BLIS void bli_obj_free_check( obj_t* obj )
 	//bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_create_const_check( double value, obj_t* obj )
+void bli_obj_create_const_check( double value, obj_t* obj )
 {
 	err_t e_val;
 
@@ -158,7 +158,7 @@ void bli_obj_create_const_copy_of_check( obj_t* a, obj_t* b )
 }
 #endif
 
-BLIS_EXPORT_BLIS void bli_dt_size_check( num_t dt )
+void bli_dt_size_check( num_t dt )
 {
 	err_t e_val;
 
@@ -166,7 +166,7 @@ BLIS_EXPORT_BLIS void bli_dt_size_check( num_t dt )
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_dt_string_check( num_t dt )
+void bli_dt_string_check( num_t dt )
 {
 	err_t e_val;
 
@@ -174,7 +174,7 @@ BLIS_EXPORT_BLIS void bli_dt_string_check( num_t dt )
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_dt_union_check( num_t dt1, num_t dt2 )
+void bli_dt_union_check( num_t dt1, num_t dt2 )
 {
 	err_t e_val;
 
@@ -185,7 +185,7 @@ BLIS_EXPORT_BLIS void bli_dt_union_check( num_t dt1, num_t dt2 )
 	bli_check_error_code( e_val );
 }
 
-BLIS_EXPORT_BLIS void bli_obj_print_check( char* label, obj_t* obj )
+void bli_obj_print_check( char* label, obj_t* obj )
 {
 	err_t e_val;
 

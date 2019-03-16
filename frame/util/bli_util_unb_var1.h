@@ -40,7 +40,7 @@
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -55,7 +55,7 @@ INSERT_GENTPROTR_BASIC0( asumv_unb_var1 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        uplo_t  uploa, \
        dim_t   m, \
@@ -72,7 +72,7 @@ INSERT_GENTPROT_BASIC0( mktrim_unb_var1 )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \
@@ -89,7 +89,7 @@ INSERT_GENTPROTR_BASIC0( normiv_unb_var1 )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t   diagoffx, \
        diag_t   diagx, \
@@ -143,7 +143,7 @@ INSERT_GENTPROT_BASIC0_I( fprintm )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t   n, \
        ctype*  x, inc_t incx, \
@@ -158,7 +158,7 @@ INSERT_GENTPROT_BASIC0( randnv_unb_var1 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        doff_t  diagoffx, \
        uplo_t  uplox, \
@@ -176,7 +176,7 @@ INSERT_GENTPROT_BASIC0( randnm_unb_var1 )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, varname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,varname) \
+void PASTEMAC(ch,varname) \
      ( \
        dim_t    n, \
        ctype*   x, inc_t incx, \

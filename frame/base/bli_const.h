@@ -32,6 +32,6 @@
 
 */
 
-BLIS_EXPORT_BLIS void bli_const_init( void );
-BLIS_EXPORT_BLIS void bli_const_finalize( void );
+void bli_const_init( void );
+void bli_const_finalize( void );
 

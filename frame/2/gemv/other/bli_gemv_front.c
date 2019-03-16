@@ -165,7 +165,7 @@ void bli_gemv_front
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+void PASTEMAC(ch,opname) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
