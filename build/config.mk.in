@@ -142,7 +142,7 @@ MK_ENABLE_SHARED  := @enable_shared@
 
 # Whether to export all symbols within the shared library, even those symbols
 # that are considered to be for internal use only.
-ENABLE_EXPORT_ALL := @enable_export_all@
+EXPORT_SHARED     := @export_shared@
 
 # Whether to enable either the BLAS or CBLAS compatibility layers.
 MK_ENABLE_BLAS    := @enable_blas@
