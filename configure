@@ -141,19 +141,22 @@ print_usage()
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
 	echo " "
-	echo "   --enable-export-all, --disable-export-all"
+	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
 	echo " "
-	echo "                 Enable (disabled by default) the exporting of all shared"
-	echo "                 library symbols in BLIS, even those that were intended"
-	echo "                 for internal use only. By default, only functions and"
-	echo "                 variables that belong to public APIs are exported in"
-	echo "                 shared libraries. Note that the public APIs encompass all"
-	echo "                 functions that almost any user would ever want to call,"
-	echo "                 including the BLAS/CBLAS compatibility APIs as well as"
-	echo "                 the basic and expert interfaces to the typed and object"
-	echo "                 APIs that are unique to BLIS. Also note that enabling"
-	echo "                 this option will have no effect in some environments,"
-	echo "                 such as when compiling with clang on Windows."
+	echo "                 Specify the subset of library symbols that are exported"
+	echo "                 within a shared library. Valid values for SYMBOLS are:"
+	echo "                 'public' (the default) and 'all'. By default, only"
+	echo "                 functions and variables that belong to public APIs are"
+	echo "                 exported in shared libraries. However, the user may"
+	echo "                 instead export all symbols in BLIS, even those that were"
+	echo "                 intended for internal use only. Note Note that the public"
+	echo "                 APIs encompass all functions that almost any user would"
+	echo "                 ever want to call, including the BLAS/CBLAS compatibility"
+	echo "                 APIs as well as the basic and expert interfaces to the"
+	echo "                 typed and object APIs that are unique to BLIS. Also note"
+	echo "                 that changing this option to 'all' will have no effect in"
+	echo "                 some environments, such as when compiling with clang on"
+	echo "                 Windows."
 	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
@@ -1786,7 +1789,7 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
-	enable_export_all='no'
+	export_shared='public'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
 	enable_mem_tracing='no'
@@ -1836,7 +1839,7 @@ main()
 
 		# Process our command line options.
 		unset OPTIND
-		while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
+		while getopts ":hp:d:e:s:t:r:qci:b:-:" opt; do
 			case $opt in
 				-)
 					case "$OPTARG" in
@@ -1897,11 +1900,8 @@ main()
 						disable-shared)
 							enable_shared='no'
 							;;
-						enable-export-all)
-							enable_export_all='yes'
-							;;
-						disable-export-all)
-							enable_export_all='no'
+						export-shared=*)
+							export_shared=${OPTARG#*=}
 							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
@@ -1993,6 +1993,9 @@ main()
 				d)
 					debug_flag=1
 					debug_type=$OPTARG
+					;;
+				e)
+					export_shared=$OPTARG
 					;;
 				s)
 					sandbox_flag=1
@@ -2594,17 +2597,21 @@ main()
 		exit 1
 	fi
 
-	# Check if the "enable export all" flag was specified.
-	if [ "x${enable_export_all}" = "xyes" ]; then
+	# Check if the "export shared" flag was specified.
+	if [ "x${export_shared}" = "xall" ]; then
 		if [ "x${enable_shared}" = "xyes" ]; then
 			echo "${script_name}: exporting all symbols within shared library."
 		else
 			echo "${script_name}: ignoring request to export all symbols within shared library."
 		fi
-	else
+	elif [ "x${export_shared}" = "xpublic" ]; then
 		if [ "x${enable_shared}" = "xyes" ]; then
 			echo "${script_name}: exporting only public symbols within shared library."
 		fi
+	else
+		echo "${script_name}: *** Invalid argument '${export_shared}' to --export-shared option given."
+		echo "${script_name}: *** Please use 'public' or 'all'."
+		exit 1
 	fi
 
 	# Check the threading model flag and standardize its value, if needed.
@@ -2913,7 +2920,7 @@ main()
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
-		| sed -e "s/@enable_export_all@/${enable_export_all}/g" \
+		| sed -e "s/@export_shared@/${export_shared}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
