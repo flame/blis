@@ -31,6 +31,12 @@ To summarize: In order to observe multithreaded parallelism within a BLIS operat
 1. Enable multithreading at configure-time. This is discussed in the [next section](docs/Multithreading.md#enabling-multithreading).
 2. Specify multithreading at runtime. This is also discussed [later on](docs/Multithreading.md#specifying-multithreading).
 
+**IMPORTANT**: Multithreading in BLIS is disabled by default. Furthermore, even when multithreading is enabled, BLIS will default to single-threaded execution at runtime. In order to both *allow* and *invoke* parallelism from within BLIS operations, you must both *enable* multithreading at configure-time and *specify* multithreading at runtime.
+
+To summarize: In order to observe multithreaded parallelism within a BLIS operation, you must do *both* of the following:
+1. Enable multithreading at configure-time. This is discussed in the [next section](docs/Multithreading.md#enabling-multithreading).
+2. Specify multithreading at runtime. This is also dicussed [later on](docs/Multithreading.md#specifying-multithreading).
+
 # Enabling multithreading
 
 BLIS disables multithreading by default. In order to allow multithreaded parallelism from BLIS, you must first enable multithreading explicitly at configure-time.
