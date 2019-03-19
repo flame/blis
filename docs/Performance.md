@@ -146,17 +146,17 @@ size of interest so that we can better assist you.
 #### pdf
 
 * [ThunderX2 single-threaded](graphs/l3_perf_tx2_nt1.pdf)
-* [ThunderX2 multithreaded (32 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.pdf)
-* [ThunderX2 multithreaded (64 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.pdf)
+* [ThunderX2 multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.pdf)
+* [ThunderX2 multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.pdf)
 
 #### png (inline)
 
 * **ThunderX2 single-threaded**
 ![single-threaded](graphs/l3_perf_tx2_nt1.png)
-* **ThunderX2 multithreaded (32 cores)**
-![multithreaded (32 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.png)
-* **ThunderX2 multithreaded (64 cores)**
-![multithreaded (64 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.png)
+* **ThunderX2 multithreaded (28 cores)**
+![multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.png)
+* **ThunderX2 multithreaded (56 cores)**
+![multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.png)
 
 ---
 
@@ -197,8 +197,8 @@ size of interest so that we can better assist you.
 #### pdf
 
 * [SkylakeX single-threaded](graphs/l3_perf_skx_nt1.pdf)
-* [SkylakeX multithreaded (32 cores)](graphs/l3_perf_skx_jc2ic13_nt26.pdf)
-* [SkylakeX multithreaded (64 cores)](graphs/l3_perf_skx_jc4ic13_nt52.pdf)
+* [SkylakeX multithreaded (26 cores)](graphs/l3_perf_skx_jc2ic13_nt26.pdf)
+* [SkylakeX multithreaded (52 cores)](graphs/l3_perf_skx_jc4ic13_nt52.pdf)
 
 #### png (inline)
 
@@ -248,8 +248,8 @@ size of interest so that we can better assist you.
 #### pdf
 
 * [Haswell single-threaded](graphs/l3_perf_has_nt1.pdf)
-* [Haswell multithreaded (32 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.pdf)
-* [Haswell multithreaded (64 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.pdf)
+* [Haswell multithreaded (12 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.pdf)
+* [Haswell multithreaded (24 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.pdf)
 
 #### png (inline)
 
