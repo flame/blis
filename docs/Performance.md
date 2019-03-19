@@ -35,12 +35,13 @@ complex) and each column representing a different operation (`gemm`,
 Each of the 20 graphs within a panel will contain an x-axis that reports
 problem size, with all matrix dimensions equal to the problem size (e.g.
 _m_ = _n_ = _k_), resulting in square matrices.
-The y-axis will report GFLOPS (in the case of single-threaded performance)
-or GFLOPS/core (in the case of single- or dual-socket multithreaded
-performance), which is simply the total GFLOPS divided by the number of
-threads utilized.
-This normalization is done intentionally in order to facilitate visual
-comparison of multithreaded graphs and single-threaded graphs.
+The y-axis will report in units GFLOPS (billions of floating-point operations
+per second) in the case of single-threaded performance, or GFLOPS/core in the
+case of single- or dual-socket multithreaded performance, where GFLOPS/core
+is simply the total GFLOPS observed divided by the number of threads utilized.
+This normalization is done intentionally in order to facilitate a visual
+assessment of the drop in efficiency of multithreaded performance relative
+to their single-threaded baselines.
 
 It's also worth pointing out that the top of each graph (e.g. the maximum
 y-axis value depicted) _always_ corresponds to the theoretical peak performance
