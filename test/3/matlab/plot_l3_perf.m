@@ -152,8 +152,8 @@ if rows == 4 && cols == 5
 		set( leg,'FontSize',fontsize-3 );
 		set( leg,'Units','inches' );
 		%set( leg,'Position',[7.70 12.75 0.7 0.3 ] ); % (0,1br)
-		%set( leg,'Position',[10.47 14.28 0.7 0.3 ] ); % (0,2tl)
-		set( leg,'Position',[11.20 12.75 0.7 0.3 ] ); % (0,2br)
+		set( leg,'Position',[10.47 14.28 0.7 0.3 ] ); % (0,2tl)
+		%set( leg,'Position',[11.20 12.75 0.7 0.3 ] ); % (0,2br)
 		%set( leg,'Position',[13.95 14.28 0.7 0.3 ] ); % (0,3tl)
 		%set( leg,'Position',[14.70 12.75 0.7 0.3 ] ); % (0,3br)
 		%set( leg,'Position',[17.45 14.28 0.7 0.3 ] ); % (0,4tl)
