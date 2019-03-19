@@ -5,16 +5,16 @@
 * **[General information](Performance.md#general-information)**
 * **[Level-3 performance](Performance.md#level-3-performance)**
   * **[ThunderX2](Performance.md#thunderx2)**
-    * **[Experiment Details](Performance.md#thunderx2-details)**
+    * **[Experiment Details](Performance.md#thunderx2-experiment-details)**
     * **[Results](Performance.md#thunderx2-results)**
   * **[SkylakeX](Performance.md#skylakex)**
-    * **[Experiment Details](Performance.md#skylakex-details)**
+    * **[Experiment Details](Performance.md#skylakex-experiment-details)**
     * **[Results](Performance.md#skylakex-results)**
   * **[Haswell](Performance.md#haswell)**
-    * **[Experiment Details](Performance.md#haswell-details)**
-    * **[Desults](Performance.md#haswell-results)**
+    * **[Experiment Details](Performance.md#haswell-experiment-details)**
+    * **[Results](Performance.md#haswell-results)**
   * **[Epyc](Performance.md#epyc)**
-    * **[Experiment Details](Performance.md#epyc-details)**
+    * **[Experiment Details](Performance.md#epyc-experiment-details)**
     * **[Results](Performance.md#epyc-results)**
 * **[Feedback](Performance.md#feedback)**
 
@@ -107,7 +107,7 @@ When corresponding with us, via email or when opening an
 you specify as closely as possible (though a range is fine) your problem
 size of interest so that we can better assist you.
 
-# Level-3 performance results
+# Level-3 performance
 
 ## ThunderX2
 
