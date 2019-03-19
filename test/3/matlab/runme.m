@@ -14,6 +14,6 @@ plot_panel_4x5(3.00,16,12,'1s','../results/has/20190206/jc2ic3jr2','has_jc2ic3jr
 plot_panel_4x5(3.00,16,24,'2s','../results/has/20190206/jc4ic3jr2','has_jc4ic3jr2','MKL'); close; clear all;
 
 % epyc
-plot_panel_4x5(3.00,8,1, 'st','../results/epyc/20190306/st',       'epyc',          'MKL'); close; clear all;
-plot_panel_4x5(2.55,8,32,'1s','../results/epyc/20190306/jc1ic8jr4','epyc_jc1ic8jr4','MKL'); close; clear all;
-plot_panel_4x5(2.55,8,64,'2s','../results/epyc/20190306/jc2ic8jr4','epyc_jc2ic8jr4','MKL'); close; clear all;
+plot_panel_4x5(3.00,8,1, 'st','../results/epyc/merged201903_0619/st','epyc',          'MKL'); close; clear all;
+plot_panel_4x5(2.55,8,32,'1s','../results/epyc/merged201903_0619/jc1ic8jr4','epyc_jc1ic8jr4','MKL'); close; clear all;
+plot_panel_4x5(2.55,8,64,'2s','../results/epyc/merged201903_0619/jc2ic8jr4','epyc_jc2ic8jr4','MKL'); close; clear all;

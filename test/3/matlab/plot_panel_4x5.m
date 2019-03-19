@@ -100,3 +100,4 @@ outfile = sprintf( 'l3_perf_%s_nt%d.pdf', arch_str, nth );
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
 print(gcf, outfile,'-bestfit','-dpdf');
 
+end

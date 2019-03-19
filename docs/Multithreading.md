@@ -23,7 +23,7 @@
 
 # Introduction
 
-Our paper [Anatomy of High-Performance Many-Threaded Matrix Multiplication](https://github.com/flame/blis#citations), presented at IPDPS'14, identified 5 loops around the microkernel as opportunities for parallelization within level-3 operations such as `gemm`. Within BLIS, we have enabled parallelism for 4 of those loops and have extended it to the rest of the level-3 operations except for `trsm`.
+Our paper [Anatomy of High-Performance Many-Threaded Matrix Multiplication](https://github.com/flame/blis#citations), presented at IPDPS'14, identified five loops around the microkernel as opportunities for parallelization within level-3 operations such as `gemm`. Within BLIS, we have enabled parallelism for four of those loops, with the fifth planned for future work. This software architecture extends naturally to all level-3 operations except for `trsm`, where its application is necessarily limited to three of the five loops due to inter-iteration dependencies.
 
 **IMPORTANT**: Multithreading in BLIS is disabled by default. Furthermore, even when multithreading is enabled, BLIS will default to single-threaded execution at runtime. In order to both *allow* and *invoke* parallelism from within BLIS operations, you must both *enable* multithreading at configure-time and *specify* multithreading at runtime.
 
