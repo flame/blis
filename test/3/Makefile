@@ -106,6 +106,10 @@ OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 #ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
 #                  $(HOME_LIB_PATH)/libatlas.a
 
+# Eigen
+EIGEN_LIB      := $(HOME_LIB_PATH)/libeigen.a
+EIGENP_LIB     := $(HOME_LIB_PATH)/libeigen.a
+
 # MKL
 MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_intel_lp64 \
@@ -199,6 +203,7 @@ DNAT     := -DIND=BLIS_NAT
 #STR_1M   := -DSTR=\"1m\"
 STR_NAT  := -DSTR=\"asm_blis\"
 STR_OBL  := -DSTR=\"openblas\"
+STR_EIG  := -DSTR=\"eigen\"
 STR_VEN  := -DSTR=\"vendor\"
 
 # Single or multithreaded string
@@ -220,6 +225,7 @@ PDEF_2S  := -DP_BEGIN=$(P2_BEGIN) -DP_INC=$(P2_INC) -DP_MAX=$(P2_MAX)
 all:        all-st all-1s all-2s
 blis:       blis-st blis-1s blis-2s
 openblas:   openblas-st openblas-1s openblas-2s
+eigen:      eigen-st eigen-1s eigen-2s
 vendor:     vendor-st vendor-1s vendor-2s
 mkl:        vendor
 armpl:      vendor
@@ -238,7 +244,7 @@ blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
 # Define the datatypes, operations, and implementations.
 DTS   := s d c z
 OPS   := gemm hemm herk trmm trsm
-IMPLS := asm_blis openblas vendor
+IMPLS := asm_blis openblas eigen vendor
 
 # Define functions to construct object filenames from the datatypes and
 # operations given an implementation. We define one function for single-
@@ -263,6 +269,13 @@ OPENBLAS_1S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_1S_OBJS))
 OPENBLAS_2S_OBJS := $(call get-2s-objs,openblas)
 OPENBLAS_2S_BINS := $(patsubst %.o,%.x,$(OPENBLAS_2S_OBJS))
 
+EIGEN_ST_OBJS    := $(call get-st-objs,eigen)
+EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
+EIGEN_1S_OBJS    := $(call get-1s-objs,eigen)
+EIGEN_1S_BINS    := $(patsubst %.o,%.x,$(EIGEN_1S_OBJS))
+EIGEN_2S_OBJS    := $(call get-2s-objs,eigen)
+EIGEN_2S_BINS    := $(patsubst %.o,%.x,$(EIGEN_2S_OBJS))
+
 VENDOR_ST_OBJS   := $(call get-st-objs,vendor)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 VENDOR_1S_OBJS   := $(call get-1s-objs,vendor)
@@ -279,6 +292,10 @@ openblas-st: $(OPENBLAS_ST_BINS)
 openblas-1s: $(OPENBLAS_1S_BINS)
 openblas-2s: $(OPENBLAS_2S_BINS)
 
+eigen-st: $(EIGEN_ST_BINS)
+eigen-1s: $(EIGEN_1S_BINS)
+eigen-2s: $(EIGEN_2S_BINS)
+
 vendor-st: $(VENDOR_ST_BINS)
 vendor-1s: $(VENDOR_1S_BINS)
 vendor-2s: $(VENDOR_2S_BINS)
@@ -293,9 +310,10 @@ armpl-2s: vendor-2s
 
 # Mark the object files as intermediate so that make will remove them
 # automatically after building the binaries on which they depend.
-.INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(OPENBLAS_ST_OBJS) $(VENDOR_ST_OBJS)
-.INTERMEDIATE: $(BLIS_NAT_1S_OBJS) $(OPENBLAS_1S_OBJS) $(VENDOR_1S_OBJS)
-.INTERMEDIATE: $(BLIS_NAT_2S_OBJS) $(OPENBLAS_2S_OBJS) $(VENDOR_2S_OBJS)
+.INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(BLIS_NAT_1S_OBJS) $(BLIS_NAT_2S_OBJS)
+.INTERMEDIATE: $(OPENBLAS_ST_OBJS) $(OPENBLAS_1S_OBJS) $(OPENBLAS_2S_OBJS)
+.INTERMEDIATE: $(EIGEN_ST_OBJS)    $(EIGEN_1S_OBJS)    $(EIGEN_2S_OBJS)
+.INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_1S_OBJS)   $(VENDOR_2S_OBJS)
 
 
 # --Object file rules --
@@ -312,7 +330,8 @@ get-dt-cpp = -DDT=bli_$(1)type
 get-bl-cpp = $(strip \
              $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
              $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
-                                              $(STR_VEN) $(BLA_DEF))))
+             $(if $(findstring    eigen,$(1)),$(STR_EIG) $(BLA_DEF),\
+                                              $(STR_VEN) $(BLA_DEF)))))
 
 define make-st-rule
 test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
@@ -349,34 +368,44 @@ $(foreach im,$(IMPLS),$(eval $(call make-2s-rule,$(dt),$(op),$(im))))))
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_$(PS_MAX)_openblas_st.x: test_%_$(PS_MAX)_openblas_st.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P1_MAX)_openblas_1s.x: test_%_$(P1_MAX)_openblas_1s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-
-test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(VENDOR_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P1_MAX)_vendor_1s.x:   test_%_$(P1_MAX)_vendor_1s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P2_MAX)_vendor_2s.x:   test_%_$(P2_MAX)_vendor_2s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-
 test_%_$(PS_MAX)_asm_blis_st.x: test_%_$(PS_MAX)_asm_blis_st.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CC) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P1_MAX)_asm_blis_1s.x: test_%_$(P1_MAX)_asm_blis_1s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CC) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P2_MAX)_asm_blis_2s.x: test_%_$(P2_MAX)_asm_blis_2s.o $(LIBBLIS_LINK)
-	$(LINKER) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CC) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+test_%_$(PS_MAX)_openblas_st.x: test_%_$(PS_MAX)_openblas_st.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(OPENBLAS_LIB)  $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_openblas_1s.x: test_%_$(P1_MAX)_openblas_1s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(OPENBLASP_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+test_%_$(PS_MAX)_eigen_st.x:    test_%_$(PS_MAX)_eigen_st.o    $(LIBBLIS_LINK)
+	$(CXX) $(strip $<  $(EIGEN_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_eigen_1s.x:    test_%_$(P1_MAX)_eigen_1s.o    $(LIBBLIS_LINK)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_eigen_2s.x:    test_%_$(P2_MAX)_eigen_2s.o    $(LIBBLIS_LINK)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o    $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(VENDOR_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P1_MAX)_vendor_1s.x:   test_%_$(P1_MAX)_vendor_1s.o    $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_$(P2_MAX)_vendor_2s.x:   test_%_$(P2_MAX)_vendor_2s.o    $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 
 # -- Clean rules --
