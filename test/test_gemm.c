@@ -150,8 +150,13 @@ int main( int argc, char** argv )
 	    bli_obj_set_conjtrans( transa, &a);
 	    bli_obj_set_conjtrans( transb, &b);
 
-	    bli_setsc( 0.0, -1, &alpha );
-	    bli_setsc( 0.0, 1, &beta );
+	    //bli_setsc( 0.0, -1, &alpha );
+	    //bli_setsc( 0.0, 1, &beta );
+
+	    bli_setsc( -1, 0.0, &alpha );
+	    bli_setsc( 1, 0.0, &beta );
+
+	    printf("%1.1f %1.1f\n", *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &alpha)), *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &beta)));
 
 #else
 	for ( p = p_begin; p <= p_end; p += p_inc )
