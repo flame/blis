@@ -104,7 +104,12 @@ void bli_l3_thrinfo_create_root
        thrinfo_t** thread
      );
 
-void bli_l3_thrinfo_print_paths
+void bli_l3_thrinfo_print_gemm_paths
+     (
+       thrinfo_t** threads
+     );
+
+void bli_l3_thrinfo_print_trsm_paths
      (
        thrinfo_t** threads
      );

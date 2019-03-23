@@ -70,7 +70,11 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations
+else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
 
 # Override the default value for LDFLAGS.
 LDFLAGS        := -mmic

@@ -32,13 +32,13 @@
 
 */
 
-void  bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx );
+void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx );
 
-void  bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_1m_stage( dim_t stage, cntx_t* cntx );
-void  bli_cntx_nat_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_1m_stage( dim_t stage, cntx_t* cntx );
+void bli_cntx_nat_stage( dim_t stage, cntx_t* cntx );
 

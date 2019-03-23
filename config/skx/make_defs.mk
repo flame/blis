@@ -89,7 +89,7 @@ endif
 # to overcome the AVX-512 frequency drop". (Issue #187)
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd
+CRVECFLAGS     := -march=skylake-avx512 -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations
 else
 ifeq ($(CC_VENDOR),icc)
 CRVECFLAGS     := -xCORE-AVX2

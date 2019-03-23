@@ -40,16 +40,16 @@ typedef void  (*free_ft)   ( void*  p    );
 // -----------------------------------------------------------------------------
 
 #if 0
-void* bli_malloc_pool( size_t size );
-void  bli_free_pool( void* p );
+BLIS_EXPORT_BLIS void* bli_malloc_pool( size_t size );
+BLIS_EXPORT_BLIS void   bli_free_pool( void* p );
 #endif
 
 void* bli_malloc_intl( size_t size );
 void* bli_calloc_intl( size_t size );
 void  bli_free_intl( void* p );
 
-void* bli_malloc_user( size_t size );
-void  bli_free_user( void* p );
+BLIS_EXPORT_BLIS void* bli_malloc_user( size_t size );
+BLIS_EXPORT_BLIS void  bli_free_user( void* p );
 
 // -----------------------------------------------------------------------------
 

@@ -46,7 +46,7 @@ THIS_CONFIG    := power9
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
-CMISCFLAGS     := -mcpu=power9 
+CMISCFLAGS     :=  
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -69,7 +69,7 @@ ifeq ($(CC_VENDOR),IBM)
 CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9
 else
 $(info $(CC_VENDOR))
-$(error gcc is required for this configuration.)
+$(error gcc/xlc is required for this configuration.)
 endif
 endif
 

@@ -49,8 +49,8 @@ typedef struct ger_s ger_t;
 #define bli_cntl_sub_ger_rp( cntl )   cntl->sub_ger_rp
 #define bli_cntl_sub_ger_cp( cntl )   cntl->sub_ger_cp
 
-void   bli_ger_cntl_init( void );
-void   bli_ger_cntl_finalize( void );
+void    bli_ger_cntl_init( void );
+void    bli_ger_cntl_finalize( void );
 ger_t* bli_ger_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
                                 bszid_t    bszid,

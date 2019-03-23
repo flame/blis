@@ -14,12 +14,14 @@ but many others have contributed code and feedback, including
   Erling Andersen       @erling-d-andersen
   Alex Arslan           @ararslan
   Vernon Austel                             (IBM, T.J. Watson Research Center)
+  Matthew Brett         @matthew-brett      (University of Birmingham)
   Jed Brown             @jedbrown           (Argonne National Laboratory)
   Robin Christ          @robinchrist
   Kay Dewhurst          @jkd2016            (Max Planck Institute, Halle, Germany)
   Jeff Diamond                              (Oracle)
   Johannes Dieterich    @iotamudelta
   Krzysztof Drewniak    @krzysz00
+  Marat Dukhan          @Maratyszcza        (Google)
   Victor Eijkhout       @VictorEijkhout     (Texas Advanced Computing Center)
   Isuru Fernando        @isuruf
   Roman Gareev          @gareevroman
@@ -30,7 +32,7 @@ but many others have contributed code and feedback, including
   Jeff Hammond          @jeffhammond        (Intel)
   Jacob Gorm Hansen     @jacobgorm
   Jean-Michel Hautbois  @jhautbois
-  Ian Henriksen         @insertinterestingnamehere
+  Ian Henriksen         @insertinterestingnamehere (The University of Texas at Austin)
   Minh Quan Ho          @hominhquan
   Matthew Honnibal      @honnibal
   Stefan Husmann        @stefanhusmann
@@ -63,11 +65,13 @@ but many others have contributed code and feedback, including
   Rene Sitt
   Tony Skjellum         @tonyskjellum       (The University of Tennessee at Chattanooga)
   Mikhail Smelyanskiy                       (Intel, Parallel Computing Lab)
+  Nathaniel Smith       @njsmith
   Shaden Smith          @ShadenSmith
   Tyler Smith           @tlrmchlsmth        (The University of Texas at Austin)
   Paul Springer         @springer13         (RWTH-Aachen)
   Vladimir Sukarev
   Santanu Thangaraj                         (AMD)
+  Nicholai Tukanov      @nicholaiTukanov    (The University of Texas at Austin)
   Rhys Ulerich          @RhysU              (The University of Texas at Austin)
   Robert van de Geijn   @rvdg               (The University of Texas at Austin)
   Kiran Varaganti       @kvaragan           (AMD)
@@ -83,8 +87,10 @@ partners, including
 
   AMD
   Hewlett Packard Enterprise
+  Huawei
   Intel
   Microsoft
+  Oracle
   Texas Instruments
 
 as well as the National Science Foundation (NSF Awards CCF-0917167,

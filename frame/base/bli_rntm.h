@@ -239,7 +239,7 @@ static void bli_rntm_init( rntm_t* rntm )
 
 // Function prototypes
 
-void bli_rntm_set_ways_for_op
+BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
      (
        opid_t  l3_op,
        side_t  side,

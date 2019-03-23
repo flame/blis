@@ -59,61 +59,40 @@ void bli_dgemm_power9_asm_12x6
 	__asm__ volatile
 	(
 	"                                               \n\t"
-	"ld                %%r26, %6                    \n\t"
-  "li                %%r27, 1                     \n\t"
-  "lxv               %%vr0,  0(%%r26)              \n\t" 
-  "std               %%r27, 4(%%r26)              \n\t"
-	// "                                            \n\t"
-  // "                                            \n\t"
-  // "ld                r26, %6                   \n\t" // load C
-  // "                                            \n\t"
-  // "ld                r28, %2                   \n\t" // load A
-	// "ld                r27, %3                   \n\t" // load B
-  // "                                            \n\t"
-  // "                                            \n\t" 
-  // "lxv               0, 0(r26)                 \n\t" // load elems of C 
-  // "lxv               1, 1(r26)                 \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "li                r4, %1                    \n\t" // load k_iter
-  // "mtctr             r4                        \n\t"
-  // "loop:                                       \n\t"
-  // "                                            \n\t"
-  // "lxv               36, 0(r28)                \n\t" // load col of a
-  // "lxv               37, 1(r28)                \n\t" // load col of a
-  // "                                            \n\t"
-  // "lxvdsx            47, 0, r27                \n\t" // broadcast b
-  // "addi              r27,r27,8                 \n\t" // inc b
-  // "                                            \n\t"
-  // "xvmaddadp         0,36,47                   \n\t"
-  // "xvmaddadp         1,37,47                   \n\t"
-  // "                                            \n\t"
-  // "lxvdsx            47, 0, r27                \n\t" // broadcast b
-  // "addi              r27,r27,8                 \n\t" // inc b
-  // "                                            \n\t"
-  // "xvmaddadp         0,36,47                   \n\t"
-  // "xvmaddadp         1,37,47                   \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "addi              r28,r28,32                \n\t" // move A forward
-  // "bdnz loop                                   \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
-  // "li                r5,16                     \n\t" // use as offset
-  // "                                            \n\t"
-  // "stxvd2x           0,0,r26                   \n\t" // store c back into memory 
-  // "stxvd2x           1,r5,r26                  \n\t"
-  // "                                            \n\t"
-  // "                                            \n\t"
+	"ld               %%r26, %6                     \n\t" // load addrs of matrices
+  "ld               %%r27, %2                     \n\t"
+  "ld               %%r28, %3                     \n\t"
+  //"lxv              %%vs30, 0(%%r26)              \n\t"
+  //"lxv              %%vs31, 16(%%r26)             \n\t"
+  "                                               \n\t"
+  "ld               %%r6, %0                      \n\t"
+  "mtctr            %%r6                          \n\t"
+  "                                               \n\t"
+  "li               %%r10,0                       \n\t"
+  "li               %%r15,0                       \n\t"
+  "li               %%r16,0                       \n\t"
+  "                                               \n\t"
+  "loop:                                          \n\t"
+  "                                               \n\t"
+  "lxvd2x           %%vs0, %%r16, %%r27           \n\t"
+  "lxvdsx           %%vs1, %%r10, %%r28           \n\t"
+  // "                                               \n\t"
+  "xvmuldp          %%vs3, %%vs0, %%vs1           \n\t"
+  "stxvd2x          %%vs3, %%r15, %%r26           \n\t"
+  // "                                               \n\t"
+  // "addi             %%r10, %%r10, 8               \n\t"
+  // "lxvdsx           %%vs1, %%r10, %%r28           \n\t"
+  // "                                               \n\t"
+  // "xvmuldp          %%vs4, %%vs0, %%vs1            \n\t"
+  // "stxvd2x          %%vs3, %%r15, %%r26            \n\t"
+  // "                                               \n\t"
+  "addi             %%r15, %%r27, 64              \n\t"
+  "addi             %%r, %%r28, 16              \n\t"
+  // "                                               \n\t"
+  "bdnz             loop                          \n\t"
+  // "                                               \n\t"
   
-
+  //"stxv               %%vs31, 16(%%r26)           \n\t"
 
 	: // output operands (none)
 	: // input operands
@@ -131,7 +110,7 @@ void bli_dgemm_power9_asm_12x6
 	: // register clobber list
 	/*Unclobberable registers: r1 (stk ptr), r2(toc ptr), r11(env ptr),
 	r13(64b mode thread local data ptr, r30(stk frm ptr), r31(stk frm ptr) */
-  "r4", "r5", "r26", "r27", "r28", "0", "1", "36", "37", "47"
+  "r26", "r27", "r28", "r10", "r15", "r16", "vs0", "vs1", "vs3"
 	);
 }
 

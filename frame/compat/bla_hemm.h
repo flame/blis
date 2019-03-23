@@ -39,7 +39,7 @@
 #undef  GENTPROTCO
 #define GENTPROTCO( ftype, ftype_r, ch, chr, blasname ) \
 \
-void PASTEF77(ch,blasname) \
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      ( \
        const f77_char* side, \
        const f77_char* uploa, \

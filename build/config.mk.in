@@ -135,10 +135,14 @@ BUILDING_OOT      := @configured_oot@
 ARG_MAX_HACK      := @enable_arg_max_hack@
 
 # Whether to build the static and shared libraries.
-# Note the "MK_" prefix, which helps differentiate these variables from
+# NOTE: The "MK_" prefix, which helps differentiate these variables from
 # their corresonding cpp macros that use the BLIS_ prefix.
 MK_ENABLE_STATIC  := @enable_static@
 MK_ENABLE_SHARED  := @enable_shared@
+
+# Whether to export all symbols within the shared library, even those symbols
+# that are considered to be for internal use only.
+EXPORT_SHARED     := @export_shared@
 
 # Whether to enable either the BLAS or CBLAS compatibility layers.
 MK_ENABLE_BLAS    := @enable_blas@

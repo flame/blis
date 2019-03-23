@@ -186,7 +186,7 @@ static void bli_blksz_scale_def_max
 
 // -----------------------------------------------------------------------------
 
-blksz_t* bli_blksz_create_ed
+BLIS_EXPORT_BLIS blksz_t* bli_blksz_create_ed
      (
        dim_t b_s, dim_t be_s,
        dim_t b_d, dim_t be_d,
@@ -194,13 +194,13 @@ blksz_t* bli_blksz_create_ed
        dim_t b_z, dim_t be_z
      );
 
-blksz_t* bli_blksz_create
+BLIS_EXPORT_BLIS blksz_t* bli_blksz_create
      (
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      );
 
-void bli_blksz_init_ed
+BLIS_EXPORT_BLIS void bli_blksz_init_ed
      (
        blksz_t* b,
        dim_t    b_s, dim_t be_s,
@@ -209,20 +209,20 @@ void bli_blksz_init_ed
        dim_t    b_z, dim_t be_z
      );
 
-void bli_blksz_init
+BLIS_EXPORT_BLIS void bli_blksz_init
      (
        blksz_t* b,
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      );
 
-void bli_blksz_init_easy
+BLIS_EXPORT_BLIS void bli_blksz_init_easy
      (
        blksz_t* b,
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z
      );
 
-void bli_blksz_free
+BLIS_EXPORT_BLIS void bli_blksz_free
      (
        blksz_t* b
      );
@@ -230,7 +230,7 @@ void bli_blksz_free
 // -----------------------------------------------------------------------------
 
 #if 0
-void bli_blksz_reduce_dt_to
+BLIS_EXPORT_BLIS void bli_blksz_reduce_dt_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz

@@ -57,7 +57,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -fomit-frame-pointer
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
@@ -78,7 +78,11 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations
+else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

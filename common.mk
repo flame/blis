@@ -506,9 +506,9 @@ SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
-SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+SOFLAGS    += -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += -Wl,--export-all-symbols -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
+SOFLAGS    += -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.
@@ -608,7 +608,7 @@ endif
 
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
-# --- Shared library (position-independent code) flags ---
+# --- Position-independent code flags (shared libraries only) ---
 
 # Emit position-independent code for dynamic linking.
 ifeq ($(IS_WIN),yes)
@@ -619,6 +619,69 @@ else
 CPICFLAGS := -fPIC
 endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
+
+# --- Symbol exporting flags (shared libraries only) ---
+
+# Determine default export behavior / visibility of symbols for gcc.
+ifeq ($(CC_VENDOR),gcc)
+ifeq ($(IS_WIN),yes)
+ifeq ($(EXPORT_SHARED),all)
+CMISCFLAGS := -Wl,--export-all-symbols, -Wl,--enable-auto-import
+else # ifeq ($(EXPORT_SHARED),public)
+CMISCFLAGS := -Wl,--exclude-all-symbols
+endif
+else # ifeq ($(IS_WIN),no)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+CMISCFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+CMISCFLAGS := -fvisibility=hidden
+endif
+endif
+endif
+
+# Determine default export behavior / visibility of symbols for icc.
+# NOTE: The Windows branches have been omitted since we currently make no
+# effort to support Windows builds via icc (only gcc/clang via AppVeyor).
+ifeq ($(CC_VENDOR),icc)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+CMISCFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+CMISCFLAGS := -fvisibility=hidden
+endif
+endif
+
+# Determine default export behavior / visibility of symbols for clang.
+ifeq ($(CC_VENDOR),clang)
+ifeq ($(IS_WIN),yes)
+ifeq ($(EXPORT_SHARED),all)
+# NOTE: clang on Windows does not appear to support exporting all symbols
+# by default, and therefore we ignore the value of EXPORT_SHARED.
+CMISCFLAGS :=
+else # ifeq ($(EXPORT_SHARED),public)
+# NOTE: The default behavior of clang on Windows is to hide all symbols
+# and only export functions and other declarations that have beenannotated
+# as needing to be exported.
+CMISCFLAGS :=
+endif
+else # ifeq ($(IS_WIN),no)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+CMISCFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+CMISCFLAGS := -fvisibility=hidden
+endif
+endif
+endif
+
+$(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CMISCFLAGS,$(c))))
 
 # --- Language flags ---
 

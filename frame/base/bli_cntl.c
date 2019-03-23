@@ -59,6 +59,7 @@ cntl_t* bli_cntl_create_node
 	bli_cntl_set_bszid( bszid, cntl );
 	bli_cntl_set_var_func( var_func, cntl );
 	bli_cntl_set_params( params, cntl );
+	bli_cntl_set_sub_prenode( NULL, cntl );
 	bli_cntl_set_sub_node( sub_node, cntl );
 
 	// Query the address of the node's packed mem_t entry so we can initialize
@@ -95,6 +96,7 @@ void bli_cntl_clear_node
 	// actually is not needed, but we do it for debugging/completeness.
 	bli_cntl_set_var_func( NULL, cntl );
 	bli_cntl_set_params( NULL, cntl );
+	bli_cntl_set_sub_prenode( NULL, cntl );
 	bli_cntl_set_sub_node( NULL, cntl );
 
 	// Clearing these fields is potentially more important if the control
@@ -126,14 +128,40 @@ void bli_cntl_free_w_thrinfo
 	// Base case: simply return when asked to free NULL nodes.
 	if ( cntl == NULL ) return;
 
-	cntl_t*    cntl_sub_node   = bli_cntl_sub_node( cntl );
-	void*      cntl_params     = bli_cntl_params( cntl );
-	mem_t*     cntl_pack_mem   = bli_cntl_pack_mem( cntl );
+	cntl_t* cntl_sub_prenode = bli_cntl_sub_prenode( cntl );
+	cntl_t* cntl_sub_node    = bli_cntl_sub_node( cntl );
+	void*   cntl_params      = bli_cntl_params( cntl );
+	mem_t*  cntl_pack_mem    = bli_cntl_pack_mem( cntl );
 
-	thrinfo_t* thread_sub_node = bli_thrinfo_sub_node( thread );
+	// Don't immediately dereference the prenode and subnode of the thrinfo_t
+	// node. In some cases, the thrinfo_t tree is not built out all the way,
+	// perhaps because there are more ways of parallelization than micropanels
+	// of data in this dimension, or because the problem is small enough that
+	// there is no gemm subproblem in bli_trsm_blk_var1(). Thus, we start with
+	// NULL values for these variables and only dereference the fields of the
+	// thrinfo_t struct if the thrinfo_t exists (ie: is non-NULL). We will also
+	// have to check the thrinfo_t pointer for NULLness before using it below,
+	// when checking if we need to free the pack_mem field of the cntl_t node
+	// (see below).
+	thrinfo_t* thread_sub_prenode = NULL;
+	thrinfo_t* thread_sub_node    = NULL;
 
-	// Only recurse if the current thrinfo_t node has a child.
-	if ( thread_sub_node != NULL )
+	if ( thread != NULL )
+	{
+		thread_sub_prenode = bli_thrinfo_sub_prenode( thread );
+		thread_sub_node    = bli_thrinfo_sub_node( thread );
+	}
+
+	// Only recurse into prenode branch if it exists.
+	if ( cntl_sub_prenode != NULL )
+	{
+		// Recursively free all memory associated with the sub-prenode and its
+		// children.
+		bli_cntl_free_w_thrinfo( rntm, cntl_sub_prenode, thread_sub_prenode );
+	}
+
+	// Only recurse into the child node if it exists.
+	if ( cntl_sub_node != NULL )
 	{
 		// Recursively free all memory associated with the sub-node and its
 		// children.
@@ -153,6 +181,10 @@ void bli_cntl_free_w_thrinfo
 	// Release the current node's pack mem_t entry back to the memory
 	// broker from which it originated, but only if the mem_t entry is
 	// allocated, and only if the current thread is chief for its group.
+	// Also note that we don't proceed with either of the above tests if
+	// the thrinfo_t pointer is NULL. (See above for background on when
+	// this can happen.)
+	if ( thread != NULL )
 	if ( bli_thread_am_ochief( thread ) )
 	if ( bli_mem_is_alloc( cntl_pack_mem ) )
 	{
@@ -176,9 +208,16 @@ void bli_cntl_free_wo_thrinfo
 	// Base case: simply return when asked to free NULL nodes.
 	if ( cntl == NULL ) return;
 
-	cntl_t*    cntl_sub_node   = bli_cntl_sub_node( cntl );
-	void*      cntl_params     = bli_cntl_params( cntl );
-	mem_t*     cntl_pack_mem   = bli_cntl_pack_mem( cntl );
+	cntl_t* cntl_sub_prenode = bli_cntl_sub_prenode( cntl );
+	cntl_t* cntl_sub_node    = bli_cntl_sub_node( cntl );
+	void*   cntl_params      = bli_cntl_params( cntl );
+	mem_t*  cntl_pack_mem    = bli_cntl_pack_mem( cntl );
+
+	{
+		// Recursively free all memory associated with the sub-prenode and its
+		// children.
+		bli_cntl_free_wo_thrinfo( rntm, cntl_sub_prenode );
+	}
 
 	{
 		// Recursively free all memory associated with the sub-node and its
@@ -244,6 +283,20 @@ cntl_t* bli_cntl_copy
 		bli_cntl_set_params( params_copy, cntl_copy );
 	}
 
+	// If the sub-prenode exists, copy it recursively.
+	if ( bli_cntl_sub_prenode( cntl ) != NULL )
+	{
+		cntl_t* sub_prenode_copy = bli_cntl_copy
+		(
+		  rntm,
+		  bli_cntl_sub_prenode( cntl )
+		);
+
+		// Save the address of the new sub-node (sub-tree) to the existing
+		// node.
+		bli_cntl_set_sub_prenode( sub_prenode_copy, cntl_copy );
+	}
+
 	// If the sub-node exists, copy it recursively.
 	if ( bli_cntl_sub_node( cntl ) != NULL )
 	{
@@ -277,14 +330,18 @@ void bli_cntl_mark_family
 	// Set the family of the root node.
 	bli_cntl_set_family( family, cntl );
 
-	// Continue as long as the current node has a valid child.
-	while ( bli_cntl_sub_node( cntl ) != NULL )
+	// Recursively set the family field of the sub-tree rooted at the sub-node,
+	// if it exists.
+	if ( bli_cntl_sub_prenode( cntl ) != NULL )
 	{
-		// Move down the tree to the child node.
-		cntl = bli_cntl_sub_node( cntl );
+		bli_cntl_mark_family( family, bli_cntl_sub_prenode( cntl ) );
+	}
 
-		// Set the family of the current node.
-		bli_cntl_set_family( family, cntl );
+	// Recursively set the family field of the sub-tree rooted at the prenode,
+	// if it exists.
+	if ( bli_cntl_sub_node( cntl ) != NULL )
+	{
+		bli_cntl_mark_family( family, bli_cntl_sub_node( cntl ) );
 	}
 }
 

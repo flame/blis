@@ -34,7 +34,7 @@
 
 #include "bli_obj_check.h"
 
-void bli_obj_create
+BLIS_EXPORT_BLIS void bli_obj_create
      (
        num_t  dt,
        dim_t  m,
@@ -44,7 +44,7 @@ void bli_obj_create
        obj_t* obj
      );
 
-void bli_obj_create_with_attached_buffer
+BLIS_EXPORT_BLIS void bli_obj_create_with_attached_buffer
      (
        num_t  dt,
        dim_t  m,
@@ -55,7 +55,7 @@ void bli_obj_create_with_attached_buffer
        obj_t* obj
      );
 
-void bli_obj_create_without_buffer
+BLIS_EXPORT_BLIS void bli_obj_create_without_buffer
      (
        num_t  dt,
        dim_t  m,
@@ -63,7 +63,7 @@ void bli_obj_create_without_buffer
        obj_t* obj
      );
 
-void bli_obj_alloc_buffer
+BLIS_EXPORT_BLIS void bli_obj_alloc_buffer
      (
        inc_t  rs,
        inc_t  cs,
@@ -71,7 +71,7 @@ void bli_obj_alloc_buffer
        obj_t* obj
      );
 
-void bli_obj_attach_buffer
+BLIS_EXPORT_BLIS void bli_obj_attach_buffer
      (
        void*  p,
        inc_t  rs,
@@ -80,26 +80,26 @@ void bli_obj_attach_buffer
        obj_t* obj
      );
 
-void bli_obj_create_1x1
+BLIS_EXPORT_BLIS void bli_obj_create_1x1
      (
        num_t  dt,
        obj_t* obj
      );
 
-void bli_obj_create_1x1_with_attached_buffer
+BLIS_EXPORT_BLIS void bli_obj_create_1x1_with_attached_buffer
      (
        num_t  dt,
        void*  p,
        obj_t* obj
      );
 
-void bli_obj_create_conf_to
+BLIS_EXPORT_BLIS void bli_obj_create_conf_to
      (
        obj_t* s,
        obj_t* d
      );
 
-void bli_obj_free
+BLIS_EXPORT_BLIS void bli_obj_free
      (
        obj_t* obj
      );
@@ -114,36 +114,36 @@ void bli_adjust_strides
        inc_t* is
      );
 
-siz_t bli_dt_size
+BLIS_EXPORT_BLIS siz_t bli_dt_size
      (
        num_t dt
      );
 
-char* bli_dt_string
+BLIS_EXPORT_BLIS char* bli_dt_string
      (
        num_t dt
      );
 
-dim_t bli_align_dim_to_mult
+BLIS_EXPORT_BLIS dim_t bli_align_dim_to_mult
      (
        dim_t dim,
        dim_t dim_mult
      );
 
-dim_t bli_align_dim_to_size
+BLIS_EXPORT_BLIS dim_t bli_align_dim_to_size
      (
        dim_t dim,
        siz_t elem_size,
        siz_t align_size
      );
 
-dim_t bli_align_ptr_to_size
+BLIS_EXPORT_BLIS dim_t bli_align_ptr_to_size
      (
        void*  p,
        size_t align_size
      );
 
-void bli_obj_print
+BLIS_EXPORT_BLIS void bli_obj_print
      (
        char*  label,
        obj_t* obj

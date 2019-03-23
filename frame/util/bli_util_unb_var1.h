@@ -110,7 +110,7 @@ INSERT_GENTPROTR_BASIC0( normim_unb_var1 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        FILE*  file, \
        char*  s1, \
@@ -126,7 +126,7 @@ INSERT_GENTPROT_BASIC0_I( fprintv )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        FILE*  file, \
        char*  s1, \

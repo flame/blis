@@ -42,6 +42,7 @@ void bli_packm_thrinfo_init
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id,
+       bszid_t    bszid,
        thrinfo_t* sub_node
      )
 {
@@ -51,6 +52,7 @@ void bli_packm_thrinfo_init
 	  ocomm, ocomm_id,
 	  n_way, work_id,
 	  FALSE,
+	  BLIS_NO_PART,
 	  sub_node
 	);
 }
@@ -66,6 +68,7 @@ void bli_packm_thrinfo_init_single
 	  &BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
+	  BLIS_NO_PART,
 	  NULL
 	);
 }

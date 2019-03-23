@@ -9,6 +9,9 @@
 * **[Step 3b: Testing (optional)](BuildSystem.md#step-3b-testing-optional)**
 * **[Step 4: Installation](BuildSystem.md#step-4-installation)**
 * **[Cleaning out build products](BuildSystem.md#cleaning-out-build-products)**
+* **[Compiling with BLIS](BuildSystem.md#compiling-with-blis)**
+  * [Disabling BLAS prototypes](BuildSystem.md#disabling-blas-prototypes)
+  * [CBLAS](BuildSystem.md#cblas)
 * **[Linking against BLIS](BuildSystem.md#linking-against-blis)**
 * **[Uninstalling](BuildSystem.md#uninstalling)**
 * **[make targets](BuildSystem.md#make-targets)**
@@ -83,7 +86,7 @@ Alternatively, `configure` can automatically select a configuration based on you
 ```
 $ ./configure auto
 ```
-However, as of this writing, only a limited number of architectures are detected. If the `configure` script is not able to detect your architecture, the `generic` configuration will be used. 
+However, as of this writing, only a limited number of architectures are detected. If the `configure` script is not able to detect your architecture, the `generic` configuration will be used.
 
 Upon running configure, you will get output similar to the following. The exact output will depend on whether you cloned BLIS from a `git` repository or whether you obtained BLIS via a downloadable tarball from the [releases](https://github.com/flame/blis/releases) page.
 ```
@@ -338,6 +341,47 @@ Removing include.
 Running the `distclean` target is like saying, "Remove anything ever created by the build system."
 
 
+## Compiling with BLIS
+
+All BLIS definitions and prototypes may be included in your C source file by including a single header file, `blis.h`:
+```c
+#include "stdio.h"
+#include "stdlib.h"
+#include "otherstuff.h"
+#include "blis.h"
+```
+If the BLAS compatibility layer was enabled at configure-time (as it is by default), then `blis.h` will also provide BLAS prototypes to your source code.
+
+
+### Disabling BLAS prototypes
+
+Some applications already `#include` a header that contains BLAS prototypes. This can cause problems if those applications also try to `#include` the BLIS header file, as shown above. Suppose for a moment that `otherstuff.h` in the example above already provides BLAS prototypes.
+```
+$ gcc -I/path/to/blis -I/path/to/otherstuff -c main.c -o main.o
+In file included from main.c:41:0:
+/path/to/blis/blis.h:36900:111: error: conflicting declaration of C function ‘int xerbla_(const bla_character*, const bla_integer*, ftnlen)’
+ TEF770(xerbla)(const bla_character *srname, const bla_integer *info, ftnlen srname_len);
+```
+If your application is already declaring (prototyping) BLAS functions, then you may disable those prototypes from being defined included within `blis.h`. This prevents `blis.h` from re-declaring those prototypes, or, allows your other header to declare those functions for the first time, depending on the order that you `#include` the headers.
+```c
+#include "stdio.h"
+#include "stdlib.h"
+#include "otherstuff.h"
+#define BLIS_DISABLE_BLAS_DEFS    // disable BLAS prototypes within BLIS.
+#include "blis.h"
+```
+By `#defining` the `BLIS_DISABLE_BLAS_DEFS` macro, we signal to `blis.h` that it should skip over the BLAS prototypes, but otherwise `#include` everything else as it normally would. Note that `BLIS_DISABLE_BLAS_DEFS` must be `#defined` *prior* to the `#include "blis.h"` directive in order for it to have any effect.
+
+
+### CBLAS
+
+If you build BLIS with CBLAS enabled and you wish to access CBLAS function prototypes from within your application, you will have to `#include` the `cblas.h` header separately from `blis.h`.
+```
+#include "blis.h"
+#include "cblas.h"
+```
+
+
 ## Linking against BLIS
 
 Once you have instantiated (configured and compiled, and perhaps installed) a BLIS library, you can link to it in your application's makefile as you would any other library. The following is an abbreviated makefile for a small hypothetical application that has just two external dependencies: BLIS and the standard C math library. We also link against libpthread since that library has been a runtime dependency of BLIS since 70640a3 (December 2017).
@@ -357,7 +401,7 @@ OBJS        = main.o util.o other.o
 %.o: %.c
     $(CC) $(CFLAGS) -c $< -o $@
 
-all: $(OBJS) 
+all: $(OBJS)
     $(LINKER) $(OBJS) $(BLIS_LIB) $(OTHER_LIBS) -o my_program.x
 ```
 The above example assumes you will want to include BLIS definitions and function prototypes into your application via `#include blis.h`. (If you are only using the BLIS via the BLAS compatibility layer, including `blis.h` is not necessary.) Since BLIS headers are installed into a `blis` subdirectory of `PREFIX/include`, you must make sure that the compiler knows where to find the `blis.h` header file. This is typically accomplished by inserting `#include "blis.h"` into your application's source code files and compiling the code with `-I PREFIX/include/blis`.

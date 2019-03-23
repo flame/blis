@@ -457,7 +457,7 @@ bli_printm( "c", c, "%6.3f", "" );
 #endif
 		bli_gemm( alpha, a, b, beta, c );
 #if 1
-bli_printm( "welcome to your result | c after", c, "%6.3f", "" );
+bli_printm( "c after", c, "%6.3f", "");
 #endif
 		break;
 

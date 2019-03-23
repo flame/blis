@@ -101,16 +101,15 @@ bli_rntm_print( rntm );
 		}
 		else if ( l3_op == BLIS_TRSM )
 		{
-			// For trsm_l, we extract all parallelism from the jc and jr loops.
-			// For trsm_r, we extract all parallelism from the ic loop.
+//printf( "bli_rntm_set_ways_for_op(): jc%d ic%d jr%d\n", (int)jc, (int)ic, (int)jr );
 			if ( bli_is_left( side ) )
 			{
 				bli_rntm_set_ways_only
 				(
 				  jc,
 				  1,
-				  1,
-				  ic * pc * jr * ir,
+				  ic * pc,
+				  jr * ir,
 				  1,
 				  rntm
 				);
