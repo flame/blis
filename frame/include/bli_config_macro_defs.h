@@ -190,20 +190,22 @@
 // with that setting overridden only for function prototypes or variable
 // declarations that are annotated with BLIS_EXPORT_BLIS.
 
-#if !defined(BLIS_ENABLE_SHARED)
+#ifndef BLIS_EXPORT
+  #if !defined(BLIS_ENABLE_SHARED)
     #define BLIS_EXPORT
-#else
+  #else
     #if defined(_WIN32) || defined(__CYGWIN__)
-        #ifdef BLIS_IS_BUILDING_LIBRARY
-            #define BLIS_EXPORT __declspec(dllexport)
-        #else
-            #define BLIS_EXPORT __declspec(dllimport)
-        #endif
+      #ifdef BLIS_IS_BUILDING_LIBRARY
+        #define BLIS_EXPORT __declspec(dllexport)
+      #else
+        #define BLIS_EXPORT __declspec(dllimport)
+      #endif
     #elif defined(__GNUC__) && __GNUC__ >= 4
-        #define BLIS_EXPORT __attribute__ ((visibility ("default")))
+      #define BLIS_EXPORT __attribute__ ((visibility ("default")))
     #else
-        #define BLIS_EXPORT
+      #define BLIS_EXPORT
     #endif
+  #endif
 #endif
 
 #define BLIS_EXPORT_BLIS BLIS_EXPORT
