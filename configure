@@ -1311,8 +1311,7 @@ get_compiler_version()
 	# to OS X's egrep only returning the first match.
 	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
 	if [ "${cc_vendor}" = "icc" -o \
-	     "${cc_vendor}" = "gcc" -o \
-	     "${cc_vendor}" = "clang" ]; then
+	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
 	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
@@ -1360,7 +1359,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.5+
+	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1435,27 +1434,42 @@ check_compiler()
 
 	# clang
 	if [ "x${cc_vendor}" = "xclang" ]; then
-
-		if [ ${cc_major} -lt 3 ]; then
-			echoerr_unsupportedcc
-		fi
-		if [ ${cc_major} -eq 3 ]; then
-			if [ ${cc_minor} -lt 3 ]; then
+		if [ "$(echo ${vendor_string} | grep -o Apple)" = "Apple" ]; then
+			if [ ${cc_major} -lt 5 ]; then
 				echoerr_unsupportedcc
 			fi
-			if [ ${cc_minor} -lt 5 ]; then
+			# See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
+			if [ ${cc_major} -eq 5 ]; then
+				# Apple clang 5.0 is clang 3.4svn
 				blacklistcc_add "excavator"
 				blacklistcc_add "zen"
-				blacklistcc_add "knl"
 			fi
-			if [ ${cc_minor} -lt 9 ]; then
+			if [ ${cc_major} -lt 7 ]; then
+				blacklistcc_add "knl"
 				blacklistcc_add "skx"
 			fi
-		fi
-		if [ ${cc_major} -lt 4 ]; then
-			# See comment above regarding zen support.
-			#blacklistcc_add "zen"
-			: # explicit no-op since bash can't handle empty loop bodies.
+		else
+			if [ ${cc_major} -lt 3 ]; then
+				echoerr_unsupportedcc
+			fi
+			if [ ${cc_major} -eq 3 ]; then
+				if [ ${cc_minor} -lt 3 ]; then
+					echoerr_unsupportedcc
+				fi
+				if [ ${cc_minor} -lt 5 ]; then
+					blacklistcc_add "excavator"
+					blacklistcc_add "zen"
+				fi
+				if [ ${cc_minor} -lt 9 ]; then
+					blacklistcc_add "knl"
+					blacklistcc_add "skx"
+				fi
+			fi
+			if [ ${cc_major} -lt 4 ]; then
+				# See comment above regarding zen support.
+				#blacklistcc_add "zen"
+				: # explicit no-op since bash can't handle empty loop bodies.
+			fi
 		fi
 	fi
 }
@@ -1513,8 +1527,8 @@ check_assembler()
 	#
 
 	# The assembler on OS X won't recognize AVX-512 without help.
-	if [ "$(uname -s)" == "Darwin" ]; then
-		cflags="-Wa,-march=knl"
+	if [ "${cc_vendor}" == "clang" ]; then
+		cflags="-march=knl"
 	fi
 
 	asm_fp=$(find ${asm_dir} -name "avx512f.s")
@@ -1530,8 +1544,8 @@ check_assembler()
 	#
 
 	# The assembler on OS X won't recognize AVX-512 without help.
-	if [ "$(uname -s)" == "Darwin" ]; then
-		cflags="-Wa,-march=skylake-avx512"
+	if [ "${cc_vendor}" == "clang" ]; then
+		cflags="-march=skylake-avx512"
 	fi
 
 	asm_fp=$(find ${asm_dir} -name "avx512dq.s")
