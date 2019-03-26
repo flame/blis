@@ -33,7 +33,15 @@
 */
 
 #include <unistd.h>
-#include "blis.h"
+#ifdef EIGEN
+  #define BLIS_DISABLE_BLAS_DEFS
+  #include "blis.h"
+  #include <Eigen/Core>
+  #include <Eigen/src/misc/blas.h>
+  using namespace Eigen;
+#else
+  #include "blis.h"
+#endif
 
 //#define PRINT
 
