@@ -33,7 +33,15 @@
 */
 
 #include <unistd.h>
-#include "blis.h"
+#ifdef EIGEN
+  #define BLIS_DISABLE_BLAS_DEFS
+  #include "blis.h"
+  #include <Eigen/Core>
+  #include <Eigen/src/misc/blas.h>
+  using namespace Eigen;
+#else
+  #include "blis.h"
+#endif
 
 //#define PRINT
 
@@ -197,11 +205,11 @@ int main( int argc, char** argv )
 				f77_int   lda    = bli_obj_col_stride( &a );
 				f77_int   ldb    = bli_obj_col_stride( &b );
 				f77_int   ldc    = bli_obj_col_stride( &c );
-				float*    alphap = bli_obj_buffer( &alpha );
-				float*    ap     = bli_obj_buffer( &a );
-				float*    bp     = bli_obj_buffer( &b );
-				float*    betap  = bli_obj_buffer( &beta );
-				float*    cp     = bli_obj_buffer( &c );
+				float*    alphap = ( float* )bli_obj_buffer( &alpha );
+				float*    ap     = ( float* )bli_obj_buffer( &a );
+				float*    bp     = ( float* )bli_obj_buffer( &b );
+				float*    betap  = ( float* )bli_obj_buffer( &beta );
+				float*    cp     = ( float* )bli_obj_buffer( &c );
 
 				ssymm_( &f77_side,
 						&f77_uploa,
@@ -220,11 +228,11 @@ int main( int argc, char** argv )
 				f77_int   lda    = bli_obj_col_stride( &a );
 				f77_int   ldb    = bli_obj_col_stride( &b );
 				f77_int   ldc    = bli_obj_col_stride( &c );
-				double*   alphap = bli_obj_buffer( &alpha );
-				double*   ap     = bli_obj_buffer( &a );
-				double*   bp     = bli_obj_buffer( &b );
-				double*   betap  = bli_obj_buffer( &beta );
-				double*   cp     = bli_obj_buffer( &c );
+				double*   alphap = ( double* )bli_obj_buffer( &alpha );
+				double*   ap     = ( double* )bli_obj_buffer( &a );
+				double*   bp     = ( double* )bli_obj_buffer( &b );
+				double*   betap  = ( double* )bli_obj_buffer( &beta );
+				double*   cp     = ( double* )bli_obj_buffer( &c );
 
 				dsymm_( &f77_side,
 						&f77_uploa,
@@ -243,11 +251,19 @@ int main( int argc, char** argv )
 				f77_int   lda    = bli_obj_col_stride( &a );
 				f77_int   ldb    = bli_obj_col_stride( &b );
 				f77_int   ldc    = bli_obj_col_stride( &c );
-				scomplex* alphap = bli_obj_buffer( &alpha );
-				scomplex* ap     = bli_obj_buffer( &a );
-				scomplex* bp     = bli_obj_buffer( &b );
-				scomplex* betap  = bli_obj_buffer( &beta );
-				scomplex* cp     = bli_obj_buffer( &c );
+#ifdef EIGEN
+				float*    alphap = ( float*    )bli_obj_buffer( &alpha );
+				float*    ap     = ( float*    )bli_obj_buffer( &a );
+				float*    bp     = ( float*    )bli_obj_buffer( &b );
+				float*    betap  = ( float*    )bli_obj_buffer( &beta );
+				float*    cp     = ( float*    )bli_obj_buffer( &c );
+#else
+				scomplex* alphap = ( scomplex* )bli_obj_buffer( &alpha );
+				scomplex* ap     = ( scomplex* )bli_obj_buffer( &a );
+				scomplex* bp     = ( scomplex* )bli_obj_buffer( &b );
+				scomplex* betap  = ( scomplex* )bli_obj_buffer( &beta );
+				scomplex* cp     = ( scomplex* )bli_obj_buffer( &c );
+#endif
 
 				chemm_( &f77_side,
 						&f77_uploa,
@@ -266,11 +282,19 @@ int main( int argc, char** argv )
 				f77_int   lda    = bli_obj_col_stride( &a );
 				f77_int   ldb    = bli_obj_col_stride( &b );
 				f77_int   ldc    = bli_obj_col_stride( &c );
-				dcomplex* alphap = bli_obj_buffer( &alpha );
-				dcomplex* ap     = bli_obj_buffer( &a );
-				dcomplex* bp     = bli_obj_buffer( &b );
-				dcomplex* betap  = bli_obj_buffer( &beta );
-				dcomplex* cp     = bli_obj_buffer( &c );
+#ifdef EIGEN
+				double*   alphap = ( double*   )bli_obj_buffer( &alpha );
+				double*   ap     = ( double*   )bli_obj_buffer( &a );
+				double*   bp     = ( double*   )bli_obj_buffer( &b );
+				double*   betap  = ( double*   )bli_obj_buffer( &beta );
+				double*   cp     = ( double*   )bli_obj_buffer( &c );
+#else
+				dcomplex* alphap = ( dcomplex* )bli_obj_buffer( &alpha );
+				dcomplex* ap     = ( dcomplex* )bli_obj_buffer( &a );
+				dcomplex* bp     = ( dcomplex* )bli_obj_buffer( &b );
+				dcomplex* betap  = ( dcomplex* )bli_obj_buffer( &beta );
+				dcomplex* cp     = ( dcomplex* )bli_obj_buffer( &c );
+#endif
 
 				zhemm_( &f77_side,
 						&f77_uploa,
