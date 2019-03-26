@@ -180,6 +180,14 @@ CXXFLAGS       += -I$(EIGEN_INC)
 CXXFLAGS_ST    := -march=native $(subst -fopenmp,,$(CXXFLAGS))
 CXXFLAGS_MT    := -march=native $(CXXFLAGS)
 
+# Define a set of CFLAGS for use with C++ and Eigen.
+CXXFLAGS       := $(subst -std=c99,-std=c++11,$(CFLAGS))
+CXXFLAGS       += -I$(EIGEN_INC)
+
+# Create a copy of CXXFLAGS without -fopenmp in order to disable multithreading.
+CXXFLAGS_ST    := -march=native $(subst -fopenmp,,$(CXXFLAGS))
+CXXFLAGS_MT    := -march=native $(CXXFLAGS)
+
 
 # Which library?
 BLI_DEF  := -DBLIS
@@ -435,13 +443,13 @@ test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
 
 
 test_%_$(PS_MAX)_eigen_st.x:    test_%_$(PS_MAX)_eigen_st.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGEN_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P1_MAX)_eigen_1s.x:    test_%_$(P1_MAX)_eigen_1s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P2_MAX)_eigen_2s.x:    test_%_$(P2_MAX)_eigen_2s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 
 test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o   $(LIBBLIS_LINK)
