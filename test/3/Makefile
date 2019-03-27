@@ -97,6 +97,8 @@ OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
 # Eigen
 EIGEN_INC      := $(HOME)/flame/eigen/include/eigen3
+EIGEN_LIB      := $(HOME_LIB_PATH)/libeigen_blas_static.a
+EIGENP_LIB     := $(EIGEN_LIB)
 
 # MKL
 MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
@@ -330,26 +332,35 @@ get-dt-cpp = $(strip \
 
 # A function to return other cpp macros that help the test driver
 # identify the implementation.
+#get-bl-cpp = $(strip \
+#             $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
+#             $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
+#             $(if $(findstring    eigen,$(1)),$(STR_EIG) $(EIG_DEF),\
+#                                              $(STR_VEN) $(BLA_DEF)))))
+
 get-bl-cpp = $(strip \
              $(if $(findstring     blis,$(1)),$(STR_NAT) $(BLI_DEF),\
              $(if $(findstring openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
-             $(if $(findstring    eigen,$(1)),$(STR_EIG) $(EIG_DEF),\
+             $(if $(and $(findstring eigen,$(1)),\
+                        $(findstring  gemm,$(2))),\
+                                              $(STR_EIG) $(EIG_DEF),\
                                               $(STR_VEN) $(BLA_DEF)))))
+
 
 # Rules for BLIS and BLAS libraries.
 define make-st-rule
 test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_ST) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_ST) -c $$< -o $$@
 endef
 
 define make-1s-rule
 test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_1S) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_1S) -c $$< -o $$@
 endef
 
 define make-2s-rule
 test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
-	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_2S) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_2S) -c $$< -o $$@
 endef
 
 $(foreach dt,$(DTS), \
@@ -367,17 +378,17 @@ $(foreach im,$(BIMPLS),$(eval $(call make-2s-rule,$(dt),$(op),$(im))))))
 # Rules for Eigen.
 define make-eigst-rule
 test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_ST) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_ST) -c $$< -o $$@
+	$(CXX) $(CXXFLAGS_ST) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_ST) -c $$< -o $$@
 endef
 
 define make-eig1s-rule
 test_$(1)$(2)_$(P1_MAX)_$(3)_1s.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_1S) -c $$< -o $$@
+	$(CXX) $(CXXFLAGS_MT) $(PDEF_1S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_1S) -c $$< -o $$@
 endef
 
 define make-eig2s-rule
 test_$(1)$(2)_$(P2_MAX)_$(3)_2s.o: test_$(op).c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3)) $(DNAT) $(STR_2S) -c $$< -o $$@
+	$(CXX) $(CXXFLAGS_MT) $(PDEF_2S) $(call get-dt-cpp,$(1)) $(call get-bl-cpp,$(3),$(2)) $(DNAT) $(STR_2S) -c $$< -o $$@
 endef
 
 $(foreach dt,$(DTS), \
@@ -421,13 +432,13 @@ test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
 
 
 test_%_$(PS_MAX)_eigen_st.x:    test_%_$(PS_MAX)_eigen_st.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGEN_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P1_MAX)_eigen_1s.x:    test_%_$(P1_MAX)_eigen_1s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P2_MAX)_eigen_2s.x:    test_%_$(P2_MAX)_eigen_2s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 
 test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o   $(LIBBLIS_LINK)
