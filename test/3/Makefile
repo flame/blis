@@ -358,6 +358,7 @@ get-bl-cpp = $(strip \
                                               $(STR_VEN) $(BLA_DEF))))))
 
 
+
 # Rules for BLIS and BLAS libraries.
 define make-st-rule
 test_$(1)$(2)_$(PS_MAX)_$(3)_st.o: test_$(op).c Makefile
@@ -443,13 +444,13 @@ test_%_$(P2_MAX)_openblas_2s.x: test_%_$(P2_MAX)_openblas_2s.o $(LIBBLIS_LINK)
 
 
 test_%_$(PS_MAX)_eigen_st.x:    test_%_$(PS_MAX)_eigen_st.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGEN_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P1_MAX)_eigen_1s.x:    test_%_$(P1_MAX)_eigen_1s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P2_MAX)_eigen_2s.x:    test_%_$(P2_MAX)_eigen_2s.o    $(LIBBLIS_LINK)
-	$(CXX) $(strip $<                   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+	$(CXX) $(strip $<  $(EIGENP_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 
 test_%_$(PS_MAX)_vendor_st.x:   test_%_$(PS_MAX)_vendor_st.o   $(LIBBLIS_LINK)
