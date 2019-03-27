@@ -344,7 +344,9 @@ get-bl-cpp = $(strip \
              $(if $(and $(findstring eigen,$(1)),\
                         $(findstring  gemm,$(2))),\
                                               $(STR_EIG) $(EIG_DEF),\
-                                              $(STR_VEN) $(BLA_DEF)))))
+             $(if       $(findstring eigen,$(1)),\
+                                              $(STR_EIG) $(BLA_DEF),\
+                                              $(STR_VEN) $(BLA_DEF))))))
 
 
 # Rules for BLIS and BLAS libraries.
