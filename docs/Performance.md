@@ -194,6 +194,13 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=26` (multithreaded, 26 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=52` (multithreaded, 52 cores)
+  * Eigen 3.3.7
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
+    * Requested threading via `export OMP_NUM_THREADS=26` (multithreaded, 26 cores)
+    * Requested threading via `export OMP_NUM_THREADS=52` (multithreaded, 52 cores)
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2019 update 1
     * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export MKL_NUM_THREADS=26` (multithreaded, 26 cores)
@@ -251,6 +258,13 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=12` (multithreaded, 12 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=24` (multithreaded, 24 cores)
+  * Eigen 3.3.7
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
+    * Requested threading via `export OMP_NUM_THREADS=12` (multithreaded, 12 cores)
+    * Requested threading via `export OMP_NUM_THREADS=24` (multithreaded, 24 cores)
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2018 update 2
     * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export MKL_NUM_THREADS=12` (multithreaded, 12 cores)
@@ -309,6 +323,13 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=32` (multithreaded, 32 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=64` (multithreaded, 64 cores)
+  * Eigen 3.3.7
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
+    * Requested threading via `export OMP_NUM_THREADS=32` (multithreaded, 32 cores)
+    * Requested threading via `export OMP_NUM_THREADS=64` (multithreaded, 64 cores)
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2019 update 1
     * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export MKL_NUM_THREADS=32` (multithreaded, 32 cores)
