@@ -48,14 +48,14 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,  FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_2x2,  FALSE,
 		cntx
 	);
-/*
+
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     8,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     2,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,    64,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   256,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,  4096,     0,     0 );
@@ -72,6 +72,6 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 	  cntx
 	);
-*/
+
 }
 

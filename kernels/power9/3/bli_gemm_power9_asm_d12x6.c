@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_dgemm_power9_asm_12x6
+void bli_dgemm_power9_asm_2x2
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -51,7 +51,7 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
+	uint64_t k_iter = k0;
 	uint64_t k_left = k0 % 4;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
@@ -59,40 +59,41 @@ void bli_dgemm_power9_asm_12x6
 	__asm__ volatile
 	(
 	"                                               \n\t"
-	"ld               %%r26, %6                     \n\t" // load addrs of matrices
-  "ld               %%r27, %2                     \n\t"
-  "ld               %%r28, %3                     \n\t"
-  //"lxv              %%vs30, 0(%%r26)              \n\t"
-  //"lxv              %%vs31, 16(%%r26)             \n\t"
+	"ld               %%r26, %6                     \n\t" // c
+  "ld               %%r27, %2                     \n\t" // a
+  "ld               %%r28, %3                     \n\t" // b
+  "                                               \n\t" 
+  "                                               \n\t" // indices
+  "li               %%r10,0                       \n\t" // for b
+  "li               %%r14,32                      \n\t" // for c
+  "li               %%r15,0                       \n\t" // for c
+  "li               %%r16,32                       \n\t" // for a
+  "lxvd2x           %%vs3, %%r15, %%r26           \n\t" // load col of c
+  // "lxvd2x           %%vs4, %%r14, %%r26           \n\t" // load col of c
   "                                               \n\t"
-  "ld               %%r6, %0                      \n\t"
-  "mtctr            %%r6                          \n\t"
+  // "ld               %%r30, %0                     \n\t" // k_iter
+  // "mtctr            %%r30                         \n\t"
+  // "loop:                                          \n\t"
   "                                               \n\t"
-  "li               %%r10,0                       \n\t"
-  "li               %%r15,0                       \n\t"
-  "li               %%r16,0                       \n\t"
-  "                                               \n\t"
-  "loop:                                          \n\t"
-  "                                               \n\t"
-  "lxvd2x           %%vs0, %%r16, %%r27           \n\t"
-  "lxvdsx           %%vs1, %%r10, %%r28           \n\t"
-  // "                                               \n\t"
-  "xvmuldp          %%vs3, %%vs0, %%vs1           \n\t"
-  "stxvd2x          %%vs3, %%r15, %%r26           \n\t"
-  // "                                               \n\t"
-  // "addi             %%r10, %%r10, 8               \n\t"
-  // "lxvdsx           %%vs1, %%r10, %%r28           \n\t"
-  // "                                               \n\t"
-  // "xvmuldp          %%vs4, %%vs0, %%vs1            \n\t"
-  // "stxvd2x          %%vs3, %%r15, %%r26            \n\t"
-  // "                                               \n\t"
-  "addi             %%r15, %%r27, 64              \n\t"
-  "addi             %%r, %%r28, 16              \n\t"
-  // "                                               \n\t"
-  "bdnz             loop                          \n\t"
-  // "                                               \n\t"
+  "lxvd2x           %%vs0, %%r16, %%r27           \n\t" // load col of a
+  // "                                                \n\t"
+  // "                                                \n\t"
+  "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat an elem of b
+  "xvmaddadp        %%vs3, %%vs0, %%vs1           \n\t" // mult a * b 
+  // "                                                \n\t"
+  // "addi             %%r10, %%r10, 8               \n\t" // go to next elem of b
+  // // "                                                \n\t"
+  // "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat new elem
+  // "xvmaddadp        %%vs4, %%vs0, %%vs1           \n\t" // a * b
+  // // "                                                \n\t"
+  // "addi             %%r16, %%r16, 32              \n\t" // move a to next col
+  // "addi             %%r10, %%r10, 24              \n\t" // move b to next row
+  // // "                                                \n\t"
+  // "bdnz             loop                          \n\t"
+  "stxvd2x          %%vs3, %%r14, %%r26           \n\t" 
+  // "stxvd2x          %%vs3, %%r14, %%r26           \n\t" 
+  // "                                                \n\t"
   
-  //"stxv               %%vs31, 16(%%r26)           \n\t"
 
 	: // output operands (none)
 	: // input operands
@@ -108,9 +109,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
-	/*Unclobberable registers: r1 (stk ptr), r2(toc ptr), r11(env ptr),
-	r13(64b mode thread local data ptr, r30(stk frm ptr), r31(stk frm ptr) */
-  "r26", "r27", "r28", "r10", "r15", "r16", "vs0", "vs1", "vs3"
+  "r26", "r27", "r28", "r10", "r14", "r15", "r16", "r30", "vs0", "vs1", "vs3"
 	);
 }
 
