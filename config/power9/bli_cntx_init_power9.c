@@ -45,21 +45,12 @@ void bli_cntx_init_power9( cntx_t* cntx )
 
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
-<<<<<<< HEAD
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,  FALSE,
 		cntx
 	);
-=======
-//	bli_cntx_set_l3_nat_ukrs
-//	(
-//	  1,
-//	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power7_int_8x4,  FALSE,
-//	  cntx
-//	);
->>>>>>> feefcab4427a75b0b55af215486b85abcda314f7
 /*
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
