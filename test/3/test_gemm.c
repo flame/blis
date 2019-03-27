@@ -33,7 +33,15 @@
 */
 
 #include <unistd.h>
-#include "blis.h"
+#ifdef EIGEN
+  #define BLIS_DISABLE_BLAS_DEFS
+  #include "blis.h"
+  #include <Eigen/Core>
+  #include <Eigen/src/misc/blas.h>
+  using namespace Eigen;
+#else
+  #include "blis.h"
+#endif
 
 //#define PRINT
 
@@ -161,6 +169,42 @@ int main( int argc, char** argv )
 		bli_ind_enable_dt( ind, dt );
 #endif
 
+#ifdef EIGEN
+		double alpha_r, alpha_i;
+
+		bli_getsc( &alpha, &alpha_r, &alpha_i );
+
+		void* ap = bli_obj_buffer_at_off( &a );
+		void* bp = bli_obj_buffer_at_off( &b );
+		void* cp = bli_obj_buffer_at_off( &c );
+
+		const int os_a = bli_obj_col_stride( &a );
+		const int os_b = bli_obj_col_stride( &b );
+		const int os_c = bli_obj_col_stride( &c );
+
+		Stride<Dynamic,1> stride_a( os_a, 1 );
+		Stride<Dynamic,1> stride_b( os_b, 1 );
+		Stride<Dynamic,1> stride_c( os_c, 1 );
+
+	#if defined(IS_FLOAT)
+		Map<MatrixXf,  0, Stride<Dynamic,1> > A( ( float*  )ap, m, k, stride_a );
+		Map<MatrixXf,  0, Stride<Dynamic,1> > B( ( float*  )bp, k, n, stride_b );
+		Map<MatrixXf,  0, Stride<Dynamic,1> > C( ( float*  )cp, m, n, stride_c );
+	#elif defined (IS_DOUBLE)
+		Map<MatrixXd,  0, Stride<Dynamic,1> > A( ( double* )ap, m, k, stride_a );
+		Map<MatrixXd,  0, Stride<Dynamic,1> > B( ( double* )bp, k, n, stride_b );
+		Map<MatrixXd,  0, Stride<Dynamic,1> > C( ( double* )cp, m, n, stride_c );
+	#elif defined (IS_SCOMPLEX)
+		Map<MatrixXcf, 0, Stride<Dynamic,1> > A( ( std::complex<float>*  )ap, m, k, stride_a );
+		Map<MatrixXcf, 0, Stride<Dynamic,1> > B( ( std::complex<float>*  )bp, k, n, stride_b );
+		Map<MatrixXcf, 0, Stride<Dynamic,1> > C( ( std::complex<float>*  )cp, m, n, stride_c );
+	#elif defined (IS_DCOMPLEX)
+		Map<MatrixXcd, 0, Stride<Dynamic,1> > A( ( std::complex<double>* )ap, m, k, stride_a );
+		Map<MatrixXcd, 0, Stride<Dynamic,1> > B( ( std::complex<double>* )bp, k, n, stride_b );
+		Map<MatrixXcd, 0, Stride<Dynamic,1> > C( ( std::complex<double>* )cp, m, n, stride_c );
+	#endif
+#endif
+
 		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -175,7 +219,7 @@ int main( int argc, char** argv )
 			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
-#ifdef BLIS
+#if defined(BLIS)
 
 			bli_gemm( &alpha,
 			          &a,
@@ -183,21 +227,25 @@ int main( int argc, char** argv )
 			          &beta,
 			          &c );
 
-#else
+#elif defined(EIGEN)
+
+			C.noalias() += alpha_r * A * B;
+
+#else // if defined(BLAS)
 
 			if ( bli_is_float( dt ) )
 			{
-				f77_int  mm     = bli_obj_length( &c );
-				f77_int  kk     = bli_obj_width_after_trans( &a );
-				f77_int  nn     = bli_obj_width( &c );
-				f77_int  lda    = bli_obj_col_stride( &a );
-				f77_int  ldb    = bli_obj_col_stride( &b );
-				f77_int  ldc    = bli_obj_col_stride( &c );
-				float*   alphap = bli_obj_buffer( &alpha );
-				float*   ap     = bli_obj_buffer( &a );
-				float*   bp     = bli_obj_buffer( &b );
-				float*   betap  = bli_obj_buffer( &beta );
-				float*   cp     = bli_obj_buffer( &c );
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width_after_trans( &a );
+				f77_int   nn     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldb    = bli_obj_col_stride( &b );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				float*    alphap = ( float* )bli_obj_buffer( &alpha );
+				float*    ap     = ( float* )bli_obj_buffer( &a );
+				float*    bp     = ( float* )bli_obj_buffer( &b );
+				float*    betap  = ( float* )bli_obj_buffer( &beta );
+				float*    cp     = ( float* )bli_obj_buffer( &c );
 
 				sgemm_( &f77_transa,
 						&f77_transb,
@@ -212,17 +260,17 @@ int main( int argc, char** argv )
 			}
 			else if ( bli_is_double( dt ) )
 			{
-				f77_int  mm     = bli_obj_length( &c );
-				f77_int  kk     = bli_obj_width_after_trans( &a );
-				f77_int  nn     = bli_obj_width( &c );
-				f77_int  lda    = bli_obj_col_stride( &a );
-				f77_int  ldb    = bli_obj_col_stride( &b );
-				f77_int  ldc    = bli_obj_col_stride( &c );
-				double*  alphap = bli_obj_buffer( &alpha );
-				double*  ap     = bli_obj_buffer( &a );
-				double*  bp     = bli_obj_buffer( &b );
-				double*  betap  = bli_obj_buffer( &beta );
-				double*  cp     = bli_obj_buffer( &c );
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width_after_trans( &a );
+				f77_int   nn     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldb    = bli_obj_col_stride( &b );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				double*   alphap = ( double* )bli_obj_buffer( &alpha );
+				double*   ap     = ( double* )bli_obj_buffer( &a );
+				double*   bp     = ( double* )bli_obj_buffer( &b );
+				double*   betap  = ( double* )bli_obj_buffer( &beta );
+				double*   cp     = ( double* )bli_obj_buffer( &c );
 
 				dgemm_( &f77_transa,
 						&f77_transb,
@@ -237,17 +285,17 @@ int main( int argc, char** argv )
 			}
 			else if ( bli_is_scomplex( dt ) )
 			{
-				f77_int  mm     = bli_obj_length( &c );
-				f77_int  kk     = bli_obj_width_after_trans( &a );
-				f77_int  nn     = bli_obj_width( &c );
-				f77_int  lda    = bli_obj_col_stride( &a );
-				f77_int  ldb    = bli_obj_col_stride( &b );
-				f77_int  ldc    = bli_obj_col_stride( &c );
-				scomplex*  alphap = bli_obj_buffer( &alpha );
-				scomplex*  ap     = bli_obj_buffer( &a );
-				scomplex*  bp     = bli_obj_buffer( &b );
-				scomplex*  betap  = bli_obj_buffer( &beta );
-				scomplex*  cp     = bli_obj_buffer( &c );
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width_after_trans( &a );
+				f77_int   nn     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldb    = bli_obj_col_stride( &b );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				scomplex* alphap = ( scomplex* )bli_obj_buffer( &alpha );
+				scomplex* ap     = ( scomplex* )bli_obj_buffer( &a );
+				scomplex* bp     = ( scomplex* )bli_obj_buffer( &b );
+				scomplex* betap  = ( scomplex* )bli_obj_buffer( &beta );
+				scomplex* cp     = ( scomplex* )bli_obj_buffer( &c );
 
 				cgemm_( &f77_transa,
 						&f77_transb,
@@ -262,17 +310,17 @@ int main( int argc, char** argv )
 			}
 			else if ( bli_is_dcomplex( dt ) )
 			{
-				f77_int  mm     = bli_obj_length( &c );
-				f77_int  kk     = bli_obj_width_after_trans( &a );
-				f77_int  nn     = bli_obj_width( &c );
-				f77_int  lda    = bli_obj_col_stride( &a );
-				f77_int  ldb    = bli_obj_col_stride( &b );
-				f77_int  ldc    = bli_obj_col_stride( &c );
-				dcomplex*  alphap = bli_obj_buffer( &alpha );
-				dcomplex*  ap     = bli_obj_buffer( &a );
-				dcomplex*  bp     = bli_obj_buffer( &b );
-				dcomplex*  betap  = bli_obj_buffer( &beta );
-				dcomplex*  cp     = bli_obj_buffer( &c );
+				f77_int   mm     = bli_obj_length( &c );
+				f77_int   kk     = bli_obj_width_after_trans( &a );
+				f77_int   nn     = bli_obj_width( &c );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				f77_int   ldb    = bli_obj_col_stride( &b );
+				f77_int   ldc    = bli_obj_col_stride( &c );
+				dcomplex* alphap = ( dcomplex* )bli_obj_buffer( &alpha );
+				dcomplex* ap     = ( dcomplex* )bli_obj_buffer( &a );
+				dcomplex* bp     = ( dcomplex* )bli_obj_buffer( &b );
+				dcomplex* betap  = ( dcomplex* )bli_obj_buffer( &beta );
+				dcomplex* cp     = ( dcomplex* )bli_obj_buffer( &c );
 
 				zgemm_( &f77_transa,
 						&f77_transb,
