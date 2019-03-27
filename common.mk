@@ -530,6 +530,11 @@ ifeq ($(IS_WIN),no)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
+# On windows, use the shared library even if static is created.
+ifeq ($(IS_WIN),yes)
+LIBBLIS_L      := $(LIBBLIS_SO)
+LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+endif
 endif
 
 
