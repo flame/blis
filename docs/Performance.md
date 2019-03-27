@@ -183,7 +183,7 @@ size of interest so that we can better assist you.
   * multicore: 64 GFLOPS/core (double-precision), 128 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Compiler: gcc 7.3.0
-* Results gathered: 6 March 2019
+* Results gathered: 6 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
@@ -197,6 +197,7 @@ size of interest so that we can better assist you.
   * Eigen 3.3.7
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OMP_NUM_THREADS=26` (multithreaded, 26 cores)
     * Requested threading via `export OMP_NUM_THREADS=52` (multithreaded, 52 cores)
@@ -208,7 +209,10 @@ size of interest so that we can better assist you.
 * Affinity:
   * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 51"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
-  * No changes made.
+  * Driver: acpi-cpufreq
+  * Governor: performance
+  * Hardware limits: 1.0GHz - 2.0GHz
+  * Adjusted minimum: 2.0GHz
 * Comments:
   * MKL yields superb performance for most operations, though BLIS is not far behind except for trsm. (We understand the trsm underperformance and hope to address it in the future.) OpenBLAS lags far behind MKL and BLIS due to lack of full support for AVX-512, and possibly other reasons related to software architecture and register/cache blocksizes.
 
@@ -247,7 +251,7 @@ size of interest so that we can better assist you.
   * multicore: 49.6 GFLOPS/core (double-precision), 99.2 GFLOPS/core (single-precision)
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Compiler: gcc 6.3.0
-* Results gathered: 25-26 February 2019
+* Results gathered: 25-26 February 2019, 27 March 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
@@ -261,6 +265,7 @@ size of interest so that we can better assist you.
   * Eigen 3.3.7
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OMP_NUM_THREADS=12` (multithreaded, 12 cores)
     * Requested threading via `export OMP_NUM_THREADS=24` (multithreaded, 24 cores)
@@ -312,7 +317,7 @@ size of interest so that we can better assist you.
   * multicore: 20.4 GFLOPS/core (double-precision), 40.8 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Compiler: gcc 7.3.0
-* Results gathered: 6 March 2019, 19 March 2019
+* Results gathered: 6 March 2019, 19 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
@@ -326,6 +331,7 @@ size of interest so that we can better assist you.
   * Eigen 3.3.7
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OMP_NUM_THREADS=32` (multithreaded, 32 cores)
     * Requested threading via `export OMP_NUM_THREADS=64` (multithreaded, 64 cores)
