@@ -194,7 +194,8 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=26` (multithreaded, 26 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=52` (multithreaded, 52 cores)
-  * Eigen 3.3.7
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
@@ -214,7 +215,7 @@ size of interest so that we can better assist you.
   * Hardware limits: 1.0GHz - 2.0GHz
   * Adjusted minimum: 2.0GHz
 * Comments:
-  * MKL yields superb performance for most operations, though BLIS is not far behind except for trsm. (We understand the trsm underperformance and hope to address it in the future.) OpenBLAS lags far behind MKL and BLIS due to lack of full support for AVX-512, and possibly other reasons related to software architecture and register/cache blocksizes.
+  * MKL yields superb performance for most operations, though BLIS is not far behind except for `trsm`. (We understand the `trsm` underperformance and hope to address it in the future.) OpenBLAS lags far behind MKL and BLIS due to lack of full support for AVX-512, and possibly other reasons related to software architecture and register/cache blocksizes.
 
 ### SkylakeX results
 
@@ -262,7 +263,8 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=12` (multithreaded, 12 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=24` (multithreaded, 24 cores)
-  * Eigen 3.3.7
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
@@ -328,7 +330,8 @@ size of interest so that we can better assist you.
     * Requested threading via `export OPENBLAS_NUM_THREADS=1` (single-threaded)
     * Requested threading via `export OPENBLAS_NUM_THREADS=32` (multithreaded, 32 cores)
     * Requested threading via `export OPENBLAS_NUM_THREADS=64` (multithreaded, 64 cores)
-  * Eigen 3.3.7
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.

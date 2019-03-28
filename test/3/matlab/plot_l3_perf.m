@@ -144,8 +144,8 @@ if rows == 4 && cols == 5
 			              'Location', legend_loc );
 		end
 		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize-3 );
-		%set( leg,'Position',[11.20 12.81 0.7 0.3 ] ); % (0,2br)
-		set( leg,'Position',[ 4.20 12.81 0.7 0.3 ] ); % (0,0br)
+		set( leg,'Position',[11.20 12.81 0.7 0.3 ] ); % (0,2br)
+		%set( leg,'Position',[ 4.20 12.81 0.7 0.3 ] ); % (0,0br)
 	elseif nth > 1 && theid == 4
 		if with_eigen == 1
 			leg = legend( [ blis_ln open_ln eige_ln vend_ln ], ...
@@ -158,6 +158,7 @@ if rows == 4 && cols == 5
 		end
 		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize-3 );
 		%set( leg,'Position',[7.70 12.81 0.7 0.3 ] ); % (0,1br)
+		%set( leg,'Position',[11.20 12.81 0.7 0.3 ] ); % (0,2br)
 		set( leg,'Position',[10.47 14.17 0.7 0.3 ] ); % (0,2tl)
 	end
 end
