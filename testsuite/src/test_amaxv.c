@@ -362,7 +362,7 @@ void PASTEMAC0(opname) \
 */ \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH(tname,_vft) f = \
 	PASTEMAC(opname,_qfp)( dt ); \
 \

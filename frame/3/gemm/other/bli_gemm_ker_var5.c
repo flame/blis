@@ -45,7 +45,7 @@ typedef void (*FUNCPTR_T)(
                            void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b,
                            void*   beta,
                            void*   c, inc_t rs_c, inc_t cs_c,
-                           void*   gemm_ukr
+                           void_fp gemm_ukr
                          );
 
 static FUNCPTR_T GENARRAY(ftypes,gemm_ker_var5);
@@ -87,7 +87,7 @@ void bli_gemm_ker_var5( obj_t*  a,
 	FUNCPTR_T f;
 
 	func_t*   gemm_ukrs;
-	void*     gemm_ukr;
+	void_fp   gemm_ukr;
 
 
 	// Detach and multiply the scalars attached to A and B.
@@ -135,7 +135,7 @@ void PASTEMAC(ch,varname)( \
                            void*   b, inc_t rs_b, dim_t pd_b, inc_t ps_b, \
                            void*   beta, \
                            void*   c, inc_t rs_c, inc_t cs_c, \
-                           void*   gemm_ukr  \
+                           void_fp gemm_ukr  \
                          ) \
 { \
 	/* Cast the micro-kernel address to its function pointer type. */ \

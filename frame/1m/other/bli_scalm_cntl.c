@@ -36,7 +36,7 @@
 
 cntl_t* bli_scalm_cntl_create_node
      (
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      )
 {

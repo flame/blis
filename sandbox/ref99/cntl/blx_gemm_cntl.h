@@ -62,7 +62,7 @@ cntl_t* blx_gemm_cntl_create_node
      (
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      );
 
