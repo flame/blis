@@ -70,7 +70,12 @@ GENFRONT( sumsqv )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-GENARRAY_FPA( void*, opname ); \
+/*
+GENARRAY_FPA( void_fp, opname ); \
+*/ \
+\
+GENARRAY_FPA( PASTECH(opname,_vft), \
+              PASTECH0(opname) ); \
 \
 PASTECH(opname,_vft) \
 PASTEMAC(opname,_qfp)( num_t dt ) \

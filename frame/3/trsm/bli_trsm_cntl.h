@@ -69,7 +69,7 @@ cntl_t* bli_trsm_cntl_create_node
        rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
-       void*   var_func, 
+       void_fp var_func,
        cntl_t* sub_node
      );
 

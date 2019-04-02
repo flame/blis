@@ -140,6 +140,9 @@
 #define PASTEBLACHK_(op)           bla_ ## op ## _check
 #define PASTEBLACHK(op)            PASTEBLACHK_(op)
 
+#define PASTECH0_(op)              op
+#define PASTECH0(op)               PASTECH0_(op)
+
 #define PASTECH_(ch,op)            ch ## op
 #define PASTECH(ch,op)             PASTECH_(ch,op)
 

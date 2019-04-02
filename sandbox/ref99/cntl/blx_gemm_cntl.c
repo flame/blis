@@ -55,9 +55,9 @@ cntl_t* blx_gemmbp_cntl_create
        pack_t schema_b
      )
 {
-	void* macro_kernel_fp;
-	void* packa_fp;
-	void* packb_fp;
+	void_fp macro_kernel_fp;
+	void_fp packa_fp;
+	void_fp packb_fp;
 
 	macro_kernel_fp = blx_gemm_ker_var2;
 
@@ -158,7 +158,7 @@ cntl_t* blx_gemm_cntl_create_node
      (
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      )
 {

@@ -938,23 +938,12 @@ static guint_t bli_pack_schema_index( pack_t schema )
 // Increment a pointer by an integer fraction:
 //   p0 + (num/dem)
 // where p0 is a pointer to a datatype of size sizeof_p0.
-static void* bli_ptr_inc_by_frac( void* p0, siz_t sizeof_p0, dim_t num, dim_t den )
+static void_fp bli_ptr_inc_by_frac( void_fp p0, siz_t sizeof_p0, dim_t num, dim_t den )
 {
-	return ( void* )
+	return ( void_fp )
 	       ( ( char* )p0 + ( ( num * ( dim_t )sizeof_p0 ) / den ) );
 }
 
-static bool_t bli_is_null( void* p )
-{
-	return ( bool_t )
-	       ( p == NULL );
-}
-
-static bool_t bli_is_nonnull( void* p )
-{
-	return ( bool_t )
-	       ( p != NULL );
-}
 
 
 // Set dimensions, increments, effective uplo/diagoff, etc for ONE matrix

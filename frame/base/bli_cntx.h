@@ -217,7 +217,7 @@ static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_l3_vir_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+static void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	func_t* func = bli_cntx_get_l3_vir_ukrs( ukr_id, cntx );
 
@@ -232,7 +232,7 @@ static func_t* bli_cntx_get_l3_nat_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_l3_nat_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+static void_fp bli_cntx_get_l3_nat_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	func_t* func = bli_cntx_get_l3_nat_ukrs( ukr_id, cntx );
 
@@ -266,7 +266,7 @@ static func_t* bli_cntx_get_l1f_kers( l1fkr_t ker_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_l1f_ker_dt( num_t dt, l1fkr_t ker_id, cntx_t* cntx )
+static void_fp bli_cntx_get_l1f_ker_dt( num_t dt, l1fkr_t ker_id, cntx_t* cntx )
 {
 	func_t* func = bli_cntx_get_l1f_kers( ker_id, cntx );
 
@@ -283,7 +283,7 @@ static func_t* bli_cntx_get_l1v_kers( l1vkr_t ker_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
+static void_fp bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
 {
 	func_t* func = bli_cntx_get_l1v_kers( ker_id, cntx );
 
@@ -309,9 +309,9 @@ static func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+static void_fp bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	void* fp = NULL;
+	void_fp fp = NULL;
 
 	// Only query the context for the packm func_t (and then extract the
 	// datatype-specific function pointer) if the packm kernel being
@@ -344,9 +344,9 @@ static func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
 	return func;
 }
 
-static void* bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+static void_fp bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	void* fp = NULL;
+	void_fp fp = NULL;
 
 	// Only query the context for the unpackm func_t (and then extract the
 	// datatype-specific function pointer) if the unpackm kernel being
@@ -513,7 +513,7 @@ static void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 	funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_packm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+static void bli_cntx_set_packm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
 	func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
 
@@ -527,7 +527,7 @@ static void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx
 	funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_unpackm_ker_dt( void* fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+static void bli_cntx_set_unpackm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
 	func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
 
