@@ -1033,7 +1033,7 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	if [ $is_win = no ]; then
+	if [[ $is_win == no || "$cc_vendor" != "clang" ]]; then
 		ldflags="${LIBPTHREAD--lpthread}"
 	fi
 
@@ -2834,7 +2834,7 @@ main()
 	# For Windows builds, clear the libpthread_esc variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
-	if [ $is_win = yes ]; then
+	if [[ $is_win == yes && "$cc_vendor" == "clang" ]]; then
 		libpthread_esc=
 	fi
 
