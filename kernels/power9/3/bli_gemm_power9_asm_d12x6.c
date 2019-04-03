@@ -65,34 +65,33 @@ void bli_dgemm_power9_asm_2x2
   "                                               \n\t" 
   "                                               \n\t" // indices
   "li               %%r10,0                       \n\t" // for b
-  "li               %%r14,32                      \n\t" // for c
+  "li               %%r14,64                      \n\t" // for c
   "li               %%r15,0                       \n\t" // for c
-  "li               %%r16,32                       \n\t" // for a
+  "li               %%r16,0                       \n\t" // for a
+  "                                               \n\t"
   "lxvd2x           %%vs3, %%r15, %%r26           \n\t" // load col of c
-  // "lxvd2x           %%vs4, %%r14, %%r26           \n\t" // load col of c
+  "lxvd2x           %%vs4, %%r14, %%r26           \n\t" // load col of c
   "                                               \n\t"
-  // "ld               %%r30, %0                     \n\t" // k_iter
-  // "mtctr            %%r30                         \n\t"
-  // "loop:                                          \n\t"
-  "                                               \n\t"
+  "ld               %%r30, %0                     \n\t" // k_iter
+  "mtctr            %%r30                         \n\t"
+  "loop:                                          \n\t"
   "lxvd2x           %%vs0, %%r16, %%r27           \n\t" // load col of a
-  // "                                                \n\t"
-  // "                                                \n\t"
+  "                                               \n\t"
   "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat an elem of b
   "xvmaddadp        %%vs3, %%vs0, %%vs1           \n\t" // mult a * b 
+  // "                                               \n\t"
+  "addi             %%r10, %%r10, 8               \n\t" // go to next elem of b
+  // "                                               \n\t"
+  "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat new elem
+  "xvmaddadp        %%vs4, %%vs0, %%vs1           \n\t" // a * b
   // "                                                \n\t"
-  // "addi             %%r10, %%r10, 8               \n\t" // go to next elem of b
-  // // "                                                \n\t"
-  // "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat new elem
-  // "xvmaddadp        %%vs4, %%vs0, %%vs1           \n\t" // a * b
-  // // "                                                \n\t"
-  // "addi             %%r16, %%r16, 32              \n\t" // move a to next col
-  // "addi             %%r10, %%r10, 24              \n\t" // move b to next row
-  // // "                                                \n\t"
-  // "bdnz             loop                          \n\t"
-  "stxvd2x          %%vs3, %%r14, %%r26           \n\t" 
-  // "stxvd2x          %%vs3, %%r14, %%r26           \n\t" 
-  // "                                                \n\t"
+  "addi             %%r16, %%r16, 16              \n\t" // move a to next col
+  "addi             %%r10, %%r10, 8               \n\t" // move b to next row
+  // "                                               \n\t"
+  "bdnz             loop                          \n\t"
+  "stxvd2x          %%vs3, %%r15, %%r26           \n\t"
+  "stxvd2x          %%vs4, %%r14, %%r26           \n\t"
+  "                                               \n\t"
   
 
 	: // output operands (none)
