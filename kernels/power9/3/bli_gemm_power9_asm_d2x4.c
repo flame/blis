@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_dgemm_power9_asm_2x2
+void bli_dgemm_power9_asm_2x4
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -66,27 +66,57 @@ void bli_dgemm_power9_asm_2x2
   "                                               \n\t" // Create indices
   "li               %%r10,0                       \n\t" // for C (1st col)
   "li               %%r11,16                      \n\t" // for C (2nd col)
+  "li               %%r12,32                      \n\t" // for C (3rd col)
+  "li               %%r13,64                      \n\t" // for C (4th col)
   "                                               \n\t"
   "li               %%r20,0                       \n\t" // for A 
   "li               %%r30,0                       \n\t" // for B
   "                                               \n\t"
   "lxvd2x           %%vs0, %%r10, %%r1            \n\t" // Load 1st col of C
   "lxvd2x           %%vs1, %%r11, %%r1            \n\t" // Load 2nd col of C
+  "lxvd2x           %%vs2, %%r12, %%r1            \n\t" // Load 3rd col of C
+  "lxvd2x           %%vs3, %%r13, %%r1            \n\t" // Load 4th col of C
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
   "K_ITER_LOOP:                                   \n\t" // Begin k_iter loop
   "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
   "lxvd2x           %%vs20, %%r20, %%r2           \n\t" // Load a new col of A
   "                                               \n\t"
   "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
   "xvmaddadp        %%vs0, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 1st 
   "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index
   "                                               \n\t"
   "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
   "xvmaddadp        %%vs1, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 2nd
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs2, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 3rd
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs3, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 4th
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
   "                                               \n\t"
   "addi             %%r20, %%r20, 16              \n\t" // Move A's index to new col
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index to new row
@@ -96,6 +126,8 @@ void bli_dgemm_power9_asm_2x2
   "                                               \n\t"
   "stxvd2x          %%vs0, %%r10, %%r1            \n\t" // Store updated C in memory
   "stxvd2x          %%vs1, %%r11, %%r1            \n\t"
+  "stxvd2x          %%vs2, %%r12, %%r1            \n\t"
+  "stxvd2x          %%vs3, %%r13, %%r1            \n\t"
   "                                               \n\t"
   
 
