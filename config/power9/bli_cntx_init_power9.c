@@ -49,7 +49,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_2x4,  FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_2x6,  FALSE,
 		cntx
 	);
 #else
@@ -65,7 +65,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	//                                           s      d      c      z
 #if 1
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
 #else
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     2,     0,     0 );

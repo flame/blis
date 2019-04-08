@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_dgemm_power9_asm_2x4
+void bli_dgemm_power9_asm_2x6
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -66,16 +66,20 @@ void bli_dgemm_power9_asm_2x4
   "                                               \n\t" // Create indices
   "li               %%r10,0                       \n\t" // for C (1st col)
   "li               %%r11,16                      \n\t" // for C (2nd col)
-  "li               %%r12,32                      \n\t" // for C (3rd col)
-  "li               %%r13,64                      \n\t" // for C (4th col)
+  "li               %%r14,32                      \n\t" // for C (3rd col)
+  "li               %%r15,48                      \n\t" // for C (4th col)
+  "li               %%r16,64                      \n\t" // for C (3rd col)
+  "li               %%r17,80                      \n\t" // for C (4th col)
   "                                               \n\t"
   "li               %%r20,0                       \n\t" // for A 
   "li               %%r30,0                       \n\t" // for B
   "                                               \n\t"
   "lxvd2x           %%vs0, %%r10, %%r1            \n\t" // Load 1st col of C
   "lxvd2x           %%vs1, %%r11, %%r1            \n\t" // Load 2nd col of C
-  "lxvd2x           %%vs2, %%r12, %%r1            \n\t" // Load 3rd col of C
-  "lxvd2x           %%vs3, %%r13, %%r1            \n\t" // Load 4th col of C
+  "lxvd2x           %%vs2, %%r14, %%r1            \n\t" // Load 3rd col of C
+  "lxvd2x           %%vs3, %%r15, %%r1            \n\t" // Load 4th col of C
+  "lxvd2x           %%vs4, %%r16, %%r1            \n\t" // Load 3rd col of C
+  "lxvd2x           %%vs5, %%r17, %%r1            \n\t" // Load 4th col of C
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
@@ -84,10 +88,10 @@ void bli_dgemm_power9_asm_2x4
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
   "lxvd2x           %%vs20, %%r20, %%r2           \n\t" // Load a new col of A
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
   "                                               \n\t"
   "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
   "xvmaddadp        %%vs0, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 1st 
@@ -115,6 +119,20 @@ void bli_dgemm_power9_asm_2x4
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs4, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 5th
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs5, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 6th
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -126,8 +144,10 @@ void bli_dgemm_power9_asm_2x4
   "                                               \n\t"
   "stxvd2x          %%vs0, %%r10, %%r1            \n\t" // Store updated C in memory
   "stxvd2x          %%vs1, %%r11, %%r1            \n\t"
-  "stxvd2x          %%vs2, %%r12, %%r1            \n\t"
-  "stxvd2x          %%vs3, %%r13, %%r1            \n\t"
+  "stxvd2x          %%vs2, %%r14, %%r1            \n\t"
+  "stxvd2x          %%vs3, %%r15, %%r1            \n\t"
+  "stxvd2x          %%vs4, %%r16, %%r1            \n\t"
+  "stxvd2x          %%vs5, %%r17, %%r1            \n\t"
   "                                               \n\t"
   
 
@@ -146,6 +166,7 @@ void bli_dgemm_power9_asm_2x4
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", "r9", "r10", "r11", "r12", "r13", "r20", "r30", "vs20", "vs30", "vs0", "vs1"
+  "r1", "r3", "r9", "r10", "r11", "r14", "r15", "r16", "r17", "r20", "r30", 
+  "vs20", "vs30", "vs0", "vs1", "vs2", "vs3", "vs4", "vs5"
 	);
 }
