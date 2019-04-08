@@ -59,38 +59,43 @@ void bli_dgemm_power9_asm_2x2
 	__asm__ volatile
 	(
 	"                                               \n\t"
-	"ld               %%r26, %6                     \n\t" // c
-  "ld               %%r27, %2                     \n\t" // a
-  "ld               %%r28, %3                     \n\t" // b
+	"ld               %%r1, %6                      \n\t" // load ptr of C
+  "ld               %%r2, %2                      \n\t" // load ptr of A
+  "ld               %%r3, %3                      \n\t" // load ptr of B
   "                                               \n\t" 
-  "                                               \n\t" // indices
-  "li               %%r10,0                       \n\t" // for b
-  "li               %%r14,64                      \n\t" // for c
-  "li               %%r15,0                       \n\t" // for c
-  "li               %%r16,0                       \n\t" // for a
+  "                                               \n\t" // Create indices
+  "li               %%r10,0                       \n\t" // for C (1st col)
+  "li               %%r11,16                      \n\t" // for C (2nd col)
   "                                               \n\t"
-  "lxvd2x           %%vs3, %%r15, %%r26           \n\t" // load col of c
-  "lxvd2x           %%vs4, %%r14, %%r26           \n\t" // load col of c
+  "li               %%r20,0                       \n\t" // for A 
+  "li               %%r30,0                       \n\t" // for B
   "                                               \n\t"
-  "ld               %%r30, %0                     \n\t" // k_iter
-  "mtctr            %%r30                         \n\t"
-  "loop:                                          \n\t"
-  "lxvd2x           %%vs0, %%r16, %%r27           \n\t" // load col of a
+  "lxvd2x           %%vs0, %%r10, %%r1            \n\t" // Load 1st col of C
+  "lxvd2x           %%vs1, %%r11, %%r1            \n\t" // Load 2nd col of C
   "                                               \n\t"
-  "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat an elem of b
-  "xvmaddadp        %%vs3, %%vs0, %%vs1           \n\t" // mult a * b 
-  // "                                               \n\t"
-  "addi             %%r10, %%r10, 8               \n\t" // go to next elem of b
-  // "                                               \n\t"
-  "lxvdsx           %%vs1, %%r10, %%r28           \n\t" // splat new elem
-  "xvmaddadp        %%vs4, %%vs0, %%vs1           \n\t" // a * b
-  // "                                                \n\t"
-  "addi             %%r16, %%r16, 16              \n\t" // move a to next col
-  "addi             %%r10, %%r10, 8               \n\t" // move b to next row
-  // "                                               \n\t"
-  "bdnz             loop                          \n\t"
-  "stxvd2x          %%vs3, %%r15, %%r26           \n\t"
-  "stxvd2x          %%vs4, %%r14, %%r26           \n\t"
+  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
+  "mtctr            %%r9                          \n\t"
+  "                                               \n\t"
+  "K_ITER_LOOP:                                   \n\t" // Begin k_iter loop
+  "                                               \n\t"
+  "lxvd2x           %%vs20, %%r20, %%r2           \n\t" // Load a new col of A
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs0, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 1st 
+  "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs1, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 2nd
+  "                                               \n\t"
+  "addi             %%r20, %%r20, 16              \n\t" // Move A's index to new col
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index to new row
+  "                                               \n\t"
+  "bdnz             K_ITER_LOOP                   \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "stxvd2x          %%vs0, %%r10, %%r1            \n\t" // Store updated C in memory
+  "stxvd2x          %%vs1, %%r11, %%r1            \n\t"
   "                                               \n\t"
   
 
@@ -108,9 +113,7 @@ void bli_dgemm_power9_asm_2x2
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
-  "r26", "r27", "r28", "r10", "r14", "r15", "r16", "r30", "vs0", "vs1", "vs3"
+  /* unclobberable regs: r2(PIC reg), */
+  "r1", "r3", "r9", "r10", "r11", "r12", "r13", "r20", "r30", "vs20", "vs30", "vs0", "vs1"
 	);
 }
-
-
-
