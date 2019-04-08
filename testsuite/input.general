@@ -16,7 +16,7 @@ cj      # Vector storage scheme(s) to test:
         #   'c' = colvec / unit stride; 'j' = colvec / non-unit stride;
         #   'r' = rowvec / unit stride; 'i' = rowvec / non-unit stride
 0       # Test all combinations of storage schemes?
-1       # Perform all tests with alignment?
+0       # Perform all tests with alignment?
         #   '0' = do NOT align buffers/ldims; '1' = align buffers/ldims
 0       # Randomize vectors and matrices using:
         #   '0' = real values on [-1,1];
@@ -27,8 +27,8 @@ d       # Datatype(s) to test:
         #   'd' = double real; 'z' = double complex
 0       # Test gemm with mixed-domain operands?
 0       # Test gemm with mixed-precision operands?
-4       # Problem size: first to test
-4       # Problem size: maximum to test
+128       # Problem size: first to test
+128       # Problem size: maximum to test
 100     # Problem size: increment between experiments
         # Complex level-3 implementations to test:
 0       #   3mh  ('1' = enable; '0' = disable)
