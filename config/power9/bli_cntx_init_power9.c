@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#define test 0
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
@@ -45,7 +46,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
-#if 1
+#if test
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
@@ -63,7 +64,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-#if 1
+#if test
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
 #else

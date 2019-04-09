@@ -70,8 +70,8 @@ void bli_dgemm_power9_asm_2x2
   "li               %%r20,0                       \n\t" // for A 
   "li               %%r30,0                       \n\t" // for B
   "                                               \n\t"
-  "lxvd2x           %%vs0, %%r10, %%r1            \n\t" // Load 1st col of C
-  "lxvd2x           %%vs1, %%r11, %%r1            \n\t" // Load 2nd col of C
+  "lxv           %%vs0, 0(%%r1)            \n\t" // Load 1st col of C
+  "lxv           %%vs1, 16(%%r1)            \n\t" // Load 2nd col of C
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
@@ -94,8 +94,8 @@ void bli_dgemm_power9_asm_2x2
   "bdnz             K_ITER_LOOP                   \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "stxvd2x          %%vs0, %%r10, %%r1            \n\t" // Store updated C in memory
-  "stxvd2x          %%vs1, %%r11, %%r1            \n\t"
+  "stxv          %%vs0, 0(%%r1)            \n\t" // Store updated C in memory
+  "stxv          %%vs1, 16(%%r1)            \n\t"
   "                                               \n\t"
   
 
