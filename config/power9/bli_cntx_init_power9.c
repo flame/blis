@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#define test 1
+#define test 0
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
@@ -57,7 +57,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_2x2,  FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_4x6,  FALSE,
 		cntx
 	);
 #endif
@@ -68,8 +68,8 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
 #else
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     2,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     2,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     4,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
 #endif
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,    64,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   256,     0,     0 );
