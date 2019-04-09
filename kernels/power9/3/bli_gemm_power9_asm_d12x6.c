@@ -63,13 +63,13 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r2, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "                                               \n\t" 
-  "                                               \n\t"
-  "li               %%r10,0                       \n\t" // for B
-  "li               %%r11,8                       \n\t"
-  "li               %%r12,16                      \n\t"
-  "li               %%r13,24                      \n\t"
-  "li               %%r14,32                      \n\t"
-  "li               %%r15,40                      \n\t"
+  "                                               \n\t" // Offsets for B
+  "li               %%r20,0                       \n\t" // 0
+  "li               %%r21,8                       \n\t" // 1
+  "li               %%r22,16                      \n\t" // 2
+  "li               %%r23,24                      \n\t" // 3
+  "li               %%r24,32                      \n\t" // 4
+  "li               %%r25,40                      \n\t" // 5
   "                                               \n\t"
   "lxv              %%vs0, 0(%%r1)                \n\t" // Load 1_1 col of C
   "lxv              %%vs1, 16(%%r1)               \n\t" // Load 1_2 col of C
@@ -122,12 +122,12 @@ void bli_dgemm_power9_asm_12x6
   "lxv           %%vs40, 64(%%r2)                 \n\t" 
   "lxv           %%vs41, 80(%%r2)                 \n\t" 
   "                                               \n\t"
-  "lxvdsx       %%vs48, %%r10, %%r3               \n\t" // Broadcast B - 1
-  "lxvdsx       %%vs49, %%r11, %%r3               \n\t" // Broadcast B - 2
-  "lxvdsx       %%vs50, %%r12, %%r3               \n\t" // Broadcast B - 3
-  "lxvdsx       %%vs51, %%r13, %%r3               \n\t" // Broadcast B - 4
-  "lxvdsx       %%vs52, %%r14, %%r3               \n\t" // Broadcast B - 5
-  "lxvdsx       %%vs53, %%r15, %%r3               \n\t" // Broadcast B - 6
+  "lxvdsx       %%vs48, %%r20, %%r3               \n\t" // Broadcast B - 1
+  "lxvdsx       %%vs49, %%r21, %%r3               \n\t" // Broadcast B - 2
+  "lxvdsx       %%vs50, %%r22, %%r3               \n\t" // Broadcast B - 3
+  "lxvdsx       %%vs51, %%r23, %%r3               \n\t" // Broadcast B - 4
+  "lxvdsx       %%vs52, %%r24, %%r3               \n\t" // Broadcast B - 5
+  "lxvdsx       %%vs53, %%r25, %%r3               \n\t" // Broadcast B - 6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -256,10 +256,10 @@ void bli_dgemm_power9_asm_12x6
   /* unclobberable regs: r2(PIC reg), */
   "r1", "r3", 
   "r9", 
-  "r10", "r11", "r12", "r13", "r14", "r15", 
+  "r20", "r21", "r22", "r23", "r24", "r25", 
   "vs36", "vs37", "vs38", "vs39", "vs40", "vs41", 
   "vs48", "vs49", "vs50", "vs51", "vs52", "vs53",
-  
+
   "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
   "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
   "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29", "vs30",
