@@ -64,7 +64,12 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "                                               \n\t" 
   "                                               \n\t"
-  "li               %%r30,0                       \n\t" // for B
+  "li               %%r10,0                       \n\t" // for B
+  "li               %%r11,8                       \n\t"
+  "li               %%r12,16                      \n\t"
+  "li               %%r13,24                      \n\t"
+  "li               %%r14,32                      \n\t"
+  "li               %%r15,40                      \n\t"
   "                                               \n\t"
   "lxv              %%vs0, 0(%%r1)                \n\t" // Load 1_1 col of C
   "lxv              %%vs1, 16(%%r1)               \n\t" // Load 1_2 col of C
@@ -117,10 +122,15 @@ void bli_dgemm_power9_asm_12x6
   "lxv           %%vs40, 64(%%r2)                 \n\t" 
   "lxv           %%vs41, 80(%%r2)                 \n\t" 
   "                                               \n\t"
+  "lxvdsx       %%vs48, %%r10, %%r3               \n\t" // Broadcast B - 1
+  "lxvdsx       %%vs49, %%r11, %%r3               \n\t" // Broadcast B - 2
+  "lxvdsx       %%vs50, %%r12, %%r3               \n\t" // Broadcast B - 3
+  "lxvdsx       %%vs51, %%r13, %%r3               \n\t" // Broadcast B - 4
+  "lxvdsx       %%vs52, %%r14, %%r3               \n\t" // Broadcast B - 5
+  "lxvdsx       %%vs53, %%r15, %%r3               \n\t" // Broadcast B - 6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" // Group 1 FMA
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" 
@@ -131,63 +141,53 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
-  "xvmaddadp        %%vs6, %%vs36, %%vs48         \n\t" // Group 2 FMA
-  "xvmaddadp        %%vs7, %%vs37, %%vs48         \n\t" 
-  "xvmaddadp        %%vs8, %%vs38, %%vs48         \n\t"
-  "xvmaddadp        %%vs9, %%vs39, %%vs48         \n\t"
-  "xvmaddadp        %%vs10, %%vs40, %%vs48        \n\t"
-  "xvmaddadp        %%vs11, %%vs41, %%vs48        \n\t"
+  "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" // Group 2 FMA
+  "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" 
+  "xvmaddadp        %%vs8, %%vs38, %%vs49         \n\t"
+  "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t"
+  "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t"
+  "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
-  "xvmaddadp        %%vs12, %%vs36, %%vs48        \n\t" // Group 3 FMA
-  "xvmaddadp        %%vs13, %%vs37, %%vs48        \n\t" 
-  "xvmaddadp        %%vs14, %%vs38, %%vs48        \n\t"
-  "xvmaddadp        %%vs15, %%vs39, %%vs48        \n\t"
-  "xvmaddadp        %%vs16, %%vs40, %%vs48        \n\t"
-  "xvmaddadp        %%vs17, %%vs41, %%vs48        \n\t"
+  "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" // Group 3 FMA
+  "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" 
+  "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t"
+  "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t"
+  "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t"
+  "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
-  "xvmaddadp        %%vs18, %%vs36, %%vs48        \n\t" // Group 4 FMA
-  "xvmaddadp        %%vs19, %%vs37, %%vs48        \n\t" 
-  "xvmaddadp        %%vs20, %%vs38, %%vs48        \n\t"
-  "xvmaddadp        %%vs21, %%vs39, %%vs48        \n\t"
-  "xvmaddadp        %%vs22, %%vs40, %%vs48        \n\t"
-  "xvmaddadp        %%vs23, %%vs41, %%vs48        \n\t"
+  "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" // Group 4 FMA
+  "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" 
+  "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t"
+  "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t"
+  "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t"
+  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
-  "xvmaddadp        %%vs24, %%vs36, %%vs48        \n\t" // Group 5 FMA
-  "xvmaddadp        %%vs25, %%vs37, %%vs48        \n\t" 
-  "xvmaddadp        %%vs26, %%vs38, %%vs48        \n\t"
-  "xvmaddadp        %%vs27, %%vs39, %%vs48        \n\t"
-  "xvmaddadp        %%vs28, %%vs40, %%vs48        \n\t"
-  "xvmaddadp        %%vs29, %%vs41, %%vs48        \n\t"
+  "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" // Group 5 FMA
+  "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" 
+  "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t"
+  "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t"
+  "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t"
+  "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
   "                                               \n\t"
-  "xvmaddadp        %%vs30, %%vs36, %%vs48        \n\t" // Group 6 FMA
-  "xvmaddadp        %%vs31, %%vs37, %%vs48        \n\t" 
-  "xvmaddadp        %%vs32, %%vs38, %%vs48        \n\t"
-  "xvmaddadp        %%vs33, %%vs39, %%vs48        \n\t"
-  "xvmaddadp        %%vs34, %%vs40, %%vs48        \n\t"
-  "xvmaddadp        %%vs35, %%vs41, %%vs48        \n\t"
+  "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" // Group 6 FMA
+  "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" 
+  "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t"
+  "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t"
+  "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t"
+  "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -195,7 +195,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "addi             %%r2, %%r2, 96                \n\t" // Move A-ptr to new col
-  "addi             %%r30, %%r30, 8               \n\t" // Move B-index to new row
+  "addi             %%r3, %%r3, 48                \n\t" // Move B-ptr to new row
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
