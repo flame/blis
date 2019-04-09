@@ -63,23 +63,15 @@ void bli_dgemm_power9_asm_2x6
   "ld               %%r2, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "                                               \n\t" 
-  "                                               \n\t" // Create indices
-  "li               %%r10,0                       \n\t" // for C (1st col)
-  "li               %%r11,16                      \n\t" // for C (2nd col)
-  "li               %%r14,32                      \n\t" // for C (3rd col)
-  "li               %%r15,48                      \n\t" // for C (4th col)
-  "li               %%r16,64                      \n\t" // for C (3rd col)
-  "li               %%r17,80                      \n\t" // for C (4th col)
   "                                               \n\t"
-  "li               %%r20,0                       \n\t" // for A 
   "li               %%r30,0                       \n\t" // for B
   "                                               \n\t"
-  "lxvd2x           %%vs0, %%r10, %%r1            \n\t" // Load 1st col of C
-  "lxvd2x           %%vs1, %%r11, %%r1            \n\t" // Load 2nd col of C
-  "lxvd2x           %%vs2, %%r14, %%r1            \n\t" // Load 3rd col of C
-  "lxvd2x           %%vs3, %%r15, %%r1            \n\t" // Load 4th col of C
-  "lxvd2x           %%vs4, %%r16, %%r1            \n\t" // Load 3rd col of C
-  "lxvd2x           %%vs5, %%r17, %%r1            \n\t" // Load 4th col of C
+  "lxv              %%vs0, 0(%%r1)                \n\t" // Load 1 col of C
+  "lxv              %%vs1, 16(%%r1)               \n\t" // Load 2 col of C
+  "lxv              %%vs2, 32(%%r1)               \n\t" // Load 3 col of C
+  "lxv              %%vs3, 48(%%r1)               \n\t" // Load 4 col of C
+  "lxv              %%vs4, 64(%%r1)               \n\t" // Load 5 col of C
+  "lxv              %%vs5, 80(%%r1)               \n\t" // Load 6 col of C
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
@@ -88,66 +80,66 @@ void bli_dgemm_power9_asm_2x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "lxvd2x           %%vs20, %%r20, %%r2           \n\t" // Load a new col of A
+  "lxv           %%vs36, 0(%%r2)                  \n\t" // Load a new col of A
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs0, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 1st 
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
-  "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs1, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 2nd
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 1st 
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index
   "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs2, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 3rd
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs1, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 2nd
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index
   "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs3, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 4th
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs2, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 3rd
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index
   "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs4, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 5th
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs3, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 4th
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index
   "                                               \n\t"
-  "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
-  "xvmaddadp        %%vs5, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 6th
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs4, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 5th
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "addi             %%r30, %%r30, 8               \n\t" // Move B's index
+  "                                               \n\t"
+  "lxvdsx           %%vs48, %%r30, %%r3           \n\t" // Broadcast elem of B
+  "xvmaddadp        %%vs5, %%vs36, %%vs48         \n\t" // FMA (C += AB) - 6th
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "addi             %%r20, %%r20, 16              \n\t" // Move A's index to new col
+  "addi             %%r2, %%r2, 16              \n\t" // Move A's index to new col
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index to new row
   "                                               \n\t"
   "bdnz             K_ITER_LOOP                   \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "stxvd2x          %%vs0, %%r10, %%r1            \n\t" // Store updated C in memory
-  "stxvd2x          %%vs1, %%r11, %%r1            \n\t"
-  "stxvd2x          %%vs2, %%r14, %%r1            \n\t"
-  "stxvd2x          %%vs3, %%r15, %%r1            \n\t"
-  "stxvd2x          %%vs4, %%r16, %%r1            \n\t"
-  "stxvd2x          %%vs5, %%r17, %%r1            \n\t"
+  "stxv             %%vs0, 0(%%r1)                \n\t" // Store updated C in memory
+  "stxv             %%vs1, 16(%%r1)               \n\t"
+  "stxv             %%vs2, 32(%%r1)               \n\t"
+  "stxv             %%vs3, 48(%%r1)               \n\t"
+  "stxv             %%vs4, 64(%%r1)               \n\t"
+  "stxv             %%vs5, 80(%%r1)               \n\t"
   "                                               \n\t"
   
 
@@ -167,6 +159,6 @@ void bli_dgemm_power9_asm_2x6
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
   "r1", "r3", "r9", "r10", "r11", "r14", "r15", "r16", "r17", "r20", "r30", 
-  "vs20", "vs30", "vs0", "vs1", "vs2", "vs3", "vs4", "vs5"
+  "vs36", "vs48", "vs0", "vs1", "vs2", "vs3", "vs4", "vs5"
 	);
 }

@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#define test 0
+#define test 1
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {

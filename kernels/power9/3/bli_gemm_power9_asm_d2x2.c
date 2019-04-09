@@ -78,7 +78,7 @@ void bli_dgemm_power9_asm_2x2
   "                                               \n\t"
   "K_ITER_LOOP:                                   \n\t" // Begin k_iter loop
   "                                               \n\t"
-  "lxvd2x           %%vs20, %%r20, %%r2           \n\t" // Load a new col of A
+  "lxv              %%vs20, 0(%%r2)           \n\t" // Load a new col of A
   "                                               \n\t"
   "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
   "xvmaddadp        %%vs0, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 1st 
@@ -88,7 +88,7 @@ void bli_dgemm_power9_asm_2x2
   "lxvdsx           %%vs30, %%r30, %%r3           \n\t" // Broadcast elem of B
   "xvmaddadp        %%vs1, %%vs20, %%vs30         \n\t" // FMA (C += AB) - 2nd
   "                                               \n\t"
-  "addi             %%r20, %%r20, 16              \n\t" // Move A's index to new col
+  "addi             %%r2, %%r2, 16              \n\t" // Move A's index to new col
   "addi             %%r30, %%r30, 8               \n\t" // Move B's index to new row
   "                                               \n\t"
   "bdnz             K_ITER_LOOP                   \n\t"
