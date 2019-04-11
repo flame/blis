@@ -51,8 +51,6 @@ print_usage()
 	#echo " "
 	#echo " BLIS ${version}"
 	echo " "
-	echo " Field G. Van Zee"
-	echo " "
 	echo " Configure BLIS's build system for compilation using a specified"
 	echo " configuration directory."
 	echo " "
@@ -72,30 +70,37 @@ print_usage()
 	echo " "
 	echo "   -p PREFIX, --prefix=PREFIX"
 	echo " "
-	echo "                 The path to which make will install all build products."
-	echo "                 If given, this option implies the following options:"
-	echo "                   --libdir=PREFIX/lib"
-	echo "                   --incdir=PREFIX/include"
+	echo "                 The common installation prefix for all files. If given,"
+	echo "                 this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                   --includedir=PREFIX/include"
 	echo "                   --sharedir=PREFIX/share"
-	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
+	echo "                 where EXECPREFIX defaults to PREFIX. If this option is"
+	echo "                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX"
 	echo "                 refers to a directory that does not exist, it will be"
 	echo "                 created."
 	echo " "
+	echo "   --exec-prefix=EXECPREFIX"
+	echo " "
+	echo "                 The installation prefix for libraries. Specifically, if"
+	echo "                 given, this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                 If not given, EXECPREFIX defaults to PREFIX, which may be"
+	echo "                 modified by the --prefix option. If EXECPREFIX refers to"
+	echo "                 a directory that does not exist, it will be created."
+	echo " "
 	echo "   --libdir=LIBDIR"
 	echo " "
-	echo "                 The path to which make will install libraries. If given,"
-	echo "                 LIBDIR will override the corresponding directory implied"
-	echo "                 by --prefix; if not not given, LIBDIR defaults to"
-	echo "                 PREFIX/lib. If LIBDIR refers to a directory that does"
-	echo "                 not exist, it will be created."
+	echo "                 The path to which make will install libraries. If not"
+	echo "                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to"
+	echo "                 a directory that does not exist, it will be created."
 	echo " "
 	echo "   --includedir=INCDIR"
 	echo " "
 	echo "                 The path to which make will install development header"
-	echo "                 files. If given, INCDIR will override the corresponding"
-	echo "                 directory implied by --prefix; if not given, INCDIR"
-	echo "                 defaults to PREFIX/include. If INCDIR refers to a"
-	echo "                 directory that does not exist, it will be created."
+	echo "                 files. If not given, INCDIR defaults to PREFIX/include."
+	echo "                 If INCDIR refers to a directory that does not exist, it"
+	echo "                 will be created."
 	echo " "
 	echo "   --sharedir=SHAREDIR"
 	echo " "
@@ -104,11 +109,9 @@ print_usage()
 	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
 	echo "                 such as those in the examples or testsuite directories, to"
 	echo "                 operate on an installed copy of BLIS rather than a local"
-	echo "                 (and possibly uninstalled) copy. If given, SHAREDIR will"
-	echo "                 override the corresponding directory implied by --prefix;"
-	echo "                 if not given, SHAREDIR defaults to PREFIX/share. If"
-	echo "                 SHAREDIR refers to a directory that does not exist, it"
-	echo "                 will be created."
+	echo "                 (and possibly uninstalled) copy. If not given, SHAREDIR"
+	echo "                 defaults to PREFIX/share. If SHAREDIR refers to a"
+	echo "                 directory that does not exist, it will be created."
 	echo " "
 	echo "   --enable-verbose-make, --disable-verbose-make"
 	echo " "
@@ -1762,21 +1765,33 @@ main()
 
 	# -- configure options --
 
-	# The user-given install prefix and a flag indicating it was given.
-	#install_prefix_def="${HOME}/blis"
-	install_prefix_user=${HOME}/blis  # default to this directory.
+	# Define the default prefix so that the print_usage() function can
+	# output it in the --help text.
+	prefix_def='/usr/local'
+
+	# The installation prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	prefix=${prefix_def}
 	prefix_flag=''
 
-	# The user-given install libdir and a flag indicating it was given.
-	install_libdir_user=''
+	# The installation exec_prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	exec_prefix='${prefix}'
+	exec_prefix_flag=''
+
+	# The installation libdir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	libdir='${exec_prefix}/lib'
 	libdir_flag=''
 
-	# The user-given install includedir and a flag indicating it was given.
-	install_incdir_user=''
-	incdir_flag=''
+	# The installation includedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	includedir='${prefix}/include'
+	includedir_flag=''
 
-	# The user-given install sharedir and a flag indicating it was given.
-	install_sharedir_user=''
+	# The installation sharedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	sharedir='${prefix}/share'
 	sharedir_flag=''
 
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
@@ -1789,7 +1804,7 @@ main()
 	debug_flag=''
 
 	# The threading flag.
-	threading_model='no'
+	threading_model='off'
 
 	# The method of assigning micropanels to threads in the JR and JR loops.
 	thread_part_jrir='slab'
@@ -1865,19 +1880,23 @@ main()
 							;;
 						prefix=*)
 							prefix_flag=1
-							install_prefix_user=${OPTARG#*=}
+							prefix=${OPTARG#*=}
+							;;
+						exec-prefix=*)
+							exec_prefix_flag=1
+							exec_prefix=${OPTARG#*=}
 							;;
 						libdir=*)
 							libdir_flag=1
-							install_libdir_user=${OPTARG#*=}
+							libdir=${OPTARG#*=}
 							;;
 						includedir=*)
-							incdir_flag=1
-							install_incdir_user=${OPTARG#*=}
+							includedir_flag=1
+							includedir=${OPTARG#*=}
 							;;
 						sharedir=*)
 							sharedir_flag=1
-							install_sharedir_user=${OPTARG#*=}
+							sharedir=${OPTARG#*=}
 							;;
 						enable-debug)
 							debug_flag=1
@@ -1920,11 +1939,11 @@ main()
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
 							;;
+						disable-threading)
+							threading_model='off'
+							;;
 						thread-part-jrir=*)
 							thread_part_jrir=${OPTARG#*=}
-							;;
-						disable-threading)
-							threading_model='no'
 							;;
 						enable-pba-pools)
 							enable_pba_pools='yes'
@@ -2002,7 +2021,7 @@ main()
 					;;
 				p)
 					prefix_flag=1
-					install_prefix_user=$OPTARG
+					prefix=$OPTARG
 					;;
 				d)
 					debug_flag=1
@@ -2497,54 +2516,49 @@ main()
 
 	# -- Prepare variables for subsitution into template files -----------------
 
-	# Parse the status of the install prefix and echo feedback.
+	# Parse the status of the prefix option and echo feedback.
 	if [ -n "${prefix_flag}" ]; then
-		echo "${script_name}: detected --prefix='${install_prefix_user}'."
+		echo "${script_name}: detected --prefix='${prefix}'."
 	else
-		echo "${script_name}: no install prefix option given; defaulting to '${install_prefix_user}'."
+		echo "${script_name}: no install prefix option given; defaulting to '${prefix}'."
 	fi
 
-	# Set initial (candidate) values for the libdir and includedir using the
-	# install prefix that was determined above.
-	install_libdir=${install_prefix_user}/lib
-	install_incdir=${install_prefix_user}/include
-	install_sharedir=${install_prefix_user}/share
+	# Parse the status of the exec_prefix option and echo feedback.
+	if [ -n "${exec_prefix_flag}" ]; then
+		echo "${script_name}: detected --exec-prefix='${exec_prefix}'."
+	else
+		echo "${script_name}: no install exec_prefix option given; defaulting to PREFIX."
+	fi
 
-	# Set the install libdir, if it was specified. Note that this will override
-	# the default libdir implied by the install prefix, even if both options
-	# were given.
+	# Parse the status of the libdir option and echo feedback.
 	if [ -n "${libdir_flag}" ]; then
-		echo "${script_name}: detected --libdir='${install_libdir_user}'."
-		install_libdir=${install_libdir_user}
+		echo "${script_name}: detected --libdir='${libdir}'."
 	else
-		echo "${script_name}: no install libdir option given; defaulting to PREFIX/lib."
+		echo "${script_name}: no install libdir option given; defaulting to EXECPREFIX/lib."
 	fi
 
-	# Set the install includedir, if it was specified. Note that this will
-	# override the default includedir implied by the install prefix, even if
-	# both options were given.
-	if [ -n "${incdir_flag}" ]; then
-		echo "${script_name}: detected --includedir='${install_incdir_user}'."
-		install_incdir=${install_incdir_user}
+	# Parse the status of the includedir option and echo feedback.
+	if [ -n "${includedir_flag}" ]; then
+		echo "${script_name}: detected --includedir='${includedir}'."
 	else
 		echo "${script_name}: no install includedir option given; defaulting to PREFIX/include."
 	fi
 
-	# Set the install sharedir, if it was specified. Note that this will
-	# override the default sharedir implied by the install prefix, even if
-	# both options were given.
+	# Parse the status of the sharedir option and echo feedback.
 	if [ -n "${sharedir_flag}" ]; then
-		echo "${script_name}: detected --sharedir='${install_sharedir_user}'."
-		install_sharedir=${install_sharedir_user}
+		echo "${script_name}: detected --sharedir='${sharedir}'."
 	else
 		echo "${script_name}: no install sharedir option given; defaulting to PREFIX/share."
 	fi
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
-	echo "${script_name}:   libdir:     ${install_libdir}"
-	echo "${script_name}:   includedir: ${install_incdir}"
-	echo "${script_name}:   sharedir:   ${install_sharedir}"
+	echo "${script_name}:   prefix:      "${prefix}
+	echo "${script_name}:   exec_prefix: "${exec_prefix}
+	echo "${script_name}:   libdir:      "${libdir}
+	echo "${script_name}:   includedir:  "${includedir}
+	echo "${script_name}:   sharedir:    "${sharedir}
+	echo "${script_name}: NOTE: the variables above can be overridden when running make."
 
 	# Check if CFLAGS is non-empty.
 	if [ -n "${CFLAGS}" ]; then
@@ -2649,9 +2663,11 @@ main()
 		enable_pthreads='yes'
 		enable_pthreads_01=1
 		threading_model="pthreads" # Standardize the value.
-	elif [ "x${threading_model}" = "xno" ] ||
+	elif [ "x${threading_model}" = "xoff" ] ||
+	     [ "x${threading_model}" = "xno" ] ||
 	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
+		threading_model="off"
 	else
 		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
@@ -2813,13 +2829,15 @@ main()
 	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
 	# characters here so that the sed commands below do the right thing.
-	os_name_esc=$(echo          "${os_name}"          | sed 's/\//\\\//g')
-	install_libdir_esc=$(echo   "${install_libdir}"   | sed 's/\//\\\//g')
-	install_incdir_esc=$(echo   "${install_incdir}"   | sed 's/\//\\\//g')
-	install_sharedir_esc=$(echo "${install_sharedir}" | sed 's/\//\\\//g')
-	dist_path_esc=$(echo        "${dist_path}"        | sed 's/\//\\\//g')
-	cc_esc=$(echo               "${found_cc}"         | sed 's/\//\\\//g')
-	cxx_esc=$(echo              "${found_cxx}"        | sed 's/\//\\\//g')
+	os_name_esc=$(echo     "${os_name}"     | sed 's/\//\\\//g')
+	prefix_esc=$(echo      "${prefix}"      | sed 's/\//\\\//g')
+	exec_prefix_esc=$(echo "${exec_prefix}" | sed 's/\//\\\//g')
+	libdir_esc=$(echo      "${libdir}"      | sed 's/\//\\\//g')
+	includedir_esc=$(echo  "${includedir}"  | sed 's/\//\\\//g')
+	sharedir_esc=$(echo    "${sharedir}"    | sed 's/\//\\\//g')
+	dist_path_esc=$(echo   "${dist_path}"   | sed 's/\//\\\//g')
+	cc_esc=$(echo          "${found_cc}"    | sed 's/\//\\\//g')
+	cxx_esc=$(echo         "${found_cxx}"   | sed 's/\//\\\//g')
 	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
 
 	# For RANLIB, if the variable is not set, we use a default value of
@@ -2926,9 +2944,11 @@ main()
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
-		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
-		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
-		| sed -e "s/@install_sharedir@/${install_sharedir_esc}/g" \
+		| sed -e "s/@prefix@/${prefix_esc}/g" \
+		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
+		| sed -e "s/@libdir@/${libdir_esc}/g" \
+		| sed -e "s/@includedir@/${includedir_esc}/g" \
+		| sed -e "s/@sharedir@/${sharedir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
