@@ -90,7 +90,7 @@ However, as of this writing, only a limited number of architectures are detected
 
 Upon running configure, you will get output similar to the following. The exact output will depend on whether you cloned BLIS from a `git` repository or whether you obtained BLIS via a downloadable tarball from the [releases](https://github.com/flame/blis/releases) page.
 ```
-$ ./configure haswell
+$ ./configure --prefix=$HOME/blis haswell
 configure: using 'gcc' compiler.
 configure: found gcc version 5.4.0 (maj: 5, min: 4, rev: 0).
 configure: checking for blacklisted configurations due to gcc 5.4.0.
@@ -169,17 +169,11 @@ The installation prefix can be specified via the `--prefix=PREFIX` option:
 ```
 $ ./configure --prefix=/usr <configname>
 ```
-This will cause libraries to eventually be installed (via `make install`) to `PREFIX/lib` and development headers to be installed to `PREFIX/include`. (The default value of `PREFIX` is `$(HOME)/blis`.) You can also specify the library install directory separately from the development header install directory with the `--libdir=LIBDIR` and `--includedir=INCDIR` options, respectively:
+This will cause libraries to eventually be installed (via `make install`) to `PREFIX/lib` and development headers to be installed to `PREFIX/include`. (The default value of `PREFIX` is `/usr/local`.) You can also specify the library install directory separately from the development header install directory with the `--libdir=LIBDIR` and `--includedir=INCDIR` options, respectively:
 ```
 $ ./configure --libdir=/usr/lib --includedir=/usr/include <configname>
 ```
-The `--libdir=LIBDIR` and `--includedir=INCDIR` options will override any `PREFIX` path, whether it was specified explicitly via `--prefix` or implicitly (via the default). That is, `LIBDIR` defaults to `PREFIX/lib` and `INCDIR` defaults to `PREFIX/include`, but each will be overriden by their respective `--libdir`/`--includedir` options. So,
-```
-$ ./configure --libdir=/usr/lib <configname>
-
-```
-will configure BLIS to install libraries to `/usr/lib` and header files to the default location (`$HOME/blis/include`).
-Also, note that `configure` will create any installation directories that do not already exist.
+The `--libdir=LIBDIR` and `--includedir=INCDIR` options will override any path implied by `PREFIX`, whether it was specified explicitly via `--prefix` or implicitly (via the default). That is, `LIBDIR` defaults to `EXECPREFIX/lib` (where `EXECPREFIX`, set via `--exec-prefix=EXECPREFIX`, defaults to `PREFIX`) and `INCDIR` defaults to `PREFIX/include`, but `LIBDIR` and `INCDIR` will each be overriden by their respective `--libdir`/`--includedir` options. There is a third related option, `--sharedir=SHAREDIR`, where `SHAREDIR` defaults to `PREFIX/share`. This option specifies the installation directory for certain makefile fragments that contain variables determined by `configure` (e.g. `CC`, `CFLAGS`, `LDFLAGS`, etc.). These files allow certain BLIS makefiles, such as those in the `examples` or `testsuite` directories, to operate on an installed copy of BLIS rather than a local (and possibly uninstalled) copy.
 
 For a complete list of supported `configure` options and arguments, run `configure` with the `-h` option:
 ```
