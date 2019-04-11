@@ -173,29 +173,29 @@ static err_t bli_sgemm_small
      )
 {
 
-    int M = bli_obj_length( c ); // number of rows of Matrix C
-    int N = bli_obj_width( c );  // number of columns of Matrix C
-    int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
-    int L = M * N;
+    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+    gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    gint_t L = M * N;
 
                                 //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
     if ((((L) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
         || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
 
-        int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-        int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-        int ldc = bli_obj_col_stride( c ); // column stride of matrix C
-        int row_idx, col_idx, k;
+        guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+        guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+        guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
+        guint_t row_idx, col_idx, k;
         float *A = a->buffer; // pointer to elements of Matrix A
         float *B = b->buffer; // pointer to elements of Matrix B
         float *C = c->buffer; // pointer to elements of Matrix C
 
         float *tA = A, *tB = B, *tC = C;//, *tA_pack;
         float *tA_packed; // temprorary pointer to hold packed A memory pointer
-        int row_idx_packed; //packed A memory row index
-        int lda_packed; //lda of packed A
-        int col_idx_start; //starting index after A matrix is packed.
+        guint_t row_idx_packed; //packed A memory row index
+        guint_t lda_packed; //lda of packed A
+        guint_t col_idx_start; //starting index after A matrix is packed.
         dim_t tb_inc_row = 1; // row stride of matrix B
         dim_t tb_inc_col = ldb; // column stride of matrix B
         __m256 ymm4, ymm5, ymm6, ymm7;
@@ -203,13 +203,13 @@ static err_t bli_sgemm_small
         __m256 ymm12, ymm13, ymm14, ymm15;
         __m256 ymm0, ymm1, ymm2, ymm3;
 
-        int n_remainder; // If the N is non multiple of 3.(N%3)
-        int m_remainder; // If the M is non multiple of 32.(M%32)
+        gint_t n_remainder; // If the N is non multiple of 3.(N%3)
+        gint_t m_remainder; // If the M is non multiple of 32.(M%32)
 
         float *alpha_cast, *beta_cast; // alpha, beta multiples
         alpha_cast = (alpha->buffer);
         beta_cast = (beta->buffer);
-        int required_packing_A = 1;
+        gint_t required_packing_A = 1;
 
         // when N is equal to 1 call GEMV instead of GEMM
         if (N == 1)
@@ -1575,10 +1575,10 @@ static err_t bli_dgemm_small
      )
 {
 
-    int M = bli_obj_length( c ); // number of rows of Matrix C
-    int N = bli_obj_width( c );  // number of columns of Matrix C
-    int K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
-    int L = M * N;
+    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+    gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    gint_t L = M * N;
 
                                 // If alpha is zero, scale by beta and return.
                                 //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
@@ -1586,19 +1586,19 @@ static err_t bli_dgemm_small
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
 
-        int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-        int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-        int ldc = bli_obj_col_stride( c ); // column stride of matrix C
-        int row_idx, col_idx, k;
+        guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+        guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+        guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
+        guint_t row_idx, col_idx, k;
         double *A = a->buffer; // pointer to elements of Matrix A
         double *B = b->buffer; // pointer to elements of Matrix B
         double *C = c->buffer; // pointer to elements of Matrix C
 
         double *tA = A, *tB = B, *tC = C;//, *tA_pack;
         double *tA_packed; // temprorary pointer to hold packed A memory pointer
-        int row_idx_packed; //packed A memory row index
-        int lda_packed; //lda of packed A
-        int col_idx_start; //starting index after A matrix is packed.
+        guint_t row_idx_packed; //packed A memory row index
+        guint_t lda_packed; //lda of packed A
+        guint_t col_idx_start; //starting index after A matrix is packed.
         dim_t tb_inc_row = 1; // row stride of matrix B
         dim_t tb_inc_col = ldb; // column stride of matrix B
         __m256d ymm4, ymm5, ymm6, ymm7;
@@ -1606,13 +1606,13 @@ static err_t bli_dgemm_small
         __m256d ymm12, ymm13, ymm14, ymm15;
         __m256d ymm0, ymm1, ymm2, ymm3;
 
-        int n_remainder; // If the N is non multiple of 3.(N%3)
-        int m_remainder; // If the M is non multiple of 16.(M%16)
+        gint_t n_remainder; // If the N is non multiple of 3.(N%3)
+        gint_t m_remainder; // If the M is non multiple of 16.(M%16)
 
         double *alpha_cast, *beta_cast; // alpha, beta multiples
         alpha_cast = (alpha->buffer);
         beta_cast = (beta->buffer);
-        int required_packing_A = 1;
+        gint_t required_packing_A = 1;
 
         // when N is equal to 1 call GEMV instead of GEMM
         if (N == 1)
@@ -2978,12 +2978,12 @@ static err_t bli_sgemm_small_atbn
        cntl_t* cntl
      )
 {
-    int M = bli_obj_length( c ); // number of rows of Matrix C
-    int N = bli_obj_width( c );  // number of columns of Matrix C
-    int K = bli_obj_length( b ); // number of rows of Matrix B
-    int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-    int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-    int ldc = bli_obj_col_stride( c ); // column stride of matrix C
+    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+    gint_t K = bli_obj_length( b ); // number of rows of Matrix B
+    guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
     int row_idx = 0, col_idx = 0, k;
     float *A = a->buffer; // pointer to matrix A elements, stored in row major format
     float *B = b->buffer; // pointer to matrix B elements, stored in column major format
@@ -3370,13 +3370,13 @@ static err_t bli_dgemm_small_atbn
        cntl_t* cntl
      )
 {
-    int M = bli_obj_length( c ); // number of rows of Matrix C
-    int N = bli_obj_width( c );  // number of columns of Matrix C
-    int K = bli_obj_length( b ); // number of rows of Matrix B
-    int lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
-    int ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
-    int ldc = bli_obj_col_stride( c ); // column stride of matrix C
-    int row_idx = 0, col_idx = 0, k;
+    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+    gint_t K = bli_obj_length( b ); // number of rows of Matrix B
+    guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
+    guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
+    guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
+    guint_t row_idx = 0, col_idx = 0, k;
     double *A = a->buffer; // pointer to matrix A elements, stored in row major format
     double *B = b->buffer; // pointer to matrix B elements, stored in column major format
     double *C = c->buffer; // pointer to matrix C elements, stored in column major format
