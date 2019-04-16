@@ -247,7 +247,7 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 			# First, check if the header is our root header (and if so, ignore it).
 			# Otherwise, if the header was found, we recurse. Otherwise, we output
 			# the #include directive with a comment indicating that it as skipped
-			if header == root_file_name:
+			if header == root_inputfile:
 
 				markl = result.group(1)
 				markr = result.group(3)
@@ -341,7 +341,7 @@ strip_comments = None
 recursive_flag = None
 verbose_flag   = None
 regex          = None
-root_file_name = None
+root_inputfile = None
 
 def main():
 
@@ -351,7 +351,7 @@ def main():
 	global recursive_flag
 	global verbose_flag
 	global regex
-	global root_file_name
+	global root_inputfile
 
 	# Obtain the script name.
 	path, script_name = os.path.split(sys.argv[0])
@@ -415,7 +415,7 @@ def main():
 
 	# Save the filename (basename) part of the input file (or root file) into a
 	# global variable that we can access later from within flatten_header().
-	root_file_name = os.path.basename( inputfile )
+	root_inputfile = os.path.basename( inputfile )
 
 	# Separate the directories into distinct strings.
 	dir_list = dir_list.split()
