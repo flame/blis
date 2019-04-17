@@ -43,6 +43,9 @@
   #include "blis.h"
 #endif
 
+//#define COL_STORAGE
+#define ROW_STORAGE
+
 //#define PRINT
 
 int main( int argc, char** argv )
@@ -77,6 +80,7 @@ int main( int argc, char** argv )
 
 	ind     = IND;
 
+#if 1
 	p_begin = P_BEGIN;
 	p_max   = P_MAX;
 	p_inc   = P_INC;
@@ -84,6 +88,15 @@ int main( int argc, char** argv )
 	m_input = -1;
 	n_input = -1;
 	k_input = -1;
+#else
+	p_begin = 40;
+	p_max   = 1000;
+	p_inc   = 40;
+
+	m_input = -1;
+	n_input = -1;
+	k_input = -1;
+#endif
 
 
 	// Supress compiler warnings about unused variable 'ind'.
@@ -147,10 +160,17 @@ int main( int argc, char** argv )
 		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
 		bli_obj_create( dt, 1, 1, 0, 0, &beta );
 
+	#ifdef COL_STORAGE
 		bli_obj_create( dt, m, k, 0, 0, &a );
 		bli_obj_create( dt, k, n, 0, 0, &b );
 		bli_obj_create( dt, m, n, 0, 0, &c );
 		bli_obj_create( dt, m, n, 0, 0, &c_save );
+	#else
+		bli_obj_create( dt, m, k, k, 1, &a );
+		bli_obj_create( dt, k, n, n, 1, &b );
+		bli_obj_create( dt, m, n, n, 1, &c );
+		bli_obj_create( dt, m, n, n, 1, &c_save );
+	#endif
 
 		bli_randm( &a );
 		bli_randm( &b );
@@ -178,30 +198,57 @@ int main( int argc, char** argv )
 		void* bp = bli_obj_buffer_at_off( &b );
 		void* cp = bli_obj_buffer_at_off( &c );
 
+	#ifdef COL_STORAGE
 		const int os_a = bli_obj_col_stride( &a );
 		const int os_b = bli_obj_col_stride( &b );
 		const int os_c = bli_obj_col_stride( &c );
+	#else
+		const int os_a = bli_obj_row_stride( &a );
+		const int os_b = bli_obj_row_stride( &b );
+		const int os_c = bli_obj_row_stride( &c );
+	#endif
 
 		Stride<Dynamic,1> stride_a( os_a, 1 );
 		Stride<Dynamic,1> stride_b( os_b, 1 );
 		Stride<Dynamic,1> stride_c( os_c, 1 );
 
+	#ifdef COL_STORAGE
+		#if defined(IS_FLOAT)
+		typedef Matrix<float,                Dynamic, Dynamic, ColMajor> MatrixXf_;
+		#elif defined (IS_DOUBLE)
+		typedef Matrix<double,               Dynamic, Dynamic, ColMajor> MatrixXd_;
+		#elif defined (IS_SCOMPLEX)
+		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, ColMajor> MatrixXcf_;
+		#elif defined (IS_DCOMPLEX)
+		typedef Matrix<std::complex<double>, Dynamic, Dynamic, ColMajor> MatrixXcd_;
+		#endif
+	#else
+		#if defined(IS_FLOAT)
+		typedef Matrix<float,                Dynamic, Dynamic, RowMajor> MatrixXf_;
+		#elif defined (IS_DOUBLE)
+		typedef Matrix<double,               Dynamic, Dynamic, RowMajor> MatrixXd_;
+		#elif defined (IS_SCOMPLEX)
+		typedef Matrix<std::complex<float>,  Dynamic, Dynamic, RowMajor> MatrixXcf_;
+		#elif defined (IS_DCOMPLEX)
+		typedef Matrix<std::complex<double>, Dynamic, Dynamic, RowMajor> MatrixXcd_;
+		#endif
+	#endif
 	#if defined(IS_FLOAT)
-		Map<MatrixXf,  0, Stride<Dynamic,1> > A( ( float*  )ap, m, k, stride_a );
-		Map<MatrixXf,  0, Stride<Dynamic,1> > B( ( float*  )bp, k, n, stride_b );
-		Map<MatrixXf,  0, Stride<Dynamic,1> > C( ( float*  )cp, m, n, stride_c );
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > A( ( float*  )ap, m, k, stride_a );
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > B( ( float*  )bp, k, n, stride_b );
+		Map<MatrixXf_,  0, Stride<Dynamic,1> > C( ( float*  )cp, m, n, stride_c );
 	#elif defined (IS_DOUBLE)
-		Map<MatrixXd,  0, Stride<Dynamic,1> > A( ( double* )ap, m, k, stride_a );
-		Map<MatrixXd,  0, Stride<Dynamic,1> > B( ( double* )bp, k, n, stride_b );
-		Map<MatrixXd,  0, Stride<Dynamic,1> > C( ( double* )cp, m, n, stride_c );
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > A( ( double* )ap, m, k, stride_a );
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > B( ( double* )bp, k, n, stride_b );
+		Map<MatrixXd_,  0, Stride<Dynamic,1> > C( ( double* )cp, m, n, stride_c );
 	#elif defined (IS_SCOMPLEX)
-		Map<MatrixXcf, 0, Stride<Dynamic,1> > A( ( std::complex<float>*  )ap, m, k, stride_a );
-		Map<MatrixXcf, 0, Stride<Dynamic,1> > B( ( std::complex<float>*  )bp, k, n, stride_b );
-		Map<MatrixXcf, 0, Stride<Dynamic,1> > C( ( std::complex<float>*  )cp, m, n, stride_c );
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > A( ( std::complex<float>*  )ap, m, k, stride_a );
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > B( ( std::complex<float>*  )bp, k, n, stride_b );
+		Map<MatrixXcf_, 0, Stride<Dynamic,1> > C( ( std::complex<float>*  )cp, m, n, stride_c );
 	#elif defined (IS_DCOMPLEX)
-		Map<MatrixXcd, 0, Stride<Dynamic,1> > A( ( std::complex<double>* )ap, m, k, stride_a );
-		Map<MatrixXcd, 0, Stride<Dynamic,1> > B( ( std::complex<double>* )bp, k, n, stride_b );
-		Map<MatrixXcd, 0, Stride<Dynamic,1> > C( ( std::complex<double>* )cp, m, n, stride_c );
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > A( ( std::complex<double>* )ap, m, k, stride_a );
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > B( ( std::complex<double>* )bp, k, n, stride_b );
+		Map<MatrixXcd_, 0, Stride<Dynamic,1> > C( ( std::complex<double>* )cp, m, n, stride_c );
 	#endif
 #endif
 
