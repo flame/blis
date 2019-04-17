@@ -530,6 +530,11 @@ ifeq ($(IS_WIN),no)
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
 endif
+# On windows, use the shared library even if static is created.
+ifeq ($(IS_WIN),yes)
+LIBBLIS_L      := $(LIBBLIS_SO)
+LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
+endif
 endif
 
 
@@ -625,16 +630,16 @@ $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
 # Determine default export behavior / visibility of symbols for gcc.
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(IS_WIN),yes)
-ifeq ($(ENABLE_EXPORT_ALL),yes)
+ifeq ($(EXPORT_SHARED),all)
 CMISCFLAGS := -Wl,--export-all-symbols, -Wl,--enable-auto-import
-else
+else # ifeq ($(EXPORT_SHARED),public)
 CMISCFLAGS := -Wl,--exclude-all-symbols
 endif
 else # ifeq ($(IS_WIN),no)
-ifeq ($(ENABLE_EXPORT_ALL),yes)
+ifeq ($(EXPORT_SHARED),all)
 # Export all symbols by default.
 CMISCFLAGS := -fvisibility=default
-else
+else # ifeq ($(EXPORT_SHARED),public)
 # Hide all symbols by default and export only those that have been annotated
 # as needing to be exported.
 CMISCFLAGS := -fvisibility=hidden
@@ -646,10 +651,10 @@ endif
 # NOTE: The Windows branches have been omitted since we currently make no
 # effort to support Windows builds via icc (only gcc/clang via AppVeyor).
 ifeq ($(CC_VENDOR),icc)
-ifeq ($(ENABLE_EXPORT_ALL),yes)
+ifeq ($(EXPORT_SHARED),all)
 # Export all symbols by default.
 CMISCFLAGS := -fvisibility=default
-else
+else # ifeq ($(EXPORT_SHARED),public)
 # Hide all symbols by default and export only those that have been annotated
 # as needing to be exported.
 CMISCFLAGS := -fvisibility=hidden
@@ -659,21 +664,21 @@ endif
 # Determine default export behavior / visibility of symbols for clang.
 ifeq ($(CC_VENDOR),clang)
 ifeq ($(IS_WIN),yes)
-ifeq ($(ENABLE_EXPORT_ALL),yes)
+ifeq ($(EXPORT_SHARED),all)
 # NOTE: clang on Windows does not appear to support exporting all symbols
-# by default, and therefore we ignore the value of ENABLE_EXPORT_ALL.
+# by default, and therefore we ignore the value of EXPORT_SHARED.
 CMISCFLAGS :=
-else
+else # ifeq ($(EXPORT_SHARED),public)
 # NOTE: The default behavior of clang on Windows is to hide all symbols
 # and only export functions and other declarations that have beenannotated
 # as needing to be exported.
 CMISCFLAGS :=
 endif
 else # ifeq ($(IS_WIN),no)
-ifeq ($(ENABLE_EXPORT_ALL),yes)
+ifeq ($(EXPORT_SHARED),all)
 # Export all symbols by default.
 CMISCFLAGS := -fvisibility=default
-else
+else # ifeq ($(EXPORT_SHARED),public)
 # Hide all symbols by default and export only those that have been annotated
 # as needing to be exported.
 CMISCFLAGS := -fvisibility=hidden

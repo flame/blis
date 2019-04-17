@@ -9,6 +9,7 @@ The BLIS framework was primarily authored by
 
 but many others have contributed code and feedback, including
 
+  Sameer Agarwal        @sandwichmaker      (Google)
   Murtaza Ali                               (Texas Instruments)
   Sajid Ali             @s-sajid-ali        (Northwestern University)
   Erling Andersen       @erling-d-andersen
@@ -23,6 +24,7 @@ but many others have contributed code and feedback, including
   Krzysztof Drewniak    @krzysz00
   Marat Dukhan          @Maratyszcza        (Google)
   Victor Eijkhout       @VictorEijkhout     (Texas Advanced Computing Center)
+  Evgeny Epifanovsky    @epifanovsky        (Q-Chem)
   Isuru Fernando        @isuruf
   Roman Gareev          @gareevroman
   Richard Goldschmidt   @SuperFluffy
@@ -71,6 +73,7 @@ but many others have contributed code and feedback, including
   Paul Springer         @springer13         (RWTH-Aachen)
   Vladimir Sukarev
   Santanu Thangaraj                         (AMD)
+  Nicholai Tukanov      @nicholaiTukanov    (The University of Texas at Austin)
   Rhys Ulerich          @RhysU              (The University of Texas at Austin)
   Robert van de Geijn   @rvdg               (The University of Texas at Austin)
   Kiran Varaganti       @kvaragan           (AMD)

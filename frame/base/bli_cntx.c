@@ -532,9 +532,9 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	   void bli_cntx_set_l3_nat_ukrs
 	   (
 	     dim_t   n_ukrs,
-	     l3ukr_t ukr0_id, num_t dt0, void* ukr0_fp, bool_t pref0,
-	     l3ukr_t ukr1_id, num_t dt1, void* ukr1_fp, bool_t pref1,
-	     l3ukr_t ukr2_id, num_t dt2, void* ukr2_fp, bool_t pref2,
+	     l3ukr_t ukr0_id, num_t dt0, void_fp ukr0_fp, bool_t pref0,
+	     l3ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp, bool_t pref1,
+	     l3ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp, bool_t pref2,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -557,7 +557,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	void**   ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void*   ) );
+	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ) );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
@@ -590,7 +590,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		// within a bool_t afterwards.
 		const l3ukr_t  ukr_id   = ( l3ukr_t )va_arg( args, l3ukr_t );
 		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
-		      void*    ukr_fp   = ( void*   )va_arg( args, void*   );
+		      void_fp  ukr_fp   = ( void_fp )va_arg( args, void_fp );
 		const bool_t   ukr_pref = ( bool_t  )va_arg( args, int     );
 
 		// Store the values in our temporary arrays.
@@ -627,7 +627,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		// multiple id, and blocksize scalar.
 		const l3ukr_t ukr_id   = ukr_ids[ i ];
 		const num_t   ukr_dt   = ukr_dts[ i ];
-		      void*   ukr_fp   = ukr_fps[ i ];
+		      void_fp ukr_fp   = ukr_fps[ i ];
 		const bool_t  ukr_pref = ukr_prefs[ i ];
 
 		// Index into the func_t and mbool_t for the current kernel id
@@ -686,9 +686,9 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	   void bli_cntx_set_l1f_kers
 	   (
 	     dim_t   n_ukrs,
-	     l1fkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
-	     l1fkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
-	     l1fkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     l1fkr_t ker0_id, num_t ker0_dt, void_fp ker0_fp,
+	     l1fkr_t ker1_id, num_t ker1_dt, void_fp ker1_fp,
+	     l1fkr_t ker2_id, num_t ker2_dt, void_fp ker2_fp,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -711,7 +711,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1f_kers(): " );
 	#endif
-	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
 
 	// -- Begin variable argument section --
 
@@ -728,7 +728,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 		// that we need to store to the context.
 		const l1fkr_t  ker_id   = ( l1fkr_t )va_arg( args, l1fkr_t );
 		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
-		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
+		      void_fp  ker_fp   = ( void_fp )va_arg( args, void_fp );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -759,7 +759,7 @@ void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
 		// multiple id, and blocksize scalar.
 		const l1fkr_t ker_id   = ker_ids[ i ];
 		const num_t   ker_dt   = ker_dts[ i ];
-		      void*   ker_fp   = ker_fps[ i ];
+		      void_fp ker_fp   = ker_fps[ i ];
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.
@@ -804,9 +804,9 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	   void bli_cntx_set_l1v_kers
 	   (
 	     dim_t   n_ukrs,
-	     l1vkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
-	     l1vkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
-	     l1vkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     l1vkr_t ker0_id, num_t ker0_dt, void_fp ker0_fp,
+	     l1vkr_t ker1_id, num_t ker1_dt, void_fp ker1_fp,
+	     l1vkr_t ker2_id, num_t ker2_dt, void_fp ker2_fp,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -829,7 +829,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l1v_kers(): " );
 	#endif
-	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
 
 	// -- Begin variable argument section --
 
@@ -846,7 +846,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 		// that we need to store to the context.
 		const l1vkr_t  ker_id   = ( l1vkr_t )va_arg( args, l1vkr_t );
 		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
-		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
+		      void_fp  ker_fp   = ( void_fp )va_arg( args, void_fp );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -877,7 +877,7 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 		// multiple id, and blocksize scalar.
 		const l1vkr_t ker_id   = ker_ids[ i ];
 		const num_t   ker_dt   = ker_dts[ i ];
-		      void*   ker_fp   = ker_fps[ i ];
+		      void_fp ker_fp   = ker_fps[ i ];
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.
@@ -922,9 +922,9 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 	   void bli_cntx_set_packm_kers
 	   (
 	     dim_t   n_ukrs,
-	     l1mkr_t ker0_id, num_t ker0_dt, void* ker0_fp,
-	     l1mkr_t ker1_id, num_t ker1_dt, void* ker1_fp,
-	     l1mkr_t ker2_id, num_t ker2_dt, void* ker2_fp,
+	     l1mkr_t ker0_id, num_t ker0_dt, void_fp ker0_fp,
+	     l1mkr_t ker1_id, num_t ker1_dt, void_fp ker1_fp,
+	     l1mkr_t ker2_id, num_t ker2_dt, void_fp ker2_fp,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -947,7 +947,7 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_packm_kers(): " );
 	#endif
-	void**   ker_fps   = bli_malloc_intl( n_kers * sizeof( void*   ) );
+	void_fp* ker_fps   = bli_malloc_intl( n_kers * sizeof( void_fp ) );
 
 	// -- Begin variable argument section --
 
@@ -964,7 +964,7 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 		// that we need to store to the context.
 		const l1mkr_t  ker_id   = ( l1mkr_t )va_arg( args, l1mkr_t );
 		const num_t    ker_dt   = ( num_t   )va_arg( args, num_t   );
-		      void*    ker_fp   = ( void*   )va_arg( args, void*   );
+		      void_fp  ker_fp   = ( void_fp )va_arg( args, void_fp );
 
 		// Store the values in our temporary arrays.
 		ker_ids[ i ]   = ker_id;
@@ -995,7 +995,7 @@ void bli_cntx_set_packm_kers( dim_t n_kers, ... )
 		// multiple id, and blocksize scalar.
 		const l1mkr_t ker_id   = ker_ids[ i ];
 		const num_t   ker_dt   = ker_dts[ i ];
-		      void*   ker_fp   = ker_fps[ i ];
+		      void_fp ker_fp   = ker_fps[ i ];
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.

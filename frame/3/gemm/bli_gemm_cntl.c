@@ -56,9 +56,9 @@ cntl_t* bli_gemmbp_cntl_create
        pack_t  schema_b
      )
 {
-	void* macro_kernel_fp;
-	void* packa_fp;
-	void* packb_fp;
+	void_fp macro_kernel_fp;
+	void_fp packa_fp;
+	void_fp packb_fp;
 
 	// Use the function pointers to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
@@ -165,7 +165,7 @@ cntl_t* bli_gemmpb_cntl_create
        opid_t family
      )
 {
-	void* macro_kernel_p = bli_gemm_ker_var1;
+	void_fp macro_kernel_p = bli_gemm_ker_var1;
 
 	// Change the macro-kernel if the operation family is herk or trmm.
 	//if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
@@ -270,7 +270,7 @@ cntl_t* bli_gemm_cntl_create_node
        rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      )
 {

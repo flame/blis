@@ -56,9 +56,9 @@ cntl_t* bli_trsm_l_cntl_create
        pack_t  schema_b
      )
 {
-	void* macro_kernel_p;
-	void* packa_fp;
-	void* packb_fp;
+	void_fp macro_kernel_p;
+	void_fp packa_fp;
+	void_fp packb_fp;
 
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
@@ -210,10 +210,10 @@ cntl_t* bli_trsm_r_cntl_create
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
-	void* macro_kernel_p = bli_trsm_xx_ker_var2;
+	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	void* packa_fp = bli_packm_blk_var1;
-	void* packb_fp = bli_packm_blk_var1;
+	void_fp packa_fp = bli_packm_blk_var1;
+	void_fp packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -318,7 +318,7 @@ cntl_t* bli_trsm_cntl_create_node
        rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      )
 {

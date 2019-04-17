@@ -37,10 +37,10 @@
 
 func_t* bli_func_create
      (
-       void* ptr_s,
-       void* ptr_d,
-       void* ptr_c,
-       void* ptr_z
+       void_fp ptr_s,
+       void_fp ptr_d,
+       void_fp ptr_c,
+       void_fp ptr_z
      )
 {
 	func_t* f;
@@ -62,10 +62,10 @@ func_t* bli_func_create
 void bli_func_init
      (
        func_t* f,
-       void*   ptr_s,
-       void*   ptr_d,
-       void*   ptr_c,
-       void*   ptr_z
+       void_fp ptr_s,
+       void_fp ptr_d,
+       void_fp ptr_c,
+       void_fp ptr_z
      )
 {
 	bli_func_set_dt( ptr_s, BLIS_FLOAT,    f );

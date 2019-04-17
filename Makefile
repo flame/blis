@@ -385,23 +385,22 @@ ifeq ($(IS_CONFIGURED),yes)
 # named with three .so version numbers.
 UNINSTALL_OLD_LIBS    :=
 
-UNINSTALL_OLD_LIBS    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?.?.?" 2> /dev/null | $(GREP) -v "$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT)")
+UNINSTALL_OLD_LIBS    += $(filter-out $(INSTALL_LIBDIR)/$(LIBBLIS).$(LIBBLIS_SO_MMB_EXT),$(wildcard $(INSTALL_LIBDIR)/$(LIBBLIS_SO).?.?.?))
 
 # These shell commands gather the filepaths to any library symlink in the
 # current LIBDIR that might be left over from an old installation. We start
 # with symlinks named using the .so major version number.
-UNINSTALL_OLD_SYML    := $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS_SO).?" 2> /dev/null | $(GREP) -v "$(LIBBLIS_SO).$(SO_MAJOR)")
+UNINSTALL_OLD_SYML    := $(filter-out $(INSTALL_LIBDIR)/$(LIBBLIS_SO).$(SO_MAJOR),$(wildcard $(INSTALL_LIBDIR)/$(LIBBLIS_SO).?))
 
 # We also prepare to uninstall older-style symlinks whose names contain the
 # BLIS version number and configuration family.
-UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.a" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).a")
-
-UNINSTALL_OLD_SYML    += $(shell $(FIND) $(INSTALL_LIBDIR)/ -name "$(LIBBLIS)-*.$(SHLIB_EXT)" 2> /dev/null | $(GREP) -v "$(LIBBLIS)-$(VERS_CONF).$(SHLIB_EXT)")
+UNINSTALL_OLD_SYML    += $(wildcard $(INSTALL_LIBDIR)/$(LIBBLIS)-*.a)
+UNINSTALL_OLD_SYML    += $(wildcard $(INSTALL_LIBDIR)/$(LIBBLIS)-*.$(SHLIB_EXT))
 
 # This shell command grabs all files named "*.h" that are not blis.h or cblas.h
 # in the installation directory. We consider this set of headers to be "old" and
 # eligible for removal upon running of the uninstall-old-headers target.
-UNINSTALL_OLD_HEADERS := $(shell $(FIND) $(INSTALL_INCDIR)/blis/ -name "*.h" 2> /dev/null | $(GREP) -v "$(BLIS_H)" | $(GREP) -v "$(CBLAS_H)")
+UNINSTALL_OLD_HEADERS := $(filter-out $(BLIS_H),$(filter-out $(CBLAS_H),$(wildcard $(INSTALL_INCDIR)/blis/*.h)))
 
 endif # IS_CONFIGURED
 
@@ -1020,23 +1019,24 @@ endif # ifeq ($(IS_WIN),no)
 # --- Query current configuration ---
 
 showconfig: check-env
-	@echo "configuration family:  $(CONFIG_NAME)"
-	@echo "sub-configurations:    $(CONFIG_LIST)"
-	@echo "requisite kernels:     $(KERNEL_LIST)"
-	@echo "kernel-to-config map:  $(KCONFIG_MAP)"
-	@echo "-----------------------"
-	@echo "BLIS version string:   $(VERSION)"
-	@echo ".so major version:     $(SO_MAJOR)"
-	@echo ".so minor.build vers:  $(SO_MINORB)"
-	@echo "install libdir:        $(INSTALL_LIBDIR)"
-	@echo "install includedir:    $(INSTALL_INCDIR)"
-	@echo "debugging status:      $(DEBUG_TYPE)"
-	@echo "multithreading status: $(THREADING_MODEL)"
-	@echo "enable BLAS API?       $(MK_ENABLE_BLAS)"
-	@echo "enable CBLAS API?      $(MK_ENABLE_CBLAS)"
-	@echo "build static library?  $(MK_ENABLE_STATIC)"
-	@echo "build shared library?  $(MK_ENABLE_SHARED)"
-	@echo "ARG_MAX hack enabled?  $(ARG_MAX_HACK)"
+	@echo "configuration family:    $(CONFIG_NAME)"
+	@echo "sub-configurations:      $(CONFIG_LIST)"
+	@echo "requisite kernels sets:  $(KERNEL_LIST)"
+	@echo "kernel-to-config map:    $(KCONFIG_MAP)"
+	@echo "-------------------------"
+	@echo "BLIS version string:     $(VERSION)"
+	@echo ".so major version:       $(SO_MAJOR)"
+	@echo ".so minor.build vers:    $(SO_MINORB)"
+	@echo "install libdir:          $(INSTALL_LIBDIR)"
+	@echo "install includedir:      $(INSTALL_INCDIR)"
+	@echo "install sharedir:        $(INSTALL_SHAREDIR)"
+	@echo "debugging status:        $(DEBUG_TYPE)"
+	@echo "multithreading status:   $(THREADING_MODEL)"
+	@echo "enable BLAS API?         $(MK_ENABLE_BLAS)"
+	@echo "enable CBLAS API?        $(MK_ENABLE_CBLAS)"
+	@echo "build static library?    $(MK_ENABLE_STATIC)"
+	@echo "build shared library?    $(MK_ENABLE_SHARED)"
+	@echo "ARG_MAX hack enabled?    $(ARG_MAX_HACK)"
 
 
 # --- Clean rules ---
@@ -1052,16 +1052,16 @@ ifneq ($(SANDBOX),)
 	- $(FIND) $(SANDBOX_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 else
-	@echo "Removing makefile fragments from $(CONFIG_FRAG_PATH)."
+	@echo "Removing makefile fragments from $(CONFIG_FRAG_PATH)"
 	@- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
-	@echo "Removing makefile fragments from $(FRAME_FRAG_PATH)."
+	@echo "Removing makefile fragments from $(FRAME_FRAG_PATH)"
 	@- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
-	@echo "Removing makefile fragments from $(REFKERN_FRAG_PATH)."
+	@echo "Removing makefile fragments from $(REFKERN_FRAG_PATH)"
 	@- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
-	@echo "Removing makefile fragments from $(KERNELS_FRAG_PATH)."
+	@echo "Removing makefile fragments from $(KERNELS_FRAG_PATH)"
 	@- $(FIND) $(KERNELS_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 ifneq ($(SANDBOX),)
-	@echo "Removing makefile fragments from $(SANDBOX_FRAG_PATH)."
+	@echo "Removing makefile fragments from $(SANDBOX_FRAG_PATH)"
 	@- $(FIND) $(SANDBOX_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
 endif
@@ -1073,7 +1073,7 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	$(RM_F) $(BLIS_H_FLAT)
 	$(RM_F) $(CBLAS_H_FLAT)
 else
-	@echo "Removing flattened header files from $(BASE_INC_PATH)."
+	@echo "Removing flattened header files from $(BASE_INC_PATH)"
 	@$(RM_F) $(BLIS_H_FLAT)
 	@$(RM_F) $(CBLAS_H_FLAT)
 endif
@@ -1086,9 +1086,9 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(LIBBLIS_A_PATH)
 	- $(RM_F) $(LIBBLIS_SO_PATH)
 else
-	@echo "Removing object files from $(BASE_OBJ_PATH)."
+	@echo "Removing object files from $(BASE_OBJ_PATH)"
 	@- $(FIND) $(BASE_OBJ_PATH) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing libraries from $(BASE_LIB_PATH)."
+	@echo "Removing libraries from $(BASE_LIB_PATH)"
 	@- $(RM_F) $(LIBBLIS_A_PATH)
 	@- $(RM_F) $(LIBBLIS_SO_PATH)
 endif
@@ -1110,13 +1110,13 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
 	- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
 else
-	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)."
+	@echo "Removing object files from $(BASE_OBJ_BLASTEST_PATH)"
 	@- $(RM_F) $(BLASTEST_F2C_OBJS) $(BLASTEST_DRV_OBJS)
-	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)."
+	@echo "Removing libf2c.a from $(BASE_OBJ_BLASTEST_PATH)"
 	@- $(RM_F) $(BLASTEST_F2C_LIB)
-	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)."
+	@echo "Removing binaries from $(BASE_OBJ_BLASTEST_PATH)"
 	@- $(RM_F) $(BLASTEST_DRV_BIN_PATHS)
-	@echo "Removing driver output files 'out.*'."
+	@echo "Removing driver output files 'out.*'"
 	@- $(RM_F) $(addprefix out.,$(BLASTEST_DRV_BASES))
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
@@ -1129,13 +1129,13 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
 	- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
 else
-	@echo "Removing object files from ./$(BLASTEST_DIR)/$(OBJ_DIR)."
+	@echo "Removing object files from ./$(BLASTEST_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(BLASTEST_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing libf2c.a from ./$(BLASTEST_DIR)."
+	@echo "Removing libf2c.a from ./$(BLASTEST_DIR)"
 	@- $(RM_F) $(BLASTEST_DIR)/$(BLASTEST_F2C_LIB_NAME)
-	@echo "Removing binaries from ./$(BLASTEST_DIR)."
+	@echo "Removing binaries from ./$(BLASTEST_DIR)"
 	@- $(FIND) $(BLASTEST_DIR) -name "*.x" | $(XARGS) $(RM_F)
-	@echo "Removing driver output files 'out.*' from ./$(BLASTEST_DIR)."
+	@echo "Removing driver output files 'out.*' from ./$(BLASTEST_DIR)"
 	@- $(RM_F) $(addprefix $(BLASTEST_DIR)/out.,$(BLASTEST_DRV_BASES))
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
@@ -1153,11 +1153,11 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(TESTSUITE_BIN)
 	- $(RM_F) $(TESTSUITE_OUT_FILE)
 else
-	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)."
+	@echo "Removing object files from $(BASE_OBJ_TESTSUITE_PATH)"
 	@- $(RM_F) $(MK_TESTSUITE_OBJS)
-	@echo "Removing binary $(TESTSUITE_BIN)."
+	@echo "Removing binary $(TESTSUITE_BIN)"
 	@- $(RM_F) $(TESTSUITE_BIN)
-	@echo "Removing $(TESTSUITE_OUT_FILE)."
+	@echo "Removing $(TESTSUITE_OUT_FILE)"
 	@- $(RM_F) $(TESTSUITE_OUT_FILE)
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
@@ -1168,9 +1168,9 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
 else
-	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)."
+	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
-	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)."
+	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)"
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
@@ -1184,15 +1184,15 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
 else
-	@echo "Removing $(BLIS_CONFIG_H)."
+	@echo "Removing $(BLIS_CONFIG_H)"
 	@$(RM_F) $(BLIS_CONFIG_H)
-	@echo "Removing $(CONFIG_MK_FILE)."
+	@echo "Removing $(CONFIG_MK_FILE)"
 	@- $(RM_F) $(CONFIG_MK_FILE)
-	@echo "Removing $(OBJ_DIR)."
+	@echo "Removing $(OBJ_DIR)"
 	@- $(RM_RF) $(OBJ_DIR)
-	@echo "Removing $(LIB_DIR)."
+	@echo "Removing $(LIB_DIR)"
 	@- $(RM_RF) $(LIB_DIR)
-	@echo "Removing $(INCLUDE_DIR)."
+	@echo "Removing $(INCLUDE_DIR)"
 	@- $(RM_RF) $(INCLUDE_DIR)
 endif
 endif
@@ -1201,7 +1201,7 @@ endif
 # --- CHANGELOG rules ---
 
 changelog:
-	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'."
+	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'"
 	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
 
 
@@ -1216,7 +1216,7 @@ uninstall-libs: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_LIBS_INST)
 else
-	@echo "Uninstalling libraries $(notdir $(MK_LIBS_INST)) from $(dir $(firstword $(MK_LIBS_INST)))."
+	@echo "Uninstalling libraries $(notdir $(MK_LIBS_INST)) from $(dir $(firstword $(MK_LIBS_INST)))"
 	@- $(RM_F) $(MK_LIBS_INST)
 endif
 
@@ -1224,7 +1224,7 @@ uninstall-lib-symlinks: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(MK_LIBS_SYML)
 else
-	@echo "Uninstalling symlinks $(notdir $(MK_LIBS_SYML)) from $(dir $(firstword $(MK_LIBS_SYML)))."
+	@echo "Uninstalling symlinks $(notdir $(MK_LIBS_SYML)) from $(dir $(firstword $(MK_LIBS_SYML)))"
 	@- $(RM_F) $(MK_LIBS_SYML)
 endif
 
@@ -1232,7 +1232,7 @@ uninstall-headers: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_INCL_DIR_INST)
 else
-	@echo "Uninstalling directory '$(notdir $(MK_INCL_DIR_INST))' from $(dir $(MK_INCL_DIR_INST))."
+	@echo "Uninstalling directory '$(notdir $(MK_INCL_DIR_INST))' from $(dir $(MK_INCL_DIR_INST))"
 	@- $(RM_RF) $(MK_INCL_DIR_INST)
 endif
 
@@ -1240,7 +1240,7 @@ uninstall-share: check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(MK_SHARE_DIR_INST)
 else
-	@echo "Uninstalling directory '$(notdir $(MK_SHARE_DIR_INST))' from $(dir $(MK_SHARE_DIR_INST))."
+	@echo "Uninstalling directory '$(notdir $(MK_SHARE_DIR_INST))' from $(dir $(MK_SHARE_DIR_INST))"
 	@- $(RM_RF) $(MK_SHARE_DIR_INST)
 endif
 
@@ -1256,7 +1256,7 @@ $(UNINSTALL_OLD_LIBS) $(UNINSTALL_OLD_SYML) $(UNINSTALL_OLD_HEADERS): check-env
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $@
 else
-	@echo "Uninstalling $(@F) from $(@D)/."
+	@echo "Uninstalling $(@F) from $(@D)/"
 	@- $(RM_F) $@
 endif
 

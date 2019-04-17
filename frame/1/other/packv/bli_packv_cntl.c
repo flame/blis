@@ -36,8 +36,8 @@
 
 cntl_t* bli_packv_cntl_obj_create
      (
-       void*     var_func,
-       void*     packv_var_func,
+       void_fp   var_func,
+       void_fp   packv_var_func,
        bszid_t   bmid,
        pack_t    pack_schema,
        cntl_t*   sub_node

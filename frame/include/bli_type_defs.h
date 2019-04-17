@@ -197,6 +197,16 @@ typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
 
+// -- Void function pointer types --
+
+// Note: This type should be used in any situation where the address of a
+// *function* will be conveyed or stored prior to it being typecast back
+// to the correct function type. It does not need to be used when conveying
+// or storing the address of *data* (such as an array of float or double).
+
+//typedef void (*void_fp)( void );
+typedef void* void_fp;
+
 
 //
 // -- BLIS info bit field offsets ----------------------------------------------
@@ -1016,7 +1026,7 @@ struct cntl_s
 	// Basic fields (usually required).
 	opid_t         family;
 	bszid_t        bszid;
-	void*          var_func;
+	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
 
@@ -1049,7 +1059,7 @@ typedef struct blksz_s
 typedef struct func_s
 {
 	// Kernel function address.
-	void*  ptr[BLIS_NUM_FP_TYPES];
+	void_fp ptr[BLIS_NUM_FP_TYPES];
 
 } func_t;
 

@@ -40,10 +40,31 @@
 #endif
 #endif // BLIS_ENABLE_CBLAS
 
+// By default, if the BLAS compatibility layer is enabled, we define
+// (include) all of the BLAS prototypes. However, if the user is
+// #including "blis.h" and also #including another header that also
+// declares the BLAS functions, then we provide an opportunity to
+// #undefine the BLIS_ENABLE_BLAS_DEFS macro (see below).
+#ifdef BLIS_ENABLE_BLAS
+#define BLIS_ENABLE_BLAS_DEFS
+#else
+#undef  BLIS_ENABLE_BLAS_DEFS
+#endif
+
 // Skip prototyping all of the BLAS if the BLAS test drivers are being
 // compiled.
-#ifndef BLIS_VIA_BLASTEST
-#ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_VIA_BLASTEST
+#undef BLIS_ENABLE_BLAS_DEFS
+#endif
+
+// Skip prototyping all of the BLAS if the environment has defined the
+// macro BLIS_DISABLE_BLAS_DEFS.
+#ifdef BLIS_DISABLE_BLAS_DEFS
+#undef BLIS_ENABLE_BLAS_DEFS
+#endif
+
+// Begin including all BLAS prototypes.
+#ifdef BLIS_ENABLE_BLAS_DEFS
 
 
 // -- System headers needed by BLAS compatibility layer --
@@ -180,4 +201,3 @@
 
 
 #endif // BLIS_ENABLE_BLAS
-#endif // BLIS_VIA_BLASTEST
