@@ -46,7 +46,7 @@ err_t bli_gemmsup
      )
 {
 	// Return early if small matrix handling is disabled at configure-time.
-	#ifdef BLIS_DISABLE_SM_HANDLING
+	#ifdef BLIS_DISABLE_SUP_HANDLING
 	return BLIS_FAILURE;
 	#endif
 
