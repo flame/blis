@@ -242,6 +242,16 @@ print_usage()
 	echo "                 only be enabled when mixed domain/precision support is"
 	echo "                 enabled."
 	echo " "
+	echo "   --disable-sup-handling, --enable-sup-handling"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 matrix problems via separate code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"small\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
+	echo " "
 	echo "   -s NAME --enable-sandbox=NAME"
 	echo " "
 	echo "                 Enable a separate sandbox implementation of gemm. This"
@@ -1828,6 +1838,7 @@ main()
 	enable_cblas='no'
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
+	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
 
@@ -1999,6 +2010,12 @@ main()
 							;;
 						disable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='no'
+							;;
+						enable-sup-handling)
+							enable_sup_handling='yes'
+							;;
+						disable-sup-handling)
+							enable_sup_handling='no'
 							;;
 						with-memkind)
 							enable_memkind='yes'
@@ -2778,6 +2795,13 @@ main()
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
 	fi
+	if [ "x${enable_sup_handling}" = "xyes" ]; then
+		echo "${script_name}: small matrix handling is enabled."
+		enable_sup_handling_01=1
+	else
+		echo "${script_name}: small matrix handling is disabled."
+		enable_sup_handling_01=0
+	fi
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
@@ -2986,6 +3010,7 @@ main()
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
+		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \

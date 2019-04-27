@@ -789,6 +789,97 @@ static void bli_toggle_dim( mdim_t* mdim )
 }
 
 
+// stor3_t-related
+
+static stor3_t bli_stor3_from_strides( inc_t rs_c, inc_t cs_c,
+                                       inc_t rs_a, inc_t cs_a,
+                                       inc_t rs_b, inc_t cs_b  )
+{
+	// If any matrix is general-stored, return the stor3_t id for the
+	// general-purpose sup microkernel.
+	if ( bli_is_gen_stored( rs_c, cs_c ) ||
+	     bli_is_gen_stored( rs_a, cs_a ) ||
+	     bli_is_gen_stored( rs_b, cs_b ) ) return BLIS_XXX;
+
+	// Otherwise, compute and return the stor3_t id as follows.
+	const bool_t c_is_col = bli_is_col_stored( rs_c, cs_c );
+	const bool_t a_is_col = bli_is_col_stored( rs_a, cs_a );
+	const bool_t b_is_col = bli_is_col_stored( rs_b, cs_b );
+
+	return ( stor3_t )( 4 * c_is_col +
+	                    2 * a_is_col +
+	                    1 * b_is_col );
+}
+
+static stor3_t bli_stor3_trans( stor3_t id )
+{
+#if 1
+	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
+	=
+	{
+	  ( stor3_t )7,  // BLIS_RRR = 0  ->  BLIS_CCC = 7
+	  ( stor3_t )5,  // BLIS_RRC = 1  ->  BLIS_CRC = 5
+	  ( stor3_t )6,  // BLIS_RCR = 2  ->  BLIS_CCR = 6
+	  ( stor3_t )4,  // BLIS_RCC = 3  ->  BLIS_CRR = 4
+	  ( stor3_t )3,  // BLIS_CRR = 4  ->  BLIS_RCC = 3
+	  ( stor3_t )1,  // BLIS_CRC = 5  ->  BLIS_RRC = 1
+	  ( stor3_t )2,  // BLIS_CCR = 6  ->  BLIS_RCR = 2
+	  ( stor3_t )0,  // BLIS_CCC = 7  ->  BLIS_RRR = 0
+	};
+
+	return map[id];
+#else
+	return   ( ( id & 0x4 ) ^ 0x4 )        | // flip c bit
+	       ( ( ( id & 0x1 ) ^ 0x1 ) << 1 ) | // flip b bit and move to a position
+	       ( ( ( id & 0x2 ) ^ 0x2 ) >> 1 );  // flip a bit and move to b position
+#endif
+}
+
+static stor3_t bli_stor3_transa( stor3_t id )
+{
+#if 0
+	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
+	=
+	{
+	  ( stor3_t )1,  // BLIS_RRR = 0  ->  BLIS_RRC = 1
+	  ( stor3_t )0,  // BLIS_RRC = 1  ->  BLIS_RRR = 0
+	  ( stor3_t )3,  // BLIS_RCR = 2  ->  BLIS_RCC = 3
+	  ( stor3_t )2,  // BLIS_RCC = 3  ->  BLIS_RCR = 2
+	  ( stor3_t )5,  // BLIS_CRR = 4  ->  BLIS_CRC = 5
+	  ( stor3_t )4,  // BLIS_CRC = 5  ->  BLIS_CRR = 4
+	  ( stor3_t )7,  // BLIS_CCR = 6  ->  BLIS_CCC = 7
+	  ( stor3_t )6,  // BLIS_CCC = 7  ->  BLIS_CCR = 6
+	};
+
+	return map[id];
+#else
+	return ( stor3_t )( id ^ 0x1 );
+#endif
+}
+
+static stor3_t bli_stor3_transb( stor3_t id )
+{
+#if 0
+	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
+	=
+	{
+	  ( stor3_t )2,  // BLIS_RRR = 0  ->  BLIS_RCR = 2
+	  ( stor3_t )3,  // BLIS_RRC = 1  ->  BLIS_RCC = 3
+	  ( stor3_t )0,  // BLIS_RCR = 2  ->  BLIS_RRR = 0
+	  ( stor3_t )1,  // BLIS_RCC = 3  ->  BLIS_RRC = 1
+	  ( stor3_t )6,  // BLIS_CRR = 4  ->  BLIS_CCR = 6
+	  ( stor3_t )7,  // BLIS_CRC = 5  ->  BLIS_CCC = 7
+	  ( stor3_t )4,  // BLIS_CCR = 6  ->  BLIS_CRR = 4
+	  ( stor3_t )5,  // BLIS_CCC = 7  ->  BLIS_CRC = 5
+	};
+
+	return map[id];
+#else
+	return ( stor3_t )( id ^ 0x2 );
+#endif
+}
+
+
 
 // index-related
 
