@@ -1470,6 +1470,9 @@ typedef struct rntm_s
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	membrk_t* membrk;
 
+	// A switch to enable/disable small/unpacked matrix handling in level-3 ops.
+	bool_t    l3_sup;
+
 } rntm_t;
 
 
