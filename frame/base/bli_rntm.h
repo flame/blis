@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,6 +45,13 @@ typedef struct rntm_s
 {
 	dim_t     num_threads;
 	dim_t*    thrloop;
+
+	pool_t*   sba_pool;
+
+	membrk_t* membrk;
+
+	bool_t    l3_sup;
+
 } rntm_t;
 */
 
@@ -85,6 +92,11 @@ static dim_t bli_rntm_ir_ways( rntm_t* rntm )
 static dim_t bli_rntm_pr_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KR, rntm );
+}
+
+static bool_t bli_rntm_l3_sup( rntm_t* rntm )
+{
+	return rntm->l3_sup;
 }
 
 //
@@ -175,6 +187,22 @@ static void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
 	rntm->membrk = membrk;
 }
 
+static void bli_rntm_set_l3_sup( bool_t l3_sup, rntm_t* rntm )
+{
+	// Set the bool_t indicating whether level-3 sup handling is enabled.
+	rntm->l3_sup = l3_sup;
+}
+
+static void bli_rntm_enable_l3_sup( rntm_t* rntm )
+{
+	bli_rntm_set_l3_sup( TRUE, rntm );
+}
+
+static void bli_rntm_disable_l3_sup( rntm_t* rntm )
+{
+	bli_rntm_set_l3_sup( FALSE, rntm );
+}
+
 static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
 	bli_rntm_set_num_threads_only( -1, rntm );
@@ -186,6 +214,14 @@ static void bli_rntm_clear_ways_only( rntm_t* rntm )
 static void bli_rntm_clear_sba_pool( rntm_t* rntm )
 {
 	bli_rntm_set_sba_pool( NULL, rntm );
+}
+static void bli_rntm_clear_membrk( rntm_t* rntm )
+{
+	bli_rntm_set_membrk( NULL, rntm );
+}
+static void bli_rntm_clear_l3_sup( rntm_t* rntm )
+{
+	bli_rntm_set_l3_sup( 1, rntm );
 }
 
 //
@@ -223,9 +259,14 @@ static void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir,
 // of the public "set" accessors, each of which guarantees that the rntm_t
 // will be in a good state upon return.
 
-#define BLIS_RNTM_INITIALIZER { .num_threads = -1, \
-                                .thrloop = { -1, -1, -1, -1, -1, -1 }, \
-                                .sba_pool = NULL } \
+#define BLIS_RNTM_INITIALIZER \
+        { \
+          .num_threads = -1, \
+          .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
+          .sba_pool    = NULL, \
+          .membrk      = NULL, \
+          .l3_sup      = 1  \
+        }  \
 
 static void bli_rntm_init( rntm_t* rntm )
 {
@@ -233,6 +274,9 @@ static void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_ways_only( rntm );
 
 	bli_rntm_clear_sba_pool( rntm );
+	bli_rntm_clear_membrk( rntm );
+
+	bli_rntm_clear_l3_sup( rntm );
 }
 
 // -----------------------------------------------------------------------------

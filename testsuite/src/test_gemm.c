@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -236,11 +236,11 @@ void libblis_test_gemm_experiment
 	libblis_test_mobj_create( params, datatype, transa,
 	                          sc_str[1], m, k, &a );
 	libblis_test_mobj_create( params, datatype, transb,
-	                          sc_str[1], k, n, &b );
+	                          sc_str[2], k, n, &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, n, &c );
+	                          sc_str[0], m, n, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, n, &c_save );
+	                          sc_str[0], m, n, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )
@@ -259,6 +259,9 @@ void libblis_test_gemm_experiment
 	libblis_test_mobj_randomize( params, TRUE, &b );
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
+//bli_setm( &BLIS_ONE, &a );
+//bli_setsc(  1.0,  0.0, &alpha );
+//bli_setsc(  0.0,  0.0, &beta );
 
 	// Apply the parameters.
 	bli_obj_set_conjtrans( transa, &a );
@@ -349,13 +352,13 @@ void libblis_test_gemm_md
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, dt_a, transa,
-	                          sc_str[0], m, k, &a );
+	                          sc_str[1], m, k, &a );
 	libblis_test_mobj_create( params, dt_b, transb,
-	                          sc_str[1], k, n, &b );
+	                          sc_str[2], k, n, &b );
 	libblis_test_mobj_create( params, dt_c, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, n, &c );
+	                          sc_str[0], m, n, &c );
 	libblis_test_mobj_create( params, dt_c, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, n, &c_save );
+	                          sc_str[0], m, n, &c_save );
 
 	// For mixed-precision, set the computation precision of C.
 	if ( params->mixed_precision )
@@ -449,15 +452,20 @@ void libblis_test_gemm_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 #if 0
+//bli_printm( "alpha", alpha, "%5.2f", "" );
+//bli_printm( "beta", beta, "%5.2f", "" );
 bli_printm( "a", a, "%5.2f", "" );
 bli_printm( "b", b, "%5.2f", "" );
 bli_printm( "c", c, "%5.2f", "" );
-bli_printm( "alpha", alpha, "%5.2f", "" );
-bli_printm( "beta", beta, "%5.2f", "" );
 #endif
+//if ( bli_obj_length( b ) == 16 &&
+//     bli_obj_stor3_from_strides( c, a, b ) == BLIS_CRR )
+//bli_printm( "c before", c, "%6.3f", "" );
 		bli_gemm( alpha, a, b, beta, c );
 #if 0
-bli_printm( "c after", c, "%5.2f", "" );
+if ( bli_obj_length( c ) == 12 &&
+     bli_obj_stor3_from_strides( c, a, b ) == BLIS_RRR )
+bli_printm( "c after", c, "%6.3f", "" );
 #endif
 		break;
 

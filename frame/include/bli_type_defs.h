@@ -814,6 +814,80 @@ typedef enum
 #if 0
 typedef enum
 {
+	// RV = row-stored, contiguous vector-loading
+	// RG = row-stored, non-contiguous gather-loading
+	// CV = column-stored, contiguous vector-loading
+	// CG = column-stored, non-contiguous gather-loading
+
+	// RD = row-stored, dot-based
+	// CD = col-stored, dot-based
+
+	// RC = row-stored, column-times-column
+	// CR = column-stored, row-times-row
+
+	// GX = general-stored generic implementation
+
+	BLIS_GEMMSUP_RV_UKR = 0,
+	BLIS_GEMMSUP_RG_UKR,
+	BLIS_GEMMSUP_CV_UKR,
+	BLIS_GEMMSUP_CG_UKR,
+
+	BLIS_GEMMSUP_RD_UKR,
+	BLIS_GEMMSUP_CD_UKR,
+
+	BLIS_GEMMSUP_RC_UKR,
+	BLIS_GEMMSUP_CR_UKR,
+
+	BLIS_GEMMSUP_GX_UKR,
+} l3sup_t;
+
+#define BLIS_NUM_LEVEL3_SUP_UKRS 9
+#endif
+
+
+typedef enum
+{
+	// 3-operand storage combinations
+	BLIS_RRR = 0,
+	BLIS_RRC, // 1
+	BLIS_RCR, // 2
+	BLIS_RCC, // 3
+	BLIS_CRR, // 4
+	BLIS_CRC, // 5
+	BLIS_CCR, // 6
+	BLIS_CCC, // 7
+	BLIS_XXX, // 8
+
+#if 0
+	BLIS_RRG,
+	BLIS_RCG,
+	BLIS_RGR,
+	BLIS_RGC,
+	BLIS_RGG,
+	BLIS_CRG,
+	BLIS_CCG,
+	BLIS_CGR,
+	BLIS_CGC,
+	BLIS_CGG,
+	BLIS_GRR,
+	BLIS_GRC,
+	BLIS_GRG,
+	BLIS_GCR,
+	BLIS_GCC,
+	BLIS_GCG,
+	BLIS_GGR,
+	BLIS_GGC,
+	BLIS_GGG,
+#endif
+} stor3_t;
+
+#define BLIS_NUM_3OP_RC_COMBOS 9
+//#define BLIS_NUM_3OP_RCG_COMBOS 27
+
+
+#if 0
+typedef enum
+{
 	BLIS_JC_IDX = 0,
 	BLIS_PC_IDX,
 	BLIS_IC_IDX,
@@ -885,6 +959,19 @@ typedef enum
 } bszid_t;
 
 #define BLIS_NUM_BLKSZS 11
+
+
+// -- Threshold ID type --
+
+typedef enum
+{
+	BLIS_MT = 0, // level-3 small/unpacked matrix threshold in m dimension
+	BLIS_NT,     // level-3 small/unpacked matrix threshold in n dimension
+	BLIS_KT      // level-3 small/unpacked matrix threshold in k dimension
+
+} threshid_t;
+
+#define BLIS_NUM_THRESH 3
 
 
 // -- Architecture ID type --
@@ -1326,6 +1413,12 @@ typedef struct cntx_s
 	func_t    l3_nat_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	mbool_t   l3_nat_ukrs_prefs[ BLIS_NUM_LEVEL3_UKRS ];
 
+	blksz_t   l3_sup_thresh[ BLIS_NUM_THRESH ];
+	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
+	blksz_t   l3_sup_blkszs[ BLIS_NUM_BLKSZS ];
+	func_t    l3_sup_kers[ BLIS_NUM_3OP_RC_COMBOS ];
+	mbool_t   l3_sup_kers_prefs[ BLIS_NUM_3OP_RC_COMBOS ];
+
 	func_t    l1f_kers[ BLIS_NUM_LEVEL1F_KERS ];
 	func_t    l1v_kers[ BLIS_NUM_LEVEL1V_KERS ];
 
@@ -1355,6 +1448,9 @@ typedef struct rntm_s
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	membrk_t* membrk;
+
+	// A switch to enable/disable small/unpacked matrix handling in level-3 ops.
+	bool_t    l3_sup;
 
 } rntm_t;
 

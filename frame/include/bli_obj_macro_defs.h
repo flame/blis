@@ -1128,6 +1128,44 @@ static void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
 	obj->ps = ps;
 }
 
+// stor3_t-related
+
+static stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
+{
+	const inc_t rs_c = bli_obj_row_stride( c );
+	const inc_t cs_c = bli_obj_col_stride( c );
+
+	inc_t rs_a, cs_a;
+	inc_t rs_b, cs_b;
+
+	if ( bli_obj_has_notrans( a ) )
+	{
+		rs_a = bli_obj_row_stride( a );
+		cs_a = bli_obj_col_stride( a );
+	}
+	else
+	{
+		rs_a = bli_obj_col_stride( a );
+		cs_a = bli_obj_row_stride( a );
+	}
+
+	if ( bli_obj_has_notrans( b ) )
+	{
+		rs_b = bli_obj_row_stride( b );
+		cs_b = bli_obj_col_stride( b );
+	}
+	else
+	{
+		rs_b = bli_obj_col_stride( b );
+		cs_b = bli_obj_row_stride( b );
+	}
+
+	return bli_stor3_from_strides( rs_c, cs_c,
+	                               rs_a, cs_a,
+	                               rs_b, cs_b  );
+}
+
+
 // -- Initialization-related macros --
 
 // Finish the initialization started by the matrix-specific static initializer
@@ -1419,7 +1457,32 @@ static void bli_obj_induce_trans( obj_t* obj )
 	bli_obj_set_panel_dims( n_panel, m_panel, obj );
 
 	// Note that this macro DOES NOT touch the transposition bit! If
-	// the calling code is using this macro to handle an object whose
+	// the calling code is using this function to handle an object whose
+	// transposition bit is set prior to computation, that code needs
+	// to manually clear or toggle the bit, via
+	// bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
+	// respectively.
+}
+
+static void bli_obj_induce_fast_trans( obj_t* obj )
+{
+	// NOTE: This function is only used in situations where the matrices
+	// are guaranteed to not have structure or be packed.
+
+	// Induce transposition among basic fields.
+	dim_t  m        = bli_obj_length( obj );
+	dim_t  n        = bli_obj_width( obj );
+	inc_t  rs       = bli_obj_row_stride( obj );
+	inc_t  cs       = bli_obj_col_stride( obj );
+	dim_t  offm     = bli_obj_row_off( obj );
+	dim_t  offn     = bli_obj_col_off( obj );
+
+	bli_obj_set_dims( n, m, obj );
+	bli_obj_set_strides( cs, rs, obj );
+	bli_obj_set_offs( offn, offm, obj );
+
+	// Note that this macro DOES NOT touch the transposition bit! If
+	// the calling code is using this function to handle an object whose
 	// transposition bit is set prior to computation, that code needs
 	// to manually clear or toggle the bit, via
 	// bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
