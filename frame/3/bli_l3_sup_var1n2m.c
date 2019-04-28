@@ -232,11 +232,11 @@ void PASTEMAC(ch,varname) \
        rntm_t* restrict rntm  \
      ) \
 { \
-	/* If any dimension is zero, return immediately. */ \
-	if ( bli_zero_dim3( m, n, k ) ) return; \
+	/* If m or n is zero, return immediately. */ \
+	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* If alpha is zero, scale by beta and return. */ \
-	if ( PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
+	/* If k < 1 or alpha is zero, scale by beta and return. */ \
+	if ( k < 1 || PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
 	{ \
 		PASTEMAC(ch,scalm) \
 		( \
@@ -612,11 +612,11 @@ void PASTEMAC(ch,varname) \
        rntm_t* restrict rntm  \
      ) \
 { \
-	/* If any dimension is zero, return immediately. */ \
-	if ( bli_zero_dim3( m, n, k ) ) return; \
+	/* If m or n is zero, return immediately. */ \
+	if ( bli_zero_dim2( m, n ) ) return; \
 \
-	/* If alpha is zero, scale by beta and return. */ \
-	if ( PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
+	/* If k < 1 or alpha is zero, scale by beta and return. */ \
+	if ( k < 1 || PASTEMAC(ch,eq0)( *(( ctype* )alpha) ) ) \
 	{ \
 		PASTEMAC(ch,scalm) \
 		( \

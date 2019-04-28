@@ -94,6 +94,19 @@ err_t bli_gemmsup
 			return BLIS_FAILURE;
 	}
 
+#if 0
+const num_t dt = bli_obj_dt( c );
+const dim_t m  = bli_obj_length( c );
+const dim_t n  = bli_obj_width( c );
+const dim_t k  = bli_obj_width_after_trans( a );
+const dim_t tm = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx );
+const dim_t tn = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx );
+const dim_t tk = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx );
+
+printf( "dims: %d %d %d (threshs: %d %d %d)\n",
+        (int)m, (int)n, (int)k, (int)tm, (int)tn, (int)tk );
+#endif
+
 	// We've now ruled out the following two possibilities:
 	// - the ukernel prefers the operation as-is, and the sup thresholds are
 	//   unsatisfied.
