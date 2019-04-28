@@ -50,15 +50,6 @@
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
-// Allow the sup implementation to combine some small edge case iterations in
-// the 2nd loop of the panel-block algorithm (MR) and/or the 2nd loop of the
-// block-panel algorithm (NR) with the last full iteration that precedes it.
-// NOTE: These cpp macros need to be explicitly set to an integer since they
-// are used at compile-time to create unconditional branches or dead code
-// regions.
-#define BLIS_ENABLE_SUP_MR_EXT 1
-#define BLIS_ENABLE_SUP_NR_EXT 0
-
 
 
 //#endif

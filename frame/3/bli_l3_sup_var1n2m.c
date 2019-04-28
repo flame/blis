@@ -362,7 +362,7 @@ void PASTEMAC(ch,varname) \
 		   rows of C and A. (If MRX > MR, the mkernel has agreed to handle
 		   these cases.) Note that this prevents us from declaring jr_iter and
 		   jr_left as const. */ \
-		if ( BLIS_ENABLE_SUP_MR_EXT ) \
+		if ( 1 ) \
 		if ( MRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= MRE ) \
 		{ \
 			jr_iter--; jr_left += MR; \
@@ -730,7 +730,7 @@ void PASTEMAC(ch,varname) \
 		   columns of C and B. (If NRX > NR, the mkernel has agreed to handle
 		   these cases.) Note that this prevents us from declaring jr_iter and
 		   jr_left as const. */ \
-		if ( BLIS_ENABLE_SUP_NR_EXT ) \
+		if ( 1 ) \
 		if ( NRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= NRE ) \
 		{ \
 			jr_iter--; jr_left += NR; \
