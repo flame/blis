@@ -433,9 +433,9 @@ void GENBARNAME(cntx_init)
 	// register new (probably larger) thresholds that are almost surely more
 	// appropriate that these default values.
 	//                                          s     d     c     z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   10,   10,   10,   10 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   10,   10,   10,   10 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   10,   10,   10,   10 );
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],    0,    0,    0,    0 );
 
 	// Initialize the context with the default thresholds.
 	bli_cntx_set_l3_sup_thresh
