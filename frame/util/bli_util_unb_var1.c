@@ -466,7 +466,7 @@ void PASTEMAC(ch,varname) \
 		/* If the absolute value of the current element exceeds that of
 		   the previous largest, save it and its index. If NaN is
 		   encountered, then treat it the same as if it were a valid
-		   value that was smaller than any previously seen. This
+		   value that was larger than any previously seen. This
 		   behavior mimics that of LAPACK's ?lange(). */ \
 		if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 		{ \

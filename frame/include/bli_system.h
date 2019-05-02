@@ -36,6 +36,12 @@
 #ifndef BLIS_SYSTEM_H
 #define BLIS_SYSTEM_H
 
+// NOTE: If not yet defined, we define _POSIX_C_SOURCE to make sure that
+// various parts of POSIX are defined and made available.
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -111,7 +117,8 @@
 #elif BLIS_OS_OSX
   #include <mach/mach_time.h>
 #else
-  #include <sys/time.h>
+  //#include <sys/time.h>
+
   #include <time.h>
 #endif
 
