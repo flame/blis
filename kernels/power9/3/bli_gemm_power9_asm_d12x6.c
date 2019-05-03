@@ -100,6 +100,19 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
+#define SCALECMATRIX \
+ "xvmuldp          %%vs36, %%vs36, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs37, %%vs37, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs38, %%vs38, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs39, %%vs39, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs40, %%vs40, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs41, %%vs41, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs42, %%vs42, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs43, %%vs43, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs44, %%vs44, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs45, %%vs45, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs46, %%vs46, %%vs49   	 \n\t" \
+ "xvmuldp          %%vs47, %%vs47, %%vs49   	 \n\t" \
  
 #define LOADCMATRIX \
   "lxv              %%vs36, 0(%%r15)              \n\t" \
@@ -187,6 +200,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r2, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
+  "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
@@ -324,12 +338,15 @@ void bli_dgemm_power9_asm_12x6
   "xvmuldp          %%vs35, %%vs35, %%vs48        \n\t"
   "                                               \n\t"
   "                                               \n\t"
+  "mtctr            %%r5                          \n\t"
+  "bdz              DBETAZERO                     \n\t" // if ZF = 1, jump to beta == 0 case
   "                                               \n\t"
   "ld               %%r15, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "ADDTOC:                                        \n\t" // C = C + alpha*(AB)
+  "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
+  SCALECMATRIX
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -346,6 +363,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "addi             %%r15, %%r15,  192            \n\t" // Move C-ptr
   LOADCMATRIX
+  SCALECMATRIX
   "                                               \n\t"
   "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"  
   "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"  
@@ -363,6 +381,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "addi             %%r15, %%r15,  192            \n\t" // Move C-ptr
   LOADCMATRIX
+  SCALECMATRIX
   "                                               \n\t"
   "xvadddp          %%vs24, %%vs24, %%vs36   	    \n\t"  
   "xvadddp          %%vs25, %%vs25, %%vs37   	    \n\t"  
@@ -380,7 +399,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r1, %6                      \n\t" // load ptr for C
+  "DBETAZERO:                                     \n\t"
   STORECMATRIX 
   "                                               \n\t"
   
