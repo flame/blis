@@ -298,6 +298,7 @@ print_usage()
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
+        echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
