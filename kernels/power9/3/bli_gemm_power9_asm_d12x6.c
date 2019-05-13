@@ -100,6 +100,77 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
+#define LOADANDUPDATE \
+  "lxv           %%vs36, 0(%%r2)                  \n\t" \
+  "lxv           %%vs37, 16(%%r2)                 \n\t" \
+  "lxv           %%vs38, 32(%%r2)                 \n\t" \
+  "lxv           %%vs39, 48(%%r2)                 \n\t" \
+  "lxv           %%vs40, 64(%%r2)                 \n\t" \
+  "lxv           %%vs41, 80(%%r2)                 \n\t" \
+  "                                               \n\t" \
+  "lxvdsx       %%vs48, %%r20, %%r3               \n\t" \
+  "lxvdsx       %%vs49, %%r21, %%r3               \n\t" \
+  "lxvdsx       %%vs50, %%r22, %%r3               \n\t" \
+  "lxvdsx       %%vs51, %%r23, %%r3               \n\t" \
+  "lxvdsx       %%vs52, %%r24, %%r3               \n\t" \
+  "lxvdsx       %%vs53, %%r25, %%r3               \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
+  "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
+  "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t" \
+  "xvmaddadp        %%vs3, %%vs39, %%vs48         \n\t" \
+  "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
+  "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
+  "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
+  "xvmaddadp        %%vs8, %%vs38, %%vs49         \n\t" \
+  "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t" \
+  "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
+  "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
+  "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
+  "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t" \
+  "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t" \
+  "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
+  "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
+  "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
+  "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t" \
+  "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t" \
+  "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
+  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
+  "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
+  "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t" \
+  "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t" \
+  "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
+  "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
+  "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
+  "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t" \
+  "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t" \
+  "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
+  "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "                                               \n\t" \
+  "addi             %%r2, %%r2, 96                \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
+
 #define SCALECMATRIX \
  "xvmuldp          %%vs36, %%vs36, %%vs49   	 \n\t" \
  "xvmuldp          %%vs37, %%vs37, %%vs49   	 \n\t" \
@@ -187,7 +258,7 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0;
+	uint64_t k_iter = k0 / 4;
 	uint64_t k_left = k0 % 4;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
@@ -216,81 +287,22 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
-  "                                               \n\t"
-  "lxv           %%vs36, 0(%%r2)                  \n\t" // Load a new col of A
-  "lxv           %%vs37, 16(%%r2)                 \n\t" 
-  "lxv           %%vs38, 32(%%r2)                 \n\t" 
-  "lxv           %%vs39, 48(%%r2)                 \n\t" 
-  "lxv           %%vs40, 64(%%r2)                 \n\t" 
-  "lxv           %%vs41, 80(%%r2)                 \n\t" 
-  "                                               \n\t"
-  "lxvdsx       %%vs48, %%r20, %%r3               \n\t" // Broadcast B - 1
-  "lxvdsx       %%vs49, %%r21, %%r3               \n\t" // Broadcast B - 2
-  "lxvdsx       %%vs50, %%r22, %%r3               \n\t" // Broadcast B - 3
-  "lxvdsx       %%vs51, %%r23, %%r3               \n\t" // Broadcast B - 4
-  "lxvdsx       %%vs52, %%r24, %%r3               \n\t" // Broadcast B - 5
-  "lxvdsx       %%vs53, %%r25, %%r3               \n\t" // Broadcast B - 6
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" // Group 1 FMA
-  "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" 
-  "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t"
-  "xvmaddadp        %%vs3, %%vs39, %%vs48         \n\t"
-  "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t"
-  "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" // Group 2 FMA
-  "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" 
-  "xvmaddadp        %%vs8, %%vs38, %%vs49         \n\t"
-  "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t"
-  "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t"
-  "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" // Group 3 FMA
-  "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" 
-  "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t"
-  "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t"
-  "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t"
-  "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" // Group 4 FMA
-  "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" 
-  "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t"
-  "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t"
-  "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t"
-  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" // Group 5 FMA
-  "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" 
-  "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t"
-  "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t"
-  "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t"
-  "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" // Group 6 FMA
-  "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" 
-  "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t"
-  "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t"
-  "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t"
-  "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
-  "addi             %%r2, %%r2, 96                \n\t" // Move A-ptr to new col
-  "addi             %%r3, %%r3, 48                \n\t" // Move B-ptr to new row
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
+  "ld               %%r9, %1                      \n\t" // edge case
+  "cmpwi            %%r7, %%r9, 0                 \n\t"
+  "beq              %%r7, DPOSTACCUM             \n\t"
+  "mtctr            %%r9                          \n\t"
   "                                               \n\t"
+  "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  LOADANDUPDATE
+  "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
@@ -419,8 +431,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", 
-  "r9", 
+  "r1", "r3", "r7", "r9", 
 
   "r20", "r21", "r22", "r23", "r24", "r25",
 
