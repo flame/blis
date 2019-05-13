@@ -94,37 +94,37 @@ endif
 # BLAS library path(s). This is where the BLAS libraries reside.
 HOME_LIB_PATH   := $(HOME)/flame/lib
 #VENDOR_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-MKL_LIB_PATH := $(HOME)/intel/mkl/lib/intel64
+#MKL_LIB_PATH := $(HOME)/intel/mkl/lib/intel64
 #VENDOR_LIB_PATH := ${MKLROOT}/lib/intel64
 #ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
 
 # OpenBLAS
-OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
-OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
+# OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
+# OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
 # ATLAS
 #ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
 #                  $(HOME_LIB_PATH)/libatlas.a
 
 # MKL
-MKL_LIB        := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_sequential \
-                  -lpthread -lm -ldl
+# MKL_LIB        := -L$(MKL_LIB_PATH) \
+#                   -lmkl_intel_lp64 \
+#                   -lmkl_core \
+#                   -lmkl_sequential \
+#                   -lpthread -lm -ldl
 #MKLP_LIB       := -L$(MKL_LIB_PATH) \
 #                  -lmkl_intel_thread \
 #                  -lmkl_core \
 #                  -lmkl_intel_ilp64 \
 #                  -L$(ICC_LIB_PATH) \
 #                  -liomp5
-MKLP_LIB       := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_gnu_thread \
-                  -lpthread -lm -ldl -fopenmp
-                  #-L$(ICC_LIB_PATH) \
-                  #-lgomp
+# MKLP_LIB       := -L$(MKL_LIB_PATH) \
+#                   -lmkl_intel_lp64 \
+#                   -lmkl_core \
+#                   -lmkl_gnu_thread \
+#                   -lpthread -lm -ldl -fopenmp
+#                   #-L$(ICC_LIB_PATH) \
+#                   #-lgomp
 
 VENDOR_LIB     := $(MKL_LIB)
 VENDORP_LIB    := $(MKLP_LIB)
@@ -236,8 +236,8 @@ blis-2s:    blis-nat-2s
 blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
 
 # Define the datatypes, operations, and implementations.
-DTS   := s d c z
-OPS   := gemm hemm herk trmm trsm
+DTS   := d #s d c z
+OPS   := gemm #hemm herk trmm trsm
 IMPLS := asm_blis openblas vendor
 
 # Define functions to construct object filenames from the datatypes and

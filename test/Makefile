@@ -96,7 +96,7 @@ endif
 BLAS_LIB_PATH  := $(HOME)/flame/lib
 #MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
 #MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
+#MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
 #ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
 
 # OpenBLAS
@@ -115,11 +115,11 @@ MKL_LIB        := -L$(MKL_LIB_PATH) \
 
 # ESSL
 # Note: ESSL is named differently for SMP and/or BG
-ESSL_TYPE      :=       # This is the 32b library on POWER
+#ESSL_TYPE      :=       # This is the 32b library on POWER
 #ESSL_TYPE      := 6464  # This is the 64b library on POWER
 #ESSL_TYPE      := bg    # This is the 32b single-threaded library on Blue Gene
 #ESSL_TYPE      := smpbg # This is the 32b multi-threaded library on Blue Gene
-ESSL_LIB       := $(ESSL_LIB_PATH)/libessl$(ESSL_TYPE).a
+#ESSL_LIB       := $(ESSL_LIB_PATH)/libessl$(ESSL_TYPE).a
 
 # Accelerate
 MAC_LIB        := -framework Accelerate

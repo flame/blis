@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+
 #define VSZEROOUT \
  "xxlxor           %%vs0, %%vs0, %%vs0              \n\t" \
  "xxlxor           %%vs1, %%vs1, %%vs1              \n\t" \
@@ -117,7 +118,6 @@
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
   "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t" \
@@ -170,6 +170,44 @@
   "                                               \n\t" \
   "addi             %%r2, %%r2, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
+
+#define SCALEBYALPHA \
+ "xvmuldp          %%vs0, %%vs0, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs1, %%vs1, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs2, %%vs2, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs3, %%vs3, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs4, %%vs4, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs5, %%vs5, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs6, %%vs6, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs7, %%vs7, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs8, %%vs8, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs9, %%vs9, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs10, %%vs10, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs11, %%vs11, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs12, %%vs12, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs13, %%vs13, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs14, %%vs14, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs15, %%vs15, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs16, %%vs16, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs17, %%vs17, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs18, %%vs18, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs19, %%vs19, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs20, %%vs20, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs21, %%vs21, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs22, %%vs22, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs23, %%vs23, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs24, %%vs24, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs25, %%vs25, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs26, %%vs26, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs27, %%vs27, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs28, %%vs28, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs29, %%vs29, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs30, %%vs30, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs31, %%vs31, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs32, %%vs32, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs33, %%vs33, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs34, %%vs34, %%vs48   	 \n\t" \
+ "xvmuldp          %%vs35, %%vs35, %%vs48   	 \n\t" 
 
 #define SCALECMATRIX \
  "xvmuldp          %%vs36, %%vs36, %%vs49   	 \n\t" \
@@ -312,42 +350,7 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx           %%vs48, 0, %%r4               \n\t" // splat alpha
   "lxvdsx           %%vs49, 0, %%r5               \n\t" // splat beta
   "                                               \n\t"
-  "xvmuldp          %%vs0, %%vs0, %%vs48          \n\t" // scale by alpha
-  "xvmuldp          %%vs1, %%vs1, %%vs48          \n\t"  
-  "xvmuldp          %%vs2, %%vs2, %%vs48          \n\t"  
-  "xvmuldp          %%vs3, %%vs3, %%vs48          \n\t"  
-  "xvmuldp          %%vs4, %%vs4, %%vs48          \n\t"  
-  "xvmuldp          %%vs5, %%vs5, %%vs48          \n\t"  
-  "xvmuldp          %%vs6, %%vs6, %%vs48          \n\t"  
-  "xvmuldp          %%vs7, %%vs7, %%vs48          \n\t"  
-  "xvmuldp          %%vs8, %%vs8, %%vs48          \n\t"  
-  "xvmuldp          %%vs9, %%vs9, %%vs48          \n\t"  
-  "xvmuldp          %%vs10, %%vs10, %%vs48        \n\t"  
-  "xvmuldp          %%vs11, %%vs11, %%vs48        \n\t"  
-  "xvmuldp          %%vs12, %%vs12, %%vs48        \n\t"  
-  "xvmuldp          %%vs13, %%vs13, %%vs48        \n\t"  
-  "xvmuldp          %%vs14, %%vs14, %%vs48        \n\t"  
-  "xvmuldp          %%vs15, %%vs15, %%vs48        \n\t"  
-  "xvmuldp          %%vs16, %%vs16, %%vs48        \n\t"  
-  "xvmuldp          %%vs17, %%vs17, %%vs48        \n\t"  
-  "xvmuldp          %%vs18, %%vs18, %%vs48        \n\t"  
-  "xvmuldp          %%vs19, %%vs19, %%vs48        \n\t"  
-  "xvmuldp          %%vs20, %%vs20, %%vs48        \n\t"  
-  "xvmuldp          %%vs21, %%vs21, %%vs48        \n\t"  
-  "xvmuldp          %%vs22, %%vs22, %%vs48        \n\t"  
-  "xvmuldp          %%vs23, %%vs23, %%vs48        \n\t"  
-  "xvmuldp          %%vs24, %%vs24, %%vs48        \n\t"  
-  "xvmuldp          %%vs25, %%vs25, %%vs48        \n\t"  
-  "xvmuldp          %%vs26, %%vs26, %%vs48        \n\t"  
-  "xvmuldp          %%vs27, %%vs27, %%vs48        \n\t"  
-  "xvmuldp          %%vs28, %%vs28, %%vs48        \n\t"  
-  "xvmuldp          %%vs29, %%vs29, %%vs48        \n\t"  
-  "xvmuldp          %%vs30, %%vs30, %%vs48        \n\t"  
-  "xvmuldp          %%vs31, %%vs31, %%vs48        \n\t"  
-  "xvmuldp          %%vs32, %%vs32, %%vs48        \n\t"  
-  "xvmuldp          %%vs33, %%vs33, %%vs48        \n\t"  
-  "xvmuldp          %%vs34, %%vs34, %%vs48        \n\t"  
-  "xvmuldp          %%vs35, %%vs35, %%vs48        \n\t"
+  SCALEBYALPHA
   "                                               \n\t"
   "                                               \n\t"
   "mtctr            %%r5                          \n\t"

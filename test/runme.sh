@@ -5,12 +5,14 @@ out_root="output"
 #out_root="output_square"
 
 # Operations to test.
-l2_ops="gemv ger hemv her her2 trmv trsv"
-l3_ops="gemm hemm herk her2k trmm trsm"
-test_ops="${l2_ops} ${l3_ops}"
+# l2_ops="gemv ger hemv her her2 trmv trsv"
+l3_ops="gemm" 
+# "hemm herk her2k trmm trsm"
+test_ops=" ${l3_ops}" 
+# "${l2_ops}"
 
-# Implementations to test
-test_impls="openblas atlas mkl blis"
+# Implementations to test | "openblas atlas mkl"
+test_impls="blis"
 
 for im in ${test_impls}; do
 
@@ -22,7 +24,7 @@ for im in ${test_impls}; do
 		# Construct the name of the output file.
 		out_file="${out_root}_${op}_${im}.m"
 
-		echo "Running ${exec_name} > ${out_file}"
+		echo " Running ${exec_name} > ${out_file} "
 
 		# Run executable.
 		./${exec_name} > ${out_file}
