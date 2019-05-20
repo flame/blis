@@ -62,6 +62,11 @@ endif
 # gcc 4.9 (clang 3.5) or later:
 # possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+else
+ifeq ($(CC_VENDOR),clang)
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+else
+$(error gcc or clang are required for this configuration.)
 endif
 # Store all of the variables here to new variables containing the
 # configuration name.
