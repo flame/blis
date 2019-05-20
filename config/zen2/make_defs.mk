@@ -65,13 +65,15 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 # gcc 9.0 (clang ?) or later:
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver2 
+#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver2
+# gcc 6.0 (clang 4.0) or later:
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-avx256-split-unaligned-store
 # gcc 4.9 (clang 3.5) or later:
 # possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver2 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif
