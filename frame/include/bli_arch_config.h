@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,7 +62,9 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
-
+#ifdef BLIS_CONFIG_ZEN2
+CNTX_INIT_PROTS( zen2 )
+#endif
 #ifdef BLIS_CONFIG_ZEN
 CNTX_INIT_PROTS( zen )
 #endif
@@ -150,6 +153,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
+#ifdef BLIS_FAMILY_ZEN2
+#include "bli_family_zen2.h"
+#endif
 #ifdef BLIS_FAMILY_ZEN
 #include "bli_family_zen.h"
 #endif
