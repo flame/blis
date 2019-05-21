@@ -128,24 +128,20 @@ void bli_cntx_init_zen( cntx_t* cntx )
 
 */
 
-#ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
-	// Zen optmized level 3 cache block sizes
-	#if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
+      // Zen optmized level 3 cache block sizes
+
+#if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
   
         bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  510,   144,    72 );
         bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  1024,   256,   256 );
         bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 
-  #else
+#else
         bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
         bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
         bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   2040,  4080,  4080 );
-  #endif
-#else
-        bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-        bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-        bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   4080,  4080,  4080 );
 #endif
+
 
 
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );

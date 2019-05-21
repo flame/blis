@@ -66,6 +66,14 @@ arch_t bli_cpuid_query_id( void )
 	// vendor.
 	vendor = bli_cpuid_query( &family, &model, &features );
 
+#if 0
+	printf( "vendor   = %s\n", vendor==1 ? "AMD": "INTEL" );
+	printf("family    = %x\n", family );
+	printf( "model    = %x\n", model );
+	
+	printf( "features = %x\n", features );
+#endif
+
 	if ( vendor == VENDOR_INTEL )
 	{
 		// Check for each Intel configuration that is enabled, check for that
@@ -252,7 +260,7 @@ bool_t bli_cpuid_is_zen2
 	// - 0x00-0xff (THIS NEEDS UPDATING)
 	const bool_t is_arch
 	=
-	( 0x00 <= model && model <= 0xff );
+	( 0x30 <= model && model <= 0xff );
 
 	if ( !is_arch ) return FALSE;
 
@@ -415,6 +423,8 @@ arch_t bli_cpuid_query_id( void )
 	//printf( "model    = %u\n", model );
 	//printf( "part     = 0x%x\n", part );
 	//printf( "features = %u\n", features );
+
+
 
 	if ( vendor == VENDOR_ARM )
 	{

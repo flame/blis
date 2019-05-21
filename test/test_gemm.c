@@ -36,7 +36,7 @@
 #include "blis.h"
 
 
-#define FILE_IN_OUT      // File based input matrix dimensions
+//#define FILE_IN_OUT      // File based input matrix dimensions
 
 
 //#define PRINT

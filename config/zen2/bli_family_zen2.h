@@ -33,8 +33,8 @@
 
 */
 
-//#ifndef BLIS_FAMILY_H
-//#define BLIS_FAMILY_H
+#ifndef BLI_FAMILY_ZEN2_
+#define BLI_FAMILY_ZEN2_
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
@@ -57,4 +57,5 @@
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
 
+#endif
 
