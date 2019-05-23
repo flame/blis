@@ -1583,7 +1583,7 @@ static err_t bli_dgemm_small
                                 // If alpha is zero, scale by beta and return.
                                 //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
-    if( N < BLIS_SMALL_MATRIX_THRES_ROME && K < BLIS_SMALL_MATRIX_THRES_ROME)
+    if( (L != 0) && (K != 0) && (N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))
 #else
     if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))

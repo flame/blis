@@ -52,6 +52,13 @@ void bli_gemm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
+#if 0
+	gint_t M = bli_obj_length( c );
+    	gint_t N = bli_obj_width( c );
+    	gint_t K = bli_obj_width( a );
+
+	if( !(M && N && K)) return;
+#endif
 
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
