@@ -34,7 +34,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "blis.h"
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifndef BLI_FAMILY_ZEN2_
 #include "immintrin.h"
 #define GEMM_BLK_V1 8            //Block size to perform gemm and apply trsm
 #define GEMM_ACCUM_A 1            //Peform B1=B1-(B0*A0) operation instead of B1'=(B0*A0) and then B1=B1-B1'
@@ -3857,7 +3856,7 @@ static  err_t bli_dtrsm_small_XAuB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n)>250 && (m/n) < 22)
+	if(max(m,n)>150 && (m/n) < 22)
 	{
 		return BLIS_NOT_YET_IMPLEMENTED;
 	}
@@ -5195,7 +5194,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if((max(m,n)>380) && (m/n)<22)
+	if((max(m,n)>180) && (m/n)<22)
 	{
 		return BLIS_NOT_YET_IMPLEMENTED;
 	}
@@ -6373,7 +6372,7 @@ static  err_t bli_dtrsm_small_XAltB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-    if(max(m,n) > 250)
+    if(max(m,n) > 120)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -7718,7 +7717,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-    if(max(m,n) > 250)
+    if(max(m,n) > 120)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -8886,7 +8885,7 @@ static  err_t bli_dtrsm_small_XAlB(
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
 
-	if(max(m,n) > 250)
+	if(max(m,n) > 120)
 		return BLIS_NOT_YET_IMPLEMENTED;
 
     dim_t i, j, k;        //loop variablse
@@ -9868,7 +9867,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 250)
+	if(max(m,n) > 120)
 		return BLIS_NOT_YET_IMPLEMENTED;
 
     dim_t i, j, k;        //loop variablse
@@ -10709,7 +10708,7 @@ static  err_t bli_dtrsm_small_XAutB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 200)
+	if(max(m,n) > 120)
 		return BLIS_NOT_YET_IMPLEMENTED;
 
     dim_t i, j, k;        //loop variablse
@@ -11702,7 +11701,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 200)
+	if(max(m,n) > 120)
 		return BLIS_NOT_YET_IMPLEMENTED;
 
     dim_t i, j, k;        //loop variablse
@@ -25021,5 +25020,4 @@ static void trsm_AutXB_block_allSmallSizedMatrices_alpha_unitDiag(float *ptr_l, 
     } //numRows of A
     ///////////////////loop ends /////////////////////
 }
-#endif
 #endif
