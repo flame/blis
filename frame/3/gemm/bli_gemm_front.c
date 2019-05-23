@@ -74,6 +74,16 @@ void bli_gemm_front
 		}
 	}
 #endif
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemm_check( alpha, a, b, beta, c, cntx );
+
+	// If alpha is zero, scale by beta and return.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
