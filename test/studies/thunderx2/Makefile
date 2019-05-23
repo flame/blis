@@ -158,7 +158,7 @@ CFLAGS         := $(call get-frame-cflags-for,$(CONFIG_NAME))
 CFLAGS         += -g -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-lIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
+#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 
 # Datatype

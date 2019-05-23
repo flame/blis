@@ -103,7 +103,7 @@ CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
+#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 # Binary executable name.
 TESTSUITE_BIN  := test_libblis.x
