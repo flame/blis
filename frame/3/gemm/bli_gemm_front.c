@@ -53,6 +53,13 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+	gint_t M = bli_obj_length( c );
+    	gint_t N = bli_obj_width( c );
+    	gint_t K = bli_obj_width( a );
+
+	if( !(M && N && K)) return;
+
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
