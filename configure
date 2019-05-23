@@ -298,7 +298,7 @@ print_usage()
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
-        echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
+	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
@@ -2895,13 +2895,13 @@ main()
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 
-	if [ ${dist_path} != "./" ]; then
+	if [ "${dist_path}" != "./" ]; then
 
 		# At this point, we know the user did not run "./configure". But we
 		# have not yet ruled out "<fullpath>/configure" or some # equivalent
 		# that uses relative paths. To further rule out these possibilities,
 		# we create a dummy file in the current build directory.
-		touch ./${dummy_file}
+		touch "./${dummy_file}"
 
 		# If the dummy file we just created in the current directory does not
 		# appear in the source distribution path, then we are in a different
