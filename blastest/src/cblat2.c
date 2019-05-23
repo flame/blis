@@ -5451,7 +5451,7 @@ real sdiff_(real *x, real *y)
 
 } /* chkxer_ */
 
-/* Subroutine */ int xerbla_(char *srname, integer *info, ftnlen srname_len)
+/* Subroutine */ BLIS_EXPORT_BLAS int xerbla_(char *srname, integer *info, ftnlen srname_len)
 {
     /* Format strings */
     static char fmt_9999[] = "(\002 ******* XERBLA WAS CALLED WITH INFO ="
