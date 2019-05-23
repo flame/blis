@@ -131,6 +131,9 @@ size of interest so that we can better assist you.
   * BLIS 075143df (0.5.1-39)
     * configured with `./configure -t openmp thunderx2` (single- and multithreaded)
     * sub-configuration exercised: `thunderx2`
+    * Requested single-threaded execution (the default) by setting no environment variables
+    * Requested threading via `export BLIS_JC_NT=4 BLIS_IC_NT=7` (multithreaded, 28 cores)
+    * Requested threading via `export BLIS_JC_NT=8 BLIS_IC_NT=7` (multithreaded, 56 cores)
   * OpenBLAS 52d3f7a
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=56` (multithreaded, 56 cores)
@@ -188,6 +191,9 @@ size of interest so that we can better assist you.
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `skx`
+    * Requested single-threaded execution (the default) by setting no environment variables
+    * Requested threading via `export BLIS_JC_NT=2 BLIS_IC_NT=13` (multithreaded, 26 cores)
+    * Requested threading via `export BLIS_JC_NT=4 BLIS_IC_NT=13` (multithreaded, 52 cores)
   * OpenBLAS 0.3.5
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=52` (multithreaded, 52 cores)
@@ -257,6 +263,9 @@ size of interest so that we can better assist you.
   * BLIS 075143df (0.5.1-39)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `haswell`
+    * Requested single-threaded execution (the default) by setting no environment variables
+    * Requested threading via `export BLIS_JC_NT=2 BLIS_IC_NT=3 BLIS_JR_NT=2` (multithreaded, 12 cores)
+    * Requested threading via `export BLIS_JC_NT=4 BLIS_IC_NT=3 BLIS_JR_NT=2` (multithreaded, 24 cores)
   * OpenBLAS 0.3.5
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=24` (multithreaded, 24 cores)
@@ -324,6 +333,9 @@ size of interest so that we can better assist you.
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `zen`
+    * Requested single-threaded execution (the default) by setting no environment variables
+    * Requested threading via `export BLIS_JC_NT=1 BLIS_IC_NT=8 BLIS_JR_NT=4` (multithreaded, 32 cores)
+    * Requested threading via `export BLIS_JC_NT=2 BLIS_IC_NT=8 BLIS_JR_NT=4` (multithreaded, 64 cores)
   * OpenBLAS 0.3.5
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
     * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
