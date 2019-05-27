@@ -558,7 +558,7 @@ bool_t bli_cpuid_is_cortexa9
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
