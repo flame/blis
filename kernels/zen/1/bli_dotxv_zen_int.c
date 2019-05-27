@@ -4,11 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-<<<<<<< HEAD
    Copyright (C) 2016 - 2019, Advanced Micro Devices, Inc.
-=======
-   Copyright (C) 2016 - 2018, Advanced Micro Devices, Inc.
->>>>>>> Merged BLIS Release 1.3
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
