@@ -4,7 +4,7 @@ BLIS
 An object-based framework for developing high-performance BLAS-like
 libraries.
 
-Copyright (C) 2018, Advanced Micro Devices, Inc.
+Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -34,19 +34,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "blis.h"
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-#ifndef BLI_FAMILY_ZEN2_
 #include "immintrin.h"
 #define GEMM_BLK_V1 8            //Block size to perform gemm and apply trsm
 #define GEMM_ACCUM_A 1            //Peform B1=B1-(B0*A0) operation instead of B1'=(B0*A0) and then B1=B1-B1'
 #define OPT_CACHE_BLOCKING_L1 1 //Perform trsm block-wise in blocks of GEMM_BLK_V1 instead of all columns of B together.
 #define REARRANGE_SHFL 0        //Rearrange operations using blend or shuffle
 #define BLI_AlXB_M_SP    16
-//#define BLI_AlXB_M_DP    16
 #define BLI_XAltB_N_SP   128
 #define BLI_AutXB_M_SP   64
 #define BLI_AutXB_N_SP   128
-#define max(a,b) a>b?a:b
-#define min(a,b) a<b?a:b
 
 // XA = B; A is lower-traingular; No transpose; double precision; non-unit diagonal
 static  err_t bli_dtrsm_small_XAlB(
@@ -952,8 +948,17 @@ static err_t bli_dtrsm_small_AlXB(
   dim_t m = bli_obj_length(b); // number of rows of matrix B
   dim_t n = bli_obj_width(b);  // number of columns of matrix B
 
-  if(max(m,n) > 90)
-	return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
   dim_t m_remainder = m % D_MR;     //number of remainder rows
   dim_t n_remainder = n % D_NR;     //number of remainder columns
@@ -2506,8 +2511,17 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
   dim_t m = bli_obj_length(b); // number of rows of matrix B
   dim_t n = bli_obj_width(b);  // number of columns of matrix B
 
-  if(max(m,n) > 90)
-	return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
   dim_t m_remainder = m % D_MR;     //number of remainder rows
   dim_t n_remainder = n % D_NR;     //number of remainder columns
@@ -3857,10 +3871,17 @@ static  err_t bli_dtrsm_small_XAuB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n)>250 && (m/n) < 22)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+	if(bli_max(m,n)>D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUB_ROME && (m/n) < D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO)
 	{
 		return BLIS_NOT_YET_IMPLEMENTED;
 	}
+#else
+	if(bli_max(m,n)>D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES && (m/n) < D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO)
+	{
+		return BLIS_NOT_YET_IMPLEMENTED;
+	}
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -5195,10 +5216,17 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if((max(m,n)>380) && (m/n)<22)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+	if(bli_max(m,n)>D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUB_ROME && (m/n) < D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO)
 	{
 		return BLIS_NOT_YET_IMPLEMENTED;
 	}
+#else
+	if(bli_max(m,n)>D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES && (m/n) < D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO)
+	{
+		return BLIS_NOT_YET_IMPLEMENTED;
+	}
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -6373,10 +6401,17 @@ static  err_t bli_dtrsm_small_XAltB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-    if(max(m,n) > 250)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -7718,11 +7753,17 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-    if(max(m,n) > 250)
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
-
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -8886,8 +8927,17 @@ static  err_t bli_dtrsm_small_XAlB(
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
 
-	if(max(m,n) > 250)
-		return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -9868,8 +9918,17 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 250)
-		return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -10709,8 +10768,17 @@ static  err_t bli_dtrsm_small_XAutB(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 200)
-		return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -11702,8 +11770,17 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
-	if(max(m,n) > 200)
-		return BLIS_NOT_YET_IMPLEMENTED;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ROME)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#else
+    if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES)
+    {
+        return BLIS_NOT_YET_IMPLEMENTED;
+    }
+#endif
 
     dim_t i, j, k;        //loop variablse
     dim_t k_iter;         //determines the number of GEMM operations to be done
@@ -25021,5 +25098,4 @@ static void trsm_AutXB_block_allSmallSizedMatrices_alpha_unitDiag(float *ptr_l, 
     } //numRows of A
     ///////////////////loop ends /////////////////////
 }
-#endif
 #endif

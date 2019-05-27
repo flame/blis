@@ -59,5 +59,12 @@
 
 //This macro will enable  BLIS DGEMM to choose block sizes for a  single instance mode
 #define BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES 	0
+
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES 250
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES 90
+
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO 22
+
+
 //#endif
 
