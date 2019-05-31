@@ -18,7 +18,8 @@ else
 	show_plot = 1;
 end
 
-legend_plot_id = 11;
+%legend_plot_id = 11;
+legend_plot_id = 1*cols + 1*5;
 
 if 1
 ax1 = subplot( rows, cols, theid );
@@ -96,8 +97,8 @@ x_end = data_blissup( size( data_blissup, 1 ), psize_col );
 
 x_axis( :, 1 ) = data_blissup( :, psize_col );
 
-data_peak( 1, 1:2 ) = [     0 max_perf_core ];
-data_peak( 2, 1:2 ) = [ x_end max_perf_core ];
+%data_peak( 1, 1:2 ) = [     0 max_perf_core ];
+%data_peak( 2, 1:2 ) = [ x_end max_perf_core ];
 
 if show_plot == 1
 blissup_ln  = line( x_axis( :, 1 ), data_blissup( :, flopscol ) / nth, ...
@@ -159,7 +160,7 @@ elseif 500 <= x_end && x_end < 1000
 end
 
 if show_plot == 1 || theid == legend_plot_id
-if rows == 4 && cols == 6
+if rows == 4 && cols == 7
 	if nth == 1 && theid == legend_plot_id
 		leg = legend( ...
 		[ ...
@@ -180,7 +181,8 @@ if rows == 4 && cols == 6
 		set( leg,'FontSize',fontsize ); %-3 );
 		set( leg,'Units','inches' );
 		%                    xpos ypos
-		set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
+		%set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
+		set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
 	elseif nth > 1 && theid == legend_plot_id
 	end
 end
@@ -204,18 +206,21 @@ if theid > (rows-1)*cols
 %tpos = get( xlab, 'Position' )
 %tpos(2) = tpos(2) + 10;
 %set( xlab, 'Position', tpos );
-if     theid == rows*cols - 5
-xlab = xlabel( ax1, 'm = 6; n = k' );
-elseif theid == rows*cols - 4
-xlab = xlabel( ax1, 'n = 8; m = k' );
-elseif theid == rows*cols - 3
-xlab = xlabel( ax1, 'k = 4; m = n' );
-elseif theid == rows*cols - 2
-xlab = xlabel( ax1, 'm; n = 8, k = 4' );
-elseif theid == rows*cols - 1
-xlab = xlabel( ax1, 'n; m = 6, k = 4' );
-elseif theid == rows*cols - 0
-xlab = xlabel( ax1, 'k; m = 6, n = 8' );
+	if     theid == rows*cols - 6
+	xlab = xlabel( ax1, 'm = 6; n = k' );
+	elseif theid == rows*cols - 5
+	xlab = xlabel( ax1, 'n = 8; m = k' );
+	elseif theid == rows*cols - 4
+	xlab = xlabel( ax1, 'k = 4; m = n' );
+	elseif theid == rows*cols - 3
+	xlab = xlabel( ax1, 'm; n = 8, k = 4' );
+	elseif theid == rows*cols - 2
+	xlab = xlabel( ax1, 'n; m = 6, k = 4' );
+	elseif theid == rows*cols - 1
+	xlab = xlabel( ax1, 'k; m = 6, n = 8' );
+	elseif theid == rows*cols - 0
+	xlab = xlabel( ax1, 'm = n = k' );
+	end
 end
 
 if mod(theid-1,cols) == 0

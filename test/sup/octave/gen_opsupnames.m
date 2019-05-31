@@ -18,6 +18,7 @@ for io = 1:nops
 	opsupnames( i+3, : ) = sprintf( '%s_%s_mpn%dk%d', op, stor, smalln, smallk );
 	opsupnames( i+4, : ) = sprintf( '%s_%s_m%dnpk%d', op, stor, smallm, smallk );
 	opsupnames( i+5, : ) = sprintf( '%s_%s_m%dn%dkp', op, stor, smallm, smalln );
+	opsupnames( i+6, : ) = sprintf( '%s_%s_mpnpkp', op, stor );
 
 	opnames( i+0, : ) = sprintf( '%s', op );
 	opnames( i+1, : ) = sprintf( '%s', op );
@@ -25,8 +26,9 @@ for io = 1:nops
 	opnames( i+3, : ) = sprintf( '%s', op );
 	opnames( i+4, : ) = sprintf( '%s', op );
 	opnames( i+5, : ) = sprintf( '%s', op );
+	opnames( i+6, : ) = sprintf( '%s', op );
 
-	i = i + 6;
+	i = i + 7;
 end
 
 r_val1 = opsupnames;
