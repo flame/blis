@@ -66,5 +66,8 @@
 
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO 22
 
+//When running HPL with pure MPI without DGEMM Threading (Single Threaded BLIS ), making this macro 1 gives best performance.
+#define AOCL_BLIS_MULTIINSTANCE   0
+
 #endif
 
