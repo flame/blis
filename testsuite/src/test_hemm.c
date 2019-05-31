@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -202,13 +202,13 @@ void libblis_test_hemm_experiment
 	// Create test operands (vectors and/or matrices).
 	bli_set_dim_with_side( side, m, n, &mn_side );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[0], mn_side, mn_side, &a );
+	                          sc_str[1], mn_side, mn_side, &a );
 	libblis_test_mobj_create( params, datatype, transb,
-	                          sc_str[1], m,       n,       &b );
+	                          sc_str[2], m,       n,       &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m,       n,       &c );
+	                          sc_str[0], m,       n,       &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m,       n,       &c_save );
+	                          sc_str[0], m,       n,       &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )

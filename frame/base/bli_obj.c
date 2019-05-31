@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -405,7 +405,8 @@ void bli_adjust_strides
 	// matrix).
 	if ( m == 0 || n == 0 ) return;
 
-	// Interpret rs = cs = 0 as request for column storage.
+	// Interpret rs = cs = 0 as request for column storage and -1 as a request
+	// for row storage.
 	if ( *rs == 0 && *cs == 0 && ( *is == 0 || *is == 1 ) )
 	{
 		// First we handle the 1x1 scalar case explicitly.
@@ -414,8 +415,9 @@ void bli_adjust_strides
 			*rs = 1;
 			*cs = 1;
 		}
-		// We use column-major storage, except when m == 1, because we don't
-		// want both strides to be unit.
+		// We use column-major storage, except when m == 1, in which case we
+		// use what amounts to row-major storage because we don't want both
+		// strides to be unit.
 		else if ( m == 1 && n > 1 )
 		{
 			*rs = n;
@@ -433,6 +435,46 @@ void bli_adjust_strides
 		// Align the strides depending on the tilt of the matrix. Note that
 		// scalars are neither row nor column tilted. Also note that alignment
 		// is only done for rs = cs = 0, and any user-supplied row and column
+		// strides are preserved.
+		if ( bli_is_col_tilted( m, n, *rs, *cs ) )
+		{
+			*cs = bli_align_dim_to_size( *cs, elem_size,
+			                             BLIS_HEAP_STRIDE_ALIGN_SIZE );
+		}
+		else if ( bli_is_row_tilted( m, n, *rs, *cs ) )
+		{
+			*rs = bli_align_dim_to_size( *rs, elem_size,
+		                                 BLIS_HEAP_STRIDE_ALIGN_SIZE );
+		}
+	}
+	else if ( *rs == -1 && *cs == -1 && ( *is == 0 || *is == 1 ) )
+	{
+		// First we handle the 1x1 scalar case explicitly.
+		if ( m == 1 && n == 1 )
+		{
+			*rs = 1;
+			*cs = 1;
+		}
+		// We use row-major storage, except when n == 1, in which case we
+		// use what amounts to column-major storage because we don't want both
+		// strides to be unit.
+		else if ( n == 1 && m > 1 )
+		{
+			*rs = 1;
+			*cs = m;
+		}
+		else
+		{
+			*rs = n;
+			*cs = 1;
+		}
+
+		// Use default complex storage.
+		*is = 1;
+
+		// Align the strides depending on the tilt of the matrix. Note that
+		// scalars are neither row nor column tilted. Also note that alignment
+		// is only done for rs = cs = -1, and any user-supplied row and column
 		// strides are preserved.
 		if ( bli_is_col_tilted( m, n, *rs, *cs ) )
 		{

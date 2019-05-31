@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,12 +58,29 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	BLIS_OAPI_EX_DECLS \
 \
+	/* If the rntm is non-NULL, it may indicate that we should forgo sup
+	   handling altogether. */ \
+	bool_t enable_sup = TRUE; \
+	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+\
+	if ( enable_sup ) \
+	{ \
+		/* Execute the small/unpacked oapi handler. If it finds that the problem
+		   does not fall within the thresholds that define "small", or for some
+		   other reason decides not to use the small/unpacked implementation,
+		   the function returns with BLIS_FAILURE, which causes execution to
+		   proceed towards the conventional implementation. */ \
+		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+		if ( result == BLIS_SUCCESS ) return; \
+	} \
+\
 	/* Only proceed with an induced method if each of the operands have a
 	   complex storage datatype. NOTE: Allowing precisions to vary while
 	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (including
-	   the computation datatype). If any operands are real, skip the induced
-	   method chooser function and proceed directly with native execution. */ \
+	   operations use 1m only if all storage datatypes are equal (and they
+	   ignore the computation precision). If any operands are real, skip the
+	   induced method chooser function and proceed directly with native
+	   execution. */ \
 	if ( bli_obj_is_complex( c ) && \
 	     bli_obj_is_complex( a ) && \
 	     bli_obj_is_complex( b ) ) \
@@ -81,6 +99,49 @@ void PASTEMAC(opname,EX_SUF) \
 }
 
 GENFRONT( gemm )
+
+
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
+       BLIS_OAPI_EX_PARAMS  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	BLIS_OAPI_EX_DECLS \
+\
+	/* Only proceed with an induced method if each of the operands have a
+	   complex storage datatype. NOTE: Allowing precisions to vary while
+	   using 1m, which is what we do here, is unique to gemm; other level-3
+	   operations use 1m only if all storage datatypes are equal (and they
+	   ignore the computation precision). If any operands are real, skip the
+	   induced method chooser function and proceed directly with native
+	   execution. */ \
+	if ( bli_obj_is_complex( c ) && \
+	     bli_obj_is_complex( a ) && \
+	     bli_obj_is_complex( b ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+}
+
 GENFRONT( her2k )
 GENFRONT( syr2k )
 
