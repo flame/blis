@@ -131,6 +131,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	      mc = 510, kc = 1024 and nc = 4080
 */
 
+      // Zen optmized level 3 cache block sizes
 #ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
 	// Zen optmized level 3 cache block sizes
 	#if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
