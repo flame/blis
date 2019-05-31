@@ -45,15 +45,15 @@ n_opsupnames = size( opsupnames, 1 );
 
 if 1 == 1
 	%fig = figure('Position', [100, 100, 2400, 1500]);
-	fig = figure('Position', [100, 100, 1600, 1000]);
+	fig = figure('Position', [100, 100, 1860, 1000]);
 	orient( fig, 'portrait' );
 	set(gcf,'PaperUnits', 'inches');
 	if 0 == 1 % matlab
-		set(gcf,'PaperSize', [11 15.0]);
-		set(gcf,'PaperPosition', [0 0 11 15.0]);
+		set(gcf,'PaperSize', [11 17.5]);
+		set(gcf,'PaperPosition', [0 0 11 17.5]);
 		set(gcf,'PaperPositionMode','manual');
 	else % octave 4.x
-	   set(gcf,'PaperSize', [10 15.0]);
+	   set(gcf,'PaperSize', [10 17.5]);
 	   set(gcf,'PaperPositionMode','auto');
 	end
 	set(gcf,'PaperOrientation','landscape');
@@ -120,10 +120,18 @@ for opi = 1:n_opsupnames
 	                 data_open, ...
 	                 data_vend, vend_str, ...
 	                 nth, ...
-	                 4, 6, ...
+	                 4, 7, ...
 	                 cfreq, ...
 	                 dflopspercycle, ...
 	                 opi );
+
+	clear data_st_?gemm_*
+	clear data_blissup;
+	clear data_blislpab;
+	clear data_eigen;
+	clear data_open;
+	clear data_vend;
+
 	end
 
 end
