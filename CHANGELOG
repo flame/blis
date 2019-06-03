@@ -5166,7 +5166,7 @@ Date:   Tue Oct 9 15:29:48 2018 -0500
       case, and thus the change effectively applies to both left and right
       cases.
 
-commit f1dba506c970f14e612580d3c171e7c5ffd0a5fb (amd)
+commit f1dba506c970f14e612580d3c171e7c5ffd0a5fb
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Oct 8 17:59:41 2018 -0500
 
