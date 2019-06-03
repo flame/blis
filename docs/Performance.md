@@ -21,11 +21,13 @@
 # Introduction
 
 This document showcases performance results for a representative sample of
-level-3 operations with BLIS and BLAS for several hardware architectures.
+level-3 operations on large matrices with BLIS and BLAS for several hardware
+architectures.
 
 # General information
 
-Generally speaking, we publish three "panels" for each type of hardware,
+Generally speaking, for level-3 operations on large matrices, we publish three
+"panels" for each type of hardware,
 each of which reports one of: single-threaded performance, multithreaded
 performance on a single socket, or multithreaded performance on two sockets.
 Each panel will consist of a 4x5 grid of graphs, with each row representing
@@ -155,18 +157,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [ThunderX2 single-threaded](graphs/l3_perf_tx2_nt1.pdf)
-* [ThunderX2 multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.pdf)
-* [ThunderX2 multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.pdf)
+* [ThunderX2 single-threaded](graphs/large/l3_perf_tx2_nt1.pdf)
+* [ThunderX2 multithreaded (28 cores)](graphs/large/l3_perf_tx2_jc4ic7_nt28.pdf)
+* [ThunderX2 multithreaded (56 cores)](graphs/large/l3_perf_tx2_jc8ic7_nt56.pdf)
 
 #### png (inline)
 
 * **ThunderX2 single-threaded**
-![single-threaded](graphs/l3_perf_tx2_nt1.png)
+![single-threaded](graphs/large/l3_perf_tx2_nt1.png)
 * **ThunderX2 multithreaded (28 cores)**
-![multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.png)
+![multithreaded (28 cores)](graphs/large/l3_perf_tx2_jc4ic7_nt28.png)
 * **ThunderX2 multithreaded (56 cores)**
-![multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.png)
+![multithreaded (56 cores)](graphs/large/l3_perf_tx2_jc8ic7_nt56.png)
 
 ---
 
@@ -227,18 +229,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [SkylakeX single-threaded](graphs/l3_perf_skx_nt1.pdf)
-* [SkylakeX multithreaded (26 cores)](graphs/l3_perf_skx_jc2ic13_nt26.pdf)
-* [SkylakeX multithreaded (52 cores)](graphs/l3_perf_skx_jc4ic13_nt52.pdf)
+* [SkylakeX single-threaded](graphs/large/l3_perf_skx_nt1.pdf)
+* [SkylakeX multithreaded (26 cores)](graphs/large/l3_perf_skx_jc2ic13_nt26.pdf)
+* [SkylakeX multithreaded (52 cores)](graphs/large/l3_perf_skx_jc4ic13_nt52.pdf)
 
 #### png (inline)
 
 * **SkylakeX single-threaded**
-![single-threaded](graphs/l3_perf_skx_nt1.png)
+![single-threaded](graphs/large/l3_perf_skx_nt1.png)
 * **SkylakeX multithreaded (26 cores)**
-![multithreaded (26 cores)](graphs/l3_perf_skx_jc2ic13_nt26.png)
+![multithreaded (26 cores)](graphs/large/l3_perf_skx_jc2ic13_nt26.png)
 * **SkylakeX multithreaded (52 cores)**
-![multithreaded (52 cores)](graphs/l3_perf_skx_jc4ic13_nt52.png)
+![multithreaded (52 cores)](graphs/large/l3_perf_skx_jc4ic13_nt52.png)
 
 ---
 
@@ -296,18 +298,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [Haswell single-threaded](graphs/l3_perf_has_nt1.pdf)
-* [Haswell multithreaded (12 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.pdf)
-* [Haswell multithreaded (24 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.pdf)
+* [Haswell single-threaded](graphs/large/l3_perf_has_nt1.pdf)
+* [Haswell multithreaded (12 cores)](graphs/large/l3_perf_has_jc2ic3jr2_nt12.pdf)
+* [Haswell multithreaded (24 cores)](graphs/large/l3_perf_has_jc4ic3jr2_nt24.pdf)
 
 #### png (inline)
 
 * **Haswell single-threaded**
-![single-threaded](graphs/l3_perf_has_nt1.png)
+![single-threaded](graphs/large/l3_perf_has_nt1.png)
 * **Haswell multithreaded (12 cores)**
-![multithreaded (12 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.png)
+![multithreaded (12 cores)](graphs/large/l3_perf_has_jc2ic3jr2_nt12.png)
 * **Haswell multithreaded (24 cores)**
-![multithreaded (24 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.png)
+![multithreaded (24 cores)](graphs/large/l3_perf_has_jc4ic3jr2_nt24.png)
 
 ---
 
@@ -369,18 +371,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [Epyc single-threaded](graphs/l3_perf_epyc_nt1.pdf)
-* [Epyc multithreaded (32 cores)](graphs/l3_perf_epyc_jc1ic8jr4_nt32.pdf)
-* [Epyc multithreaded (64 cores)](graphs/l3_perf_epyc_jc2ic8jr4_nt64.pdf)
+* [Epyc single-threaded](graphs/large/l3_perf_epyc_nt1.pdf)
+* [Epyc multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.pdf)
+* [Epyc multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.pdf)
 
 #### png (inline)
 
 * **Epyc single-threaded**
-![single-threaded](graphs/l3_perf_epyc_nt1.png)
+![single-threaded](graphs/large/l3_perf_epyc_nt1.png)
 * **Epyc multithreaded (32 cores)**
-![multithreaded (32 cores)](graphs/l3_perf_epyc_jc1ic8jr4_nt32.png)
+![multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.png)
 * **Epyc multithreaded (64 cores)**
-![multithreaded (64 cores)](graphs/l3_perf_epyc_jc2ic8jr4_nt64.png)
+![multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.png)
 
 ---
 

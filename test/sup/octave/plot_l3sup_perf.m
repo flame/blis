@@ -8,7 +8,7 @@ function r_val = plot_l3sup_perf( opname, ...
                                   rows, cols, ...
                                   cfreq, ...
                                   dfps, ...
-                                  theid )
+                                  theid, impl )
 if ... %mod(theid-1,cols) == 2 || ...
    ... %mod(theid-1,cols) == 3 || ...
    ... %mod(theid-1,cols) == 4 || ...
@@ -178,11 +178,16 @@ if rows == 4 && cols == 7
 		'Location', legend_loc );
 		set( leg,'Box','off' );
 		set( leg,'Color','none' );
-		set( leg,'FontSize',fontsize ); %-3 );
 		set( leg,'Units','inches' );
 		%                    xpos ypos
 		%set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
+		if impl == 'octave'
+		set( leg,'FontSize',fontsize );
 		set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
+		else
+		set( leg,'FontSize',fontsize );
+		set( leg,'Position',[18.34 10.22 1.15 0.7 ] ); % (1,4tl)
+		end
 	elseif nth > 1 && theid == legend_plot_id
 	end
 end
@@ -195,7 +200,7 @@ box( ax1, 'on' );
 titl = title( titlename );
 set( titl, 'FontWeight', 'normal' ); % default font style is now 'bold'.
 
-if 1 == 1
+if impl == 'octave'
 tpos = get( titl, 'Position' ); % default is to align across whole figure, not box.
 tpos(1) = tpos(1) + -40;
 set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
