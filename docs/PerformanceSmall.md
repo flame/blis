@@ -55,11 +55,11 @@ can be issued per cycle (per core);
 register (for the datatype in question); and
 3. 2.0, since an FMA instruction fuses two operations (a multiply and an add).
 
-The problem size range, represented on the x-axis, is usually sampled in
+The problem size range, represented on the x-axis, is sampled in
 increments of 4 up to 800 for the cases where one or two dimensions is small
 (and constant)
-and up to 400 in the case where all dimensions (m, n, and k) are bound to the
-problem size (i.e., square matrices).
+and up to 400 in the case where all dimensions (e.g. _m_, _n_, and _k_) are
+bound to the problem size (i.e., square matrices).
 
 Note that the constant small matrix dimensions were chosen to be _very_
 small--in the neighborhood of 8--intentionally to showcase what happens when
@@ -67,18 +67,18 @@ at least one of the matrices is abnormally "skinny." Typically, organizations
 and individuals only publish performance with square matrices, which can miss
 the problem sizes of interest to many applications. Here, in addition to square
 matrices (shown in the seventh column), we also show six other scenarios where
-one or two `gemm` dimensions (of m, n, and k) is small.
+one or two `gemm` dimensions (of _m,_ _n_, and _k_) is small.
 
 The legend in each graph contains two entries for BLIS, corresponding to the
-two black lines, one solid and one dotted. The dotted line ("BLIS conv")
+two black lines, one solid and one dotted. The dotted line, **"BLIS conv"**,
 represents the conventional implementation that targets large matrices. This
 was the only implementation available in BLIS prior to the addition to the
-small/skinny matrix support. The solid line ("BLIS sup") makes use of the
+small/skinny matrix support. The solid line, **"BLIS sup"**, makes use of the
 new small/skinny matrix implementation for certain small problems. Whenever
 these results differ by any significant amount (beyond noise), it denotes a
 problem size for which BLIS employed the new small/skinny implementation.
-Put another way, the delta between these two lines represents the performance
-improvement between BLIS's previous status quo and the new regime.
+Put another way, **the delta between these two lines represents the performance
+improvement between BLIS's previous status quo and the new regime.**
 
 Finally, each point along each curve represents the best of three trials.
 
@@ -135,7 +135,8 @@ size of interest so that we can better assist you.
   * Hardware limits: 800MHz - 3.8GHz
   * Adjusted minimum: 3.7GHz
 * Comments:
-  * 
+  * For both row- and column-stored matrices, BLIS's new small/skinny matrix implementation is competitive with (or exceeds the performance of) the next highest-performing solution (typically MKL), except for a few cases of where the _k_ dimension is very small. It is likely the case that this shape scenario begs a different kernel approach, since the BLIS microkernel is inherently designed to iterate over many _k_ dimension iterations (which leads them to incur considerable overhead for small values of _k_).
+  * For the classic case of `dgemm_nn` on square matrices, BLIS is the fastest implementation for the problem size range of approximately 80 to 180. BLIS is also competitive in this general range for other transpose parameter combinations (`nt`, `tn`, and `tt`).
 
 ### Kaby Lake results
 
@@ -193,7 +194,8 @@ d affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 6
   * Hardware limits: 1.2GHz - 2.0GHz
   * Adjusted minimum: 2.0GHz
 * Comments:
-  * 
+  * As with Kaby Lake, BLIS's new small/skinny matrix implementation is competitive with (or exceeds the performance of) the next highest-performing solution, except for a few cases of where the _k_ dimension is very small.
+  * For the classic case of `dgemm_nn` on square matrices, BLIS is the fastest implementation for the problem size range of approximately 12 to 256. BLIS is also competitive in this general range for other transpose parameter combinations (`nt`, `tn`, and `tt`).
 
 ### Epyc results
 
