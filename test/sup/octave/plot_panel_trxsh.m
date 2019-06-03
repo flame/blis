@@ -1,5 +1,5 @@
 function r_val = plot_panel_trxsh ...
-     (
+     ( ...
        cfreq, ...
        dflopspercycle, ...
        nth, ...
@@ -9,7 +9,8 @@ function r_val = plot_panel_trxsh ...
        smalldims, ...
        dirpath, ...
        arch_str, ...
-       vend_str
+       vend_str, ...
+       impl ...
      )
 
 %cfreq = 1.8;
@@ -45,14 +46,14 @@ n_opsupnames = size( opsupnames, 1 );
 
 if 1 == 1
 	%fig = figure('Position', [100, 100, 2400, 1500]);
-	fig = figure('Position', [100, 100, 1860, 1000]);
+	fig = figure('Position', [100, 100, 2800, 1500]);
 	orient( fig, 'portrait' );
 	set(gcf,'PaperUnits', 'inches');
-	if 0 == 1 % matlab
-		set(gcf,'PaperSize', [11 17.5]);
-		set(gcf,'PaperPosition', [0 0 11 17.5]);
+	if impl == 'matlab'
+		set(gcf,'PaperSize', [11.5 20.4]);
+		set(gcf,'PaperPosition', [0 0 11.5 20.4]);
 		set(gcf,'PaperPositionMode','manual');
-	else % octave 4.x
+	else % impl == 'octave' % octave 4.x
 	   set(gcf,'PaperSize', [10 17.5]);
 	   set(gcf,'PaperPositionMode','auto');
 	end
@@ -123,9 +124,9 @@ for opi = 1:n_opsupnames
 	                 4, 7, ...
 	                 cfreq, ...
 	                 dflopspercycle, ...
-	                 opi );
+	                 opi, impl );
 
-	clear data_st_?gemm_*
+	clear data_st_*gemm_*;
 	clear data_blissup;
 	clear data_blislpab;
 	clear data_eigen;
@@ -137,12 +138,14 @@ for opi = 1:n_opsupnames
 end
 
 % Construct the name of the file to which we will output the graph.
-outfile = sprintf( 'fig_%s_%s_%s_nt%d.pdf', oproot, stor_str, arch_str, nth );
+outfile = sprintf( 'l3sup_%s_%s_%s_nt%d.pdf', oproot, stor_str, arch_str, nth );
 
 % Output the graph to pdf format.
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
 %print(gcf, outfile,'-bestfit','-dpdf');
-if 1 == 1
+if impl == 'octave'
 print(gcf, outfile);
+else % if impl == 'matlab'
+print(gcf, outfile,'-bestfit','-dpdf');
 end
 
