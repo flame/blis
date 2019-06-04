@@ -112,13 +112,15 @@ size of interest so that we can better assist you.
   * single-core: 57.6 GFLOPS (double-precision), 115.2 GFLOPS (single-precision)
 * Operating system: Gentoo Linux (Linux kernel 5.0.7)
 * Compiler: gcc 7.3.0
-* Results gathered: 31 May 2019
+* Results gathered: 31 May 2019, 3 June 2019
 * Implementations tested:
   * BLIS 6bf449c (0.5.2-42)
     * configured with `./configure --enable-cblas auto`
     * sub-configuration exercised: `haswell`
   * OpenBLAS 0.3.6
-    * configured with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+  * BLASFEO 75a3dd8
+    * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
@@ -170,13 +172,15 @@ size of interest so that we can better assist you.
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Compiler: gcc 7.3.0
-* Results gathered: 31 May 2019
+* Results gathered: 31 May 2019, 3 June 2019
 * Implementations tested:
   * BLIS 6bf449c (0.5.2-42)
     * configured with `./configure --enable-cblas auto`
     * sub-configuration exercised: `zen`
   * OpenBLAS 0.3.6
-    * configured with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+  * BLASFEO 75a3dd8
+    * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
