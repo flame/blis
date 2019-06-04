@@ -137,8 +137,8 @@ size of interest so that we can better assist you.
     * Multithreaded (28 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=7`
     * Multithreaded (56 core) execution requested via `export BLIS_JC_NT=8 BLIS_IC_NT=7`
   * OpenBLAS 52d3f7a
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=56` (multithreaded, 56 cores)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=56` (multithreaded, 56 cores)
     * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
     * Multithreaded (28 core) execution requested via `export OPENBLAS_NUM_THREADS=28`
     * Multithreaded (56 core) execution requested via `export OPENBLAS_NUM_THREADS=56`
@@ -197,8 +197,8 @@ size of interest so that we can better assist you.
     * Multithreaded (26 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=13`
     * Multithreaded (52 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=13`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=52` (multithreaded, 52 cores)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=52` (multithreaded, 52 cores)
     * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
     * Multithreaded (26 core) execution requested via `export OPENBLAS_NUM_THREADS=26`
     * Multithreaded (52 core) execution requested via `export OPENBLAS_NUM_THREADS=52`
@@ -269,8 +269,8 @@ size of interest so that we can better assist you.
     * Multithreaded (12 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=3 BLIS_JR_NT=2`
     * Multithreaded (24 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=3 BLIS_JR_NT=2`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=24` (multithreaded, 24 cores)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=24` (multithreaded, 24 cores)
     * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
     * Multithreaded (12 core) execution requested via `export OPENBLAS_NUM_THREADS=12`
     * Multithreaded (24 core) execution requested via `export OPENBLAS_NUM_THREADS=24`
@@ -339,8 +339,8 @@ size of interest so that we can better assist you.
     * Multithreaded (32 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=8 BLIS_JR_NT=4`
     * Multithreaded (64 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=8 BLIS_JR_NT=4`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
     * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
     * Multithreaded (32 core) execution requested via `export OPENBLAS_NUM_THREADS=32`
     * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`

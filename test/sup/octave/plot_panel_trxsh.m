@@ -22,6 +22,7 @@ filetemp_blissup  = '%s/output_%s_%s_blissup.m';
 filetemp_blislpab = '%s/output_%s_%s_blislpab.m';
 filetemp_eigen    = '%s/output_%s_%s_eigen.m';
 filetemp_open     = '%s/output_%s_%s_openblas.m';
+filetemp_bfeo     = '%s/output_%s_%s_blasfeo.m';
 filetemp_vend     = '%s/output_%s_%s_vendor.m';
 
 % Create a variable name "template" for the variables contained in the
@@ -76,6 +77,7 @@ for opi = 1:n_opsupnames
 	file_blislpab = sprintf( filetemp_blislpab, dirpath, thr_str, opsupname );
 	file_eigen    = sprintf( filetemp_eigen,    dirpath, thr_str, opsupname );
 	file_open     = sprintf( filetemp_open,     dirpath, thr_str, opsupname );
+	file_bfeo     = sprintf( filetemp_bfeo,     dirpath, thr_str, opsupname );
 	file_vend     = sprintf( filetemp_vend,     dirpath, thr_str, opsupname );
 
 	% Load the data files.
@@ -87,6 +89,8 @@ for opi = 1:n_opsupnames
 	run( file_eigen )
 	%str = sprintf( '  Loading %s', file_open ); disp(str);
 	run( file_open )
+	%str = sprintf( '  Loading %s', file_open ); disp(str);
+	run( file_bfeo )
 	%str = sprintf( '  Loading %s', file_vend ); disp(str);
 	run( file_vend )
 
@@ -95,20 +99,23 @@ for opi = 1:n_opsupnames
 	var_blislpab = sprintf( vartemp, thr_str, opname, 'blislpab' );
 	var_eigen    = sprintf( vartemp, thr_str, opname, 'eigen' );
 	var_open     = sprintf( vartemp, thr_str, opname, 'openblas' );
+	var_bfeo     = sprintf( vartemp, thr_str, opname, 'blasfeo' );
 	var_vend     = sprintf( vartemp, thr_str, opname, 'vendor' );
 
 	% Use eval() to instantiate the variable names constructed above,
 	% copying each to a simplified name.
-	data_blissup  = eval( var_blissup );  % e.g. data_st_sgemm_blissup( :, : );
-	data_blislpab = eval( var_blislpab ); % e.g. data_st_sgemm_blislpab( :, : );
-	data_eigen = eval( var_eigen );       % e.g. data_st_sgemm_eigen( :, : );
-	data_open = eval( var_open );         % e.g. data_st_sgemm_openblas( :, : );
-	data_vend = eval( var_vend );         % e.g. data_st_sgemm_vendor( :, : );
+	data_blissup  = eval( var_blissup );  % e.g. data_st_dgemm_blissup( :, : );
+	data_blislpab = eval( var_blislpab ); % e.g. data_st_dgemm_blislpab( :, : );
+	data_eigen = eval( var_eigen );       % e.g. data_st_dgemm_eigen( :, : );
+	data_open = eval( var_open );         % e.g. data_st_dgemm_openblas( :, : );
+	data_bfeo = eval( var_bfeo );         % e.g. data_st_dgemm_blasfeo( :, : );
+	data_vend = eval( var_vend );         % e.g. data_st_dgemm_vendor( :, : );
 
 	%str = sprintf( '  Reading %s', var_blissup ); disp(str);
 	%str = sprintf( '  Reading %s', var_blislpab ); disp(str);
 	%str = sprintf( '  Reading %s', var_eigen ); disp(str);
 	%str = sprintf( '  Reading %s', var_open ); disp(str);
+	%str = sprintf( '  Reading %s', var_bfeo ); disp(str);
 	%str = sprintf( '  Reading %s', var_vend ); disp(str);
 
 	% Plot one result in an m x n grid of plots, via the subplot()
@@ -119,6 +126,7 @@ for opi = 1:n_opsupnames
 	                 data_blislpab, ...
 	                 data_eigen, ...
 	                 data_open, ...
+	                 data_bfeo, ...
 	                 data_vend, vend_str, ...
 	                 nth, ...
 	                 4, 7, ...
@@ -131,6 +139,7 @@ for opi = 1:n_opsupnames
 	clear data_blislpab;
 	clear data_eigen;
 	clear data_open;
+	clear data_bfeo;
 	clear data_vend;
 
 	end
