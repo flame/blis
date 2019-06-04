@@ -100,6 +100,9 @@ MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
 OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
 OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
+# BLASFEO
+BLASFEO_LIB    := $(HOME_LIB_PATH)/libblasfeo.a
+
 # ATLAS
 ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
                   $(HOME_LIB_PATH)/libatlas.a
@@ -132,9 +135,9 @@ VENDORP_LIB    := $(MKLP_LIB)
 #
 
 # Single core
-PS_BEGIN := 16
+PS_BEGIN := 4
 PS_MAX   := 800
-PS_INC   := 16
+PS_INC   := 4
 
 # Multicore
 P1_BEGIN := 120
@@ -221,7 +224,8 @@ SHAPES := l_l_s \
           s_l_l \
           s_s_l \
           s_l_s \
-          l_s_s
+          l_s_s \
+          l_l_l
 
 SMS := 6
 SNS := 8
@@ -301,7 +305,8 @@ get-imp-defs = $(strip $(subst  blissup,-DSTR=\"$(1)\" -DBLIS -DSUP, \
                        $(subst blislpab,-DSTR=\"$(1)\" -DBLIS, \
                        $(subst    eigen,-DSTR=\"$(1)\" -DEIGEN, \
                        $(subst openblas,-DSTR=\"$(1)\" -DCBLAS, \
-                       $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1)))))))
+                       $(subst  blasfeo,-DSTR=\"$(1)\" -DCBLAS, \
+                       $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1))))))))
 
 TRANS0  = $(call stripu,$(TRANS))
 STORS0  = $(call stripu,$(STORS))
@@ -331,6 +336,9 @@ EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
 OPENBLAS_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),openblas)
 OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
 
+BLASFEO_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blasfeo)
+BLASFEO_ST_BINS  := $(patsubst %.o,%.x,$(BLASFEO_ST_OBJS))
+
 VENDOR_ST_OBJS   := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),vendor)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
@@ -342,6 +350,7 @@ VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
                $(BLISLPAB_ST_OBJS) \
                $(EIGEN_ST_OBJS) \
                $(OPENBLAS_ST_OBJS) \
+               $(BLASFEO_ST_OBJS) \
                $(VENDOR_ST_OBJS)
 
 
@@ -355,22 +364,24 @@ blissup:     blissup-st
 blislpab:    blislpab-st
 eigen:       eigen-st
 openblas:    openblas-st
+blasfeo:     blasfeo-st
 vendor:      vendor-st
 
-st:          blissup-st blislpab-st eigen-st openblas-st vendor-st
+st:          blissup-st blislpab-st eigen-st openblas-st blasfeo-st vendor-st
 blis:        blissup-st blislpab-st
 
 blissup-st:  $(BLISSUP_ST_BINS)
 blislpab-st: $(BLISLPAB_ST_BINS)
 eigen-st:    $(EIGEN_ST_BINS)
 openblas-st: $(OPENBLAS_ST_BINS)
+blasfeo-st:  $(BLASFEO_ST_BINS)
 vendor-st:   $(VENDOR_ST_BINS)
 
 
 # --Object file rules --
 
 # Define the implementations for which we will instantiate compilation rules.
-BIMPLS := blissup blislpab openblas vendor
+BIMPLS := blissup blislpab openblas blasfeo vendor
 EIMPLS := eigen
 
 #      1     2  3   4 567  8
@@ -432,6 +443,9 @@ test_%_eigen_st.x:    test_%_eigen_st.o    $(LIBBLIS_LINK)
 
 test_%_openblas_st.x: test_%_openblas_st.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(OPENBLAS_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+test_%_blasfeo_st.x:  test_%_blasfeo_st.o  $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(BLASFEO_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(VENDOR_LIB)        $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
