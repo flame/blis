@@ -24,11 +24,11 @@ ops="gemm"
 trans="nn nt tn tt"
 
 # Storage combinations to test.
-stors="rrr rrc rcr rcc crr crc ccr ccc"
+#stors="rrr rrc rcr rcc crr crc ccr ccc"
 stors="rrr ccc"
 
 # Problem shapes to test.
-shapes="sll lsl lls lss sls ssl"
+shapes="sll lsl lls lss sls ssl lll"
 
 # FGVZ: figure out how to probe what's in the directory and
 # execute everything that's there?
@@ -37,13 +37,13 @@ sns="8"
 sks="4"
 
 # Implementations to test.
-#impls="vendor blissup blislpab openblas eigen"
+impls="vendor blissup blislpab openblas eigen"
 #impls="vendor openblas eigen"
 #impls="blislpab blissup"
 #mpls="openblas eigen vendor"
 #mpls="eigen"
-impls="blissup"
-#impls="vendor blissup openblas blislpab eigen"
+#impls="blissup"
+#impls="blasfeo"
 
 # Example: test_dgemm_nn_rrc_m6npkp_blissup_st.x
 
