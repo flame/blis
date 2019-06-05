@@ -79,16 +79,16 @@ and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
 What's New
 ----------
 
- * **Small/skinny matrix support for dgemm now available!** Thanks to funding
-from AMD, we have dramatically accelerated `gemm` for double-precision real
-matrix problems where one or two dimensions is exceedingly small. A natural
-byproduct of this optimization is that the traditional case of small _m = n = k_
-(i.e. square matrices) is also accelerated, even though it was not targeted
-specifically. And though only `dgemm` was optimized for now, support for other
-datatypes, other operations, and/or multithreading may be implemented in the
-future. We've also added a new [PerformanceSmall](docs/PerformanceSmall.md)
-document to showcase the improvement in performance when some matrix dimensions
-are small.
+ * **Small/skinny matrix support for dgemm now available!** Thanks to
+contributions made possible by our partnership with AMD, we have dramatically
+accelerated `gemm` for double-precision real matrix problems where one or two
+dimensions is exceedingly small. A natural byproduct of this optimization is
+that the traditional case of small _m = n = k_ (i.e. square matrices) is also
+accelerated, even though it was not targeted specifically. And though only
+`dgemm` was optimized for now, support for other datatypes, other operations,
+and/or multithreading may be implemented in the future. We've also added a new
+[PerformanceSmall](docs/PerformanceSmall.md) document to showcase the
+improvement in performance when some matrix dimensions are small.
 
  * **Performance comparisons now available!** We recently measured the
 performance of various level-3 operations on a variety of hardware architectures,
