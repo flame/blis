@@ -190,8 +190,7 @@ size of interest so that we can better assist you.
   * MKL 2019 update 4
     * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
 * Affinity:
-  * None.
-d affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 63"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
+  * N/A.
 * Frequency throttling (via `cpupower`):
   * Driver: acpi-cpufreq
   * Governor: performance
