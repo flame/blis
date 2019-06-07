@@ -763,8 +763,18 @@ endif
 # --- #pragma omp simd flags (used for reference kernels only) ---
 
 ifeq ($(PRAGMA_OMP_SIMD),yes)
+ifeq ($(CC_VENDOR),gcc)
 COMPSIMDFLAGS := -fopenmp-simd
 else
+ifeq ($(CC_VENDOR),clang)
+COMPSIMDFLAGS := -fopenmp-simd
+else
+ifeq ($(CC_VENDOR),icc)
+COMPSIMDFLAGS := -qopenmp-simd
+endif
+endif
+endif
+else # ifeq ($(PRAGMA_OMP_SIMD),no)
 COMPSIMDFLAGS :=
 endif
 
