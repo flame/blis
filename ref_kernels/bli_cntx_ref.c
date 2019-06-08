@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -123,6 +123,26 @@
 // Instantiate prototypes for above functions via the virtual micro-kernel API
 // template.
 #include "bli_l3_ind_ukr.h"
+
+// -- Level-3 small/unpacked micro-kernel prototype definitions ----------------
+
+// NOTE: This results in redundant prototypes for gemmsup_r and gemmsup_c
+// kernels, but since they will be identical the compiler won't complain.
+
+#undef  gemmsup_rv_ukr_name
+#define gemmsup_rv_ukr_name   GENARNAME(gemmsup_r)
+#undef  gemmsup_rg_ukr_name
+#define gemmsup_rg_ukr_name   GENARNAME(gemmsup_r)
+#undef  gemmsup_cv_ukr_name
+#define gemmsup_cv_ukr_name   GENARNAME(gemmsup_c)
+#undef  gemmsup_cg_ukr_name
+#define gemmsup_cg_ukr_name   GENARNAME(gemmsup_c)
+
+#undef  gemmsup_gx_ukr_name
+#define gemmsup_gx_ukr_name   GENARNAME(gemmsup_g)
+
+// Include the small/unpacked kernel API template.
+#include "bli_l3_sup_ker.h"
 
 // -- Level-1m (packm/unpackm) kernel prototype redefinitions ------------------
 
@@ -295,14 +315,24 @@
 // -- Macros to help concisely instantiate bli_func_init() ---------------------
 
 #define gen_func_init_co( func_p, opname ) \
-\
+{ \
 	bli_func_init( func_p, NULL,               NULL, \
-	                       PASTEMAC(c,opname), PASTEMAC(z,opname) )
+	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+}
 
 #define gen_func_init( func_p, opname ) \
-\
+{ \
 	bli_func_init( func_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
-	                       PASTEMAC(c,opname), PASTEMAC(z,opname) )
+	                       PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+}
+
+#define gen_sup_func_init( func0_p, func1_p, opname ) \
+{ \
+	bli_func_init( func0_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+	bli_func_init( func1_p, PASTEMAC(s,opname), PASTEMAC(d,opname), \
+	                        PASTEMAC(c,opname), PASTEMAC(z,opname) ); \
+}
 
 
 
@@ -314,9 +344,11 @@ void GENBARNAME(cntx_init)
      )
 {
 	blksz_t  blkszs[ BLIS_NUM_BLKSZS ];
+	blksz_t  thresh[ BLIS_NUM_THRESH ];
 	func_t*  funcs;
 	mbool_t* mbools;
 	dim_t    i;
+	void**   vfuncs;
 
 
 	// -- Clear the context ----------------------------------------------------
@@ -363,6 +395,11 @@ void GENBARNAME(cntx_init)
 
 	funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
 
+	// NOTE: We set the virtual micro-kernel slots to contain the addresses
+	// of the native micro-kernels. In general, the ukernels in the virtual
+	// ukernel slots are always called, and if the function called happens to
+	// be a virtual micro-kernel, it will then know to find its native
+	// ukernel in the native ukernel slots.
 	gen_func_init( &funcs[ BLIS_GEMM_UKR ],       gemm_ukr_name       );
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_L_UKR ], gemmtrsm_l_ukr_name );
 	gen_func_init( &funcs[ BLIS_GEMMTRSM_U_UKR ], gemmtrsm_u_ukr_name );
@@ -386,6 +423,91 @@ void GENBARNAME(cntx_init)
 	bli_mbool_init( &mbools[ BLIS_GEMMTRSM_U_UKR ], FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_TRSM_L_UKR ],     FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_TRSM_U_UKR ],     FALSE, FALSE, FALSE, FALSE );
+
+
+	// -- Set level-3 small/unpacked thresholds --------------------------------
+
+	// NOTE: The default thresholds are set very low so that the sup framework
+	// only actives for exceedingly small dimensions. If a sub-configuration
+	// registers optimized sup kernels, then that sub-configuration should also
+	// register new (probably larger) thresholds that are almost surely more
+	// appropriate that these default values.
+	//                                          s     d     c     z
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],    0,    0,    0,    0 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],    0,    0,    0,    0 );
+
+	// Initialize the context with the default thresholds.
+	bli_cntx_set_l3_sup_thresh
+	(
+	  3,
+	  BLIS_MT, &thresh[ BLIS_MT ],
+	  BLIS_NT, &thresh[ BLIS_NT ],
+	  BLIS_KT, &thresh[ BLIS_KT ],
+	  cntx
+	);
+
+
+	// -- Set level-3 small/unpacked handlers ----------------------------------
+
+	vfuncs = bli_cntx_l3_sup_handlers_buf( cntx );
+
+	// Initialize all of the function pointers to NULL;
+	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i ) vfuncs[ i ] = NULL;
+
+	// The level-3 sup handlers are oapi-based, so we only set one slot per
+	// operation.
+
+	// Set the gemm slot to the default gemm sup handler.
+	vfuncs[ BLIS_GEMM ] = bli_gemmsup_ref;
+
+
+	// -- Set level-3 small/unpacked micro-kernels and preferences -------------
+
+	funcs  = bli_cntx_l3_sup_kers_buf( cntx );
+	mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
+
+#if 0
+	// Adhere to the small/unpacked ukernel mappings:
+	// - rv -> rrr, rcr
+	// - rg -> rrc, rcc
+	// - cv -> ccr, ccc
+	// - cg -> crr, crc
+	gen_sup_func_init( &funcs[ BLIS_RRR ],
+	                   &funcs[ BLIS_RCR ], gemmsup_rv_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_RRC ],
+	                   &funcs[ BLIS_RCC ], gemmsup_rg_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_CCR ],
+	                   &funcs[ BLIS_CCC ], gemmsup_cv_ukr_name );
+	gen_sup_func_init( &funcs[ BLIS_CRR ],
+	                   &funcs[ BLIS_CRC ], gemmsup_cg_ukr_name );
+#endif
+	gen_func_init( &funcs[ BLIS_RRR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RRC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RCR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_RCC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRR ], gemmsup_cv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRC ], gemmsup_cv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCR ], gemmsup_cv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCC ], gemmsup_cv_ukr_name );
+
+	// Register the general-stride/generic ukernel to the "catch-all" slot
+	// associated with the BLIS_XXX enum value. This slot will be queried if
+	// *any* operand is stored with general stride.
+	gen_func_init( &funcs[ BLIS_XXX ], gemmsup_gx_ukr_name );
+
+
+	// Set the l3 sup ukernel storage preferences.
+	bli_mbool_init( &mbools[ BLIS_RRR ], TRUE,  TRUE,  TRUE,  TRUE  );
+	bli_mbool_init( &mbools[ BLIS_RRC ], TRUE,  TRUE,  TRUE,  TRUE  );
+	bli_mbool_init( &mbools[ BLIS_RCR ], TRUE,  TRUE,  TRUE,  TRUE  );
+	bli_mbool_init( &mbools[ BLIS_RCC ], TRUE,  TRUE,  TRUE,  TRUE  );
+	bli_mbool_init( &mbools[ BLIS_CRR ], FALSE, FALSE, FALSE, FALSE );
+	bli_mbool_init( &mbools[ BLIS_CRC ], FALSE, FALSE, FALSE, FALSE );
+	bli_mbool_init( &mbools[ BLIS_CCR ], FALSE, FALSE, FALSE, FALSE );
+	bli_mbool_init( &mbools[ BLIS_CCC ], FALSE, FALSE, FALSE, FALSE );
+
+	bli_mbool_init( &mbools[ BLIS_XXX ], FALSE, FALSE, FALSE, FALSE );
 
 
 	// -- Set level-1f kernels -------------------------------------------------

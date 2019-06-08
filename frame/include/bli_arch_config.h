@@ -171,6 +171,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
+#ifdef BLIS_FAMILY_THUNDERX2
+#include "bli_family_thunderx2.h"
+#endif
 #ifdef BLIS_FAMILY_CORTEXA57
 #include "bli_family_cortexa57.h"
 #endif

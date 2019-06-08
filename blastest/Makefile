@@ -136,7 +136,7 @@ CFLAGS         += -Wno-maybe-uninitialized -Wno-parentheses -Wfatal-errors \
                   -I$(INC_PATH) -DHAVE_BLIS_H
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
+#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 # Override the location of the check-blastest.sh script.
 #BLASTEST_CHECK := ./check-blastest.sh

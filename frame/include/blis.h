@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -88,6 +88,7 @@ extern "C" {
 #include "bli_l1f_ker_prot.h"
 #include "bli_l1m_ker_prot.h"
 #include "bli_l3_ukr_prot.h"
+#include "bli_l3_sup_ker_prot.h"
 
 #include "bli_arch_config_pre.h"
 #include "bli_arch_config.h"

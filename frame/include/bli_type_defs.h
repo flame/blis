@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -196,6 +196,16 @@ typedef float     f77_float;
 typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
+
+// -- Void function pointer types --
+
+// Note: This type should be used in any situation where the address of a
+// *function* will be conveyed or stored prior to it being typecast back
+// to the correct function type. It does not need to be used when conveying
+// or storing the address of *data* (such as an array of float or double).
+
+//typedef void (*void_fp)( void );
+typedef void* void_fp;
 
 
 //
@@ -804,6 +814,80 @@ typedef enum
 #if 0
 typedef enum
 {
+	// RV = row-stored, contiguous vector-loading
+	// RG = row-stored, non-contiguous gather-loading
+	// CV = column-stored, contiguous vector-loading
+	// CG = column-stored, non-contiguous gather-loading
+
+	// RD = row-stored, dot-based
+	// CD = col-stored, dot-based
+
+	// RC = row-stored, column-times-column
+	// CR = column-stored, row-times-row
+
+	// GX = general-stored generic implementation
+
+	BLIS_GEMMSUP_RV_UKR = 0,
+	BLIS_GEMMSUP_RG_UKR,
+	BLIS_GEMMSUP_CV_UKR,
+	BLIS_GEMMSUP_CG_UKR,
+
+	BLIS_GEMMSUP_RD_UKR,
+	BLIS_GEMMSUP_CD_UKR,
+
+	BLIS_GEMMSUP_RC_UKR,
+	BLIS_GEMMSUP_CR_UKR,
+
+	BLIS_GEMMSUP_GX_UKR,
+} l3sup_t;
+
+#define BLIS_NUM_LEVEL3_SUP_UKRS 9
+#endif
+
+
+typedef enum
+{
+	// 3-operand storage combinations
+	BLIS_RRR = 0,
+	BLIS_RRC, // 1
+	BLIS_RCR, // 2
+	BLIS_RCC, // 3
+	BLIS_CRR, // 4
+	BLIS_CRC, // 5
+	BLIS_CCR, // 6
+	BLIS_CCC, // 7
+	BLIS_XXX, // 8
+
+#if 0
+	BLIS_RRG,
+	BLIS_RCG,
+	BLIS_RGR,
+	BLIS_RGC,
+	BLIS_RGG,
+	BLIS_CRG,
+	BLIS_CCG,
+	BLIS_CGR,
+	BLIS_CGC,
+	BLIS_CGG,
+	BLIS_GRR,
+	BLIS_GRC,
+	BLIS_GRG,
+	BLIS_GCR,
+	BLIS_GCC,
+	BLIS_GCG,
+	BLIS_GGR,
+	BLIS_GGC,
+	BLIS_GGG,
+#endif
+} stor3_t;
+
+#define BLIS_NUM_3OP_RC_COMBOS 9
+//#define BLIS_NUM_3OP_RCG_COMBOS 27
+
+
+#if 0
+typedef enum
+{
 	BLIS_JC_IDX = 0,
 	BLIS_PC_IDX,
 	BLIS_IC_IDX,
@@ -863,8 +947,10 @@ typedef enum
 	BLIS_MC,
 	BLIS_KC,
 	BLIS_NC,
+
 	BLIS_M2, // level-2 blocksize in m dimension
 	BLIS_N2, // level-2 blocksize in n dimension
+
 	BLIS_AF, // level-1f axpyf fusing factor
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
@@ -873,6 +959,19 @@ typedef enum
 } bszid_t;
 
 #define BLIS_NUM_BLKSZS 11
+
+
+// -- Threshold ID type --
+
+typedef enum
+{
+	BLIS_MT = 0, // level-3 small/unpacked matrix threshold in m dimension
+	BLIS_NT,     // level-3 small/unpacked matrix threshold in n dimension
+	BLIS_KT      // level-3 small/unpacked matrix threshold in k dimension
+
+} threshid_t;
+
+#define BLIS_NUM_THRESH 3
 
 
 // -- Architecture ID type --
@@ -1014,7 +1113,7 @@ struct cntl_s
 	// Basic fields (usually required).
 	opid_t         family;
 	bszid_t        bszid;
-	void*          var_func;
+	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
 
@@ -1047,7 +1146,7 @@ typedef struct blksz_s
 typedef struct func_s
 {
 	// Kernel function address.
-	void*  ptr[BLIS_NUM_FP_TYPES];
+	void_fp ptr[BLIS_NUM_FP_TYPES];
 
 } func_t;
 
@@ -1138,6 +1237,71 @@ typedef struct obj_s
 	dim_t         n_panel;  // n dimension of a "full" panel
 } obj_t;
 
+// Pre-initializors. Things that must be set afterwards:
+// - root object pointer
+// - info bitfields: dt, target_dt, exec_dt, comp_dt
+// - info2 bitfields: scalar_dt
+// - elem_size
+// - dims, strides
+// - buffer
+// - internal scalar buffer (must always set imaginary component)
+
+#define BLIS_OBJECT_INITIALIZER \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 0, 0 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( float ), /* this is changed later. */ \
+\
+	.buffer    = NULL, \
+	.rs        = 0, \
+	.cs        = 0, \
+	.is        = 1,  \
+\
+	.scalar    = { 0.0, 0.0 }, \
+\
+	.m_padded  = 0, \
+	.n_padded  = 0, \
+	.ps        = 0, \
+	.pd        = 0, \
+	.m_panel   = 0, \
+	.n_panel   = 0  \
+}
+
+#define BLIS_OBJECT_INITIALIZER_1X1 \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 1, 1 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( float ), /* this is changed later. */ \
+\
+	.buffer    = NULL, \
+	.rs        = 0, \
+	.cs        = 0, \
+	.is        = 1,  \
+\
+	.scalar    = { 0.0, 0.0 }, \
+\
+	.m_padded  = 0, \
+	.n_padded  = 0, \
+	.ps        = 0, \
+	.pd        = 0, \
+	.m_panel   = 0, \
+	.n_panel   = 0  \
+}
+
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
@@ -1204,6 +1368,39 @@ static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
+// Initializors for global scalar constants.
+// NOTE: These must remain cpp macros since they are initializor
+// expressions, not functions.
+
+#define bli_obj_init_const( buffer0 ) \
+{ \
+	.root      = NULL, \
+\
+	.off       = { 0, 0 }, \
+	.dim       = { 1, 1 }, \
+	.diag_off  = 0, \
+\
+	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
+	                   BLIS_BITVAL_DENSE      | \
+	                   BLIS_BITVAL_GENERAL, \
+	.info2     = 0x0, \
+	.elem_size = sizeof( constdata_t ), \
+\
+	.buffer    = buffer0, \
+	.rs        = 1, \
+	.cs        = 1, \
+	.is        = 1  \
+}
+
+#define bli_obj_init_constdata( val ) \
+{ \
+	.s =           ( float  )val, \
+	.d =           ( double )val, \
+	.c = { .real = ( float  )val, .imag = 0.0f }, \
+	.z = { .real = ( double )val, .imag = 0.0 }, \
+	.i =           ( gint_t )val, \
+}
+
 
 // -- Context type --
 
@@ -1215,6 +1412,12 @@ typedef struct cntx_s
 	func_t    l3_vir_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	func_t    l3_nat_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	mbool_t   l3_nat_ukrs_prefs[ BLIS_NUM_LEVEL3_UKRS ];
+
+	blksz_t   l3_sup_thresh[ BLIS_NUM_THRESH ];
+	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
+	blksz_t   l3_sup_blkszs[ BLIS_NUM_BLKSZS ];
+	func_t    l3_sup_kers[ BLIS_NUM_3OP_RC_COMBOS ];
+	mbool_t   l3_sup_kers_prefs[ BLIS_NUM_3OP_RC_COMBOS ];
 
 	func_t    l1f_kers[ BLIS_NUM_LEVEL1F_KERS ];
 	func_t    l1v_kers[ BLIS_NUM_LEVEL1V_KERS ];
@@ -1245,6 +1448,9 @@ typedef struct rntm_s
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	membrk_t* membrk;
+
+	// A switch to enable/disable small/unpacked matrix handling in level-3 ops.
+	bool_t    l3_sup;
 
 } rntm_t;
 

@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
 * [Changes in 0.5.2](ReleaseNotes.md#changes-in-052)
 * [Changes in 0.5.1](ReleaseNotes.md#changes-in-051)
 * [Changes in 0.5.0](ReleaseNotes.md#changes-in-050)
@@ -33,6 +34,34 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.6.0
+June 3, 2019
+
+Improvements present in 0.6.0:
+
+Framework:
+- Implemented small/skinny/unpacked (sup) framework for accelerated level-3 performance when at least one matrix dimension is small (or very small). For now, only `dgemm` is optimized, and this new implementation currently only targets Intel Haswell through Coffee Lake, and AMD Zen-based Ryzen/Epyc. (The existing kernels should extend without significant modification to Zen2-based Ryzen/Epyc once they are available.) Also, multithreaded parallelism is not yet implemented, though application-level threading should be fine. (AMD)
+- Changed function pointer usages of `void*` to new, typedef'ed type `void_fp`.
+- Allow compile-time disabling of BLAS prototypes in BLIS, in case the application already has access to prototypes.
+- In `bli_system.h`, define `_POSIX_C_SOURCE` to `200809L` if the macro is not already defined. This ensures that things such as pthreads are properly defined by an application that has `#include "blis.h"` but omits the definition of `_POSIX_C_SOURCE` from the command-line compiler options. (Christos Psarras)
+
+Kernels:
+- None.
+
+Build system:
+- Updated the way configure and the top-level Makefile handle installation prefixes (`prefix`, `exec_prefix`, `libdir`, `includedir`, `sharedir`) to better conform with GNU conventions.
+- Improved clang version detection. (Isuru Fernando)
+- Use pthreads on MinGW and Cygwin. (Isuru Fernando)
+
+Testing:
+- Added Eigen support to test drivers in `test/3`.
+- Fix inadvertently hidden `xerbla_()` in blastest drivers when building only shared libraries. (Isuru Fernando, M. Zhou)
+
+Documentation:
+- Added `docs/PerformanceSmall.md` to showcase new BLIS small/skinny `dgemm` performance on Kaby Lake and Epyc.
+- Added Eigen results (3.3.90) to performance graphs showcased in `docs/Performance.md`.
+- Added BLIS thread factorization info to `docs/Performance.md`.
 
 ## Changes in 0.5.2
 March 19, 2019

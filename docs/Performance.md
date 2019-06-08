@@ -21,11 +21,13 @@
 # Introduction
 
 This document showcases performance results for a representative sample of
-level-3 operations with BLIS and BLAS for several hardware architectures.
+level-3 operations on large matrices with BLIS and BLAS for several hardware
+architectures.
 
 # General information
 
-Generally speaking, we publish three "panels" for each type of hardware,
+Generally speaking, for level-3 operations on large matrices, we publish three
+"panels" for each type of hardware,
 each of which reports one of: single-threaded performance, multithreaded
 performance on a single socket, or multithreaded performance on two sockets.
 Each panel will consist of a 4x5 grid of graphs, with each row representing
@@ -50,17 +52,17 @@ Theoretical peak performance, in units of GFLOPS/core, is calculated as the
 product of:
 1. the maximum sustainable clock rate in GHz; and
 2. the maximum number of floating-point operations (flops) that can be
-executed per cycle.
+executed per cycle (per core).
 
 Note that the maximum sustainable clock rate may change depending on the
 conditions.
 For example, on some systems the maximum clock rate is higher when only one
 core is active (e.g. single-threaded performance) versus when all cores are
 active (e.g. multithreaded performance).
-The maximum number of flops executable per cycle is generally computed as the
-product of:
+The maximum number of flops executable per cycle (per core) is generally
+computed as the product of:
 1. the maximum number of fused multiply-add (FMA) vector instructions that
-can be issued per cycle;
+can be issued per cycle (per core);
 2. the maximum number of elements that can be stored within a single vector
 register (for the datatype in question); and
 3. 2.0, since an FMA instruction fuses two operations (a multiply and an add).
@@ -91,7 +93,7 @@ allow it to finish.
 
 Where along the x-axis you focus your attention will depend on the segment of
 the problem size range that you care about most. Some people's applications
-depend heavily on smaller problems, where "small" can mean anything from 200
+depend heavily on smaller problems, where "small" can mean anything from 10
 to 1000 or even higher. Some people consider 1000 to be quite large, while
 others insist that 5000 is merely "medium." What each of us considers to be
 small, medium, or large (naturally) depends heavily on the kinds of dense
@@ -131,12 +133,21 @@ size of interest so that we can better assist you.
   * BLIS 075143df (0.5.1-39)
     * configured with `./configure -t openmp thunderx2` (single- and multithreaded)
     * sub-configuration exercised: `thunderx2`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (28 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=7`
+    * Multithreaded (56 core) execution requested via `export BLIS_JC_NT=8 BLIS_IC_NT=7`
   * OpenBLAS 52d3f7a
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=56` (multithreaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=56` (multithreaded, 56 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (28 core) execution requested via `export OPENBLAS_NUM_THREADS=28`
+    * Multithreaded (56 core) execution requested via `export OPENBLAS_NUM_THREADS=56`
   * ARMPL 18.4
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (28 core) execution requested via `export OMP_NUM_THREADS=28`
+    * Multithreaded (56 core) execution requested via `export OMP_NUM_THREADS=56`
 * Affinity:
-  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 55"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` was unset.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 55"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * No changes made.
 * Comments:
@@ -146,18 +157,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [ThunderX2 single-threaded](graphs/l3_perf_tx2_nt1.pdf)
-* [ThunderX2 multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.pdf)
-* [ThunderX2 multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.pdf)
+* [ThunderX2 single-threaded](graphs/large/l3_perf_tx2_nt1.pdf)
+* [ThunderX2 multithreaded (28 cores)](graphs/large/l3_perf_tx2_jc4ic7_nt28.pdf)
+* [ThunderX2 multithreaded (56 cores)](graphs/large/l3_perf_tx2_jc8ic7_nt56.pdf)
 
 #### png (inline)
 
 * **ThunderX2 single-threaded**
-![single-threaded](graphs/l3_perf_tx2_nt1.png)
+![single-threaded](graphs/large/l3_perf_tx2_nt1.png)
 * **ThunderX2 multithreaded (28 cores)**
-![multithreaded (28 cores)](graphs/l3_perf_tx2_jc4ic7_nt28.png)
+![multithreaded (28 cores)](graphs/large/l3_perf_tx2_jc4ic7_nt28.png)
 * **ThunderX2 multithreaded (56 cores)**
-![multithreaded (56 cores)](graphs/l3_perf_tx2_jc8ic7_nt56.png)
+![multithreaded (56 cores)](graphs/large/l3_perf_tx2_jc8ic7_nt56.png)
 
 ---
 
@@ -177,38 +188,59 @@ size of interest so that we can better assist you.
   * multicore: 64 GFLOPS/core (double-precision), 128 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Compiler: gcc 7.3.0
-* Results gathered: 6 March 2019
+* Results gathered: 6 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `skx`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (26 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=13`
+    * Multithreaded (52 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=13`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=52` (multithreaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=52` (multithreaded, 52 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (26 core) execution requested via `export OPENBLAS_NUM_THREADS=26`
+    * Multithreaded (52 core) execution requested via `export OPENBLAS_NUM_THREADS=52`
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (26 core) execution requested via `export OMP_NUM_THREADS=26`
+    * Multithreaded (52 core) execution requested via `export OMP_NUM_THREADS=52`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2019 update 1
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (26 core) execution requested via `export MKL_NUM_THREADS=26`
+    * Multithreaded (52 core) execution requested via `export MKL_NUM_THREADS=52`
 * Affinity:
-  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 51"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` was unset.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 51"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
-  * No changes made.
+  * Driver: acpi-cpufreq
+  * Governor: performance
+  * Hardware limits: 1.0GHz - 2.0GHz
+  * Adjusted minimum: 2.0GHz
 * Comments:
-  * MKL yields superb performance for most operations, though BLIS is not far behind except for trsm. (We understand the trsm underperformance and hope to address it in the future.) OpenBLAS lags far behind MKL and BLIS due to lack of full support for AVX-512, and possibly other reasons related to software architecture and register/cache blocksizes.
+  * MKL yields superb performance for most operations, though BLIS is not far behind except for `trsm`. (We understand the `trsm` underperformance and hope to address it in the future.) OpenBLAS lags far behind MKL and BLIS due to lack of full support for AVX-512, and possibly other reasons related to software architecture and register/cache blocksizes.
 
 ### SkylakeX results
 
 #### pdf
 
-* [SkylakeX single-threaded](graphs/l3_perf_skx_nt1.pdf)
-* [SkylakeX multithreaded (26 cores)](graphs/l3_perf_skx_jc2ic13_nt26.pdf)
-* [SkylakeX multithreaded (52 cores)](graphs/l3_perf_skx_jc4ic13_nt52.pdf)
+* [SkylakeX single-threaded](graphs/large/l3_perf_skx_nt1.pdf)
+* [SkylakeX multithreaded (26 cores)](graphs/large/l3_perf_skx_jc2ic13_nt26.pdf)
+* [SkylakeX multithreaded (52 cores)](graphs/large/l3_perf_skx_jc4ic13_nt52.pdf)
 
 #### png (inline)
 
 * **SkylakeX single-threaded**
-![single-threaded](graphs/l3_perf_skx_nt1.png)
+![single-threaded](graphs/large/l3_perf_skx_nt1.png)
 * **SkylakeX multithreaded (26 cores)**
-![multithreaded (26 cores)](graphs/l3_perf_skx_jc2ic13_nt26.png)
+![multithreaded (26 cores)](graphs/large/l3_perf_skx_jc2ic13_nt26.png)
 * **SkylakeX multithreaded (52 cores)**
-![multithreaded (52 cores)](graphs/l3_perf_skx_jc4ic13_nt52.png)
+![multithreaded (52 cores)](graphs/large/l3_perf_skx_jc4ic13_nt52.png)
 
 ---
 
@@ -228,17 +260,35 @@ size of interest so that we can better assist you.
   * multicore: 49.6 GFLOPS/core (double-precision), 99.2 GFLOPS/core (single-precision)
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Compiler: gcc 6.3.0
-* Results gathered: 25-26 February 2019
+* Results gathered: 25-26 February 2019, 27 March 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `haswell`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (12 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=3 BLIS_JR_NT=2`
+    * Multithreaded (24 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=3 BLIS_JR_NT=2`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=24` (multithreaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=24` (multithreaded, 24 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OPENBLAS_NUM_THREADS=12`
+    * Multithreaded (24 core) execution requested via `export OPENBLAS_NUM_THREADS=24`
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
+    * Multithreaded (24 core) execution requested via `export OMP_NUM_THREADS=24`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2018 update 2
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export MKL_NUM_THREADS=12`
+    * Multithreaded (24 core) execution requested via `export MKL_NUM_THREADS=24`
 * Affinity:
-  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 23"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` was unset.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 23"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * No changes made.
 * Comments:
@@ -248,18 +298,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [Haswell single-threaded](graphs/l3_perf_has_nt1.pdf)
-* [Haswell multithreaded (12 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.pdf)
-* [Haswell multithreaded (24 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.pdf)
+* [Haswell single-threaded](graphs/large/l3_perf_has_nt1.pdf)
+* [Haswell multithreaded (12 cores)](graphs/large/l3_perf_has_jc2ic3jr2_nt12.pdf)
+* [Haswell multithreaded (24 cores)](graphs/large/l3_perf_has_jc4ic3jr2_nt24.pdf)
 
 #### png (inline)
 
 * **Haswell single-threaded**
-![single-threaded](graphs/l3_perf_has_nt1.png)
+![single-threaded](graphs/large/l3_perf_has_nt1.png)
 * **Haswell multithreaded (12 cores)**
-![multithreaded (12 cores)](graphs/l3_perf_has_jc2ic3jr2_nt12.png)
+![multithreaded (12 cores)](graphs/large/l3_perf_has_jc2ic3jr2_nt12.png)
 * **Haswell multithreaded (24 cores)**
-![multithreaded (24 cores)](graphs/l3_perf_has_jc4ic3jr2_nt24.png)
+![multithreaded (24 cores)](graphs/large/l3_perf_has_jc4ic3jr2_nt24.png)
 
 ---
 
@@ -280,17 +330,35 @@ size of interest so that we can better assist you.
   * multicore: 20.4 GFLOPS/core (double-precision), 40.8 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Compiler: gcc 7.3.0
-* Results gathered: 6 March 2019, 19 March 2019
+* Results gathered: 6 March 2019, 19 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
     * configured with `./configure -t openmp auto` (single- and multithreaded)
     * sub-configuration exercised: `zen`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (32 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=8 BLIS_JR_NT=4`
+    * Multithreaded (64 core) execution requested via `export BLIS_JC_NT=2 BLIS_IC_NT=8 BLIS_JR_NT=4`
   * OpenBLAS 0.3.5
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-    * configured with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (32 core) execution requested via `export OPENBLAS_NUM_THREADS=32`
+    * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
+  * Eigen 3.3.90
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (32 core) execution requested via `export OMP_NUM_THREADS=32`
+    * Multithreaded (64 core) execution requested via `export OMP_NUM_THREADS=64`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
   * MKL 2019 update 1
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (32 core) execution requested via `export MKL_NUM_THREADS=32`
+    * Multithreaded (64 core) execution requested via `export MKL_NUM_THREADS=64`
 * Affinity:
-  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 63"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` was unset.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0 1 2 3 ... 63"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * Driver: acpi-cpufreq
   * Governor: performance
@@ -303,18 +371,18 @@ size of interest so that we can better assist you.
 
 #### pdf
 
-* [Epyc single-threaded](graphs/l3_perf_epyc_nt1.pdf)
-* [Epyc multithreaded (32 cores)](graphs/l3_perf_epyc_jc1ic8jr4_nt32.pdf)
-* [Epyc multithreaded (64 cores)](graphs/l3_perf_epyc_jc2ic8jr4_nt64.pdf)
+* [Epyc single-threaded](graphs/large/l3_perf_epyc_nt1.pdf)
+* [Epyc multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.pdf)
+* [Epyc multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.pdf)
 
 #### png (inline)
 
 * **Epyc single-threaded**
-![single-threaded](graphs/l3_perf_epyc_nt1.png)
+![single-threaded](graphs/large/l3_perf_epyc_nt1.png)
 * **Epyc multithreaded (32 cores)**
-![multithreaded (32 cores)](graphs/l3_perf_epyc_jc1ic8jr4_nt32.png)
+![multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.png)
 * **Epyc multithreaded (64 cores)**
-![multithreaded (64 cores)](graphs/l3_perf_epyc_jc2ic8jr4_nt64.png)
+![multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.png)
 
 ---
 

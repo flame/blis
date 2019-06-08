@@ -21,7 +21,8 @@ if [ ${sys} = "blis" ]; then
 	export GOMP_CPU_AFFINITY="0 1 2 3"
 
 	threads="jc1ic1jr1_2400
-	         jc2ic2jr1_4000"
+	         jc2ic3jr2_6000
+	         jc4ic3jr2_8000"
 
 elif [ ${sys} = "stampede2" ]; then
 
@@ -70,17 +71,32 @@ test_dts="d " #s z c"
 test_ops="gemm "#hemm herk trmm trsm"
 
 # Implementations to test.
+<<<<<<< HEAD
 #impls="all"
 #impls="other"
 impls="blis"
+=======
+#impls="blis"
+#impls="other"
+impls="eigen"
+#impls="all"
+>>>>>>> upstream/master
 
 if [ "${impls}" = "blis" ]; then
 
 	test_impls="asm_blis"
 
+elif [ "${impls}" = "eigen" ]; then
+
+	test_impls="eigen"
+
 elif [ "${impls}" = "other" ]; then
 
 	test_impls="openblas vendor"
+
+elif [ "${impls}" = "eigen" ]; then
+
+	test_impls="eigen"
 
 else
 
@@ -138,6 +154,15 @@ for th in ${threads}; do
 
 			for op in ${test_ops}; do
 
+				# Eigen does not support multithreading for hemm, herk, trmm,
+				# or trsm. So if we're getting ready to execute an Eigen driver
+				# for one of these operations and nt > 1, we skip this test.
+				if [ "${im}"  = "eigen" ] && \
+				   [ "${op}" != "gemm"  ] && \
+				   [ "${nt}" != "1"     ]; then
+					continue;
+				fi
+
 				# Find the threading suffix by probing the executable.
 				binname=$(ls ${exec_root}_${dt}${op}_${psize}_${im}_*.x)
 				suf_ext=${binname##*_}
@@ -148,13 +173,24 @@ for th in ${threads}; do
 				# Set the number of threads according to th.
 				if [ "${suf}" = "1s" ] || [ "${suf}" = "2s" ]; then
 
-					export BLIS_JC_NT=${jc_nt}
-					export BLIS_PC_NT=${pc_nt}
-					export BLIS_IC_NT=${ic_nt}
-					export BLIS_JR_NT=${jr_nt}
-					export BLIS_IR_NT=${ir_nt}
-					export OPENBLAS_NUM_THREADS=${nt}
-					export MKL_NUM_THREADS=${nt}
+					# Set the threading parameters based on the implementation
+					# that we are preparing to run.
+					if   [ "${im}" = "asm_blis" ]; then
+						unset  OMP_NUM_THREADS
+						export BLIS_JC_NT=${jc_nt}
+						export BLIS_PC_NT=${pc_nt}
+						export BLIS_IC_NT=${ic_nt}
+						export BLIS_JR_NT=${jr_nt}
+						export BLIS_IR_NT=${ir_nt}
+					elif [ "${im}" = "openblas" ]; then
+						unset  OMP_NUM_THREADS
+						export OPENBLAS_NUM_THREADS=${nt}
+					elif [ "${im}" = "eigen" ]; then
+						export OMP_NUM_THREADS=${nt}
+					elif [ "${im}" = "vendor" ]; then
+						unset  OMP_NUM_THREADS
+						export MKL_NUM_THREADS=${nt}
+					fi
 					export nt_use=${nt}
 
 					# Multithreaded OpenBLAS seems to have a problem running
@@ -173,6 +209,7 @@ for th in ${threads}; do
 					export BLIS_IC_NT=1
 					export BLIS_JR_NT=1
 					export BLIS_IR_NT=1
+					export OMP_NUM_THREADS=1
 					export OPENBLAS_NUM_THREADS=1
 					export MKL_NUM_THREADS=1
 					export nt_use=1

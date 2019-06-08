@@ -36,7 +36,7 @@
 
 typedef void (*cntx_stage_ft)( dim_t stage, cntx_t* cntx );
 
-static void* bli_cntx_ind_stage_fp[BLIS_NUM_IND_METHODS] =
+static void_fp bli_cntx_ind_stage_fp[BLIS_NUM_IND_METHODS] =
 {
 /* 3mh  */ bli_cntx_3mh_stage,
 /* 3m1  */ bli_cntx_3m1_stage,

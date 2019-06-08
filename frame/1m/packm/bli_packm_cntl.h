@@ -92,8 +92,8 @@ static packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
 cntl_t* bli_packm_cntl_create_node
      (
        rntm_t*   rntm,
-       void*     var_func,
-       void*     packm_var_func,
+       void_fp   var_func,
+       void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
        bool_t    does_invert_diag,

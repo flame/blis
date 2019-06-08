@@ -41,11 +41,11 @@ static cntx_t** gks[ BLIS_NUM_ARCHS ];
 
 // The array of function pointers holding the registered context initialization
 // functions for induced methods.
-static void*    cntx_ind_init[ BLIS_NUM_ARCHS ];
+static void_fp  cntx_ind_init[ BLIS_NUM_ARCHS ];
 
 // The array of function pointers holding the registered context initialization
 // functions for reference kernels.
-static void*    cntx_ref_init[ BLIS_NUM_ARCHS ];
+static void_fp  cntx_ref_init[ BLIS_NUM_ARCHS ];
 
 // Define a function pointer type for context initialization functions.
 typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
@@ -235,7 +235,7 @@ void bli_gks_init_index( void )
 	// architecture id elements of the internal arrays to NULL. 
 
 	const size_t gks_size = sizeof( cntx_t* ) * BLIS_NUM_ARCHS;
-	const size_t fpa_size = sizeof( void*   ) * BLIS_NUM_ARCHS;
+	const size_t fpa_size = sizeof( void_fp ) * BLIS_NUM_ARCHS;
 
 	// Set every entry in gks and context init function pointer arrays to
 	// zero/NULL. This is done so that later on we know which ones were
@@ -292,10 +292,10 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 void bli_gks_register_cntx
      (
-       arch_t id,
-       void*  nat_fp,
-       void*  ref_fp,
-       void*  ind_fp
+       arch_t  id,
+       void_fp nat_fp,
+       void_fp ref_fp,
+       void_fp ind_fp
      )
 {
 	// This function is called by bli_gks_init() for each architecture that
@@ -585,8 +585,8 @@ bool_t bli_gks_cntx_l3_nat_ukr_is_ref
 
 	// Query each context for the micro-kernel function pointer for the
 	// specified datatype.
-	void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, &ref_cntx );
-	void* fp     = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx );
+	void_fp ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, &ref_cntx );
+	void_fp fp     = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx );
 
 	// Return the result.
 	return fp == ref_fp;
@@ -614,7 +614,7 @@ char* bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt )
 	// then query the ukernel function pointer for the given datatype from
 	// that context.
 	cntx_t* cntx  = bli_gks_query_ind_cntx( method, dt );
-	void*   fp    = bli_cntx_get_l3_vir_ukr_dt( dt, ukr, cntx );
+	void_fp fp    = bli_cntx_get_l3_vir_ukr_dt( dt, ukr, cntx );
 
 	// Check whether the ukernel function pointer is NULL for the given
 	// datatype. If it is NULL, return the string for not applicable.
@@ -693,8 +693,8 @@ kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt )
 
 		// Query the native ukernel func_t from both the native and reference
 		// contexts.
-		void* nat_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, nat_cntx );
-		void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, &ref_cntx_l );
+		void_fp nat_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, nat_cntx );
+		void_fp ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, &ref_cntx_l );
 
 		if ( nat_fp == ref_fp ) return BLIS_REFERENCE_UKERNEL;
 		else                    return BLIS_OPTIMIZED_UKERNEL;

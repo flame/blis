@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -195,13 +195,13 @@ void libblis_test_syr2k_experiment
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
-	                          sc_str[0], m, k, &a );
+	                          sc_str[1], m, k, &a );
 	libblis_test_mobj_create( params, datatype, transb,
-	                          sc_str[1], m, k, &b );
+	                          sc_str[2], m, k, &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, m, &c );
+	                          sc_str[0], m, m, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, m, &c_save );
+	                          sc_str[0], m, m, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )

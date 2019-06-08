@@ -57,7 +57,7 @@ typedef void (*FUNCPTR_T)
        void*   p, inc_t rs_p, inc_t cs_p,
                   inc_t is_p,
                   dim_t pd_p, inc_t ps_p,
-       void*   packm_ker,
+       void_fp packm_ker,
        cntx_t* cntx,
        thrinfo_t* thread
      );
@@ -152,7 +152,7 @@ void bli_packm_blk_var1
 	void*     buf_kappa;
 
 	func_t*   packm_kers;
-	void*     packm_ker;
+	void_fp   packm_ker;
 
 	FUNCPTR_T f;
 
@@ -296,7 +296,7 @@ void PASTEMAC(ch,varname) \
        void*   p, inc_t rs_p, inc_t cs_p, \
                   inc_t is_p, \
                   dim_t pd_p, inc_t ps_p, \
-       void*   packm_ker, \
+       void_fp packm_ker, \
        cntx_t* cntx, \
        thrinfo_t* thread  \
      ) \
