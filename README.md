@@ -331,7 +331,7 @@ table of supported microarchitectures.
  * **[Multithreading](docs/Multithreading.md).** This document describes how to
 use the multithreading features of BLIS.
 
- * **[Mixed-Datatype](docs/MixedDatatypes.md).** This document provides an
+ * **[Mixed-Datatypes](docs/MixedDatatypes.md).** This document provides an
 overview of BLIS's mixed-datatype functionality and provides a brief example
 of how to take advantage of this new code.
 
