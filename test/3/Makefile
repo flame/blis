@@ -85,15 +85,11 @@ endif
 #
 
 # BLAS library path(s). This is where the BLAS libraries reside.
-<<<<<<< HEAD
 HOME_LIB_PATH   := $(HOME)/flame/lib
 #VENDOR_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
 #MKL_LIB_PATH := $(HOME)/intel/mkl/lib/intel64
 #VENDOR_LIB_PATH := ${MKLROOT}/lib/intel64
 #ICC_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/compiler/lib/intel64
-=======
-HOME_LIB_PATH  := $(HOME)/flame/lib
->>>>>>> upstream/master
 
 # OpenBLAS
 # OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
@@ -109,20 +105,11 @@ EIGEN_LIB      := $(HOME_LIB_PATH)/libeigen_blas_static.a
 EIGENP_LIB     := $(EIGEN_LIB)
 
 # MKL
-<<<<<<< HEAD
 # MKL_LIB        := -L$(MKL_LIB_PATH) \
 #                   -lmkl_intel_lp64 \
 #                   -lmkl_core \
 #                   -lmkl_sequential \
 #                   -lpthread -lm -ldl
-=======
-MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-MKL_LIB        := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_sequential \
-                  -lpthread -lm -ldl
->>>>>>> upstream/master
 #MKLP_LIB       := -L$(MKL_LIB_PATH) \
 #                  -lmkl_intel_thread \
 #                  -lmkl_core \
@@ -258,16 +245,9 @@ blis-2s:    blis-nat-2s
 blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
 
 # Define the datatypes, operations, and implementations.
-<<<<<<< HEAD
 DTS   := d #s d c z
 OPS   := gemm #hemm herk trmm trsm
 IMPLS := asm_blis openblas vendor
-=======
-DTS    := s d c z
-OPS    := gemm hemm herk trmm trsm
-BIMPLS := asm_blis openblas vendor
-EIMPLS := eigen
->>>>>>> upstream/master
 
 # Define functions to construct object filenames from the datatypes and
 # operations given an implementation. We define one function for single-
