@@ -277,42 +277,42 @@
   "stxv              %%vs35, 80(%%r20)    \n\t"
 #else
 #define STORECMATRIX \
-  "stxv              %%vs0, 0(%%r10)    \n\t" \
-  "stxv              %%vs1, 16(%%r10)    \n\t" \
-  "stxv              %%vs2, 32(%%r10)    \n\t" \
-  "stxv              %%vs3, 48(%%r10)    \n\t" \
-  "stxv              %%vs4, 64(%%r10)    \n\t" \
-  "stxv              %%vs5, 80(%%r10)    \n\t" \
-  "stxv              %%vs6, 96(%%r10)    \n\t" \
-  "stxv              %%vs7, 112(%%r10)    \n\t" \
-  "stxv              %%vs8, 128(%%r10)    \n\t" \
-  "stxv              %%vs9, 144(%%r10)    \n\t" \
-  "stxv              %%vs10, 160(%%r10)    \n\t" \
-  "stxv              %%vs11, 176(%%r10)    \n\t" \
-  "stxv              %%vs12, 192(%%r10)    \n\t" \
-  "stxv              %%vs13, 208(%%r10)    \n\t" \
-  "stxv              %%vs14, 224(%%r10)    \n\t" \
-  "stxv              %%vs15, 240(%%r10)    \n\t" \
-  "stxv              %%vs16, 256(%%r10)    \n\t" \
-  "stxv              %%vs17, 272(%%r10)    \n\t" \
-  "stxv              %%vs18, 288(%%r10)    \n\t" \
-  "stxv              %%vs19, 304(%%r10)    \n\t" \
-  "stxv              %%vs20, 320(%%r10)    \n\t" \
-  "stxv              %%vs21, 336(%%r10)    \n\t" \
-  "stxv              %%vs22, 352(%%r10)    \n\t" \
-  "stxv              %%vs23, 368(%%r10)    \n\t" \
-  "stxv              %%vs24, 384(%%r10)    \n\t" \
-  "stxv              %%vs25, 400(%%r10)    \n\t" \
-  "stxv              %%vs26, 416(%%r10)    \n\t" \
-  "stxv              %%vs27, 432(%%r10)    \n\t" \
-  "stxv              %%vs28, 448(%%r10)    \n\t" \
-  "stxv              %%vs29, 464(%%r10)    \n\t" \
-  "stxv              %%vs30, 480(%%r10)    \n\t" \
-  "stxv              %%vs31, 496(%%r10)    \n\t" \
-  "stxv              %%vs32, 512(%%r10)    \n\t" \
-  "stxv              %%vs33, 528(%%r10)    \n\t" \
-  "stxv              %%vs34, 544(%%r10)    \n\t" \
-  "stxv              %%vs35, 560(%%r10)    \n\t"
+  "stxv              %%vs0, 0(%%r15)    \n\t" \
+  "stxv              %%vs1, 16(%%r15)    \n\t" \
+  "stxv              %%vs2, 32(%%r15)    \n\t" \
+  "stxv              %%vs3, 48(%%r15)    \n\t" \
+  "stxv              %%vs4, 64(%%r15)    \n\t" \
+  "stxv              %%vs5, 80(%%r15)    \n\t" \
+  "stxv              %%vs6, 96(%%r15)    \n\t" \
+  "stxv              %%vs7, 112(%%r15)    \n\t" \
+  "stxv              %%vs8, 128(%%r15)    \n\t" \
+  "stxv              %%vs9, 144(%%r15)    \n\t" \
+  "stxv              %%vs10, 160(%%r15)    \n\t" \
+  "stxv              %%vs11, 176(%%r15)    \n\t" \
+  "stxv              %%vs12, 192(%%r15)    \n\t" \
+  "stxv              %%vs13, 208(%%r15)    \n\t" \
+  "stxv              %%vs14, 224(%%r15)    \n\t" \
+  "stxv              %%vs15, 240(%%r15)    \n\t" \
+  "stxv              %%vs16, 256(%%r15)    \n\t" \
+  "stxv              %%vs17, 272(%%r15)    \n\t" \
+  "stxv              %%vs18, 288(%%r15)    \n\t" \
+  "stxv              %%vs19, 304(%%r15)    \n\t" \
+  "stxv              %%vs20, 320(%%r15)    \n\t" \
+  "stxv              %%vs21, 336(%%r15)    \n\t" \
+  "stxv              %%vs22, 352(%%r15)    \n\t" \
+  "stxv              %%vs23, 368(%%r15)    \n\t" \
+  "stxv              %%vs24, 384(%%r15)    \n\t" \
+  "stxv              %%vs25, 400(%%r15)    \n\t" \
+  "stxv              %%vs26, 416(%%r15)    \n\t" \
+  "stxv              %%vs27, 432(%%r15)    \n\t" \
+  "stxv              %%vs28, 448(%%r15)    \n\t" \
+  "stxv              %%vs29, 464(%%r15)    \n\t" \
+  "stxv              %%vs30, 480(%%r15)    \n\t" \
+  "stxv              %%vs31, 496(%%r15)    \n\t" \
+  "stxv              %%vs32, 512(%%r15)    \n\t" \
+  "stxv              %%vs33, 528(%%r15)    \n\t" \
+  "stxv              %%vs34, 544(%%r15)    \n\t" \
+  "stxv              %%vs35, 560(%%r15)    \n\t"
 #endif
 
 
