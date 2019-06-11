@@ -371,9 +371,9 @@ void PASTEMAC(ch,varname) \
 \
 			printf("ker var 2: m_cur %d MR = %d n_cur %d NR = %d\n", m_cur, MR, n_cur, NR); \
 			/* Handle interior and edge cases separately. */ \
-			/*/if ( m_cur == MR && n_cur == NR ) \
+			if ( m_cur == MR && n_cur == NR ) \
 			{ \
-				/* Invoke the gemm micro-kernel. * / \
+				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
 				  k, \
@@ -388,7 +388,7 @@ void PASTEMAC(ch,varname) \
 			} \
 			else \
 			{ \
-				/* Invoke the gemm micro-kernel. * / \
+				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
 				  k, \
@@ -401,13 +401,12 @@ void PASTEMAC(ch,varname) \
 				  cntx  \
 				); \
 \
-				/* Scale the bottom edge of C and add the result from above. * / \
+				/* Scale the bottom edge of C and add the result from above. */ \
 				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
 				                        ct,  rs_ct, cs_ct, \
 				                        beta_cast, \
 				                        c11, rs_c,  cs_c ); \
 			} \
-			*/ \
 		} \
 	} \
 \
