@@ -356,10 +356,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
-  "ld               %%r4, %4                      \n\t" // load ptr for alpha
+  "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
   "                                               \n\t"
-  "lxvdsx           %%vs48, 0, %%r4               \n\t" // splat alpha
+  "lxvdsx           %%vs48, 0, %%r8               \n\t" // splat alpha
   "lxvdsx           %%vs49, 0, %%r5               \n\t" // splat beta
   "                                               \n\t"
   SCALEBYALPHA
@@ -368,13 +368,13 @@ void bli_dgemm_power9_asm_12x6
   "mtctr            %%r5                          \n\t"
   "bdz              DBETAZERO                     \n\t" // if ZF = 1, jump to beta == 0 case
   "                                               \n\t"
-  "ld               %%r15, %6                     \n\t" // load ptr for C (used as offset)
+  "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r16, %%r16,  192            \n\t" // Move C-ptr
+  "addi             %%r29, %%r29,  192            \n\t" // Move C-ptr
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -391,7 +391,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r16, %%r16,  192            \n\t" // Move C-ptr
+  "addi             %%r29, %%r29,  192            \n\t" // Move C-ptr
   "                                               \n\t"
   "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"  
   "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"  
@@ -447,7 +447,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r3", "r4", "r7", "r9", 
+  "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
   "r15", "r16", "r17", "r18", "r19",
   "r20", "r21", "r22", "r23", "r24", "r25",
 
