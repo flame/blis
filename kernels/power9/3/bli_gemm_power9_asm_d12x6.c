@@ -102,12 +102,12 @@
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
 #define LOADANDUPDATE \
-  "lxv           %%vs36, 0(%%r2)                  \n\t" \
-  "lxv           %%vs37, 16(%%r2)                 \n\t" \
-  "lxv           %%vs38, 32(%%r2)                 \n\t" \
-  "lxv           %%vs39, 48(%%r2)                 \n\t" \
-  "lxv           %%vs40, 64(%%r2)                 \n\t" \
-  "lxv           %%vs41, 80(%%r2)                 \n\t" \
+  "lxv           %%vs36, 0(%%r4)                  \n\t" \
+  "lxv           %%vs37, 16(%%r4)                 \n\t" \
+  "lxv           %%vs38, 32(%%r4)                 \n\t" \
+  "lxv           %%vs39, 48(%%r4)                 \n\t" \
+  "lxv           %%vs40, 64(%%r4)                 \n\t" \
+  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r20, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r21, %%r3               \n\t" \
@@ -168,7 +168,7 @@
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "addi             %%r2, %%r2, 96                \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
 
 #define SCALEBYALPHA \
@@ -238,18 +238,43 @@
   "lxv              %%vs47, 176(%%r15)            \n\t"
 
 #define STORECMATRIX \
-  "stxv              %%vs0, 0(%%r1)                   \n\t" \
-  "stxv              %%vs1, 16(%%r1)                  \n\t" \
-  "stxv              %%vs2, 32(%%r1)                  \n\t" \
-  "stxv              %%vs3, 48(%%r1)                  \n\t" \
-  "stxv              %%vs4, 64(%%r1)                  \n\t" \
-  "stxv              %%vs5, 80(%%r1)                  \n\t" \
-  "stxv              %%vs6, 0(%%r10)                  \n\t" \
-  "stxv              %%vs7, 16(%%r10)                 \n\t" \
-  "stxv              %%vs8, 32(%%r10)                 \n\t" \
-  "stxv              %%vs9, 48(%%r10)                 \n\t" \
-  "stxv              %%vs10, 64(%%r10)                \n\t" \
-  "stxv              %%vs11, 80(%%r10)                \n\t" 
+  "stxv              %%vs0, 0(%%r10)    \n\t" \
+  "stxv              %%vs1, 16(%%r10)    \n\t" \
+  "stxv              %%vs2, 32(%%r10)    \n\t" \
+  "stxv              %%vs3, 48(%%r10)    \n\t" \
+  "stxv              %%vs4, 64(%%r10)    \n\t" \
+  "stxv              %%vs5, 80(%%r10)    \n\t" \
+  "stxv              %%vs6, 0(%%r11)    \n\t" \
+  "stxv              %%vs7, 16(%%r11)    \n\t" \
+  "stxv              %%vs8, 32(%%r11)    \n\t" \
+  "stxv              %%vs9, 48(%%r11)    \n\t" \
+  "stxv              %%vs10, 64(%%r11)    \n\t" \
+  "stxv              %%vs11, 80(%%r11)    \n\t" \
+  "stxv              %%vs12, 0(%%r12)    \n\t" \
+  "stxv              %%vs13, 16(%%r12)    \n\t" \
+  "stxv              %%vs14, 32(%%r12)    \n\t" \
+  "stxv              %%vs15, 48(%%r12)    \n\t" \
+  "stxv              %%vs16, 64(%%r12)    \n\t" \
+  "stxv              %%vs17, 80(%%r12)    \n\t" \
+  "stxv              %%vs18, 0(%%r13)    \n\t" \
+  "stxv              %%vs19, 16(%%r13)    \n\t" \
+  "stxv              %%vs20, 32(%%r13)    \n\t" \
+  "stxv              %%vs21, 48(%%r13)    \n\t" \
+  "stxv              %%vs22, 64(%%r13)    \n\t" \
+  "stxv              %%vs23, 80(%%r13)    \n\t" \
+  "stxv              %%vs24, 0(%%r14)    \n\t" \
+  "stxv              %%vs25, 16(%%r14)    \n\t" \
+  "stxv              %%vs26, 32(%%r14)    \n\t" \
+  "stxv              %%vs27, 48(%%r14)    \n\t" \
+  "stxv              %%vs28, 64(%%r14)    \n\t" \
+  "stxv              %%vs29, 80(%%r14)    \n\t" \
+  "stxv              %%vs30, 0(%%r15)    \n\t" \
+  "stxv              %%vs31, 16(%%r15)    \n\t" \
+  "stxv              %%vs32, 32(%%r15)    \n\t" \
+  "stxv              %%vs33, 48(%%r15)    \n\t" \
+  "stxv              %%vs34, 64(%%r15)    \n\t" \
+  "stxv              %%vs35, 80(%%r15)    \n\t" \
+
 
 void bli_dgemm_power9_asm_12x6
      (
@@ -288,20 +313,16 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
-  "ld               %%r1, %6                      \n\t" // load ptr for C
+  "ld               %%r10, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
-  "add              %%r10, %%r1, %%r6             \n\t" // c + cs_c
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 2
-  "add              %%r11, %%r1, %%r6             \n\t" // c + cs_c * 2
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 3
-  "add              %%r12, %%r1, %%r6             \n\t" // c + cs_c * 3
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 4
-  "add              %%r13, %%r1, %%r6             \n\t" // c + cs_c * 4
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 5
-  "add              %%r14, %%r1, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r11, %%r10, %%r6             \n\t" // c + cs_c
+  "add              %%r12, %%r11, %%r6             \n\t" // c + cs_c * 2
+  "add              %%r13, %%r12, %%r6             \n\t" // c + cs_c * 3
+  "add              %%r14, %%r13, %%r6             \n\t" // c + cs_c * 4
+  "add              %%r15, %%r14, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "b              DBETAZERO                       \n\t"
 #if 0  
@@ -356,7 +377,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r15, %%r15,  192            \n\t" // Move C-ptr
+  "addi             %%r16, %%r16,  192            \n\t" // Move C-ptr
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -373,7 +394,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r15, %%r15,  192            \n\t" // Move C-ptr
+  "addi             %%r16, %%r16,  192            \n\t" // Move C-ptr
   "                                               \n\t"
   "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"  
   "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"  
@@ -430,8 +451,8 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", "r4", "r7", "r9", 
-  "r10",
+  "r3", "r4", "r7", "r9", 
+  "r10", "r11", "r12", "r13", "r14", "r15",
   "r20", "r21", "r22", "r23", "r24", "r25",
 
   "vs36", "vs37", "vs38", "vs39", "vs40", "vs41", 
