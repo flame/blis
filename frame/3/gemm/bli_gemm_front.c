@@ -65,6 +65,8 @@ void bli_gemm_front
 #endif
 #endif
 
+	printf("size of C m = %d, n = %d \n", bli_obj_length(c), bli_obj_width(c));
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
@@ -258,6 +260,9 @@ void bli_gemm_front
 	}
 #endif
 #endif
+
+	printf("size of C m = %d, n = %d \n", bli_obj_length(c), bli_obj_width(c));
+
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
