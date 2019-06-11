@@ -249,7 +249,13 @@
   "stxv              %%vs8, 32(%%r11)    \n\t" \
   "stxv              %%vs9, 48(%%r11)    \n\t" \
   "stxv              %%vs10, 64(%%r11)    \n\t" \
-  "stxv              %%vs11, 80(%%r11)    \n\t" 
+  "stxv              %%vs11, 80(%%r11)    \n\t" \
+  "stxv              %%vs12, 0(%%r12)    \n\t" \
+  "stxv              %%vs13, 16(%%r12)    \n\t" \
+  "stxv              %%vs14, 32(%%r12)    \n\t" \
+  "stxv              %%vs15, 48(%%r12)    \n\t" \
+  "stxv              %%vs16, 64(%%r12)    \n\t" \
+  "stxv              %%vs17, 80(%%r12)    \n\t" 
 
 
 void bli_dgemm_power9_asm_12x6
@@ -295,7 +301,7 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r6, %8                      \n\t" // load cs_c
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "add              %%r11, %%r10, %%r6             \n\t" // c + cs_c
-  //"add              %%r12, %%r11, %%r6             \n\t" // c + cs_c * 2
+  "add              %%r12, %%r11, %%r6             \n\t" // c + cs_c * 2
   //"add              %%r13, %%r12, %%r6             \n\t" // c + cs_c * 3
   //"add              %%r14, %%r13, %%r6             \n\t" // c + cs_c * 4
   //"add              %%r15, %%r14, %%r6             \n\t" // c + cs_c * 5
