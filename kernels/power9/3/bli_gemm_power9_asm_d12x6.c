@@ -243,13 +243,13 @@
   "stxv              %%vs2, 32(%%r1)                  \n\t" \
   "stxv              %%vs3, 48(%%r1)                  \n\t" \
   "stxv              %%vs4, 64(%%r1)                  \n\t" \
-  "stxv              %%vs5, 80(%%r1)                  \n\t" \
-  "stxv              %%vs6, 0(%%r10)                  \n\t" \
-  "stxv              %%vs7, 16(%%r10)                 \n\t" \
-  "stxv              %%vs8, 32(%%r10)                 \n\t" \
-  "stxv              %%vs9, 48(%%r10)                 \n\t" \
-  "stxv              %%vs10, 64(%%r10)                \n\t" \
-  "stxv              %%vs11, 80(%%r10)                \n\t" 
+  "stxv              %%vs5, 80(%%r1)                  \n\t" 
+  // "stxv              %%vs6, 0(%%r10)                  \n\t" \
+  // "stxv              %%vs7, 16(%%r10)                 \n\t" \
+  // "stxv              %%vs8, 32(%%r10)                 \n\t" \
+  // "stxv              %%vs9, 48(%%r10)                 \n\t" \
+  // "stxv              %%vs10, 64(%%r10)                \n\t" \
+  // "stxv              %%vs11, 80(%%r10)                \n\t" 
   // "stxv              %%vs12, 0(%%r11)                \n\t" \
   // "stxv              %%vs13, 16(%%r11)                \n\t" \
   // "stxv              %%vs14, 32(%%r11)                \n\t" \
