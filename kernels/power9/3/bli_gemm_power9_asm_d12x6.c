@@ -274,7 +274,7 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t cs_c   = cs_c0;
 
   printf("In kernel\n");
-  printf("rs_c = %ld, cs_c = %ld", rs_c, cs_c);
+  printf("rs_c = %ld, cs_c = %ld\n ", rs_c, cs_c);
   if(rs_c0 != 1)
   {
     bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
