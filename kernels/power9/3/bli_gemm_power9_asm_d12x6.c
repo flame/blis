@@ -310,6 +310,17 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
+  "ld               %%r6, %8                      \n\t" // load cs_c
+  "add              %%r10, %%r1, %%r6             \n\t" // c + cs_c
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 2
+  "add              %%r11, %%r1, %%r6             \n\t" // c + cs_c * 2
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 3
+  "add              %%r12, %%r1, %%r6             \n\t" // c + cs_c * 3
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 4
+  "add              %%r13, %%r1, %%r6             \n\t" // c + cs_c * 4
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 5
+  "add              %%r14, %%r1, %%r6             \n\t" // c + cs_c * 5
+  "                                               \n\t"
   "b              DBETAZERO                       \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
@@ -352,16 +363,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
-  "ld               %%r6, %8                      \n\t" // load cs_c
-  "add              %%r10, %%r1, %%r6             \n\t"
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 2
-  "add              %%r11, %%r1, %%r6             \n\t"
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 3
-  "add              %%r12, %%r1, %%r6             \n\t"
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 4
-  "add              %%r13, %%r1, %%r6             \n\t"
-  "add              %%r6, %%r6, %%r6              \n\t" // mul 5
-  "add              %%r14, %%r1, %%r6             \n\t"
   "                                               \n\t"
   "mtctr            %%r5                          \n\t"
   "bdz              DBETAZERO                     \n\t" // if ZF = 1, jump to beta == 0 case
