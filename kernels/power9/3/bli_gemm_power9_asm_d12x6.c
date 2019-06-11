@@ -306,12 +306,12 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "b              DBETAZERO                       \n\t"
   "                                               \n\t"
   "ld               %%r2, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
+  "b              DBETAZERO                       \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
   "li               %%r21,8                       \n\t" // 1
