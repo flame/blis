@@ -294,14 +294,14 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r6, %8                      \n\t" // load cs_c
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "add              %%r10, %%r1, %%r6             \n\t" // c + cs_c
-  // "add              %%r6, %%r6, %%r6              \n\t" // mul 2
-  // "add              %%r11, %%r1, %%r6             \n\t" // c + cs_c * 2
-  // "add              %%r6, %%r6, %%r6              \n\t" // mul 3
-  // "add              %%r12, %%r1, %%r6             \n\t" // c + cs_c * 3
-  // "add              %%r6, %%r6, %%r6              \n\t" // mul 4
-  // "add              %%r13, %%r1, %%r6             \n\t" // c + cs_c * 4
-  // "add              %%r6, %%r6, %%r6              \n\t" // mul 5
-  // "add              %%r14, %%r1, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 2
+  "add              %%r11, %%r1, %%r6             \n\t" // c + cs_c * 2
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 3
+  "add              %%r12, %%r1, %%r6             \n\t" // c + cs_c * 3
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 4
+  "add              %%r13, %%r1, %%r6             \n\t" // c + cs_c * 4
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 5
+  "add              %%r14, %%r1, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "b              DBETAZERO                       \n\t"
 #if 0  
