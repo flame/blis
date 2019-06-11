@@ -276,8 +276,8 @@ void libblis_test_gemm_experiment
 bli_printm( "a = [", &a, "%7.6f", "];" );
 bli_printm( "b = [", &b, "%7.6f", "];" );
 bli_printm( "c = [", &c, "%7.6f", "];" );
-bli_printm( "alpha", &alpha, "%5.2f", "" );
-bli_printm( "beta", &beta, "%5.2f", "" );
+//bli_printm( "alpha", &alpha, "%5.2f", "" );
+//bli_printm( "beta", &beta, "%5.2f", "" );
 #endif
 
 		time = bli_clock();
