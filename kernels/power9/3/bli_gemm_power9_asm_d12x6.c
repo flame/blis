@@ -237,7 +237,6 @@
   "lxv              %%vs46, 160(%%r15)            \n\t" \
   "lxv              %%vs47, 176(%%r15)            \n\t"
 
-#if 0
 #define STORECMATRIX \
   "stxv              %%vs0, 0(%%r15)    \n\t" \
   "stxv              %%vs1, 16(%%r15)    \n\t" \
@@ -275,45 +274,6 @@
   "stxv              %%vs33, 48(%%r20)    \n\t" \
   "stxv              %%vs34, 64(%%r20)    \n\t" \
   "stxv              %%vs35, 80(%%r20)    \n\t"
-#else
-#define STORECMATRIX \
-  "stxv              %%vs0, 0(%%r15)    \n\t" \
-  "stxv              %%vs1, 16(%%r15)    \n\t" \
-  "stxv              %%vs2, 32(%%r15)    \n\t" \
-  "stxv              %%vs3, 48(%%r15)    \n\t" \
-  "stxv              %%vs4, 64(%%r15)    \n\t" \
-  "stxv              %%vs5, 80(%%r15)    \n\t" \
-  "stxv              %%vs6, 96(%%r15)    \n\t" \
-  "stxv              %%vs7, 112(%%r15)    \n\t" \
-  "stxv              %%vs8, 128(%%r15)    \n\t" \
-  "stxv              %%vs9, 144(%%r15)    \n\t" \
-  "stxv              %%vs10, 160(%%r15)    \n\t" \
-  "stxv              %%vs11, 176(%%r15)    \n\t" \
-  "stxv              %%vs12, 192(%%r15)    \n\t" \
-  "stxv              %%vs13, 208(%%r15)    \n\t" \
-  "stxv              %%vs14, 224(%%r15)    \n\t" \
-  "stxv              %%vs15, 240(%%r15)    \n\t" \
-  "stxv              %%vs16, 256(%%r15)    \n\t" \
-  "stxv              %%vs17, 272(%%r15)    \n\t" \
-  "stxv              %%vs18, 288(%%r15)    \n\t" \
-  "stxv              %%vs19, 304(%%r15)    \n\t" \
-  "stxv              %%vs20, 320(%%r15)    \n\t" \
-  "stxv              %%vs21, 336(%%r15)    \n\t" \
-  "stxv              %%vs22, 352(%%r15)    \n\t" \
-  "stxv              %%vs23, 368(%%r15)    \n\t" \
-  "stxv              %%vs24, 384(%%r15)    \n\t" \
-  "stxv              %%vs25, 400(%%r15)    \n\t" \
-  "stxv              %%vs26, 416(%%r15)    \n\t" \
-  "stxv              %%vs27, 432(%%r15)    \n\t" \
-  "stxv              %%vs28, 448(%%r15)    \n\t" \
-  "stxv              %%vs29, 464(%%r15)    \n\t" \
-  "stxv              %%vs30, 480(%%r15)    \n\t" \
-  "stxv              %%vs31, 496(%%r15)    \n\t" \
-  "stxv              %%vs32, 512(%%r15)    \n\t" \
-  "stxv              %%vs33, 528(%%r15)    \n\t" \
-  "stxv              %%vs34, 544(%%r15)    \n\t" \
-  "stxv              %%vs35, 560(%%r15)    \n\t"
-#endif
 
 
 
@@ -385,7 +345,6 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
-  "b                DBETAZERO                     \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
