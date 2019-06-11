@@ -289,6 +289,8 @@ void bli_gemm_front
 	  cntl
 	);
 
+	printf("after kernel\n");
+
 #ifdef BLIS_ENABLE_GEMM_MD
 #ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
 	// If we created a temporary matrix conformal to C for whatever reason,
