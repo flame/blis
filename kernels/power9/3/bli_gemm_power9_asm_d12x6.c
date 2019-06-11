@@ -324,8 +324,7 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 4
   "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
-  "b              DBETAZERO                       \n\t"
-#if 0  
+#if 1  
   "                                               \n\t" // Offsets for B
   "li               %%r21,0                       \n\t" // 0
   "li               %%r22,8                       \n\t" // 1
