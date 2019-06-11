@@ -255,14 +255,7 @@
   "stxv              %%vs14, 32(%%r12)    \n\t" \
   "stxv              %%vs15, 48(%%r12)    \n\t" \
   "stxv              %%vs16, 64(%%r12)    \n\t" \
-  "stxv              %%vs17, 80(%%r12)    \n\t" \
-  "stxv              %%vs18, 0(%%r13)    \n\t" \
-  "stxv              %%vs19, 16(%%r13)    \n\t" \
-  "stxv              %%vs20, 32(%%r13)    \n\t" \
-  "stxv              %%vs21, 48(%%r13)    \n\t" \
-  "stxv              %%vs22, 64(%%r13)    \n\t" \
-  "stxv              %%vs23, 80(%%r13)    \n\t" 
-
+  "stxv              %%vs17, 80(%%r12)    \n\t" 
 
 void bli_dgemm_power9_asm_12x6
      (
@@ -309,8 +302,8 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r11, %%r10, %%r6             \n\t" // c + cs_c
   "add              %%r12, %%r11, %%r6             \n\t" // c + cs_c * 2
   "add              %%r13, %%r12, %%r6             \n\t" // c + cs_c * 3
-  //"add              %%r14, %%r13, %%r6             \n\t" // c + cs_c * 4
-  //"add              %%r15, %%r14, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r14, %%r13, %%r6             \n\t" // c + cs_c * 4
+  "add              %%r15, %%r14, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "b              DBETAZERO                       \n\t"
 #if 0  
