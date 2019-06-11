@@ -272,8 +272,7 @@ void bli_gemm_front
 #endif
 #endif
 
-	printf("size of C m = %d, n = %d \n", bli_obj_length(c), bli_obj_width(c));
-
+	printf("bli_front5 | size of C m = %d, n = %d \n", bli_obj_length(cp), bli_obj_width(cp));
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
