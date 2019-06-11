@@ -152,6 +152,8 @@ void bli_gemm_front
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
+
+	printf("gemm_front3 rs_c %d cs_c %d\n", bli_obj_row_stride(&c_local), bli_obj_col_stride(&c_local));
 	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_obj_swap( &a_local, &b_local );
@@ -289,7 +291,6 @@ void bli_gemm_front
 	  cntl
 	);
 
-	printf("after kernel\n");
 
 #ifdef BLIS_ENABLE_GEMM_MD
 #ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
