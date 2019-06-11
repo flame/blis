@@ -301,7 +301,7 @@ void bli_dgemm_power9_asm_12x6
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "add              %%r11, %%r10, %%r6             \n\t" // c + cs_c
   "add              %%r12, %%r11, %%r6             \n\t" // c + cs_c * 2
-  "add              %%r13, %%r12, %%r6             \n\t" // c + cs_c * 3
+  //"add              %%r13, %%r12, %%r6             \n\t" // c + cs_c * 3
   "add              %%r14, %%r13, %%r6             \n\t" // c + cs_c * 4
   "add              %%r15, %%r14, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
