@@ -65,7 +65,7 @@ void bli_gemm_front
 #endif
 #endif
 
-	printf("size of C m = %d, n = %d \n", bli_obj_length(c), bli_obj_width(c));
+	printf("bli_front1 | size of C m = %d, n = %d \n", bli_obj_length(c), bli_obj_width(c));
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -82,6 +82,9 @@ void bli_gemm_front
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
+
+	printf("bli_front2 | size of C m = %d, n = %d \n",bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ));
 
 #ifdef BLIS_ENABLE_GEMM_MD
 	cntx_t cntx_local;
@@ -157,10 +160,16 @@ void bli_gemm_front
 		bli_obj_induce_trans( &b_local );
 		bli_obj_induce_trans( &c_local );
 
+		printf("bli_front3 | size of C m = %d, n = %d \n",bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ));
+
 		// We must also swap the pack schemas, which were set by bli_gemm_md()
 		// or the inlined code above.
 		bli_obj_swap_pack_schemas( &a_local, &b_local );
 	}
+
+	printf("bli_front4 | size of C m = %d, n = %d \n",bli_obj_length( &c_local ),
+	  bli_obj_width( &c_local ));
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
@@ -236,6 +245,8 @@ void bli_gemm_front
 		// microtile).
 		if      ( is_ccr_mismatch ) { rs = 1; cs = m; }
 		else if ( is_crc_mismatch ) { rs = n; cs = 1; }
+
+		printf("bli_front (use_ct) | size of C m = %d, n = %d \n", m, n);
 
 		bli_obj_create( dt_ct, m, n, rs, cs, &ct );
 
