@@ -345,6 +345,7 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
+  "b                DBETAZERO                     \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
