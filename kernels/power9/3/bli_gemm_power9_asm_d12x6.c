@@ -322,7 +322,7 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r17, %%r16, %%r6             \n\t" // c + cs_c * 2
   "add              %%r18, %%r17, %%r6             \n\t" // c + cs_c * 3
   "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 4
-  "add              %%r10, %%r19, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "b              DBETAZERO                       \n\t"
 #if 0  
@@ -452,7 +452,7 @@ void bli_dgemm_power9_asm_12x6
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
   "r3", "r4", "r7", "r9", 
-  "r10", "r11", "r12", "r14", "r15", "r16",
+  "r15", "r16", "r17", "r18", "r19",
   "r20", "r21", "r22", "r23", "r24", "r25",
 
   "vs36", "vs37", "vs38", "vs39", "vs40", "vs41", 
