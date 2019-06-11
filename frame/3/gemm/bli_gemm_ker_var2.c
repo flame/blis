@@ -119,9 +119,6 @@ void bli_gemm_ker_var2
 
 	FUNCPTR_T f;
 
-	printf("ker_var2_obj: m = %ld, n = %ld\n", m, n); \
-
-
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
 	bli_obj_scalar_detach( b, &scalar_b );
@@ -170,10 +167,7 @@ void bli_gemm_ker_var2
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_exec];
-
-	printf("ker_var2_obj: m = %ld, n = %ld\n", m, n); \
-	
+	f = ftypes[dt_exec];	
 
 	// Invoke the function.
 	f( schema_a,
@@ -369,7 +363,6 @@ void PASTEMAC(ch,varname) \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
 \
-			printf("ker var 2: m_cur %d MR = %d n_cur %d NR = %d\n", m_cur, MR, n_cur, NR); \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \
 			{ \

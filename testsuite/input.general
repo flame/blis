@@ -9,7 +9,7 @@
 #
 
 1       # Number of repeats per experiment (best result is reported)
-r       # Matrix storage scheme(s) to test:
+c       # Matrix storage scheme(s) to test:
         #   'c' = col-major storage; 'g' = general stride storage;
         #   'r' = row-major storage
 cj      # Vector storage scheme(s) to test:
