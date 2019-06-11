@@ -245,8 +245,8 @@ void libblis_test_gemm_experiment
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )
 	{
-		bli_setsc(  1.2,  0.0, &alpha );
-		bli_setsc(  0.9,  0.0, &beta );
+		bli_setsc(  1.0,  0.0, &alpha );
+		bli_setsc(  0.0,  0.0, &beta );
 	}
 	else
 	{
@@ -272,11 +272,23 @@ void libblis_test_gemm_experiment
 	{
 		bli_copym( &c_save, &c );
 
+#if 1
+bli_printm( "a = [", &a, "%7.6f", "];" );
+bli_printm( "b = [", &b, "%7.6f", "];" );
+//bli_printm( "c = [", &c, "%7.6f", "];" );
+//bli_printm( "alpha", &alpha, "%5.2f", "" );
+//bli_printm( "beta", &beta, "%5.2f", "" );
+#endif
+
 		time = bli_clock();
 
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
 
 		time_min = bli_clock_min_diff( time_min, time );
+#if 1
+bli_printm( "c_after = [", &c, "%7.6f", "];" );
+#endif
+
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -401,8 +413,6 @@ void libblis_test_gemm_md
 	{
 		bli_copym( &c_save, &c );
 
-		time = bli_clock();
-
 #if 0
 bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "b", &b, "%5.2f", "" );
@@ -410,12 +420,17 @@ bli_printm( "c", &c, "%5.2f", "" );
 bli_printm( "alpha", &alpha, "%5.2f", "" );
 bli_printm( "beta", &beta, "%5.2f", "" );
 #endif
+
+		time = bli_clock();
+
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
+
+		time_min = bli_clock_min_diff( time_min, time );
+
 #if 0
 bli_printm( "c after", &c, "%5.2f", "" );
 #endif
 
-		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -451,7 +466,7 @@ void libblis_test_gemm_impl
 	switch ( iface )
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
-#if 1
+#if 0
 bli_printm( "alpha", alpha, "%5.2f", "" );
 bli_printm( "beta", beta, "%5.2f", "" );
 bli_printm( "a", a, "%6.3f", "" );
@@ -462,7 +477,7 @@ bli_printm( "c", c, "%6.3f", "" );
 //     bli_obj_stor3_from_strides( c, a, b ) == BLIS_CRR )
 //bli_printm( "c before", c, "%6.3f", "" );
 		bli_gemm( alpha, a, b, beta, c );
-#if 1
+#if 0
 bli_printm( "c after", c, "%6.3f", "");
 #endif
 		break;

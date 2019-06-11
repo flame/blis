@@ -1,3 +1,4 @@
+
 #
 #
 #  BLIS    
@@ -57,7 +58,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -funroll-loops
+COPTFLAGS      := -O0
 endif
 
 # Flags specific to optimized kernels.

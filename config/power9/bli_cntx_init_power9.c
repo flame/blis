@@ -33,44 +33,29 @@
 */
 
 #include "blis.h"
-#define test 1
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-
+	
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_power9_ref( cntx );
-
+		
 	// -------------------------------------------------------------------------
 
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
-#if test
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,  FALSE,
+	1,
+	 BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,  FALSE,
 		cntx
 	);
-#else
-	bli_cntx_set_l3_nat_ukrs
-	(
-	  1,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power9_asm_4x6,  FALSE,
-		cntx
-	);
-#endif
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-#if test
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     12,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
-#else
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     4,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
-#endif
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,    60,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   256,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,  2562,     0,     0 );
