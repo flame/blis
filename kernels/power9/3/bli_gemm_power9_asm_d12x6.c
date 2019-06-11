@@ -282,10 +282,10 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "                                               \n\t"
-  "ld               %%r2, %2                      \n\t" // load ptr of A
+  "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r1, %6                      \n\t" // load ptr for C
+  "                                               \n\t" 
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
@@ -300,6 +300,7 @@ void bli_dgemm_power9_asm_12x6
   // "add              %%r14, %%r1, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "b              DBETAZERO                       \n\t"
+#if 0  
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
   "li               %%r21,8                       \n\t" // 1
@@ -402,8 +403,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
+#endif
   "                                               \n\t"
   "DBETAZERO:                                     \n\t"
+  "                                               \n\t" 
   STORECMATRIX 
   "                                               \n\t"
   
@@ -423,8 +426,8 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", "r7", "r9", 
-
+  "r1", "r3", "r4", "r7", "r9", 
+  "r10",
   "r20", "r21", "r22", "r23", "r24", "r25",
 
   "vs36", "vs37", "vs38", "vs39", "vs40", "vs41", 
