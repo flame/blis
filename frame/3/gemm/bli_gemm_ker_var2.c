@@ -281,7 +281,6 @@ void PASTEMAC(ch,varname) \
 \
 	m_iter = m / MR; \
 	m_left = m % MR; \
-	printf("ker_var2: m = %ld, n = %ld\n", m, n); \
 \
 	if ( n_left ) ++n_iter; \
 	if ( m_left ) ++m_iter; \
