@@ -244,76 +244,36 @@
   "stxv              %%vs3, 48(%%r1)                  \n\t" \
   "stxv              %%vs4, 64(%%r1)                  \n\t" \
   "stxv              %%vs5, 80(%%r1)                  \n\t" \
-  "stxv              %%vs6, 96(%%r1)                  \n\t" \
-  "stxv              %%vs7, 112(%%r1)                 \n\t" \
-  "stxv              %%vs8, 128(%%r1)                 \n\t" \
-  "stxv              %%vs9, 144(%%r1)                 \n\t" \
-  "stxv              %%vs10, 160(%%r1)                \n\t" \
-  "stxv              %%vs11, 176(%%r1)                \n\t" \
-  "stxv              %%vs12, 192(%%r1)                \n\t" \
-  "stxv              %%vs13, 208(%%r1)                \n\t" \
-  "stxv              %%vs14, 224(%%r1)                \n\t" \
-  "stxv              %%vs15, 240(%%r1)                \n\t" \
-  "stxv              %%vs16, 256(%%r1)                \n\t" \
-  "stxv              %%vs17, 272(%%r1)                \n\t" \
-  "stxv              %%vs18, 288(%%r1)                \n\t" \
-  "stxv              %%vs19, 304(%%r1)                \n\t" \
-  "stxv              %%vs20, 320(%%r1)                \n\t" \
-  "stxv              %%vs21, 336(%%r1)                \n\t" \
-  "stxv              %%vs22, 352(%%r1)                \n\t" \
-  "stxv              %%vs23, 368(%%r1)                \n\t" \
-  "stxv              %%vs24, 384(%%r1)                \n\t" \
-  "stxv              %%vs25, 400(%%r1)                \n\t" \
-  "stxv              %%vs26, 416(%%r1)                \n\t" \
-  "stxv              %%vs27, 432(%%r1)                \n\t" \
-  "stxv              %%vs28, 448(%%r1)                \n\t" \
-  "stxv              %%vs29, 464(%%r1)                \n\t" \
-  "stxv              %%vs30, 480(%%r1)                \n\t" \
-  "stxv              %%vs31, 496(%%r1)                \n\t" \
-  "stxv              %%vs32, 512(%%r1)                \n\t" \
-  "stxv              %%vs33, 528(%%r1)                \n\t" \
-  "stxv              %%vs34, 544(%%r1)                \n\t" \
-  "stxv              %%vs35, 560(%%r1)                \n\t" 
-
-#define LOADINTERMEDIATE \
-"li               %%r7,9                         \n\t" \
-"li               %%r8,9                         \n\t" \
-"mtvsrdd          %%vs0, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs1, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs2, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs3, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs4, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs5, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs6, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs7, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs8, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs9, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs10, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs11, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs12, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs13, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs14, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs15, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs16, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs17, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs18, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs19, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs20, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs21, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs22, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs23, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs24, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs25, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs26, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs27, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs28, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs29, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs30, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs31, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs32, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs33, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs34, %%r7, %%r8    \n\t" \
-"mtvsrdd          %%vs35, %%r7, %%r8    \n\t"
+  "stxv              %%vs6, 0(%%r10)                  \n\t" \
+  "stxv              %%vs7, 16(%%r10)                 \n\t" \
+  "stxv              %%vs8, 32(%%r10)                 \n\t" \
+  "stxv              %%vs9, 48(%%r10)                 \n\t" \
+  "stxv              %%vs10, 64(%%r10)                \n\t" \
+  "stxv              %%vs11, 80(%%r10)                \n\t" \
+  "stxv              %%vs12, 0(%%r11)                \n\t" \
+  "stxv              %%vs13, 16(%%r11)                \n\t" \
+  "stxv              %%vs14, 32(%%r11)                \n\t" \
+  "stxv              %%vs15, 48(%%r11)                \n\t" \
+  "stxv              %%vs16, 64(%%r11)                \n\t" \
+  "stxv              %%vs17, 80(%%r11)                \n\t" \
+  "stxv              %%vs18, 0(%%r12)                \n\t" \
+  "stxv              %%vs19, 16(%%r12)                \n\t" \
+  "stxv              %%vs20, 32(%%r12)                \n\t" \
+  "stxv              %%vs21, 48(%%r12)                \n\t" \
+  "stxv              %%vs22, 64(%%r12)                \n\t" \
+  "stxv              %%vs23, 80(%%r12)                \n\t" \
+  "stxv              %%vs24, 0(%%r13)                \n\t" \
+  "stxv              %%vs25, 16(%%r13)                \n\t" \
+  "stxv              %%vs26, 32(%%r13)                \n\t" \
+  "stxv              %%vs27, 48(%%r13)                \n\t" \
+  "stxv              %%vs28, 64(%%r13)                \n\t" \
+  "stxv              %%vs29, 80(%%r13)                \n\t" \
+  "stxv              %%vs30, 0(%%r14)                \n\t" \
+  "stxv              %%vs31, 16(%%r14)                \n\t" \
+  "stxv              %%vs32, 32(%%r14)                \n\t" \
+  "stxv              %%vs33, 48(%%r14)                \n\t" \
+  "stxv              %%vs34, 64(%%r14)                \n\t" \
+  "stxv              %%vs35, 80(%%r14)                \n\t" 
 
 void bli_dgemm_power9_asm_12x6
      (
@@ -350,7 +310,6 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
-  LOADINTERMEDIATE
   "b              DBETAZERO                       \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
@@ -393,6 +352,16 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
+  "ld               %%r6, %8                      \n\t" // load cs_c
+  "add              %%r10, %%r1, %%r6             \n\t"
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 2
+  "add              %%r11, %%r1, %%r6             \n\t"
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 3
+  "add              %%r12, %%r1, %%r6             \n\t"
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 4
+  "add              %%r13, %%r1, %%r6             \n\t"
+  "add              %%r6, %%r6, %%r6              \n\t" // mul 5
+  "add              %%r14, %%r1, %%r6             \n\t"
   "                                               \n\t"
   "mtctr            %%r5                          \n\t"
   "bdz              DBETAZERO                     \n\t" // if ZF = 1, jump to beta == 0 case
@@ -475,7 +444,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", "r7", "r9", 
+  "r1", "r3", "r6", "r7", "r9", "r10", "r11", "r12", "r13", "r14",
 
   "r20", "r21", "r22", "r23", "r24", "r25",
 
