@@ -266,9 +266,6 @@ void bli_dgemm_power9_asm_12x6
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-  if(rs_c0 != 1)
-    bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
-
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 	uint64_t k_iter = k0 / 4;
@@ -277,6 +274,11 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t cs_c   = cs_c0;
 
   printf("In kernel\n");
+  printf("rs_c = %ld, cs_c = %ld", rs_c, cs_c);
+  if(rs_c0 != 1)
+  {
+    bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
+  }
 
 
 	__asm__ volatile
