@@ -102,12 +102,12 @@
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
 #define LOADANDUPDATE \
-  "lxv           %%vs36, 0(%%r2)                  \n\t" \
-  "lxv           %%vs37, 16(%%r2)                 \n\t" \
-  "lxv           %%vs38, 32(%%r2)                 \n\t" \
-  "lxv           %%vs39, 48(%%r2)                 \n\t" \
-  "lxv           %%vs40, 64(%%r2)                 \n\t" \
-  "lxv           %%vs41, 80(%%r2)                 \n\t" \
+  "lxv           %%vs36, 0(%%r4)                  \n\t" \
+  "lxv           %%vs37, 16(%%r4)                 \n\t" \
+  "lxv           %%vs38, 32(%%r4)                 \n\t" \
+  "lxv           %%vs39, 48(%%r4)                 \n\t" \
+  "lxv           %%vs40, 64(%%r4)                 \n\t" \
+  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r21, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r22, %%r3               \n\t" \
@@ -168,7 +168,7 @@
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "addi             %%r2, %%r2, 96                \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
 
 #define SCALEBYALPHA \
@@ -237,6 +237,7 @@
   "lxv              %%vs46, 160(%%r15)            \n\t" \
   "lxv              %%vs47, 176(%%r15)            \n\t"
 
+#if 0
 #define STORECMATRIX \
   "stxv              %%vs0, 0(%%r15)    \n\t" \
   "stxv              %%vs1, 16(%%r15)    \n\t" \
@@ -274,6 +275,46 @@
   "stxv              %%vs33, 48(%%r20)    \n\t" \
   "stxv              %%vs34, 64(%%r20)    \n\t" \
   "stxv              %%vs35, 80(%%r20)    \n\t"
+#else
+#define STORECMATRIX \
+  "stxv              %%vs0, 0(%%r10)    \n\t" \
+  "stxv              %%vs1, 16(%%r10)    \n\t" \
+  "stxv              %%vs2, 32(%%r10)    \n\t" \
+  "stxv              %%vs3, 48(%%r10)    \n\t" \
+  "stxv              %%vs4, 64(%%r10)    \n\t" \
+  "stxv              %%vs5, 80(%%r10)    \n\t" \
+  "stxv              %%vs6, 96(%%r10)    \n\t" \
+  "stxv              %%vs7, 112(%%r10)    \n\t" \
+  "stxv              %%vs8, 128(%%r10)    \n\t" \
+  "stxv              %%vs9, 144(%%r10)    \n\t" \
+  "stxv              %%vs10, 160(%%r10)    \n\t" \
+  "stxv              %%vs11, 176(%%r10)    \n\t" \
+  "stxv              %%vs12, 192(%%r10)    \n\t" \
+  "stxv              %%vs13, 208(%%r10)    \n\t" \
+  "stxv              %%vs14, 224(%%r10)    \n\t" \
+  "stxv              %%vs15, 240(%%r10)    \n\t" \
+  "stxv              %%vs16, 256(%%r10)    \n\t" \
+  "stxv              %%vs17, 272(%%r10)    \n\t" \
+  "stxv              %%vs18, 288(%%r10)    \n\t" \
+  "stxv              %%vs19, 304(%%r10)    \n\t" \
+  "stxv              %%vs20, 320(%%r10)    \n\t" \
+  "stxv              %%vs21, 336(%%r10)    \n\t" \
+  "stxv              %%vs22, 352(%%r10)    \n\t" \
+  "stxv              %%vs23, 368(%%r10)    \n\t" \
+  "stxv              %%vs24, 384(%%r10)    \n\t" \
+  "stxv              %%vs25, 400(%%r10)    \n\t" \
+  "stxv              %%vs26, 416(%%r10)    \n\t" \
+  "stxv              %%vs27, 432(%%r10)    \n\t" \
+  "stxv              %%vs28, 448(%%r10)    \n\t" \
+  "stxv              %%vs29, 464(%%r10)    \n\t" \
+  "stxv              %%vs30, 480(%%r10)    \n\t" \
+  "stxv              %%vs31, 496(%%r10)    \n\t" \
+  "stxv              %%vs32, 512(%%r10)    \n\t" \
+  "stxv              %%vs33, 528(%%r10)    \n\t" \
+  "stxv              %%vs34, 544(%%r10)    \n\t" \
+  "stxv              %%vs35, 560(%%r10)    \n\t"
+#endif
+
 
 
 void bli_dgemm_power9_asm_12x6
@@ -299,6 +340,7 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t cs_c   = cs_c0;
 
   printf("In kernel\n");
+
   if(rs_c0 != 1)
   {
     bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
@@ -310,7 +352,7 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "ld               %%r2, %2                      \n\t" // load ptr of A
+  "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r15, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
