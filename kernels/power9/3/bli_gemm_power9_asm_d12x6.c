@@ -244,36 +244,6 @@
   "stxv              %%vs3, 48(%%r1)                  \n\t" \
   "stxv              %%vs4, 64(%%r1)                  \n\t" \
   "stxv              %%vs5, 80(%%r1)                  \n\t" 
-  // "stxv              %%vs6, 0(%%r10)                  \n\t" \
-  // "stxv              %%vs7, 16(%%r10)                 \n\t" \
-  // "stxv              %%vs8, 32(%%r10)                 \n\t" \
-  // "stxv              %%vs9, 48(%%r10)                 \n\t" \
-  // "stxv              %%vs10, 64(%%r10)                \n\t" \
-  // "stxv              %%vs11, 80(%%r10)                \n\t" 
-  // "stxv              %%vs12, 0(%%r11)                \n\t" \
-  // "stxv              %%vs13, 16(%%r11)                \n\t" \
-  // "stxv              %%vs14, 32(%%r11)                \n\t" \
-  // "stxv              %%vs15, 48(%%r11)                \n\t" \
-  // "stxv              %%vs16, 64(%%r11)                \n\t" \
-  // "stxv              %%vs17, 80(%%r11)                \n\t" \
-  // "stxv              %%vs18, 0(%%r12)                \n\t" \
-  // "stxv              %%vs19, 16(%%r12)                \n\t" \
-  // "stxv              %%vs20, 32(%%r12)                \n\t" \
-  // "stxv              %%vs21, 48(%%r12)                \n\t" \
-  // "stxv              %%vs22, 64(%%r12)                \n\t" \
-  // "stxv              %%vs23, 80(%%r12)                \n\t" \
-  // "stxv              %%vs24, 0(%%r13)                \n\t" \
-  // "stxv              %%vs25, 16(%%r13)                \n\t" \
-  // "stxv              %%vs26, 32(%%r13)                \n\t" \
-  // "stxv              %%vs27, 48(%%r13)                \n\t" \
-  // "stxv              %%vs28, 64(%%r13)                \n\t" \
-  // "stxv              %%vs29, 80(%%r13)                \n\t" \
-  // "stxv              %%vs30, 0(%%r14)                \n\t" \
-  // "stxv              %%vs31, 16(%%r14)                \n\t" \
-  // "stxv              %%vs32, 32(%%r14)                \n\t" \
-  // "stxv              %%vs33, 48(%%r14)                \n\t" \
-  // "stxv              %%vs34, 64(%%r14)                \n\t" \
-  // "stxv              %%vs35, 80(%%r14)                \n\t" 
 
 void bli_dgemm_power9_asm_12x6
      (
