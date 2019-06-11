@@ -300,7 +300,6 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  printf("cs_c = %li\n", cs_c);
 
 	__asm__ volatile
 	(
@@ -448,7 +447,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r1", "r3", "r6", "r7", "r9", "r10", "r11", "r12", "r13", "r14",
+  "r1", "r3", "r7", "r9", 
 
   "r20", "r21", "r22", "r23", "r24", "r25",
 
