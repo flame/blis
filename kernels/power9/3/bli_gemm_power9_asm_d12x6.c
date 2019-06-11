@@ -102,12 +102,12 @@
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
 #define LOADANDUPDATE \
-  "lxv           %%vs36, 0(%%r4)                  \n\t" \
-  "lxv           %%vs37, 16(%%r4)                 \n\t" \
-  "lxv           %%vs38, 32(%%r4)                 \n\t" \
-  "lxv           %%vs39, 48(%%r4)                 \n\t" \
-  "lxv           %%vs40, 64(%%r4)                 \n\t" \
-  "lxv           %%vs41, 80(%%r4)                 \n\t" \
+  "lxv           %%vs36, 0(%%r2)                  \n\t" \
+  "lxv           %%vs37, 16(%%r2)                 \n\t" \
+  "lxv           %%vs38, 32(%%r2)                 \n\t" \
+  "lxv           %%vs39, 48(%%r2)                 \n\t" \
+  "lxv           %%vs40, 64(%%r2)                 \n\t" \
+  "lxv           %%vs41, 80(%%r2)                 \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r21, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r22, %%r3               \n\t" \
@@ -168,7 +168,7 @@
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
+  "addi             %%r2, %%r2, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
 
 #define SCALEBYALPHA \
@@ -299,7 +299,6 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t cs_c   = cs_c0;
 
   printf("In kernel\n");
-  printf("rs_c = %ld, cs_c = %ld\n ", rs_c, cs_c);
   if(rs_c0 != 1)
   {
     bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
@@ -311,7 +310,7 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "ld               %%r4, %2                      \n\t" // load ptr of A
+  "ld               %%r2, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r15, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
@@ -324,7 +323,6 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 4
   "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
-#if 1  
   "                                               \n\t" // Offsets for B
   "li               %%r21,0                       \n\t" // 0
   "li               %%r22,8                       \n\t" // 1
@@ -428,7 +426,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-#endif
   "                                               \n\t"
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
@@ -455,12 +452,11 @@ void bli_dgemm_power9_asm_12x6
   "r15", "r16", "r17", "r18", "r19",
   "r20", "r21", "r22", "r23", "r24", "r25",
 
-  "vs36", "vs37", "vs38", "vs39", "vs40", "vs41", 
-  "vs48", "vs49", "vs50", "vs51", "vs52", "vs53",
-
   "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
   "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
   "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29", "vs30",
-  "vs31", "vs32", "vs33", "vs34", "vs35"
+  "vs31", "vs32", "vs33", "vs34", "vs35", "vs36", "vs37", "vs38", "vs39", "vs40",
+  "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49", "vs50",
+  "vs51", "vs52", "vs53"
   );
 }
