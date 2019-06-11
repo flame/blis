@@ -311,6 +311,7 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
+  "mulli            %%r6, %%r6, 8                 \n\t" // mul by size of elem
   "add              %%r10, %%r1, %%r6             \n\t" // c + cs_c
   "add              %%r6, %%r6, %%r6              \n\t" // mul 2
   "add              %%r11, %%r1, %%r6             \n\t" // c + cs_c * 2
