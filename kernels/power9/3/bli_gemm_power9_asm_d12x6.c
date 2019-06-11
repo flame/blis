@@ -275,6 +275,45 @@
   "stxv              %%vs34, 544(%%r1)                \n\t" \
   "stxv              %%vs35, 560(%%r1)                \n\t" 
 
+#define LOADINTERMEDIATE \
+"li               %%r7,9                         \n\t" \
+"li               %%r8,9                         \n\t" \
+"mtvsrdd          %%vs0, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs1, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs2, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs3, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs4, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs5, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs6, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs7, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs8, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs9, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs10, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs11, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs12, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs13, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs14, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs15, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs16, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs17, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs18, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs19, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs20, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs21, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs22, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs23, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs24, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs25, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs26, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs27, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs28, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs29, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs30, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs31, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs32, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs33, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs34, %%r7, %%r8    \n\t" \
+"mtvsrdd          %%vs35, %%r7, %%r8    \n\t"
 
 void bli_dgemm_power9_asm_12x6
      (
@@ -311,6 +350,7 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r1, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
+  LOADINTERMEDIATE
   "b              DBETAZERO                       \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r20,0                       \n\t" // 0
