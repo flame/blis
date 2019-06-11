@@ -119,6 +119,9 @@ void bli_gemm_ker_var2
 
 	FUNCPTR_T f;
 
+	printf("ker_var2_obj: m = %ld, n = %ld\n", m, n); \
+
+
 	// Detach and multiply the scalars attached to A and B.
 	bli_obj_scalar_detach( a, &scalar_a );
 	bli_obj_scalar_detach( b, &scalar_b );
