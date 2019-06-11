@@ -362,6 +362,7 @@ void PASTEMAC(ch,varname) \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
 \
+			printf("ker var 2: m_cur %d MR = %d n_cur %d NR = %d\n", m_cur, MR, n_cur, NR); \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \
 			{ \
