@@ -300,6 +300,8 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
+  printf("cs_c = %li\n", cs_c);
+
 	__asm__ volatile
 	(
 	"                                               \n\t"
