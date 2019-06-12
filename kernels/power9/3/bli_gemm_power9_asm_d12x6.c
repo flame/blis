@@ -294,8 +294,8 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -338,6 +338,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
   LOADANDUPDATE
   LOADANDUPDATE
   LOADANDUPDATE
