@@ -364,6 +364,7 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx           %%vs49, 0, %%r5               \n\t" // splat beta
   "                                               \n\t"
   SCALEBYALPHA
+  #if 0
   "                                               \n\t"
   "                                               \n\t"
   "mtctr            %%r5                          \n\t"
@@ -429,9 +430,9 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
-  //STORECMATRIX 
+  STORECMATRIX 
   "                                               \n\t"
-  
+  #endif
 
 	: // output operands (none)
 	: // input operands
