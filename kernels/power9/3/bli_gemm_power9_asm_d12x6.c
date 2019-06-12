@@ -371,13 +371,13 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   
   "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
-  #if 0
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
   "addi             %%r29, %%r29,  192            \n\t" // Move C-ptr
+  #if 0
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
