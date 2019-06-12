@@ -159,6 +159,8 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
@@ -168,8 +170,6 @@
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
 
 #define SCALEBYALPHA \
  "xvmuldp          %%vs0, %%vs0, %%vs48   	 \n\t" \
