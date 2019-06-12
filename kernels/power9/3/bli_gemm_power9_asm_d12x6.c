@@ -103,7 +103,12 @@
 
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "                                               \n\t" \
+  "lxv           %%vs36, 0(%%r4)                  \n\t" \
+  "lxv           %%vs37, 16(%%r4)                 \n\t" \
+  "lxv           %%vs38, 32(%%r4)                 \n\t" \
+  "lxv           %%vs39, 48(%%r4)                 \n\t" \
+  "lxv           %%vs40, 64(%%r4)                 \n\t" \
+  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
@@ -156,12 +161,6 @@
   "addi             %%r4, %%r4, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
-  "lxv           %%vs36, 0(%%r4)                  \n\t" \
-  "lxv           %%vs37, 16(%%r4)                 \n\t" \
-  "lxv           %%vs38, 32(%%r4)                 \n\t" \
-  "lxv           %%vs39, 48(%%r4)                 \n\t" \
-  "lxv           %%vs40, 64(%%r4)                 \n\t" \
-  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
@@ -319,12 +318,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
   "                                               \n\t"
-  "lxv           %%vs36, 0(%%r4)                  \n\t" // load first col of A
-  "lxv           %%vs37, 16(%%r4)                 \n\t" 
-  "lxv           %%vs38, 32(%%r4)                 \n\t" 
-  "lxv           %%vs39, 48(%%r4)                 \n\t" 
-  "lxv           %%vs40, 64(%%r4)                 \n\t" 
-  "lxv           %%vs41, 80(%%r4)                 \n\t" 
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
   "li               %%r23,8                       \n\t" // 1
