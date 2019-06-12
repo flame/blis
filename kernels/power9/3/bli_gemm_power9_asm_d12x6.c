@@ -238,42 +238,42 @@
   "lxv              %%vs47, 176(%%r15)            \n\t"
 
 #define STORECMATRIX \
-  "stxv              %%vs0, 0(%%r15)    \n\t" \
-  "stxv              %%vs1, 16(%%r15)    \n\t" \
-  "stxv              %%vs2, 32(%%r15)    \n\t" \
-  "stxv              %%vs3, 48(%%r15)    \n\t" \
-  "stxv              %%vs4, 64(%%r15)    \n\t" \
-  "stxv              %%vs5, 80(%%r15)    \n\t" \
-  "stxv              %%vs6, 0(%%r16)    \n\t" \
-  "stxv              %%vs7, 16(%%r16)    \n\t" \
-  "stxv              %%vs8, 32(%%r16)    \n\t" \
-  "stxv              %%vs9, 48(%%r16)    \n\t" \
-  "stxv              %%vs10, 64(%%r16)    \n\t" \
-  "stxv              %%vs11, 80(%%r16)    \n\t" \
-  "stxv              %%vs12, 0(%%r17)    \n\t" \
-  "stxv              %%vs13, 16(%%r17)    \n\t" \
-  "stxv              %%vs14, 32(%%r17)    \n\t" \
-  "stxv              %%vs15, 48(%%r17)    \n\t" \
-  "stxv              %%vs16, 64(%%r17)    \n\t" \
-  "stxv              %%vs17, 80(%%r17)    \n\t" \
-  "stxv              %%vs18, 0(%%r18)    \n\t" \
-  "stxv              %%vs19, 16(%%r18)    \n\t" \
-  "stxv              %%vs20, 32(%%r18)    \n\t" \
-  "stxv              %%vs21, 48(%%r18)    \n\t" \
-  "stxv              %%vs22, 64(%%r18)    \n\t" \
-  "stxv              %%vs23, 80(%%r18)    \n\t" \
-  "stxv              %%vs24, 0(%%r19)    \n\t" \
-  "stxv              %%vs25, 16(%%r19)    \n\t" \
-  "stxv              %%vs26, 32(%%r19)    \n\t" \
-  "stxv              %%vs27, 48(%%r19)    \n\t" \
-  "stxv              %%vs28, 64(%%r19)    \n\t" \
-  "stxv              %%vs29, 80(%%r19)    \n\t" \
-  "stxv              %%vs30, 0(%%r20)    \n\t" \
-  "stxv              %%vs31, 16(%%r20)    \n\t" \
-  "stxv              %%vs32, 32(%%r20)    \n\t" \
-  "stxv              %%vs33, 48(%%r20)    \n\t" \
-  "stxv              %%vs34, 64(%%r20)    \n\t" \
-  "stxv              %%vs35, 80(%%r20)    \n\t"
+  "stxv              %%vs0, 0(%%r16)    \n\t" \
+  "stxv              %%vs1, 16(%%r16)    \n\t" \
+  "stxv              %%vs2, 32(%%r16)    \n\t" \
+  "stxv              %%vs3, 48(%%r16)    \n\t" \
+  "stxv              %%vs4, 64(%%r16)    \n\t" \
+  "stxv              %%vs5, 80(%%r16)    \n\t" \
+  "stxv              %%vs6, 0(%%r17)    \n\t" \
+  "stxv              %%vs7, 16(%%r17)    \n\t" \
+  "stxv              %%vs8, 32(%%r17)    \n\t" \
+  "stxv              %%vs9, 48(%%r17)    \n\t" \
+  "stxv              %%vs10, 64(%%r17)    \n\t" \
+  "stxv              %%vs11, 80(%%r17)    \n\t" \
+  "stxv              %%vs12, 0(%%r18)    \n\t" \
+  "stxv              %%vs13, 16(%%r18)    \n\t" \
+  "stxv              %%vs14, 32(%%r18)    \n\t" \
+  "stxv              %%vs15, 48(%%r18)    \n\t" \
+  "stxv              %%vs16, 64(%%r18)    \n\t" \
+  "stxv              %%vs17, 80(%%r18)    \n\t" \
+  "stxv              %%vs18, 0(%%r19)    \n\t" \
+  "stxv              %%vs19, 16(%%r19)    \n\t" \
+  "stxv              %%vs20, 32(%%r19)    \n\t" \
+  "stxv              %%vs21, 48(%%r19)    \n\t" \
+  "stxv              %%vs22, 64(%%r19)    \n\t" \
+  "stxv              %%vs23, 80(%%r19)    \n\t" \
+  "stxv              %%vs24, 0(%%r20)    \n\t" \
+  "stxv              %%vs25, 16(%%r20)    \n\t" \
+  "stxv              %%vs26, 32(%%r20)    \n\t" \
+  "stxv              %%vs27, 48(%%r20)    \n\t" \
+  "stxv              %%vs28, 64(%%r20)    \n\t" \
+  "stxv              %%vs29, 80(%%r20)    \n\t" \
+  "stxv              %%vs30, 0(%%r21)    \n\t" \
+  "stxv              %%vs31, 16(%%r21)    \n\t" \
+  "stxv              %%vs32, 32(%%r21)    \n\t" \
+  "stxv              %%vs33, 48(%%r21)    \n\t" \
+  "stxv              %%vs34, 64(%%r21)    \n\t" \
+  "stxv              %%vs35, 80(%%r21)    \n\t"
 
 
 
@@ -313,16 +313,16 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
-  "ld               %%r15, %6                      \n\t" // load ptr for C
+  "ld               %%r16, %6                      \n\t" // load ptr for C
   "                                               \n\t" 
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
-  "add              %%r16, %%r15, %%r6             \n\t" // c + cs_c
-  "add              %%r17, %%r16, %%r6             \n\t" // c + cs_c * 2
-  "add              %%r18, %%r17, %%r6             \n\t" // c + cs_c * 3
-  "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 4
-  "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r17, %%r16, %%r6             \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6             \n\t" // c + cs_c * 2
+  "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
