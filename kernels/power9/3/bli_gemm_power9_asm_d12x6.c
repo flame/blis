@@ -301,6 +301,7 @@ void bli_dgemm_power9_asm_12x6
 
   if(rs_c0 != 1)
   {
+    printf("rs_c0 = %ld | cs_c0 = %ld\n", rs_c0, cs_c0);
     bli_check_error_code(BLIS_NOT_YET_IMPLEMENTED);
   }
 
