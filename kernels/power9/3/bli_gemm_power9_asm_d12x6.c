@@ -150,7 +150,7 @@
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
-  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \ 
+  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
   "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
@@ -165,7 +165,7 @@
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
+  "                                               \n\t" 
 
 #else
 #define LOADANDUPDATE \
