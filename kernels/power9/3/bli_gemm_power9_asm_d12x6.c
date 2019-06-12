@@ -432,11 +432,11 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
+  #endif
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
   STORECMATRIX 
   "                                               \n\t"
-  #endif
 	: // output operands (none)
 	: // input operands
 	  "m" (k_iter), // 0
