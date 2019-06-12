@@ -101,7 +101,7 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
-#if 1
+#if 0
 #define LOADANDUPDATE \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
