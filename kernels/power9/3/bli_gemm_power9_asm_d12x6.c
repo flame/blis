@@ -369,11 +369,11 @@ void bli_dgemm_power9_asm_12x6
   SCALEBYALPHA
   "                                               \n\t"
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
-  "add              %%r17, %%r16, %%r6             \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6             \n\t" // c + cs_c * 2
-  "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 4
-  "add              %%r21, %%r20, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t"
