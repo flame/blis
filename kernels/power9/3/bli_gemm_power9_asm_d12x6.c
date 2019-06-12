@@ -109,12 +109,12 @@
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs48, %%r21, %%r3               \n\t" \
-  "lxvdsx       %%vs49, %%r22, %%r3               \n\t" \
-  "lxvdsx       %%vs50, %%r23, %%r3               \n\t" \
-  "lxvdsx       %%vs51, %%r24, %%r3               \n\t" \
-  "lxvdsx       %%vs52, %%r25, %%r3               \n\t" \
-  "lxvdsx       %%vs53, %%r26, %%r3               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
+  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
@@ -325,12 +325,12 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 5
   "                                               \n\t"
   "                                               \n\t" // Offsets for B
-  "li               %%r21,0                       \n\t" // 0
-  "li               %%r22,8                       \n\t" // 1
-  "li               %%r23,16                      \n\t" // 2
-  "li               %%r24,24                      \n\t" // 3
-  "li               %%r25,32                      \n\t" // 4
-  "li               %%r26,40                      \n\t" // 5
+  "li               %%r22,0                       \n\t" // 0
+  "li               %%r23,8                       \n\t" // 1
+  "li               %%r24,16                      \n\t" // 2
+  "li               %%r25,24                      \n\t" // 3
+  "li               %%r26,32                      \n\t" // 4
+  "li               %%r27,40                      \n\t" // 5
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
