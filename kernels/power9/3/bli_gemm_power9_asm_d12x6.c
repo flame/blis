@@ -355,8 +355,8 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
-  #if 0
   "DPOSTACCUM:                                    \n\t"
+  #if 0
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
