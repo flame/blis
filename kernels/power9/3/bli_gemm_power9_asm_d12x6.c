@@ -109,12 +109,7 @@
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
-  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
-  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
-  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
-  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
@@ -125,6 +120,7 @@
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
   "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
@@ -133,6 +129,7 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -141,6 +138,7 @@
   "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
   "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
   "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
@@ -149,6 +147,7 @@
   "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
   "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
   "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
@@ -157,6 +156,7 @@
   "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
   "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
   "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
@@ -326,6 +326,7 @@ void bli_dgemm_power9_asm_12x6
   "li               %%r26,32                      \n\t" // 4
   "li               %%r27,40                      \n\t" // 5
   "                                               \n\t"
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" 
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
@@ -375,9 +376,9 @@ void bli_dgemm_power9_asm_12x6
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
-  SCALECMATRIX
   "add             %%r22, %%r23, %%r6             \n\t" // Move C-ptrs
   "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
+  SCALECMATRIX
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -393,9 +394,9 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs11, %%vs11, %%vs47        \n\t" 
   "                                               \n\t"
   LOADCMATRIX
-  SCALECMATRIX
   "add             %%r22, %%r23, %%r6             \n\t" // Move C-ptrs
   "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
+  SCALECMATRIX
   "                                               \n\t"
   "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"  
   "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"  
