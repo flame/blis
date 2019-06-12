@@ -236,7 +236,7 @@
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
+  "                                               \n\t" 
 #endif
 
 #define SCALEBYALPHA \
