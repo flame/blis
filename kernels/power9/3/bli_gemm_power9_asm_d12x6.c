@@ -224,18 +224,18 @@
  "xvmuldp          %%vs47, %%vs47, %%vs49   	 \n\t" \
  
 #define LOADCMATRIX \
-  "lxv              %%vs36, 0(%%r15)              \n\t" \
-  "lxv              %%vs37, 16(%%r15)             \n\t" \
-  "lxv              %%vs38, 32(%%r15)             \n\t" \
-  "lxv              %%vs39, 48(%%r15)             \n\t" \
-  "lxv              %%vs40, 64(%%r15)             \n\t" \
-  "lxv              %%vs41, 80(%%r15)             \n\t" \
-  "lxv              %%vs42, 96(%%r15)             \n\t" \
-  "lxv              %%vs43, 112(%%r15)            \n\t" \
-  "lxv              %%vs44, 128(%%r15)            \n\t" \
-  "lxv              %%vs45, 144(%%r15)            \n\t" \
-  "lxv              %%vs46, 160(%%r15)            \n\t" \
-  "lxv              %%vs47, 176(%%r15)            \n\t"
+  "lxv              %%vs36, 0(%%r29)              \n\t" \
+  "lxv              %%vs37, 16(%%r29)             \n\t" \
+  "lxv              %%vs38, 32(%%r29)             \n\t" \
+  "lxv              %%vs39, 48(%%r29)             \n\t" \
+  "lxv              %%vs40, 64(%%r29)             \n\t" \
+  "lxv              %%vs41, 80(%%r29)             \n\t" \
+  "lxv              %%vs42, 96(%%r29)             \n\t" \
+  "lxv              %%vs43, 112(%%r29)            \n\t" \
+  "lxv              %%vs44, 128(%%r29)            \n\t" \
+  "lxv              %%vs45, 144(%%r29)            \n\t" \
+  "lxv              %%vs46, 160(%%r29)            \n\t" \
+  "lxv              %%vs47, 176(%%r29)            \n\t"
 
 #define STORECMATRIX \
   "stxv              %%vs0, 0(%%r16)    \n\t" \
