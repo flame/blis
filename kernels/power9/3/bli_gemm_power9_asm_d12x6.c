@@ -368,7 +368,14 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t"
-  "                                               \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
+  "nop                                            \n\t"
   
   "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
   "add              %%r30, %%r29, %%r6            \n\t" // load ptr for C (used as offset)
