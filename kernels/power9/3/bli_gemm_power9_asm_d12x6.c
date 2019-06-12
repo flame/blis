@@ -102,12 +102,6 @@
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
 #define LOADANDUPDATE \
-  "lxv           %%vs36, 0(%%r4)                  \n\t" \
-  "lxv           %%vs37, 16(%%r4)                 \n\t" \
-  "lxv           %%vs38, 32(%%r4)                 \n\t" \
-  "lxv           %%vs39, 48(%%r4)                 \n\t" \
-  "lxv           %%vs40, 64(%%r4)                 \n\t" \
-  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
@@ -161,6 +155,13 @@
   "                                               \n\t" \
   "addi             %%r4, %%r4, 96                \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
+  "                                               \n\t" \
+  "lxv           %%vs36, 0(%%r4)                  \n\t" \
+  "lxv           %%vs37, 16(%%r4)                 \n\t" \
+  "lxv           %%vs38, 32(%%r4)                 \n\t" \
+  "lxv           %%vs39, 48(%%r4)                 \n\t" \
+  "lxv           %%vs40, 64(%%r4)                 \n\t" \
+  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
@@ -318,6 +319,12 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
   "                                               \n\t"
+  "lxv           %%vs36, 0(%%r4)                  \n\t" // load first col of A
+  "lxv           %%vs37, 16(%%r4)                 \n\t" 
+  "lxv           %%vs38, 32(%%r4)                 \n\t" 
+  "lxv           %%vs39, 48(%%r4)                 \n\t" 
+  "lxv           %%vs40, 64(%%r4)                 \n\t" 
+  "lxv           %%vs41, 80(%%r4)                 \n\t" 
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
   "li               %%r23,8                       \n\t" // 1
@@ -330,12 +337,12 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
-  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
-  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
-  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
-  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
-  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
-  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
+  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" 
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
