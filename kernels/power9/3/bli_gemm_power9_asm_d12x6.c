@@ -379,6 +379,7 @@ void bli_dgemm_power9_asm_12x6
   SCALECMATRIX
   "add             %%r29, %%r30, %%r6             \n\t" // Move C-ptrs
   "add             %%r30, %%r29, %%r6             \n\t" // Move C-ptrs
+  #if 0
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -431,7 +432,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  #if 0
+  
   #endif
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
