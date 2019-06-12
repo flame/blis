@@ -314,6 +314,7 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
   "ld               %%r16, %6                      \n\t" // load ptr for C
+  #if 0
   "                                               \n\t" 
   "                                               \n\t" 
   "ld               %%r6, %8                      \n\t" // load cs_c
@@ -323,7 +324,6 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 3
   "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 4
   "add              %%r28, %%r20, %%r6             \n\t" // c + cs_c * 5
-  #if 0
   "                                               \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
