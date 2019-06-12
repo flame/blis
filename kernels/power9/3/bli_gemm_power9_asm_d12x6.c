@@ -450,7 +450,7 @@ void bli_dgemm_power9_asm_12x6
   /* unclobberable regs: r2(PIC reg), */
   "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
   "r16", "r17", "r18", "r19",
-  "r20", "r21", "r22", "r23", "r24", "r25",
+  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r29",
 
   "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
   "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
