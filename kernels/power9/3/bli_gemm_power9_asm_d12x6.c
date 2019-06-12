@@ -347,8 +347,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r28, %1                      \n\t" // edge case
-  "cmpwi            %%r15, %%r28, 0                 \n\t"
-  "beq              %%r15, DPOSTACCUM              \n\t"
+  "cmpwi            %%r0, %%r28, 0                 \n\t"
+  "beq              %%r0, DPOSTACCUM              \n\t"
   "mtctr            %%r28                          \n\t"
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
