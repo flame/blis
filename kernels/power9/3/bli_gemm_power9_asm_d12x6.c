@@ -118,28 +118,28 @@
   "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
   "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
   "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
-
+  "                                               \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
   "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
   "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
   "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
   "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
-
+  "                                               \n\t" \
   "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t" \
   "xvmaddadp        %%vs8, %%vs38, %%vs49         \n\t" \
   "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t" \
   "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t" \
   "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t" \
   "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t" \
-
+  "                                               \n\t" \
   "xvmaddadp        %%vs3, %%vs39, %%vs48         \n\t" \
   "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t" \
   "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t" \
   "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t" \
   "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t" \
   "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t" \
-
+  "                                               \n\t" \
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
