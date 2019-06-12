@@ -336,9 +336,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
-  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
-  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
@@ -371,6 +368,10 @@ void bli_dgemm_power9_asm_12x6
   "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
+  "                                               \n\t"
+  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
+  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
+  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
