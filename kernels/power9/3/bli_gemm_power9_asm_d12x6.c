@@ -103,12 +103,14 @@
 
 #define LOADANDUPDATE \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
   "lxv           %%vs38, 32(%%r4)                 \n\t" \
   "lxv           %%vs39, 48(%%r4)                 \n\t" \
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
@@ -158,8 +160,6 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
