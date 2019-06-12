@@ -357,6 +357,14 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   LOADANDUPDATE
   LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
