@@ -310,7 +310,6 @@ void bli_dgemm_power9_asm_12x6
 	(
 	"                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
-  #if 0
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
@@ -436,7 +435,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t" 
   STORECMATRIX 
   "                                               \n\t"
-  #endif
+
 
 	: // output operands (none)
 	: // input operands
