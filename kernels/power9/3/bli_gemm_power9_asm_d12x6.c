@@ -306,8 +306,8 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -353,6 +353,10 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   LOADANDUPDATE
   LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
+  LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
@@ -390,7 +394,7 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
+  "DADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
   "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
