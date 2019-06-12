@@ -369,10 +369,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
-  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
-  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
-  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
-  "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
   "                                               \n\t"
@@ -390,6 +386,9 @@ void bli_dgemm_power9_asm_12x6
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t"
   "                                               \n\t"
+  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
+  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
+  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
