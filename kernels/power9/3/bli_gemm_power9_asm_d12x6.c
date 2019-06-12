@@ -356,7 +356,6 @@ void bli_dgemm_power9_asm_12x6
   "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
-  #if 0
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
@@ -431,7 +430,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  #endif
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
   STORECMATRIX 
