@@ -224,18 +224,18 @@
  "xvmuldp          %%vs47, %%vs47, %%vs49   	 \n\t" \
  
 #define LOADCMATRIX \
-  "lxv              %%vs36, 0(%%r29)              \n\t" \
-  "lxv              %%vs37, 16(%%r29)             \n\t" \
-  "lxv              %%vs38, 32(%%r29)             \n\t" \
-  "lxv              %%vs39, 48(%%r29)             \n\t" \
-  "lxv              %%vs40, 64(%%r29)             \n\t" \
-  "lxv              %%vs41, 80(%%r29)             \n\t" \
-  "lxv              %%vs42, 0(%%r30)             \n\t" \
-  "lxv              %%vs43, 16(%%r30)            \n\t" \
-  "lxv              %%vs44, 32(%%r30)            \n\t" \
-  "lxv              %%vs45, 48(%%r30)            \n\t" \
-  "lxv              %%vs46, 64(%%r30)            \n\t" \
-  "lxv              %%vs47, 80(%%r30)            \n\t"
+  "lxv              %%vs36, 0(%%r22)              \n\t" \
+  "lxv              %%vs37, 16(%%r22)             \n\t" \
+  "lxv              %%vs38, 32(%%r22)             \n\t" \
+  "lxv              %%vs39, 48(%%r22)             \n\t" \
+  "lxv              %%vs40, 64(%%r22)             \n\t" \
+  "lxv              %%vs41, 80(%%r22)             \n\t" \
+  "lxv              %%vs42, 0(%%r23)             \n\t" \
+  "lxv              %%vs43, 16(%%r23)            \n\t" \
+  "lxv              %%vs44, 32(%%r23)            \n\t" \
+  "lxv              %%vs45, 48(%%r23)            \n\t" \
+  "lxv              %%vs46, 64(%%r23)            \n\t" \
+  "lxv              %%vs47, 80(%%r23)            \n\t"
 
 #define STORECMATRIX \
   "stxv              %%vs0, 0(%%r16)    \n\t" \
@@ -368,17 +368,9 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  "nop                                            \n\t"
-  
-  "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
-  "add              %%r30, %%r29, %%r6            \n\t" // load ptr for C (used as offset)
+  "                                               \n\t"
+  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
+  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   #if 0
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
