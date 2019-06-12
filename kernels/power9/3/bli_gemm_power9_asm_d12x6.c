@@ -230,12 +230,12 @@
   "lxv              %%vs39, 48(%%r29)             \n\t" \
   "lxv              %%vs40, 64(%%r29)             \n\t" \
   "lxv              %%vs41, 80(%%r29)             \n\t" \
-  "lxv              %%vs42, 96(%%r29)             \n\t" \
-  "lxv              %%vs43, 112(%%r29)            \n\t" \
-  "lxv              %%vs44, 128(%%r29)            \n\t" \
-  "lxv              %%vs45, 144(%%r29)            \n\t" \
-  "lxv              %%vs46, 160(%%r29)            \n\t" \
-  "lxv              %%vs47, 176(%%r29)            \n\t"
+  "lxv              %%vs42, 0(%%r30)             \n\t" \
+  "lxv              %%vs43, 16(%%r30)            \n\t" \
+  "lxv              %%vs44, 32(%%r30)            \n\t" \
+  "lxv              %%vs45, 48(%%r30)            \n\t" \
+  "lxv              %%vs46, 64(%%r30)            \n\t" \
+  "lxv              %%vs47, 80(%%r30)            \n\t"
 
 #define STORECMATRIX \
   "stxv              %%vs0, 0(%%r16)    \n\t" \
@@ -371,13 +371,14 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   
   "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
+  "add              %%r30, %%r29, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r29, %%r29,  192            \n\t" // Move C-ptr
-  #if 0
+  "add             %%r29, %%r30, %%r6             \n\t" // Move C-ptrs
+  "add             %%r30, %%r29, %%r6             \n\t" // Move C-ptrs
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36          \n\t"  
   "xvadddp          %%vs1, %%vs1, %%vs37          \n\t"  
@@ -394,7 +395,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   LOADCMATRIX
   SCALECMATRIX
-  "addi             %%r29, %%r29,  192            \n\t" // Move C-ptr
+  "add             %%r29, %%r30, %%r6             \n\t" // Move C-ptrs
+  "add             %%r30, %%r29, %%r6             \n\t" // Move C-ptrs
   "                                               \n\t"
   "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"  
   "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"  
@@ -429,6 +431,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
+  #if 0
   #endif
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
