@@ -366,11 +366,12 @@ void bli_dgemm_power9_asm_12x6
   SCALEBYALPHA
   "                                               \n\t"
   "                                               \n\t"
-  "mtctr            %%r5                          \n\t"
-  "bdz              DBETAZERO                     \n\t" // if ZF = 1, jump to beta == 0 case
+  "cmpwi            %%r0, %%r5, 0                 \n\t"
+  "beq              %%r0, DBETAZERO               \n\t"
   "                                               \n\t"
-  #if 0
+  
   "ld               %%r29, %6                     \n\t" // load ptr for C (used as offset)
+  #if 0
   "                                               \n\t"
   "ADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
