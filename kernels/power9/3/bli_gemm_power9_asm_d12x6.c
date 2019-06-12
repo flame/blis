@@ -347,8 +347,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
-  "cmpwi            %%r7, %%r9, 0                 \n\t"
-  "beq              %%r7, DPOSTACCUM              \n\t"
+  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "beq              %%r0, DPOSTACCUM              \n\t"
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
@@ -448,9 +448,9 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), */
-  "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
+  "r0", "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
   "r15", "r16", "r17", "r18", "r19",
-  "r20", "r21", "r22", "r23", "r24", "r25",
+  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r29", 
 
   "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
   "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
