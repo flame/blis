@@ -268,12 +268,12 @@
   "stxv              %%vs27, 48(%%r20)    \n\t" \
   "stxv              %%vs28, 64(%%r20)    \n\t" \
   "stxv              %%vs29, 80(%%r20)    \n\t" \
-  "stxv              %%vs30, 0(%%r28)    \n\t" \
-  "stxv              %%vs31, 16(%%r28)    \n\t" \
-  "stxv              %%vs32, 32(%%r28)    \n\t" \
-  "stxv              %%vs33, 48(%%r28)    \n\t" \
-  "stxv              %%vs34, 64(%%r28)    \n\t" \
-  "stxv              %%vs35, 80(%%r28)    \n\t"
+  "stxv              %%vs30, 0(%%r21)    \n\t" \
+  "stxv              %%vs31, 16(%%r21)    \n\t" \
+  "stxv              %%vs32, 32(%%r21)    \n\t" \
+  "stxv              %%vs33, 48(%%r21)    \n\t" \
+  "stxv              %%vs34, 64(%%r21)    \n\t" \
+  "stxv              %%vs35, 80(%%r21)    \n\t"
 
 
 
@@ -320,10 +320,10 @@ void bli_dgemm_power9_asm_12x6
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "add              %%r17, %%r16, %%r6             \n\t" // c + cs_c
   "add              %%r18, %%r17, %%r6             \n\t" // c + cs_c * 2
-  #if 0
   "add              %%r19, %%r18, %%r6             \n\t" // c + cs_c * 3
   "add              %%r20, %%r19, %%r6             \n\t" // c + cs_c * 4
-  "add              %%r28, %%r20, %%r6             \n\t" // c + cs_c * 5
+  "add              %%r21, %%r20, %%r6             \n\t" // c + cs_c * 5
+  
   "                                               \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
@@ -431,12 +431,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
   STORECMATRIX 
   "                                               \n\t"
-  #endif
 
 	: // output operands (none)
 	: // input operands
