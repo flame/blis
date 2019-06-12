@@ -429,7 +429,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
-  STORECMATRIX 
+  //STORECMATRIX 
   "                                               \n\t"
   
 
