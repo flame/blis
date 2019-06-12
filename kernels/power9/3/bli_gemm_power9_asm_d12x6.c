@@ -309,6 +309,7 @@ void bli_dgemm_power9_asm_12x6
 	__asm__ volatile
 	(
 	"                                               \n\t"
+  "ld               %%r6, %8                      \n\t" // load cs_c
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
   "li               %%r23,8                       \n\t" // 1
@@ -317,16 +318,11 @@ void bli_dgemm_power9_asm_12x6
   "li               %%r26,32                      \n\t" // 4
   "li               %%r27,40                      \n\t" // 5
   "                                               \n\t"
-  "                                               \n\t"
-  VSZEROOUT                                             // Zero out vec regs
-  "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
-  "ld               %%r16, %6                      \n\t" // load ptr for C
-  "                                               \n\t" 
-  "                                               \n\t" 
-  "ld               %%r6, %8                      \n\t" // load cs_c
+  "ld               %%r16, %6                     \n\t" // load ptr for C
   "                                               \n\t"
+  VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
@@ -348,6 +344,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
+  "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
   "cmpwi            %%r0, %%r9, 0                 \n\t"
@@ -368,7 +365,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
-  "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
   "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2
   "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
