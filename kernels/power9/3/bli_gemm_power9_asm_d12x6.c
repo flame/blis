@@ -576,7 +576,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
   "                                               \n\t"
-  #if 0
+  #if 1
   "ld              %%r22, %6                      \n\t"
   "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
   "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
