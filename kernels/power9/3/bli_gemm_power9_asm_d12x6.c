@@ -277,17 +277,20 @@
   "lxsdx       %%vs42, %%r9, %%r27              \n\t" \
   "xxpermdi    %%vs41, %%vs41, %%vs42, 0    	  \n\t"
 
-#define GENLOAD_SCALE_UPDATE \
-  LOADGEN_CMATRIX   \
+#define GEN_NEXT_COL_CMATRIX \
   "add             %%r22, %%r22, %%r6             \n\t" \
   "add             %%r23, %%r23, %%r6             \n\t" \
   "add             %%r24, %%r24, %%r6             \n\t" \
   "add             %%r25, %%r25, %%r6             \n\t" \
   "add             %%r26, %%r26, %%r6             \n\t" \
-  "add             %%r27, %%r27, %%r6             \n\t" \
+  "add             %%r27, %%r27, %%r6             \n\t"
+
+#define GENLOAD_SCALE_UPDATE \
+  LOADGEN_CMATRIX   \
+  GEN_NEXT_COL_CMATRIX \
   SCALEGEN_CMATRIX
 
-#define GENSTORE_CMATRIX \
+// #define GENSTORE_CMATRIX \
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
@@ -585,11 +588,130 @@ void bli_dgemm_power9_asm_12x6
   "add             %%r27, %%r26, %%r9             \n\t" // c + rs_c * 9
   "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
   "                                               \n\t"
-  "stxsdx          %%vs0, 0, %%r22                \n\t"
-  "xxswapd         %%vs0, %%vs0                   \n\t"
-  "stxsdx          %%vs0, %%r9, %%r22             \n\t"
+  "stxsdx          %%vs0, 0, %%r22                \n\t" 
+  "xxswapd         %%vs0, %%vs0                   \n\t" 
+  "stxsdx          %%vs0, %%r9, %%r22             \n\t" 
+  "stxsdx          %%vs1, 0, %%r23                \n\t" 
+  "xxswapd         %%vs1, %%vs1                   \n\t" 
+  "stxsdx          %%vs1, %%r9, %%r23             \n\t" 
+  "stxsdx          %%vs2, 0, %%r24                \n\t" 
+  "xxswapd         %%vs2, %%vs2                   \n\t" 
+  "stxsdx          %%vs2, %%r9, %%r24             \n\t" 
+  "stxsdx          %%vs3, 0, %%r25                \n\t" 
+  "xxswapd         %%vs3, %%vs3                   \n\t" 
+  "stxsdx          %%vs3, %%r9, %%r25             \n\t" 
+  "stxsdx          %%vs4, 0, %%r26                \n\t" 
+  "xxswapd         %%vs4, %%vs4                   \n\t" 
+  "stxsdx          %%vs4, %%r9, %%r26             \n\t" 
+  "stxsdx          %%vs5, 0, %%r27                \n\t" 
+  "xxswapd         %%vs5, %%vs5                   \n\t" 
+  "stxsdx          %%vs5, %%r9, %%r27             \n\t"
   "                                               \n\t"
-  GENSTORE_CMATRIX
+  GEN_NEXT_COL_CMATRIX
+  "                                               \n\t"
+  "stxsdx          %%vs6, 0, %%r22                \n\t" 
+  "xxswapd         %%vs6, %%vs0                   \n\t" 
+  "stxsdx          %%vs6, %%r9, %%r22             \n\t" 
+  "stxsdx          %%vs7, 0, %%r23                \n\t" 
+  "xxswapd         %%vs7, %%vs1                   \n\t" 
+  "stxsdx          %%vs7, %%r9, %%r23             \n\t" 
+  "stxsdx          %%vs8, 0, %%r24                \n\t" 
+  "xxswapd         %%vs8, %%vs2                   \n\t" 
+  "stxsdx          %%vs8, %%r9, %%r24             \n\t" 
+  "stxsdx          %%vs9, 0, %%r25                \n\t" 
+  "xxswapd         %%vs9, %%vs3                   \n\t" 
+  "stxsdx          %%vs9, %%r9, %%r25             \n\t" 
+  "stxsdx          %%vs10, 0, %%r26                \n\t" 
+  "xxswapd         %%vs10, %%vs4                   \n\t" 
+  "stxsdx          %%vs10, %%r9, %%r26             \n\t" 
+  "stxsdx          %%vs11, 0, %%r27                \n\t" 
+  "xxswapd         %%vs11, %%vs5                   \n\t" 
+  "stxsdx          %%vs11, %%r9, %%r27             \n\t"
+  "                                               \n\t"
+  GEN_NEXT_COL_CMATRIX 
+  "                                               \n\t"
+  "stxsdx          %%vs12, 0, %%r22               \n\t" 
+  "xxswapd         %%vs12, %%vs12                 \n\t" 
+  "stxsdx          %%vs12, %%r9, %%r22            \n\t" 
+  "stxsdx          %%vs13, 0, %%r23               \n\t" 
+  "xxswapd         %%vs13, %%vs13                 \n\t" 
+  "stxsdx          %%vs13, %%r9, %%r23            \n\t" 
+  "stxsdx          %%vs14, 0, %%r24               \n\t" 
+  "xxswapd         %%vs14, %%vs14                 \n\t" 
+  "stxsdx          %%vs14, %%r9, %%r24            \n\t" 
+  "stxsdx          %%vs15, 0, %%r25               \n\t" 
+  "xxswapd         %%vs15, %%vs15                 \n\t" 
+  "stxsdx          %%vs15, %%r9, %%r25            \n\t" 
+  "stxsdx          %%vs16, 0, %%r26               \n\t" 
+  "xxswapd         %%vs16, %%vs16                 \n\t" 
+  "stxsdx          %%vs16, %%r9, %%r26            \n\t" 
+  "stxsdx          %%vs17, 0, %%r27               \n\t" 
+  "xxswapd         %%vs17, %%vs17                 \n\t" 
+  "stxsdx          %%vs17, %%r9, %%r27            \n\t" 
+  "                                               \n\t"
+  GEN_NEXT_COL_CMATRIX 
+  "                                               \n\t"
+  "stxsdx          %%vs18, 0, %%r22               \n\t" 
+  "xxswapd         %%vs18, %%vs18                 \n\t" 
+  "stxsdx          %%vs18, %%r9, %%r22            \n\t" 
+  "stxsdx          %%vs19, 0, %%r23               \n\t" 
+  "xxswapd         %%vs19, %%vs19                 \n\t" 
+  "stxsdx          %%vs19, %%r9, %%r23            \n\t" 
+  "stxsdx          %%vs20, 0, %%r24               \n\t" 
+  "xxswapd         %%vs20, %%vs20                 \n\t" 
+  "stxsdx          %%vs20, %%r9, %%r24            \n\t" 
+  "stxsdx          %%vs21, 0, %%r25               \n\t" 
+  "xxswapd         %%vs21, %%vs21                 \n\t" 
+  "stxsdx          %%vs21, %%r9, %%r25            \n\t" 
+  "stxsdx          %%vs22, 0, %%r26               \n\t" 
+  "xxswapd         %%vs22, %%vs22                 \n\t" 
+  "stxsdx          %%vs22, %%r9, %%r26            \n\t" 
+  "stxsdx          %%vs23, 0, %%r27               \n\t" 
+  "xxswapd         %%vs23, %%vs23                 \n\t" 
+  "stxsdx          %%vs23, %%r9, %%r27            \n\t" 
+  "                                               \n\t"
+  GEN_NEXT_COL_CMATRIX 
+  "                                               \n\t"
+  "stxsdx          %%vs24, 0, %%r22               \n\t" 
+  "xxswapd         %%vs24, %%vs24                 \n\t" 
+  "stxsdx          %%vs24, %%r9, %%r22            \n\t" 
+  "stxsdx          %%vs25, 0, %%r23               \n\t" 
+  "xxswapd         %%vs25, %%vs25                 \n\t" 
+  "stxsdx          %%vs25, %%r9, %%r23            \n\t" 
+  "stxsdx          %%vs26, 0, %%r24               \n\t" 
+  "xxswapd         %%vs26, %%vs26                 \n\t" 
+  "stxsdx          %%vs26, %%r9, %%r24            \n\t" 
+  "stxsdx          %%vs27, 0, %%r25               \n\t" 
+  "xxswapd         %%vs27, %%vs27                 \n\t" 
+  "stxsdx          %%vs27, %%r9, %%r25            \n\t" 
+  "stxsdx          %%vs28, 0, %%r26               \n\t" 
+  "xxswapd         %%vs28, %%vs28                 \n\t" 
+  "stxsdx          %%vs28, %%r9, %%r26            \n\t" 
+  "stxsdx          %%vs29, 0, %%r27               \n\t" 
+  "xxswapd         %%vs29, %%vs29                 \n\t" 
+  "stxsdx          %%vs29, %%r9, %%r27            \n\t" 
+  "                                               \n\t"
+  GEN_NEXT_COL_CMATRIX 
+  "                                               \n\t"
+  "stxsdx          %%vs30, 0, %%r22               \n\t" 
+  "xxswapd         %%vs30, %%vs30                 \n\t" 
+  "stxsdx          %%vs30, %%r9, %%r22            \n\t" 
+  "stxsdx          %%vs31, 0, %%r23               \n\t" 
+  "xxswapd         %%vs31, %%vs31                 \n\t" 
+  "stxsdx          %%vs31, %%r9, %%r23            \n\t" 
+  "stxsdx          %%vs32, 0, %%r24               \n\t" 
+  "xxswapd         %%vs32, %%vs32                 \n\t" 
+  "stxsdx          %%vs32, %%r9, %%r24            \n\t" 
+  "stxsdx          %%vs33, 0, %%r25               \n\t" 
+  "xxswapd         %%vs33, %%vs33                 \n\t" 
+  "stxsdx          %%vs33, %%r9, %%r25            \n\t" 
+  "stxsdx          %%vs34, 0, %%r26               \n\t" 
+  "xxswapd         %%vs34, %%vs34                 \n\t" 
+  "stxsdx          %%vs34, %%r9, %%r26            \n\t" 
+  "stxsdx          %%vs35, 0, %%r27               \n\t" 
+  "xxswapd         %%vs35, %%vs35                 \n\t" 
+  "stxsdx          %%vs35, %%r9, %%r27            \n\t"
+  "                                               \n\t"
   "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
