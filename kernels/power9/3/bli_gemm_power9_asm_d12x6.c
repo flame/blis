@@ -329,6 +329,7 @@ void bli_dgemm_power9_asm_12x6
   "li               %%r25,24                      \n\t" // 3
   "li               %%r26,32                      \n\t" // 4
   "li               %%r27,40                      \n\t" // 5
+  "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
@@ -358,7 +359,6 @@ void bli_dgemm_power9_asm_12x6
   "bdnz             DLOOPKITER                    \n\t"
   "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
   "                                               \n\t"
-  "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
   "cmpwi            %%r0, %%r9, 0                 \n\t"
