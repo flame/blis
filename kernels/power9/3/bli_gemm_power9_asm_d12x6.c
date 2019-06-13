@@ -288,7 +288,6 @@
   SCALEGEN_CMATRIX
 
 #define GENSTORE_CMATRIX \
-  "stxsd             %%vs0, "
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
