@@ -380,8 +380,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
-  "ld               %%r9, %7                      \n\t" // load rs_c
-  "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
+  // "ld               %%r9, %7                      \n\t" // load rs_c
+  // "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "                                               \n\t" // create offset regs
   "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
@@ -389,8 +389,8 @@ void bli_dgemm_power9_asm_12x6
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   "                                               \n\t"
-  "cmpwi            %%r0, %%r9, 8                 \n\t"
-  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
+  // "cmpwi            %%r0, %%r9, 8                 \n\t"
+  // "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -451,17 +451,17 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs33, %%vs33, %%vs51   	    \n\t" 
   "xvadddp          %%vs34, %%vs34, %%vs52   	    \n\t" 
   "xvadddp          %%vs35, %%vs35, %%vs53   	    \n\t"
-  "b                DCOLSTORED                    \n\t"
-  "                                               \n\t"
-  "                                               \n\t"
+  // "b                DCOLSTORED                    \n\t"
+  // "                                               \n\t"
+  // "                                               \n\t"
   "DBETAZERO:                                     \n\t"
-  "                                               \n\t" 
-  "cmpwi            %%r0, %%r9, 8                 \n\t"
-  "beq              DCOLSTORED                    \n\t" //if rs_c == 8, C is col stored
-  "                                               \n\t"
-  "DGENSTORED:                                    \n\t"
-  COLSTORECMATRIX
-  "b               DDONE                          \n\t"
+  // "                                               \n\t" 
+  // "cmpwi            %%r0, %%r9, 8                 \n\t"
+  // "beq              DCOLSTORED                    \n\t" //if rs_c == 8, C is col stored
+  // "                                               \n\t"
+  // "DGENSTORED:                                    \n\t"
+  // COLSTORECMATRIX
+  // "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
   COLSTORECMATRIX
