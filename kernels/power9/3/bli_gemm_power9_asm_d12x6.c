@@ -431,6 +431,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
+  #if 0
   "                                               \n\t" // create offset regs
   "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
   "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
@@ -502,7 +503,8 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs34, %%vs34, %%vs40        \n\t"
   "xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
   "                                               \n\t"
-  "b                DCOLSTORED                    \n\t"
+  #endif
+  "b                DGENSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
