@@ -290,8 +290,6 @@
   GEN_NEXT_COL_CMATRIX \
   SCALEGEN_CMATRIX
 
-// #define GENSTORE_CMATRIX \
-
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
   "stxv              %%vs1, 16(%%r16)           \n\t" \
