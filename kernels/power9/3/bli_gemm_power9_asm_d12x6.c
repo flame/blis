@@ -431,7 +431,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
-  #if 0
+  #if 1
   "                                               \n\t" // create offset regs
   "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
   "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
