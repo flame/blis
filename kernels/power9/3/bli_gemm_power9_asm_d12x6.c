@@ -337,7 +337,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
@@ -347,7 +346,6 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
@@ -357,7 +355,6 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
   "                                               \n\t"
   "                                               \n\t"
   "ld               %%r9, %1                      \n\t" // edge case
@@ -368,7 +365,6 @@ void bli_dgemm_power9_asm_12x6
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
   LOADANDUPDATE
   "bdnz             DLOOPKLEFT                    \n\t"
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
@@ -384,6 +380,10 @@ void bli_dgemm_power9_asm_12x6
   // "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "                                               \n\t" // create offset regs
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
   "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
