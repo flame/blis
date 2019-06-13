@@ -249,7 +249,7 @@
   "lxv              %%vs52, 64(%%r24)            \n\t" \
   "lxv              %%vs53, 80(%%r24)            \n\t" 
 
-#define STORECMATRIX \
+#define COLSTORECMATRIX \
   "stxv              %%vs0, 0(%%r16)    \n\t" \
   "stxv              %%vs1, 16(%%r16)    \n\t" \
   "stxv              %%vs2, 32(%%r16)    \n\t" \
@@ -336,7 +336,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "                                               \n\t"
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
@@ -345,7 +345,8 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
   "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
-  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" 
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
@@ -355,6 +356,7 @@ void bli_dgemm_power9_asm_12x6
   LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
   "                                               \n\t"
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
@@ -366,6 +368,7 @@ void bli_dgemm_power9_asm_12x6
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
   LOADANDUPDATE
   "bdnz             DLOOPKLEFT                    \n\t"
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
@@ -377,20 +380,30 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "ld               %%r9, %7                      \n\t" // load rs_c
+  "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
+  "                                               \n\t"
+  "                                               \n\t" // create offset regs
   "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
-  "beq              %%r0, DBETAZERO               \n\t"
+  "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
+  "                                               \n\t"
+  "cmpwi            %%r0, %%r9, 8                 \n\t"
+  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "DCOLSTOREDBNZ:                                 \n\t"
   "                                               \n\t"
   "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "DADDTOC:                                        \n\t" // C = beta*C + alpha*(AB)
+  "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCMATRIX
   "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
@@ -438,11 +451,22 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs33, %%vs33, %%vs51   	    \n\t" 
   "xvadddp          %%vs34, %%vs34, %%vs52   	    \n\t" 
   "xvadddp          %%vs35, %%vs35, %%vs53   	    \n\t"
+  "b                DCOLSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "DBETAZERO:                                     \n\t"
   "                                               \n\t" 
-  STORECMATRIX 
+  "cmpwi            %%r0, %%r9, 8                 \n\t"
+  "beq              DCOLSTORED                    \n\t" //if rs_c == 8, C is col stored
+  "                                               \n\t"
+  "DGENSTORED:                                    \n\t"
+  COLSTORECMATRIX
+  "b               DDONE                          \n\t"
+  "                                               \n\t"
+  "DCOLSTORED:                                    \n\t"
+  COLSTORECMATRIX
+  "                                               \n\t"
+  "DDONE:                                         \n\t"  
   "                                               \n\t"
 	: // output operands (none)
 	: // input operands
