@@ -287,7 +287,10 @@
   "add             %%r27, %%r27, %%r6             \n\t" \
   SCALEGEN_CMATRIX
 
-#define COLSTORECMATRIX \
+#define GENSTORE_CMATRIX \
+  "stxsd             %%vs0, "
+
+#define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
   "stxv              %%vs1, 16(%%r16)           \n\t" \
   "stxv              %%vs2, 32(%%r16)           \n\t" \
@@ -435,7 +438,7 @@ void bli_dgemm_power9_asm_12x6
   "add             %%r25, %%r24, %%r9             \n\t" // c + rs_c * 5
   "add             %%r25, %%r25, %%r9             \n\t" // c + rs_c * 6 
   "add             %%r26, %%r25, %%r9             \n\t" // c + rs_c * 7
-  "add             %%r36, %%r26, %%r9             \n\t" // c + rs_c * 8
+  "add             %%r26, %%r26, %%r9             \n\t" // c + rs_c * 8
   "add             %%r27, %%r26, %%r9             \n\t" // c + rs_c * 9
   "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
   "                                               \n\t"
@@ -569,11 +572,14 @@ void bli_dgemm_power9_asm_12x6
   "beq              DCOLSTORED                    \n\t" //if rs_c == 8, C is col stored
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
-  COLSTORECMATRIX
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENSTORE_CMATRIX
   "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
-  COLSTORECMATRIX
+  COLSTORE_CMATRIX
   "                                               \n\t"
   "DDONE:                                         \n\t"  
   "                                               \n\t"
