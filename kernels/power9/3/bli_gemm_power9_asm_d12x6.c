@@ -410,7 +410,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
-  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "lxvdsx           %%vs48, 0, %%r8               \n\t" // splat alpha
   "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
@@ -423,6 +422,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
+  "                                               \n\t"
+  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "cmpwi            %%r0, %%r9, 8                 \n\t"
   "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
@@ -572,7 +573,21 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
   "                                               \n\t"
+  "ld              %%r22, %6                      \n\t"
+  "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
+  "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
+  "add             %%r24, %%r23, %%r9             \n\t" // c + rs_c * 3
+  "add             %%r24, %%r24, %%r9             \n\t" // c + rs_c * 4
+  "add             %%r25, %%r24, %%r9             \n\t" // c + rs_c * 5
+  "add             %%r25, %%r25, %%r9             \n\t" // c + rs_c * 6 
+  "add             %%r26, %%r25, %%r9             \n\t" // c + rs_c * 7
+  "add             %%r26, %%r26, %%r9             \n\t" // c + rs_c * 8
+  "add             %%r27, %%r26, %%r9             \n\t" // c + rs_c * 9
+  "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
   "                                               \n\t"
+  "stxsdx          %%vs0, 0, %%r22                \n\t"
+  "xxswapd         %%vs0, %%vs0                   \n\t"
+  "stxsdx          %%vs0, %%r9, %%r22             \n\t"
   "                                               \n\t"
   GENSTORE_CMATRIX
   "b               DDONE                          \n\t"
