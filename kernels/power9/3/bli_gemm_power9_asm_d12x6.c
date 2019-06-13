@@ -379,12 +379,6 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r9, %7                      \n\t" // load rs_c
   "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
-  "                                               \n\t" // create offset regs
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
-  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
@@ -393,11 +387,17 @@ void bli_dgemm_power9_asm_12x6
   "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
   "                                               \n\t"
   "                                               \n\t"
-  "                                               \n\t"
+  "DGENSTOREDBNZ:                                 \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
+  "                                               \n\t" // create offset regs
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
