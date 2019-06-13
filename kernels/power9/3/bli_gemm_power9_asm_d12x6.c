@@ -209,7 +209,7 @@
  "xvmuldp          %%vs34, %%vs34, %%vs48   	 \n\t" \
  "xvmuldp          %%vs35, %%vs35, %%vs48   	 \n\t" 
 
-#define SCALECMATRIX \
+#define SCALECOL_CMATRIX \
  "xvmuldp          %%vs36, %%vs36, %%vs59   	 \n\t" \
  "xvmuldp          %%vs37, %%vs37, %%vs59   	 \n\t" \
  "xvmuldp          %%vs38, %%vs38, %%vs59   	 \n\t" \
@@ -229,7 +229,7 @@
  "xvmuldp          %%vs52, %%vs52, %%vs59   	 \n\t" \
  "xvmuldp          %%vs53, %%vs53, %%vs59   	 \n\t" \
  
-#define LOADCMATRIX \
+#define LOADCOL_CMATRIX \
   "lxv              %%vs36, 0(%%r22)              \n\t" \
   "lxv              %%vs37, 16(%%r22)             \n\t" \
   "lxv              %%vs38, 32(%%r22)             \n\t" \
@@ -247,45 +247,83 @@
   "lxv              %%vs50, 32(%%r24)            \n\t" \
   "lxv              %%vs51, 48(%%r24)            \n\t" \
   "lxv              %%vs52, 64(%%r24)            \n\t" \
-  "lxv              %%vs53, 80(%%r24)            \n\t" 
+  "lxv              %%vs53, 80(%%r24)            \n\t"
+
+#define SCALEGEN_CMATRIX \
+  "xvmuldp          %%vs36, %%vs36, %%vs59   	 \n\t" \
+  "xvmuldp          %%vs37, %%vs37, %%vs59   	 \n\t" \
+  "xvmuldp          %%vs38, %%vs38, %%vs59   	 \n\t" \
+  "xvmuldp          %%vs39, %%vs39, %%vs59   	 \n\t" \
+  "xvmuldp          %%vs40, %%vs40, %%vs59   	 \n\t" \
+  "xvmuldp          %%vs41, %%vs41, %%vs59   	 \n\t"
+
+#define LOADGEN_CMATRIX \
+  "lxsdx	     %%vs36, 0, %%r22            	    \n\t" \
+  "lxsdx       %%vs37, %%r9, %%r22              \n\t" \
+  "xxpermdi    %%vs36, %%vs36, %%vs37, 0    	  \n\t" \
+  "lxsdx	     %%vs37, 0, %%r23            	    \n\t" \
+  "lxsdx       %%vs38, %%r9, %%r23              \n\t" \
+  "xxpermdi    %%vs37, %%vs37, %%vs38, 0    	  \n\t" \
+  "lxsdx	     %%vs38, 0, %%r24            	    \n\t" \
+  "lxsdx       %%vs39, %%r9, %%r24              \n\t" \
+  "xxpermdi    %%vs38, %%vs38, %%vs39, 0    	  \n\t" \
+  "lxsdx	     %%vs39, 0, %%r25            	    \n\t" \
+  "lxsdx       %%vs40, %%r9, %%r25              \n\t" \
+  "xxpermdi    %%vs39, %%vs39, %%vs40, 0    	  \n\t" \
+  "lxsdx	     %%vs40, 0, %%r26            	    \n\t" \
+  "lxsdx       %%vs41, %%r9, %%r26              \n\t" \
+  "xxpermdi    %%vs40, %%vs40, %%vs41, 0    	  \n\t" \
+  "lxsdx	     %%vs41, 0, %%r27            	    \n\t" \
+  "lxsdx       %%vs42, %%r9, %%r27              \n\t" \
+  "xxpermdi    %%vs41, %%vs41, %%vs42, 0    	  \n\t"
+
+#define GENLOAD_SCALE_UPDATE \
+  LOADGEN_CMATRIX   \
+  "add             %%r22, %%r22, %%r6             \n\t" \
+  "add             %%r23, %%r23, %%r6             \n\t" \
+  "add             %%r24, %%r24, %%r6             \n\t" \
+  "add             %%r25, %%r25, %%r6             \n\t" \
+  "add             %%r26, %%r26, %%r6             \n\t" \
+  "add             %%r27, %%r27, %%r6             \n\t" \
+  SCALEGEN_CMATRIX
 
 #define COLSTORECMATRIX \
-  "stxv              %%vs0, 0(%%r16)    \n\t" \
-  "stxv              %%vs1, 16(%%r16)    \n\t" \
-  "stxv              %%vs2, 32(%%r16)    \n\t" \
-  "stxv              %%vs3, 48(%%r16)    \n\t" \
-  "stxv              %%vs4, 64(%%r16)    \n\t" \
-  "stxv              %%vs5, 80(%%r16)    \n\t" \
-  "stxv              %%vs6, 0(%%r17)    \n\t" \
-  "stxv              %%vs7, 16(%%r17)    \n\t" \
-  "stxv              %%vs8, 32(%%r17)    \n\t" \
-  "stxv              %%vs9, 48(%%r17)    \n\t" \
-  "stxv              %%vs10, 64(%%r17)    \n\t" \
-  "stxv              %%vs11, 80(%%r17)    \n\t" \
-  "stxv              %%vs12, 0(%%r18)    \n\t" \
-  "stxv              %%vs13, 16(%%r18)    \n\t" \
-  "stxv              %%vs14, 32(%%r18)    \n\t" \
-  "stxv              %%vs15, 48(%%r18)    \n\t" \
-  "stxv              %%vs16, 64(%%r18)    \n\t" \
-  "stxv              %%vs17, 80(%%r18)    \n\t" \
-  "stxv              %%vs18, 0(%%r19)    \n\t" \
-  "stxv              %%vs19, 16(%%r19)    \n\t" \
-  "stxv              %%vs20, 32(%%r19)    \n\t" \
-  "stxv              %%vs21, 48(%%r19)    \n\t" \
-  "stxv              %%vs22, 64(%%r19)    \n\t" \
-  "stxv              %%vs23, 80(%%r19)    \n\t" \
-  "stxv              %%vs24, 0(%%r20)    \n\t" \
-  "stxv              %%vs25, 16(%%r20)    \n\t" \
-  "stxv              %%vs26, 32(%%r20)    \n\t" \
-  "stxv              %%vs27, 48(%%r20)    \n\t" \
-  "stxv              %%vs28, 64(%%r20)    \n\t" \
-  "stxv              %%vs29, 80(%%r20)    \n\t" \
-  "stxv              %%vs30, 0(%%r21)    \n\t" \
-  "stxv              %%vs31, 16(%%r21)    \n\t" \
-  "stxv              %%vs32, 32(%%r21)    \n\t" \
-  "stxv              %%vs33, 48(%%r21)    \n\t" \
-  "stxv              %%vs34, 64(%%r21)    \n\t" \
-  "stxv              %%vs35, 80(%%r21)    \n\t"
+  "stxv              %%vs0, 0(%%r16)            \n\t" \
+  "stxv              %%vs1, 16(%%r16)           \n\t" \
+  "stxv              %%vs2, 32(%%r16)           \n\t" \
+  "stxv              %%vs3, 48(%%r16)           \n\t" \
+  "stxv              %%vs4, 64(%%r16)           \n\t" \
+  "stxv              %%vs5, 80(%%r16)           \n\t" \
+  "stxv              %%vs6, 0(%%r17)            \n\t" \
+  "stxv              %%vs7, 16(%%r17)           \n\t" \
+  "stxv              %%vs8, 32(%%r17)           \n\t" \
+  "stxv              %%vs9, 48(%%r17)           \n\t" \
+  "stxv              %%vs10, 64(%%r17)          \n\t" \
+  "stxv              %%vs11, 80(%%r17)          \n\t" \
+  "stxv              %%vs12, 0(%%r18)           \n\t" \
+  "stxv              %%vs13, 16(%%r18)          \n\t" \
+  "stxv              %%vs14, 32(%%r18)          \n\t" \
+  "stxv              %%vs15, 48(%%r18)          \n\t" \
+  "stxv              %%vs16, 64(%%r18)          \n\t" \
+  "stxv              %%vs17, 80(%%r18)          \n\t" \
+  "stxv              %%vs18, 0(%%r19)           \n\t" \
+  "stxv              %%vs19, 16(%%r19)          \n\t" \
+  "stxv              %%vs20, 32(%%r19)          \n\t" \
+  "stxv              %%vs21, 48(%%r19)          \n\t" \
+  "stxv              %%vs22, 64(%%r19)          \n\t" \
+  "stxv              %%vs23, 80(%%r19)          \n\t" \
+  "stxv              %%vs24, 0(%%r20)           \n\t" \
+  "stxv              %%vs25, 16(%%r20)          \n\t" \
+  "stxv              %%vs26, 32(%%r20)          \n\t" \
+  "stxv              %%vs27, 48(%%r20)          \n\t" \
+  "stxv              %%vs28, 64(%%r20)          \n\t" \
+  "stxv              %%vs29, 80(%%r20)          \n\t" \
+  "stxv              %%vs30, 0(%%r21)           \n\t" \
+  "stxv              %%vs31, 16(%%r21)          \n\t" \
+  "stxv              %%vs32, 32(%%r21)          \n\t" \
+  "stxv              %%vs33, 48(%%r21)          \n\t" \
+  "stxv              %%vs34, 64(%%r21)          \n\t" \
+  "stxv              %%vs35, 80(%%r21)          \n\t"
 
 
 
@@ -370,6 +408,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
+  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "lxvdsx           %%vs48, 0, %%r8               \n\t" // splat alpha
   "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
@@ -388,7 +427,78 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
+  "                                               \n\t" // create offset regs
+  "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
+  "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
+  "add             %%r24, %%r23, %%r9             \n\t" // c + rs_c * 3
+  "add             %%r24, %%r24, %%r9             \n\t" // c + rs_c * 4
+  "add             %%r25, %%r24, %%r9             \n\t" // c + rs_c * 5
+  "add             %%r25, %%r25, %%r9             \n\t" // c + rs_c * 6 
+  "add             %%r26, %%r25, %%r9             \n\t" // c + rs_c * 7
+  "add             %%r36, %%r26, %%r9             \n\t" // c + rs_c * 8
+  "add             %%r27, %%r26, %%r9             \n\t" // c + rs_c * 9
+  "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
   "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (1) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" 
+  "xvadddp          %%vs1, %%vs1, %%vs37   	      \n\t" 
+  "xvadddp          %%vs2, %%vs2, %%vs38   	      \n\t" 
+  "xvadddp          %%vs3, %%vs3, %%vs39   	      \n\t" 
+  "xvadddp          %%vs4, %%vs4, %%vs40   	      \n\t" 
+  "xvadddp          %%vs5, %%vs5, %%vs41   	      \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (2) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs6, %%vs6, %%vs36          \n\t" 
+  "xvadddp          %%vs7, %%vs7, %%vs37          \n\t" 
+  "xvadddp          %%vs8, %%vs8, %%vs38          \n\t" 
+  "xvadddp          %%vs9, %%vs9, %%vs39          \n\t" 
+  "xvadddp          %%vs10, %%vs10, %%vs40        \n\t" 
+  "xvadddp          %%vs11, %%vs11, %%vs41        \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (3) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs12, %%vs12, %%vs36        \n\t"
+  "xvadddp          %%vs13, %%vs13, %%vs37        \n\t"
+  "xvadddp          %%vs14, %%vs14, %%vs38        \n\t"
+  "xvadddp          %%vs15, %%vs15, %%vs39        \n\t"
+  "xvadddp          %%vs16, %%vs16, %%vs40        \n\t"
+  "xvadddp          %%vs17, %%vs17, %%vs41        \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (4) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs18, %%vs18, %%vs36        \n\t"
+  "xvadddp          %%vs19, %%vs19, %%vs37        \n\t"
+  "xvadddp          %%vs20, %%vs20, %%vs38        \n\t"
+  "xvadddp          %%vs21, %%vs21, %%vs39        \n\t"
+  "xvadddp          %%vs22, %%vs22, %%vs40        \n\t"
+  "xvadddp          %%vs23, %%vs23, %%vs41        \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (5) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs24, %%vs24, %%vs36        \n\t"
+  "xvadddp          %%vs25, %%vs25, %%vs37        \n\t"
+  "xvadddp          %%vs26, %%vs26, %%vs38        \n\t"
+  "xvadddp          %%vs27, %%vs27, %%vs39        \n\t"
+  "xvadddp          %%vs28, %%vs28, %%vs40        \n\t"
+  "xvadddp          %%vs29, %%vs29, %%vs41        \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  GENLOAD_SCALE_UPDATE                                  // (6) load, scale, and move offsets of C
+  "                                               \n\t"
+  "xvadddp          %%vs30, %%vs30, %%vs36        \n\t"
+  "xvadddp          %%vs31, %%vs31, %%vs37        \n\t"
+  "xvadddp          %%vs32, %%vs32, %%vs38        \n\t"
+  "xvadddp          %%vs33, %%vs33, %%vs39        \n\t"
+  "xvadddp          %%vs34, %%vs34, %%vs40        \n\t"
+  "xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
+  "                                               \n\t"
+  "b                DCOLSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
@@ -399,19 +509,18 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
   "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
-  "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
-  LOADCMATRIX
+  LOADCOL_CMATRIX
   "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
   "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
   "add             %%r24, %%r23, %%r6             \n\t" // Move C-ptrs
-  SCALECMATRIX
+  SCALECOL_CMATRIX
   "                                               \n\t"
-  "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" 
+  "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" // Begin adding to C
   "xvadddp          %%vs1, %%vs1, %%vs37   	      \n\t" 
   "xvadddp          %%vs2, %%vs2, %%vs38   	      \n\t" 
   "xvadddp          %%vs3, %%vs3, %%vs39   	      \n\t" 
@@ -430,8 +539,8 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs16, %%vs16, %%vs52   	    \n\t" 
   "xvadddp          %%vs17, %%vs17, %%vs53   	    \n\t" 
   "                                               \n\t"
-  LOADCMATRIX
-  SCALECMATRIX
+  LOADCOL_CMATRIX
+  SCALECOL_CMATRIX
   "                                               \n\t"
   "xvadddp          %%vs18, %%vs18, %%vs36   	    \n\t" 
   "xvadddp          %%vs19, %%vs19, %%vs37   	    \n\t" 
