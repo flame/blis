@@ -421,7 +421,7 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 0
+  #if 1
 	uint64_t k_iter = k0 / 4;
 	uint64_t k_left = k0 % 4;
   #else
