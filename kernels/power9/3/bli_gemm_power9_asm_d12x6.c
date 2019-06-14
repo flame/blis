@@ -579,7 +579,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
   "                                               \n\t"
-  #if 1
+  
   "ld              %%r22, %6                      \n\t" // load c
   "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
   "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
@@ -612,6 +612,7 @@ void bli_dgemm_power9_asm_12x6
 "xxpermdi        %%vs5, %%vs5, %%vs5, 3       \n\t" 
 "stxsdx          %%vs5, %%r9, %%r27      \n\t" 
 "                                               \n\t"
+#if 0
  GEN_NEXT_COL_CMATRIX 
 "                                               \n\t"
 "stxsdx          %%vs6, 0, %%r22         \n\t" 
