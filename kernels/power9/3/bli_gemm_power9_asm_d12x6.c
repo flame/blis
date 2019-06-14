@@ -582,12 +582,11 @@ void bli_dgemm_power9_asm_12x6
   
   "ld              %%r22, %6                      \n\t" // load c
   "slwi            %%r10, %%r9, 1                 \n\t"
-  "add             %%r23, %%r22, %%r10             \n\t" // c + rs_c * 2
-  "add             %%r24, %%r23, %%r10             \n\t" // c + rs_c * 4
-  "add             %%r25, %%r24, %%r10             \n\t" // c + rs_c * 6 
-  "add             %%r26, %%r25, %%r10             \n\t" // c + rs_c * 8
-  "add             %%r27, %%r26, %%r10             \n\t" // c + rs_c * 10
-  "                                               \n\t"
+  "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
+  "add             %%r24, %%r23, %%r10            \n\t" // c + rs_c * 4
+  "add             %%r25, %%r24, %%r10            \n\t" // c + rs_c * 6 
+  "add             %%r26, %%r25, %%r10            \n\t" // c + rs_c * 8
+  "add             %%r27, %%r26, %%r10            \n\t" // c + rs_c * 10
   "                                               \n\t"
   "                                               \n\t"
   "stxsdx          %%vs0, %%r9, %%r22             \n\t" 
