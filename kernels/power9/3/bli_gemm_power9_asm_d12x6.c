@@ -101,7 +101,7 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
-#if 1
+#if 0
 #define LOADANDUPDATE \
   "                                               \n\t" \
   "                                               \n\t" \
@@ -466,12 +466,14 @@ void bli_dgemm_power9_asm_12x6
   "beq              %%r0, DPRELOOPKLEFT           \n\t"
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
-  // "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
-  // "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
-  // "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
-  // "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
-  // "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
-  // "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
+  #if 1
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
+  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
+  #endif
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
