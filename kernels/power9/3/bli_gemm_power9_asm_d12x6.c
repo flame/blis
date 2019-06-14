@@ -230,24 +230,24 @@
  "xvmuldp          %%vs53, %%vs53, %%vs59   	 \n\t" \
  
 #define LOADCOL_CMATRIX \
-  "lxv              %%vs36, 0(%%r22)              \n\t" \
-  "lxv              %%vs37, 16(%%r22)             \n\t" \
-  "lxv              %%vs38, 32(%%r22)             \n\t" \
-  "lxv              %%vs39, 48(%%r22)             \n\t" \
-  "lxv              %%vs40, 64(%%r22)             \n\t" \
-  "lxv              %%vs41, 80(%%r22)             \n\t" \
-  "lxv              %%vs42, 0(%%r23)             \n\t" \
-  "lxv              %%vs43, 16(%%r23)            \n\t" \
-  "lxv              %%vs44, 32(%%r23)            \n\t" \
-  "lxv              %%vs45, 48(%%r23)            \n\t" \
-  "lxv              %%vs46, 64(%%r23)            \n\t" \
-  "lxv              %%vs47, 80(%%r23)            \n\t" \
-  "lxv              %%vs48, 0(%%r24)             \n\t" \
-  "lxv              %%vs49, 16(%%r24)            \n\t" \
-  "lxv              %%vs50, 32(%%r24)            \n\t" \
-  "lxv              %%vs51, 48(%%r24)            \n\t" \
-  "lxv              %%vs52, 64(%%r24)            \n\t" \
-  "lxv              %%vs53, 80(%%r24)            \n\t"
+  "lxv              %%vs36, 0(%%r22)           \n\t" \
+  "lxv              %%vs37, 16(%%r22)          \n\t" \
+  "lxv              %%vs38, 32(%%r22)          \n\t" \
+  "lxv              %%vs39, 48(%%r22)          \n\t" \
+  "lxv              %%vs40, 64(%%r22)          \n\t" \
+  "lxv              %%vs41, 80(%%r22)          \n\t" \
+  "lxv              %%vs42, 0(%%r23)           \n\t" \
+  "lxv              %%vs43, 16(%%r23)          \n\t" \
+  "lxv              %%vs44, 32(%%r23)          \n\t" \
+  "lxv              %%vs45, 48(%%r23)          \n\t" \
+  "lxv              %%vs46, 64(%%r23)          \n\t" \
+  "lxv              %%vs47, 80(%%r23)          \n\t" \
+  "lxv              %%vs48, 0(%%r24)           \n\t" \
+  "lxv              %%vs49, 16(%%r24)          \n\t" \
+  "lxv              %%vs50, 32(%%r24)          \n\t" \
+  "lxv              %%vs51, 48(%%r24)          \n\t" \
+  "lxv              %%vs52, 64(%%r24)          \n\t" \
+  "lxv              %%vs53, 80(%%r24)          \n\t"
 
 #define SCALEGEN_CMATRIX \
   "xvmuldp          %%vs36, %%vs36, %%vs59   	 \n\t" \
@@ -434,7 +434,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
-  #if 1
   "                                               \n\t" // create offset regs
   "slwi            %%r10, %%r9, 1                 \n\t"
   "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
@@ -502,7 +501,6 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs34, %%vs34, %%vs40        \n\t"
   "xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
   "                                               \n\t"
-  #endif
   "b                DGENSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
