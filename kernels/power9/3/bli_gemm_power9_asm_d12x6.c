@@ -594,7 +594,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
 "stxsdx          %%vs0, 0, %%r22         \n\t" 
-"xxpermdi        %%vs0, %%vs0, %%vs0, 3       \n\t" 
+"xxpermdi        %%vs0, %%vs0, %%vs0, 2       \n\t" 
 "stxsdx          %%vs0, %%r9, %%r22      \n\t"
 #if 0 
 "stxsdx          %%vs1, 0, %%r23         \n\t" 
