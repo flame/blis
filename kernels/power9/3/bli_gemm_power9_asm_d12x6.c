@@ -507,6 +507,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
+  #if 0
   "                                               \n\t" // create offset regs
   "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
   "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
@@ -566,6 +567,7 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs34, %%vs34, %%vs52   	    \n\t" 
   "xvadddp          %%vs35, %%vs35, %%vs53   	    \n\t"
   "                                               \n\t"
+  #endif
   "b                DCOLSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -713,8 +715,8 @@ void bli_dgemm_power9_asm_12x6
   "xxswapd         %%vs35, %%vs35		              \n\t" 
   "stxsdx          %%vs35, 0, %%r27               \n\t"
   "                                               \n\t"
-  "b               DDONE                          \n\t"
   #endif
+  "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
   COLSTORE_CMATRIX
