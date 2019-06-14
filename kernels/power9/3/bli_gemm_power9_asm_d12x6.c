@@ -395,21 +395,21 @@ void bli_dgemm_power9_asm_12x6
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
   LOADANDUPDATE
-  LOADANDUPDATE
-  LOADANDUPDATE
-  LOADANDUPDATE
+  // LOADANDUPDATE
+  // LOADANDUPDATE
+  // LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r9, %1                      \n\t" // edge case
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
-  "beq              %%r0, DPOSTACCUM              \n\t"
-  "mtctr            %%r9                          \n\t"
-  "                                               \n\t"
-  "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
-  LOADANDUPDATE
-  "bdnz             DLOOPKLEFT                    \n\t"
+  // "ld               %%r9, %1                      \n\t" // edge case
+  // "cmpwi            %%r0, %%r9, 0                 \n\t"
+  // "beq              %%r0, DPOSTACCUM              \n\t"
+  // "mtctr            %%r9                          \n\t"
+  // "                                               \n\t"
+  // "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  // LOADANDUPDATE
+  // "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
