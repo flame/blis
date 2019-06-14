@@ -648,7 +648,7 @@ void bli_dgemm_power9_asm_12x6
 "xxswapd         %%vs5, %%vs5		       \n\t" 
 "stxsdx          %%vs5, %%r9, %%r27      \n\t"
 "                                               \n\t"
-#if 0
+#if 1
  GEN_NEXT_COL_CMATRIX 
 "                                               \n\t"
 "stxsdx          %%vs6, 0, %%r22         \n\t" 
