@@ -245,8 +245,8 @@ void libblis_test_gemm_experiment
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )
 	{
-		bli_setsc(  1.0,  0.0, &alpha );
-		bli_setsc(  1.0,  0.0, &beta );
+		bli_setsc(  0.0,  0.0, &alpha );
+		bli_setsc(  0.9,  0.0, &beta );
 	}
 	else
 	{
