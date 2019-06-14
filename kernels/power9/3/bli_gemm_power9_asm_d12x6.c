@@ -501,11 +501,18 @@ void bli_dgemm_power9_asm_12x6
   "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
+  "                                               \n\t" // create offset regs for C
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
   "                                               \n\t"
   "lxvdsx           %%vs48, 0, %%r8               \n\t" // splat alpha
+  "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
@@ -515,15 +522,13 @@ void bli_dgemm_power9_asm_12x6
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   "                                               \n\t"
-  "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
   "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c = 8,
+  "cmpwi            %%r0, %%r9, 8                 \n\t" //  if rs_c = 8
   "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
-  #if 1
   "                                               \n\t" // create offset regs
   "slwi            %%r10, %%r9, 1                 \n\t"
   "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
@@ -592,11 +597,9 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
   "                                               \n\t"
   "b                DGENSTORED                    \n\t"
-  #endif
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
-  #if 1
   "                                               \n\t"
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
@@ -650,7 +653,6 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs34, %%vs34, %%vs52   	    \n\t" 
   "xvadddp          %%vs35, %%vs35, %%vs53   	    \n\t"
   "                                               \n\t"
-  #endif
   "b                DCOLSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
@@ -664,7 +666,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
   "                                               \n\t"
-  #if 1
   "ld              %%r22, %6                      \n\t" // load c
   "slwi            %%r10, %%r9, 1                 \n\t"
   "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
@@ -798,16 +799,9 @@ void bli_dgemm_power9_asm_12x6
   "xxswapd         %%vs35, %%vs35		              \n\t" 
   "stxsdx          %%vs35, 0, %%r27               \n\t"
   "                                               \n\t"
-  #endif
   "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
-  "                                               \n\t" // create offset regs
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
-  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   COLSTORE_CMATRIX
   "                                               \n\t"
