@@ -383,6 +383,12 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "mtctr            %%r9                          \n\t"
+  "                                               \n\t" // create offset regs
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
@@ -508,12 +514,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
   #if 0
-  "                                               \n\t" // create offset regs
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
-  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
