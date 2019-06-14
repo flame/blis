@@ -507,7 +507,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
-  #if 0
+  #if 1
   "                                               \n\t"
   "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
   "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
