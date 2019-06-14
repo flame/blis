@@ -461,11 +461,6 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
-  // "cmpwi            %%r0, %%r9, 0                 \n\t"
-  // "beq              %%r0, DPRELOOPKLEFT           \n\t"
-  "mtctr            %%r9                          \n\t"
-  "                                               \n\t"
   #if 1
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
@@ -474,6 +469,11 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
   #endif
+  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
+  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "beq              %%r0, DPRELOOPKLEFT           \n\t"
+  "mtctr            %%r9                          \n\t"
+  "                                               \n\t"
   "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
