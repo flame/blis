@@ -434,6 +434,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
+  #if 0
   "                                               \n\t" // create offset regs
   "slwi            %%r10, %%r9, 1                 \n\t"
   "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
@@ -502,6 +503,7 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
   "                                               \n\t"
   "b                DGENSTORED                    \n\t"
+  #endif
   "                                               \n\t"
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
@@ -563,17 +565,21 @@ void bli_dgemm_power9_asm_12x6
   "xvadddp          %%vs33, %%vs33, %%vs51   	    \n\t" 
   "xvadddp          %%vs34, %%vs34, %%vs52   	    \n\t" 
   "xvadddp          %%vs35, %%vs35, %%vs53   	    \n\t"
+  "                                               \n\t"
   "b                DCOLSTORED                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "DBETAZERO:                                     \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "                                               \n\t"
+  "DBETAZERO:                                     \n\t" // beta=0 case
   "                                               \n\t" 
-  "cmpwi            %%r0, %%r9, 8                 \n\t"
-  "beq              DCOLSTORED                    \n\t" //if rs_c == 8, C is col stored
+  "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
+  "beq              DCOLSTORED                    \n\t" // C is col stored
   "                                               \n\t"
   "DGENSTORED:                                    \n\t"
   "                                               \n\t"
-  
+  #if 0
   "ld              %%r22, %6                      \n\t" // load c
   "slwi            %%r10, %%r9, 1                 \n\t"
   "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
@@ -708,6 +714,7 @@ void bli_dgemm_power9_asm_12x6
   "stxsdx          %%vs35, 0, %%r27               \n\t"
   "                                               \n\t"
   "b               DDONE                          \n\t"
+  #endif
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
   COLSTORE_CMATRIX
