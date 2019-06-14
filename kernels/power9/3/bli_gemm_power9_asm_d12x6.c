@@ -347,7 +347,7 @@ void bli_dgemm_power9_asm_12x6
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	uint64_t k_iter = k0 / 4;
+	uint64_t k_iter = k0;
 	uint64_t k_left = k0 % 4;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
@@ -394,21 +394,21 @@ void bli_dgemm_power9_asm_12x6
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
   LOADANDUPDATE
-  LOADANDUPDATE
-  LOADANDUPDATE
-  LOADANDUPDATE
+  // LOADANDUPDATE
+  // LOADANDUPDATE
+  // LOADANDUPDATE
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r9, %1                      \n\t" // edge case
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
-  "beq              %%r0, DPOSTACCUM              \n\t"
-  "mtctr            %%r9                          \n\t"
-  "                                               \n\t"
-  "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
-  LOADANDUPDATE
-  "bdnz             DLOOPKLEFT                    \n\t"
+  // "ld               %%r9, %1                      \n\t" // edge case
+  // "cmpwi            %%r0, %%r9, 0                 \n\t"
+  // "beq              %%r0, DPOSTACCUM              \n\t"
+  // "mtctr            %%r9                          \n\t"
+  // "                                               \n\t"
+  // "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  // LOADANDUPDATE
+  // "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
