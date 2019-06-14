@@ -103,6 +103,8 @@
 
 #define LOADANDUPDATE \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
+  "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
   "lxv           %%vs38, 32(%%r4)                 \n\t" \
@@ -118,6 +120,7 @@
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "                                               \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
   "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
@@ -159,8 +162,6 @@
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
@@ -373,6 +374,7 @@ void bli_dgemm_power9_asm_12x6
   "li               %%r25,24                      \n\t" // 3
   "li               %%r26,32                      \n\t" // 4
   "li               %%r27,40                      \n\t" // 5
+  "                                               \n\t"
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
@@ -719,6 +721,7 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
   "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
   "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
+  "                                               \n\t"
   COLSTORE_CMATRIX
   "                                               \n\t"
   "DDONE:                                         \n\t"  
