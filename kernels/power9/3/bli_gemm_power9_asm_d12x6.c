@@ -474,12 +474,12 @@ void bli_dgemm_power9_asm_12x6
   #endif
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r9, %0                      \n\t" 
-  "cmpwi            %%r0, %%r9, 0                 \n\t" // if k_iter = 0
-  "beq              %%r0, DPRELOOPKLEFT           \n\t" // jump to edge case loop
-  "mtctr            %%r9                          \n\t" // Set k_iter to be loop counter
+  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
+  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "beq              %%r0, DPRELOOPKLEFT           \n\t"
+  "mtctr            %%r9                          \n\t"
   "                                               \n\t"
-  "                                               \n\t"  
+  "                                               \n\t" // k_iter loop does A*B 
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
   LOADANDUPDATE
@@ -491,22 +491,16 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DPRELOOPKLEFT:                                 \n\t"
   "                                               \n\t"
-  "ld               %%r9, %1                      \n\t" 
-  "cmpwi            %%r0, %%r9, 0                 \n\t" // if k_left = 0
-  "beq              %%r0, DPOSTACCUM              \n\t" // jump to post accum
-  "mtctr            %%r9                          \n\t" // set k_left to be loop counter
+  "ld               %%r9, %1                      \n\t" // edge case
+  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "beq              %%r0, DPOSTACCUM              \n\t"
+  "mtctr            %%r9                          \n\t"
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
   LOADANDUPDATE
   "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
-  "                                               \n\t" // create offset regs for C
-  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
-  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
-  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
-  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
-  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   "ld               %%r8, %4                      \n\t" // load ptr for alpha
   "ld               %%r5, %5                      \n\t" // load ptr for beta
@@ -519,13 +513,14 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r9, %7                      \n\t" // load rs_c
   "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
+  "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   "                                               \n\t"
   "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "cmpwi            %%r0, %%r9, 8                 \n\t" //  if rs_c = 8
-  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case
+  "cmpwi            %%r0, %%r9, 8                 \n\t"
+  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
@@ -802,6 +797,12 @@ void bli_dgemm_power9_asm_12x6
   "b               DDONE                          \n\t"
   "                                               \n\t"
   "DCOLSTORED:                                    \n\t"
+  "                                               \n\t" // create offset regs
+  "add              %%r17, %%r16, %%r6            \n\t" // c + cs_c
+  "add              %%r18, %%r17, %%r6            \n\t" // c + cs_c * 2 
+  "add              %%r19, %%r18, %%r6            \n\t" // c + cs_c * 3
+  "add              %%r20, %%r19, %%r6            \n\t" // c + cs_c * 4
+  "add              %%r21, %%r20, %%r6            \n\t" // c + cs_c * 5
   "                                               \n\t"
   COLSTORE_CMATRIX
   "                                               \n\t"
