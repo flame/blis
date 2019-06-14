@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+#define PRELOADB 1
+
 
 #define VSZEROOUT \
  "xxlxor           %%vs0, %%vs0, %%vs0              \n\t" \
@@ -101,9 +103,11 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
-#if 0
+#if PRELOADB
+//load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
@@ -112,12 +116,6 @@
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
-  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
-  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
-  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
-  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
-  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
@@ -135,7 +133,6 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -168,14 +165,20 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
+  "                                               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
+  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" 
 
-
 #else
-#define LOADANDUPDATE \
+  // load B at beginning of loop
+  #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
@@ -184,6 +187,12 @@
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
+  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
@@ -201,6 +210,7 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -233,13 +243,6 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
-  "lxvdsx       %%vs49, %%r23, %%r3               \n\t" \
-  "lxvdsx       %%vs50, %%r24, %%r3               \n\t" \
-  "lxvdsx       %%vs51, %%r25, %%r3               \n\t" \
-  "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
-  "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" 
 #endif
@@ -461,7 +464,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  #if 1
+  #if PRELOADB
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
   "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
@@ -469,6 +472,8 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
   #endif
+  "                                               \n\t"
+  "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "cmpwi            %%r0, %%r9, 0                 \n\t"
   "beq              %%r0, DPRELOOPKLEFT           \n\t"
