@@ -16,7 +16,7 @@ cj      # Vector storage scheme(s) to test:
         #   'c' = colvec / unit stride; 'j' = colvec / non-unit stride;
         #   'r' = rowvec / unit stride; 'i' = rowvec / non-unit stride
 0       # Test all combinations of storage schemes?
-1       # Perform all tests with alignment?
+0       # Perform all tests with alignment?
         #   '0' = do NOT align buffers/ldims; '1' = align buffers/ldims
 0       # Randomize vectors and matrices using:
         #   '0' = real values on [-1,1];
