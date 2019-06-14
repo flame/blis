@@ -258,24 +258,24 @@
   "xvmuldp          %%vs41, %%vs41, %%vs59   	 \n\t"
 
 #define LOADGEN_CMATRIX \
-  "lxsdx	     %%vs36, 0, %%r22            	    \n\t" \
-  "lxsdx       %%vs37, %%r9, %%r22              \n\t" \
-  "xxpermdi    %%vs36, %%vs36, %%vs37, 0    	  \n\t" \
-  "lxsdx	     %%vs37, 0, %%r23            	    \n\t" \
-  "lxsdx       %%vs38, %%r9, %%r23              \n\t" \
-  "xxpermdi    %%vs37, %%vs37, %%vs38, 0    	  \n\t" \
-  "lxsdx	     %%vs38, 0, %%r24            	    \n\t" \
-  "lxsdx       %%vs39, %%r9, %%r24              \n\t" \
-  "xxpermdi    %%vs38, %%vs38, %%vs39, 0    	  \n\t" \
-  "lxsdx	     %%vs39, 0, %%r25            	    \n\t" \
-  "lxsdx       %%vs40, %%r9, %%r25              \n\t" \
-  "xxpermdi    %%vs39, %%vs39, %%vs40, 0    	  \n\t" \
-  "lxsdx	     %%vs40, 0, %%r26            	    \n\t" \
-  "lxsdx       %%vs41, %%r9, %%r26              \n\t" \
-  "xxpermdi    %%vs40, %%vs40, %%vs41, 0    	  \n\t" \
-  "lxsdx	     %%vs41, 0, %%r27            	    \n\t" \
-  "lxsdx       %%vs42, %%r9, %%r27              \n\t" \
-  "xxpermdi    %%vs41, %%vs41, %%vs42, 0    	  \n\t"
+  "lxsdx	     %%vs36, %%r9, %%r22             \n\t" \
+  "lxsdx       %%vs37, 0, %%r22                \n\t" \
+  "xxpermdi    %%vs36, %%vs36, %%vs37, 0       \n\t" \
+  "lxsdx	     %%vs37, %%r9, %%r23             \n\t" \
+  "lxsdx       %%vs38, 0, %%r23                \n\t" \
+  "xxpermdi    %%vs37, %%vs37, %%vs38, 0       \n\t" \
+  "lxsdx	     %%vs38, %%r9, %%r24             \n\t" \
+  "lxsdx       %%vs39, 0, %%r24                \n\t" \
+  "xxpermdi    %%vs38, %%vs38, %%vs39, 0       \n\t" \
+  "lxsdx	     %%vs39, %%r9, %%r25             \n\t" \
+  "lxsdx       %%vs40, 0, %%r25                \n\t" \
+  "xxpermdi    %%vs39, %%vs39, %%vs40, 0       \n\t" \
+  "lxsdx	     %%vs40, %%r9, %%r26             \n\t" \
+  "lxsdx       %%vs41, 0, %%r26                \n\t" \
+  "xxpermdi    %%vs40, %%vs40, %%vs41, 0       \n\t" \
+  "lxsdx	     %%vs41, %%r9, %%r27             \n\t" \
+  "lxsdx       %%vs42, 0, %%r27                \n\t" \
+  "xxpermdi    %%vs41, %%vs41, %%vs42, 0       \n\t"
 
 #define GEN_NEXT_COL_CMATRIX \
   "add             %%r22, %%r22, %%r6             \n\t" \
@@ -436,16 +436,12 @@ void bli_dgemm_power9_asm_12x6
   "DGENSTOREDBNZ:                                 \n\t"
   #if 1
   "                                               \n\t" // create offset regs
-  "add             %%r23, %%r22, %%r9             \n\t" // c + rs_c
-  "add             %%r23, %%r23, %%r9             \n\t" // c + rs_c * 2
-  "add             %%r24, %%r23, %%r9             \n\t" // c + rs_c * 3
-  "add             %%r24, %%r24, %%r9             \n\t" // c + rs_c * 4
-  "add             %%r25, %%r24, %%r9             \n\t" // c + rs_c * 5
-  "add             %%r25, %%r25, %%r9             \n\t" // c + rs_c * 6 
-  "add             %%r26, %%r25, %%r9             \n\t" // c + rs_c * 7
-  "add             %%r26, %%r26, %%r9             \n\t" // c + rs_c * 8
-  "add             %%r27, %%r26, %%r9             \n\t" // c + rs_c * 9
-  "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
+  "slwi            %%r10, %%r9, 1                 \n\t"
+  "add             %%r23, %%r22, %%r10            \n\t" // c + rs_c * 2
+  "add             %%r24, %%r23, %%r10            \n\t" // c + rs_c * 4
+  "add             %%r25, %%r24, %%r10            \n\t" // c + rs_c * 6 
+  "add             %%r26, %%r25, %%r10            \n\t" // c + rs_c * 8
+  "add             %%r27, %%r26, %%r10            \n\t" // c + rs_c * 10
   "                                               \n\t"
   GENLOAD_SCALE_UPDATE                                  // (1) load, scale, and move offsets of C
   "                                               \n\t"
