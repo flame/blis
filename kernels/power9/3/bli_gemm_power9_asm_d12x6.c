@@ -593,7 +593,6 @@ void bli_dgemm_power9_asm_12x6
   "add             %%r27, %%r27, %%r9             \n\t" // c + rs_c * 10
   "                                               \n\t"
   "                                               \n\t"
-  "lxv            %%vs0, 0(%%r22)                 \n\t"
   "xxswapd        %%vs0, %%vs0       \n\t"
   "stxsdx          %%vs0, 0, %%r22         \n\t" 
   "xxswapd        %%vs0, %%vs0       \n\t"
