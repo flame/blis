@@ -462,8 +462,8 @@ void bli_dgemm_power9_asm_12x6
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
   "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
-  "beq              %%r0, DPRELOOPKLEFT           \n\t"
+  // "cmpwi            %%r0, %%r9, 0                 \n\t"
+  // "beq              %%r0, DPRELOOPKLEFT           \n\t"
   "mtctr            %%r9                          \n\t"
   "                                               \n\t"
   #if 1
