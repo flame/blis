@@ -101,7 +101,7 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
-#if 0
+#if 1
 #define LOADANDUPDATE \
   "                                               \n\t" \
   "                                               \n\t" \
@@ -461,7 +461,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
-  #if 1
+  #if 0
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" // load first row of B
   "lxvdsx       %%vs49, %%r23, %%r3               \n\t" 
   "lxvdsx       %%vs50, %%r24, %%r3               \n\t" 
