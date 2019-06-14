@@ -28,7 +28,7 @@ d       # Datatype(s) to test:
 0       # Test gemm with mixed-domain operands?
 0       # Test gemm with mixed-precision operands?
 256      # Problem size: first to test
-256     # Problem size: maximum to test
+257     # Problem size: maximum to test
 1      # Problem size: increment between experiments
         # Complex level-3 implementations to test:
 0       #   3mh  ('1' = enable; '0' = disable)
