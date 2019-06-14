@@ -474,12 +474,12 @@ void bli_dgemm_power9_asm_12x6
   #endif
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
-  "beq              %%r0, DPRELOOPKLEFT           \n\t"
-  "mtctr            %%r9                          \n\t"
+  "ld               %%r9, %0                      \n\t" 
+  "cmpwi            %%r0, %%r9, 0                 \n\t" // if k_iter = 0
+  "beq              %%r0, DPRELOOPKLEFT           \n\t" // jump to edge case loop
+  "mtctr            %%r9                          \n\t" // Set k_iter to be loop counter
   "                                               \n\t"
-  "                                               \n\t" // k_iter loop does A*B 
+  "                                               \n\t"  
   "DLOOPKITER:                                    \n\t" // Begin k_iter loop
   "                                               \n\t"
   LOADANDUPDATE
@@ -491,10 +491,10 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DPRELOOPKLEFT:                                 \n\t"
   "                                               \n\t"
-  "ld               %%r9, %1                      \n\t" // edge case
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
-  "beq              %%r0, DPOSTACCUM              \n\t"
-  "mtctr            %%r9                          \n\t"
+  "ld               %%r9, %1                      \n\t" 
+  "cmpwi            %%r0, %%r9, 0                 \n\t" // if k_left = 0
+  "beq              %%r0, DPOSTACCUM              \n\t" // jump to post accum
+  "mtctr            %%r9                          \n\t" // set k_left to be loop counter
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
   LOADANDUPDATE
@@ -506,21 +506,20 @@ void bli_dgemm_power9_asm_12x6
   "ld               %%r5, %5                      \n\t" // load ptr for beta
   "                                               \n\t"
   "lxvdsx           %%vs48, 0, %%r8               \n\t" // splat alpha
-  "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
   "                                               \n\t"
   SCALEBYALPHA
   "                                               \n\t"
   "ld               %%r9, %7                      \n\t" // load rs_c
   "slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
-  "                                               \n\t"
   "cmpwi            %%r0, %%r5, 0                 \n\t"
   "beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   "                                               \n\t"
+  "lxvdsx           %%vs59, 0, %%r5               \n\t" // splat beta
   "ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
-  "cmpwi            %%r0, %%r9, 8                 \n\t"
-  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
+  "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c = 8,
+  "beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case
   "                                               \n\t"
   "                                               \n\t"
   "DGENSTOREDBNZ:                                 \n\t"
