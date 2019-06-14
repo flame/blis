@@ -277,7 +277,7 @@
 # --- Level-3 --------------------------------------------------------------
 
 2        # gemm
-12 12 -1  #   dimensions: m n k
+-1 -1 -1  #   dimensions: m n k
 nn       #   parameters: transa transb
 
 1        # hemm
