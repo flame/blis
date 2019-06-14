@@ -594,8 +594,9 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "                                               \n\t"
 "stxsdx          %%vs0, 0, %%r22         \n\t" 
-"xxpermdi        %%vs0, %%vs0, %%vs0, 0       \n\t" 
+"xxswapd        %%vs0, %%vs0       \n\t" 
 "stxsdx          %%vs0, %%r9, %%r22      \n\t" 
+#if 0
 "stxsdx          %%vs1, 0, %%r23         \n\t" 
 "xxpermdi        %%vs1, %%vs1, %%vs1, 0       \n\t" 
 "stxsdx          %%vs1, %%r9, %%r23      \n\t" 
@@ -612,7 +613,7 @@ void bli_dgemm_power9_asm_12x6
 "xxpermdi        %%vs5, %%vs5, %%vs5, 0       \n\t" 
 "stxsdx          %%vs5, %%r9, %%r27      \n\t" 
 "                                               \n\t"
-#if 0
+
  GEN_NEXT_COL_CMATRIX 
 "                                               \n\t"
 "stxsdx          %%vs6, 0, %%r22         \n\t" 
