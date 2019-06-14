@@ -103,14 +103,12 @@
 
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
   "lxv           %%vs38, 32(%%r4)                 \n\t" \
   "lxv           %%vs39, 48(%%r4)                 \n\t" \
   "lxv           %%vs40, 64(%%r4)                 \n\t" \
   "lxv           %%vs41, 80(%%r4)                 \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
@@ -401,14 +399,14 @@ void bli_dgemm_power9_asm_12x6
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
   "                                               \n\t"
-  // "ld               %%r9, %1                      \n\t" // edge case
-  // "cmpwi            %%r0, %%r9, 0                 \n\t"
-  // "beq              %%r0, DPOSTACCUM              \n\t"
-  // "mtctr            %%r9                          \n\t"
-  // "                                               \n\t"
-  // "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
-  // LOADANDUPDATE
-  // "bdnz             DLOOPKLEFT                    \n\t"
+  "ld               %%r9, %1                      \n\t" // edge case
+  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "beq              %%r0, DPOSTACCUM              \n\t"
+  "mtctr            %%r9                          \n\t"
+  "                                               \n\t"
+  "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  LOADANDUPDATE
+  "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
   "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
