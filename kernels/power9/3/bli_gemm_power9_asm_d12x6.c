@@ -107,7 +107,6 @@
 //load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
@@ -133,6 +132,7 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -596,15 +596,15 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
   "                                               \n\t"
-  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
-  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
+  "add              %%r23, %%r22, %%r6            \n\t" // c + cs_c
+  "add              %%r24, %%r23, %%r6            \n\t" // c + cs_c * 2
   "                                               \n\t"
   "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCOL_CMATRIX
-  "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
-  "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
-  "add             %%r24, %%r23, %%r6             \n\t" // Move C-ptrs
+  "add             %%r22, %%r24, %%r6             \n\t" // c + cs_c * 3
+  "add             %%r23, %%r22, %%r6             \n\t" // c + cs_c * 4
+  "add             %%r24, %%r23, %%r6             \n\t" // c + cs_c * 5
   SCALECOL_CMATRIX
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" // Begin adding to C
