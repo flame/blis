@@ -103,10 +103,11 @@
  "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63           \n\t"   
 
-//load B at the end
 #if PRELOADB
+//load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
+  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r4)                  \n\t" \
   "lxv           %%vs37, 16(%%r4)                 \n\t" \
@@ -132,7 +133,6 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
-  "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -365,7 +365,7 @@
 #define GENLOAD_SCALE_UPDATE \
   LOADGEN_CMATRIX   \
   GEN_NEXT_COL_CMATRIX \
-  SCALEGEN_CMATRIX 
+  SCALEGEN_CMATRIX
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
@@ -460,7 +460,7 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
-  "ld               %%r16, %6                     \n\t" // load ptr of C
+  "ld               %%r16, %6                     \n\t" // load ptr for C
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
@@ -596,8 +596,8 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
   "                                               \n\t"
-  "add              %%r23, %%r22, %%r6            \n\t" // c + cs_c
-  "add              %%r24, %%r23, %%r6            \n\t" // c + cs_c * 2
+  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
+  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
   "                                               \n\t"
   "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
@@ -825,12 +825,13 @@ void bli_dgemm_power9_asm_12x6
   /* unclobberable regs: r2(PIC reg), r30(stack frame)*/
   "r0", "r3", "r4", "r5", "r6", "r8", "r9", 
   "r16", "r17", "r18", "r19", "r20", 
-  "r21", "r22", "r23", "r24", "r25", "r26", "r27"
-  // "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
-  // "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
-  // "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29", "vs30",
-  // "vs31", "vs32", "vs33", "vs34", "vs35", "vs36", "vs37", "vs38", "vs39", "vs40",
-  // "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49", "vs50",
-  // "vs51", "vs52", "vs53"
+  "r21", "r22", "r23", "r24", "r25", "r26", "r27",
+
+  "vs0", "vs1", "vs2", "vs3", "vs4", "vs5", "vs6", "vs7", "vs8", "vs9", "vs10",
+  "vs11", "vs12", "vs13", "vs14", "vs15", "vs16", "vs17", "vs18", "vs19", "vs20",
+  "vs21", "vs22", "vs23", "vs24", "vs25", "vs26", "vs27", "vs28", "vs29", "vs30",
+  "vs31", "vs32", "vs33", "vs34", "vs35", "vs36", "vs37", "vs38", "vs39", "vs40",
+  "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49", "vs50",
+  "vs51", "vs52", "vs53"
   );
 }
