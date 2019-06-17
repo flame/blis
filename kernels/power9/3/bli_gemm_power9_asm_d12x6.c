@@ -109,12 +109,6 @@
   "                                               \n\t" \
   "addi             %%r3, %%r3, 48                \n\t" \
   "                                               \n\t" \
-  "lxv           %%vs36, 0(%%r4)                  \n\t" \
-  "lxv           %%vs37, 16(%%r4)                 \n\t" \
-  "lxv           %%vs38, 32(%%r4)                 \n\t" \
-  "lxv           %%vs39, 48(%%r4)                 \n\t" \
-  "lxv           %%vs40, 64(%%r4)                 \n\t" \
-  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
@@ -170,9 +164,14 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
+  "lxv           %%vs36, 0(%%r4)                  \n\t" \
+  "lxv           %%vs37, 16(%%r4)                 \n\t" \
+  "lxv           %%vs38, 32(%%r4)                 \n\t" \
+  "lxv           %%vs39, 48(%%r4)                 \n\t" \
+  "lxv           %%vs40, 64(%%r4)                 \n\t" \
+  "lxv           %%vs41, 80(%%r4)                 \n\t" \
   "                                               \n\t" 
 
 #else
@@ -471,6 +470,12 @@ void bli_dgemm_power9_asm_12x6
   "lxvdsx       %%vs51, %%r25, %%r3               \n\t" 
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" 
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t"
+  "lxv           %%vs36, 0(%%r4)                  \n\t" 
+  "lxv           %%vs37, 16(%%r4)                 \n\t" 
+  "lxv           %%vs38, 32(%%r4)                 \n\t" 
+  "lxv           %%vs39, 48(%%r4)                 \n\t" 
+  "lxv           %%vs40, 64(%%r4)                 \n\t" 
+  "lxv           %%vs41, 80(%%r4)                 \n\t" 
   #endif
   "                                               \n\t"
   "                                               \n\t"
