@@ -8,7 +8,7 @@
 #  accepted values.
 #
 
-1       # Number of repeats per experiment (best result is reported)
+3       # Number of repeats per experiment (best result is reported)
 rcg       # Matrix storage scheme(s) to test:
         #   'c' = col-major storage; 'g' = general stride storage;
         #   'r' = row-major storage
