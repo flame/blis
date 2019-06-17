@@ -272,11 +272,11 @@ void libblis_test_gemm_experiment
 	{
 		bli_copym( &c_save, &c );
 
-#if 0
-//bli_printm( "a = [", &a, "%7.6f", "];" );
-//bli_printm( "b = [", &b, "%7.6f", "];" );
+#if 1
 bli_printm( "alpha", &alpha, "%5.2f", "" );
 bli_printm( "beta", &beta, "%5.2f", "" );
+bli_printm( "a = [", &a, "%7.6f", "];" );
+bli_printm( "b = [", &b, "%7.6f", "];" );
 bli_printm( "c = [", &c, "%7.6f", "];" );
 #endif
 
@@ -285,7 +285,7 @@ bli_printm( "c = [", &c, "%7.6f", "];" );
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
 
 		time_min = bli_clock_min_diff( time_min, time );
-#if 0
+#if 1
 bli_printm( "c_after = [", &c, "%7.6f", "];" );
 #endif
 
