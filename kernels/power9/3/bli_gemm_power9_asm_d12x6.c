@@ -364,8 +364,8 @@
 
 #define GENLOAD_SCALE_UPDATE \
   LOADGEN_CMATRIX   \
-  GEN_NEXT_COL_CMATRIX \
-  SCALEGEN_CMATRIX
+  SCALEGEN_CMATRIX \
+  GEN_NEXT_COL_CMATRIX 
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
@@ -449,12 +449,12 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   "ld               %%r6, %8                      \n\t" // load cs_c
   "                                               \n\t" // Offsets for B
-  "liat               %%r22,0                       \n\t" // 0
-  "liat               %%r23,8                       \n\t" // 1
-  "liat               %%r24,16                      \n\t" // 2
-  "liat               %%r25,24                      \n\t" // 3
-  "liat               %%r26,32                      \n\t" // 4
-  "liat               %%r27,40                      \n\t" // 5
+  "li               %%r22,0                       \n\t" // 0
+  "li               %%r23,8                       \n\t" // 1
+  "li               %%r24,16                      \n\t" // 2
+  "li               %%r25,24                      \n\t" // 3
+  "li               %%r26,32                      \n\t" // 4
+  "li               %%r27,40                      \n\t" // 5
   "                                               \n\t"
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
@@ -596,16 +596,16 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DCOLSTOREDBNZ:                                 \n\t"
   "                                               \n\t"
-  "add              %%r23, %%r22, %%r6            \n\t" // load ptr for C (used as offset)
-  "add              %%r24, %%r23, %%r6            \n\t" // load ptr for C (used as offset)
+  "add              %%r23, %%r22, %%r6            \n\t" // c + cs_c
+  "add              %%r24, %%r23, %%r6            \n\t" // c + cs_c * 2
   "                                               \n\t"
   "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCOL_CMATRIX
+  SCALECOL_CMATRIX
   "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
   "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
   "add             %%r24, %%r23, %%r6             \n\t" // Move C-ptrs
-  SCALECOL_CMATRIX
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" // Begin adding to C
   "xvadddp          %%vs1, %%vs1, %%vs37   	      \n\t" 
