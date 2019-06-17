@@ -448,6 +448,9 @@ void bli_dgemm_power9_asm_12x6
 	(
 	"                                               \n\t"
   "ld               %%r6, %8                      \n\t" // load cs_c
+  "ld               %%r7, %1                      \n\t" // load k_left
+  "ld               %%r9, %0                      \n\t" // load k_iter
+  "                                               \n\t"
   "                                               \n\t" // Offsets for B
   "li               %%r22,0                       \n\t" // 0
   "li               %%r23,8                       \n\t" // 1
@@ -474,7 +477,6 @@ void bli_dgemm_power9_asm_12x6
   #endif
   "                                               \n\t"
   "                                               \n\t"
-  "ld               %%r9, %0                      \n\t" // Set k_iter to be loop counter
   "cmpwi            %%r0, %%r9, 0                 \n\t"
   "beq              %%r0, DPRELOOPKLEFT           \n\t"
   "mtctr            %%r9                          \n\t"
@@ -491,10 +493,9 @@ void bli_dgemm_power9_asm_12x6
   "                                               \n\t"
   "DPRELOOPKLEFT:                                 \n\t"
   "                                               \n\t"
-  "ld               %%r9, %1                      \n\t" // edge case
-  "cmpwi            %%r0, %%r9, 0                 \n\t"
+  "cmpwi            %%r0, %%r7, 0                 \n\t"
   "beq              %%r0, DPOSTACCUM              \n\t"
-  "mtctr            %%r9                          \n\t"
+  "mtctr            %%r7                          \n\t"
   "                                               \n\t"
   "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
   LOADANDUPDATE
@@ -823,7 +824,7 @@ void bli_dgemm_power9_asm_12x6
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2(PIC reg), r30(stack frame)*/
-  "r0", "r3", "r4", "r5", "r6", "r8", "r9", 
+  "r0", "r3", "r4", "r5", "r6", "r7", "r8", "r9", 
   "r16", "r17", "r18", "r19", "r20", 
   "r21", "r22", "r23", "r24", "r25", "r26", "r27",
 
