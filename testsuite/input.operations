@@ -278,7 +278,7 @@
 
 2        # gemm
 4 4 -1  #   dimensions: m n k
-??       #   parameters: transa transb
+nn       #   parameters: transa transb
 
 1        # hemm
 -1 -1    #   dimensions: m n
