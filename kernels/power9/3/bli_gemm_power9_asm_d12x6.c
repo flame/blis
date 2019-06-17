@@ -364,8 +364,8 @@
 
 #define GENLOAD_SCALE_UPDATE \
   LOADGEN_CMATRIX   \
-  SCALEGEN_CMATRIX \
-  GEN_NEXT_COL_CMATRIX 
+  GEN_NEXT_COL_CMATRIX \
+  SCALEGEN_CMATRIX 
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs0, 0(%%r16)            \n\t" \
@@ -602,10 +602,10 @@ void bli_dgemm_power9_asm_12x6
   "DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
   "                                               \n\t"
   LOADCOL_CMATRIX
-  SCALECOL_CMATRIX
   "add             %%r22, %%r24, %%r6             \n\t" // Move C-ptrs
   "add             %%r23, %%r22, %%r6             \n\t" // Move C-ptrs
   "add             %%r24, %%r23, %%r6             \n\t" // Move C-ptrs
+  SCALECOL_CMATRIX
   "                                               \n\t"
   "xvadddp          %%vs0, %%vs0, %%vs36   	      \n\t" // Begin adding to C
   "xvadddp          %%vs1, %%vs1, %%vs37   	      \n\t" 
