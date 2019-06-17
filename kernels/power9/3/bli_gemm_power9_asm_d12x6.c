@@ -170,6 +170,7 @@
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
+  "                                               \n\t" \
   "lxvdsx       %%vs53, %%r27, %%r3               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" 
