@@ -124,6 +124,7 @@
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "                                               \n\t" \
+  "addi             %%r4, %%r4, 96                \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r3               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
@@ -161,7 +162,6 @@
   "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs52, %%r26, %%r3               \n\t" \
-  "addi             %%r4, %%r4, 96                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
   "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
