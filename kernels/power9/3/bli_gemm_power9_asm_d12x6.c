@@ -449,18 +449,18 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   "ld               %%r6, %8                      \n\t" // load cs_c
   "                                               \n\t" // Offsets for B
-  "li               %%r22,0                       \n\t" // 0
-  "li               %%r23,8                       \n\t" // 1
-  "li               %%r24,16                      \n\t" // 2
-  "li               %%r25,24                      \n\t" // 3
-  "li               %%r26,32                      \n\t" // 4
-  "li               %%r27,40                      \n\t" // 5
+  "liat               %%r22,0                       \n\t" // 0
+  "liat               %%r23,8                       \n\t" // 1
+  "liat               %%r24,16                      \n\t" // 2
+  "liat               %%r25,24                      \n\t" // 3
+  "liat               %%r26,32                      \n\t" // 4
+  "liat               %%r27,40                      \n\t" // 5
   "                                               \n\t"
   "slwi             %%r6, %%r6, 3                 \n\t" // mul by size of elem
   "                                               \n\t"
   "ld               %%r4, %2                      \n\t" // load ptr of A
   "ld               %%r3, %3                      \n\t" // load ptr of B
-  "ld               %%r16, %6                     \n\t" // load ptr for C
+  "ld               %%r16, %6                     \n\t" // load ptr of C
   "                                               \n\t"
   VSZEROOUT                                             // Zero out vec regs
   "                                               \n\t"
