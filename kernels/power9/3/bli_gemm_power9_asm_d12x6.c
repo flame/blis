@@ -96,7 +96,6 @@
 //load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r8, %%r8, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r7)                  \n\t" \
   "lxv           %%vs37, 16(%%r7)                 \n\t" \
@@ -105,6 +104,7 @@
   "lxv           %%vs40, 64(%%r7)                 \n\t" \
   "lxv           %%vs41, 80(%%r7)                 \n\t" \
   "                                               \n\t" \
+  "lxvdsx       %%vs49, %%r23, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
@@ -114,7 +114,7 @@
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "                                               \n\t" \
   "addi             %%r7, %%r7, 96                \n\t" \
-  "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
   "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
@@ -123,7 +123,7 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs49, %%r23, %%r8               \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -132,7 +132,7 @@
   "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
   "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs50, %%r24, %%r8               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
   "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
@@ -141,7 +141,8 @@
   "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
   "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r8               \n\t" \
+  "addi             %%r8, %%r8, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
   "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
@@ -150,7 +151,7 @@
   "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
   "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
   "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
@@ -160,7 +161,6 @@
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs53, %%r27, %%r8               \n\t" \
   "                                               \n\t" \
 
 
@@ -386,12 +386,7 @@ void bli_dgemm_power9_asm_12x6
   	"                                               \n\t"
   VSZEROOUT                                               // Zero out vec regs
   	"                                               \n\t"
-	"lxvdsx       %%vs48, %%r22, %%r8               \n\t" // load first row of B
-  	"lxvdsx       %%vs49, %%r23, %%r8               \n\t" 
- 	"lxvdsx       %%vs50, %%r24, %%r8               \n\t" 
-  	"lxvdsx       %%vs51, %%r25, %%r8               \n\t" 
-  	"lxvdsx       %%vs52, %%r26, %%r8               \n\t" 
-  	"lxvdsx       %%vs53, %%r27, %%r8               \n\t"
+	"lxvdsx       %%vs48, %%r22, %%r8               \n\t" // splat first elem of B
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r17, 0                 \n\t"
