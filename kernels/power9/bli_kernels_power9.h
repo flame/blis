@@ -34,9 +34,9 @@
 
 // -- level-3 --
 
-// gemm (asm d2x4)
+// gemm (asm d12x6)
 GEMM_UKR_PROT( double,   d, gemm_power9_asm_12x6 )
 
-// gemm (asm d2x2)
-GEMM_UKR_PROT( double,   d, gemm_power9_asm_4x6 )
+// gemm (asm d6x4)
+GEMM_UKR_PROT( double,   d, gemm_power9_asm_6x4 )
 
