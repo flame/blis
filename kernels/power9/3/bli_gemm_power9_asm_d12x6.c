@@ -258,22 +258,22 @@
 #define LOADGEN_CMATRIX \
   "lxsdx	   %%vs36, %%r9, %%r22             \n\t" \
   "lxsdx       %%vs37, 0, %%r22                \n\t" \
+  "lxsdx	   %%vs38, %%r9, %%r23             \n\t" \
+  "lxsdx       %%vs39, 0, %%r23                \n\t" \
+  "lxsdx	   %%vs40, %%r9, %%r24             \n\t" \
+  "lxsdx       %%vs41, 0, %%r24                \n\t" \
+  "lxsdx	   %%vs42, %%r9, %%r25             \n\t" \
+  "lxsdx       %%vs43, 0, %%r25                \n\t" \
+  "lxsdx	   %%vs44, %%r9, %%r26             \n\t" \
+  "lxsdx       %%vs45, 0, %%r26                \n\t" \
+  "lxsdx	   %%vs46, %%r9, %%r27             \n\t" \
+  "lxsdx       %%vs47, 0, %%r27                \n\t" \
   "xxpermdi    %%vs36, %%vs36, %%vs37, 0       \n\t" \
-  "lxsdx	   %%vs37, %%r9, %%r23             \n\t" \
-  "lxsdx       %%vs38, 0, %%r23                \n\t" \
-  "xxpermdi    %%vs37, %%vs37, %%vs38, 0       \n\t" \
-  "lxsdx	   %%vs38, %%r9, %%r24             \n\t" \
-  "lxsdx       %%vs39, 0, %%r24                \n\t" \
-  "xxpermdi    %%vs38, %%vs38, %%vs39, 0       \n\t" \
-  "lxsdx	   %%vs39, %%r9, %%r25             \n\t" \
-  "lxsdx       %%vs40, 0, %%r25                \n\t" \
-  "xxpermdi    %%vs39, %%vs39, %%vs40, 0       \n\t" \
-  "lxsdx	   %%vs40, %%r9, %%r26             \n\t" \
-  "lxsdx       %%vs41, 0, %%r26                \n\t" \
-  "xxpermdi    %%vs40, %%vs40, %%vs41, 0       \n\t" \
-  "lxsdx	   %%vs41, %%r9, %%r27             \n\t" \
-  "lxsdx       %%vs42, 0, %%r27                \n\t" \
-  "xxpermdi    %%vs41, %%vs41, %%vs42, 0       \n\t"
+  "xxpermdi    %%vs37, %%vs38, %%vs39, 0       \n\t" \
+  "xxpermdi    %%vs38, %%vs40, %%vs41, 0       \n\t" \
+  "xxpermdi    %%vs39, %%vs42, %%vs43, 0       \n\t" \
+  "xxpermdi    %%vs40, %%vs44, %%vs45, 0       \n\t" \
+  "xxpermdi    %%vs41, %%vs46, %%vs47, 0       \n\t"
 
 #define GEN_NEXT_COL_CMATRIX \
   "add             %%r22, %%r22, %%r10             \n\t" \
