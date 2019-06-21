@@ -96,7 +96,6 @@
 //load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r8, %%r8, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r7)                  \n\t" \
   "lxv           %%vs37, 16(%%r7)                 \n\t" \
@@ -124,6 +123,7 @@
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
   "                                               \n\t" \
+  "addi             %%r8, %%r8, 48                \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -390,8 +390,6 @@ void bli_dgemm_power9_asm_12x6
   	"lxvdsx       %%vs49, %%r23, %%r8               \n\t" 
  	"lxvdsx       %%vs50, %%r24, %%r8               \n\t" 
   	"lxvdsx       %%vs51, %%r25, %%r8               \n\t" 
-  	"lxvdsx       %%vs52, %%r26, %%r8               \n\t" 
-  	"lxvdsx       %%vs53, %%r27, %%r8               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r17, 0                 \n\t"
