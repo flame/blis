@@ -91,12 +91,16 @@
  "xxlxor           %%vs51, %%vs51, %%vs51           \n\t" \
  "xxlxor           %%vs52, %%vs52, %%vs52           \n\t" \
  "xxlxor           %%vs53, %%vs53, %%vs53           \n\t" \
+ "xxlxor           %%vs54, %%vs54, %%vs54           \n\t" \
+ "xxlxor           %%vs55, %%vs55, %%vs55           \n\t" \
+ "xxlxor           %%vs56, %%vs56, %%vs56           \n\t" \
+ "xxlxor           %%vs57, %%vs57, %%vs57           \n\t" \
+ "xxlxor           %%vs58, %%vs58, %%vs58           \n\t" \
  "xxlxor           %%vs59, %%vs59, %%vs59           \n\t"    
 
 //load B at the end
 #define LOADANDUPDATE \
   "                                               \n\t" \
-  "addi             %%r8, %%r8, 48                \n\t" \
   "                                               \n\t" \
   "lxv           %%vs36, 0(%%r7)                  \n\t" \
   "lxv           %%vs37, 16(%%r7)                 \n\t" \
@@ -105,6 +109,16 @@
   "lxv           %%vs40, 64(%%r7)                 \n\t" \
   "lxv           %%vs41, 80(%%r7)                 \n\t" \
   "                                               \n\t" \
+  "lxv           %%vs42, 96(%%r7)                 \n\t" \
+  "lxv           %%vs43, 112(%%r7)                \n\t" \
+  "lxv           %%vs44, 128(%%r7)                \n\t" \
+  "lxv           %%vs45, 144(%%r7)                \n\t" \
+  "lxv           %%vs46, 160(%%r7)                \n\t" \
+  "lxv           %%vs47, 176(%%r7)                \n\t" \
+  "                                               \n\t" \
+  "addi             %%r8, %%r8, 48                \n\t" \
+  "addi             %%r28, %%r28, 48              \n\t" \
+  "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
@@ -112,8 +126,7 @@
   "xvmaddadp        %%vs3, %%vs39, %%vs48         \n\t" \
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
-  "                                               \n\t" \
-  "addi             %%r7, %%r7, 96                \n\t" \
+  "addi             %%r7, %%r7, 192               \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
@@ -122,8 +135,23 @@
   "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t" \
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs49, %%r23, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs0, %%vs42, %%vs54         \n\t" \
+  "xvmaddadp        %%vs1, %%vs43, %%vs54         \n\t" \
+  "xvmaddadp        %%vs2, %%vs44, %%vs54         \n\t" \
+  "xvmaddadp        %%vs3, %%vs45, %%vs54         \n\t" \
+  "xvmaddadp        %%vs4, %%vs46, %%vs54         \n\t" \
+  "xvmaddadp        %%vs5, %%vs47, %%vs54         \n\t" \
+  "lxvdsx       %%vs54, %%r23, %%r28              \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs6, %%vs42, %%vs55         \n\t" \
+  "xvmaddadp        %%vs7, %%vs43, %%vs55         \n\t" \
+  "xvmaddadp        %%vs8, %%vs44, %%vs55         \n\t" \
+  "xvmaddadp        %%vs9, %%vs45, %%vs55         \n\t" \
+  "xvmaddadp        %%vs10, %%vs46, %%vs55        \n\t" \
+  "xvmaddadp        %%vs11, %%vs47, %%vs55        \n\t" \
+  "lxvdsx       %%vs55, %%r23, %%r28              \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
   "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
@@ -131,7 +159,6 @@
   "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t" \
   "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
   "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs50, %%r24, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
@@ -140,8 +167,23 @@
   "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t" \
   "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
   "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs12, %%vs42, %%vs56        \n\t" \
+  "xvmaddadp        %%vs13, %%vs43, %%vs56        \n\t" \
+  "xvmaddadp        %%vs14, %%vs44, %%vs56        \n\t" \
+  "xvmaddadp        %%vs15, %%vs45, %%vs56        \n\t" \
+  "xvmaddadp        %%vs16, %%vs46, %%vs56        \n\t" \
+  "xvmaddadp        %%vs17, %%vs47, %%vs56        \n\t" \
+  "lxvdsx       %%vs56, %%r24, %%r28              \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs18, %%vs42, %%vs57        \n\t" \
+  "xvmaddadp        %%vs19, %%vs43, %%vs57        \n\t" \
+  "xvmaddadp        %%vs20, %%vs44, %%vs57        \n\t" \
+  "xvmaddadp        %%vs21, %%vs45, %%vs57        \n\t" \
+  "xvmaddadp        %%vs22, %%vs46, %%vs57        \n\t" \
+  "xvmaddadp        %%vs23, %%vs47, %%vs57        \n\t" \
+  "lxvdsx       %%vs57, %%r25, %%r28              \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
   "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
@@ -149,7 +191,6 @@
   "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t" \
   "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
   "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
@@ -158,9 +199,23 @@
   "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t" \
   "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
   "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
-  "                                               \n\t" \
-  "                                               \n\t" \
   "lxvdsx       %%vs53, %%r27, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs24, %%vs42, %%vs58        \n\t" \
+  "xvmaddadp        %%vs25, %%vs43, %%vs58        \n\t" \
+  "xvmaddadp        %%vs26, %%vs44, %%vs58        \n\t" \
+  "xvmaddadp        %%vs27, %%vs45, %%vs58        \n\t" \
+  "xvmaddadp        %%vs28, %%vs46, %%vs58        \n\t" \
+  "xvmaddadp        %%vs29, %%vs47, %%vs58        \n\t" \
+  "lxvdsx       %%vs58, %%r26, %%r28               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs30, %%vs42, %%vs59        \n\t" \
+  "xvmaddadp        %%vs31, %%vs43, %%vs59        \n\t" \
+  "xvmaddadp        %%vs32, %%vs44, %%vs59        \n\t" \
+  "xvmaddadp        %%vs33, %%vs45, %%vs59        \n\t" \
+  "xvmaddadp        %%vs34, %%vs46, %%vs59        \n\t" \
+  "xvmaddadp        %%vs35, %%vs47, %%vs59        \n\t" \
+  "lxvdsx       %%vs59, %%r27, %%r28               \n\t" \
   "                                               \n\t" \
 
 
@@ -341,8 +396,8 @@ void bli_dgemm_power9_asm_12x6
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
   #if 1
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
   #else
   uint64_t k_iter = 0;
 	uint64_t k_left = k0;
@@ -364,6 +419,8 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
   	"ld               %%r10, %8                     \n\t" // load cs_c
   	"ld               %%r9, %7                      \n\t" // load rs_c
+	"ld               %%r7, %2                      \n\t" // load ptr of A
+  	"ld               %%r8, %3                      \n\t" // load ptr of B
   	"                                               \n\t"
   	"                                               \n\t" // Offsets for B
   	"li               %%r22,0                       \n\t" // 0
@@ -373,16 +430,14 @@ void bli_dgemm_power9_asm_12x6
   	"li               %%r26,32                      \n\t" // 4
   	"li               %%r27,40                      \n\t" // 5
   	"                                               \n\t"
-  	"ld               %%r17, %0                      \n\t" // load k_iter
+  	"ld               %%r17, %0                     \n\t" // load k_iter
   	"ld               %%r18, %1                     \n\t" // load k_left
-  	"                                               \n\t"
   	"                                               \n\t"
   	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
   	"slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   	"                                               \n\t"
-  	"ld               %%r7, %2                      \n\t" // load ptr of A
-  	"ld               %%r8, %3                      \n\t" // load ptr of B
   	"ld               %%r16, %6                     \n\t" // load ptr for C
+	"addi             %%r28, %%r8, 48               \n\t"
   	"                                               \n\t"
   VSZEROOUT                                               // Zero out vec regs
   	"                                               \n\t"
@@ -392,6 +447,12 @@ void bli_dgemm_power9_asm_12x6
   	"lxvdsx       %%vs51, %%r25, %%r8               \n\t" 
   	"lxvdsx       %%vs52, %%r26, %%r8               \n\t" 
   	"lxvdsx       %%vs53, %%r27, %%r8               \n\t"
+	"lxvdsx       %%vs54, %%r22, %%r28              \n\t" // load second row of B
+  	"lxvdsx       %%vs55, %%r23, %%r28              \n\t" 
+ 	"lxvdsx       %%vs56, %%r24, %%r28              \n\t" 
+  	"lxvdsx       %%vs57, %%r25, %%r28              \n\t" 
+  	"lxvdsx       %%vs58, %%r26, %%r28              \n\t" 
+  	"lxvdsx       %%vs59, %%r27, %%r28              \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r17, 0                 \n\t"
