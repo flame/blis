@@ -231,7 +231,7 @@
 
 
 
-void bli_dgemm_power9_asm_12x6
+void bli_dgemm_power9_asm_6x4
      (
        dim_t               k0,
        double*    restrict alpha,
