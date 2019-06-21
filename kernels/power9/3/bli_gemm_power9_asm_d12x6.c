@@ -439,6 +439,12 @@ void bli_dgemm_power9_asm_12x6
   	"                                               \n\t"
   SCALEBYALPHA
   	"                                               \n\t"
+	"                                               \n\t" // create offset regs
+  	"add              %%r17, %%r16, %%r10           \n\t" // c + cs_c
+  	"add              %%r18, %%r17, %%r10           \n\t" // c + cs_c * 2 
+  	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
+  	"add              %%r20, %%r19, %%r10           \n\t" // c + cs_c * 4
+  	"add              %%r21, %%r20, %%r10           \n\t" // c + cs_c * 5
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r28, 0                \n\t"
@@ -452,12 +458,6 @@ void bli_dgemm_power9_asm_12x6
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
   	"                                               \n\t" // create offset regs
-  	"slwi            %%r12, %%r9, 1                 \n\t"
-  	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
-  	"add             %%r24, %%r23, %%r12            	\n\t" // c + rs_c * 4
-  	"add             %%r25, %%r24, %%r12            	\n\t" // c + rs_c * 6 
-  	"add             %%r26, %%r25, %%r12            	\n\t" // c + rs_c * 8
-  	"add             %%r27, %%r26, %%r12            	\n\t" // c + rs_c * 10
   	"                                               	\n\t"
   GENLOAD_SCALE_UPDATE                                  // (1) load, scale, and move offsets of C
   	"                                              	    \n\t"
@@ -724,12 +724,6 @@ void bli_dgemm_power9_asm_12x6
   	"b               DDONE                          \n\t"
   	"                                               \n\t"
   	"DCOLSTORED:                                    \n\t"
-  	"                                               \n\t" // create offset regs
-  	"add              %%r17, %%r16, %%r10           \n\t" // c + cs_c
-  	"add              %%r18, %%r17, %%r10           \n\t" // c + cs_c * 2 
-  	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
-  	"add              %%r20, %%r19, %%r10           \n\t" // c + cs_c * 4
-  	"add              %%r21, %%r20, %%r10           \n\t" // c + cs_c * 5
   	"                                               \n\t"
  COLSTORE_CMATRIX
   	"                                               \n\t"
