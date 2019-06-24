@@ -42,3 +42,14 @@ void bli_syrk_front
        rntm_t* rntm,
        cntl_t* cntl
      );
+	 
+err_t bli_syrk_small
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );

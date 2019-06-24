@@ -36,6 +36,9 @@
 #include "blis.h"
 
 
+//#define FILE_IN_OUT      // File based input matrix dimensions
+
+
 //#define PRINT
 
 int main( int argc, char** argv )
@@ -58,11 +61,19 @@ int main( int argc, char** argv )
 	double dtime_save;
 	double gflops;
 
+
+#ifdef FILE_IN_OUT
+	FILE* fin  = NULL;
+	FILE* fout = NULL;
+	char gemm = 's';
+
+#endif
+
 	//bli_init();
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 3;
+	n_repeats = 10;
 
 #ifndef PRINT
 	p_begin = 200;
@@ -96,20 +107,58 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
-	// Begin with initializing the last entry to zero so that
-	// matlab allocates space for the entire array once up-front.
-	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
-#ifdef BLIS
-	printf( "data_gemm_blis" );
-#else
-	printf( "data_gemm_%s", BLAS );
-#endif
-	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
-	        ( unsigned long )0,
-	        ( unsigned long )0,
-	        ( unsigned long )0, 0.0 );
 
+#ifdef FILE_IN_OUT
+	if (argc < 3)
+	  {
+	    printf("Usage: ./test_gemm_XX.x input.csv output.csv\n");
+	    exit(1);
+	  }
+	fin = fopen(argv[1], "r");
+	if (fin == NULL)
+	  {
+	    printf("Error opening the file %s\n", argv[1]);
+	    exit(1);
+	  }
+	fout = fopen(argv[2], "w");
+	if (fout == NULL)
+	  {
+	    printf("Error opening output file %s\n", argv[2]);
+	    exit(1);
+	  }
+	fprintf(fout, "m\t k\t n\t cs_a\t cs_b\t cs_c\t gflops\t GEMM_Algo\n");
+
+
+	printf("~~~~~~~~~~_BLAS\t m\t k\t n\t cs_a\t cs_b\t cs_c \t gflops\t GEMM_Algo\n");
+
+	inc_t cs_a;
+	inc_t cs_b;
+	inc_t cs_c;
+
+	while (fscanf(fin, "%ld %ld %ld %ld %ld %ld\n", &m, &k, &n, &cs_a, &cs_b, &cs_c) == 6)
+	  {
+	    if ((m > cs_a) || (k > cs_b) || (m > cs_c)) continue; // leading dimension should be greater than number of rows
+	    
+	    bli_obj_create( dt, 1, 1, 0, 0, &alpha);
+	    bli_obj_create( dt, 1, 1, 0, 0, &beta );
+
+	    bli_obj_create( dt, m, k, 1, cs_a, &a );
+	    bli_obj_create( dt, k, n, 1, cs_b, &b );
+	    bli_obj_create( dt, m, n, 1, cs_c, &c );
+	    bli_obj_create( dt, m, n, 1, cs_c, &c_save );
+
+	    bli_obj_set_conjtrans( transa, &a);
+	    bli_obj_set_conjtrans( transb, &b);
+
+	    //bli_setsc( 0.0, -1, &alpha );
+	    //bli_setsc( 0.0, 1, &beta );
+
+	    bli_setsc( -1, 0.0, &alpha );
+	    bli_setsc( 1, 0.0, &beta );
+
+	    //	    printf("%1.1f %1.1f\n", *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &alpha)), *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &beta)));
+
+#else
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
 		if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
@@ -136,7 +185,7 @@ int main( int argc, char** argv )
 
 		bli_setsc(  (0.9/1.0), 0.2, &alpha );
 		bli_setsc( -(1.1/1.0), 0.3, &beta );
-
+#endif
 
 		bli_copym( &c, &c_save );
 	
@@ -156,7 +205,7 @@ int main( int argc, char** argv )
 			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
-#ifdef BLIS
+#if 0 //def BLIS
 
 			bli_gemm( &alpha,
 			          &a,
@@ -179,6 +228,7 @@ int main( int argc, char** argv )
 			float*   bp     = bli_obj_buffer( &b );
 			float*   betap  = bli_obj_buffer( &beta );
 			float*   cp     = bli_obj_buffer( &c );
+		
 
 			sgemm_( &f77_transa,
 			        &f77_transb,
@@ -286,12 +336,46 @@ int main( int argc, char** argv )
 #else
 		printf( "data_gemm_%s", BLAS );
 #endif
+
+
+#ifdef FILE_IN_OUT
+
+		if ( bli_is_double( dt ) ) {
+
+		  if (((m * n) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES/4))  || ((m  < (BLIS_SMALL_M_RECT_MATRIX_THRES/2) ) && (k < (BLIS_SMALL_K_RECT_MATRIX_THRES/2) )))
+		    gemm = 'S';      // small gemm
+		  else gemm = 'N';   // Normal blis gemm
+		  
+		}
+		else if (bli_is_float( dt )) {
+		  if (((m * n) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))  || ((m  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (k < BLIS_SMALL_K_RECT_MATRIX_THRES)))
+		    gemm = 'S';    // small gemm
+		  else gemm = 'N'; // normal blis gemm
+		}
+		
+		
+
+		printf("%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f \t %c\n", \
+			( unsigned long )m,
+		        ( unsigned long )k,
+		       ( unsigned long )n, (unsigned long)cs_a, (unsigned long)cs_b, (unsigned long)cs_c,  gflops, gemm );
+		
+		
+		fprintf(fout, "%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f \t %c\n", \
+			( unsigned long )m,
+		        ( unsigned long )k,
+		        ( unsigned long )n, (unsigned long)cs_a, (unsigned long)cs_b, (unsigned long)cs_c,  gflops, gemm );
+		fflush(fout);
+
+#else
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
 		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
 		        ( unsigned long )n, gflops );
+		
 
+#endif
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );
 
@@ -302,6 +386,11 @@ int main( int argc, char** argv )
 	}
 
 	//bli_finalize();
+
+#ifdef FILE_IN_OUT
+	fclose(fin);
+	fclose(fout);
+#endif
 
 	return 0;
 }

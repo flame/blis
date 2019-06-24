@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ void bli_gemm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
+
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.

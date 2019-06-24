@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2016, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,13 +43,27 @@
 #define BLIS_THREAD_MAX_JR      1
 
 #define BLIS_ENABLE_ZEN_BLOCK_SIZES
-//#define BLIS_ENABLE_SMALL_MATRIX
+#define BLIS_ENABLE_SMALL_MATRIX
+#define BLIS_ENABLE_SMALL_MATRIX_TRSM
+
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
 #define BLIS_SMALL_M_RECT_MATRIX_THRES 160
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
+#define BLIS_SMALL_MATRIX_THRES_TRSM   32768 //128(128+128) => m*(m+n)
+#define BLIS_SMALL_MATRIX_A_THRES_TRSM	128
+#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
+#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
+
+//This macro will enable  BLIS DGEMM to choose block sizes for a  single instance mode
+#define BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES 	0
+
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES 250
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES 90
+
+#define D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO 22
 
 
 //#endif
