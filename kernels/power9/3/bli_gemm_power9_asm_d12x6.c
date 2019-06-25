@@ -441,7 +441,7 @@
 
 
 
-void bli_dgemm_power9_asm_12x6_cpy
+void bli_dgemm_power9_asm_12x6
      (
        dim_t               k0,
        double*    restrict alpha,
