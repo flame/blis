@@ -58,7 +58,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     12,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   132,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   264,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   678,     0,     0 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,  8160,     0,     0 );
 	
