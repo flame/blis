@@ -262,17 +262,14 @@
   "                                               \n\t" \
   "                                               \n\t" \
   "                                               \n\t" \
-  "                                               \n\t" \
-  "                                               \n\t" \
-  "                                               \n\t" \
   "addi             %%r8, %%r8, 96                \n\t" \
-  "addi             %%r28, %%r28, 96              \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs34, %%vs46, %%vs59        \n\t" \
   "xvmaddadp        %%vs35, %%vs47, %%vs59        \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "                                               \n\t" \
   "lxvdsx       %%vs58, %%r27, %%r28              \n\t" \
+  "addi             %%r28, %%r28, 96              \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
   "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t" \
