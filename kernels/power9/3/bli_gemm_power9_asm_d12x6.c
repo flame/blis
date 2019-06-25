@@ -93,7 +93,12 @@
  "xxlxor           %%vs53, %%vs53, %%vs53           \n\t" \
  "xxlxor           %%vs59, %%vs59, %%vs59           \n\t"    
 
-#define PRELOADA \
+//load B at the end
+#define LOADANDUPDATE2 \
+  "                                               \n\t" \
+  "addi             %%r8, %%r8, 96                \n\t" \
+  "addi             %%r28, %%r28, 96              \n\t" \
+  "                                               \n\t" \
   "lxv           %%vs36, 0(%%r7)                  \n\t" \
   "lxv           %%vs37, 16(%%r7)                 \n\t" \
   "lxv           %%vs38, 32(%%r7)                 \n\t" \
@@ -105,173 +110,106 @@
   "lxv           %%vs44, 128(%%r7)                \n\t" \
   "lxv           %%vs45, 144(%%r7)                \n\t" \
   "lxv           %%vs46, 160(%%r7)                \n\t" \
-
-#define PRELOADB1 \
-  "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
-	"lxvdsx       %%vs49, %%r23, %%r8               \n\t" \
-	"lxvdsx       %%vs50, %%r24, %%r8               \n\t" \
-	"lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
-	"lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
-	"lxvdsx       %%vs53, %%r27, %%r8               \n\t"
-
-#define PRELOADB2 \
-  "lxvdsx       %%vs54, %%r22, %%r28              \n\t" \
-  "lxvdsx       %%vs55, %%r23, %%r28              \n\t" \
- 	"lxvdsx       %%vs56, %%r24, %%r28              \n\t" \
-  "lxvdsx       %%vs57, %%r25, %%r28              \n\t" \
-  "lxvdsx       %%vs58, %%r26, %%r28              \n\t" 
-
-//load B at the end
-#define LOADANDUPDATE2 \
+  "lxv           %%vs47, 176(%%r7)                \n\t" \
+  "                                               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs0, %%vs36, %%vs48         \n\t" \
   "xvmaddadp        %%vs1, %%vs37, %%vs48         \n\t" \
   "xvmaddadp        %%vs2, %%vs38, %%vs48         \n\t" \
   "xvmaddadp        %%vs3, %%vs39, %%vs48         \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs59, %%r22, %%r8               \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
+  "addi             %%r7, %%r7, 192               \n\t" \
+  "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
+  "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
-  "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
-  "                                               \n\t" \
-  "lxv           %%vs47, 0(%%r7)                  \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
-  "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
-  "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
   "xvmaddadp        %%vs7, %%vs37, %%vs49         \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs48, %%r23, %%r8               \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs8, %%vs38, %%vs49         \n\t" \
   "xvmaddadp        %%vs9, %%vs39, %%vs49         \n\t" \
   "xvmaddadp        %%vs10, %%vs40, %%vs49        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs36, 16(%%r7)                  \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs11, %%vs41, %%vs49        \n\t" \
-  "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
-  "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
+  "lxvdsx       %%vs49, %%r23, %%r8               \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs49, %%r24, %%r8               \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
-  "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
-  "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs37, 32(%%r7)                  \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t" \
-  "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
-  "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
-  "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs50, %%r25, %%r8               \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t" \
-  "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t" \
-  "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs38, 48(%%r7)                  \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
-  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
-  "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs51, %%r26, %%r8               \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t" \
-  "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
-  "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs39, 64(%%r7)                  \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
-  "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
   "xvmaddadp        %%vs0, %%vs42, %%vs54         \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs52, %%r27, %%r8               \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs1, %%vs43, %%vs54         \n\t" \
   "xvmaddadp        %%vs2, %%vs44, %%vs54         \n\t" \
   "xvmaddadp        %%vs3, %%vs45, %%vs54         \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs40, 80(%%r7)                  \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs4, %%vs46, %%vs54         \n\t" \
   "xvmaddadp        %%vs5, %%vs47, %%vs54         \n\t" \
+  "lxvdsx       %%vs54, %%r22, %%r28              \n\t" \
+  "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs42, %%vs55         \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs53, %%r22, %%r28              \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs12, %%vs42, %%vs56        \n\t" \
-  "xvmaddadp        %%vs18, %%vs42, %%vs57        \n\t" \
-  "xvmaddadp        %%vs24, %%vs42, %%vs58        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs41, 96(%%r7)                  \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs30, %%vs42, %%vs59        \n\t" \
   "xvmaddadp        %%vs7, %%vs43, %%vs55         \n\t" \
   "xvmaddadp        %%vs8, %%vs44, %%vs55         \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs54, %%r23, %%r28              \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs9, %%vs45, %%vs55         \n\t" \
   "xvmaddadp        %%vs10, %%vs46, %%vs55        \n\t" \
   "xvmaddadp        %%vs11, %%vs47, %%vs55        \n\t" \
+  "lxvdsx       %%vs55, %%r23, %%r28              \n\t" \
   "                                               \n\t" \
-  "lxv          %%vs42, 112(%%r7)                 \n\t" \
+  "xvmaddadp        %%vs12, %%vs36, %%vs50        \n\t" \
+  "xvmaddadp        %%vs13, %%vs37, %%vs50        \n\t" \
+  "xvmaddadp        %%vs14, %%vs38, %%vs50        \n\t" \
+  "xvmaddadp        %%vs15, %%vs39, %%vs50        \n\t" \
+  "xvmaddadp        %%vs16, %%vs40, %%vs50        \n\t" \
+  "xvmaddadp        %%vs17, %%vs41, %%vs50        \n\t" \
+  "lxvdsx       %%vs50, %%r24, %%r8               \n\t" \
   "                                               \n\t" \
+  "xvmaddadp        %%vs18, %%vs36, %%vs51        \n\t" \
+  "xvmaddadp        %%vs19, %%vs37, %%vs51        \n\t" \
+  "xvmaddadp        %%vs20, %%vs38, %%vs51        \n\t" \
+  "xvmaddadp        %%vs21, %%vs39, %%vs51        \n\t" \
+  "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
+  "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
+  "lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs12, %%vs42, %%vs56        \n\t" \
   "xvmaddadp        %%vs13, %%vs43, %%vs56        \n\t" \
-  "xvmaddadp        %%vs19, %%vs43, %%vs57        \n\t" \
-  "xvmaddadp        %%vs25, %%vs43, %%vs58        \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs55, %%r24, %%r28              \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs31, %%vs43, %%vs59        \n\t" \
   "xvmaddadp        %%vs14, %%vs44, %%vs56        \n\t" \
   "xvmaddadp        %%vs15, %%vs45, %%vs56        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs43, 128(%%r7)                 \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs16, %%vs46, %%vs56        \n\t" \
   "xvmaddadp        %%vs17, %%vs47, %%vs56        \n\t" \
+  "lxvdsx       %%vs56, %%r24, %%r28               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs18, %%vs42, %%vs57        \n\t" \
+  "xvmaddadp        %%vs19, %%vs43, %%vs57        \n\t" \
   "xvmaddadp        %%vs20, %%vs44, %%vs57        \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs56, %%r25, %%r28              \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs26, %%vs44, %%vs58        \n\t" \
-  "xvmaddadp        %%vs32, %%vs44, %%vs59        \n\t" \
   "xvmaddadp        %%vs21, %%vs45, %%vs57        \n\t" \
-  "                                               \n\t" \
-  "lxv          %%vs44, 144(%%r7)                 \n\t" \
-  "                                               \n\t" \
   "xvmaddadp        %%vs22, %%vs46, %%vs57        \n\t" \
   "xvmaddadp        %%vs23, %%vs47, %%vs57        \n\t" \
+  "lxvdsx       %%vs57, %%r25, %%r28               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
+  "xvmaddadp        %%vs25, %%vs37, %%vs52        \n\t" \
+  "xvmaddadp        %%vs26, %%vs38, %%vs52        \n\t" \
+  "xvmaddadp        %%vs27, %%vs39, %%vs52        \n\t" \
+  "xvmaddadp        %%vs28, %%vs40, %%vs52        \n\t" \
+  "xvmaddadp        %%vs29, %%vs41, %%vs52        \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs30, %%vs36, %%vs53        \n\t" \
+  "xvmaddadp        %%vs31, %%vs37, %%vs53        \n\t" \
+  "xvmaddadp        %%vs32, %%vs38, %%vs53        \n\t" \
+  "xvmaddadp        %%vs33, %%vs39, %%vs53        \n\t" \
+  "xvmaddadp        %%vs34, %%vs40, %%vs53        \n\t" \
+  "xvmaddadp        %%vs35, %%vs41, %%vs53        \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r8               \n\t" \
+  "                                               \n\t" \
+  "xvmaddadp        %%vs24, %%vs42, %%vs58        \n\t" \
+  "xvmaddadp        %%vs25, %%vs43, %%vs58        \n\t" \
+  "xvmaddadp        %%vs26, %%vs44, %%vs58        \n\t" \
   "xvmaddadp        %%vs27, %%vs45, %%vs58        \n\t" \
-  "                                               \n\t" \
-  "lxvdsx       %%vs57, %%r26, %%r28              \n\t" \
-  "                                               \n\t" \
-  "xvmaddadp        %%vs33, %%vs45, %%vs59        \n\t" \
   "xvmaddadp        %%vs28, %%vs46, %%vs58        \n\t" \
   "xvmaddadp        %%vs29, %%vs47, %%vs58        \n\t" \
+  "lxvdsx       %%vs58, %%r26, %%r28               \n\t" \
   "                                               \n\t" \
-  "lxv          %%vs45, 160(%%r7)                 \n\t" \
-  "                                               \n\t" \
+  "xvmaddadp        %%vs30, %%vs42, %%vs59        \n\t" \
+  "xvmaddadp        %%vs31, %%vs43, %%vs59        \n\t" \
+  "xvmaddadp        %%vs32, %%vs44, %%vs59        \n\t" \
+  "xvmaddadp        %%vs33, %%vs45, %%vs59        \n\t" \
   "xvmaddadp        %%vs34, %%vs46, %%vs59        \n\t" \
   "xvmaddadp        %%vs35, %%vs47, %%vs59        \n\t" \
+  "lxvdsx       %%vs59, %%r27, %%r28               \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs58, %%r27, %%r28              \n\t" \
-  "lxv          %%vs46, 176(%%r7)                 \n\t" \
-  "                                               \n\t" \
-  "addi         %%r7, %%r7, 192                   \n\t" \
-  "addi         %%r8, %%r8, 96                    \n\t" \
-  "addi         %%r28, %%r28, 96                  \n\t"     
-
-
-
 
 //load B at the end
 #define LOADANDUPDATE1 \
@@ -293,6 +231,7 @@
   "xvmaddadp        %%vs4, %%vs40, %%vs48         \n\t" \
   "xvmaddadp        %%vs5, %%vs41, %%vs48         \n\t" \
   "                                               \n\t" \
+  "addi             %%r7, %%r7, 96                \n\t" \
   "lxvdsx       %%vs48, %%r22, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs6, %%vs36, %%vs49         \n\t" \
@@ -320,7 +259,6 @@
   "xvmaddadp        %%vs22, %%vs40, %%vs51        \n\t" \
   "xvmaddadp        %%vs23, %%vs41, %%vs51        \n\t" \
   "                                               \n\t" \
-  "addi             %%r7, %%r7, 96                \n\t" \
   "lxvdsx       %%vs51, %%r25, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs24, %%vs36, %%vs52        \n\t" \
@@ -503,7 +441,7 @@
 
 
 
-void bli_dgemm_power9_asm_12x6
+void bli_dgemm_power9_asm_12x6_cpy
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -564,32 +502,36 @@ void bli_dgemm_power9_asm_12x6
   	"ld               %%r8, %3                      \n\t" // load ptr of B
   	"ld               %%r16, %6                     \n\t" // load ptr for C
   	"                                               \n\t"
-VSZEROOUT                                               // Zero out vec regs
+  VSZEROOUT                                               // Zero out vec regs
     "addi             %%r28, %%r8, 48               \n\t"
   	"                                               \n\t"
-PRELOADB1
+	"lxvdsx       %%vs48, %%r22, %%r8               \n\t" // load first row of B
+  	"lxvdsx       %%vs49, %%r23, %%r8               \n\t" 
+ 	"lxvdsx       %%vs50, %%r24, %%r8               \n\t" 
+  	"lxvdsx       %%vs51, %%r25, %%r8               \n\t" 
+  	"lxvdsx       %%vs52, %%r26, %%r8               \n\t" 
+  	"lxvdsx       %%vs53, %%r27, %%r8               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r17, 0                \n\t"
   	"beq              %%r0, DPRELOOPKLEFT           \n\t"
   	"mtctr            %%r17                         \n\t"
+	"lxvdsx       %%vs54, %%r22, %%r28              \n\t" // load second row of B
+  	"lxvdsx       %%vs55, %%r23, %%r28              \n\t" 
+ 	"lxvdsx       %%vs56, %%r24, %%r28              \n\t" 
+  	"lxvdsx       %%vs57, %%r25, %%r28              \n\t" 
+  	"lxvdsx       %%vs58, %%r26, %%r28              \n\t" 
+  	"lxvdsx       %%vs59, %%r27, %%r28              \n\t"
   	"                                               \n\t"
-PRELOADA
-PRELOADB2
-    "addi             %%r7, %%r7, 176               \n\t"
-    "addi             %%r8, %%r8, 88                \n\t"
-    "addi             %%r28, %%r28, 88              \n\t"
   	"                                               \n\t" // k_iter loop does A*B 
   	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
   	"                                               \n\t"
-LOADANDUPDATE2
-LOADANDUPDATE2
-LOADANDUPDATE2
-LOADANDUPDATE2
+  LOADANDUPDATE2
+  LOADANDUPDATE2
+  LOADANDUPDATE2
+  LOADANDUPDATE2
   	"                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
-    "                                               \n\t"
-    "addi             %%r8, %%r8, -88                \n\t"
   	"                                               \n\t"
   	"DPRELOOPKLEFT:                                 \n\t"
   	"                                               \n\t"
