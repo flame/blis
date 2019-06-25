@@ -266,9 +266,9 @@
   "lxvdsx       %%vs58, %%r27, %%r28              \n\t" \
   "lxv          %%vs46, 176(%%r7)                 \n\t" \
   "                                               \n\t" \
+  "addi         %%r7, %%r7, 192                   \n\t" \
   "addi         %%r8, %%r8, 96                    \n\t" \
-  "addi         %%r28, %%r28, 96                  \n\t" \
-  "addi         %%r7, %%r7, 192                   \n\t"    
+  "addi         %%r28, %%r28, 96                  \n\t"     
 
 
 
