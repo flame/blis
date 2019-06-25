@@ -223,7 +223,6 @@
   "xvmaddadp        %%vs11, %%vs47, %%vs55        \n\t" \
   "                                               \n\t" \
   "lxv          %%vs42, 112(%%r7)                 \n\t" \
-  "addi         %%r8, %%r8, 96                    \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs13, %%vs43, %%vs56        \n\t" \
   "xvmaddadp        %%vs19, %%vs43, %%vs57        \n\t" \
@@ -267,8 +266,9 @@
   "lxvdsx       %%vs58, %%r27, %%r28              \n\t" \
   "lxv          %%vs46, 176(%%r7)                 \n\t" \
   "                                               \n\t" \
+  "addi         %%r8, %%r8, 96                    \n\t" \
   "addi         %%r28, %%r28, 96                  \n\t" \
-  "addi         %%r7, %%r7, 192                   \n\t"   
+  "addi         %%r7, %%r7, 192                   \n\t"    
 
 
 
