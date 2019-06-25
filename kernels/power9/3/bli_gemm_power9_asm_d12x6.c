@@ -590,7 +590,6 @@ LOADANDUPDATE2
     "                                               \n\t"
     "addi             %%r8, %%r8, -88               \n\t"
     "addi             %%r7, %%r7, -176              \n\t"
-PRELOADB1
   	"                                               \n\t"
   	"DPRELOOPKLEFT:                                 \n\t"
   	"                                               \n\t"
