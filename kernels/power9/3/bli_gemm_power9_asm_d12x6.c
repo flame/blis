@@ -669,8 +669,8 @@ void bli_dgemm_power9_asm_12x6
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
   #if 1
-	uint64_t k_iter = k0 / 12;
-	uint64_t k_left = k0 % 12;
+	uint64_t k_iter = k0 / 8;
+	uint64_t k_left = k0 % 8;
   #else
   uint64_t k_iter = 0;
 	uint64_t k_left = k0;
@@ -737,7 +737,7 @@ LOADANDUPDATE2
   	"bdnz             DLOOPKITER                    \n\t"
     "                                               \n\t"
     "addi             %%r8, %%r8, -88               \n\t"
-    "addi             %%r7, %%r7, -496              \n\t"
+    "addi             %%r7, %%r7, -368              \n\t"
   	"                                               \n\t"
   	"DPRELOOPKLEFT:                                 \n\t"
   	"                                               \n\t"
