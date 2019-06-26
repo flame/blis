@@ -669,8 +669,8 @@ void bli_dgemm_power9_asm_12x6
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
   #if 1
-	uint64_t k_iter = k0 / 12;
-	uint64_t k_left = k0 % 12;
+	uint64_t k_iter = k0 / 4;
+	uint64_t k_left = k0 % 4;
   #else
   uint64_t k_iter = 0;
 	uint64_t k_left = k0;
@@ -730,8 +730,6 @@ PRELOADB2
   	"                                               \n\t" // k_iter loop does A*B 
   	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
   	"                                               \n\t"
-LOADANDUPDATE2
-LOADANDUPDATE2
 LOADANDUPDATE2
   	"                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
