@@ -738,7 +738,7 @@ LOADANDUPDATE2
   	"bdnz             DLOOPKITER                    \n\t"
     "                                               \n\t"
     "addi             %%r8, %%r8, -88               \n\t"
-    "addi             %%r7, %%r7, -368              \n\t"
+    "addi             %%r7, %%r7, -752              \n\t"
   	"                                               \n\t"
   	"DPRELOOPKLEFT:                                 \n\t"
   	"                                               \n\t"
