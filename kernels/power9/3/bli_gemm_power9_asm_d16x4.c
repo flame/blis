@@ -201,34 +201,38 @@
   SCALEGEN_CMATRIX
 
 #define COLSTORE_CMATRIX \
-  "stxv              %%vs8, 32(%%r17)           \n\t" \
-  "stxv              %%vs9, 48(%%r17)           \n\t" \
-  "stxv              %%vs10, 64(%%r17)          \n\t" \
-  "stxv              %%vs11, 80(%%r17)          \n\t" \
-  "stxv              %%vs12, 0(%%r18)           \n\t" \
-  "stxv              %%vs13, 16(%%r18)          \n\t" \
-  "stxv              %%vs14, 32(%%r18)          \n\t" \
-  "stxv              %%vs15, 48(%%r18)          \n\t" \
-  "stxv              %%vs16, 64(%%r18)          \n\t" \
-  "stxv              %%vs17, 80(%%r18)          \n\t" \
-  "stxv              %%vs18, 0(%%r19)           \n\t" \
-  "stxv              %%vs19, 16(%%r19)          \n\t" \
-  "stxv              %%vs20, 32(%%r19)          \n\t" \
-  "stxv              %%vs21, 48(%%r19)          \n\t" \
-  "stxv              %%vs22, 64(%%r19)          \n\t" \
-  "stxv              %%vs23, 80(%%r19)          \n\t" \
-  "stxv              %%vs24, 0(%%r20)           \n\t" \
-  "stxv              %%vs25, 16(%%r20)          \n\t" \
-  "stxv              %%vs26, 32(%%r20)          \n\t" \
-  "stxv              %%vs27, 48(%%r20)          \n\t" \
-  "stxv              %%vs28, 64(%%r20)          \n\t" \
-  "stxv              %%vs29, 80(%%r20)          \n\t" \
-  "stxv              %%vs30, 0(%%r21)           \n\t" \
-  "stxv              %%vs31, 16(%%r21)          \n\t" \
-  "stxv              %%vs32, 32(%%r21)          \n\t" \
-  "stxv              %%vs33, 48(%%r21)          \n\t" \
-  "stxv              %%vs34, 64(%%r21)          \n\t" \
-  "stxv              %%vs35, 80(%%r21)          \n\t"
+  "stxv              %%vs32, 0(%%r16)           \n\t" \
+  "stxv              %%vs33, 16(%%r16)           \n\t" \
+  "stxv              %%vs34, 32(%%r16)          \n\t" \
+  "stxv              %%vs35, 48(%%r16)          \n\t" \
+  "stxv              %%vs36, 64(%%r16)           \n\t" \
+  "stxv              %%vs37, 80(%%r16)          \n\t" \
+  "stxv              %%vs38, 96(%%r16)          \n\t" \
+  "stxv              %%vs39, 112(%%r16)          \n\t" \
+  "stxv              %%vs40, 0(%%r17)          \n\t" \
+  "stxv              %%vs41, 16(%%r17)          \n\t" \
+  "stxv              %%vs42, 32(%%r17)           \n\t" \
+  "stxv              %%vs43, 48(%%r17)          \n\t" \
+  "stxv              %%vs44, 64(%%r17)          \n\t" \
+  "stxv              %%vs45, 80(%%r17)          \n\t" \
+  "stxv              %%vs46, 96(%%r17)          \n\t" \
+  "stxv              %%vs47, 112(%%r17)          \n\t" \
+  "stxv              %%vs48, 0(%%r18)           \n\t" \
+  "stxv              %%vs49, 16(%%r18)          \n\t" \
+  "stxv              %%vs50, 32(%%r18)          \n\t" \
+  "stxv              %%vs51, 48(%%r18)          \n\t" \
+  "stxv              %%vs52, 64(%%r18)          \n\t" \
+  "stxv              %%vs53, 80(%%r18)          \n\t" \
+  "stxv              %%vs54, 96(%%r18)           \n\t" \
+  "stxv              %%vs55, 112(%%r18)          \n\t" \
+  "stxv              %%vs56, 0(%%r19)          \n\t" \
+  "stxv              %%vs57, 16(%%r19)          \n\t" \
+  "stxv              %%vs58, 32(%%r19)          \n\t" \
+  "stxv              %%vs59, 48(%%r19)          \n\t" \
+  "stxv              %%vs60, 64(%%r19)          \n\t" \
+  "stxv              %%vs61, 80(%%r19)          \n\t" \
+  "stxv              %%vs62, 96(%%r19)          \n\t" \
+  "stxv              %%vs63, 112(%%r19)          \n\t" 
 
 
 
@@ -839,9 +843,43 @@ VSZEROOUT                                                 // Zero out vec regs
   	"add              %%r17, %%r16, %%r10           \n\t" // c + cs_c
   	"add              %%r18, %%r17, %%r10           \n\t" // c + cs_c * 2 
   	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
-  	"add              %%r20, %%r19, %%r10           \n\t" // c + cs_c * 4
-  	"add              %%r21, %%r20, %%r10           \n\t" // c + cs_c * 5
   	"                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "xxpermdi   %%vs32, %%vs8, %%vs0, 1             \n\t"
+    "xxpermdi   %%vs33, %%vs9, %%vs1, 1             \n\t"
+    "xxpermdi   %%vs34, %%vs10, %%vs2, 1            \n\t"
+    "xxpermdi   %%vs35, %%vs11, %%vs3, 1            \n\t"
+    "xxpermdi   %%vs36, %%vs12, %%vs4, 1            \n\t"
+    "xxpermdi   %%vs37, %%vs13, %%vs5, 1            \n\t"
+    "xxpermdi   %%vs38, %%vs14, %%vs6, 1            \n\t"
+    "xxpermdi   %%vs39, %%vs15, %%vs7, 1            \n\t"
+    "xxpermdi   %%vs40, %%vs0, %%vs8, 1             \n\t"
+    "xxpermdi   %%vs41, %%vs1, %%vs9, 1             \n\t"
+    "xxpermdi   %%vs42, %%vs2, %%vs10, 1            \n\t"
+    "xxpermdi   %%vs43, %%vs3, %%vs11, 1            \n\t"
+    "xxpermdi   %%vs44, %%vs4, %%vs12, 1            \n\t"
+    "xxpermdi   %%vs45, %%vs5, %%vs13, 1            \n\t"
+    "xxpermdi   %%vs46, %%vs6, %%vs14, 1            \n\t"
+    "xxpermdi   %%vs47, %%vs7, %%vs15, 1            \n\t"
+    "xxpermdi   %%vs48, %%vs24, %%vs16, 1           \n\t"
+    "xxpermdi   %%vs49, %%vs25, %%vs17, 1           \n\t"
+    "xxpermdi   %%vs50, %%vs26, %%vs18, 1           \n\t"
+    "xxpermdi   %%vs51, %%vs27, %%vs19, 1           \n\t"
+    "xxpermdi   %%vs52, %%vs28, %%vs20, 1           \n\t"
+    "xxpermdi   %%vs53, %%vs29, %%vs21, 1           \n\t"
+    "xxpermdi   %%vs54, %%vs30, %%vs22, 1           \n\t"
+    "xxpermdi   %%vs55, %%vs31, %%vs23, 1           \n\t"
+    "xxpermdi   %%vs56, %%vs16, %%vs24, 1           \n\t"
+    "xxpermdi   %%vs57, %%vs17, %%vs25, 1           \n\t"
+    "xxpermdi   %%vs58, %%vs18, %%vs26, 1           \n\t"
+    "xxpermdi   %%vs59, %%vs19, %%vs27, 1           \n\t"
+    "xxpermdi   %%vs60, %%vs20, %%vs28, 1           \n\t"
+    "xxpermdi   %%vs61, %%vs21, %%vs29, 1           \n\t"
+    "xxpermdi   %%vs62, %%vs22, %%vs30, 1           \n\t"
+    "xxpermdi   %%vs63, %%vs23, %%vs31, 1           \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
  COLSTORE_CMATRIX
   	"                                               \n\t"
   	"DDONE:                                         \n\t"  
