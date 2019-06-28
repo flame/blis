@@ -436,7 +436,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"lxvdsx           %%vs48, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
   	"                                               \n\t"
-  SCALEBYALPHA
+  //SCALEBYALPHA
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
