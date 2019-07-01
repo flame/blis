@@ -351,6 +351,7 @@ void bli_dgemm_power9_asm_16x4
    printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
                                      k_iter, *alpha, *beta, rs_c, cs_c);
 
+  return;
 
 	__asm__ volatile
 	(
