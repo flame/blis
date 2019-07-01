@@ -386,6 +386,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
     "                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
+    "b                DCOLSTORED                    \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
