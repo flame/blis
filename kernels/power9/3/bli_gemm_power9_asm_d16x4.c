@@ -444,6 +444,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
+    "b                DDONE                         \n\t"
     "ld               %%r29, 0(%%r28)               \n\t"
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
@@ -455,7 +456,6 @@ void bli_dgemm_power9_asm_16x4
     SCALEBYALPHA
   	"                                               \n\t"
   	"                                               \n\t"
-    "b                DDONE                         \n\t"
   	"                                               \n\t"
   	"cmpdi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
