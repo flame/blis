@@ -373,6 +373,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
+    "b                DDONE                         \n\t"
   	"                                               \n\t"
     VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
