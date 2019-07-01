@@ -348,8 +348,8 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
-                                     k_left, *alpha, *beta, rs_c, cs_c);
+  printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | beta* = %x | rs_c = %ld | cs_c = %ld \n",
+                                     k_left, *alpha, *beta, beta, rs_c, cs_c);
 
 	__asm__ volatile
 	(
@@ -444,7 +444,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
-    "b                DDONE                         \n\t"
     "ld               %%r29, 0(%%r28)               \n\t"
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
