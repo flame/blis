@@ -207,6 +207,62 @@
 "xvmuldp         %%vs31, %%vs31, %%vs60      \n\t"
 #endif
 
+#define LOADANDUPDATE \
+    "lxv              %%vs32, 0(%%r7)               \n\t"\
+    "lxv              %%vs33, 16(%%r7)              \n\t"\
+    "lxv              %%vs34, 32(%%r7)              \n\t"\
+    "lxv              %%vs35, 48(%%r7)              \n\t"\
+    "lxv              %%vs36, 64(%%r7)              \n\t"\
+    "lxv              %%vs37, 80(%%r7)              \n\t"\
+    "lxv              %%vs38, 96(%%r7)              \n\t"\
+    "lxv              %%vs39, 112(%%r7)             \n\t"\
+  	"                                               \n\t"\
+    "lxv              %%vs48, 0(%%r8)               \n\t"\
+    "lxv              %%vs50, 16(%%r8)              \n\t"\
+    "xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t"\
+    "xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t"\
+    "                                               \n\t"\
+    "                                               \n\t"\
+    "addi             %%r8, %%r8, 32                \n\t"\
+    "addi             %%r7, %%r7, 128               \n\t"\
+    "                                               \n\t"\
+    "xvmaddadp        %%vs0, %%vs32, %%vs48         \n\t"\
+    "xvmaddadp        %%vs1, %%vs33, %%vs48         \n\t"\
+    "xvmaddadp        %%vs2, %%vs34, %%vs48         \n\t"\
+    "xvmaddadp        %%vs3, %%vs35, %%vs48         \n\t"\
+    "xvmaddadp        %%vs4, %%vs36, %%vs48         \n\t"\
+    "xvmaddadp        %%vs5, %%vs37, %%vs48         \n\t"\
+    "xvmaddadp        %%vs6, %%vs38, %%vs48         \n\t"\
+    "xvmaddadp        %%vs7, %%vs39, %%vs48         \n\t"\
+    "                                               \n\t"\
+    "                                               \n\t"\
+    "xvmaddadp        %%vs8, %%vs32, %%vs49         \n\t"\
+    "xvmaddadp        %%vs9, %%vs33, %%vs49         \n\t"\
+    "xvmaddadp        %%vs10, %%vs34, %%vs49        \n\t"\
+    "xvmaddadp        %%vs11, %%vs35, %%vs49        \n\t"\
+    "xvmaddadp        %%vs12, %%vs36, %%vs49        \n\t"\
+    "xvmaddadp        %%vs13, %%vs37, %%vs49        \n\t"\
+    "xvmaddadp        %%vs14, %%vs38, %%vs49        \n\t"\
+    "xvmaddadp        %%vs15, %%vs39, %%vs49        \n\t"\
+    "                                               \n\t"\
+    "xvmaddadp        %%vs16, %%vs32, %%vs50        \n\t"\
+    "xvmaddadp        %%vs17, %%vs33, %%vs50        \n\t"\
+    "xvmaddadp        %%vs18, %%vs34, %%vs50        \n\t"\
+    "xvmaddadp        %%vs19, %%vs35, %%vs50        \n\t" \
+    "xvmaddadp        %%vs20, %%vs36, %%vs50        \n\t" \
+    "xvmaddadp        %%vs21, %%vs37, %%vs50        \n\t" \
+    "xvmaddadp        %%vs22, %%vs38, %%vs50        \n\t" \
+    "xvmaddadp        %%vs23, %%vs39, %%vs50        \n\t" \
+    "                                               \n\t" \
+    "xvmaddadp        %%vs24, %%vs32, %%vs51        \n\t" \
+    "xvmaddadp        %%vs25, %%vs33, %%vs51        \n\t" \
+    "xvmaddadp        %%vs26, %%vs34, %%vs51        \n\t" \
+    "xvmaddadp        %%vs27, %%vs35, %%vs51        \n\t" \
+    "xvmaddadp        %%vs28, %%vs36, %%vs51        \n\t" \
+    "xvmaddadp        %%vs29, %%vs37, %%vs51        \n\t" \
+    "xvmaddadp        %%vs30, %%vs38, %%vs51        \n\t" \
+    "xvmaddadp        %%vs31, %%vs39, %%vs51        \n\t" 
+
 #define SCALECOL_CMATRIX \
   "xvmuldp         %%vs32, %%vs32, %%vs59      \n\t" \
   "xvmuldp         %%vs33, %%vs33, %%vs59      \n\t" \
@@ -319,7 +375,7 @@ void bli_dgemm_power9_asm_16x4
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 1
+  #if 0
 	uint64_t k_iter = k0;
 	uint64_t k_left = 0;
   #else
@@ -391,61 +447,8 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
+    LOADANDUPDATE
   	"                                               \n\t"
-    "lxv              %%vs32, 0(%%r7)               \n\t" // Load even col of A
-    "lxv              %%vs33, 16(%%r7)              \n\t"
-    "lxv              %%vs34, 32(%%r7)              \n\t"
-    "lxv              %%vs35, 48(%%r7)              \n\t"
-    "lxv              %%vs36, 64(%%r7)              \n\t" // Load even col of A (cont)
-    "lxv              %%vs37, 80(%%r7)              \n\t"
-    "lxv              %%vs38, 96(%%r7)              \n\t"
-    "lxv              %%vs39, 112(%%r7)             \n\t"
-  	"                                               \n\t"
-    "lxv              %%vs48, 0(%%r8)               \n\t" // Load even row of B
-    "lxv              %%vs50, 16(%%r8)              \n\t"
-    "xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t"
-    "xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
-    "addi             %%r8, %%r8, 32                \n\t"
-    "addi             %%r7, %%r7, 128               \n\t"
-    "                                               \n\t"
-    "xvmaddadp        %%vs0, %%vs32, %%vs48         \n\t"
-    "xvmaddadp        %%vs1, %%vs33, %%vs48         \n\t"
-    "xvmaddadp        %%vs2, %%vs34, %%vs48         \n\t"
-    "xvmaddadp        %%vs3, %%vs35, %%vs48         \n\t"
-    "xvmaddadp        %%vs4, %%vs36, %%vs48         \n\t"
-    "xvmaddadp        %%vs5, %%vs37, %%vs48         \n\t"
-    "xvmaddadp        %%vs6, %%vs38, %%vs48         \n\t"
-    "xvmaddadp        %%vs7, %%vs39, %%vs48         \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
-    "xvmaddadp        %%vs8, %%vs32, %%vs49         \n\t"
-    "xvmaddadp        %%vs9, %%vs33, %%vs49         \n\t"
-    "xvmaddadp        %%vs10, %%vs34, %%vs49        \n\t"
-    "xvmaddadp        %%vs11, %%vs35, %%vs49        \n\t"
-    "xvmaddadp        %%vs12, %%vs36, %%vs49        \n\t"
-    "xvmaddadp        %%vs13, %%vs37, %%vs49        \n\t"
-    "xvmaddadp        %%vs14, %%vs38, %%vs49        \n\t"
-    "xvmaddadp        %%vs15, %%vs39, %%vs49        \n\t"
-    "                                               \n\t"
-    "xvmaddadp        %%vs16, %%vs32, %%vs50        \n\t"
-    "xvmaddadp        %%vs17, %%vs33, %%vs50        \n\t"
-    "xvmaddadp        %%vs18, %%vs34, %%vs50        \n\t"
-    "xvmaddadp        %%vs19, %%vs35, %%vs50        \n\t"
-    "xvmaddadp        %%vs20, %%vs36, %%vs50        \n\t"
-    "xvmaddadp        %%vs21, %%vs37, %%vs50        \n\t"
-    "xvmaddadp        %%vs22, %%vs38, %%vs50        \n\t"
-    "xvmaddadp        %%vs23, %%vs39, %%vs50        \n\t"
-    "                                               \n\t"
-    "xvmaddadp        %%vs24, %%vs32, %%vs51        \n\t"
-    "xvmaddadp        %%vs25, %%vs33, %%vs51        \n\t"
-    "xvmaddadp        %%vs26, %%vs34, %%vs51        \n\t"
-    "xvmaddadp        %%vs27, %%vs35, %%vs51        \n\t"
-    "xvmaddadp        %%vs28, %%vs36, %%vs51        \n\t"
-    "xvmaddadp        %%vs29, %%vs37, %%vs51        \n\t"
-    "xvmaddadp        %%vs30, %%vs38, %%vs51        \n\t"
-    "xvmaddadp        %%vs31, %%vs39, %%vs51        \n\t"
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -456,6 +459,17 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
+    "DPRELOOPKLEFT:                                 \n\t"
+  	"                                               \n\t"
+  	"cmpwi            %%r0, %%r18, 0                \n\t"
+  	"beq              %%r0, DPOSTACCUM              \n\t"
+  	"mtctr            %%r18                         \n\t"
+  	"                                               \n\t"
+  	"DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+    "                                               \n\t"
+    LOADANDUPDATE
+    "                                               \n\t"
+  	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
@@ -478,24 +492,14 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"DPRELOOPKLEFT:                                 \n\t"
-  	// "                                               \n\t"
-  	// "cmpwi            %%r0, %%r18, 0                \n\t"
-  	// "beq              %%r0, DPOSTACCUM              \n\t"
-  	// "mtctr            %%r18                         \n\t"
-  	// "                                               \n\t"
-  	// "DLOOPKLEFT:                                    \n\t" // EDGE LOOP
-    // "                                               \n\t"
-    // "                                               \n\t"
-  	// "bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
   	"DPOSTACCUM:                                    \n\t"
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
-  	"ld               %%r28, %5                      \n\t" // load ptr for beta
+  	"ld               %%r28, %5                     \n\t" // load ptr for beta
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
-  	"lxvdsx           %%vs59, 0, %%r28               \n\t" // splat beta
+  	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -504,16 +508,16 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"cmpwi            %%r0, %%r28, 0                \n\t"
-  	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
+  	"cmpwi            %%r7, %%r28, 0                \n\t"
+  	"beq              %%r7, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   	"                                               \n\t"
     "b DCOLSTOREDBNZ                                \n\t"
     "                                               \n\t"
     "                                               \n\t"
-  	"cmpwi            %%r0, %%r9, 8                 \n\t"
-  	"beq              DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
+  	"cmpwi            %%r7, %%r9, 8                 \n\t"
+  	"beq              %%r7, DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
