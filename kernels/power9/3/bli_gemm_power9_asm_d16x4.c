@@ -492,6 +492,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
+    "lq               %%r29, 0(%%r28)               \n\t"
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
@@ -504,7 +505,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"xscmpeqdp        %%r0, %%vs59, %%vs61          \n\t"
+  	"cmpwi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
