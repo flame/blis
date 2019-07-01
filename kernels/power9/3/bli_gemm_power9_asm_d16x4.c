@@ -385,8 +385,8 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
-                                    k_iter, *alpha, *beta, rs_c, cs_c);
+  // printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
+  //                                   k_iter, *alpha, *beta, rs_c, cs_c);
 
 
 	__asm__ volatile
@@ -505,7 +505,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"cmpwi            %%r0, %%r29, 0                \n\t"
+  	"cmpdi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
