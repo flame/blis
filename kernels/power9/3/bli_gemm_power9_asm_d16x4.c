@@ -466,7 +466,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
-    "                                               \n\t"
+    "b                DCOLSTOREDBNZ                 \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -492,7 +492,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
-    "ld               %%r29, 0(%%r28)               \n\t"
+    "ld               %%r29, 0(%%r28)               \n\t" // load beta from mem
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
@@ -504,7 +504,6 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-    "b                DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
   	"cmpwi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
@@ -672,7 +671,6 @@ VSZEROOUT                                                 // Zero out vec regs
     "stxv              %%vs62, 96(%%r23)            \n\t" 
     "stxv              %%vs63, 112(%%r23)           \n\t" 
     "            	                                  \n\t" 
-    "b DDONE                                        \n\t"
     "lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
   	"                                               \n\t"
     "lxv              %%vs32, 0(%%r24)              \n\t" 
