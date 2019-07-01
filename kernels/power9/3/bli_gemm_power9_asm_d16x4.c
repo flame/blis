@@ -506,6 +506,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r28, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
+    "b DCOLSTORED                                   \n\t"
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   	"                                               \n\t"
