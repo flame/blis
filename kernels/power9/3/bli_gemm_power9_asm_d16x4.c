@@ -136,7 +136,7 @@
     "xxpermdi   %%vs62, %%vs22, %%vs30, 1           \n\t" \
     "xxpermdi   %%vs63, %%vs23, %%vs31, 1           \n\t"
 
-
+#if 0
 #define SCALEBYALPHA \
   "xvmuldp         %%vs32, %%vs32, %%vs31      \n\t" \
   "xvmuldp         %%vs33, %%vs33, %%vs31      \n\t" \
@@ -170,6 +170,42 @@
   "xvmuldp         %%vs61, %%vs61, %%vs31      \n\t" \
   "xvmuldp         %%vs62, %%vs62, %%vs31      \n\t" \
   "xvmuldp         %%vs63, %%vs63, %%vs31      \n\t" 
+
+#else
+#define SCALEBYALPHA \
+"xvmuldp         %%vs0, %%vs0, %%vs60      \n\t" \
+"xvmuldp         %%vs1, %%vs1, %%vs60      \n\t" \
+"xvmuldp         %%vs2, %%vs2, %%vs60      \n\t" \
+"xvmuldp         %%vs3, %%vs3, %%vs60      \n\t" \
+"xvmuldp         %%vs4, %%vs4, %%vs60      \n\t" \
+"xvmuldp         %%vs5, %%vs5, %%vs60      \n\t" \
+"xvmuldp         %%vs6, %%vs6, %%vs60      \n\t" \
+"xvmuldp         %%vs7, %%vs7, %%vs60      \n\t" \
+"xvmuldp         %%vs8, %%vs8, %%vs60      \n\t" \
+"xvmuldp         %%vs9, %%vs9, %%vs60      \n\t" \
+"xvmuldp         %%vs10, %%vs10, %%vs60      \n\t" \
+"xvmuldp         %%vs11, %%vs11, %%vs60      \n\t" \
+"xvmuldp         %%vs12, %%vs12, %%vs60      \n\t" \
+"xvmuldp         %%vs13, %%vs13, %%vs60      \n\t" \
+"xvmuldp         %%vs14, %%vs14, %%vs60      \n\t" \
+"xvmuldp         %%vs15, %%vs15, %%vs60      \n\t" \
+"xvmuldp         %%vs16, %%vs16, %%vs60      \n\t" \
+"xvmuldp         %%vs17, %%vs17, %%vs60      \n\t" \
+"xvmuldp         %%vs18, %%vs18, %%vs60      \n\t" \
+"xvmuldp         %%vs19, %%vs19, %%vs60      \n\t" \
+"xvmuldp         %%vs20, %%vs20, %%vs60      \n\t" \
+"xvmuldp         %%vs21, %%vs21, %%vs60      \n\t" \
+"xvmuldp         %%vs22, %%vs22, %%vs60      \n\t" \
+"xvmuldp         %%vs23, %%vs23, %%vs60      \n\t" \
+"xvmuldp         %%vs24, %%vs24, %%vs60      \n\t" \
+"xvmuldp         %%vs25, %%vs25, %%vs60      \n\t" \
+"xvmuldp         %%vs26, %%vs26, %%vs60      \n\t" \
+"xvmuldp         %%vs27, %%vs27, %%vs60      \n\t" \
+"xvmuldp         %%vs28, %%vs28, %%vs60      \n\t" \
+"xvmuldp         %%vs29, %%vs29, %%vs60      \n\t" \
+"xvmuldp         %%vs30, %%vs30, %%vs60      \n\t" \
+"xvmuldp         %%vs31, %%vs31, %%vs60      \n\t"
+#endif
 
 #define SCALECOL_CMATRIX \
   "xvmuldp         %%vs32, %%vs32, %%vs59      \n\t" \
@@ -421,7 +457,6 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-    "b DCOLSTORED                                   \n\t"
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
@@ -459,10 +494,13 @@ VSZEROOUT                                                 // Zero out vec regs
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
   	"                                               \n\t"
-  	"lxvdsx           %%vs31, 0, %%r0               \n\t" // splat alpha
+  	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
     "                                               \n\t"
   	"b DCOLSTORED                                   \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
   SCALEBYALPHA
   	"                                               \n\t"
   	"                                               \n\t"
