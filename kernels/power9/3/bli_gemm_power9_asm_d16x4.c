@@ -72,83 +72,47 @@
  "xxlxor           %%vs32, %%vs32, %%vs32           \n\t" \
  "xxlxor           %%vs33, %%vs33, %%vs33           \n\t" \
  "xxlxor           %%vs34, %%vs34, %%vs34           \n\t" \
- "xxlxor           %%vs35, %%vs35, %%vs35           \n\t" \
- "xxlxor           %%vs36, %%vs36, %%vs36           \n\t" \
- "xxlxor           %%vs37, %%vs37, %%vs37           \n\t" \
- "xxlxor           %%vs38, %%vs38, %%vs38           \n\t" \
- "xxlxor           %%vs39, %%vs39, %%vs39           \n\t" \
- "xxlxor           %%vs40, %%vs40, %%vs40           \n\t" \
- "xxlxor           %%vs41, %%vs41, %%vs41           \n\t" \
- "xxlxor           %%vs42, %%vs42, %%vs42           \n\t" \
- "xxlxor           %%vs43, %%vs43, %%vs43           \n\t" \
- "xxlxor           %%vs44, %%vs44, %%vs44           \n\t" \
- "xxlxor           %%vs45, %%vs45, %%vs45           \n\t" \
- "xxlxor           %%vs46, %%vs46, %%vs46           \n\t" \
- "xxlxor           %%vs47, %%vs47, %%vs47           \n\t" \
- "xxlxor           %%vs48, %%vs48, %%vs48           \n\t" \
- "xxlxor           %%vs49, %%vs49, %%vs49           \n\t" \
- "xxlxor           %%vs50, %%vs50, %%vs50           \n\t" \
- "xxlxor           %%vs51, %%vs51, %%vs51           \n\t" \
- "xxlxor           %%vs52, %%vs52, %%vs52           \n\t" \
- "xxlxor           %%vs53, %%vs53, %%vs53           \n\t" \
- "xxlxor           %%vs54, %%vs54, %%vs54           \n\t" \
- "xxlxor           %%vs55, %%vs55, %%vs55           \n\t" \
- "xxlxor           %%vs56, %%vs56, %%vs56           \n\t" \
- "xxlxor           %%vs57, %%vs57, %%vs57           \n\t" \
- "xxlxor           %%vs58, %%vs58, %%vs58           \n\t" \
- "xxlxor           %%vs59, %%vs59, %%vs59           \n\t" \
- "xxlxor           %%vs60, %%vs60, %%vs60           \n\t" \
- "xxlxor           %%vs61, %%vs61, %%vs61           \n\t" \
- "xxlxor           %%vs62, %%vs62, %%vs62           \n\t" \
- "xxlxor           %%vs63, %%vs63, %%vs63           \n\t" 
+ "xxlxor           %%vs35, %%vs35, %%vs35    \n\t" \
+ "xxlxor           %%vs36, %%vs36, %%vs36    \n\t" \
+ "xxlxor           %%vs37, %%vs37, %%vs37    \n\t" \
+ "xxlxor           %%vs38, %%vs38, %%vs38    \n\t" \
+ "xxlxor           %%vs39, %%vs39, %%vs39    \n\t" \
+ "xxlxor           %%vs40, %%vs40, %%vs40    \n\t" \
+ "xxlxor           %%vs41, %%vs41, %%vs41    \n\t" \
+ "xxlxor           %%vs42, %%vs42, %%vs42    \n\t" \
+ "xxlxor           %%vs43, %%vs43, %%vs43    \n\t" \
+ "xxlxor           %%vs44, %%vs44, %%vs44    \n\t" \
+ "xxlxor           %%vs45, %%vs45, %%vs45    \n\t" \
+ "xxlxor           %%vs46, %%vs46, %%vs46    \n\t" \
+ "xxlxor           %%vs47, %%vs47, %%vs47    \n\t" \
+ "xxlxor           %%vs48, %%vs48, %%vs48    \n\t" \
+ "xxlxor           %%vs49, %%vs49, %%vs49    \n\t" \
+ "xxlxor           %%vs50, %%vs50, %%vs50    \n\t" \
+ "xxlxor           %%vs51, %%vs51, %%vs51    \n\t" \
+ "xxlxor           %%vs52, %%vs52, %%vs52    \n\t" \
+ "xxlxor           %%vs53, %%vs53, %%vs53    \n\t" \
+ "xxlxor           %%vs54, %%vs54, %%vs54    \n\t" \
+ "xxlxor           %%vs55, %%vs55, %%vs55    \n\t" \
+ "xxlxor           %%vs56, %%vs56, %%vs56    \n\t" \
+ "xxlxor           %%vs57, %%vs57, %%vs57    \n\t" \
+ "xxlxor           %%vs58, %%vs58, %%vs58    \n\t" \
+ "xxlxor           %%vs59, %%vs59, %%vs59    \n\t" \
+ "xxlxor           %%vs60, %%vs60, %%vs60    \n\t" \
+ "xxlxor           %%vs61, %%vs61, %%vs61    \n\t" \
+ "xxlxor           %%vs62, %%vs62, %%vs62    \n\t" \
+ "xxlxor           %%vs63, %%vs63, %%vs63    \n\t" 
 
-#if 0
 #define SCALEBYALPHA \
-  "xvmuldp         %%vs32, %%vs32, %%vs31      \n\t" \
-  "xvmuldp         %%vs33, %%vs33, %%vs31      \n\t" \
-  "xvmuldp         %%vs34, %%vs34, %%vs31      \n\t" \
-  "xvmuldp         %%vs35, %%vs35, %%vs31      \n\t" \
-  "xvmuldp         %%vs36, %%vs36, %%vs31      \n\t" \
-  "xvmuldp         %%vs37, %%vs37, %%vs31      \n\t" \
-  "xvmuldp         %%vs38, %%vs38, %%vs31      \n\t" \
-  "xvmuldp         %%vs39, %%vs39, %%vs31      \n\t" \
-  "xvmuldp         %%vs40, %%vs40, %%vs31      \n\t" \
-  "xvmuldp         %%vs41, %%vs41, %%vs31      \n\t" \
-  "xvmuldp         %%vs42, %%vs42, %%vs31      \n\t" \
-  "xvmuldp         %%vs43, %%vs43, %%vs31      \n\t" \
-  "xvmuldp         %%vs44, %%vs44, %%vs31      \n\t" \
-  "xvmuldp         %%vs45, %%vs45, %%vs31      \n\t" \
-  "xvmuldp         %%vs46, %%vs46, %%vs31      \n\t" \
-  "xvmuldp         %%vs47, %%vs47, %%vs31      \n\t" \
-  "xvmuldp         %%vs48, %%vs48, %%vs31      \n\t" \
-  "xvmuldp         %%vs49, %%vs49, %%vs31      \n\t" \
-  "xvmuldp         %%vs50, %%vs50, %%vs31      \n\t" \
-  "xvmuldp         %%vs51, %%vs51, %%vs31      \n\t" \
-  "xvmuldp         %%vs52, %%vs52, %%vs31      \n\t" \
-  "xvmuldp         %%vs53, %%vs53, %%vs31      \n\t" \
-  "xvmuldp         %%vs54, %%vs54, %%vs31      \n\t" \
-  "xvmuldp         %%vs55, %%vs55, %%vs31      \n\t" \
-  "xvmuldp         %%vs56, %%vs56, %%vs31      \n\t" \
-  "xvmuldp         %%vs57, %%vs57, %%vs31      \n\t" \
-  "xvmuldp         %%vs58, %%vs58, %%vs31      \n\t" \
-  "xvmuldp         %%vs59, %%vs59, %%vs31      \n\t" \
-  "xvmuldp         %%vs60, %%vs60, %%vs31      \n\t" \
-  "xvmuldp         %%vs61, %%vs61, %%vs31      \n\t" \
-  "xvmuldp         %%vs62, %%vs62, %%vs31      \n\t" \
-  "xvmuldp         %%vs63, %%vs63, %%vs31      \n\t" 
-
-#else
-#define SCALEBYALPHA \
-"xvmuldp         %%vs0, %%vs0, %%vs60      \n\t" \
-"xvmuldp         %%vs1, %%vs1, %%vs60      \n\t" \
-"xvmuldp         %%vs2, %%vs2, %%vs60      \n\t" \
-"xvmuldp         %%vs3, %%vs3, %%vs60      \n\t" \
-"xvmuldp         %%vs4, %%vs4, %%vs60      \n\t" \
-"xvmuldp         %%vs5, %%vs5, %%vs60      \n\t" \
-"xvmuldp         %%vs6, %%vs6, %%vs60      \n\t" \
-"xvmuldp         %%vs7, %%vs7, %%vs60      \n\t" \
-"xvmuldp         %%vs8, %%vs8, %%vs60      \n\t" \
-"xvmuldp         %%vs9, %%vs9, %%vs60      \n\t" \
+"xvmuldp         %%vs0, %%vs0, %%vs60        \n\t" \
+"xvmuldp         %%vs1, %%vs1, %%vs60        \n\t" \
+"xvmuldp         %%vs2, %%vs2, %%vs60        \n\t" \
+"xvmuldp         %%vs3, %%vs3, %%vs60        \n\t" \
+"xvmuldp         %%vs4, %%vs4, %%vs60        \n\t" \
+"xvmuldp         %%vs5, %%vs5, %%vs60        \n\t" \
+"xvmuldp         %%vs6, %%vs6, %%vs60        \n\t" \
+"xvmuldp         %%vs7, %%vs7, %%vs60        \n\t" \
+"xvmuldp         %%vs8, %%vs8, %%vs60        \n\t" \
+"xvmuldp         %%vs9, %%vs9, %%vs60        \n\t" \
 "xvmuldp         %%vs10, %%vs10, %%vs60      \n\t" \
 "xvmuldp         %%vs11, %%vs11, %%vs60      \n\t" \
 "xvmuldp         %%vs12, %%vs12, %%vs60      \n\t" \
@@ -171,7 +135,6 @@
 "xvmuldp         %%vs29, %%vs29, %%vs60      \n\t" \
 "xvmuldp         %%vs30, %%vs30, %%vs60      \n\t" \
 "xvmuldp         %%vs31, %%vs31, %%vs60      \n\t"
-#endif
 
 #define LOADANDUPDATE \
     "lxv              %%vs32, 0(%%r7)               \n\t"\
@@ -289,38 +252,38 @@
   SCALEGEN_CMATRIX
 
 #define PERMUTEALLVREG \
-    "xxpermdi   %%vs32, %%vs8, %%vs0, 1             \n\t" \
-    "xxpermdi   %%vs33, %%vs9, %%vs1, 1             \n\t" \
-    "xxpermdi   %%vs34, %%vs10, %%vs2, 1            \n\t" \
-    "xxpermdi   %%vs35, %%vs11, %%vs3, 1            \n\t" \
-    "xxpermdi   %%vs36, %%vs12, %%vs4, 1            \n\t" \
-    "xxpermdi   %%vs37, %%vs13, %%vs5, 1            \n\t" \
-    "xxpermdi   %%vs38, %%vs14, %%vs6, 1            \n\t" \
-    "xxpermdi   %%vs39, %%vs15, %%vs7, 1            \n\t" \
-    "xxpermdi   %%vs40, %%vs0, %%vs8, 1             \n\t" \
-    "xxpermdi   %%vs41, %%vs1, %%vs9, 1             \n\t" \
-    "xxpermdi   %%vs42, %%vs2, %%vs10, 1            \n\t" \
-    "xxpermdi   %%vs43, %%vs3, %%vs11, 1            \n\t" \
-    "xxpermdi   %%vs44, %%vs4, %%vs12, 1            \n\t" \
-    "xxpermdi   %%vs45, %%vs5, %%vs13, 1            \n\t" \
-    "xxpermdi   %%vs46, %%vs6, %%vs14, 1            \n\t" \
-    "xxpermdi   %%vs47, %%vs7, %%vs15, 1            \n\t" \
-    "xxpermdi   %%vs48, %%vs24, %%vs16, 1           \n\t" \
-    "xxpermdi   %%vs49, %%vs25, %%vs17, 1           \n\t" \
-    "xxpermdi   %%vs50, %%vs26, %%vs18, 1           \n\t" \
-    "xxpermdi   %%vs51, %%vs27, %%vs19, 1           \n\t" \
-    "xxpermdi   %%vs52, %%vs28, %%vs20, 1           \n\t" \
-    "xxpermdi   %%vs53, %%vs29, %%vs21, 1           \n\t" \
-    "xxpermdi   %%vs54, %%vs30, %%vs22, 1           \n\t" \
-    "xxpermdi   %%vs55, %%vs31, %%vs23, 1           \n\t" \
-    "xxpermdi   %%vs56, %%vs16, %%vs24, 1           \n\t" \
-    "xxpermdi   %%vs57, %%vs17, %%vs25, 1           \n\t" \
-    "xxpermdi   %%vs58, %%vs18, %%vs26, 1           \n\t" \
-    "xxpermdi   %%vs59, %%vs19, %%vs27, 1           \n\t" \
-    "xxpermdi   %%vs60, %%vs20, %%vs28, 1           \n\t" \
-    "xxpermdi   %%vs61, %%vs21, %%vs29, 1           \n\t" \
-    "xxpermdi   %%vs62, %%vs22, %%vs30, 1           \n\t" \
-    "xxpermdi   %%vs63, %%vs23, %%vs31, 1           \n\t"
+  "xxpermdi   %%vs32, %%vs8, %%vs0, 1             \n\t" \
+  "xxpermdi   %%vs33, %%vs9, %%vs1, 1             \n\t" \
+  "xxpermdi   %%vs34, %%vs10, %%vs2, 1            \n\t" \
+  "xxpermdi   %%vs35, %%vs11, %%vs3, 1            \n\t" \
+  "xxpermdi   %%vs36, %%vs12, %%vs4, 1            \n\t" \
+  "xxpermdi   %%vs37, %%vs13, %%vs5, 1            \n\t" \
+  "xxpermdi   %%vs38, %%vs14, %%vs6, 1            \n\t" \
+  "xxpermdi   %%vs39, %%vs15, %%vs7, 1            \n\t" \
+  "xxpermdi   %%vs40, %%vs0, %%vs8, 1             \n\t" \
+  "xxpermdi   %%vs41, %%vs1, %%vs9, 1             \n\t" \
+  "xxpermdi   %%vs42, %%vs2, %%vs10, 1            \n\t" \
+  "xxpermdi   %%vs43, %%vs3, %%vs11, 1            \n\t" \
+  "xxpermdi   %%vs44, %%vs4, %%vs12, 1            \n\t" \
+  "xxpermdi   %%vs45, %%vs5, %%vs13, 1            \n\t" \
+  "xxpermdi   %%vs46, %%vs6, %%vs14, 1            \n\t" \
+  "xxpermdi   %%vs47, %%vs7, %%vs15, 1            \n\t" \
+  "xxpermdi   %%vs48, %%vs24, %%vs16, 1           \n\t" \
+  "xxpermdi   %%vs49, %%vs25, %%vs17, 1           \n\t" \
+  "xxpermdi   %%vs50, %%vs26, %%vs18, 1           \n\t" \
+  "xxpermdi   %%vs51, %%vs27, %%vs19, 1           \n\t" \
+  "xxpermdi   %%vs52, %%vs28, %%vs20, 1           \n\t" \
+  "xxpermdi   %%vs53, %%vs29, %%vs21, 1           \n\t" \
+  "xxpermdi   %%vs54, %%vs30, %%vs22, 1           \n\t" \
+  "xxpermdi   %%vs55, %%vs31, %%vs23, 1           \n\t" \
+  "xxpermdi   %%vs56, %%vs16, %%vs24, 1           \n\t" \
+  "xxpermdi   %%vs57, %%vs17, %%vs25, 1           \n\t" \
+  "xxpermdi   %%vs58, %%vs18, %%vs26, 1           \n\t" \
+  "xxpermdi   %%vs59, %%vs19, %%vs27, 1           \n\t" \
+  "xxpermdi   %%vs60, %%vs20, %%vs28, 1           \n\t" \
+  "xxpermdi   %%vs61, %%vs21, %%vs29, 1           \n\t" \
+  "xxpermdi   %%vs62, %%vs22, %%vs30, 1           \n\t" \
+  "xxpermdi   %%vs63, %%vs23, %%vs31, 1           \n\t"
 
 #define COLSTORE_CMATRIX \
   "stxv              %%vs32, 0(%%r16)           \n\t" \
@@ -411,7 +374,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-VSZEROOUT                                                 // Zero out vec regs
+    VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
@@ -467,7 +430,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-  	"b                DCOLSTORED                    \n\t"
+  	"b                DDONE                         \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
@@ -501,7 +464,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-  SCALEBYALPHA
+    SCALEBYALPHA
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
