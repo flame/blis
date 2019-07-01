@@ -504,7 +504,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"vcmpequd         %%r0, %%vs59, %%vs61          \n\t"
+  	"xscmpeqdp        %%r0, %%vs59, %%vs61          \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
