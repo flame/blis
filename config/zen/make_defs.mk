@@ -70,7 +70,7 @@ CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp -mllvm -disable-licm-vrp 
 else
 $(error gcc or clang are required for this configuration.)
 endif
