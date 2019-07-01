@@ -497,12 +497,12 @@ VSZEROOUT                                                 // Zero out vec regs
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
     "                                               \n\t"
-  	"b DCOLSTORED                                   \n\t"
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
   SCALEBYALPHA
   	"                                               \n\t"
+    "b DCOLSTORED                                   \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r28, 0                \n\t"
