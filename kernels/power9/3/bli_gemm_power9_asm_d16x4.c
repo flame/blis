@@ -504,6 +504,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
+    "b                DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
   	"cmpwi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
