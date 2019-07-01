@@ -467,7 +467,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-  	"b                DCOLSTOREDBNZ                 \n\t"
+  	"b                DCOLSTORED                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
