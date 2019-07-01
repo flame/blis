@@ -351,7 +351,6 @@ void bli_dgemm_power9_asm_16x4
   printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
                                      k_left, *alpha, *beta, rs_c, cs_c);
 
-
 	__asm__ volatile
 	(
 	"                                                 \n\t"
@@ -431,7 +430,7 @@ void bli_dgemm_power9_asm_16x4
   	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-  	//"b                DDONE                         \n\t"
+  	"b                DDONE                         \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
