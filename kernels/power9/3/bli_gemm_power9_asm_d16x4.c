@@ -419,9 +419,9 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-    PERMUTEALLVREG
   	"                                               \n\t"
   	"                                               \n\t"
+    "b DCOLSTORED                                   \n\t"
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
@@ -461,7 +461,8 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"lxvdsx           %%vs31, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
-  	"                                               \n\t"
+    "                                               \n\t"
+  	"b DCOLSTORED                                   \n\t"
   SCALEBYALPHA
   	"                                               \n\t"
   	"                                               \n\t"
@@ -871,10 +872,11 @@ VSZEROOUT                                                 // Zero out vec regs
   	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
   	"                                               \n\t"
     "                                               \n\t"
+    PERMUTEALLVREG
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
- COLSTORE_CMATRIX
+    COLSTORE_CMATRIX
   	"                                               \n\t"
   	"DDONE:                                         \n\t"  
   	"                                               \n\t"
