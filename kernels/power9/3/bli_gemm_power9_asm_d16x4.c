@@ -492,7 +492,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
-    "lq               %%r29, 0(%%r28)               \n\t"
+    "ld               %%r29, 0(%%r28)               \n\t"
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
