@@ -443,7 +443,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	// "DPRELOOPKLEFT:                                 \n\t"
+  	"DPRELOOPKLEFT:                                 \n\t"
   	// "                                               \n\t"
   	// "cmpwi            %%r0, %%r18, 0                \n\t"
   	// "beq              %%r0, DPOSTACCUM              \n\t"
