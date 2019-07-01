@@ -502,7 +502,6 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
   SCALEBYALPHA
   	"                                               \n\t"
-    "b DCOLSTORED                                   \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"cmpwi            %%r0, %%r28, 0                \n\t"
