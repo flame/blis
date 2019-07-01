@@ -135,11 +135,7 @@
  "xvmuldp          %%vs28, %%vs28, %%vs48   	 \n\t" \
  "xvmuldp          %%vs29, %%vs29, %%vs48   	 \n\t" \
  "xvmuldp          %%vs30, %%vs30, %%vs48   	 \n\t" \
- "xvmuldp          %%vs31, %%vs31, %%vs48   	 \n\t" \
- "xvmuldp          %%vs32, %%vs32, %%vs48   	 \n\t" \
- "xvmuldp          %%vs33, %%vs33, %%vs48   	 \n\t" \
- "xvmuldp          %%vs34, %%vs34, %%vs48   	 \n\t" \
- "xvmuldp          %%vs35, %%vs35, %%vs48   	 \n\t" 
+ "xvmuldp          %%vs31, %%vs31, %%vs48   	 \n\t" 
 
 #define SCALECOL_CMATRIX \
   "xvmuldp         %%vs32, %%vs32, %%vs59      \n\t" \
@@ -386,7 +382,6 @@ VSZEROOUT                                                 // Zero out vec regs
     "                                               \n\t"
     "                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
-    "b                DCOLSTORED                    \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
