@@ -859,6 +859,7 @@ void bli_dgemm_power9_asm_16x4
   	"b               DDONE                          \n\t"
   	"                                               \n\t"
   	"DCOLSTORED:                                    \n\t"
+    "b                DDONE                         \n\t"
   	"                                               \n\t" // create offset regs
   	"add              %%r17, %%r16, %%r10           \n\t" // c + cs_c
   	"add              %%r18, %%r17, %%r10           \n\t" // c + cs_c * 2 
