@@ -504,7 +504,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-    "b                DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
+    "b                DCOLSTOREDBNZ                 \n\t" // jump to COLstore case, if rs_c = 8
   	"cmpwi            %%r0, %%r29, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
@@ -598,7 +598,6 @@ VSZEROOUT                                                 // Zero out vec regs
   	"DADDTOC:                                      	\n\t" // C = beta*C + alpha*(AB)
   	"                                              	\n\t"
     "            	                                  \n\t"
-    "            	                                  \n\t"
     "lxv              %%vs32, 0(%%r22)              \n\t" 
     "lxv              %%vs33, 16(%%r22)             \n\t" 
     "lxv              %%vs34, 32(%%r22)             \n\t" 
@@ -673,7 +672,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "stxv              %%vs62, 96(%%r23)            \n\t" 
     "stxv              %%vs63, 112(%%r23)           \n\t" 
     "            	                                  \n\t" 
-    "                                               \n\t"
+    "b DDONE                                        \n\t"
     "lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
   	"                                               \n\t"
     "lxv              %%vs32, 0(%%r24)              \n\t" 
