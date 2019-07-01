@@ -444,7 +444,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
-    "ld               %%r30, 0(%%r28)               \n\t" // load val of beta
+    "ld               %%r26, 0(%%r28)               \n\t" // load val of beta
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
@@ -456,12 +456,11 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"cmpdi            %%r0, %%r30, 0                \n\t"
+  	"cmpdi            %%r0, %%r26, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   	"                                               \n\t"
-    "b DCOLSTOREDBNZ                                \n\t"
     "                                               \n\t"
     "                                               \n\t"
   	"cmpwi            %%r0, %%r9, 8                 \n\t"
