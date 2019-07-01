@@ -444,14 +444,9 @@ VSZEROOUT                                                 // Zero out vec regs
   	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
     "                                               \n\t"
     "                                               \n\t"
-  	"                                               \n\t"
-  	"                                               \n\t"
     "                                               \n\t"
     LOADANDUPDATE
   	"                                               \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
@@ -500,6 +495,7 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
+    "xxlxor           %%vs61, %%vs61, %%vs61        \n\t"
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -508,16 +504,16 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-  	"cmpwi            %%r7, %%r28, 0                \n\t"
-  	"beq              %%r7, DBETAZERO               \n\t" // jump to BZ case if beta = 0
+  	"fcmpu            %%r0, %%f59, %%f61            \n\t"
+  	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   	"                                               \n\t"
     "b DCOLSTOREDBNZ                                \n\t"
     "                                               \n\t"
     "                                               \n\t"
-  	"cmpwi            %%r7, %%r9, 8                 \n\t"
-  	"beq              %%r7, DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
+  	"cmpwi            %%r0, %%r9, 8                 \n\t"
+  	"beq              %%r0, DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
