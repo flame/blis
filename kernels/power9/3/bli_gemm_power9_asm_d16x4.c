@@ -496,7 +496,6 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
   	"lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
-    "xxlxor           %%vs61, %%vs61, %%vs61        \n\t"
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -510,7 +509,6 @@ VSZEROOUT                                                 // Zero out vec regs
   	"                                               \n\t"
   	"ld               %%r22, %6                     \n\t" // load ptr for C (used as offset)
   	"                                               \n\t"
-    "b DCOLSTOREDBNZ                                \n\t"
     "                                               \n\t"
     "                                               \n\t"
   	"cmpwi            %%r0, %%r9, 8                 \n\t"
@@ -675,6 +673,7 @@ VSZEROOUT                                                 // Zero out vec regs
     "stxv              %%vs63, 112(%%r23)           \n\t" 
     "            	                                  \n\t" 
     "                                               \n\t"
+    "lxvdsx           %%vs59, 0, %%r28              \n\t" // splat beta
   	"                                               \n\t"
     "lxv              %%vs32, 0(%%r24)              \n\t" 
     "lxv              %%vs33, 16(%%r24)             \n\t" 
