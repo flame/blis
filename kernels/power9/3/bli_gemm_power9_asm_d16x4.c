@@ -952,8 +952,8 @@ void bli_dgemm_power9_asm_16x4
   , "vs50", "vs51", "vs52", "vs53", "vs54", "vs55", "vs56", "vs57", "vs58", "vs58"
   , "vs60", "vs61", "vs62", "vs63"
   #endif
+  );
 
   if(*debug)
     printf("it worked!\n");
-  );
 }
