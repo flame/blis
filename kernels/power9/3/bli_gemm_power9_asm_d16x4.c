@@ -382,6 +382,9 @@ void bli_dgemm_power9_asm_16x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
+  int *debug = malloc(sizeof(int));
+  *debug = 0;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
   #if 1
@@ -403,11 +406,16 @@ void bli_dgemm_power9_asm_16x4
 
 	__asm__ volatile
 	(
-	"                                                 \n\t"
-  	"ld               %%r10, %8                     \n\t" // load cs_c
+	  "                                               \n\t"
+  	"                                               \n\t"
+  	"ld               %%r10, %9                     \n\t"
+    "li               %%r9, 1                       \n\t"
+    "stw              %%r9, 0(%%r10)                \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "ld               %%r10, %8                     \n\t" // load cs_c
   	"ld               %%r9, %7                      \n\t" // load rs_c
-  	"                                               \n\t"
-  	"                                               \n\t"
+    "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
   	"ld               %%r18, %1                     \n\t" // load k_left
   	"                                               \n\t"
@@ -915,7 +923,9 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)/*,   // 8
+	  "m" (cs_c),   // 8
+    "m" (debug)   // 9
+                  /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
@@ -941,8 +951,9 @@ void bli_dgemm_power9_asm_16x4
   , "vs40", "vs41", "vs42", "vs43", "vs44", "vs45", "vs46", "vs47", "vs48", "vs49"
   , "vs50", "vs51", "vs52", "vs53", "vs54", "vs55", "vs56", "vs57", "vs58", "vs58"
   , "vs60", "vs61", "vs62", "vs63"
-  
-
   #endif
+
+  if(*debug)
+    printf("it worked!\n");
   );
 }
