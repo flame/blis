@@ -50,13 +50,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 		1,
-	 	BLIS_GEMM_UKR, BLIS_DOUBLE,
-		#if 0   
-		bli_dgemm_power9_asm_12x6
-		#else
-		bli_dgemm_power9_asm_16x4
-		#endif
-		,  FALSE,
+	 	BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_16x4,  FALSE,
 		cntx
 	);
 
