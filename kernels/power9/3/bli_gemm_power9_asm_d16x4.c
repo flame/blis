@@ -408,9 +408,9 @@ void bli_dgemm_power9_asm_16x4
 	(
 	  "                                               \n\t"
   	"                                               \n\t"
-  	"ld               %%r10, %9                     \n\t"
+  	// "ld               %%r10, %9                     \n\t"
     "li               %%r9, 1                       \n\t"
-    "stw              %%r9, 0(%%r10)                \n\t"
+    "stw              %%r9, 0(%9)                   \n\t"
     "                                               \n\t"
     "                                               \n\t"
     "ld               %%r10, %8                     \n\t" // load cs_c
