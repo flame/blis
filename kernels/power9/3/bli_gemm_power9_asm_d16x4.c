@@ -482,6 +482,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
+    PERMUTEALLVREG
   	"                                               \n\t" // create offset regs
   	"slwi            %%r12, %%r9, 1                 \n\t"
   	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
@@ -492,7 +493,6 @@ void bli_dgemm_power9_asm_16x4
     "add             %%r28, %%r27, %%r12            \n\t" // c + rs_c * 12
     "add             %%r29, %%r28, %%r12            \n\t" // c + rs_c * 14
   	"                                               \n\t"
-    PERMUTEALLVREG
     GENLOAD_SCALE_UPDATE                                  // (1) load, scale, increment offsets
   	"                                              	\n\t"
 	  "xvadddp      %%vs0, %%vs0, %%vs32              \n\t"
