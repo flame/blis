@@ -397,7 +397,7 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  #if 1
+  #if 0
   printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
                                       k_iter, k_left, *alpha, *beta, rs_c, cs_c);
   #elif 0
@@ -526,6 +526,12 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                               \n\t" // create offset regs
   	"slwi            %%r12, %%r9, 1                 \n\t"
   	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
@@ -538,21 +544,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (1) load, scale, increment offsets
   	"                                              	\n\t"
-    "xxpermdi     %%vs40, %%vs0, %%vs8, 1           \n\t" // permute
-    "xxpermdi     %%vs41, %%vs1, %%vs9, 1           \n\t"
-    "xxpermdi     %%vs42, %%vs2, %%vs10, 1          \n\t"
-    "xxpermdi     %%vs43, %%vs3, %%vs11, 1          \n\t"
-    "xxpermdi     %%vs44, %%vs4, %%vs12, 1          \n\t"
-    "xxpermdi     %%vs45, %%vs5, %%vs13, 1          \n\t"
-    "xxpermdi     %%vs46, %%vs6, %%vs14, 1          \n\t"
-    "xxpermdi     %%vs47, %%vs7, %%vs15, 1          \n\t"
-    "                                              	\n\t" 
-	  GENADD_STORE                                          // add and store
-  	"                                               \n\t"
-  	"                                               \n\t"
-    GENLOAD_SCALE_UPDATE                                  // (2) load, scale, increment offsets
-  	"                                               \n\t"
-    "                                               \n\t"
     "xxpermdi     %%vs40, %%vs8, %%vs0, 1           \n\t" // permute
     "xxpermdi     %%vs41, %%vs9, %%vs1, 1           \n\t"
     "xxpermdi     %%vs42, %%vs10, %%vs2, 1          \n\t"
@@ -561,6 +552,21 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi     %%vs45, %%vs13, %%vs5, 1          \n\t"
     "xxpermdi     %%vs46, %%vs14, %%vs6, 1          \n\t"
     "xxpermdi     %%vs47, %%vs15, %%vs7, 1          \n\t"
+    "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
+  	"                                               \n\t"
+  	"                                               \n\t"
+    GENLOAD_SCALE_UPDATE                                  // (2) load, scale, increment offsets
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"xxpermdi     %%vs40, %%vs0, %%vs8, 1           \n\t" // permute
+    "xxpermdi     %%vs41, %%vs1, %%vs9, 1           \n\t"
+    "xxpermdi     %%vs42, %%vs2, %%vs10, 1          \n\t"
+    "xxpermdi     %%vs43, %%vs3, %%vs11, 1          \n\t"
+    "xxpermdi     %%vs44, %%vs4, %%vs12, 1          \n\t"
+    "xxpermdi     %%vs45, %%vs5, %%vs13, 1          \n\t"
+    "xxpermdi     %%vs46, %%vs6, %%vs14, 1          \n\t"
+    "xxpermdi     %%vs47, %%vs7, %%vs15, 1          \n\t"
     "                                              	\n\t" 
 	  GENADD_STORE                                          // add and store
   	"                                               \n\t"
@@ -593,10 +599,28 @@ void bli_dgemm_power9_asm_16x4
 	  GENADD_STORE                                          // add and store
   	"                                              	\n\t"
   	"                                              	\n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"b                DDONE                       	\n\t"
   	"                                              	\n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                              	\n\t"
   	"DCOLSTOREDBNZ:                                	\n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                              	\n\t" // column offsets
   	"add              %%r23, %%r22, %%r10           \n\t" // c + cs_c
     "add              %%r24, %%r23, %%r10           \n\t" // c + cs_c * 2
@@ -764,6 +788,14 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"b                DDONE                         \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
