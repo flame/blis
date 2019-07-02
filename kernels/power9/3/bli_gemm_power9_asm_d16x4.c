@@ -257,6 +257,41 @@
 "add             %%r28, %%r28, %%r10            \n\t" \
 "add             %%r29, %%r29, %%r10            \n\t"
 
+#define GENADD_STORE \
+"xvadddp      %%vs40, %%vs40, %%vs32            \n\t" \
+"xvadddp      %%vs41, %%vs41, %%vs33            \n\t" \
+"xvadddp      %%vs42, %%vs42, %%vs34            \n\t" \
+"xvadddp      %%vs43, %%vs43, %%vs35            \n\t" \
+"xvadddp      %%vs44, %%vs44, %%vs36            \n\t" \
+"xvadddp      %%vs45, %%vs45, %%vs37            \n\t" \
+"xvadddp      %%vs46, %%vs46, %%vs38            \n\t" \
+"xvadddp      %%vs47, %%vs47, %%vs39            \n\t" \
+"                                              	\n\t" \
+"stxsdx       %%vs40, %%r9, %%r22               \n\t" \
+"xxswapd      %%vs40, %%vs40                    \n\t" \
+"stxsdx       %%vs41, %%r9, %%r23               \n\t" \
+"xxswapd      %%vs41, %%vs41                    \n\t" \
+"stxsdx       %%vs42, %%r9, %%r24               \n\t" \
+"xxswapd      %%vs42, %%vs42                    \n\t" \
+"stxsdx       %%vs43, %%r9, %%r25               \n\t" \
+"xxswapd      %%vs43, %%vs43                    \n\t" \
+"stxsdx       %%vs44, %%r9, %%r26               \n\t" \
+"xxswapd      %%vs44, %%vs44                    \n\t" \
+"stxsdx       %%vs45, %%r9, %%r27               \n\t" \
+"xxswapd      %%vs45, %%vs45                    \n\t" \
+"stxsdx       %%vs46, %%r9, %%r28               \n\t" \
+"xxswapd      %%vs46, %%vs46                    \n\t" \
+"stxsdx       %%vs47, %%r9, %%r29               \n\t" \
+"xxswapd      %%vs47, %%vs47                    \n\t" \
+"stxsdx       %%vs40, 0, %%r22                  \n\t" \
+"stxsdx       %%vs41, 0, %%r23                  \n\t" \
+"stxsdx       %%vs42, 0, %%r24                  \n\t" \
+"stxsdx       %%vs43, 0, %%r25                  \n\t" \
+"stxsdx       %%vs44, 0, %%r26                  \n\t" \
+"stxsdx       %%vs45, 0, %%r27                  \n\t" \
+"stxsdx       %%vs46, 0, %%r28                  \n\t" \
+"stxsdx       %%vs47, 0, %%r29                  \n\t" \
+
 #define GENLOAD_SCALE_UPDATE \
   LOADGEN_CMATRIX   \
   GEN_NEXT_COL_CMATRIX \
@@ -482,7 +517,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
-    PERMUTEALLVREG
   	"                                               \n\t" // create offset regs
   	"slwi            %%r12, %%r9, 1                 \n\t"
   	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
@@ -495,54 +529,62 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (1) load, scale, increment offsets
   	"                                              	\n\t"
-	  "xvadddp      %%vs0, %%vs0, %%vs32              \n\t"
-    "xvadddp      %%vs1, %%vs1, %%vs33              \n\t"
-    "xvadddp      %%vs2, %%vs2, %%vs34              \n\t"
-    "xvadddp      %%vs3, %%vs3, %%vs35              \n\t"
-    "xvadddp      %%vs4, %%vs4, %%vs36              \n\t"
-    "xvadddp      %%vs5, %%vs5, %%vs37              \n\t"
-    "xvadddp      %%vs6, %%vs6, %%vs38              \n\t"
-    "xvadddp      %%vs7, %%vs7, %%vs39              \n\t"
+    "xxpermdi     %%vs40, %%vs8, %%vs0, 1           \n\t" // permute
+    "xxpermdi     %%vs41, %%vs9, %%vs1, 1           \n\t"
+    "xxpermdi     %%vs42, %%vs10, %%vs2, 1          \n\t"
+    "xxpermdi     %%vs43, %%vs11, %%vs3, 1          \n\t"
+    "xxpermdi     %%vs44, %%vs12, %%vs4, 1          \n\t"
+    "xxpermdi     %%vs45, %%vs13, %%vs5, 1          \n\t"
+    "xxpermdi     %%vs46, %%vs14, %%vs6, 1          \n\t"
+    "xxpermdi     %%vs47, %%vs15, %%vs7, 1          \n\t"
+    "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
   	"                                               \n\t"
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (2) load, scale, increment offsets
   	"                                               \n\t"
     "                                               \n\t"
-  	"xvadddp      %%vs8, %%vs8, %%vs32              \n\t"
-    "xvadddp      %%vs9, %%vs9, %%vs33              \n\t"
-    "xvadddp      %%vs10, %%vs10, %%vs34            \n\t"
-    "xvadddp      %%vs11, %%vs11, %%vs35            \n\t"
-    "xvadddp      %%vs12, %%vs12, %%vs36            \n\t"
-    "xvadddp      %%vs13, %%vs13, %%vs37            \n\t"
-    "xvadddp      %%vs14, %%vs14, %%vs38            \n\t"
-    "xvadddp      %%vs15, %%vs15, %%vs39            \n\t"
+  	"xxpermdi     %%vs40, %%vs0, %%vs8, 1           \n\t" // permute
+    "xxpermdi     %%vs41, %%vs1, %%vs9, 1           \n\t"
+    "xxpermdi     %%vs42, %%vs2, %%vs10, 1          \n\t"
+    "xxpermdi     %%vs43, %%vs3, %%vs11, 1          \n\t"
+    "xxpermdi     %%vs44, %%vs4, %%vs12, 1          \n\t"
+    "xxpermdi     %%vs45, %%vs5, %%vs13, 1          \n\t"
+    "xxpermdi     %%vs46, %%vs6, %%vs14, 1          \n\t"
+    "xxpermdi     %%vs47, %%vs7, %%vs15, 1          \n\t"
+    "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
   	"                                               \n\t"
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (3) load, scale, increment offsets
   	"                                               \n\t"
-  	"xvadddp      %%vs16, %%vs16, %%vs32            \n\t" 
-    "xvadddp      %%vs17, %%vs17, %%vs33            \n\t"
-    "xvadddp      %%vs18, %%vs18, %%vs34            \n\t"
-    "xvadddp      %%vs19, %%vs19, %%vs35            \n\t"
-    "xvadddp      %%vs20, %%vs20, %%vs36            \n\t"
-    "xvadddp      %%vs21, %%vs21, %%vs37            \n\t"
-    "xvadddp      %%vs22, %%vs22, %%vs38            \n\t"
-    "xvadddp      %%vs23, %%vs23, %%vs39            \n\t"
+  	"xxpermdi     %%vs40, %%vs16, %%vs24, 1         \n\t" // permute
+    "xxpermdi     %%vs41, %%vs17, %%vs25, 1         \n\t"
+    "xxpermdi     %%vs42, %%vs18, %%vs26, 1         \n\t"
+    "xxpermdi     %%vs43, %%vs19, %%vs27, 1         \n\t"
+    "xxpermdi     %%vs44, %%vs20, %%vs28, 1         \n\t"
+    "xxpermdi     %%vs45, %%vs21, %%vs29, 1         \n\t"
+    "xxpermdi     %%vs46, %%vs22, %%vs30, 1         \n\t"
+    "xxpermdi     %%vs47, %%vs23, %%vs31, 1         \n\t"
+    "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
   	"                                               \n\t"
   	"                                          	    \n\t"
     GENLOAD_SCALE_UPDATE                                  // (4) load, scale, increment offsets
   	"                                               \n\t"
-  	"xvadddp      %%vs24, %%vs24, %%vs32            \n\t" 
-    "xvadddp      %%vs25, %%vs25, %%vs33            \n\t"
-    "xvadddp      %%vs26, %%vs26, %%vs34            \n\t"
-    "xvadddp      %%vs27, %%vs27, %%vs35            \n\t"
-    "xvadddp      %%vs28, %%vs28, %%vs36            \n\t"
-    "xvadddp      %%vs29, %%vs29, %%vs37            \n\t"
-    "xvadddp      %%vs30, %%vs30, %%vs38            \n\t"
-    "xvadddp      %%vs31, %%vs31, %%vs39            \n\t"
+  	"xxpermdi     %%vs40, %%vs24, %%vs16, 1         \n\t" // permute
+    "xxpermdi     %%vs41, %%vs25, %%vs17, 1         \n\t"
+    "xxpermdi     %%vs42, %%vs26, %%vs18, 1         \n\t"
+    "xxpermdi     %%vs43, %%vs27, %%vs19, 1         \n\t"
+    "xxpermdi     %%vs44, %%vs28, %%vs20, 1         \n\t"
+    "xxpermdi     %%vs45, %%vs29, %%vs21, 1         \n\t"
+    "xxpermdi     %%vs46, %%vs30, %%vs22, 1         \n\t"
+    "xxpermdi     %%vs47, %%vs31, %%vs23, 1         \n\t"
+    "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
   	"                                              	\n\t"
   	"                                              	\n\t"
-  	"b                DGENSTORED                   	\n\t"
+  	"b                DDONE                       	\n\t"
   	"                                              	\n\t"
   	"                                              	\n\t"
   	"DCOLSTOREDBNZ:                                	\n\t"
@@ -723,6 +765,7 @@ void bli_dgemm_power9_asm_16x4
   	"cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
   	"beq              DCOLSTORED                    \n\t" // C is col stored
   	"                                               \n\t"
+    PERMUTEALLVREG
   	"DGENSTORED:                                    \n\t"
   	"                                               \n\t"
   	"ld              %%r22, %6                      \n\t" // load c
