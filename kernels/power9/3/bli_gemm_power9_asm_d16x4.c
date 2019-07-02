@@ -394,8 +394,12 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  // printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
-  //                                    k_left, *alpha, *beta, rs_c, cs_c);
+  #if 0
+  printf("Entering ukernel | k = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld \n",
+                                      k_left, *alpha, *beta, rs_c, cs_c);
+  #elif 1
+  printf("Entering kernel\n");
+  #endif
 
 	__asm__ volatile
 	(
@@ -765,7 +769,6 @@ void bli_dgemm_power9_asm_16x4
   	"cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
   	"beq              DCOLSTORED                    \n\t" // C is col stored
   	"                                               \n\t"
-    PERMUTEALLVREG
   	"DGENSTORED:                                    \n\t"
   	"                                               \n\t"
   	"ld              %%r22, %6                      \n\t" // load c
