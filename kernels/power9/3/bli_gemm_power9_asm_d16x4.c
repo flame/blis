@@ -576,21 +576,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (3) load, scale, increment offsets
   	"                                               \n\t"
-  	"xxpermdi     %%vs40, %%vs16, %%vs24, 1         \n\t" // permute
-    "xxpermdi     %%vs41, %%vs17, %%vs25, 1         \n\t"
-    "xxpermdi     %%vs42, %%vs18, %%vs26, 1         \n\t"
-    "xxpermdi     %%vs43, %%vs19, %%vs27, 1         \n\t"
-    "xxpermdi     %%vs44, %%vs20, %%vs28, 1         \n\t"
-    "xxpermdi     %%vs45, %%vs21, %%vs29, 1         \n\t"
-    "xxpermdi     %%vs46, %%vs22, %%vs30, 1         \n\t"
-    "xxpermdi     %%vs47, %%vs23, %%vs31, 1         \n\t"
-    "                                              	\n\t" 
-	  GENADD_STORE                                          // add and store
-  	GEN_NEXT_COL_CMATRIX
-    "                                               \n\t"
-  	"                                          	    \n\t"
-    GENLOAD_SCALE_UPDATE                                  // (4) load, scale, increment offsets
-  	"                                               \n\t"
   	"xxpermdi     %%vs40, %%vs24, %%vs16, 1         \n\t" // permute
     "xxpermdi     %%vs41, %%vs25, %%vs17, 1         \n\t"
     "xxpermdi     %%vs42, %%vs26, %%vs18, 1         \n\t"
@@ -600,6 +585,21 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi     %%vs46, %%vs30, %%vs22, 1         \n\t"
     "xxpermdi     %%vs47, %%vs31, %%vs23, 1         \n\t"
     "                                              	\n\t" 
+	  GENADD_STORE                                          // add and store
+  	GEN_NEXT_COL_CMATRIX
+    "                                               \n\t"
+  	"                                          	    \n\t"
+    GENLOAD_SCALE_UPDATE                                  // (4) load, scale, increment offsets
+  	"                                               \n\t"
+    "xxpermdi     %%vs40, %%vs16, %%vs24, 1         \n\t" // permute
+    "xxpermdi     %%vs41, %%vs17, %%vs25, 1         \n\t"
+    "xxpermdi     %%vs42, %%vs18, %%vs26, 1         \n\t"
+    "xxpermdi     %%vs43, %%vs19, %%vs27, 1         \n\t"
+    "xxpermdi     %%vs44, %%vs20, %%vs28, 1         \n\t"
+    "xxpermdi     %%vs45, %%vs21, %%vs29, 1         \n\t"
+    "xxpermdi     %%vs46, %%vs22, %%vs30, 1         \n\t"
+    "xxpermdi     %%vs47, %%vs23, %%vs31, 1         \n\t" 
+    "                                              	\n\t"
 	  GENADD_STORE                                          // add and store
   	"                                              	\n\t"
   	"                                              	\n\t"
