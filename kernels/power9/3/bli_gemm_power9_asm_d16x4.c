@@ -267,6 +267,7 @@
 "xvadddp      %%vs46, %%vs46, %%vs38            \n\t" \
 "xvadddp      %%vs47, %%vs47, %%vs39            \n\t" \
 "                                              	\n\t" \
+"stxsdx       %%vs40, %%r9, %%r22               \n\t" \
 "xxswapd      %%vs40, %%vs40                    \n\t" \
 "stxsdx       %%vs41, %%r9, %%r23               \n\t" \
 "xxswapd      %%vs41, %%vs41                    \n\t" \
@@ -395,7 +396,7 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  #if 0
+  #if 1
   printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
                                       k_iter, k_left, *alpha, *beta, rs_c, cs_c);
   #elif 0
