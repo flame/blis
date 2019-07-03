@@ -237,7 +237,7 @@
 "lxsdx     %%vs45, 0, %%r28                     \n\t" \
 "lxsdx     %%vs46, %%r9, %%r29                  \n\t" \
 "lxsdx     %%vs47, 0, %%r29                     \n\t" \
-"xxpermdi    %%vs32, %%vs33, %%vs32, 0          \n\t" \
+"xxpermdi    %%vs32, %%vs32, %%vs33, 0          \n\t" \
 "xxpermdi    %%vs33, %%vs34, %%vs35, 0          \n\t" \
 "xxpermdi    %%vs34, %%vs36, %%vs37, 0          \n\t" \
 "xxpermdi    %%vs35, %%vs38, %%vs39, 0          \n\t" \
