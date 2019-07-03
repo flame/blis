@@ -221,7 +221,7 @@
 "xvmaddadp        %%vs3, %%vs43, %%vs52         \n\t" \
 "                                               \n\t" \
 "lxv              %%vs50, 48(%%r8)              \n\t" \
-"xxpermdi         %%vs51, %%vs51, %%vs51, 2     \n\t" \
+"xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs4, %%vs44, %%vs52         \n\t" \
 "xvmaddadp        %%vs5, %%vs45, %%vs52         \n\t" \
