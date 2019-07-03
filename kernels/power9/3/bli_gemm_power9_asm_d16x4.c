@@ -513,7 +513,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-    #if 0
   	"cmpdi            %%r0, %%r26, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
@@ -527,7 +526,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
     "                                               \n\t"
-    #endif
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
