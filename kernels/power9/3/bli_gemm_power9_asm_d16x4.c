@@ -121,6 +121,8 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
     PRELOAD_A_B
   	"                                               \n\t"
+    "addi             %%r8, %%r8, 32                \n\t" 
+    "addi             %%r7, %%r7, 128               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
@@ -128,8 +130,7 @@ void bli_dgemm_power9_asm_16x4
   	"beq              %%r0, DPRELOOPKLEFT           \n\t"
   	"mtctr            %%r17                         \n\t"
   	"                                               \n\t"
-  	"                                               \n\t"
-    "                                               \n\t"
+  	"                                               \n\t" 
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -138,10 +139,8 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    LOAD_UPDATE_1
-    LOAD_UPDATE_1
-    LOAD_UPDATE_1
-    LOAD_UPDATE_1
+    LOAD_UPDATE_2
+    LOAD_UPDATE_2
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
