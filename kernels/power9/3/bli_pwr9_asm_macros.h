@@ -68,6 +68,16 @@
  "xxlxor           %%vs62, %%vs62, %%vs62       \n\t" \
  "xxlxor           %%vs63, %%vs63, %%vs63       \n\t" 
 
+
+
+
+
+
+
+
+
+
+
 #define SCALE_ALPHA \
 "xvmuldp         %%vs0, %%vs0, %%vs60           \n\t" \
 "xvmuldp         %%vs1, %%vs1, %%vs60           \n\t" \
@@ -102,6 +112,13 @@
 "xvmuldp         %%vs30, %%vs30, %%vs60         \n\t" \
 "xvmuldp         %%vs31, %%vs31, %%vs60         \n\t"
 
+
+
+
+
+
+
+
 #define PRELOAD_A_B \
 "lxv              %%vs32, 0(%%r7)               \n\t" \
 "lxv              %%vs33, 16(%%r7)              \n\t" \
@@ -117,6 +134,15 @@
 "lxv              %%vs37, 80(%%r7)              \n\t" \
 "lxv              %%vs38, 96(%%r7)              \n\t" \
 "lxv              %%vs39, 112(%%r7)             \n\t" 
+
+
+
+
+
+
+
+
+
 
 
 #define LOAD_UPDATE_2 \
@@ -249,6 +275,17 @@
 "                                               \n\t" \
 "                                               \n\t"
 
+
+
+
+
+
+
+
+
+
+
+
 #define LOAD_UPDATE_1 \
 "                                               \n\t" \
 "addi             %%r8, %%r8, 32                \n\t" \
@@ -314,6 +351,13 @@
 
 
 
+
+
+
+
+
+
+
 #define COL_ADD_TO_C \
 "xvadddp          %%vs48, %%vs48, %%vs32   	    \n\t" \
 "xvadddp          %%vs49, %%vs49, %%vs33   	    \n\t" \
@@ -337,6 +381,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
 #define COL_SCALE_BETA \
 "xvmuldp         %%vs32, %%vs32, %%vs59         \n\t" \
 "xvmuldp         %%vs33, %%vs33, %%vs59         \n\t" \
@@ -355,6 +409,16 @@
 "xvmuldp         %%vs46, %%vs46, %%vs59         \n\t" \
 "xvmuldp         %%vs47, %%vs47, %%vs59         \n\t"  
 
+
+
+
+
+
+
+
+
+
+
 #define GEN_BETA_SCALE \
 "xvmuldp          %%vs32, %%vs32, %%vs59   	    \n\t" \
 "xvmuldp          %%vs33, %%vs33, %%vs59   	    \n\t" \
@@ -364,6 +428,14 @@
 "xvmuldp          %%vs37, %%vs37, %%vs59   	    \n\t" \
 "xvmuldp          %%vs38, %%vs38, %%vs59   	    \n\t" \
 "xvmuldp          %%vs39, %%vs39, %%vs59   	    \n\t" 
+
+
+
+
+
+
+
+
 
 #define GEN_LOAD_C \
 "lxsdx     %%vs32, %%r9, %%r22                  \n\t" \
@@ -392,6 +464,13 @@
 "xxpermdi    %%vs39, %%vs46, %%vs47, 0          \n\t" 
 
 
+
+
+
+
+
+
+
 #define GEN_NEXT_COL_C \
 "add             %%r22, %%r22, %%r10            \n\t" \
 "add             %%r23, %%r23, %%r10            \n\t" \
@@ -401,6 +480,16 @@
 "add             %%r27, %%r27, %%r10            \n\t" \
 "add             %%r28, %%r28, %%r10            \n\t" \
 "add             %%r29, %%r29, %%r10            \n\t"
+
+
+
+
+
+
+
+
+
+
 
 #define GEN_ADD_STORE \
 "xvadddp      %%vs40, %%vs40, %%vs32            \n\t" \
@@ -437,9 +526,25 @@
 "stxsdx       %%vs46, 0, %%r28                  \n\t" \
 "stxsdx       %%vs47, 0, %%r29                  \n\t" \
 
+
+
+
+
+
+
 #define GEN_LOAD_SCALE \
   GEN_LOAD_C   \
   GEN_BETA_SCALE
+
+
+
+
+
+
+
+
+
+
 
 #define PERMUTE_ALL_VREG \
   "xxpermdi   %%vs32, %%vs8, %%vs0, 1           \n\t" \
@@ -475,6 +580,16 @@
   "xxpermdi   %%vs62, %%vs22, %%vs30, 1         \n\t" \
   "xxpermdi   %%vs63, %%vs23, %%vs31, 1         \n\t"
 
+
+
+
+
+
+
+
+
+
+
 #define COL_BZ_STORE_C \
   "stxv              %%vs32, 0(%%r16)           \n\t" \
   "stxv              %%vs33, 16(%%r16)          \n\t" \
@@ -508,3 +623,6 @@
   "stxv              %%vs61, 80(%%r19)          \n\t" \
   "stxv              %%vs62, 96(%%r19)          \n\t" \
   "stxv              %%vs63, 112(%%r19)         \n\t" 
+
+
+
