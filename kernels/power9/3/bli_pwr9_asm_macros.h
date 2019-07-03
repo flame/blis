@@ -255,7 +255,6 @@
 "addi             %%r7, %%r7, 128               \n\t" \
 "                                               \n\t" \
 "                                               \n\t" \
-"                                               \n\t" \
 "xvmaddadp        %%vs0, %%vs32, %%vs48         \n\t" \
 "xvmaddadp        %%vs1, %%vs33, %%vs48         \n\t" \
 "xvmaddadp        %%vs2, %%vs34, %%vs48         \n\t" \
@@ -275,9 +274,9 @@
 "xvmaddadp        %%vs14, %%vs38, %%vs49        \n\t" \
 "xvmaddadp        %%vs15, %%vs39, %%vs49        \n\t" \
 "                                               \n\t" \
+"                                               \n\t" \
 "lxv              %%vs48, 0(%%r8)               \n\t" \
 "xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t" \
-"                                               \n\t" \
 "                                               \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs16, %%vs32, %%vs50        \n\t" \

@@ -58,7 +58,7 @@ void bli_dgemm_power9_asm_16x4
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 1
+  #if 0
 	uint64_t k_iter = k0 / 4;
 	uint64_t k_left = k0 % 4;
   #else
@@ -119,6 +119,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
+    PRELOAD_A_B
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -127,7 +128,12 @@ void bli_dgemm_power9_asm_16x4
   	"beq              %%r0, DPRELOOPKLEFT           \n\t"
   	"mtctr            %%r17                         \n\t"
   	"                                               \n\t"
-  	"                                               \n\t"  
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
     "                                               \n\t"
     "                                               \n\t"
