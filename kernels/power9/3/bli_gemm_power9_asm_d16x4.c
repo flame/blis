@@ -135,7 +135,24 @@
 "xvmuldp         %%vs29, %%vs29, %%vs60         \n\t" \
 "xvmuldp         %%vs30, %%vs30, %%vs60         \n\t" \
 "xvmuldp         %%vs31, %%vs31, %%vs60         \n\t"
- 
+
+#define PRELOAD_A_B \
+"lxv              %%vs32, 0(%%r7)               \n\t" \
+"lxv              %%vs33, 16(%%r7)              \n\t" \
+"lxv              %%vs34, 32(%%r7)              \n\t" \
+"lxv              %%vs35, 48(%%r7)              \n\t" \
+"                                               \n\t" \
+"lxv              %%vs48, 0(%%r8)               \n\t" \
+"lxv              %%vs50, 16(%%r8)              \n\t" \
+"xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t" \
+"xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t" \
+"                                               \n\t" \
+"lxv              %%vs36, 64(%%r7)              \n\t" \
+"lxv              %%vs37, 80(%%r7)              \n\t" \
+"lxv              %%vs38, 96(%%r7)              \n\t" \
+"lxv              %%vs39, 112(%%r7)             \n\t" 
+
+
 #define LOADANDUPDATE2 \
 "                                               \n\t" \
 "                                               \n\t" \
@@ -332,7 +349,41 @@
 
 
 
-
+#define COL_ADD_STORE \
+"xvadddp          %%vs48, %%vs48, %%vs32   	    \n\t" \
+"xvadddp          %%vs49, %%vs49, %%vs33   	    \n\t" \
+"xvadddp          %%vs50, %%vs50, %%vs34   	    \n\t" \
+"xvadddp          %%vs51, %%vs51, %%vs35        \n\t" \
+"xvadddp          %%vs52, %%vs52, %%vs36 	      \n\t" \
+"xvadddp          %%vs53, %%vs53, %%vs37    	  \n\t" \
+"xvadddp          %%vs54, %%vs54, %%vs38   	    \n\t" \
+"xvadddp          %%vs55, %%vs55, %%vs39     	  \n\t" \
+"xvadddp          %%vs56, %%vs56, %%vs40   	    \n\t" \
+"xvadddp          %%vs57, %%vs57, %%vs41   	    \n\t" \
+"xvadddp          %%vs58, %%vs58, %%vs42   	    \n\t" \
+"xvadddp          %%vs59, %%vs59, %%vs43        \n\t" \
+"xvadddp          %%vs60, %%vs60, %%vs44 	      \n\t" \
+"xvadddp          %%vs61, %%vs61, %%vs45    	  \n\t" \
+"xvadddp          %%vs62, %%vs62, %%vs46   	    \n\t" \
+"xvadddp          %%vs63, %%vs63, %%vs47     	  \n\t" \
+"            	                                  \n\t" \
+"            	                                  \n\t" \
+"stxv              %%vs48, 0(%%r24)             \n\t" \
+"stxv              %%vs49, 16(%%r24)            \n\t" \
+"stxv              %%vs50, 32(%%r24)            \n\t" \
+"stxv              %%vs51, 48(%%r24)            \n\t" \
+"stxv              %%vs52, 64(%%r24)            \n\t" \
+"stxv              %%vs53, 80(%%r24)            \n\t" \
+"stxv              %%vs54, 96(%%r24)            \n\t" \
+"stxv              %%vs55, 112(%%r24)           \n\t" \
+"stxv              %%vs56, 0(%%r25)             \n\t" \
+"stxv              %%vs57, 16(%%r25)            \n\t" \
+"stxv              %%vs58, 32(%%r25)            \n\t" \
+"stxv              %%vs59, 48(%%r25)            \n\t" \
+"stxv              %%vs60, 64(%%r25)            \n\t" \
+"stxv              %%vs61, 80(%%r25)            \n\t" \
+"stxv              %%vs62, 96(%%r25)            \n\t" \
+"stxv              %%vs63, 112(%%r25)           \n\t" 
 
 
 
@@ -578,6 +629,14 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -605,6 +664,18 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
     "                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -667,6 +738,38 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
   	"cmpwi            %%r0, %%r9, 8                 \n\t"
   	"beq              %%r0, DCOLSTOREDBNZ           \n\t" // jump to COLstore case, if rs_c = 8
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTOREDBNZ:                                 \n\t"
@@ -762,8 +865,32 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"                                              	\n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"DCOLSTOREDBNZ:                                	\n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -815,41 +942,7 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs63, %%vs7, %%vs15, 1   	  \n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	"xvadddp          %%vs48, %%vs48, %%vs32   	    \n\t" // add (1)
-  	"xvadddp          %%vs49, %%vs49, %%vs33   	    \n\t" 
-  	"xvadddp          %%vs50, %%vs50, %%vs34   	    \n\t" 
-  	"xvadddp          %%vs51, %%vs51, %%vs35        \n\t" 
-  	"xvadddp          %%vs52, %%vs52, %%vs36 	      \n\t" 
-  	"xvadddp          %%vs53, %%vs53, %%vs37    	  \n\t" 
-  	"xvadddp          %%vs54, %%vs54, %%vs38   	    \n\t" 
-  	"xvadddp          %%vs55, %%vs55, %%vs39     	  \n\t" 
-    "            	                                  \n\t"
-    "xvadddp          %%vs56, %%vs56, %%vs40   	    \n\t"
-  	"xvadddp          %%vs57, %%vs57, %%vs41   	    \n\t" 
-  	"xvadddp          %%vs58, %%vs58, %%vs42   	    \n\t" 
-  	"xvadddp          %%vs59, %%vs59, %%vs43        \n\t" 
-  	"xvadddp          %%vs60, %%vs60, %%vs44 	      \n\t" 
-  	"xvadddp          %%vs61, %%vs61, %%vs45    	  \n\t" 
-  	"xvadddp          %%vs62, %%vs62, %%vs46   	    \n\t" 
-  	"xvadddp          %%vs63, %%vs63, %%vs47     	  \n\t"
-    "            	                                  \n\t"
-    "            	                                  \n\t" 
-    "stxv              %%vs48, 0(%%r22)             \n\t" // store (1)
-    "stxv              %%vs49, 16(%%r22)            \n\t" 
-    "stxv              %%vs50, 32(%%r22)            \n\t" 
-    "stxv              %%vs51, 48(%%r22)            \n\t" 
-    "stxv              %%vs52, 64(%%r22)            \n\t" 
-    "stxv              %%vs53, 80(%%r22)            \n\t" 
-    "stxv              %%vs54, 96(%%r22)            \n\t" 
-    "stxv              %%vs55, 112(%%r22)           \n\t"
-    "stxv              %%vs56, 0(%%r23)             \n\t" 
-    "stxv              %%vs57, 16(%%r23)            \n\t" 
-    "stxv              %%vs58, 32(%%r23)            \n\t" 
-    "stxv              %%vs59, 48(%%r23)            \n\t" 
-    "stxv              %%vs60, 64(%%r23)            \n\t" 
-    "stxv              %%vs61, 80(%%r23)            \n\t" 
-    "stxv              %%vs62, 96(%%r23)            \n\t" 
-    "stxv              %%vs63, 112(%%r23)           \n\t" 
+  	COL_ADD_STORE                                         // add then store (1)
     "            	                                  \n\t"
     "lxvdsx           %%vs59, 0, %%r28              \n\t" // resplat beta 
     "                                               \n\t"
@@ -893,41 +986,7 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs63, %%vs23, %%vs31, 1   	\n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	"xvadddp          %%vs48, %%vs48, %%vs32   	    \n\t" // add (2)
-  	"xvadddp          %%vs49, %%vs49, %%vs33   	    \n\t" 
-  	"xvadddp          %%vs50, %%vs50, %%vs34   	    \n\t" 
-  	"xvadddp          %%vs51, %%vs51, %%vs35        \n\t" 
-  	"xvadddp          %%vs52, %%vs52, %%vs36 	      \n\t" 
-  	"xvadddp          %%vs53, %%vs53, %%vs37    	  \n\t" 
-  	"xvadddp          %%vs54, %%vs54, %%vs38   	    \n\t" 
-  	"xvadddp          %%vs55, %%vs55, %%vs39     	  \n\t" 
-    "            	                                  \n\t"
-    "xvadddp          %%vs56, %%vs56, %%vs40   	    \n\t"
-  	"xvadddp          %%vs57, %%vs57, %%vs41   	    \n\t" 
-  	"xvadddp          %%vs58, %%vs58, %%vs42   	    \n\t" 
-  	"xvadddp          %%vs59, %%vs59, %%vs43        \n\t" 
-  	"xvadddp          %%vs60, %%vs60, %%vs44 	      \n\t" 
-  	"xvadddp          %%vs61, %%vs61, %%vs45    	  \n\t" 
-  	"xvadddp          %%vs62, %%vs62, %%vs46   	    \n\t" 
-  	"xvadddp          %%vs63, %%vs63, %%vs47     	  \n\t"
-    "            	                                  \n\t"
-    "            	                                  \n\t" 
-    "stxv              %%vs48, 0(%%r24)             \n\t" // store (2)
-    "stxv              %%vs49, 16(%%r24)            \n\t" 
-    "stxv              %%vs50, 32(%%r24)            \n\t" 
-    "stxv              %%vs51, 48(%%r24)            \n\t" 
-    "stxv              %%vs52, 64(%%r24)            \n\t" 
-    "stxv              %%vs53, 80(%%r24)            \n\t" 
-    "stxv              %%vs54, 96(%%r24)            \n\t" 
-    "stxv              %%vs55, 112(%%r24)           \n\t"
-    "stxv              %%vs56, 0(%%r25)             \n\t" 
-    "stxv              %%vs57, 16(%%r25)            \n\t" 
-    "stxv              %%vs58, 32(%%r25)            \n\t" 
-    "stxv              %%vs59, 48(%%r25)            \n\t" 
-    "stxv              %%vs60, 64(%%r25)            \n\t" 
-    "stxv              %%vs61, 80(%%r25)            \n\t" 
-    "stxv              %%vs62, 96(%%r25)            \n\t" 
-    "stxv              %%vs63, 112(%%r25)           \n\t" 
+  	COL_ADD_STORE                                         // add then store (2)
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
@@ -937,6 +996,30 @@ void bli_dgemm_power9_asm_16x4
   	"b                DDONE                         \n\t"
   	"                                               \n\t"
     "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
@@ -956,6 +1039,30 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
   	"cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
   	"beq              DCOLSTORED                    \n\t" // C is col stored
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+  	"                                               \n\t"
   	"                                               \n\t"
   	"DGENSTORED:                                    \n\t"
   	"                                               \n\t"
@@ -1078,15 +1185,40 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"b               DDONE                          \n\t"
   	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
+    "                                               \n\t"
+  	"                                               \n\t"
   	"DCOLSTORED:                                    \n\t"
   	"                                               \n\t" // create offset regs
   	"add              %%r17, %%r16, %%r10           \n\t" // c + cs_c
   	"add              %%r18, %%r17, %%r10           \n\t" // c + cs_c * 2 
   	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
   	"                                               \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
-    "                                               \n\t"
     "                                               \n\t"
     COLSTORE_CMATRIX
   	"                                               \n\t"
