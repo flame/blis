@@ -237,7 +237,7 @@
 "lxsdx     %%vs45, 0, %%r28                     \n\t" \
 "lxsdx     %%vs46, %%r9, %%r29                  \n\t" \
 "lxsdx     %%vs47, 0, %%r29                     \n\t" \
-"xxpermdi    %%vs32, %%vs33, %%vs32, 0          \n\t" \
+"xxpermdi    %%vs32, %%vs32, %%vs33, 0          \n\t" \
 "xxpermdi    %%vs33, %%vs34, %%vs35, 0          \n\t" \
 "xxpermdi    %%vs34, %%vs36, %%vs37, 0          \n\t" \
 "xxpermdi    %%vs35, %%vs38, %%vs39, 0          \n\t" \
@@ -294,7 +294,6 @@
 
 #define GENLOAD_SCALE_UPDATE \
   LOADGEN_CMATRIX   \
-  GEN_NEXT_COL_CMATRIX \
   SCALEGEN_CMATRIX
 
 #define PERMUTEALLVREG \
@@ -554,6 +553,7 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi     %%vs47, %%vs15, %%vs7, 1          \n\t"
     "                                              	\n\t" 
 	  GENADD_STORE                                          // add and store
+    GEN_NEXT_COL_CMATRIX 
   	"                                               \n\t"
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (2) load, scale, increment offsets
@@ -569,7 +569,8 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi     %%vs47, %%vs7, %%vs15, 1          \n\t"
     "                                              	\n\t" 
 	  GENADD_STORE                                          // add and store
-  	"                                               \n\t"
+  	GEN_NEXT_COL_CMATRIX
+    "                                               \n\t"
   	"                                               \n\t"
     GENLOAD_SCALE_UPDATE                                  // (3) load, scale, increment offsets
   	"                                               \n\t"
@@ -583,7 +584,8 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi     %%vs47, %%vs23, %%vs31, 1         \n\t"
     "                                              	\n\t" 
 	  GENADD_STORE                                          // add and store
-  	"                                               \n\t"
+  	GEN_NEXT_COL_CMATRIX
+    "                                               \n\t"
   	"                                          	    \n\t"
     GENLOAD_SCALE_UPDATE                                  // (4) load, scale, increment offsets
   	"                                               \n\t"
