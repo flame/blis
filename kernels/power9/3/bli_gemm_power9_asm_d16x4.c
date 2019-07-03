@@ -349,7 +349,7 @@
 
 
 
-#define COL_ADD_STORE \
+#define COL_ADD \
 "xvadddp          %%vs48, %%vs48, %%vs32   	    \n\t" \
 "xvadddp          %%vs49, %%vs49, %%vs33   	    \n\t" \
 "xvadddp          %%vs50, %%vs50, %%vs34   	    \n\t" \
@@ -367,23 +367,7 @@
 "xvadddp          %%vs62, %%vs62, %%vs46   	    \n\t" \
 "xvadddp          %%vs63, %%vs63, %%vs47     	  \n\t" \
 "            	                                  \n\t" \
-"            	                                  \n\t" \
-"stxv              %%vs48, 0(%%r24)             \n\t" \
-"stxv              %%vs49, 16(%%r24)            \n\t" \
-"stxv              %%vs50, 32(%%r24)            \n\t" \
-"stxv              %%vs51, 48(%%r24)            \n\t" \
-"stxv              %%vs52, 64(%%r24)            \n\t" \
-"stxv              %%vs53, 80(%%r24)            \n\t" \
-"stxv              %%vs54, 96(%%r24)            \n\t" \
-"stxv              %%vs55, 112(%%r24)           \n\t" \
-"stxv              %%vs56, 0(%%r25)             \n\t" \
-"stxv              %%vs57, 16(%%r25)            \n\t" \
-"stxv              %%vs58, 32(%%r25)            \n\t" \
-"stxv              %%vs59, 48(%%r25)            \n\t" \
-"stxv              %%vs60, 64(%%r25)            \n\t" \
-"stxv              %%vs61, 80(%%r25)            \n\t" \
-"stxv              %%vs62, 96(%%r25)            \n\t" \
-"stxv              %%vs63, 112(%%r25)           \n\t" 
+"            	                                  \n\t" 
 
 
 
@@ -942,7 +926,25 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs63, %%vs7, %%vs15, 1   	  \n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	COL_ADD_STORE                                         // add then store (1)
+  	COL_ADD
+    "            	                                  \n\t"
+    "            	                                  \n\t" 
+    "stxv              %%vs48, 0(%%r22)             \n\t" // store (1)
+    "stxv              %%vs49, 16(%%r22)            \n\t" 
+    "stxv              %%vs50, 32(%%r22)            \n\t" 
+    "stxv              %%vs51, 48(%%r22)            \n\t" 
+    "stxv              %%vs52, 64(%%r22)            \n\t" 
+    "stxv              %%vs53, 80(%%r22)            \n\t" 
+    "stxv              %%vs54, 96(%%r22)            \n\t" 
+    "stxv              %%vs55, 112(%%r22)           \n\t"
+    "stxv              %%vs56, 0(%%r23)             \n\t" 
+    "stxv              %%vs57, 16(%%r23)            \n\t" 
+    "stxv              %%vs58, 32(%%r23)            \n\t" 
+    "stxv              %%vs59, 48(%%r23)            \n\t" 
+    "stxv              %%vs60, 64(%%r23)            \n\t" 
+    "stxv              %%vs61, 80(%%r23)            \n\t" 
+    "stxv              %%vs62, 96(%%r23)            \n\t" 
+    "stxv              %%vs63, 112(%%r23)           \n\t" 
     "            	                                  \n\t"
     "lxvdsx           %%vs59, 0, %%r28              \n\t" // resplat beta 
     "                                               \n\t"
@@ -986,8 +988,24 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs63, %%vs23, %%vs31, 1   	\n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	COL_ADD_STORE                                         // add then store (2)
+  	COL_ADD 
   	"                                               \n\t"
+    "stxv              %%vs48, 0(%%r24)             \n\t" 
+    "stxv              %%vs49, 16(%%r24)            \n\t" 
+    "stxv              %%vs50, 32(%%r24)            \n\t" 
+    "stxv              %%vs51, 48(%%r24)            \n\t" 
+    "stxv              %%vs52, 64(%%r24)            \n\t" 
+    "stxv              %%vs53, 80(%%r24)            \n\t" 
+    "stxv              %%vs54, 96(%%r24)            \n\t" 
+    "stxv              %%vs55, 112(%%r24)           \n\t" 
+    "stxv              %%vs56, 0(%%r25)             \n\t" 
+    "stxv              %%vs57, 16(%%r25)            \n\t" 
+    "stxv              %%vs58, 32(%%r25)            \n\t" 
+    "stxv              %%vs59, 48(%%r25)            \n\t" 
+    "stxv              %%vs60, 64(%%r25)            \n\t" 
+    "stxv              %%vs61, 80(%%r25)            \n\t" 
+    "stxv              %%vs62, 96(%%r25)            \n\t" 
+    "stxv              %%vs63, 112(%%r25)           \n\t" 
     "                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
