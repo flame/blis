@@ -267,7 +267,6 @@
 "xvadddp      %%vs46, %%vs46, %%vs38            \n\t" \
 "xvadddp      %%vs47, %%vs47, %%vs39            \n\t" \
 "                                              	\n\t" \
-"stxsdx       %%vs40, %%r9, %%r22               \n\t" \
 "xxswapd      %%vs40, %%vs40                    \n\t" \
 "stxsdx       %%vs41, %%r9, %%r23               \n\t" \
 "xxswapd      %%vs41, %%vs41                    \n\t" \
