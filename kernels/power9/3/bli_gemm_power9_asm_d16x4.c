@@ -55,22 +55,10 @@ void bli_dgemm_power9_asm_16x4
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 1
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
-  #else
-  uint64_t k_iter = 0;
-	uint64_t k_left = k0;
-  #endif
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-  #if 0
-  printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
-                                      k_iter, k_left, *alpha, *beta, rs_c, cs_c);
-  #elif 0
-  printf("[Entering kernel]\n");
-  #endif
 
 	__asm__ volatile
 	(
