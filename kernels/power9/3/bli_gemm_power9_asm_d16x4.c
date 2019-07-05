@@ -81,20 +81,15 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    "ld               %%r10, %8                     \n\t" // load cs_c
-  	"ld               %%r9, %7                      \n\t" // load rs_c
     "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
   	"ld               %%r18, %1                     \n\t" // load k_left
   	"                                               \n\t"
   	"                                               \n\t"
-  	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
-  	"slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   	"                                               \n\t"
   	"                                               \n\t"
   	"ld               %%r7, %2                      \n\t" // load ptr of A
   	"ld               %%r8, %3                      \n\t" // load ptr of B
-  	"ld               %%r16, %6                     \n\t" // load ptr for C
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
@@ -172,6 +167,7 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
   	"bdnz             DLOOPKLEFT                    \n\t"
   	"                                               \n\t"
+    "ld               %%r16, %6                     \n\t" // load ptr for C
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -197,6 +193,10 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"ld               %%r0, %4                      \n\t" // load ptr for alpha
   	"ld               %%r28, %5                     \n\t" // load ptr for beta
+    "                                               \n\t"
+    "ld               %%r10, %8                     \n\t" // load cs_c
+    "ld               %%r9, %7                      \n\t" // load rs_c
+    "                                               \n\t"
     "ld               %%r26, 0(%%r28)               \n\t" // load val of beta
   	"                                               \n\t"
   	"lxvdsx           %%vs60, 0, %%r0               \n\t" // splat alpha
@@ -208,7 +208,10 @@ void bli_dgemm_power9_asm_16x4
     SCALE_ALPHA
   	"                                               \n\t"
   	"                                               \n\t"
+    "slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
+  	"slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   	"                                               \n\t"
+    "                                               \n\t"
   	"cmpdi            %%r0, %%r26, 0                \n\t"
   	"beq              %%r0, DBETAZERO               \n\t" // jump to BZ case if beta = 0
   	"                                               \n\t"
@@ -401,8 +404,6 @@ void bli_dgemm_power9_asm_16x4
     "lxv              %%vs46, 96(%%r23)             \n\t" 
     "lxv              %%vs47, 112(%%r23)            \n\t"
     "                                               \n\t"
-    COL_SCALE_BETA                                         // scale (1)
-  	"            	                                  \n\t"
     "xxpermdi         %%vs48, %%vs8, %%vs0, 1   	  \n\t" // permute (1)
     "xxpermdi         %%vs49, %%vs9, %%vs1, 1   	  \n\t"
     "xxpermdi         %%vs50, %%vs10, %%vs2, 1   	  \n\t"
@@ -420,6 +421,9 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs61, %%vs5, %%vs13, 1   	  \n\t"
     "xxpermdi         %%vs62, %%vs6, %%vs14, 1   	  \n\t"
     "xxpermdi         %%vs63, %%vs7, %%vs15, 1   	  \n\t"
+    "                                               \n\t"
+    COL_SCALE_BETA                                         // scale (1)
+  	"            	                                  \n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
   	COL_ADD_TO_C
@@ -462,10 +466,7 @@ void bli_dgemm_power9_asm_16x4
     "lxv              %%vs46, 96(%%r25)             \n\t" 
     "lxv              %%vs47, 112(%%r25)            \n\t"
   	"                                               \n\t"
-    COL_SCALE_BETA                                      // scale (2)
-    "                                               \n\t"
-  	"                                               \n\t"
-  	"xxpermdi         %%vs48, %%vs24, %%vs16, 1  	  \n\t" // permute (2)
+    "xxpermdi         %%vs48, %%vs24, %%vs16, 1  	  \n\t" // permute (2)
     "xxpermdi         %%vs49, %%vs25, %%vs17, 1  	  \n\t"
     "xxpermdi         %%vs50, %%vs26, %%vs18, 1  	  \n\t"
     "xxpermdi         %%vs51, %%vs27, %%vs19, 1  	  \n\t"
@@ -482,7 +483,10 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs61, %%vs21, %%vs29, 1  	  \n\t"
     "xxpermdi         %%vs62, %%vs22, %%vs30, 1     \n\t"
     "xxpermdi         %%vs63, %%vs23, %%vs31, 1   	\n\t"
+    "                                               \n\t"
     "            	                                  \n\t"
+    COL_SCALE_BETA                                      // scale (2)
+    "                                               \n\t"
     "            	                                  \n\t"
   	COL_ADD_TO_C 
   	"                                               \n\t"
