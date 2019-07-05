@@ -179,6 +179,8 @@
 "xvmaddadp        %%vs14, %%vs38, %%vs49        \n\t" \
 "xvmaddadp        %%vs15, %%vs39, %%vs49        \n\t" \
 "                                               \n\t" \
+"lxv              %%vs44, 64(%%r7)              \n\t" \
+"lxv              %%vs45, 80(%%r7)              \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs16, %%vs32, %%vs50        \n\t" \
 "xvmaddadp        %%vs17, %%vs33, %%vs50        \n\t" \
