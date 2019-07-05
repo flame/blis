@@ -144,7 +144,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
         bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   2040,  4080,  4080 );
 
    #endif
-
+#else
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   72,   144,    72 );
         bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
         bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   4080,  4080,  4080 );
