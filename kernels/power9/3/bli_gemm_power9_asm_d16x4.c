@@ -745,7 +745,7 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c),   // 8
+	  "m" (cs_c)   // 8
                   /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
@@ -774,4 +774,5 @@ void bli_dgemm_power9_asm_16x4
   , "vs60", "vs61", "vs62", "vs63"
   #endif
   );
+
 }
