@@ -163,7 +163,7 @@ void bli_dgemm_power9_asm_16x4
   	"beq              %%r0, DPOSTACCUM              \n\t"
   	"mtctr            %%r18                         \n\t"
   	"                                               \n\t"
-  	"DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  	"DLOOPKLEFT:                                    \n\t" // EDGE LOOP 
     "                                               \n\t"
     LOAD_UPDATE_1
     "                                               \n\t"
@@ -774,5 +774,4 @@ void bli_dgemm_power9_asm_16x4
   , "vs60", "vs61", "vs62", "vs63"
   #endif
   );
-
 }
