@@ -140,7 +140,6 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
     "                                               \n\t"
     LOAD_UPDATE_2
-    LOAD_UPDATE_2
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
