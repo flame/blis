@@ -35,7 +35,7 @@
 #include "blis.h"
 #include "bli_pwr9_asm_macros.h"
 
-#define XLC 0 
+#define XLC 0
 
 
 void bli_dgemm_power9_asm_16x4
@@ -53,33 +53,12 @@ void bli_dgemm_power9_asm_16x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-  #if 0
-  int debug_l; 
-  int *debug = &debug_l;
-  *debug = 0;
-  #else
-  int *debug = malloc(sizeof(int));
-  *debug = 0;
-  #endif
-
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 0
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
-  #else
-  uint64_t k_iter = 0;
-	uint64_t k_left = k0;
-  #endif
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-  #if 0
-  printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
-                                      k_iter, k_left, *alpha, *beta, rs_c, cs_c);
-  #elif 0
-  printf("[Entering kernel]\n");
-  #endif
 
 	__asm__ volatile
 	(
@@ -598,109 +577,109 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
     "stxsdx          %%vs32, %%r9, %%r22            \n\t" 
-    "xxswapd         %%vs32, %%vs32		              \n\t"  
+    "xxswapd         %%vs32, %%vs32		              \n\t" 
+    "stxsdx          %%vs32, 0, %%r22               \n\t" 
     "stxsdx          %%vs33, %%r9, %%r23            \n\t" 
-    "xxswapd         %%vs33, %%vs33		              \n\t"  
+    "xxswapd         %%vs33, %%vs33		              \n\t" 
+    "stxsdx          %%vs33, 0, %%r23               \n\t" 
     "stxsdx          %%vs34, %%r9, %%r24            \n\t" 
-    "xxswapd         %%vs34, %%vs34		              \n\t"  
+    "xxswapd         %%vs34, %%vs34		              \n\t" 
+    "stxsdx          %%vs34, 0, %%r24               \n\t" 
     "stxsdx          %%vs35, %%r9, %%r25            \n\t" 
-    "xxswapd         %%vs35, %%vs35		              \n\t"  
+    "xxswapd         %%vs35, %%vs35		              \n\t" 
+    "stxsdx          %%vs35, 0, %%r25               \n\t" 
     "stxsdx          %%vs36, %%r9, %%r26            \n\t" 
-    "xxswapd         %%vs36, %%vs36		              \n\t"  
+    "xxswapd         %%vs36, %%vs36		              \n\t" 
+    "stxsdx          %%vs36, 0, %%r26               \n\t" 
     "stxsdx          %%vs37, %%r9, %%r27            \n\t" 
     "xxswapd         %%vs37, %%vs37		              \n\t" 
-    "stxsdx          %%vs38, %%r9, %%r28            \n\t" 
-    "xxswapd         %%vs38, %%vs38		              \n\t"  
-    "stxsdx          %%vs39, %%r9, %%r29            \n\t" 
-    "xxswapd         %%vs39, %%vs39		              \n\t"
-    "stxsdx          %%vs32, 0, %%r22               \n\t"
-    "stxsdx          %%vs33, 0, %%r23               \n\t"
-    "stxsdx          %%vs34, 0, %%r24               \n\t"
-    "stxsdx          %%vs35, 0, %%r25               \n\t"
-    "stxsdx          %%vs36, 0, %%r26               \n\t"
     "stxsdx          %%vs37, 0, %%r27               \n\t" 
+    "stxsdx          %%vs38, %%r9, %%r28            \n\t" 
+    "xxswapd         %%vs38, %%vs38		              \n\t" 
     "stxsdx          %%vs38, 0, %%r28               \n\t" 
+    "stxsdx          %%vs39, %%r9, %%r29            \n\t" 
+    "xxswapd         %%vs39, %%vs39		              \n\t" 
     "stxsdx          %%vs39, 0, %%r29               \n\t" 
     "                                               \n\t"
     GEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs40, %%r9, %%r22            \n\t" 
-    "xxswapd         %%vs40, %%vs40		              \n\t"  
+    "xxswapd         %%vs40, %%vs40		              \n\t" 
+    "stxsdx          %%vs40, 0, %%r22               \n\t" 
     "stxsdx          %%vs41, %%r9, %%r23            \n\t" 
     "xxswapd         %%vs41, %%vs41		              \n\t" 
+    "stxsdx          %%vs41, 0, %%r23               \n\t" 
     "stxsdx          %%vs42, %%r9, %%r24            \n\t" 
-    "xxswapd         %%vs42, %%vs42		              \n\t"  
+    "xxswapd         %%vs42, %%vs42		              \n\t" 
+    "stxsdx          %%vs42, 0, %%r24               \n\t" 
     "stxsdx          %%vs43, %%r9, %%r25            \n\t" 
-    "xxswapd         %%vs43, %%vs43		              \n\t"  
+    "xxswapd         %%vs43, %%vs43		              \n\t" 
+    "stxsdx          %%vs43, 0, %%r25               \n\t" 
     "stxsdx          %%vs44, %%r9, %%r26            \n\t" 
-    "xxswapd         %%vs44, %%vs44		              \n\t"  
+    "xxswapd         %%vs44, %%vs44		              \n\t" 
+    "stxsdx          %%vs44, 0, %%r26               \n\t" 
     "stxsdx          %%vs45, %%r9, %%r27            \n\t" 
     "xxswapd         %%vs45, %%vs45		              \n\t" 
+    "stxsdx          %%vs45, 0, %%r27               \n\t" 
     "stxsdx          %%vs46, %%r9, %%r28            \n\t" 
-    "xxswapd         %%vs46, %%vs46		              \n\t"  
-    "stxsdx          %%vs47, %%r9, %%r29            \n\t" 
-    "xxswapd         %%vs47, %%vs47		              \n\t"
-    "stxsdx          %%vs40, 0, %%r22               \n\t"
-    "stxsdx          %%vs41, 0, %%r23               \n\t" 
-    "stxsdx          %%vs42, 0, %%r24               \n\t"
-    "stxsdx          %%vs43, 0, %%r25               \n\t"
-    "stxsdx          %%vs44, 0, %%r26               \n\t"
-    "stxsdx          %%vs45, 0, %%r27               \n\t"
+    "xxswapd         %%vs46, %%vs46		              \n\t" 
     "stxsdx          %%vs46, 0, %%r28               \n\t" 
+    "stxsdx          %%vs47, %%r9, %%r29            \n\t" 
+    "xxswapd         %%vs47, %%vs47		              \n\t" 
     "stxsdx          %%vs47, 0, %%r29               \n\t" 
     "                                               \n\t"
     GEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs48, %%r9, %%r22            \n\t" 
-    "xxswapd         %%vs48, %%vs48		              \n\t"  
+    "xxswapd         %%vs48, %%vs48		              \n\t" 
+    "stxsdx          %%vs48, 0, %%r22               \n\t" 
     "stxsdx          %%vs49, %%r9, %%r23            \n\t" 
-    "xxswapd         %%vs49, %%vs49		              \n\t"  
+    "xxswapd         %%vs49, %%vs49		              \n\t" 
+    "stxsdx          %%vs49, 0, %%r23               \n\t" 
     "stxsdx          %%vs50, %%r9, %%r24            \n\t" 
-    "xxswapd         %%vs50, %%vs50		              \n\t"  
+    "xxswapd         %%vs50, %%vs50		              \n\t" 
+    "stxsdx          %%vs50, 0, %%r24               \n\t" 
     "stxsdx          %%vs51, %%r9, %%r25            \n\t" 
-    "xxswapd         %%vs51, %%vs51		              \n\t"  
+    "xxswapd         %%vs51, %%vs51		              \n\t" 
+    "stxsdx          %%vs51, 0, %%r25               \n\t" 
     "stxsdx          %%vs52, %%r9, %%r26            \n\t" 
-    "xxswapd         %%vs52, %%vs52		              \n\t"  
+    "xxswapd         %%vs52, %%vs52		              \n\t" 
+    "stxsdx          %%vs52, 0, %%r26               \n\t" 
     "stxsdx          %%vs53, %%r9, %%r27            \n\t" 
     "xxswapd         %%vs53, %%vs53		              \n\t" 
-    "stxsdx          %%vs54, %%r9, %%r28            \n\t" 
-    "xxswapd         %%vs54, %%vs54		              \n\t"  
-    "stxsdx          %%vs55, %%r9, %%r29            \n\t" 
-    "xxswapd         %%vs55, %%vs55		              \n\t"
-    "stxsdx          %%vs48, 0, %%r22               \n\t"
-    "stxsdx          %%vs49, 0, %%r23               \n\t"
-    "stxsdx          %%vs50, 0, %%r24               \n\t"
-    "stxsdx          %%vs51, 0, %%r25               \n\t"
-    "stxsdx          %%vs52, 0, %%r26               \n\t"
     "stxsdx          %%vs53, 0, %%r27               \n\t" 
+    "stxsdx          %%vs54, %%r9, %%r28            \n\t" 
+    "xxswapd         %%vs54, %%vs54		              \n\t" 
     "stxsdx          %%vs54, 0, %%r28               \n\t" 
+    "stxsdx          %%vs55, %%r9, %%r29            \n\t" 
+    "xxswapd         %%vs55, %%vs55		              \n\t" 
     "stxsdx          %%vs55, 0, %%r29               \n\t" 
     "                                               \n\t"
     GEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs56, %%r9, %%r22            \n\t" 
-    "xxswapd         %%vs56, %%vs56		              \n\t"  
+    "xxswapd         %%vs56, %%vs56		              \n\t" 
+    "stxsdx          %%vs56, 0, %%r22               \n\t" 
     "stxsdx          %%vs57, %%r9, %%r23            \n\t" 
-    "xxswapd         %%vs57, %%vs57		              \n\t"  
+    "xxswapd         %%vs57, %%vs57		              \n\t" 
+    "stxsdx          %%vs57, 0, %%r23               \n\t" 
     "stxsdx          %%vs58, %%r9, %%r24            \n\t" 
-    "xxswapd         %%vs58, %%vs58		              \n\t"  
+    "xxswapd         %%vs58, %%vs58		              \n\t" 
+    "stxsdx          %%vs58, 0, %%r24               \n\t" 
     "stxsdx          %%vs59, %%r9, %%r25            \n\t" 
-    "xxswapd         %%vs59, %%vs59		              \n\t"  
+    "xxswapd         %%vs59, %%vs59		              \n\t" 
+    "stxsdx          %%vs59, 0, %%r25               \n\t" 
     "stxsdx          %%vs60, %%r9, %%r26            \n\t" 
-    "xxswapd         %%vs60, %%vs60		              \n\t"  
+    "xxswapd         %%vs60, %%vs60		              \n\t" 
+    "stxsdx          %%vs60, 0, %%r26               \n\t" 
     "stxsdx          %%vs61, %%r9, %%r27            \n\t" 
-    "xxswapd         %%vs61, %%vs61		              \n\t"  
+    "xxswapd         %%vs61, %%vs61		              \n\t" 
+    "stxsdx          %%vs61, 0, %%r27               \n\t" 
     "stxsdx          %%vs62, %%r9, %%r28            \n\t" 
-    "xxswapd         %%vs62, %%vs62		              \n\t"  
-    "stxsdx          %%vs63, %%r9, %%r29            \n\t" 
-    "xxswapd         %%vs63, %%vs63		              \n\t"
-    "stxsdx          %%vs56, 0, %%r22               \n\t"
-    "stxsdx          %%vs57, 0, %%r23               \n\t"
-    "stxsdx          %%vs58, 0, %%r24               \n\t"
-    "stxsdx          %%vs59, 0, %%r25               \n\t"
-    "stxsdx          %%vs60, 0, %%r26               \n\t"
-    "stxsdx          %%vs61, 0, %%r27               \n\t"
+    "xxswapd         %%vs62, %%vs62		              \n\t" 
     "stxsdx          %%vs62, 0, %%r28               \n\t" 
+    "stxsdx          %%vs63, %%r9, %%r29            \n\t" 
+    "xxswapd         %%vs63, %%vs63		              \n\t" 
     "stxsdx          %%vs63, 0, %%r29               \n\t" 
   	"                                               \n\t"
   	"b               DDONE                          \n\t"
@@ -754,15 +733,15 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)   // 8
-                  /*,   
+	  "m" (cs_c)    // 8 
+    /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
   /* unclobberable regs: r2, r3, r4, r5, r6, r13, r14, r15, r30, r31 */
   "r0",  "r7", "r8", "r9",
   "r10", "r12","r16", "r17", "r18", "r19", 
-  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28"
+  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29"
 
   #if XLC
   ,"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"
