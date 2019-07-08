@@ -53,8 +53,12 @@ void bli_dgemm_power9_asm_16x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
+  #if 1
+  int debug_l; 
+  int *debug = &debug_l;
+  *debug = 0;
+  #else
   int *debug = malloc(sizeof(int));
-  #if 0
   *debug = 0;
   #endif
 
