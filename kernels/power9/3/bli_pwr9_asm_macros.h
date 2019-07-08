@@ -1380,6 +1380,7 @@
 
 
 
+
 #define GEN_BETA_SCALE \
 "xvmuldp          %%vs32, %%vs32, %%vs59   	    \n\t" \
 "xvmuldp          %%vs33, %%vs33, %%vs59   	    \n\t" \
@@ -1584,6 +1585,4 @@
   "stxv              %%vs61, 80(%%r19)          \n\t" \
   "stxv              %%vs62, 96(%%r19)          \n\t" \
   "stxv              %%vs63, 112(%%r19)         \n\t" 
-
-
 
