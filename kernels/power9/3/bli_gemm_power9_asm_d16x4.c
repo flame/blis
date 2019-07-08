@@ -778,6 +778,4 @@ void bli_dgemm_power9_asm_16x4
   #endif
   );
 
-  if(*debug)
-    printf("it worked!\n");
 }
