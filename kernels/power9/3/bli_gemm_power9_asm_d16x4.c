@@ -65,7 +65,7 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  #if 0
+  #if 1
   printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
                                       k_iter, k_left, *alpha, *beta, rs_c, cs_c);
   #elif 0
