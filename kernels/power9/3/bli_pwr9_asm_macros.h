@@ -1551,38 +1551,38 @@
 
 
 #define COL_BZ_STORE_C \
-  "stxv              %%vs32, 0(%%r16)           \n\t" \
-  "stxv              %%vs33, 16(%%r16)          \n\t" \
-  "stxv              %%vs34, 32(%%r16)          \n\t" \
-  "stxv              %%vs35, 48(%%r16)          \n\t" \
-  "stxv              %%vs36, 64(%%r16)          \n\t" \
-  "stxv              %%vs37, 80(%%r16)          \n\t" \
-  "stxv              %%vs38, 96(%%r16)          \n\t" \
-  "stxv              %%vs39, 112(%%r16)         \n\t" \
-  "stxv              %%vs40, 0(%%r17)           \n\t" \
-  "stxv              %%vs41, 16(%%r17)          \n\t" \
-  "stxv              %%vs42, 32(%%r17)          \n\t" \
-  "stxv              %%vs43, 48(%%r17)          \n\t" \
-  "stxv              %%vs44, 64(%%r17)          \n\t" \
-  "stxv              %%vs45, 80(%%r17)          \n\t" \
-  "stxv              %%vs46, 96(%%r17)          \n\t" \
-  "stxv              %%vs47, 112(%%r17)         \n\t" \
-  "stxv              %%vs48, 0(%%r18)           \n\t" \
-  "stxv              %%vs49, 16(%%r18)          \n\t" \
-  "stxv              %%vs50, 32(%%r18)          \n\t" \
-  "stxv              %%vs51, 48(%%r18)          \n\t" \
-  "stxv              %%vs52, 64(%%r18)          \n\t" \
-  "stxv              %%vs53, 80(%%r18)          \n\t" \
-  "stxv              %%vs54, 96(%%r18)          \n\t" \
-  "stxv              %%vs55, 112(%%r18)         \n\t" \
-  "stxv              %%vs56, 0(%%r19)           \n\t" \
-  "stxv              %%vs57, 16(%%r19)          \n\t" \
-  "stxv              %%vs58, 32(%%r19)          \n\t" \
-  "stxv              %%vs59, 48(%%r19)          \n\t" \
-  "stxv              %%vs60, 64(%%r19)          \n\t" \
-  "stxv              %%vs61, 80(%%r19)          \n\t" \
-  "stxv              %%vs62, 96(%%r19)          \n\t" \
-  "stxv              %%vs63, 112(%%r19)         \n\t" 
+  "stxv              %%vs32, 0(%%r22)           \n\t" \
+  "stxv              %%vs33, 16(%%r22)          \n\t" \
+  "stxv              %%vs34, 32(%%r22)          \n\t" \
+  "stxv              %%vs35, 48(%%r22)          \n\t" \
+  "stxv              %%vs36, 64(%%r22)          \n\t" \
+  "stxv              %%vs37, 80(%%r22)          \n\t" \
+  "stxv              %%vs38, 96(%%r22)          \n\t" \
+  "stxv              %%vs39, 112(%%r22)         \n\t" \
+  "stxv              %%vs40, 0(%%r23)           \n\t" \
+  "stxv              %%vs41, 16(%%r23)          \n\t" \
+  "stxv              %%vs42, 32(%%r23)          \n\t" \
+  "stxv              %%vs43, 48(%%r23)          \n\t" \
+  "stxv              %%vs44, 64(%%r23)          \n\t" \
+  "stxv              %%vs45, 80(%%r23)          \n\t" \
+  "stxv              %%vs46, 96(%%r23)          \n\t" \
+  "stxv              %%vs47, 112(%%r23)         \n\t" \
+  "stxv              %%vs48, 0(%%r24)           \n\t" \
+  "stxv              %%vs49, 16(%%r24)          \n\t" \
+  "stxv              %%vs50, 32(%%r24)          \n\t" \
+  "stxv              %%vs51, 48(%%r24)          \n\t" \
+  "stxv              %%vs52, 64(%%r24)          \n\t" \
+  "stxv              %%vs53, 80(%%r24)          \n\t" \
+  "stxv              %%vs54, 96(%%r24)          \n\t" \
+  "stxv              %%vs55, 112(%%r24)         \n\t" \
+  "stxv              %%vs56, 0(%%r25)           \n\t" \
+  "stxv              %%vs57, 16(%%r25)          \n\t" \
+  "stxv              %%vs58, 32(%%r25)          \n\t" \
+  "stxv              %%vs59, 48(%%r25)          \n\t" \
+  "stxv              %%vs60, 64(%%r25)          \n\t" \
+  "stxv              %%vs61, 80(%%r25)          \n\t" \
+  "stxv              %%vs62, 96(%%r25)          \n\t" \
+  "stxv              %%vs63, 112(%%r25)         \n\t" 
 
 
 
