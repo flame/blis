@@ -53,9 +53,12 @@ void bli_dgemm_power9_asm_16x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
+  int *debug = malloc(sizeof(int));
+  *debug = 0;
+
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-  #if 0
+  #if 1
 	uint64_t k_iter = k0 / 6;
 	uint64_t k_left = k0 % 6;
   #else
@@ -65,7 +68,7 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-  #if 1
+  #if 0
   printf("[Entering ukernel] k_iter = %ld | k_left = %ld | alpha = %lf | beta = %lf | rs_c = %ld | cs_c = %ld\n",
                                       k_iter, k_left, *alpha, *beta, rs_c, cs_c);
   #elif 0
@@ -745,8 +748,9 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)   // 8
-                      /*,   
+	  "m" (cs_c),   // 8
+    "m" (debug)   // 9
+                  /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
 	: // register clobber list
@@ -774,4 +778,7 @@ void bli_dgemm_power9_asm_16x4
   , "vs60", "vs61", "vs62", "vs63"
   #endif
   );
+
+  if(*debug)
+    printf("it worked!\n");
 }
