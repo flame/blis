@@ -60,6 +60,7 @@ void bli_dgemm_power9_asm_16x4
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
+
 	__asm__ volatile
 	(
 	  "                                               \n\t"
