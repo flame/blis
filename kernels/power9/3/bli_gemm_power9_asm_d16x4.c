@@ -53,14 +53,11 @@ void bli_dgemm_power9_asm_16x4
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
-  int *debug = malloc(sizeof(int));
-  *debug = 0;
-
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
   #if 1
-	uint64_t k_iter = k0 / 6;
-	uint64_t k_left = k0 % 6;
+	uint64_t k_iter = k0 / 16;
+	uint64_t k_left = k0 % 16;
   #else
   uint64_t k_iter = 0;
 	uint64_t k_left = k0;
@@ -778,7 +775,4 @@ void bli_dgemm_power9_asm_16x4
   , "vs60", "vs61", "vs62", "vs63"
   #endif
   );
-
-  if(*debug)
-    printf("it worked!\n");
 }
