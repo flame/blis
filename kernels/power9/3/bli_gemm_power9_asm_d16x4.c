@@ -83,9 +83,13 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"                                               \n\t"
     PRELOAD_A_B
+    "                                               \n\t"
+    "                                               \n\t"
     "addi             %%r8, %%r8, 32                \n\t" 
     "addi             %%r7, %%r7, 128               \n\t"
   	"                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
     ZERO_OUT_VREG                                                 // Zero out vec regs
   	"                                               \n\t"
   	"                                               \n\t"
@@ -99,6 +103,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
+    "or %%r7, %%r7, %%r7                            \n\t"
   	"                                               \n\t"
     "cmpwi            %%r0, %%r17, 0                \n\t"
   	"beq              %%r0, DPRELOOPKLEFT           \n\t"
