@@ -103,7 +103,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
-    "or %%r7, %%r7, %%r7                            \n\t"
+    "or %%r5, %%r5, %%r5                            \n\t"
   	"                                               \n\t"
     "cmpwi            %%r0, %%r17, 0                \n\t"
   	"beq              %%r0, DPRELOOPKLEFT           \n\t"
