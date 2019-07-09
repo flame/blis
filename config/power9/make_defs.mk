@@ -69,7 +69,7 @@ else
 ifeq ($(CC_VENDOR),IBM)
 CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9
 else
-$(info $(CC_VENDOR))
+$(info $(CC_VENDOR)) 
 $(error gcc/xlc is required for this configuration.)
 endif
 endif
