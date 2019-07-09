@@ -1574,14 +1574,14 @@
 "stxsdx       %%vs46, %%r9, %%r28               \n\t" \
 "stxsdx       %%vs47, %%r9, %%r29               \n\t" \
 "                                              	\n\t" \
-"xxswapd      %%vs40, %%vs40                    \n\t" \
-"xxswapd      %%vs41, %%vs41                    \n\t" \
-"xxswapd      %%vs42, %%vs42                    \n\t" \
-"xxswapd      %%vs43, %%vs43                    \n\t" \
-"xxswapd      %%vs44, %%vs44                    \n\t" \
-"xxswapd      %%vs45, %%vs45                    \n\t" \
-"xxswapd      %%vs46, %%vs46                    \n\t" \
-"xxswapd      %%vs47, %%vs47                    \n\t" \
+"xxpermdi     %%vs40, %%vs40, %%vs40, 2         \n\t" \
+"xxpermdi     %%vs41, %%vs41, %%vs41, 2         \n\t" \
+"xxpermdi     %%vs42, %%vs42, %%vs42, 2         \n\t" \
+"xxpermdi     %%vs43, %%vs43, %%vs43, 2         \n\t" \
+"xxpermdi     %%vs44, %%vs44, %%vs44, 2         \n\t" \
+"xxpermdi     %%vs45, %%vs45, %%vs45, 2         \n\t" \
+"xxpermdi     %%vs46, %%vs46, %%vs46, 2         \n\t" \
+"xxpermdi     %%vs47, %%vs47, %%vs47, 2         \n\t" \
 "                                              	\n\t" \
 "stxsdx       %%vs40, 0, %%r22                  \n\t" \
 "stxsdx       %%vs41, 0, %%r23                  \n\t" \
