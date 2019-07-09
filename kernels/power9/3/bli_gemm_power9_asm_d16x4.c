@@ -35,8 +35,6 @@
 #include "blis.h"
 #include "bli_pwr9_asm_macros.h"
 
-#define XLC 0
-
 
 void bli_dgemm_power9_asm_16x4
      (

@@ -117,7 +117,6 @@
 #define LOAD_UPDATE_16 \
 "                                               \n\t" \
 "                                               \n\t" \
-"or               %%r12, %%r12, %%r12           \n\t" \
 "                                               \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs0, %%vs32, %%vs48         \n\t" \
