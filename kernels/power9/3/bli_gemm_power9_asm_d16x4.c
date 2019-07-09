@@ -107,7 +107,7 @@ void bli_dgemm_power9_asm_16x4
   	"mtctr            %%r17                         \n\t"
   	"                                               \n\t"
   	"                                               \n\t" 
-  	"DLOOPKITER_16:                                 \n\t" // Begin k_iter loop
+  	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
