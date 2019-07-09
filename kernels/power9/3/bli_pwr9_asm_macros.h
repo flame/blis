@@ -88,15 +88,15 @@
 
 
 #define PRELOAD_A_B \
-"lxv              %%vs32, 0(%%r7)               \n\t" \
-"lxv              %%vs33, 16(%%r7)              \n\t" \
-"lxv              %%vs34, 32(%%r7)              \n\t" \
-"lxv              %%vs35, 48(%%r7)              \n\t" \
-"                                               \n\t" \
 "lxv              %%vs48, 0(%%r8)               \n\t" \
 "lxv              %%vs50, 16(%%r8)              \n\t" \
 "xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t" \
 "xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t" \
+"                                               \n\t" \
+"lxv              %%vs32, 0(%%r7)               \n\t" \
+"lxv              %%vs33, 16(%%r7)              \n\t" \
+"lxv              %%vs34, 32(%%r7)              \n\t" \
+"lxv              %%vs35, 48(%%r7)              \n\t" \
 "                                               \n\t" \
 "lxv              %%vs36, 64(%%r7)              \n\t" \
 "lxv              %%vs37, 80(%%r7)              \n\t" \
