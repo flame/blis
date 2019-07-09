@@ -391,15 +391,15 @@
 "xvmaddadp        %%vs3, %%vs35, %%vs48         \n\t" \
 "                                               \n\t" \
 "lxv              %%vs40, 512(%%r7)             \n\t" \
-"lxv              %%vs41, 528(%%r7)                \n\t" \
+"lxv              %%vs41, 528(%%r7)             \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs4, %%vs36, %%vs48         \n\t" \
 "xvmaddadp        %%vs5, %%vs37, %%vs48         \n\t" \
 "xvmaddadp        %%vs6, %%vs38, %%vs48         \n\t" \
 "xvmaddadp        %%vs7, %%vs39, %%vs48         \n\t" \
 "                                               \n\t" \
-"lxv              %%vs42, 544(%%r7)              \n\t" \
-"lxv              %%vs43, 560(%%r7)              \n\t" \
+"lxv              %%vs42, 544(%%r7)             \n\t" \
+"lxv              %%vs43, 560(%%r7)             \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs8, %%vs32, %%vs49         \n\t" \
 "xvmaddadp        %%vs9, %%vs33, %%vs49         \n\t" \

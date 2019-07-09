@@ -55,6 +55,8 @@ void bli_dgemm_power9_asm_16x4
 	// different size than is expected by load instructions.
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
+  uint64_t k_left2 = k_left / 2;
+  uint64_t k_left1 = k_left % 2;
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -69,7 +71,8 @@ void bli_dgemm_power9_asm_16x4
   	"ld               %%r9, %7                      \n\t" // load rs_c
     "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
-  	"ld               %%r18, %1                     \n\t" // load k_left
+    "ld               %%r19, %9                     \n\t" // load k_left2
+  	"ld               %%r18, %10                    \n\t" // load k_left1
   	"                                               \n\t"
   	"                                               \n\t"
   	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
@@ -104,11 +107,11 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
   	"                                               \n\t"
     "cmpwi            %%r0, %%r17, 0                \n\t"
-  	"beq              %%r0, DPRELOOPKLEFT           \n\t"
+  	"beq              %%r0, DPRELOOPKLEFT2          \n\t"
   	"mtctr            %%r17                         \n\t"
   	"                                               \n\t"
   	"                                               \n\t" 
-  	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
+  	"DLOOPKITER_16:                                 \n\t" // UNROLL BY 16
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -116,25 +119,47 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-  	"bdnz             DLOOPKITER                    \n\t"
+  	"bdnz             DLOOPKITER_16                 \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-  	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
-  	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
+  	"DPRELOOPKLEFT2:                                \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "cmpwi            %%r0, %%r19, 0                \n\t"
+  	"beq              %%r0, DPRELOOPKLEFT1          \n\t"
+  	"mtctr            %%r19                         \n\t"
+  	"                                               \n\t"
+    "DLOOPKLEFT_2:                                  \n\t" // UNROLL BY 2
+    "                                               \n\t"
+    LOAD_UPDATE_2
+    "                                               \n\t"
+  	"bdnz             DLOOPKLEFT_2                  \n\t"
   	"                                               \n\t"
     "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
   	"                                               \n\t"
-    "DPRELOOPKLEFT:                                 \n\t"
-  	"                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
+    "DPRELOOPKLEFT1:                                \n\t"
+    "                                               \n\t"
+    "                                               \n\t"
   	"cmpwi            %%r0, %%r18, 0                \n\t"
   	"beq              %%r0, DPOSTACCUM              \n\t"
   	"mtctr            %%r18                         \n\t"
@@ -719,7 +744,9 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)    // 8 
+	  "m" (cs_c),   // 8 
+    "m" (k_left2), // 9
+    "m" (k_left1) // 10
     /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
