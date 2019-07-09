@@ -370,7 +370,6 @@ void bli_dgemm_power9_asm_16x4
     "lxv              %%vs46, 96(%%r23)             \n\t" 
     "lxv              %%vs47, 112(%%r23)            \n\t"
     "                                               \n\t"
-    COL_SCALE_BETA                                         // scale (1)
   	"            	                                  \n\t"
     "xxpermdi         %%vs48, %%vs8, %%vs0, 1   	  \n\t" // permute (1)
     "xxpermdi         %%vs49, %%vs9, %%vs1, 1   	  \n\t"
@@ -380,6 +379,8 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs53, %%vs13, %%vs5, 1   	  \n\t"
     "xxpermdi         %%vs54, %%vs14, %%vs6, 1   	  \n\t"
     "xxpermdi         %%vs55, %%vs15, %%vs7, 1   	  \n\t"
+    "            	                                  \n\t"
+    COL_SCALE_BETA                                         // scale (1)
     "            	                                  \n\t"
     "xxpermdi         %%vs56, %%vs0, %%vs8, 1   	  \n\t"
     "xxpermdi         %%vs57, %%vs1, %%vs9, 1   	  \n\t"
@@ -431,7 +432,6 @@ void bli_dgemm_power9_asm_16x4
     "lxv              %%vs46, 96(%%r25)             \n\t" 
     "lxv              %%vs47, 112(%%r25)            \n\t"
   	"                                               \n\t"
-    COL_SCALE_BETA                                      // scale (2)
     "                                               \n\t"
   	"                                               \n\t"
   	"xxpermdi         %%vs48, %%vs24, %%vs16, 1  	  \n\t" // permute (2)
@@ -442,6 +442,8 @@ void bli_dgemm_power9_asm_16x4
     "xxpermdi         %%vs53, %%vs29, %%vs21, 1     \n\t"
     "xxpermdi         %%vs54, %%vs30, %%vs22, 1   	\n\t"
     "xxpermdi         %%vs55, %%vs31, %%vs23, 1   	\n\t"
+    "            	                                  \n\t"
+    COL_SCALE_BETA                                      // scale (2)
     "            	                                  \n\t"
     "xxpermdi         %%vs56, %%vs16, %%vs24, 1  	  \n\t"
     "xxpermdi         %%vs57, %%vs17, %%vs25, 1  	  \n\t"
