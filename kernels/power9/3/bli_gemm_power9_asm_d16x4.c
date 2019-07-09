@@ -95,7 +95,7 @@ void bli_dgemm_power9_asm_16x4
     "                                               \n\t"
   	"                                               \n\t"
     "cmpwi            %%r0, %%r17, 0                \n\t"
-  	"beq              %%r0, DPRELOOPKLEFT_2         \n\t"
+  	"beq              %%r0, DPRELOOPKLEFT_1         \n\t"
   	"mtctr            %%r17                         \n\t"
   	"                                               \n\t"
   	"                                               \n\t" 
