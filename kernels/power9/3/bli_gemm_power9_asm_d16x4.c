@@ -106,7 +106,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
-  	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
+  	"DLOOPKITER_16:                                    \n\t" // Begin k_iter loop
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -114,7 +114,7 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-  	"bdnz             DLOOPKITER                    \n\t"
+  	"bdnz             DLOOPKITER_16                    \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -127,11 +127,11 @@ void bli_dgemm_power9_asm_16x4
   	"beq              %%r0, DPRELOOPKLEFT_1              \n\t"
   	"mtctr            %%r18                         \n\t"
   	"                                               \n\t"
-  	"DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  	"DLOOPKLEFT_2:                                    \n\t" // EDGE LOOP
     "                                               \n\t"
     LOAD_UPDATE_2
     "                                               \n\t"
-  	"bdnz             DLOOPKLEFT                    \n\t"
+  	"bdnz             DLOOPKLEFT_2                    \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -148,11 +148,11 @@ void bli_dgemm_power9_asm_16x4
   	"beq              %%r0, DPOSTACCUM              \n\t"
   	"mtctr            %%r18                         \n\t"
   	"                                               \n\t"
-  	"DLOOPKLEFT:                                    \n\t" // EDGE LOOP
+  	"DLOOPKLEFT_1:                                    \n\t" // EDGE LOOP
     "                                               \n\t"
     LOAD_UPDATE_1
     "                                               \n\t"
-  	"bdnz             DLOOPKLEFT                    \n\t"
+  	"bdnz             DLOOPKLEFT_1                    \n\t"
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
