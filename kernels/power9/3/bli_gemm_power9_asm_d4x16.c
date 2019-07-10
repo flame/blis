@@ -91,8 +91,8 @@ void bli_dgemm_power9_asm_4x16
   	"                                               \n\t"
     DPRELOAD_A_B
   	"                                               \n\t"
-    "addi             %%r8, %%r8, 128               \n\t" 
-    "addi             %%r7, %%r7, 32                \n\t"
+    "addi             %%r8, %%r8, 32                \n\t" 
+    "addi             %%r7, %%r7, 128               \n\t"
   	"                                               \n\t"
     ZERO_OUT_VREG                                                 // Zero out vec regs
   	"                                               \n\t"
