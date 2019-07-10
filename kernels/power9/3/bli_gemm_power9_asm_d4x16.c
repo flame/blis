@@ -36,7 +36,7 @@
 #include "bli_pwr9_asm_macros.h"
 
 
-void bli_dgemm_power9_asm_16x4
+void bli_dgemm_power9_asm_4x16
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -746,7 +746,9 @@ void bli_dgemm_power9_asm_16x4
   #endif
   );
 
+  
 }
+
 
 
 
