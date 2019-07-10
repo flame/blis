@@ -53,8 +53,15 @@ void bli_dgemm_power9_asm_4x16
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
+
+  #if 0
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
+  #else
+  uint64_t k_iter = 0;
+	uint64_t k_left = k0;
+  #endif
+
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -65,27 +72,27 @@ void bli_dgemm_power9_asm_4x16
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    "ld               %%r10, %8                     \n\t" // load cs_c
-  	"ld               %%r9, %7                      \n\t" // load rs_c
+    "ld               %%r9, %8                      \n\t" // load cs_c
+  	"ld               %%r10, %7                     \n\t" // load rs_c
     "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
-  	"ld               %%r18, %1                    \n\t" // load k_left_1
+  	"ld               %%r18, %1                     \n\t" // load k_left
   	"                                               \n\t"
   	"                                               \n\t"
   	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
   	"slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   	"                                               \n\t"
   	"                                               \n\t"
-  	"ld               %%r7, %2                      \n\t" // load ptr of A
-  	"ld               %%r8, %3                      \n\t" // load ptr of B
+  	"ld               %%r8, %2                      \n\t" // load ptr of A
+  	"ld               %%r7, %3                      \n\t" // load ptr of B
   	"ld               %%r16, %6                     \n\t" // load ptr for C
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
-    PRELOAD_A_B
+    DPRELOAD_A_B
   	"                                               \n\t"
-    "addi             %%r8, %%r8, 32                \n\t" 
-    "addi             %%r7, %%r7, 128               \n\t"
+    "addi             %%r8, %%r8, 128               \n\t" 
+    "addi             %%r7, %%r7, 32                \n\t"
   	"                                               \n\t"
     ZERO_OUT_VREG                                                 // Zero out vec regs
   	"                                               \n\t"
@@ -107,7 +114,7 @@ void bli_dgemm_power9_asm_4x16
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    LOAD_UPDATE_16
+    DLOAD_UPDATE_16
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -136,7 +143,7 @@ void bli_dgemm_power9_asm_4x16
   	"                                               \n\t"
   	"DLOOPKLEFT_1:                                  \n\t" // EDGE LOOP
     "                                               \n\t"
-    LOAD_UPDATE_1
+    DLOAD_UPDATE_1
     "                                               \n\t"
   	"bdnz             DLOOPKLEFT_1                  \n\t"
   	"                                               \n\t"
@@ -173,7 +180,7 @@ void bli_dgemm_power9_asm_4x16
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    SCALE_ALPHA
+    DSCALE_ALPHA
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
@@ -237,7 +244,7 @@ void bli_dgemm_power9_asm_4x16
     "add             %%r28, %%r27, %%r12            \n\t" // c + rs_c * 12
     "add             %%r29, %%r28, %%r12            \n\t" // c + rs_c * 14
   	"                                               \n\t"
-    GEN_LOAD_SCALE                                  // (1) load, scale, increment offsets
+    DGEN_LOAD_SCALE                                  // (1) load, scale, increment offsets
   	"                                              	\n\t"
     "xxpermdi     %%vs40, %%vs8, %%vs0, 1           \n\t" // permute
     "xxpermdi     %%vs41, %%vs9, %%vs1, 1           \n\t"
@@ -248,11 +255,11 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi     %%vs46, %%vs14, %%vs6, 1          \n\t"
     "xxpermdi     %%vs47, %%vs15, %%vs7, 1          \n\t"
     "                                              	\n\t" 
-	  GEN_ADD_STORE                                          // add and store
-    GEN_NEXT_COL_C 
+	  DGEN_ADD_STORE                                          // add and store
+    DGEN_NEXT_COL_C 
   	"                                               \n\t"
   	"                                               \n\t"
-    GEN_LOAD_SCALE                                  // (2) load, scale, increment offsets
+    DGEN_LOAD_SCALE                                  // (2) load, scale, increment offsets
   	"                                               \n\t"
     "                                               \n\t"
   	"xxpermdi     %%vs40, %%vs0, %%vs8, 1           \n\t" // permute
@@ -264,11 +271,11 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi     %%vs46, %%vs6, %%vs14, 1          \n\t"
     "xxpermdi     %%vs47, %%vs7, %%vs15, 1          \n\t"
     "                                              	\n\t" 
-	  GEN_ADD_STORE                                          // add and store
-  	GEN_NEXT_COL_C
+	  DGEN_ADD_STORE                                          // add and store
+  	DGEN_NEXT_COL_C
     "                                               \n\t"
   	"                                               \n\t"
-    GEN_LOAD_SCALE                                  // (3) load, scale, increment offsets
+    DGEN_LOAD_SCALE                                  // (3) load, scale, increment offsets
   	"                                               \n\t"
   	"xxpermdi     %%vs40, %%vs24, %%vs16, 1         \n\t" // permute
     "xxpermdi     %%vs41, %%vs25, %%vs17, 1         \n\t"
@@ -279,11 +286,11 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi     %%vs46, %%vs30, %%vs22, 1         \n\t"
     "xxpermdi     %%vs47, %%vs31, %%vs23, 1         \n\t"
     "                                              	\n\t" 
-	  GEN_ADD_STORE                                          // add and store
-  	GEN_NEXT_COL_C
+	  DGEN_ADD_STORE                                          // add and store
+  	DGEN_NEXT_COL_C
     "                                               \n\t"
   	"                                          	    \n\t"
-    GEN_LOAD_SCALE                                  // (4) load, scale, increment offsets
+    DGEN_LOAD_SCALE                                  // (4) load, scale, increment offsets
   	"                                               \n\t"
     "xxpermdi     %%vs40, %%vs16, %%vs24, 1         \n\t" // permute
     "xxpermdi     %%vs41, %%vs17, %%vs25, 1         \n\t"
@@ -294,7 +301,7 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi     %%vs46, %%vs22, %%vs30, 1         \n\t"
     "xxpermdi     %%vs47, %%vs23, %%vs31, 1         \n\t" 
     "                                              	\n\t"
-	  GEN_ADD_STORE                                          // add and store
+	  DGEN_ADD_STORE                                          // add and store
   	"                                              	\n\t"
   	"                                              	\n\t"
     "                                               \n\t"
@@ -369,7 +376,7 @@ void bli_dgemm_power9_asm_4x16
     "lxv              %%vs46, 96(%%r23)             \n\t" 
     "lxv              %%vs47, 112(%%r23)            \n\t"
     "                                               \n\t"
-    COL_SCALE_BETA                                         // scale (1)
+    DCOL_SCALE_BETA                                         // scale (1)
   	"            	                                  \n\t"
     "xxpermdi         %%vs48, %%vs8, %%vs0, 1   	  \n\t" // permute (1)
     "xxpermdi         %%vs49, %%vs9, %%vs1, 1   	  \n\t"
@@ -390,7 +397,7 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi         %%vs63, %%vs7, %%vs15, 1   	  \n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	COL_ADD_TO_C
+  	DCOL_ADD_TO_C
     "            	                                  \n\t"
     "            	                                  \n\t" 
     "stxv              %%vs48, 0(%%r22)             \n\t" // store (1)
@@ -430,7 +437,7 @@ void bli_dgemm_power9_asm_4x16
     "lxv              %%vs46, 96(%%r25)             \n\t" 
     "lxv              %%vs47, 112(%%r25)            \n\t"
   	"                                               \n\t"
-    COL_SCALE_BETA                                      // scale (2)
+    DCOL_SCALE_BETA                                      // scale (2)
     "                                               \n\t"
   	"                                               \n\t"
   	"xxpermdi         %%vs48, %%vs24, %%vs16, 1  	  \n\t" // permute (2)
@@ -452,7 +459,7 @@ void bli_dgemm_power9_asm_4x16
     "xxpermdi         %%vs63, %%vs23, %%vs31, 1   	\n\t"
     "            	                                  \n\t"
     "            	                                  \n\t"
-  	COL_ADD_TO_C 
+  	DCOL_ADD_TO_C 
   	"                                               \n\t"
     "stxv              %%vs48, 0(%%r24)             \n\t" 
     "stxv              %%vs49, 16(%%r24)            \n\t" 
@@ -515,7 +522,7 @@ void bli_dgemm_power9_asm_4x16
   	"                                               \n\t"
   	"DBETAZERO:                                     \n\t" // beta=0 case
   	"                                               \n\t" 
-    PERMUTE_ALL_VREG
+    DPERMUTE_ALL_VREG
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
@@ -584,7 +591,7 @@ void bli_dgemm_power9_asm_4x16
     "xxswapd         %%vs39, %%vs39		              \n\t" 
     "stxsdx          %%vs39, 0, %%r29               \n\t" 
     "                                               \n\t"
-    GEN_NEXT_COL_C 
+    DGEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs40, %%r9, %%r22            \n\t" 
     "xxswapd         %%vs40, %%vs40		              \n\t" 
@@ -611,7 +618,7 @@ void bli_dgemm_power9_asm_4x16
     "xxswapd         %%vs47, %%vs47		              \n\t" 
     "stxsdx          %%vs47, 0, %%r29               \n\t" 
     "                                               \n\t"
-    GEN_NEXT_COL_C 
+    DGEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs48, %%r9, %%r22            \n\t" 
     "xxswapd         %%vs48, %%vs48		              \n\t" 
@@ -638,7 +645,7 @@ void bli_dgemm_power9_asm_4x16
     "xxswapd         %%vs55, %%vs55		              \n\t" 
     "stxsdx          %%vs55, 0, %%r29               \n\t" 
     "                                               \n\t"
-    GEN_NEXT_COL_C 
+    DGEN_NEXT_COL_C 
     "                                               \n\t"
     "stxsdx          %%vs56, %%r9, %%r22            \n\t" 
     "xxswapd         %%vs56, %%vs56		              \n\t" 
@@ -702,7 +709,7 @@ void bli_dgemm_power9_asm_4x16
   	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
   	"                                               \n\t"
     "                                               \n\t"
-    COL_BZ_STORE_C
+    DCOL_BZ_STORE_C
   	"                                               \n\t"
   	"DDONE:                                         \n\t"  
   	"                                               \n\t"

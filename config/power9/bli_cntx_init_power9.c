@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-#define ROW_STORED 0
+#define ROW_STORED 1
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
