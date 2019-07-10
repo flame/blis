@@ -34,6 +34,8 @@
 
 #include "blis.h"
 
+#define ROW_STORED 0
+
 void bli_cntx_init_power9( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
