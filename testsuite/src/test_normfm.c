@@ -259,7 +259,7 @@ void libblis_test_normfm_check
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   norm := normf( x )
+	//   norm := normfm( x )
 	//
 	// is functioning correctly if
 	//

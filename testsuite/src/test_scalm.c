@@ -280,7 +280,7 @@ void libblis_test_scalm_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y + -conjbeta(beta) * y_orig )
+	//   normfm( y + -conjbeta(beta) * y_orig )
 	//
 	// is negligible.
 	//

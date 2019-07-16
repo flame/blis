@@ -305,7 +305,7 @@ void libblis_test_trsv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - x_orig )
+	//   normfv( y - x_orig )
 	//
 	// is negligible, where
 	//

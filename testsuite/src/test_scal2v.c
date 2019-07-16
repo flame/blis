@@ -285,7 +285,7 @@ void libblis_test_scal2v_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - alpha * conjx(x) )
+	//   normfv( y - alpha * conjx(x) )
 	//
 	// is negligible.
 	//
