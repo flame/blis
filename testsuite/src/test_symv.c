@@ -322,7 +322,7 @@ void libblis_test_symv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - v )
+	//   normfv( y - v )
 	//
 	// is negligible, where
 	//

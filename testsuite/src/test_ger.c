@@ -303,7 +303,7 @@ void libblis_test_ger_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( v - w )
+	//   normfv( v - w )
 	//
 	// is negligible, where
 	//

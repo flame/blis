@@ -314,7 +314,7 @@ void libblis_test_axpy2v_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( z - v )
+	//   normfv( z - v )
 	//
 	// is negligible, where v contains z as computed by two calls to axpyv.
 	//

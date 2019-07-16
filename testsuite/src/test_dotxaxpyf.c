@@ -366,11 +366,11 @@ void libblis_test_dotxaxpyf_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - v )
+	//   normfv( y - v )
 	//
 	// and
 	//
-	//   normf( z - q )
+	//   normfv( z - q )
 	//
 	// are negligible, where v and q contain y and z as computed by repeated
 	// calls to dotxv and axpyv, respectively.

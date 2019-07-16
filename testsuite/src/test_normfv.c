@@ -256,7 +256,7 @@ void libblis_test_normfv_check
 	//
 	// Under these conditions, we assume that the implementation for
 	//
-	//   norm := normf( x )
+	//   norm := normfv( x )
 	//
 	// is functioning correctly if
 	//

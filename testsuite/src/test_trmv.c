@@ -304,7 +304,7 @@ void libblis_test_trmv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - x )
+	//   normfv( y - x )
 	//
 	// is negligible, where
 	//

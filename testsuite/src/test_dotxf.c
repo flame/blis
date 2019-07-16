@@ -324,7 +324,7 @@ void libblis_test_dotxf_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - v )
+	//   normfv( y - v )
 	//
 	// is negligible, where v contains y as computed by repeated calls to
 	// dotxv.

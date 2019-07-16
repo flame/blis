@@ -313,7 +313,7 @@ void libblis_test_syr2_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( v - w )
+	//   normfv( v - w )
 	//
 	// is negligible, where
 	//

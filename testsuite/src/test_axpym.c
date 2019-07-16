@@ -289,7 +289,7 @@ void libblis_test_axpym_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - ( y_orig + alpha * conjx(x) ) )
+	//   normfm( y - ( y_orig + alpha * conjx(x) ) )
 	//
 	// is negligible.
 	//

@@ -296,7 +296,7 @@ void libblis_test_axpbyv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - ( beta * y_orig + alpha * conjx(x) ) )
+	//   normfv( y - ( beta * y_orig + alpha * conjx(x) ) )
 	//
 	// is negligible.
 	//

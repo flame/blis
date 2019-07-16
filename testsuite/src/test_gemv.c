@@ -324,7 +324,7 @@ void libblis_test_gemv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - z )
+	//   normfv( y - z )
 	//
 	// is negligible, where
 	//

@@ -304,7 +304,7 @@ void libblis_test_dotxv_check
 	//
 	// is functioning correctly if
 	//
-	//   sqrtsc( rho.real ) - sqrtsc( alpha ) * normf( x )
+	//   sqrtsc( rho.real ) - sqrtsc( alpha ) * normfv( x )
 	//
 	// and
 	//

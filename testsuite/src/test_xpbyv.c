@@ -283,7 +283,7 @@ void libblis_test_xpbyv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - ( beta * y_orig + conjx(x) ) )
+	//   normfv( y - ( beta * y_orig + conjx(x) ) )
 	//
 	// is negligible.
 	//
