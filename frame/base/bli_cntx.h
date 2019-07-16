@@ -648,6 +648,22 @@ static void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, 
 	bmults[ bs_id ] = mult_id;
 }
 
+static void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_def( bs, dt, blksz );
+}
+
+static void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_max( bs, dt, blksz );
+}
+
 static void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
 {
 	func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );

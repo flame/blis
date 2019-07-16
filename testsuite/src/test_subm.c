@@ -275,7 +275,7 @@ void libblis_test_subm_check
 	//
 	// is functioning correctly if
 	//
-	//   normfv(y) - sqrt( absqsc( beta - conjx(alpha) ) * m * n )
+	//   normfm(y) - sqrt( absqsc( beta - conjx(alpha) ) * m * n )
 	//
 	// is negligible.
 	//
