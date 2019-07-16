@@ -135,14 +135,14 @@ PS_MAX   := 2400
 PS_INC   := 48
 
 # Single-socket (multithreaded)
-P1_BEGIN := 120
-P1_MAX   := 6000
-P1_INC   := 120
+P1_BEGIN := 96
+P1_MAX   := 4800
+P1_INC   := 96
 
 # Dual-socket (multithreaded)
-P2_BEGIN := 160
-P2_MAX   := 8000
-P2_INC   := 160
+P2_BEGIN := 144
+P2_MAX   := 7200
+P2_INC   := 144
 
 
 #

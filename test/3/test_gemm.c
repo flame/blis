@@ -43,8 +43,8 @@
   #include "blis.h"
 #endif
 
-//#define COL_STORAGE
-#define ROW_STORAGE
+#define COL_STORAGE
+//#define ROW_STORAGE
 
 //#define PRINT
 
