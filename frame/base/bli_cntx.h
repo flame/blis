@@ -215,13 +215,13 @@ static dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 static void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t mc, cntx_t* cntx )
 {
 	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_set_def( mc, dt, blksz );
+	bli_blksz_set_def( mc, dt, blksz );
 }
 
 static void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t mc, cntx_t* cntx )
 {
 	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_set_max( mc, dt, blksz );
+	bli_blksz_set_max( mc, dt, blksz );
 }
 
 /* ************************************************************************** */
