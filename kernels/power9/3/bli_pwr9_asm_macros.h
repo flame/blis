@@ -1578,20 +1578,20 @@
 "xvadddp      %%vs47, %%vs47, %%vs39            \n\t" \
 "                                              	\n\t" \
 "stxsdx       %%vs40, %%r9, %%r22               \n\t" \
-"xxswapd      %%vs40, %%vs40                    \n\t" \
 "stxsdx       %%vs41, %%r9, %%r23               \n\t" \
-"xxswapd      %%vs41, %%vs41                    \n\t" \
 "stxsdx       %%vs42, %%r9, %%r24               \n\t" \
-"xxswapd      %%vs42, %%vs42                    \n\t" \
 "stxsdx       %%vs43, %%r9, %%r25               \n\t" \
-"xxswapd      %%vs43, %%vs43                    \n\t" \
 "stxsdx       %%vs44, %%r9, %%r26               \n\t" \
-"xxswapd      %%vs44, %%vs44                    \n\t" \
 "stxsdx       %%vs45, %%r9, %%r27               \n\t" \
-"xxswapd      %%vs45, %%vs45                    \n\t" \
 "stxsdx       %%vs46, %%r9, %%r28               \n\t" \
-"xxswapd      %%vs46, %%vs46                    \n\t" \
 "stxsdx       %%vs47, %%r9, %%r29               \n\t" \
+"xxswapd      %%vs40, %%vs40                    \n\t" \
+"xxswapd      %%vs41, %%vs41                    \n\t" \
+"xxswapd      %%vs42, %%vs42                    \n\t" \
+"xxswapd      %%vs43, %%vs43                    \n\t" \
+"xxswapd      %%vs44, %%vs44                    \n\t" \
+"xxswapd      %%vs45, %%vs45                    \n\t" \
+"xxswapd      %%vs46, %%vs46                    \n\t" \
 "xxswapd      %%vs47, %%vs47                    \n\t" \
 "stxsdx       %%vs40, 0, %%r22                  \n\t" \
 "stxsdx       %%vs41, 0, %%r23                  \n\t" \
