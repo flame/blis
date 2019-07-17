@@ -55,8 +55,6 @@ void bli_dgemm_power9_asm_16x4
 	// different size than is expected by load instructions.
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
-  uint64_t k_iter_2 = k_left / 2;
-  uint64_t k_left_2 = k_left % 2;
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -119,17 +117,6 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
   	"                                               \n\t"
-    "DPRELOOPKLEFT_2:                               \n\t"
-  	"                                               \n\t"
-  	"cmpwi            %%r0, %%r19, 0                \n\t"
-  	"beq              %%r0, DPRELOOPKLEFT_1         \n\t"
-  	"mtctr            %%r19                         \n\t"
-  	"                                               \n\t"
-  	"DLOOPKLEFT_2:                                  \n\t" // EDGE LOOP
-    "                                               \n\t"
-    DLOAD_UPDATE_2
-    "                                               \n\t"
-  	"bdnz             DLOOPKLEFT_2                  \n\t"
     "                                               \n\t"
   	"                                               \n\t"
     "                                               \n\t"
@@ -723,15 +710,14 @@ void bli_dgemm_power9_asm_16x4
 	: // output operands (none)
 	: // input operands
 	  "m" (k_iter), // 0
-	  "m" (k_left_2), // 1
+	  "m" (k_left), // 1
 	  "m" (a),      // 2
 	  "m" (b),      // 3
 	  "m" (alpha),  // 4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c),   // 8
-    "m" (k_iter_2)
+	  "m" (cs_c)   // 8
     /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
