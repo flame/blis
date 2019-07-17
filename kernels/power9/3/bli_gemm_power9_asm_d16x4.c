@@ -730,7 +730,7 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)    // 8
+	  "m" (cs_c),   // 8
     "m" (k_iter_2)
     /*,   
 	  "m" (b_next), // 9
