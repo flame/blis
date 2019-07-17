@@ -1,13 +1,10 @@
 /*
-
    BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
-
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
    Copyright (C) 2019, Advanced Micro Devices, Inc.
-
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -19,7 +16,6 @@
     - Neither the name(s) of the copyright holder(s) nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
-
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -31,7 +27,6 @@
    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 */
 
 #ifndef BLIS_CNTX_H
@@ -45,28 +40,22 @@ typedef struct cntx_s
 {
 	blksz_t*  blkszs;
 	bszid_t*  bmults;
-
 	func_t*   l3_vir_ukrs;
 	func_t*   l3_nat_ukrs;
 	mbool_t*  l3_nat_ukrs_prefs;
-
 	blksz_t*  l3_sup_thresh;
 	void**    l3_sup_handlers;
 	blksz_t*  l3_sup_blkszs;
 	func_t*   l3_sup_kers;
 	mbool_t*  l3_sup_kers_prefs;
-
 	func_t*   l1f_kers;
 	func_t*   l1v_kers;
-
 	func_t*   packm_kers;
 	func_t*   unpackm_kers;
-
 	ind_t     method;
 	pack_t    schema_a;
 	pack_t    schema_b;
 	pack_t    schema_c;
-
 } cntx_t;
 */
 
@@ -209,22 +198,6 @@ static dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 	// Return the auxiliary (maximum) blocksize value for the datatype given.
 	return bs_dt;
 }
-
-/* *****************************    HACK    ********************************* */
-
-static void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t mc, cntx_t* cntx )
-{
-	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	bli_blksz_set_def( mc, dt, blksz );
-}
-
-static void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t mc, cntx_t* cntx )
-{
-	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	bli_blksz_set_max( mc, dt, blksz );
-}
-
-/* ************************************************************************** */
 
 static bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, cntx_t* cntx )
 {
@@ -662,6 +635,22 @@ static void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, 
 
 	blkszs[ bs_id ] = *blksz;
 	bmults[ bs_id ] = mult_id;
+}
+
+static void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_def( bs, dt, blksz );
+}
+
+static void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	bli_blksz_set_max( bs, dt, blksz );
 }
 
 static void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
