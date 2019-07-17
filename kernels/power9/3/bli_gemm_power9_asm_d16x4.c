@@ -69,8 +69,7 @@ void bli_dgemm_power9_asm_16x4
   	"ld               %%r9, %7                      \n\t" // load rs_c
     "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
-    "ld               %%r19, %9                     \n\t" // load k_iter_2
-  	"ld               %%r18, %1                     \n\t" // load k_left_2
+  	"ld               %%r18, %1                     \n\t" // load k_left
   	"                                               \n\t"
   	"                                               \n\t"
   	"slwi             %%r10, %%r10, 3               \n\t" // mul by size of elem
