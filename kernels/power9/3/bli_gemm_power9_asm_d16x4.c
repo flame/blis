@@ -53,8 +53,15 @@ void bli_dgemm_power9_asm_16x4
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
+
+  #if 1
 	uint64_t k_iter = k0 / 16;
 	uint64_t k_left = k0 % 16;
+  #else
+  uint64_t k_iter = 0;
+	uint64_t k_left = k0;
+  #endif
+
   uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -65,8 +72,8 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    "ld               %%r10, %8                     \n\t" // load cs_c
-  	"ld               %%r9, %7                      \n\t" // load rs_c
+    "ld               %%r9, %7                      \n\t" // load rs_c
+  	"ld               %%r10, %8                     \n\t" // load cs_c
     "                                               \n\t"
   	"ld               %%r17, %0                     \n\t" // load k_iter
   	"ld               %%r18, %1                     \n\t" // load k_left
@@ -76,8 +83,8 @@ void bli_dgemm_power9_asm_16x4
   	"slwi             %%r9, %%r9, 3                 \n\t" // mul by size of elem
   	"                                               \n\t"
   	"                                               \n\t"
-  	"ld               %%r7, %2                      \n\t" // load ptr of A
   	"ld               %%r8, %3                      \n\t" // load ptr of B
+  	"ld               %%r7, %2                      \n\t" // load ptr of A
   	"ld               %%r16, %6                     \n\t" // load ptr for C
   	"                                               \n\t"
   	"                                               \n\t"
@@ -716,7 +723,7 @@ void bli_dgemm_power9_asm_16x4
 	  "m" (beta),   // 5
 	  "m" (c),      // 6
 	  "m" (rs_c),   // 7
-	  "m" (cs_c)   // 8
+	  "m" (cs_c)    // 8
     /*,   
 	  "m" (b_next), // 9
 	  "m" (a_next)*/  // 10
