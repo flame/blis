@@ -91,9 +91,9 @@ void bli_cntx_init_power9( cntx_t* cntx )
 		#endif
 	#endif
 
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   64,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1024,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   4096,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
 	 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

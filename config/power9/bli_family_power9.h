@@ -35,8 +35,9 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
-//#define BLIS_SIMD_NUM_REGISTERS 32
-//#define BLIS_SIMD_SIZE 64
+#define BLIS_SIMD_NUM_REGISTERS 64
+#define BLIS_SIMD_SIZE 32
+
 //
 //#ifdef BLIS_NO_HBWMALLOC
 //  #include <stdlib.h>
@@ -48,15 +49,14 @@
 //    #define BLIS_FREE_POOL    hbw_free
 //#endif
 
-
 #if 0
 // -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
 
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x4
-#define BLIS_DEFAULT_MR_D              8
+#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_16x4
+#define BLIS_DEFAULT_MR_D              16
 #define BLIS_DEFAULT_NR_D              4
-#define BLIS_DEFAULT_MC_D              64
-#define BLIS_DEFAULT_KC_D              256
+#define BLIS_DEFAULT_MC_D              288
+#define BLIS_DEFAULT_KC_D              1024
 #define BLIS_DEFAULT_NC_D              4096
 #endif
 
