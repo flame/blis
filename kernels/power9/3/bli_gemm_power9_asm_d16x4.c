@@ -529,15 +529,6 @@ void bli_dgemm_power9_asm_16x4
   	"add              %%r19, %%r18, %%r10           \n\t" // c + cs_c * 3
     "                                               \n\t"
     "                                               \n\t"
-    "ld              %%r22, %6                      \n\t" // load c
-  	"slwi            %%r12, %%r9, 1                 \n\t"
-  	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
-  	"add             %%r24, %%r23, %%r12            \n\t" // c + rs_c * 4
-  	"add             %%r25, %%r24, %%r12            \n\t" // c + rs_c * 6 
-  	"add             %%r26, %%r25, %%r12            \n\t" // c + rs_c * 8
-  	"add             %%r27, %%r26, %%r12            \n\t" // c + rs_c * 10
-    "add             %%r28, %%r27, %%r12            \n\t" // c + rs_c * 12
-    "add             %%r29, %%r28, %%r12            \n\t" // c + rs_c * 14
     "                                               \n\t"
     "                                               \n\t" 
     DPERMUTE_ALL_VREG
@@ -573,6 +564,15 @@ void bli_dgemm_power9_asm_16x4
   	"                                               \n\t"
   	"DGENSTORED:                                    \n\t"
   	"                                               \n\t"
+    "ld              %%r22, %6                      \n\t" // load c
+  	"slwi            %%r12, %%r9, 1                 \n\t"
+  	"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
+  	"add             %%r24, %%r23, %%r12            \n\t" // c + rs_c * 4
+  	"add             %%r25, %%r24, %%r12            \n\t" // c + rs_c * 6 
+  	"add             %%r26, %%r25, %%r12            \n\t" // c + rs_c * 8
+  	"add             %%r27, %%r26, %%r12            \n\t" // c + rs_c * 10
+    "add             %%r28, %%r27, %%r12            \n\t" // c + rs_c * 12
+    "add             %%r29, %%r28, %%r12            \n\t" // c + rs_c * 14
   	"                                               \n\t"
   	"                                               \n\t"
     "stxsdx          %%vs32, %%r9, %%r22            \n\t"   
