@@ -63,13 +63,13 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
+CKVECFLAGS     := -mavx -mfpmath=sse -march=sandybridge
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xAVX
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
+CKVECFLAGS     := -mavx -mfpmath=sse -march=sandybridge
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
