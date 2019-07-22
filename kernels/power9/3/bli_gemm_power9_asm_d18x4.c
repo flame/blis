@@ -362,7 +362,6 @@ void bli_dgemm_power9_asm_18x4
     "lxv              %%vs44, 128(%%r16)            \n\t"
     "                                               \n\t" 
     "                                               \n\t"
-    DCOL_SCALE_BETA                                       // scale (1)
   	"            	                                  \n\t"
     "                                               \n\t"
     "xxpermdi         %%vs48, %%vs9,  %%vs0, 1   	  \n\t" // permute (1)
@@ -375,6 +374,7 @@ void bli_dgemm_power9_asm_18x4
     "xxpermdi         %%vs55, %%vs16, %%vs7, 1   	  \n\t"
     "xxpermdi         %%vs56, %%vs17, %%vs8, 1   	  \n\t"
     "            	                                  \n\t"
+    DCOL_SCALE_BETA                                       // scale (1)
     DCOL_ADD_TO_C
     "            	                                  \n\t"
     "stxv              %%vs48, 0(%%r16)             \n\t" // store (1)
@@ -404,7 +404,6 @@ void bli_dgemm_power9_asm_18x4
     "lxv              %%vs44, 128(%%r17)            \n\t"
     "                                               \n\t" 
     "                                               \n\t"
-    DCOL_SCALE_BETA                                       // scale (2)
   	"            	                                  \n\t"
     "                                               \n\t"
     "xxpermdi         %%vs48, %%vs0, %%vs9,  1   	  \n\t" // permute (2)
@@ -417,6 +416,7 @@ void bli_dgemm_power9_asm_18x4
     "xxpermdi         %%vs55, %%vs7, %%vs16, 1   	  \n\t"
     "xxpermdi         %%vs56, %%vs8, %%vs17, 1   	  \n\t"
     "            	                                  \n\t"
+    DCOL_SCALE_BETA                                       // scale (2)
     DCOL_ADD_TO_C
     "            	                                  \n\t"
     "stxv              %%vs48, 0(%%r17)             \n\t" // store (2)
@@ -447,7 +447,6 @@ void bli_dgemm_power9_asm_18x4
     "lxv              %%vs44, 128(%%r18)            \n\t"
     "                                               \n\t" 
     "                                               \n\t"
-    DCOL_SCALE_BETA                                       // scale (3)
   	"            	                                  \n\t"
     "                                               \n\t"
     "xxpermdi         %%vs48, %%vs27, %%vs18, 1   	\n\t" // permute (3)
@@ -460,6 +459,7 @@ void bli_dgemm_power9_asm_18x4
     "xxpermdi         %%vs55, %%vs34, %%vs25, 1   	\n\t"
     "xxpermdi         %%vs56, %%vs35, %%vs26, 1   	\n\t"
     "            	                                  \n\t"
+    DCOL_SCALE_BETA                                       // scale (3)
     DCOL_ADD_TO_C
     "            	                                  \n\t"
     "stxv              %%vs48, 0(%%r18)             \n\t" // store (3)
@@ -490,7 +490,6 @@ void bli_dgemm_power9_asm_18x4
     "lxv              %%vs44, 128(%%r19)            \n\t"
     "                                               \n\t" 
     "                                               \n\t"
-    DCOL_SCALE_BETA                                       // scale (4)
   	"            	                                  \n\t"
     "                                               \n\t"
     "xxpermdi         %%vs48, %%vs18, %%vs27, 1   	\n\t" // permute (4)
@@ -503,6 +502,7 @@ void bli_dgemm_power9_asm_18x4
     "xxpermdi         %%vs55, %%vs25, %%vs34, 1   	\n\t"
     "xxpermdi         %%vs56, %%vs26, %%vs35, 1   	\n\t"
     "            	                                  \n\t"
+    DCOL_SCALE_BETA                                       // scale (4)
     DCOL_ADD_TO_C
     "            	                                  \n\t"
     "stxv              %%vs48, 0(%%r19)             \n\t" // store (4)
