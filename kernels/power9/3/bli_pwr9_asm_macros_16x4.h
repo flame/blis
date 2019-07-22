@@ -1221,6 +1221,8 @@
 
 
 #define DLOAD_UPDATE_2 \
+"                                               \n\t" \
+"                                               \n\t" \
 "xvmaddadp        %%vs0, %%vs32, %%vs48        \n\t" \
 "xvmaddadp        %%vs1, %%vs33, %%vs48        \n\t" \
 "xvmaddadp        %%vs2, %%vs34, %%vs48        \n\t" \
@@ -1289,26 +1291,26 @@
 "xvmaddadp        %%vs2, %%vs42, %%vs52        \n\t" \
 "xvmaddadp        %%vs3, %%vs43, %%vs52        \n\t" \
 "                                               \n\t" \
-"lxv              %%vs48, 32(%%r8)               \n\t" \
-"lxv              %%vs50, 48(%%r8)               \n\t" \
-"xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t" \
-"xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t" \
+"lxv              %%vs32, 128(%%r7)              \n\t" \
+"lxv              %%vs33, 144(%%r7)              \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs4, %%vs44, %%vs52        \n\t" \
 "xvmaddadp        %%vs5, %%vs45, %%vs52        \n\t" \
 "xvmaddadp        %%vs6, %%vs46, %%vs52        \n\t" \
 "xvmaddadp        %%vs7, %%vs47, %%vs52        \n\t" \
 "                                               \n\t" \
-"lxv              %%vs32, 128(%%r7)              \n\t" \
-"lxv              %%vs33, 144(%%r7)              \n\t" \
+"lxv              %%vs34, 160(%%r7)              \n\t" \
+"lxv              %%vs35, 176(%%r7)              \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs8, %%vs40, %%vs53        \n\t" \
 "xvmaddadp        %%vs9, %%vs41, %%vs53        \n\t" \
 "xvmaddadp        %%vs10, %%vs42, %%vs53        \n\t" \
 "xvmaddadp        %%vs11, %%vs43, %%vs53        \n\t" \
 "                                               \n\t" \
-"lxv              %%vs34, 160(%%r7)              \n\t" \
-"lxv              %%vs35, 176(%%r7)              \n\t" \
+"lxv              %%vs48, 32(%%r8)               \n\t" \
+"lxv              %%vs50, 48(%%r8)               \n\t" \
+"xxpermdi         %%vs49, %%vs48, %%vs48, 2     \n\t" \
+"xxpermdi         %%vs51, %%vs50, %%vs50, 2     \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs12, %%vs44, %%vs53        \n\t" \
 "xvmaddadp        %%vs13, %%vs45, %%vs53        \n\t" \
@@ -1349,6 +1351,7 @@
 "                                               \n\t" \
 "addi             %%r8, %%r8, 64               \n\t" \
 "addi             %%r7, %%r7, 256               \n\t" \
+
 
 
 
