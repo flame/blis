@@ -124,12 +124,14 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 	//bli_blksz_init_easy( &blkszs[ BLIS_MC ],  1008,  1008,  1008,  1008 );
+	//bli_blksz_init_easy( &blkszs[ BLIS_MC ],   168,    72,    72,    36 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   168,    72,    75,   192 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 #else
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    16,     8,     8,     4 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     6,     6,     3,     3 );
 	//bli_blksz_init_easy( &blkszs[ BLIS_MC ],  1024,  1024,  1024,  1024 );
+	//bli_blksz_init_easy( &blkszs[ BLIS_MC ],   112,    64,    56,    32 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   112,    72,    56,    44 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 #endif
