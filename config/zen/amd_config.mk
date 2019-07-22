@@ -4,7 +4,6 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2014, The University of Texas at Austin
 #  Copyright (C) 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -33,33 +32,51 @@
 #
 #
 
-# FLAGS that are specific to 'zen2' architecture are added here.
-# FLAGS that are common for all the AMD architectures are present in config/zen/amd_config.mk
-#
+# All the common flags for AMD architectures will be added here
 
-# Declare the name of the current configuration and add it to the
-# running list of configurations included by common.mk.
-THIS_CONFIG    := zen2
-#CONFIGS_INCL   += $(THIS_CONFIG)
-
-# Include file containing common flags for all AMD architectures
-AMD_CONFIG_FILE := amd_config.mk
-AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
--include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 #
 # --- Determine the C compiler and related flags ---
 #
+
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    :=
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
+
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3 -fomit-frame-pointer
+endif
+
 # Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-# gcc 9.0 (clang ?) or later:
-#CKVECFLAGS     := -march=znver2
 # gcc 6.0 (clang 4.0) or later:
-CKVECFLAGS     += -march=znver1 -mno-avx256-split-unaligned-store
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
 # gcc 4.9 (clang 3.5) or later:
 # possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+else
+ifeq ($(CC_VENDOR),clang)
+#if compiling with AOCC, use these flags
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2.0.0')),1)
+CKVECFLAGS +=  -mllvm -disable-licm-vrp
 endif
-# Store all of the variables here to new variables containing the
-# configuration name.
-$(eval $(call store-make-defs,$(THIS_CONFIG)))
+else
+$(error gcc or clang are required for this configuration.)
+endif
+endif
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+CRVECFLAGS     := $(CKVECFLAGS)
 

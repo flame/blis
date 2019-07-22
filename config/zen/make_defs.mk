@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,56 +33,22 @@
 #
 #
 
+# FLAGS specific to zen architecture are added here.
+# FLAGS that are common for all the AMD architectures are present in amd_config.mk
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
 THIS_CONFIG    := zen
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
-#
-# --- Determine the C compiler and related flags ---
-#
+# Include file containing common flags for all AMD architectures
+AMD_CONFIG_FILE := amd_config.mk
+AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
+-include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
-# NOTE: The build system will append these variables with various
-# general-purpose/configuration-agnostic flags in common.mk. You
-# may specify additional flags here as needed.
-CPPROCFLAGS    :=
-CMISCFLAGS     :=
-CPICFLAGS      :=
-CWARNFLAGS     :=
-
-ifneq ($(DEBUG_TYPE),off)
-CDBGFLAGS      := -g
-endif
-
-ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
-else
-COPTFLAGS      := -O3 -fomit-frame-pointer
-endif
-
-# Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-# gcc 6.0 (clang 4.0) or later:
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
-# gcc 4.9 (clang 3.5) or later:
-# possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-else
-ifeq ($(CC_VENDOR),clang)
-#if compiling with AOCC, use these flags
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp -mllvm -disable-licm-vrp 
-# if compiling with vanilla clang use these flags
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-else
-$(error gcc or clang are required for this configuration.)
+CKVECFLAGS += -march=znver1
 endif
-endif
-
-# Flags specific to reference kernels.
-CROPTFLAGS     := $(CKOPTFLAGS)
-CRVECFLAGS     := $(CKVECFLAGS)
 
 # Store all of the variables here to new variables containing the
 # configuration name.
