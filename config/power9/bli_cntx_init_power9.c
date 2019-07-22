@@ -34,6 +34,10 @@
 
 #include "blis.h"
 
+#define umk_12x6 0
+#define umk_4x16 0
+#define umk_18x4 0
+
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
@@ -47,14 +51,14 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
 
-	#if 0
+	#if umk_12x6
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
 			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_12x6,  FALSE,
 			cntx
 		);
-	#elif 0
+	#elif umk_4x16
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
@@ -62,7 +66,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 			cntx
 		);
 
-	#elif 1
+	#elif umk_18x4
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
@@ -82,21 +86,21 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
 
-	#if 0 // 12x6
+	#if umk_12x6 // 12x6
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     12,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8190,     0,     0 );
 	
-	#elif 0 // 4x16
+	#elif umk_4x16 // 4x16
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     4,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     16,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
 
-	#elif 1 // 18x4
+	#elif umk_18x4 // 18x4
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     18,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
