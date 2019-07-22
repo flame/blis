@@ -62,7 +62,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 			cntx
 		);
 
-	#elif 1
+	#elif 0
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
@@ -96,7 +96,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
 
-	#elif 1 // 18x4
+	#elif 0 // 18x4
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     18,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
