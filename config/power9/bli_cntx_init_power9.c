@@ -34,8 +34,6 @@
 
 #include "blis.h"
 
-#define ROW_STORED 0
-#define umk12x6 0
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
@@ -49,15 +47,14 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
 
-	#if umk12x6
+	#if 0
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
 			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_12x6,  FALSE,
 			cntx
 		);
-	#else
-		#if ROW_STORED
+	#elif 0
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
@@ -65,35 +62,56 @@ void bli_cntx_init_power9( cntx_t* cntx )
 			cntx
 		);
 
-		#else
+	#elif 1
+		bli_cntx_set_l3_nat_ukrs
+		(
+			1,
+			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_18x4,  FALSE,
+			cntx
+		);
+
+	#else
 		bli_cntx_set_l3_nat_ukrs
 		(
 			1,
 			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_16x4,  FALSE,
 			cntx
 		);
-		#endif
 	#endif
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	#if umk12x6
+
+	#if 0 // 12x6
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     12,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
-	#else
-		#if ROW_STORED
+		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8190,     0,     0 );
+	
+	#elif 0 // 4x16
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     4,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     16,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
 
-		#else
+	#elif 1 // 18x4
+		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     18,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
+		
+	#else //16x4
 		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     16,     0,     0 );
 		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
-		#endif
+		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
+		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
+		
 	#endif
 
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
 	 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
