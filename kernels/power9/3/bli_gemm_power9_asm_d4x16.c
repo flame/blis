@@ -33,7 +33,7 @@
 */
 
 #include "blis.h"
-#include "bli_pwr9_asm_macros.h"
+#include "bli_pwr9_asm_macros_16x4.h"
 
 
 void bli_dgemm_power9_asm_4x16
