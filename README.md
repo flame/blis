@@ -76,6 +76,17 @@ and [collaborators](http://shpc.ices.utexas.edu/collaborators.html),
 [publications](http://shpc.ices.utexas.edu/publications.html),
 and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
 
+Education and Learning
+----------------------
+
+Want to understand what's under the hood?
+Many of the same concepts and principles employed when developing BLIS are
+introduced and taught in a basic pedagogical setting as part of
+[LAFF-On Programming for High Performance (LAFF-On-PfHP)](http://www.ulaff.net/),
+one of several massive open online courses (MOOCs) in the
+[Linear Algebra: Foundations to Frontiers](http://www.ulaff.net/) series,
+all of which are available for free via the [edX platform](http://www.edx.org/).
+
 What's New
 ----------
 
