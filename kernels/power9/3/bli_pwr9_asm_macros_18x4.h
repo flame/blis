@@ -2122,8 +2122,8 @@
 "xvmaddadp        %%vs22, %%vs40, %%vs56        \n\t" \
 "xvmaddadp        %%vs23, %%vs41, %%vs56        \n\t" \
 "                                               \n\t" \
-"lxv              %%vs51, 4416(%%r7)              \n\t" \
-"lxv              %%vs52, 4432(%%r7)              \n\t" \
+"lxv              %%vs51, 4416(%%r7)            \n\t" \
+"lxv              %%vs52, 4432(%%r7)            \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs24, %%vs42, %%vs56        \n\t" \
 "xvmaddadp        %%vs25, %%vs43, %%vs56        \n\t" \
@@ -2132,7 +2132,7 @@
 "xvmaddadp        %%vs28, %%vs37, %%vs57        \n\t" \
 "xvmaddadp        %%vs29, %%vs38, %%vs57        \n\t" \
 "                                               \n\t" \
-"lxv              %%vs53, 4448(%%r7)              \n\t" \
+"lxv              %%vs53, 4448(%%r7)            \n\t" \
 "                                               \n\t" \
 "xvmaddadp        %%vs30, %%vs39, %%vs57        \n\t" \
 "xvmaddadp        %%vs31, %%vs40, %%vs57        \n\t" \
