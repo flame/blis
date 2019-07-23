@@ -100,7 +100,7 @@ void bli_dgemm_power9_asm_18x4
     "                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
-    DLOAD_UPDATE_32
+    DLOAD_UPDATE_16
   	"                                               \n\t"
     "                                               \n\t"
     "                                               \n\t"
