@@ -6,6 +6,7 @@ Contents
 --------
 
 * **[Introduction](#introduction)**
+* **[Education and Learning](#education-and-learning)**
 * **[What's New](#whats-new)**
 * **[What People Are Saying About BLIS](#what-people-are-saying-about-blis)**
 * **[Key Features](#key-features)**
