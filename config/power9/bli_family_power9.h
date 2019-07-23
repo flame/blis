@@ -36,7 +36,7 @@
 //#define BLIS_FAMILY_H
 
 #define BLIS_SIMD_NUM_REGISTERS 64
-#define BLIS_SIMD_SIZE 32
+#define BLIS_SIMD_SIZE 16
 
 //
 //#ifdef BLIS_NO_HBWMALLOC
