@@ -54,8 +54,8 @@ void bli_dgemm_power9_asm_12x6
 	// different size than is expected by load instructions.
 
 	#if 1
-	uint64_t k_iter = k0 / 2;
-	uint64_t k_left = k0 % 2;
+	uint64_t k_iter = k0 / 32;
+	uint64_t k_left = k0 % 32;
 	#else
 	uint64_t k_iter = 0;
 	uint64_t k_left = k0;
@@ -99,12 +99,12 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
 	"                                               \n\t"
 	"                                               \n\t"
-	PRELOAD_A_B
 	"                                               \n\t"
 	ZERO_OUT_VREG                                             // Zero out vec regs
 	"                                               \n\t"
 	"                                               \n\t"
 	"                                               \n\t"
+	PRELOAD_A_B
 	"                                               \n\t"
 	"addi             %%r28, %%r8, 48               \n\t"
 	"addi             %%r8, %%r8, 96                \n\t"
