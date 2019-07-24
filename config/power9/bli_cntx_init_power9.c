@@ -34,9 +34,9 @@
 
 #include "blis.h"
 
-#define umk_12x6 0
+#define umk_12x6 1
 #define umk_4x16 0
-#define umk_18x4 1
+#define umk_18x4 0
 
 
 void bli_cntx_init_power9( cntx_t* cntx )
