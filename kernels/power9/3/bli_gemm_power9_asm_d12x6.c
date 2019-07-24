@@ -54,8 +54,8 @@ void bli_dgemm_power9_asm_12x6
 	// different size than is expected by load instructions.
 
 	#if 1
-	uint64_t k_iter = k0 / 4;
-	uint64_t k_left = k0 % 4;
+	uint64_t k_iter = k0 / 16;
+	uint64_t k_left = k0 % 16;
 	#else
 	uint64_t k_iter = 0;
 	uint64_t k_left = k0;
