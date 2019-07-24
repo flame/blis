@@ -52,9 +52,12 @@ AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
 # Flags specific to optimized kernels.
 ifeq ($(CC_VENDOR),gcc)
 # gcc 9.0 (clang ?) or later:
-#CKVECFLAGS     := -march=znver2
+ifeq ($(strip $(shell gcc -dumpversion)),9)
+CKVECFLAGS     += -march=znver2
 # gcc 6.0 (clang 4.0) or later:
+else
 CKVECFLAGS     += -march=znver1 -mno-avx256-split-unaligned-store
+endif
 # gcc 4.9 (clang 3.5) or later:
 # possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp

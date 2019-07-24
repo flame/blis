@@ -66,8 +66,8 @@ CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
 #CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-#if compiling with AOCC, use these flags
 CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+#if compiling with AOCC, use these flags
 ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2.0.0')),1)
 CKVECFLAGS +=  -mllvm -disable-licm-vrp
 endif
