@@ -52,7 +52,8 @@ AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
 # Flags specific to optimized kernels.
 ifeq ($(CC_VENDOR),gcc)
 # gcc 9.0 (clang ?) or later:
-ifeq ($(strip $(shell gcc -dumpversion)),9)
+GCC_VERSION := $(strip $(shell gcc -dumpversion))
+ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     += -march=znver2
 # gcc 6.0 (clang 4.0) or later:
 else
