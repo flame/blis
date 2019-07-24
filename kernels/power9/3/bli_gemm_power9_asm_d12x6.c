@@ -60,7 +60,7 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t k_iter = 0;
 	uint64_t k_left = k0;
 	#endif
-	
+
   	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
@@ -99,21 +99,21 @@ void bli_dgemm_power9_asm_12x6
 	"                                               \n\t"
 	"                                               \n\t"
 	"                                               \n\t"
+	PRELOAD_A_B
 	"                                               \n\t"
 	ZERO_OUT_VREG                                             // Zero out vec regs
 	"                                               \n\t"
 	"                                               \n\t"
 	"                                               \n\t"
 	"                                               \n\t"
-	"                                               \n\t"
-	"                                               \n\t"
-	"                                               \n\t"
-	"                                               \n\t"
-	"                                               \n\t"
-	PRELOAD_A_B
-    "addi             %%r28, %%r8, 48               \n\t"
+	"addi             %%r28, %%r8, 48               \n\t"
 	"addi             %%r8, %%r8, 96                \n\t"
 	"addi             %%r7, %%r7, 96                \n\t"
+	"                                               \n\t"
+	"                                               \n\t"
+	"                                               \n\t"
+	"                                               \n\t"
+	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
   	"                                               \n\t"
