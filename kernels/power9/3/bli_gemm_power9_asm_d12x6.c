@@ -138,7 +138,7 @@ void bli_dgemm_power9_asm_12x6
   	"                                               \n\t" // k_iter loop does A*B 
   	"DLOOPKITER:                                    \n\t" // Begin k_iter loop
   	"                                               \n\t"
-	LOAD_UPDATE_2
+	LOAD_UPDATE_32
   	"                                               \n\t"
   	"bdnz             DLOOPKITER                    \n\t"
     "                                               \n\t"

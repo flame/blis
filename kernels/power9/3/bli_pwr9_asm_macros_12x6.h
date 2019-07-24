@@ -361,7 +361,7 @@
   "addi             %%r28, %%r28, 96              \n\t" 
 
 
-#define LOAD_UPDATE_16 \
+#define LOAD_UPDATE_32 \
 "                                               \n\t" \
 "lxv              %%vs42, 0(%%r7)               \n\t" \
 "lxv              %%vs43, 16(%%r7)               \n\t" \
