@@ -482,8 +482,8 @@
   "xvmaddadp        %%vs28, %%vs46, %%vs58        \n\t" \
   "xvmaddadp        %%vs29, %%vs47, %%vs58        \n\t" \
   "                                               \n\t" \
-  "lxvdsx       %%vs53, %%r26, %%r8               \n\t" \
-  "lxvdsx       %%vs54, %%r27, %%r8               \n\t" \
+  "lxvdsx       %%vs52, %%r26, %%r8               \n\t" \
+  "lxvdsx       %%vs53, %%r27, %%r8               \n\t" \
   "                                               \n\t" \
   "xvmaddadp        %%vs30, %%vs42, %%vs59        \n\t" \
   "xvmaddadp        %%vs31, %%vs43, %%vs59        \n\t" \
