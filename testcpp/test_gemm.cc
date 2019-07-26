@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string.h>
 #include <unistd.h>
-#include "gemm.hh"
+#include "blis.hh"
 
 using namespace std;
 
@@ -60,7 +60,7 @@ int main( int argc, char** argv )
 	print_matrix<float>(a_f , M , K);
 	cout<<"b_f= \n";
 	print_matrix<float>(b_f , K , N);
-	blis::gemm(blis::Layout::RowMajor, blis::Op::NoTrans, blis::Op::NoTrans, M, N, K, alpha_f, a_f,
+	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_f, a_f,
 			lda, b_f, ldb, beta_f, c_f, ldc);
 	cout<<"c_f= \n";
 	print_matrix<float>(c_f , M , N);
@@ -71,7 +71,7 @@ int main( int argc, char** argv )
 	print_matrix<double>(a_d , M , K);
 	printf("b_d = \n");
 	print_matrix<double>(b_d , K , N);
-	blis::gemm(blis::Layout::RowMajor, blis::Op::NoTrans, blis::Op::NoTrans, M, N, K, alpha_d, a_d,
+	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_d, a_d,
 			lda, b_d, ldb, beta_d, c_d, ldc);
 	printf("c_d = \n");
 	print_matrix<double>(c_d , M , N);
@@ -82,7 +82,7 @@ int main( int argc, char** argv )
 	print_matrix<std::complex<float>>(a_c , M , K);
 	printf("b_c = \n");
 	print_matrix<std::complex<float>>(b_c , K , N);
-	blis::gemm(blis::Layout::RowMajor, blis::Op::NoTrans, blis::Op::NoTrans, M, N, K, alpha_c, a_c,
+	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_c, a_c,
 			lda, b_c, ldb, beta_c, c_c, ldc);
 	printf("c_c = \n");
 	print_matrix<std::complex<float>>(c_c , M , N);
@@ -93,7 +93,7 @@ int main( int argc, char** argv )
 	print_matrix<std::complex<double>>(a_z , M , K);
 	printf("b_z = \n");
 	print_matrix<std::complex<double>>(b_z , K , N);
-	blis::gemm(blis::Layout::RowMajor, blis::Op::NoTrans, blis::Op::NoTrans, M, N, K, alpha_z, a_z,
+	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_z, a_z,
 			lda, b_z, ldb, beta_z, c_z, ldc);
 	printf("c_z = \n");
 	print_matrix<std::complex<double>>(c_z , M , N);

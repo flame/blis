@@ -1,11 +1,10 @@
-#ifndef BLAS_GEMM_HH
-#define BLAS_GEMM_HH
+#ifndef BLIS_HH
+#define BLIS_HH
 
-//#include "blis_util.hh"
+#include "blis_util.hh"
 #include "cblas.hh"
-
 #include <limits>
-#define blis_int int
+
 namespace blis {
 
 // =============================================================================
@@ -83,9 +82,9 @@ namespace blis {
 
 template< typename TA, typename TB, typename TC >
 void gemm(
-    blis::Layout layout,
-    blis::Op transA,
-    blis::Op transB,
+    CBLAS_LAYOUT layout,
+    CBLAS_TRANSPOSE transA,
+    CBLAS_TRANSPOSE transB,
     int64_t m, int64_t n, int64_t k,
     scalar_type<TA, TB, TC> alpha,
     TA const *A, int64_t lda,
@@ -93,59 +92,11 @@ void gemm(
     scalar_type<TA, TB, TC> beta,
     TC       *C, int64_t ldc )
 {
-#if 0
-    //throw std::exception();  // not yet implemented
-    printf("In gemm.cc\n");
-    cblis_gemm(cblis_layout_const(layout),
-               cblis_trans_const(transA),
-               cblis_trans_const(transB),
-               m, n, k, alpha, A,lda, B, ldb, beta, C, ldc);
-#endif
-    // check arguments
-    blis_error_if( layout != Layout::ColMajor &&
-                   layout != Layout::RowMajor );
-    blis_error_if( transA != Op::NoTrans &&
-                   transA != Op::Trans &&
-                   transA != Op::ConjTrans );
-    blis_error_if( transB != Op::NoTrans &&
-                   transB != Op::Trans &&
-                   transB != Op::ConjTrans );
-    blis_error_if( m < 0 );
-    blis_error_if( n < 0 );
-    blis_error_if( k < 0 );
-
-    if ((transA == Op::NoTrans) ^ (layout == Layout::RowMajor))
-        blis_error_if( lda < m );
-    else
-        blis_error_if( lda < k );
-
-    if ((transB == Op::NoTrans) ^ (layout == Layout::RowMajor))
-        blis_error_if( ldb < k );
-    else
-        blis_error_if( ldb < n );
-
-    if (layout == Layout::ColMajor)
-        blis_error_if( ldc < m );
-    else
-        blis_error_if( ldc < n );
-
-    // check for overflow in native BLAS integer type, if smaller than int64_t
-    if (sizeof(int64_t) > sizeof(blis_int)) {
-        blis_error_if( m   > std::numeric_limits<blis_int>::max() );
-        blis_error_if( n   > std::numeric_limits<blis_int>::max() );
-        blis_error_if( k   > std::numeric_limits<blis_int>::max() );
-        blis_error_if( lda > std::numeric_limits<blis_int>::max() );
-        blis_error_if( ldb > std::numeric_limits<blis_int>::max() );
-        blis_error_if( ldc > std::numeric_limits<blis_int>::max() );
-    }
-    printf("In gemm.cpp\n");
-    cblas_gemm(cblas_layout_const(layout),
-                    cblas_trans_const(transA),
-                    cblas_trans_const(transB),
-                    m, n, k, alpha, A,lda, B, ldb, beta, C, ldc);
+//    printf("In gemm.cpp\n");
+    cblas_gemm(layout, transA, transB, m, n, k, alpha, A,lda, B, ldb, beta, C, ldc);
 
 };
 
 }  // namespace blis
 
-#endif        //  #ifndef BLAS_GEMM_HH
+#endif        //  #ifndef BLIS_HH

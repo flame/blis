@@ -131,7 +131,7 @@ MAC_LIB        := -framework Accelerate
 #
 
 TEST_SRC_PATH  := .
-CPP_SRC_PATH  := ../srccpp/
+CPP_SRC_PATH  := ../cpp/
 TEST_OBJ_PATH  := .
 
 # Gather all local object files.
@@ -147,13 +147,13 @@ CINCFLAGS      := -I$(INC_PATH)
 CXX	= g++
 
 # Use the CFLAGS for the configuration family.
-CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
+override CFLAGS         += $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
 #CFLAGS         = -O0 -g -Wall 
 #CFLAGS         += -I$(INC_PATH)
-CFLAGS         += -I$(TEST_SRC_PATH)
-CFLAGS      += -I$(CPP_SRC_PATH)
+override CFLAGS         += -I$(TEST_SRC_PATH)
+override CFLAGS      += -I$(CPP_SRC_PATH)
 
 LINKER = $(CXX)
 
@@ -173,7 +173,8 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: test_gemm_blis.x
+blis: test_gemm_blis.x \
+	test_gemm1_blis.x
 
 openblas: \
       test_dotv_openblas.x \
@@ -285,7 +286,7 @@ test_%_mac.o: test_%.c
 	$(CC) $(CFLAGS) -DBLAS=\"mac\" -c $< -o $@
 
 test_%_blis.o: test_%.cc
-	$(CXX) $(CFLAGS) -DBLIS -c $< -o $@
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 
 # -- Executable file rules --
