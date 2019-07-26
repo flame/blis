@@ -115,7 +115,11 @@ CINCFLAGS      := -I$(INC_PATH)
 CXX	= g++
 
 # Use the CFLAGS for the configuration family.
+<<<<<<< HEAD
 override CFLAGS         += $(call get-sandbox-cxxflags-for,$(CONFIG_NAME))
+=======
+override CFLAGS         += $(call get-user-cflags-for,$(CONFIG_NAME))
+>>>>>>> Code Cleanup done; Test code updated to add performance measurement
 
 # Add local header paths to CFLAGS
 #CFLAGS         = -O0 -g -Wall 
@@ -136,6 +140,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 # Complete list of possible targets when defining 'all':
 #
+<<<<<<< HEAD
 #   blis 
 #
 all: blis 
@@ -182,6 +187,103 @@ blis: test_asum_blis.x \
 	test_trsm_blis.x \
 	test_trsv_blis.x 
  
+=======
+#   blis openblas atlas mkl mac essl
+#
+#all: blis openblas atlas mkl
+all: blis openblas mkl
+
+blis: test_gemm_blis.x \
+	test_gemm1_blis.x
+
+openblas: \
+      test_dotv_openblas.x \
+      test_axpyv_openblas.x \
+      test_gemv_openblas.x \
+      test_ger_openblas.x \
+      test_hemv_openblas.x \
+      test_her_openblas.x \
+      test_her2_openblas.x \
+      test_trmv_openblas.x \
+      test_trsv_openblas.x \
+      \
+      test_gemm_openblas.x \
+      test_hemm_openblas.x \
+      test_herk_openblas.x \
+      test_her2k_openblas.x \
+      test_trmm_openblas.x \
+      test_trsm_openblas.x
+
+atlas: \
+      test_dotv_atlas.x \
+      test_axpyv_atlas.x \
+      test_gemv_atlas.x \
+      test_ger_atlas.x \
+      test_hemv_atlas.x \
+      test_her_atlas.x \
+      test_her2_atlas.x \
+      test_trmv_atlas.x \
+      test_trsv_atlas.x \
+      \
+      test_gemm_atlas.x \
+      test_hemm_atlas.x \
+      test_herk_atlas.x \
+      test_her2k_atlas.x \
+      test_trmm_atlas.x \
+      test_trsm_atlas.x
+
+mkl:  test_dotv_mkl.x \
+      test_axpyv_mkl.x \
+      test_gemv_mkl.x \
+      test_ger_mkl.x \
+      test_hemv_mkl.x \
+      test_her_mkl.x \
+      test_her2_mkl.x \
+      test_trmv_mkl.x \
+      test_trsv_mkl.x \
+      \
+      test_gemm_mkl.x \
+      test_hemm_mkl.x \
+      test_herk_mkl.x \
+      test_her2k_mkl.x \
+      test_trmm_mkl.x \
+      test_trsm_mkl.x
+
+essl: test_dotv_essl.x \
+      test_axpyv_essl.x \
+      test_gemv_essl.x \
+      test_ger_essl.x \
+      test_hemv_essl.x \
+      test_her_essl.x \
+      test_her2_essl.x \
+      test_trmv_essl.x \
+      test_trsv_essl.x \
+      \
+      test_gemm_essl.x \
+      test_hemm_essl.x \
+      test_herk_essl.x \
+      test_her2k_essl.x \
+      test_trmm_essl.x \
+      test_trsm_essl.x
+
+mac:  test_dotv_mac.x \
+      test_axpyv_mac.x \
+      test_gemv_mac.x \
+      test_ger_mac.x \
+      test_hemv_mac.x \
+      test_her_mac.x \
+      test_her2_mac.x \
+      test_trmv_mac.x \
+      test_trsv_mac.x \
+      \
+      test_gemm_mac.x \
+      test_hemm_mac.x \
+      test_herk_mac.x \
+      test_her2k_mac.x \
+      test_trmm_mac.x \
+      test_trsm_mac.x
+
+>>>>>>> Code Cleanup done; Test code updated to add performance measurement
 
 
 # --Object file rules --
@@ -190,7 +292,11 @@ $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 test_%_blis.o: test_%.cc
+<<<<<<< HEAD
 	@$(CXX) $(CFLAGS) -c $< -o $@
+=======
+	$(CXX) $(CFLAGS) -c $< -o $@
+>>>>>>> Code Cleanup done; Test code updated to add performance measurement
 
 
 # -- Executable file rules --
