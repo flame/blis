@@ -1,3 +1,36 @@
+/*
+
+   BLISPP
+   C++ test driver for BLIS CPP gemm routine and reference cblas gemm routine.
+
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+    - Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+    - Neither the name(s) of the copyright holder(s) nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
 #include <complex>
 
 #include <stdio.h>
@@ -5,98 +38,174 @@
 #include <string.h>
 #include <unistd.h>
 #include "blis.hh"
+#include "test_gemm.hh"
 
 using namespace std;
-
-#define DIM 2
-template <typename T>
-void print_matrix(T * matrix , int m , int n)
+#define PRINT
+int computeError(
+        int    ldc,
+        int    ldc_ref,
+        int    m,
+        int    n,
+        double *C,
+        double *C_ref
+        )
 {
-	for ( int L=0; L < m; L ++ ) {
-		for ( int J = 0; J < n; J ++ ) {
-			cout<< matrix[L * n + J]<<" ";
-		}
-		cout<<"\n";
-	}
+    int    i, j;
+    int ret = 0;
+    for ( i = 0; i < m; i ++ ) {
+        for ( j = 0; j < n; j ++ ) {
+            if (  C( i, j ) != C_ref( i, j ) ) {
+                printf( "C[ %d ][ %d ] != C_ref, %E, %E\n", i, j, C( i, j ), C_ref( i, j ) );
+		ret = 1;
+                break;
+            }
+        }
+    }
+    return ret;
 
 }
+void test_dgemm(  ) 
+{
+    int    i, j, p, nx;
+    double *A, *B, *C, *C_ref;
+    double alpha, beta;
+    double tmp, error, flops;
+    double ref_beg, ref_time, bl_dgemm_beg, bl_dgemm_time;
+    int    nrepeats;
+    int m,n,k;
+    int    lda, ldb, ldc, ldc_ref;
+    double ref_rectime, bl_dgemm_rectime;
+
+    alpha = 1.0;
+    beta = 0.0;
+    m = 5;
+    k = 6;
+    n = 4;
+
+    A    = (double*)malloc( sizeof(double) * m * k );
+    B    = (double*)malloc( sizeof(double) * k * n );
+
+    lda = m;
+    ldb = k;
+    ldc     = m;
+    ldc_ref = m;
+    C     = bl_malloc_aligned( ldc, n + 4, sizeof(double) );
+    C_ref = (double*)malloc( sizeof(double) * m * n );
+
+    nrepeats = 3;
+
+    srand48 (time(NULL));
+
+    // Randonly generate points in [ 0, 1 ].
+    for ( p = 0; p < k; p ++ ) {
+        for ( i = 0; i < m; i ++ ) {
+            A( i, p ) = (double)( drand48() );	
+        }
+    }
+    for ( j = 0; j < n; j ++ ) {
+        for ( p = 0; p < k; p ++ ) {
+            B( p, j ) = (double)( drand48() );
+        }
+    }
+
+    for ( j = 0; j < n; j ++ ) {
+        for ( i = 0; i < m; i ++ ) {
+            C_ref( i, j ) = (double)( 0.0 );	
+                C( i, j ) = (double)( 0.0 );	
+        }
+    }
+#ifdef PRINT
+    bl_dgemm_printmatrix(A, lda ,m,k);
+    bl_dgemm_printmatrix(B, ldb ,k,n);
+    bl_dgemm_printmatrix(C, ldc ,m,n);
+#endif
+    for ( i = 0; i < nrepeats; i ++ ) {
+        bl_dgemm_beg = bl_clock();
+        {
+		blis::gemm(
+		    CblasColMajor,
+		    CblasNoTrans,
+		    CblasNoTrans,
+                    m,
+                    n,
+                    k,
+		    alpha,
+                    A,
+                    lda,
+                    B,
+                    ldb,
+		    beta,
+                    C,
+                    ldc
+                    );
+        }
+        bl_dgemm_time = bl_clock() - bl_dgemm_beg;
+
+        if ( i == 0 ) {
+            bl_dgemm_rectime = bl_dgemm_time;
+        } else {
+            bl_dgemm_rectime = bl_dgemm_time < bl_dgemm_rectime ? bl_dgemm_time : bl_dgemm_rectime;
+        }
+    }
+
+#ifdef PRINT
+    bl_dgemm_printmatrix(C, ldc ,m,n);
+#endif
+    for ( i = 0; i < nrepeats; i ++ ) {
+        ref_beg = bl_clock();
+        {
+		cblas_dgemm(
+		    CblasColMajor,
+		    CblasNoTrans,
+		    CblasNoTrans,
+                    m,
+                    n,
+                    k,
+		    alpha,
+                    A,
+                    lda,
+                    B,
+                    ldb,
+		    beta,
+                    C_ref,
+                    ldc_ref
+                    );
+        }
+        ref_time = bl_clock() - ref_beg;
+
+        if ( i == 0 ) {
+            ref_rectime = ref_time;
+        } else {
+            ref_rectime = ref_time < ref_rectime ? ref_time : ref_rectime;
+        }
+    }
+
+#ifdef PRINT
+    bl_dgemm_printmatrix(C_ref, ldc_ref ,m,n);
+#endif
+    if(computeError(ldc, ldc_ref, m, n, C, C_ref )==1)
+	    printf("%s TEST FAIL\n" ,__func__);
+    else
+	    printf("%s TEST PASS\n" , __func__);
+
+
+    // Compute overall floating point operations.
+    flops = ( m * n / ( 1000.0 * 1000.0 * 1000.0 ) ) * ( 2 * k );
+
+    printf( "%5d\t %5d\t %5d\t %5.2lf\t %5.2lf\n", 
+            m, n, k, flops / bl_dgemm_rectime, flops / ref_rectime );
+
+    free( A     );
+    free( B     );
+    free( C     );
+    free( C_ref );
+}
+
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-	int M, N, K, lda, ldb, ldc;
-	double a_d[DIM * DIM] = { 1.111, 2.222, 3.333, 4.444 };
-	double b_d[DIM * DIM] = { 5.555, 6.666, 7.777, 8.888 };
-	double c_d[DIM * DIM];
-	double alpha_d, beta_d;
-	float a_f[DIM * DIM] = { 1.1, 2.2, 3.3, 4.4 };
-	float b_f[DIM * DIM] = { 5.5, 6.6, 7.7, 8.8 };
-	float c_f[DIM * DIM];
-	float alpha_f, beta_f;
-	std::complex<float> a_c[DIM * DIM]={{1, 2},{3, 4},{5,6},{7,8}};
-	std::complex<float> b_c[DIM * DIM]={{1, 2},{3, 4},{5,6},{7,8}};
-	std::complex<float> c_c[DIM * DIM];
-	std::complex<float> alpha_c, beta_c;
-	std::complex<double> a_z[DIM * DIM]={{1.1, 2.2},{3.3, 4.4},{5.5,6.6},{7.7,8.8}};
-	std::complex<double> b_z[DIM * DIM]={{1.1, 2.2},{3.3, 4.4},{5.5,6.6},{7.7,8.8}};
-	std::complex<double> c_z[DIM * DIM];
-	std::complex<double> alpha_z, beta_z;
-	M = DIM;
-	N = M;
-	K = M;
-	lda = M;
-	ldb = K;
-	ldc = M;
-	alpha_d = 1.0;
-	beta_d = 0.0;
-	alpha_f = 1.0;
-	beta_f = 0.0;
-	alpha_c = {1.0,1.0};
-	beta_c = {0.0,0.0};
-	alpha_z = {1.0,1.0};
-	beta_z = {0.0,0.0};
-
-	/*cblis_sgemm*/	
-	cout<<"a_f= \n";
-	print_matrix<float>(a_f , M , K);
-	cout<<"b_f= \n";
-	print_matrix<float>(b_f , K , N);
-	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_f, a_f,
-			lda, b_f, ldb, beta_f, c_f, ldc);
-	cout<<"c_f= \n";
-	print_matrix<float>(c_f , M , N);
-
-
-	/*cblis_dgemm*/	
-	printf("a_d = \n");
-	print_matrix<double>(a_d , M , K);
-	printf("b_d = \n");
-	print_matrix<double>(b_d , K , N);
-	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_d, a_d,
-			lda, b_d, ldb, beta_d, c_d, ldc);
-	printf("c_d = \n");
-	print_matrix<double>(c_d , M , N);
-
-
-	/*cblis_cgemm*/	
-	printf("a_c = \n");
-	print_matrix<std::complex<float>>(a_c , M , K);
-	printf("b_c = \n");
-	print_matrix<std::complex<float>>(b_c , K , N);
-	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_c, a_c,
-			lda, b_c, ldb, beta_c, c_c, ldc);
-	printf("c_c = \n");
-	print_matrix<std::complex<float>>(c_c , M , N);
-
-
-	/*cblis_zgemm*/	
-	printf("a_z = \n");
-	print_matrix<std::complex<double>>(a_z , M , K);
-	printf("b_z = \n");
-	print_matrix<std::complex<double>>(b_z , K , N);
-	blis::gemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, alpha_z, a_z,
-			lda, b_z, ldb, beta_z, c_z, ldc);
-	printf("c_z = \n");
-	print_matrix<std::complex<double>>(c_z , M , N);
-	return 0;
+    test_dgemm( );
+    return 0;
 
 }
