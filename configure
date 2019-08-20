@@ -2756,8 +2756,13 @@ main()
 		enable_memkind_01=0
 	fi
 	if [ "x${pragma_omp_simd}" = "xyes" ]; then
-		echo "${script_name}: compiler appears to support #pragma omp simd."
-		enable_pragma_omp_simd_01=1
+		if [ "x${cc_vendor}" = "xgcc" ]; then
+			echo "${script_name}: #pragma omp simd not used with GCC."
+			enable_pragma_omp_simd_01=0
+		else
+			echo "${script_name}: compiler appears to support #pragma omp simd."
+			enable_pragma_omp_simd_01=1
+		fi
 	else
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
