@@ -127,7 +127,9 @@ size of interest so that we can better assist you.
   * single-core: 17.6 GFLOPS (double-precision), 35.2 GFLOPS (single-precision)
   * multicore: 17.6 GFLOPS/core (double-precision), 35.2 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 16.04 (Linux kernel 4.15.0)
+* Page size: unknown
 * Compiler: gcc 7.3.0
+* Driver source code directory: `test/3`
 * Results gathered: 14 February 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
@@ -187,7 +189,9 @@ size of interest so that we can better assist you.
   * single-core: 64 GFLOPS (double-precision), 128 GFLOPS (single-precision)
   * multicore: 64 GFLOPS/core (double-precision), 128 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
+* Driver source code directory: `test/3`
 * Results gathered: 6 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
@@ -259,7 +263,9 @@ size of interest so that we can better assist you.
   * single-core: 56 GFLOPS (double-precision), 112 GFLOPS (single-precision)
   * multicore: 49.6 GFLOPS/core (double-precision), 99.2 GFLOPS/core (single-precision)
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
+* Page size: 4096 bytes
 * Compiler: gcc 6.3.0
+* Driver source code directory: `test/3`
 * Results gathered: 25-26 February 2019, 27 March 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
@@ -329,7 +335,9 @@ size of interest so that we can better assist you.
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
   * multicore: 20.4 GFLOPS/core (double-precision), 40.8 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
+* Driver source code directory: `test/3`
 * Results gathered: 6 March 2019, 19 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)

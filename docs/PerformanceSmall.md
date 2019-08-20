@@ -111,7 +111,9 @@ size of interest so that we can better assist you.
 * Peak performance:
   * single-core: 57.6 GFLOPS (double-precision), 115.2 GFLOPS (single-precision)
 * Operating system: Gentoo Linux (Linux kernel 5.0.7)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
+* Driver source code directory: `test/sup`
 * Results gathered: 31 May 2019, 3 June 2019, 19 June 2019
 * Implementations tested:
   * BLIS 6bf449c (0.5.2-42)
@@ -171,7 +173,9 @@ size of interest so that we can better assist you.
 * Peak performance:
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
+* Driver source code directory: `test/sup`
 * Results gathered: 31 May 2019, 3 June 2019, 19 June 2019
 * Implementations tested:
   * BLIS 6bf449c (0.5.2-42)
