@@ -64,6 +64,10 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx -mfpmath=sse -march=sandybridge
+ifeq ($(GCC_OT_4_9_0),yes)
+# If gcc is older than 4.9.0, we must use a different label for -march.
+CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
+endif
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xAVX

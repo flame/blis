@@ -63,11 +63,15 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-# gcc 6.0 (clang 4.0) or later:
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
-# gcc 4.9 (clang 3.5) or later:
-# possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
+CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
+ifeq ($(GCC_OT_6_1_0),yes)
+# If gcc is older than 6.1.0, we must use -march=bdver4 and then remove the
+# Bulldozer instruction sets that were omitted from Zen.
+# Additionally, if gcc is 4.9 (clang 3.5?) or newer, we may want to add
+# Zen-specific instructions back into the mix:
+# -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
 CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+endif
 else
 ifeq ($(CC_VENDOR),clang)
 CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp

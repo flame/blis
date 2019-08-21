@@ -64,6 +64,10 @@ endif
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
+ifeq ($(GCC_OT_4_9_0),yes)
+# If gcc is older than 4.9.0, we must use a different label for -march.
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+endif
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xCORE-AVX2

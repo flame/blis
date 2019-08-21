@@ -89,6 +89,10 @@ endif
 CC_VENDOR         := @CC_VENDOR@
 CC                := @CC@
 
+# Important C compiler ranges.
+GCC_OT_4_9_0      := @gcc_older_than_4_9_0@
+GCC_OT_6_1_0      := @gcc_older_than_6_1_0@
+
 # The C++ compiler. NOTE: A C++ is typically not needed.
 CXX               := @CXX@
 
