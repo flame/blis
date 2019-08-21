@@ -1530,7 +1530,7 @@ check_compiler_version_ranges()
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
 
-	echo "${script_name}: checking for consequential version ranges for ${cc} ${cc_version}."
+	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
