@@ -1,9 +1,6 @@
 language: c
 sudo: required
 dist: trusty
-env:
-  global:
-      secure: "Ty3PM1xGhXwxfJG6YyY9bUZyXzw98ekHxQEqU9VnrMXTZb28IxfocPCXHjL34r9HTGosO5Pmierhal1Cs3ZKE5ZAJqJhCfck+kwlH21Uay5CNYglDtSmy2qxtbbDG4AxpEZ1UKlIZr1pNh/x+pRemSmnMEnQp/E7QJqdkhm4+aMX2bWKyLPtrdL+B9QXLVT2nT6/Fw3i05aBhpcFJpSPfvYX2KoCZYdJOSKcKci4T8nAfP/c0olkz+jAkBZxZFgO9Ptrt/lvHtVPrkh5o29GvHg2i/4vucbsMltoxlV31/2eYpdr17Ngtt41MMVn2fHV4lVhLmENc04nlm084fBtg73T6b8hNy5JlcA44xI/UrPJsQAJ+0A0ds9BbBQKPxOmaF/O8WGXhwiwdKT6DGS9lj05f3S+yZfeNE3pQhLEcvwXLO5SW3VvKXMj0t/lZyG+XCkvFjD7KEPQV4g+BZc2zzD9TwDx3ydn8Uzd6zZlq1erQUzCnODP24wuwfrNP8nqxFYG0VtI8oZW62IC9U2hcnAF5QNXXW3yDYD65k3BHbigfI28gu9iO9G8RxOglR27J7Whdqkqw3AMRaqyHt2tdbz7tM2dLZ0EatT5m8esjC+LP4EshW9C59jP2U9vJ/94YEgOfwiqk8+e6fL/7dJvOumbwu1RclRI9DS88PPYb3Q="
 matrix:
   include:
   # full testsuite (all tests except for mixed datatype)
@@ -80,4 +77,4 @@ script:
 - $CC --version
 - make -j 2
 - if [ "$TEST" != "0" ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
-- if [ $SDE -eq 1 ] && [ "$TRAVIS_PULL_REQUEST" = "false" ] ; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
+- if [ "$SDE" = "1" ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
