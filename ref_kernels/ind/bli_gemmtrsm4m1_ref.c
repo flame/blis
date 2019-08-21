@@ -88,8 +88,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* A hack to avoid a 'restrict' warning triggered by passing in the
 	   same address (one_r) for both alpha and beta when calling the last
 	   of the four matrix products. We now use one_r for alpha and this
-	   new local variable, onel, for beta. */ \
-	ctype             onel; \
+	   new local variable, onel, for beta. (See issue #328.) */ \
+	ctype_r           onel; \
 	ctype_r* restrict onel_r      = &onel; \
 	PASTEMAC(chr,set1s)( onel ); \
 \
