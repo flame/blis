@@ -208,7 +208,14 @@ size of interest so that we can better assist you.
     * Multithreaded (52 core) execution requested via `export OPENBLAS_NUM_THREADS=52`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
@@ -282,7 +289,14 @@ size of interest so that we can better assist you.
     * Multithreaded (24 core) execution requested via `export OPENBLAS_NUM_THREADS=24`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
@@ -354,7 +368,14 @@ size of interest so that we can better assist you.
     * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`

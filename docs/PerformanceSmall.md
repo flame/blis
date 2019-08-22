@@ -125,7 +125,14 @@ size of interest so that we can better assist you.
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
@@ -187,7 +194,14 @@ size of interest so that we can better assist you.
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
