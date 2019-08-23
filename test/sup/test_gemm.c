@@ -318,7 +318,11 @@ int main( int argc, char** argv )
 				float*    betap  = ( float* )bli_obj_buffer( &beta );
 				float*    cp     = ( float* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_sgemm( &f77_transa,
+				#else
 				sgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -343,7 +347,11 @@ int main( int argc, char** argv )
 				double*   betap  = ( double* )bli_obj_buffer( &beta );
 				double*   cp     = ( double* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_dgemm( &f77_transa,
+				#else
 				dgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -368,7 +376,11 @@ int main( int argc, char** argv )
 				scomplex* betap  = ( scomplex* )bli_obj_buffer( &beta );
 				scomplex* cp     = ( scomplex* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_cgemm( &f77_transa,
+				#else
 				cgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -393,7 +405,11 @@ int main( int argc, char** argv )
 				dcomplex* betap  = ( dcomplex* )bli_obj_buffer( &beta );
 				dcomplex* cp     = ( dcomplex* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_zgemm( &f77_transa,
+				#else
 				zgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,

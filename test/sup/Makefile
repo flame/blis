@@ -105,6 +105,7 @@ BLASFEO_LIB    := $(HOME_LIB_PATH)/libblasfeo.a
 
 # libxsmm
 LIBXSMM_LIB    := $(HOME_LIB_PATH)/libxsmm.a
+LDFLAGS        += -ldl
 
 # ATLAS
 ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
@@ -309,7 +310,7 @@ get-imp-defs = $(strip $(subst  blissup,-DSTR=\"$(1)\" -DBLIS -DSUP, \
                        $(subst    eigen,-DSTR=\"$(1)\" -DEIGEN, \
                        $(subst openblas,-DSTR=\"$(1)\" -DCBLAS, \
                        $(subst  blasfeo,-DSTR=\"$(1)\" -DCBLAS, \
-                       $(subst  libxsmm,-DSTR=\"$(1)\" -DBLAS, \
+                       $(subst  libxsmm,-DSTR=\"$(1)\" -DBLAS -DXSMM, \
                        $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1)))))))))
 
 TRANS0  = $(call stripu,$(TRANS))
