@@ -158,7 +158,8 @@ int main( int argc, char** argv )
 	        ( unsigned long )0, 0.0 );
 
 
-	for ( p = p_begin; p <= p_max; p += p_inc )
+	//for ( p = p_begin; p <= p_max; p += p_inc )
+	for ( p = p_max; p_begin <= p; p -= p_inc )
 	{
 		obj_t  a, b, c;
 		obj_t  c_save;
