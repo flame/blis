@@ -96,6 +96,9 @@ endif
 HOME_LIB_PATH  := $(HOME)/flame/lib
 MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
 
+# netlib BLAS
+NETLIB_LIB     := $(HOME_LIB_PATH)/libblas.a
+
 # OpenBLAS
 OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
 OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
@@ -104,8 +107,8 @@ OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 BLASFEO_LIB    := $(HOME_LIB_PATH)/libblasfeo.a
 
 # libxsmm
-LIBXSMM_LIB    := $(HOME_LIB_PATH)/libxsmm.a
-LDFLAGS        += -ldl
+LIBXSMM_LIB    := $(HOME_LIB_PATH)/libxsmm.a -ldl \
+                  $(NETLIB_LIB) -lgfortran
 
 # ATLAS
 ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
@@ -474,5 +477,5 @@ test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.x
+	- $(RM_F) *.x *.o
 

@@ -196,7 +196,7 @@ int main( int argc, char** argv )
 		bli_obj_set_conjtrans( transa, &a );
 		bli_obj_set_conjtrans( transb, &b );
 
-		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc(  (1.0/1.0), 0.0, &alpha );
 		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 		bli_copym( &c, &c_save );
