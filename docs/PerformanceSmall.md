@@ -1,19 +1,19 @@
 # Contents
 
-* **[Contents](Performance.md#contents)**
-* **[Introduction](Performance.md#introduction)**
-* **[General information](Performance.md#general-information)**
-* **[Level-3 performance](Performance.md#level-3-performance)**
-  * **[Kaby Lake](Performance.md#kaby-lake)**
-    * **[Experiment details](Performance.md#kaby-lake-experiment-details)**
-    * **[Results](Performance.md#kaby-lake-results)**
-  * **[Haswell](Performance.md#haswell)**
-    * **[Experiment details](Performance.md#haswell-experiment-details)**
-    * **[Results](Performance.md#haswell-results)**
-  * **[Epyc](Performance.md#epyc)**
-    * **[Experiment details](Performance.md#epyc-experiment-details)**
-    * **[Results](Performance.md#epyc-results)**
-* **[Feedback](Performance.md#feedback)**
+* **[Contents](PerformanceSmall.md#contents)**
+* **[Introduction](PerformanceSmall.md#introduction)**
+* **[General information](PerformanceSmall.md#general-information)**
+* **[Level-3 performance](PerformanceSmall.md#level-3-performance)**
+  * **[Kaby Lake](PerformanceSmall.md#kaby-lake)**
+    * **[Experiment details](PerformanceSmall.md#kaby-lake-experiment-details)**
+    * **[Results](PerformanceSmall.md#kaby-lake-results)**
+  * **[Haswell](PerformanceSmall.md#haswell)**
+    * **[Experiment details](PerformanceSmall.md#haswell-experiment-details)**
+    * **[Results](PerformanceSmall.md#haswell-results)**
+  * **[Epyc](PerformanceSmall.md#epyc)**
+    * **[Experiment details](PerformanceSmall.md#epyc-experiment-details)**
+    * **[Results](PerformanceSmall.md#epyc-results)**
+* **[Feedback](PerformanceSmall.md#feedback)**
 
 # Introduction
 
