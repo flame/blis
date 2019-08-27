@@ -38,13 +38,13 @@ sks="4"
 
 # Implementations to test.
 impls="vendor blissup blislpab openblas eigen libxsmm blasfeo"
-#impls="vendor openblas eigen"
-#impls="blislpab blissup"
-#impls="openblas eigen vendor"
-#impls="eigen"
+#impls="vendor"
 #impls="blissup"
-#impls="blasfeo"
+#impls="blislpab"
+#impls="openblas"
+#impls="eigen"
 #impls="libxsmm"
+#impls="blasfeo"
 
 # Example: test_dgemm_nn_rrc_m6npkp_blissup_st.x
 

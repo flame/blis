@@ -217,14 +217,21 @@ TRANS := n_n \
          t_n \
          t_t
 
+# While BLIS supports all combinations of row and column storage for matrices
+# C, A, and B, the alternatives mostly only support CBLAS APIs, which inherently
+# support only "all row-storage" or "all column-storage". Thus, we disable the
+# building of those other drivers so that compilation/linking completes sooner.
+#STORS := r_r_r \
+#         r_r_c \
+#         r_c_r \
+#         r_c_c \
+#         c_r_r \
+#         c_r_c \
+#         c_c_r \
+#         c_c_c
 STORS := r_r_r \
-         r_r_c \
-         r_c_r \
-         r_c_c \
-         c_r_r \
-         c_r_c \
-         c_c_r \
          c_c_c
+
 
 SHAPES := l_l_s \
           l_s_l \
