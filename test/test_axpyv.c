@@ -96,10 +96,11 @@ int main( int argc, char** argv )
 	printf( "data_axpyv_%s", BLAS );
 #endif
 	printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0, 0.0 );
 
-	for ( p = p_begin; p <= p_end; p += p_inc )
+	//for ( p = p_begin; p <= p_end; p += p_inc )
+	for ( p = p_end; p_begin <= p; p -= p_inc )
 	{
 
 		if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
@@ -188,7 +189,7 @@ int main( int argc, char** argv )
 		printf( "data_axpyv_%s", BLAS );
 #endif
 		printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
-				( unsigned long )(p - p_begin + 1)/p_inc + 1,
+				( unsigned long )(p - p_begin)/p_inc + 1,
 				( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
