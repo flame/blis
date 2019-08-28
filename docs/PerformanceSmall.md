@@ -113,21 +113,21 @@ size of interest so that we can better assist you.
 * Max FMA vector IPC: 2
 * Peak performance:
   * single-core: 57.6 GFLOPS (double-precision), 115.2 GFLOPS (single-precision)
-* Operating system: Gentoo Linux (Linux kernel 5.0.7)
+* Operating system: Gentoo Linux (Linux kernel 5.2.4)
 * Page size: 4096 bytes
 * Compiler: gcc 8.3.0
 * Driver source code directory: `test/sup`
-* Results gathered: 23 August 2019, 26 August 2019
+* Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
     * configured with `./configure --enable-cblas auto`
     * sub-configuration exercised: `haswell`
-  * OpenBLAS 0.3.6
+  * OpenBLAS 0.3.7
     * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
   * BLASFEO 01f6b7f
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -136,7 +136,8 @@ size of interest so that we can better assist you.
            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
          endif()
          ```
-    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
   * MKL 2019 update 4
@@ -185,18 +186,18 @@ size of interest so that we can better assist you.
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Page size: 4096 bytes
 * Compiler: gcc 7.3.0
-* Driver source code directory: `test/3`
-* Results gathered: 23 August 2019, 26 August 2019
+* Driver source code directory: `test/sup`
+* Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
     * configured with `./configure --enable-cblas auto`
     * sub-configuration exercised: `haswell`
-  * OpenBLAS 0.3.6
+  * OpenBLAS 0.3.7
     * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
   * BLASFEO 01f6b7f
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -205,7 +206,8 @@ size of interest so that we can better assist you.
            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
          endif()
          ```
-    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
   * MKL 2019 update 4
@@ -251,19 +253,19 @@ size of interest so that we can better assist you.
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Page size: 4096 bytes
-* Compiler: gcc 7.3.0
+* Compiler: gcc 7.4.0
 * Driver source code directory: `test/sup`
-* Results gathered: 23 August 2019, 26 August 2019
+* Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
     * configured with `./configure --enable-cblas auto`
     * sub-configuration exercised: `zen`
-  * OpenBLAS 0.3.6
+  * OpenBLAS 0.3.7
     * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
   * BLASFEO 01f6b7f
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (30 May 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -272,7 +274,8 @@ size of interest so that we can better assist you.
            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
          endif()
          ```
-    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
   * MKL 2019 update 4
