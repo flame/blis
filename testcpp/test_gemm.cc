@@ -32,45 +32,20 @@
 */
 
 #include <complex>
-
-#include <stdio.h>
 #include <iostream>
-#include <string.h>
-#include <unistd.h>
 #include "blis.hh"
 #include "test_gemm.hh"
 
+using namespace blis;
 using namespace std;
 #define PRINT
-int computeError(
-        int    ldc,
-        int    ldc_ref,
-        int    m,
-        int    n,
-        double *C,
-        double *C_ref
-        )
-{
-    int    i, j;
-    int ret = 0;
-    for ( i = 0; i < m; i ++ ) {
-        for ( j = 0; j < n; j ++ ) {
-            if (  C( i, j ) != C_ref( i, j ) ) {
-                printf( "C[ %d ][ %d ] != C_ref, %E, %E\n", i, j, C( i, j ), C_ref( i, j ) );
-		ret = 1;
-                break;
-            }
-        }
-    }
-    return ret;
 
-}
 void test_dgemm(  ) 
 {
-    int    i, j, p, nx;
+    int    i, j, p;
     double *A, *B, *C, *C_ref;
     double alpha, beta;
-    double tmp, error, flops;
+    double flops;
     double ref_beg, ref_time, bl_dgemm_beg, bl_dgemm_time;
     int    nrepeats;
     int m,n,k;
@@ -83,15 +58,15 @@ void test_dgemm(  )
     k = 6;
     n = 4;
 
-    A    = (double*)malloc( sizeof(double) * m * k );
-    B    = (double*)malloc( sizeof(double) * k * n );
+    A    = new double[m * k];
+    B    = new double[k * n];
 
     lda = m;
     ldb = k;
     ldc     = m;
     ldc_ref = m;
-    C     = bl_malloc_aligned( ldc, n + 4, sizeof(double) );
-    C_ref = (double*)malloc( sizeof(double) * m * n );
+    C    = new double[ldc * n];
+    C_ref= new double[m * n];
 
     nrepeats = 3;
 
@@ -122,24 +97,22 @@ void test_dgemm(  )
 #endif
     for ( i = 0; i < nrepeats; i ++ ) {
         bl_dgemm_beg = bl_clock();
-        {
-		blis::gemm(
-		    CblasColMajor,
-		    CblasNoTrans,
-		    CblasNoTrans,
-                    m,
-                    n,
-                    k,
-		    alpha,
-                    A,
-                    lda,
-                    B,
-                    ldb,
-		    beta,
-                    C,
-                    ldc
-                    );
-        }
+	blis::gemm(
+	    CblasColMajor,
+	    CblasNoTrans,
+	    CblasNoTrans,
+            m,
+            n,
+            k,
+	    alpha,
+            A,
+            lda,
+            B,
+            ldb,
+	    beta,
+            C,
+            ldc
+            );
         bl_dgemm_time = bl_clock() - bl_dgemm_beg;
 
         if ( i == 0 ) {
@@ -154,24 +127,21 @@ void test_dgemm(  )
 #endif
     for ( i = 0; i < nrepeats; i ++ ) {
         ref_beg = bl_clock();
-        {
-		cblas_dgemm(
-		    CblasColMajor,
-		    CblasNoTrans,
-		    CblasNoTrans,
-                    m,
-                    n,
-                    k,
-		    alpha,
-                    A,
-                    lda,
-                    B,
-                    ldb,
-		    beta,
-                    C_ref,
-                    ldc_ref
-                    );
-        }
+	cblas_dgemm(
+	    CblasColMajor,
+	    CblasNoTrans,
+	    CblasNoTrans,
+            m,
+            n,
+            k,
+	    alpha,
+            A,
+            lda,
+            B,
+            ldb,
+	    beta,
+            C_ref,
+            ldc_ref);
         ref_time = bl_clock() - ref_beg;
 
         if ( i == 0 ) {
@@ -201,11 +171,144 @@ void test_dgemm(  )
     free( C     );
     free( C_ref );
 }
+void test_zgemm(  )
+{
+    int    i, j, p;
+    std::complex<double> *A, *B, *C, *C_ref;
+    std::complex<double> alpha, beta;
+    double flops;
+    double ref_beg, ref_time, bl_dgemm_beg, bl_dgemm_time;
+    int    nrepeats;
+    int m,n,k;
+    int    lda, ldb, ldc, ldc_ref;
+    double ref_rectime, bl_dgemm_rectime;
+
+    alpha = 1.0;
+    beta = 0.0;
+    m = 5;
+    k = 6;
+    n = 4;
+
+    A    = new complex<double>[m * k];
+    B    = new complex<double>[k * n];
+
+    lda = m;
+    ldb = k;
+    ldc     = m;
+    ldc_ref = m;
+    C    = new complex<double>[ldc * n];
+    C_ref= new complex<double>[m * n];
+    nrepeats = 3;
+
+    srand48 (time(NULL));
+
+    // Randonly generate points in [ 0, 1 ].
+    for ( p = 0; p < k; p ++ ) {
+        for ( i = 0; i < m; i ++ ) {
+            A( i, p ) = (complex<double>)( drand48() );
+        }
+    }
+    for ( j = 0; j < n; j ++ ) {
+        for ( p = 0; p < k; p ++ ) {
+            B( p, j ) = (complex<double>)( drand48() );
+        }
+    }
+
+    for ( j = 0; j < n; j ++ ) {
+        for ( i = 0; i < m; i ++ ) {
+            C_ref( i, j ) = (complex<double>)( 0.0 );
+                C( i, j ) = (complex<double>)( 0.0 );
+        }
+    }
+#ifdef PRINT
+    bl_dgemm_printmatrix(A, lda ,m,k);
+    bl_dgemm_printmatrix(B, ldb ,k,n);
+    bl_dgemm_printmatrix(C, ldc ,m,n);
+#endif
+    for ( i = 0; i < nrepeats; i ++ ) {
+        bl_dgemm_beg = bl_clock();
+        blis::gemm(
+            CblasColMajor,
+            CblasNoTrans,
+            CblasNoTrans,
+            m,
+            n,
+            k,
+            alpha,
+            A,
+            lda,
+            B,
+            ldb,
+            beta,
+            C,
+            ldc
+            );
+
+        bl_dgemm_time = bl_clock() - bl_dgemm_beg;
+
+           
+	if ( i == 0 ) {
+            bl_dgemm_rectime = bl_dgemm_time;
+        } else {
+            bl_dgemm_rectime = bl_dgemm_time < bl_dgemm_rectime ? bl_dgemm_time : bl_dgemm_rectime;
+        }
+    }
+
+#ifdef PRINT
+    bl_dgemm_printmatrix(C, ldc ,m,n);
+#endif
+    for ( i = 0; i < nrepeats; i ++ ) {
+        ref_beg = bl_clock();
+        cblas_zgemm(
+            CblasColMajor,
+            CblasNoTrans,
+            CblasNoTrans,
+            m,
+            n,
+            k,
+            &alpha,
+            A,
+            lda,
+            B,
+            ldb,
+            &beta,
+            C_ref,
+            ldc_ref);
+        ref_time = bl_clock() - ref_beg;
+
+        if ( i == 0 ) {
+            ref_rectime = ref_time;
+        } else {
+            ref_rectime = ref_time < ref_rectime ? ref_time : ref_rectime;
+        }
+    }
+
+#ifdef PRINT
+    bl_dgemm_printmatrix(C_ref, ldc_ref ,m,n);
+#endif
+    if(computeError(ldc, ldc_ref, m, n, C, C_ref )==1)
+            printf("%s TEST FAIL\n" ,__func__);
+    else
+            printf("%s TEST PASS\n" , __func__);
+
+
+    // Compute overall floating point operations.
+    flops = ( m * n / ( 1000.0 * 1000.0 * 1000.0 ) ) * ( 2 * k );
+
+    printf( "%5d\t %5d\t %5d\t %5.2lf\t %5.2lf\n",
+            m, n, k, flops / bl_dgemm_rectime, flops / ref_rectime );
+
+    free( A     );
+    free( B     );
+    free( C     );
+    free( C_ref );
+}
 
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
     test_dgemm( );
+    test_zgemm( );
     return 0;
 
 }

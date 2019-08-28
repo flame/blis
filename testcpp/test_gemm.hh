@@ -52,38 +52,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Determine the target operating system
-#if defined(_WIN32) || defined(__CYGWIN__)
-#define BL_OS_WINDOWS 1
-#elif defined(__APPLE__) || defined(__MACH__)
-#define BL_OS_OSX 1
-#elif defined(__ANDROID__)
-#define BL_OS_ANDROID 1
-#elif defined(__linux__)
-#define BL_OS_LINUX 1
-#elif defined(__bgq__)
-#define BL_OS_BGQ 1
-#elif defined(__bg__)
-#define BL_OS_BGP 1
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
-      defined(__bsdi__) || defined(__DragonFly__)
-#define BL_OS_BSD 1
-#else
-#error "Cannot determine operating system"
-#endif
 
-// gettimeofday() needs this.
-#if BL_OS_WINDOWS
-  #include <time.h>
-#elif BL_OS_OSX
-  #include <mach/mach_time.h>
-#else
   #include <sys/time.h>
   #include <time.h>
-#endif
 
-//#include "bl_config.h"
-
+using namespace std;
 #define min( i, j ) ( (i)<(j) ? (i): (j) )
 
 #define A( i, j )     A[ (j)*lda + (i) ]
@@ -91,40 +64,44 @@
 #define C( i, j )     C[ (j)*ldc + (i) ]
 #define C_ref( i, j ) C_ref[ (j)*ldc_ref + (i) ]
 #define GEMM_SIMD_ALIGN_SIZE 32
-struct aux_s {
-    double *b_next;
-    float  *b_next_s;
-    int    ldr;
-    char   *flag;
-    int    pc;
-    int    m;
-    int    n;
-};
-typedef struct aux_s aux_t;
 
-void bl_dgemm(
+template< typename T >
+int computeError(
+        int    ldc,
+        int    ldc_ref,
         int    m,
         int    n,
-        int    k,
-        double *A,
-        int    lda,
-        double *B,
-        int    ldb,
-        double *C,
-        int    ldc
-        );
+        T *C,
+        T *C_ref
+        )
+{
+    int    i, j;
+    int ret = 0;
+    for ( i = 0; i < m; i ++ ) {
+        for ( j = 0; j < n; j ++ ) {
+            if (  C( i, j ) != C_ref( i, j ) ) {
+                printf( "C[ %d ][ %d ] != C_ref, %E, %E\n", i, j, C( i, j ), C_ref( i, j ) );
+                ret = 1;
+                break;
+            }
+        }
+    }
+    return ret;
+
+}
 
 /*
  *
  *
  */ 
-double *bl_malloc_aligned(
+template <typename T>
+T *bl_malloc_aligned(
         int    m,
         int    n,
         int    size
         )
 {
-    double *ptr;
+    T *ptr;
     int    err;
 
     err = posix_memalign( (void**)&ptr, (size_t)GEMM_SIMD_ALIGN_SIZE, size * m * n );
@@ -143,8 +120,9 @@ double *bl_malloc_aligned(
  *
  *
  */
+template <typename T>
 void bl_dgemm_printmatrix(
-        double *A,
+        T *A,
         int    lda,
         int    m,
         int    n
@@ -153,7 +131,7 @@ void bl_dgemm_printmatrix(
     int    i, j;
     for ( i = 0; i < m; i ++ ) {
         for ( j = 0; j < n; j ++ ) {
-            printf("%lf\t", A[j * lda + i]);
+		cout<< A[j * lda + i]<<" ";
         }
         printf("\n");
     }
