@@ -3,6 +3,8 @@
 * **[Contents](Performance.md#contents)**
 * **[Introduction](Performance.md#introduction)**
 * **[General information](Performance.md#general-information)**
+* **[Interpretation](Performance.md#interpretation)**
+* **[Reproduction](Performance.md#reproduction)**
 * **[Level-3 performance](Performance.md#level-3-performance)**
   * **[ThunderX2](Performance.md#thunderx2)**
     * **[Experiment details](Performance.md#thunderx2-experiment-details)**
@@ -110,6 +112,29 @@ When corresponding with us, via email or when opening an
 you specify as closely as possible (though a range is fine) your problem
 size of interest so that we can better assist you.
 
+# Reproduction
+
+In general, we do not offer any step-by-step guide for how to reproduce the
+performance graphs shown below.
+
+That said, if you are keenly interested in running your own performance
+benchmarks, either in an attempt to reproduce the results shown here or to
+measure performance of different hardware, of different implementations (or
+versions), and/or for different problem sizes, you should begin by studying
+the source code, `Makefile`, and scripts in
+the [test/3](https://github.com/flame/blis/tree/master/test/3) directory
+of the BLIS source distribution. Then, you'll need to take time to build
+and/or install some (or all) of the implementations shown (e.g.
+[OpenBLAS](https://github.com/xianyi/OpenBLAS),
+[MKL](https://software.intel.com/en-us/mkl/), and
+[Eigen](http://eigen.tuxfamily.org), including BLIS. Be sure to consult
+the detailed notes provided below; they should be *very* helpful in successfully
+building the libraries. The `runme.sh` script in `test/3` will help you run
+some (or all) of the test drivers produced by the `Makefile`, and the
+Matlab/Octave function `plot_panel_4x5()` defined in the `matlab` directory
+will help you turn the output of those test drivers into a PDF file of graphs.
+The `runthese.m` file will contain example invocations of the function.
+
 # Level-3 performance
 
 ## ThunderX2
@@ -129,7 +154,6 @@ size of interest so that we can better assist you.
 * Operating system: Ubuntu 16.04 (Linux kernel 4.15.0)
 * Page size: unknown
 * Compiler: gcc 7.3.0
-* Driver source code directory: `test/3`
 * Results gathered: 14 February 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
@@ -191,7 +215,6 @@ size of interest so that we can better assist you.
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Page size: 4096 bytes
 * Compiler: gcc 7.3.0
-* Driver source code directory: `test/3`
 * Results gathered: 6 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)
@@ -272,7 +295,6 @@ size of interest so that we can better assist you.
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Page size: 4096 bytes
 * Compiler: gcc 6.3.0
-* Driver source code directory: `test/3`
 * Results gathered: 25-26 February 2019, 27 March 2019
 * Implementations tested:
   * BLIS 075143df (0.5.1-39)
@@ -351,7 +373,6 @@ size of interest so that we can better assist you.
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Page size: 4096 bytes
 * Compiler: gcc 7.3.0
-* Driver source code directory: `test/3`
 * Results gathered: 6 March 2019, 19 March 2019, 27 March 2019
 * Implementations tested:
   * BLIS 9f1dbe5 (0.5.1-54)

@@ -3,6 +3,8 @@
 * **[Contents](PerformanceSmall.md#contents)**
 * **[Introduction](PerformanceSmall.md#introduction)**
 * **[General information](PerformanceSmall.md#general-information)**
+* **[Interpretation](PerformanceSmall.md#interpretation)**
+* **[Reproduction](PerformanceSmall.md#reproduction)**
 * **[Level-3 performance](PerformanceSmall.md#level-3-performance)**
   * **[Kaby Lake](PerformanceSmall.md#kaby-lake)**
     * **[Experiment details](PerformanceSmall.md#kaby-lake-experiment-details)**
@@ -22,7 +24,7 @@ on small matrices with BLIS and BLAS for select hardware architectures.
 
 # General information
 
-Generally speaking, for level-3 operations on small matrices, we publish 
+Generally speaking, for level-3 operations on small matrices, we publish
 two "panels" for each type of hardware, one that reflects performance on
 row-stored matrices and another for column-stored matrices.
 Each panel will consist of a 4x7 grid of graphs, with each row representing
@@ -98,6 +100,31 @@ When corresponding with us, via email or when opening an
 you specify as closely as possible (though a range is fine) your problem
 size of interest so that we can better assist you.
 
+# Reproduction
+
+In general, we do not offer any step-by-step guide for how to reproduce the
+performance graphs shown below.
+
+That said, if you are keenly interested in running your own performance
+benchmarks, either in an attempt to reproduce the results shown here or to
+measure performance of different hardware, of different implementations (or
+versions), and/or for different problem sizes, you should begin by studying
+the source code, `Makefile`, and scripts in
+the [test/sup](https://github.com/flame/blis/tree/master/test/sup) directory
+of the BLIS source distribution. Then, you'll need to take time to build
+and/or install some (or all) of the implementations shown (e.g.
+[OpenBLAS](https://github.com/xianyi/OpenBLAS),
+[MKL](https://software.intel.com/en-us/mkl/),
+[Eigen](http://eigen.tuxfamily.org),
+[BLASFEO](https://github.com/giaf/blasfeo), and
+[libxsmm](https://github.com/hfp/libxsmm)), including BLIS. Be sure to consult
+the detailed notes provided below; they should be *very* helpful in successfully
+building the libraries. The `runme.sh` script in `test/sup` will help you run
+some (or all) of the test drivers produced by the `Makefile`, and the
+Matlab/Octave function `plot_panel_trxsh()` defined in the `octave` directory
+will help you turn the output of those test drivers into a PDF file of graphs.
+The `runthese.m` file will contain example invocations of the function.
+
 # Level-3 performance
 
 ## Kaby Lake
@@ -116,7 +143,6 @@ size of interest so that we can better assist you.
 * Operating system: Gentoo Linux (Linux kernel 5.2.4)
 * Page size: 4096 bytes
 * Compiler: gcc 8.3.0
-* Driver source code directory: `test/sup`
 * Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
@@ -186,7 +212,6 @@ size of interest so that we can better assist you.
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Page size: 4096 bytes
 * Compiler: gcc 7.3.0
-* Driver source code directory: `test/sup`
 * Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
@@ -254,7 +279,6 @@ size of interest so that we can better assist you.
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Page size: 4096 bytes
 * Compiler: gcc 7.4.0
-* Driver source code directory: `test/sup`
 * Results gathered: 23-28 August 2019
 * Implementations tested:
   * BLIS 4a0a6e8 (0.6.0-28)
