@@ -311,7 +311,7 @@ GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
 
 #undef  GENTFUNCR
-#ifdef FE_OVERFLOW
+#if defined(FE_OVERFLOW) && !defined(__APPLE__)
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
 void PASTEMAC(ch,varname) \
