@@ -311,6 +311,13 @@ GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
 
 #undef  GENTFUNCR
+// We've disabled the dotv-based implementation because that method of
+// computing the sum of the squares of x inherently does not check for
+// overflow. Instead, we use the fallback method based on sumsqv, which
+// takes care to not overflow unnecessarily (ie: takes care for the
+// sqrt( sum of the squares of x ) to not overflow if the sum of the
+// squares of x would normally overflow. See GitHub issue #332 for
+// discussion.
 #if 0 //defined(FE_OVERFLOW) && !defined(__APPLE__)
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
