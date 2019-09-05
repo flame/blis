@@ -52,10 +52,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-  #include <sys/time.h>
-  #include <time.h>
-
 using namespace std;
 #define min( i, j ) ( (i)<(j) ? (i): (j) )
 
@@ -63,7 +59,6 @@ using namespace std;
 #define B( i, j )     B[ (j)*ldb + (i) ]
 #define C( i, j )     C[ (j)*ldc + (i) ]
 #define C_ref( i, j ) C_ref[ (j)*ldc_ref + (i) ]
-#define GEMM_SIMD_ALIGN_SIZE 32
 
 template< typename T >
 int computeError(
@@ -93,32 +88,6 @@ int computeError(
 /*
  *
  *
- */ 
-template <typename T>
-T *bl_malloc_aligned(
-        int    m,
-        int    n,
-        int    size
-        )
-{
-    T *ptr;
-    int    err;
-
-    err = posix_memalign( (void**)&ptr, (size_t)GEMM_SIMD_ALIGN_SIZE, size * m * n );
-
-    if ( err ) {
-        printf( "bl_malloc_aligned(): posix_memalign() failures" );
-        exit( 1 );    
-    }
-
-    return ptr;
-}
-
-
-
-/*
- *
- *
  */
 template <typename T>
 void bl_dgemm_printmatrix(
@@ -136,34 +105,6 @@ void bl_dgemm_printmatrix(
         printf("\n");
     }
     printf("\n");
-}
-
-/*
- * The timer functions are copied directly from BLIS 0.2.0
- *
- */
-static double gtod_ref_time_sec = 0.0;
-double bl_clock_helper()
-{
-    double the_time, norm_sec;
-    struct timespec ts;
-
-    clock_gettime( CLOCK_MONOTONIC, &ts );
-
-    if ( gtod_ref_time_sec == 0.0 )
-        gtod_ref_time_sec = ( double ) ts.tv_sec;
-
-    norm_sec = ( double ) ts.tv_sec - gtod_ref_time_sec;
-
-    the_time = norm_sec + ts.tv_nsec * 1.0e-9;
-
-    return the_time;
-}
-
-
-double bl_clock( void )
-{
-	return bl_clock_helper();
 }
 
 #endif

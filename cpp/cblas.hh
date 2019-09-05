@@ -182,6 +182,22 @@ cblas_scal(
     cblas_zscal( n, &alpha, x, incx );
 }
 
+inline void
+cblas_scal(
+    int n, float alpha,
+    std::complex<float>* x, int incx )
+{
+    cblas_csscal( n, alpha, x, incx );
+}
+
+inline void
+cblas_scal(
+    int n, double alpha,
+    std::complex<double>* x, int incx )
+{
+    cblas_zdscal( n, alpha, x, incx );
+}
+
 // -----------------------------------------------------------------------------
 inline void
 cblas_copy(

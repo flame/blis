@@ -46,7 +46,7 @@
 #
 
 .PHONY: all \
-        blis openblas atlas mkl \
+        blis \
         clean cleanx
 
 
@@ -94,36 +94,6 @@ endif
 
 # BLAS library path(s). This is where the BLAS libraries reside.
 BLAS_LIB_PATH  := $(HOME)/flame/lib
-#MKL_LIB_PATH   := /opt/apps/intel/13/composer_xe_2013.2.146/mkl/lib/intel64
-#MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
-MKL_LIB_PATH   := ${MKLROOT}/lib/intel64
-#ESSL_LIB_PATH  := $(HOME)/path/to/essl/changeme
-
-# OpenBLAS
-OPENBLAS_LIB   := $(BLAS_LIB_PATH)/libopenblas.a
-
-# ATLAS
-ATLAS_LIB      := $(BLAS_LIB_PATH)/libf77blas.a \
-                  $(BLAS_LIB_PATH)/libatlas.a
-
-# MKL
-MKL_LIB        := -L$(MKL_LIB_PATH) \
-                  -lmkl_intel_lp64 \
-                  -lmkl_core \
-                  -lmkl_sequential \
-                  -lpthread -lm -ldl
-
-# ESSL
-# Note: ESSL is named differently for SMP and/or BG
-ESSL_TYPE      :=       # This is the 32b library on POWER
-#ESSL_TYPE      := 6464  # This is the 64b library on POWER
-#ESSL_TYPE      := bg    # This is the 32b single-threaded library on Blue Gene
-#ESSL_TYPE      := smpbg # This is the 32b multi-threaded library on Blue Gene
-ESSL_LIB       := $(ESSL_LIB_PATH)/libessl$(ESSL_TYPE).a
-
-# Accelerate
-MAC_LIB        := -framework Accelerate
-
 
 
 #
@@ -168,122 +138,22 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 # Complete list of possible targets when defining 'all':
 #
-#   blis openblas atlas mkl mac essl
+#   blis 
 #
-#all: blis openblas atlas mkl
-all: blis openblas mkl
+#all: blis
+all: blis 
 
-blis: test_gemm_blis.x \
-	test_gemm1_blis.x
-
-openblas: \
-      test_dotv_openblas.x \
-      test_axpyv_openblas.x \
-      test_gemv_openblas.x \
-      test_ger_openblas.x \
-      test_hemv_openblas.x \
-      test_her_openblas.x \
-      test_her2_openblas.x \
-      test_trmv_openblas.x \
-      test_trsv_openblas.x \
-      \
-      test_gemm_openblas.x \
-      test_hemm_openblas.x \
-      test_herk_openblas.x \
-      test_her2k_openblas.x \
-      test_trmm_openblas.x \
-      test_trsm_openblas.x
-
-atlas: \
-      test_dotv_atlas.x \
-      test_axpyv_atlas.x \
-      test_gemv_atlas.x \
-      test_ger_atlas.x \
-      test_hemv_atlas.x \
-      test_her_atlas.x \
-      test_her2_atlas.x \
-      test_trmv_atlas.x \
-      test_trsv_atlas.x \
-      \
-      test_gemm_atlas.x \
-      test_hemm_atlas.x \
-      test_herk_atlas.x \
-      test_her2k_atlas.x \
-      test_trmm_atlas.x \
-      test_trsm_atlas.x
-
-mkl:  test_dotv_mkl.x \
-      test_axpyv_mkl.x \
-      test_gemv_mkl.x \
-      test_ger_mkl.x \
-      test_hemv_mkl.x \
-      test_her_mkl.x \
-      test_her2_mkl.x \
-      test_trmv_mkl.x \
-      test_trsv_mkl.x \
-      \
-      test_gemm_mkl.x \
-      test_hemm_mkl.x \
-      test_herk_mkl.x \
-      test_her2k_mkl.x \
-      test_trmm_mkl.x \
-      test_trsm_mkl.x
-
-essl: test_dotv_essl.x \
-      test_axpyv_essl.x \
-      test_gemv_essl.x \
-      test_ger_essl.x \
-      test_hemv_essl.x \
-      test_her_essl.x \
-      test_her2_essl.x \
-      test_trmv_essl.x \
-      test_trsv_essl.x \
-      \
-      test_gemm_essl.x \
-      test_hemm_essl.x \
-      test_herk_essl.x \
-      test_her2k_essl.x \
-      test_trmm_essl.x \
-      test_trsm_essl.x
-
-mac:  test_dotv_mac.x \
-      test_axpyv_mac.x \
-      test_gemv_mac.x \
-      test_ger_mac.x \
-      test_hemv_mac.x \
-      test_her_mac.x \
-      test_her2_mac.x \
-      test_trmv_mac.x \
-      test_trsv_mac.x \
-      \
-      test_gemm_mac.x \
-      test_hemm_mac.x \
-      test_herk_mac.x \
-      test_her2k_mac.x \
-      test_trmm_mac.x \
-      test_trsm_mac.x
-
+blis: test_trsm_blis.x \
+      test_symm_blis.x \
+      test_hemm_blis.x \
+      test_gemm1_blis.x \
+      test_gemm_blis.x
 
 
 # --Object file rules --
 
 $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
-
-test_%_openblas.o: test_%.c
-	$(CC) $(CFLAGS) -DBLAS=\"openblas\" -c $< -o $@
-
-test_%_atlas.o: test_%.c
-	$(CC) $(CFLAGS) -DBLAS=\"atlas\" -c $< -o $@
-
-test_%_mkl.o: test_%.c
-	$(CC) $(CFLAGS) -DBLAS=\"mkl\" -c $< -o $@
-
-test_%_essl.o: test_%.c
-	$(CC) $(CFLAGS) -DBLAS=\"essl\" -c $< -o $@
-
-test_%_mac.o: test_%.c
-	$(CC) $(CFLAGS) -DBLAS=\"mac\" -c $< -o $@
 
 test_%_blis.o: test_%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
@@ -296,24 +166,8 @@ test_%_blis.o: test_%.cc
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
 
-test_%_openblas.x: test_%_openblas.o $(LIBBLIS_LINK)
-	$(LINKER) $<             $(OPENBLAS_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_atlas.x: test_%_atlas.o $(LIBBLIS_LINK)
-	$(LINKER) $<             $(ATLAS_LIB)    $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_mkl.x: test_%_mkl.o $(LIBBLIS_LINK)
-	$(LINKER) $<             $(MKL_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_essl.x: test_%_essl.o $(LIBBLIS_LINK)
-	$(LINKER) $<             $(ESSL_LIB)     $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
-test_%_mac.x: test_%_mac.o $(LIBBLIS_LINK)
-	$(LINKER) $<             $(MAC_LIB)      $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
 test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
 	$(LINKER) $^       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
-
 
 # -- Clean rules --
 
