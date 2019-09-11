@@ -1,6 +1,7 @@
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
 [![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
 
 Contents
 --------
@@ -12,7 +13,7 @@ Contents
 * **[Key Features](#key-features)**
 * **[Getting Started](#getting-started)**
 * **[Documentation](#documentation)**
-* **[External GNU/Linux Packages](#external-gnulinux-packages)**
+* **[External Packages](#external-packages)**
 * **[Discussion](#discussion)**
 * **[Contributing](#contributing)**
 * **[Citations](#citations)**
@@ -395,8 +396,8 @@ please read this thorough walkthrough of the configuration system.
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
 
-External GNU/Linux packages
----------------------------
+External packages
+-----------------
 
 Generally speaking, we **highly recommend** building from source whenever
 possible using the latest `git` clone. (Tarballs of each
@@ -431,6 +432,9 @@ the source rpms may build for others.
 
  * **GNU Guix**. Guix has BLIS packages, provides builds only for the generic
 target and some specific x86_64 micro-architectures.
+
+ * **Conda**. conda channel [conda-forge](https://github.com/conda-forge/blis-feedstock)
+has Linux, OSX and Windows binary packages for x86_64.
 
 Discussion
 ----------
