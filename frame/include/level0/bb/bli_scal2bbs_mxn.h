@@ -155,7 +155,7 @@ static void PASTEMAC(ch,opname) \
 				                        *chiij_r, *chiij_i, \
 				                        *psiij_r, *psiij_i ); \
 \
-				for ( dim_t p = 1; i < d; ++p ) \
+				for ( dim_t p = 1; p < d; ++p ) \
 				{ \
 					ctype_r* restrict psiijd_r = psiij_r + p*ds_y; \
 					ctype_r* restrict psiijd_i = psiij_i + p*ds_y; \
@@ -186,7 +186,7 @@ static void PASTEMAC(ch,opname) \
 				                       *chiij_r, *chiij_i, \
 				                       *psiij_r, *psiij_i ); \
 \
-				for ( dim_t p = 1; i < d; ++p ) \
+				for ( dim_t p = 1; p < d; ++p ) \
 				{ \
 					ctype_r* restrict psiijd_r = psiij_r + p*ds_y; \
 					ctype_r* restrict psiijd_i = psiij_i + p*ds_y; \
