@@ -389,6 +389,7 @@ pool_t* bli_apool_array_elem
 		const siz_t num_blocks     = 1;
 		const siz_t block_ptrs_len = 25;
 		const siz_t align_size     = 16;
+		const siz_t offset_size    = 0;
 		malloc_ft   malloc_fp      = BLIS_MALLOC_POOL;
 		free_ft     free_fp        = BLIS_FREE_POOL;
 
@@ -425,6 +426,7 @@ pool_t* bli_apool_array_elem
 		  block_ptrs_len,
 		  block_size,
 		  align_size,
+		  offset_size,
 		  malloc_fp,
 		  free_fp,
 		  pool

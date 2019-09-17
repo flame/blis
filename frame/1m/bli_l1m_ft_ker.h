@@ -86,6 +86,7 @@ INSERT_GENTDEF( packm )
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \

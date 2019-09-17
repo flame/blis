@@ -108,9 +108,9 @@ void bli_gemm_front
 	// schemas, as are contexts for 1m, and if necessary bli_gemm_md() would
 	// have made a copy and modified the schemas, so reading them from the
 	// context should be a safe bet at this point.) This is a sort of hack for
-	// communicating the desired pack schemas for to bli_gemm_cntl_create()
-	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
-	// us to subsequently access the schemas from the control tree, which
+	// communicating the desired pack schemas to bli_gemm_cntl_create() (via
+	// bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows us
+	// to subsequently access the schemas from the control tree, which
 	// hopefully reduces some confusion, particularly in bli_packm_init().
 	const pack_t schema_a = bli_cntx_schema_a_block( cntx );
 	const pack_t schema_b = bli_cntx_schema_b_panel( cntx );
