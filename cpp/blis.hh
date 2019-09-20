@@ -366,7 +366,7 @@ void axpy(
     cblas_axpy( n, alpha, x, incx, y, incy );
 }
 
-/*! \brief Performs forms the dot product of two vectors for arbitrary data types 
+/*! \brief Performs the dot product of two vectors for arbitrary data types 
 
   \b Purpose:	
 
@@ -400,16 +400,19 @@ void axpy(
   \return Unconjugated dot product, x^T * y.
   REAL/DOUBLE PRECISION 
   */
-template< typename TX, typename TY >
-TY dot(
+template< typename T, typename TR >
+TR dot(
     int64_t n,
-    TX const *x, int64_t incx,
-    TX const *y, int64_t incy )
+    T const *x, int64_t incx,
+    T const *y, int64_t incy )
 {
-    return cblas_dot( n, x, incx, y, incy );
+    if((std::is_same<T, float>::value)&(std::is_same<T, double>::value))
+	    return cblas_dsdot( n, x, incx, y, incy );
+    else
+	    return cblas_dot( n, x, incx, y, incy );
 }
 
-/*! \brief Performs forms the dot product of two complex vectors 
+/*! \brief Performs the dot product of two complex vectors 
 
   \b Purpose:	
 
@@ -451,7 +454,7 @@ T dotu(
     return cblas_dotu( n, x, incx, y, incy );
 }
 
-/*! \brief Performs forms the dot product of two complex vectors 
+/*! \brief Performs the dot product of two complex vectors 
 
   \b Purpose:	
 
@@ -2982,7 +2985,7 @@ void gemm(
     cblas_gemm(layout, transA, transB, m, n, k, alpha, A,lda, B, ldb, beta, C, ldc);
 }
 
-/*! \brief Solve the triangular matrix-vector equation for arbitrary data types 
+/*! \brief Solve the triangular matrix-matrix equation for arbitrary data types 
 
   \b Purpose:	
 

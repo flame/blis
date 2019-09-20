@@ -290,16 +290,6 @@ cblas_dot(
 {
     return cblas_ddot( n, x, incx, y, incy );
 }
-#if 0
-inline double
-cblas_dot(
-    int n,
-    float const *x, int incx,
-    float const *y, int incy )
-{
-    return cblas_dsdot( n, x, incx, y, incy );
-}
-#endif
 // -----------------------------------------------------------------------------
 inline std::complex<float>
 cblas_dotu(
