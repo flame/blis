@@ -63,7 +63,7 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv8-a+fp+simd -mcpu=cortex-a53
+CKVECFLAGS     := -mcpu=cortex-a53
 else
 $(error gcc is required for this configuration.)
 endif
