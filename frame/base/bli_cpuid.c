@@ -1143,4 +1143,67 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 	return r_val;
 }
 
+#elif __PPC64__
+// NB POWER7 isn't actually used.  (ppc64le Linux is only supported on
+// POWER8+.  Is BLIS is supposed to support big-endian?)
+
+#include <sys/auxv.h>
+
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = 0;			// Not used
+	*features = 0;			// Not used
+
+#if 0
+// The easy GCC (and recent clang?) version
+#  if __GNUC__ >= 6
+	if ( __builtin_cpu_is( "power9" ) )
+		*part = BLIS_ARCH_POWER9;
+	else
+#  endif
+		if ( __builtin_cpu_is( "power8" ) )
+		*part = BLIS_ARCH_POWER8;
+	else if ( __builtin_cpu_is( "power7" ) )
+		*part = BLIS_ARCH_POWER7;
+	else
+		*part = BLIS_ARCH_GENERIC;
+#else
+// See https://developer.ibm.com/tutorials/optimized-libraries-for-linux-on-power/
+	char * platform = NULL;
+
+	platform = (char*) getauxval (AT_PLATFORM);
+	if ( strcmp( platform, "power8" ) == 0 )
+		*part = BLIS_ARCH_POWER8;
+	else if ( strcmp( platform, "power9" ) == 0 )
+		*part = BLIS_ARCH_POWER9;
+	else if ( strcmp( platform, "power7" ) == 0 )
+		*part = BLIS_ARCH_POWER7;
+	else
+		*part = BLIS_ARCH_GENERIC;
+#endif
+	return 0;
+}
+
+arch_t bli_cpuid_query_id( void )
+{
+	uint32_t vendor, model, part, features;
+
+	vendor = bli_cpuid_query( &model, &part, &features );
+
+// NB.  Must use #ifdef, not #if (for configure)
+#ifdef BLIS_CONFIG_POWER8
+	if ( part == BLIS_ARCH_POWER8 )
+		return BLIS_ARCH_POWER8;
+#endif
+#ifdef BLIS_CONFIG_POWER9
+	if ( part == BLIS_ARCH_POWER9 )
+		return BLIS_ARCH_POWER9;
+#endif
+	return BLIS_ARCH_GENERIC;
+}
 #endif

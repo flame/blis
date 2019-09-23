@@ -12,6 +12,7 @@ x86_64:      intel64 amd64
 intel64:     skx knl haswell sandybridge penryn generic
 amd64:       zen excavator steamroller piledriver bulldozer generic
 arm64:       thunderx2 cortexa57 cortexa53 generic
+power:       power9 power8 generic
 #arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
@@ -37,6 +38,7 @@ cortexa9:    cortexa9/armv7a
 
 # IBM architectures.
 power9:	     power9/generic
+power8:	     power8/generic
 bgq:         bgq
 
 # Generic architectures.
