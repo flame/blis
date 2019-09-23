@@ -1017,6 +1017,87 @@ uint32_t bli_cpuid_query
 
 #elif defined(__arm__) || defined(_M_ARM)
 
+/* 
+   I can't easily find documentation to do this as for aarch64, though
+   it presumably could be unearthed from Linux code.  However, on
+   Linux 5.2 (and Androids's 3.4), /proc/cpuinfo has this sort of
+   thing, as partially used below:
+
+   CPU implementer	: 0x41
+   CPU architecture: 7
+   CPU variant	: 0x3
+   CPU part	: 0xc09
+
+   The complication for family selection is that Neon is optional for
+   CoertexA9, for instance.
+
+   arch/arm/include/asm/cputype.h has:
+
+   ARM_CPU_IMP_ARM			0x41
+   ARM_CPU_IMP_BRCM		0x42
+   ARM_CPU_IMP_DEC			0x44
+   ARM_CPU_IMP_INTEL		0x69
+
+   ARM implemented processors 
+   ARM_CPU_PART_ARM1136		0x4100b360
+   ARM_CPU_PART_ARM1156		0x4100b560
+   ARM_CPU_PART_ARM1176		0x4100b760
+   ARM_CPU_PART_ARM11MPCORE	0x4100b020
+   ARM_CPU_PART_CORTEX_A8		0x4100c080
+   ARM_CPU_PART_CORTEX_A9		0x4100c090
+   ARM_CPU_PART_CORTEX_A5		0x4100c050
+   ARM_CPU_PART_CORTEX_A7		0x4100c070
+   ARM_CPU_PART_CORTEX_A12		0x4100c0d0
+   ARM_CPU_PART_CORTEX_A17		0x4100c0e0
+   ARM_CPU_PART_CORTEX_A15		0x4100c0f0
+   ARM_CPU_PART_CORTEX_A53		0x4100d030
+   ARM_CPU_PART_CORTEX_A57		0x4100d070
+   ARM_CPU_PART_CORTEX_A72		0x4100d080
+   ARM_CPU_PART_CORTEX_A73		0x4100d090
+   ARM_CPU_PART_CORTEX_A75		0x4100d0a0
+   ARM_CPU_PART_MASK		0xff00fff0
+
+   Broadcom implemented processors 
+   ARM_CPU_PART_BRAHMA_B15		0x420000f0
+   ARM_CPU_PART_BRAHMA_B53		0x42001000
+
+   DEC implemented cores 
+   ARM_CPU_PART_SA1100		0x4400a110
+
+   Intel implemented cores 
+   ARM_CPU_PART_SA1110		0x6900b110
+   ARM_CPU_REV_SA1110_A0		0
+   ARM_CPU_REV_SA1110_B0		4
+   ARM_CPU_REV_SA1110_B1		5
+   ARM_CPU_REV_SA1110_B2		6
+   ARM_CPU_REV_SA1110_B4		8
+
+   ARM_CPU_XSCALE_ARCH_MASK	0xe000
+   ARM_CPU_XSCALE_ARCH_V1		0x2000
+   ARM_CPU_XSCALE_ARCH_V2		0x4000
+   ARM_CPU_XSCALE_ARCH_V3		0x6000
+
+   Qualcomm implemented cores
+   ARM_CPU_PART_SCORPION		0x510002d0
+
+   The list must be pretty incomplete.  A phone example in Android:
+   "Qualcomm MSM 8974 HAMMERHEAD" (AKA Snapdragon 800):
+   implementor: 0x51; variant: 0x2;  part: 0x06f
+
+   ----
+
+   It looks as if you should be able to do something similar to POWER
+   (below), instead of reading /proc, like:
+
+   #include <sys/auxv.h>
+   #include <linux/auxvec.h>  // for AT_PLATFORM
+   char * platform = NULL;
+   platform = (char*) getauxval (AT_PLATFORM);
+
+   but that just yields "v7l" on cortexa9.
+
+ */
+
 #define TEMP_BUFFER_SIZE 200
 
 uint32_t bli_cpuid_query
