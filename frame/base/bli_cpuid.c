@@ -1191,9 +1191,9 @@ uint32_t bli_cpuid_query
 
 arch_t bli_cpuid_query_id( void )
 {
-	uint32_t vendor, model, part, features;
+	uint32_t model, part, features;
 
-	vendor = bli_cpuid_query( &model, &part, &features );
+	(void) bli_cpuid_query( &model, &part, &features );
 
 // NB.  Must use #ifdef, not #if (for configure)
 #ifdef BLIS_CONFIG_POWER8
