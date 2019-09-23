@@ -57,7 +57,9 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -funroll-loops
+# Fixme: This should use -O3, but that breaks cpuid dispatch somehow,
+# and we end up executing power9 code on power8.
+COPTFLAGS      := -O2 -funroll-loops
 endif
 
 # Flags specific to optimized kernels.
@@ -71,7 +73,7 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -O3
 else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
