@@ -192,6 +192,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- IBM BG/Q --
 
+#ifdef BLIS_FAMILY_POWER
+#include "bli_family_power.h"
+#endif
 #ifdef BLIS_FAMILY_POWER9
 #include "bli_family_power9.h"
 #endif
