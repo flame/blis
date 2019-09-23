@@ -401,6 +401,10 @@ arch_t bli_cpuid_query_id( void )
 			if ( bli_cpuid_is_cortexa57( model, part, features ) )
 				return BLIS_ARCH_CORTEXA57;
 #endif
+#ifdef BLIS_CONFIG_CORTEXA53
+		if ( bli_cpuid_is_cortexa53( model, part, features ) )
+			return BLIS_ARCH_CORTEXA53;
+#endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
 			return BLIS_ARCH_GENERIC;
@@ -437,12 +441,7 @@ bool_t bli_cpuid_is_thunderx2
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_THUNDERX2;
 }
 
 bool_t bli_cpuid_is_cortexa57
@@ -452,12 +451,7 @@ bool_t bli_cpuid_is_cortexa57
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_CORTEXA57;
 }
 
 bool_t bli_cpuid_is_cortexa53
@@ -467,12 +461,7 @@ bool_t bli_cpuid_is_cortexa53
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_CORTEXA53;
 }
 
 bool_t bli_cpuid_is_cortexa15
@@ -909,7 +898,124 @@ int vpu_count( void )
 	}
 }
 
-#elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
+#elif defined(__aarch64__)
+
+// This is adapted from OpenBLAS.  See
+// https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
+// for the mechanism, but not the magic numbers.
+
+#include <asm/hwcap.h>
+#include <sys/auxv.h>
+
+#ifndef HWCAP_CPUID
+#define HWCAP_CPUID (1 << 11)
+#endif
+
+static uint32_t get_coretype(void) {
+	int implementer, part, midr_el1;
+
+	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
+		return 0;
+	}
+		// Also available from
+		// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+		// and split out in /proc/cpuinfo
+		__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
+	/*
+	 * MIDR_EL1
+	 *
+	 * 31		   24 23	 20 19			16 15		   4 3		  0
+	 * -----------------------------------------------------------------
+	 * | Implementer | Variant | Architecture | Part Number | Revision |
+	 * -----------------------------------------------------------------
+	 */
+	implementer = (midr_el1 >> 24) & 0xFF;
+	part		= (midr_el1 >> 4)  & 0xFFF;
+	// From Linux arch/arm64/include/asm/cputype.h
+	// ARM_CPU_IMP_ARM 0x41
+	// ARM_CPU_IMP_APM 0x50
+	// ARM_CPU_IMP_CAVIUM 0x43
+	// ARM_CPU_IMP_BRCM 0x42
+	// ARM_CPU_IMP_QCOM 0x51
+	// ARM_CPU_IMP_NVIDIA 0x4E
+	// ARM_CPU_IMP_FUJITSU 0x46
+	// ARM_CPU_IMP_HISI 0x48
+	//
+	// ARM_CPU_PART_AEM_V8 0xD0F
+	// ARM_CPU_PART_FOUNDATION 0xD00
+	// ARM_CPU_PART_CORTEX_A57 0xD07
+	// ARM_CPU_PART_CORTEX_A72 0xD08
+	// ARM_CPU_PART_CORTEX_A53 0xD03
+	// ARM_CPU_PART_CORTEX_A73 0xD09
+	// ARM_CPU_PART_CORTEX_A75 0xD0A
+	// ARM_CPU_PART_CORTEX_A35 0xD04
+	// ARM_CPU_PART_CORTEX_A55 0xD05
+	// ARM_CPU_PART_CORTEX_A76 0xD0B
+	// ARM_CPU_PART_NEOVERSE_N1 0xD0C
+	//
+	// APM_CPU_PART_POTENZA 0x000
+	//
+	// CAVIUM_CPU_PART_THUNDERX 0x0A1
+	// CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
+	// CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
+	// CAVIUM_CPU_PART_THUNDERX2 0x0AF
+	//
+	// BRCM_CPU_PART_VULCAN 0x516
+	//
+	// QCOM_CPU_PART_FALKOR_V1 0x800
+	// QCOM_CPU_PART_FALKOR 0xC00
+	// QCOM_CPU_PART_KRYO 0x200
+	//
+	// NVIDIA_CPU_PART_DENVER 0x003
+	// NVIDIA_CPU_PART_CARMEL 0x004
+	//
+	// FUJITSU_CPU_PART_A64FX 0x001
+	//
+	// HISI_CPU_PART_TSV110 0xD01
+	switch(implementer)
+	{
+		case 0x41:		// ARM
+			switch (part)
+			{
+				case 0xd07: // Cortex A57
+					return BLIS_ARCH_CORTEXA57;
+				case 0xd03: // Cortex A53
+					return BLIS_ARCH_CORTEXA53;
+			}
+			break;
+		case 0x42:		// Broadcom
+			switch (part)
+			{
+				case 0x516: // Vulcan
+					return BLIS_ARCH_THUNDERX2;
+			}
+			break;
+		case 0x43:		// Cavium
+			switch (part)
+			{
+				case 0x0af: // ThunderX2
+					return BLIS_ARCH_THUNDERX2;
+			}
+			break;
+	}
+	return BLIS_ARCH_CORTEXA57; // Fixme: Is this the best default?
+}
+
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = MODEL_ARMV8;
+	*part	  = get_coretype();
+	*features = 0;
+
+	return VENDOR_ARM;
+}
+
+#elif defined(__arm__) || defined(_M_ARM)
 
 #define TEMP_BUFFER_SIZE 200
 
