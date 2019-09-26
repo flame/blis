@@ -375,9 +375,6 @@ arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, model, part, features;
 
-	// Call the CPUID instruction and parse its results into a model id,
-	// part id, and a feature bit field. The return value encodes the
-	// vendor.
 	vendor = bli_cpuid_query( &model, &part, &features );
 
 #if 0
@@ -918,10 +915,10 @@ static uint32_t get_coretype(void) {
 	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
 		return 0;
 	}
-		// Also available from
-		// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
-		// and split out in /proc/cpuinfo
-		__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
+	// Also available from
+	// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+	// and split out in /proc/cpuinfo
+	__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
 	/*
 	 * MIDR_EL1
 	 *
