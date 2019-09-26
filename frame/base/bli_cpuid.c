@@ -1223,4 +1223,40 @@ arch_t bli_cpuid_query_id( void )
 #endif
 	return BLIS_ARCH_GENERIC;
 }
+
+#elif __s390x__	 /* gcc */ || __zarch__ /* clang */ || __SYSC_ZARCH__ /* Systems/C */
+/*
+Example cpuinfo (from Fedora build) in case there's no better way than
+reading it:
+
+CPU info:
+Architecture:        s390x
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Big Endian
+CPU(s):              2
+On-line CPU(s) list: 0,1
+Thread(s) per core:  1
+Core(s) per socket:  1
+Socket(s) per book:  1
+Book(s) per drawer:  1
+Drawer(s):           2
+NUMA node(s):        1
+Vendor ID:           IBM/S390
+Machine type:        2964
+CPU dynamic MHz:     5000
+CPU static MHz:      5000
+BogoMIPS:            3033.00
+Hypervisor:          z/VM 6.4.0
+Hypervisor vendor:   IBM
+Virtualization type: full
+Dispatching mode:    horizontal
+L1d cache:           128K
+L1i cache:           96K
+L2d cache:           2048K
+L2i cache:           2048K
+L3 cache:            65536K
+L4 cache:            491520K
+NUMA node0 CPU(s):   0,1
+Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx sie
+*/
 #endif
