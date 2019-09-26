@@ -900,6 +900,7 @@ int vpu_count( void )
 
 #elif defined(__aarch64__)
 
+#if __linux__
 // This is adapted from OpenBLAS.  See
 // https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
 // for the mechanism, but not the magic numbers.
@@ -1000,6 +1001,7 @@ static uint32_t get_coretype(void) {
 	}
 	return BLIS_ARCH_CORTEXA57; // Fixme: Is this the best default?
 }
+#endif
 
 uint32_t bli_cpuid_query
      (
@@ -1009,8 +1011,11 @@ uint32_t bli_cpuid_query
      )
 {
 	*model	  = MODEL_ARMV8;
-	*part	  = get_coretype();
+	*part     = 0;
 	*features = 0;
+#if __linux__
+	*part	  = get_coretype();
+#endif
 
 	return VENDOR_ARM;
 }
