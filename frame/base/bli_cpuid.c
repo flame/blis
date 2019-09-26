@@ -1143,10 +1143,26 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 	return r_val;
 }
 
-#elif __PPC64__
+// https://sourceforge.net/p/predef/wiki/Architectures/ lists macros
+#elif __PPC64__ /* gcc */ || __ppc64__ /* should be gcc, but failed */ || \
+      _ARCH_PPC64 /* xlc */
 // NB POWER7 isn't actually used.  (ppc64le Linux is only supported on
 // POWER8+.  Is BLIS is supposed to support big-endian?)
 
+#if !__linux__
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = 0;			// Not used
+	*features = 0;			// Not used
+	*part = BLIS_ARCH_GENERIC;
+	return 0;
+}
+#else
 #include <sys/auxv.h>
 
 uint32_t bli_cpuid_query
@@ -1188,6 +1204,7 @@ uint32_t bli_cpuid_query
 #endif
 	return 0;
 }
+#endif
 
 arch_t bli_cpuid_query_id( void )
 {
