@@ -144,10 +144,10 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 CINCFLAGS      := -I$(INC_PATH)
 
 # Use the CFLAGS for the configuration family.
-override CFLAGS         += $(call get-user-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
-override CFLAGS         += -I$(TEST_SRC_PATH)
+CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
 LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
@@ -165,7 +165,22 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: test_gemm_blis.x
+blis: test_dotv_blis.x \
+      test_axpyv_blis.x \
+      test_gemv_blis.x \
+      test_ger_blis.x \
+      test_hemv_blis.x \
+      test_her_blis.x \
+      test_her2_blis.x \
+      test_trmv_blis.x \
+      test_trsv_blis.x \
+      \
+      test_gemm_blis.x \
+      test_hemm_blis.x \
+      test_herk_blis.x \
+      test_her2k_blis.x \
+      test_trmm_blis.x \
+      test_trsm_blis.x	
 
 openblas: \
       test_dotv_openblas.x \

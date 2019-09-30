@@ -73,7 +73,7 @@ int main( int argc, char** argv )
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 100;
+	n_repeats = 10;
 
 #ifndef PRINT
 	p_begin = 200;
@@ -93,21 +93,12 @@ int main( int argc, char** argv )
 	n_input = 4;
 #endif
 
-#if 0
+#if 1
 //	dt = BLIS_FLOAT;
-//	dt = BLIS_DOUBLE;
+	dt = BLIS_DOUBLE;
 #else
 //	dt = BLIS_SCOMPLEX;
 //	dt = BLIS_DCOMPLEX;
-#endif
-#ifdef FLOAT
-        dt = BLIS_FLOAT;
-#elif defined DOUBLE
-        dt = BLIS_DOUBLE;
-#elif defined SCOMPLEX
-        dt = BLIS_SCOMPLEX;
-#elif defined DCOMPLEX
-        dt = BLIS_DCOMPLEX;
 #endif
 
 
@@ -215,7 +206,7 @@ int main( int argc, char** argv )
 			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
-#if BLIS
+#if 0 //def BLIS
 
 			bli_gemm( &alpha,
 			          &a,
