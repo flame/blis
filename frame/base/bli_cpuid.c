@@ -53,14 +53,70 @@
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
 #endif
+#include <string.h>
 
 // -----------------------------------------------------------------------------
+
+static arch_t bli_env_check(void)
+{
+	char *envval = getenv("BLIS_CORETYPE");
+	for (arch_t i = 0; i < BLIS_NUM_ARCHS; i++)
+	{
+		if ( envval && ( 0 == strcmp( envval, bli_arch_string (i) ) ) )
+			return i;
+	}
+	return -1;
+}
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, family, model, features;
+	arch_t envval = bli_env_check();
+
+// We need to check the environment first, though the structure of
+// this is awkward.
+#ifdef BLIS_CONFIG_SKX
+		if ( BLIS_ARCH_SKX == envval )
+			return BLIS_ARCH_SKX;
+#endif
+#ifdef BLIS_CONFIG_KNL
+		if ( BLIS_ARCH_KNL == envval )
+			return BLIS_ARCH_KNL;
+#endif
+#ifdef BLIS_CONFIG_HASWELL
+		if ( BLIS_ARCH_HASWELL == envval )
+			return BLIS_ARCH_HASWELL;
+#endif
+#ifdef BLIS_CONFIG_SANDYBRIDGE
+		if ( BLIS_ARCH_SANDYBRIDGE == envval )
+			return BLIS_ARCH_SANDYBRIDGE;
+#endif
+#ifdef BLIS_CONFIG_PENRYN
+		if ( BLIS_ARCH_PENRYN == envval )
+			return BLIS_ARCH_PENRYN;
+#endif
+#ifdef BLIS_CONFIG_ZEN
+		if ( BLIS_ARCH_ZEN == envval )
+			return BLIS_ARCH_ZEN;
+#endif
+#ifdef BLIS_CONFIG_EXCAVATOR
+		if ( BLIS_ARCH_EXCAVATOR == envval )
+			return BLIS_ARCH_EXCAVATOR;
+#endif
+#ifdef BLIS_CONFIG_STEAMROLLER
+		if ( BLIS_ARCH_STEAMROLLER == envval )
+			return BLIS_ARCH_STEAMROLLER;
+#endif
+#ifdef BLIS_CONFIG_PILEDRIVER
+		if ( BLIS_ARCH_PILEDRIVER == envval )
+			return BLIS_ARCH_PILEDRIVER;
+#endif
+#ifdef BLIS_CONFIG_BULLDOZER
+		if ( BLIS_ARCH_BULLDOZER == envval )
+			return BLIS_ARCH_BULLDOZER;
+#endif
 
 	// Call the CPUID instruction and parse its results into a family id,
 	// model id, and a feature bit field. The return value encodes the
@@ -374,6 +430,28 @@ bool_t bli_cpuid_is_bulldozer
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, model, part, features;
+	arch_t envval = bli_env_check();
+
+#ifdef BLIS_CONFIG_THUNDERX2
+			if ( BLIS_ARCH_THUNDERX2 == envval )
+				return BLIS_ARCH_THUNDERX2;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA57
+			if ( BLIS_ARCH_CORTEXA57 == envval )
+				return BLIS_ARCH_CORTEXA57;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA53
+		if ( BLIS_ARCH_CORTEXA53 == envval )
+			return BLIS_ARCH_CORTEXA53;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA15
+			if ( BLIS_ARCH_CORTEXA15 == envval )
+				return BLIS_ARCH_CORTEXA15;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA9
+			if ( BLIS_ARCH_CORTEXA9 == envval )
+				return BLIS_ARCH_CORTEXA9;
+#endif
 
 	// Call the CPUID instruction and parse its results into a model id,
 	// part id, and a feature bit field. The return value encodes the
@@ -1209,17 +1287,27 @@ uint32_t bli_cpuid_query
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t model, part, features;
+	arch_t envval = bli_env_check();
+
+#ifdef BLIS_CONFIG_POWER9
+	if ( BLIS_CONFIG_POWER9 == envval )
+		return BLIS_CONFIG_POWER9;
+#endif
+#ifdef BLIS_CONFIG_POWER8
+	if ( BLIS_CONFIG_POWER8 == envval )
+		return BLIS_CONFIG_POWER8;
+#endif
 
 	(void) bli_cpuid_query( &model, &part, &features );
 
 // NB.  Must use #ifdef, not #if (for configure)
-#ifdef BLIS_CONFIG_POWER8
-	if ( part == BLIS_ARCH_POWER8 )
-		return BLIS_ARCH_POWER8;
-#endif
 #ifdef BLIS_CONFIG_POWER9
 	if ( part == BLIS_ARCH_POWER9 )
 		return BLIS_ARCH_POWER9;
+#endif
+#ifdef BLIS_CONFIG_POWER8
+	if ( part == BLIS_ARCH_POWER8 )
+		return BLIS_ARCH_POWER8;
 #endif
 	return BLIS_ARCH_GENERIC;
 }
