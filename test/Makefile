@@ -148,10 +148,10 @@ CBLAS_HEADER_PATH  = ../frame/compat/cblas/src
 CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
-override CFLAGS         += $(call get-user-cflags-for,$(CONFIG_NAME))
+CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
-override CFLAGS         += -I$(TEST_SRC_PATH)
+CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
 #LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
