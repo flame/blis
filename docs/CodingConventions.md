@@ -17,6 +17,8 @@
 
 This wiki describes the coding conventions used in BLIS. Please try to adhere to these conventions when submitting pull requests and/or (if you have permission) committing directly to the repository.
 
+There is some support for these conventions for Emacs editing in the `.dir-locals.el` file, which will affect editing with CC mode in the blis directory.
+
 ## C99
 
 Most of the code in BLIS is written in C, and specifically in ISO C99. This section describes the C coding standards used within BLIS.
