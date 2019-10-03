@@ -92,13 +92,12 @@ int main( int argc, char** argv )
 #endif
 
 #if 1
-//	dt = BLIS_FLOAT;
+	//dt = BLIS_FLOAT;
 	dt = BLIS_DOUBLE;
 #else
-//	dt = BLIS_SCOMPLEX;
-//	dt = BLIS_DCOMPLEX;
+	//dt = BLIS_SCOMPLEX;
+	dt = BLIS_DCOMPLEX;
 #endif
-
 
 	transa = BLIS_NO_TRANSPOSE;
 	transb = BLIS_NO_TRANSPOSE;
