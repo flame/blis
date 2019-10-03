@@ -28,7 +28,6 @@
 #define CBLAS_HH
 
 extern "C" {
-#include <cblas.h>
 #include <blis.h>
 }
 
