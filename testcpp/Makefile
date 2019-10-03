@@ -143,11 +143,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #all: blis
 all: blis 
 
-blis: test_trsm_blis.x \
-      test_symm_blis.x \
-      test_hemm_blis.x \
-      test_gemm_blis.x
-
+blis: test_gemm_blis.x 
 
 # --Object file rules --
 

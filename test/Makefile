@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2018, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -180,7 +180,7 @@ blis: test_dotv_blis.x \
       test_herk_blis.x \
       test_her2k_blis.x \
       test_trmm_blis.x \
-      test_trsm_blis.x	
+      test_trsm_blis.x
 
 openblas: \
       test_dotv_openblas.x \
