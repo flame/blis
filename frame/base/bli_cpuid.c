@@ -54,6 +54,7 @@
   #include "bli_cpuid.h"
 #endif
 #include <string.h>
+#include "bli_arch.h"
 
 // -----------------------------------------------------------------------------
 
