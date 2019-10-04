@@ -81,6 +81,8 @@ arch_t bli_cpuid_query_id( void )
 // We need to check the environment first for all relevant
 // possibilities, though the structure of this is awkward, with
 // condtionals below.
+// Note that configure greps for '^#ifdef +BLIS_CONFIG_' in this file,
+// so use #ifdef, not #if.
 #ifdef BLIS_CONFIG_SKX
 		if ( BLIS_ARCH_SKX == envval )
 			return BLIS_ARCH_SKX;
