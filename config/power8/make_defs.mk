@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := power9
+THIS_CONFIG    := power8
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -46,7 +46,7 @@ THIS_CONFIG    := power9
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 CPPROCFLAGS    :=
-CMISCFLAGS     := -mcpu=power9 
+CMISCFLAGS     := -mcpu=power8
 CPICFLAGS      :=
 CWARNFLAGS     :=
 

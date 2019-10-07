@@ -411,7 +411,7 @@ Sometimes, a sub-configuration may need access to more than one kernel set. If a
 ```
 zen:         zen/haswell/sandybridge
 ```
-The line above defines the `zen` singleton family as containing only itself, the `zen` sub-configuration, and also specifies that this sub-configuration must have access to the `haswell` kernel set as well as the `sandybridge` kernel set. What if there exists a `zen` kernel set as well, which the `zen` sub-configuration must access in addition to those of `haswell` and `sanydbridge`? In this case, it would need to be annotated explicitly as:
+The line above defines the `zen` singleton family as containing only itself, the `zen` sub-configuration, and also specifies that this sub-configuration must have access to the `haswell` kernel set as well as the `sandybridge` kernel set. What if there exists a `zen` kernel set as well, which the `zen` sub-configuration must access in addition to those of `haswell` and `sandybridge`? In this case, it would need to be annotated explicitly as:
 ```
 zen:         zen/zen/haswell/sandybridge
 ```
@@ -592,13 +592,8 @@ Adding support for a new umbrella configuration family in BLIS is fairly straigh
       ```
       The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
 
-   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
-      ```c
-      #ifdef BLIS_FAMILY_INTELAVX
-          id = bli_cpuid_query_id();
-      #endif
-      ```
-      This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other heuristic to determine how to choose the correct sub-configuration at runtime. When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.)
+   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by adding BLIS_FAMILY_INTELAVX to the conditional guarding `bli_cpuid_query_id().
+      This results in `bli_cpuid_query_id()` being called, which will return the `arch_t` ID value corresponding to the hardware detected by `CPUID`. (If your configuration family does not consist of x86_64 architectures, then you'll need some other mechanism to choose the correct sub-configuration at runtime.  All else failing, on Linux you may be able to read the information from `/proc/cpuinfo` or `/sys/`.  When in doubt, please [open an issue](https://github.com/flame/blis/issues) to begin a dialogue with developers.  Even without a mechanism for detecting the architecture, you should enable selecting it through the environment using `bli_env_check()`, as for x86_64.)
 
 
 
@@ -769,9 +764,15 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
               return BLIS_ARCH_KNL;
       #endif
       ```
-      Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware. Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
+      Additionally, we had to define the function `bli_cpuid_is_knl()`, which checks for various processor features known to be present on `knl` systems and returns a boolean `TRUE` if all relevant feature checks are satisfied by the hardware.  (Such functions are only a convenience; for instance, they aren't used for POWER.)  Note that the order in which we check for the sub-configurations is important. We must check for microarchitectural matches from most recent to most dated. This prevents an older sub-configuration from being selected on newer hardware when a newer sub-configuration would have also matched.
 
-
+      You also need to add a case to the code earlier in the file for selecting the configuration via the environment:
+      ```c
+      #ifdef BLIS_CONFIG_KNL
+            if ( BLIS_ARCH_KNL == envval )
+                return BLIS_ARCH_KNL;
+      #endif
+      ```
 
    * **`frame/base/bli_cpuid.h`**. After defining the function `bli_cpuid_is_knl()`, we must also update [bli_cpuid.h](https://github.com/flame/blis/blob/master/frame/base/bli_cpuid.h) to contain a prototype for the function.
 

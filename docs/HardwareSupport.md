@@ -33,8 +33,10 @@ A few remarks / reminders:
 | ARMv7 Cortex-A15 (NEON)              | `cortex-a15`           | `sd`   |            |
 | ARMv8 Cortex-A53 (NEON)              | `cortex-a53`           | `sd`   |            |
 | ARMv8 Cortex-A57 (NEON)              | `cortex-a57`           | `sd`   |            |
+| ARMv8.1 ThunderX2 (NEON)             | `thunderx2`            | `sd`   |            |
 | IBM Blue Gene/Q (QPX int)            | `bgq`                  |  `d`   |            |
-| IBM Power7 (QPX int)                 | `power7`               |  `d`   |            |
+| IBM Power8 (C99)                     | `power8`               | `sdcz` | `sdcz`     |
+| IBM Power9 (C99)                     | `power9`               | `sdcz` | `sdcz`     |
 | template (C99)                       | `template`             | `sdcz` | `sdcz`     |
 
 ## Level-1f kernels

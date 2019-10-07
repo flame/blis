@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := power9
+THIS_CONFIG    := power
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -45,8 +45,8 @@ THIS_CONFIG    := power9
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    :=
-CMISCFLAGS     := -mcpu=power9 
+CPPROCFLAGS    := -D_GNU_SOURCE
+CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -57,9 +57,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-# Fixme: This should use -O3, but that breaks cpuid dispatch somehow,
-# and we end up executing power9 code on power8.
-COPTFLAGS      := -O2 -funroll-loops
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
@@ -73,7 +71,7 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -O3
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast

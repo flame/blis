@@ -56,11 +56,74 @@
 
 // -----------------------------------------------------------------------------
 
+// Allow selecting the micro-architecture via the environment,
+// similarly to OpenBLAS, which uses OPENBLAS_CORETYPE.
+// The environment should be ignored when configuring.
+static arch_t bli_env_check( void )
+{
+#ifndef BLIS_CONFIGURETIME_CPUID
+	char *envval = getenv( "BLIS_CORETYPE" );
+	for ( arch_t i = 0; i < BLIS_NUM_ARCHS; i++ )
+	{
+		if ( envval && ( 0 == strcmp( envval, bli_arch_string (i) ) ) )
+			return i;
+	}
+#endif
+	return -1;
+}
+
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, family, model, features;
+	arch_t envval = bli_env_check();
+
+// We need to check the environment first for all relevant
+// possibilities, though the structure of this is awkward, with
+// condtionals below.
+// Note that configure greps for '^#ifdef +BLIS_CONFIG_' in this file,
+// so use #ifdef, not #if.
+#ifdef BLIS_CONFIG_SKX
+		if ( BLIS_ARCH_SKX == envval )
+			return BLIS_ARCH_SKX;
+#endif
+#ifdef BLIS_CONFIG_KNL
+		if ( BLIS_ARCH_KNL == envval )
+			return BLIS_ARCH_KNL;
+#endif
+#ifdef BLIS_CONFIG_HASWELL
+		if ( BLIS_ARCH_HASWELL == envval )
+			return BLIS_ARCH_HASWELL;
+#endif
+#ifdef BLIS_CONFIG_SANDYBRIDGE
+		if ( BLIS_ARCH_SANDYBRIDGE == envval )
+			return BLIS_ARCH_SANDYBRIDGE;
+#endif
+#ifdef BLIS_CONFIG_PENRYN
+		if ( BLIS_ARCH_PENRYN == envval )
+			return BLIS_ARCH_PENRYN;
+#endif
+#ifdef BLIS_CONFIG_ZEN
+		if ( BLIS_ARCH_ZEN == envval )
+			return BLIS_ARCH_ZEN;
+#endif
+#ifdef BLIS_CONFIG_EXCAVATOR
+		if ( BLIS_ARCH_EXCAVATOR == envval )
+			return BLIS_ARCH_EXCAVATOR;
+#endif
+#ifdef BLIS_CONFIG_STEAMROLLER
+		if ( BLIS_ARCH_STEAMROLLER == envval )
+			return BLIS_ARCH_STEAMROLLER;
+#endif
+#ifdef BLIS_CONFIG_PILEDRIVER
+		if ( BLIS_ARCH_PILEDRIVER == envval )
+			return BLIS_ARCH_PILEDRIVER;
+#endif
+#ifdef BLIS_CONFIG_BULLDOZER
+		if ( BLIS_ARCH_BULLDOZER == envval )
+			return BLIS_ARCH_BULLDOZER;
+#endif
 
 	// Call the CPUID instruction and parse its results into a family id,
 	// model id, and a feature bit field. The return value encodes the
@@ -374,6 +437,28 @@ bool_t bli_cpuid_is_bulldozer
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t vendor, model, part, features;
+	arch_t envval = bli_env_check();
+
+#ifdef BLIS_CONFIG_THUNDERX2
+			if ( BLIS_ARCH_THUNDERX2 == envval )
+				return BLIS_ARCH_THUNDERX2;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA57
+			if ( BLIS_ARCH_CORTEXA57 == envval )
+				return BLIS_ARCH_CORTEXA57;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA53
+		if ( BLIS_ARCH_CORTEXA53 == envval )
+			return BLIS_ARCH_CORTEXA53;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA15
+			if ( BLIS_ARCH_CORTEXA15 == envval )
+				return BLIS_ARCH_CORTEXA15;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA9
+			if ( BLIS_ARCH_CORTEXA9 == envval )
+				return BLIS_ARCH_CORTEXA9;
+#endif
 
 	// Call the CPUID instruction and parse its results into a model id,
 	// part id, and a feature bit field. The return value encodes the
@@ -400,6 +485,10 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_CORTEXA57
 			if ( bli_cpuid_is_cortexa57( model, part, features ) )
 				return BLIS_ARCH_CORTEXA57;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA53
+		if ( bli_cpuid_is_cortexa53( model, part, features ) )
+			return BLIS_ARCH_CORTEXA53;
 #endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
@@ -437,12 +526,7 @@ bool_t bli_cpuid_is_thunderx2
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_THUNDERX2;
 }
 
 bool_t bli_cpuid_is_cortexa57
@@ -452,12 +536,7 @@ bool_t bli_cpuid_is_cortexa57
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_CORTEXA57;
 }
 
 bool_t bli_cpuid_is_cortexa53
@@ -467,12 +546,7 @@ bool_t bli_cpuid_is_cortexa53
        uint32_t features
      )
 {
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_NEON;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return model == BLIS_ARCH_CORTEXA53;
 }
 
 bool_t bli_cpuid_is_cortexa15
@@ -909,7 +983,124 @@ int vpu_count( void )
 	}
 }
 
-#elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
+#elif defined(__aarch64__)
+
+// This is adapted from OpenBLAS.  See
+// https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
+// for the mechanism, but not the magic numbers.
+
+#include <asm/hwcap.h>
+#include <sys/auxv.h>
+
+#ifndef HWCAP_CPUID
+#define HWCAP_CPUID (1 << 11)
+#endif
+
+static uint32_t get_coretype(void) {
+	int implementer, part, midr_el1;
+
+	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
+		return 0;
+	}
+		// Also available from
+		// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+		// and split out in /proc/cpuinfo
+		__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
+	/*
+	 * MIDR_EL1
+	 *
+	 * 31		   24 23	 20 19			16 15		   4 3		  0
+	 * -----------------------------------------------------------------
+	 * | Implementer | Variant | Architecture | Part Number | Revision |
+	 * -----------------------------------------------------------------
+	 */
+	implementer = (midr_el1 >> 24) & 0xFF;
+	part		= (midr_el1 >> 4)  & 0xFFF;
+	// From Linux arch/arm64/include/asm/cputype.h
+	// ARM_CPU_IMP_ARM 0x41
+	// ARM_CPU_IMP_APM 0x50
+	// ARM_CPU_IMP_CAVIUM 0x43
+	// ARM_CPU_IMP_BRCM 0x42
+	// ARM_CPU_IMP_QCOM 0x51
+	// ARM_CPU_IMP_NVIDIA 0x4E
+	// ARM_CPU_IMP_FUJITSU 0x46
+	// ARM_CPU_IMP_HISI 0x48
+	//
+	// ARM_CPU_PART_AEM_V8 0xD0F
+	// ARM_CPU_PART_FOUNDATION 0xD00
+	// ARM_CPU_PART_CORTEX_A57 0xD07
+	// ARM_CPU_PART_CORTEX_A72 0xD08
+	// ARM_CPU_PART_CORTEX_A53 0xD03
+	// ARM_CPU_PART_CORTEX_A73 0xD09
+	// ARM_CPU_PART_CORTEX_A75 0xD0A
+	// ARM_CPU_PART_CORTEX_A35 0xD04
+	// ARM_CPU_PART_CORTEX_A55 0xD05
+	// ARM_CPU_PART_CORTEX_A76 0xD0B
+	// ARM_CPU_PART_NEOVERSE_N1 0xD0C
+	//
+	// APM_CPU_PART_POTENZA 0x000
+	//
+	// CAVIUM_CPU_PART_THUNDERX 0x0A1
+	// CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
+	// CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
+	// CAVIUM_CPU_PART_THUNDERX2 0x0AF
+	//
+	// BRCM_CPU_PART_VULCAN 0x516
+	//
+	// QCOM_CPU_PART_FALKOR_V1 0x800
+	// QCOM_CPU_PART_FALKOR 0xC00
+	// QCOM_CPU_PART_KRYO 0x200
+	//
+	// NVIDIA_CPU_PART_DENVER 0x003
+	// NVIDIA_CPU_PART_CARMEL 0x004
+	//
+	// FUJITSU_CPU_PART_A64FX 0x001
+	//
+	// HISI_CPU_PART_TSV110 0xD01
+	switch(implementer)
+	{
+		case 0x41:		// ARM
+			switch (part)
+			{
+				case 0xd07: // Cortex A57
+					return BLIS_ARCH_CORTEXA57;
+				case 0xd03: // Cortex A53
+					return BLIS_ARCH_CORTEXA53;
+			}
+			break;
+		case 0x42:		// Broadcom
+			switch (part)
+			{
+				case 0x516: // Vulcan
+					return BLIS_ARCH_THUNDERX2;
+			}
+			break;
+		case 0x43:		// Cavium
+			switch (part)
+			{
+				case 0x0af: // ThunderX2
+					return BLIS_ARCH_THUNDERX2;
+			}
+			break;
+	}
+	return BLIS_ARCH_CORTEXA57; // Fixme: Is this the best default?
+}
+
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = MODEL_ARMV8;
+	*part	  = get_coretype();
+	*features = 0;
+
+	return VENDOR_ARM;
+}
+
+#elif defined(__arm__) || defined(_M_ARM)
 
 #define TEMP_BUFFER_SIZE 200
 
@@ -1037,4 +1228,130 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 	return r_val;
 }
 
+// https://sourceforge.net/p/predef/wiki/Architectures/ lists macros
+#elif __PPC64__ /* gcc */ || __ppc64__ /* should be gcc, but failed */ || \
+      _ARCH_PPC64 /* xlc */
+// NB POWER7 isn't actually used.  (ppc64le Linux is only supported on
+// POWER8+.  Is BLIS is supposed to support big-endian?)
+
+#if !__linux__
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = 0;			// Not used
+	*features = 0;			// Not used
+	*part = BLIS_ARCH_GENERIC;
+	return 0;
+}
+#else
+#include <sys/auxv.h>
+
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+	*model	  = 0;			// Not used
+	*features = 0;			// Not used
+
+#if 0
+// The easy GCC (and recent clang?) version
+#  if __GNUC__ >= 6
+	if ( __builtin_cpu_is( "power9" ) )
+		*part = BLIS_ARCH_POWER9;
+	else
+#  endif
+		if ( __builtin_cpu_is( "power8" ) )
+		*part = BLIS_ARCH_POWER8;
+	else if ( __builtin_cpu_is( "power7" ) )
+		*part = BLIS_ARCH_POWER7;
+	else
+		*part = BLIS_ARCH_GENERIC;
+#else
+// See https://developer.ibm.com/tutorials/optimized-libraries-for-linux-on-power/
+	char * platform = NULL;
+
+	platform = (char*) getauxval (AT_PLATFORM);
+	if ( strcmp( platform, "power8" ) == 0 )
+		*part = BLIS_ARCH_POWER8;
+	else if ( strcmp( platform, "power9" ) == 0 )
+		*part = BLIS_ARCH_POWER9;
+	else if ( strcmp( platform, "power7" ) == 0 )
+		*part = BLIS_ARCH_POWER7;
+	else
+		*part = BLIS_ARCH_GENERIC;
+#endif
+	return 0;
+}
+#endif
+
+arch_t bli_cpuid_query_id( void )
+{
+	uint32_t model, part, features;
+	arch_t envval = bli_env_check();
+
+#ifdef BLIS_CONFIG_POWER9
+	if ( BLIS_CONFIG_POWER9 == envval )
+		return BLIS_CONFIG_POWER9;
+#endif
+#ifdef BLIS_CONFIG_POWER8
+	if ( BLIS_CONFIG_POWER8 == envval )
+		return BLIS_CONFIG_POWER8;
+#endif
+
+	(void) bli_cpuid_query( &model, &part, &features );
+
+// NB.  Must use #ifdef, not #if (for configure)
+#ifdef BLIS_CONFIG_POWER9
+	if ( part == BLIS_ARCH_POWER9 )
+		return BLIS_ARCH_POWER9;
+#endif
+#ifdef BLIS_CONFIG_POWER8
+	if ( part == BLIS_ARCH_POWER8 )
+		return BLIS_ARCH_POWER8;
+#endif
+	return BLIS_ARCH_GENERIC;
+}
+
+#elif __s390x__	 /* gcc */ || __zarch__ /* clang */ || __SYSC_ZARCH__ /* Systems/C */
+/*
+Example cpuinfo (from Fedora build) in case there's no better way than
+reading it:
+
+CPU info:
+Architecture:        s390x
+CPU op-mode(s):      32-bit, 64-bit
+Byte Order:          Big Endian
+CPU(s):              2
+On-line CPU(s) list: 0,1
+Thread(s) per core:  1
+Core(s) per socket:  1
+Socket(s) per book:  1
+Book(s) per drawer:  1
+Drawer(s):           2
+NUMA node(s):        1
+Vendor ID:           IBM/S390
+Machine type:        2964
+CPU dynamic MHz:     5000
+CPU static MHz:      5000
+BogoMIPS:            3033.00
+Hypervisor:          z/VM 6.4.0
+Hypervisor vendor:   IBM
+Virtualization type: full
+Dispatching mode:    horizontal
+L1d cache:           128K
+L1i cache:           96K
+L2d cache:           2048K
+L2i cache:           2048K
+L3 cache:            65536K
+L4 cache:            491520K
+NUMA node0 CPU(s):   0,1
+Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx sie
+*/
 #endif

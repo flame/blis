@@ -79,7 +79,8 @@ void bli_arch_set_id( void )
     defined BLIS_FAMILY_AMD64   || \
     defined BLIS_FAMILY_X86_64  || \
     defined BLIS_FAMILY_ARM64   || \
-    defined BLIS_FAMILY_ARM32
+    defined BLIS_FAMILY_ARM32   || \
+    defined BLIS_FAMILY_POWER
 	id = bli_cpuid_query_id();
 #endif
 
@@ -141,6 +142,12 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_POWER7
 	id = BLIS_ARCH_POWER7;
 #endif
+#ifdef BLIS_FAMILY_POWER8
+	id = BLIS_ARCH_POWER8;
+#endif
+#ifdef BLIS_FAMILY_POWER9
+	id = BLIS_ARCH_POWER9;
+#endif
 #ifdef BLIS_FAMILY_BGQ
 	id = BLIS_ARCH_BGQ;
 #endif
@@ -184,9 +191,10 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa15",
     "cortexa9",
 
+    "power9",
+    "power8",
     "power7",
     "bgq",
-    "power9",
 
     "generic"
 };
