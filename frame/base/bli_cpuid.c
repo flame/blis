@@ -943,7 +943,11 @@ int vpu_count( void )
 		if ( loc == NULL )
 			return -1;
 
-		loc = strstr( loc+1, " " );
+		// We may have W-nnnn rather than, say, Gold nnnn
+		if ( 'W' == *loc && '-' == *(loc+1) )
+			loc++;
+		else
+			loc = strstr( loc+1, " " );
 		if ( loc == NULL )
 			return -1;
 
