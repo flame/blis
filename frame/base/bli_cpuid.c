@@ -153,7 +153,25 @@ bool_t bli_cpuid_is_skx
 
 	int nvpu = vpu_count();
 
-	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 )
+	if ( bli_cpuid_has_features( features, expected ) )
+	{
+		switch (nvpu)
+		{
+		case 1:
+			if ( bli_dolog )
+				fprintf( stderr, "BLIS: Hardware has 1 FMA unit -- not using SKX config\n" );
+			return FALSE;
+		case 2:
+			if ( bli_dolog )
+				fprintf( stderr, "BLIS: Hardware has 2 FMA units -- using SKX config\n" );
+			return TRUE;
+		default:
+			if ( bli_dolog )
+				fprintf( stderr, "BLIS: Number of FMA units unknown -- not using SKX config\n" );
+			return FALSE;
+		}
+	}
+	else
 		return FALSE;
 
 	return TRUE;
@@ -1047,6 +1065,23 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 
 	// Return r_val so the caller knows if we failed.
 	return r_val;
+}
+
+void bli_log( char * fmt, ... )
+{
+	va_list ap;
+	char prefix[] = "BLIS: ";
+	char * newfmt;
+
+	if ( bli_dolog && fmt )
+	{
+		int n = strlen( fmt ) + strlen( prefix ) + 1;
+		newfmt = malloc( n );
+		snprintf( newfmt, n, "%s%s", prefix, fmt );
+		va_start( ap, fmt );
+		vfprintf( stderr, newfmt, ap );
+		va_end( ap );
+	}
 }
 
 #endif

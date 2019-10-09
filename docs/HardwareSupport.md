@@ -23,7 +23,10 @@ A few remarks / reminders:
     `frame/base/bli_cpuid.c`) which may be incorrect for new
     processors, particularly Gold ones.  In that case, you can either
     fix the code (and please raise an issue!) or export
-    `BLIS_CORETYPE=skx` from the environment.
+    `BLIS_CORETYPE=skx` from the environment.  You can debug that, if
+    the performance is too low by, setting BLIS_DEBUG in the
+    environment at runtime; that will print on stderr the number of
+    FMA units assumed and the hardware configuration selected.
 
 | Vendor/Microarchitecture             | BLIS sub-configuration | `gemm` | `gemmtrsm` |
 |:-------------------------------------|:-----------------------|:-------|:-----------|
