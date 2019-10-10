@@ -158,16 +158,13 @@ bool_t bli_cpuid_is_skx
 		switch (nvpu)
 		{
 		case 1:
-			if ( bli_dolog )
-				fprintf( stderr, "BLIS: Hardware has 1 FMA unit -- not using SKX config\n" );
+			bli_log( "Hardware has 1 FMA unit -- not using SKX config\n" );
 			return FALSE;
 		case 2:
-			if ( bli_dolog )
-				fprintf( stderr, "BLIS: Hardware has 2 FMA units -- using SKX config\n" );
+			bli_log( "Hardware has 2 FMA units -- using SKX config\n" );
 			return TRUE;
 		default:
-			if ( bli_dolog )
-				fprintf( stderr, "BLIS: Number of FMA units unknown -- not using SKX config\n" );
+			bli_log( "Number of FMA units unknown -- not using SKX config\n" );
 			return FALSE;
 		}
 	}
@@ -1067,6 +1064,8 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 	return r_val;
 }
 
+#endif
+
 void bli_log( char * fmt, ... )
 {
 	va_list ap;
@@ -1083,5 +1082,3 @@ void bli_log( char * fmt, ... )
 		va_end( ap );
 	}
 }
-
-#endif
