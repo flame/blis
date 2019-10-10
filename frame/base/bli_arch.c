@@ -74,6 +74,7 @@ void bli_arch_set_id_once( void )
 
 void bli_arch_set_id( void )
 {
+	bli_dolog = getenv( "BLIS_DEBUG" ) != NULL;
 	// Architecture families.
 #if defined BLIS_FAMILY_INTEL64 || \
     defined BLIS_FAMILY_AMD64   || \
@@ -160,6 +161,9 @@ void bli_arch_set_id( void )
 	id = BLIS_ARCH_GENERIC;
 #endif
 
+	if ( bli_dolog )
+		fprintf( stderr, "BLIS: selecting %s architecture\n",
+				 bli_arch_string( id ) );
 	//printf( "blis_arch_query_id(): id = %u\n", id );
 	//exit(1);
 }

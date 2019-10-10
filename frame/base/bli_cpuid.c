@@ -216,7 +216,22 @@ bool_t bli_cpuid_is_skx
 
 	int nvpu = vpu_count();
 
-	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 )
+	if ( bli_cpuid_has_features( features, expected ) )
+	{
+		switch (nvpu)
+		{
+		case 1:
+			bli_log( "Hardware has 1 FMA unit -- not using SKX config\n" );
+			return FALSE;
+		case 2:
+			bli_log( "Hardware has 2 FMA units -- using SKX config\n" );
+			return TRUE;
+		default:
+			bli_log( "Number of FMA units unknown -- not using SKX config\n" );
+			return FALSE;
+		}
+	}
+	else
 		return FALSE;
 
 	return TRUE;
@@ -920,6 +935,10 @@ void get_cpu_name( char *cpu_name )
 	*( uint32_t* )&cpu_name[32+12] = edx;
 }
 
+// Return the number of FMA units _assuming avx512 is supported_.
+// This needs updating for new processor types, sigh.
+// See https://ark.intel.com/content/www/us/en/ark.html#@Processors
+// and also https://github.com/jeffhammond/vpu-count and
 int vpu_count( void )
 {
 	char  cpu_name[48] = {};
@@ -931,15 +950,21 @@ int vpu_count( void )
 
 	if ( strstr( cpu_name, "Intel(R) Xeon(R)" ) != NULL )
 	{
-		loc = strstr( cpu_name, "Platinum" );
+		if (( loc = strstr( cpu_name, "Platinum" ) ))
+			return 2;
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Gold" );
+			loc = strstr( cpu_name, "Gold" ); // 1 or 2, tested below
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Silver" );
+			if (( loc = strstr( cpu_name, "Silver" ) ))
+				return 1;
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Bronze" );
+			if (( loc = strstr( cpu_name, "Bronze" ) ))
+				return 1;
 		if ( loc == NULL )
 			loc = strstr( cpu_name, "W" );
+		if ( loc == NULL )
+			if (( loc = strstr( cpu_name, "D" ) ))
+				return 1;
 		if ( loc == NULL )
 			return -1;
 
@@ -952,32 +977,30 @@ int vpu_count( void )
 			return -1;
 
 		strncpy( model_num, loc+1, 4 );
-		model_num[4] = '\0';
+		model_num[4] = '\0';	// Things like i9-10900X matched above
 
 		sku = atoi( model_num );
 
+		// These were derived from ARK listings as of 2019-10-09, but
+		// may not be complete, especially as the ARK Skylake listing
+		// seems to be listed.
 		if      ( 8199 >= sku && sku >= 8100 ) return 2;
 		else if ( 6199 >= sku && sku >= 6100 ) return 2;
 		else if (                sku == 5122 ) return 2;
+		else if ( 6299 >= sku && sku >= 6200 ) return 2; // Cascade Lake Gold
+		else if ( 5299 >= sku && sku >= 5200 ) return 1; // Cascade Lake Gold
 		else if ( 5199 >= sku && sku >= 5100 ) return 1;
 		else if ( 4199 >= sku && sku >= 4100 ) return 1;
 		else if ( 3199 >= sku && sku >= 3100 ) return 1;
+		else if ( 3299 >= sku && sku >= 3200 ) return 2; // Cascade Lake W
+		else if ( 2299 >= sku && sku >= 2200 ) return 2; // Cascade Lake W
 		else if ( 2199 >= sku && sku >= 2120 ) return 2;
+		else if ( 2102 == sku || sku == 2104 ) return 2; // Gold exceptions
 		else if ( 2119 >= sku && sku >= 2100 ) return 1;
 		else return -1;
 	}
-	else if ( strstr( cpu_name, "Intel(R) Core(TM) i9" ) != NULL )
-	{
-		return 1;
-	}
-	else if ( strstr( cpu_name, "Intel(R) Core(TM) i7" ) != NULL )
-	{
-		if ( strstr( cpu_name, "7800X" ) != NULL ||
-		     strstr( cpu_name, "7820X" ) != NULL )
-			return 1;
-		else
-			return -1;
-	}
+	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
+		return 2;				// All i7/i9 with avx512?
 	else
 	{
 		return -1;
@@ -1442,3 +1465,20 @@ NUMA node0 CPU(s):   0,1
 Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx sie
 */
 #endif
+
+void bli_log( char * fmt, ... )
+{
+	va_list ap;
+	char prefix[] = "BLIS: ";
+	char * newfmt;
+
+	if ( bli_dolog && fmt )
+	{
+		int n = strlen( fmt ) + strlen( prefix ) + 1;
+		newfmt = malloc( n );
+		snprintf( newfmt, n, "%s%s", prefix, fmt );
+		va_start( ap, fmt );
+		vfprintf( stderr, newfmt, ap );
+		va_end( ap );
+	}
+}
