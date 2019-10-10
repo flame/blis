@@ -53,18 +53,22 @@
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
 #endif
-#include <string.h>
 
 // -----------------------------------------------------------------------------
 
-static arch_t bli_env_check(void)
+// Allow selecting the micro-architecture via the environment,
+// similarly to OpenBLAS, which uses OPENBLAS_CORETYPE.
+// The environment should be ignored when configuring.
+static arch_t bli_env_check( void )
 {
-	char *envval = getenv("BLIS_CORETYPE");
-	for (arch_t i = 0; i < BLIS_NUM_ARCHS; i++)
+#ifndef BLIS_CONFIGURETIME_CPUID
+	char *envval = getenv( "BLIS_CORETYPE" );
+	for ( arch_t i = 0; i < BLIS_NUM_ARCHS; i++ )
 	{
 		if ( envval && ( 0 == strcmp( envval, bli_arch_string (i) ) ) )
 			return i;
 	}
+#endif
 	return -1;
 }
 
@@ -75,8 +79,9 @@ arch_t bli_cpuid_query_id( void )
 	uint32_t vendor, family, model, features;
 	arch_t envval = bli_env_check();
 
-// We need to check the environment first, though the structure of
-// this is awkward.
+// We need to check the environment first for all relevant
+// possibilities, though the structure of this is awkward, with
+// condtionals below.
 #ifdef BLIS_CONFIG_SKX
 		if ( BLIS_ARCH_SKX == envval )
 			return BLIS_ARCH_SKX;
