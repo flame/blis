@@ -75,8 +75,8 @@ ifeq ($(CC_VENDOR),clang)
 # I couldn't find which versions of clang added support for -march=znver1
 # or -march=znver2, so we don't even bother attempting the differentiation
 # that appears in the gcc branch above.
-CRVECFLAGS += -march=znver2
-CKVECFLAGS += -march=znver2
+CRVECFLAGS += -march=znver1
+CKVECFLAGS += -march=znver1
 else
 $(error gcc or clang are required for this configuration.)
 endif
