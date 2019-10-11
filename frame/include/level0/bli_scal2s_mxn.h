@@ -32,23 +32,58 @@
 
 */
 
+#ifndef BLIS_SCAL2S_MXN_H
+#define BLIS_SCAL2S_MXN_H
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+// scal2s_mxn
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,varname) \
+static void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   panel_dim, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len, \
-       dim_t   panel_len_max, \
-       ctype*  kappa, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  p,             inc_t ldp, \
-       cntx_t* cntx  \
-     );
+       const conj_t       conjx, \
+       const dim_t        m, \
+       const dim_t        n, \
+       ctype*    restrict alpha, \
+       ctype*    restrict x, const inc_t rs_x, const inc_t cs_x, \
+       ctype*    restrict y, const inc_t rs_y, const inc_t cs_y  \
+     ) \
+{ \
+	if ( bli_is_conj( conjx ) ) \
+	{ \
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict xj = x + j*cs_x; \
+			ctype* restrict yj = y + j*cs_y; \
+\
+			for ( dim_t i = 0; i < m; ++i ) \
+			{ \
+				ctype* restrict xij = xj + i*rs_x; \
+				ctype* restrict yij = yj + i*rs_y; \
+\
+				PASTEMAC(ch,scal2js)( *alpha, *xij, *yij ); \
+			} \
+		} \
+	} \
+	else /* if ( bli_is_noconj( conjx ) ) */ \
+	{ \
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict xj = x + j*cs_x; \
+			ctype* restrict yj = y + j*cs_y; \
+\
+			for ( dim_t i = 0; i < m; ++i ) \
+			{ \
+				ctype* restrict xij = xj + i*rs_x; \
+				ctype* restrict yij = yj + i*rs_y; \
+\
+				PASTEMAC(ch,scal2s)( *alpha, *xij, *yij ); \
+			} \
+		} \
+	} \
+}
 
-INSERT_GENTPROT_BASIC0( packm_cxk )
+INSERT_GENTFUNC_BASIC0( scal2s_mxn )
 
+#endif

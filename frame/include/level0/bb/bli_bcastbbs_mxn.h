@@ -32,23 +32,43 @@
 
 */
 
+#ifndef BLIS_BCASTBBS_MXN_H
+#define BLIS_BCASTBBS_MXN_H
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
+// bcastbbs_mxn
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
 \
-void PASTEMAC(ch,varname) \
+static void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conja, \
-       pack_t  schema, \
-       dim_t   panel_dim, \
-       dim_t   panel_dim_max, \
-       dim_t   panel_len, \
-       dim_t   panel_len_max, \
-       ctype*  kappa, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  p,             inc_t ldp, \
-       cntx_t* cntx  \
-     );
+       const dim_t        m, \
+       const dim_t        n, \
+       ctype*    restrict y, const inc_t incy, const inc_t ldy  \
+     ) \
+{ \
+	/* Assume that the duplication factor is the column stride of y. */ \
+	const dim_t d    = ldy; \
+	const dim_t ds_y = 1; \
+\
+	for ( dim_t i = 0; i < m; ++i ) \
+	{ \
+		ctype* restrict yi = y + i*incy; \
+\
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict yij = yi + j*ldy; \
+\
+			for ( dim_t p = 1; p < d; ++p ) \
+			{ \
+				ctype* restrict yijd = yij + p*ds_y; \
+\
+				PASTEMAC(ch,copys)( *yij, *yijd ); \
+			} \
+		} \
+	} \
+}
 
-INSERT_GENTPROT_BASIC0( packm_cxk )
+INSERT_GENTFUNC_BASIC0( bcastbbs_mxn )
 
+#endif

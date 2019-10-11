@@ -195,8 +195,15 @@
 #include "bli_adds_mxn_uplo.h"
 #include "bli_set0s_mxn.h"
 #include "bli_copys_mxn.h"
+#include "bli_scal2s_mxn.h"
 #include "bli_xpbys_mxn.h"
 #include "bli_xpbys_mxn_uplo.h"
+
+// -- "broadcast B" scalar macros --
+
+#include "bli_bcastbbs_mxn.h"
+#include "bli_scal2bbs_mxn.h"
+#include "bli_set0bbs_mxn.h"
 
 
 // -- 3m-specific scalar macros --

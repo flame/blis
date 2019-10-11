@@ -100,6 +100,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc, \
+		  schema, \
 		  panel_dim, \
 		  panel_dim_max, \
 		  panel_len, \
@@ -338,6 +339,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc, \
+		  schema, \
 		  panel_dim, \
 		  panel_dim_max, \
 		  panel_len, \
@@ -436,6 +438,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc10, \
+		  schema, \
 		  p10_dim, \
 		  panel_dim_max, \
 		  p10_len, \
@@ -455,6 +458,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc12, \
+		  schema, \
 		  p12_dim, \
 		  panel_dim_max, \
 		  p12_len, \
@@ -561,6 +565,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(ch,kername) \
 	( \
 	  conjc, \
+	  schema, \
 	  panel_dim, \
 	  panel_dim_max, \
 	  panel_len, \

@@ -111,6 +111,7 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 void bli_spackm_knl_asm_16xk
      (
        conj_t           conja,
+       pack_t           schema,
        dim_t            cdim_,
        dim_t            n_,
        dim_t            n_max_,
@@ -377,6 +378,7 @@ void bli_spackm_knl_asm_16xk
 void bli_spackm_knl_asm_24xk
      (
        conj_t           conja,
+       pack_t           schema,
        dim_t            cdim_,
        dim_t            n_,
        dim_t            n_max_,

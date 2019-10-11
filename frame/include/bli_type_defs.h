@@ -1052,6 +1052,7 @@ typedef struct
 
 	siz_t     block_size;
 	siz_t     align_size;
+	siz_t     offset_size;
 
 	malloc_ft malloc_fp;
 	free_ft   free_fp;

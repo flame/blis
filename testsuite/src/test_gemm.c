@@ -403,17 +403,7 @@ void libblis_test_gemm_md
 
 		time = bli_clock();
 
-#if 0
-bli_printm( "a", &a, "%5.2f", "" );
-bli_printm( "b", &b, "%5.2f", "" );
-bli_printm( "c", &c, "%5.2f", "" );
-bli_printm( "alpha", &alpha, "%5.2f", "" );
-bli_printm( "beta", &beta, "%5.2f", "" );
-#endif
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
-#if 0
-bli_printm( "c after", &c, "%5.2f", "" );
-#endif
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}

@@ -40,6 +40,7 @@
 void PASTEMAC(ch,opname) \
      ( \
        conj_t  conja, \
+       pack_t  schema, \
        dim_t   panel_dim, \
        dim_t   panel_dim_max, \
        dim_t   panel_len, \
@@ -73,36 +74,51 @@ void PASTEMAC(ch,opname) \
 		   the outer (panel_dim_max - panel_dim) rows or columns of the
 		   micropanel. (Note that these rows/columns correspond to values
 		   beyond the edge of matrix A.) The kernel intrinsically knows its
-		   own panel_dim_max, since that corresponds to the kernel's register
-		   blocksize. However, we need to pass in panel_len_max because the
-		   bottom-right edge case of trsm_lu will need all elements above the
-		   extended diagonal and beyond (to the right of) the bottom-right
-		   element to be initialized to zero so the trsm portion of the
-		   computational kernel will operate with zeros for those iterations.
+		   own panel_dim_max, since that corresponds to the packm kernel's
+		   leading dimension. However, we *do* need to pass in panel_len_max
+		   because the bottom-right edge case of trsm_lu will need all
+		   elements above the extended diagonal and beyond (to the right of)
+		   the bottom-right element to be initialized to zero so the trsm
+		   portion of the computational kernel will operate with zeros for
+		   those iterations.
 
-		   As an example, if trsm_lu is executed on a 6x6 matrix, and the
-		   gemmtrsm kernel uses MR = 6, the computation will begin with the
-		   edge case, which is the bottom 2x2 matrix marked with x's. Code
-		   in bli_packm_tri_cxk() will extend the diagonal as identity into
-		   the remaining portion of the micropanel. But before that happens,
-		   the packm kernel must have set the 0's shown below. (Unreferenced
-		   elements are marked with '.'.)
+		   For example, if trsm_lu is executed on an 10x10 triangular matrix,
+		   and the gemmtrsm kernel uses MR = 6, the computation will begin
+		   with the edge case, which is the bottom-right 4x4 upper triangular
+		   matrix. Code in bli_packm_tri_cxk() will extend the diagonal as
+		   identity into the remaining portion of the micropanel. But before
+		   that happens, the packm kernel must have set the 0's added in
+		   step (3) below.
 
-                x x 0 0 0 0
-                . x 0 0 0 0
-                . . 1 0 0 0
-                . . . 1 0 0
-                . . . . 1 0
-                . . . . . 1
+             packm kernel     packm kernel     packm kernel     packm_tri_cxk
+		     step 1:          step 2:          step 3:          step 4:
 
-           In this case, panel_dim will be 2 because two rows of data are
-           copied from A, panel_len will be 2 because those two rows span
-           two columns of A, and panel_len_max will be 6 because there are a
-           total of 6 columns that can be written to, 4 of which lie beyond
-		   the values copied from A. */ \
+             x x x x . .      x x x x . .      x x x x 0 0      x x x x 0 0
+             ? x x x . .      ? x x x . .      ? x x x 0 0      ? x x x 0 0
+             ? ? x x . .  ->  ? ? x x . .  ->  ? ? x x 0 0  ->  ? ? x x 0 0
+             ? ? ? x . .      ? ? ? x . .      ? ? ? x 0 0      ? ? ? x 0 0
+             . . . . . .      0 0 0 0 0 0      0 0 0 0 0 0      0 0 0 0 1 0
+             . . . . . .      0 0 0 0 0 0      0 0 0 0 0 0      0 0 0 0 0 1
+
+		     x  Copied from A; valid element.
+             ?  Copied from A, but value is unknown and unused.
+		     .  Uninitialized.
+             0  Initialized to zero.
+             1  Initialized to one.
+
+		     NOTE: In step 5 (not shown), bli_packm_tri_cxk() sets the ?'s
+		     to zero. This is not needed to support trsm, but rather to
+		     support trmm. (Both use the same packing format and code.)
+
+           In this case, panel_dim will be 4 because four rows of data are
+           copied from A, panel_len will be 4 because those four rows span
+           four columns of A, and panel_len_max will be 6 because there are a
+           total of 6 columns that can be written to in the packed micropanel,
+		   2 of which lie beyond the values copied from A. */ \
 		f \
 		( \
 		  conja, \
+		  schema, \
 		  panel_dim, \
 		  panel_len, \
 		  panel_len_max, \
