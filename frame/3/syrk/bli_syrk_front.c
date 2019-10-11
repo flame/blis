@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,7 +47,6 @@ void bli_syrk_front
      )
 {
 	bli_init_once();
-
 	obj_t   a_local;
 	obj_t   at_local;
 	obj_t   c_local;
@@ -70,6 +70,12 @@ void bli_syrk_front
 	// For syrk, the right-hand "B" operand is simply A^T.
 	bli_obj_alias_to( a, &at_local );
 	bli_obj_induce_trans( &at_local );
+
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	gint_t status = bli_syrk_small( alpha, &a_local, &at_local, beta, &c_local,
+	                                cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel

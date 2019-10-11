@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1516,19 +1516,37 @@ check_compiler_version_ranges()
 	# comments:
 	#   These older versions of gcc do not explicitly support the Zen (Zen1)
 	#   microarchitecture; the newest microarchitectural value understood by
-	#   these versions is '-march=bdver4' [3]. However, support for them can
-	#   be attained in a roundabout way by starting with the instruction sets
-	#   enabled by '-march=bdver4' and then disabling the instruction sets
-	#   that were removed in the transition from Excavator to Zen, namely:
-	#   FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen via the
-	#   '-march=znver1' option [4].
+	#   these versions is '-march=bdver4' [3]. However, basic support for these
+	#   older versions can be attained in a roundabout way by starting with the
+	#   instruction sets enabled by '-march=bdver4' and then disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, namely: FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen
+	#   via the '-march=znver1' option [4].
 	#
 	#   [3] https://gcc.gnu.org/onlinedocs/gcc-5.5.0/gcc/x86-Options.html#x86-Options
 	#   [4] https://gcc.gnu.org/onlinedocs/gcc-6.1.0/gcc/x86-Options.html#x86-Options
 	#
+	# range: gcc < 9.1 (ie: 8.3 or older)
+	# variable: gcc_older_than_9_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen2
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is either '-march=znver1' (if !gcc_older_than_6_1_0) [5]
+	#   or '-march=bdver4' (if gcc_older_than_6_1_0) [3]. If gcc is 6.1 or
+	#   newer, '-march=znver1' may be used (since the instruction sets it
+	#   enables are a subset of those enabled by '-march=znver2'); otherwise,
+	#   '-march=bdver4' must be used in conjuction with disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, as described in the section above for gcc_older_than_6_1_0.
+	#   Newer versions of gcc support Zen2 via the '-march=znver2' option [6].
+	#
+	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
+	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/x86-Options.html#x86-Options
+	#
 
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
+	gcc_older_than_9_1_0='no'
 
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
@@ -1547,6 +1565,12 @@ check_compiler_version_ranges()
 		if [ ${cc_major} -lt 6 ]; then
 			echo "${script_name}: note: found ${cc} version older than 6.1."
 			gcc_older_than_6_1_0='yes'
+		fi
+
+		# Check for gcc < 9.1.0 (ie: 8.3 or older).
+		if [ ${cc_major} -lt 9 ]; then
+			echo "${script_name}: note: found ${cc} version older than 9.1."
+			gcc_older_than_9_1_0='yes'
 		fi
 	fi
 
@@ -3037,6 +3061,7 @@ main()
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
 		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
+		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
