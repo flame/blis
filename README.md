@@ -596,8 +596,9 @@ This project and its associated research were partially sponsored by grants from
 [Texas Instruments](http://www.ti.com/),
 [AMD](http://www.amd.com/),
 [Oracle](http://www.oracle.com/),
-and
 [Huawei](http://www.huawei.com/),
+and
+[Facebook](http://www.facebook.com/),
 as well as grants from the
 [National Science Foundation](http://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).
