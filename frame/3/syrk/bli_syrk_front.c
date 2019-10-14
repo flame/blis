@@ -47,20 +47,10 @@ void bli_syrk_front
      )
 {
 	bli_init_once();
+
 	obj_t   a_local;
 	obj_t   at_local;
 	obj_t   c_local;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syrk_check( alpha, a, beta, c, cntx );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
 
 	// Alias A and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
@@ -76,6 +66,17 @@ void bli_syrk_front
 	                                cntx, cntl );
 	if ( status == BLIS_SUCCESS ) return;
 #endif
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_syrk_check( alpha, a, beta, c, cntx );
+
+	// If alpha is zero, scale by beta and return.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
