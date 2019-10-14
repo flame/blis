@@ -2395,7 +2395,6 @@ main()
 		# Use the command line argument as the configuration name.
 		config_name=$1
 
-		#echo "${script_name}: manual configuration requested."
 		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
 
 	fi
@@ -2511,22 +2510,42 @@ main()
 		# but we have it here just in case.
 		if [ $1 = "auto" ]; then
 
-			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
+			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
 			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
 			echo "${script_name}: "
 			exit 1;
 
 		else
 
-			echo "${script_name}: 'user-specified configuration '${conf}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
+			# At this point, we know: (a) config_list is empty; and (b) the user
+			# requested manual configuration. If the config_name given by the
+			# user is present in the configuration blacklist (config_blist),
+			# then we can deduce why the config_list is empty: because the only
+			# subconfig implied by config_name is blacklisted. Thus, we cannot
+			# proceed.
 
+			if [ $(is_in_list "${config_name}" "${config_blist}") == "true" ]; then
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
+				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+
+				# If config_name is NOT present in config_blist, then we know
+				# that config_list is empty simply because config_name is
+				# unregistered.
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
-
 	else
 
 		# This branch executes when the configuration is found to be present
