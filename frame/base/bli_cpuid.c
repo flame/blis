@@ -1012,6 +1012,7 @@ int vpu_count( void )
 // https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
 // for the mechanism, but not the magic numbers.
 
+// Fixme:  Could these be missing in older Linux?
 #include <asm/hwcap.h>
 #include <sys/auxv.h>
 
@@ -1023,11 +1024,14 @@ static uint32_t get_coretype(void) {
 	int implementer, part, midr_el1;
 
 	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
+		// Fixme:  We could try reading /sys and /proc here, as below.
+		// Find out if that could work when the HWCAP test fails.
 		return 0;
 	}
 	// Also available from
 	// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
-	// and split out in /proc/cpuinfo
+	// and split out in /proc/cpuinfo (with a tab before the colon):
+	// CPU part	: 0x0a1
 	__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
 	/*
 	 * MIDR_EL1
@@ -1080,6 +1084,9 @@ static uint32_t get_coretype(void) {
 	// FUJITSU_CPU_PART_A64FX 0x001
 	//
 	// HISI_CPU_PART_TSV110 0xD01
+
+	// Fixme:  After merging the vpu_count branch we could report the
+	// part here with bli_dolog.
 	switch(implementer)
 	{
 		case 0x41:		// ARM
