@@ -57,13 +57,13 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+COPTFLAGS      := -O2 -mcpu=cortrex-a15
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mcpu=cortexa15
+CKVECFLAGS     :=
 else
 $(error gcc is required for this configuration.)
 endif
