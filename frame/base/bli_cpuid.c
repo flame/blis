@@ -962,6 +962,8 @@ int vpu_count( void )
 			loc = strstr( cpu_name, "W" );
 		if ( loc == NULL )
 			if (( loc = strstr( cpu_name, "D" ) ))
+				// Fixme:  May be wrong
+				// <https://github.com/jeffhammond/vpu-count/issues/3#issuecomment-542044651>
 				return 1;
 		if ( loc == NULL )
 			return -1;
