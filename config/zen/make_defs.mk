@@ -57,7 +57,7 @@ CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS += -march=znver1
 endif
-endif
+
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
