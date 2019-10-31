@@ -845,7 +845,7 @@ void bli_?axpy2v
 ```
 Perform
 ```
-  y := y + alphax * conjx(x) + alphay * conjy(y)
+  z := y + alphax * conjx(x) + alphay * conjy(y)
 ```
 where `x`, `y`, and `z` are vectors of length _m_. The kernel, if optimized, is implemented as a fused pair of calls to [axpyv](BLISTypedAPI.md#axpyv).
 

@@ -17,6 +17,8 @@
 
 This wiki describes the coding conventions used in BLIS. Please try to adhere to these conventions when submitting pull requests and/or (if you have permission) committing directly to the repository.
 
+There is some support for these conventions for Emacs editing in the `.dir-locals.el` file, which will affect editing with CC mode in the blis directory.
+
 ## C99
 
 Most of the code in BLIS is written in C, and specifically in ISO C99. This section describes the C coding standards used within BLIS.
@@ -32,19 +34,25 @@ Please either use braces to denote the indentation limits of scope, or to enclos
         foo = 1;
     }
 
-    // This is also fine.
+    // This is also fine. (Ideal for short conditional bodies.)
     if ( bli_obj_is_real( x ) ) { foo = 1; return; }
 
     // This is bad. Please use one of the two forms above.
     if ( bli_obj_is_real( x ) ) {
         foo = 1;
     }
+
+    // This is (much) worse. Please no.
+    if ( bli_obj_is_real( x ) )
+        {
+        foo = 1;
+        }
 }
 ```
 
 ### Indentation
 
-If at all possible, **please use tabs to denote changing levels of scope!** If you can't use tabs or doing so would be very inconvenient given your editor and setup, please set your indentation to use exactly four spaces per level of indentation. Below is what it would look like if you used tabs (with a tab width set to four spaces), or four actual spaces per indentation level.
+If at all possible, **please use tabs to denote changing levels of scope!** If you can't use tabs or doing so would be very inconvenient given your editor and setup, please set your indentation to use exactly four spaces per level of indentation. Below is what it would look like if you used tabs (with a tab width set to occupy four spaces), or four actual spaces per indentation level.
 ```c
 bool_t bli_obj_is_real( obj_t* x )
 {
@@ -103,6 +111,10 @@ Please use blank lines to separate lines of code from the next line of code. How
     // Set the matrix dimensions.
     bli_obj_set_length( 10, x );
     bli_obj_set_width( 5, x );
+
+    // Set the matrix structure.
+    bli_obj_set_struc( BLIS_GENERAL, x );
+    bli_obj_set_uplo( BLIS_DENSE, x );
 }
 ```
 
@@ -132,7 +144,7 @@ Sometimes, to more efficiently display code on the screen, it's helpful to skip 
 
 ### Whitespace in function calls
 
-For single-line function calls, please **avoid** a space between the last character in the function/macro name and the open parentheses. Also, please do not insert any spaces before commas that separate arguments to a function/macro invocation.
+For single-line function calls, **please avoid** a space between the last character in the function/macro name and the open parentheses. Also, please do not insert any spaces before commas that separate arguments to a function/macro invocation. But please **do** insert at least once space after each comma. (I say "at least one" because sometimes it looks nicer to align the commas with those of function calls on lines above or below the function call in question.) Also, please include one space between the opening parentheses and the first argument, and also between the last argument and closing parentheses
 ```c
 {
     obj_t x;
@@ -141,11 +153,14 @@ For single-line function calls, please **avoid** a space between the last charac
     bli_obj_create( BLIS_DOUBLE, 3, 4, 0, 0, &x );
     bli_obj_set_length( 10, x );
 
-    // Bad. Please avoid.
+    // Bad. Please avoid these.
     bli_obj_set_dt ( BLIS_FLOAT, x );
-
-    // Bad. Please avoid.
     bli_obj_set_dt( BLIS_FLOAT , x );
+    bli_obj_set_dt(BLIS_FLOAT, x);
+    bli_obj_set_dt(BLIS_FLOAT,x);
+
+    // Good.
+    bli_obj_set_dt( BLIS_FLOAT, x );
 }
 ```
 For multi-line function calls, please use the following template:
@@ -170,15 +185,23 @@ Notice that here, the parentheses are formatted similar to braces. However, noti
 
 When defining a function with few arguments, insert a single space after commas and types, and after the first parentheses and before the last parentheses:
 ```c
+// Please write "short" function signatures like this.
 void bli_obj_set_length( dim_t m, obj_t* a )
 {
     // Body of function
 }
 ```
 As with single-line function calls, please do not place a space between the last character of the function name and the open parentheses to the argument list!
-
+```c
+// Please avoid this.
+void bli_obj_set_length ( dim_t m, obj_t* a )
+{
+    // Body of function
+}
+```
 When defining a function with many arguments, especially those that would not comfortably fit in a single 80-character line, you can split the type signature into multiple lines:
 ```c
+// Please write "long" function signatures like this.
 void bli_gemm
      (
        obj_t*  alpha,
@@ -194,6 +217,7 @@ void bli_gemm
 ```
 If you are going to use this style of function definition, please indent the parentheses exactly five spaces (don't use tabs here). Then, indent the arguments with an additional two spaces. Thus, parentheses should be in column 6 (counting from 1) and argument types should begin in column 8. Also notice that the number of spaces after each argument's type specifier varies so that the argument names are aligned. If you insert qualifiers such as `restrict`, please right-justify them:
 ```c
+// Please align 'restrict' keywords and variables, as appropriate.
 void bli_gemm
      (
        obj_t*  restrict alpha,
@@ -213,18 +237,39 @@ void bli_gemm
 Please insert whitespace into conditional expressions.
 ```c
 {
-   // Good.
-   if ( m == 10 && n > 0 ) return;
+    // Good.
+    if ( m == 10 && n > 0 ) return;
 
-   // Bad.
-   if ( m==10 && n>0 ) return;
+    // Bad.
+    if ( m==10 && n>0 ) return;
 
-   // Worse!
-   if (m==10&&n>0) return;
+    // Worse!
+    if (m==10&&n>0) return;
+
+    // Okay, now you're just messing with me.
+    if(m==10&&n>0)return;
 }
 ```
 Unlike with the parentheses that surround the argument list of a function call, there should be exactly one space after conditional keywords and the open parentheses for its associated conditional statement: `if (...)`, `else if (...)`, and `while (...)`.
+```c
+{
+    // Good.
+    if ( ... ) return 0;
+    else if ( ... ) return 1;
 
+    // Good.
+    while ( ... )
+    {
+        // loop body.
+    }
+
+    // Good.
+    do
+    {
+        // loop body.
+    } while ( ... );
+}
+```
 Sometimes, extra spaces for alignment are desired:
 ```c
 {

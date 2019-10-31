@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,11 +52,12 @@ void bli_membrk_init
 {
 	membrk_t* restrict membrk = bli_membrk_query();
 
-	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE;
+	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE_GEN;
 	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
 	free_ft     free_fp    = BLIS_FREE_POOL;
 
-	// These fields are used for general-purpose allocation.
+	// These fields are used for general-purpose allocation (ie: buf_type
+	// equal to BLIS_BUFFER_FOR_GEN_USE) within bli_membrk_acquire_m().
 	bli_membrk_set_align_size( align_size, membrk );
 	bli_membrk_set_malloc_fp( malloc_fp, membrk );
 	bli_membrk_set_free_fp( free_fp, membrk );
@@ -348,8 +349,15 @@ void bli_membrk_init_pools
 	const dim_t block_ptrs_len_b = 80;
 	const dim_t block_ptrs_len_c = 0;
 
-	// Use the address alignment size designated (at configure-time) for pools.
-	const siz_t align_size   = BLIS_POOL_ADDR_ALIGN_SIZE;
+	// Use the address alignment sizes designated (at configure-time) for pools.
+	const siz_t align_size_a = BLIS_POOL_ADDR_ALIGN_SIZE_A;
+	const siz_t align_size_b = BLIS_POOL_ADDR_ALIGN_SIZE_B;
+	const siz_t align_size_c = BLIS_POOL_ADDR_ALIGN_SIZE_C;
+
+	// Use the offsets from the above alignments.
+	const siz_t offset_size_a = BLIS_POOL_ADDR_OFFSET_SIZE_A;
+	const siz_t offset_size_b = BLIS_POOL_ADDR_OFFSET_SIZE_B;
+	const siz_t offset_size_c = BLIS_POOL_ADDR_OFFSET_SIZE_C;
 
 	// Use the malloc() and free() designated (at configure-time) for pools.
 	malloc_ft malloc_fp  = BLIS_MALLOC_POOL;
@@ -362,12 +370,12 @@ void bli_membrk_init_pools
 	                                     cntx );
 
 	// Initialize the memory pools for A, B, and C.
-	bli_pool_init( num_blocks_a, block_ptrs_len_a, block_size_a, align_size,
-	               malloc_fp, free_fp, pool_a );
-	bli_pool_init( num_blocks_b, block_ptrs_len_b, block_size_b, align_size,
-	               malloc_fp, free_fp, pool_b );
-	bli_pool_init( num_blocks_c, block_ptrs_len_c, block_size_c, align_size,
-	               malloc_fp, free_fp, pool_c );
+	bli_pool_init( num_blocks_a, block_ptrs_len_a, block_size_a, align_size_a,
+	               offset_size_a, malloc_fp, free_fp, pool_a );
+	bli_pool_init( num_blocks_b, block_ptrs_len_b, block_size_b, align_size_b,
+	               offset_size_b, malloc_fp, free_fp, pool_b );
+	bli_pool_init( num_blocks_c, block_ptrs_len_c, block_size_c, align_size_c,
+	               offset_size_c, malloc_fp, free_fp, pool_c );
 }
 
 void bli_membrk_finalize_pools

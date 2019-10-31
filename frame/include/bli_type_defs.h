@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -992,6 +992,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
 	BLIS_ARCH_STEAMROLLER,
@@ -1015,7 +1016,9 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 20
+// NOTE: This value must be updated to reflect the number of enum values
+// listed above for arch_t!
+#define BLIS_NUM_ARCHS 21
 
 
 //
@@ -1049,6 +1052,7 @@ typedef struct
 
 	siz_t     block_size;
 	siz_t     align_size;
+	siz_t     offset_size;
 
 	malloc_ft malloc_fp;
 	free_ft   free_fp;

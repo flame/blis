@@ -141,24 +141,15 @@ int main( int argc, char** argv )
 
 	printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
 	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
 
 
-	cntx_t* cntx = bli_gks_query_ind_cntx( BLIS_NAT, dt );
-	dim_t   mr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-	dim_t   kc   = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
-	dim_t   mc0  = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx );
-	dim_t   mc   = 2 * mr;
-
 	//for ( p = p_begin; p <= p_max; p += p_inc )
-	//for ( p = p_max; p_begin <= p; p -= p_inc )
-	for ( p = p_max; mc <= mc0; mc += mr )
+	for ( p = p_max; p_begin <= p; p -= p_inc )
 	{
-		bli_cntx_set_blksz_def_dt( dt, BLIS_MC, mc, cntx );
-		bli_cntx_set_blksz_max_dt( dt, BLIS_MC, mc, cntx );
 
 		if ( m_input < 0 ) m = p / ( dim_t )abs(m_input);
 		else               m =     ( dim_t )    m_input;
@@ -166,9 +157,6 @@ int main( int argc, char** argv )
 		else               n =     ( dim_t )    n_input;
 		if ( k_input < 0 ) k = p / ( dim_t )abs(k_input);
 		else               k =     ( dim_t )    k_input;
-
-		m = ( m / mc ) * mc;
-		k = ( k / kc ) * kc;
 
 		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
 		bli_obj_create( dt, 1, 1, 0, 0, &beta );
@@ -409,10 +397,10 @@ int main( int argc, char** argv )
 
 		printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
-		        ( unsigned long )mc,
+		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
-		        ( unsigned long )k, gflops );
+		        ( unsigned long )k,
+		        ( unsigned long )n, gflops );
 
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );

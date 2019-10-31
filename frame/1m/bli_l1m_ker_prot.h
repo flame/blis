@@ -44,6 +44,7 @@
 void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \

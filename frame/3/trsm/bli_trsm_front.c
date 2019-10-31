@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +51,11 @@ void bli_trsm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
+
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )

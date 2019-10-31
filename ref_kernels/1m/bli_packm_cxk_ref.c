@@ -40,6 +40,7 @@
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -188,6 +189,7 @@ INSERT_GENTFUNC_BASIC3( packm_2xk, 2, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -344,6 +346,7 @@ INSERT_GENTFUNC_BASIC3( packm_3xk, 3, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -498,6 +501,7 @@ INSERT_GENTFUNC_BASIC3( packm_4xk, 4, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -641,6 +645,7 @@ INSERT_GENTFUNC_BASIC3( packm_6xk, 6, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -819,6 +824,7 @@ INSERT_GENTFUNC_BASIC3( packm_8xk, 8, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -978,6 +984,7 @@ INSERT_GENTFUNC_BASIC3( packm_10xk, 10, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -1145,6 +1152,7 @@ INSERT_GENTFUNC_BASIC3( packm_12xk, 12, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -1320,6 +1328,7 @@ INSERT_GENTFUNC_BASIC3( packm_14xk, 14, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
@@ -1503,6 +1512,7 @@ INSERT_GENTFUNC_BASIC3( packm_16xk, 16, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \

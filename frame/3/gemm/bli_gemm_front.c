@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,7 +57,8 @@ void bli_gemm_front
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_dt( a ) == bli_obj_dt( c ) )
+	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
 	{
 		gint_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
 		if ( status == BLIS_SUCCESS ) return;
@@ -110,9 +111,9 @@ void bli_gemm_front
 	// schemas, as are contexts for 1m, and if necessary bli_gemm_md() would
 	// have made a copy and modified the schemas, so reading them from the
 	// context should be a safe bet at this point.) This is a sort of hack for
-	// communicating the desired pack schemas for to bli_gemm_cntl_create()
-	// (via bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows
-	// us to subsequently access the schemas from the control tree, which
+	// communicating the desired pack schemas to bli_gemm_cntl_create() (via
+	// bli_l3_thread_decorator() and bli_l3_cntl_create_if()). This allows us
+	// to subsequently access the schemas from the control tree, which
 	// hopefully reduces some confusion, particularly in bli_packm_init().
 	const pack_t schema_a = bli_cntx_schema_a_block( cntx );
 	const pack_t schema_b = bli_cntx_schema_b_panel( cntx );

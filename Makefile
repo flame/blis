@@ -953,11 +953,11 @@ ifeq ($(IS_WIN),no)
 $(INSTALL_LIBDIR)/%.$(LIBBLIS_SO_MMB_EXT): $(BASE_LIB_PATH)/%.$(SHLIB_EXT) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(MKDIR) $(@D)
-	$(INSTALL) -m 0644 $< $@
+	$(INSTALL) -m 0755 $< $@
 else
 	@echo "Installing $(@F) into $(INSTALL_LIBDIR)/"
 	@$(MKDIR) $(@D)
-	@$(INSTALL) -m 0644 $< $@
+	@$(INSTALL) -m 0755 $< $@
 endif
 
 else # ifeq ($(IS_WIN),yes)

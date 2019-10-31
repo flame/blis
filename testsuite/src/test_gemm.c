@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -413,23 +413,9 @@ void libblis_test_gemm_md
 	{
 		bli_copym( &c_save, &c );
 
-#if 0
-bli_printm( "a", &a, "%5.2f", "" );
-bli_printm( "b", &b, "%5.2f", "" );
-bli_printm( "c", &c, "%5.2f", "" );
-bli_printm( "alpha", &alpha, "%5.2f", "" );
-bli_printm( "beta", &beta, "%5.2f", "" );
-#endif
-
 		time = bli_clock();
 
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
-
-		time_min = bli_clock_min_diff( time_min, time );
-
-#if 0
-bli_printm( "c after", &c, "%5.2f", "" );
-#endif
 
 	}
 
@@ -638,7 +624,7 @@ void libblis_test_gemm_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( v - z )
+	//   normfv( v - z )
 	//
 	// is negligible, where
 	//

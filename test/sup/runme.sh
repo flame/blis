@@ -37,12 +37,13 @@ sns="8"
 sks="4"
 
 # Implementations to test.
-impls="vendor blissup blislpab openblas eigen"
-#impls="vendor openblas eigen"
-#impls="blislpab blissup"
-#mpls="openblas eigen vendor"
-#mpls="eigen"
+impls="vendor blissup blislpab openblas eigen libxsmm blasfeo"
+#impls="vendor"
 #impls="blissup"
+#impls="blislpab"
+#impls="openblas"
+#impls="eigen"
+#impls="libxsmm"
 #impls="blasfeo"
 
 # Example: test_dgemm_nn_rrc_m6npkp_blissup_st.x
@@ -71,6 +72,13 @@ for th in ${threads}; do
 										# rrr/ccc storage cases.
 										if [ "${im:0:4}" != "blis" ] && \
 										   [ "${st}" != "rrr" ] && \
+										   [ "${st}" != "ccc" ]; then
+											continue;
+										fi
+
+										# Further limit execution of libxsmm to
+										# ccc storage cases.
+										if [ "${im:0:7}" = "libxsmm" ] && \
 										   [ "${st}" != "ccc" ]; then
 											continue;
 										fi

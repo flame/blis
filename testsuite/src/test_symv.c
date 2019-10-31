@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -322,7 +322,7 @@ void libblis_test_symv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y - v )
+	//   normfv( y - v )
 	//
 	// is negligible, where
 	//

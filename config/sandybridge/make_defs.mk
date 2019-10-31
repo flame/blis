@@ -63,13 +63,17 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
+CKVECFLAGS     := -mavx -mfpmath=sse -march=sandybridge
+ifeq ($(GCC_OT_4_9_0),yes)
+# If gcc is older than 4.9.0, we must use a different label for -march.
 CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
+endif
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xAVX
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx -mfpmath=sse -march=corei7-avx
+CKVECFLAGS     := -mavx -mfpmath=sse -march=sandybridge
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -79,9 +83,13 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
 endif
 
 # Store all of the variables here to new variables containing the

@@ -14,7 +14,12 @@
 
 This document serves as a guide to users interested in taking advantage of
 BLIS's support for performing the `gemm` operation on operands of differing
-datatypes (domain and/or precision).
+datatypes (domain and/or precision). For further details on the implementation
+present in BLIS, please see the latest draft of our paper
+"Supporting Mixed-domain Mixed-precision Matrix Multiplication
+within the BLIS Framework" available in the
+[Citations section](https://github.com/flame/blis/#citations)
+of the main [BLIS webpage](https://github.com/flame/blis).
 
 ## Categories of mixed datatypes
 

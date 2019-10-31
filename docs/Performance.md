@@ -3,6 +3,8 @@
 * **[Contents](Performance.md#contents)**
 * **[Introduction](Performance.md#introduction)**
 * **[General information](Performance.md#general-information)**
+* **[Interpretation](Performance.md#interpretation)**
+* **[Reproduction](Performance.md#reproduction)**
 * **[Level-3 performance](Performance.md#level-3-performance)**
   * **[ThunderX2](Performance.md#thunderx2)**
     * **[Experiment details](Performance.md#thunderx2-experiment-details)**
@@ -110,6 +112,29 @@ When corresponding with us, via email or when opening an
 you specify as closely as possible (though a range is fine) your problem
 size of interest so that we can better assist you.
 
+# Reproduction
+
+In general, we do not offer any step-by-step guide for how to reproduce the
+performance graphs shown below.
+
+That said, if you are keenly interested in running your own performance
+benchmarks, either in an attempt to reproduce the results shown here or to
+measure performance of different hardware, of different implementations (or
+versions), and/or for different problem sizes, you should begin by studying
+the source code, `Makefile`, and scripts in
+the [test/3](https://github.com/flame/blis/tree/master/test/3) directory
+of the BLIS source distribution. Then, you'll need to take time to build
+and/or install some (or all) of the implementations shown (e.g.
+[OpenBLAS](https://github.com/xianyi/OpenBLAS),
+[MKL](https://software.intel.com/en-us/mkl/), and
+[Eigen](http://eigen.tuxfamily.org), including BLIS. Be sure to consult
+the detailed notes provided below; they should be *very* helpful in successfully
+building the libraries. The `runme.sh` script in `test/3` will help you run
+some (or all) of the test drivers produced by the `Makefile`, and the
+Matlab/Octave function `plot_panel_4x5()` defined in the `matlab` directory
+will help you turn the output of those test drivers into a PDF file of graphs.
+The `runthese.m` file will contain example invocations of the function.
+
 # Level-3 performance
 
 ## ThunderX2
@@ -127,6 +152,7 @@ size of interest so that we can better assist you.
   * single-core: 17.6 GFLOPS (double-precision), 35.2 GFLOPS (single-precision)
   * multicore: 17.6 GFLOPS/core (double-precision), 35.2 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 16.04 (Linux kernel 4.15.0)
+* Page size: unknown
 * Compiler: gcc 7.3.0
 * Results gathered: 14 February 2019
 * Implementations tested:
@@ -187,6 +213,7 @@ size of interest so that we can better assist you.
   * single-core: 64 GFLOPS (double-precision), 128 GFLOPS (single-precision)
   * multicore: 64 GFLOPS/core (double-precision), 128 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
 * Results gathered: 6 March 2019, 27 March 2019
 * Implementations tested:
@@ -204,7 +231,14 @@ size of interest so that we can better assist you.
     * Multithreaded (52 core) execution requested via `export OPENBLAS_NUM_THREADS=52`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
@@ -259,6 +293,7 @@ size of interest so that we can better assist you.
   * single-core: 56 GFLOPS (double-precision), 112 GFLOPS (single-precision)
   * multicore: 49.6 GFLOPS/core (double-precision), 99.2 GFLOPS/core (single-precision)
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
+* Page size: 4096 bytes
 * Compiler: gcc 6.3.0
 * Results gathered: 25-26 February 2019, 27 March 2019
 * Implementations tested:
@@ -276,7 +311,14 @@ size of interest so that we can better assist you.
     * Multithreaded (24 core) execution requested via `export OPENBLAS_NUM_THREADS=24`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
@@ -329,6 +371,7 @@ size of interest so that we can better assist you.
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
   * multicore: 20.4 GFLOPS/core (double-precision), 40.8 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
 * Compiler: gcc 7.3.0
 * Results gathered: 6 March 2019, 19 March 2019, 27 March 2019
 * Implementations tested:
@@ -346,7 +389,14 @@ size of interest so that we can better assist you.
     * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
   * Eigen 3.3.90
     * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (March 27, 2019)
-    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal).
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 67.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`

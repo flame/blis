@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,7 +53,14 @@ BLIS_EXPORT_BLIS gint_t bli_info_get_stack_buf_max_size( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_stack_buf_align_size( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_heap_addr_align_size( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_heap_stride_align_size( void );
-BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size_a( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size_b( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size_c( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_align_size_gen( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_offset_size_a( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_offset_size_b( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_offset_size_c( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_pool_addr_offset_size_gen( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_stay_auto_init( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_blas( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_cblas( void );

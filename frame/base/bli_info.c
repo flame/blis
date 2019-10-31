@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,25 +43,32 @@
 static char* bli_version_str       = BLIS_VERSION_STRING;
 static char* bli_int_type_size_str = STRINGIFY_INT( BLIS_INT_TYPE_SIZE );
 
-char* bli_info_get_version_str( void )              { return bli_version_str; }
-char* bli_info_get_int_type_size_str( void )        { return bli_int_type_size_str; }
+char* bli_info_get_version_str( void )                { return bli_version_str; }
+char* bli_info_get_int_type_size_str( void )          { return bli_int_type_size_str; }
 
 
 
 // -- General configuration-related --------------------------------------------
 
-gint_t bli_info_get_int_type_size( void )           { return BLIS_INT_TYPE_SIZE; }
-gint_t bli_info_get_num_fp_types( void )            { return BLIS_NUM_FP_TYPES; }
-gint_t bli_info_get_max_type_size( void )           { return BLIS_MAX_TYPE_SIZE; }
-gint_t bli_info_get_page_size( void )               { return BLIS_PAGE_SIZE; }
-gint_t bli_info_get_simd_num_registers( void )      { return BLIS_SIMD_NUM_REGISTERS; }
-gint_t bli_info_get_simd_size( void )               { return BLIS_SIMD_SIZE; }
-gint_t bli_info_get_simd_align_size( void )         { return BLIS_SIMD_ALIGN_SIZE; }
-gint_t bli_info_get_stack_buf_max_size( void )      { return BLIS_STACK_BUF_MAX_SIZE; }
-gint_t bli_info_get_stack_buf_align_size( void )    { return BLIS_STACK_BUF_ALIGN_SIZE; }
-gint_t bli_info_get_heap_addr_align_size( void )    { return BLIS_HEAP_ADDR_ALIGN_SIZE; }
-gint_t bli_info_get_heap_stride_align_size( void )  { return BLIS_HEAP_STRIDE_ALIGN_SIZE; }
-gint_t bli_info_get_pool_addr_align_size( void )    { return BLIS_POOL_ADDR_ALIGN_SIZE; }
+gint_t bli_info_get_int_type_size( void )             { return BLIS_INT_TYPE_SIZE; }
+gint_t bli_info_get_num_fp_types( void )              { return BLIS_NUM_FP_TYPES; }
+gint_t bli_info_get_max_type_size( void )             { return BLIS_MAX_TYPE_SIZE; }
+gint_t bli_info_get_page_size( void )                 { return BLIS_PAGE_SIZE; }
+gint_t bli_info_get_simd_num_registers( void )        { return BLIS_SIMD_NUM_REGISTERS; }
+gint_t bli_info_get_simd_size( void )                 { return BLIS_SIMD_SIZE; }
+gint_t bli_info_get_simd_align_size( void )           { return BLIS_SIMD_ALIGN_SIZE; }
+gint_t bli_info_get_stack_buf_max_size( void )        { return BLIS_STACK_BUF_MAX_SIZE; }
+gint_t bli_info_get_stack_buf_align_size( void )      { return BLIS_STACK_BUF_ALIGN_SIZE; }
+gint_t bli_info_get_heap_addr_align_size( void )      { return BLIS_HEAP_ADDR_ALIGN_SIZE; }
+gint_t bli_info_get_heap_stride_align_size( void )    { return BLIS_HEAP_STRIDE_ALIGN_SIZE; }
+gint_t bli_info_get_pool_addr_align_size_a( void )    { return BLIS_POOL_ADDR_ALIGN_SIZE_A; }
+gint_t bli_info_get_pool_addr_align_size_b( void )    { return BLIS_POOL_ADDR_ALIGN_SIZE_B; }
+gint_t bli_info_get_pool_addr_align_size_c( void )    { return BLIS_POOL_ADDR_ALIGN_SIZE_C; }
+gint_t bli_info_get_pool_addr_align_size_gen( void )  { return BLIS_POOL_ADDR_ALIGN_SIZE_GEN; }
+gint_t bli_info_get_pool_addr_offset_size_a( void )   { return BLIS_POOL_ADDR_OFFSET_SIZE_A; }
+gint_t bli_info_get_pool_addr_offset_size_b( void )   { return BLIS_POOL_ADDR_OFFSET_SIZE_B; }
+gint_t bli_info_get_pool_addr_offset_size_c( void )   { return BLIS_POOL_ADDR_OFFSET_SIZE_C; }
+gint_t bli_info_get_pool_addr_offset_size_gen( void ) { return BLIS_POOL_ADDR_OFFSET_SIZE_GEN; }
 gint_t bli_info_get_enable_stay_auto_init( void )
 {
 #ifdef BLIS_ENABLE_STAY_AUTO_INITIALIZED

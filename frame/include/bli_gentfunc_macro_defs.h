@@ -225,6 +225,24 @@ GENTFUNCR( dcomplex, double, z, d, tfuncname, varname1, varname2, varname3, varn
 
 
 
+// -- Basic one-operand macro with real domain only --
+
+// -- (no auxiliary arguments) --
+
+#define INSERT_GENTFUNCRO_BASIC0( tfuncname ) \
+\
+GENTFUNCRO( float,  s, tfuncname ) \
+GENTFUNCRO( double, d, tfuncname ) \
+
+// -- (one auxiliary argument) --
+
+#define INSERT_GENTFUNCRO_BASIC( tfuncname, varname ) \
+\
+GENTFUNCRO( float,  s, tfuncname, varname ) \
+GENTFUNCRO( double, d, tfuncname, varname ) \
+
+
+
 // -- Basic one-operand macro with complex domain only and real projection --
 
 // -- (no auxiliary arguments) --

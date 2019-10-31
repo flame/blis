@@ -23,6 +23,7 @@ filetemp_blislpab = '%s/output_%s_%s_blislpab.m';
 filetemp_eigen    = '%s/output_%s_%s_eigen.m';
 filetemp_open     = '%s/output_%s_%s_openblas.m';
 filetemp_bfeo     = '%s/output_%s_%s_blasfeo.m';
+filetemp_xsmm     = '%s/output_%s_%s_libxsmm.m';
 filetemp_vend     = '%s/output_%s_%s_vendor.m';
 
 % Create a variable name "template" for the variables contained in the
@@ -83,15 +84,10 @@ for opi = 1:n_opsupnames
 	% Load the data files.
 	%str = sprintf( '  Loading %s', file_blissup ); disp(str);
 	run( file_blissup )
-	%str = sprintf( '  Loading %s', file_blislpab ); disp(str);
 	run( file_blislpab )
-	%str = sprintf( '  Loading %s', file_eigen ); disp(str);
 	run( file_eigen )
-	%str = sprintf( '  Loading %s', file_open ); disp(str);
 	run( file_open )
-	%str = sprintf( '  Loading %s', file_open ); disp(str);
 	run( file_bfeo )
-	%str = sprintf( '  Loading %s', file_vend ); disp(str);
 	run( file_vend )
 
 	% Construct variable names for the variables in the data files.
@@ -111,11 +107,25 @@ for opi = 1:n_opsupnames
 	data_bfeo = eval( var_bfeo );         % e.g. data_st_dgemm_blasfeo( :, : );
 	data_vend = eval( var_vend );         % e.g. data_st_dgemm_vendor( :, : );
 
+	if stor_str == 'ccc'
+		% Only read xsmm data for the column storage case, since that's the
+		% only format that libxsmm supports.
+		file_xsmm = sprintf( filetemp_xsmm,     dirpath, thr_str, opsupname );
+		run( file_xsmm )
+		var_xsmm  = sprintf( vartemp, thr_str, opname, 'libxsmm' );
+		data_xsmm = eval( var_xsmm );     % e.g. data_st_dgemm_libxsmm( :, : );
+	else
+		% Set the data variable to zeros using the same dimensions as the other
+		% variables.
+		data_xsmm = zeros( size( data_blissup, 1 ), ...
+		                   size( data_blissup, 2 ) );
+	end
 	%str = sprintf( '  Reading %s', var_blissup ); disp(str);
 	%str = sprintf( '  Reading %s', var_blislpab ); disp(str);
 	%str = sprintf( '  Reading %s', var_eigen ); disp(str);
 	%str = sprintf( '  Reading %s', var_open ); disp(str);
 	%str = sprintf( '  Reading %s', var_bfeo ); disp(str);
+	%str = sprintf( '  Reading %s', var_xsmm ); disp(str);
 	%str = sprintf( '  Reading %s', var_vend ); disp(str);
 
 	% Plot one result in an m x n grid of plots, via the subplot()
@@ -127,6 +137,7 @@ for opi = 1:n_opsupnames
 	                 data_eigen, ...
 	                 data_open, ...
 	                 data_bfeo, ...
+	                 data_xsmm, ...
 	                 data_vend, vend_str, ...
 	                 nth, ...
 	                 4, 7, ...
@@ -140,6 +151,7 @@ for opi = 1:n_opsupnames
 	clear data_eigen;
 	clear data_open;
 	clear data_bfeo;
+	clear data_xsmm;
 	clear data_vend;
 
 	end
