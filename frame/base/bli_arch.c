@@ -142,7 +142,7 @@ void bli_arch_set_id( void )
 
 	// IBM microarchitectures.
 #ifdef BLIS_FAMILY_POWER9
-        id = BLIS_ARCH_POWER9;
+  id = BLIS_ARCH_POWER9;
 #endif
 #ifdef BLIS_FAMILY_POWER7
 	id = BLIS_ARCH_POWER7;

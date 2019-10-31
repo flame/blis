@@ -34,101 +34,55 @@
 
 #include "blis.h"
 
-#define umk_12x6 1
-#define umk_4x16 0
-#define umk_18x4 0
+// Instantiate prototypes for packm kernels.
+PACKM_KER_PROT(    double, d, packm_6xk_bb2_power9_ref )
+
+// Instantiate prototypes for level-3 kernels.
+//GEMM_UKR_PROT(     double, d, gemmbb_power9_ref )
 
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-	
+
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_power9_ref( cntx );
-		
-	// -------------------------------------------------------------------------
-
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-
-	#if umk_12x6
-		bli_cntx_set_l3_nat_ukrs
-		(
-			1,
-			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_12x6,  FALSE,
-			cntx
-		);
-	#elif umk_4x16
-		bli_cntx_set_l3_nat_ukrs
-		(
-			1,
-			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_4x16,  TRUE,
-			cntx
-		);
-
-	#elif umk_18x4
-		bli_cntx_set_l3_nat_ukrs
-		(
-			1,
-			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_18x4,  FALSE,
-			cntx
-		);
-
-	#else
-		bli_cntx_set_l3_nat_ukrs
-		(
-			1,
-			BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_16x4,  FALSE,
-			cntx
-		);
-	#endif
-
-	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                           s      d      c      z
-
-	#if umk_12x6 // 12x6
-		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     12,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     6,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8190,     0,     0 );
 	
-	#elif umk_4x16 // 4x16
-		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     4,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     16,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
+	// Update the context with optimized native gemm micro-kernels and
+    // their storage preferences.
+    bli_cntx_set_l3_nat_ukrs
+    (
+      1,
+      //BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemmbb_power9_ref,        FALSE,
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,        FALSE,
+      cntx
+    );
 
-	#elif umk_18x4 // 18x4
-		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     18,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
-		
-	#else //16x4
-		bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     16,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,   288,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   1920,     0,     0 );
-		bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,   8192,     0,     0 );
-		
-	#endif
+    // Update the context with optimized packm kernels.
+    bli_cntx_set_packm_kers
+    (
+      1,
+      BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_6xk_bb2_power9_ref,
+      cntx
+    );
 
-	 
-	// Update the context with the current architecture's register and cache
-	// blocksizes (and multiples) for native execution.
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    12,    -1,    -1 );
+    bli_blksz_init     ( &blkszs[ BLIS_NR ],    -1,     6,    -1,    -1,
+                                                -1,    12,    -1,    -1 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   576,    -1,    -1 );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,  1408,    -1,    -1 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  8190,    -1,    -1 );
+
 	bli_cntx_set_blkszs
-	(
-	  BLIS_NAT, 5,
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  cntx
-	);
-
+    (
+      BLIS_NAT, 5,
+      // level-3
+      BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+      BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+      BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+      BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+      BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+      cntx
+    );	
 }
 
