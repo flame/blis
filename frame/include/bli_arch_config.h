@@ -268,6 +268,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- IBM BG/Q --
 
+#ifdef BLIS_KERNELS_POWER9
+#include "bli_kernels_power9.h"
+#endif
 #ifdef BLIS_KERNELS_POWER7
 #include "bli_kernels_power7.h"
 #endif

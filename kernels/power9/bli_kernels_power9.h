@@ -32,10 +32,16 @@
 
 */
 
-#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
-#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
+// -- level-3 --
 
-#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
-#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
+// gemm (asm d12x6)
+GEMM_UKR_PROT( double,   d, gemm_power9_asm_12x6 )
 
+// gemm (asm d18x4)
+GEMM_UKR_PROT( double,   d, gemm_power9_asm_18x4 )
 
+// gemm (asm d4x16)
+GEMM_UKR_PROT( double,   d, gemm_power9_asm_16x4 )
+
+// gemm (asm d4x16)
+GEMM_UKR_PROT( double,   d, gemm_power9_asm_4x16 )

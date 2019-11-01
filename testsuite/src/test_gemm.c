@@ -272,11 +272,23 @@ void libblis_test_gemm_experiment
 	{
 		bli_copym( &c_save, &c );
 
+#if 0
+bli_printm( "alpha", &alpha, "%5.2f", "" );
+bli_printm( "beta", &beta, "%5.2f", "" );
+bli_printm( "a = [", &a, "%7.6f", "];" );
+bli_printm( "b = [", &b, "%7.6f", "];" );
+bli_printm( "c = [", &c, "%7.6f", "];" );
+#endif
+
 		time = bli_clock();
 
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
 
 		time_min = bli_clock_min_diff( time_min, time );
+#if 0
+bli_printm( "c_after = [", &c, "%7.6f", "];" );
+#endif
+
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -405,7 +417,6 @@ void libblis_test_gemm_md
 
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
 
-		time_min = bli_clock_min_diff( time_min, time );
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -442,20 +453,18 @@ void libblis_test_gemm_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 #if 0
-//bli_printm( "alpha", alpha, "%5.2f", "" );
-//bli_printm( "beta", beta, "%5.2f", "" );
-bli_printm( "a", a, "%5.2f", "" );
-bli_printm( "b", b, "%5.2f", "" );
-bli_printm( "c", c, "%5.2f", "" );
+bli_printm( "alpha", alpha, "%5.2f", "" );
+bli_printm( "beta", beta, "%5.2f", "" );
+bli_printm( "a", a, "%6.3f", "" );
+bli_printm( "b", b, "%6.3f", "" );
+bli_printm( "c", c, "%6.3f", "" );
 #endif
 //if ( bli_obj_length( b ) == 16 &&
 //     bli_obj_stor3_from_strides( c, a, b ) == BLIS_CRR )
 //bli_printm( "c before", c, "%6.3f", "" );
 		bli_gemm( alpha, a, b, beta, c );
 #if 0
-if ( bli_obj_length( c ) == 12 &&
-     bli_obj_stor3_from_strides( c, a, b ) == BLIS_RRR )
-bli_printm( "c after", c, "%6.3f", "" );
+bli_printm( "c after", c, "%6.3f", "");
 #endif
 		break;
 
