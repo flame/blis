@@ -60,7 +60,7 @@ void bli_dgemm_power9_asm_12x6
 	uint64_t k_left = k0;
 	#endif
 
-  	uint64_t rs_c   = rs_c0;
+  uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
 	__asm__ volatile
@@ -95,57 +95,33 @@ void bli_dgemm_power9_asm_12x6
 "                                               \n\t"
 ZERO_OUT_VREG                                         // Zero out vec regs
 "                                               \n\t"
-PRELOAD											      // preload col of A/row of B
-"                                               \n\t"
+PRELOAD											                          // preload col of A/row of B
 "                                               \n\t"
 "addi             %%r8, %%r8, 96                \n\t" // move ptrs
 "addi             %%r7, %%r7, 96                \n\t"
 "                                               \n\t"
-#if 1
 "dcbt             0, %%r16                      \n\t" // prefetch
 "dcbt             0, %%r17                      \n\t" // prefetch 
 "dcbt             0, %%r18                      \n\t" // prefetch 
 "dcbt             0, %%r19                      \n\t" // prefetch
 "dcbt             0, %%r20                      \n\t" // prefetch
 "dcbt             0, %%r21                      \n\t" // prefetch
-#endif
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
 "                                               \n\t"
 "cmpwi            %%r0, %%r11, 0                \n\t" // if k_iter == 0,
 "beq              %%r0, DCONSIDERKLEFT          \n\t" // then jmp to k_left
 "mtctr            %%r11                         \n\t" // else, do k_iter loop
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
 "                                               \n\t"  
 "DLOOPKITER:                                    \n\t" // k_iter loop
 "                                               \n\t"
-A_B_PRODUCT_16									      // compute A*B 
+A_B_PRODUCT_16									                      // compute A*B 
 "                                               \n\t"
 "bdnz             DLOOPKITER                    \n\t"
 "                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
 "DCONSIDERKLEFT:                                \n\t"
-"                                               \n\t"
 "                                               \n\t"
 "cmpwi            %%r0, %%r12, 0                \n\t" // if k_left == 0,
 "beq              %%r0, DPOSTACCUM              \n\t" // then jmp to post accum
 "mtctr            %%r12                         \n\t" // else, do k_left loop
-"                                               \n\t"
 "                                               \n\t"
 "DLOOPKLEFT:                                    \n\t" // k_left loop 
 "                                               \n\t"
@@ -153,355 +129,44 @@ A_B_PRODUCT_1
 "                                               \n\t"
 "bdnz             DLOOPKLEFT                    \n\t" 
 "                                               \n\t"
-"                                               \n\t"
 "DPOSTACCUM:                                    \n\t" // post accumlation
 "                                               \n\t"
-SCALE_ALPHA											  // scale A*B by alpha
+DSCALE_ALPHA											                    // scale A*B by alpha
 "                                               \n\t"
 "cmpdi            %%r0, %%r26, 0                \n\t" // if beta == 0,
 "beq              %%r0, DBETAZERO               \n\t" // then jmp to BZ
 "                                               \n\t"
-"ld               %%r22, %6                     \n\t" // load ptr of C 
-"                                               \n\t"
 "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8
 "beq              DCOLSTOREDBNZ                 \n\t" // then jmp to col store 
 "                                               \n\t"
+"DGENSTOREDBNZ:                                 \n\t" // BNZ gen stored case 
 "                                               \n\t"
-"DGENSTOREDBNZ:                                 \n\t"
-#if 0
-"                                               \n\t" // create offset regs
-"slwi             %%r12, %%r9, 1                \n\t" // rs_c * 2
-"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
-"add             %%r24, %%r23, %%r12           	\n\t" // c + rs_c * 4
-"add             %%r25, %%r24, %%r12           	\n\t" // c + rs_c * 6 
-"add             %%r26, %%r25, %%r12           	\n\t" // c + rs_c * 8
-"add             %%r27, %%r26, %%r12           	\n\t" // c + rs_c * 10
+DGEN_LOAD_OFS_C                                       // load offset regs
 "                                              	\n\t"
-GENLOAD_SCALE_UPDATE                                	  // (1) load, scale, and move offsets of C
+DGEN_SCALE_BETA
 "                                               \n\t"
-"xvadddp          %%vs0,  %%vs0,  %%vs36   	    \n\t" 
-"xvadddp          %%vs1,  %%vs1,  %%vs37   	  	\n\t" 
-"xvadddp          %%vs2,  %%vs2,  %%vs38   	  	\n\t" 
-"xvadddp          %%vs3,  %%vs3,  %%vs39	    \n\t" 
-"xvadddp          %%vs4,  %%vs4,  %%vs40   	  	\n\t" 
-"xvadddp          %%vs5,  %%vs5,  %%vs41   	  	\n\t"
-"                                               \n\t"
-"                                               \n\t"
-GENLOAD_SCALE_UPDATE                                    // (2) load, scale, and move offsets of C
-"                                               \n\t"
-"xvadddp          %%vs6,  %%vs6,  %%vs36        \n\t" 
-"xvadddp          %%vs7,  %%vs7,  %%vs37        \n\t" 
-"xvadddp          %%vs8,  %%vs8,  %%vs38        \n\t" 
-"xvadddp          %%vs9,  %%vs9,  %%vs39        \n\t" 
-"xvadddp          %%vs10, %%vs10, %%vs40        \n\t" 
-"xvadddp          %%vs11, %%vs11, %%vs41        \n\t"
-"                                               \n\t"
-"                                               \n\t"
-GENLOAD_SCALE_UPDATE                                    // (3) load, scale, and move offsets of C
-"                                               \n\t"
-"xvadddp          %%vs12, %%vs12, %%vs36        \n\t"
-"xvadddp          %%vs13, %%vs13, %%vs37        \n\t"
-"xvadddp          %%vs14, %%vs14, %%vs38        \n\t"
-"xvadddp          %%vs15, %%vs15, %%vs39        \n\t"
-"xvadddp          %%vs16, %%vs16, %%vs40        \n\t"
-"xvadddp          %%vs17, %%vs17, %%vs41        \n\t"
-"                                               \n\t"
-"                                          	    \n\t"
-GENLOAD_SCALE_UPDATE                                    // (4) load, scale, and move offsets of C
-"                                               \n\t"
-"xvadddp          %%vs18, %%vs18, %%vs36        \n\t"
-"xvadddp          %%vs19, %%vs19, %%vs37        \n\t"
-"xvadddp          %%vs20, %%vs20, %%vs38        \n\t"
-"xvadddp          %%vs21, %%vs21, %%vs39        \n\t"
-"xvadddp          %%vs22, %%vs22, %%vs40        \n\t"
-"xvadddp          %%vs23, %%vs23, %%vs41        \n\t"
-"                                               \n\t"
-"                                               \n\t"
-GENLOAD_SCALE_UPDATE                                    // (5) load, scale, and move offsets of C
-"                                               \n\t"
-"xvadddp          %%vs24, %%vs24, %%vs36        \n\t"
-"xvadddp          %%vs25, %%vs25, %%vs37        \n\t"
-"xvadddp          %%vs26, %%vs26, %%vs38        \n\t"
-"xvadddp          %%vs27, %%vs27, %%vs39        \n\t"
-"xvadddp          %%vs28, %%vs28, %%vs40        \n\t"
-"xvadddp          %%vs29, %%vs29, %%vs41        \n\t"
-"                                               \n\t"
-"                                               \n\t"
-GENLOAD_SCALE_UPDATE                                    // (6) load, scale, and move offsets of C
-"                                               \n\t"
-"xvadddp          %%vs30, %%vs30, %%vs36        \n\t"
-"xvadddp          %%vs31, %%vs31, %%vs37        \n\t"
-"xvadddp          %%vs32, %%vs32, %%vs38        \n\t"
-"xvadddp          %%vs33, %%vs33, %%vs39        \n\t"
-"xvadddp          %%vs34, %%vs34, %%vs40        \n\t"
-"xvadddp          %%vs35, %%vs35, %%vs41        \n\t"
-"                                               \n\t"
-#endif
 "b                DGENSTORED                    \n\t"
 "                                               \n\t"
+"DCOLSTOREDBNZ:                                 \n\t" // BNZ col stored case
 "                                               \n\t"
+DCOL_SCALE_BETA                                       
 "                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"DCOLSTOREDBNZ:                                 \n\t"
-COL_SCALE_BETA_TEST
-//COL_SCALE_BETA_TEST_2
-//COL_SCALE_BETA_TEST_3
-#if 0
-"                                               \n\t"
-"                                               \n\t"
-"DADDTOC:                                       \n\t" // C = beta*C + alpha*(AB)
-"                                               \n\t"
-"lxv              %%vs36,  0(%%r16)             \n\t" 
-"lxv              %%vs37, 16(%%r16)             \n\t" 
-"lxv              %%vs38, 32(%%r16)             \n\t" 
-"lxv              %%vs39, 48(%%r16)             \n\t" 
-"lxv              %%vs40, 64(%%r16)             \n\t" 
-"lxv              %%vs41, 80(%%r16)             \n\t" 
-"lxv              %%vs42,  0(%%r17)             \n\t" 
-"lxv              %%vs43, 16(%%r17)             \n\t" 
-"lxv              %%vs44, 32(%%r17)             \n\t" 
-"lxv              %%vs45, 48(%%r17)             \n\t" 
-"lxv              %%vs46, 64(%%r17)             \n\t" 
-"lxv              %%vs47, 80(%%r17)             \n\t" 
-"lxv              %%vs48,  0(%%r18)             \n\t" 
-"lxv              %%vs49, 16(%%r18)             \n\t" 
-"lxv              %%vs50, 32(%%r18)             \n\t" 
-"lxv              %%vs51, 48(%%r18)             \n\t" 
-"lxv              %%vs52, 64(%%r18)             \n\t" 
-"lxv              %%vs53, 80(%%r18)             \n\t"
-"            	                                \n\t"
-"xvmaddadp          %%vs0,  %%vs36,  %%vs63        \n\t"
-"xvmaddadp          %%vs1,  %%vs37,  %%vs63        \n\t"
-"xvmaddadp          %%vs2,  %%vs38,  %%vs63        \n\t"
-"xvmaddadp          %%vs3,  %%vs39,  %%vs63        \n\t"
-"xvmaddadp          %%vs4,  %%vs40,  %%vs63        \n\t"
-"xvmaddadp          %%vs5,  %%vs41,  %%vs63        \n\t"
-"xvmaddadp          %%vs6,  %%vs42,  %%vs63        \n\t"
-"xvmaddadp          %%vs7,  %%vs43,  %%vs63        \n\t"
-"xvmaddadp          %%vs8,  %%vs44,  %%vs63        \n\t"
-"xvmaddadp          %%vs9,  %%vs45,  %%vs63        \n\t"
-"xvmaddadp          %%vs10,  %%vs46,  %%vs63        \n\t"
-"xvmaddadp          %%vs11,  %%vs47,  %%vs63        \n\t"
-"xvmaddadp          %%vs12,  %%vs48,  %%vs63        \n\t"
-"xvmaddadp          %%vs13,  %%vs49,  %%vs63        \n\t"
-"xvmaddadp          %%vs14,  %%vs50,  %%vs63        \n\t"
-"xvmaddadp          %%vs15,  %%vs51,  %%vs63        \n\t"
-"xvmaddadp          %%vs16,  %%vs52,  %%vs63        \n\t"
-"xvmaddadp          %%vs17,  %%vs53,  %%vs63        \n\t"
-"                                               \n\t"
-"lxv              %%vs36,  0(%%r19)             \n\t" 
-"lxv              %%vs37, 16(%%r19)             \n\t" 
-"lxv              %%vs38, 32(%%r19)             \n\t" 
-"lxv              %%vs39, 48(%%r19)             \n\t" 
-"lxv              %%vs40, 64(%%r19)             \n\t" 
-"lxv              %%vs41, 80(%%r19)             \n\t" 
-"lxv              %%vs42,  0(%%r20)             \n\t" 
-"lxv              %%vs43, 16(%%r20)             \n\t" 
-"lxv              %%vs44, 32(%%r20)             \n\t" 
-"lxv              %%vs45, 48(%%r20)             \n\t" 
-"lxv              %%vs46, 64(%%r20)             \n\t" 
-"lxv              %%vs47, 80(%%r20)             \n\t" 
-"lxv              %%vs48,  0(%%r21)             \n\t" 
-"lxv              %%vs49, 16(%%r21)             \n\t" 
-"lxv              %%vs50, 32(%%r21)             \n\t" 
-"lxv              %%vs51, 48(%%r21)             \n\t" 
-"lxv              %%vs52, 64(%%r21)             \n\t" 
-"lxv              %%vs53, 80(%%r21)             \n\t"
-"                                               \n\t"
-"xvmaddadp          %%vs18,  %%vs36,  %%vs63        \n\t"
-"xvmaddadp          %%vs19,  %%vs37,  %%vs63        \n\t"
-"xvmaddadp          %%vs20,  %%vs38,  %%vs63        \n\t"
-"xvmaddadp          %%vs21,  %%vs39,  %%vs63        \n\t"
-"xvmaddadp          %%vs22,  %%vs40,  %%vs63        \n\t"
-"xvmaddadp          %%vs23,  %%vs41,  %%vs63        \n\t"
-"xvmaddadp          %%vs24,  %%vs42,  %%vs63        \n\t"
-"xvmaddadp          %%vs25,  %%vs43,  %%vs63        \n\t"
-"xvmaddadp          %%vs26,  %%vs44,  %%vs63        \n\t"
-"xvmaddadp          %%vs27,  %%vs45,  %%vs63        \n\t"
-"xvmaddadp          %%vs28,  %%vs46,  %%vs63        \n\t"
-"xvmaddadp          %%vs29,  %%vs47,  %%vs63        \n\t"
-"xvmaddadp          %%vs30,  %%vs48,  %%vs63        \n\t"
-"xvmaddadp          %%vs31,  %%vs49,  %%vs63        \n\t"
-"xvmaddadp          %%vs32,  %%vs50,  %%vs63        \n\t"
-"xvmaddadp          %%vs33,  %%vs51,  %%vs63        \n\t"
-"xvmaddadp          %%vs34,  %%vs52,  %%vs63        \n\t"
-"xvmaddadp          %%vs35,  %%vs53,  %%vs63        \n\t"
-"                                               \n\t"
-"                                               \n\t"
-#endif
 "b                DCOLSTORED                    \n\t"
 "                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"DBETAZERO:                                     \n\t" // beta=0 case
+"DBETAZERO:                                     \n\t" // BZ case
 "                                               \n\t" 
 "cmpwi            %%r0, %%r9, 8                 \n\t" // if rs_c == 8,
 "beq              DCOLSTORED                    \n\t" // C is col stored
 "                                               \n\t"
-"DGENSTORED:                                    \n\t"
-#if 0
+"DGENSTORED:                                    \n\t" // BZ gen stored case
 "                                               \n\t"
-"ld              %%r22, %6                      \n\t" // c
-"add             %%r23, %%r22, %%r12            \n\t" // c + rs_c * 2
-"add             %%r24, %%r23, %%r12           	\n\t" // c + rs_c * 4
-"add             %%r25, %%r24, %%r12           	\n\t" // c + rs_c * 6 
-"add             %%r26, %%r25, %%r12           	\n\t" // c + rs_c * 8
-"add             %%r27, %%r26, %%r12           	\n\t" // c + rs_c * 10
+DGEN_LOAD_OFS_C                                       // load offset regs
 "                                               \n\t"
-"stxsdx          %%vs0, %%r9, %%r22             \n\t" 
-"xxswapd         %%vs0, %%vs0		            \n\t" 
-"stxsdx          %%vs0, 0, %%r22                \n\t" 
-"stxsdx          %%vs1, %%r9, %%r23             \n\t" 
-"xxswapd         %%vs1, %%vs1		            \n\t" 
-"stxsdx          %%vs1, 0, %%r23                \n\t" 
-"stxsdx          %%vs2, %%r9, %%r24             \n\t" 
-"xxswapd         %%vs2, %%vs2		            \n\t" 
-"stxsdx          %%vs2, 0, %%r24                \n\t" 
-"stxsdx          %%vs3, %%r9, %%r25             \n\t" 
-"xxswapd         %%vs3, %%vs3		            \n\t" 
-"stxsdx          %%vs3, 0, %%r25                \n\t" 
-"stxsdx          %%vs4, %%r9, %%r26             \n\t" 
-"xxswapd         %%vs4, %%vs4		            \n\t" 
-"stxsdx          %%vs4, 0, %%r26                \n\t" 
-"stxsdx          %%vs5, %%r9, %%r27             \n\t" 
-"xxswapd         %%vs5, %%vs5		            \n\t" 
-"stxsdx          %%vs5, 0, %%r27                \n\t" 
+DGEN_STORE                                            
 "                                               \n\t"
-GEN_NEXT_COL_CMATRIX
-"                                               \n\t"
-"stxsdx          %%vs6, %%r9, %%r22             \n\t" 
-"xxswapd         %%vs6, %%vs6		            \n\t" 
-"stxsdx          %%vs6, 0, %%r22                \n\t" 
-"stxsdx          %%vs7, %%r9, %%r23             \n\t" 
-"xxswapd         %%vs7, %%vs7		            \n\t" 
-"stxsdx          %%vs7, 0, %%r23                \n\t" 
-"stxsdx          %%vs8, %%r9, %%r24             \n\t" 
-"xxswapd         %%vs8, %%vs8		            \n\t" 
-"stxsdx          %%vs8, 0, %%r24                \n\t" 
-"stxsdx          %%vs9, %%r9, %%r25             \n\t" 
-"xxswapd         %%vs9, %%vs9		            \n\t" 
-"stxsdx          %%vs9, 0, %%r25                \n\t" 
-"stxsdx          %%vs10, %%r9, %%r26            \n\t" 
-"xxswapd         %%vs10, %%vs10		            \n\t" 
-"stxsdx          %%vs10, 0, %%r26               \n\t" 
-"stxsdx          %%vs11, %%r9, %%r27            \n\t" 
-"xxswapd         %%vs11, %%vs11		            \n\t" 
-"stxsdx          %%vs11, 0, %%r27               \n\t" 
-"                                               \n\t"
-GEN_NEXT_COL_CMATRIX 
-"                                               \n\t"
-"stxsdx          %%vs12, %%r9, %%r22            \n\t" 
-"xxswapd         %%vs12, %%vs12		            \n\t" 
-"stxsdx          %%vs12, 0, %%r22               \n\t" 
-"stxsdx          %%vs13, %%r9, %%r23            \n\t" 
-"xxswapd         %%vs13, %%vs13		            \n\t" 
-"stxsdx          %%vs13, 0, %%r23               \n\t" 
-"stxsdx          %%vs14, %%r9, %%r24            \n\t" 
-"xxswapd         %%vs14, %%vs14		            \n\t" 
-"stxsdx          %%vs14, 0, %%r24               \n\t" 
-"stxsdx          %%vs15, %%r9, %%r25            \n\t" 
-"xxswapd         %%vs15, %%vs15		            \n\t" 
-"stxsdx          %%vs15, 0, %%r25               \n\t" 
-"stxsdx          %%vs16, %%r9, %%r26            \n\t" 
-"xxswapd         %%vs16, %%vs16		            \n\t" 
-"stxsdx          %%vs16, 0, %%r26               \n\t" 
-"stxsdx          %%vs17, %%r9, %%r27            \n\t" 
-"xxswapd         %%vs17, %%vs17		            \n\t" 
-"stxsdx          %%vs17, 0, %%r27               \n\t" 
-"                                               \n\t"
-GEN_NEXT_COL_CMATRIX 
-"                                               \n\t"
-"stxsdx          %%vs18, %%r9, %%r22            \n\t" 
-"xxswapd         %%vs18, %%vs18		            \n\t" 
-"stxsdx          %%vs18, 0, %%r22               \n\t" 
-"stxsdx          %%vs19, %%r9, %%r23            \n\t" 
-"xxswapd         %%vs19, %%vs19		            \n\t" 
-"stxsdx          %%vs19, 0, %%r23               \n\t" 
-"stxsdx          %%vs20, %%r9, %%r24            \n\t" 
-"xxswapd         %%vs20, %%vs20		            \n\t" 
-"stxsdx          %%vs20, 0, %%r24               \n\t" 
-"stxsdx          %%vs21, %%r9, %%r25            \n\t" 
-"xxswapd         %%vs21, %%vs21		            \n\t" 
-"stxsdx          %%vs21, 0, %%r25               \n\t" 
-"stxsdx          %%vs22, %%r9, %%r26            \n\t" 
-"xxswapd         %%vs22, %%vs22		            \n\t" 
-"stxsdx          %%vs22, 0, %%r26               \n\t" 
-"stxsdx          %%vs23, %%r9, %%r27            \n\t" 
-"xxswapd         %%vs23, %%vs23		            \n\t" 
-"stxsdx          %%vs23, 0, %%r27               \n\t" 
-"                                               \n\t"
-GEN_NEXT_COL_CMATRIX 
-"                                               \n\t"
-"stxsdx          %%vs24, %%r9, %%r22            \n\t" 
-"xxswapd         %%vs24, %%vs24		            \n\t" 
-"stxsdx          %%vs24, 0, %%r22               \n\t" 
-"stxsdx          %%vs25, %%r9, %%r23            \n\t" 
-"xxswapd         %%vs25, %%vs25		            \n\t" 
-"stxsdx          %%vs25, 0, %%r23               \n\t" 
-"stxsdx          %%vs26, %%r9, %%r24            \n\t" 
-"xxswapd         %%vs26, %%vs26		            \n\t" 
-"stxsdx          %%vs26, 0, %%r24               \n\t" 
-"stxsdx          %%vs27, %%r9, %%r25            \n\t" 
-"xxswapd         %%vs27, %%vs27		            \n\t" 
-"stxsdx          %%vs27, 0, %%r25               \n\t" 
-"stxsdx          %%vs28, %%r9, %%r26            \n\t" 
-"xxswapd         %%vs28, %%vs28	                \n\t" 
-"stxsdx          %%vs28, 0, %%r26               \n\t" 
-"stxsdx          %%vs29, %%r9, %%r27            \n\t" 
-"xxswapd         %%vs29, %%vs29		            \n\t" 
-"stxsdx          %%vs29, 0, %%r27               \n\t" 
-"                                               \n\t"
-GEN_NEXT_COL_CMATRIX 
-"                                               \n\t"
-"stxsdx          %%vs30, %%r9, %%r22            \n\t" 
-"xxswapd         %%vs30, %%vs30		            \n\t" 
-"stxsdx          %%vs30, 0, %%r22               \n\t" 
-"stxsdx          %%vs31, %%r9, %%r23            \n\t" 
-"xxswapd         %%vs31, %%vs31		            \n\t" 
-"stxsdx          %%vs31, 0, %%r23               \n\t" 
-"stxsdx          %%vs32, %%r9, %%r24            \n\t" 
-"xxswapd         %%vs32, %%vs32		            \n\t" 
-"stxsdx          %%vs32, 0, %%r24               \n\t" 
-"stxsdx          %%vs33, %%r9, %%r25            \n\t" 
-"xxswapd         %%vs33, %%vs33		            \n\t" 
-"stxsdx          %%vs33, 0, %%r25               \n\t" 
-"stxsdx          %%vs34, %%r9, %%r26            \n\t" 
-"xxswapd         %%vs34, %%vs34	                \n\t" 
-"stxsdx          %%vs34, 0, %%r26               \n\t" 
-"stxsdx          %%vs35, %%r9, %%r27            \n\t" 
-"xxswapd         %%vs35, %%vs35		            \n\t" 
-"stxsdx          %%vs35, 0, %%r27               \n\t"
-"                                               \n\t"
-#endif
 "b               DDONE                          \n\t"
 "                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"                                               \n\t"
-"DCOLSTORED:                                    \n\t"
+"DCOLSTORED:                                    \n\t" // BZ col stored case
 "                                               \n\t"
 DCOL_STORE
 "                                               \n\t"
