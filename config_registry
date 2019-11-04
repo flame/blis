@@ -12,7 +12,7 @@ x86_64:      intel64 amd64
 intel64:     skx knl haswell sandybridge penryn generic
 amd64:       zen excavator steamroller piledriver bulldozer generic
 arm64:       thunderx2 cortexa57 cortexa53 generic
-#arm32:       cortexa15 cortexa9 generic
+arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
 skx:         skx/skx/haswell/zen
