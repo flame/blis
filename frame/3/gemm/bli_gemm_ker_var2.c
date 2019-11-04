@@ -167,7 +167,7 @@ void bli_gemm_ker_var2
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_exec];	
+	f = ftypes[dt_exec];
 
 	// Invoke the function.
 	f( schema_a,

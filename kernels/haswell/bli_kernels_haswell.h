@@ -56,7 +56,7 @@ GEMMTRSM_UKR_PROT( float,    s, gemmtrsm_u_haswell_asm_6x16 )
 GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_haswell_asm_6x8 )
 
 
-// gemm (asm d8x6) 
+// gemm (asm d8x6)
 //GEMM_UKR_PROT( float,    s, gemm_haswell_asm_16x6 )
 //GEMM_UKR_PROT( double,   d, gemm_haswell_asm_8x6 )
 //GEMM_UKR_PROT( scomplex, c, gemm_haswell_asm_8x3 )
