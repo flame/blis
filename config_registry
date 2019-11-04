@@ -23,6 +23,7 @@ sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
+zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell
 excavator:   excavator/piledriver
 steamroller: steamroller/piledriver

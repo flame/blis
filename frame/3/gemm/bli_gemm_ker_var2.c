@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -167,7 +167,7 @@ void bli_gemm_ker_var2
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_exec];
+	f = ftypes[dt_exec];	
 
 	// Invoke the function.
 	f( schema_a,

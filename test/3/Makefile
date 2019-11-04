@@ -130,9 +130,9 @@ VENDORP_LIB    := $(MKLP_LIB)
 #
 
 # Single core (single-threaded)
-PS_BEGIN := 48
-PS_MAX   := 2400
-PS_INC   := 48
+PS_BEGIN := 100
+PS_MAX   := 1000
+PS_INC   := 100
 
 # Single-socket (multithreaded)
 P1_BEGIN := 96
@@ -242,8 +242,8 @@ blis-2s:    blis-nat-2s
 blis-nat:   blis-nat-st blis-nat-1s blis-nat-2s
 
 # Define the datatypes, operations, and implementations.
-DTS    := s d c z
-OPS    := gemm hemm herk trmm trsm
+DTS    := d # s d c z
+OPS    := gemm # hemm herk trmm trsm
 BIMPLS := asm_blis openblas vendor
 EIMPLS := eigen
 

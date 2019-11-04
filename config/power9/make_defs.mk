@@ -1,3 +1,4 @@
+
 #
 #
 #  BLIS    
@@ -45,8 +46,8 @@ THIS_CONFIG    := power9
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    :=
-CMISCFLAGS     := -mcpu=power9 
+CPPROCFLAGS    := 
+CMISCFLAGS     :=  
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -65,9 +66,14 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     :=
+CKVECFLAGS     := -mcpu=power9 -mtune=power9 -DXLC=0
 else
-$(error gcc is required for this configuration.)
+ifeq ($(CC_VENDOR),IBM)
+CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9 -DXLC=1
+else
+$(info $(CC_VENDOR)) 
+$(error gcc/xlc is required for this configuration.)
+endif
 endif
 
 # Flags specific to reference kernels.
@@ -79,8 +85,6 @@ ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 else
 CRVECFLAGS     := $(CKVECFLAGS)
-endif
-endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

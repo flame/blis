@@ -11,6 +11,7 @@ Contents
 * **[What's New](#whats-new)**
 * **[What People Are Saying About BLIS](#what-people-are-saying-about-blis)**
 * **[Key Features](#key-features)**
+* **[How to Download BLIS](#how-to-download-blis)**
 * **[Getting Started](#getting-started)**
 * **[Documentation](#documentation)**
 * **[External Packages](#external-packages)**
@@ -281,8 +282,61 @@ details, please see the documentation on [mixed datatype](docs/MixedDatatypes.md
 support and/or our [ACM TOMS](https://toms.acm.org/) journal paper on
 mixed-domain/mixed-precision `gemm` ([linked below](#citations)).
 
+How to Download BLIS
+--------------------
+
+There are a few ways to download BLIS. We list the most common four ways below.
+We **highly recommend** using either Option 1 or 2. Otherwise, we recommend
+Option 3 (over Option 4) so your compiler can perform optimizations specific
+to your hardware.
+
+1. **Download a source repository with `git clone`.**
+Generally speaking, we prefer using `git clone` to clone a `git` repository.
+Having a repository allows the user to periodically pull in the latest changes
+and quickly rebuild BLIS whenever they wish. Also, implicit in cloning a
+repository is that the repository defaults to using the `master` branch, which
+contains the latest "stable" commits since the most recent release. (This is
+in contrast to Option 3 in which the user is opting for code that may be
+slightly out of date.)
+
+   In order to clone a `git` repository of BLIS, please obtain a repository
+URL by clicking on the green button above the file/directory listing near the
+top of this page (as rendered by GitHub). Generally speaking, it will amount
+to executing the following command in your terminal shell:
+   ```
+   git clone https://github.com/flame/blis.git
+   ```
+
+2. **Download a source repository via a zip file.**
+If you are uncomfortable with using `git` but would still like the latest
+stable commits, we recommend that you download BLIS as a zip file.
+
+   In order to download a zip file of the BLIS source distribution, please
+click on the green button above the file listing near the top of this page.
+This should reveal a link for downloading the zip file.
+
+3. **Download a source release via a tarball/zip file.**
+Alternatively, if you would like to stick to the code that is included in
+official releases, you may download either a tarball or zip file of any of
+BLIS's previous [tagged releases](https://github.com/flame/blis/releases).
+We consider this option to be less than ideal for most people since it will
+likely mean you miss out on the latest bugfix or feature commits (in contrast
+to Options 1 or 2), and you also will not be able to update your code with a
+simple `git pull` command (in contrast to Option 1).
+
+4. **Download a binary package specific to your OS.**
+While we don't recommend this as the first choice for most users, we provide
+links to community members who generously maintain BLIS packages for various
+Linux distributions such as Debian Unstable and EPEL/Fedora. Please see the
+[External Packages](#external-packages) section below for more information.
+
 Getting Started
 ---------------
+
+*NOTE: This section assumes you've either cloned a BLIS source code repository
+via `git`, downloaded the latest source code via a zip file, or downloaded the
+source code for a tagged version release---Options 1, 2, or 3, respectively,
+as discussed in [the previous section](#how-to-download-blis).*
 
 If you just want to build a sequential (not parallelized) version of BLIS
 in a hurry and come back and explore other topics later, you can configure
@@ -396,7 +450,7 @@ please read this thorough walkthrough of the configuration system.
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
 
-External packages
+External Packages
 -----------------
 
 Generally speaking, we **highly recommend** building from source whenever
@@ -596,8 +650,9 @@ This project and its associated research were partially sponsored by grants from
 [Texas Instruments](http://www.ti.com/),
 [AMD](http://www.amd.com/),
 [Oracle](http://www.oracle.com/),
-and
 [Huawei](http://www.huawei.com/),
+and
+[Facebook](http://www.facebook.com/),
 as well as grants from the
 [National Science Foundation](http://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).
