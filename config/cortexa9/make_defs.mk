@@ -63,7 +63,7 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mcpu=cortexa9
+CKVECFLAGS     := -mcpu=cortex-a9
 else
 $(error gcc is required for this configuration.)
 endif
