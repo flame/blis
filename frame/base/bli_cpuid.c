@@ -569,9 +569,7 @@ bool_t bli_cpuid_is_cortexa15
 	// Check for expected CPU features.
 	const uint32_t expected = FEATURE_NEON;
 
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return bli_cpuid_has_features( features, expected ) && model == 0xc0f;
 }
 
 bool_t bli_cpuid_is_cortexa9
@@ -584,9 +582,7 @@ bool_t bli_cpuid_is_cortexa9
 	// Check for expected CPU features.
 	const uint32_t expected = FEATURE_NEON;
 
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
+	return bli_cpuid_has_features( features, expected ) && model == 0xc09;
 }
 
 #endif
@@ -1142,7 +1138,7 @@ uint32_t bli_cpuid_query
    I can't easily find documentation to do this as for aarch64, though
    it presumably could be unearthed from Linux code.  However, on
    Linux 5.2 (and Androids's 3.4), /proc/cpuinfo has this sort of
-   thing, as partially used below:
+   thing, used below:
 
    CPU implementer	: 0x41
    CPU architecture: 7
@@ -1150,7 +1146,11 @@ uint32_t bli_cpuid_query
    CPU part	: 0xc09
 
    The complication for family selection is that Neon is optional for
-   CoertexA9, for instance.
+   CortexA9, for instance.  That's tested in bli_cpuid_is_cortexa9.
+
+   When reading /proc/cpuinfo, we should check the entry corresponding
+   to the core we're actually running on, in case the system is
+   heterogeneous (big.little).
 
    arch/arm/include/asm/cputype.h has:
 
@@ -1207,8 +1207,8 @@ uint32_t bli_cpuid_query
 
    ----
 
-   It looks as if you should be able to do something similar to POWER
-   (below), instead of reading /proc, like:
+   Although it looks as if you should be able to do something similar
+   to POWER, instead of reading /proc, like:
 
    #include <sys/auxv.h>
    #include <linux/auxvec.h>  // for AT_PLATFORM
