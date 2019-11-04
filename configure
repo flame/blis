@@ -1430,6 +1430,8 @@ check_compiler()
 			# Thus, this "blacklistcc_add" statement has been moved above.
 			#blacklistcc_add "zen"
 			blacklistcc_add "skx"
+                        # GCC-5 may support POWER9 but it is unverified.
+			blacklistcc_add "power9"
 		fi
 	fi
 
