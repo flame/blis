@@ -310,14 +310,16 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 	// Create the packed objects. Use packmr and packnr as the leading
 	// dimensions of ap and bp, respectively.
-	bli_obj_create( datatype, m, k+m, 1, ldap, &ap );
-	bli_obj_create( datatype, k+m, n, ldbp, 1, &bp );
+	bli_obj_create( datatype, ldap, k+m, 1, ldap, &ap );
+	bli_obj_create( datatype, k+m, ldbp, ldbp, 1, &bp );
 
 	// Set up the objects for packing. Calling packm_init_pack() does everything
 	// except checkout a memory pool block and save its address to the obj_t's.
 	// However, it does overwrite the buffer field of packed object with that of
-	// the source object. So, we have to save the buffer address that was
-	// allocated.
+	// the source object (as a side-effect of bli_obj_alias_to(); that buffer
+	// field would normally be overwritten yet again by the address from the
+	// memory pool block). So, we have to save the buffer address that was
+	// allocated so we can re-store it to the object afterward.
 	void* buf_ap = bli_obj_buffer( &ap );
 	void* buf_bp = bli_obj_buffer( &bp );
 	bli_packm_init_pack( BLIS_INVERT_DIAG, BLIS_PACKED_ROW_PANELS,
@@ -391,6 +393,10 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	bli_cntl_free( cntl_a, &BLIS_PACKM_SINGLE_THREADED );
 	bli_cntl_free( cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 #endif
+
+	// Free the packed objects.
+	bli_obj_free( &ap );
+	bli_obj_free( &bp );
 
 	// Free the test objects.
 	bli_obj_free( &a_big );
