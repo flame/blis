@@ -264,7 +264,15 @@ void libblis_test_trsm_ukr_experiment
 #endif
 
 	// Create the packed objects. Use packmr and packnr as the leading
-	// dimensions of ap and bp, respectively.
+	// dimensions of ap and bp, respectively. Note that we use the ldims
+	// instead of the matrix dimensions for allocation purposes here.
+	// This is a little hacky and was prompted when trying to support
+	// configurations such as power9 that employ duplication/broadcasting
+	// of elements in one of the packed matrix objects. Thankfully, packm
+	// doesn't care about those dimensions and instead relies on
+	// information taken from the source object. Thus, this is merely
+	// about coaxing bli_obj_create() in allocating enough space for our
+	// purposes.
 	bli_obj_create( datatype, ldap, m, 1, ldap, &ap );
 	bli_obj_create( datatype, m, ldbp, ldbp, 1, &bp );
 
