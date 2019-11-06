@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -131,6 +132,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN3
+		if ( bli_cpuid_is_zen3( family, model, features ) )
+			return BLIS_ARCH_ZEN3;
+#endif	  
 #ifdef BLIS_CONFIG_ZEN2
 		if ( bli_cpuid_is_zen2( family, model, features ) )
 			return BLIS_ARCH_ZEN2;
@@ -277,6 +282,34 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+
+bool bli_cpuid_is_zen3
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX  |
+	                          FEATURE_FMA3 |
+	                          FEATURE_AVX2;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// For zen3 the family id is 0x19
+	if ( family != 0x19 ) return FALSE;
+
+	// Finally, check for specific models:
+	// - 0x00-0xff (THIS NEEDS UPDATING)
+	const bool is_arch
+	=
+	( 0x00 <= model && model <= 0xff );
+
+	if ( !is_arch ) return FALSE;
+
+	return TRUE;
+}
 
 bool bli_cpuid_is_zen2
      (

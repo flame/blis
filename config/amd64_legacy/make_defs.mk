@@ -1,6 +1,6 @@
 #
 #
-#  BLIS
+#  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := amd64
+THIS_CONFIG    := amd64_legacy
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #

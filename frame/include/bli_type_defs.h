@@ -1000,6 +1000,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN3,
 	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
@@ -1032,7 +1033,6 @@ typedef enum
 	BLIS_NUM_ARCHS
 
 } arch_t;
-
 
 //
 // -- BLIS misc. structure types -----------------------------------------------
