@@ -992,6 +992,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN3,
 	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
@@ -1016,9 +1017,7 @@ typedef enum
 
 } arch_t;
 
-// NOTE: This value must be updated to reflect the number of enum values
-// listed above for arch_t!
-#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC+1)
+#define BLIS_NUM_ARCHS 22
 
 
 //

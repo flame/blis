@@ -3050,7 +3050,7 @@ main()
 	#create a AOCL specific #define
 	#This macro is enabled only for zen family configurations.
 	#This enables us to use different cache block sizes for TRSM instead of common level-3 block sizes.
-	uconf=$(echo ${config_name} | grep -c 'zen' | cut -d. -f1)
+	uconf=$(echo ${config_name} | grep -c 'zen\|amd64' | cut -d. -f1)
 	if [[ $uconf == 1 ]]; then
 		enable_aocl_zen='yes'
 		enable_aocl_zen_01=1

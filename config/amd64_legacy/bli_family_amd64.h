@@ -33,8 +33,8 @@
 
 */
 
-#ifndef BLIS_FAMILY_AMD64_H
-#define BLIS_FAMILY_AMD64_H
+#ifndef BLIS_FAMILY_AMD64_LEG_H
+#define BLIS_FAMILY_AMD64_LEG_H
 
 // Place holder for bundle configuration.
 
