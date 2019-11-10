@@ -99,7 +99,7 @@ CNTX_INIT_PROTS( cortexa15 )
 CNTX_INIT_PROTS( cortexa9 )
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
 #ifdef BLIS_CONFIG_POWER9
 CNTX_INIT_PROTS( power9 )
@@ -110,6 +110,9 @@ CNTX_INIT_PROTS( power8 )
 #ifdef BLIS_CONFIG_POWER7
 CNTX_INIT_PROTS( power7 )
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_CONFIG_BGQ
 CNTX_INIT_PROTS( bgq )
 #endif
@@ -204,7 +207,7 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_cortexa9.h"
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
 #ifdef BLIS_FAMILY_POWER
 #include "bli_family_power.h"
@@ -218,6 +221,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_POWER7
 #include "bli_family_power7.h"
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_FAMILY_BGQ
 #include "bli_family_bgq.h"
 #endif
@@ -283,7 +289,7 @@ CNTX_INIT_PROTS( generic )
 #include "bli_kernels_armv7a.h"
 #endif
 
-// -- IBM BG/Q --
+// -- IBM Power --
 
 #ifdef BLIS_KERNELS_POWER9
 #include "bli_kernels_power9.h"
@@ -291,6 +297,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_KERNELS_POWER7
 #include "bli_kernels_power7.h"
 #endif
+
+// -- IBM BG/Q --
+
 #ifdef BLIS_KERNELS_BGQ
 #include "bli_kernels_bgq.h"
 #endif

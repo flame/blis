@@ -65,15 +65,16 @@ elif [ ${sys} = "ul264" ]; then
 fi
 
 # Datatypes to test.
-test_dts="d " #s z c"
+test_dts="d s z c"
 
 # Operations to test.
-test_ops="gemm "#hemm herk trmm trsm"
+test_ops="gemm hemm herk trmm trsm"
 
 # Implementations to test.
-#impls="all"
-#impls="other"
 impls="blis"
+#impls="other"
+#impls="eigen"
+#impls="all"
 
 if [ "${impls}" = "blis" ]; then
 
