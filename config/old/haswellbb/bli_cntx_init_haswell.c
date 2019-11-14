@@ -192,7 +192,7 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	                                            24,    12,     6,     6 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,    72,    36 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  2076 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  2076 );
 #endif
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,     8,     8 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,     8,     8 );

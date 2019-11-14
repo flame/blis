@@ -56,6 +56,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype* restrict alpha1     = a; \
 	ctype* restrict pi1        = p; \
 \
+	const dim_t     dfac       = 2; \
+\
 	/* Handle the packing of B (column panel schemas) separately from packing
 	   of A (row panel schemas). */ \
 	if ( bli_is_col_packed( schema ) ) \
@@ -162,7 +164,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			  n, \
 			  kappa, \
 			  a, inca, lda, \
-			  p, 2,    ldp  \
+			  p, dfac, ldp  \
 			); \
 \
 			/* if ( cdim < mnr ) */ \
@@ -171,13 +173,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				const dim_t     m_edge = mnr - cdim; \
 				const dim_t     n_edge = n_max; \
 				ctype* restrict p_cast = p; \
-				ctype* restrict p_edge = p_cast + (i  )*2; \
+				ctype* restrict p_edge = p_cast + (i  )*dfac; \
 \
 				PASTEMAC(ch,set0bbs_mxn) \
 				( \
 				  m_edge, \
 				  n_edge, \
-				  p_edge, 2, ldp  \
+				  p_edge, dfac, ldp  \
 				); \
 			} \
 		} \
@@ -194,7 +196,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			( \
 			  m_edge, \
 			  n_edge, \
-			  p_edge, 2, ldp  \
+			  p_edge, dfac, ldp  \
 			); \
 		} \
 	} \
@@ -339,6 +341,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict alpha1     = a; \
 	ctype* restrict pi1        = p; \
+\
+	const dim_t     dfac       = 4; \
 \
 	/* Handle the packing of B (column panel schemas) separately from packing
 	   of A (row panel schemas). */ \
@@ -494,7 +498,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			  n, \
 			  kappa, \
 			  a, inca, lda, \
-			  p, 4,    ldp  \
+			  p, dfac, ldp  \
 			); \
 \
 			/* if ( cdim < mnr ) */ \
@@ -503,13 +507,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				const dim_t     m_edge = mnr - cdim; \
 				const dim_t     n_edge = n_max; \
 				ctype* restrict p_cast = p; \
-				ctype* restrict p_edge = p_cast + (i  )*2; \
+				ctype* restrict p_edge = p_cast + (i  )*dfac; \
 \
 				PASTEMAC(ch,set0bbs_mxn) \
 				( \
 				  m_edge, \
 				  n_edge, \
-				  p_edge, 4, ldp  \
+				  p_edge, dfac, ldp  \
 				); \
 			} \
 		} \
@@ -526,7 +530,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			( \
 			  m_edge, \
 			  n_edge, \
-			  p_edge, 4, ldp  \
+			  p_edge, dfac, ldp  \
 			); \
 		} \
 	} \
