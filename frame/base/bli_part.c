@@ -126,22 +126,11 @@ void bli_acquire_mpart_mdim
 	doff_t diag_off_inc;
 
 
-	// NOTE: Most of this function implicitly assumes moving forward.
-	// When moving backward, we have to relocate i.
-	if ( direct == BLIS_BWD )
-	{
-		// Query the dimension in the partitioning direction.
-		dim_t m = bli_obj_length_after_trans( obj );
-
-		// Modify i to account for the fact that we are moving backwards.
-		i = m - i - b;
-	}
-
-
 	// Call a special function for partitioning packed objects. (By only
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
-	// partitioned through normally.)
+	// partitioned through normally.) Note that the function called below
+	// assumes forward partitioning.
 	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
@@ -171,6 +160,15 @@ void bli_acquire_mpart_mdim
 	// Foolproofing: do not let b exceed what's left of the m dimension at
 	// row offset i.
 	if ( b > m - i ) b = m - i;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate i.
+	if ( direct == BLIS_BWD )
+	{
+		// Modify i to account for the fact that we are moving backwards.
+		i = m - i - b;
+	}
 
 
 	// Support SUBPART1B (behind SUBPART1) and SUBPART1A (ahead of SUBPART1),
@@ -352,22 +350,11 @@ void bli_acquire_mpart_ndim
 	doff_t diag_off_inc;
 
 
-	// NOTE: Most of this function implicitly assumes moving forward.
-	// When moving backward, we have to relocate j.
-	if ( direct == BLIS_BWD )
-	{
-		// Query the dimension in the partitioning direction.
-		dim_t n = bli_obj_width_after_trans( obj );
-
-		// Modify i to account for the fact that we are moving backwards.
-		j = n - j - b;
-	}
-
-
 	// Call a special function for partitioning packed objects. (By only
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
-	// partitioned through normally.)
+	// partitioned through normally.) Note that the function called below
+	// assumes forward partitioning.
 	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_l2r( req_part, j, b, obj, sub_obj );
@@ -397,6 +384,15 @@ void bli_acquire_mpart_ndim
 	// Foolproofing: do not let b exceed what's left of the n dimension at
 	// column offset j.
 	if ( b > n - j ) b = n - j;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate j.
+	if ( direct == BLIS_BWD )
+	{
+		// Modify j to account for the fact that we are moving backwards.
+		j = n - j - b;
+	}
 
 
 	// Support SUBPART1B (behind SUBPART1) and SUBPART1A (ahead of SUBPART1),
@@ -578,22 +574,11 @@ void bli_acquire_mpart_mndim
 	doff_t diag_off_inc;
 
 
-	// NOTE: Most of this function implicitly assumes moving forward.
-	// When moving backward, we have to relocate ij.
-	if ( direct == BLIS_BWD )
-	{
-		// Query the dimension of the object.
-		dim_t mn = bli_obj_length( obj );
-
-		// Modify ij to account for the fact that we are moving backwards.
-		ij = mn - ij - b;
-	}
-
-
 	// Call a special function for partitioning packed objects. (By only
 	// catching those objects packed to panels, we omit cases where the
 	// object is packed to row or column storage, as such objects can be
-	// partitioned through normally.)
+	// partitioned through normally.) Note that the function called below
+	// assumes forward partitioning.
 	if ( bli_obj_is_panel_packed( obj ) )
 	{
 		bli_packm_acquire_mpart_tl2br( req_part, ij, b, obj, sub_obj );
@@ -624,6 +609,15 @@ void bli_acquire_mpart_mndim
 	// row/column offset ij.
 	min_m_n = bli_min( m, n );
 	if ( b > min_m_n - ij ) b = min_m_n - ij;
+
+
+	// NOTE: Most of this function implicitly assumes moving forward.
+	// When moving backward, we have to relocate ij.
+	if ( direct == BLIS_BWD )
+	{
+		// Modify ij to account for the fact that we are moving backwards.
+		ij = min_m_n - ij - b;
+	}
 
 
 	// Compute offset increments and dimensions based on which
