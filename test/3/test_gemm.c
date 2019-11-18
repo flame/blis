@@ -184,7 +184,7 @@ int main( int argc, char** argv )
 		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 		bli_copym( &c, &c_save );
-	
+
 #if 0 //def BLIS
 		bli_ind_disable_all_dt( dt );
 		bli_ind_enable_dt( ind, dt );

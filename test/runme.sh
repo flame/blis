@@ -11,7 +11,8 @@ l3_ops="gemm"
 test_ops=" ${l3_ops}" 
 # "${l2_ops}"
 
-# Implementations to test | "openblas atlas mkl"
+# Implementations to test.
+#test_impls="openblas mkl blis"
 test_impls="blis"
 
 for im in ${test_impls}; do

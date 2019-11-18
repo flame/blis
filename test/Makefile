@@ -165,21 +165,23 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis:   test_gemm_blis.x \
-#       test_dotv_blis.x \
-#       test_axpyv_blis.x \
-#       test_gemv_blis.x \
-#       test_ger_blis.x \
-#       test_hemv_blis.x \
-#       test_her_blis.x \
-#       test_her2_blis.x \
-#       test_trmv_blis.x \
-#       test_trsv_blis.x \
-      # test_hemm_blis.x \
-      # test_herk_blis.x \
-      # test_her2k_blis.x \
-      # test_trmm_blis.x \
-      # test_trsm_blis.x
+blis: \
+       test_dotv_blis.x \
+       test_axpyv_blis.x \
+       test_gemv_blis.x \
+       test_ger_blis.x \
+       test_hemv_blis.x \
+       test_her_blis.x \
+       test_her2_blis.x \
+       test_trmv_blis.x \
+       test_trsv_blis.x \
+       \
+       test_gemm_blis.x \
+       test_hemm_blis.x \
+       test_herk_blis.x \
+       test_her2k_blis.x \
+       test_trmm_blis.x \
+       test_trsm_blis.x
 
 openblas: \
       test_dotv_openblas.x \
