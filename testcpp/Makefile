@@ -115,13 +115,13 @@ CINCFLAGS      := -I$(INC_PATH)
 CXX	= g++
 
 # Use the CFLAGS for the configuration family.
-override CFLAGS         += $(call get-user-cflags-for,$(CONFIG_NAME))
+override CFLAGS         += $(call get-sandbox-cxxflags-for,$(CONFIG_NAME))
 
 # Add local header paths to CFLAGS
 #CFLAGS         = -O0 -g -Wall 
 #CFLAGS         += -I$(INC_PATH)
-override CFLAGS         += -g  -I$(TEST_SRC_PATH)
-override CFLAGS      += -g -I$(CPP_SRC_PATH)
+override CFLAGS         += -I$(TEST_SRC_PATH)
+override CFLAGS      += -I$(CPP_SRC_PATH)
 
 LINKER = $(CXX)
 
@@ -138,18 +138,7 @@ LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 #
 #   blis 
 #
-#all: blis
 all: blis 
-
-#blis: test_gemm_blis.x \
-	test_hemm_blis.x \
-	test_herk_blis.x \
-	test_her2k_blis.x \
-	test_symm_blis.x \
-	test_syr2k_blis.x \
-	test_syrk_blis.x \
-	test_trmm_blis.x \
-	test_trsm_blis.x \
 
 
 blis: test_asum_blis.x \
@@ -201,18 +190,14 @@ $(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.cc
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 test_%_blis.o: test_%.cc
-	$(CXX) $(CFLAGS) -c $< -o $@
+	@$(CXX) $(CFLAGS) -c $< -o $@
 
 
 # -- Executable file rules --
 
-# NOTE: For the BLAS test drivers, we place the BLAS libraries before BLIS
-# on the link command line in case BLIS was configured with the BLAS
-# compatibility layer. This prevents BLIS from inadvertently getting called
-# for the BLAS routines we are trying to test with.
-
 test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
-	$(LINKER) $^       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	@$(LINKER) $^       $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+	./$@
 
 # -- Clean rules --
 

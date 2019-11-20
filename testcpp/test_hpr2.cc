@@ -38,7 +38,6 @@
 
 using namespace blis;
 using namespace std;
-//#define PRINT
 #define N 1
 
 /*
@@ -48,7 +47,7 @@ using namespace std;
 template< typename T >
 void test_hpr2(  )
 {
-int n,lda;
+int n;
 int incX = -1;
 int incY = -1;
  n = N;
@@ -64,12 +63,6 @@ T Y[1];
 T A_ref[1];
   A_ref[0] =  { 0.829742, 0.0 };
 
-#ifdef PRINT
-   printf("Matrix A\n");
-   printmatrix(A, lda, n, n,(char *) "A");
-   printf("Vector X \n");
-   printvector(X, n, (char *) "X");
-#endif
 	blis::hpr2(
 	    CblasColMajor,
 	    CblasLower,
@@ -82,12 +75,6 @@ T A_ref[1];
             A
             );
 
-#ifdef PRINT
-     printf("Matrix A after blis:hpr2\n");
-     printmatrix (A, lda, n, n, (char *) "A output");
-     printf(" A_ref blis:hpr2\n");
-     printmatrix(A_ref, lda, n, n,(char *)"A_refoutput");
-#endif
 
      if(computeErrorM(1, 1, n, n, A, A_ref )==1)
              printf("%s TEST FAIL\n" ,__PRETTY_FUNCTION__);

@@ -38,8 +38,6 @@
 
 using namespace blis;
 using namespace std;
-//#define PRINT
-//#define PRINT
 #define N 2
 /*
  * Test application assumes matrices to be column major, non-transposed
@@ -47,9 +45,8 @@ using namespace std;
 template< typename T >
 void test_tpsv(  ) 
 {
- int n,lda;
+ int n;
  n = N;
- lda = n;
 
  T A[] = { -0.381f, 0.53f, 0.451f };
  T X[] = { 0.144f, 0.032f };
@@ -58,10 +55,6 @@ void test_tpsv(  )
    
    
 
-#ifdef PRINT
-    printmatrix(A, lda ,n,n,(char *)"A");
-    printvector(X, n,(char *)"X");
-#endif
 	blis::tpsv(
 	    CblasColMajor,
 	    CblasLower,
@@ -73,11 +66,6 @@ void test_tpsv(  )
             incX
             );
 
-#ifdef PRINT
-	printvector(X, n,(char *) "X blis::tpsv\n");
-	printvector(X_ref, n,(char *) "X_ref blis::tpsv output");
-
-#endif
 
   if(computeErrorV(1,1, n, X, X_ref )==1)
 	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__);

@@ -284,6 +284,7 @@ INCLUDE_DIR        := include
 BLASTEST_DIR       := blastest
 TESTSUITE_DIR      := testsuite
 CPP_HEADER_DIR     := cpp
+CPP_TEST_DIR       := testcpp
 
 # The filename suffix for reference kernels.
 REFNM              := ref

@@ -417,9 +417,11 @@ all: libs
 
 libs: libblis
 
-test: checkblis checkblas
+test: checkblis checkblas 
 
 check: checkblis-fast checkblas
+
+checkcpp: checkbliscpp
 
 install: libs install-libs install-lib-symlinks install-headers install-share
 
@@ -862,6 +864,10 @@ else
 	                     > $(TESTSUITE_OUT_FILE)
 endif
 
+# Check results of BLIS CPP Template tests
+checkbliscpp:
+	$(MAKE) -C $(CPP_TEST_DIR) 
+
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -1168,11 +1174,13 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+	- $(MAKE) -C $(CPP_TEST_DIR) clean
 else
 	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)."
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)."
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+	@$(MAKE) -C $(CPP_TEST_DIR) clean
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
