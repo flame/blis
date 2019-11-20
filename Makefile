@@ -249,7 +249,8 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
-
+# Install BLIS CPP Template header files
+HEADERS_TO_INSTALL += $(CPP_HEADER_DIR)/*.hh
 
 #
 # --- public makefile fragment definitions -------------------------------------
