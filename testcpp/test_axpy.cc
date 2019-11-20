@@ -39,125 +39,100 @@
 using namespace blis;
 using namespace std;
 //#define PRINT
-#define ALPHA 1.0
-#define BETA 0.0
-#define M 5
 #define N 6
-#define K 4
+#define ALPHA 1.0
 
 /*
  * Test application assumes matrices to be column major, non-transposed
  */
-template< typename T >
-void ref_gemm(int64_t m, int64_t n, int64_t k,
+template< typename T>
+void ref_axpy(int64_t n,
     T * alpha,
-    T *A,
-    T *B,
-    T * beta,
-    T *C )
+    T *X,
+    T *Y
+     )
 
 {
-   obj_t obj_a, obj_b, obj_c;
-   obj_t obj_alpha, obj_beta;
+   obj_t obj_x, obj_y, obj_alpha;
    num_t dt;
+  
    if(is_same<T, float>::value)
-       dt = BLIS_FLOAT;
+     dt = BLIS_FLOAT;
    else if(is_same<T, double>::value)
-       dt = BLIS_DOUBLE;
+     dt = BLIS_DOUBLE;
    else if(is_same<T, complex<float>>::value)
-       dt = BLIS_SCOMPLEX;
+     dt = BLIS_SCOMPLEX;
    else if(is_same<T, complex<double>>::value)
-       dt = BLIS_DCOMPLEX;
+     dt = BLIS_DCOMPLEX;
+
 
    bli_obj_create_with_attached_buffer( dt, 1, 1, alpha, 1,1,&obj_alpha );
-   bli_obj_create_with_attached_buffer( dt, 1, 1, beta,  1,1,&obj_beta );
-   bli_obj_create_with_attached_buffer( dt, m, k, A, 1,m,&obj_a );
-   bli_obj_create_with_attached_buffer( dt, k, n, B,1,k,&obj_b );
-   bli_obj_create_with_attached_buffer( dt, m, n, C, 1,m,&obj_c );
+   bli_obj_create_with_attached_buffer( dt, n, 1, X, 1, n,&obj_x );
+   bli_obj_create_with_attached_buffer( dt, n, 1, Y, 1, n,&obj_y );
 
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_a );
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_b );
-   bli_gemm( &obj_alpha,
-             &obj_a,
-             &obj_b,
-             &obj_beta,
-             &obj_c );
+   bli_axpyv( &obj_alpha,
+	     &obj_x,
+	     &obj_y
+	     );
 	
 }
 template< typename T >
-void test_gemm(  ) 
+void test_axpy( )
 {
-    T *A, *B, *C, *C_ref;
-    T alpha, beta;
-    int m,n,k;
-    int    lda, ldb, ldc, ldc_ref;
+    T *X, *Y,*Y_ref;
+    T alpha = ALPHA;
+    int n;
+    int incx, incy;
 
-    alpha = ALPHA;
-    beta = BETA;
-    m = M;
-    k = K;
     n = N;
 
-    lda = m;
-    ldb = k;
-    ldc     = m;
-    ldc_ref = m;
+    incx = 1;
+    incy = 1;
+
     srand (time(NULL));
-    allocate_init_buffer(A , m , k);
-    allocate_init_buffer(B , k , n);
-    allocate_init_buffer(C , m , n);
-    copy_buffer(C, C_ref , m ,n);
+    allocate_init_buffer(X , n , 1);
+    allocate_init_buffer(Y , n , 1);
+    copy_buffer(Y, Y_ref , n ,1);
 
 #ifdef PRINT
-    printmatrix(A, lda ,m,k , (char *)"A");
-    printmatrix(B, ldb ,k,n, (char *)"B");
-    printmatrix(C, ldc ,m,n, (char *)"C");
-#endif
-	blis::gemm(
-	    CblasColMajor,
-	    CblasNoTrans,
-	    CblasNoTrans,
-            m,
+    printvector(X, n,(char *) "X");
+    printvector(Y, n, (char *) "Y");
+#endif     
+	blis::axpy(
             n,
-            k,
 	    alpha,
-            A,
-            lda,
-            B,
-            ldb,
-	    beta,
-            C,
-            ldc
-            );
+            X,
+            incx,
+	    Y,
+	    incy
+	    );
 
 #ifdef PRINT
-    printmatrix(C,ldc ,m,n , (char *)"C output");
+    printvector(Y, n,(char *) "Y output");
 #endif
-   ref_gemm(m, n, k, &alpha, A, B, &beta, C_ref);
+        ref_axpy(n , &alpha , X, Y_ref ); 
 
 #ifdef PRINT
-    printmatrix(C_ref, ldc_ref ,m,n, (char *)"C ref output");
+    printvector(Y_ref, n, (char *) "Y ref output");
 #endif
-    if(computeErrorM(ldc, ldc_ref, m, n, C, C_ref )==1)
-	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__ );
-    else
-	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__ );
+     if(computeErrorV(incy, incy , n, Y, Y_ref )==1)
+        printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__);
+     else
+        printf("%s TEST PASS\n" , __PRETTY_FUNCTION__);
 
 
-
-    delete[]( A     );
-    delete[]( B     );
-    delete[]( C     );
-    delete[]( C_ref );
+    delete[]( X     );
+    delete[]( Y     );
+    delete[]( Y_ref );
 }
 
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    test_gemm<double>( );
-    test_gemm<float>( );
-    test_gemm<complex<float>>( );
-    test_gemm<complex<double>>( );
+    test_axpy<float>( );
+    test_axpy<double>( );
+    test_axpy<complex<float>>( );
+    test_axpy<complex<double>>( );
     return 0;
 
 }

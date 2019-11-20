@@ -27,7 +27,6 @@
 #define BLIS_HH
 
 #include "cblas.hh"
-#include "blis_util.hh"
 
 namespace blis {
 
@@ -406,10 +405,7 @@ TR dot(
     T const *x, int64_t incx,
     T const *y, int64_t incy )
 {
-    if((std::is_same<T, float>::value)&(std::is_same<TR, double>::value))
-	    return cblas_dsdot( n, x, incx, y, incy );
-    else
-	    return cblas_dot( n, x, incx, y, incy );
+    return cblas_dot( n, x, incx, y, incy );
 }
 
 /*! \brief Performs the dot product of two complex vectors 

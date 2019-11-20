@@ -39,125 +39,71 @@
 using namespace blis;
 using namespace std;
 //#define PRINT
-#define ALPHA 1.0
-#define BETA 0.0
-#define M 5
-#define N 6
-#define K 4
+#define ALPHA -1.0
+#define BETA -1.0
+#define M 3
+#define N 4
 
-/*
- * Test application assumes matrices to be column major, non-transposed
- */
 template< typename T >
-void ref_gemm(int64_t m, int64_t n, int64_t k,
-    T * alpha,
-    T *A,
-    T *B,
-    T * beta,
-    T *C )
-
+void test_gbmv(  ) 
 {
-   obj_t obj_a, obj_b, obj_c;
-   obj_t obj_alpha, obj_beta;
-   num_t dt;
-   if(is_same<T, float>::value)
-       dt = BLIS_FLOAT;
-   else if(is_same<T, double>::value)
-       dt = BLIS_DOUBLE;
-   else if(is_same<T, complex<float>>::value)
-       dt = BLIS_SCOMPLEX;
-   else if(is_same<T, complex<double>>::value)
-       dt = BLIS_DCOMPLEX;
-
-   bli_obj_create_with_attached_buffer( dt, 1, 1, alpha, 1,1,&obj_alpha );
-   bli_obj_create_with_attached_buffer( dt, 1, 1, beta,  1,1,&obj_beta );
-   bli_obj_create_with_attached_buffer( dt, m, k, A, 1,m,&obj_a );
-   bli_obj_create_with_attached_buffer( dt, k, n, B,1,k,&obj_b );
-   bli_obj_create_with_attached_buffer( dt, m, n, C, 1,m,&obj_c );
-
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_a );
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_b );
-   bli_gemm( &obj_alpha,
-             &obj_a,
-             &obj_b,
-             &obj_beta,
-             &obj_c );
-	
-}
-template< typename T >
-void test_gemm(  ) 
-{
-    T *A, *B, *C, *C_ref;
+//    int    i, j, p;
     T alpha, beta;
-    int m,n,k;
-    int    lda, ldb, ldc, ldc_ref;
-
+    int m,n;
+   int KL = 1;
+   int KU = 1;
+   int lda = 4;
+   T A[] = { 0.423f, -0.143f, -0.182f, -0.076f, -0.855f, 0.599f, 0.389f, -0.473f, 0.493f, -0.902f, -0.889f, -0.256f, 0.112f, 0.128f, -0.277f, -0.777f };
+   T X[] = { 0.488f, 0.029f, -0.633f, 0.84f };
+   int incX = -1;
+   T Y[] = { 0.874f, 0.322f, -0.477f };
+   int incY = -1;
+   T Y_ref[] = { -0.656261f, 0.19575f, 0.055905f }; 
     alpha = ALPHA;
     beta = BETA;
     m = M;
-    k = K;
     n = N;
 
-    lda = m;
-    ldb = k;
-    ldc     = m;
-    ldc_ref = m;
-    srand (time(NULL));
-    allocate_init_buffer(A , m , k);
-    allocate_init_buffer(B , k , n);
-    allocate_init_buffer(C , m , n);
-    copy_buffer(C, C_ref , m ,n);
 
 #ifdef PRINT
-    printmatrix(A, lda ,m,k , (char *)"A");
-    printmatrix(B, ldb ,k,n, (char *)"B");
-    printmatrix(C, ldc ,m,n, (char *)"C");
+        printmatrix(A, lda ,m,n,(char *) "A");
+        printvector(Y, m, (char *)"m");
 #endif
-	blis::gemm(
+	blis::gbmv(
 	    CblasColMajor,
 	    CblasNoTrans,
-	    CblasNoTrans,
             m,
-            n,
-            k,
-	    alpha,
+            n,KL,KU,
+            alpha,
             A,
             lda,
-            B,
-            ldb,
+            X,
+	    incX,
 	    beta,
-            C,
-            ldc
+            Y,
+            incY
             );
 
 #ifdef PRINT
-    printmatrix(C,ldc ,m,n , (char *)"C output");
-#endif
-   ref_gemm(m, n, k, &alpha, A, B, &beta, C_ref);
+         printvector(Y, m,(char *)"Y blis:gbmv");
+         printvector(Y_ref, m, (char *) "Y_ref blis:gbmv" );
 
-#ifdef PRINT
-    printmatrix(C_ref, ldc_ref ,m,n, (char *)"C ref output");
 #endif
-    if(computeErrorM(ldc, ldc_ref, m, n, C, C_ref )==1)
+
+    if(computeErrorV(incY,incY, m, Y, Y_ref )==1)
 	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__ );
     else
 	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__ );
 
-
-
-    delete[]( A     );
-    delete[]( B     );
-    delete[]( C     );
-    delete[]( C_ref );
 }
 
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    test_gemm<double>( );
-    test_gemm<float>( );
-    test_gemm<complex<float>>( );
-    test_gemm<complex<double>>( );
+   test_gbmv<double>( );
+   test_gbmv<float>( );
+   test_gbmv<complex<float>>( );
+   test_gbmv<complex<double>>( );
     return 0;
 
 }

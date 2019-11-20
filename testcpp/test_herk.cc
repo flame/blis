@@ -1,7 +1,7 @@
 /*
 
    BLISPP
-   C++ test driver for BLIS CPP gemm routine and reference blis gemm routine.
+   C++ test driver for BLIS CPP herk routine and reference blis herk routine.
 
    Copyright (C) 2019, Advanced Micro Devices, Inc.
 
@@ -30,7 +30,6 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-
 #include <complex>
 #include <iostream>
 #include "blis.hh"
@@ -41,112 +40,107 @@ using namespace std;
 //#define PRINT
 #define ALPHA 1.0
 #define BETA 0.0
-#define M 5
 #define N 6
-#define K 4
+#define K 6
 
 /*
  * Test application assumes matrices to be column major, non-transposed
  */
 template< typename T >
-void ref_gemm(int64_t m, int64_t n, int64_t k,
-    T * alpha,
+void ref_herk(int64_t n, int64_t k,
+    real_type<T> * alpha,
     T *A,
-    T *B,
-    T * beta,
+    real_type<T> * beta,
     T *C )
 
 {
-   obj_t obj_a, obj_b, obj_c;
+   obj_t obj_a,obj_c;
    obj_t obj_alpha, obj_beta;
    num_t dt;
-   if(is_same<T, float>::value)
-       dt = BLIS_FLOAT;
-   else if(is_same<T, double>::value)
-       dt = BLIS_DOUBLE;
-   else if(is_same<T, complex<float>>::value)
-       dt = BLIS_SCOMPLEX;
-   else if(is_same<T, complex<double>>::value)
-       dt = BLIS_DCOMPLEX;
 
-   bli_obj_create_with_attached_buffer( dt, 1, 1, alpha, 1,1,&obj_alpha );
-   bli_obj_create_with_attached_buffer( dt, 1, 1, beta,  1,1,&obj_beta );
-   bli_obj_create_with_attached_buffer( dt, m, k, A, 1,m,&obj_a );
-   bli_obj_create_with_attached_buffer( dt, k, n, B,1,k,&obj_b );
-   bli_obj_create_with_attached_buffer( dt, m, n, C, 1,m,&obj_c );
+     if(is_same<T, complex<float>>::value)
+         dt = BLIS_SCOMPLEX;
+     else if(is_same<T, complex<double>>::value)
+         dt = BLIS_DCOMPLEX;
 
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_a );
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_b );
-   bli_gemm( &obj_alpha,
+   if(dt == BLIS_SCOMPLEX){
+     bli_obj_create_with_attached_buffer( BLIS_FLOAT, 1, 1, alpha, 1,1,&obj_alpha );
+     bli_obj_create_with_attached_buffer( BLIS_FLOAT, 1, 1, beta,  1,1,&obj_beta );
+   }
+   else if(dt == BLIS_DCOMPLEX){
+     bli_obj_create_with_attached_buffer( BLIS_DOUBLE, 1, 1, alpha, 1,1,&obj_alpha );
+     bli_obj_create_with_attached_buffer( BLIS_DOUBLE, 1, 1, beta,  1,1,&obj_beta );
+   }
+
+   bli_obj_create_with_attached_buffer( dt, n, k, A, 1,n,&obj_a );
+   bli_obj_create_with_attached_buffer( dt, n, n, C, 1,n,&obj_c );
+
+   bli_obj_set_struc( BLIS_HERMITIAN, &obj_c );
+   bli_obj_set_uplo( BLIS_LOWER, &obj_c );
+   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_c );
+   bli_herk( &obj_alpha,
              &obj_a,
-             &obj_b,
              &obj_beta,
              &obj_c );
 	
 }
 template< typename T >
-void test_gemm(  ) 
+void test_herk(  )
 {
-    T *A, *B, *C, *C_ref;
-    T alpha, beta;
-    int m,n,k;
-    int    lda, ldb, ldc, ldc_ref;
+    T *A, *C, *C_ref;
+   real_type<T> alpha;
+   real_type<T> beta;
+   int n,k;
+   int    lda, ldc, ldc_ref;
 
-    alpha = ALPHA;
+    alpha = ALPHA; 
     beta = BETA;
-    m = M;
     k = K;
     n = N;
 
-    lda = m;
-    ldb = k;
-    ldc     = m;
-    ldc_ref = m;
+
+    lda = k;
+    ldc     = n;
+    ldc_ref = n;
     srand (time(NULL));
-    allocate_init_buffer(A , m , k);
-    allocate_init_buffer(B , k , n);
-    allocate_init_buffer(C , m , n);
-    copy_buffer(C, C_ref , m ,n);
+    allocate_init_buffer(A , n , k);
+    allocate_init_buffer(C , n , n);
+    copy_buffer(C, C_ref , n ,n);
 
 #ifdef PRINT
-    printmatrix(A, lda ,m,k , (char *)"A");
-    printmatrix(B, ldb ,k,n, (char *)"B");
-    printmatrix(C, ldc ,m,n, (char *)"C");
+    printmatrix(A, lda ,n,k, (char *)"A");
+    printmatrix(C, ldc ,n,n, (char *)"C");
 #endif
-	blis::gemm(
+	blis::herk(
 	    CblasColMajor,
+	    CblasLower,
 	    CblasNoTrans,
-	    CblasNoTrans,
-            m,
             n,
             k,
 	    alpha,
             A,
             lda,
-            B,
-            ldb,
-	    beta,
+            beta,
             C,
             ldc
             );
 
 #ifdef PRINT
-    printmatrix(C,ldc ,m,n , (char *)"C output");
+    printmatrix(C, ldc ,n,n, (char *)"C output");
 #endif
-   ref_gemm(m, n, k, &alpha, A, B, &beta, C_ref);
+   ref_herk(n, k, &alpha, A, &beta, C_ref);
 
 #ifdef PRINT
-    printmatrix(C_ref, ldc_ref ,m,n, (char *)"C ref output");
+    printmatrix(C_ref, ldc_ref ,n,n, (char *)"C ref output");
 #endif
-    if(computeErrorM(ldc, ldc_ref, m, n, C, C_ref )==1)
-	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__ );
+    if(computeErrorM(ldc, ldc_ref, n, n, C, C_ref )==1)
+	    printf("%s TEST FAIL\n" ,__PRETTY_FUNCTION__);
     else
-	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__ );
+	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__);
 
 
 
     delete[]( A     );
-    delete[]( B     );
     delete[]( C     );
     delete[]( C_ref );
 }
@@ -154,10 +148,8 @@ void test_gemm(  )
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    test_gemm<double>( );
-    test_gemm<float>( );
-    test_gemm<complex<float>>( );
-    test_gemm<complex<double>>( );
+    test_herk<complex<float>>( );
+    test_herk<complex<double>>( );
     return 0;
 
 }

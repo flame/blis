@@ -31,10 +31,30 @@ extern "C" {
 #include <blis.h>
 }
 
-
 #include <complex>
 
 namespace blis{
+
+template< typename... Types > struct real_type_traits;
+
+//define real_type<> type alias
+template< typename... Types >
+using real_type = typename real_type_traits< Types... >::real_t;
+
+// for one type
+template< typename T >
+struct real_type_traits<T>
+{
+    using real_t = T;
+};
+
+// for one complex type, strip complex
+template< typename T >
+struct real_type_traits< std::complex<T> >
+{
+    using real_t = T;
+};
+
 // =============================================================================
 // Level 1 BLAS
 // -----------------------------------------------------------------------------
@@ -96,7 +116,7 @@ cblas_rotm(
     int n,
     float *x, int incx,
     float *y, int incy,
-    float  p[5] )
+    const float  p[5] )
 {
     cblas_srotm( n, x, incx, y, incy, p );
 }
@@ -106,7 +126,7 @@ cblas_rotm(
     int n,
     double *x, int incx,
     double *y, int incy,
-    double  p[5] )
+    const double  p[5] )
 {
     cblas_drotm( n, x, incx, y, incy, p );
 }

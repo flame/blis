@@ -39,125 +39,104 @@
 using namespace blis;
 using namespace std;
 //#define PRINT
-#define ALPHA 1.0
-#define BETA 0.0
+//#define PRINT
 #define M 5
 #define N 6
-#define K 4
-
 /*
  * Test application assumes matrices to be column major, non-transposed
  */
 template< typename T >
-void ref_gemm(int64_t m, int64_t n, int64_t k,
-    T * alpha,
+void ref_trsv(int64_t n,
     T *A,
-    T *B,
-    T * beta,
-    T *C )
+    T *X
+    )
 
 {
-   obj_t obj_a, obj_b, obj_c;
-   obj_t obj_alpha, obj_beta;
+   obj_t obj_a, obj_x;
    num_t dt;
+
    if(is_same<T, float>::value)
-       dt = BLIS_FLOAT;
+        dt = BLIS_FLOAT;
    else if(is_same<T, double>::value)
-       dt = BLIS_DOUBLE;
+        dt = BLIS_DOUBLE;
    else if(is_same<T, complex<float>>::value)
-       dt = BLIS_SCOMPLEX;
+        dt = BLIS_SCOMPLEX;
    else if(is_same<T, complex<double>>::value)
-       dt = BLIS_DCOMPLEX;
+        dt = BLIS_DCOMPLEX;
 
-   bli_obj_create_with_attached_buffer( dt, 1, 1, alpha, 1,1,&obj_alpha );
-   bli_obj_create_with_attached_buffer( dt, 1, 1, beta,  1,1,&obj_beta );
-   bli_obj_create_with_attached_buffer( dt, m, k, A, 1,m,&obj_a );
-   bli_obj_create_with_attached_buffer( dt, k, n, B,1,k,&obj_b );
-   bli_obj_create_with_attached_buffer( dt, m, n, C, 1,m,&obj_c );
+   bli_obj_create_with_attached_buffer( dt, n, n, A, 1,n,&obj_a );
+   bli_obj_create_with_attached_buffer( dt, n, 1, X, 1,n,&obj_x );
 
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_a );
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_b );
-   bli_gemm( &obj_alpha,
-             &obj_a,
-             &obj_b,
-             &obj_beta,
-             &obj_c );
+   bli_obj_set_struc( BLIS_TRIANGULAR, &obj_a );
+   bli_obj_set_uplo( BLIS_LOWER, &obj_a );
+   bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &obj_a );
+   bli_obj_set_diag( BLIS_NONUNIT_DIAG, &obj_a );
+   bli_trsv( &BLIS_ONE,
+	     &obj_a,
+             &obj_x
+             );
 	
 }
 template< typename T >
-void test_gemm(  ) 
+void test_trsv(  ) 
 {
-    T *A, *B, *C, *C_ref;
-    T alpha, beta;
-    int m,n,k;
-    int    lda, ldb, ldc, ldc_ref;
+    T *A, *X, *X_ref;
+    int n;
+    int  lda, incx, incx_ref;
 
-    alpha = ALPHA;
-    beta = BETA;
-    m = M;
-    k = K;
     n = N;
 
-    lda = m;
-    ldb = k;
-    ldc     = m;
-    ldc_ref = m;
+    lda = n;
+    incx = 1;
+    incx_ref = 1;
+
     srand (time(NULL));
-    allocate_init_buffer(A , m , k);
-    allocate_init_buffer(B , k , n);
-    allocate_init_buffer(C , m , n);
-    copy_buffer(C, C_ref , m ,n);
+    allocate_init_buffer(A , n , n);
+    allocate_init_buffer(X , n , 1);
+    copy_buffer(X, X_ref , n ,1);
 
 #ifdef PRINT
-    printmatrix(A, lda ,m,k , (char *)"A");
-    printmatrix(B, ldb ,k,n, (char *)"B");
-    printmatrix(C, ldc ,m,n, (char *)"C");
-#endif
-	blis::gemm(
+    printmatrix(A, lda ,n,n,(char *) "A");
+    printvector(X, n,(char *) "X");
+#endif	
+    blis::trsv(
 	    CblasColMajor,
+	    CblasLower,
 	    CblasNoTrans,
-	    CblasNoTrans,
-            m,
+	    CblasNonUnit,
             n,
-            k,
-	    alpha,
             A,
             lda,
-            B,
-            ldb,
-	    beta,
-            C,
-            ldc
+            X,
+            incx
             );
 
 #ifdef PRINT
-    printmatrix(C,ldc ,m,n , (char *)"C output");
+    printvector(X, n,(char *) "X output");
 #endif
-   ref_gemm(m, n, k, &alpha, A, B, &beta, C_ref);
+       ref_trsv(n, A, X_ref);
 
 #ifdef PRINT
-    printmatrix(C_ref, ldc_ref ,m,n, (char *)"C ref output");
+	printvector(X_ref, n,(char *) "X ref output");
 #endif
-    if(computeErrorM(ldc, ldc_ref, m, n, C, C_ref )==1)
-	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__ );
+    if(computeErrorV(incx, incx_ref, n, X, X_ref )==1)
+	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__);
     else
-	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__ );
-
+	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__);
 
 
     delete[]( A     );
-    delete[]( B     );
-    delete[]( C     );
-    delete[]( C_ref );
+    delete[]( X     );
+    delete[]( X_ref );
 }
 
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    test_gemm<double>( );
-    test_gemm<float>( );
-    test_gemm<complex<float>>( );
-    test_gemm<complex<double>>( );
+    test_trsv<double>( );
+    test_trsv<float>( );
+    test_trsv<complex<float>>( );
+    test_trsv<complex<double>>( );
     return 0;
 
-}
+}	

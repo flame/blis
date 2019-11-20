@@ -43,23 +43,23 @@ using namespace std;
 #define BETA 0.0
 #define M 5
 #define N 6
-#define K 4
 
 /*
  * Test application assumes matrices to be column major, non-transposed
  */
 template< typename T >
-void ref_gemm(int64_t m, int64_t n, int64_t k,
+void ref_gemv(int64_t m, int64_t n,
     T * alpha,
     T *A,
-    T *B,
+    T *X,
     T * beta,
-    T *C )
+    T *Y )
 
 {
-   obj_t obj_a, obj_b, obj_c;
+   obj_t obj_a, obj_x, obj_y;
    obj_t obj_alpha, obj_beta;
    num_t dt;
+
    if(is_same<T, float>::value)
        dt = BLIS_FLOAT;
    else if(is_same<T, double>::value)
@@ -71,93 +71,92 @@ void ref_gemm(int64_t m, int64_t n, int64_t k,
 
    bli_obj_create_with_attached_buffer( dt, 1, 1, alpha, 1,1,&obj_alpha );
    bli_obj_create_with_attached_buffer( dt, 1, 1, beta,  1,1,&obj_beta );
-   bli_obj_create_with_attached_buffer( dt, m, k, A, 1,m,&obj_a );
-   bli_obj_create_with_attached_buffer( dt, k, n, B,1,k,&obj_b );
-   bli_obj_create_with_attached_buffer( dt, m, n, C, 1,m,&obj_c );
+   bli_obj_create_with_attached_buffer( dt, m, n, A, 1,m,&obj_a );
+   bli_obj_create_with_attached_buffer( dt, n, 1, X, 1,n,&obj_x );
+   bli_obj_create_with_attached_buffer( dt, m, 1, Y, 1,m,&obj_y );
 
    bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_a );
-   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_b );
-   bli_gemm( &obj_alpha,
+   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_x);
+   bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &obj_y);
+   bli_gemv( &obj_alpha,
              &obj_a,
-             &obj_b,
+             &obj_x,
              &obj_beta,
-             &obj_c );
+             &obj_y );
 	
 }
 template< typename T >
-void test_gemm(  ) 
+void test_gemv(  ) 
 {
-    T *A, *B, *C, *C_ref;
+    T *A, *Y, *Y_ref, *X;
     T alpha, beta;
-    int m,n,k;
-    int    lda, ldb, ldc, ldc_ref;
+    int m,n;
+    int lda, incx, incy, incy_ref;
 
     alpha = ALPHA;
     beta = BETA;
     m = M;
-    k = K;
     n = N;
 
     lda = m;
-    ldb = k;
-    ldc     = m;
-    ldc_ref = m;
+    incx  = 1;
+    incy     = 1;
+    incy_ref = 1;
+
     srand (time(NULL));
-    allocate_init_buffer(A , m , k);
-    allocate_init_buffer(B , k , n);
-    allocate_init_buffer(C , m , n);
-    copy_buffer(C, C_ref , m ,n);
+    allocate_init_buffer(A , m , n);
+    allocate_init_buffer(X , m , 1);
+    allocate_init_buffer(Y , m , 1);
+    copy_buffer(Y, Y_ref , m ,1);
 
 #ifdef PRINT
-    printmatrix(A, lda ,m,k , (char *)"A");
-    printmatrix(B, ldb ,k,n, (char *)"B");
-    printmatrix(C, ldc ,m,n, (char *)"C");
+    printmatrix(A, lda ,m,n,(char *) "A");
+    printvector(X, m,(char *) "X");
+    printvector(Y, m, (char *)"Y");
 #endif
-	blis::gemm(
+	blis::gemv(
 	    CblasColMajor,
-	    CblasNoTrans,
 	    CblasNoTrans,
             m,
             n,
-            k,
-	    alpha,
+            alpha,
             A,
             lda,
-            B,
-            ldb,
+            X,
+	    incx,
 	    beta,
-            C,
-            ldc
+            Y,
+            incy
             );
 
 #ifdef PRINT
-    printmatrix(C,ldc ,m,n , (char *)"C output");
+    printvector(Y, m, (char *)"Y output");
 #endif
-   ref_gemm(m, n, k, &alpha, A, B, &beta, C_ref);
+   ref_gemv(m, n, &alpha, A, X, &beta, Y_ref);
 
 #ifdef PRINT
-    printmatrix(C_ref, ldc_ref ,m,n, (char *)"C ref output");
+    printvector(Y_ref, m, (char *) "Y_Ref output");
 #endif
-    if(computeErrorM(ldc, ldc_ref, m, n, C, C_ref )==1)
+    if(computeErrorV(incy,incy_ref, m , Y, Y_ref )==1)
 	    printf("%s TEST FAIL\n" , __PRETTY_FUNCTION__ );
     else
 	    printf("%s TEST PASS\n" , __PRETTY_FUNCTION__ );
 
 
 
-    delete[]( A     );
-    delete[]( B     );
-    delete[]( C     );
-    delete[]( C_ref );
+    delete[]( A );
+    delete[]( X );
+    delete[]( Y  );
+    delete[]( Y_ref );
 }
 
 // -----------------------------------------------------------------------------
 int main( int argc, char** argv )
 {
-    test_gemm<double>( );
-    test_gemm<float>( );
-    test_gemm<complex<float>>( );
-    test_gemm<complex<double>>( );
+   test_gemv<float>( );
+   test_gemv<double>( );
+   test_gemv<complex<float>>( );
+   test_gemv<complex<double>>( );
     return 0;
 
 }
