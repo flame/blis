@@ -54,8 +54,8 @@ typedef struct gemv_s gemv_t;
 #define bli_cntl_sub_gemv_t_rp( cntl )  cntl->sub_gemv_t_rp
 #define bli_cntl_sub_gemv_t_cp( cntl )  cntl->sub_gemv_t_cp
 
-void    bli_gemv_cntl_init( void );
-void    bli_gemv_cntl_finalize( void );
+void     bli_gemv_cntl_init( void );
+void     bli_gemv_cntl_finalize( void );
 gemv_t* bli_gemv_cntl_obj_create( impl_t     impl_type,
                                   varnum_t   var_num,
                                   bszid_t    bszid,

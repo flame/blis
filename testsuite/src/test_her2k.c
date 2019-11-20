@@ -195,13 +195,13 @@ void libblis_test_her2k_experiment
 
 	// Create test operands (vectors and/or matrices).
 	libblis_test_mobj_create( params, datatype, transa,
-	                          sc_str[0], m, k, &a );
+	                          sc_str[1], m, k, &a );
 	libblis_test_mobj_create( params, datatype, transb,
-	                          sc_str[1], m, k, &b );
+	                          sc_str[2], m, k, &b );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, m, &c );
+	                          sc_str[0], m, m, &c );
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE,
-	                          sc_str[2], m, m, &c_save );
+	                          sc_str[0], m, m, &c_save );
 
 	// Set alpha and beta.
 	if ( bli_obj_is_real( &c ) )
@@ -336,7 +336,7 @@ void libblis_test_her2k_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( v - z )
+	//   normfv( v - z )
 	//
 	// is negligible, where
 	//

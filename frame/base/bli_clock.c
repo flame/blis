@@ -59,6 +59,9 @@ double bli_clock_min_diff( double time_min, double time_start )
 	// - under a nanosecond
 	// is actually garbled due to the clocks being taken too closely together.
 	if      ( time_min <= 0.0    ) time_min = time_min_prev;
+        // To genuinely measure time for an application taking more than an hour, the below
+	// line is commented. If wrongly measuring higher time we could always use previous_min.
+	/* else if ( time_min >  3600.0 ) time_min = time_min_prev; */
 	else if ( time_min <  1.0e-9 ) time_min = time_min_prev;
 
 	return time_min;

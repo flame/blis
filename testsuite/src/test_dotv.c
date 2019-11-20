@@ -278,7 +278,7 @@ void libblis_test_dotv_check
 	//
 	// is functioning correctly if
 	//
-	//   sqrtsc( rho.real ) - normf( x )
+	//   sqrtsc( rho.real ) - normfv( x )
 	//
 	// and
 	//

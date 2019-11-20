@@ -140,6 +140,9 @@
 #define PASTEBLACHK_(op)           bla_ ## op ## _check
 #define PASTEBLACHK(op)            PASTEBLACHK_(op)
 
+#define PASTECH0_(op)              op
+#define PASTECH0(op)               PASTECH0_(op)
+
 #define PASTECH_(ch,op)            ch ## op
 #define PASTECH(ch,op)             PASTECH_(ch,op)
 
@@ -153,10 +156,10 @@
 #define STRINGIFY_INT( s )         MKSTR( s )
 
 // Fortran-77 name-mangling macros.
-#define PASTEF770(name)                            name ## _
-#define PASTEF77(ch1,name)           ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)      ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEF770(name)                                      name ## _
+#define PASTEF77(ch1,name)                     ch1        ## name ## _
+#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
 
 // -- Include other groups of macros
 

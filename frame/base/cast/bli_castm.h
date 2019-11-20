@@ -36,7 +36,7 @@
 // Prototype object-based interface.
 //
 
-void bli_castm
+BLIS_EXPORT_BLIS void bli_castm
      (
        obj_t* a,
        obj_t* b
@@ -49,7 +49,7 @@ void bli_castm
 #undef  GENTPROT2
 #define GENTPROT2( ctype_a, ctype_b, cha, chb, opname ) \
 \
-void PASTEMAC2(cha,chb,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC2(cha,chb,opname) \
      ( \
        trans_t transa, \
        dim_t   m, \

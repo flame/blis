@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        trans_t transa, \
        conj_t  conjx, \
@@ -60,7 +60,7 @@ INSERT_GENTPROT_BASIC0( gemv )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        conj_t  conjx, \
        conj_t  conjy, \
@@ -79,7 +79,7 @@ INSERT_GENTPROT_BASIC0( ger )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conja, \
@@ -100,7 +100,7 @@ INSERT_GENTPROT_BASIC0( symv )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
@@ -117,7 +117,7 @@ INSERT_GENTPROTR_BASIC0( her )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t   uploa, \
        conj_t   conjx, \
@@ -134,7 +134,7 @@ INSERT_GENTPROT_BASIC0( syr )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        conj_t  conjx, \
@@ -154,7 +154,7 @@ INSERT_GENTPROT_BASIC0( syr2 )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-void PASTEMAC2(ch,opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
        uplo_t  uploa, \
        trans_t transa, \

@@ -46,8 +46,25 @@ AMD_CONFIG_FILE := amd_config.mk
 AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
 -include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3
+endif
+
+# Flags specific to optimized kernels.
+CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS += -march=znver1
+endif
+
+
+# Flags specific to reference kernels.
+CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations
+else
+CRVECFLAGS     := $(CKVECFLAGS)
 endif
 
 # Store all of the variables here to new variables containing the

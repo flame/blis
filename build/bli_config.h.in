@@ -135,6 +135,12 @@
 #endif
 #endif
 
+#if @enable_sup_handling@
+#define BLIS_ENABLE_SUP_HANDLING
+#else
+#define BLIS_DISABLE_SUP_HANDLING
+#endif
+
 #if @enable_memkind@
 #define BLIS_ENABLE_MEMKIND
 #else
@@ -158,5 +164,6 @@
 #else
 #define BLIS_DISABLE_SHARED
 #endif
+
 
 #endif

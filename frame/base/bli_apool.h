@@ -56,7 +56,7 @@ static pool_t* bli_apool_pool( apool_t* apool )
 	return &(apool->pool);
 }
 
-static bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
+static  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 {
 	return &(apool->mutex);
 }

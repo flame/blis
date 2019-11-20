@@ -1,10 +1,1703 @@
-commit e0408c3ca3d53bc8e6fedac46ea42c86e06c922d (HEAD -> master, tag: 0.5.1)
+commit 18c876b989fd0dcaa27becd14e4f16bdac7e89b3 (HEAD -> master, tag: 0.6.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 3 18:37:19 2019 -0500
+
+    Version file update (0.6.0)
+
+commit 0f1b3bf49eb593ca7bb08b68a7209f7cd550f912 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 3 18:35:19 2019 -0500
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated ReleaseNotes.md in preparation for next version.
+    - CREDITS file update.
+
+commit 27da2e8400d900855da0d834b5417d7e83f21de1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 3 17:14:56 2019 -0500
+
+    Minor edits to docs/PerformanceSmall.md.
+    
+    Details:
+    - Added performance analysis to "Comments" section of both Kaby Lake and
+      Epyc sections.
+    - Added emphasis to certain passages.
+
+commit 09ba05c6f87efbaadf085497dc137845f16ee9c5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 3 16:53:19 2019 -0500
+
+    Added sup performance graphs/document to 'docs'.
+    
+    Details:
+    - Added a new markdown document, docs/PerformanceSmall.md, which
+      publishes new performance graphs for Kaby Lake and Epyc showcasing
+      the new BLIS sup (small/skinny/unpacked) framework logic and kernels.
+      For now, only single-threaded dgemm performance is shown.
+    - Reorganized graphs in docs/graphs into docs/graphs/large, with new
+      graphs being placed in docs/graphs/sup.
+    - Updates to scripts in test/sup/octave, mostly to allow decent output
+      in both GNU octave and Matlab.
+    - Updated README.md to mention and refer to the new PerformanceSmall.md
+      document.
+
+commit 6bf449cc6941734748034de0e9af22b75f1d6ba1
+Merge: abd8a9fa a4e8801d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 31 17:42:40 2019 -0500
+
+    Merge branch 'amd'
+
+commit a4e8801d08d81fa42ebea6a05a990de8dcedc803 (origin/amd, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 31 17:30:51 2019 -0500
+
+    Increased MT sup threshold for double to 201.
+    
+    Details:
+    - Fine-tuned the double-precision real MT threshold (which controls
+      whether the sup implementation kicks for smaller m dimension values)
+      from 180 to 201 for haswell and 180 to 256 for zen.
+    - Updated octave scripts in test/sup/octave to include a seventh column
+      to display performance for m = n = k.
+
+commit abd8a9fa7df4569aa2711964c19888b8e248901f (origin/pfhp)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 28 12:49:44 2019 -0500
+
+    Inadvertantly hidden xerbla_() in blastest (#313).
+    
+    Details:
+    - Attempted a fix to issue #313, which reports that when building only
+      a shared library (ie: static library build is disabled), running the
+      BLAS test drivers can fail because those drivers provide their own
+      local version of xerbla_() as a clever (albeit still rather hackish)
+      way of checking the error codes that result from the individual tests.
+      This local xerbla_() function is never found at link-time because the
+      BLAS test drivers' Makefile imports BLIS compilation flags via the
+      get-user-cflags-for() function, which currently conveys the
+      -fvisibility=hidden flag, which hides symbols unless they are
+      explicitly annotated for export. The -fvisibility=hidden flag was
+      only ever intended for use when building BLIS (not for applications),
+      and so the attempted solution here is to omit the symbol export
+      flag(s) from get-user-cflags-for() by storing the symbol export
+      flag(s) to a new BULID_SYMFLAGS variable instead of appending it
+      to the subconfigurations' CMISCFLAGS variable (which is returned by
+      every get-*-cflags-for() function). Thanks to M. Zhou for reporting
+      this issue and also to Isuru Fernando for suggesting the fix.
+    - Renamed BUILD_FLAGS to BUILD_CPPFLAGS to harmonize with the newly
+      created BUILD_SYMFLAGS.
+    - Fixed typo in entry for --export-shared flag in 'configure --help'
+      text.
+
+commit 755730608d923538273a90c48bfdf77571f86519
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 23 17:34:36 2019 -0500
+
+    Minor rewording of language around mt env. vars.
+
+commit ba31abe73c97c16c78fffc59a215761b8d9fd1f6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 23 14:59:53 2019 -0500
+
+    Added BLIS theading info to Performance.md.
+    
+    Details:
+    - Documented the BLIS environment variables that were set
+      (e.g. BLIS_JC_NT, BLIS_IC_NT, BLIS_JR_NT) for each machine and
+      threading configuration in order to achieve the parallelism reported
+      on in docs/Performance.md.
+
+commit cb788ffc89cac03b44803620412a5e83450ca949
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 23 13:00:53 2019 -0500
+
+    Increased MT sup threshold for double to 180.
+    
+    Details:
+    - Increased the double-precision real MT threshold (which controls
+      whether the sup implementation kicks for smaller m dimension values)
+      from 80 to 180, and this change was made for both haswell and zen
+      subconfigurations. This is less about the m dimension in particular
+      and more about facilitating a smoother performance transition when
+      m = n = k.
+
+commit 057f5f3d211e7513f457ee6ca6c9555d00ad1e57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 23 12:51:17 2019 -0500
+
+    Minor build system housekeeping.
+    
+    Details:
+    - Commented out redundant setting of LIBBLIS_LINK within all driver-
+      level Makefiles. This variable is already set within common.mk, and
+      so the only time it should be overridden is if the user wants to link
+      to a different copy of libblis.
+    - Very minor changes to build/gen-make-frags/gen-make-frag.sh.
+    - Whitespace and inconsequential quoting change to configure.
+    - Moved top-level 'windows' directory into a new 'attic' directory.
+
+commit 32392cfc72af7f42da817a129748349fb1951346
+Author: Jeff Hammond <jeff.r.hammond@intel.com>
+Date:   Tue May 14 15:52:30 2019 -0400
+
+    add info about CXX in configure (#311)
+
+commit fa7e6b182b8365465ade178b0e4cd344ff6f6460
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 1 19:13:00 2019 -0500
+
+    Define _POSIX_C_SOURCE in bli_system.h.
+    
+    Details:
+    - Added
+        #ifndef _POSIX_C_SOURCE
+        #define _POSIX_C_SOURCE 200809L
+        #endif
+      to bli_system.h so that an application that uses BLIS (specifically,
+      an application that #includes blis.h) does not need to remember to
+      #define the macro itself (either on the command line or in the code
+      that includes blis.h) in order to activate things like the pthreads.
+      Thanks to Christos Psarras for reporting this issue and suggesting
+      this fix.
+    - Commented out #include <sys/time.h> in bli_system.h, since I don't
+      think this header is used/needed anymore.
+    - Comment update to function macro for bli_?normiv_unb_var1() in
+      frame/util/bli_util_unb_var1.c.
+
+commit 3df84f1b5d5e1146bb01bfc466ac20c60a9cc859
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 27 21:27:32 2019 -0500
+
+    Minor bugfixes in sup dgemm implementation.
+    
+    Details:
+    - Fixed an obscure but in the bli_dgemmsup_rv_haswell_asm_5x8n() kernel
+      that only affected the beta == 0, column-storage output case. Thanks
+      to the BLAS test drivers for catching this bug.
+    - Previously, bli_gemmsup_ref_var1n() and _var2m() were returning if
+      k = 0, when the correct action would be to scale by beta (and then
+      return). Thanks to the BLAS test drivers to catching this bug.
+    - Changed the sup threshold behavior such that the sup implementation
+      only kicks in if a matrix dimension is strictly less than (rather than
+      less than or equal to) the threshold in question.
+    - Initialize all thresholds to zero (instead of 10) by default in
+      ref_kernels/bli_cntx_ref.c. This, combined with the above change to
+      threshold testing means that calls to BLIS or BLAS with one or more
+      matrix dimensions of zero will no longer trigger the sup
+      implementation.
+    - Added disabled debugging output to frame/3/bli_l3_sup.c (for future
+      use, perhaps).
+
+commit ecbdd1c42dcebfecd729fe351e6bb0076aba7d81
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 27 19:38:11 2019 -0500
+
+    Ceased use of BLIS_ENABLE_SUP_MR/NR_EXT macros.
+    
+    Details:
+    - Removed already limited use of the BLIS_ENABLE_SUP_MR_EXT and
+      BLIS_ENABLE_SUP_NR_EXT macros in bli_gemmsup_ref_var1n() and
+      bli_gemmsup_ref_var2m(). Their purpose was merely to avoid a long
+      conditional that would determine whether to allow the last iteration
+      to be merged with the second-to-last iteration. Functionally, the
+      macros were not needed, and they ended up causing problems when
+      building configuration families such as intel64 and x86_64.
+
+commit aa8a6bec3036a41e1bff2034f8ef6766a704ec49
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 27 18:53:33 2019 -0500
+
+    Fixed typo in --disable-sup-handling macro guard.
+    
+    Details:
+    - Fixed an incorrectly-named macro guard that is intended to allow
+      disabling of the sup framework via the configure option
+      --disable-sup-handling. In this case, the preprocessor macro,
+      BLIS_DISABLE_SUP_HANDLING, was still named by its name from an older
+      uncommitted version of the code (BLIS_DISABLE_SM_HANDLING).
+
+commit b9c9f03502c78a63cfcc21654b06e9089e2a3822
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 27 18:44:50 2019 -0500
+
+    Implemented gemm on skinny/unpacked matrices.
+    
+    Details:
+    - Implemented a new sub-framework within BLIS to support the management
+      of code and kernels that specifically target matrix problems for which
+      at least one dimension is deemed to be small, which can result in long
+      and skinny matrix operands that are ill-suited for the conventional
+      level-3 implementations in BLIS. The new framework tackles the problem
+      in two ways. First the stripped-down algorithmic loops forgo the
+      packing that is famously performed in the classic code path. That is,
+      the computation is performed by a new family of kernels tailored
+      specifically for operating on the source matrices as-is (unpacked).
+      Second, these new kernels will typically (and in the case of haswell
+      and zen, do in fact) include separate assembly sub-kernels for
+      handling of edge cases, which helps smooth performance when performing
+      problems whose m and n dimension are not naturally multiples of the
+      register blocksizes. In a reference to the sub-framework's purpose of
+      supporting skinny/unpacked level-3 operations, the "sup" operation
+      suffix (e.g. gemmsup) is typically used to denote a separate namespace
+      for related code and kernels. NOTE: Since the sup framework does not
+      perform any packing, it targets row- and column-stored matrices A, B,
+      and C. For now, if any matrix has non-unit strides in both dimensions,
+      the problem is computed by the conventional implementation.
+    - Implemented the default sup handler as a front-end to two variants.
+      bli_gemmsup_ref_var2() provides a block-panel variant (in which the
+      2nd loop around the microkernel iterates over n and the 1st loop
+      iterates over m), while bli_gemmsup_ref_var1() provides a panel-block
+      variant (2nd loop over m and 1st loop over n). However, these variants
+      are not used by default and provided for reference only. Instead, the
+      default sup handler calls _var2m() and _var1n(), which are similar
+      to _var2() and _var1(), respectively, except that they defer to the
+      sup kernel itself to iterate over the m and n dimension, respectively.
+      In other words, these variants rely not on microkernels, but on
+      so-called "millikernels" that iterate along m and k, or n and k.
+      The benefit of using millikernels is a reduction of function call
+      and related (local integer typecast) overhead as well as the ability
+      for the kernel to know which micropanel (A or B) will change during
+      the next iteration of the 1st loop, which allows it to focus its
+      prefetching on that micropanel. (In _var2m()'s millikernel, the upanel
+      of A changes while the same upanel of B is reused. In _var1n()'s, the
+      upanel of B changes while the upanel of A is reused.)
+    - Added a new configure option, --[en|dis]able-sup-handling, which is
+      enabled by default. However, the default thresholds at which the
+      default sup handler is activated are set to zero for each of the m, n,
+      and k dimensions, which effectively disables the implementation. (The
+      default sup handler only accepts the problem if at least one dimension
+      is smaller than or equal to its corresponding threshold. If all
+      dimensions are larger than their thresholds, the problem is rejected
+      by the sup front-end and control is passed back to the conventional
+      implementation, which proceeds normally.)
+    - Added support to the cntx_t structure to track new fields related to
+      the sup framework, most notably:
+      - sup thresholds: the thresholds at which the sup handler is called.
+      - sup handlers: the address of the function to call to implement
+        the level-3 skinny/unpacked matrix implementation.
+      - sup blocksizes: the register and cache blocksizes used by the sup
+        implementation (which may be the same or different from those used
+        by the conventional packm-based approach).
+      - sup kernels: the kernels that the handler will use in implementing
+        the sup functionality.
+      - sup kernel prefs: the IO preference of the sup kernels, which may
+        differ from the preferences of the conventional gemm microkernels'
+        IO preferences.
+    - Added a bool_t to the rntm_t structure that indicates whether sup
+      handling should be enabled/disabled. This allows per-call control
+      of whether the sup implementation is used, which is useful for test
+      drivers that wish to switch between the conventional and sup codes
+      without having to link to different copies of BLIS. The corresponding
+      accessor functions for this new bool_t are defined in bli_rntm.h.
+    - Implemented several row-preferential gemmsup kernels in a new
+      directory, kernels/haswell/3/sup. These kernels include two general
+      implementation types--'rd' and 'rv'--for the 6x8 base shape, with
+      two specialized millikernels that embed the 1st loop within the kernel
+      itself.
+    - Added ref_kernels/3/bli_gemmsup_ref.c, which provides reference
+      gemmsup microkernels. NOTE: These microkernels, unlike the current
+      crop of conventional (pack-based) microkernels, do not use constant
+      loop bounds. Additionally, their inner loop iterates over the k
+      dimension.
+    - Defined new typedef enums:
+      - stor3_t: captures the effective storage combination of the level-3
+        problem. Valid values are BLIS_RRR, BLIS_RRC, BLIS_RCR, etc. A
+        special value of BLIS_XXX is used to denote an arbitrary combination
+        which, in practice, means that at least one of the operands is
+        stored according to general stride.
+      - threshid_t: captures each of the three dimension thresholds.
+    - Changed bli_adjust_strides() in bli_obj.c so that bli_obj_create()
+      can be passed "-1, -1" as a lazy request for row storage. (Note that
+      "0, 0" is still accepted as a lazy request for column storage.)
+    - Added support for various instructions to bli_x86_asm_macros.h,
+      including imul, vhaddps/pd, and other instructions related to integer
+      vectors.
+    - Disabled the older small matrix handling code inserted by AMD in
+      bli_gemm_front.c, since the sup framework introduced in this commit
+      is intended to provide a more generalized solution.
+    - Added test/sup directory, which contains standalone performance test
+      drivers, a Makefile, a runme.sh script, and an 'octave' directory
+      containing scripts compatible with GNU Octave. (They also may work
+      with matlab, but if not, they are probably close to working.)
+    - Reinterpret the storage combination string (sc_str) in the various
+      level-3 testsuite modules (e.g. src/test_gemm.c) so that the order
+      of each matrix storage char is "cab" rather than "abc".
+    - Comment updates in level-3 BLAS API wrappers in frame/compat.
+
+commit 0d549ceda822833bec192bbf80633599620c15d9
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Sat Apr 27 22:56:02 2019 +0000
+
+    make unix friendly archives on appveyor (#310)
+
+commit 945928c650051c04d6900c7f4e9e29cd0e5b299f
+Merge: 663f6629 74e513eb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 17 15:58:56 2019 -0500
+
+    Merge branch 'amd' of github.com:flame/blis into amd
+
+commit 74e513eb6a6787a925d43cd1500277d54d86ab8f (origin/dev)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 17 13:34:44 2019 -0500
+
+    Support row storage in Eigen gemm test/3 driver.
+    
+    Details:
+    - Added preprocessor branches to test/3/test_gemm.c to explicitly
+      support row-stored matrices. Column-stored matrices are also still
+      supported (and is the default for now). (This is mainly residual work
+      leftover from initial integration of Eigen into the test drivers, so
+      if we ever want to test Eigen with row-stored matrices, the code will
+      be ready to use, even if it is not yet integrated into the Makefile
+      in test/3.)
+
+commit b5d457fae9bd75c4ca67f7bc7214e527aa248127
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 16 12:50:01 2019 -0500
+
+    Applied forgotten variable rename from 89a70cc.
+    
+    Details:
+    - Somehow the variable name change (root_file_name -> root_inputname)
+      in flatten-headers.py mentioned in the commit log entry for 89a70cc
+      didn't make it into the actual commit. This commit applies that
+      change.
+
+commit 89a70cccf869333147eb2559cdfa5a23dc915824
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Apr 11 18:33:08 2019 -0500
+
+    GNU-like handling of installation prefix et al.
+    
+    Details:
+    - Changed the default installation prefix from $HOME/lib to /usr/local.
+    - Modified the way configure internally handles the prefix, libdir,
+      includedir, and sharedir (and also added an --exec-prefix option).
+      The defaults to these variables are set as follows:
+        prefix:      /usr/local
+        exec_prefix: ${prefix}
+        libdir:      ${exec_prefix}/lib
+        includedir:  ${prefix}/include
+        sharedir:    ${prefix}/share
+      The key change, aside from the addition of exec_prefix and its use to
+      define the default to libdir, is that the variables are substituted
+      into config.mk with quoting that delays evaluation, meaning the
+      substituted values may contain unevaluated references to other
+      variables (namely, ${prefix} and ${exec_prefix}). This more closely
+      follows GNU conventions, including those used by GNU autoconf, and
+      also allows make to override any one of the variables *after*
+      configure has already been run (e.g. during 'make install').
+    - Updates to build/config.mk.in pursuant to above changes.
+    - Updates to output of 'configure --help' pursuant to above changes.
+    - Updated docs/BuildSystem.md to reflect the new default installation
+      prefix, as well as mention EXECPREFIX and SHAREDIR.
+    - Changed the definitions of the UNINSTALL_OLD_* variables in the
+      top-level Makefile to use $(wildcard ...) instead of 'find'. This
+      was motivated by the new way of handling prefix and friends, which
+      leads to the 'find' command being run on /usr/local (by default),
+      which can take a while almost never yielding any benefit (since the
+      user will very rarely use the uninstall-old targets).
+    - Removed periods from the end of descriptive output statements (i.e.,
+      non-verbose output) since those statements often end with file or
+      directory paths, which get confusing to read when puctuated by a
+      period.
+    - Trival change to 'make showconfig' output.
+    - Removed my name from 'configure --help'. (Many have contributed to it
+      over the years.)
+    - In configure script, changed the default state of threading_model
+      variable from 'no' to 'off' to match that of debug_type, where there
+      are similarly more than two valid states. ('no' is still accepted
+      if given via the --enable-debug= option, though it will be
+      standardized to 'off' prior to config.mk being written out.)
+    - Minor variable name change in flatten-headers.py that was intended for
+      32812ff.
+    - CREDITS file update.
+
+commit 32812ff5aba05d34c421fe1024a61f3e2d5e7052
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 9 12:20:19 2019 -0500
+
+    Minor bugfix to flatten-headers.py.
+    
+    Details:
+    - Fixed a minor bug in flatten-headers.py whereby the script, upon
+      encountering a #include directive for the root header file, would
+      erroneously recurse and inline the conents of that root header.
+      The script has been modified to avoid recursion into any headers
+      that share the same name as the root-level header that was passed
+      into the script. (Note: this bug didn't actually manifest in BLIS,
+      so it's merely a precaution for usage of flatten-headers.py in other
+      contexts.)
+
+commit bec90e0b6aeb3c9b19589c2b700fda2d66f6ccdf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 2 17:45:13 2019 -0500
+
+    Minor update to docs/HardwareSupport.md document.
+    
+    Details:
+    - Added more details and clarifying language to implications of 1m and
+      the recycling of microkernels between microarchitectures.
+
+commit 89cd650e7be01b59aefaa85885a3ea78970351e4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 2 17:23:55 2019 -0500
+
+    Use void_fp for function pointers instead of void*.
+    
+    Change void*-typed function pointers to void_fp.
+    - Updated all instances of void* variables that store function pointers
+      to variables of a new type, void_fp. Originally, I wanted to define
+      the type of void_fp as "void (*void_fp)( void )"--that is, a pointer
+      to a function with no return value and no arguments. However, once
+      I did this, I realized that gcc complains with incompatible pointer
+      type (-Wincompatible-pointer-types) warnings every time any such a
+      pointer is being assigned to its final, type-accurate function
+      pointer type. That is, gcc will silently typecast a void* to
+      another defined function pointer type (e.g. dscalv_ker_ft) during
+      an assignment from the former to the latter, but the same statement
+      will trigger a warning when typecasting from a void_fp type. I suspect
+      an explicit typecast is needed in order to avoid the warning, which
+      I'm not willing to insert at this time.
+    - Added a typedef to bli_type_defs.h defining void_fp as void*, along
+      with a commented-out version of the aborted definition described
+      above. (Note that POSIX requires that void* and function pointers
+      be interchangeable; it is the C standard that does not provide this
+      guarantee.)
+    - Comment updates to various _oapi.c files.
+
+commit ffce3d632b284eb52474036096815ec38ca8dd5f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 2 14:40:50 2019 -0500
+
+    Renamed armv8a gemm kernel filename.
+    
+    Details:
+    - Renamed
+        kernels/armv8a/3/bli_gemm_armv8a_opt_4x4.c
+      to
+        kernels/armv8a/3/bli_gemm_armv8a_asm_d6x8.c.
+      This follows the naming convention used by other kernel sets, most
+      notably haswell.
+
+commit 77867478af02144544b4e7b6df5d54d874f3f93b
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Tue Apr 2 13:33:11 2019 -0500
+
+    Use pthreads on MinGW and Cygwin (#307)
+
+commit 7bc75882f02ce3470a357950878492e87e688cec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 28 17:40:50 2019 -0500
+
+    Updated Eigen results in docs/graphs with 3.3.90.
+    
+    Details:
+    - Updated the level-3 performance graphs in docs/graphs with new Eigen
+      results, this time using a development version cloned from their git
+      mirror on March 27, 2019 (version 3.3.90). Performance is improved
+      over 3.3.7, though still noticeably short of BLIS/MKL in most cases.
+    - Very minor updates to docs/Performance.md and matlab scripts in
+      test/3/matlab.
+
+commit 20ea7a1217d3833db89a96158c42da2d6e968ed8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 27 18:09:17 2019 -0500
+
+    Minor text updates (Eigen) to docs/Performance.md.
+    
+    Details:
+    - Added/updated a few more details, mostly regarding Eigen.
+
+commit bfb7e1bc6af468e4ff22f7e27151ea400dcd318a
+Merge: 044df950 2c85e1dd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 27 17:58:19 2019 -0500
+
+    Merge branch 'dev'
+
+commit 2c85e1dd9d5d84da7228ea4ae6deec56a89b3a8f (dev)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 27 16:29:51 2019 -0500
+
+    Added Eigen results to performance graphs.
+    
+    Details:
+    - Updated the Haswell, SkylakeX, and Epyc performance graphs in
+      docs/graphs to report on Eigen implementations, where applicable.
+      Specifically, Eigen implements all level-3 operations sequentially,
+      however, of those operations it only provides multithreaded gemm.
+      Thus, mt results for symm/hemm, syrk/herk, trmm, and trsm are
+      omitted. Thanks to Sameer Agarwal for his help configuring and
+      using Eigen.
+    - Updated docs/Performance.md to note the new implementation tested.
+    - CREDITS file update.
+
+commit bfac7e385f8061f2e6591de208b0acf852f04580
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 27 16:04:48 2019 -0500
+
+    Added ability to plot with Eigen in test/3/matlab.
+    
+    Details:
+    - Updated matlab scripts in test/3/matlab to optionally plot/display
+      Eigen performance curves. Whether Eigen is plotted is determined by
+      a new boolean function parameter, with_eigen.
+    - Updated runme.m scratchpad to reflect the latest invocations of the
+      plot_panel_4x5() function (with Eigen plotting enabled).
+
+commit 67535317b9411c90de7fa4cb5b0fdb8f61fdcd79
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 27 13:32:18 2019 -0500
+
+    Fixed mislabeled eigen output from test/3 drivers.
+    
+    Details:
+    - Fixed the Makefile in test/3 so that it no longer incorrectly labels
+      the matlab output variables from Eigen-linked hemm, herk, trmm, and
+      trsm driver output as "vendor". (The gemm drivers were already
+      correctly outputing matlab variables containing the "eigen" label.)
+
+commit 044df9506f823643c0cdd53e81ad3c27a9f9d4ff
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Mar 27 12:39:31 2019 -0500
+
+    Test with shared on windows (#306)
+    
+    Export macros can't support both shared and static at the same time.
+    When blis is built with both shared and static, headers assume that
+    shared is used at link time and dllimports the symbols with __imp_
+    prefix.
+    
+    To use the headers with static libraries a user can give
+    -DBLIS_EXPORT= to import the symbol without the __imp_ prefix
+
+commit 5e6b160c8a85e5e23bab0f64958a8acf4918a4ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 19:10:59 2019 -0500
+
+    Link to Eigen BLAS for non-gemm drivers in test/3.
+    
+    Details:
+    - Adjusted test/3/Makefile so that the test drivers are linked against
+      Eigen's BLAS library for hemm, herk, trmm, and trsm. We have to do
+      this since Eigen's headers don't define implementations to the
+      standard BLAS APIs.
+    - Simplified #included headers in hemm, herk, trmm, and trsm source
+      driver files, since nothing specific to Eigen is needed at
+      compile-time for those operations.
+
+commit e593221383aae19dfdc3f30539de80ed05cfec7f
+Merge: 92fb9c87 c208b9dc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 15:51:45 2019 -0500
+
+    Merge branch 'master' into dev
+
+commit 92fb9c87bf88b9f9c401eeecd9aa9c3521bc2adb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 26 15:43:23 2019 -0500
+
+    Add more support for Eigen to drivers in test/3.
+    
+    Details:
+    - Use compile-time implementations of Eigen in test_gemm.c via new
+      EIGEN cpp macro, defined on command line. (Linking to Eigen's BLAS
+      library is not necessary.) However, as of Eigen 3.3.7, Eigen only
+      parallelizes the gemm operation and not hemm, herk, trmm, trsm, or
+      any other level-3 operation.
+    - Fixed a bug in trmm and trsm drivers whereby the wrong function
+      (bli_does_trans()) was being called to determine whether the object
+      for matrix A should be created for a left- or right-side case. This
+      was corrected by changing the function to bli_is_left(), as is done
+      in the hemm driver.
+    - Added support for running Eigen test drivers from runme.sh.
+
+commit c208b9dc46852c877197d53b6dd913a046b6ebb6
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Mon Mar 25 13:03:44 2019 -0500
+
+    Fix clang version detection (#305)
+    
+    clang -dumpversion gives 4.2.1 for all clang versions as clang was
+    originally compatible with gcc 4.2.1
+    
+    Apple clang version and clang version are two different things
+    and the real clang version cannot be deduced from apple clang version
+    programatically. Rely on wikipedia to map apple clang to clang version
+    
+    Also fixes assembly detection with clang
+    
+    clang 3.8 can't build knl as it doesn't recognize zmm0
+
+commit feefcab4427a75b0b55af215486b85abcda314f7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 21 18:11:20 2019 -0500
+
+    Allow disabling of BLAS prototypes at compile-time.
+    
+    Details:
+    - Modified bli_blas.h so that:
+      - By default, if the BLAS layer is enabled at configure-time, BLAS
+        prototypes are also enabled within blis.h;
+      - But if the user #defines BLIS_DISABLE_BLAS_DEFS prior to including
+        blis.h, BLAS prototypes are skipped over entirely so that, for
+        example, the application or some other header pulled in by the
+        application may prototype the BLAS functions without causing any
+        duplication.
+    - Updated docs/BuildSystem.md to document the feature above, and
+      related text.
+
+commit 288843b06d91e1b4fade337959aef773090bd1c9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 20 17:52:23 2019 -0500
+
+    Added Eigen support to test/3 Makefile, runme.sh.
+    
+    Details:
+    - Added targets to test/3/Makefile that link against a BLAS library
+      build by Eigen. It appears, however, that Eigen's BLAS library does
+      not support multithreading. (It may be that multithreading is only
+      available when using the native C++ APIs.)
+    - Updated runme.sh with a few Eigen-related tweaks.
+    - Minor tweaks to docs/Performance.md.
+
+commit 153e0be21d9ff413e370511b68d553dd02abada9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 17:53:18 2019 -0500
+
+    More minor tweaks to docs/Performance.md.
+    
+    Details:
+    - Defined GFLOPS as billions of floating-point operations per second,
+      and reworded the sentence after about normalization.
+
+commit 05c4e42642cc0c8dbfa94a6c21e975ac30c0517a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 17:07:20 2019 -0500
+
+    CHANGELOG update (0.5.2)
+
+commit 9204cd0cb0cc27790b8b5a2deb0233acd9edeb9b (tag: 0.5.2)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 17:07:18 2019 -0500
+
+    Version file update (0.5.2)
+
+commit 64560cd9248ebf4c02c4a1eeef958e1ca434e510
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 17:04:20 2019 -0500
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated ReleaseNotes.md in preparation for next version.
+
+commit ab5ad557ea69479d487c9a3cb516f43fa1089863
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 16:50:41 2019 -0500
+
+    Very minor tweaks to Performance.md.
+
+commit 03c4a25e1aa8a6c21abbb789baa599ac419c3641
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 16:47:15 2019 -0500
+
+    Minor fixes to docs/Performance.md.
+    
+    Details:
+    - Fixed some incorrect labels associated with the pdf/png graphs,
+      apparently the result of copy-pasting.
+
+commit fe6dd8b132f39ecb8893d54cd8e75d4bbf6dab83
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 16:30:23 2019 -0500
+
+    Fixed broken section links in docs/Performance.md.
+    
+    Details:
+    - Fixed a few broken section links in the Contents section.
+
+commit 913cf97653f5f9a40aa89a5b79e2b0a8882dd509
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 16:15:24 2019 -0500
+
+    Added docs/Performance.md and docs/graphs subdir.
+    
+    Details:
+    - Added a new markdown document, docs/Performance.md, which reports
+      performance of a representative set of level-3 operations across a
+      variety of hardware architectures, comparing BLIS to OpenBLAS and a
+      vendor library (MKL on Intel/AMD, ARMPL on ARM). Performance graphs,
+      in pdf and png formats, reside in docs/graphs.
+    - Updated README.md to link to new Performance.md document.
+    - Minor updates to CREDITS, docs/Multithreading.md.
+    - Minor updates to matlab scripts in test/3/matlab.
+
+commit 9945ef24fd758396b698b19bb4e23e53b9d95725
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 19 15:28:44 2019 -0500
+
+    Adjusted cache blocksizes for zen subconfig.
+    
+    Details:
+    - Adjusted the zen sub-configuration's cache blocksizes for float,
+      scomplex, and dcomplex based on the existing values for double.
+      (The previous values were taken directly from the haswell subconfig,
+      which targets Intel Haswell/Broadwell/Skylake systems.)
+
+commit d202d008d51251609d08d3c278bb6f4ca9caf8e4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 18 18:18:25 2019 -0500
+
+    Renamed --enable-export-all to --export-shared=[].
+    
+    Details:
+    - Replaced the existing --enable-export-all / --disable-export-all
+      configure option with --export-shared=[public|all], with the 'public'
+      instance of the latter corresponding to --disable-export-all and the
+      'all' instance corresponding to --enable-export-all. Nothing else
+      semantically about the option, or its default, has changed.
+
+commit ff78089870f714663026a7136e696603b5259560
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 18 13:22:55 2019 -0500
+
+    Updates to docs/Multithreading.md.
+    
+    Details:
+    - Made extra explicit the fact that: (a) multithreading in BLIS is
+      disabled by default; and (b) even with multithreading enabled, the
+      user must specify multithreading at runtime in order to observe
+      parallelism. Thanks to M. Zhou for suggesting these clarifications
+      in #292.
+    - Also made explicit that only the environment variable and global
+      runtime API methods are available when using the BLAS API. If the
+      user wishes to use the local runtime API (specify multithreading on
+      a per-call basis), one of the native BLIS APIs must be used.
+
+commit 663f662932c3f182fefc3c77daa1bf8c3394bb8b
+Merge: 938c05ef 6bfe3812
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 16 16:17:12 2019 -0500
+
+    Merge branch 'amd' of github.com:flame/blis into amd
+
+commit 938c05ef8654e2fc013d39a57f51d91d40cc40fb
+Merge: 4ed39c09 5a5f494e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 16 16:01:43 2019 -0500
+
+    Merge branch 'amd' of github.com:flame/blis into amd
+
+commit 6bfe3812e29b86c95b828822e4e5473b48891167
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 15 13:57:49 2019 -0500
+
+    Use -fvisibility=[...] with clang on Linux/BSD/OSX.
+    
+    Details:
+    - Modified common.mk to use the -fvisibility=[hidden|default] option
+      when compiling with clang on non-Windows platforms (Linux, BSD, OS X,
+      etc.). Thanks to Isuru Fernando for pointing out this option works
+      with clang on these OSes.
+
+commit 809395649c5bbf48778ede4c03c1df705dd49566
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 13 18:21:35 2019 -0500
+
+    Annotated additional symbols for export.
+    
+    Details:
+    - Added export annotations to additional function prototypes in order to
+      accommodate the testsuite.
+    - Disabled calling bli_amaxv_check() from within the testsuite's
+      test_amaxv.c.
+
+commit e095926c643fd9c9c2220ebecd749caae0f71d42
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 13 17:35:18 2019 -0500
+
+    Support shared lib export of only public symbols.
+    
+    Details:
+    - Introduced a new configure option, --enable-export-all, which will
+      cause all shared library symbols to be exported by default, or,
+      alternatively, --disable-export-all, which will cause all symbols to
+      be hidden by default, with only those symbols that are annotated for
+      visibility, via BLIS_EXPORT_BLIS (and BLIS_EXPORT_BLAS for BLAS
+      symbols), to be exported. The default for this configure option is
+      --disable-export-all. Thanks to Isuru Fernando for consulting on
+      this commit.
+    - Removed BLIS_EXPORT_BLIS annotations from frame/1m/bli_l1m_unb_var1.h,
+      which was intended for 5a5f494.
+    - Relocated BLIS_EXPORT-related cpp logic from bli_config.h.in to
+      frame/include/bli_config_macro_defs.h.
+    - Provided appropriate logic within common.mk to implement variable
+      symbol visibility for gcc, clang, and icc (to the extend that each of
+      these compilers allow).
+    - Relocated --help text associated with debug option (-d) to configure
+      slightly further down in the list.
+
+commit 5a5f494e428372c7c27ed1f14802e15a83221e87
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 12 18:45:09 2019 -0500
+
+    Removed export macros from all internal prototypes.
+    
+    Details:
+    - After merging PR #303, at Isuru's request, I removed the use of
+      BLIS_EXPORT_BLIS from all function prototypes *except* those that we
+      potentially wish to be exported in shared/dynamic libraries. In other
+      words, I removed the use of BLIS_EXPORT_BLIS from all prototypes of
+      functions that can be considered private or for internal use only.
+      This is likely the last big modification along the path towards
+      implementing the functionality spelled out in issue #248. Thanks
+      again to Isuru Fernando for his initial efforts of sprinkling the
+      export macros throughout BLIS, which made removing them where
+      necessary relatively painless. Also, I'd like to thank Tony Kelman,
+      Nathaniel Smith, Ian Henriksen, Marat Dukhan, and Matthew Brett for
+      participating in the initial discussion in issue #37 that was later
+      summarized and restated in issue #248.
+    - CREDITS file update.
+
+commit 3dc18920b6226026406f1d2a8b2c2b405a2649d5
+Merge: b938c16b 766769ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 12 11:20:25 2019 -0500
+
+    Merge branch 'master' into dev
+
+commit 766769eeb944bd28641a6f72c49a734da20da755
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Mon Mar 11 19:05:32 2019 -0500
+
+    Export functions without def file (#303)
+    
+    * Revert "restore bli_extern_defs exporting for now"
+    
+    This reverts commit 09fb07c350b2acee17645e8e9e1b8d829c73dca8.
+    
+    * Remove symbols not intended to be public
+    
+    * No need of def file anymore
+    
+    * Fix whitespace
+    
+    * No need of configure option
+    
+    * Remove export macro from definitions
+    
+    * Remove blas export macro from definitions
+
+commit 4ed39c0971c7917e2675cf5449f563b1f4751ccc
+Merge: 540ec1b4 b938c16b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 8 11:56:58 2019 -0600
+
+    Merge branch 'amd' of github.com:flame/blis into amd
+
+commit b938c16b0c9e839335ac2c14944b82890143d02f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 7 16:40:39 2019 -0600
+
+    Renamed test/3m4m to test/3.
+    
+    Details:
+    - Renamed '3m4m' directory to '3', which captures the directory nicely
+      since it builds test drivers to test level-3 operations.
+    - These test drivers ceased to be used to test the 3m and 4m (or even
+      1m) induced methods long ago, hence the name change.
+
+commit ab89a40582ec7acf802e59b0763bed099a02edd8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 7 16:26:12 2019 -0600
+
+    More minor updates and edits to test/3m4m.
+    
+    Details:
+    - Further updates to matlab scripts, mostly for compatibility with
+      GNU Octave.
+    - More tweaks to runme.sh.
+    - Updates to runme.m that allow copy-paste into matlab interactive
+      session to generate graphs.
+
+commit f0e70dfbf3fee4c4e382c2c4e87c25454cbc79a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 7 01:04:05 2019 +0000
+
+    Very minor updates to test/3m4m for ul252.
+    
+    Details:
+    - Very minor updates to the newly revamped test/3m4m drivers when used
+      on a Xeon Platinum (SkylakeX).
+
+commit 9f1dbe572b1fd5e7dd30d5649bdf59259ad770d5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 5 17:47:55 2019 -0600
+
+    Overhauled test/3m4m Makefile and scripts.
+    
+    Details:
+    - Rewrote much of Makefile to generate executables for single- and dual-
+      socket multithreading as well as single-threaded. Each of the three
+      can also use a different problem size range/increment, as is often
+      appropriate when doubling/halving the number of threads.
+    - Rewrote runme.sh script to flexibly execute as many threading
+      parameter scenarios as is given in the input parameter string
+      (currently set within the script itself). The string also encodes
+      the maximum problem size for each threading scenario, which is used
+      to identify the executable to run. Also improved the "progress" output
+      of the script to reduce redundant info and improve readability in
+      terminals that are not especially wide.
+    - Minor updates to test_*.c source files.
+    - Updated matlab scripts according to changes made to the Makefile,
+      test drivers, and runme.sh script, and renamed 'plot_all.m' to
+      'runme.m'.
+
+commit 3bdab823fa93342895bf45d812439324a37db77c
+Merge: 70f12f20 e2a02ebd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 28 14:07:24 2019 -0600
+
+    Merge branch 'master' into dev
+
+commit e2a02ebd005503c63138d48a2b7d18978ee29205
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 28 13:58:59 2019 -0600
+
+    Updates (from ls5) to test/3m4m/runme.sh.
+    
+    Details:
+    - Lonestar5-specific updates to runme.sh.
+
+commit f0dcc8944fa379d53770f5cae5d670140918f00c
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Wed Feb 27 17:27:23 2019 -0600
+
+    Add symbol export macro for all functions (#302)
+    
+    * initial export of blis functions
+    
+    * Regenerate def file for master
+    
+    * restore bli_extern_defs exporting for now
+
+commit 540ec1b479712d5e1da637a718927249c15d867f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Feb 24 19:09:10 2019 -0600
+
+    Updated level-3 BLAS to call object API directly.
+    
+    Details:
+    - Updated the BLAS compatibility layer for level-3 operations so that
+      the corresponding BLIS object API is called directly rather than first
+      calling the typed BLIS API. The previous code based on the typed BLIS
+      API calls is still available in a deactivated cpp macro branch, which
+      may be re-activated by #defining BLIS_BLAS3_CALLS_TAPI. (This does not
+      yet correspond to a configure option. If it seems like people might
+      want to toggle this behavior more regularly, a configure option can be
+      added in the future.)
+    - Updated the BLIS typed API to statically "pre-initialize" objects via
+      new initializor macros. Initialization is then finished via calls to
+      static functions bli_obj_init_finish_1x1() and bli_obj_init_finish(),
+      which are similar to the previously-called functions,
+      bli_obj_create_1x1_with_attached_buffer() and
+      bli_obj_create_with_attached_buffer(), respectively. (The BLAS
+      compatibility layer updates mentioned above employ this new technique
+      as well.)
+    - Transformed certain routines in bli_param_map.c--specifically, the
+      ones that convert netlib-style parameters to BLIS equivalents--into
+      static functions, now in bli_param_map.h. (The remaining three classes
+      of conversation routines were left unchanged.)
+    - Added the aforementioned pre-initializor macros to bli_type_defs.h.
+    - Relocated bli_obj_init_const() and bli_obj_init_constdata() from
+      bli_obj_macro_defs.h to bli_type_defs.h.
+    - Added a few macros to bli_param_macro_defs.h for testing domains for
+      real/complexness and precisions for single/double-ness.
+
+commit 8e023bc914e9b4ac1f13614feb360b105fbe44d2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 22 16:55:30 2019 -0600
+
+    Updates to 3m4m/matlab scripts.
+    
+    Details:
+    - Minor updates to matlab graph-generating scripts.
+    - Added a plot_all.m script that is more of a scratchpad for copying and
+      pasting function invocations into matlab to generate plots that are
+      presently of interest to us.
+
+commit 70f12f209bc1901b5205902503707134cf2991a0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Feb 20 16:10:10 2019 -0600
+
+    Changed unsafe-loop to unsafe-math optimizations.
+    
+    Details:
+    - Changed -funsafe-loop-optimizations (re-)introduced in 7690855 for
+      make_defs.mk files' CRVECFLAGS to -funsafe-math-optimizations (to
+      account for a miscommunication in issue #300). Thanks to Dave Love
+      for this suggestion and Jeff Hammond for his feedback on the topic.
+
+commit 7690855c5106a56e5b341a350f8db1c78caacd89
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 19:16:01 2019 -0600
+
+    Restored -funsafe-loop-optimizations to subconfigs.
+    
+    Details:
+    - Restored use of -funsafe-loop-optimizations in the definitions of
+      CRVECFLAGS (when using gcc), but only for sub-configurations (and
+      not configuration families such as amd64, intel64, and x86_64).
+      This more or less reverts 5190d05 and 6cf1550.
+
+commit 44994d1490897b08cde52a615a2e37ddae8b2061
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 18:35:30 2019 -0600
+
+    Disable TBM, XOP, LWP instructions in AMD configs.
+    
+    Details:
+    - Added -mno-tbm -mno-xop -mno-lwp to CKVECFLAGS in bulldozer,
+      piledriver, steamroller, and excavator configurations to explicitly
+      disable AMD's bulldozer-era TBM, XOP, and LWP instruction sets in an
+      attempt to fix the invalid instruction error that has plagued Travis
+      CI builds since 6a014a3. Thanks to Devin Matthews for pointing out
+      that the offending instruction was part of TBM (issue #300).
+    - Restored -O3 to piledriver configuration's COPTFLAGS.
+
+commit 1e5b530744c1906140d47f43c5cad235eaa619cf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 18:04:38 2019 -0600
+
+    Reverted piledriver COPTFLAGS from -O3 to -O2.
+    
+    Details:
+    - Debugging continues; changing COPTFLAGS for piledriver subconfig from
+      -O3 to -O2, its original value prior to 6a014a3.
+
+commit 6cf155049168652c512aefdd16d74e7ff39b98df
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 17:29:51 2019 -0600
+
+    Removed -funsafe-loop-optimizations from all configs.
+    
+    Details:
+    - Error persists. Removed -funsafe-loop-optimizations from all remaining
+      sub-configurations.
+
+commit 5190d05a27c5fa4c7942e20094f76eb9a9785c3e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 17:07:35 2019 -0600
+
+    Removed -funsafe-loop-optimizations from piledriver.
+    
+    Details:
+    - Error persists; continuing debugging from bf0fb78c by removing
+      -funsafe-loop-optimizations from piledriver configuration.
+
+commit bf0fb78c5e575372060d22f5ceeb5b332e8978ec
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 16:51:38 2019 -0600
+
+    Removed -funsafe-loop-optimizations from families.
+    
+    Details:
+    - Removed -funsafe-loop-optimizations from the configuration families
+      affected by 6a014a3, specifically: intel64, amd64, and x86_64.
+      This is part of an attempt to debug why the sde, as executed by
+      Travis CI, is crashing via the following error:
+    
+        TID 0 SDE-ERROR: Executed instruction not valid for specified chip
+        (ICELAKE): 0x9172a5: bextr_xop rax, rcx, 0x103
+
+commit 6a014a3377a2e829dbc294b814ca257a2bfcb763
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 14:52:29 2019 -0600
+
+    Standardized optimization flags in make_defs.mk.
+    
+    Details:
+    - Per Dave Love's recommendation in issue #300, this commit defines
+        COPTFLAGS := -03
+      and
+        CRVECFLAGS := $(CKVECFLAGS) -funsafe-loop-optimizations
+      in the make_defs.mk for all Intel- and AMD-based configurations.
+
+commit 565fa3853b381051ac92cff764625909d105644d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 18 11:43:58 2019 -0600
+
+    Redirect trsm pc, ir parallelism to ic, jr loops.
+    
+    Details:
+    - trsm parallelization was temporarily simplifed in 075143d to entirely
+      ignore any parallelism specified via the pc or ir loops. Now, any
+      parallelism specified to the pc loop will be redirected to the ic
+      loop, and any parallelism specified to the ir loop will be redirected
+      to the jr loop. (Note that because of inter-iteration dependencies,
+      trsm cannot parallelize the ir loop. Parallelism via the pc loop is
+      at least somewhat feasible in theory, but it would require tracking
+      dependencies between blocks--something for which BLIS currently lacks
+      the necessary supporting infrastructure.)
+
+commit a023c643f25222593f4c98c2166212561d030621
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 14 20:18:55 2019 -0600
+
+    Regenerated symbols in build/libblis-symbols.def.
+    
+    Details:
+    - Reran ./build/regen-symbols.sh after running
+      'configure --enable-cblas auto'
+
+commit 075143dfd92194647da9022c1a58511b20fc11f3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 14 18:52:45 2019 -0600
+
+    Added support for IC loop parallelism to trsm.
+    
+    Details:
+    - Parallelism within the IC loop (3rd loop around the microkernel) is
+      now supported within the trsm operation. This is done via a new branch
+      on each of the control and thread trees, which guide execution of a
+      new trsm-only subproblem from within bli_trsm_blk_var1(). This trsm
+      subproblem corresponds to the macrokernel computation on only the
+      block of A that contains the diagonal (labeled as A11 in algorithms
+      with FLAME-like partitioning), and the corresponding row panel of C.
+      During the trsm subproblem, all threads within the JC communicator
+      participate and parallelize along the JR loop, including any
+      parallelism that was specified for the IC loop. (IR loop parallelism
+      is not supported for trsm due to inter-iteration dependencies.) After
+      this trsm subproblem is complete, a barrier synchronizes all
+      participating threads and then they proceed to apply the prescribed
+      BLIS_IC_NT (or equivalent) ways of parallelism (and any BLIS_JR_NT
+      parallelism specified within) to the remaining gemm subproblem (the
+      rank-k update that is performed using the newly updated row-panel of
+      B). Thus, trsm now supports JC, IC, and JR loop parallelism.
+    - Modified bli_trsm_l_cntl_create() to create the new "prenode" branch
+      of the trsm_l cntl_t tree. The trsm_r tree was left unchanged, for
+      now, since it is not currently used. (All trsm problems are cast in
+      terms of left-side trsm.)
+    - Updated bli_cntl_free_w_thrinfo() to be able to free the newly shaped
+      trsm cntl_t trees. Fixed a potentially latent bug whereby a cntl_t
+      subnode is only recursed upon if there existed a corresponding
+      thrinfo_t node, which may not always exist (for problems too small
+      to employ full parallelization due to the minimum granularity imposed
+      by micropanels).
+    - Updated other functions in frame/base/bli_cntl.c, such as
+      bli_cntl_copy() and bli_cntl_mark_family(), to recurse on sub-prenodes
+      if they exist.
+    - Updated bli_thrinfo_free() to recurse into sub-nodes and prenodes
+      when they exist, and added support for growing a prenode branch to
+      bli_thrinfo_grow() via a corresponding set of help functions named
+      with the _prenode() suffix.
+    - Added a bszid_t field thrinfo_t nodes. This field comes in handy when
+      debugging the allocation/release of thrinfo_t nodes, as it helps trace
+      the "identity" of each nodes as it is created/destroyed.
+    - Renamed
+        bli_l3_thrinfo_print_paths() -> bli_l3_thrinfo_print_gemm_paths()
+      and created a separate bli_l3_thrinfo_print_trsm_paths() function to
+      print out the newly reconfigured thrinfo_t trees for the trsm
+      operation.
+    - Trival changes to bli_gemm_blk_var?.c and bli_trsm_blk_var?.c
+      regarding variable declarations.
+    - Removed subpart_t enum values BLIS_SUBPART1T, BLIS_SUBPART1B,
+      BLIS_SUBPART1L, BLIS_SUBPART1R. Then added support for two new labels
+      (semantically speaking): BLIS_SUBPART1A and BLIS_SUBPART1B, which
+      represent the subpartition ahead of and behind, respectively,
+      BLIS_SUBPART1. Updated check functions in bli_check.c accordingly.
+    - Shuffled layering/APIs for bli_acquire_mpart_[mn]dim() and
+      bli_acquire_mpart_t2b/b2t(), _l2r/r2l().
+    - Deprecated old functions in frame/3/bli_l3_thrinfo.c.
+
+commit 78bc0bc8b6b528c79b11f81ea19250a1db7450ed
+Author: Nicholai Tukanov <nicholai@utexas.edu>
+Date:   Thu Feb 14 13:29:02 2019 -0600
+
+    Power9 sub-configuration  (#298)
+    
+    Formally registered power9 sub-configuration.
+    
+    Details:
+    - Added and registered power9 sub-configuration into the build system.
+      Thanks to Nicholai Tukanov and Devangi Parikh for these contributions.
+    - Note: The sub-configuration does not yet have a corresponding
+      architecture-specific kernel set registered, and so for now the
+      sub-config is using the generic kernel set.
+
+commit 6b832731261f9e7ad003a9ea4682e9ca973ef844
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 12 16:01:28 2019 -0600
+
+    Generalized ref kernels' pragma omp simd usage.
+    
+    Details:
+    - Replaced direct usage of _Pragma( "omp simd" ) in reference kernels
+      with PRAGMA_SIMD, which is defined as a function of the compiler being
+      used in a new bli_pragma_macro_defs.h file. That definition is cleared
+      when BLIS detects that the -fopenmp-simd command line option is
+      unsupported. Thanks to Devin Matthews and Jeff Hammond for suggestions
+      that guided this commit.
+    - Updated configure and bli_config.h.in so that the appropriate anchor
+      is substituted in (when the corresponding pragma omp simd support is
+      present).
+
+commit b1f5ce8622b682b79f956fed83f04a60daa8e0fc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 5 17:38:50 2019 -0600
+
+    Minor updates to scripts in test/mixeddt/matlab.
+
+commit 38203ecd15b1fa50897d733daeac6850d254e581
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Mon Feb 4 15:28:28 2019 -0500
+
+    Added thunderx2 system in the mixeddt test scripts
+    
+    Details:
+     - Added thunderx2 (tx2) as a system in the runme.sh in test/mixeddt
+
+commit dfc91843ea52297bf636147793029a0c1345be04
+Author: Devangi N. Parikh <dnp@cs.utexas.edu>
+Date:   Mon Feb 4 15:23:40 2019 -0500
+
+    Fixed gcc flags for thunderx2 subconfiguration
+    
+    Details:
+    - Fixed -march flag. Thunderx2 is an armv8.1a architecture not armv8a.
+
+commit c665eb9b888ec7e41bd0a28c4c8ac4094d0a01b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 28 16:22:23 2019 -0600
+
+    Minor updates to docs, Makefiles.
+    
+    Details:
+    - Changed all occurrances of
+        micro-kernel -> microkernel
+        macro-kernel -> macrokernel
+        micro-panel  -> micropanel
+      in all markdown documents in 'docs' directory. This change is being
+      made since we've reached the point in adoption and acceptance of
+      BLIS's insights where words such as "microkernel" are no longer new,
+      and therefore now merit being unhyphenated.
+    - Updated "Implementation Notes" sections of KernelsHowTo.md, which
+      still contained references to nonexistent cpp macros such as
+      BLIS_DEFAULT_MR_? and BLIS_PACKDIM_MR_?.
+    - Added 'run-fast' and 'check-fast' targets to testsuite/Makefile.
+    - Minor updates to Testsuite.md, including suggesting use of
+      'make check' and 'make check-fast' when running from the local
+      testsuite directory.
+    - Added a comment to top-level Makefile explaining the purpose behind
+      the TESTSUITE_WRAPPER variable, which at first glance appears to serve
+      no purpose.
+
+commit 1aa280d0520ed5eaea3b119b4e92b789ecad78a4
+Author: M. Zhou <5723047+cdluminate@users.noreply.github.com>
+Date:   Sun Jan 27 21:40:48 2019 +0000
+
+    Amend OS detection for kFreeBSD. (#295)
+
+commit fffc23bb35d117a433886eb52ee684ff5cf6997f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 25 13:35:31 2019 -0600
+
+    CREDITS file update.
+
+commit 26c5cf495ce22521af5a36a1012491213d5a4551
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 24 18:49:31 2019 -0600
+
+    Fixed bug in skx subconfig related to bdd46f9.
+    
+    Details:
+    - Fixed code in the skx subconfiguration that became a bug after
+      committing bdd46f9. Specifically, the bli_cntx_init_skx() function
+      was overwriting default blocksizes for the scomplex and dcomplex
+      microkernels despite the fact that only single and double real
+      microkernels were being registered. This was not a problem prior to
+      bdd46f9 since all microkernels used dynamically-queried (at runtime)
+      register blocksizes for loop bounds. However, post-bdd46f9, this
+      became a bug because the reference ukernels for scomplex and dcomplex
+      were written with their register blocksizes hard-coded as constant
+      loop bounds, which conflicted the the erroneous scomplex and dcomplex
+      values that bli_cntx_init_skx() was setting in the context. The
+      lesson here is that going forward, all subconfigurations must not set
+      any blocksizes for datatypes corresponding to default/reference
+      microkernels. (Note that a blocksize is left unchanged by the
+      bli_cntx_set_blkszs() function if it was set to -1.)
+
+commit 180f8e42e167b83a757340ad4bd4a5c7a1d6437b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 24 18:01:15 2019 -0600
+
+    Fixed undefined behavior trsm ukr bug in bdd46f9.
+    
+    Details:
+    - Fixed a bug that mainfested anytime a configuration was used in which
+      optimized microkernels were registered and the trsm operation (or
+      kernel) was invoked. The bug resulted from the optimized microkernels'
+      register blocksizes conflicting with the hard-coded values--expressed
+      in the form of constant loop bounds--used in the new reference trsm
+      ukernels that were introduced in bdd46f9. The fix was easy: reverting
+      back to the implementation that uses variable-bound loops, which
+      amounted to changing an #if 0 to #if 1 (since I preserved the older
+      implementation in the file alongside the new code based on constant-
+      bound loops). It should be noted that this fix must be permanent,
+      since the trsm kernel code with constant-bound loops can never work
+      with gemm ukernels that use different register blocksizes.
+
+commit bdd46f9ee88057d52610161966a11c224e5a026c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 24 17:23:18 2019 -0600
+
+    Rewrote reference kernels to use #pragma omp simd.
+    
+    Details:
+    - Rewrote level-1v, -1f, and -3 reference kernels in terms of simplified
+      indexing annotated by the #pragma omp simd directive, which a compiler
+      can use to vectorize certain constant-bounded loops. (The new kernels
+      actually use _Pragma("omp simd") since the kernels are defined via
+      templatizing macros.) Modest speedup was observed in most cases using
+      gcc 5.4.0, which may improve with newer versions. Thanks to Devin
+      Matthews for suggesting this via issue #286 and #259.
+    - Updated default blocksizes defined in ref_kernels/bli_cntx_ref.c to
+      be 4x16, 4x8, 4x8, and 4x4 for single, double, scomplex and dcomplex,
+      respectively, with a default row preference for the gemm ukernel. Also
+      updated axpyf, dotxf, and dotxaxpyf fusing factors to 8, 6, and 4,
+      respectively, for all datatypes.
+    - Modified configure to verify that -fopenmp-simd is a valid compiler
+      option (via a new detect/omp_simd/omp_simd_detect.c file).
+    - Added a new header in which prefetch macros are defined according to
+      which compiler is detected (via macros such as __GNUC__). These
+      prefetch macros are not yet employed anywhere, though.
+    - Updated the year in copyrights of template license headers in
+      build/templates and removed AMD as a default copyright holder.
+
+commit 63de2b0090829677755eb5cdb27e73bc738da32d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 23 12:16:27 2019 -0600
+
+    Prevent redef of ftnlen in blastest f2c_types.h.
+    
+    Details:
+    - Guard typedef of ftnlen in f2c_types.h with a #ifndef HAVE_BLIS_H
+      directive to prevent the redefinition of that type. Thanks to Jeff
+      Diamond for reporting this compiler warning (and apologies for the
+      delay in committing a fix).
+
+commit eec2e183a7b7d67702dbd1f39c153f38148b2446
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 21 12:12:18 2019 -0600
+
+    Added escaping to '/' in os_name in configure.
+    
+    Details:
+    - Add os_name to the list of variables into which the '/' character is
+      escaped. This is meant to address (or at least make progress toward
+      addressing) #293. Thanks to Isuru Fernando for spotting this as the
+      potential fix, and also thanks to M. Zhou for the original report.
+
+commit adf5c17f0839fdbc1f4a1780f637928b1e78e389
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jan 18 15:14:45 2019 -0600
+
+    Formally registered thunderx2 subconfiguration.
+    
+    Details:
+    - Added a separate subconfiguration for thunderx2, which now uses
+      different optimization flags than cortexa57/cortexa53.
+
+commit 094cfdf7df6c2764c25fcbfce686ba29b933942c
+Author: M. Zhou <5723047+cdluminate@users.noreply.github.com>
+Date:   Fri Jan 18 18:46:13 2019 +0000
+
+    Port BLIS to GNU Hurd OS. (#294)
+    
+    Prevent blis.h from misidentifying Hurd as OSX.
+
+commit 5d7d616e8e591c2f3c7c2d73220eb27ea484f9c9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 15 20:52:51 2019 -0600
+
+    README.md update re: mixeddt TOMS paper.
+
+commit 58c7fb4788177487f73a3964b7a910fe4dc75941
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 8 17:00:27 2019 -0600
+
+    Added more matlab scripts for mixeddt paper.
+    
+    Details:
+    - Added a variant set of matlab scripts geared to producing plots that
+      reflect performance data gathered with and without extra memory
+      optimizations enabled. These scripts reside (for now) in
+      test/mixeddt/matlab/wawoxmem.
+
+commit 34286eb914b48b56cdda4dfce192608b9f86d053
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 8 11:41:20 2019 -0600
+
+    Minor update to docs/HardwareSupport.md.
+
+commit 108b04dc5b1b1288db95f24088d1e40407d7bc88
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 7 20:16:31 2019 -0600
+
+    Regenerated symbols in build/libblis-symbols.def.
+    
+    Details:
+    - Reran ./build/regen-symbols.sh after running
+      'configure --enable-cblas auto' to reflect removal of
+      bli_malloc_pool() and bli_free_pool().
+
+commit 706cbd9d5622f4690e6332a89cf41ab5c8771899
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 7 18:28:19 2019 -0600
+
+    Minor tweaks/cleanups to bli_malloc.c, _apool.c.
+    
+    Details:
+    - Removed malloc_ft and free_ft function pointer arguments from the
+      interface to bli_apool_init() after deciding that there is no need to
+      specify the malloc()/free() for blocks within the apool. (The apool
+      blocks are actually just array_t structs.) Instead, we simply call
+      bli_malloc_intl()/_free_intl() directly. This has the added benefit
+      of allowing additional output when memory tracing is enabled via
+      --enable-mem-tracing. Also made corresponding changes elsewhere in
+      the apool API.
+    - Changed the inner pools (elements of the array_t within the apool_t)
+      to use BLIS_MALLOC_POOL and BLIS_FREE_POOL instead of BLIS_MALLOC_INTL
+      and BLIS_FREE_INTL.
+    - Disabled definitions of bli_malloc_pool() and bli_free_pool() since
+      there are no longer any consumers of these functions.
+    - Very minor comment / printf() updates.
+
+commit 579145039d945adbcad1177b1d53fb2d3f2e6573
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Mon Jan 7 23:00:15 2019 +0100
+
+    Initialize error messages at compile time (#289)
+    
+    * Initialize error messages at compile time
+    
+    - Assigning strings directly to the bli_error_string array, instead of
+    snprintf() at execution-time.
+    
+    * Retired bli_error_init(), _finalize().
+    
+    Details:
+    - Removed functions obviated by changes in 80e8dc6: bli_error_init(),
+      bli_error_finalize(), and bli_error_init_msgs(), as well as calls to
+      the former two in bli_init.c.
+    
+    * Regenerated symbols in build/libblis-symbols.def.
+    
+    Details:
+    - Reran ./build/regen-symbols.sh after running
+      'configure --enable-cblas auto'.
+
+commit aafbca086e36b6727d7be67e21fef5bd9ff7bfd9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 7 12:38:21 2019 -0600
+
+    Updated external package language in README.md.
+    
+    Details:
+    - Updated/added comments about Fedora, OpenSUSE, and GNU Guix under the
+      newly-renamed "External GNU/Linux packages" section. Thanks to Dave
+      Love for providing these revisions.
+
+commit daacfe68404c9cc8078e5e7ba49a8c7d93e8cda3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 7 12:12:47 2019 -0600
+
+    Allow running configure with python 3.4.
+    
+    Details:
+    - Relax version blacklisting of python3 to allow 3.4 or later instead
+      of 3.5 or later. Thanks to Dave Love for pointing out that 3.4 was
+      sufficient for the purpose of BLIS's build system. (It should be
+      noted that we're not sure which, if any, python3 versions prior to
+      3.4 are insufficient, and that the only thing stopping us from
+      determining this is the fact that these earlier versions of python3
+      are not readily available for us to test with.)
+    - Updated docs/BuildSystem.md to be explicit about current python2 vs
+      python3 version requirements.
+
+commit ad8d9adb09a7dd267bbdeb2bd1fbbf9daf64ee76
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 3 16:08:24 2019 -0600
+
+    README.md, CREDITS update.
+    
+    Details:
+    - Added "What's New" and "What People Are Saying About BLIS" sections to
+      README.md.
+    - Added missing github handles to various individuals' entries in the
+      CREDITS file.
+
+commit 7052fca5aef430241278b67d24cef6fe33106904
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 2 13:48:40 2019 -0600
+
+    Apply f272c289 to bli_fmalloc_noalign().
+    
+    Details:
+    - Perform the same check for NULL return values and error message output
+      in bli_fmalloc_noalign() as is performed by bli_fmalloc_align(). (This
+      change was intended for f272c289.)
+
+commit 528e3ad16a42311a852a8376101959b4ccd801a5
+Merge: 3126c52e f272c289
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 2 13:39:19 2019 -0600
+
+    Merge branch 'amd'
+
+commit 3126c52ea795ffb7d30b16b7f7ccc2a288a6158d
+Merge: 61441b24 8091998b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 2 13:37:37 2019 -0600
+
+    Merge branch 'amd'
+
+commit f272c2899a6764eedbe05cea874ee3bd258dbff3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 2 12:34:15 2019 -0600
+
+    Add error message to malloc() check for NULL.
+    
+    Details:
+    - Output an error message if and when the malloc()-equivalent called by
+      bli_fmalloc_align() ever returns NULL. Everything was already in place
+      for this to happen, including the error return code, the error string
+      sprintf(), the error checking function bli_check_valid_malloc_buf()
+      definition, and its prototype. Thanks to Minh Quan Ho for pointing out
+      the missing error message.
+    - Increased the default block_ptrs_len for each inner pool stored in the
+      small block allocator from 10 to 25. Under normal execution, each
+      thread uses only 21 blocks, so this change will prevent the sba from
+      needing to resize the block_ptrs array of any given inner pool as
+      threads initially populate the pool with small blocks upon first
+      execution of a level-3 operation.
+    - Nix stray newline echo in configure.
+
+commit eb97f778a1e13ee8d3b3aade05e479c4dfcfa7c0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 25 20:17:09 2018 -0600
+
+    Added missing AMD copyrights to previous commit.
+    
+    Details:
+    - Forgot to add AMD copyrights to several touched files that did not
+      already have them in 2f31743.
+
+commit 2f3174330fb29164097d664b7c84e05c7ced7d95
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 25 19:35:01 2018 -0600
+
+    Implemented a pool-based small block allocator.
+    
+    Details:
+    - Implemented a sophisticated data structure and set of APIs that track
+      the small blocks of memory (around 80-100 bytes each) used when
+      creating nodes for control and thread trees (cntl_t and thrinfo_t) as
+      well as thread communicators (thrcomm_t). The purpose of the small
+      block allocator, or sba, is to allow the library to transition into a
+      runtime state in which it does not perform any calls to malloc() or
+      free() during normal execution of level-3 operations, regardless of
+      the threading environment (potentially multiple application threads
+      as well as multiple BLIS threads). The functionality relies on a new
+      data structure, apool_t, which is (roughly speaking) a pool of
+      arrays, where each array element is a pool of small blocks. The outer
+      pool, which is protected by a mutex, provides separate arrays for each
+      application thread while the arrays each handle multiple BLIS threads
+      for any given application thread. The design minimizes the potential
+      for lock contention, as only concurrent application threads would
+      need to fight for the apool_t lock, and only if they happen to begin
+      their level-3 operations at precisely the same time. Thanks to Kiran
+      Varaganti and AMD for requesting this feature.
+    - Added a configure option to disable the sba pools, which are enabled
+      by default; renamed the --[dis|en]able-packbuf-pools option to
+      --[dis|en]able-pba-pools; and rewrote the --help text associated with
+      this new option and consolidated it with the --help text for the
+      option associated with the sba (--[dis|en]able-sba-pools).
+    - Moved the membrk field from the cntx_t to the rntm_t. We now pass in
+      a rntm_t* to the bli_membrk_acquire() and _release() APIs, just as we
+      do for bli_sba_acquire() and _release().
+    - Replaced all calls to bli_malloc_intl() and bli_free_intl() that are
+      used for small blocks with calls to bli_sba_acquire(), which takes a
+      rntm (in addition to the bytes requested), and bli_sba_release().
+      These latter two functions reduce to the former two when the sba pools
+      are disabled at configure-time.
+    - Added rntm_t* arguments to various cntl_t and thrinfo_t functions, as
+      required by the new usage of bli_sba_acquire() and _release().
+    - Moved the freeing of "old" blocks (those allocated prior to a change
+      in the block_size) from bli_membrk_acquire_m() to the implementation
+      of the pool_t checkout function.
+    - Miscellaneous improvements to the pool_t API.
+    - Added a block_size field to the pblk_t.
+    - Harmonized the way that the trsm_ukr testsuite module performs packing
+      relative to that of gemmtrsm_ukr, in part to avoid the need to create
+      a packm control tree node, which now requires a rntm_t that has been
+      initialized with an sba and membrk.
+    - Re-enable explicit call bli_finalize() in testsuite so that users who
+      run the testsuite with memory tracing enabled can check for memory
+      leaks.
+    - Manually imported the compact/minor changes from 61441b24 that cause
+      the rntm to be copied locally when it is passed in via one of the
+      expert APIs.
+    - Reordered parameters to various bli_thrcomm_*() functions so that the
+      thrcomm_t* to the comm being modified is last, not first.
+    - Added more descriptive tracing for allocating/freeing small blocks and
+      formalized via a new configure option: --[dis|en]able-mem-tracing.
+    - Moved some unused scalm code and headers into frame/1m/other.
+    - Whitespace changes to bli_pthread.c.
+    - Regenerated build/libblis-symbols.def.
+
+commit 61441b24f3244a4b202c29611a4899dd5c51d3a1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 20 19:38:11 2018 -0600
+
+    Make local copy of user's rntm_t in level-3 ops.
+    
+    Details:
+    - In the case that the caller passes in a non-NULL rntm_t pointer into
+      one of the expert APIs for a level-3 operation (e.g. bli_gemm_ex()),
+      make a local copy of the rntm_t and use the address of that local copy
+      in all subsequent execution (which may change the contents of the
+      rntm_t). This prevents a potentially confusing situation whereby a
+      user-initialized rntm_t is used once (in, say, gemm), and then found
+      by the user to be in a different state before it is used a second
+      time.
+
+commit e809b5d2f1023b4249969e2f516291c9a3a00b80
+Merge: 76016691 0476f706
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 20 16:27:26 2018 -0600
+
+    Merge branch 'master' into amd
+
+commit 0476f706b93e83f6b74a3d7b7e6e9cc9a1a52c3b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 18 14:56:20 2018 -0600
+
+    CHANGELOG update (0.5.1)
+
+commit e0408c3ca3d53bc8e6fedac46ea42c86e06c922d (tag: 0.5.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Dec 18 14:56:16 2018 -0600
 
     Version file update (0.5.1)
 
-commit 3ab231afc9f69d14493908c53c85a84c5fba58aa (origin/master, origin/HEAD)
+commit 3ab231afc9f69d14493908c53c85a84c5fba58aa
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Dec 18 14:53:37 2018 -0600
 
@@ -52,6 +1745,55 @@ Date:   Mon Dec 17 19:17:30 2018 -0600
       choosing between OpenMP and pthreads, and specifying affinity via
       OpenMP.
     - CREDITS file update.
+
+commit 76016691e2c514fcb59f940c092475eda968daa2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Dec 13 17:23:09 2018 -0600
+
+    Improvements to bli_pool; malloc()/free() tracing.
+    
+    Details:
+    - Added malloc_ft and free_ft fields to pool_t, which are provided when
+      the pool is initialized, to allow bli_pool_alloc_block() and
+      bli_pool_free_block() to call bli_fmalloc_align()/bli_ffree_align()
+      with arbitrary align_size values (according to how the pool_t was
+      initialized).
+    - Added a block_ptrs_len argument to bli_pool_init(), which allows the
+      caller to specify an initial length for the block_ptrs array, which
+      previously suffered the cost of being reallocated, copied, and freed
+      each time a new block was added to the pool.
+    - Consolidated the "buf_sys" and "buf_align" pointer fields in pblk_t
+      into a single "buf" field. Consolidated the bli_pblk API accordingly
+      and also updated the bli_mem API implementation. This was done
+      because I'd previously already implemented opaque alignment via
+      bli_malloc_align(), which allocates extra space and stores the
+      original pointer returned by malloc() one element before the element
+      whose address is aligned.
+    - Tweaked bli_membrk_acquire_m() and bli_membrk_release() to call
+      bli_fmalloc_align() and bli_ffree_align(), which required adding an
+      align_size field to the membrk_t struct.
+    - Pass the pack schemas directly into bli_l3_cntl_create_if() rather
+      than transmit them via objects for A and B.
+    - Simplified bli_l3_cntl_free_if() and renamed to bli_l3_cntl_free().
+      The function had not been conditionally freeing control trees for
+      quite some time. Also, removed obj_t* parameters since they aren't
+      needed anymore (or never were).
+    - Spun-off OpenMP nesting code in bli_l3_thread_decorator() to a
+      separate function, bli_l3_thread_decorator_thread_check().
+    - Renamed:
+        bli_malloc_align()   -> bli_fmalloc_align()
+        bli_free_align()     -> bli_ffree_align()
+        bli_malloc_noalign() -> bli_fmalloc_noalign()
+        bli_free_noalign()   -> bli_ffree_noalign()
+      The 'f' is for "function" since they each take a malloc_ft or free_ft
+      function pointer argument.
+    - Inserted various printf() calls for the purposes of tracing memory
+      allocation and freeing, guarded by cpp macro ENABLE_MEM_DEBUG, which,
+      for now, is intended to be a "hidden" feature rather than one hooked
+      up to a configure-time option.
+    - Defined bli_rntm_equals(), which compares two rntm_t for equality.
+      (There are no use cases for this function yet, but there may be soon.)
+    - Whitespace changes to function parameter lists in bli_pool.c, .h.
 
 commit f808d829c58dc4194cc3ebc3825fbdde12cd3f93
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -105,6 +1847,13 @@ Date:   Wed Dec 12 15:22:59 2018 -0600
     - Fixed a minor bug in the testsuite that prevented non-1m-based induced
       method implementations of trsm from executing.
 
+commit 02ec0be3ba0b0d6b4186386ae140906a96de919b
+Merge: e275def3 c534da62
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 5 19:33:53 2018 -0600
+
+    Merge branch 'master' into amd
+
 commit c534da62c0015f91391983da5376c9e091378010
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Dec 5 15:51:05 2018 -0600
@@ -149,7 +1898,7 @@ Date:   Wed Dec 5 20:06:32 2018 +0000
       (That is, when native complex microkernels are missing, we usually
       want to test performance of 1m.)
 
-commit 0645f239fbdf37ee9d2096ee3bb0e76b3302cfff (origin/dev, dev)
+commit 0645f239fbdf37ee9d2096ee3bb0e76b3302cfff
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Dec 4 14:31:06 2018 -0600
 
@@ -237,6 +1986,13 @@ Date:   Mon Dec 3 17:49:52 2018 -0600
     - Relocated and renamed frame/ind/misc/bli_l3_ind_opt.h to
       frame/3/gemm/ind/bli_gemm_ind_opt.h.
     - Various whitespace/comment updates.
+
+commit e275def30ac41cadce296560fa67282704f20a02
+Merge: 8091998b dc184095
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 30 15:39:50 2018 -0600
+
+    Merge branch 'master' into amd
 
 commit dc18409551f341125169fe8d4d43ac45e81bdf28
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -489,6 +2245,13 @@ Date:   Wed Nov 14 13:47:45 2018 -0600
       Isuru Fernando for suggesting this fix, and also to Costas Yamin for
       originally reporting the issue (#277).
 
+commit 8091998b6500e343c2024561c2b1aa73c3bafb0b
+Merge: 333d8562 7b5ba731
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 14 12:36:35 2018 -0600
+
+    Merge branch 'master' into amd
+
 commit 7b5ba7319b3901ad0e6c6b4fa3c1d96b579efbe9
 Merge: ce719f81 52392932
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -547,6 +2310,18 @@ Date:   Tue Nov 13 13:03:15 2018 -0600
       guaranteed to be equal to the storage datatype even if the computation
       datatype contains a different value. Thanks to Devangi Parikh for
       helping in isolating this bug.
+
+commit 333d8562f04eea0676139a10cb80a97f107b45b0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Nov 11 14:28:53 2018 -0600
+
+    Added debug output to bli_malloc.c.
+    
+    Details:
+    - Added debug output to bli_malloc.c in order to debug certain kinds of
+      memory behavior in BLIS. The printf() statements are disabled and must
+      be enabled manually.
+    - Whitespace/comment updates in bli_membrk.c.
 
 commit ce719f816d1237f5277527d7f61123e77180be54
 Author: Field G. Van Zee <field@cs.utexas.edu>
@@ -5671,7 +7446,7 @@ Date:   Fri Feb 23 17:42:48 2018 -0600
 
     Version file update (0.3.0)
 
-commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d
+commit 3defc7265c12cf85e9de2d7a1f243c5e090a6f9d (origin/master, origin/HEAD)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 17:38:19 2018 -0600
 
@@ -5707,7 +7482,7 @@ Date:   Fri Feb 23 16:33:32 2018 -0600
       contained. To remedy this situation, we now selectively use movss to
       load any element that could be the last element in the matrix.
 
-commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt)
+commit 5112e1859e7f8888f5555eb7bc02bd9fab9b4442 (origin/rt, rt)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Feb 23 14:31:26 2018 -0600
 
@@ -5939,7 +7714,7 @@ Date:   Thu Jan 4 20:51:35 2018 -0600
       time hardware detection (when clang is selected).
     - Added some missing (but mostly-optional) quotes to configure script.
 
-commit 5a7005dd44ed3174abbe360981e367fd41c99b4b
+commit 5a7005dd44ed3174abbe360981e367fd41c99b4b (origin/amd, amd)
 Merge: 7be88705 3bc99a96
 Author: Nisanth M P <nisanth.padinharepatt@amd.com>
 Date:   Wed Jan 3 12:05:12 2018 +0530
@@ -5988,7 +7763,7 @@ Date:   Sat Dec 23 15:32:03 2017 -0600
       is used by the auto-detection script to printf() the name of the
       sub-configuration corresponding to the detected hardware.
 
-commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit)
+commit 9804adfd405056ec332bb8e13d68c7b52bd3a6c1 (origin/selfinit, selfinit)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Dec 21 19:22:57 2017 -0600
 

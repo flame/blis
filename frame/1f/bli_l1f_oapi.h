@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alphax, \
        obj_t*  alphay, \
@@ -56,7 +56,7 @@ GENTPROT( axpy2v )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
@@ -71,7 +71,7 @@ GENTPROT( axpyf )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  xt, \
@@ -88,7 +88,7 @@ GENTPROT( dotaxpyv )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  at, \
@@ -107,7 +107,7 @@ GENTPROT( dotxaxpyf )
 #undef  GENTPROT
 #define GENTPROT( opname ) \
 \
-void PASTEMAC(opname,EX_SUF) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \

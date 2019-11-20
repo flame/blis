@@ -4,6 +4,8 @@
 
 ## Contents
 
+* [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
+* [Changes in 0.5.2](ReleaseNotes.md#changes-in-052)
 * [Changes in 0.5.1](ReleaseNotes.md#changes-in-051)
 * [Changes in 0.5.0](ReleaseNotes.md#changes-in-050)
 * [Changes in 0.4.1](ReleaseNotes.md#changes-in-041)
@@ -32,6 +34,70 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.6.0
+June 3, 2019
+
+Improvements present in 0.6.0:
+
+Framework:
+- Implemented small/skinny/unpacked (sup) framework for accelerated level-3 performance when at least one matrix dimension is small (or very small). For now, only `dgemm` is optimized, and this new implementation currently only targets Intel Haswell through Coffee Lake, and AMD Zen-based Ryzen/Epyc. (The existing kernels should extend without significant modification to Zen2-based Ryzen/Epyc once they are available.) Also, multithreaded parallelism is not yet implemented, though application-level threading should be fine. (AMD)
+- Changed function pointer usages of `void*` to new, typedef'ed type `void_fp`.
+- Allow compile-time disabling of BLAS prototypes in BLIS, in case the application already has access to prototypes.
+- In `bli_system.h`, define `_POSIX_C_SOURCE` to `200809L` if the macro is not already defined. This ensures that things such as pthreads are properly defined by an application that has `#include "blis.h"` but omits the definition of `_POSIX_C_SOURCE` from the command-line compiler options. (Christos Psarras)
+
+Kernels:
+- None.
+
+Build system:
+- Updated the way configure and the top-level Makefile handle installation prefixes (`prefix`, `exec_prefix`, `libdir`, `includedir`, `sharedir`) to better conform with GNU conventions.
+- Improved clang version detection. (Isuru Fernando)
+- Use pthreads on MinGW and Cygwin. (Isuru Fernando)
+
+Testing:
+- Added Eigen support to test drivers in `test/3`.
+- Fix inadvertently hidden `xerbla_()` in blastest drivers when building only shared libraries. (Isuru Fernando, M. Zhou)
+
+Documentation:
+- Added `docs/PerformanceSmall.md` to showcase new BLIS small/skinny `dgemm` performance on Kaby Lake and Epyc.
+- Added Eigen results (3.3.90) to performance graphs showcased in `docs/Performance.md`.
+- Added BLIS thread factorization info to `docs/Performance.md`.
+
+## Changes in 0.5.2
+March 19, 2019
+
+Improvements present in 0.5.2:
+
+Framework:
+- Added support for IC loop parallelism to the `trsm` operation.
+- Implemented a pool-based small block allocator and a corresponding `configure` option (enabled by default), which minimizes the number of calls to `malloc()` and `free()` for the purposes of allocating small blocks (on the order of 100 bytes). These small blocks are used by internal data structures, and the repeated allocation and freeing of these structures could, perhaps, cause memory fragmentation issues in certain application circumstances. This was never reproduced and observed, however, and remains entirely theoretical. Still, the sba should be no slower, and perhaps a little faster, than repeatedly calling `malloc()` and `free()` for these internal data structures. Also, the sba was designed to be thread-safe. (AMD)
+- Refined and extended the output enabled by `--enable-mem-tracing`, which allows a developer to follow memory allocation and release performed by BLIS.
+- Initialize error messages at compile-time rather than at runtime. (Minh Quan Ho)
+- Fixed a potential situation whereby the multithreading parameters in a `rntm_t` object that is passed into an expert interface is ignored.
+- Prevent a redefinition of `ftnlen` in the `f2c_types.h` in blastest. (Jeff Diamond)
+
+Kernels:
+- Adjusted the cache blocksizes in the `zen` sub-configuration for `float`, `scomplex`, and `dcomplex` datatypes. The previous values, taken directly from the `haswell` subconfig, were merely meant to be reasonable placeholders until more suitable values were determined, as had already taken place for the `double` datatype. (AMD)
+- Rewrote reference kernels in terms of simplified indexing annotated by the `#pragma omp simd` directive, which a compiler can use to vectorize certain constant-bounded loops. The `#pragma` is disabled via a preprocessor macro layer if the compiler is found by `configure` to not support `-fopenmp-simd`. (Devin Matthews, Jeff Hammond)
+
+Build system:
+- Added symbol-export annotation macros to all of the function prototypes and global variable declarations for public symbols, and created a new `configure` option, `--export-shared=[public|all]`, that controls which symbols--only those that are meant to be public, or all symbols--are exported to the shared library. (Isuru Fernando)
+- Standardized to using `-O3` in various subconfigs, and also `-funsafe-math-optimizations` for reference kernels. (Dave Love, Jeff Hammond)
+- Disabled TBM, XOP, LWP instructions in all AMD subconfigs. (Devin Matthews)
+- Fixed issues that prevented using BLIS on GNU Hurd. (M. Zhou)
+- Relaxed python3 requirements to allow python 3.4 or later. Previously, python 3.5 or later was required if python3 was being used. (Dave Love)
+- Added `thunderx2` sub-configuration. (Devangi Parikh)
+- Added `power9` sub-configuration. For now, this subconfig only uses reference kernels. (Nicholai Tukanov)
+- Fixed an issue with `configure` failing on OSes--including certain flavors of BSD--that contain a slash '/' character in the output of `uname -s`. (Isuru Fernando, M. Zhou)
+
+Testing:
+- Renamed `test/3m4m` directory to `test/3`.
+- Lots of updates and improvements to Makefiles, shell scripts, and matlab scripts in `test/3`.
+
+Documentation:
+- Added a new `docs/Performance.md` document that showcases single-threaded, single-socket, and dual-socket performance results of `single`, `double`, `scomplex`, and `dcomplex` level-3 operations in BLIS, OpenBLAS, and MKL/ARMPL for Haswell, SkylakeX, ThunderX2, and Epyc hardware architectures. (Note: Other implementations such as Eigen and ATLAS may be added to these graphs in the future.)
+- Updated `README.md` to include new language on external packages. (Dave Love)
+- Updated `docs/Multithreading.md` to be more explicit about the fact that multithreading is disabled by default at configure-time, and the fact that BLIS will run executed single-threaded at runtime by default if no multithreaded specification is given. (M. Zhou)
 
 ## Changes in 0.5.1
 December 18, 2018
@@ -88,7 +154,7 @@ Kernels:
 Build system:
 - Added support for building Windows DLLs via AppVeyor [2], complete with a built-in implementation of pthreads for Windows, as well as an implementation of the `pthread_barrier_*()` APIs for use on OS X. (Isuru Fernando, Devin Matthews, Mathieu Poumeyrol, Matthew Honnibal)
 - Defined a `cortexa53` sub-configuration, which is similar to `cortexa57` except that it uses slightly different compiler flags. (Mathieu Poumeyrol)
-- Added python version checking to configure script.
+- Added python version checking to `configure` script.
 - Added a script to automate the regeneration of the symbols list file (now located in `build/libblis-symbols.def`).
 - Various tweaks in preparation for BLIS's inclusion within Debian. (M. Zhou)
 - Various fixes and cleanups.
@@ -246,16 +312,16 @@ May 2, 2017
 - Implemented the 1m method for inducing complex matrix multiplication. (Please see ACM TOMS publication ["Implementing high-performance complex matrix multiplication via the 1m method"](https://github.com/flame/blis#citations) for more details.)
 - Switched to simpler `trsm_r` implementation.
 - Relaxed constraints that `MC % NR = 0` and `NC % MR = 0`, as this was only needed for the more sophisticated `trsm_r` implementation.
-- Automatic loop thread assignment. (Devin Matthews) 
-- Updates to `.travis.yml` configuration file. (Devin Matthews) 
+- Automatic loop thread assignment. (Devin Matthews)
+- Updates to `.travis.yml` configuration file. (Devin Matthews)
 - Updates to non-default haswell microkernels.
 - Match storage format of the temporary micro-tiles in macrokernels to that of the microkernel storage preference for edge cases.
-- Added support for Intel's Knight's Landing. (Devin Matthews) 
-- Added more flexible options to specify multithreading via the configure script. (Devin Matthews) 
-- OS X compatibility fixes. (Devin Matthews) 
-- Other small changes and fixes. 
+- Added support for Intel's Knight's Landing. (Devin Matthews)
+- Added more flexible options to specify multithreading via the configure script. (Devin Matthews)
+- OS X compatibility fixes. (Devin Matthews)
+- Other small changes and fixes.
 
-Also, thanks to Elmar Peise, Krzysztof Drewniak, and Francisco Igual for their contributions in reporting/fixing certain bugs that were addressed in this version. 
+Also, thanks to Elmar Peise, Krzysztof Drewniak, and Francisco Igual for their contributions in reporting/fixing certain bugs that were addressed in this version.
 
 ## Changes in 0.2.1
 October 5, 2016
@@ -439,7 +505,7 @@ While neither `bli_config.h` nor `bli_kernel.h` has changed formats since 0.0.7,
 ## Changes in 0.0.7
 April 30, 2013
 
-This version incorporates many small fixes and feature enhancements made during our SC13 collaboration. 
+This version incorporates many small fixes and feature enhancements made during our SC13 collaboration.
 
 ## Changes in 0.0.6
 April 13, 2013
@@ -478,7 +544,7 @@ The compatibility layer is enabled via a configuration option in `bl2_config.h`.
 ## Changes in 0.0.2
 February 11, 2013
 
-Most notably, this version contains the new test suite I've been working on for the last month. 
+Most notably, this version contains the new test suite I've been working on for the last month.
 
 What is the test suite? It is a highly configurable test driver that allows one to test an arbitrary set of BLIS operations, with an arbitrary set of parameter combinations, and matrix/vector storage formats, as well as whichever datatypes you are interested in. (For now, only homogeneous datatyping is supported, which is what most people want.) You can also specify an arbitrary problem size range with arbitrary increments, and arbitrary ratios between dimensions (or anchor a dimension to a single value), and you can output directly to files which store the output in matlab syntax, which makes it easy to generate performance graphs.
 

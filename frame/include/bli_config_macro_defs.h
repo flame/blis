@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,11 +46,11 @@
 // internally within BLIS as well as those exposed in the native BLAS-like BLIS
 // interface.
 #ifndef BLIS_INT_TYPE_SIZE
-#ifdef BLIS_ARCH_64
-#define BLIS_INT_TYPE_SIZE               64
-#else
-#define BLIS_INT_TYPE_SIZE               32
-#endif
+  #ifdef BLIS_ARCH_64
+    #define BLIS_INT_TYPE_SIZE 64
+  #else
+    #define BLIS_INT_TYPE_SIZE 32
+  #endif
 #endif
 
 
@@ -157,7 +158,19 @@
 // C99 type "long int". Note that this ONLY affects integers used within the
 // BLAS compatibility layer.
 #ifndef BLIS_BLAS_INT_TYPE_SIZE
-#define BLIS_BLAS_INT_TYPE_SIZE     32
+  #define BLIS_BLAS_INT_TYPE_SIZE 32
+#endif
+
+// By default, the level-3 BLAS routines are implemented by directly calling
+// the BLIS object API. Alternatively, they may first call the typed BLIS
+// API, which will then call the object API.
+//#define BLIS_BLAS3_CALLS_TAPI
+#ifdef BLIS_BLAS3_CALLS_TAPI
+  #undef  BLIS_BLAS3_CALLS_OAPI
+#else
+  // Default behavior is to call object API directly.
+  #undef  BLIS_BLAS3_CALLS_OAPI // In case user explicitly enabled.
+  #define BLIS_BLAS3_CALLS_OAPI
 #endif
 
 
@@ -174,6 +187,42 @@
 #else
   // Default behavior is disabled.
 #endif
+
+
+// -- SHARED LIBRARY SYMBOL EXPORT ---------------------------------------------
+
+// When building shared libraries, we can control which symbols are exported for
+// linking by external applications. BLIS annotates all function prototypes that
+// are meant to be "public" with BLIS_EXPORT_BLIS (with BLIS_EXPORT_BLAS playing
+// a similar role for BLAS compatibility routines). Which symbols are exported
+// is controlled by the default symbol visibility, as specifed by the gcc option
+// -fvisibility=[default|hidden]. The default for this option is 'default', or,
+// "public", which, if allowed to stand, causes all symbols in BLIS to be
+// linkable from the outside. But when compiling with -fvisibility=hidden, all
+// symbols start out hidden (that is, restricted only for internal use by BLIS),
+// with that setting overridden only for function prototypes or variable
+// declarations that are annotated with BLIS_EXPORT_BLIS.
+
+#ifndef BLIS_EXPORT
+  #if !defined(BLIS_ENABLE_SHARED)
+    #define BLIS_EXPORT
+  #else
+    #if defined(_WIN32) || defined(__CYGWIN__)
+      #ifdef BLIS_IS_BUILDING_LIBRARY
+        #define BLIS_EXPORT __declspec(dllexport)
+      #else
+        #define BLIS_EXPORT __declspec(dllimport)
+      #endif
+    #elif defined(__GNUC__) && __GNUC__ >= 4
+      #define BLIS_EXPORT __attribute__ ((visibility ("default")))
+    #else
+      #define BLIS_EXPORT
+    #endif
+  #endif
+#endif
+
+#define BLIS_EXPORT_BLIS BLIS_EXPORT
+#define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 
 #endif

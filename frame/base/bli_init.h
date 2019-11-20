@@ -32,15 +32,15 @@
 
 */
 
-void   bli_init( void );
-void   bli_finalize( void );
+BLIS_EXPORT_BLIS void bli_init( void );
+BLIS_EXPORT_BLIS void bli_finalize( void );
 
-void   bli_init_auto( void );
-void   bli_finalize_auto( void );
+void bli_init_auto( void );
+void bli_finalize_auto( void );
 
-void   bli_init_apis( void );
-void   bli_finalize_apis( void );
+void bli_init_apis( void );
+void bli_finalize_apis( void );
 
-void   bli_init_once( void );
-void   bli_finalize_once( void );
+void bli_init_once( void );
+void bli_finalize_once( void );
 

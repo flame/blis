@@ -41,8 +41,8 @@ typedef struct scalv_s scalv_t;
 
 #define bli_cntl_sub_scalv( cntl )  cntl->sub_scalv
 
-void     bli_scalv_cntl_init( void );
-void     bli_scalv_cntl_finalize( void );
+void      bli_scalv_cntl_init( void );
+void      bli_scalv_cntl_finalize( void );
 scalv_t* bli_scalv_cntl_obj_create( impl_t       impl_type,
                                     varnum_t     var_num );
 void bli_scalv_cntl_obj_init( scalv_t*   cntl,

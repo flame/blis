@@ -35,28 +35,16 @@
 #ifndef BLIS_EXTERN_DEFS_H
 #define BLIS_EXTERN_DEFS_H
 
-#if !defined(BLIS_ENABLE_SHARED) || !defined(_MSC_VER)
-#define BLIS_EXPORT
-#else
-// Windows builds require us to explicitly identify global variable symbols
-// to be imported from the .dll.
-#ifdef BLIS_IS_BUILDING_LIBRARY
-#define BLIS_EXPORT __declspec(dllexport)
-#else
-#define BLIS_EXPORT __declspec(dllimport)
-#endif
-#endif
+BLIS_EXPORT_BLIS extern obj_t BLIS_TWO;
+BLIS_EXPORT_BLIS extern obj_t BLIS_ONE;
+//BLIS_EXPORT_BLIS extern obj_t BLIS_ONE_HALF;
+BLIS_EXPORT_BLIS extern obj_t BLIS_ZERO;
+//BLIS_EXPORT_BLIS extern obj_t BLIS_MINUS_ONE_HALF;
+BLIS_EXPORT_BLIS extern obj_t BLIS_MINUS_ONE;
+BLIS_EXPORT_BLIS extern obj_t BLIS_MINUS_TWO;
 
-BLIS_EXPORT extern obj_t BLIS_TWO;
-BLIS_EXPORT extern obj_t BLIS_ONE;
-//BLIS_EXPORT extern obj_t BLIS_ONE_HALF;
-BLIS_EXPORT extern obj_t BLIS_ZERO;
-//BLIS_EXPORT extern obj_t BLIS_MINUS_ONE_HALF;
-BLIS_EXPORT extern obj_t BLIS_MINUS_ONE;
-BLIS_EXPORT extern obj_t BLIS_MINUS_TWO;
-
-BLIS_EXPORT extern thrcomm_t BLIS_SINGLE_COMM;
-BLIS_EXPORT extern thrinfo_t BLIS_PACKM_SINGLE_THREADED;
-BLIS_EXPORT extern thrinfo_t BLIS_GEMM_SINGLE_THREADED;
+BLIS_EXPORT_BLIS extern thrcomm_t BLIS_SINGLE_COMM;
+BLIS_EXPORT_BLIS extern thrinfo_t BLIS_PACKM_SINGLE_THREADED;
+BLIS_EXPORT_BLIS extern thrinfo_t BLIS_GEMM_SINGLE_THREADED;
 
 #endif

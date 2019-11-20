@@ -147,6 +147,10 @@ int main( int argc, char** argv )
 	    bli_obj_create( dt, m, n, 1, cs_c, &c );
 	    bli_obj_create( dt, m, n, 1, cs_c, &c_save );
 
+	    bli_randm( &a );
+	    bli_randm( &b );
+	    bli_randm( &c );
+
 	    bli_obj_set_conjtrans( transa, &a);
 	    bli_obj_set_conjtrans( transb, &b);
 

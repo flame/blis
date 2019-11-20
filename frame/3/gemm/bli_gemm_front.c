@@ -54,6 +54,7 @@ void bli_gemm_front
 	obj_t   c_local;
 
 
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&

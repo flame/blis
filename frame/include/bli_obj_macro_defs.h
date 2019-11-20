@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1127,6 +1128,93 @@ static void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
 	obj->ps = ps;
 }
 
+// stor3_t-related
+
+static stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
+{
+	const inc_t rs_c = bli_obj_row_stride( c );
+	const inc_t cs_c = bli_obj_col_stride( c );
+
+	inc_t rs_a, cs_a;
+	inc_t rs_b, cs_b;
+
+	if ( bli_obj_has_notrans( a ) )
+	{
+		rs_a = bli_obj_row_stride( a );
+		cs_a = bli_obj_col_stride( a );
+	}
+	else
+	{
+		rs_a = bli_obj_col_stride( a );
+		cs_a = bli_obj_row_stride( a );
+	}
+
+	if ( bli_obj_has_notrans( b ) )
+	{
+		rs_b = bli_obj_row_stride( b );
+		cs_b = bli_obj_col_stride( b );
+	}
+	else
+	{
+		rs_b = bli_obj_col_stride( b );
+		cs_b = bli_obj_row_stride( b );
+	}
+
+	return bli_stor3_from_strides( rs_c, cs_c,
+	                               rs_a, cs_a,
+	                               rs_b, cs_b  );
+}
+
+
+// -- Initialization-related macros --
+
+// Finish the initialization started by the matrix-specific static initializer
+// (e.g. BLIS_OBJECT_PREINITIALIZER)
+// NOTE: This is intended only for use in the BLAS compatibility API and typed
+// BLIS API.
+
+static void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t rs, inc_t cs, obj_t* obj )
+{
+	bli_obj_set_as_root( obj );
+
+	bli_obj_set_dt( dt, obj );
+	bli_obj_set_target_dt( dt, obj );
+	bli_obj_set_exec_dt( dt, obj );
+	bli_obj_set_comp_dt( dt, obj );
+
+	bli_obj_set_dims( m, n, obj );
+	bli_obj_set_strides( rs, cs, obj );
+
+	siz_t elem_size = sizeof( float );
+	if ( bli_dt_prec_is_double( dt ) ) elem_size *= 2;
+	if ( bli_dt_dom_is_complex( dt ) ) elem_size *= 2;
+	bli_obj_set_elem_size( elem_size, obj );
+
+	bli_obj_set_buffer( p, obj );
+
+	bli_obj_set_scalar_dt( dt, obj );
+	void* restrict s = bli_obj_internal_scalar_buffer( obj );
+
+	if      ( bli_dt_prec_is_single( dt ) ) { (( scomplex* )s)->real = 1.0F;
+	                                          (( scomplex* )s)->imag = 0.0F; }
+	else if ( bli_dt_prec_is_double( dt ) ) { (( dcomplex* )s)->real = 1.0;
+	                                          (( dcomplex* )s)->imag = 0.0; }
+}
+
+// Finish the initialization started by the 1x1-specific static initializer
+// (e.g. BLIS_OBJECT_PREINITIALIZER_1X1)
+// NOTE: This is intended only for use in the BLAS compatibility API and typed
+// BLIS API.
+
+static void bli_obj_init_finish_1x1( num_t dt, void* p, obj_t* obj )
+{
+	bli_obj_set_as_root( obj );
+
+	bli_obj_set_dt( dt, obj );
+
+	bli_obj_set_buffer( p, obj );
+}
+
 // -- Miscellaneous object macros --
 
 // Toggle the region referenced (or "stored").
@@ -1156,38 +1244,6 @@ static void bli_obj_set_defaults( obj_t* obj )
 {
 	obj->info = 0x0;
 	obj->info = obj->info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL;
-}
-
-// Initializors for global scalar constants.
-// NOTE: These must remain cpp macros since they are initializor
-// expressions, not functions.
-
-#define bli_obj_init_const( buffer0 ) \
-{ \
-	.root      = NULL, \
-\
-	.off       = { 0, 0 }, \
-	.dim       = { 1, 1 }, \
-	.diag_off  = 0, \
-\
-	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
-	                   BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.elem_size = sizeof( constdata_t ), \
-\
-	.buffer    = buffer0, \
-	.rs        = 1, \
-	.cs        = 1, \
-	.is        = 1  \
-}
-
-#define bli_obj_init_constdata( val ) \
-{ \
-	.s =           ( float  )val, \
-	.d =           ( double )val, \
-	.c = { .real = ( float  )val, .imag = 0.0f }, \
-	.z = { .real = ( double )val, .imag = 0.0 }, \
-	.i =           ( gint_t )val, \
 }
 
 // Acquire buffer at object's submatrix offset (offset-aware buffer query).
@@ -1401,7 +1457,32 @@ static void bli_obj_induce_trans( obj_t* obj )
 	bli_obj_set_panel_dims( n_panel, m_panel, obj );
 
 	// Note that this macro DOES NOT touch the transposition bit! If
-	// the calling code is using this macro to handle an object whose
+	// the calling code is using this function to handle an object whose
+	// transposition bit is set prior to computation, that code needs
+	// to manually clear or toggle the bit, via
+	// bli_obj_set_onlytrans() or bli_obj_toggle_trans(),
+	// respectively.
+}
+
+static void bli_obj_induce_fast_trans( obj_t* obj )
+{
+	// NOTE: This function is only used in situations where the matrices
+	// are guaranteed to not have structure or be packed.
+
+	// Induce transposition among basic fields.
+	dim_t  m        = bli_obj_length( obj );
+	dim_t  n        = bli_obj_width( obj );
+	inc_t  rs       = bli_obj_row_stride( obj );
+	inc_t  cs       = bli_obj_col_stride( obj );
+	dim_t  offm     = bli_obj_row_off( obj );
+	dim_t  offn     = bli_obj_col_off( obj );
+
+	bli_obj_set_dims( n, m, obj );
+	bli_obj_set_strides( cs, rs, obj );
+	bli_obj_set_offs( offn, offm, obj );
+
+	// Note that this macro DOES NOT touch the transposition bit! If
+	// the calling code is using this function to handle an object whose
 	// transposition bit is set prior to computation, that code needs
 	// to manually clear or toggle the bit, via
 	// bli_obj_set_onlytrans() or bli_obj_toggle_trans(),

@@ -34,7 +34,6 @@
 */
 
 #include "blis.h"
-
 //#define PRINT_SMALL_TRSM_INFO
 
 void bli_trsm_front
@@ -49,11 +48,15 @@ void bli_trsm_front
      )
 {
 	bli_init_once();
-
+	int i, j;
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
  
+//int m = bli_obj_length(*b);
+//int n = bli_obj_width(*b); 
+//float *L =  a->buffer;
+ // float *B =  b->buffer;
 
 #ifdef PRINT_SMALL_TRSM_INFO
         printf("Side:: %c\n", side ? 'R' : 'L');

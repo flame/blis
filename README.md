@@ -6,6 +6,7 @@ Contents
 --------
 
 * **[Introduction](#introduction)**
+* **[Education and Learning](#education-and-learning)**
 * **[What's New](#whats-new)**
 * **[What People Are Saying About BLIS](#what-people-are-saying-about-blis)**
 * **[Key Features](#key-features)**
@@ -76,8 +77,37 @@ and [collaborators](http://shpc.ices.utexas.edu/collaborators.html),
 [publications](http://shpc.ices.utexas.edu/publications.html),
 and [other educational projects](http://www.ulaff.net/) (such as MOOCs).
 
+Education and Learning
+----------------------
+
+Want to understand what's under the hood?
+Many of the same concepts and principles employed when developing BLIS are
+introduced and taught in a basic pedagogical setting as part of
+[LAFF-On Programming for High Performance (LAFF-On-PfHP)](http://www.ulaff.net/),
+one of several massive open online courses (MOOCs) in the
+[Linear Algebra: Foundations to Frontiers](http://www.ulaff.net/) series,
+all of which are available for free via the [edX platform](http://www.edx.org/).
+
 What's New
 ----------
+
+ * **Small/skinny matrix support for dgemm now available!** Thanks to
+contributions made possible by our partnership with AMD, we have dramatically
+accelerated `gemm` for double-precision real matrix problems where one or two
+dimensions is exceedingly small. A natural byproduct of this optimization is
+that the traditional case of small _m = n = k_ (i.e. square matrices) is also
+accelerated, even though it was not targeted specifically. And though only
+`dgemm` was optimized for now, support for other datatypes, other operations,
+and/or multithreading may be implemented in the future. We've also added a new
+[PerformanceSmall](docs/PerformanceSmall.md) document to showcase the
+improvement in performance when some matrix dimensions are small.
+
+ * **Performance comparisons now available!** We recently measured the
+performance of various level-3 operations on a variety of hardware architectures,
+as implemented within BLIS and other BLAS libraries for all four of the standard
+floating-point datatypes. The results speak for themselves! Check out our
+extensive performance graphs and background info in our new
+[Performance](docs/Performance.md) document.
 
  * **BLIS is now in Debian Unstable!** Thanks to Debian developer-maintainers
 [M. Zhou](https://github.com/cdluminate) and
@@ -87,7 +117,7 @@ the second-most popular Linux distribution (behind Ubuntu, which Debian packages
 feed into). The Debian tracker page may be found
 [here](https://tracker.debian.org/pkg/blis).
 
- * **BLIS now supports mixed-datatype gemm.** The `gemm` operation may now be
+ * **BLIS now supports mixed-datatype gemm!** The `gemm` operation may now be
 executed on operands of mixed domains and/or mixed precisions. Any combination
 of storage datatype for A, B, and C is now supported, along with a separate
 computation precision that can differ from the storage precision of A and B.
@@ -313,9 +343,19 @@ table of supported microarchitectures.
  * **[Multithreading](docs/Multithreading.md).** This document describes how to
 use the multithreading features of BLIS.
 
- * **[Mixed-Datatype](docs/MixedDatatype.md).** This document provides an
+ * **[Mixed-Datatypes](docs/MixedDatatypes.md).** This document provides an
 overview of BLIS's mixed-datatype functionality and provides a brief example
 of how to take advantage of this new code.
+
+ * **[Performance](docs/Performance.md).** This document reports empirically
+measured performance of a representative set of level-3 operations on a variety
+of hardware architectures, as implemented within BLIS and other BLAS libraries
+for all four of the standard floating-point datatypes.
+
+ * **[PerformanceSmall](docs/PerformanceSmall.md).** This document reports
+empirically measured performance of `gemm` on select hardware architectures
+within BLIS and other BLAS libraries when performing matrix problems where one
+or two dimensions is exceedingly small.
 
  * **[Release Notes](docs/ReleaseNotes.md).** This document tracks a summary of
 changes included with each new version of BLIS, along with contributor credits

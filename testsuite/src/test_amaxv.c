@@ -351,11 +351,18 @@ void PASTEMAC0(opname) \
 \
     void*     buf_index = bli_obj_buffer_at_off( index ); \
 \
+/*
+	FGVZ: Disabling this code since bli_amaxv_check() is supposed to be a
+	non-public API function, and therefore unavailable unless all symbols
+	are scheduled to be exported at configure-time (which is not currently
+	the default behavior).
+
     if ( bli_error_checking_is_enabled() ) \
         bli_amaxv_check( x, index ); \
+*/ \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH(tname,_vft) f = \
 	PASTEMAC(opname,_qfp)( dt ); \
 \

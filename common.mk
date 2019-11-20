@@ -118,7 +118,8 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
 get-refinit-cflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    -DBLIS_CNAME=$(1) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
@@ -126,23 +127,27 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    $(COMPSIMDFLAGS) \
                                    -DBLIS_CNAME=$(1) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 # When compiling sandboxes, we use flags similar to those of general framework
@@ -153,19 +158,24 @@ get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
 get-sandbox-c99flags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                                    $(CSBOXINCFLAGS) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cxxflags-for,$(1)) \
                                    $(CSBOXINCFLAGS) \
-                                   $(BUILD_FLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
                             )
 
 # Define a separate function that will return appropriate flags for use by
 # applications that want to use the same basic flags as those used when BLIS
-# was compiled. (This is the same as get-frame-cflags-for(), except that it
-# omits the BUILD_FLAGS, which are exclusively for use when BLIS is being
-# compiled.)
+# was compiled. (NOTE: This is the same as the $(get-frame-cflags-for ...)
+# function, except that it omits two variables that contain flags exclusively
+# for use when BLIS is being compiled/built: BUILD_CPPFLAGS, which contains a
+# cpp macro that confirms that BLIS is being built; and BUILD_SYMFLAGS, which
+# contains symbol export flags that are only needed when a shared library is
+# being compiled/linked.)
 get-user-cflags-for      = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
                             )
@@ -508,9 +518,9 @@ SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
-SOFLAGS    += -Wl,-def:build/libblis-symbols.def -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+SOFLAGS    += -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
-SOFLAGS    += -Wl,--export-all-symbols -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
+SOFLAGS    += -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif
 else
 # Linux shared library link flags.
@@ -531,6 +541,11 @@ ifeq ($(IS_WIN),no)
 # For Linux and OS X: set rpath property of shared object.
 LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
 endif
+endif
+# On windows, use the shared library even if static is created.
+ifeq ($(IS_WIN),yes)
+LIBBLIS_L      := $(LIBBLIS_SO)
+LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 endif
 endif
 
@@ -610,7 +625,7 @@ endif
 
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CWARNFLAGS,$(c))))
 
-# --- Shared library (position-independent code) flags ---
+# --- Position-independent code flags (shared libraries only) ---
 
 # Emit position-independent code for dynamic linking.
 ifeq ($(IS_WIN),yes)
@@ -621,6 +636,71 @@ else
 CPICFLAGS := -fPIC
 endif
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPICFLAGS,$(c))))
+
+# --- Symbol exporting flags (shared libraries only) ---
+
+# NOTE: These flags are only applied when building BLIS and not used by
+# applications that import BLIS compilation flags via the
+# $(get-user-cflags-for ...) function.
+
+# Determine default export behavior / visibility of symbols for gcc.
+ifeq ($(CC_VENDOR),gcc)
+ifeq ($(IS_WIN),yes)
+ifeq ($(EXPORT_SHARED),all)
+BUILD_SYMFLAGS := -Wl,--export-all-symbols, -Wl,--enable-auto-import
+else # ifeq ($(EXPORT_SHARED),public)
+BUILD_SYMFLAGS := -Wl,--exclude-all-symbols
+endif
+else # ifeq ($(IS_WIN),no)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+BUILD_SYMFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+BUILD_SYMFLAGS := -fvisibility=hidden
+endif
+endif
+endif
+
+# Determine default export behavior / visibility of symbols for icc.
+# NOTE: The Windows branches have been omitted since we currently make no
+# effort to support Windows builds via icc (only gcc/clang via AppVeyor).
+ifeq ($(CC_VENDOR),icc)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+BUILD_SYMFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+BUILD_SYMFLAGS := -fvisibility=hidden
+endif
+endif
+
+# Determine default export behavior / visibility of symbols for clang.
+ifeq ($(CC_VENDOR),clang)
+ifeq ($(IS_WIN),yes)
+ifeq ($(EXPORT_SHARED),all)
+# NOTE: clang on Windows does not appear to support exporting all symbols
+# by default, and therefore we ignore the value of EXPORT_SHARED.
+BUILD_SYMFLAGS :=
+else # ifeq ($(EXPORT_SHARED),public)
+# NOTE: The default behavior of clang on Windows is to hide all symbols
+# and only export functions and other declarations that have beenannotated
+# as needing to be exported.
+BUILD_SYMFLAGS :=
+endif
+else # ifeq ($(IS_WIN),no)
+ifeq ($(EXPORT_SHARED),all)
+# Export all symbols by default.
+BUILD_SYMFLAGS := -fvisibility=default
+else # ifeq ($(EXPORT_SHARED),public)
+# Hide all symbols by default and export only those that have been annotated
+# as needing to be exported.
+BUILD_SYMFLAGS := -fvisibility=hidden
+endif
+endif
+endif
 
 # --- Language flags ---
 
@@ -685,8 +765,18 @@ endif
 # --- #pragma omp simd flags (used for reference kernels only) ---
 
 ifeq ($(PRAGMA_OMP_SIMD),yes)
+ifeq ($(CC_VENDOR),gcc)
 COMPSIMDFLAGS := -fopenmp-simd
 else
+ifeq ($(CC_VENDOR),clang)
+COMPSIMDFLAGS := -fopenmp-simd
+else
+ifeq ($(CC_VENDOR),icc)
+COMPSIMDFLAGS := -qopenmp-simd
+endif
+endif
+endif
+else # ifeq ($(PRAGMA_OMP_SIMD),no)
 COMPSIMDFLAGS :=
 endif
 
@@ -960,7 +1050,7 @@ VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
 # Define a C preprocessor flag that is *only* defined when BLIS is being
 # compiled. (In other words, an application that #includes blis.h will not
 # get this cpp macro.)
-BUILD_FLAGS    := -DBLIS_IS_BUILDING_LIBRARY
+BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 
 

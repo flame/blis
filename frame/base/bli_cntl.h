@@ -42,7 +42,7 @@ struct cntl_s
 	// Basic fields (usually required).
 	opid_t         family;
 	bszid_t        bszid;
-	void*          var_func;
+	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
 
@@ -60,56 +60,56 @@ typedef struct cntl_s cntl_t;
 
 // -- Control tree prototypes --
 
-cntl_t* bli_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_cntl_create_node
      (
        rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        void*   params,
        cntl_t* sub_node
      );
 
-void bli_cntl_free_node
+BLIS_EXPORT_BLIS void bli_cntl_free_node
      (
        rntm_t* rntm,
        cntl_t* cntl
      );
 
-void bli_cntl_clear_node
+BLIS_EXPORT_BLIS void bli_cntl_clear_node
      (
        cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
 
-void bli_cntl_free
+BLIS_EXPORT_BLIS void bli_cntl_free
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-void bli_cntl_free_w_thrinfo
+BLIS_EXPORT_BLIS void bli_cntl_free_w_thrinfo
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-void bli_cntl_free_wo_thrinfo
+BLIS_EXPORT_BLIS void bli_cntl_free_wo_thrinfo
      (
        rntm_t*    rntm,
        cntl_t*    cntl
      );
 
-cntl_t* bli_cntl_copy
+BLIS_EXPORT_BLIS cntl_t* bli_cntl_copy
      (
        rntm_t* rntm,
        cntl_t* cntl
      );
 
-void bli_cntl_mark_family
+BLIS_EXPORT_BLIS void bli_cntl_mark_family
      (
        opid_t  family,
        cntl_t* cntl
@@ -137,7 +137,7 @@ static bszid_t bli_cntl_bszid( cntl_t* cntl )
 	return cntl->bszid;
 }
 
-static void* bli_cntl_var_func( cntl_t* cntl )
+static void_fp bli_cntl_var_func( cntl_t* cntl )
 {
 	return cntl->var_func;
 }
@@ -200,7 +200,7 @@ static void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
 	cntl->bszid = bszid;
 }
 
-static void bli_cntl_set_var_func( void* var_func, cntl_t* cntl )
+static void bli_cntl_set_var_func( void_fp var_func, cntl_t* cntl )
 {
 	cntl->var_func = var_func;
 }

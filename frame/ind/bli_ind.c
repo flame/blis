@@ -168,9 +168,9 @@ bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt )
 }
 #endif
 
-void* bli_ind_oper_get_avail( opid_t oper, num_t dt )
+void_fp bli_ind_oper_get_avail( opid_t oper, num_t dt )
 {
-	void* func_p;
+	void_fp func_p;
 
 	if ( bli_opid_is_level3( oper ) )
 	{

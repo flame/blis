@@ -345,7 +345,7 @@ void libblis_test_dotaxpyv_check
 	//
 	// and
 	//
-	//   normf( z - z_temp )
+	//   normfv( z - z_temp )
 	//
 	// are negligible, where rho_temp and z_temp contain rho and z as
 	// computed by dotv and axpyv, respectively.

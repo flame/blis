@@ -39,7 +39,7 @@
 #undef  GENTPROTR
 #define GENTPROTR( ftype_xy, ftype_r, chxy, chr, blasname ) \
 \
-void PASTEF77(chxy,blasname)( \
+BLIS_EXPORT_BLAS void PASTEF77(chxy,blasname)( \
                               ftype_xy*  x, \
                               ftype_xy*  y, \
                               ftype_r*   c, \

@@ -63,13 +63,13 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xCORE-AVX2
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -78,7 +78,11 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) #-funsafe-math-optimizations
+else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

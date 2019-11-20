@@ -38,8 +38,8 @@
 cntl_t* bli_unpackm_cntl_create_node
      (
        rntm_t*   rntm,
-       void*     var_func,
-       void*     unpackm_var_func,
+       void_fp   var_func,
+       void_fp   unpackm_var_func,
        cntl_t*   sub_node
      )
 {

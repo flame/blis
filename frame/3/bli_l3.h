@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,14 +61,28 @@
 #include "bli_tapi_ba.h"
 #include "bli_l3_tapi.h"
 
-// Prototype microkernel wrapper APIs
+// Define function types for small/unpacked handlers/kernels.
+#include "bli_l3_sup_oft.h"
+#include "bli_l3_sup_ft_ker.h"
+
+// Define static edge case logic for use in small/unpacked kernels.
+//#include "bli_l3_sup_edge.h"
+
+// Prototype object API to small/unpacked matrix dispatcher.
+#include "bli_l3_sup.h"
+
+// Prototype reference implementation of small/unpacked matrix handler.
+#include "bli_l3_sup_ref.h"
+#include "bli_l3_sup_vars.h"
+
+// Prototype microkernel wrapper APIs.
 #include "bli_l3_ukr_oapi.h"
 #include "bli_l3_ukr_tapi.h"
 
 // Generate function pointer arrays for tapi microkernel functions.
 #include "bli_l3_ukr_fpa.h"
 
-// Operation-specific headers
+// Operation-specific headers.
 #include "bli_gemm.h"
 #include "bli_hemm.h"
 #include "bli_herk.h"

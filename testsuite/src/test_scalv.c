@@ -276,7 +276,7 @@ void libblis_test_scalv_check
 	//
 	// is functioning correctly if
 	//
-	//   normf( y + -conjbeta(beta) * y_orig )
+	//   normfv( y + -conjbeta(beta) * y_orig )
 	//
 	// is negligible.
 	//
