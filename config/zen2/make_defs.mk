@@ -64,18 +64,29 @@ endif
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-# gcc 9.0 (clang ?) or later:
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver2
-# gcc 6.0 (clang 4.0) or later:
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-avx256-split-unaligned-store
-# gcc 4.9 (clang 3.5) or later:
-# possibly add zen-specific instructions: -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+GCC_VERSION := $(strip $(shell gcc -dumpversion | cut -d. -f1))
+#gcc or clang version must be atleast 4.0
+# gcc 9.0 or later:
+ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
+CKVECFLAGS     += -march=znver2
+else
+CKVECFLAGS     += -march=znver1 -mno-avx256-split-unaligned-store
+endif
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2.0.0')),1)
+CKVECFLAGS += -march=znver2
 else
-$(error gcc or clang are required for this configuration.)
+#if compiling with clang
+VENDOR_STRING := $(strip $(shell ${CC_VENDOR} --version | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*'))
+CC_MAJOR := $(shell (echo ${VENDOR_STRING} | cut -d. -f1))
+#clang 9.0 or later:
+ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
+CKVECFLAGS += -march=znver2
+else
+CKVECFLAGS += -march=znver1
+endif
+endif
 endif
 endif
 
