@@ -162,7 +162,7 @@ int computeErrorM(
      int    i;
      int ret = 0;
      for ( i = 0; i < n; i ++ ) {
-           if ( (fabs( Y[ i ]) - fabs(Y_ref[ i ] ) ) > 0.00001)  {
+           if ( (fabs( Y_ref[ i ]) - fabs(Y[ i ] ) ) > 0.00001)  {
 		  cout  << Y[i] <<  Y_ref[i];
                  ret = 1;
                  break;
