@@ -93,9 +93,9 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
- * **SIAM Activity Group on Supercomputing Best Paper Prize for 2020** We are
-thrilled to announce that the paper that we internally refer to as the second
-BLIS paper,
+ * **BLIS awarded SIAM Activity Group on Supercomputing Best Paper Prize for 2020!**
+We are thrilled to announce that the paper that we internally refer to as the
+second BLIS paper,
 
    "The BLIS Framework: Experiments in Portability." Field G. Van Zee, Tyler Smith, Bryan Marker, Tze Meng Low, Robert A. van de Geijn, Francisco Igual, Mikhail Smelyanskiy, Xianyi Zhang, Michael Kistler, Vernon Austel, John A. Gunnels, Lee Killough. ACM Transactions on Mathematical Software (TOMS), 42(2):12:1--12:19, 2016.
 
