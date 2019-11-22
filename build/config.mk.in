@@ -98,6 +98,9 @@ RANLIB            := @RANLIB@
 # Archiver.
 AR                := @AR@
 
+# Python Interpreter
+PYTHON            := @PYTHON@
+
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
 # of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
 # the value of CFLAGS/LDFLAGS if either was specified on the command line).

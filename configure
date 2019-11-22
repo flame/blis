@@ -2866,6 +2866,7 @@ main()
 	dist_path_esc=$(echo   "${dist_path}"   | sed 's/\//\\\//g')
 	cc_esc=$(echo          "${found_cc}"    | sed 's/\//\\\//g')
 	cxx_esc=$(echo         "${found_cxx}"   | sed 's/\//\\\//g')
+	python_esc=$(echo      "${found_python}"    | sed 's/\//\\\//g')
 	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
 
 	# For RANLIB, if the variable is not set, we use a default value of
@@ -2967,6 +2968,7 @@ main()
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@PYTHON@/${python_esc}/g" \
 		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
