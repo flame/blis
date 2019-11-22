@@ -93,7 +93,7 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
- * **SIAM Activity Group Supercomputing Best Paper Prize for 2020** We are
+ * **SIAM Activity Group on Supercomputing Best Paper Prize for 2020** We are
 thrilled to announce that the paper that we internally refer to as the second
 BLIS paper,
 
