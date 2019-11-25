@@ -94,8 +94,8 @@ for (i = 0; i < m; i++) //no. of cols of B
 }
 #endif
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-        gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
-        if ( status == BLIS_SUCCESS ) return;
+	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
 #endif
 
 	// Check parameters.

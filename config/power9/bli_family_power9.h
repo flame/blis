@@ -32,34 +32,10 @@
 
 */
 
-//#ifndef BLIS_FAMILY_H
-//#define BLIS_FAMILY_H
+#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
+#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
 
-//#define BLIS_SIMD_NUM_REGISTERS 32
-//#define BLIS_SIMD_SIZE 64
-//
-//#ifdef BLIS_NO_HBWMALLOC
-//  #include <stdlib.h>
-//    #define BLIS_MALLOC_POOL  malloc
-//    #define BLIS_FREE_POOL    free
-//#else
-//  #include <hbwmalloc.h>
-//    #define BLIS_MALLOC_POOL  hbw_malloc
-//    #define BLIS_FREE_POOL    hbw_free
-//#endif
+#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
+#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
 
-
-#if 0
-// -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
-
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_opt_8x4
-#define BLIS_DEFAULT_MR_D              8
-#define BLIS_DEFAULT_NR_D              4
-#define BLIS_DEFAULT_MC_D              64
-#define BLIS_DEFAULT_KC_D              256
-#define BLIS_DEFAULT_NC_D              4096
-#endif
-
-
-//#endif
 

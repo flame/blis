@@ -47,12 +47,25 @@ void bli_syrk_front
      )
 {
 	bli_init_once();
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-        gint_t status = BLIS_FAILURE;
-#endif
+
 	obj_t   a_local;
 	obj_t   at_local;
 	obj_t   c_local;
+
+	// Alias A and C in case we need to apply transformations.
+	bli_obj_alias_to( a, &a_local );
+	bli_obj_alias_to( c, &c_local );
+	bli_obj_set_as_root( &c_local );
+
+	// For syrk, the right-hand "B" operand is simply A^T.
+	bli_obj_alias_to( a, &at_local );
+	bli_obj_induce_trans( &at_local );
+
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	gint_t status = bli_syrk_small( alpha, &a_local, &at_local, beta, &c_local,
+	                                cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -64,38 +77,6 @@ void bli_syrk_front
 		bli_scalm( beta, c );
 		return;
 	}
-
-	// Alias A and C in case we need to apply transformations.
-	bli_obj_alias_to( a, &a_local );
-	bli_obj_alias_to( c, &c_local );
-	bli_obj_set_as_root( &c_local );
-
-	// For syrk, the right-hand "B" operand is simply A^T.
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-    	bli_obj_alias_to( a, &at_local );
-    	if (bli_obj_has_trans(a) != 0)
-    	{//At*A operation
-        	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, &at_local );
-        	//call small syrk.
-        	//syrk small matrix threshold check is done inside bli_syrk_small().
-        	status = bli_syrk_small( alpha, &a_local, &at_local, beta, &c_local, cntx, cntl );
-    	}
-    	else if ((a->dim[0] <= BLIS_SMALL_MATRIX_A_THRES_M_SYRK && a->dim[1] < BLIS_SMALL_MATRIX_A_THRES_N_SYRK) ||
-            	(a->dim[0] < BLIS_SMALL_MATRIX_A_THRES_M_SYRK && a->dim[1] <= BLIS_SMALL_MATRIX_A_THRES_N_SYRK))
-    	{//A*At operation
-        	bli_obj_set_conjtrans( BLIS_TRANSPOSE, &at_local );
-        	//call small syrk.
-        	//Explicit matrix dimension threshold check in this else if section before calling bli_syrk_small().
-        	status = bli_syrk_small( alpha, &a_local, &at_local, beta, &c_local, cntx, cntl );
-    	}
-    	if ( status == BLIS_SUCCESS )
-    	{
-            	return;
-    	}
-#endif
-
-	bli_obj_alias_to( a, &at_local );
-	bli_obj_induce_trans( &at_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel

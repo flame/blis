@@ -158,6 +158,8 @@ enum
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
+char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath );
+
 enum
 {
 	VENDOR_ARM = 0,

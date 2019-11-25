@@ -654,6 +654,128 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 
 // -----------------------------------------------------------------------------
 
+void bli_cntx_set_l3_vir_ukrs( dim_t n_ukrs, ... )
+{
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default level-3 virtual microkernels. It should be called after
+	// bli_cntx_init_defaults() so that the context begins with default
+	// microkernels across all datatypes.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_l3_vir_ukrs
+	   (
+	     dim_t   n_ukrs,
+	     l3ukr_t ukr0_id, num_t dt0, void_fp ukr0_fp,
+	     l3ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp,
+	     l3ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	l3ukr_t* ukr_ids   = bli_malloc_intl( n_ukrs * sizeof( l3ukr_t ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	num_t*   ukr_dts   = bli_malloc_intl( n_ukrs * sizeof( num_t   ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	void_fp* ukr_fps   = bli_malloc_intl( n_ukrs * sizeof( void_fp ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_ukrs );
+
+	// Process n_ukrs tuples.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the l3ukr_t of the kernel we're about to process,
+		// - the datatype of the kernel, and
+		// - the kernel function pointer.
+		// that we need to store to the context.
+		const l3ukr_t  ukr_id   = ( l3ukr_t )va_arg( args, l3ukr_t );
+		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
+		      void_fp  ukr_fp   = ( void_fp )va_arg( args, void_fp );
+
+		// Store the values in our temporary arrays.
+		ukr_ids[ i ]   = ukr_id;
+		ukr_dts[ i ]   = ukr_dt;
+		ukr_fps[ i ]   = ukr_fp;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the addresses of:
+	// - the l3 virtual ukernel func_t array
+	func_t*  cntx_l3_vir_ukrs       = bli_cntx_l3_vir_ukrs_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_ukrs; ++i )
+	{
+		// Read the current ukernel id, ukernel datatype, ukernel function
+		// pointer, and ukernel preference.
+		const l3ukr_t ukr_id   = ukr_ids[ i ];
+		const num_t   ukr_dt   = ukr_dts[ i ];
+		      void_fp ukr_fp   = ukr_fps[ i ];
+
+		// Index into the func_t and mbool_t for the current kernel id
+		// being processed.
+		func_t*       vukrs  = &cntx_l3_vir_ukrs[ ukr_id ];
+
+		// Store the ukernel function pointer and preference values into
+		// the context. Notice that we redundantly store the native
+		// ukernel address in both the native and virtual ukernel slots
+		// in the context. This is standard practice when creating a
+		// native context. (Induced method contexts will overwrite the
+		// virtual function pointer with the address of the appropriate
+		// virtual ukernel.)
+		bli_func_set_dt( ukr_fp, ukr_dt, vukrs );
+	}
+
+	// Free the temporary local arrays.
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	bli_free_intl( ukr_ids );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	bli_free_intl( ukr_dts );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_vir_ukrs(): " );
+	#endif
+	bli_free_intl( ukr_fps );
+}
+
+// -----------------------------------------------------------------------------
+
 void bli_cntx_set_l3_sup_thresh( dim_t n_thresh, ... )
 {
 	// This function can be called from the bli_cntx_init_*() function for

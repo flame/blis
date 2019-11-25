@@ -152,13 +152,14 @@ int main( int argc, char** argv )
 	printf( "data_%s_%cgemm_%c%c_%s", THR_STR, dt_ch,
 	                                  transal, transbl, STR );
 	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
 
 
-	for ( p = p_begin; p <= p_max; p += p_inc )
+	//for ( p = p_begin; p <= p_max; p += p_inc )
+	for ( p = p_max; p_begin <= p; p -= p_inc )
 	{
 		obj_t  a, b, c;
 		obj_t  c_save;
@@ -195,7 +196,7 @@ int main( int argc, char** argv )
 		bli_obj_set_conjtrans( transa, &a );
 		bli_obj_set_conjtrans( transb, &b );
 
-		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+		bli_setsc(  (1.0/1.0), 0.0, &alpha );
 		bli_setsc(  (1.0/1.0), 0.0, &beta );
 
 		bli_copym( &c, &c_save );
@@ -317,7 +318,11 @@ int main( int argc, char** argv )
 				float*    betap  = ( float* )bli_obj_buffer( &beta );
 				float*    cp     = ( float* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_sgemm( &f77_transa,
+				#else
 				sgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -342,7 +347,11 @@ int main( int argc, char** argv )
 				double*   betap  = ( double* )bli_obj_buffer( &beta );
 				double*   cp     = ( double* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_dgemm( &f77_transa,
+				#else
 				dgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -367,7 +376,11 @@ int main( int argc, char** argv )
 				scomplex* betap  = ( scomplex* )bli_obj_buffer( &beta );
 				scomplex* cp     = ( scomplex* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_cgemm( &f77_transa,
+				#else
 				cgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -392,7 +405,11 @@ int main( int argc, char** argv )
 				dcomplex* betap  = ( dcomplex* )bli_obj_buffer( &beta );
 				dcomplex* cp     = ( dcomplex* )bli_obj_buffer( &c );
 
+				#ifdef XSMM
+				libxsmm_zgemm( &f77_transa,
+				#else
 				zgemm_( &f77_transa,
+				#endif
 				        &f77_transb,
 				        &mm,
 				        &nn,
@@ -545,7 +562,7 @@ int main( int argc, char** argv )
 		printf( "data_%s_%cgemm_%c%c_%s", THR_STR, dt_ch,
 		                                  transal, transbl, STR );
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )n,
 		        ( unsigned long )k, gflops );

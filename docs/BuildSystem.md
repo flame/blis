@@ -74,6 +74,12 @@ Another special configuration (one that, unlike `auto`, _is_ present in `config`
 
 If you are a BLIS developer and wish to create your own configuration, either from scratch or using an existing configuration as a starting point, please read the BLIS [Configuration Guide](ConfigurationHowTo.md).
 
+### Multithreading
+
+Multithreading in BLIS is disabled by default. For more information on enabling multithreading, please read the section of the [Multithreading](Multithreading.md) document titled ["Enabling Multithreading"](Multithreading.md#enabling-multithreading).
+
+**IMPORTANT**: Even when multithreading is enabled at configure-time, BLIS will default to single-threaded execution at runtime. For more information on the various ways of specifying multithreading at runtime, please read the section titled ["Specifying Multithreading"](Multithreading.md#specifying-multithreading).
+
 ## Step 2: Running `configure`
 
 This step should be somewhat familiar to many people who use open source software. To configure the build system, simply run:
@@ -86,7 +92,7 @@ Alternatively, `configure` can automatically select a configuration based on you
 ```
 $ ./configure auto
 ```
-However, as of this writing, only a limited number of architectures are detected. If the `configure` script is not able to detect your architecture, the `generic` configuration will be used.
+However, as of this writing, BLIS lacks support for automatically detecting some architectures. If the `configure` script is not able to detect your architecture, the `generic` configuration will be used.
 
 Upon running configure, you will get output similar to the following. The exact output will depend on whether you cloned BLIS from a `git` repository or whether you obtained BLIS via a downloadable tarball from the [releases](https://github.com/flame/blis/releases) page.
 ```
@@ -180,7 +186,6 @@ For a complete list of supported `configure` options and arguments, run `configu
 $ ./configure -h
 ```
 The output from this invocation of `configure` should give you an up-to-date list of options and their descriptions.
-
 
 ## Step 3: Compilation
 

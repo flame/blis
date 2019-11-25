@@ -117,26 +117,19 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 
 /*
-	Multi Instance performance degradation on different cores
-	a) 	CPU freq 2.6 Ghz
-		DDR4 2400
-		Multi instance mode
-                mc = 240, kc = 512, and nc = 2040
-	
-	b)	CPU freq 2.4Ghz
-		DDR4 2400
-		Multi Instance mode
-		either
-		mc = 240, kc = 512 and nc = 2040 
-			    (or)
-		mc = 390, kc = 512 and nc = 4080
+	Multi Instance performance improvement of DGEMM when binded to a CCX
+	In Multi instance each thread runs a sequential DGEMM.
 
-	c)  	Higher frequency(3.1Ghz), single instance mode choose default value
-		mc = 510, kc = 1024 and nc = 4080
+	a)  If BLIS is run in a multi-instance mode with
+	    CPU freq 2.6/2.2 Ghz
+	    DDR4 clock frequency 2400Mhz
+          mc = 240, kc = 512, and nc = 2040
+	    has better performance on EPYC server, over the default block sizes.
 
+	b)  If BLIS is run in Single Instance mode
+	      mc = 510, kc = 1024 and nc = 4080
 */
 
-      // Zen optmized level 3 cache block sizes
 #ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
    #if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
   
@@ -151,12 +144,10 @@ void bli_cntx_init_zen( cntx_t* cntx )
 
    #endif
 #else
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   72,   144,    72 );
-        bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-        bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   4080,  4080,  4080 );
-
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
 #endif
- 	//bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 

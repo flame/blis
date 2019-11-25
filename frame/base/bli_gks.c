@@ -98,7 +98,7 @@ void bli_gks_init( void )
 
 		// AMD architectures
 #ifdef BLIS_CONFIG_ZEN2
-		bli_gks_register_cntx( BLIS_ARCH_ZEN2,         bli_cntx_init_zen2,
+		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
 		                                              bli_cntx_init_zen2_ref,
 		                                              bli_cntx_init_zen2_ind );
 #endif
@@ -140,7 +140,7 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa57_ind );
 #endif
 #ifdef BLIS_CONFIG_CORTEXA53
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa53,
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA53,   bli_cntx_init_cortexa53,
 		                                              bli_cntx_init_cortexa53_ref,
 		                                              bli_cntx_init_cortexa53_ind );
 #endif

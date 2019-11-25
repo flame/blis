@@ -230,7 +230,6 @@ void bli_sdotv_zen_int10
 		// transitioning from from AVX to SSE instructions (which may occur
 		// later, especially if BLIS is compiled with -mfpmath=sse).
 		_mm256_zeroupper();
-
 	}
 	else
 	{
