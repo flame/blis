@@ -1327,7 +1327,10 @@ get_compiler_version()
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
-	else
+	#if compiler is AOCC, first grep for clang and then the version number.
+	elif [ "${cc_vendor}" = "clang" ]; then
+            cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
+    else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
 
