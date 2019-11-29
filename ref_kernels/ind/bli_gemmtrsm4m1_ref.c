@@ -85,6 +85,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype_r* restrict one_r       = PASTEMAC(chr,1); \
 	ctype_r* restrict minus_one_r = PASTEMAC(chr,m1); \
 \
+	/* A hack to avoid a 'restrict' warning triggered by passing in the
+	   same address (one_r) for both alpha and beta when calling the last
+	   of the four matrix products. We now use one_r for alpha and this
+	   new local variable, onel, for beta. (See issue #328.) */ \
+	ctype_r           onel; \
+	ctype_r* restrict onel_r      = &onel; \
+	PASTEMAC(chr,set1s)( onel ); \
+\
 	ctype_r           alpha_r     = PASTEMAC(ch,real)( *alpha ); \
 	ctype_r           alpha_i     = PASTEMAC(ch,imag)( *alpha ); \
 \
@@ -187,7 +195,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: bx111p_i", k+m, n, \
 	  one_r, \
 	  a1x_i, \
 	  bx1_i, \
-	  one_r, \
+	  onel_r, \
 	  b11_r, rs_b, cs_b, \
 	  data, \
 	  cntx  \

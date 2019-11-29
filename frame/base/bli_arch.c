@@ -141,14 +141,14 @@ void bli_arch_set_id( void )
 #endif
 
 	// IBM microarchitectures.
+#ifdef BLIS_FAMILY_POWER9
+	id = BLIS_ARCH_POWER9;
+#endif
 #ifdef BLIS_FAMILY_POWER7
 	id = BLIS_ARCH_POWER7;
 #endif
 #ifdef BLIS_FAMILY_BGQ
 	id = BLIS_ARCH_BGQ;
-#endif
-#ifdef BLIS_FAMILY_POWER9
-        id = BLIS_ARCH_POWER9;
 #endif
 
 	// Generic microarchitecture.
@@ -188,9 +188,9 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa15",
     "cortexa9",
 
+    "power9",
     "power7",
     "bgq",
-    "power9",
 
     "generic"
 };

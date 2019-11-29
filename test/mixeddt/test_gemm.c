@@ -77,7 +77,7 @@ int main( int argc, char** argv )
 	prec_t comp_prec = bli_dt_prec( dtx );
 
 	dim_t p_begin = P_BEGIN;
-	dim_t p_end   = P_END;
+	dim_t p_max   = P_MAX;
 	dim_t p_inc   = P_INC;
 
 	int m_input   = -1;
@@ -122,12 +122,12 @@ int main( int argc, char** argv )
 
 	// Begin with initializing the last entry to zero so that
 	// matlab allocates space for the entire array once up-front.
-	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+	for ( p = p_begin; p + p_inc <= p_max; p += p_inc ) ;
 
 	//printf( "data_%s_%c%c%c%cgemm_%s",      THR_STR, dtc_ch, dta_ch, dtb_ch, dtx_ch, STR );
 	printf( "data_gemm_%s", STR );
 	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
@@ -143,7 +143,8 @@ int main( int argc, char** argv )
 	else if ( c_complex && a_complex && b_complex ) flopsmul = 8.0;
 
 
-	for ( p = p_begin; p <= p_end; p += p_inc )
+	//for ( p = p_begin; p <= p_max; p += p_inc )
+	for ( p = p_max; p_begin <= p; p -= p_inc )
 	{
 
 		if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
@@ -220,7 +221,7 @@ int main( int argc, char** argv )
 		//printf( "data_%s_%c%c%c%cgemm_%s",      THR_STR, dtc_ch, dta_ch, dtb_ch, dtx_ch, STR );
 		printf( "data_gemm_%s", STR );
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
 		        ( unsigned long )n, gflops );

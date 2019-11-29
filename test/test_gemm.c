@@ -35,10 +35,7 @@
 #include <unistd.h>
 #include "blis.h"
 
-
-//#define FILE_IN_OUT      // File based input matrix dimensions
-
-
+//#define FILE_IN_OUT
 //#define PRINT
 
 int main( int argc, char** argv )
@@ -60,20 +57,17 @@ int main( int argc, char** argv )
 	double dtime;
 	double dtime_save;
 	double gflops;
-
-
 #ifdef FILE_IN_OUT
 	FILE* fin  = NULL;
 	FILE* fout = NULL;
 	char gemm = 's';
 
 #endif
-
 	//bli_init();
 
 	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 10;
+	n_repeats = 3;
 
 #ifndef PRINT
 	p_begin = 200;
@@ -160,8 +154,6 @@ int main( int argc, char** argv )
 	    bli_setsc( -1, 0.0, &alpha );
 	    bli_setsc( 1, 0.0, &beta );
 
-	    //	    printf("%1.1f %1.1f\n", *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &alpha)), *((double *)bli_obj_buffer_for_const(BLIS_FLOAT, &beta)));
-
 #else
 	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
@@ -189,8 +181,8 @@ int main( int argc, char** argv )
 
 		bli_setsc(  (0.9/1.0), 0.2, &alpha );
 		bli_setsc( -(1.1/1.0), 0.3, &beta );
-#endif
 
+#endif
 		bli_copym( &c, &c_save );
 	
 		dtime_save = DBL_MAX;
@@ -209,7 +201,7 @@ int main( int argc, char** argv )
 			bli_printm( "c", &c, "%4.1f", "" );
 #endif
 
-#if 0 //def BLIS
+#ifdef BLIS
 
 			bli_gemm( &alpha,
 			          &a,
@@ -232,7 +224,6 @@ int main( int argc, char** argv )
 			float*   bp     = bli_obj_buffer( &b );
 			float*   betap  = bli_obj_buffer( &beta );
 			float*   cp     = bli_obj_buffer( &c );
-		
 
 			sgemm_( &f77_transa,
 			        &f77_transb,
@@ -373,12 +364,10 @@ int main( int argc, char** argv )
 
 #else
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
 		        ( unsigned long )n, gflops );
-		
-
 #endif
 		bli_obj_free( &alpha );
 		bli_obj_free( &beta );
@@ -390,11 +379,6 @@ int main( int argc, char** argv )
 	}
 
 	//bli_finalize();
-
-#ifdef FILE_IN_OUT
-	fclose(fin);
-	fclose(fout);
-#endif
 
 	return 0;
 }

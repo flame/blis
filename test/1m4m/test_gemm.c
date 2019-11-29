@@ -147,7 +147,7 @@ int main( int argc, char** argv )
 
 	printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
 	printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+	        ( unsigned long )(p - p_begin)/p_inc + 1,
 	        ( unsigned long )0,
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
@@ -403,7 +403,7 @@ int main( int argc, char** argv )
 
 		printf( "data_%s_%cgemm_%s", THR_STR, dt_ch, STR );
 		printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin + 1)/p_inc + 1,
+		        ( unsigned long )(p - p_begin)/p_inc + 1,
 		        ( unsigned long )m,
 		        ( unsigned long )k,
 		        ( unsigned long )n, gflops );

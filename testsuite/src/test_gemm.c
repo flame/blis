@@ -263,6 +263,10 @@ void libblis_test_gemm_experiment
 //bli_setsc(  1.0,  0.0, &alpha );
 //bli_setsc(  0.0,  0.0, &beta );
 
+//bli_setm( &BLIS_ONE, &a );
+//bli_setsc(  1.0,  0.0, &alpha );
+//bli_setsc(  0.0,  0.0, &beta );
+
 	// Apply the parameters.
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
@@ -403,17 +407,7 @@ void libblis_test_gemm_md
 
 		time = bli_clock();
 
-#if 0
-bli_printm( "a", &a, "%5.2f", "" );
-bli_printm( "b", &b, "%5.2f", "" );
-bli_printm( "c", &c, "%5.2f", "" );
-bli_printm( "alpha", &alpha, "%5.2f", "" );
-bli_printm( "beta", &beta, "%5.2f", "" );
-#endif
 		libblis_test_gemm_impl( iface, &alpha, &a, &b, &beta, &c );
-#if 0
-bli_printm( "c after", &c, "%5.2f", "" );
-#endif
 
 		time_min = bli_clock_min_diff( time_min, time );
 	}

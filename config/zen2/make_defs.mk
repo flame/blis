@@ -33,6 +33,9 @@
 #
 #
 
+# FLAGS that are specific to the 'zen2' architecture are added here.
+# FLAGS that are common for all the AMD architectures are present in
+# config/zen/amd_config.mk.
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
@@ -70,7 +73,10 @@ GCC_VERSION := $(strip $(shell gcc -dumpversion | cut -d. -f1))
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     += -march=znver2
 else
-CKVECFLAGS     += -march=znver1 -mno-avx256-split-unaligned-store
+# If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
+# as the fallback option.
+CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
+CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 endif
 else
 ifeq ($(CC_VENDOR),clang)

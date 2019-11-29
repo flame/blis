@@ -113,6 +113,30 @@ err_t bli_syrk_small
        cntl_t* cntl
      )
 {
+	// FGVZ: This code was originally in bli_syrk_front(). However, it really
+	// fits more naturally here within the bli_syrk_small() function. This
+	// becomes a bit more obvious now that the code is here, as it contains
+	// cpp macros such as BLIS_SMALL_MATRIX_A_THRES_M_SYRK, which are specific
+	// to this implementation.
+	if ( bli_obj_has_trans( a ) )
+	{
+		// Continue with small implementation.
+		;
+	}
+	else if ( ( bli_obj_length( a ) <= BLIS_SMALL_MATRIX_A_THRES_M_SYRK &&
+	            bli_obj_width( a )  <  BLIS_SMALL_MATRIX_A_THRES_N_SYRK ) ||
+	          ( bli_obj_length( a ) <  BLIS_SMALL_MATRIX_A_THRES_M_SYRK &&
+	            bli_obj_width( a )  <= BLIS_SMALL_MATRIX_A_THRES_N_SYRK ) )
+	{
+		// Continue with small implementation.
+		;
+	}
+	else
+	{
+		// Reject the problem and return to large code path.
+		return BLIS_FAILURE;
+	}
+
 #ifdef BLIS_ENABLE_MULTITHREADING
     return BLIS_NOT_YET_IMPLEMENTED;
 #endif

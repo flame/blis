@@ -54,8 +54,9 @@ endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
-
+ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS += -march=znver1
+endif
 
 
 # Flags specific to reference kernels.

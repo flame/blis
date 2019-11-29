@@ -1433,6 +1433,8 @@ check_compiler()
 			# Thus, this "blacklistcc_add" statement has been moved above.
 			#blacklistcc_add "zen"
 			blacklistcc_add "skx"
+			# gcc 5.x may support POWER9 but it is unverified.
+			blacklistcc_add "power9"
 		fi
 	fi
 
@@ -1488,6 +1490,103 @@ check_compiler()
 				: # explicit no-op since bash can't handle empty loop bodies.
 			fi
 		fi
+	fi
+}
+
+check_compiler_version_ranges()
+{
+	local cc
+
+	cc="${found_cc}"
+
+	#
+	# We check for various compiler version ranges that may cause us
+	# issues in properly supporting those compiler versions within the
+	# BLIS build system.
+	#
+	# range: gcc < 4.9.0 (ie: 4.8.5 or older)
+	# variable: gcc_older_than_4_9_0
+	# comments:
+	#   These older versions of gcc may support microarchitectures such as
+	#   sandybridge, but the '-march=' flag uses a different label syntax.
+	#   In newer versions, '-march=sandybridge' is the preferred syntax [1].
+	#   However, in older versions, the syntax for the same compiler option
+	#   is '-march=corei7-avx' [2].
+	#
+	#   [1] https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options
+	#   [2] https://gcc.gnu.org/onlinedocs/gcc-4.8.5/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options
+	#
+	# range: gcc < 6.1 (ie: 5.5 or older)
+	# variable: gcc_older_than_6_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen (Zen1)
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is '-march=bdver4' [3]. However, basic support for these
+	#   older versions can be attained in a roundabout way by starting with the
+	#   instruction sets enabled by '-march=bdver4' and then disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, namely: FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen
+	#   via the '-march=znver1' option [4].
+	#
+	#   [3] https://gcc.gnu.org/onlinedocs/gcc-5.5.0/gcc/x86-Options.html#x86-Options
+	#   [4] https://gcc.gnu.org/onlinedocs/gcc-6.1.0/gcc/x86-Options.html#x86-Options
+	#
+	# range: gcc < 9.1 (ie: 8.3 or older)
+	# variable: gcc_older_than_9_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen2
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is either '-march=znver1' (if !gcc_older_than_6_1_0) [5]
+	#   or '-march=bdver4' (if gcc_older_than_6_1_0) [3]. If gcc is 6.1 or
+	#   newer, '-march=znver1' may be used (since the instruction sets it
+	#   enables are a subset of those enabled by '-march=znver2'); otherwise,
+	#   '-march=bdver4' must be used in conjuction with disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, as described in the section above for gcc_older_than_6_1_0.
+	#   Newer versions of gcc support Zen2 via the '-march=znver2' option [6].
+	#
+	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
+	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/x86-Options.html#x86-Options
+	#
+
+	gcc_older_than_4_9_0='no'
+	gcc_older_than_6_1_0='no'
+	gcc_older_than_9_1_0='no'
+
+	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
+
+	# gcc
+	if [ "x${cc_vendor}" = "xgcc" ]; then
+
+		# Check for gcc < 4.9.0 (ie: 4.8.5 or older).
+		if [ ${cc_major} -eq 4 ]; then
+			if [ ${cc_minor} -lt 9 ]; then
+				echo "${script_name}: note: found ${cc} version older than 4.9.0."
+				gcc_older_than_4_9_0='yes'
+			fi
+		fi
+
+		# Check for gcc < 6.1.0 (ie: 5.5 or older).
+		if [ ${cc_major} -lt 6 ]; then
+			echo "${script_name}: note: found ${cc} version older than 6.1."
+			gcc_older_than_6_1_0='yes'
+		fi
+
+		# Check for gcc < 9.1.0 (ie: 8.3 or older).
+		if [ ${cc_major} -lt 9 ]; then
+			echo "${script_name}: note: found ${cc} version older than 9.1."
+			gcc_older_than_9_1_0='yes'
+		fi
+	fi
+
+	# icc
+	if [ "x${cc_vendor}" = "xicc" ]; then
+		:
+	fi
+
+	# clang
+	if [ "x${cc_vendor}" = "xclang" ]; then
+		:
 	fi
 }
 
@@ -2192,9 +2291,11 @@ main()
 
 	# Check the compiler's version. Certain versions of certain compilers
 	# will preclude building certain sub-configurations, which are added
-	# to a blacklist.
+	# to a blacklist. We also make note of certain version ranges that
+	# will be useful to know about later.
 	get_compiler_version
 	check_compiler
+	check_compiler_version_ranges
 
 	# Now check the assembler's ability to assemble code. Older versions
 	# of binutils may not be aware of certain instruction sets. Those
@@ -2323,7 +2424,6 @@ main()
 		# Use the command line argument as the configuration name.
 		config_name=$1
 
-		#echo "${script_name}: manual configuration requested."
 		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
 
 	fi
@@ -2439,22 +2539,42 @@ main()
 		# but we have it here just in case.
 		if [ $1 = "auto" ]; then
 
-			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
+			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
 			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
 			echo "${script_name}: "
 			exit 1;
 
 		else
 
-			echo "${script_name}: 'user-specified configuration '${conf}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
+			# At this point, we know: (a) config_list is empty; and (b) the user
+			# requested manual configuration. If the config_name given by the
+			# user is present in the configuration blacklist (config_blist),
+			# then we can deduce why the config_list is empty: because the only
+			# subconfig implied by config_name is blacklisted. Thus, we cannot
+			# proceed.
 
+			if [ $(is_in_list "${config_name}" "${config_blist}") == "true" ]; then
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
+				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+
+				# If config_name is NOT present in config_blist, then we know
+				# that config_list is empty simply because config_name is
+				# unregistered.
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
-
 	else
 
 		# This branch executes when the configuration is found to be present
@@ -2964,6 +3084,9 @@ main()
 		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
+		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
+		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
+		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \

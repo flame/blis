@@ -96,12 +96,19 @@ endif
 HOME_LIB_PATH  := $(HOME)/flame/lib
 MKL_LIB_PATH   := $(HOME)/intel/mkl/lib/intel64
 
+# netlib BLAS
+NETLIB_LIB     := $(HOME_LIB_PATH)/libblas.a
+
 # OpenBLAS
 OPENBLAS_LIB   := $(HOME_LIB_PATH)/libopenblas.a
 OPENBLASP_LIB  := $(HOME_LIB_PATH)/libopenblasp.a
 
 # BLASFEO
 BLASFEO_LIB    := $(HOME_LIB_PATH)/libblasfeo.a
+
+# libxsmm
+LIBXSMM_LIB    := $(HOME_LIB_PATH)/libxsmm.a -ldl \
+                  $(NETLIB_LIB) -lgfortran
 
 # ATLAS
 ATLAS_LIB      := $(HOME_LIB_PATH)/libf77blas.a \
@@ -210,14 +217,21 @@ TRANS := n_n \
          t_n \
          t_t
 
+# While BLIS supports all combinations of row and column storage for matrices
+# C, A, and B, the alternatives mostly only support CBLAS APIs, which inherently
+# support only "all row-storage" or "all column-storage". Thus, we disable the
+# building of those other drivers so that compilation/linking completes sooner.
+#STORS := r_r_r \
+#         r_r_c \
+#         r_c_r \
+#         r_c_c \
+#         c_r_r \
+#         c_r_c \
+#         c_c_r \
+#         c_c_c
 STORS := r_r_r \
-         r_r_c \
-         r_c_r \
-         r_c_c \
-         c_r_r \
-         c_r_c \
-         c_c_r \
          c_c_c
+
 
 SHAPES := l_l_s \
           l_s_l \
@@ -306,14 +320,18 @@ get-imp-defs = $(strip $(subst  blissup,-DSTR=\"$(1)\" -DBLIS -DSUP, \
                        $(subst    eigen,-DSTR=\"$(1)\" -DEIGEN, \
                        $(subst openblas,-DSTR=\"$(1)\" -DCBLAS, \
                        $(subst  blasfeo,-DSTR=\"$(1)\" -DCBLAS, \
-                       $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1))))))))
+                       $(subst  libxsmm,-DSTR=\"$(1)\" -DBLAS -DXSMM, \
+                       $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1)))))))))
 
 TRANS0  = $(call stripu,$(TRANS))
 STORS0  = $(call stripu,$(STORS))
 
 # Limit BLAS and Eigen to only using all row-stored, or all column-stored matrices.
+# Also, limit libxsmm to using all column-stored matrices since it does not offer
+# CBLAS interfaces.
 BSTORS0 = rrr ccc
 ESTORS0 = rrr ccc
+XSTORS0 = ccc
 
 
 #
@@ -339,6 +357,9 @@ OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
 BLASFEO_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blasfeo)
 BLASFEO_ST_BINS  := $(patsubst %.o,%.x,$(BLASFEO_ST_OBJS))
 
+LIBXSMM_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),libxsmm)
+LIBXSMM_ST_BINS  := $(patsubst %.o,%.x,$(LIBXSMM_ST_OBJS))
+
 VENDOR_ST_OBJS   := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),vendor)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
@@ -351,6 +372,7 @@ VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
                $(EIGEN_ST_OBJS) \
                $(OPENBLAS_ST_OBJS) \
                $(BLASFEO_ST_OBJS) \
+               $(LIBXSMM_ST_OBJS) \
                $(VENDOR_ST_OBJS)
 
 
@@ -365,9 +387,11 @@ blislpab:    blislpab-st
 eigen:       eigen-st
 openblas:    openblas-st
 blasfeo:     blasfeo-st
+libxsmm:     libxsmm-st
 vendor:      vendor-st
 
-st:          blissup-st blislpab-st eigen-st openblas-st blasfeo-st vendor-st
+st:          blissup-st blislpab-st \
+             eigen-st openblas-st blasfeo-st libxsmm-st vendor-st
 blis:        blissup-st blislpab-st
 
 blissup-st:  $(BLISSUP_ST_BINS)
@@ -375,13 +399,14 @@ blislpab-st: $(BLISLPAB_ST_BINS)
 eigen-st:    $(EIGEN_ST_BINS)
 openblas-st: $(OPENBLAS_ST_BINS)
 blasfeo-st:  $(BLASFEO_ST_BINS)
+libxsmm-st:  $(LIBXSMM_ST_BINS)
 vendor-st:   $(VENDOR_ST_BINS)
 
 
 # --Object file rules --
 
 # Define the implementations for which we will instantiate compilation rules.
-BIMPLS := blissup blislpab openblas blasfeo vendor
+BIMPLS := blissup blislpab openblas blasfeo libxsmm vendor
 EIMPLS := eigen
 
 #      1     2  3   4 567  8
@@ -447,6 +472,9 @@ test_%_openblas_st.x: test_%_openblas_st.o $(LIBBLIS_LINK)
 test_%_blasfeo_st.x:  test_%_blasfeo_st.o  $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(BLASFEO_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
+test_%_libxsmm_st.x:  test_%_libxsmm_st.o  $(LIBBLIS_LINK)
+	$(CC) $(strip $<  $(LIBXSMM_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
 test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(VENDOR_LIB)        $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
@@ -456,5 +484,5 @@ test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 clean: cleanx
 
 cleanx:
-	- $(RM_F) *.x
+	- $(RM_F) *.x *.o
 
