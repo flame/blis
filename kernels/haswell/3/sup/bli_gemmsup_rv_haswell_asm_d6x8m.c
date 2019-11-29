@@ -172,12 +172,44 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
 #else
-			bli_dgemv_ex
-			(
-			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
-			  beta, cij, rs_c0, cntx, NULL
-			);
+			dim_t ps_a0 = bli_auxinfo_ps_a( data );
+
+			if ( ps_a0 == 6 * rs_a0 )
+			{
+				// Since A is not packed, we can use one gemv.
+				bli_dgemv_ex
+				(
+				  BLIS_NO_TRANSPOSE, conjb, m0, k0,
+				  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
+				  beta, cij, rs_c0, cntx, NULL
+				);
+			}
+			else
+			{
+				const dim_t mr = 6;
+
+				// Since A is packed into row panels, we must use a loop over
+				// gemv.
+				dim_t m_iter = ( m0 + mr - 1 ) / mr;
+				dim_t m_left =   m0            % mr;
+
+				double* restrict ai_ii  = ai;
+				double* restrict cij_ii = cij;
+
+				for ( dim_t ii = 0; ii < m_iter; ii += 1 )
+				{
+					dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
+					                 ? mr : m_left );
+
+					bli_dgemv_ex
+					(
+					  BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
+					  alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
+					  beta, cij_ii, rs_c0, cntx, NULL
+					);
+					cij_ii += mr*rs_c0; ai_ii += ps_a0;
+				}
+			}
 #endif
 		}
 		return;
@@ -200,6 +232,10 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a8  = ps_a * sizeof( double );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -836,8 +872,10 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a8), rax)               // load ps_a8
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a8
 
 	dec(r11)                           // ii -= 1;
 	jne(.DLOOP6X8I)                    // iterate again if ii != 0.
@@ -858,6 +896,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a8]  "m" (ps_a8),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -887,7 +926,9 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		double* restrict cij = c + i_edge*rs_c;
-		double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
+		double* restrict ai  = a + m_iter * ps_a;
 		double* restrict bj  = b;
 
 #if 0
@@ -1055,6 +1096,10 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a8  = ps_a * sizeof( double );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -1689,8 +1734,10 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a8), rax)               // load ps_a8
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a8
 
 	dec(r11)                           // ii -= 1;
 	jne(.DLOOP6X8I)                    // iterate again if ii != 0.
@@ -1711,6 +1758,7 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a8]  "m" (ps_a8),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1740,7 +1788,9 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		double* restrict cij = c + i_edge*rs_c;
-		double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
+		double* restrict ai  = a + m_iter * ps_a;
 		double* restrict bj  = b;
 
 #if 0
@@ -1908,6 +1958,10 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a8  = ps_a * sizeof( double );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -2396,8 +2450,10 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a8), rax)               // load ps_a8
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a8
 
 	dec(r11)                           // ii -= 1;
 	jne(.DLOOP6X4I)                    // iterate again if ii != 0.
@@ -2418,6 +2474,7 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a8]  "m" (ps_a8),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -2447,7 +2504,9 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		double* restrict cij = c + i_edge*rs_c;
-		double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
+		double* restrict ai  = a + m_iter * ps_a;
 		double* restrict bj  = b;
 
 #if 0
@@ -2615,6 +2674,10 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a8  = ps_a * sizeof( double );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -3077,8 +3140,10 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a8), rax)               // load ps_a8
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a8
 
 	dec(r11)                           // ii -= 1;
 	jne(.DLOOP6X2I)                    // iterate again if ii != 0.
@@ -3099,6 +3164,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a8]  "m" (ps_a8),
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -3128,7 +3194,9 @@ void bli_dgemmsup_rv_haswell_asm_6x2m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		double* restrict cij = c + i_edge*rs_c;
-		double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + i_edge*rs_a;
+		//double* restrict ai  = a + ( i_edge / 6 ) * ps_a;
+		double* restrict ai  = a + m_iter * ps_a;
 		double* restrict bj  = b;
 
 #if 0

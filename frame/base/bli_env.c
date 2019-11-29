@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,68 +33,63 @@
 
 */
 
-#include "bli_l3_cntl.h"
-#include "bli_l3_check.h"
+#include "blis.h"
 
-// Define function types.
-#include "bli_l3_ft_ex.h"
-#include "bli_l3_ft_ukr.h"
-#include "bli_l3_oft.h"
-#include "bli_l3_oft_var.h"
+// -----------------------------------------------------------------------------
 
-#include "bli_l3_blocksize.h"
-#include "bli_l3_direct.h"
-#include "bli_l3_prune.h"
-#include "bli_l3_packm.h"
+dim_t bli_env_get_var( const char* env, dim_t fallback )
+{
+	dim_t r_val;
+	char* str;
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l3_oapi.h"
+	// Query the environment variable and store the result in str.
+	str = getenv( env );
 
-#include "bli_oapi_ba.h"
-#include "bli_l3_oapi.h"
+	// Set the return value based on the string obtained from getenv().
+	if ( str != NULL )
+	{
+		// If there was no error, convert the string to an integer and
+		// prepare to return that integer.
+		r_val = strtol( str, NULL, 10 );
+	}
+	else
+	{
+		// If there was an error, use the "fallback" as the return value.
+		r_val = fallback;
+	}
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l3_tapi.h"
+	return r_val;
+}
 
-#include "bli_tapi_ba.h"
-#include "bli_l3_tapi.h"
+#if 0
+void bli_env_set_var( const char* env, dim_t value )
+{
+	dim_t       r_val;
+	char        value_str[32];
+	const char* fs_32 = "%u";
+	const char* fs_64 = "%lu";
 
-// Define function types for small/unpacked handlers/kernels.
-#include "bli_l3_sup_oft.h"
-#include "bli_l3_sup_ft_ker.h"
+	// Convert the string to an integer, but vary the format specifier
+	// depending on the integer type size.
+	if ( bli_info_get_int_type_size() == 32 ) sprintf( value_str, fs_32, value );
+	else                                      sprintf( value_str, fs_64, value );
 
-// Define static edge case logic for use in small/unpacked kernels.
-//#include "bli_l3_sup_edge.h"
+	// Set the environment variable using the string we just wrote to via
+	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
+	// value if the environment variable already exists.)
+	r_val = bli_setenv( env, value_str, TRUE );
 
-// Prototype object API to small/unpacked matrix dispatcher.
-#include "bli_l3_sup.h"
+	// Check the return value in case something went horribly wrong.
+	if ( r_val == -1 )
+	{
+		char err_str[128];
 
-// Prototype reference implementation of small/unpacked matrix handler.
-#include "bli_l3_sup_ref.h"
-#include "bli_l3_sup_int.h"
-#include "bli_l3_sup_vars.h"
-#include "bli_l3_sup_packm_a.h"
-#include "bli_l3_sup_packm_b.h"
-#include "bli_l3_sup_packm_var.h"
+		// Query the human-readable error string corresponding to errno.
+		strerror_r( errno, err_str, 128 );
 
-// Prototype microkernel wrapper APIs.
-#include "bli_l3_ukr_oapi.h"
-#include "bli_l3_ukr_tapi.h"
-
-// Generate function pointer arrays for tapi microkernel functions.
-#include "bli_l3_ukr_fpa.h"
-
-// Operation-specific headers.
-#include "bli_gemm.h"
-#include "bli_hemm.h"
-#include "bli_herk.h"
-#include "bli_her2k.h"
-#include "bli_symm.h"
-#include "bli_syrk.h"
-#include "bli_syr2k.h"
-#include "bli_trmm.h"
-#include "bli_trmm3.h"
-#include "bli_trsm.h"
+		// Print the error message.
+		bli_print_msg( err_str, __FILE__, __LINE__ );
+	}
+}
+#endif
 
