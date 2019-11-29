@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,46 +32,13 @@
 
 */
 
-#ifndef BLIS_L3_SUP_DECOR_H
-#define BLIS_L3_SUP_DECOR_H
+#ifndef BLIS_L3_SUP_DECOR_OPENMP_H
+#define BLIS_L3_SUP_DECOR_OPENMP_H
 
-// -- sup definitions ----------------------------------------------------------
+// Definitions specific to situations when OpenMP multithreading is enabled.
+#ifdef BLIS_ENABLE_OPENMP
 
-// Level-3 sup internal function type.
-typedef err_t (*l3supint_t)
-     (
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-// Level-3 sup thread decorator prototype.
-err_t bli_l3_sup_thread_decorator
-     (
-       l3supint_t func,
-       opid_t     family,
-       //pack_t     schema_a,
-       //pack_t     schema_b,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
-     );
-
-// Include definitions specific to the method of multithreading for the
-// sup code path.
-#include "bli_l3_sup_decor_single.h"
-#include "bli_l3_sup_decor_openmp.h"
-#include "bli_l3_sup_decor_pthreads.h"
+#endif
 
 #endif
 
