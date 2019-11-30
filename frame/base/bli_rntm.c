@@ -34,6 +34,29 @@
 
 #include "blis.h"
 
+// The global rntm_t structure, which holds the global thread settings
+// along with a few other key parameters.
+rntm_t global_rntm;
+
+// A mutex to allow synchronous access to global_rntm.
+bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+
+// ----------------------------------------------------------------------------
+
+void bli_rntm_init_from_global( rntm_t* rntm )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	// Acquire the mutex protecting global_rntm.
+	bli_pthread_mutex_lock( &global_rntm_mutex );
+
+	*rntm = global_rntm;
+
+	// Release the mutex protecting global_rntm.
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
+}
+
 // -----------------------------------------------------------------------------
 
 void bli_rntm_set_ways_for_op
@@ -152,7 +175,7 @@ void bli_rntm_set_ways_from_rntm
 	bool_t ways_set = FALSE;
 
 	// If the rntm was fed in as a copy of the global runtime via
-	// bli_thread_init_rntm(), we know that either the num_threads
+	// bli_rntm_init_from_global(), we know that either the num_threads
 	// field will be set and all of the ways unset, or vice versa.
 	// However, we can't be sure that a user-provided rntm_t isn't
 	// initialized uncleanly. So here we have to enforce some rules

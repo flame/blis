@@ -65,6 +65,15 @@ static inc_t bli_auxinfo_is_b( auxinfo_t* ai )
 	return ai->is_b;
 }
 
+static inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
+{
+	return ai->ps_a;
+}
+static inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
+{
+	return ai->ps_b;
+}
+
 #if 0
 static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
 {
@@ -105,6 +114,15 @@ static void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
 static void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
 {
 	ai->is_b = is;
+}
+
+static void bli_auxinfo_set_ps_a( inc_t ps, auxinfo_t* ai )
+{
+	ai->ps_a = ps;
+}
+static void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
+{
+	ai->ps_b = ps;
 }
 
 #if 0

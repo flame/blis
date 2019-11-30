@@ -174,6 +174,16 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  cntx
 	);
 
+#if 0
+	// Initialize the context with the sup handlers.
+	bli_cntx_set_l3_sup_handlers
+	(
+	  1,
+	  BLIS_GEMM, bli_gemmsup_ref,
+	  cntx
+	);
+#endif
+
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
 	(
