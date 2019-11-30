@@ -147,7 +147,14 @@ static void bli_mem_set_size( siz_t size, mem_t* mem )
 static void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
+#ifdef __cplusplus
+	packbuf_t pb;
+	//C++ has more strong type checking. Using -1 will result in error
+	//Pass actual type instead
+	bli_mem_set_buf_type ( pb, mem );
+#else
 	bli_mem_set_buf_type( -1, mem );
+#endif
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 }
