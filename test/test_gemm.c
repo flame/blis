@@ -37,7 +37,7 @@
 
 //#define FILE_IN_OUT
 //#define PRINT
-
+//#define MATRIX_INITIALISATION
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
@@ -140,11 +140,11 @@ int main( int argc, char** argv )
 	    bli_obj_create( dt, k, n, 1, cs_b, &b );
 	    bli_obj_create( dt, m, n, 1, cs_c, &c );
 	    bli_obj_create( dt, m, n, 1, cs_c, &c_save );
-
+#ifdef MATRIX_INITIALISATION
 	    bli_randm( &a );
 	    bli_randm( &b );
 	    bli_randm( &c );
-
+#endif
 	    bli_obj_set_conjtrans( transa, &a);
 	    bli_obj_set_conjtrans( transb, &b);
 
