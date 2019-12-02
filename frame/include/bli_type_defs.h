@@ -1018,7 +1018,7 @@ typedef enum
 
 // NOTE: This value must be updated to reflect the number of enum values
 // listed above for arch_t!
-#define BLIS_NUM_ARCHS 21
+#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC+1)
 
 
 //
