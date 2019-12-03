@@ -946,7 +946,7 @@ static err_t bli_dtrsm_small_AlXB(
 
   dim_t m = bli_obj_length(b); // number of rows of matrix B
   dim_t n = bli_obj_width(b);  // number of columns of matrix B
-/*
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
     if(bli_max(m,n) > D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME)
     {
@@ -958,7 +958,7 @@ static err_t bli_dtrsm_small_AlXB(
         return BLIS_NOT_YET_IMPLEMENTED;
     }
 #endif
-*/
+
   dim_t m_remainder = m % D_MR;     //number of remainder rows
   dim_t n_remainder = n % D_NR;     //number of remainder columns
 
