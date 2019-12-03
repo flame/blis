@@ -93,6 +93,26 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **BLIS awarded SIAM Activity Group on Supercomputing Best Paper Prize for 2020!**
+We are thrilled to announce that the paper that we internally refer to as the
+second BLIS paper,
+
+   "The BLIS Framework: Experiments in Portability." Field G. Van Zee, Tyler Smith, Bryan Marker, Tze Meng Low, Robert A. van de Geijn, Francisco Igual, Mikhail Smelyanskiy, Xianyi Zhang, Michael Kistler, Vernon Austel, John A. Gunnels, Lee Killough. ACM Transactions on Mathematical Software (TOMS), 42(2):12:1--12:19, 2016.
+
+   was selected for the [SIAM Activity Group on Supercomputing Best Paper Prize](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)
+for 2020. The prize is awarded once every two years to a paper judged to be
+the most outstanding paper in the field of parallel scientific and engineering
+computing, and has only been awarded once before (in 2016) since its inception
+in 2015 (the committee did not award the prize in 2018). The prize will be
+awarded at the [SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle next February. Robert will
+be present at the conference to accept the prize and give
+[a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266).
+The selection committee sought to recognize the paper, "which validates BLIS,
+a framework relying on the notion of microkernels that enables both productivity
+and high performance." Their statement continues, "The framework will continue
+having an important influence on the design and the instantiation of dense linear
+algebra libraries."
+
  * **Small/skinny matrix support for dgemm now available!** Thanks to
 contributions made possible by our partnership with AMD, we have dramatically
 accelerated `gemm` for double-precision real matrix problems where one or two
