@@ -1259,6 +1259,7 @@ uint32_t bli_cpuid_query
 {
 	*model	  = 0;			// Not used
 	*features = 0;			// Not used
+	*part = BLIS_ARCH_GENERIC;
 
 #if 0
 // The easy GCC (and recent clang?) version
@@ -1271,21 +1272,16 @@ uint32_t bli_cpuid_query
 		*part = BLIS_ARCH_POWER8;
 	else if ( __builtin_cpu_is( "power7" ) )
 		*part = BLIS_ARCH_POWER7;
-	else
-		*part = BLIS_ARCH_GENERIC;
 #else
 // See https://developer.ibm.com/tutorials/optimized-libraries-for-linux-on-power/
-	char * platform = NULL;
-
-	platform = (char*) getauxval (AT_PLATFORM);
+	char * platform = (char*) getauxval (AT_PLATFORM);
+        if ( !platform ) retun 0; // Fixme: can it be null?
 	if ( strcmp( platform, "power8" ) == 0 )
 		*part = BLIS_ARCH_POWER8;
 	else if ( strcmp( platform, "power9" ) == 0 )
 		*part = BLIS_ARCH_POWER9;
 	else if ( strcmp( platform, "power7" ) == 0 )
 		*part = BLIS_ARCH_POWER7;
-	else
-		*part = BLIS_ARCH_GENERIC;
 #endif
 	return 0;
 }
