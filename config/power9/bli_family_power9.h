@@ -38,4 +38,9 @@
 #define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
 #define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
 
-
+// Disable right-side hemm, symm, and trmm[3] to accommodate the broadcasting of
+// elements within the packed matrix B.
+#define BLIS_DISABLE_HEMM_RIGHT
+#define BLIS_DISABLE_SYMM_RIGHT
+#define BLIS_DISABLE_TRMM_RIGHT
+#define BLIS_DISABLE_TRMM3_RIGHT
