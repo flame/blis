@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -67,7 +66,6 @@ TRSM_UKR_PROT(     dcomplex, z, trsmbb_u_power9_ref )
 void bli_cntx_init_power9( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-	blksz_t thresh[ BLIS_NUM_THRESH ];
 
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_power9_ref( cntx );
