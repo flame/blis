@@ -76,3 +76,56 @@ AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
 
+// -- level-3 sup --------------------------------------------------------------
+// semmsup_rv
+
+//GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16 )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x8 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x8 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x8 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x4 )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x2 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x2 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x2 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x2 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x2 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x2 )
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_6x1 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_5x1 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_4x1 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_3x1 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_2x1 )
+GEMMSUP_KER_PROT( float,   s, gemmsup_r_zen_ref_1x1 )
+
+// gemmsup_rv (mkernel in m dim)
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x8m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4m )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x2m )
+
+// gemmsup_rv (mkernel in n dim)
+
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x16n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x16n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x16n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x16n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x16n )
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x16n )
