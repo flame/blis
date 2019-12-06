@@ -695,19 +695,19 @@ static err_t dtrsm_small_XAlB (
 {
 
     dim_t i, j, k;
-    for(i = 0; i < M; i++)
-        for(j = 0; j < N; j++)
+    for(j = 0; j < N; j++)
+        for(i = 0; i < M; i++)
             B[i+j*ldb] *= alpha;
 
-    for(k = N-1; k+1 > 0; k--)
+    for(k = N;k--;)
     {
-        double lkk_inv = 1.0/A[k+k*lda];
-        for(i = M-1; i+1 > 0; i--)
+        double lkk_inv = 1.0/A[(k)+(k)*lda];
+        for(i = M;i--;)
         {
-            B[i+k*ldb] *= lkk_inv;
-            for(j = k-1; j+1 > 0; j--)
+            B[(i)+(k)*ldb] *= lkk_inv;
+            for(j = k;j--;)
             {
-                B[i+j*ldb] -= B[i+k*ldb] * A[k+j*lda];
+                B[(i)+(j)*ldb] -= B[(i)+(k)*ldb] * A[(k)+(j)*lda];
             }
         }
     }
@@ -731,20 +731,23 @@ static err_t dtrsm_small_XAlB_unitDiag(
 
     dim_t i, j, k;
 
-    for(i = 0 ; i < M; i++)
-        for(j = 0; j < N; j++)
+    for(j = 0 ; j < N; j++)
+        for(i = 0; i < M; i++)
             B[i+j*ldb] *= alpha;
-
-     for(k = N-1; k+1 > 0; k--)
+    double A_k_j;
+     for(k = N; k--;)
      {
-        for(i = M-1; i+1 > 0; i--)
+        for(j = k; j--;)
         {
-            for(j = k-1; j+1 > 0; j--)
+            A_k_j = A[(k)+(j)*lda];
+            for(i = M; i--;)
             {
-                B[i+j*ldb] -= B[i+k*ldb] * A[k+j*lda];
+                B[(i)+(j)*ldb] -= B[(i)+(k)*ldb] * A_k_j;
             }
         }
     }
+
+
 return BLIS_SUCCESS;
 }
 
@@ -765,19 +768,19 @@ static err_t dtrsm_small_XAutB (
 
     dim_t i, j, k;
 
-    for(i = 0; i < M; i++)
-        for(j = 0; j < N; j++)
+    for(j = 0; j < N; j++)
+        for(i = 0; i < M; i++)
             B[i+j*ldb] *=alpha;
 
-    for(k = N-1; k+1 > 0; k--)
+    for(k = N; k--;)
     {
-        double lkk_inv = 1.0/A[k+k*lda];
-        for(i = M-1; i+1 > 0; i--)
+        double lkk_inv = 1.0/A[(k)+(k)*lda];
+        for(i = M; i--;)
         {
-            B[i+k*ldb] *= lkk_inv;
-            for(j = k-1; j+1 > 0; j--)
+            B[(i)+(k)*ldb] *= lkk_inv;
+            for(j = k; j--;)
             {
-                B[i+j*ldb] -= B[i+k*ldb] * A[j+k*lda];
+                B[(i)+(j)*ldb] -= B[(i)+(k)*ldb] * A[(j)+(k)*lda];
             }
         }
     }
@@ -800,18 +803,20 @@ static err_t dtrsm_small_XAutB_unitDiag(
 {
 
     dim_t i, j, k;
+    double A_k_j;
 
-    for(i = 0; i< M; i++)
-        for(j = 0; j< N; j++)
+    for(j = 0; j< N; j++)
+        for(i = 0; i< M; i++)
             B[i+j*ldb] *= alpha;
 
-     for(i = M-1; i+1 > 0; i--)
+     for(k = N; k--;)
      {
-        for(j = N-1; j+1 > 0; j--)
+        for(j = k; j--;)
         {
-            for(k = j-1; k+1 > 0; k--)
+            A_k_j = A[(j)+(k)*lda];
+            for(i = M; i--;)
             {
-                B[i+k*ldb] -= B[i+j*ldb] * A[k+j*lda];
+                B[(i)+(j)*ldb] -= B[(i)+(k)*ldb] * A_k_j;
 
             }
         }
@@ -959,8 +964,8 @@ static err_t bli_dtrsm_small_AlXB(
     }
 #endif
 
-  dim_t m_remainder = m % D_MR;     //number of remainder rows
-  dim_t n_remainder = n % D_NR;     //number of remainder columns
+  dim_t m_remainder = m & 3;     //number of remainder rows
+  dim_t n_remainder = n & 7;     //number of remainder columns
 
   dim_t cs_a = bli_obj_col_stride(a); // column stride of A
   dim_t cs_b = bli_obj_col_stride(b); // column stride of B
@@ -974,6 +979,9 @@ static err_t bli_dtrsm_small_AlXB(
 
   double *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
   double *ptr_b01_dup;
+
+  double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+  double* f_temp;
 
   double ones = 1.0;
 
@@ -1291,11 +1299,16 @@ static err_t bli_dtrsm_small_AlXB(
 
         k_iter = i / D_MR;            //number of times GEMM operation to be done(in blocks of 4x4)
 
-        double f_temp[4];
         int iter;
 
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * 7)[iter];
+        if((j+D_NR) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                f_t[iter] = (b11 + cs_b * 7)[iter];
+            f_temp = f_t;
+        }
+        else
+            f_temp = (b11 + cs_b * 7);
 
         ymm8 = _mm256_setzero_pd();
         ymm9 = _mm256_setzero_pd();
@@ -1433,7 +1446,7 @@ static err_t bli_dtrsm_small_AlXB(
         ymm6 = _mm256_fmsub_pd(ymm6, ymm16, ymm14);    //B11[0-3][6] *alpha -= B01[0-3][6]
         ymm7 = _mm256_fmsub_pd(ymm7, ymm16, ymm15);    //B11[0-3][7] *alpha -= B01[0-3][7]
 
-        if(m_remainder == 3)
+        if(3 == m_remainder)
         {
             ///implement TRSM///
 
@@ -1573,7 +1586,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm7 = _mm256_blend_pd(ymm7, ymm15, 0x08);
 
         }
-        if(m_remainder == 2)
+        else if(2 == m_remainder)
         {
             ///implement TRSM///
 
@@ -1686,7 +1699,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm7 = _mm256_permute2f128_pd(ymm7, ymm15, 0x30);
 
         }
-        if(m_remainder == 1)
+        else if(1 == m_remainder)
         {
             ///implement TRSM///
 
@@ -1788,8 +1801,11 @@ static err_t bli_dtrsm_small_AlXB(
         _mm256_storeu_pd((double *)(b11 + cs_b * 6), ymm6);        //store(B11[0-3][6])
         _mm256_storeu_pd((double *)(f_temp), ymm7);        //store(B11[0-3][7])
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * 7)[iter] = f_temp[iter];
+        if((j+D_NR) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * 7)[iter] = f_t[iter];
+        }
     }
   }
 
@@ -2004,12 +2020,16 @@ static err_t bli_dtrsm_small_AlXB(
 
         k_iter = i / D_MR;      //number of GEMM operations to be performed(in blocks of 4x4)
 
-        double f_temp[4];
-        int iter;
+        dim_t iter;
 
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * 3)[iter];
-
+        if((j+4) == n)
+        {
+            f_temp = f_t;
+            for(iter = 0; iter < m_remainder; iter++)
+                f_temp[iter] = (b11 + cs_b * 3)[iter];
+        }
+        else
+            f_temp = (b11 + cs_b * 3);
         ///GEMM for previously calculated values ///
 
         //load 4x4 block from b11
@@ -2093,7 +2113,7 @@ static err_t bli_dtrsm_small_AlXB(
         ymm3 = _mm256_fmsub_pd(ymm3, ymm15, ymm7);  //B11[0-3][3] *alpha -= ymm7
 
 
-        if(m_remainder == 3)
+        if(3 == m_remainder)
         {
             ///implement TRSM///
             //1st col
@@ -2199,7 +2219,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
             ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
         }
-        if(m_remainder == 2)
+        else if( 2 == m_remainder )
         {
             ///implement TRSM///
             //1st col
@@ -2285,7 +2305,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm3 = _mm256_permute2f128_pd(ymm3, ymm7,0x30);
 
         }
-        if(m_remainder == 1)
+        else if(1 == m_remainder)
         {
             ///implement TRSM///
             //1st col
@@ -2357,9 +2377,11 @@ static err_t bli_dtrsm_small_AlXB(
         _mm256_storeu_pd((double *)(b11 + cs_b * 2), ymm2); //store(B11[0-3][2])
         _mm256_storeu_pd((double *)(f_temp), ymm3); //store(B11[0-3][3])
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * 3)[iter] = f_temp[iter];
-
+        if((j+4) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * 3)[iter] = f_temp[iter];
+        }
     }
 
     n_remainder -= 4;
@@ -2386,7 +2408,7 @@ static err_t bli_dtrsm_small_AlXB(
         ///GEMM for previously calculated values ///
 
         //load 4x4 block from b11
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));              //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));       //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -2452,7 +2474,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm2 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);  //B11[0-3][2] *alpha -= ymm6
             ymm3 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][3] *alpha -= ymm7
         }
-        if(n_remainder == 2)
+        else if(2 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));          //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -2508,7 +2530,7 @@ static err_t bli_dtrsm_small_AlXB(
             ymm2 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][2] *alpha -= ymm6
             ymm3 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][3] *alpha -= ymm7
         }
-        if(n_remainder == 1)
+        else if(1 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));      //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -2661,20 +2683,20 @@ static err_t bli_dtrsm_small_AlXB(
         ymm1 = _mm256_permute2f128_pd(ymm14,ymm15,0x20);    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
         ymm3 = _mm256_permute2f128_pd(ymm14,ymm15,0x31);    //B11[0][3] B11[1][3] B11[2][3] B11[3][3]
 
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
             _mm256_storeu_pd((double *)(b11 + cs_b * 2), ymm2); //store(B11[0-3][2])
 
         }
-        if(n_remainder == 2)
+        else if(2 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
 
         }
-        if(n_remainder == 1)
+        else if(1 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
         }
@@ -2690,11 +2712,15 @@ static err_t bli_dtrsm_small_AlXB(
 
         k_iter = i / D_MR;      //number of times GEMM operations to be performed
 
-        double f_temp[4];
-        int iter;
-
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * (n_remainder -1))[iter];
+        dim_t iter;
+        if((j+n_remainder) == n)
+        {
+            f_temp = f_t;
+            for(iter = 0; iter < m_remainder; iter++)
+                f_temp[iter] = (b11 + cs_b * (n_remainder -1))[iter];
+        }
+        else
+            f_temp = (b11 + cs_b * (n_remainder -1));
 
         ymm4 = _mm256_setzero_pd();
         ymm5 = _mm256_setzero_pd();
@@ -2705,7 +2731,7 @@ static err_t bli_dtrsm_small_AlXB(
 
 
         //load 4x4 block from b11
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));              //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));       //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -2770,19 +2796,19 @@ static err_t bli_dtrsm_small_AlXB(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x08);
                 ymm2 = _mm256_blend_pd(ymm10, ymm2, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm9, ymm1, 0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm10, ymm2, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x0E);
@@ -2792,7 +2818,7 @@ static err_t bli_dtrsm_small_AlXB(
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
             _mm256_storeu_pd((double *)(f_temp), ymm2); //store(B11[0-3][2])
         }
-        if(n_remainder == 2)
+        if(2 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));          //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(f_temp));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -2848,17 +2874,17 @@ static err_t bli_dtrsm_small_AlXB(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm9, ymm1, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x0E);
@@ -2913,23 +2939,26 @@ static err_t bli_dtrsm_small_AlXB(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
             }
             _mm256_storeu_pd((double *)(f_temp), ymm0);              //store(B11[0-3][0])
         }
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+        if((j+n_remainder) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+        }
 
         ///scalar code for trsm without alpha///
         dtrsm_small_AlXB(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
@@ -2990,8 +3019,8 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
     }
 #endif
 
-  dim_t m_remainder = m % D_MR;     //number of remainder rows
-  dim_t n_remainder = n % D_NR;     //number of remainder columns
+  dim_t m_remainder = m & (3);     //number of remainder rows
+  dim_t n_remainder = n & (7);     //number of remainder columns
 
   dim_t cs_a = bli_obj_col_stride(a); // column stride of A
   dim_t cs_b = bli_obj_col_stride(b); // column stride of B
@@ -3005,6 +3034,9 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
   double *a10, *a11, *b01, *b11;    //pointers that point to blocks for GEMM and TRSM
   double *ptr_b01_dup;
+
+  double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+  double* f_temp;
 
   double ones = 1.0;
 
@@ -3277,11 +3309,16 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
         k_iter = i / D_MR;            //number of times GEMM operation to be done(in blocks of 4x4)
 
-        double f_temp[4];
-        int iter;
+        dim_t iter;
 
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * 7)[iter];
+        if((j+D_NR) == n)
+        {
+            f_temp = f_t;
+            for(iter = 0; iter < m_remainder; iter++)
+                f_temp[iter] = (b11 + cs_b * 7)[iter];
+        }
+        else
+            f_temp = (b11 + cs_b * 7);
 
         ymm8 = _mm256_setzero_pd();
         ymm9 = _mm256_setzero_pd();
@@ -3419,7 +3456,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         ymm6 = _mm256_fmsub_pd(ymm6, ymm16, ymm14);    //B11[0-3][6] *alpha -= B01[0-3][6]
         ymm7 = _mm256_fmsub_pd(ymm7, ymm16, ymm15);    //B11[0-3][7] *alpha -= B01[0-3][7]
 
-        if(m_remainder == 3)
+        if(3 == m_remainder)
         {
             ///implement TRSM///
 
@@ -3523,7 +3560,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm7 = _mm256_blend_pd(ymm7, ymm15, 0x08);
 
         }
-        if(m_remainder == 2)
+        else if(2 == m_remainder)
         {
             ///implement TRSM///
 
@@ -3610,7 +3647,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm7 = _mm256_permute2f128_pd(ymm7, ymm15, 0x30);
 
         }
-        if(m_remainder == 1)
+        else if(1 == m_remainder)
         {
             ymm8 = _mm256_loadu_pd((double const *)(b11 + cs_b * 0));    //load B11[0-3][0]
             ymm9 = _mm256_loadu_pd((double const *)(b11 + cs_b * 1));    //load B11[0-3][1]
@@ -3641,8 +3678,11 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         _mm256_storeu_pd((double *)(b11 + cs_b * 6), ymm6);        //store(B11[0-3][6])
         _mm256_storeu_pd((double *)(f_temp), ymm7);        //store(B11[0-3][7])
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * 7)[iter] = f_temp[iter];
+        if((j+D_NR) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * 7)[iter] = f_temp[iter];
+        }
     }
   }
 
@@ -3814,12 +3854,16 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
         k_iter = i / D_MR;      //number of GEMM operations to be performed(in blocks of 4x4)
 
-        double f_temp[4];
-        int iter;
+        dim_t iter;
 
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * 3)[iter];
-
+        if((j+4) == n)
+        {
+            f_temp = f_t;
+            for(iter = 0; iter < m_remainder; iter++)
+                f_temp[iter] = (b11 + cs_b * 3)[iter];
+        }
+        else
+            f_temp = (b11 + cs_b * 3);
         ///GEMM for previously calculated values ///
 
         //load 4x4 block from b11
@@ -3903,7 +3947,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         ymm3 = _mm256_fmsub_pd(ymm3, ymm15, ymm7);  //B11[0-3][3] *alpha -= ymm7
 
 
-        if(m_remainder == 3)
+        if(3 == m_remainder)
         {
             ///implement TRSM///
             //1st col
@@ -3969,7 +4013,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
             ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
         }
-        if(m_remainder == 2)
+        else if(2 == m_remainder)
         {
             ///implement TRSM///
             //1st col
@@ -4028,7 +4072,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm3 = _mm256_permute2f128_pd(ymm3, ymm7,0x30);
 
         }
-        if(m_remainder == 1)
+        else if(1 == m_remainder)
         {
             //load 4x4 block from b11
             ymm4 = _mm256_loadu_pd((double const *)(b11));              //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -4048,9 +4092,11 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         _mm256_storeu_pd((double *)(b11 + cs_b * 2), ymm2); //store(B11[0-3][2])
         _mm256_storeu_pd((double *)(f_temp), ymm3); //store(B11[0-3][3])
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * 3)[iter] = f_temp[iter];
-
+        if((j+4) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * 3)[iter] = f_temp[iter];
+        }
     }
 
     n_remainder -= 4;
@@ -4077,7 +4123,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         ///GEMM for previously calculated values ///
 
         //load 4x4 block from b11
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));              //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));       //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -4143,7 +4189,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm2 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);  //B11[0-3][2] *alpha -= ymm6
             ymm3 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][3] *alpha -= ymm7
         }
-        if(n_remainder == 2)
+        else if(2 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));          //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -4199,7 +4245,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             ymm2 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][2] *alpha -= ymm6
             ymm3 = _mm256_broadcast_sd((double const *)(&ones));  //B11[0-3][3] *alpha -= ymm7
         }
-        if(n_remainder == 1)
+        else if(1 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));      //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -4311,20 +4357,20 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
         ymm1 = _mm256_permute2f128_pd(ymm14,ymm15,0x20);    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
         ymm3 = _mm256_permute2f128_pd(ymm14,ymm15,0x31);    //B11[0][3] B11[1][3] B11[2][3] B11[3][3]
 
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
             _mm256_storeu_pd((double *)(b11 + cs_b * 2), ymm2); //store(B11[0-3][2])
 
         }
-        if(n_remainder == 2)
+        else if(2 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
 
         }
-        if(n_remainder == 1)
+        else if(1 == n_remainder)
         {
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
         }
@@ -4340,11 +4386,16 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
         k_iter = i / D_MR;      //number of times GEMM operations to be performed
 
-        double f_temp[4];
-        int iter;
+        dim_t iter;
 
-        for(iter = 0; iter < m_remainder; iter++)
-            f_temp[iter] = (b11 + cs_b * (n_remainder -1))[iter];
+        if((j+n_remainder) == n)
+        {
+            f_temp = f_t;
+            for(iter = 0; iter < m_remainder; iter++)
+                f_temp[iter] = (b11 + cs_b * (n_remainder -1))[iter];
+        }
+        else
+            f_temp = (b11 + cs_b * (n_remainder -1));
 
         ymm4 = _mm256_setzero_pd();
         ymm5 = _mm256_setzero_pd();
@@ -4355,7 +4406,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
 
         //load 4x4 block from b11
-        if(n_remainder == 3)
+        if(3 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));              //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));       //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -4420,19 +4471,19 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x08);
                 ymm2 = _mm256_blend_pd(ymm10, ymm2, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm9, ymm1, 0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm10, ymm2, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x0E);
@@ -4442,7 +4493,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             _mm256_storeu_pd((double *)(b11 + (cs_b)), ymm1);   //store(B11[0-3][1])
             _mm256_storeu_pd((double *)(f_temp), ymm2); //store(B11[0-3][2])
         }
-        if(n_remainder == 2)
+        else if(2 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(b11));          //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
             ymm1 = _mm256_loadu_pd((double const *)(f_temp));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -4498,17 +4549,17 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm9, ymm1, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
                 ymm1 = _mm256_blend_pd(ymm9, ymm1, 0x0E);
@@ -4516,7 +4567,7 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
             _mm256_storeu_pd((double *)b11, ymm0);              //store(B11[0-3][0])
             _mm256_storeu_pd((double *)(f_temp), ymm1);   //store(B11[0-3][1])
         }
-        if(n_remainder == 1)
+        else if(1 == n_remainder)
         {
             ymm0 = _mm256_loadu_pd((double const *)(f_temp));      //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -4563,24 +4614,26 @@ static err_t bli_dtrsm_small_AlXB_unitDiag(
 
             ///implement TRSM///
             //determine correct values to store
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm8, ymm0, 0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm8, ymm0, 0x0E);
             }
             _mm256_storeu_pd((double *)(f_temp), ymm0);              //store(B11[0-3][0])
         }
 
-        for(iter = 0; iter < m_remainder; iter++)
-            (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
-
+        if((j+n_remainder) == n)
+        {
+            for(iter = 0; iter < m_remainder; iter++)
+                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+        }
         ///scalar code for trsm without alpha///
         dtrsm_small_AlXB_unitDiag(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
     }
@@ -4622,8 +4675,10 @@ static  err_t bli_dtrsm_small_XAuB(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -4651,6 +4706,9 @@ static  err_t bli_dtrsm_small_XAuB(
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
+
+  double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+  double* f_temp;
 
     cs_b_offset[0] = cs_b << 1;            //cs_b_offset[0] = cs_b * 2;
     cs_b_offset[1] = cs_b_offset[0] + cs_b;//cs_b_offset[1] = cs_b * 3;
@@ -4919,7 +4977,7 @@ static  err_t bli_dtrsm_small_XAuB(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -5094,7 +5152,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm10);      //store(B11[0-3][2])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0] + D_NR), ymm14);//store(B11[4-7][2])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -5225,7 +5283,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm9);             //store(B11[0-3][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b + D_NR), ymm13);     //store(B11[4-7][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -5508,7 +5566,7 @@ static  err_t bli_dtrsm_small_XAuB(
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -5637,7 +5695,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -5738,7 +5796,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -5825,12 +5883,16 @@ static  err_t bli_dtrsm_small_XAuB(
 
             k_iter = j / D_NR;          //number of time GEMM to be performed(in blocks of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b_offset[1])[iter];
-
+            if((j+D_NR) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b * 3)[iter];
+            }
+            else
+                f_temp = (b11 + cs_b * 3);
             ///GEMM for previous blocks ///
 
             ///load 4x4 block of b11
@@ -5994,24 +6056,28 @@ static  err_t bli_dtrsm_small_XAuB(
             ymm4 = _mm256_loadu_pd((double const *)(b11));
             ymm5 = _mm256_loadu_pd((double const *)(b11 + cs_b));
             ymm6 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[0]));
+            ymm7 = _mm256_loadu_pd((double const *)f_temp);
 
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0, ymm4, 0x08);
                 ymm1 = _mm256_blend_pd(ymm1, ymm5, 0x08);
                 ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
+                ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm0,ymm4,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm1,ymm5,0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm2,ymm6,0x30);
+                ymm3 = _mm256_permute2f128_pd(ymm3,ymm7,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0,ymm4,0x0E);
                 ymm1 = _mm256_blend_pd(ymm1,ymm5,0x0E);
                 ymm2 = _mm256_blend_pd(ymm2,ymm6,0x0E);
+                ymm3 = _mm256_blend_pd(ymm3,ymm7,0x0E);
             }
 
             _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
@@ -6019,8 +6085,11 @@ static  err_t bli_dtrsm_small_XAuB(
             _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             _mm256_storeu_pd((double *)(f_temp), ymm3);   //store(B11[x][3])
 
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            if((j+D_NR) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b * 3)[iter] = f_temp[iter];
+            }
         }
         if(n_remainder)     //implementation for remainder columns(when 'N' is not a multiple of D_NR)
         {
@@ -6031,12 +6100,16 @@ static  err_t bli_dtrsm_small_XAuB(
 
             k_iter = j / D_NR;      //number of GEMM operations to be performed(in block of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
-
+            if((j+n_remainder) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            }
+            else
+                f_temp = (b11 + cs_b * (n_remainder-1));
             ///GEMM for previous blocks ///
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
@@ -6044,7 +6117,7 @@ static  err_t bli_dtrsm_small_XAuB(
             ymm7 = _mm256_setzero_pd();
 
             ///load 4x4 block of b11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -6116,19 +6189,19 @@ static  err_t bli_dtrsm_small_XAuB(
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ymm6 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);
 
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                     ymm2 = _mm256_blend_pd(ymm6, ymm2, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                     ymm2 = _mm256_permute2f128_pd(ymm6,ymm2,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -6138,7 +6211,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)f_temp, ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(f_temp));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -6200,17 +6273,17 @@ static  err_t bli_dtrsm_small_XAuB(
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2  == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -6218,7 +6291,7 @@ static  err_t bli_dtrsm_small_XAuB(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(f_temp), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)f_temp);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -6270,23 +6343,25 @@ static  err_t bli_dtrsm_small_XAuB(
 
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 }
                 _mm256_storeu_pd((double *)f_temp, ymm0);                      //store(B11[x][0])
             }
-
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            if((j+n_remainder) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            }
             //scalar code for TRSM
                 dtrsm_small_XAuB(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
         }
@@ -6327,8 +6402,10 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -6356,6 +6433,9 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
+
+    double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+    double* f_temp;
 
     cs_b_offset[0] = cs_b << 1;            //cs_b_offset[0] = cs_b * 2;
     cs_b_offset[1] = cs_b_offset[0] + cs_b;//cs_b_offset[1] = cs_b * 3;
@@ -6578,7 +6658,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -6712,7 +6792,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm10);      //store(B11[0-3][2])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0] + D_NR), ymm14);//store(B11[4-7][2])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -6817,7 +6897,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm9);             //store(B11[0-3][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b + D_NR), ymm13);     //store(B11[4-7][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -7044,7 +7124,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -7145,7 +7225,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -7224,7 +7304,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -7293,12 +7373,16 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
             k_iter = j / D_NR;          //number of time GEMM to be performed(in blocks of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b_offset[1])[iter];
-
+            if((j+D_NR) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b_offset[1])[iter];
+            }
+            else
+                f_temp = (b11 + cs_b_offset[1]);
             ///GEMM for previous blocks ///
 
             ///load 4x4 block of b11
@@ -7423,24 +7507,28 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
             ymm4 = _mm256_loadu_pd((double const *)(b11));
             ymm5 = _mm256_loadu_pd((double const *)(b11 + cs_b));
             ymm6 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[0]));
+            ymm7 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[1]));
 
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0, ymm4, 0x08);
                 ymm1 = _mm256_blend_pd(ymm1, ymm5, 0x08);
                 ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
+                ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm0,ymm4,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm1,ymm5,0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm2,ymm6,0x30);
+                ymm3 = _mm256_permute2f128_pd(ymm3,ymm7,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0,ymm4,0x0E);
                 ymm1 = _mm256_blend_pd(ymm1,ymm5,0x0E);
                 ymm2 = _mm256_blend_pd(ymm2,ymm6,0x0E);
+                ymm3 = _mm256_blend_pd(ymm3,ymm7,0x0E);
             }
 
             _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
@@ -7448,8 +7536,11 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
             _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             _mm256_storeu_pd((double *)(f_temp), ymm3);   //store(B11[x][3])
 
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            if((j+D_NR) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            }
         }
         if(n_remainder)     //implementation for remainder columns(when 'N' is not a multiple of D_NR)
         {
@@ -7460,11 +7551,16 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
             k_iter = j / D_NR;      //number of GEMM operations to be performed(in block of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            if((j+n_remainder) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            }
+            else
+                f_temp = (b11 + cs_b * (n_remainder-1));
 
             ///GEMM for previous blocks ///
             ymm4 = _mm256_setzero_pd();
@@ -7473,7 +7569,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
             ymm7 = _mm256_setzero_pd();
 
             ///load 4x4 block of b11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(b11 + cs_b));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -7545,19 +7641,19 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ymm6 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);
 
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                     ymm2 = _mm256_blend_pd(ymm6, ymm2, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                     ymm2 = _mm256_permute2f128_pd(ymm6,ymm2,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -7567,7 +7663,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)f_temp, ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            if(2 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm1 = _mm256_loadu_pd((double const *)(f_temp));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -7629,17 +7725,17 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -7647,7 +7743,7 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(f_temp), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            if(1 == n_remainder)
             {
                 ymm0 = _mm256_loadu_pd((double const *)f_temp);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -7699,23 +7795,26 @@ static  err_t bli_dtrsm_small_XAuB_unitDiag(
 
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 }
                 _mm256_storeu_pd((double *)f_temp, ymm0);                      //store(B11[x][0])
             }
 
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            if((j+n_remainder) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            }
             //scalar code for TRSM
                 dtrsm_small_XAuB_unitDiag(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
         }
@@ -7757,8 +7856,10 @@ static  err_t bli_dtrsm_small_XAltB(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -7786,6 +7887,9 @@ static  err_t bli_dtrsm_small_XAltB(
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
+
+    double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+    double* f_temp;
 
     cs_b_offset[0] = cs_b << 1;            //cs_b_offset[0] = cs_b * 2;
     cs_b_offset[1] = cs_b_offset[0] + cs_b;//cs_b_offset[1] = cs_b * 3;
@@ -8054,7 +8158,7 @@ static  err_t bli_dtrsm_small_XAltB(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -8233,7 +8337,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm10);      //store(B11[0-3][2])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0] + D_NR), ymm14);//store(B11[4-7][2])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -8364,7 +8468,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm9);             //store(B11[0-3][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b + D_NR), ymm13);     //store(B11[4-7][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -8645,7 +8749,7 @@ static  err_t bli_dtrsm_small_XAltB(
             ymm7 = _mm256_setzero_pd();
 
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -8782,7 +8886,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -8887,7 +8991,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -8973,11 +9077,16 @@ static  err_t bli_dtrsm_small_XAltB(
 
             k_iter = j / D_NR;          //number of time GEMM to be performed(in blocks of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b_offset[1])[iter];
+            if((j+D_NR) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b_offset[1])[iter];
+            }
+            else
+                f_temp = (b11 + cs_b_offset[1]);
 
             ///GEMM for previous blocks ///
 
@@ -9144,24 +9253,28 @@ static  err_t bli_dtrsm_small_XAltB(
             ymm4 = _mm256_loadu_pd((double const *)(b11));
             ymm5 = _mm256_loadu_pd((double const *)(b11 + cs_b));
             ymm6 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[0]));
+            ymm7 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[1]));
 
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0, ymm4, 0x08);
                 ymm1 = _mm256_blend_pd(ymm1, ymm5, 0x08);
                 ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
+                ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm0,ymm4,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm1,ymm5,0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm2,ymm6,0x30);
+                ymm3 = _mm256_permute2f128_pd(ymm3,ymm7,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0,ymm4,0x0E);
                 ymm1 = _mm256_blend_pd(ymm1,ymm5,0x0E);
                 ymm2 = _mm256_blend_pd(ymm2,ymm6,0x0E);
+                ymm3 = _mm256_blend_pd(ymm3,ymm7,0x0E);
             }
 
             _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
@@ -9169,8 +9282,11 @@ static  err_t bli_dtrsm_small_XAltB(
             _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             _mm256_storeu_pd((double *)(f_temp), ymm3);   //store(B11[x][3])
 
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            if((j+D_NR) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            }
         }
         if(n_remainder)     //implementation for remainder columns(when 'N' is not a multiple of D_NR)
         {
@@ -9181,11 +9297,16 @@ static  err_t bli_dtrsm_small_XAltB(
 
             k_iter = j / D_NR;      //number of GEMM operations to be performed(in block of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            if((j+n_remainder) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            }
+            else
+                f_temp = (b11 + cs_b * (n_remainder-1));
 
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
@@ -9193,7 +9314,7 @@ static  err_t bli_dtrsm_small_XAltB(
             ymm7 = _mm256_setzero_pd();
             ///GEMM for previous blocks ///
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -9266,19 +9387,19 @@ static  err_t bli_dtrsm_small_XAltB(
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ymm6 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                     ymm2 = _mm256_blend_pd(ymm6, ymm2, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                     ymm2 = _mm256_permute2f128_pd(ymm6,ymm2,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -9288,7 +9409,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(f_temp), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -9354,17 +9475,17 @@ static  err_t bli_dtrsm_small_XAltB(
             ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
             ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
             ///implement TRSM///
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                    ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -9372,7 +9493,7 @@ static  err_t bli_dtrsm_small_XAltB(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(f_temp), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
             ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)(f_temp));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -9426,22 +9547,26 @@ static  err_t bli_dtrsm_small_XAltB(
 
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 }
                 _mm256_storeu_pd((double *)f_temp, ymm0);                      //store(B11[x][0])
             }
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+
+            if((j+n_remainder) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            }
             //scalar code for TRSM
                dtrsm_small_XAltB(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
         }
@@ -9482,8 +9607,10 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -9509,6 +9636,9 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
+
+    double f_t[4] __attribute__((aligned(64)));//buffer to store corner column when m_remainder !=0
+    double* f_temp;
 
     cs_b_offset[0] = cs_b << 1;            //cs_b_offset[0] = cs_b * 2;
     cs_b_offset[1] = cs_b_offset[0] + cs_b;//cs_b_offset[1] = cs_b * 3;
@@ -9729,7 +9859,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -9868,7 +9998,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm10);      //store(B11[0-3][2])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0] + D_NR), ymm14);//store(B11[4-7][2])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -9972,7 +10102,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm9);             //store(B11[0-3][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b + D_NR), ymm13);     //store(B11[4-7][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -10199,7 +10329,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             ymm7 = _mm256_setzero_pd();
 
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -10301,7 +10431,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -10380,7 +10510,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                ///GEMM for previous blocks ///
                 ///load 4x4 block of b11
@@ -10453,12 +10583,16 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
             k_iter = j / D_NR;          //number of time GEMM to be performed(in blocks of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b_offset[1])[iter];
-
+            if((j+D_NR) == n)
+            {
+                f_temp = f_t;
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b_offset[1])[iter];
+            }
+            else
+                f_temp = (b11 + cs_b_offset[1]);
             ///GEMM for previous blocks ///
 
             ///load 4x4 block of b11
@@ -10585,24 +10719,28 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             ymm4 = _mm256_loadu_pd((double const *)(b11));
             ymm5 = _mm256_loadu_pd((double const *)(b11 + cs_b));
             ymm6 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[0]));
+            ymm7 = _mm256_loadu_pd((double const *)(b11 + cs_b_offset[1]));
 
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0, ymm4, 0x08);
                 ymm1 = _mm256_blend_pd(ymm1, ymm5, 0x08);
                 ymm2 = _mm256_blend_pd(ymm2, ymm6, 0x08);
+                ymm3 = _mm256_blend_pd(ymm3, ymm7, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm0,ymm4,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm1,ymm5,0x30);
                 ymm2 = _mm256_permute2f128_pd(ymm2,ymm6,0x30);
+                ymm3 = _mm256_permute2f128_pd(ymm3,ymm7,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm0,ymm4,0x0E);
                 ymm1 = _mm256_blend_pd(ymm1,ymm5,0x0E);
                 ymm2 = _mm256_blend_pd(ymm2,ymm6,0x0E);
+                ymm3 = _mm256_blend_pd(ymm3,ymm7,0x0E);
             }
 
             _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
@@ -10610,8 +10748,11 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
             _mm256_storeu_pd((double *)(f_temp), ymm3);   //store(B11[x][3])
 
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            if((j+D_NR) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b_offset[1])[iter] = f_temp[iter];
+            }
         }
         if(n_remainder)     //implementation for remainder columns(when 'N' is not a multiple of D_NR)
         {
@@ -10622,11 +10763,16 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
             k_iter = j / D_NR;      //number of GEMM operations to be performed(in block of 4x4)
 
-            double f_temp[4];
-            int iter;
+            dim_t iter;
 
-            for(iter = 0; iter < m_remainder; iter++)
-                f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            if((j+n_remainder) == n)
+            {
+                f_temp = bli_malloc_user(4 * sizeof(double));
+                for(iter = 0; iter < m_remainder; iter++)
+                    f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
+            }
+            else
+                f_temp = (b11 + cs_b * (n_remainder-1));
 
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
@@ -10634,7 +10780,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             ymm7 = _mm256_setzero_pd();
             ///GEMM for previous blocks ///
 
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)b11);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -10707,19 +10853,19 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
                 ymm6 = _mm256_fmsub_pd(ymm2, ymm15, ymm6);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                     ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
                     ymm2 = _mm256_blend_pd(ymm6, ymm2, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                     ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
                     ymm2 = _mm256_permute2f128_pd(ymm6,ymm2,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                     ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -10729,7 +10875,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b), ymm1);             //store(B11[x][1])
                 _mm256_storeu_pd((double *)(f_temp), ymm2);   //(store(B11[x][2]))
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)b11);            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -10795,17 +10941,17 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
             ymm5 = _mm256_fmsub_pd(ymm1, ymm15, ymm5);
             ///implement TRSM///
-            if(m_remainder == 3)
+            if(3 == m_remainder)
             {
                 ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 ymm1 = _mm256_blend_pd(ymm5, ymm1, 0x08);
             }
-            if(m_remainder == 2)
+            else if(2 == m_remainder)
             {
                 ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 ymm1 = _mm256_permute2f128_pd(ymm5,ymm1,0x30);
             }
-            if(m_remainder == 1)
+            else if(1 == m_remainder)
             {
                    ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 ymm1 = _mm256_blend_pd(ymm5,ymm1,0x0E);
@@ -10813,7 +10959,7 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
                 _mm256_storeu_pd((double *)b11, ymm0);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(f_temp), ymm1);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
             ///load 4x4 block of b11
                 ymm0 = _mm256_loadu_pd((double const *)(f_temp));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -10867,22 +11013,26 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
 
                 ymm4 = _mm256_fmsub_pd(ymm0, ymm15, ymm4);
                 ///implement TRSM///
-                if(m_remainder == 3)
+                if(3 == m_remainder)
                 {
                     ymm0 = _mm256_blend_pd(ymm4, ymm0, 0x08);
                 }
-                if(m_remainder == 2)
+                else if(2 == m_remainder)
                 {
                     ymm0 = _mm256_permute2f128_pd(ymm4,ymm0,0x30);
                 }
-                if(m_remainder == 1)
+                else if(1 == m_remainder)
                 {
                        ymm0 = _mm256_blend_pd(ymm4,ymm0,0x0E);
                 }
                 _mm256_storeu_pd((double *)f_temp, ymm0);                      //store(B11[x][0])
             }
-            for(iter = 0; iter < m_remainder; iter++)
-                (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+
+            if((j+n_remainder) == n)
+            {
+                for(iter = 0; iter < m_remainder; iter++)
+                    (b11 + cs_b * (n_remainder-1))[iter] = f_temp[iter];
+            }
             //scalar code for TRSM
                dtrsm_small_XAltB_unitDiag(a11, b11, m_remainder, n_remainder, cs_a, cs_b);
         }
@@ -10923,8 +11073,10 @@ static  err_t bli_dtrsm_small_XAlB(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -10948,8 +11100,8 @@ static  err_t bli_dtrsm_small_XAlB(
     double ones = 1.0;
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double *L = a->buffer;      //pointer to matrix A
-    double *B = b->buffer;      //pointer to matrix B
+    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict B = b->buffer;      //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
@@ -11224,7 +11376,7 @@ static  err_t bli_dtrsm_small_XAlB(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -11400,7 +11552,7 @@ static  err_t bli_dtrsm_small_XAlB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                          //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);                //store(B11[4-7][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -11534,7 +11686,7 @@ static  err_t bli_dtrsm_small_XAlB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                      //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);            //store(B11[4-7][0])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -11820,7 +11972,7 @@ static  err_t bli_dtrsm_small_XAlB(
             ymm7 = _mm256_setzero_pd();
 
            ///GEMM for previous blocks ///
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm0 = _mm256_broadcast_sd((double const *)&ones);              //B11[0][3] B11[1][3] B11[2][3] B11[3][3]
@@ -11952,7 +12104,7 @@ static  err_t bli_dtrsm_small_XAlB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
                 _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm3);                      //store(B11[x][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -12054,7 +12206,7 @@ static  err_t bli_dtrsm_small_XAlB(
                 _mm256_storeu_pd((double *)(b11+ cs_b * 2), ymm2);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b * 3), ymm3);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -12170,8 +12322,10 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -12193,8 +12347,8 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
     dim_t cs_b_offset[2]; //pre-calculated strides
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double *L = a->buffer;      //pointer to matrix A
-    double *B = b->buffer;      //pointer to matrix B
+    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict B = b->buffer;      //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
@@ -12420,7 +12574,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
 
             //subtract the calculated GEMM block from current TRSM block
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -12554,7 +12708,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                          //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);                //store(B11[4-7][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -12658,7 +12812,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                      //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);            //store(B11[4-7][0])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation begins///
 
@@ -12887,7 +13041,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
             ymm7 = _mm256_setzero_pd();
 
            ///GEMM for previous blocks ///
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///load 4x4 block of b11
                 ymm1 = _mm256_loadu_pd((double const *)b11+ cs_b);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
@@ -12984,7 +13138,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
                 _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm3);                      //store(B11[x][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -13062,7 +13216,7 @@ static  err_t bli_dtrsm_small_XAlB_unitDiag(
                 _mm256_storeu_pd((double *)(b11+ cs_b * 2), ymm2);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b * 3), ymm3);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -13163,8 +13317,10 @@ static  err_t bli_dtrsm_small_XAutB(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -13187,8 +13343,8 @@ static  err_t bli_dtrsm_small_XAutB(
     double ones = 1.0;
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double *L = a->buffer;      //pointer to matrix A
-    double *B = b->buffer;      //pointer to matrix B
+    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict B = b->buffer;      //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
@@ -13462,7 +13618,7 @@ static  err_t bli_dtrsm_small_XAutB(
             ymm7 = _mm256_setzero_pd();
 
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -13642,7 +13798,7 @@ static  err_t bli_dtrsm_small_XAutB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                          //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);                //store(B11[4-7][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -13779,7 +13935,7 @@ static  err_t bli_dtrsm_small_XAutB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                      //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);            //store(B11[4-7][0])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -14073,7 +14229,7 @@ static  err_t bli_dtrsm_small_XAutB(
             ymm7 = _mm256_setzero_pd();
 
             ///load 4x4 block of b11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm1 = _mm256_loadu_pd((double const *)b11+ cs_b);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -14209,7 +14365,7 @@ static  err_t bli_dtrsm_small_XAutB(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
                 _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm3);                      //store(B11[x][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -14316,7 +14472,7 @@ static  err_t bli_dtrsm_small_XAutB(
                 _mm256_storeu_pd((double *)(b11+ cs_b * 2), ymm2);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b * 3), ymm3);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -14430,8 +14586,10 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
 
     dim_t m = bli_obj_length(b);  //number of rows
     dim_t n = bli_obj_width(b);   //number of columns
-    dim_t m_remainder = m % D_MR; //number of corner rows
-    dim_t n_remainder = n % D_NR; //number of corner columns
+
+    dim_t m_remainder = m & 7; //number of corner rows
+    dim_t n_remainder = n & 3; //number of corner columns
+
     dim_t cs_a = bli_obj_col_stride(a); //column stride of matrix A
     dim_t cs_b = bli_obj_col_stride(b); //column stride of matrix B
 
@@ -14452,8 +14610,8 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
     dim_t cs_b_offset[2]; //pre-calculated strides
 
     double AlphaVal = *(double *)AlphaObj->buffer;    //value of Alpha
-    double *L = a->buffer;      //pointer to matrix A
-    double *B = b->buffer;      //pointer to matrix B
+    double* restrict L = a->buffer;      //pointer to matrix A
+    double* restrict B = b->buffer;      //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
     double *ptr_a01_dup;
@@ -14681,7 +14839,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
             ymm7 = _mm256_setzero_pd();
 
             //load 8x4 block of B11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -14818,7 +14976,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                          //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);                //store(B11[4-7][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -14925,7 +15083,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1]), ymm11);                      //store(B11[0-3][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[1] + D_NR), ymm15);            //store(B11[4-7][0])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ///GEMM implementation starts///
 
@@ -15160,7 +15318,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
             ymm7 = _mm256_setzero_pd();
 
             ///load 4x4 block of b11
-            if(n_remainder == 3)
+            if(3 == n_remainder)
             {
                 ymm1 = _mm256_loadu_pd((double const *)b11+ cs_b);                    //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));           //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -15259,7 +15417,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
                 _mm256_storeu_pd((double *)(b11 + cs_b_offset[0]), ymm2);   //(store(B11[x][2]))
                 _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm3);                      //store(B11[x][0])
             }
-            if(n_remainder == 2)
+            else if(2 == n_remainder)
             {
                 ymm2 = _mm256_loadu_pd((double const *)(b11 + cs_b * 2));            //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
@@ -15338,7 +15496,7 @@ static  err_t bli_dtrsm_small_XAutB_unitDiag(
                 _mm256_storeu_pd((double *)(b11+ cs_b * 2), ymm2);                      //store(B11[x][0])
                 _mm256_storeu_pd((double *)(b11 + cs_b * 3), ymm3);             //store(B11[x][1])
             }
-            if(n_remainder == 1)
+            else if(1 == n_remainder)
             {
                 ymm3 = _mm256_loadu_pd((double const *)(b11 + cs_b * 3));        //B11[0][0] B11[1][0] B11[2][0] B11[3][0]
 
@@ -15436,8 +15594,8 @@ static err_t bli_strsm_small_AlXB (
   int isUnitDiag = bli_obj_has_unit_diag(a);
 
   float alphaVal;
-  float *L =  a->buffer;
-  float *B =  b->buffer;
+  float* restrict L =  a->buffer;
+  float* restrict B =  b->buffer;
 
   if (m != BLI_AlXB_M_SP || (n&7) != 0)
   {
@@ -18097,271 +18255,6 @@ static void blis_strsm_microkernel(float *ptr_l, float *ptr_b, int numRows_lb, i
     _mm256_storeu_ps((float *)(ptr_b_dup + cs_b_offset[4]), mat_a_cols[6]);
     _mm256_storeu_ps((float *)(ptr_b_dup + cs_b_offset[5]), mat_a_cols[7]);
     //end loop of cols
-}
-static void blis_dtrsm_microkernel_alpha(double *ptr_l,
-                     double *ptr_b,
-                     int m,
-                     int n,
-                     int rs_l,
-                     int rs_b,
-                     int cs_l,
-                     int cs_b,
-                     double alphaVal
-                    )
-{
-    int j;
-    int n_remainder = n%4;
-    int cs_b_offset[2];
-    double *ptr_b_dup;
-    double ones = 1.0;
-    __m256d mat_b_col[4];
-    __m256d mat_b_rearr[4];
-    __m256d mat_a_cols[4];
-    __m256d mat_a_cols_rearr[10];
-    __m256d mat_a_diag_inv[4];
-    __m256d reciprocal_diags;
-    __m256d alphaReg;
-
-    cs_b_offset[0] = (cs_b << 1);
-    cs_b_offset[1] = cs_b + cs_b_offset[0];
-
-    reciprocal_diags = _mm256_broadcast_sd((double const *)&ones);
-    alphaReg = _mm256_broadcast_sd((double const *)&alphaVal);
-
-    //if(m % 4 == 0)
-    //{
-    //1st col
-    mat_a_cols_rearr[0] = _mm256_broadcast_sd((double const *)(ptr_l+0));
-    mat_a_cols_rearr[1] = _mm256_broadcast_sd((double const *)(ptr_l+1));
-    mat_a_cols_rearr[3] = _mm256_broadcast_sd((double const *)(ptr_l+2));
-    mat_a_cols_rearr[6] = _mm256_broadcast_sd((double const *)(ptr_l+3));
-
-    //2nd col
-    ptr_l += cs_l;
-    mat_a_cols_rearr[2] = _mm256_broadcast_sd((double const *)(ptr_l + 1));
-    mat_a_cols_rearr[4] = _mm256_broadcast_sd((double const *)(ptr_l + 2));
-    mat_a_cols_rearr[7] = _mm256_broadcast_sd((double const *)(ptr_l + 3));
-
-    //3rd col
-    ptr_l += cs_l;
-    mat_a_cols_rearr[5] = _mm256_broadcast_sd((double const *)(ptr_l + 2));
-    mat_a_cols_rearr[8] = _mm256_broadcast_sd((double const *)(ptr_l + 3));
-
-    //4th col
-    ptr_l += cs_l;
-    mat_a_cols_rearr[9] = _mm256_broadcast_sd((double const *)(ptr_l + 3));
-    //compute reciprocals of L(i,i) and broadcast in registers
-    mat_a_diag_inv[0] = _mm256_unpacklo_pd(mat_a_cols_rearr[0], mat_a_cols_rearr[2]);
-    mat_a_diag_inv[1] = _mm256_unpacklo_pd(mat_a_cols_rearr[5], mat_a_cols_rearr[9]);
-
-    mat_a_diag_inv[0] = _mm256_blend_pd(mat_a_diag_inv[0], mat_a_diag_inv[1], 0x0C);
-    reciprocal_diags = _mm256_div_pd(reciprocal_diags, mat_a_diag_inv[0]);
-
-    for(j = 0;(j+3) < n; j += 4)
-    {
-        ptr_b_dup = ptr_b;
-        /*Shuffle to rearrange/transpose 8x4 block of B into contiguous row-wise registers*/
-
-    //read first set of 4x4 block of B into registers
-    mat_b_col[0] = _mm256_loadu_pd((double const *)ptr_b);
-    mat_b_col[1] = _mm256_loadu_pd((double const *)(ptr_b + (cs_b)));
-    //_mm_prefetch((char*)(ptr_l + cs_l), _MM_HINT_T0);
-    mat_b_col[2] = _mm256_loadu_pd((double const *)(ptr_b + cs_b_offset[0]));
-    //_mm_prefetch((char*)(ptr_l + row2), _MM_HINT_T0);
-    mat_b_col[3] = _mm256_loadu_pd((double const *)(ptr_b + cs_b_offset[1]));
-
-        ////unpacklow////
-        mat_b_rearr[1] = _mm256_unpacklo_pd(mat_b_col[0], mat_b_col[1]);
-        mat_b_rearr[3] = _mm256_unpacklo_pd(mat_b_col[2], mat_b_col[3]);
-
-        //rearrange low elements
-        mat_b_rearr[0] = _mm256_permute2f128_pd(mat_b_rearr[1],mat_b_rearr[3],0x20);
-        mat_b_rearr[2] = _mm256_permute2f128_pd(mat_b_rearr[1],mat_b_rearr[3],0x31);
-
-        mat_b_rearr[0] = _mm256_mul_pd(mat_b_rearr[0], alphaReg);
-        mat_b_rearr[2] = _mm256_mul_pd(mat_b_rearr[2], alphaReg);
-
-        ////unpackhigh////
-        mat_b_col[0] = _mm256_unpackhi_pd(mat_b_col[0], mat_b_col[1]);
-        mat_b_col[1] = _mm256_unpackhi_pd(mat_b_col[2], mat_b_col[3]);
-
-        //rearrange high elements
-        mat_b_rearr[1] = _mm256_permute2f128_pd(mat_b_col[0],mat_b_col[1],0x20);
-        mat_b_rearr[3] = _mm256_permute2f128_pd(mat_b_col[0],mat_b_col[1],0x31);
-
-        mat_b_rearr[1] = _mm256_mul_pd(mat_b_rearr[1], alphaReg);
-        mat_b_rearr[3] = _mm256_mul_pd(mat_b_rearr[3], alphaReg);
-        //extract a00
-        mat_a_diag_inv[0] = _mm256_permute_pd(reciprocal_diags, 0x00);
-        mat_a_diag_inv[0] = _mm256_permute2f128_pd(mat_a_diag_inv[0], mat_a_diag_inv[0], 0x00);
-
-        //(Row0): Perform mul operation of reciprocal of L(0,0) element with 1st row elements of B
-        mat_b_rearr[0] = _mm256_mul_pd(mat_b_rearr[0], mat_a_diag_inv[0]);
-
-        //extract diag a11 from a
-        mat_a_diag_inv[1] = _mm256_permute_pd(reciprocal_diags, 0x03);
-        mat_a_diag_inv[1] = _mm256_permute2f128_pd(mat_a_diag_inv[1], mat_a_diag_inv[1], 0x00);
-
-        //(Row1): FMA operations of b1 with elements of indices from (1, 0) uptill (3, 0)
-        mat_b_rearr[1] = _mm256_fnmadd_pd(mat_a_cols_rearr[1], mat_b_rearr[0], mat_b_rearr[1]);//d = c - (a*b)
-        mat_b_rearr[2] = _mm256_fnmadd_pd(mat_a_cols_rearr[3], mat_b_rearr[0], mat_b_rearr[2]);//d = c - (a*b)
-        mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[6], mat_b_rearr[0], mat_b_rearr[3]);//d = c - (a*b)
-
-        //Perform mul operation of reciprocal of L(1,1) element with 2nd row elements of B
-        mat_b_rearr[1] = _mm256_mul_pd(mat_b_rearr[1], mat_a_diag_inv[1]);
-
-
-        //extract diag a22 from a
-        mat_a_diag_inv[2] = _mm256_permute_pd(reciprocal_diags, 0x00);
-        mat_a_diag_inv[2] = _mm256_permute2f128_pd(mat_a_diag_inv[2], mat_a_diag_inv[2], 0x11);
-
-        //(Row2): FMA operations of b2 with elements of indices from (2, 0) uptill (7, 0)
-        mat_b_rearr[2] = _mm256_fnmadd_pd(mat_a_cols_rearr[4], mat_b_rearr[1], mat_b_rearr[2]);//d = c - (a*b)
-        mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[7], mat_b_rearr[1], mat_b_rearr[3]);//d = c - (a*b)
-
-        //Perform mul operation of reciprocal of L(2, 2) element with 3rd row elements of B
-        mat_b_rearr[2] = _mm256_mul_pd(mat_b_rearr[2], mat_a_diag_inv[2]);
-
-        //extract diag a33 from a
-        mat_a_diag_inv[3] = _mm256_permute_pd(reciprocal_diags, 0x0C);
-        mat_a_diag_inv[3] = _mm256_permute2f128_pd(mat_a_diag_inv[3], mat_a_diag_inv[3], 0x11);
-
-        //(Row3): FMA operations of b3 with elements of indices from (3, 0) uptill (7, 0)
-        mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[8], mat_b_rearr[2], mat_b_rearr[3]);//d = c - (a*b)
-
-        //Perform mul operation of reciprocal of L(3, 3) element with 4rth row elements of B
-        mat_b_rearr[3] = _mm256_mul_pd(mat_b_rearr[3], mat_a_diag_inv[3]);
-
-        //--> Transpose and store results of columns of B block <--//
-        ////unpacklow////
-        mat_a_cols[1] = _mm256_unpacklo_pd(mat_b_rearr[0], mat_b_rearr[1]);
-        mat_a_cols[3] = _mm256_unpacklo_pd(mat_b_rearr[2], mat_b_rearr[3]);
-
-        //rearrange low elements
-        mat_a_cols[0] = _mm256_permute2f128_pd(mat_a_cols[1],mat_a_cols[3],0x20);
-        mat_a_cols[2] = _mm256_permute2f128_pd(mat_a_cols[1],mat_a_cols[3],0x31);
-
-         ////unpackhigh////
-        mat_b_rearr[0] = _mm256_unpackhi_pd(mat_b_rearr[0], mat_b_rearr[1]);
-
-        mat_b_rearr[1] = _mm256_unpackhi_pd(mat_b_rearr[2], mat_b_rearr[3]);
-
-        //rearrange high elements
-        mat_a_cols[1] = _mm256_permute2f128_pd(mat_b_rearr[0],mat_b_rearr[1],0x20);
-        mat_a_cols[3] = _mm256_permute2f128_pd(mat_b_rearr[0],mat_b_rearr[1],0x31);
-
-        //Read next set of B columns
-        ptr_b += (cs_b+cs_b_offset[1]);
-        _mm256_storeu_pd((double *)ptr_b_dup, mat_a_cols[0]);
-        _mm256_storeu_pd((double *)(ptr_b_dup + (cs_b)), mat_a_cols[1]);
-        _mm256_storeu_pd((double *)(ptr_b_dup + cs_b_offset[0]), mat_a_cols[2]);
-        _mm256_storeu_pd((double *)(ptr_b_dup + cs_b_offset[1]), mat_a_cols[3]);
-
-      }
-    ptr_b_dup = ptr_b;
-    if(n_remainder == 3)
-    {
-
-        //read first set of 4x4 block of B into registers
-        mat_b_col[0] = _mm256_loadu_pd((double const *)ptr_b);
-        mat_b_col[1] = _mm256_loadu_pd((double const *)(ptr_b + (cs_b)));
-        mat_b_col[2] = _mm256_loadu_pd((double const *)(ptr_b + cs_b_offset[0]));
-    mat_b_col[3] = _mm256_broadcast_sd((double const *)&ones);
-    }
-    if(n_remainder == 2)
-    {
-        //read first set of 4x4 block of B into registers
-        mat_b_col[0] = _mm256_loadu_pd((double const *)ptr_b);
-        mat_b_col[1] = _mm256_loadu_pd((double const *)(ptr_b + (cs_b)));
-        mat_b_col[2] = _mm256_broadcast_sd((double const *)&ones);
-    mat_b_col[3] = _mm256_broadcast_sd((double const *)&ones);
-    }
-    if(n_remainder == 1)
-    {
-        //read first set of 4x4 block of B into registers
-        mat_b_col[0] = _mm256_loadu_pd((double const *)ptr_b);
-        mat_b_col[1] = _mm256_broadcast_sd((double const *)&ones);
-        mat_b_col[2] = _mm256_broadcast_sd((double const *)&ones);
-    mat_b_col[3] = _mm256_broadcast_sd((double const *)&ones);
-    }
-    /*Shuffle to rearrange/transpose 8x4 block of B into contiguous row-wise registers*/
-    ////unpacklow////
-    mat_b_rearr[1] = _mm256_unpacklo_pd(mat_b_col[0], mat_b_col[1]);
-    mat_b_rearr[3] = _mm256_unpacklo_pd(mat_b_col[2], mat_b_col[3]);
-    //rearrange low elements
-    mat_b_rearr[0] = _mm256_permute2f128_pd(mat_b_rearr[1],mat_b_rearr[3],0x20);
-    mat_b_rearr[2] = _mm256_permute2f128_pd(mat_b_rearr[1],mat_b_rearr[3],0x31);
-    mat_b_rearr[0] = _mm256_mul_pd(mat_b_rearr[0], alphaReg);
-    mat_b_rearr[2] = _mm256_mul_pd(mat_b_rearr[2], alphaReg);
-    ////unpackhigh////
-    mat_b_col[0] = _mm256_unpackhi_pd(mat_b_col[0], mat_b_col[1]);
-    mat_b_col[1] = _mm256_unpackhi_pd(mat_b_col[2], mat_b_col[3]);
-    //rearrange high elements
-    mat_b_rearr[1] = _mm256_permute2f128_pd(mat_b_col[0],mat_b_col[1],0x20);
-    mat_b_rearr[3] = _mm256_permute2f128_pd(mat_b_col[0],mat_b_col[1],0x31);
-    mat_b_rearr[1] = _mm256_mul_pd(mat_b_rearr[1], alphaReg);
-    mat_b_rearr[3] = _mm256_mul_pd(mat_b_rearr[3], alphaReg);
-    //extract a00
-    mat_a_diag_inv[0] = _mm256_permute_pd(reciprocal_diags, 0x00);
-    mat_a_diag_inv[0] = _mm256_permute2f128_pd(mat_a_diag_inv[0], mat_a_diag_inv[0], 0x00);
-    //(Row0): Perform mul operation of reciprocal of L(0,0) element with 1st row elements of B
-    mat_b_rearr[0] = _mm256_mul_pd(mat_b_rearr[0], mat_a_diag_inv[0]);
-    //extract diag a11 from a
-    mat_a_diag_inv[1] = _mm256_permute_pd(reciprocal_diags, 0x03);
-    mat_a_diag_inv[1] = _mm256_permute2f128_pd(mat_a_diag_inv[1], mat_a_diag_inv[1], 0x00);
-    //(Row1): FMA operations of b1 with elements of indices from (1, 0) uptill (3, 0)
-    mat_b_rearr[1] = _mm256_fnmadd_pd(mat_a_cols_rearr[1], mat_b_rearr[0], mat_b_rearr[1]);//d = c - (a*b)
-    mat_b_rearr[2] = _mm256_fnmadd_pd(mat_a_cols_rearr[3], mat_b_rearr[0], mat_b_rearr[2]);//d = c - (a*b)
-    mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[6], mat_b_rearr[0], mat_b_rearr[3]);//d = c - (a*b)
-    //Perform mul operation of reciprocal of L(1,1) element with 2nd row elements of B
-    mat_b_rearr[1] = _mm256_mul_pd(mat_b_rearr[1], mat_a_diag_inv[1]);
-    //extract diag a22 from a
-    mat_a_diag_inv[2] = _mm256_permute_pd(reciprocal_diags, 0x00);
-    mat_a_diag_inv[2] = _mm256_permute2f128_pd(mat_a_diag_inv[2], mat_a_diag_inv[2], 0x11);
-    //(Row2): FMA operations of b2 with elements of indices from (2, 0) uptill (7, 0)
-    mat_b_rearr[2] = _mm256_fnmadd_pd(mat_a_cols_rearr[4], mat_b_rearr[1], mat_b_rearr[2]);//d = c - (a*b)
-    mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[7], mat_b_rearr[1], mat_b_rearr[3]);//d = c - (a*b)
-    //Perform mul operation of reciprocal of L(2, 2) element with 3rd row elements of B
-    mat_b_rearr[2] = _mm256_mul_pd(mat_b_rearr[2], mat_a_diag_inv[2]);
-    //extract diag a33 from a
-    mat_a_diag_inv[3] = _mm256_permute_pd(reciprocal_diags, 0x0C);
-    mat_a_diag_inv[3] = _mm256_permute2f128_pd(mat_a_diag_inv[3], mat_a_diag_inv[3], 0x11);
-    //(Row3): FMA operations of b3 with elements of indices from (3, 0) uptill (7, 0)
-    mat_b_rearr[3] = _mm256_fnmadd_pd(mat_a_cols_rearr[8], mat_b_rearr[2], mat_b_rearr[3]);//d = c - (a*b)
-    //Perform mul operation of reciprocal of L(3, 3) element with 4rth row elements of B
-    mat_b_rearr[3] = _mm256_mul_pd(mat_b_rearr[3], mat_a_diag_inv[3]);
-    //--> Transpose and store results of columns of B block <--//
-    ////unpacklow////
-    mat_a_cols[1] = _mm256_unpacklo_pd(mat_b_rearr[0], mat_b_rearr[1]);
-    mat_a_cols[3] = _mm256_unpacklo_pd(mat_b_rearr[2], mat_b_rearr[3]);
-    //rearrange low elements
-    mat_a_cols[0] = _mm256_permute2f128_pd(mat_a_cols[1],mat_a_cols[3],0x20);
-    mat_a_cols[2] = _mm256_permute2f128_pd(mat_a_cols[1],mat_a_cols[3],0x31);
-    ////unpackhigh////
-    mat_b_rearr[0] = _mm256_unpackhi_pd(mat_b_rearr[0], mat_b_rearr[1]);
-    mat_b_rearr[1] = _mm256_unpackhi_pd(mat_b_rearr[2], mat_b_rearr[3]);
-    //rearrange high elements
-    mat_a_cols[1] = _mm256_permute2f128_pd(mat_b_rearr[0],mat_b_rearr[1],0x20);
-    mat_a_cols[3] = _mm256_permute2f128_pd(mat_b_rearr[0],mat_b_rearr[1],0x31);
-     //Store the computed B columns
-    if(n_remainder == 3)
-    {
-    _mm256_storeu_pd((double *)ptr_b_dup, mat_a_cols[0]);
-    _mm256_storeu_pd((double *)(ptr_b_dup + (cs_b)), mat_a_cols[1]);
-    _mm256_storeu_pd((double *)(ptr_b_dup + cs_b_offset[0]), mat_a_cols[2]);
-    }
-    if(n_remainder == 2)
-    {
-    _mm256_storeu_pd((double *)ptr_b_dup, mat_a_cols[0]);
-    _mm256_storeu_pd((double *)(ptr_b_dup + (cs_b)), mat_a_cols[1]);
-    }
-    if(n_remainder == 1)
-    {
-    _mm256_storeu_pd((double *)ptr_b_dup, mat_a_cols[0]);
-    }
-
-  //}
-
 }
 
 #if OPT_CACHE_BLOCKING_L1 //new intrinsic kernels
