@@ -66,6 +66,7 @@ void bli_thread_finalize( void );
 
 // Thread range-related prototypes.
 
+BLIS_EXPORT_BLIS
 void bli_thread_range_sub
      (
        thrinfo_t* thread,
