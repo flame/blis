@@ -386,7 +386,11 @@ endif
 BASE_LIB_PATH      := $(LIB_PATH)
 
 # The base name of the BLIS library that we will build.
+ifeq ($(THREADING_MODEL),off)
 LIBBLIS            := libblis
+else
+LIBBLIS            := libblis-mt
+endif
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
