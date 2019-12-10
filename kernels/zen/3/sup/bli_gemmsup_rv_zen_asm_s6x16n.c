@@ -102,6 +102,52 @@ void bli_sgemmsup_rv_zen_asm_6x16n
 		float* restrict cij = c;
 		float* restrict bj  = b;
 		float* restrict ai  = a;
+		
+		// We add special handling for slightly inflated MR blocksizes
+		// at edge cases, up to a maximum of 9.
+		if ( 6 < m0 )
+		{
+			sgemmsup_ker_ft ker_fp1 = NULL;
+			sgemmsup_ker_ft ker_fp2 = NULL;
+			dim_t           mr1, mr2;
+
+			if ( m0 == 7 )
+			{
+				mr1 = 4; mr2 = 3;
+				ker_fp1 = bli_sgemmsup_rv_zen_asm_4x16n;
+				ker_fp2 = bli_sgemmsup_rv_zen_asm_3x16n;
+			}
+			else if ( m0 == 8 )
+			{
+				mr1 = 4; mr2 = 4;
+				ker_fp1 = bli_sgemmsup_rv_zen_asm_4x16n;
+				ker_fp2 = bli_sgemmsup_rv_zen_asm_4x16n;
+			}
+			else // if ( m0 == 9 )
+			{
+				mr1 = 4; mr2 = 5;
+				ker_fp1 = bli_sgemmsup_rv_zen_asm_4x16n;
+				ker_fp2 = bli_sgemmsup_rv_zen_asm_5x16n;
+			}
+
+			ker_fp1
+			(
+			  conja, conjb, mr1, n0, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += mr1*rs_c0; ai += mr1*rs_a0;
+
+			ker_fp2
+			(
+			  conja, conjb, mr2, n0, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+
+			return;
+		}		
+		
 		sgemmsup_ker_ft ker_fps[6] = 
 		{
 			NULL,
