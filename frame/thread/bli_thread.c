@@ -39,8 +39,12 @@ thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
 thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
 thrcomm_t BLIS_SINGLE_COMM           = {};
 
-// The global rntm_t structure, which holds the global thread settings.
-static rntm_t global_rntm;
+// The global rntm_t structure. (The definition resides in bli_rntm.c.)
+extern rntm_t global_rntm;
+
+// A mutex to allow synchronous access to global_rntm. (The definition
+// resides in bli_rntm.c.)
+extern bli_pthread_mutex_t global_rntm_mutex;
 
 // -----------------------------------------------------------------------------
 
@@ -1188,63 +1192,6 @@ dim_t bli_ipow( dim_t base, dim_t power )
 
     return p;
 }
-// -----------------------------------------------------------------------------
-
-dim_t bli_thread_get_env( const char* env, dim_t fallback )
-{
-	dim_t r_val;
-	char* str;
-
-	// Query the environment variable and store the result in str.
-	str = getenv( env );
-
-	// Set the return value based on the string obtained from getenv().
-	if ( str != NULL )
-	{
-		// If there was no error, convert the string to an integer and
-		// prepare to return that integer.
-		r_val = strtol( str, NULL, 10 );
-	}
-	else
-	{
-		// If there was an error, use the "fallback" as the return value.
-		r_val = fallback;
-	}
-
-	return r_val;
-}
-
-#if 0
-void bli_thread_set_env( const char* env, dim_t value )
-{
-	dim_t       r_val;
-	char        value_str[32];
-	const char* fs_32 = "%u";
-	const char* fs_64 = "%lu";
-
-	// Convert the string to an integer, but vary the format specifier
-	// depending on the integer type size.
-	if ( bli_info_get_int_type_size() == 32 ) sprintf( value_str, fs_32, value );
-	else                                      sprintf( value_str, fs_64, value );
-
-	// Set the environment variable using the string we just wrote to via
-	// sprintf(). (The 'TRUE' argument means we want to overwrite the current
-	// value if the environment variable already exists.)
-	r_val = bli_setenv( env, value_str, TRUE );
-
-	// Check the return value in case something went horribly wrong.
-	if ( r_val == -1 )
-	{
-		char err_str[128];
-
-		// Query the human-readable error string corresponding to errno.
-		strerror_r( errno, err_str, 128 );
-
-		// Print the error message.
-		bli_print_msg( err_str, __FILE__, __LINE__ );
-	}
-}
-#endif
 
 // -----------------------------------------------------------------------------
 
@@ -1298,9 +1245,6 @@ dim_t bli_thread_get_num_threads( void )
 
 // ----------------------------------------------------------------------------
 
-// A mutex to allow synchronous access to global_rntm.
-static bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
-
 void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 {
 	// We must ensure that global_rntm has been initialized.
@@ -1331,22 +1275,6 @@ void bli_thread_set_num_threads( dim_t n_threads )
 
 // ----------------------------------------------------------------------------
 
-void bli_thread_init_rntm( rntm_t* rntm )
-{
-	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
-
-	// Acquire the mutex protecting global_rntm.
-	bli_pthread_mutex_lock( &global_rntm_mutex );
-
-	*rntm = global_rntm;
-
-	// Release the mutex protecting global_rntm.
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
-}
-
-// ----------------------------------------------------------------------------
-
 void bli_thread_init_rntm_from_env
      (
        rntm_t* rntm
@@ -1362,19 +1290,19 @@ void bli_thread_init_rntm_from_env
 #ifdef BLIS_ENABLE_MULTITHREADING
 
 	// Try to read BLIS_NUM_THREADS first.
-	nt = bli_thread_get_env( "BLIS_NUM_THREADS", -1 );
+	nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
 
 	// If BLIS_NUM_THREADS was not set, try to read OMP_NUM_THREADS.
 	if ( nt == -1 )
-		nt = bli_thread_get_env( "OMP_NUM_THREADS", -1 );
+		nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
 
 	// Read the environment variables for the number of threads (ways
 	// of parallelism) for each individual loop.
-	jc = bli_thread_get_env( "BLIS_JC_NT", -1 );
-	pc = bli_thread_get_env( "BLIS_PC_NT", -1 );
-	ic = bli_thread_get_env( "BLIS_IC_NT", -1 );
-	jr = bli_thread_get_env( "BLIS_JR_NT", -1 );
-	ir = bli_thread_get_env( "BLIS_IR_NT", -1 );
+	jc = bli_env_get_var( "BLIS_JC_NT", -1 );
+	pc = bli_env_get_var( "BLIS_PC_NT", -1 );
+	ic = bli_env_get_var( "BLIS_IC_NT", -1 );
+	jr = bli_env_get_var( "BLIS_JR_NT", -1 );
+	ir = bli_env_get_var( "BLIS_IR_NT", -1 );
 
 	// If any BLIS_*_NT environment variable was set, then we ignore the
 	// value of BLIS_NUM_THREADS or OMP_NUM_THREADS and use the
