@@ -990,7 +990,6 @@ void bli_sgemmsup_rv_zen_asm_4x16
 	
 	label(.SCOLSTORED)
 
-	label(.SCOLSTORED)
 	vunpcklps(ymm6, ymm4, ymm0)    //a0b0a1b1 a4b4a5b5
 	vunpcklps(ymm10, ymm8, ymm1)    //c0d0c1d1 c4d4c5d5
 	vshufps(imm(0x4e), ymm1, ymm0, ymm2) 
