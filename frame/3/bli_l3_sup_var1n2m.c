@@ -38,8 +38,6 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool_t           packa,
-       bool_t           packb,
        conj_t           conja,
        conj_t           conjb,
        dim_t            m,
@@ -52,9 +50,7 @@ typedef void (*FUNCPTR_T)
        void*   restrict c, inc_t rs_c, inc_t cs_c,
        stor3_t          eff_id,
        cntx_t* restrict cntx,
-       rntm_t* restrict rntm,
-       cntl_t* restrict cntl,
-       thrinfo_t* restrict thread
+       rntm_t* restrict rntm
      );
 
 //
@@ -73,9 +69,7 @@ void bli_gemmsup_ref_var1n
        obj_t*  c,
        stor3_t eff_id,
        cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       rntm_t* rntm
      )
 {
 #if 0
@@ -116,10 +110,8 @@ void bli_gemmsup_ref_var1n
 	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
 #else
-	const num_t    dt_exec   = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const num_t    dt_exec   = bli_obj_dt( c );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -182,8 +174,6 @@ void bli_gemmsup_ref_var1n
 		// Invoke the function.
 		f
 		(
-		  packa,
-		  packb,
 		  conja,
 		  conjb,
 		  m,
@@ -196,9 +186,7 @@ void bli_gemmsup_ref_var1n
 		  buf_c, rs_c, cs_c,
 		  eff_id,
 		  cntx,
-		  rntm,
-		  cntl,
-		  thread
+		  rntm
 		);
 	}
 	else
@@ -206,8 +194,6 @@ void bli_gemmsup_ref_var1n
 		// Invoke the function (transposing the operation).
 		f
 		(
-		  packb,
-		  packa,
 		  conjb,             // swap the conj values.
 		  conja,
 		  n,                 // swap the m and n dimensions.
@@ -220,9 +206,7 @@ void bli_gemmsup_ref_var1n
 		  buf_c, cs_c, rs_c, // swap the strides of C.
 		  bli_stor3_trans( eff_id ), // transpose the stor3_t id.
 		  cntx,
-		  rntm,
-		  cntl,
-		  thread
+		  rntm
 		);
 	}
 }
@@ -233,8 +217,6 @@ void bli_gemmsup_ref_var1n
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -247,13 +229,9 @@ void PASTEMAC(ch,varname) \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        stor3_t          stor_id, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       cntl_t* restrict cntl, \
-       thrinfo_t* restrict thread  \
+       rntm_t* restrict rntm  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-\
 	/* If m or n is zero, return immediately. */ \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -273,15 +251,15 @@ void PASTEMAC(ch,varname) \
 		return; \
 	} \
 \
+	const num_t dt  = PASTEMAC(ch,type); \
+\
 	/* This transposition of the stor3_t id value is inherent to variant 1.
 	   The reason: we assume that variant 2 is the "main" variant. The
 	   consequence of this is that we assume that the millikernels that
-	   iterate over m are registered to the "primary" kernel group associated
-	   with the kernel IO preference; similarly, mkernels that iterate over
-	   n are assumed to be registered to the "non-primary" group associated
-	   with the ("non-primary") anti-preference. Note that this pattern holds
-	   regardless of whether the mkernel set has a row or column preference.)
-	   See bli_l3_sup_int.c for a higher-level view of how this choice is made. */ \
+	   iterate over m are registered to the kernel group associated with
+	   the kernel preference. So, regardless of whether the mkernels are
+	   row- or column-preferential, millikernels that iterate over n are
+	   always placed in the slots for the opposite kernel group. */ \
 	stor_id = bli_stor3_trans( stor_id ); \
 \
 	/* Query the context for various blocksizes. */ \
@@ -301,9 +279,7 @@ void PASTEMAC(ch,varname) \
 	else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4; \
 	else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
 \
-	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR.
-	   NOTE: This is unique to variant 1 (ie: not performed in variant 2)
-	   because MC % MR == 0 and NC % NR == 0 is already enforced at runtime. */ \
+	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR. */ \
 	const dim_t NC  = bli_align_dim_to_mult( NC0, MR ); \
 	const dim_t MC  = bli_align_dim_to_mult( MC0, NR ); \
 \
@@ -323,11 +299,7 @@ void PASTEMAC(ch,varname) \
 	const inc_t icstep_b = cs_b * MC; \
 \
 	const inc_t jrstep_c = rs_c * MR; \
-\
-	/*
 	const inc_t jrstep_a = rs_a * MR; \
-	( void )jrstep_a; \
-	*/ \
 \
 	/*
 	const inc_t irstep_c = cs_c * NR; \
@@ -375,45 +347,6 @@ void PASTEMAC(ch,varname) \
 	const dim_t ir_inc  = 1; \
 	*/ \
 \
-	/* Initialize a mem_t entry for A and B. Strictly speaking, this is only
-	   needed for the matrix we will be packing (if any), but we do it
-	   unconditionally to be safe. An alternative way of initializing the
-	   mem_t entries is:
-
-	     bli_mem_clear( &mem_a ); \
-	     bli_mem_clear( &mem_b ); \
-	*/ \
-	mem_t mem_a = BLIS_MEM_INITIALIZER; \
-	mem_t mem_b = BLIS_MEM_INITIALIZER; \
-\
-	/* Prepare the packing destination buffer. If packing is not requested for
-	   matrix B, this function will reduce to a no-op. */ \
-	PASTEMAC(ch,packm_sup_init_mem_a) \
-	( \
-	  packa, \
-	  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix A to a "panel of B". */ \
-	  stor_id, \
-	  NC, KC, MR, /* Note this "panel of B" is NC x KC. */ \
-	  cntx, \
-	  rntm, \
-	  &mem_a, \
-	  thread  \
-	); \
-\
-	/* Prepare the packing destination buffer. If packing is not requested for
-	   matrix B, this function will reduce to a no-op. */ \
-	PASTEMAC(ch,packm_sup_init_mem_b) \
-	( \
-	  packb, \
-	  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix B to a "block of A". */ \
-	  stor_id, \
-	  KC, MC, NR, /* Note this "block of A" is KC x MC. */ \
-	  cntx, \
-	  rntm, \
-	  &mem_b, \
-	  thread  \
-	); \
-\
 	/* Loop over the m dimension (NC rows/columns at a time). */ \
 	for ( dim_t jj = 0; jj < jc_iter; jj += jc_inc ) \
 	{ \
@@ -425,12 +358,11 @@ void PASTEMAC(ch,varname) \
 		dim_t jr_iter = ( nc_cur + MR - 1 ) / MR; \
 		dim_t jr_left =   nc_cur % MR; \
 \
-		/* An optimization: allow the last jr iteration to contain up to MRE
-		   rows of C and A. (If MRE > MR, the mkernel has agreed to handle
+		/* An optimization: allow the last jr iteration to contain up to MRX
+		   rows of C and A. (If MRX > MR, the mkernel has agreed to handle
 		   these cases.) Note that this prevents us from declaring jr_iter and
-		   jr_left as const. NOTE: We forgo this optimization when packing A
-		   since packing an extended edge case is not yet supported. */ \
-		if ( !packa ) \
+		   jr_left as const. */ \
+		if ( 1 ) \
 		if ( MRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= MRE ) \
 		{ \
 			jr_iter--; jr_left += MR; \
@@ -447,39 +379,6 @@ void PASTEMAC(ch,varname) \
 			/* Only apply beta to the first iteration of the pc loop. */ \
 			ctype* restrict beta_use = ( pp == 0 ? beta_cast : one ); \
 \
-			ctype* a_use; \
-			inc_t  rs_a_use, cs_a_use, ps_a_use; \
-\
-			/* Determine the packing buffer and related parameters for matrix
-			   A. (If A will not be packed, then a_use will be set to point to
-			   a and the _a_use strides will be set accordingly.) Then call
-			   the packm sup variant chooser, which will call the appropriate
-			   implementation based on the schema deduced from the stor_id. */ \
-			PASTEMAC(ch,packm_sup_a) \
-			( \
-			  packa, \
-			  stor_id, \
-			  BLIS_NO_TRANSPOSE, \
-			  nc_cur, kc_cur, MR, \
-			  one, \
-			  a_pc,   rs_a,      cs_a, \
-			  &a_use, &rs_a_use, &cs_a_use, \
-			                     &ps_a_use, \
-			  cntx, \
-			  &mem_a, \
-			  thread  \
-			); \
-\
-			/* Alias a_use so that it's clear this is our current block of
-			   matrix B. */ \
-			ctype* restrict a_pc_use = a_use; \
-\
-			/* We don't need to embed the panel stride of A within the auxinfo_t
-			   object because this variant iterates through A in the jr loop,
-			   which occurs here, within the macrokernel, not within the
-			   millikernel. */ \
-			/*bli_auxinfo_set_ps_a( ps_a_use, &aux );*/ \
-\
 			/* Loop over the n dimension (MC rows at a time). */ \
 			for ( dim_t ii = 0; ii < ic_iter; ii += ic_inc ) \
 			{ \
@@ -493,51 +392,13 @@ void PASTEMAC(ch,varname) \
 				const dim_t ir_left =   mc_cur % NR; \
 				*/ \
 \
-				ctype* b_use; \
-				inc_t  rs_b_use, cs_b_use, ps_b_use; \
-\
-				/* Determine the packing buffer and related parameters for matrix
-				   B. (If B will not be packed, then b_use will be set to point to
-				   b and the _b_use strides will be set accordingly.) Then call
-				   the packm sup variant chooser, which will call the appropriate
-				   implementation based on the schema deduced from the stor_id.
-				   NOTE: packing matrix B in this panel-block algorithm corresponds
-				   to packing matrix A in the block-panel algorithm. */ \
-				PASTEMAC(ch,packm_sup_b) \
-				( \
-				  packb, \
-				  stor_id, \
-				  BLIS_NO_TRANSPOSE, \
-				  kc_cur, mc_cur, NR, \
-				  one, \
-				  b_ic,   rs_b,      cs_b, \
-				  &b_use, &rs_b_use, &cs_b_use, \
-				                     &ps_b_use, \
-				  cntx, \
-				  &mem_b, \
-				  thread  \
-				); \
-\
-				/* Alias b_use so that it's clear this is our current block of
-				   matrix B. */ \
-				ctype* restrict b_ic_use = b_use; \
-\
-				/* Embed the panel stride of B within the auxinfo_t object. The
-				   millikernel will query and use this to iterate through
-				   micropanels of B. */ \
-				bli_auxinfo_set_ps_b( ps_b_use, &aux ); \
-\
-\
 				/* Loop over the m dimension (NR columns at a time). */ \
 				for ( dim_t j = 0; j < jr_iter; j += jr_inc ) \
 				{ \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? MR : jr_left ); \
 \
-/*
 					ctype* restrict a_jr = a_pc + j * jrstep_a; \
-*/ \
-					ctype* restrict a_jr = a_pc_use + j * ps_a_use; \
-					ctype* restrict c_jr = c_ic     + j * jrstep_c; \
+					ctype* restrict c_jr = c_ic + j * jrstep_c; \
 \
 					/* Loop over the n dimension (MR rows at a time). */ \
 					{ \
@@ -550,10 +411,10 @@ void PASTEMAC(ch,varname) \
 						  mc_cur, /* Recall: mc_cur partitions the n dimension! */ \
 						  kc_cur, \
 						  alpha_cast, \
-						  a_jr,     rs_a_use, cs_a_use, \
-						  b_ic_use, rs_b_use, cs_b_use, \
+						  a_jr, rs_a, cs_a, \
+						  b_ic, rs_b, cs_b, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						  c_jr, rs_c, cs_c, \
 						  &aux, \
 						  cntx  \
 						); \
@@ -562,22 +423,6 @@ void PASTEMAC(ch,varname) \
 			} \
 		} \
 	} \
-\
-	/* Release any memory that was acquired for packing matrices A and B. */ \
-	PASTEMAC(ch,packm_sup_finalize_mem_a) \
-	( \
-	  packa, \
-	  rntm, \
-	  &mem_a, \
-	  thread  \
-	); \
-	PASTEMAC(ch,packm_sup_finalize_mem_b) \
-	( \
-	  packb, \
-	  rntm, \
-	  &mem_b, \
-	  thread  \
-	); \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "gemmsup_ref_var2: b1", kc_cur, nr_cur, b_jr, rs_b, cs_b, "%4.1f", "" ); \
@@ -605,9 +450,7 @@ void bli_gemmsup_ref_var2m
        obj_t*  c,
        stor3_t eff_id,
        cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       rntm_t* rntm
      )
 {
 #if 0
@@ -649,9 +492,6 @@ void bli_gemmsup_ref_var2m
 
 #else
 	const num_t    dt_exec   = bli_obj_dt( c );
-
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -714,8 +554,6 @@ void bli_gemmsup_ref_var2m
 		// Invoke the function.
 		f
 		(
-		  packa,
-		  packb,
 		  conja,
 		  conjb,
 		  m,
@@ -728,9 +566,7 @@ void bli_gemmsup_ref_var2m
 		  buf_c, rs_c, cs_c,
 		  eff_id,
 		  cntx,
-		  rntm,
-		  cntl,
-		  thread
+		  rntm
 		);
 	}
 	else
@@ -738,8 +574,6 @@ void bli_gemmsup_ref_var2m
 		// Invoke the function (transposing the operation).
 		f
 		(
-		  packb,             // swap the pack values.
-		  packa,
 		  conjb,             // swap the conj values.
 		  conja,
 		  n,                 // swap the m and n dimensions.
@@ -752,9 +586,7 @@ void bli_gemmsup_ref_var2m
 		  buf_c, cs_c, rs_c, // swap the strides of C.
 		  bli_stor3_trans( eff_id ), // transpose the stor3_t id.
 		  cntx,
-		  rntm,
-		  cntl,
-		  thread
+		  rntm
 		);
 	}
 }
@@ -765,8 +597,6 @@ void bli_gemmsup_ref_var2m
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -779,13 +609,9 @@ void PASTEMAC(ch,varname) \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        stor3_t          stor_id, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       cntl_t* restrict cntl, \
-       thrinfo_t* restrict thread  \
+       rntm_t* restrict rntm  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-\
 	/* If m or n is zero, return immediately. */ \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -804,6 +630,8 @@ void PASTEMAC(ch,varname) \
 		); \
 		return; \
 	} \
+\
+	const num_t dt  = PASTEMAC(ch,type); \
 \
 	/* Query the context for various blocksizes. */ \
 	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -839,11 +667,7 @@ void PASTEMAC(ch,varname) \
 	const inc_t icstep_a = rs_a * MC; \
 \
 	const inc_t jrstep_c = cs_c * NR; \
-\
-	/*
 	const inc_t jrstep_b = cs_b * NR; \
-	( void )jrstep_b; \
-	*/ \
 \
 	/*
 	const inc_t irstep_c = rs_c * MR; \
@@ -891,45 +715,6 @@ void PASTEMAC(ch,varname) \
 	const dim_t ir_inc  = 1; \
 	*/ \
 \
-	/* Initialize a mem_t entry for A and B. Strictly speaking, this is only
-	   needed for the matrix we will be packing (if any), but we do it
-	   unconditionally to be safe. An alternative way of initializing the
-	   mem_t entries is:
-
-	     bli_mem_clear( &mem_a ); \
-	     bli_mem_clear( &mem_b ); \
-	*/ \
-	mem_t mem_a = BLIS_MEM_INITIALIZER; \
-	mem_t mem_b = BLIS_MEM_INITIALIZER; \
-\
-	/* Prepare the packing destination buffer. If packing is not requested for
-	   matrix A, this function will reduce to a no-op. */ \
-	PASTEMAC(ch,packm_sup_init_mem_a) \
-	( \
-	  packa, \
-	  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix A to a "block of A". */ \
-	  stor_id, \
-	  MC, KC, MR, /* Note this "block of A" is MC x KC. */ \
-	  cntx, \
-	  rntm, \
-	  &mem_a, \
-	  thread  \
-	); \
-\
-	/* Prepare the packing destination buffer. If packing is not requested for
-	   matrix B, this function will reduce to a no-op. */ \
-	PASTEMAC(ch,packm_sup_init_mem_b) \
-	( \
-	  packb, \
-	  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix B to a "panel of B". */ \
-	  stor_id, \
-	  KC, NC, NR, /* Note this "panel of B" is KC x NC. */ \
-	  cntx, \
-	  rntm, \
-	  &mem_b, \
-	  thread  \
-	); \
-\
 	/* Loop over the n dimension (NC rows/columns at a time). */ \
 	for ( dim_t jj = 0; jj < jc_iter; jj += jc_inc ) \
 	{ \
@@ -941,12 +726,11 @@ void PASTEMAC(ch,varname) \
 		dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
 		dim_t jr_left =   nc_cur % NR; \
 \
-		/* An optimization: allow the last jr iteration to contain up to NRE
-		   columns of C and B. (If NRE > NR, the mkernel has agreed to handle
+		/* An optimization: allow the last jr iteration to contain up to NRX
+		   columns of C and B. (If NRX > NR, the mkernel has agreed to handle
 		   these cases.) Note that this prevents us from declaring jr_iter and
-		   jr_left as const. NOTE: We forgo this optimization when packing B
-		   since packing an extended edge case is not yet supported. */ \
-		if ( !packb ) \
+		   jr_left as const. */ \
+		if ( 1 ) \
 		if ( NRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= NRE ) \
 		{ \
 			jr_iter--; jr_left += NR; \
@@ -963,39 +747,6 @@ void PASTEMAC(ch,varname) \
 			/* Only apply beta to the first iteration of the pc loop. */ \
 			ctype* restrict beta_use = ( pp == 0 ? beta_cast : one ); \
 \
-			ctype* b_use; \
-			inc_t  rs_b_use, cs_b_use, ps_b_use; \
-\
-			/* Determine the packing buffer and related parameters for matrix
-			   B. (If B will not be packed, then a_use will be set to point to
-			   b and the _b_use strides will be set accordingly.) Then call
-			   the packm sup variant chooser, which will call the appropriate
-			   implementation based on the schema deduced from the stor_id. */ \
-			PASTEMAC(ch,packm_sup_b) \
-			( \
-			  packb, \
-			  stor_id, \
-			  BLIS_NO_TRANSPOSE, \
-			  kc_cur, nc_cur, NR, \
-			  one, \
-			  b_pc,   rs_b,      cs_b, \
-			  &b_use, &rs_b_use, &cs_b_use, \
-			                     &ps_b_use, \
-			  cntx, \
-			  &mem_b, \
-			  thread  \
-			); \
-\
-			/* Alias a_use so that it's clear this is our current block of
-			   matrix B. */ \
-			ctype* restrict b_pc_use = b_use; \
-\
-			/* We don't need to embed the panel stride of B within the auxinfo_t
-			   object because this variant iterates through B in the jr loop,
-			   which occurs here, within the macrokernel, not within the
-			   millikernel. */ \
-			/*bli_auxinfo_set_ps_b( ps_b_use, &aux );*/ \
-\
 			/* Loop over the m dimension (MC rows at a time). */ \
 			for ( dim_t ii = 0; ii < ic_iter; ii += ic_inc ) \
 			{ \
@@ -1009,48 +760,13 @@ void PASTEMAC(ch,varname) \
 				const dim_t ir_left =   mc_cur % MR; \
 				*/ \
 \
-				ctype* a_use; \
-				inc_t  rs_a_use, cs_a_use, ps_a_use; \
-\
-				/* Determine the packing buffer and related parameters for matrix
-				   A. (If A will not be packed, then a_use will be set to point to
-				   a and the _a_use strides will be set accordingly.) Then call
-				   the packm sup variant chooser, which will call the appropriate
-				   implementation based on the schema deduced from the stor_id. */ \
-				PASTEMAC(ch,packm_sup_a) \
-				( \
-				  packa, \
-				  stor_id, \
-				  BLIS_NO_TRANSPOSE, \
-				  mc_cur, kc_cur, MR, \
-				  one, \
-				  a_ic,   rs_a,      cs_a, \
-				  &a_use, &rs_a_use, &cs_a_use, \
-				                     &ps_a_use, \
-				  cntx, \
-				  &mem_a, \
-				  thread  \
-				); \
-\
-				/* Alias a_use so that it's clear this is our current block of
-				   matrix A. */ \
-				ctype* restrict a_ic_use = a_use; \
-\
-				/* Embed the panel stride of A within the auxinfo_t object. The
-				   millikernel will query and use this to iterate through
-				   micropanels of A (if needed). */ \
-				bli_auxinfo_set_ps_a( ps_a_use, &aux ); \
-\
 				/* Loop over the n dimension (NR columns at a time). */ \
 				for ( dim_t j = 0; j < jr_iter; j += jr_inc ) \
 				{ \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? NR : jr_left ); \
 \
-/*
-					ctype* restrict b_jr = b_pc_use + j * jrstep_b; \
-*/ \
-					ctype* restrict b_jr = b_pc_use + j * ps_b_use; \
-					ctype* restrict c_jr = c_ic     + j * jrstep_c; \
+					ctype* restrict b_jr = b_pc + j * jrstep_b; \
+					ctype* restrict c_jr = c_ic + j * jrstep_c; \
 \
 					/* Loop over the m dimension (MR rows at a time). */ \
 					{ \
@@ -1063,10 +779,10 @@ void PASTEMAC(ch,varname) \
 						  nr_cur, \
 						  kc_cur, \
 						  alpha_cast, \
-						  a_ic_use, rs_a_use, cs_a_use, \
-						  b_jr,     rs_b_use, cs_b_use, \
+						  a_ic, rs_a, cs_a, \
+						  b_jr, rs_b, cs_b, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						  c_jr, rs_c, cs_c, \
 						  &aux, \
 						  cntx  \
 						); \
@@ -1075,22 +791,6 @@ void PASTEMAC(ch,varname) \
 			} \
 		} \
 	} \
-\
-	/* Release any memory that was acquired for packing matrices A and B. */ \
-	PASTEMAC(ch,packm_sup_finalize_mem_a) \
-	( \
-	  packa, \
-	  rntm, \
-	  &mem_a, \
-	  thread  \
-	); \
-	PASTEMAC(ch,packm_sup_finalize_mem_b) \
-	( \
-	  packb, \
-	  rntm, \
-	  &mem_b, \
-	  thread  \
-	); \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "gemmsup_ref_var2: b1", kc_cur, nr_cur, b_jr, rs_b, cs_b, "%4.1f", "" ); \

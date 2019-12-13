@@ -293,10 +293,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
-
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
 	// -------------------------------------------------------------------------
@@ -927,9 +923,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP6X8J)                    // iterate again if jj != 0.
@@ -953,7 +947,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -981,9 +974,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{
@@ -1065,10 +1056,6 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
@@ -1730,9 +1717,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP6X8J)                    // iterate again if jj != 0.
@@ -1756,7 +1741,6 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -1784,9 +1768,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{
@@ -1868,10 +1850,6 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
@@ -2366,9 +2344,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP4X8J)                    // iterate again if jj != 0.
@@ -2392,7 +2368,6 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -2420,9 +2395,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{
@@ -2495,10 +2468,6 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
@@ -3024,9 +2993,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP4X8J)                    // iterate again if jj != 0.
@@ -3050,7 +3017,6 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -3078,9 +3044,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{
@@ -3153,10 +3117,6 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
@@ -3562,9 +3522,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP2X8J)                    // iterate again if jj != 0.
@@ -3588,7 +3546,6 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -3616,9 +3573,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{
@@ -3691,10 +3646,6 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
-
-	// Query the panel stride of B and convert it to units of bytes.
-	uint64_t ps_b   = bli_auxinfo_ps_b( data );
-	uint64_t ps_b8  = ps_b * sizeof( double );
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
@@ -4064,9 +4015,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
 
-	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
-	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP1X8J)                    // iterate again if jj != 0.
@@ -4090,7 +4039,6 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
-      [ps_b8]  "m" (ps_b8),
       [alpha]  "m" (alpha),
       [beta]   "m" (beta),
       [c]      "m" (c),
@@ -4118,9 +4066,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 		double* restrict cij = c + j_edge*cs_c;
 		double* restrict ai  = a;
-		//double* restrict bj  = b + j_edge*cs_b;
-		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
-		double* restrict bj  = b + n_iter * ps_b;
+		double* restrict bj  = b + j_edge*cs_b;
 
 		if ( 4 <= n_left )
 		{

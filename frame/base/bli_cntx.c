@@ -956,7 +956,8 @@ void bli_cntx_set_l3_sup_handlers( dim_t n_ops, ... )
 	// Process each operation id tuple provided.
 	for ( i = 0; i < n_ops; ++i )
 	{
-		// Read the current operation id and handler function pointer.
+		// Read the current ukernel id, ukernel datatype, and ukernel function
+		// pointer.
 		const opid_t op_id = op_ids[ i ];
 		      void*  op_fp = op_fps[ i ];
 
