@@ -186,8 +186,6 @@ void bli_gemmsup_ref_var1n
 		// Invoke the function.
 		f
 		(
-		  packa,
-		  packb,
 		  conja,
 		  conjb,
 		  m,
@@ -209,8 +207,6 @@ void bli_gemmsup_ref_var1n
 		// Invoke the function (transposing the operation).
 		f
 		(
-		  packb,
-		  packa,
 		  conjb,             // swap the conj values.
 		  conja,
 		  n,                 // swap the m and n dimensions.
@@ -253,8 +249,6 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-\
 	/* If m or n is zero, return immediately. */ \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -277,15 +271,15 @@ void PASTEMAC(ch,varname) \
 		return; \
 	} \
 \
+	const num_t dt  = PASTEMAC(ch,type); \
+\
 	/* This transposition of the stor3_t id value is inherent to variant 1.
 	   The reason: we assume that variant 2 is the "main" variant. The
 	   consequence of this is that we assume that the millikernels that
-	   iterate over m are registered to the "primary" kernel group associated
-	   with the kernel IO preference; similarly, mkernels that iterate over
-	   n are assumed to be registered to the "non-primary" group associated
-	   with the ("non-primary") anti-preference. Note that this pattern holds
-	   regardless of whether the mkernel set has a row or column preference.)
-	   See bli_l3_sup_int.c for a higher-level view of how this choice is made. */ \
+	   iterate over m are registered to the kernel group associated with
+	   the kernel preference. So, regardless of whether the mkernels are
+	   row- or column-preferential, millikernels that iterate over n are
+	   always placed in the slots for the opposite kernel group. */ \
 	stor_id = bli_stor3_trans( stor_id ); \
 \
 	/* Query the context for various blocksizes. */ \
@@ -332,9 +326,7 @@ void PASTEMAC(ch,varname) \
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
 	} \
 \
-	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR.
-	   NOTE: This is unique to variant 1 (ie: not performed in variant 2)
-	   because MC % MR == 0 and NC % NR == 0 is already enforced at runtime. */ \
+	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR. */ \
 	const dim_t NC  = bli_align_dim_to_mult( NC0, MR ); \
 	const dim_t MC  = bli_align_dim_to_mult( MC0, NR ); \
 \
@@ -354,8 +346,6 @@ void PASTEMAC(ch,varname) \
 	const inc_t icstep_b = cs_b; \
 \
 	const inc_t jrstep_c = rs_c * MR; \
-\
-	/*
 	const inc_t jrstep_a = rs_a * MR; \
 \
 	const inc_t irstep_c = cs_c * NR; \
@@ -661,10 +651,10 @@ void PASTEMAC(ch,varname) \
 						  mc_cur, /* Recall: mc_cur partitions the n dimension! */ \
 						  kc_cur, \
 						  alpha_cast, \
-						  a_jr,     rs_a_use, cs_a_use, \
-						  b_ic_use, rs_b_use, cs_b_use, \
+						  a_jr, rs_a, cs_a, \
+						  b_ic, rs_b, cs_b, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						  c_jr, rs_c, cs_c, \
 						  &aux, \
 						  cntx  \
 						); \
@@ -834,8 +824,6 @@ void bli_gemmsup_ref_var2m
 		// Invoke the function.
 		f
 		(
-		  packa,
-		  packb,
 		  conja,
 		  conjb,
 		  m,
@@ -857,8 +845,6 @@ void bli_gemmsup_ref_var2m
 		// Invoke the function (transposing the operation).
 		f
 		(
-		  packb,             // swap the pack values.
-		  packa,
 		  conjb,             // swap the conj values.
 		  conja,
 		  n,                 // swap the m and n dimensions.
@@ -901,8 +887,6 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
-	const num_t dt = PASTEMAC(ch,type); \
-\
 	/* If m or n is zero, return immediately. */ \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -924,6 +908,8 @@ void PASTEMAC(ch,varname) \
 		} \
 		return; \
 	} \
+\
+	const num_t dt  = PASTEMAC(ch,type); \
 \
 	/* Query the context for various blocksizes. */ \
 	const dim_t NR  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -986,8 +972,6 @@ void PASTEMAC(ch,varname) \
 	const inc_t icstep_a = rs_a; \
 \
 	const inc_t jrstep_c = cs_c * NR; \
-\
-	/*
 	const inc_t jrstep_b = cs_b * NR; \
 	( void )jrstep_b; \
 \
@@ -1279,10 +1263,10 @@ void PASTEMAC(ch,varname) \
 						  nr_cur, \
 						  kc_cur, \
 						  alpha_cast, \
-						  a_ic_use, rs_a_use, cs_a_use, \
-						  b_jr,     rs_b_use, cs_b_use, \
+						  a_ic, rs_a, cs_a, \
+						  b_jr, rs_b, cs_b, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						  c_jr, rs_c, cs_c, \
 						  &aux, \
 						  cntx  \
 						); \

@@ -45,11 +45,6 @@ err_t bli_gemmsup_ref
        rntm_t* rntm
      )
 {
-	// This function implements the default gemmsup handler. If you are a
-	// BLIS developer and wish to use a different gemmsup handler, please
-	// register a different function pointer in the context in your
-	// sub-configuration's bli_cntx_init_*() function.
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
