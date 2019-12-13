@@ -55,6 +55,14 @@ err_t bli_gemmsup
 	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
 	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) return BLIS_FAILURE;
 
+
+	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+	//Don't use sup for currently unsupported storage types in sgemmsup
+	if(bli_obj_is_float(c) && ((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))){
+		//printf(" gemmsup: Returning with for un-supported storage types in sgemmsup \n");
+		return BLIS_FAILURE;
+	}
+
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
