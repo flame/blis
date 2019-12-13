@@ -1185,13 +1185,6 @@ typedef struct
 	inc_t  is_a;
 	inc_t  is_b;
 
-	// The panel strides of A and B.
-	// NOTE: These are only used in situations where iteration over the
-	// micropanels takes place in part within the kernel code (e.g. sup
-	// millikernels).
-	inc_t  ps_a;
-	inc_t  ps_b;
-
 	// The type to convert to on output.
 	//num_t  dt_on_output;
 
@@ -1447,9 +1440,6 @@ typedef struct cntx_s
 
 
 // -- Runtime type --
-
-// NOTE: The order of these fields must be kept consistent with the definition
-// of the BLIS_RNTM_INITIALIZER macro in bli_rntm.h.
 
 typedef struct rntm_s
 {

@@ -85,6 +85,14 @@ void        bli_thrcomm_tree_barrier_free( barrier_t* barrier );
 void        bli_thrcomm_tree_barrier( barrier_t* barack );
 #endif
 
+void bli_l3_thread_decorator_thread_check
+     (
+       dim_t      n_threads,
+       dim_t      tid,
+	   thrcomm_t* gl_comm,
+       rntm_t*    rntm
+     );
+
 #endif
 
 #endif
