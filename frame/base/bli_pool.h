@@ -92,20 +92,6 @@ static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
 	pblk->block_size = block_size;
 }
 
-//
-// -- pool block initialization ------------------------------------------------
-//
-
-// NOTE: This initializer macro must be updated whenever fields are added or
-// removed from the pblk_t type definition. An alternative to the initializer is
-// calling bli_pblk_clear() at runtime.
-
-#define BLIS_PBLK_INITIALIZER \
-        { \
-          .buf        = NULL, \
-          .block_size = 0, \
-        }  \
-
 static void bli_pblk_clear( pblk_t* pblk )
 {
 	bli_pblk_set_buf( NULL, pblk );
