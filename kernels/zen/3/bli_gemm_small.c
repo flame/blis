@@ -44,11 +44,9 @@
 #define D_BLIS_SMALL_MATRIX_K_THRES_ROME    256
 
 #define BLIS_ENABLE_PREFETCH
-#define F_SCRATCH_DIM (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES)
 #define D_BLIS_SMALL_MATRIX_THRES (BLIS_SMALL_MATRIX_THRES / 2 )
 #define D_BLIS_SMALL_M_RECT_MATRIX_THRES (BLIS_SMALL_M_RECT_MATRIX_THRES / 2)
 #define D_BLIS_SMALL_K_RECT_MATRIX_THRES (BLIS_SMALL_K_RECT_MATRIX_THRES / 2)
-#define D_SCRATCH_DIM (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES)
 #define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called. 
 #define AT_MR 4 // The kernel dimension of the A transpose GEMM kernel.(AT_MR * NR).
 static err_t bli_sgemm_small
@@ -171,7 +169,6 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      )
 {
-
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
@@ -181,7 +178,6 @@ static err_t bli_sgemm_small
     if ((((L) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
         || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
-
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
         guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
@@ -209,9 +205,9 @@ static err_t bli_sgemm_small
         alpha_cast = (alpha->buffer);
         beta_cast = (beta->buffer);
         gint_t required_packing_A = 1;
-	mem_t local_mem_buf_A_s;
-	float *A_pack = 0;
-	rntm_t rntm;
+        mem_t local_mem_buf_A_s;
+        float *A_pack = NULL;
+        rntm_t rntm;
 	
         // when N is equal to 1 call GEMV instead of GEMM
         if (N == 1)
@@ -234,44 +230,55 @@ static err_t bli_sgemm_small
             tb_inc_row = ldb;
         }
 
-        if ((N <= 3) || ((MR * K) > F_SCRATCH_DIM))
+        /*
+         * This function was using global array to pack part of A input when needed.
+         * However, using this global array make the function non-reentrant.
+         * Instead of using a global array we should allocate buffer for each invocation.
+         * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
+         * better approach is to get the buffer from the pre-allocated pool and return
+         * it the pool once we are doing.
+         *
+         * In order to get the buffer from pool, we need access to memory broker,
+         * currently this function is not invoked in such a way that it can receive
+         * the memory broker (via rntm). Following hack will get the global memory
+         * broker that can be use it to access the pool.
+         *
+         * Note there will be memory allocation at least on first innovation
+         * as there will not be any pool created for this size.
+         * Subsequent invocations will just reuse the buffer from the pool.
+         */
+
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_membrk_rntm_set_membrk( &rntm );
+
+
+        // Get the current size of the buffer pool for A block packing.
+        // We will use the same size to avoid pool re-initliazaton 
+        siz_t buffer_size = bli_pool_block_size(
+            bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK), 
+                            bli_rntm_membrk(&rntm)));
+
+        // Based on the available memory in the buffer we will decide if 
+        // we want to do packing or not.
+        if (((MR * K) << 2) > buffer_size)
         {
             required_packing_A = 0;
         }
-
-	/*
-	 * This function was using global array to pack part of A input when needed.
-	 * However, using this global array make the function non-reentrant.
-	 * Instead of using a global array we should allocate buffer for each invocation.
-	 * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
-	 * better approach is to get the buffer from the pre-allocated pool and return
-	 * it the pool once we are doing.
-         *
-	 * In order to get the buffer from pool, we need access to memory broker,
-	 * currently this function is not invoked in such a way that it can receive
-	 * the memory broker (via rntm). Following hack will get the global memory
-	 * broker that can be use it to access the pool.
-	 *
-	 * Note there will be memory allocation at least on first innovation
-	 * as there will not be any pool created for this size.
-	 * Subsequent invocations will just reuse the buffer from the pool.
-	 */
+        else 
+        {
 #ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_sgemm_small: acquiring mem pool block of size %lu\n", (F_SCRATCH_DIM * sizeof(float)));
-#endif	
-	bli_rntm_init_from_global( &rntm );
-	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+            printf( "bli_sgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
+#endif
+            // Get the buffer from the pool, if there is no pool with
+            // required size, it will be created. 
+            bli_membrk_acquire_m(&rntm,
+                                 buffer_size,
+                                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                 &local_mem_buf_A_s);
 
-	// Get the buffer from the pool, if there is no pool with
-	// required size, it will be created. 
-	bli_membrk_acquire_m(&rntm,
-			     (F_SCRATCH_DIM * sizeof(float)),
-			     BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
-			     &local_mem_buf_A_s
-			     );
-
-	A_pack = bli_mem_buffer(&local_mem_buf_A_s);
+            A_pack = bli_mem_buffer(&local_mem_buf_A_s);
+        }
 
         /*
         * The computation loop runs for MRxN columns of C matrix, thus
@@ -1593,16 +1600,15 @@ static err_t bli_sgemm_small
             }
         }
 
-	// Return the buffer to pool
-	if (bli_mem_is_alloc( &local_mem_buf_A_s) ) {
+        // Return the buffer to pool
+        if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s) ) {
 
 #ifdef BLIS_ENABLE_MEM_TRACING
-	  printf( "bli_sgemm_small(): releasing mem pool block\n" );
+        printf( "bli_sgemm_small(): releasing mem pool block\n" );
 #endif
-	  bli_membrk_release( &rntm,
-			      &local_mem_buf_A_s
-			      );
-	}
+            bli_membrk_release(&rntm,
+                               &local_mem_buf_A_s);
+        }
 
         return BLIS_SUCCESS;
     }
@@ -1638,7 +1644,6 @@ static err_t bli_dgemm_small
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
 #endif   
     {
-
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
         guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
@@ -1666,10 +1671,10 @@ static err_t bli_dgemm_small
         alpha_cast = (alpha->buffer);
         beta_cast = (beta->buffer);
         gint_t required_packing_A = 1;
-	mem_t local_mem_buf_A_s;
-	double *D_A_pack = 0;
-	rntm_t rntm;
-	
+        mem_t local_mem_buf_A_s;
+        double *D_A_pack = NULL;
+        rntm_t rntm;
+
         // when N is equal to 1 call GEMV instead of GEMM
         if (N == 1)
         {
@@ -1691,48 +1696,58 @@ static err_t bli_dgemm_small
             tb_inc_row = ldb;
         }
 
-        if ((N <= 3) || ((D_MR * K) > D_SCRATCH_DIM))
+
+
+        /*
+         * This function was using global array to pack part of A input when needed.
+         * However, using this global array make the function non-reentrant.
+         * Instead of using a global array we should allocate buffer for each invocation.
+         * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
+         * better approach is to get the buffer from the pre-allocated pool and return
+         * it the pool once we are doing.
+         *
+         * In order to get the buffer from pool, we need access to memory broker,
+         * currently this function is not invoked in such a way that it can receive
+         * the memory broker (via rntm). Following hack will get the global memory
+         * broker that can be use it to access the pool.
+         *
+         * Note there will be memory allocation at least on first innovation
+         * as there will not be any pool created for this size.
+         * Subsequent invocations will just reuse the buffer from the pool.
+         */
+
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_membrk_rntm_set_membrk( &rntm );
+
+        // Get the current size of the buffer pool for A block packing.
+        // We will use the same size to avoid pool re-initliazaton 
+        siz_t buffer_size = bli_pool_block_size(
+            bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                            bli_rntm_membrk(&rntm)));
+
+#ifndef BLIS_ENABLE_SMALL_MATRIX_ROME
+        if (((D_MR * K) << 3) > buffer_size)
         {
             required_packing_A = 0;
         }
-
-	/*
-	 * This function was using global array to pack part of A input when needed.
-	 * However, using this global array make the function non-reentrant.
-	 * Instead of using a global array we should allocate buffer for each invocation.
-	 * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
-	 * better approach is to get the buffer from the pre-allocated pool and return
-	 * it the pool once we are doing.
-         *
-	 * In order to get the buffer from pool, we need access to memory broker,
-	 * currently this function is not invoked in such a way that it can receive
-	 * the memory broker (via rntm). Following hack will get the global memory
-	 * broker that can be use it to access the pool.
-	 *
-	 * Note there will be memory allocation at least on first innovation
-	 * as there will not be any pool created for this size.
-	 * Subsequent invocations will just reuse the buffer from the pool.
-	 */
-
-#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_dgemm_small: acquiring mem pool block of size %lu\n", (D_SCRATCH_DIM * sizeof(double)));
 #endif
+        
+        if (required_packing_A == 1)
+        {
+#ifdef BLIS_ENABLE_MEM_TRACING
+            printf( "bli_dgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
+#endif
+            // Get the buffer from the pool.
+            bli_membrk_acquire_m(&rntm,
+                                 buffer_size,
+                                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                 &local_mem_buf_A_s);
 
-  	bli_rntm_init_from_global( &rntm );
-	bli_rntm_set_num_threads_only( 1, &rntm );
-	bli_membrk_rntm_set_membrk( &rntm );
+            D_A_pack = bli_mem_buffer(&local_mem_buf_A_s);
+        }
 
-	// Get the buffer from the pool, if there is no pool with
-	// required size, it will be created. 
-	bli_membrk_acquire_m( &rntm,
-			      (D_SCRATCH_DIM * sizeof(double)),
-			      BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
-			      &local_mem_buf_A_s
-			      );
-
-	D_A_pack = bli_mem_buffer(&local_mem_buf_A_s);
-
-	/*
+        /*
         * The computation loop runs for D_MRxN columns of C matrix, thus
         * accessing the D_MRxK A matrix data and KxNR B matrix data.
         * The computation is organized as inner loops of dimension D_MRxNR.
@@ -3053,15 +3068,14 @@ static err_t bli_dgemm_small
             }
         }
 
-	// Return the buffer to pool
-	if (bli_mem_is_alloc( &local_mem_buf_A_s )) {
+    // Return the buffer to pool
+		if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s )) {
 #ifdef BLIS_ENABLE_MEM_TRACING
-	  printf( "bli_dgemm_small(): releasing mem pool block\n" );
+        printf( "bli_dgemm_small(): releasing mem pool block\n" );
 #endif
-	  bli_membrk_release( &rntm,
-			      &local_mem_buf_A_s
-			      );
-	}
+        bli_membrk_release(&rntm,
+                           &local_mem_buf_A_s);
+        }
 
         return BLIS_SUCCESS;
     }
