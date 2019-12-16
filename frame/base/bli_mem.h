@@ -34,11 +34,32 @@
 
 */
 
+
 #ifndef BLIS_MEM_H
 #define BLIS_MEM_H
 
 
-// Mem entry query
+// mem_t object type (defined in bli_type_defs.h)
+
+/*
+typedef struct mem_s
+{
+	pblk_t    pblk;
+	packbuf_t buf_type;
+	pool_t*   pool;
+	siz_t     size;
+} mem_t;
+
+typedef struct
+{
+	void*     buf;
+	siz_t     block_size;
+} pblk_t;
+*/
+
+//
+// -- mem_t query --------------------------------------------------------------
+//
 
 static pblk_t* bli_mem_pblk( mem_t* mem )
 {
@@ -78,7 +99,9 @@ static bool_t bli_mem_is_unalloc( mem_t* mem )
 }
 
 
-// Mem entry modification
+//
+// -- mem_t modification -------------------------------------------------------
+//
 
 static void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 {
@@ -105,9 +128,33 @@ static void bli_mem_set_size( siz_t size, mem_t* mem )
 	mem->size = size;
 }
 
+//
+// -- mem_t initialization -----------------------------------------------------
+//
+
+// NOTE: This initializer macro must be updated whenever fields are added or
+// removed from the mem_t type definition. An alternative to the initializer is
+// calling bli_mem_clear() at runtime.
+
+#define BLIS_MEM_INITIALIZER \
+        { \
+          .pblk        = BLIS_PBLK_INITIALIZER, \
+          .buf_type    = -1, \
+          .pool        = NULL, \
+          .size        = 0, \
+        }  \
+
 static void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
+#ifdef __cplusplus
+	packbuf_t pb;
+	//C++ has more strong type checking. Using -1 will result in error
+	//Pass actual type instead
+	bli_mem_set_buf_type ( pb, mem );
+#else
+	bli_mem_set_buf_type( -1, mem );
+#endif
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 }

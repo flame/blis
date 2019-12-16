@@ -259,7 +259,7 @@ static err_t bli_sgemm_small
 #ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_sgemm_small: acquiring mem pool block of size %lu\n", (F_SCRATCH_DIM * sizeof(float)));
 #endif	
-	bli_thread_init_rntm( &rntm );
+	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
 	bli_membrk_rntm_set_membrk( &rntm );
 
@@ -1718,7 +1718,7 @@ static err_t bli_dgemm_small
 	printf( "bli_dgemm_small: acquiring mem pool block of size %lu\n", (D_SCRATCH_DIM * sizeof(double)));
 #endif
 
-  	bli_thread_init_rntm( &rntm );
+  	bli_rntm_init_from_global( &rntm );
 	bli_rntm_set_num_threads_only( 1, &rntm );
 	bli_membrk_rntm_set_membrk( &rntm );
 

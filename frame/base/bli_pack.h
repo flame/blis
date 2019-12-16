@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,68 +32,18 @@
 
 */
 
-#include "bli_l3_cntl.h"
-#include "bli_l3_check.h"
+#ifndef BLIS_PACK_H
+#define BLIS_PACK_H
 
-// Define function types.
-#include "bli_l3_ft_ex.h"
-#include "bli_l3_ft_ukr.h"
-#include "bli_l3_oft.h"
-#include "bli_l3_oft_var.h"
+void  bli_pack_init( void );
+void  bli_pack_finalize( void );
 
-#include "bli_l3_blocksize.h"
-#include "bli_l3_direct.h"
-#include "bli_l3_prune.h"
-#include "bli_l3_packm.h"
+BLIS_EXPORT_BLIS dim_t bli_pack_get_pack_a( void );
+BLIS_EXPORT_BLIS dim_t bli_pack_get_pack_b( void );
+BLIS_EXPORT_BLIS void  bli_pack_set_pack_a( bool_t pack_a );
+BLIS_EXPORT_BLIS void  bli_pack_set_pack_b( bool_t pack_b );
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l3_oapi.h"
+void  bli_pack_init_rntm_from_env( rntm_t* rntm );
 
-#include "bli_oapi_ba.h"
-#include "bli_l3_oapi.h"
-
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l3_tapi.h"
-
-#include "bli_tapi_ba.h"
-#include "bli_l3_tapi.h"
-
-// Define function types for small/unpacked handlers/kernels.
-#include "bli_l3_sup_oft.h"
-#include "bli_l3_sup_ft_ker.h"
-
-// Define static edge case logic for use in small/unpacked kernels.
-//#include "bli_l3_sup_edge.h"
-
-// Prototype object API to small/unpacked matrix dispatcher.
-#include "bli_l3_sup.h"
-
-// Prototype reference implementation of small/unpacked matrix handler.
-#include "bli_l3_sup_ref.h"
-#include "bli_l3_sup_int.h"
-#include "bli_l3_sup_vars.h"
-#include "bli_l3_sup_packm_a.h"
-#include "bli_l3_sup_packm_b.h"
-#include "bli_l3_sup_packm_var.h"
-
-// Prototype microkernel wrapper APIs.
-#include "bli_l3_ukr_oapi.h"
-#include "bli_l3_ukr_tapi.h"
-
-// Generate function pointer arrays for tapi microkernel functions.
-#include "bli_l3_ukr_fpa.h"
-
-// Operation-specific headers.
-#include "bli_gemm.h"
-#include "bli_hemm.h"
-#include "bli_herk.h"
-#include "bli_her2k.h"
-#include "bli_symm.h"
-#include "bli_syrk.h"
-#include "bli_syr2k.h"
-#include "bli_trmm.h"
-#include "bli_trmm3.h"
-#include "bli_trsm.h"
+#endif
 
