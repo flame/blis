@@ -34,6 +34,29 @@
 
 #include "blis.h"
 
+// The global rntm_t structure, which holds the global thread settings
+// along with a few other key parameters.
+rntm_t global_rntm;
+
+// A mutex to allow synchronous access to global_rntm.
+bli_pthread_mutex_t global_rntm_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
+
+// ----------------------------------------------------------------------------
+
+void bli_rntm_init_from_global( rntm_t* rntm )
+{
+	// We must ensure that global_rntm has been initialized.
+	bli_init_once();
+
+	// Acquire the mutex protecting global_rntm.
+	bli_pthread_mutex_lock( &global_rntm_mutex );
+
+	*rntm = global_rntm;
+
+	// Release the mutex protecting global_rntm.
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
+}
+
 // -----------------------------------------------------------------------------
 
 void bli_rntm_set_ways_for_op

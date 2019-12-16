@@ -49,6 +49,14 @@
 #include "bli_packm_thrinfo.h"
 #include "bli_l3_thrinfo.h"
 
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the conventional code path.
+#include "bli_l3_decor.h"
+
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the sup code path.
+#include "bli_l3_sup_decor.h"
+
 // Initialization-related prototypes.
 void bli_thread_init( void );
 void bli_thread_finalize( void );
@@ -143,37 +151,6 @@ siz_t bli_thread_range_weighted_sub
        dim_t*     restrict j_end_thr
      );
 
-
-
-// Level-3 internal function type
-typedef void (*l3int_t)
-     (
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-// Level-3 thread decorator prototype
-void bli_l3_thread_decorator
-     (
-       l3int_t func,
-       opid_t  family,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
-     );
-
 // -----------------------------------------------------------------------------
 
 // Factorization and partitioning prototypes
@@ -204,9 +181,6 @@ dim_t bli_lcm( dim_t x, dim_t y );
 dim_t bli_ipow( dim_t base, dim_t power );
 
 // -----------------------------------------------------------------------------
-
-BLIS_EXPORT_BLIS dim_t bli_thread_get_env( const char* env, dim_t fallback );
-//void  bli_thread_set_env( const char* env, dim_t value );
 
 BLIS_EXPORT_BLIS dim_t bli_thread_get_jc_nt( void );
 BLIS_EXPORT_BLIS dim_t bli_thread_get_pc_nt( void );

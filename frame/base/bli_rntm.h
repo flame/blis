@@ -52,10 +52,7 @@ typedef struct rntm_s
 	bool      l3_sup;
 
 	pool_t*   sba_pool;
-
 	membrk_t* membrk;
-
-	bool_t    l3_sup;
 
 } rntm_t;
 */
@@ -229,10 +226,6 @@ BLIS_INLINE void bli_rntm_clear_membrk( rntm_t* rntm )
 {
 	bli_rntm_set_membrk( NULL, rntm );
 }
-static void bli_rntm_clear_l3_sup( rntm_t* rntm )
-{
-	bli_rntm_set_l3_sup( 1, rntm );
-}
 
 //
 // -- rntm_t modification (public API) -----------------------------------------
@@ -321,7 +314,6 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .l3_sup      = TRUE, \
           .sba_pool    = NULL, \
           .membrk      = NULL, \
-          .l3_sup      = 1  \
         }  \
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
@@ -330,11 +322,12 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
+	bli_rntm_clear_pack_a( rntm );
+	bli_rntm_clear_pack_b( rntm );
+	bli_rntm_clear_l3_sup( rntm );
 
 	bli_rntm_clear_sba_pool( rntm );
 	bli_rntm_clear_membrk( rntm );
-
-	bli_rntm_clear_l3_sup( rntm );
 }
 
 // -- rntm_t total thread calculation ------------------------------------------
@@ -358,6 +351,8 @@ BLIS_INLINE dim_t bli_rntm_calc_num_threads
 // -----------------------------------------------------------------------------
 
 // Function prototypes
+
+BLIS_EXPORT_BLIS void bli_rntm_init_from_global( rntm_t* rntm );
 
 BLIS_EXPORT_BLIS void bli_rntm_set_ways_for_op
      (
