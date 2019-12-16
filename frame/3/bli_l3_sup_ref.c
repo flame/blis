@@ -45,6 +45,11 @@ err_t bli_gemmsup_ref
        rntm_t* rntm
      )
 {
+	// This function implements the default gemmsup handler. If you are a
+	// BLIS developer and wish to use a different gemmsup handler, please
+	// register a different function pointer in the context in your
+	// sub-configuration's bli_cntx_init_*() function.
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
@@ -85,6 +90,14 @@ err_t bli_gemmsup_ref
 	//bli_rntm_set_pack_a( 0, rntm );
 	//bli_rntm_set_pack_b( 0, rntm );
 #endif
+	//bli_rntm_set_pack_a( 0, rntm );
+	//bli_rntm_set_pack_b( 0, rntm );
+
+	// May not need these here since packm_sup infers the schemas based
+	// on the stor3_t id. (This would also mean that they don't need to
+	// be passed into the thread decorator below.)
+	//pack_t schema_a = BLIS_PACKED_ROW_PANELS;
+	//pack_t schema_b = BLIS_PACKED_COL_PANELS;
 
 	return
 	bli_l3_sup_thread_decorator

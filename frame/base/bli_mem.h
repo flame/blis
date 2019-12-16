@@ -34,11 +34,32 @@
 
 */
 
+
 #ifndef BLIS_MEM_H
 #define BLIS_MEM_H
 
 
-// Mem entry query
+// mem_t object type (defined in bli_type_defs.h)
+
+/*
+typedef struct mem_s
+{
+	pblk_t    pblk;
+	packbuf_t buf_type;
+	pool_t*   pool;
+	siz_t     size;
+} mem_t;
+
+typedef struct
+{
+	void*     buf;
+	siz_t     block_size;
+} pblk_t;
+*/
+
+//
+// -- mem_t query --------------------------------------------------------------
+//
 
 BLIS_INLINE pblk_t* bli_mem_pblk( mem_t* mem )
 {
@@ -78,7 +99,9 @@ BLIS_INLINE bool bli_mem_is_unalloc( mem_t* mem )
 }
 
 
-// Mem entry modification
+//
+// -- mem_t modification -------------------------------------------------------
+//
 
 BLIS_INLINE void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 {

@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,59 +32,15 @@
 
 */
 
-#ifndef BLIS_THRCOMM_OPENMP_H
-#define BLIS_THRCOMM_OPENMP_H
-
-// Define thrcomm_t for situations when OpenMP multithreading is enabled.
-#ifdef BLIS_ENABLE_OPENMP
-
-#include <omp.h>
-
-// Define thrcomm_t for tree barriers and non-tree barriers.
-#ifdef BLIS_TREE_BARRIER
-struct barrier_s
-{   
-	int               arity;
-	int               count;
-	struct barrier_s* dad;
-	volatile int      signal;
-};  
-typedef struct barrier_s barrier_t;
-
-struct thrcomm_s
-{   
-	void*       sent_object;
-	dim_t       n_threads;
-	barrier_t** barriers;
-}; 
-#else
-struct thrcomm_s
-{
-	void*  sent_object;
-	dim_t  n_threads;
-
-	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
-	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
-	// don't allow the use of bool for the variables being operated upon.
-	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
-	// applies to all other related built-ins.) Thus, we get around this by
-	// redefining barrier_sense as a gint_t.
-	//volatile gint_t  barrier_sense;
-	gint_t barrier_sense;
-	dim_t  barrier_threads_arrived;
-};
-#endif
-
-typedef struct thrcomm_s thrcomm_t;
-
-// Prototypes specific to tree barriers.
-#ifdef BLIS_TREE_BARRIER
-barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index );
-void        bli_thrcomm_tree_barrier_free( barrier_t* barrier );
-void        bli_thrcomm_tree_barrier( barrier_t* barack );
-#endif
-
-#endif
-
-#endif
-
+err_t bli_gemmsup_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );
