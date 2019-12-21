@@ -952,6 +952,7 @@ static err_t bli_dtrsm_small_AlXB(
   dim_t m = bli_obj_length(b); // number of rows of matrix B
   dim_t n = bli_obj_width(b);  // number of columns of matrix B
 
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
     if((m>D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME_ROW_PANEL_M && n>D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME)
      || (m> D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME && n>D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_ROME_COLUMN_PANEL_N)
@@ -1176,9 +1177,9 @@ static err_t bli_dtrsm_small_AlXB(
 
         //broadcast diagonal elements of A11
         ymm1 = _mm256_broadcast_sd((double const *)(a11+0));            //A11[0][0]
-        ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_b +1));     //A11[1][1]
-        ymm3 = _mm256_broadcast_sd((double const *)(a11+cs_b*2 + 2));   //A11[2][2]
-        ymm4 = _mm256_broadcast_sd((double const *)(a11+cs_b*3 + 3));   //A11[3][3]
+        ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_a +1));     //A11[1][1]
+        ymm3 = _mm256_broadcast_sd((double const *)(a11+cs_a*2 + 2));   //A11[2][2]
+        ymm4 = _mm256_broadcast_sd((double const *)(a11+cs_a*3 + 3));   //A11[3][3]
 
         ymm5 = _mm256_unpacklo_pd(ymm1, ymm2);  //A11[0][0] A11[0][0] A11[1][1] A11[1][1]
         ymm6 = _mm256_unpacklo_pd(ymm3, ymm4);  //A11[2][2] A11[2][2] A11[3][3] A11[3][3]
@@ -1483,8 +1484,8 @@ static err_t bli_dtrsm_small_AlXB(
 
             //broadcast diagonal elements of A11
             ymm1 = _mm256_broadcast_sd((double const *)(a11+0));        //A11[0][0]
-            ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_b +1));        //A11[1][1]
-            ymm3 = _mm256_broadcast_sd((double const *)(a11+cs_b*2 + 2));    //A11[2][2]
+            ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_a +1));        //A11[1][1]
+            ymm3 = _mm256_broadcast_sd((double const *)(a11+cs_a*2 + 2));    //A11[2][2]
 
             ymm5 = _mm256_unpacklo_pd(ymm1, ymm2);    //A11[0][0] A11[0][0] A11[1][1] A11[1][1]
             ymm6 = _mm256_unpacklo_pd(ymm3, ymm0);    //A11[2][2] A11[2][2] A11[3][3] A11[3][3]
@@ -1623,7 +1624,7 @@ static err_t bli_dtrsm_small_AlXB(
 
             //broadcast diagonal elements of A11
             ymm1 = _mm256_broadcast_sd((double const *)(a11+0));        //A11[0][0]
-            ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_b +1));        //A11[1][1]
+            ymm2 = _mm256_broadcast_sd((double const *)(a11+ cs_a +1));        //A11[1][1]
 
             ymm5 = _mm256_unpacklo_pd(ymm1, ymm2);    //A11[0][0] A11[0][0] A11[1][1] A11[1][1]
 
