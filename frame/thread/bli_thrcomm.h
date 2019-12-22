@@ -43,10 +43,6 @@
 #include "bli_thrcomm_pthreads.h"
 
 
-// thread entry point prototype.
-void* bli_l3_thread_entry( void* data_void );
-
-
 // thrcomm_t query (field only)
 
 static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
@@ -60,8 +56,9 @@ thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
 void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
 void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
 void       bli_thrcomm_cleanup( thrcomm_t* comm );
-void       bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
-void*      bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
+
+BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
 
 void       bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
 

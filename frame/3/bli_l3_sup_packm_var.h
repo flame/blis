@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +33,28 @@
 
 */
 
-#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
-#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
+//
+// Prototype BLAS-like interfaces to the variants.
+//
 
-#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
-#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       trans_t          transc, \
+       pack_t           schema, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            m_max, \
+       dim_t            n_max, \
+       ctype*  restrict kappa, \
+       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
+                           dim_t pd_p, inc_t ps_p, \
+       cntx_t* restrict cntx, \
+       thrinfo_t* restrict thread  \
+     );
 
-// Disable right-side hemm, symm, and trmm[3] to accommodate the broadcasting of
-// elements within the packed matrix B.
-#define BLIS_DISABLE_HEMM_RIGHT
-#define BLIS_DISABLE_SYMM_RIGHT
-#define BLIS_DISABLE_TRMM_RIGHT
-#define BLIS_DISABLE_TRMM3_RIGHT
+INSERT_GENTPROT_BASIC0( packm_sup_var1 )
+

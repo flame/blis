@@ -65,8 +65,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
@@ -109,8 +109,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
@@ -147,8 +147,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
@@ -184,8 +184,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \
@@ -220,8 +220,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	/* Invoke the operation's front end. */ \
 	PASTEMAC(opname,_front) \

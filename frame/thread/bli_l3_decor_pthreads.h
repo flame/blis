@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +32,16 @@
 
 */
 
-#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
-#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
+#ifndef BLIS_L3_DECOR_PTHREADS_H
+#define BLIS_L3_DECOR_PTHREADS_H
 
-#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
-#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
+// Definitions specific to situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_PTHREADS
 
-// Disable right-side hemm, symm, and trmm[3] to accommodate the broadcasting of
-// elements within the packed matrix B.
-#define BLIS_DISABLE_HEMM_RIGHT
-#define BLIS_DISABLE_SYMM_RIGHT
-#define BLIS_DISABLE_TRMM_RIGHT
-#define BLIS_DISABLE_TRMM3_RIGHT
+// Thread entry point prototype.
+void* bli_l3_thread_entry( void* data_void );
+
+#endif
+
+#endif
+

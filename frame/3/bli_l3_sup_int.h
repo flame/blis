@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +32,15 @@
 
 */
 
-#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
-#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
-
-#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
-#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152
-
-// Disable right-side hemm, symm, and trmm[3] to accommodate the broadcasting of
-// elements within the packed matrix B.
-#define BLIS_DISABLE_HEMM_RIGHT
-#define BLIS_DISABLE_SYMM_RIGHT
-#define BLIS_DISABLE_TRMM_RIGHT
-#define BLIS_DISABLE_TRMM3_RIGHT
+err_t bli_gemmsup_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     );

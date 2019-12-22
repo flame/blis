@@ -54,6 +54,12 @@
    Therefore, this (r)ow-preferential microkernel is well-suited for
    a dot-product-based accumulation that performs vector loads from
    both A and B.
+
+   NOTE: These kernels implicitly support column-oriented IO, implemented
+   via an a high-level transposition of the entire operation. A and B will
+   effectively remain row- and column-stored, respectively, but C will then
+   effectively appear column-stored. Thus, this kernel may be used for both
+   rrc and crc cases.
 */
 
 // Prototype reference microkernels.

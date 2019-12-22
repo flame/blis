@@ -60,14 +60,6 @@ err_t bli_gemmsup
 	// that function assumes the context pointer is valid.
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-#if 0
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; }
-#endif
-
 	// Return early if a microkernel preference-induced transposition would
 	// have been performed and shifted the dimensions outside of the space
 	// of sup-handled problems.
@@ -93,6 +85,12 @@ err_t bli_gemmsup
 		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) )
 			return BLIS_FAILURE;
 	}
+
+	// Initialize a local runtime with global settings if necessary. Note
+	// that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_l;
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
 #if 0
 const num_t dt = bli_obj_dt( c );
