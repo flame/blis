@@ -50,9 +50,6 @@
 #ifndef BLIS_CPUID_H
 #define BLIS_CPUID_H
 
-bool_t   bli_dolog;
-void     bli_log( char *, ... );
-
 arch_t   bli_cpuid_query_id( void );
 
 // Intel

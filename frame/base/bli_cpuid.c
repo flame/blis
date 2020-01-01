@@ -52,6 +52,7 @@
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
+  #include "bli_arch.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -155,16 +156,16 @@ bool_t bli_cpuid_is_skx
 
 	if ( bli_cpuid_has_features( features, expected ) )
 	{
-		switch (nvpu)
+		switch ( nvpu )
 		{
 		case 1:
-			bli_log( "Hardware has 1 FMA unit -- not using SKX config\n" );
+			bli_arch_log( "Hardware has 1 FMA unit; using 'haswell' (not 'skx') sub-config.\n" );
 			return FALSE;
 		case 2:
-			bli_log( "Hardware has 2 FMA units -- using SKX config\n" );
+			bli_arch_log( "Hardware has 2 FMA units; using 'skx' sub-config.\n" );
 			return TRUE;
 		default:
-			bli_log( "Number of FMA units unknown -- not using SKX config\n" );
+			bli_arch_log( "Number of FMA units unknown; using 'haswell' (not 'skx') config.\n" );
 			return FALSE;
 		}
 	}
@@ -908,7 +909,7 @@ int vpu_count( void )
 			return -1;
 
 		strncpy( model_num, loc+1, 4 );
-		model_num[4] = '\0';	// Things like i9-10900X matched above
+		model_num[4] = '\0'; // Things like i9-10900X matched above
 
 		sku = atoi( model_num );
 
@@ -931,7 +932,7 @@ int vpu_count( void )
 		else return -1;
 	}
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
-		return 2;				// All i7/i9 with avx512?
+		return 2; // All i7/i9 with avx512?
 	else
 	{
 		return -1;
@@ -1068,19 +1069,3 @@ char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath
 
 #endif
 
-void bli_log( char * fmt, ... )
-{
-	va_list ap;
-	char prefix[] = "BLIS: ";
-	char * newfmt;
-
-	if ( bli_dolog && fmt )
-	{
-		int n = strlen( fmt ) + strlen( prefix ) + 1;
-		newfmt = malloc( n );
-		snprintf( newfmt, n, "%s%s", prefix, fmt );
-		va_start( ap, fmt );
-		vfprintf( stderr, newfmt, ap );
-		va_end( ap );
-	}
-}
