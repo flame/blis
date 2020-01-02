@@ -663,12 +663,12 @@ enum
 	FEATURE_MASK_AVX512CD            = (1u<<28), // cpuid[eax=7,ecx=0]   :ebx[28]
 	FEATURE_MASK_AVX512BW            = (1u<<30), // cpuid[eax=7,ecx=0]   :ebx[30]
 	FEATURE_MASK_AVX512VL            = (1u<<31), // cpuid[eax=7,ecx=0]   :ebx[31]
-	FEATURE_MASK_AVX512512VBMI2      = (1u<< 6), // cpuid[eax=7,ecx=0]   :ecx[ 6]
-	FEATURE_MASK_AVX512512GFNI       = (1u<< 8), // cpuid[eax=7,ecx=0]   :ecx[ 8]
-	FEATURE_MASK_AVX512512VAES       = (1u<< 9), // cpuid[eax=7,ecx=0]   :ecx[ 9]
-	FEATURE_MASK_AVX512512VPCLMULQDQ = (1u<<10), // cpuid[eax=7,ecx=0]   :ecx[10]
-	FEATURE_MASK_AVX512512BITALG     = (1u<<12), // cpuid[eax=7,ecx=0]   :ecx[12]
-	FEATURE_MASK_AVX512512VPOPCNTDQ  = (1u<<14), // cpuid[eax=7,ecx=0]   :ecx[14]
+	FEATURE_MASK_AVX512VBMI2      = (1u<< 6), // cpuid[eax=7,ecx=0]   :ecx[ 6]
+	FEATURE_MASK_AVX512GFNI       = (1u<< 8), // cpuid[eax=7,ecx=0]   :ecx[ 8]
+	FEATURE_MASK_AVX512VAES       = (1u<< 9), // cpuid[eax=7,ecx=0]   :ecx[ 9]
+	FEATURE_MASK_AVX512VPCLMULQDQ = (1u<<10), // cpuid[eax=7,ecx=0]   :ecx[10]
+	FEATURE_MASK_AVX512BITALG     = (1u<<12), // cpuid[eax=7,ecx=0]   :ecx[12]
+	FEATURE_MASK_AVX512VPOPCNTDQ  = (1u<<14), // cpuid[eax=7,ecx=0]   :ecx[14]
 	FEATURE_MASK_XGETBV   = (1u<<26)|
                             (1u<<27), // cpuid[eax=1]         :ecx[27:26]
 	XGETBV_MASK_XMM       = 0x02u,    // xcr0[1]
@@ -737,12 +737,12 @@ uint32_t bli_cpuid_query
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512VL ) ) *features |= FEATURE_AVX512VL;
 
                 /* Ice Lake */
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512VBMI2      ) ) *features |= FEATURE_AVX512512VBMI2;
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512GFNI       ) ) *features |= FEATURE_AVX512512GFNI;
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512VAES       ) ) *features |= FEATURE_AVX512512VAES;
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512VPCLMULQDQ ) ) *features |= FEATURE_AVX512512VPCLMULQDQ;
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512BITALG     ) ) *features |= FEATURE_AVX512512BITALG;
-		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512512VPOPCNTDQ  ) ) *features |= FEATURE_AVX512512VPOPCNTDQ;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VBMI2      ) ) *features |= FEATURE_AVX512VBMI2;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512GFNI       ) ) *features |= FEATURE_AVX512GFNI;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VAES       ) ) *features |= FEATURE_AVX512VAES;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VPCLMULQDQ ) ) *features |= FEATURE_AVX512VPCLMULQDQ;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512BITALG     ) ) *features |= FEATURE_AVX512BITALG;
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VPOPCNTDQ  ) ) *features |= FEATURE_AVX512VPOPCNTDQ;
 	}
 
 	// Check extended processor info / features bits for AMD-specific features.
@@ -871,12 +871,12 @@ uint32_t bli_cpuid_query
 				                FEATURE_AVX512CD            |
 				                FEATURE_AVX512BW            |
 				                FEATURE_AVX512VL            |
-                                                FEATURE_AVX512512VBMI2      |
-                                                FEATURE_AVX512512GFNI       |
-                                                FEATURE_AVX512512VAES       |
-                                                FEATURE_AVX512512VPCLMULQDQ |
-                                                FEATURE_AVX512512BITALG     |
-                                                FEATURE_AVX512512VPOPCNTDQ  );
+                                                FEATURE_AVX512VBMI2      |
+                                                FEATURE_AVX512GFNI       |
+                                                FEATURE_AVX512VAES       |
+                                                FEATURE_AVX512VPCLMULQDQ |
+                                                FEATURE_AVX512BITALG     |
+                                                FEATURE_AVX512VPOPCNTDQ  );
 			}
 
 			// The OS can manage the state of 256-bit ymm (AVX) registers
