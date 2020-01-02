@@ -32,7 +32,13 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
 done
 
 for ARCH in penryn sandybridge haswell skx knl icelake piledriver steamroller excavator zen; do
-    if [ "$ARCH" = "knl" ]; then
+    if [ "$ARCH" = "penryn" ]; then
+        $SDE -pnr -- ./test_libblis.x > output.testsuite
+    elif [ "$ARCH" = "sandybridge" ]; then
+        $SDE -snb -- ./test_libblis.x > output.testsuite
+    elif [ "$ARCH" = "haswell" ]; then
+        $SDE -hsw -- ./test_libblis.x > output.testsuite
+    elif [ "$ARCH" = "knl" ]; then
         $SDE -knl -- ./test_libblis.x > output.testsuite
     elif [ "$ARCH" = "icelake" ]; then
         $SDE -icl -- ./test_libblis.x > output.testsuite
