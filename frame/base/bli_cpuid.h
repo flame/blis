@@ -54,6 +54,7 @@
 arch_t   bli_cpuid_query_id( void );
 
 // Intel
+bool_t   bli_cpuid_is_icelake( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
 bool_t   bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
