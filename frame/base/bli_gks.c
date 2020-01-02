@@ -65,6 +65,11 @@ void bli_gks_init( void )
 		// bli_config.h.
 
 		// Intel architectures
+#ifdef BLIS_CONFIG_ICELAKE
+		bli_gks_register_cntx( BLIS_ARCH_ICELAKE,     bli_cntx_init_icelake,
+		                                              bli_cntx_init_icelake_ref,
+		                                              bli_cntx_init_icelake_ind );
+#endif
 #ifdef BLIS_CONFIG_SKX
 		bli_gks_register_cntx( BLIS_ARCH_SKX,         bli_cntx_init_skx,
 		                                              bli_cntx_init_skx_ref,
