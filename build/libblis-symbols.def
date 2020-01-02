@@ -414,6 +414,7 @@ bli_cprintv_ex
 bli_cpuid_is_bulldozer
 bli_cpuid_is_excavator
 bli_cpuid_is_haswell
+bli_cpuid_is_icelake
 bli_cpuid_is_knl
 bli_cpuid_is_penryn
 bli_cpuid_is_piledriver
