@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -867,7 +868,7 @@ void get_cpu_name( char *cpu_name )
 // Return the number of FMA units _assuming avx512 is supported_.
 // This needs updating for new processor types, sigh.
 // See https://ark.intel.com/content/www/us/en/ark.html#@Processors
-// and also https://github.com/jeffhammond/vpu-count and
+// and also https://github.com/jeffhammond/vpu-count
 int vpu_count( void )
 {
 	char  cpu_name[48] = {};
@@ -914,7 +915,7 @@ int vpu_count( void )
 
 		// These were derived from ARK listings as of 2019-10-09, but
 		// may not be complete, especially as the ARK Skylake listing
-		// seems to be listed.
+		// seems to be limited.
 		if      ( 8199 >= sku && sku >= 8100 ) return 2;
 		else if ( 6199 >= sku && sku >= 6100 ) return 2;
 		else if (                sku == 5122 ) return 2;
