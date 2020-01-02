@@ -90,6 +90,9 @@ void bli_arch_set_id( void )
 #endif
 
 	// Intel microarchitectures.
+#ifdef BLIS_FAMILY_ICELAKE
+	id = BLIS_ARCH_ICELAKE;
+#endif
 #ifdef BLIS_FAMILY_SKX
 	id = BLIS_ARCH_SKX;
 #endif
@@ -178,6 +181,7 @@ void bli_arch_set_id( void )
 // enum value given to the corresponding BLIS_ARCH_ value.
 static char* config_name[ BLIS_NUM_ARCHS ] =
 {
+    "icelake",
     "skx",
     "knl",
     "knc",
