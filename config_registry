@@ -4,7 +4,7 @@
 # Please refer to the BLIS wiki on configurations for information on the
 # syntax and semantics of this file [1].
 #
-# [1] https://github.com/flame/blis/wiki/ConfigurationHowTo
+# [1] https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md
 #
 
 # Processor families.
