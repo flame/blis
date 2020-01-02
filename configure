@@ -1376,6 +1376,7 @@ check_compiler()
 	#
 	# Specific:
 	#
+	#   icelake: icc 18.0.3+, gcc 8.0+, clang 6.0+
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
 	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
 	#   haswell: any
@@ -1437,6 +1438,9 @@ check_compiler()
 			# gcc 5.x may support POWER9 but it is unverified.
 			blacklistcc_add "power9"
 		fi
+		if [ ${cc_major} -lt 8 ]; then
+			blacklistcc_add "icelake"
+		fi
 	fi
 
 	# icc
@@ -1451,6 +1455,9 @@ check_compiler()
 			fi
 		fi
 		if [ ${cc_major} -eq 18 ]; then
+			if [ ${cc_revision} -lt 3 ]; then
+				blacklistcc_add "icelake"
+			fi
 			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
 			blacklistcc_add "knl"
 			blacklistcc_add "skx"
@@ -1498,6 +1505,9 @@ check_compiler()
 				# See comment above regarding zen support.
 				#blacklistcc_add "zen"
 				: # explicit no-op since bash can't handle empty loop bodies.
+			fi
+			if [ ${cc_major} -lt 6 ]; then
+				blacklistcc_add "icelake"
 			fi
 		fi
 	fi
@@ -1646,6 +1656,7 @@ check_assembler()
 		blacklistbu_add "steamroller"
 		blacklistbu_add "excavator"
 		blacklistbu_add "skx"
+		blacklistbu_add "icelake"
 	fi
 
 	#
@@ -1663,6 +1674,7 @@ check_assembler()
 	if [ "x${knows_avx512f}" == "xno" ]; then
 		blacklistbu_add "knl"
 		blacklistbu_add "skx"
+		blacklistbu_add "icelake"
 	fi
 
 	#
@@ -1679,6 +1691,7 @@ check_assembler()
 
 	if [ "x${knows_avx512dq}" == "xno" ]; then
 		blacklistbu_add "skx"
+		blacklistbu_add "icelake"
 	fi
 }
 
