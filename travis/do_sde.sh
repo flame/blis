@@ -31,9 +31,11 @@ for LIB in $LD_SO $LIBC_SO $LIBM_SO; do
     sudo mv .tmp $LIB
 done
 
-for ARCH in penryn sandybridge haswell skx knl piledriver steamroller excavator zen; do
+for ARCH in penryn sandybridge haswell skx knl icelake piledriver steamroller excavator zen; do
     if [ "$ARCH" = "knl" ]; then
         $SDE -knl -- ./test_libblis.x > output.testsuite
+    elif [ "$ARCH" = "icelake" ]; then
+        $SDE -icl -- ./test_libblis.x > output.testsuite
     else
         $SDE -cpuid_in $DIST_PATH/travis/cpuid/$ARCH.def -- ./test_libblis.x > output.testsuite
     fi
