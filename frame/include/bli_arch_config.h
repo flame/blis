@@ -42,6 +42,9 @@
 //
 
 // -- Intel64 architectures --
+#ifdef BLIS_CONFIG_ICELAKE
+CNTX_INIT_PROTS( icelake )
+#endif
 #ifdef BLIS_CONFIG_SKX
 CNTX_INIT_PROTS( skx )
 #endif
@@ -138,6 +141,9 @@ CNTX_INIT_PROTS( generic )
 #endif
 
 // -- Intel64 architectures --
+#ifdef BLIS_FAMILY_ICELAKE
+#include "bli_family_icelake.h"
+#endif
 #ifdef BLIS_FAMILY_SKX
 #include "bli_family_skx.h"
 #endif
@@ -223,6 +229,9 @@ CNTX_INIT_PROTS( generic )
 //
 
 // -- Intel64 architectures --
+#ifdef BLIS_KERNELS_ICELAKE
+#include "bli_kernels_icelake.h"
+#endif
 #ifdef BLIS_KERNELS_SKX
 #include "bli_kernels_skx.h"
 #endif

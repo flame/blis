@@ -984,7 +984,8 @@ typedef enum
 typedef enum
 {
 	// Intel
-	BLIS_ARCH_SKX = 0,
+	BLIS_ARCH_ICELAKE = 0,
+	BLIS_ARCH_SKX,
 	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,
