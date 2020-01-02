@@ -60,16 +60,19 @@ else
 COPTFLAGS      := -O3
 endif
 
+# Jeff: There is no need to add AVX-512 flags for the other Ice Lake instructions because
+#       those ISAs do not pertain to anything BLIS uses.
+
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=icelake-client
 else
 ifeq ($(CC_VENDOR),icc)
-CKVECFLAGS     := -xCORE-AVX512
+CKVECFLAGS     := -xICELAKE-CLIENT
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=skylake-avx512
+CKVECFLAGS     := -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse -march=icelake-client
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
