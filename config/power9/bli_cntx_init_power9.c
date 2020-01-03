@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,6 +34,35 @@
 
 #include "blis.h"
 
+// Instantiate prototypes for packm kernels.
+PACKM_KER_PROT(    float,  s, packm_6xk_bb4_power9_ref )
+PACKM_KER_PROT(    double, d, packm_6xk_bb2_power9_ref )
+
+// Instantiate prototypes for level-3 kernels.
+GEMM_UKR_PROT(     float,  s, gemmbb_power9_ref )
+GEMMTRSM_UKR_PROT( float,  s, gemmtrsmbb_l_power9_ref )
+GEMMTRSM_UKR_PROT( float,  s, gemmtrsmbb_u_power9_ref )
+TRSM_UKR_PROT(     float,  s, trsmbb_l_power9_ref )
+TRSM_UKR_PROT(     float,  s, trsmbb_u_power9_ref )
+
+GEMM_UKR_PROT(     double, d, gemmbb_power9_ref )
+GEMMTRSM_UKR_PROT( double, d, gemmtrsmbb_l_power9_ref )
+GEMMTRSM_UKR_PROT( double, d, gemmtrsmbb_u_power9_ref )
+TRSM_UKR_PROT(     double, d, trsmbb_l_power9_ref )
+TRSM_UKR_PROT(     double, d, trsmbb_u_power9_ref )
+
+GEMM_UKR_PROT(     scomplex, c, gemmbb_power9_ref )
+GEMMTRSM_UKR_PROT( scomplex, c, gemmtrsmbb_l_power9_ref )
+GEMMTRSM_UKR_PROT( scomplex, c, gemmtrsmbb_u_power9_ref )
+TRSM_UKR_PROT(     scomplex, c, trsmbb_l_power9_ref )
+TRSM_UKR_PROT(     scomplex, c, trsmbb_u_power9_ref )
+
+GEMM_UKR_PROT(     dcomplex, z, gemmbb_power9_ref )
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsmbb_l_power9_ref )
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsmbb_u_power9_ref )
+TRSM_UKR_PROT(     dcomplex, z, trsmbb_l_power9_ref )
+TRSM_UKR_PROT(     dcomplex, z, trsmbb_u_power9_ref )
+
 void bli_cntx_init_power9( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
@@ -45,26 +74,65 @@ void bli_cntx_init_power9( cntx_t* cntx )
 
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
-//	bli_cntx_set_l3_nat_ukrs
-//	(
-//	  1,
-//	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_power7_int_8x4,  FALSE,
-//	  cntx
-//	);
-/*
-	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     8,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,    64,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   256,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,  4096,     0,     0 );
+	bli_cntx_set_l3_nat_ukrs
+	(
+	  12,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemmbb_power9_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_FLOAT,    bli_strsmbb_l_power9_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_FLOAT,    bli_strsmbb_u_power9_ref,      FALSE,
+
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,     FALSE,
+	  
+	  BLIS_TRSM_L_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_l_power9_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_u_power9_ref,      FALSE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemmbb_power9_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_l_power9_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_u_power9_ref,      FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemmbb_power9_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_l_power9_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_u_power9_ref,      FALSE,
+	  cntx
+	);
+
+	// Update the context with customized virtual [gemm]trsm micro-kernels.
+	bli_cntx_set_l3_vir_ukrs
+	(
+	  8,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_l_power9_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_u_power9_ref,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsmbb_l_power9_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsmbb_u_power9_ref,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_SCOMPLEX, bli_cgemmtrsmbb_l_power9_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_SCOMPLEX, bli_cgemmtrsmbb_u_power9_ref,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_l_power9_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_u_power9_ref,
+	  cntx
+	);
+
+	// Update the context with optimized packm kernels.
+	bli_cntx_set_packm_kers
+	(
+	  2,
+	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_6xk_bb4_power9_ref,
+	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_6xk_bb2_power9_ref,
+	  cntx
+	);
+
+
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    12,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_NR ],    -1,     6,    -1,    -1,
+	                                            -1,    12,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   576,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,  1408,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  8190,    -1,    -1 );
+
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
 	  BLIS_NAT, 5,
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
@@ -72,6 +140,5 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 	  cntx
 	);
-*/
-}
 
+}

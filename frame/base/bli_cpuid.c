@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,14 @@ arch_t bli_cpuid_query_id( void )
 	// vendor.
 	vendor = bli_cpuid_query( &family, &model, &features );
 
+#if 0
+	printf( "vendor   = %s\n", vendor==1 ? "AMD": "INTEL" );
+	printf("family    = %x\n", family );
+	printf( "model    = %x\n", model );
+	
+	printf( "features = %x\n", features );
+#endif
+
 	if ( vendor == VENDOR_INTEL )
 	{
 		// Check for each Intel configuration that is enabled, check for that
@@ -102,6 +110,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN2
+		if ( bli_cpuid_is_zen2( family, model, features ) )
+			return BLIS_ARCH_ZEN2;
+#endif
 #ifdef BLIS_CONFIG_ZEN
 		if ( bli_cpuid_is_zen( family, model, features ) )
 			return BLIS_ARCH_ZEN;
@@ -244,6 +256,34 @@ bool_t bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+
+bool_t bli_cpuid_is_zen2
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX  |
+	                          FEATURE_FMA3 |
+	                          FEATURE_AVX2;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// All Zen2 cores have a family of 0x17.
+	if ( family != 0x17 ) return FALSE;
+
+	// Finally, check for specific models:
+	// - 0x30-0xff (THIS NEEDS UPDATING)
+	const bool_t is_arch
+	=
+	( 0x30 <= model && model <= 0xff );
+
+	if ( !is_arch ) return FALSE;
+
+	return TRUE;
+}
 
 bool_t bli_cpuid_is_zen
      (
@@ -404,6 +444,8 @@ arch_t bli_cpuid_query_id( void )
 	printf( "features = %u\n", features );
 #endif
 
+
+
 	if ( vendor == VENDOR_ARM )
 	{
 		if ( model == MODEL_ARMV8 )
@@ -536,7 +578,7 @@ bool_t bli_cpuid_is_cortexa9
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are

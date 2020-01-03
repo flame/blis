@@ -4,13 +4,13 @@
 # Please refer to the BLIS wiki on configurations for information on the
 # syntax and semantics of this file [1].
 #
-# [1] https://github.com/flame/blis/wiki/ConfigurationHowTo
+# [1] https://github.com/flame/blis/blob/master/docs/ConfigurationHowTo.md
 #
 
 # Processor families.
 x86_64:      intel64 amd64
 intel64:     skx knl haswell sandybridge penryn generic
-amd64:       zen excavator steamroller piledriver bulldozer generic
+amd64:       zen2 zen excavator steamroller piledriver bulldozer generic
 # NOTE: ARM families will remain disabled until runtime hardware detection
 # logic is added to BLIS.
 #arm64:       cortexa57 generic
@@ -24,6 +24,7 @@ sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
+zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell
 excavator:   excavator/piledriver
 steamroller: steamroller/piledriver
@@ -38,7 +39,7 @@ cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
 # IBM architectures.
-power9:	     power9/generic
+power9:      power9
 bgq:         bgq
 
 # Generic architectures.

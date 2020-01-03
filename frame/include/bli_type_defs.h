@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -992,6 +992,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
 	BLIS_ARCH_STEAMROLLER,
@@ -1015,7 +1016,9 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 20
+// NOTE: This value must be updated to reflect the number of enum values
+// listed above for arch_t!
+#define BLIS_NUM_ARCHS 21
 
 
 //
@@ -1181,6 +1184,13 @@ typedef struct
 	// The imaginary strides of A and B.
 	inc_t  is_a;
 	inc_t  is_b;
+
+	// The panel strides of A and B.
+	// NOTE: These are only used in situations where iteration over the
+	// micropanels takes place in part within the kernel code (e.g. sup
+	// millikernels).
+	inc_t  ps_a;
+	inc_t  ps_b;
 
 	// The type to convert to on output.
 	//num_t  dt_on_output;
@@ -1436,11 +1446,18 @@ typedef struct cntx_s
 
 // -- Runtime type --
 
+// NOTE: The order of these fields must be kept consistent with the definition
+// of the BLIS_RNTM_INITIALIZER macro in bli_rntm.h.
+
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
+
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+	bool_t    pack_a; // enable/disable packing of left-hand matrix A.
+	bool_t    pack_b; // enable/disable packing of right-hand matrix B.
+	bool_t    l3_sup; // enable/disable small matrix handling in level-3 ops.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 
@@ -1449,9 +1466,6 @@ typedef struct rntm_s
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
 	membrk_t* membrk;
-
-	// A switch to enable/disable small/unpacked matrix handling in level-3 ops.
-	bool_t    l3_sup;
 
 } rntm_t;
 

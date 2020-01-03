@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -829,12 +829,12 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	rntm_t gemm, herk, trmm_l, trmm_r, trsm_l, trsm_r;
 	dim_t  m = 1000, n = 1000, k = 1000;
 
-	bli_thread_init_rntm( &gemm   );
-	bli_thread_init_rntm( &herk   );
-	bli_thread_init_rntm( &trmm_l );
-	bli_thread_init_rntm( &trmm_r );
-	bli_thread_init_rntm( &trsm_l );
-	bli_thread_init_rntm( &trsm_r );
+	bli_rntm_init_from_global( &gemm   );
+	bli_rntm_init_from_global( &herk   );
+	bli_rntm_init_from_global( &trmm_l );
+	bli_rntm_init_from_global( &trmm_r );
+	bli_rntm_init_from_global( &trsm_l );
+	bli_rntm_init_from_global( &trsm_r );
 
 	bli_rntm_set_ways_for_op( BLIS_GEMM, BLIS_LEFT,  m, n, k, &gemm );
 	bli_rntm_set_ways_for_op( BLIS_HERK, BLIS_LEFT,  m, n, k, &herk );

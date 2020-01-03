@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,6 +48,14 @@
 #include "bli_packm_thrinfo.h"
 #include "bli_l3_thrinfo.h"
 
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the conventional code path.
+#include "bli_l3_decor.h"
+
+// Include the level-3 thread decorator and related definitions and prototypes
+// for the sup code path.
+#include "bli_l3_sup_decor.h"
+
 // Initialization-related prototypes.
 void bli_thread_init( void );
 void bli_thread_finalize( void );
@@ -58,6 +66,7 @@ void bli_thread_finalize( void );
 
 // Thread range-related prototypes.
 
+BLIS_EXPORT_BLIS
 void bli_thread_range_sub
      (
        thrinfo_t* thread,
@@ -141,37 +150,6 @@ siz_t bli_thread_range_weighted_sub
        dim_t*     restrict j_end_thr
      );
 
-
-
-// Level-3 internal function type
-typedef void (*l3int_t)
-     (
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-// Level-3 thread decorator prototype
-void bli_l3_thread_decorator
-     (
-       l3int_t func,
-       opid_t  family,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
-     );
-
 // -----------------------------------------------------------------------------
 
 // Factorization and partitioning prototypes
@@ -196,9 +174,6 @@ dim_t bli_ipow( dim_t base, dim_t power );
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS dim_t bli_thread_get_env( const char* env, dim_t fallback );
-//void  bli_thread_set_env( const char* env, dim_t value );
-
 BLIS_EXPORT_BLIS dim_t bli_thread_get_jc_nt( void );
 BLIS_EXPORT_BLIS dim_t bli_thread_get_pc_nt( void );
 BLIS_EXPORT_BLIS dim_t bli_thread_get_ic_nt( void );
@@ -208,8 +183,6 @@ BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
 
 BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
-
-BLIS_EXPORT_BLIS void  bli_thread_init_rntm( rntm_t* rntm );
 
 void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 

@@ -50,7 +50,9 @@ void PASTEMAC0(opname) \
        obj_t*  c, \
        stor3_t eff_id, \
        cntx_t* cntx, \
-       rntm_t* rntm  \
+       rntm_t* rntm, \
+       cntl_t* cntl, \
+       thrinfo_t* thread  \
      );
 
 GENPROT( gemmsup_ref_var1 )
@@ -81,11 +83,37 @@ void PASTEMAC(ch,varname) \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        stor3_t          eff_id, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm  \
+       rntm_t* restrict rntm, \
+       cntl_t* restrict cntl, \
+       thrinfo_t* restrict thread  \
      );
 
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1 )
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       bool_t           packa, \
+       bool_t           packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          eff_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       cntl_t* restrict cntl, \
+       thrinfo_t* restrict thread  \
+     );
 
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1n )
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )

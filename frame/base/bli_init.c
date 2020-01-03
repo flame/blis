@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -78,6 +78,7 @@ void bli_init_apis( void )
 	bli_gks_init();
 	bli_ind_init();
 	bli_thread_init();
+	bli_pack_init();
 	bli_memsys_init();
 }
 
@@ -85,9 +86,10 @@ void bli_finalize_apis( void )
 {
 	// Finalize various sub-APIs.
 	bli_memsys_finalize();
+	bli_pack_finalize();
 	bli_thread_finalize();
-	bli_gks_finalize();
 	bli_ind_finalize();
+	bli_gks_finalize();
 }
 
 // -----------------------------------------------------------------------------

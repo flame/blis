@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -91,6 +91,20 @@ static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
 {
 	pblk->block_size = block_size;
 }
+
+//
+// -- pool block initialization ------------------------------------------------
+//
+
+// NOTE: This initializer macro must be updated whenever fields are added or
+// removed from the pblk_t type definition. An alternative to the initializer is
+// calling bli_pblk_clear() at runtime.
+
+#define BLIS_PBLK_INITIALIZER \
+        { \
+          .buf        = NULL, \
+          .block_size = 0, \
+        }  \
 
 static void bli_pblk_clear( pblk_t* pblk )
 {

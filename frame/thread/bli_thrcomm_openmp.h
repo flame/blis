@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -78,14 +78,6 @@ barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_
 void        bli_thrcomm_tree_barrier_free( barrier_t* barrier );
 void        bli_thrcomm_tree_barrier( barrier_t* barack );
 #endif
-
-void bli_l3_thread_decorator_thread_check
-     (
-       dim_t      n_threads,
-       dim_t      tid,
-	   thrcomm_t* gl_comm,
-       rntm_t*    rntm
-     );
 
 #endif
 

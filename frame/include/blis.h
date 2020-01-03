@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -129,6 +129,8 @@ extern "C" {
 #include "bli_getopt.h"
 #include "bli_opid.h"
 #include "bli_cntl.h"
+#include "bli_env.h"
+#include "bli_pack.h"
 #include "bli_info.h"
 #include "bli_arch.h"
 #include "bli_cpuid.h"

@@ -918,10 +918,20 @@ static bool_t bli_obj_is_col_tilted( obj_t* obj )
 
 // Stride/increment modification
 
-static void bli_obj_set_strides( inc_t rs, inc_t cs, obj_t* obj )
+static void bli_obj_set_row_stride( inc_t rs, obj_t* obj )
 {
 	obj->rs = rs;
+}
+
+static void bli_obj_set_col_stride( inc_t cs, obj_t* obj )
+{
 	obj->cs = cs;
+}
+
+static void bli_obj_set_strides( inc_t rs, inc_t cs, obj_t* obj )
+{
+	bli_obj_set_row_stride( rs, obj );
+	bli_obj_set_col_stride( cs, obj );
 }
 
 static void bli_obj_set_imag_stride( inc_t is, obj_t* obj )
