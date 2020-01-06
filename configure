@@ -1453,6 +1453,7 @@ check_compiler()
 			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
 			blacklistcc_add "knl"
 			blacklistcc_add "skx"
+		fi
 		if [ ${cc_major} -ge 19 ]; then
 			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
 			echoerr_unsupportedcc
