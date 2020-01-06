@@ -74,6 +74,12 @@ void bli_arch_set_id_once( void )
 
 void bli_arch_set_id( void )
 {
+	// NOTE: Change this usage of getenv() to bli_env_get_var() after
+	// merging #351.
+	//bool_t do_logging = bli_env_get_var( "BLIS_ARCH_DEBUG", 0 );
+	bool_t do_logging = getenv( "BLIS_ARCH_DEBUG" ) != NULL;
+	bli_arch_set_logging( do_logging );
+
 	// Architecture families.
 #if defined BLIS_FAMILY_INTEL64 || \
     defined BLIS_FAMILY_AMD64   || \
@@ -156,6 +162,10 @@ void bli_arch_set_id( void )
 	id = BLIS_ARCH_GENERIC;
 #endif
 
+	if ( bli_arch_get_logging() )
+		fprintf( stderr, "libblis: selecting sub-configuration '%s'.\n",
+				 bli_arch_string( id ) );
+
 	//printf( "blis_arch_query_id(): id = %u\n", id );
 	//exit(1);
 }
@@ -198,5 +208,39 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
 char* bli_arch_string( arch_t id )
 {
 	return config_name[ id ];
+}
+
+// -----------------------------------------------------------------------------
+
+static bool_t arch_dolog = 0;
+
+void bli_arch_set_logging( bool_t dolog )
+{
+	arch_dolog = dolog;
+}
+
+bool_t bli_arch_get_logging( void )
+{
+	return arch_dolog;
+}
+
+void bli_arch_log( char* fmt, ... )
+{
+	char prefix[] = "libblis: ";
+	int  n_chars  = strlen( prefix ) + strlen( fmt ) + 1;
+
+	if ( bli_arch_get_logging() && fmt )
+	{
+		char* prefix_fmt = malloc( n_chars );
+
+		snprintf( prefix_fmt, n_chars, "%s%s", prefix, fmt );
+
+		va_list ap;
+		va_start( ap, fmt );
+		vfprintf( stderr, prefix_fmt, ap );
+		va_end( ap );
+
+		free( prefix_fmt );
+	}
 }
 
