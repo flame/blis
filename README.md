@@ -637,13 +637,13 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf):
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev1.pdf):
 
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
    title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
-   journal     = {ACM Transactions on Mathematical Software},
+   journal     = {SIAM Journal on Scientific Computing},
    note        = {submitted}
 }
 ``` 
