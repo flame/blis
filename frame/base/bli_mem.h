@@ -153,7 +153,7 @@ static void bli_mem_clear( mem_t* mem )
 	//Pass actual type instead
 	bli_mem_set_buf_type ( pb, mem );
 #else
-	bli_mem_set_buf_type( -1, mem );
+	bli_mem_set_buf_type( ( packbuf_t )-1, mem );
 #endif
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
