@@ -202,6 +202,11 @@ get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
 files-that-contain      = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),$(f),)))
 files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),,$(f))))
 
+# Define a function that removes duplicate words from a list.
+# NOTE: This function was obtained via [1]; thanks bobbogo for this
+# concise definition.
+# [1] https://stackoverflow.com/questions/16144115/makefile-remove-duplicate-words-without-sorting
+rm-dupls = $(if $1,$(firstword $1) $(call rm-dupls,$(filter-out $(firstword $1),$1)))
 
 
 #
@@ -809,9 +814,6 @@ endif
 #
 # --- LDFLAGS cleanup ----------------------------------------------------------
 #
-
-# Remove duplicate flags/options in LDFLAGS (such as -lpthread) by sorting.
-LDFLAGS := $(sort $(LDFLAGS))
 
 
 
