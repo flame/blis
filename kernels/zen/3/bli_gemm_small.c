@@ -261,7 +261,18 @@ static err_t bli_sgemm_small
 
         // Based on the available memory in the buffer we will decide if 
         // we want to do packing or not.
-        if (((MR * K) << 2) > buffer_size)
+        //
+        // This kernel assumes that "A" will be unpackged if N <= 3.
+        // Usually this range (N <= 3) is handled by SUP, however,
+        // if SUP is disabled or for any other condition if we do
+        // enter this kernel with N <= 3, we want to make sure that
+        // "A" remains unpacked.
+        //
+        // If this check is removed it will result in the crash as
+        // reported in CPUPL-587.
+        //
+        
+        if ((N <= 3) || (((MR * K) << 2) > buffer_size))
         {
             required_packing_A = 0;
         }
@@ -1726,12 +1737,21 @@ static err_t bli_dgemm_small
             bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
                             bli_rntm_membrk(&rntm)));
 
-#ifndef BLIS_ENABLE_SMALL_MATRIX_ROME
-        if (((D_MR * K) << 3) > buffer_size)
+        //
+        // This kernel assumes that "A" will be unpackged if N <= 3.
+        // Usually this range (N <= 3) is handled by SUP, however,
+        // if SUP is disabled or for any other condition if we do
+        // enter this kernel with N <= 3, we want to make sure that
+        // "A" remains unpacked.
+        //
+        // If this check is removed it will result in the crash as
+        // reported in CPUPL-587.
+        //
+
+        if ((N <= 3) || ((D_MR * K) << 3) > buffer_size)
         {
             required_packing_A = 0;
         }
-#endif
         
         if (required_packing_A == 1)
         {
