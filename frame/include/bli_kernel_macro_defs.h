@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -217,6 +218,11 @@
 #endif
 
 
+#ifdef AOCL_BLIS_ZEN
+#define TRSM_BLKSZ_FUNC bli_cntx_get_trsm_blksz
+#else
+#define TRSM_BLKSZ_FUNC bli_cntx_get_blksz
+#endif
 
 #endif
 

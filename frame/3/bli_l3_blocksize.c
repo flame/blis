@@ -1,10 +1,11 @@
-/*
+ /*
 
    BLIS
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,7 +34,6 @@
 */
 
 #include "blis.h"
-
 
 dim_t bli_l3_determine_kc
       (
@@ -311,7 +311,7 @@ dim_t PASTEMAC0(opname) \
 	/* Extract the execution datatype and use it to query the corresponding
 	   blocksize and blocksize maximum values from the blksz_t object. */ \
 	dt    = bli_obj_exec_dt( a ); \
-	bsize = bli_cntx_get_blksz( bszid, cntx ); \
+	bsize = TRSM_BLKSZ_FUNC( bszid, cntx ); \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \
 \

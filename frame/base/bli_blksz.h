@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -277,6 +278,38 @@ dim_t bli_determine_blocksize_b
        bszid_t bszid,
        cntx_t* cntx
      );
+
+#ifdef AOCL_BLIS_ZEN
+
+dim_t bli_determine_blocksize_trsm
+     (
+       dir_t   direct,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
+
+dim_t bli_determine_blocksize_trsm_f
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
+
+dim_t bli_determine_blocksize_trsm_b
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     );
+
+#endif
 
 dim_t bli_determine_blocksize_f_sub
      (

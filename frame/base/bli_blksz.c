@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -296,6 +297,78 @@ dim_t bli_determine_blocksize_b
 
 	return b_use;
 }
+
+#ifdef AOCL_BLIS_ZEN
+
+dim_t bli_determine_blocksize_trsm
+     (
+       dir_t   direct,
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
+{
+	if ( direct == BLIS_FWD )
+		return bli_determine_blocksize_trsm_f( i, dim, obj, bszid, cntx );
+	else
+		return bli_determine_blocksize_trsm_b( i, dim, obj, bszid, cntx );
+}
+
+dim_t bli_determine_blocksize_trsm_f
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
+{
+	num_t    dt;
+	blksz_t* bsize;
+	dim_t    b_alg, b_max;
+	dim_t    b_use;
+
+	// Extract the execution datatype and use it to query the corresponding
+	// blocksize and blocksize maximum values from the blksz_t object.
+	dt    = bli_obj_exec_dt( obj );
+	bsize = bli_cntx_get_trsm_blksz( bszid, cntx );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
+
+	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
+
+	return b_use;
+}
+
+dim_t bli_determine_blocksize_trsm_b
+     (
+       dim_t   i,
+       dim_t   dim,
+       obj_t*  obj,
+       bszid_t bszid,
+       cntx_t* cntx
+     )
+{
+	num_t    dt;
+	blksz_t* bsize;
+	dim_t    b_alg, b_max;
+	dim_t    b_use;
+
+	// Extract the execution datatype and use it to query the corresponding
+	// blocksize and blocksize maximum values from the blksz_t object.
+	dt    = bli_obj_exec_dt( obj );
+	bsize = bli_cntx_get_trsm_blksz( bszid, cntx );
+	b_alg = bli_blksz_get_def( dt, bsize );
+	b_max = bli_blksz_get_max( dt, bsize );
+
+	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
+
+	return b_use;
+}
+
+#endif
 
 dim_t bli_determine_blocksize_f_sub
      (

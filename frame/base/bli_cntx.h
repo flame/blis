@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -83,6 +83,10 @@ static blksz_t* bli_cntx_blkszs_buf( cntx_t* cntx )
 static bszid_t* bli_cntx_bmults_buf( cntx_t* cntx )
 {
 	return cntx->bmults;
+}
+static blksz_t* bli_cntx_trsm_blkszs_buf( cntx_t* cntx )
+{
+	return cntx->trsm_blkszs;
 }
 static func_t* bli_cntx_l3_vir_ukrs_buf( cntx_t* cntx )
 {
@@ -331,6 +335,16 @@ static blksz_t* bli_cntx_get_l3_sup_blksz( bszid_t bs_id, cntx_t* cntx )
 
 	// Return the address of the blksz_t identified by bs_id.
 	return blksz;
+}
+
+static blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	// Return the address of the blksz_t identified by bs_id.
+	return blksz;
+
 }
 
 static dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
@@ -734,6 +748,8 @@ static void bli_cntx_set_unpackm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, c
 BLIS_EXPORT_BLIS void bli_cntx_clear( cntx_t* cntx );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... );
+
+BLIS_EXPORT_BLIS void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... );
 
 BLIS_EXPORT_BLIS void bli_cntx_set_ind_blkszs( ind_t method, dim_t n_bs, ... );
 

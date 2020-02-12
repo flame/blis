@@ -45,6 +45,12 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+//This macro is enabled only for ZEN family configurations.
+//This enables us to use different cache-blocking sizes for TRSM instead of common level-3 cache-block sizes.
+#if @enable_aocl_zen@
+#define AOCL_BLIS_ZEN
+#endif
+
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
 #endif

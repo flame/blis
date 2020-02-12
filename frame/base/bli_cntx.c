@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1259,6 +1259,111 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 	bli_free_intl( ukr_prefs );
 }
 
+// -----------------------------------------------------------------------------
+
+#ifdef AOCL_BLIS_ZEN
+
+void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... )
+{
+	// This function should be called from the bli_cntx_init_*() function for
+	//  zen family architectures to set TRSM blocksizes. It should be called after
+	// bli_cntx_init_defaults() so that the context begins with default
+	// blocksizes across all datatypes.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_trsm_blkszs
+	   (
+	     dim_t   n_bs,
+	     bszid_t bs0_id, blksz_t* blksz0,
+	     bszid_t bs1_id, blksz_t* blksz1,
+	     bszid_t bs2_id, blksz_t* blksz2,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bszid_t* bszids = bli_malloc_intl( n_bs * sizeof( bszid_t  ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	blksz_t** blkszs = bli_malloc_intl( n_bs * sizeof( blksz_t* ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_bs );
+
+	// Process n_bs tuples.
+	for ( i = 0; i < n_bs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the bszid_t of the blocksize we're about to process,
+		// - the address of the blksz_t object.
+		bszid_t  bs_id = ( bszid_t  )va_arg( args, bszid_t  );
+		blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
+
+		// Store the values in our temporary arrays.
+		bszids[ i ] = bs_id;
+		blkszs[ i ] = blksz;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the addresses of:
+	// - the blocksize object array
+	blksz_t* cntx_l3_trsm_blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context. Notice that the blksz_t* pointers were saved, rather than
+	// the objects themselves, but we copy the contents of the objects
+	// when copying into the context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_bs; ++i )
+	{
+		// Read the current blocksize id, blksz_t* pointer, blocksize
+		// multiple id, and blocksize scalar.
+		bszid_t  bs_id = bszids[ i ];
+		blksz_t* blksz = blkszs[ i ];
+
+		blksz_t* cntx_l3_trsm_blksz = &cntx_l3_trsm_blkszs[ bs_id ];
+
+		// Copy the blksz_t object contents into the appropriate
+		// location within the context's blksz_t array.
+		//cntx_trsm_blkszs[ bs_id ] = *blksz;
+		//bli_blksz_copy( blksz, cntx_trsm_blksz );
+		bli_blksz_copy_if_pos( blksz, cntx_l3_trsm_blksz );
+	}
+
+	// Free the temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bli_free_intl( blkszs );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_blkszs(): " );
+	#endif
+	bli_free_intl( bszids );
+}
+#endif
 // -----------------------------------------------------------------------------
 
 void bli_cntx_set_l1f_kers( dim_t n_kers, ... )
