@@ -1506,6 +1506,8 @@ typedef struct cntx_s
 	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
 	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
 
+	blksz_t   trsm_blkszs[ BLIS_NUM_BLKSZS ];
+
 	func_t    l3_vir_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	func_t    l3_nat_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	mbool_t   l3_nat_ukrs_prefs[ BLIS_NUM_LEVEL3_UKRS ];
