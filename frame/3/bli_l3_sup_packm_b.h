@@ -40,7 +40,6 @@ void PASTEMAC(ch,opname) \
      ( \
        bool_t           will_pack, \
        packbuf_t        pack_buf_type, \
-       stor3_t          stor_id, \
        dim_t            k, \
        dim_t            n, \
        dim_t            nr, \
@@ -80,7 +79,7 @@ void PASTEMAC(ch,opname) \
        dim_t            nr, \
        dim_t*  restrict k_max, \
        dim_t*  restrict n_max, \
-       ctype*           x, inc_t           rs_x, inc_t           cs_x, \
+       ctype*           b, inc_t           rs_b, inc_t           cs_b, \
        ctype**          p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                            dim_t* restrict pd_p, inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
@@ -97,16 +96,20 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_b )
 void PASTEMAC(ch,opname) \
      ( \
        bool_t           will_pack, \
+       packbuf_t        pack_buf_type, \
        stor3_t          stor_id, \
        trans_t          transc, \
+       dim_t            k_alloc, \
+       dim_t            n_alloc, \
        dim_t            k, \
        dim_t            n, \
        dim_t            nr, \
        ctype*  restrict kappa, \
-       ctype*  restrict x, inc_t           rs_x, inc_t           cs_x, \
+       ctype*  restrict b, inc_t           rs_b, inc_t           cs_b, \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ); \

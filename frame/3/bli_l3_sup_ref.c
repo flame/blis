@@ -55,49 +55,47 @@ err_t bli_gemmsup_ref
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
 
 #if 0
-	// FGVZ: Will this be needed for constructing thrinfo_t's (recall: the
-	// sba needs to be attached to the rntm; see below)? Or will those nodes
-	// just be created "locally," in an exposed manner?
+	// NOTE: This special case handling is done within the variants.
+
+	// If alpha is zero, scale by beta and return.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
+	// If A or B has a zero dimension, scale C by beta and return early.
+	if ( bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return BLIS_SUCCESS;
+	}
+#endif
 
 	// Parse and interpret the contents of the rntm_t object to properly
-	// set the ways of parallelism for each loop, and then make any
-	// additional modifications necessary for the current operation.
-	bli_rntm_set_ways_for_op
+	// set the ways of parallelism for each loop.
+	bli_rntm_set_ways_from_rntm_sup
 	(
-	  BLIS_GEMM,
-	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
+	  bli_obj_length( c ),
+	  bli_obj_width( c ),
+	  bli_obj_width( a ),
 	  rntm
 	);
-
-	// FGVZ: the sba needs to be attached to the rntm. But it needs
-	// to be done in the thread region, since it needs a thread id.
-	//bli_sba_rntm_set_pool( tid, array, rntm_p );
-#endif
 
 #if 0
 	printf( "rntm.pack_a = %d\n", ( int )bli_rntm_pack_a( rntm ) );
 	printf( "rntm.pack_b = %d\n", ( int )bli_rntm_pack_b( rntm ) );
-#endif
+
 	//bli_rntm_set_pack_a( 0, rntm );
 	//bli_rntm_set_pack_b( 0, rntm );
-
-	// May not need these here since packm_sup infers the schemas based
-	// on the stor3_t id. (This would also mean that they don't need to
-	// be passed into the thread decorator below.)
-	//pack_t schema_a = BLIS_PACKED_ROW_PANELS;
-	//pack_t schema_b = BLIS_PACKED_COL_PANELS;
-
+#endif
 
 	return
 	bli_l3_sup_thread_decorator
 	(
 	  bli_gemmsup_int,
 	  BLIS_GEMM, // operation family id
-	  //schema_a,
-	  //schema_b,
 	  alpha,
 	  a,
 	  b,

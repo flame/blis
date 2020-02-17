@@ -42,6 +42,7 @@
 
 // Include thread info (thrinfo_t) object definitions and prototypes.
 #include "bli_thrinfo.h"
+#include "bli_thrinfo_sup.h"
 
 // Include some operation-specific thrinfo_t prototypes.
 // Note that the bli_packm_thrinfo.h must be included before the others!
@@ -164,7 +165,14 @@ void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
 
 dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
 
-void bli_partition_2x2(dim_t nthread, dim_t work1, dim_t work2, dim_t* nt1, dim_t* nt2);
+void bli_thread_partition_2x2
+     (
+       dim_t           n_thread,
+       dim_t           work1,
+       dim_t           work2,
+       dim_t* restrict nt1,
+       dim_t* restrict nt2
+     );
 
 // -----------------------------------------------------------------------------
 

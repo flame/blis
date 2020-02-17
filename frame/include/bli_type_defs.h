@@ -1452,6 +1452,7 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
+	bool_t    auto_factor;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];

@@ -171,8 +171,8 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  256,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  100,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  120,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  256,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  220,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh

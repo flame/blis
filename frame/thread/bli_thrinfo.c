@@ -78,15 +78,15 @@ void bli_thrinfo_init
        thrinfo_t* sub_node
      )
 {
-	thread->ocomm     = ocomm;
-	thread->ocomm_id  = ocomm_id;
-	thread->n_way     = n_way;
-	thread->work_id   = work_id;
-	thread->free_comm = free_comm;
-	thread->bszid     = bszid;
+	bli_thrinfo_set_ocomm( ocomm, thread );
+	bli_thrinfo_set_ocomm_id( ocomm_id, thread );
+	bli_thrinfo_set_n_way( n_way, thread );
+	bli_thrinfo_set_work_id( work_id, thread );
+	bli_thrinfo_set_free_comm( free_comm, thread );
+	bli_thrinfo_set_bszid( bszid, thread );
 
-	thread->sub_prenode = NULL;
-	thread->sub_node    = sub_node;
+	bli_thrinfo_set_sub_node( sub_node, thread );
+	bli_thrinfo_set_sub_prenode( NULL, thread );
 }
 
 void bli_thrinfo_init_single

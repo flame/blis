@@ -360,7 +360,7 @@ dim_t bli_cntl_calc_num_threads_in
 		bszid_t bszid = bli_cntl_bszid( cntl );
 		dim_t   cur_way;
 
-		// We assume bszid is in {KR,MR,NR,MC,KC,NR} if it is not
+		// We assume bszid is in {NC,KC,MC,NR,MR,KR} if it is not
 		// BLIS_NO_PART.
 		if ( bszid != BLIS_NO_PART )
 			cur_way = bli_rntm_ways_for( bszid, rntm );
