@@ -96,7 +96,7 @@ void* bli_l3_thread_entry( void* data_void )
 
 	// Alias thread-local copies of A, B, and C. These will be the objects
 	// we pass down the algorithmic function stack. Making thread-local
-	// alaises is highly recommended in case a thread needs to change any
+	// aliases is highly recommended in case a thread needs to change any
 	// of the properties of an object without affecting other threads'
 	// objects.
 	bli_obj_alias_to( a, &a_t );
