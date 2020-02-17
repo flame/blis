@@ -285,11 +285,11 @@ static void bli_rntm_disable_l3_sup( rntm_t* rntm )
 
 static void bli_rntm_clear_pack_a( rntm_t* rntm )
 {
-	bli_rntm_set_pack_a( FALSE, rntm );
+	bli_rntm_set_pack_a( TRUE, rntm );
 }
 static void bli_rntm_clear_pack_b( rntm_t* rntm )
 {
-	bli_rntm_set_pack_b( FALSE, rntm );
+	bli_rntm_set_pack_b( TRUE, rntm );
 }
 static void bli_rntm_clear_l3_sup( rntm_t* rntm )
 {
@@ -309,8 +309,8 @@ static void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .auto_factor = TRUE, \
           .num_threads = -1, \
           .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
-          .pack_a      = FALSE, \
-          .pack_b      = FALSE, \
+          .pack_a      = TRUE, \
+          .pack_b      = TRUE, \
           .l3_sup      = TRUE, \
           .sba_pool    = NULL, \
           .membrk      = NULL, \

@@ -76,7 +76,6 @@ void bli_gemmsup_ref_var1n
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 #if 0
 	obj_t at, bt;
 
@@ -228,7 +227,6 @@ void bli_gemmsup_ref_var1n
 		  thread
 		);
 	}
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 
@@ -676,7 +674,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing A (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packa ) bli_thread_barrier( thread_pa ); \
+			if ( packa ) bli_thread_obarrier( thread_pa ); \
 		} \
 	} \
 \
@@ -726,7 +724,6 @@ void bli_gemmsup_ref_var2m
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 #if 0
 	obj_t at, bt;
 
@@ -878,7 +875,6 @@ void bli_gemmsup_ref_var2m
 		  thread
 		);
 	}
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 
@@ -1296,7 +1292,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing B (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packb ) bli_thread_barrier( thread_pb ); \
+			if ( packb ) bli_thread_obarrier( thread_pb ); \
 		} \
 	} \
 \
