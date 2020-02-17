@@ -91,17 +91,14 @@ err_t bli_l3_sup_thread_decorator
 	// resize the array_t, if necessary.
 	array_t* restrict array = bli_sba_checkout_array( n_threads );
 
-	// Access the pool_t* for thread 0 and embed it into the rntm. We do
-	// this up-front only so that we can create the global comm below.
+	// Access the pool_t* for thread 0 and embed it into the rntm.
 	bli_sba_rntm_set_pool( 0, array, rntm );
 
 	// Set the packing block allocator field of the rntm.
 	bli_membrk_rntm_set_membrk( rntm );
 
-#if 0
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
-#endif
 
 
 	{
@@ -109,10 +106,7 @@ err_t bli_l3_sup_thread_decorator
 		// it was already copied in one of the high-level oapi functions.
 		rntm_t* restrict rntm_p = rntm;
 
-		cntl_t*    cntl_use = NULL;
-		//thrinfo_t* thread   = NULL;
-		thrinfo_t* thread   = &BLIS_PACKM_SINGLE_THREADED;
-
+		// There is only one thread id (for the thief thread).
 		const dim_t tid = 0;
 
 		// Use the thread id to access the appropriate pool_t* within the
@@ -123,24 +117,10 @@ err_t bli_l3_sup_thread_decorator
 		// this is redundant since it's already been done above.
 		//bli_sba_rntm_set_pool( tid, array, rntm_p );
 
-		// NOTE: Unlike with the _openmp.c and _pthreads.c variants, we don't
-		// need to alias objects for A, B, and C since they were already aliased
-		// in bli_*_front(). However, we may add aliasing here in the future so
-		// that, with all three (_single.c, _openmp.c, _pthreads.c) implementations
-		// consistently providing local aliases, we can then eliminate aliasing
-		// elsewhere.
-
-		// Create a default control tree for the operation, if needed.
-		//bli_l3_cntl_create_if( family, schema_a, schema_b,
-		//                       a, b, c, rntm_p, cntl, &cntl_use );
-#if 0
-		cntl_use = bli_gemm_cntl_create( rntm_p, family, schema_a, schema_b );
+		thrinfo_t* thread = NULL;
 
 		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
-#endif
-
-		( void )tid;
+		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
 
 		func
 		(
@@ -151,18 +131,11 @@ err_t bli_l3_sup_thread_decorator
 		  c,
 		  cntx,
 		  rntm_p,
-		  cntl_use,
 		  thread
 		);
 
-#if 0
-		// Free the thread's local control tree.
-		//bli_l3_cntl_free( rntm_p, cntl_use, thread );
-		bli_gemm_cntl_free( rntm_p, cntl_use, thread );
-
 		// Free the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_free( rntm_p, thread );
-#endif
+		bli_l3_sup_thrinfo_free( rntm_p, thread );
 	}
 
 	// We shouldn't free the global communicator since it was already freed
