@@ -43,6 +43,8 @@
 /*
 typedef struct rntm_s
 {
+	bool_t    auto_factor;
+
 	dim_t     num_threads;
 	dim_t*    thrloop;
 	dim_t     pack_a;
@@ -58,6 +60,11 @@ typedef struct rntm_s
 //
 // -- rntm_t query (public API) ------------------------------------------------
 //
+
+static bool_t bli_rntm_auto_factor( rntm_t* rntm )
+{
+	return rntm->auto_factor;
+}
 
 static dim_t bli_rntm_num_threads( rntm_t* rntm )
 {
@@ -122,6 +129,7 @@ static membrk_t* bli_rntm_membrk( rntm_t* rntm )
 	return rntm->membrk;
 }
 
+#if 0
 static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 {
 	const bool_t nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
@@ -135,10 +143,16 @@ static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
 	else                                          return FALSE;
 }
+#endif
 
 //
 // -- rntm_t modification (internal use only) ----------------------------------
 //
+
+static void bli_rntm_set_auto_factor_only( bool_t auto_factor, rntm_t* rntm )
+{
+	rntm->auto_factor = auto_factor;
+}
 
 static void bli_rntm_set_num_threads_only( dim_t nt, rntm_t* rntm )
 {
@@ -292,17 +306,20 @@ static void bli_rntm_clear_l3_sup( rntm_t* rntm )
 
 #define BLIS_RNTM_INITIALIZER \
         { \
+          .auto_factor = TRUE, \
           .num_threads = -1, \
           .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
           .pack_a      = TRUE, \
           .pack_b      = TRUE, \
-          .l3_sup      = TRUE  \
+          .l3_sup      = TRUE, \
           .sba_pool    = NULL, \
           .membrk      = NULL, \
         }  \
 
 static void bli_rntm_init( rntm_t* rntm )
 {
+	bli_rntm_set_auto_factor_only( TRUE, rntm );
+
 	bli_rntm_clear_num_threads_only( rntm );
 	bli_rntm_clear_ways_only( rntm );
 	bli_rntm_clear_pack_a( rntm );
@@ -311,6 +328,24 @@ static void bli_rntm_init( rntm_t* rntm )
 
 	bli_rntm_clear_sba_pool( rntm );
 	bli_rntm_clear_membrk( rntm );
+}
+
+// -- rntm_t total thread calculation ------------------------------------------
+
+static dim_t bli_rntm_calc_num_threads
+     (
+       rntm_t*  restrict rntm
+     )
+{
+	dim_t n_threads;
+
+	n_threads  = bli_rntm_ways_for( BLIS_NC, rntm );
+	n_threads *= bli_rntm_ways_for( BLIS_KC, rntm );
+	n_threads *= bli_rntm_ways_for( BLIS_MC, rntm );
+	n_threads *= bli_rntm_ways_for( BLIS_NR, rntm );
+	n_threads *= bli_rntm_ways_for( BLIS_MR, rntm );
+
+	return n_threads;
 }
 
 // -----------------------------------------------------------------------------
@@ -337,9 +372,23 @@ void bli_rntm_set_ways_from_rntm
        rntm_t* rntm
      );
 
+void bli_rntm_set_ways_from_rntm_sup
+     (
+       dim_t   m,
+       dim_t   n,
+       dim_t   k,
+       rntm_t* rntm
+     );
+
 void bli_rntm_print
      (
        rntm_t* rntm
+     );
+
+dim_t bli_rntm_calc_num_threads_in
+     (
+       bszid_t* restrict bszid_cur,
+       rntm_t*  restrict rntm
      );
 
 #endif

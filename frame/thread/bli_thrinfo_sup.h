@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,46 +33,34 @@
 
 */
 
+#ifndef BLIS_THRINFO_SUP_H
+#define BLIS_THRINFO_SUP_H
+
 //
-// Prototype BLAS-like interfaces to the variants.
+// Prototypes for level-3 thrinfo sup functions.
 //
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+void bli_thrinfo_sup_grow
+     (
+       rntm_t*    rntm,
+       bszid_t*   bszid_par,
+       thrinfo_t* thread
      );
 
-INSERT_GENTPROT_BASIC0( packm_sup_var1 )
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+thrinfo_t* bli_thrinfo_sup_rgrow
+     (
+       rntm_t*    rntm,
+       bszid_t*   bszid_par,
+       bszid_t*   bszid_cur,
+       thrinfo_t* thread_par
      );
 
-INSERT_GENTPROT_BASIC0( packm_sup_var2 )
+thrinfo_t* bli_thrinfo_sup_create_for_cntl
+     (
+       rntm_t*    rntm,
+       bszid_t*   bszid_par,
+       bszid_t*   bszid_chl,
+       thrinfo_t* thread_par
+     );
 
+#endif

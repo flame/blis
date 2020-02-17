@@ -129,6 +129,36 @@ static bool_t bli_thread_am_ochief( thrinfo_t* t )
 
 // thrinfo_t modification
 
+static void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
+{
+	t->ocomm = ocomm;
+}
+
+static void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
+{
+	t->ocomm_id = ocomm_id;
+}
+
+static void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
+{
+	t->n_way = n_way;
+}
+
+static void bli_thrinfo_set_work_id( dim_t work_id, thrinfo_t* t )
+{
+	t->work_id = work_id;
+}
+
+static void bli_thrinfo_set_free_comm( bool_t free_comm, thrinfo_t* t )
+{
+	t->free_comm = free_comm;
+}
+
+static void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
+{
+	t->bszid = bszid;
+}
+
 static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 {
 	t->sub_node = sub_node;
