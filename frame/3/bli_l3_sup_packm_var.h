@@ -58,3 +58,21 @@ void PASTEMAC(ch,varname) \
 
 INSERT_GENTPROT_BASIC0( packm_sup_var1 )
 
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       trans_t          transc, \
+       pack_t           schema, \
+       dim_t            m, \
+       dim_t            n, \
+       ctype*  restrict kappa, \
+       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
+       cntx_t* restrict cntx, \
+       thrinfo_t* restrict thread  \
+     );
+
+INSERT_GENTPROT_BASIC0( packm_sup_var2 )
+

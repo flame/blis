@@ -48,7 +48,6 @@ typedef err_t (*l3supint_t)
        obj_t*     c,
        cntx_t*    cntx,
        rntm_t*    rntm,
-       cntl_t*    cntl,
        thrinfo_t* thread
      );
 
@@ -57,8 +56,6 @@ err_t bli_l3_sup_thread_decorator
      (
        l3supint_t func,
        opid_t     family,
-       //pack_t     schema_a,
-       //pack_t     schema_b,
        obj_t*     alpha,
        obj_t*     a,
        obj_t*     b,
