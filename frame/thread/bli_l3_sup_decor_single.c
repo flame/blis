@@ -37,6 +37,8 @@
 
 #ifndef BLIS_ENABLE_MULTITHREADING
 
+#define SKIP_THRINFO_TREE
+
 err_t bli_l3_sup_thread_decorator
      (
        l3supint_t func,
@@ -52,34 +54,6 @@ err_t bli_l3_sup_thread_decorator
        rntm_t*    rntm
      )
 {
-#if 0
-
-	return
-	bli_gemmsup_int
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  0
-	);
-
-#else
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	//pack_t schema_a = bli_obj_pack_schema( a );
-	//pack_t schema_b = bli_obj_pack_schema( b );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
-
 	// For sequential execution, we use only one thread.
 	const dim_t n_threads = 1;
 
@@ -176,7 +150,6 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 
-#endif
 }
 
 #endif
