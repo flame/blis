@@ -37,6 +37,8 @@
 
 #ifndef BLIS_ENABLE_MULTITHREADING
 
+#define SKIP_THRINFO_TREE
+
 err_t bli_l3_sup_thread_decorator
      (
        l3supint_t func,
@@ -52,34 +54,6 @@ err_t bli_l3_sup_thread_decorator
        rntm_t*    rntm
      )
 {
-#if 0
-
-	return
-	bli_gemmsup_int
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  0
-	);
-
-#else
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	//pack_t schema_a = bli_obj_pack_schema( a );
-	//pack_t schema_b = bli_obj_pack_schema( b );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
-
 	// For sequential execution, we use only one thread.
 	const dim_t n_threads = 1;
 
@@ -97,8 +71,10 @@ err_t bli_l3_sup_thread_decorator
 	// Set the packing block allocator field of the rntm.
 	bli_membrk_rntm_set_membrk( rntm );
 
+#ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+#endif
 
 
 	{
@@ -117,10 +93,22 @@ err_t bli_l3_sup_thread_decorator
 		// this is redundant since it's already been done above.
 		//bli_sba_rntm_set_pool( tid, array, rntm_p );
 
+#ifndef SKIP_THRINFO_TREE
 		thrinfo_t* thread = NULL;
 
 		// Create the root node of the thread's thrinfo_t structure.
 		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
+#else
+		// This optimization allows us to use one of the global thrinfo_t
+		// objects for single-threaded execution rather than grow one from
+		// scratch. The key is that bli_thrinfo_sup_grow(), which is called
+		// from within the variants, will immediately return if it detects
+		// that the thrinfo_t* passed into it is either
+		// &BLIS_GEMM_SINGLE_THREADED or &BLIS_PACKM_SINGLE_THREADED.
+		thrinfo_t* thread = &BLIS_GEMM_SINGLE_THREADED;
+
+		( void )tid;
+#endif
 
 		func
 		(
@@ -134,8 +122,10 @@ err_t bli_l3_sup_thread_decorator
 		  thread
 		);
 
+#ifndef SKIP_THRINFO_TREE
 		// Free the current thread's thrinfo_t structure.
 		bli_l3_sup_thrinfo_free( rntm_p, thread );
+#endif
 	}
 
 	// We shouldn't free the global communicator since it was already freed
@@ -149,7 +139,6 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 
-#endif
 }
 
 #endif
