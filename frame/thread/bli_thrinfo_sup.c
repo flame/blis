@@ -42,6 +42,9 @@ void bli_thrinfo_sup_grow
        thrinfo_t* thread
      )
 {
+	if ( thread == &BLIS_GEMM_SINGLE_THREADED ||
+	     thread == &BLIS_PACKM_SINGLE_THREADED ) return;
+
 	// NOTE: If bli_thrinfo_sup_rgrow() is being called, the sub_node field will
 	// always be non-NULL, and so there's no need to check it.
 	//if ( bli_cntl_sub_node( cntl ) != NULL )
