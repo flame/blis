@@ -237,7 +237,7 @@ if ( col_stored ) { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_obarrier( thread ); \
+bli_thread_barrier( thread ); \
 	if ( bli_thread_work_id( thread ) == 1 ) \
 	{ \
 	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
@@ -248,7 +248,7 @@ bli_thread_obarrier( thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_obarrier( thread ); \
+bli_thread_barrier( thread ); \
 } \
 else { \
 	if ( bli_thread_work_id( thread ) == 0 ) \
@@ -261,7 +261,7 @@ else { \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_obarrier( thread ); \
+bli_thread_barrier( thread ); \
 	if ( bli_thread_work_id( thread ) == 1 ) \
 	{ \
 	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n", bli_thread_work_id( thread ), c_use, p_use ); \
@@ -272,7 +272,7 @@ bli_thread_obarrier( thread ); \
 	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" ); \
 	fflush( stdout ); \
 	} \
-bli_thread_obarrier( thread ); \
+bli_thread_barrier( thread ); \
 } \
 */
 /*
