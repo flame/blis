@@ -340,7 +340,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 
 	// Broadcast the temporary array to all threads in the parent's
 	// communicator.
-	new_comms = bli_thread_obroadcast( thread_par, new_comms );
+	new_comms = bli_thread_broadcast( thread_par, new_comms );
 
 	// Chiefs in the child communicator allocate the communicator
 	// object and store it in the array element corresponding to the
@@ -348,7 +348,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	if ( child_comm_id == 0 )
 		new_comms[ parent_work_id ] = bli_thrcomm_create( rntm, child_nt_in );
 
-	bli_thread_obarrier( thread_par );
+	bli_thread_barrier( thread_par );
 
 	// All threads create a new thrinfo_t node using the communicator
 	// that was created by their chief, as identified by parent_work_id.
@@ -364,7 +364,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	  NULL                         // sub_node
 	);
 
-	bli_thread_obarrier( thread_par );
+	bli_thread_barrier( thread_par );
 
 	// The parent's chief thread frees the temporary array of thrcomm_t
 	// pointers.
@@ -477,7 +477,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 	const dim_t child_comm_id = parent_comm_id % child_nt_in;
 	const dim_t child_work_id = child_comm_id / ( child_nt_in / child_n_way );
 
-	bli_thread_obarrier( thread_par );
+	bli_thread_barrier( thread_par );
 
 	// NOTE: Recall that parent_comm_id == child_comm_id, so checking for the
 	// parent's chief-ness is equivalent to checking for chief-ness in the new
@@ -488,7 +488,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 
 	// Broadcast the new thrcomm_t address to the other threads in the
 	// parent's group.
-	new_comm = bli_thread_obroadcast( thread_par, new_comm );
+	new_comm = bli_thread_broadcast( thread_par, new_comm );
 
 	// All threads create a new thrinfo_t node using the communicator
 	// that was created by their chief, as identified by parent_work_id.
@@ -504,7 +504,7 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 	  NULL           // sub_node
 	);
 
-	bli_thread_obarrier( thread_par );
+	bli_thread_barrier( thread_par );
 
 	return thread_chl;
 }

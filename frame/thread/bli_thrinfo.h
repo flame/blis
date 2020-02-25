@@ -141,12 +141,12 @@ static void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
 
 // other thrinfo_t-related functions
 
-static void* bli_thread_obroadcast( thrinfo_t* t, void* p )
+static void* bli_thread_broadcast( thrinfo_t* t, void* p )
 {
 	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
-static void bli_thread_obarrier( thrinfo_t* t )
+static void bli_thread_barrier( thrinfo_t* t )
 {
 	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
