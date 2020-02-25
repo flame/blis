@@ -73,6 +73,6 @@ void bli_unpackm_int
     }
 
 	// Barrier so that unpacking is done before computation.
-    bli_thread_obarrier( thread );
+    bli_thread_barrier( thread );
 }
 
