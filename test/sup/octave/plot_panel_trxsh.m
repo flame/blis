@@ -48,7 +48,7 @@ n_opsupnames = size( opsupnames, 1 );
 
 if 1 == 1
 	%fig = figure('Position', [100, 100, 2400, 1500]);
-	fig = figure('Position', [100, 100, 2800, 1500]);
+	fig = figure('Position', [100, 100, 2400, 1200]);
 	orient( fig, 'portrait' );
 	set(gcf,'PaperUnits', 'inches');
 	if impl == 'matlab'
@@ -56,7 +56,7 @@ if 1 == 1
 		set(gcf,'PaperPosition', [0 0 11.5 20.4]);
 		set(gcf,'PaperPositionMode','manual');
 	else % impl == 'octave' % octave 4.x
-	   set(gcf,'PaperSize', [10 17.5]);
+	   set(gcf,'PaperSize', [12 22.0]);
 	   set(gcf,'PaperPositionMode','auto');
 	end
 	set(gcf,'PaperOrientation','landscape');
@@ -165,8 +165,8 @@ outfile = sprintf( 'l3sup_%s_%s_%s_nt%d.pdf', oproot, stor_str, arch_str, nth );
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
 %print(gcf, outfile,'-bestfit','-dpdf');
 if impl == 'octave'
-print(gcf, outfile);
+	print(gcf, outfile);
 else % if impl == 'matlab'
-print(gcf, outfile,'-bestfit','-dpdf');
+	print(gcf, outfile,'-bestfit','-dpdf');
 end
 
