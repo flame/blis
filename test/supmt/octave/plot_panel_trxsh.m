@@ -54,7 +54,7 @@ if 1 == 1
 		set(gcf,'PaperPosition', [0 0 11.5 20.4]);
 		set(gcf,'PaperPositionMode','manual');
 	else % impl == 'octave' % octave 4.x
-	   set(gcf,'PaperSize', [12 21.5]);
+	   set(gcf,'PaperSize', [12 22.0]);
 	   set(gcf,'PaperPositionMode','auto');
 	end
 	set(gcf,'PaperOrientation','landscape');
@@ -145,8 +145,8 @@ outfile = sprintf( 'l3sup_%s_%s_%s_nt%d.pdf', oproot, stor_str, arch_str, nth );
 %print(gcf, 'gemm_md','-fillpage','-dpdf');
 %print(gcf, outfile,'-bestfit','-dpdf');
 if impl == 'octave'
-print(gcf, outfile);
+	print(gcf, outfile);
 else % if impl == 'matlab'
-print(gcf, outfile,'-bestfit','-dpdf');
+	print(gcf, outfile,'-bestfit','-dpdf');
 end
 

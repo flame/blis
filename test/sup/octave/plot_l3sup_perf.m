@@ -11,6 +11,7 @@ function r_val = plot_l3sup_perf( opname, ...
                                   cfreq, ...
                                   dfps, ...
                                   theid, impl )
+
 %if ... %mod(theid-1,cols) == 2 || ...
 %   ... %mod(theid-1,cols) == 3 || ...
 %   ... %mod(theid-1,cols) == 4 || ...
@@ -21,11 +22,11 @@ function r_val = plot_l3sup_perf( opname, ...
 %end
 
 %legend_plot_id = 11;
-legend_plot_id = 1*cols + 1*5;
+legend_plot_id = 2*cols + 1*5;
 
 if 1
-ax1 = subplot( rows, cols, theid );
-hold( ax1, 'on' );
+	ax1 = subplot( rows, cols, theid );
+	hold( ax1, 'on' );
 end
 
 % Set line properties.
@@ -83,9 +84,9 @@ end
 flopscol = size( data_blissup, 2 );
 msize = 5;
 if 1
-fontsize = 11;
+	fontsize = 12;
 else
-fontsize = 16;
+	fontsize = 16;
 end
 linesize = 0.5;
 legend_loc = 'southeast';
@@ -148,8 +149,7 @@ end
 vend_ln     = line( x_axis( 1:np, 1 ), data_vend( 1:np, flopscol ) / nth, ...
                     'Color',color_vend, 'LineStyle',lines_vend, ...
                     'LineWidth',linesize );
-else
-if theid == legend_plot_id
+elseif theid == legend_plot_id
 blissup_ln  = line( nan, nan, ...
                     'Color',color_blissup, 'LineStyle',lines_blissup, ...
                     'LineWidth',linesize );
@@ -171,7 +171,6 @@ xsmm_ln     = line( nan, nan, ...
 vend_ln     = line( nan, nan, ...
                     'Color',color_vend, 'LineStyle',lines_vend, ...
                     'LineWidth',linesize );
-end
 end
 
 
@@ -222,11 +221,11 @@ if show_plot == 1 || theid == legend_plot_id
 			set( leg,'Color','none' );
 			set( leg,'Units','inches' );
 			if impl == 'octave'
-			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
+				set( leg,'FontSize',fontsize );
+				set( leg,'Position',[15.40 4.75 1.9 1.20] ); % (1,4tl)
 			else
-			set( leg,'FontSize',fontsize-3 );
-			set( leg,'Position',[18.20 10.20 1.15 0.7 ] ); % (1,4tl)
+				set( leg,'FontSize',fontsize-3 );
+				set( leg,'Position',[18.20 10.20 1.15 0.7 ] ); % (1,4tl)
 			end
 		else
 			leg = legend( ...
@@ -249,11 +248,11 @@ if show_plot == 1 || theid == legend_plot_id
 			set( leg,'Color','none' );
 			set( leg,'Units','inches' );
 			if impl == 'octave'
-			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
+				set( leg,'FontSize',fontsize );
+				set( leg,'Position',[15.40 7.65 1.9 1.10] ); % (1,4tl)
 			else
-			set( leg,'FontSize',fontsize-1 );
-			set( leg,'Position',[18.24 10.15 1.15 0.7 ] ); % (1,4tl)
+				set( leg,'FontSize',fontsize-1 );
+				set( leg,'Position',[18.24 10.15 1.15 0.7] ); % (1,4tl)
 			end
 		end
 		set( leg,'Box','off' );
@@ -272,17 +271,31 @@ box( ax1, 'on' );
 titl = title( titlename );
 set( titl, 'FontWeight', 'normal' ); % default font style is now 'bold'.
 
+% The default is to align the plot title across whole figure, not the box.
+% This is a hack to nudge the title back to the center of the box.
 if impl == 'octave'
-tpos = get( titl, 'Position' ); % default is to align across whole figure, not box.
-tpos(1) = tpos(1) + -40;
-set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
+	tpos = get( titl, 'Position' );
+	% For some reason, the titles in the graphs in the last column start
+	% off in a different relative position than the graphs in the other
+	% columns. Here, we manually account for that.
+	if mod(theid-1,cols) == 6
+		tpos(1) = tpos(1) + -10;
+	else
+		tpos(1) = tpos(1) + -40;
+	end
+	set( titl, 'Position', tpos );
+	set( titl, 'FontSize', fontsize );
+else % impl == 'matlab'
+	tpos = get( titl, 'Position' );
+	tpos(1) = tpos(1) + 90;
+	set( titl, 'Position', tpos );
 end
 
 if theid > (rows-1)*cols
-%xlab = xlabel( ax1,xaxisname );
-%tpos = get( xlab, 'Position' )
-%tpos(2) = tpos(2) + 10;
-%set( xlab, 'Position', tpos );
+	%xlab = xlabel( ax1,xaxisname );
+	%tpos = get( xlab, 'Position' )
+	%tpos(2) = tpos(2) + 10;
+	%set( xlab, 'Position', tpos );
 	if     theid == rows*cols - 6
 	xlab = xlabel( ax1, 'm = 6; n = k' );
 	elseif theid == rows*cols - 5
@@ -301,14 +314,8 @@ if theid > (rows-1)*cols
 end
 
 if mod(theid-1,cols) == 0
-ylab = ylabel( ax1,yaxisname );
+	ylab = ylabel( ax1,yaxisname );
 end
-
-%export_fig( filename, colorflag, '-pdf', '-m2', '-painters', '-transparent' );
-%saveas( fig, filename_png );
-
-%hold( ax1, 'off' );
 
 r_val = 0;
 
-end
