@@ -141,15 +141,18 @@ VENDORP_LIB    := $(MKLP_LIB)
 # --- Problem size definitions -------------------------------------------------
 #
 
-# Single core
-PS_BEGIN := 4
-PS_MAX   := 800
-PS_INC   := 4
-
 # Multicore
-P1_BEGIN := 8 
-P1_MAX   := 1600
-P1_INC   := 8 
+P1_BEGIN_3L := 4
+P1_MAX_3L   := 800
+P1_INC_3L   := 4
+
+P1_BEGIN_2L := 8
+P1_MAX_2L   := 1600
+P1_INC_2L   := 8
+
+P1_BEGIN_1L := 64
+P1_MAX_1L   := 12800
+P1_INC_1L   := 64
 
 
 #
@@ -186,21 +189,17 @@ CXXFLAGS       += -I$(EIGEN_INC)
 CXXFLAGS_ST    := -march=native $(subst -fopenmp,,$(CXXFLAGS))
 CXXFLAGS_MT    := -march=native $(CXXFLAGS)
 
-# Single or multithreaded string
+# Single or multithreaded string.
 STR_ST   := -DTHR_STR=\"st\"
 STR_MT   := -DTHR_STR=\"mt\"
 
 # Number of trials per problem size.
 N_TRIALS := -DN_TRIALS=3
 
-# Problem size specification
-PDEF_ST  := -DP_BEGIN=$(PS_BEGIN) \
-            -DP_MAX=$(PS_MAX) \
-            -DP_INC=$(PS_INC)
-
-PDEF_MT  := -DP_BEGIN=$(P1_BEGIN) \
-            -DP_MAX=$(P1_MAX) \
-            -DP_INC=$(P1_INC)
+# Problem size specification.
+PDEF_MT_1L  := -DP_BEGIN=$(P1_BEGIN_1L) -DP_MAX=$(P1_MAX_1L) -DP_INC=$(P1_INC_1L)
+PDEF_MT_2L  := -DP_BEGIN=$(P1_BEGIN_2L) -DP_MAX=$(P1_MAX_2L) -DP_INC=$(P1_INC_2L)
+PDEF_MT_3L  := -DP_BEGIN=$(P1_BEGIN_3L) -DP_MAX=$(P1_MAX_3L) -DP_INC=$(P1_INC_3L)
 
 ifeq ($(E),1)
 ERRCHK := -DERROR_CHECK
@@ -261,6 +260,15 @@ get-2of2 = $(word 2,$(subst _, ,$(1)))
 get-1of3 = $(word 1,$(subst _, ,$(1)))
 get-2of3 = $(word 2,$(subst _, ,$(1)))
 get-3of3 = $(word 3,$(subst _, ,$(1)))
+
+# A function to return the correct PDEFS_ST variable given the shape string.
+get-pdefs = $(strip $(subst l_l_l,$(PDEF_MT_3L), \
+                    $(subst l_l_s,$(PDEF_MT_2L), \
+                    $(subst l_s_l,$(PDEF_MT_2L), \
+                    $(subst s_l_l,$(PDEF_MT_2L), \
+                    $(subst s_s_l,$(PDEF_MT_1L), \
+                    $(subst s_l_s,$(PDEF_MT_1L), \
+                    $(subst l_s_s,$(PDEF_MT_1L),$(1)))))))))
 
 # Datatype defs.
 get-dt-cpp = $(strip \
@@ -453,9 +461,11 @@ EIMPLS    := eigen
 
 # Define the function that will be used to instantiate compilation rules
 # for the various single-threaded implementations.
+# NOTE: The rules from this function are not yet working since this Makefile
+# targets multithreaded, not single-threaded, drivers.
 define make-st-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
-	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each BLIS/BLAS/CBLAS
@@ -474,7 +484,7 @@ $(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))
 # for the various multithreaded implementations.
 define make-mt-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(PDEF_MT) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
+	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-mt-rule() for each BLIS/BLAS/CBLAS
@@ -491,9 +501,11 @@ $(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))
 
 # Define the function that will be used to instantiate compilation rules
 # for the single-threaded Eigen implementation.
+# NOTE: The rules from this function are not yet working since this Makefile
+# targets multithreaded, not single-threaded, drivers.
 define make-eigst-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
-	$(CXX) $(CXXFLAGS_ST) $(ERRCHK) $(N_TRIALS) $(PDEF_ST) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
+	$(CXX) $(CXXFLAGS_ST) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each Eigen implementation.
@@ -511,7 +523,7 @@ $(eval $(call make-eigst-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl))
 # for the multithreaded Eigen implementation.
 define make-eigmt-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(ERRCHK) $(N_TRIALS) $(PDEF_MT) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
+	$(CXX) $(CXXFLAGS_MT) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each Eigen implementation.
