@@ -181,38 +181,40 @@ static err_t bli_sgemm_small
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
         guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
         guint_t row_idx, col_idx, k;
+
         float *A = a->buffer; // pointer to elements of Matrix A
         float *B = b->buffer; // pointer to elements of Matrix B
         float *C = c->buffer; // pointer to elements of Matrix C
 
         float *tA = A, *tB = B, *tC = C;//, *tA_pack;
         float *tA_packed; // temporary pointer to hold packed A memory pointer
+
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         guint_t col_idx_start; //starting index after A matrix is packed.
         dim_t tb_inc_row = 1; // row stride of matrix B
         dim_t tb_inc_col = ldb; // column stride of matrix B
 
-        __m256 ymm4, ymm5, ymm6, ymm7;
+	__m256 ymm4, ymm5, ymm6, ymm7;
         __m256 ymm8, ymm9, ymm10, ymm11;
         __m256 ymm12, ymm13, ymm14, ymm15;
         __m256 ymm0, ymm1, ymm2, ymm3;
 
         gint_t n_remainder; // If the N is non multiple of 3.(N%3)
         gint_t m_remainder; // If the M is non multiple of 32.(M%32)
-
-        float *alpha_cast, *beta_cast; // alpha, beta multiples
-        alpha_cast = (alpha->buffer);
-        beta_cast = (beta->buffer);
         gint_t required_packing_A = 1;
         mem_t local_mem_buf_A_s;
         float *A_pack = NULL;
         rntm_t rntm;
 
+        const num_t    dt_exec   = bli_obj_dt( c );
+        float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
+        float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
+
         /*Beta Zero Check*/
-        guint_t isbetanonzero=0;
+        bool_t is_beta_non_zero=0;
         if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
-            isbetanonzero = 1;
+            is_beta_non_zero = 1;
         }
 
         // when N is equal to 1 call GEMV instead of GEMM
@@ -411,7 +413,7 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate col 1.
@@ -562,7 +564,7 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate col 1.
@@ -677,7 +679,7 @@ static err_t bli_sgemm_small
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
                 // multiply C by beta and accumulate, col 1.
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     ymm2 = _mm256_loadu_ps(tC);
@@ -760,7 +762,7 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -856,7 +858,7 @@ static err_t bli_sgemm_small
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -952,7 +954,7 @@ static err_t bli_sgemm_small
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -1028,16 +1030,16 @@ static err_t bli_sgemm_small
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC + 0);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC + 0);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
                 }
                 _mm256_storeu_ps(tC + 0, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
@@ -1100,7 +1102,7 @@ static err_t bli_sgemm_small
                 ymm8 = _mm256_mul_ps(ymm8, ymm0);
                 ymm9 = _mm256_mul_ps(ymm9, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -1178,7 +1180,7 @@ static err_t bli_sgemm_small
                 ymm6 = _mm256_mul_ps(ymm6, ymm0);
                 ymm7 = _mm256_mul_ps(ymm7, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -1239,7 +1241,7 @@ static err_t bli_sgemm_small
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
 
                 // multiply C by beta and accumulate.
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     ymm2 = _mm256_loadu_ps(tC);
@@ -1297,7 +1299,7 @@ static err_t bli_sgemm_small
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
                 ymm6 = _mm256_mul_ps(ymm6, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     ymm2 = _mm256_loadu_ps(tC);
@@ -1353,7 +1355,7 @@ static err_t bli_sgemm_small
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -1399,7 +1401,7 @@ static err_t bli_sgemm_small
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
 
-                if(isbetanonzero)
+                if(is_beta_non_zero)
                 {
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     // multiply C by beta and accumulate.
@@ -1479,8 +1481,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero)
+                if(is_beta_non_zero){
                     ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1493,8 +1496,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero)
+                if(is_beta_non_zero){
                     ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                }
                 _mm256_storeu_ps(f_temp, ymm7);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1507,8 +1511,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero)
+                if(is_beta_non_zero){
                     ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                }
                 _mm256_storeu_ps(f_temp, ymm9);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1566,8 +1571,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero)
+                if(is_beta_non_zero){
                     ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1580,9 +1586,10 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero)
+                if(is_beta_non_zero){
                     ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
-                _mm256_storeu_ps(f_temp, ymm7);
+                }
+	    	_mm256_storeu_ps(f_temp, ymm7);
                 for (int i = 0; i < m_remainder; i++)
                 {
                     tC[i] = f_temp[i];
@@ -1632,7 +1639,7 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                if(isbetanonzero){
+                if(is_beta_non_zero){
                     ymm1 = _mm256_broadcast_ss(beta_cast);
                     ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
                 }
@@ -1666,7 +1673,7 @@ static err_t bli_sgemm_small
                     }
 
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
+                    if(is_beta_non_zero){
                         (*tC) = (*tC) * (*beta_cast) + result;
                     }else{
                         (*tC) = result;
@@ -3199,16 +3206,15 @@ static err_t bli_sgemm_small_atbn
     __m256 ymm0, ymm1, ymm2, ymm3;
 
     float result, scratch[8];
-    float *alpha_cast, *beta_cast; // alpha, beta multiples
-    alpha_cast = (alpha->buffer);
-    beta_cast = (beta->buffer);
+    const num_t    dt_exec   = bli_obj_dt( c );
+    float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
+    float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
 
     /*Beta Zero Check*/
-    guint_t isbetanonzero=0;
+    bool_t is_beta_non_zero=0;
     if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
-          isbetanonzero = 1;
+        is_beta_non_zero = 1;
     }
-
 
     // The non-copy version of the A^T GEMM gives better performance for the small M cases.
     // The threshold is controlled by BLIS_ATBN_M_THRES
@@ -3321,8 +3327,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm4);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
                 }else{
                     tC[0] = result;
                 }
@@ -3332,8 +3338,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm7);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
                 }else{
                     tC[1] = result;
                 }
@@ -3343,8 +3349,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm10);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
                 }else{
                     tC[2] = result;
                 }
@@ -3354,8 +3360,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm13);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
                 }else{
                     tC[3] = result;
                 }
@@ -3366,8 +3372,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm5);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
                 }else{
                     tC[0] = result;
                 }
@@ -3377,8 +3383,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm8);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
                 }else{
                     tC[1] = result;
                 }
@@ -3388,8 +3394,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm11);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
                 }else{
                     tC[2] = result;
                 }
@@ -3399,8 +3405,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm14);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
                 }else{
                     tC[3] = result;
                 }
@@ -3411,8 +3417,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm6);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
                 }else{
                     tC[0] = result;
                 }
@@ -3422,8 +3428,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm9);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
                 }else{
                     tC[1] = result;
                 }
@@ -3433,8 +3439,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm12);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
                 }else{
                     tC[2] = result;
                 }
@@ -3444,8 +3450,8 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm15);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                if(isbetanonzero){
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
                 }else{
                     tC[3] = result;
                 }
@@ -3532,8 +3538,8 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm4);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
-                    tC[0] = result + tC[0] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[0] = result + tC[0] * (*beta_cast);
                     }else{
                         tC[0] = result;
                     }
@@ -3543,8 +3549,8 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm7);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
-                    tC[1] = result + tC[1] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[1] = result + tC[1] * (*beta_cast);
                     }else{
                         tC[1] = result;
                     }
@@ -3554,8 +3560,8 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm10);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
-                    tC[2] = result + tC[2] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[2] = result + tC[2] * (*beta_cast);
                     }else{
                         tC[2] = result;
                     }
@@ -3565,8 +3571,8 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm13);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
-                    tC[3] = result + tC[3] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[3] = result + tC[3] * (*beta_cast);
                     }else{
                         tC[3] = result;
                     }
@@ -3619,8 +3625,8 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm4);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    if(isbetanonzero){
-                    tC[0] = result + tC[0] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[0] = result + tC[0] * (*beta_cast);
                     }else{
                         tC[0] = result;
                     }
