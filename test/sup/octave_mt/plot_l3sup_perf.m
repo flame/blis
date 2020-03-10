@@ -20,7 +20,7 @@ function r_val = plot_l3sup_perf( opname, ...
 %end
 
 %legend_plot_id = 11;
-legend_plot_id = 0*cols + 1*4;
+legend_plot_id = 0*cols + 1*6;
 
 if 1
 	ax1 = subplot( rows, cols, theid );
@@ -96,13 +96,14 @@ for psize_col = 1:3
 end
 x_axis( :, 1 ) = data_blissup( :, psize_col );
 
-% Compute the number of data points we have in the x-axis. Note that
-% we only use quarter the data points for the m = n = k column of graphs.
-if mod(theid-1,cols) == 6
-	np = size( data_blissup, 1 ) / 4;
-else
-	np = size( data_blissup, 1 );
-end
+% Compute the number of data points we have in the x-axis. Note that we
+% only use half the data points for the m = n = k column of graphs.
+%if mod(theid-1,cols) == 6
+%	np = size( data_blissup, 1 ) / 2;
+%else
+%	np = size( data_blissup, 1 );
+%end
+np = size( data_blissup, 1 );
 
 % Grab the last x-axis value.
 x_end = data_blissup( np, psize_col );
@@ -148,9 +149,23 @@ end
 xlim( ax1, [x_begin x_end] );
 ylim( ax1, [y_begin y_end] );
 
-if     6000 <= x_end && x_end < 10000
+if mod(theid-1,cols) == 3 || mod(theid-1,cols) == 4 || mod(theid-1,cols) == 5
+	if nth == 12
+		ylim( ax1, [y_begin y_end/2] );
+	elseif nth > 12
+		ylim( ax1, [y_begin y_end/6] );
+	end
+end
+
+if    10000 <= x_end && x_end < 15000
 	x_tick2 = x_end - 2000;
 	x_tick1 = x_tick2/2;
+	%xticks( ax1, [ x_tick1 x_tick2 ] );
+	xticks( ax1, [ 4000 8000 12000 ] );
+elseif 6000 <= x_end && x_end < 10000
+	x_tick2 = x_end - 2000;
+	x_tick1 = x_tick2/2;
+	%xticks( ax1, [ x_tick1 x_tick2 ] );
 	xticks( ax1, [ x_tick1 x_tick2 ] );
 elseif 4000 <= x_end && x_end < 6000
 	x_tick2 = x_end - 1000;
@@ -188,7 +203,8 @@ if show_plot == 1 || theid == legend_plot_id
 		set( leg,'Units','inches' );
 		if impl == 'octave'
 			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[12.40 10.60 1.9 0.95 ] ); % (1,4tl)
+			%set( leg,'Position',[12.40 10.60 1.9 0.95 ] ); % (1,4tl)
+			set( leg,'Position',[18.80 10.60 1.9 0.95 ] ); % (1,4tl)
 		else
 			set( leg,'FontSize',fontsize-1 );
 			set( leg,'Position',[18.24 10.15 1.15 0.7 ] ); % (1,4tl)
