@@ -45,10 +45,11 @@
 # --- Makefile PHONY target definitions ----------------------------------------
 #
 
-.PHONY: all all-st all-mt \
-        blis blis-st blis-mt \
+.PHONY: all \
+        st mt \
+        blissup-st blislpab-st eigen-st openblas-st vendor-st blasfeo-st libxsmm-st \
+        blissup-mt blislpab-mt eigen-mt openblas-mt vendor-mt \
         clean cleanx
-
 
 
 #
@@ -71,14 +72,12 @@ SHARE_PATH := ../..
 endif
 
 
-
 #
 # --- Include common makefile definitions --------------------------------------
 #
 
 # Include the common makefile fragment.
 -include $(SHARE_PATH)/common.mk
-
 
 
 #
@@ -141,7 +140,29 @@ VENDORP_LIB    := $(MKLP_LIB)
 # --- Problem size definitions -------------------------------------------------
 #
 
-# Multicore
+# The problem size range specification is done separately for single-threaded
+# and multithreaded execution. Within each threadedness scenario, we allow for
+# separate range specifications for cases with:
+# - 3L: three large/variable dimensions and no small/constant dimensions
+# - 2L: two large/variable dimensions and one small/constant dimension
+# - 1L: one large/variable dimension and two small/constant dimensions
+
+# -- Single-threaded --
+
+PS_BEGIN_3L := 2
+PS_MAX_3L   := 400
+PS_INC_3L   := 2
+
+PS_BEGIN_2L := 4
+PS_MAX_2L   := 800
+PS_INC_2L   := 4
+
+PS_BEGIN_1L := 32
+PS_MAX_1L   := 6400
+PS_INC_1L   := 32
+
+# -- Multithreaded --
+
 P1_BEGIN_3L := 4
 P1_MAX_3L   := 800
 P1_INC_3L   := 4
@@ -197,9 +218,13 @@ STR_MT   := -DTHR_STR=\"mt\"
 N_TRIALS := -DN_TRIALS=3
 
 # Problem size specification.
-PDEF_MT_1L  := -DP_BEGIN=$(P1_BEGIN_1L) -DP_MAX=$(P1_MAX_1L) -DP_INC=$(P1_INC_1L)
-PDEF_MT_2L  := -DP_BEGIN=$(P1_BEGIN_2L) -DP_MAX=$(P1_MAX_2L) -DP_INC=$(P1_INC_2L)
-PDEF_MT_3L  := -DP_BEGIN=$(P1_BEGIN_3L) -DP_MAX=$(P1_MAX_3L) -DP_INC=$(P1_INC_3L)
+PDEF_ST_1L := -DP_BEGIN=$(PS_BEGIN_1L) -DP_MAX=$(PS_MAX_1L) -DP_INC=$(PS_INC_1L)
+PDEF_ST_2L := -DP_BEGIN=$(PS_BEGIN_2L) -DP_MAX=$(PS_MAX_2L) -DP_INC=$(PS_INC_2L)
+PDEF_ST_3L := -DP_BEGIN=$(PS_BEGIN_3L) -DP_MAX=$(PS_MAX_3L) -DP_INC=$(PS_INC_3L)
+
+PDEF_MT_1L := -DP_BEGIN=$(P1_BEGIN_1L) -DP_MAX=$(P1_MAX_1L) -DP_INC=$(P1_INC_1L)
+PDEF_MT_2L := -DP_BEGIN=$(P1_BEGIN_2L) -DP_MAX=$(P1_MAX_2L) -DP_INC=$(P1_INC_2L)
+PDEF_MT_3L := -DP_BEGIN=$(P1_BEGIN_3L) -DP_MAX=$(P1_MAX_3L) -DP_INC=$(P1_INC_3L)
 
 ifeq ($(E),1)
 ERRCHK := -DERROR_CHECK
@@ -240,9 +265,15 @@ SHAPES := l_l_s \
           l_s_s \
           l_l_l
 
-SMS := 6
-SNS := 8
-SKS := 10
+# Define the small/constant m, n, and k dimensions for single core and multicore
+# experiments.
+SMS_ST := 6
+SNS_ST := 8
+SKS_ST := 4
+
+SMS_MT := 6
+SNS_MT := 8
+SKS_MT := 10
 
 
 #
@@ -346,29 +377,31 @@ XSTORS0 = ccc
 # --- Object and binary file definitons ----------------------------------------
 #
 
+# -- Single-threaded --
+
 get-st-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(8)_st.o)))))))
 
 # Build a list of object files and binaries for each single-threaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blissup)
+BLISSUP_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blissup)
 BLISSUP_ST_BINS  := $(patsubst %.o,%.x,$(BLISSUP_ST_OBJS))
 
-BLISLPAB_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blislpab)
+BLISLPAB_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blislpab)
 BLISLPAB_ST_BINS := $(patsubst %.o,%.x,$(BLISLPAB_ST_OBJS))
 
-EIGEN_ST_OBJS    := $(call get-st-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),eigen)
+EIGEN_ST_OBJS    := $(call get-st-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),eigen)
 EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
 
-OPENBLAS_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),openblas)
+OPENBLAS_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),openblas)
 OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
 
-BLASFEO_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blasfeo)
+BLASFEO_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blasfeo)
 BLASFEO_ST_BINS  := $(patsubst %.o,%.x,$(BLASFEO_ST_OBJS))
 
-LIBXSMM_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),libxsmm)
+LIBXSMM_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),libxsmm)
 LIBXSMM_ST_BINS  := $(patsubst %.o,%.x,$(LIBXSMM_ST_OBJS))
 
-VENDOR_ST_OBJS   := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),vendor)
+VENDOR_ST_OBJS   := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),vendor)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
 # Mark the object files as intermediate so that make will remove them
@@ -381,23 +414,25 @@ VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
                $(LIBXSMM_ST_OBJS) \
                $(VENDOR_ST_OBJS)
 
+# -- Multithreaded --
+
 get-mt-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(8)_mt.o)))))))
 
 # Build a list of object files and binaries for each multithreaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_MT_OBJS  := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blissup)
+BLISSUP_MT_OBJS  := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),blissup)
 BLISSUP_MT_BINS  := $(patsubst %.o,%.x,$(BLISSUP_MT_OBJS))
 
-BLISLPAB_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),blislpab)
+BLISLPAB_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),blislpab)
 BLISLPAB_MT_BINS := $(patsubst %.o,%.x,$(BLISLPAB_MT_OBJS))
 
-EIGEN_MT_OBJS    := $(call get-mt-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),eigen)
+EIGEN_MT_OBJS    := $(call get-mt-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),eigen)
 EIGEN_MT_BINS    := $(patsubst %.o,%.x,$(EIGEN_MT_OBJS))
 
-OPENBLAS_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),openblas)
+OPENBLAS_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),openblas)
 OPENBLAS_MT_BINS := $(patsubst %.o,%.x,$(OPENBLAS_MT_OBJS))
 
-VENDOR_MT_OBJS   := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS),$(SNS),$(SKS),vendor)
+VENDOR_MT_OBJS   := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),vendor)
 VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 #$(error "objs = $(EIGEN_ST_BINS)" )
@@ -412,20 +447,21 @@ VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 
 #
-# --- Targets/rules ------------------------------------------------------------
+# --- High-level targets/rules -------------------------------------------------
 #
 
 all:         st
 
-blis:        blissup-st blislpab-st
+#blis:        blissup-st blislpab-st
+#blissup:     blissup-st
+#blislpab:    blislpab-st
+#eigen:       eigen-st
+#openblas:    openblas-st
+#blasfeo:     blasfeo-st
+#libxsmm:     libxsmm-st
+#vendor:      vendor-st
 
-blissup:     blissup-st
-blislpab:    blislpab-st
-eigen:       eigen-st
-openblas:    openblas-st
-blasfeo:     blasfeo-st
-libxsmm:     libxsmm-st
-vendor:      vendor-st
+# -- Single-threaded --
 
 st:          blissup-st blislpab-st \
              eigen-st openblas-st blasfeo-st libxsmm-st vendor-st
@@ -438,6 +474,8 @@ blasfeo-st:  $(BLASFEO_ST_BINS)
 libxsmm-st:  $(LIBXSMM_ST_BINS)
 vendor-st:   $(VENDOR_ST_BINS)
 
+# -- Multithreaded --
+
 mt:          blissup-mt blislpab-mt \
              eigen-mt openblas-mt vendor-mt
 
@@ -448,21 +486,20 @@ openblas-mt: $(OPENBLAS_MT_BINS)
 vendor-mt:   $(VENDOR_MT_BINS)
 
 
-
-# --Object file rules --
+# --- Object file rules --------------------------------------------------------
 
 # Define the implementations for which we will instantiate compilation rules.
 BIMPLS_ST := blissup blislpab openblas blasfeo libxsmm vendor
 BIMPLS_MT := blissup blislpab openblas                 vendor
 EIMPLS    := eigen
 
+# -- Single-threaded BLAS --
+
 #      1     2  3   4 567  8
 # test_dgemm_nn_rrr_mpn6kp_blissup_st.x
 
 # Define the function that will be used to instantiate compilation rules
 # for the various single-threaded implementations.
-# NOTE: The rules from this function are not yet working since this Makefile
-# targets multithreaded, not single-threaded, drivers.
 define make-st-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
 	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
@@ -474,11 +511,13 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS), \
-$(foreach sn,$(SNS), \
-$(foreach sk,$(SKS), \
+$(foreach sm,$(SMS_ST), \
+$(foreach sn,$(SNS_ST), \
+$(foreach sk,$(SKS_ST), \
 $(foreach impl,$(BIMPLS_ST), \
 $(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+
+# -- Multithreaded BLAS --
 
 # Define the function that will be used to instantiate compilation rules
 # for the various multithreaded implementations.
@@ -493,16 +532,16 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS), \
-$(foreach sn,$(SNS), \
-$(foreach sk,$(SKS), \
+$(foreach sm,$(SMS_MT), \
+$(foreach sn,$(SNS_MT), \
+$(foreach sk,$(SKS_MT), \
 $(foreach impl,$(BIMPLS_MT), \
 $(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
 
+# -- Single-threaded Eigen --
+
 # Define the function that will be used to instantiate compilation rules
 # for the single-threaded Eigen implementation.
-# NOTE: The rules from this function are not yet working since this Makefile
-# targets multithreaded, not single-threaded, drivers.
 define make-eigst-rule
 test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
 	$(CXX) $(CXXFLAGS_ST) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
@@ -513,11 +552,13 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS), \
-$(foreach sn,$(SNS), \
-$(foreach sk,$(SKS), \
+$(foreach sm,$(SMS_ST), \
+$(foreach sn,$(SNS_ST), \
+$(foreach sk,$(SKS_ST), \
 $(foreach impl,$(EIMPLS), \
 $(eval $(call make-eigst-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+
+# -- Multithreaded Eigen --
 
 # Define the function that will be used to instantiate compilation rules
 # for the multithreaded Eigen implementation.
@@ -531,19 +572,21 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS), \
-$(foreach sn,$(SNS), \
-$(foreach sk,$(SKS), \
+$(foreach sm,$(SMS_MT), \
+$(foreach sn,$(SNS_MT), \
+$(foreach sk,$(SKS_MT), \
 $(foreach impl,$(EIMPLS), \
 $(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
 
 
-# -- Executable file rules --
+# --- Executable file rules ----------------------------------------------------
 
 # NOTE: For the BLAS test drivers, we place the BLAS libraries before BLIS
 # on the link command line in case BLIS was configured with the BLAS
 # compatibility layer. This prevents BLIS from inadvertently getting called
 # for the BLAS routines we are trying to test with.
+
+# -- Single-threaded --
 
 test_%_blissup_st.x:  test_%_blissup_st.o  $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
@@ -566,6 +609,7 @@ test_%_libxsmm_st.x:  test_%_libxsmm_st.o  $(LIBBLIS_LINK)
 test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(VENDOR_LIB)        $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
+# -- Multithreaded --
 
 test_%_blissup_mt.x:  test_%_blissup_mt.o  $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
