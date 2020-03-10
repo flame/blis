@@ -4,40 +4,14 @@
 exec_root="test"
 out_root="output"
 
-sys="blis"
-#sys="lonestar5"
-#sys="ul252"
-#sys="ul264"
-
-if [ ${sys} = "blis" ]; then
-
-	export GOMP_CPU_AFFINITY="0-3"
-	nt=4
-
-elif [ ${sys} = "lonestar5" ]; then
-
-	export GOMP_CPU_AFFINITY="0-23"
-	nt=24
-
-elif [ ${sys} = "ul252" ]; then
-
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
-	export GOMP_CPU_AFFINITY="0-51"
-	nt=52
-
-elif [ ${sys} = "ul264" ]; then
-
-	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
-	export GOMP_CPU_AFFINITY="0-63"
-	nt=64
-
-fi
+# Placeholder until we add multithreading.
+nt=1
 
 # Delay between test cases.
 delay=0.02
 
 # Threadedness to test.
-threads="mt"
+threads="st"
 
 # Datatypes to test.
 #dts="d s"
@@ -60,19 +34,17 @@ shapes="sll lsl lls lss sls ssl lll"
 # execute everything that's there?
 sms="6"
 sns="8"
-sks="10"
+sks="4"
 
 # Implementations to test.
-impls="vendor blissup blislpab openblas eigen"
+impls="vendor blissup blislpab openblas eigen libxsmm blasfeo"
 #impls="vendor"
 #impls="blissup"
 #impls="blislpab"
 #impls="openblas"
 #impls="eigen"
-
-# Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
-# restore the value.
-GOMP_CPU_AFFINITYsave=${GOMP_CPU_AFFINITY}
+#impls="libxsmm"
+#impls="blasfeo"
 
 # Example: test_dgemm_nn_rrc_m6npkp_blissup_st.x
 
@@ -95,29 +67,6 @@ for th in ${threads}; do
 								for sk in ${sks}; do
 
 									for im in ${impls}; do
-
-										if   [ "${im:0:4}" = "blis" ]; then
-											unset  OMP_NUM_THREADS
-											export BLIS_NUM_THREADS=${nt}
-										elif [ "${im}" = "openblas" ]; then
-											unset  OMP_NUM_THREADS
-											export OPENBLAS_NUM_THREADS=${nt}
-										elif [ "${im}" = "eigen" ]; then
-											export OMP_NUM_THREADS=${nt}
-										elif [ "${im}" = "vendor" ]; then
-											unset  OMP_NUM_THREADS
-											export MKL_NUM_THREADS=${nt}
-										fi
-
-										# Multithreaded OpenBLAS seems to have a problem
-										# running properly if GOMP_CPU_AFFINITY is set.
-										# So we temporarily unset it here if we are about
-										# to execute OpenBLAS, but otherwise restore it.
-										if [ ${im} = "openblas" ]; then
-											unset GOMP_CPU_AFFINITY
-										else
-											export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
-										fi
 
 										# Limit execution of non-BLIS implementations to
 										# rrr/ccc storage cases.

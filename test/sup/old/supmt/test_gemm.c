@@ -52,8 +52,11 @@ int main( int argc, char** argv )
 
 	bli_init();
 
-	// Copy the global rntm_t object in case we need it later when disabling
-	// sup.
+	// Copy the global rntm_t object so that we can use it later when disabling
+	// sup. Starting with a copy of the global rntm_t is actually necessary;
+	// if we start off with a locally-initialized rntm_t, it will not contain
+	// the ways of parallelism that were conveyed via environment variables,
+	// which is necessary when running this driver with multiple BLIS threads.
 	bli_rntm_init_from_global( &rntm_g );
 
 #ifndef ERROR_CHECK
@@ -297,9 +300,14 @@ int main( int argc, char** argv )
 			          &beta,
 			          &c );
 	#else
-			// Disable sup and use the expert interface.
+			// NOTE: We can't use the static initializer and must instead
+			// initialize the rntm_t with the copy from the global rntm_t we
+			// made at the beginning of main(). Please see the comment there
+			// for more info on why BLIS_RNTM_INITIALIZER doesn't work here.
 			//rntm_t rntm = BLIS_RNTM_INITIALIZER;
 			rntm_t rntm = rntm_g;
+
+			// Disable sup and use the expert interface.
 			bli_rntm_disable_l3_sup( &rntm );
 
 			bli_gemm_ex( &alpha,
