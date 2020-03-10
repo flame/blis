@@ -9,7 +9,10 @@ function r_val = plot_l3sup_perf( opname, ...
                                   cfreq, ...
                                   dfps, ...
                                   theid, impl )
+<<<<<<< HEAD
 
+=======
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 %if ... %mod(theid-1,cols) == 2 || ...
 %   ... %mod(theid-1,cols) == 3 || ...
 %   ... %mod(theid-1,cols) == 4 || ...
@@ -20,11 +23,19 @@ function r_val = plot_l3sup_perf( opname, ...
 %end
 
 %legend_plot_id = 11;
+<<<<<<< HEAD
 legend_plot_id = 0*cols + 1*6;
 
 if 1
 	ax1 = subplot( rows, cols, theid );
 	hold( ax1, 'on' );
+=======
+legend_plot_id = 1*cols + 1*5;
+
+if 1
+ax1 = subplot( rows, cols, theid );
+hold( ax1, 'on' );
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 end
 
 % Set line properties.
@@ -78,9 +89,15 @@ end
 flopscol = size( data_blissup, 2 );
 msize = 5;
 if 1
+<<<<<<< HEAD
 	fontsize = 12;
 else
 	fontsize = 16;
+=======
+fontsize = 11;
+else
+fontsize = 16;
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 end
 linesize = 0.5;
 legend_loc = 'southeast';
@@ -96,6 +113,7 @@ for psize_col = 1:3
 end
 x_axis( :, 1 ) = data_blissup( :, psize_col );
 
+<<<<<<< HEAD
 % Compute the number of data points we have in the x-axis. Note that we
 % only use half the data points for the m = n = k column of graphs.
 %if mod(theid-1,cols) == 6
@@ -104,6 +122,15 @@ x_axis( :, 1 ) = data_blissup( :, psize_col );
 %	np = size( data_blissup, 1 );
 %end
 np = size( data_blissup, 1 );
+=======
+% Compute the number of data points we have in the x-axis. Note that
+% we only use quarter the data points for the m = n = k column of graphs.
+if mod(theid-1,cols) == 6
+	np = size( data_blissup, 1 ) / 4;
+else
+	np = size( data_blissup, 1 );
+end
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 
 % Grab the last x-axis value.
 x_end = data_blissup( np, psize_col );
@@ -127,7 +154,12 @@ open_ln     = line( x_axis( 1:np, 1 ), data_open( 1:np, flopscol ) / nth, ...
 vend_ln     = line( x_axis( 1:np, 1 ), data_vend( 1:np, flopscol ) / nth, ...
                     'Color',color_vend, 'LineStyle',lines_vend, ...
                     'LineWidth',linesize );
+<<<<<<< HEAD
 elseif theid == legend_plot_id
+=======
+else
+if theid == legend_plot_id
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 blissup_ln  = line( nan, nan, ...
                     'Color',color_blissup, 'LineStyle',lines_blissup, ...
                     'LineWidth',linesize );
@@ -144,11 +176,16 @@ vend_ln     = line( nan, nan, ...
                     'Color',color_vend, 'LineStyle',lines_vend, ...
                     'LineWidth',linesize );
 end
+<<<<<<< HEAD
+=======
+end
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 
 
 xlim( ax1, [x_begin x_end] );
 ylim( ax1, [y_begin y_end] );
 
+<<<<<<< HEAD
 if mod(theid-1,cols) == 3 || mod(theid-1,cols) == 4 || mod(theid-1,cols) == 5
 	if nth == 12
 		ylim( ax1, [y_begin y_end/2] );
@@ -166,6 +203,11 @@ elseif 6000 <= x_end && x_end < 10000
 	x_tick2 = x_end - 2000;
 	x_tick1 = x_tick2/2;
 	%xticks( ax1, [ x_tick1 x_tick2 ] );
+=======
+if     6000 <= x_end && x_end < 10000
+	x_tick2 = x_end - 2000;
+	x_tick1 = x_tick2/2;
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 	xticks( ax1, [ x_tick1 x_tick2 ] );
 elseif 4000 <= x_end && x_end < 6000
 	x_tick2 = x_end - 1000;
@@ -202,12 +244,20 @@ if show_plot == 1 || theid == legend_plot_id
 		set( leg,'Color','none' );
 		set( leg,'Units','inches' );
 		if impl == 'octave'
+<<<<<<< HEAD
 			set( leg,'FontSize',fontsize );
 			%set( leg,'Position',[12.40 10.60 1.9 0.95 ] ); % (1,4tl)
 			set( leg,'Position',[18.80 10.60 1.9 0.95 ] ); % (1,4tl)
 		else
 			set( leg,'FontSize',fontsize-1 );
 			set( leg,'Position',[18.24 10.15 1.15 0.7 ] ); % (1,4tl)
+=======
+		set( leg,'FontSize',fontsize );
+		set( leg,'Position',[12.50 10.35 1.5 0.9 ] ); % (1,4tl)
+		else
+		set( leg,'FontSize',fontsize-1 );
+		set( leg,'Position',[18.24 10.15 1.15 0.7 ] ); % (1,4tl)
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 		end
 		set( leg,'Box','off' );
 		set( leg,'Color','none' );
@@ -224,6 +274,7 @@ box( ax1, 'on' );
 titl = title( titlename );
 set( titl, 'FontWeight', 'normal' ); % default font style is now 'bold'.
 
+<<<<<<< HEAD
 % The default is to align the plot title across whole figure, not the box.
 % This is a hack to nudge the title back to the center of the box.
 if impl == 'octave'
@@ -249,6 +300,19 @@ if theid > (rows-1)*cols
 	%tpos = get( xlab, 'Position' )
 	%tpos(2) = tpos(2) + 10;
 	%set( xlab, 'Position', tpos );
+=======
+if impl == 'octave'
+tpos = get( titl, 'Position' ); % default is to align across whole figure, not box.
+tpos(1) = tpos(1) + -40;
+set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
+end
+
+if theid > (rows-1)*cols
+%xlab = xlabel( ax1,xaxisname );
+%tpos = get( xlab, 'Position' )
+%tpos(2) = tpos(2) + 10;
+%set( xlab, 'Position', tpos );
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 	if     theid == rows*cols - 6
 	xlab = xlabel( ax1, 'm = 6; n = k' );
 	elseif theid == rows*cols - 5
@@ -267,8 +331,19 @@ if theid > (rows-1)*cols
 end
 
 if mod(theid-1,cols) == 0
+<<<<<<< HEAD
 	ylab = ylabel( ax1,yaxisname );
 end
 
+=======
+ylab = ylabel( ax1,yaxisname );
+end
+
+%export_fig( filename, colorflag, '-pdf', '-m2', '-painters', '-transparent' );
+%saveas( fig, filename_png );
+
+%hold( ax1, 'off' );
+
+>>>>>>> Merged test/sup, test/supmt into test/sup.
 r_val = 0;
 
