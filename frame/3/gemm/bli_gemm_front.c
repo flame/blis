@@ -73,7 +73,7 @@ void bli_gemm_front
 		return;
 	}
 
-#if 0
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
@@ -83,7 +83,6 @@ void bli_gemm_front
 		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
 		if ( status == BLIS_SUCCESS ) return;
 	}
-#endif
 #endif
 
 	// Alias A, B, and C in case we need to apply transformations.

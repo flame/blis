@@ -194,7 +194,6 @@ static err_t bli_sgemm_small
             beta,
             c
         );
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
         return BLIS_SUCCESS;
     }
 
@@ -1747,18 +1746,14 @@ static err_t bli_dgemm_small
             beta,
             c
         );
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
 
     if (N<3) //Implemenation assumes that N is atleast 3.
-	{
-		AOCL_DTL_TRACE_EXIT_ERR(
-			AOCL_DTL_LEVEL_INFO,
-			"N < 3, cannot be processed by small gemm"
-			);
+    {
         return BLIS_NOT_YET_IMPLEMENTED;
-	}
+    }
+
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
     if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))))
@@ -1810,7 +1805,8 @@ static err_t bli_dgemm_small
         //if true, we should perform C=alpha * A*B operation
         //instead of C = beta * C + alpha * (A * B)
         bool is_beta_non_zero = 0;
-        if(!bli_obj_equals(beta, &BLIS_ZERO))
+
+	if(!bli_obj_equals(beta, &BLIS_ZERO))
                 is_beta_non_zero = 1;
 
         /*
@@ -3847,7 +3843,9 @@ static err_t bli_dgemm_small_atbn
     //check if beta is zero
     //if true, we need to perform C = alpha * (A * B)
     //instead of C = beta * C  + alpha * (A * B)
+
     bool is_beta_non_zero = 0;
+
     if(!bli_obj_equals(beta,&BLIS_ZERO))
         is_beta_non_zero = 1;
 
