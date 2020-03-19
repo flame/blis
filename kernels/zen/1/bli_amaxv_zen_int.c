@@ -183,7 +183,7 @@ void bli_samaxv_zen_int
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
 		maxInx_vec_lo.v = _mm_blendv_ps( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
 
-		if ( max_vec_lo.f[0] > max_vec_lo.f[1] )
+		if ( max_vec_lo.f[0] >= max_vec_lo.f[1] )
 		{
 			abs_chi1_max = max_vec_lo.f[0];
 			i_max_l      = maxInx_vec_lo.f[0];
@@ -340,7 +340,7 @@ void bli_damaxv_zen_int
 		maxInx_vec_hi.v = _mm256_extractf128_pd( maxInx_vec.v, 1 );
 		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
 
-		if ( max_vec_lo.d[0] > max_vec_lo.d[1] )
+		if ( max_vec_lo.d[0] >= max_vec_lo.d[1] )
 		{
 			abs_chi1_max = max_vec_lo.d[0];
 			i_max_l      = maxInx_vec_lo.d[0];
