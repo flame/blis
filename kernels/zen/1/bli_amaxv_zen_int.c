@@ -85,14 +85,14 @@ typedef union
 #define CMP128( dt, v1, v2, i1, i2 ) \
 	_mm_or_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_GT_OQ ), 				 /* ( v1 > v2 ||           */ \
                                     _mm_andnot_p##dt( _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q ),		 /*   ( !isnan(v2) &&      */ \
-	                                              _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q ),		 /*      isnan(v1) ) ) ||  */ \
+	                                              _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q )		 /*      isnan(v1) ) ) ||  */ \
 						    )										      \
-				  )												      \
+				  ),												      \
                       _mm_and_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_EQ_OQ ),			 /* ( ( v1 == v2 ||        */ \
 		                                   _mm_and_p##dt( _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q ), /*     ( isnan(v1) &&     */ \
 								  _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q )  /*       isnan(v2) ) ) && */ \
 								)								      \
-						 )										      \
+						 ),										      \
                                      _mm_cmp_p##dt( i1, i2, _CMP_LT_OQ ) 				 /*   i1 < i2 )            */ \
 				   )												      \
 		    );
