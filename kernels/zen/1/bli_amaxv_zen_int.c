@@ -373,8 +373,8 @@ void bli_damaxv_zen_int
 		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
 		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
 		
-		max_vec_hi.v    = _mm_permute_pd( max_vec_lo.v, 1 )
-		maxInx_vec_hi.v = _mm_permute_pd( maxInx_vec_lo.v, 1 )
+		max_vec_hi.v    = _mm_permute_pd( max_vec_lo.v, 1 );
+		maxInx_vec_hi.v = _mm_permute_pd( maxInx_vec_lo.v, 1 );
 		
 		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
