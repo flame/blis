@@ -79,10 +79,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  8,
-#if 0
-	  // NOTE: Disabled vectorized amaxv kernels due to incorrect semantics.
-	  // See issue #380 for more details.
+	  10,
+#if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,

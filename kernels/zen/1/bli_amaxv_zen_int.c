@@ -71,11 +71,11 @@ typedef union
 // assumes that idx(v1) > idx(v2)
 // all "OQ" comparisons false if either operand NaN
 #define CMP256( dt, v1, v2 ) \
-	_mm256_or_p##dt( _mm256_cmp_p##dt( v1, v2, _CMP_GT_OQ ), 			/* v1 > v2  ||     */ \
-                         _mm256_andnot_p##dt( _mm256_cmp_p##dt( v2, v2, _CMP_UNORD_Q ), /* ( !isnan(v2) && */ \
+	_mm256_or_p##dt( _mm256_cmp_p##dt( v1, v2, _CMP_GT_OQ ),                        /* v1 > v2  ||     */ \
+	                 _mm256_andnot_p##dt( _mm256_cmp_p##dt( v2, v2, _CMP_UNORD_Q ), /* ( !isnan(v2) && */ \
 	                                      _mm256_cmp_p##dt( v1, v1, _CMP_UNORD_Q )  /*    isnan(v1) )  */ \
-					    )								      \
-		       );
+	                                    ) \
+	               );
 
 // return a mask which indicates either:
 // - v1 > v2
@@ -83,19 +83,19 @@ typedef union
 // - v1 == v2 (maybe == NaN) and i1 < i2
 // all "OQ" comparisons false if either operand NaN
 #define CMP128( dt, v1, v2, i1, i2 ) \
-	_mm_or_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_GT_OQ ), 				 /* ( v1 > v2 ||           */ \
-                                    _mm_andnot_p##dt( _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q ),		 /*   ( !isnan(v2) &&      */ \
-	                                              _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q )		 /*      isnan(v1) ) ) ||  */ \
-						    )										      \
-				  ),												      \
-                      _mm_and_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_EQ_OQ ),			 /* ( ( v1 == v2 ||        */ \
-		                                   _mm_and_p##dt( _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q ), /*     ( isnan(v1) &&     */ \
-								  _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q )  /*       isnan(v2) ) ) && */ \
-								)								      \
-						 ),										      \
-                                     _mm_cmp_p##dt( i1, i2, _CMP_LT_OQ ) 				 /*   i1 < i2 )            */ \
-				   )												      \
-		    );
+	_mm_or_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_GT_OQ ),                      /* ( v1 > v2 ||           */ \
+	                            _mm_andnot_p##dt( _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q ),  /*   ( !isnan(v2) &&      */ \
+	                                              _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q )   /*      isnan(v1) ) ) ||  */ \
+	                                            ) \
+	                          ), \
+	              _mm_and_p##dt( _mm_or_p##dt( _mm_cmp_p##dt( v1, v2, _CMP_EQ_OQ ),                  /* ( ( v1 == v2 ||        */ \
+	                                           _mm_and_p##dt( _mm_cmp_p##dt( v1, v1, _CMP_UNORD_Q ), /*     ( isnan(v1) &&     */ \
+	                                                          _mm_cmp_p##dt( v2, v2, _CMP_UNORD_Q )  /*       isnan(v2) ) ) && */ \
+	                                                        ) \
+	                                         ), \
+	                             _mm_cmp_p##dt( i1, i2, _CMP_LT_OQ )                                 /*   i1 < i2 )            */ \
+	                           ) \
+	            );
 
 // -----------------------------------------------------------------------------
 
