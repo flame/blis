@@ -97,7 +97,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			   encountered, then treat it the same as if it were a valid
 			   value that was smaller than any previously seen. This
 			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+			if ( abs_chi1_max < abs_chi1 || ( bli_isnan( abs_chi1 ) && !bli_isnan( abs_chi1_max ) ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
 				i_max_l      = i; \
@@ -129,7 +129,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			   encountered, then treat it the same as if it were a valid
 			   value that was smaller than any previously seen. This
 			   behavior mimics that of LAPACK's ?lange(). */ \
-			if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
+			if ( abs_chi1_max < abs_chi1 || ( bli_isnan( abs_chi1 ) && !bli_isnan( abs_chi1_max ) ) ) \
 			{ \
 				abs_chi1_max = abs_chi1; \
 				i_max_l      = i; \
