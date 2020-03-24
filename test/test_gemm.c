@@ -379,7 +379,10 @@ int main( int argc, char** argv )
 	}
 
 	//bli_finalize();
-
+#ifdef FILE_IN_OUT
+    fclose(fin);
+    fclose(fout);
+#endif
 	return 0;
 }
 

@@ -428,6 +428,10 @@ fflush(fout);
 		bli_obj_free( &c_save );
 	}
 
+#ifdef FILE_IN_OUT
+    fclose(fin);
+    fclose(fout);
+#endif
 	//bli_finalize();
 
 	return 0;
