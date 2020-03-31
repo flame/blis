@@ -515,7 +515,7 @@ endif
 ifeq ($(OS_NAME),Darwin)
 # OS X shared library link flags.
 SOFLAGS    := -dynamiclib
-SOFLAGS    += -Wl,-install_name,$(LIBBLIS_SONAME)
+SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
 else
 SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
@@ -1056,5 +1056,4 @@ BUILD_CPPFLAGS := -DBLIS_IS_BUILDING_LIBRARY
 
 # end of ifndef COMMON_MK_INCLUDED conditional block
 endif
-
 
