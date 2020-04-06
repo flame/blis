@@ -489,6 +489,12 @@ Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
 (Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
 volunteering his time to set up a standalone PPA.)
 
+ * **Gentoo**. [M. Zhou](https://github.com/cdluminate) also maintains the
+[BLIS package](https://packages.gentoo.org/packages/sci-libs/blis) entry for
+[Gentoo](https://www.gentoo.org/), a Linux distribution known for its
+source-based [portage](https://wiki.gentoo.org/wiki/Portage) package manager
+and distribution system.
+
  * **EPEL/Fedora**. There are official BLIS packages in Fedora and EPEL (for
 RHEL7+ and compatible distributions) with versions for 64-bit integers, OpenMP,
 and pthreads, and shims which can be dynamically linked instead of reference
