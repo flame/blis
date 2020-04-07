@@ -1,10 +1,389 @@
-commit 10949f528c5ffc5c3a2cad47fe16a802afb021be (HEAD -> master, tag: 0.6.1)
+commit 68b88aca6692c75a9f686187e6c4a4e196ae60a9 (HEAD -> master, tag: 0.7.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 7 14:41:44 2020 -0500
+
+    Version file update (0.7.0)
+
+commit b04de636c1702e4cb8e7ad82bab3cf43d2dbdfc6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 7 14:37:43 2020 -0500
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated docs/ReleaseNotes.md in preparation for next version.
+
+commit 2cb604ba472049ad498df72d4a2dc47a161d4c3c (origin/master, origin/dev, origin/amd, origin/HEAD, dev, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 6 16:42:14 2020 -0500
+
+    Rename more bli_thread_obarrier(), _obroadcast().
+    
+    Details:
+    - Renamed instances of bli_thread_obarrier() and bli_thread_obroadcast()
+      that were made in the supmt-specific code commited to the 'amd'
+      branch, which has now been merged with 'master'. Prior to the merge,
+      'master' received commit c01d249, which applied these renamings to
+      the existing, non-sup codebase.
+
+commit efb12bc895de451067649d5dceb059b7827a025f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 6 15:01:53 2020 -0500
+
+    Minor updates/elaborations to RELEASING file.
+
+commit 2e3b3782cfb7a2fd0d1a325844983639756def7d
+Merge: 9f3a8d4d da0c086f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Apr 6 14:55:35 2020 -0500
+
+    Merge branch 'master' into amd
+
+commit da0c086f4643772e111318f95a712831b0f981a8
+Author: Satish Balay <balay@mcs.anl.gov>
+Date:   Tue Mar 31 17:09:41 2020 -0500
+
+    OSX: specify the full path to the location of libblis.dylib (#390)
+    
+    * OSX: specify the full path to the location of libblis.dylib so that it can be found at runtime
+    
+    Before this change:
+    
+    Appication gives runtime error [when linked with blis]
+    dyld: Library not loaded: libblis.3.dylib
+    
+    balay@kpro lib % otool -L libblis.dylib
+    libblis.dylib:
+            libblis.3.dylib (compatibility version 0.0.0, current version 0.0.0)
+            /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1281.0.0)
+    
+    After this change:
+    balay@kpro lib % otool -L libblis.dylib
+    libblis.dylib:
+            /Users/balay/petsc/arch-darwin-c-debug/lib/libblis.3.dylib (compatibility version 0.0.0, current version 0.0.0)
+            /usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1281.0.0)
+    
+    * INSTALL_LIBDIR -> libdir as INSTALL_LIBDIR has DESTDIR
+    
+    Co-Authored-By: Jed Brown <jed@jedbrown.org>
+    
+    * CREDITS file update.
+    
+    Co-authored-by: Jed Brown <jed@jedbrown.org>
+    Co-authored-by: Field G. Van Zee <field@cs.utexas.edu>
+
+commit 2bca03ea9d87c0da829031a5332545d05e352211
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 28 22:10:00 2020 +0000
+
+    Updates, tweaks to runme.sh in test/1m4m.
+    
+    Details:
+    - Made several updates to test/1m4m/runme.sh, including:
+      - Added missing handling for 1m and 4m1a implementations when setting
+        the BLIS_??_NT environment variables.
+      - Added support for using numactl to run the test executables.
+      - Several other cleanups.
+
+commit c40a33190b94af5d5c201be63366594859b1233f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 26 16:55:00 2020 -0500
+
+    Warn user when auto-detection returns 'generic'.
+    
+    Details:
+    - Added logic to configure that causes the script to output a warning
+      to the user if/when "./configure auto" is run and the underlying
+      hardware feature detection code is unable to identify the hardware.
+      In these cases, the auto-detect code will return 'generic', which
+      is likely not what the user expected, and a flag will be set so that
+      a message is printed at the end of the configure output. (Thankfully,
+      we don't expect this scenario to play out very often.) Thanks to
+      Devin Matthews for suggesting this fix #384.
+
+commit 492a736fab5b9c882996ca024b64646877f22a89
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Mar 24 17:28:47 2020 -0500
+
+    Fix vectorized version of bli_amaxv (#382)
+    
+    * Fix vectorized version of bli_amaxv
+    
+    To match Netlib, i?amax should return:
+    - the lowest index among equal values
+    - the first NaN if one is encountered
+    
+    * Fix typos.
+    
+    * And another one...
+    
+    * Update ref. amaxv kernel too.
+    
+    * Re-enabled optimized amaxv kernels.
+    
+    Details:
+    - Re-enabled the optimized, intrinsics-based amaxv kernels in the 'zen'
+      kernel set for use in haswell, zen, zen2, knl, and skx subconfigs.
+      These two kernels (for s and d datatypes) were temporarily disabled in
+      e186d71 as part of issue #380. However, the key missing semantic
+      properties that prompted the disabling of these kernels--returning the
+      index of the *first* rather than of the last element with largest
+      absolute value, and returning the index of the first NaN if one is
+      encountered--were added as part of #382 thanks to Devin Matthews.
+      Thus, now that the kernels are working as expected once more, this
+      commit causes these kernels to once again be registered for the
+      affected subconfigs, which effectively reverts all code changes
+      included in e186d71.
+    - Whitespace/formatting updates to new macros in bli_amaxv_zen_int.c.
+    
+    Co-authored-by: Field G. Van Zee <field@cs.utexas.edu>
+
+commit e186d7141a51f2d7196c580e24e7b7db8f209db9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 21 18:40:36 2020 -0500
+
+    Disabled optimized amaxv kernels.
+    
+    Details:
+    - Disabled use of optimized amaxv kernels, which use vector intrinsics
+      for both 's' and 'd' datatypes. We disable these kernels because the
+      current implementations fail to observe a semantic property of the
+      BLAS i?amax_() subroutine, which is to return the index of the
+      *first* element containing the maximum absolute value (that is, the
+      first element if there exist two or more elements that contain the
+      same value). With the optimized kernels disabled, the affected
+      subconfigurations (haswell, zen, zen2, knl, and skx) will use the
+      default reference implementations. Thanks to Mat Cross for reporting
+      this issue via #380.
+    - CREDITS file update.
+
+commit 9f3a8d4d851725436b617297231a417aa9ce8c6a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 14 17:48:43 2020 -0500
+
+    Added missing return to bli_thread_partition_2x2().
+    
+    Details:
+    - Added a missing return statement to the body of an early case handling
+      branch in bli_thread_partition_2x2(). This bug only affected cases
+      where n_threads < 4, and even then, the code meant to handle cases
+      where n_threads >= 4 executes and does the right thing, albeit using
+      more CPU cycles than needed. Nonetheless, thanks to Kiran Varaganti
+      for reporting this bug via issue #377.
+    - Whitespace changes to bli_thread.c (spaces -> tabs).
+
+commit 8c3d9b9eeb6f816ec8c32a944f632a5ad3637593
+Merge: 71249fe8 0f9e0399
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 10 14:03:33 2020 -0500
+
+    Merge branch 'amd' of github.com:flame/blis into amd
+
+commit 71249fe8ddaa772616698f1e3814d40e012909ea
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 10 13:55:29 2020 -0500
+
+    Merged test/sup, test/supmt into test/sup.
+    
+    Details:
+    - Updated the Makefile, test_gemm.c, and runme.sh in test/sup to be able
+      to compile and run both single-threaded and multithreaded experiments.
+      This should help with maintenance going forward.
+    - Created a test/sup/octave_st directory of scripts (based on the
+      previous test/sup/octave scripts) as well as a test/sup/octave_mt
+      directory (based on the previous test/supmt/octave scripts). The
+      octave scripts are slightly different and not easily mergeable, and
+      thus for now I'll maintain them separately.
+    - Preserved the previous test/sup directory as test/sup/old/supst and
+      the previous test/supmt directory as test/sup/old/supmt.
+
+commit 0f9e0399e16e96da2620faf2c0c3c21274bb2ebd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 5 17:03:21 2020 -0600
+
+    Updated sup performance graphs; added mt results.
+    
+    Details:
+    - Reran all existing single-threaded performance experiments comparing
+      BLIS sup to other implementations (including the conventional code
+      path within BLIS), using the latest versions (where appropriate).
+    - Added multithreaded results for the three existing hardware types
+      showcased in docs/PerformanceSmall.md: Kaby Lake, Haswell, and Epyc
+      (Zen1).
+    - Various minor updates to the text in docs/PerformanceSmall.md.
+    - Updates to the octave scripts in test/sup/octave, test/supmt/octave.
+
+commit 90db88e5729732628c1f3acc96eeefab49f2da41
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 2 15:06:48 2020 -0600
+
+    Updated sup[mt] Makefiles for variable dim ranges.
+    
+    Details:
+    - Updated test/sup/Makefile and test/supmt/Makefile to allow specifying
+      different problem size ranges for the drivers where one, two, or three
+      matrix dimensions is large. This will facilitate the generation of
+      more meaningful graphs, particularly when two dimensions are tiny.
+
+commit 31f11a06ea9501724feec0d2fc5e4644d7dd34fc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Feb 27 14:33:20 2020 -0600
+
+    Updates to octave scripts in test/sup[mt]/octave.
+    
+    Details:
+    - Optimized scripts in test/sup/octave and test/supmt/octave for use
+      with octave 5.2.0 on Ubuntu 18.04.
+    - Fixed stray 'end' keywords in gen_opsupnames.m and plot_l3sup_perf.m,
+      which were not only unnecessary but also causing issues with versions
+      5.x.
+
+commit c01d249d7c546fe2e3cee3fe071cd4c4c88b9115
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 25 14:50:53 2020 -0600
+
+    Renamed bli_thread_obarrier(), _obroadcast().
+    
+    Details:
+    - Renamed two bli_thread_*() APIs:
+        bli_thread_obarrier()   -> bli_thread_barrier()
+        bli_thread_obroadcast() -> bli_thread_broadcast()
+      The 'o' was a leftover from when thrcomm_t objects tracked both
+      "inner" and "outer" communicators. They have long since been
+      simplified to only support the latter, and thus the 'o' is
+      superfluous.
+
+commit f6e6bf73e695226c8b23fe7900da0e0ef37030c1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 24 17:52:23 2020 -0600
+
+    List Gentoo under supported external packages.
+    
+    Details:
+    - Add mention of Gentoo Linux under the list of external packages in
+      the README.md file. Thanks to M. Zhou for maintaining this package.
+
+commit 9e5f7296ccf9b3f7b7041fe1df20b927cd0e914b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 18 15:16:03 2020 -0600
+
+    Skip building thrinfo_t tree when mt is disabled.
+    
+    Details:
+    - Return early from bli_thrinfo_sup_grow() if the thrinfo_t object
+      address is equal to either &BLIS_GEMM_SINGLE_THREADED or
+      &BLIS_PACKM_SINGLE_THREADED.
+    - Added preprocessor logic to bli_l3_sup_thread_decorator() in
+      bli_l3_sup_decor_single.c that (by default) disables code that
+      creates and frees the thrinfo_t tree and instead passes
+      &BLIS_GEMM_SINGLE_THREADED as the thrinfo_t pointer into the
+      sup implementation.
+    - The net effect of the above changes is that a small amount of
+      thrinfo_t overhead is avoided when running small/skinny dgemm
+      problems when BLIS is compiled with multithreading disabled.
+
+commit 90081e6a64b5ccea9211bdef193c2d332c68492f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 17 14:57:25 2020 -0600
+
+    Fixed bug(s) in mt sup when single-threaded.
+    
+    Details:
+    - Fixed a syntax bug in bli_l3_sup_decor_single.c as a result of
+      changing function interface for the thread entry point function
+      (of type l3supint_t).
+    - Unfortunately, fixing the interface was not enough, as it caused
+      a memory leak in the sba at bli_finalize() time. It turns out that,
+      due to the new multithreading-capable variant code useing thrinfo_t
+      objects--specifically, their calling of bli_thrinfo_grow()--we
+      have to pass in a real thrinfo_t object rather than the global
+      objects &BLIS_PACKM_SINGLE_THREADED or &BLIS_GEMM_SINGLE_THREADED.
+      Thus, I inserted the appropriate logic from the OpenMP and pthreads
+      versions so that single-threaded execution would work as intended
+      with the newly upgraded variants.
+
+commit c0558fde4511557c8f08867b035ee57dd2669dc6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 17 14:08:08 2020 -0600
+
+    Support multithreading within the sup framework.
+    
+    Details:
+    - Added multithreading support to the sup framework (via either OpenMP
+      or pthreads). Both variants 1n and 2m now have the appropriate
+      threading infrastructure, including data partitioning logic, to
+      parallelize computation. This support handles all four combinations
+      of packing on matrices A and B (neither, A only, B only, or both).
+      This implementation tries to be a little smarter when automatic
+      threading is requested (e.g. via BLIS_NUM_THREADS) in that it will
+      recalculate the factorization in units of micropanels (rather than
+      using the raw dimensions) in bli_l3_sup_int.c, when the final
+      problem shape is known and after threads have already been spawned.
+    - Implemented bli_?packm_sup_var2(), which packs to conventional row-
+      or column-stored matrices. (This is used for the rrc and crc storage
+      cases.) Previously, copym was used, but that would no longer suffice
+      because it could not be parallelized.
+    - Minor reorganization of packing-related sup functions. Specifically,
+      bli_packm_sup_init_mem_[ab]() are called from within packm_sup_[ab]()
+      instead of from the variant functions. This has the effect of making
+      the variant functions more readable.
+    - Added additional bli_thrinfo_set_*() static functions to bli_thrinfo.h
+      and inserted usage of these functions within bli_thrinfo_init(), which
+      previously was accessing thrinfo_t fields via the -> operator.
+    - Renamed bli_partition_2x2() to bli_thread_partition_2x2().
+    - Added an auto_factor field to the rntm_t struct in order to track
+      whether automatic thread factorization was originally requested.
+    - Added new test drivers in test/supmt that perform multithreaded sup
+      tests, as well as appropriate octave/matlab scripts to plot the
+      resulting output files.
+    - Added additional language to docs/Multithreading.md to make it clear
+      that specifying any BLIS_*_NT variable, even if it is set to 1, will
+      be considered manual specification for the purposes of determining
+      whether to auto-factorize via BLIS_NUM_THREADS.
+    - Minor comment updates.
+
+commit d7a7679182d72a7eaecef4cd9b9a103ee0a7b42b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Feb 7 17:37:03 2020 -0600
+
+    Fixed int-to-packbuf_t conversion error (C++ only).
+    
+    Details:
+    - Fixed an error that manifests only when using C++ (specifically,
+      modern versions of g++) to compile drivers in 'test' (and likely most
+      other application code that #includes blis.h. Thanks to Ajay Panyala
+      for reporting this issue (#374).
+
+commit d626112b8d5302f9585fb37a8e37849747a2a317
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 15 13:27:02 2020 -0600
+
+    Removed sorting on LDFLAGS in common.mk (#373).
+    
+    Details:
+    - Removed a line of code in common.mk that passed LDFLAGS through the
+      sort function. The purpose was not to sort the contents, but rather
+      to remove duplicates. However, there is valid syntax in a string of
+      linker flags that, when sorted, yields different/broken behavior.
+      So I've removed the line in common.mk that sorts LDFLAGS. Also, for
+      future use, I've added a new function, rm-dupls, that removes
+      duplicates without sorting. (This function was based on code from a
+      stackoverflow thread that is linked to in the comments for that
+      code.) Thanks to Isuru Fernando for reporting this issue (#373).
+
+commit e67deb22aaeab5ed6794364520190936748ef272
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 14 16:01:34 2020 -0600
+
+    CHANGELOG update (0.6.1)
+
+commit 10949f528c5ffc5c3a2cad47fe16a802afb021be (tag: 0.6.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Jan 14 16:01:33 2020 -0600
 
     Version file update (0.6.1)
 
-commit 5db8e710a2baff121cba9c63b61ca254a2ec097a (origin/master, origin/HEAD)
+commit 5db8e710a2baff121cba9c63b61ca254a2ec097a
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Jan 14 15:59:59 2020 -0600
 
@@ -129,7 +508,7 @@ Date:   Mon Dec 16 16:30:26 2019 -0600
       add the dot product to the (promoted) scalar and THEN downcast the sum
       to float. Thanks to Devin Matthews for catching this bug.
 
-commit fe2560a4b1d8ef8d0a446df6002b1e7decc826e9 (origin/dev, origin/amd)
+commit fe2560a4b1d8ef8d0a446df6002b1e7decc826e9
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Dec 6 17:12:44 2019 -0600
 
@@ -147,7 +526,7 @@ Date:   Fri Dec 6 17:12:44 2019 -0600
       reporting this bug.
     - CREDITS file update.
 
-commit 2853825234001af8f175ad47cef5d6ff9b7a5982 (amd)
+commit 2853825234001af8f175ad47cef5d6ff9b7a5982
 Merge: efa61a6c 61b1f0b0
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Fri Dec 6 16:06:46 2019 -0600
@@ -504,7 +883,7 @@ Date:   Fri Nov 1 17:57:03 2019 -0500
       limited to slightly incompatible vector register mnemonics in the GNU
       extended inline assembly clobber list.
 
-commit 58102aeaa282dc79554ed045e1b17a6eda292e15 (dev)
+commit 58102aeaa282dc79554ed045e1b17a6eda292e15
 Merge: 52059506 b9bc222b
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Oct 28 17:58:31 2019 -0500
