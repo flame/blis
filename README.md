@@ -113,16 +113,16 @@ and high performance." Their statement continues, "The framework will continue
 having an important influence on the design and the instantiation of dense linear
 algebra libraries."
 
- * **Small/skinny matrix support for dgemm now available!** Thanks to
+ * **Multithreaded small/skinny matrix support for dgemm now available!** Thanks to
 contributions made possible by our partnership with AMD, we have dramatically
 accelerated `gemm` for double-precision real matrix problems where one or two
 dimensions is exceedingly small. A natural byproduct of this optimization is
 that the traditional case of small _m = n = k_ (i.e. square matrices) is also
 accelerated, even though it was not targeted specifically. And though only
-`dgemm` was optimized for now, support for other datatypes, other operations,
-and/or multithreading may be implemented in the future. We've also added a new
-[PerformanceSmall](docs/PerformanceSmall.md) document to showcase the
-improvement in performance when some matrix dimensions are small.
+`dgemm` was optimized for now, support for other datatypes and/or other operations
+may be implemented in the future. We've also added new graphs to the
+[PerformanceSmall](docs/PerformanceSmall.md) document to showcase multithreaded
+performance when one or more matrix dimensions are small.
 
  * **Performance comparisons now available!** We recently measured the
 performance of various level-3 operations on a variety of hardware architectures,
