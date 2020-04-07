@@ -74,6 +74,7 @@ void bli_finalize_auto( void )
 
 void bli_init_apis( void )
 {
+	AOCL_DTL_INITIALIZE(AOCL_DTL_LEVEL_ALL);
 	// Initialize various sub-APIs.
 	bli_gks_init();
 	bli_ind_init();
@@ -90,6 +91,7 @@ void bli_finalize_apis( void )
 	bli_thread_finalize();
 	bli_ind_finalize();
 	bli_gks_finalize();
+    AOCL_DTL_UNINITIALIZE();
 }
 
 // -----------------------------------------------------------------------------

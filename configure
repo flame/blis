@@ -1844,6 +1844,10 @@ main()
 	frame_dir='frame'
 	frame_dirpath="${dist_path}/${frame_dir}"
 
+	# The root directory of the BLIS framework.
+	aocldtl_dir='aocl_dtl'
+	aocldtl_dirpath="${dist_path}/${aocldtl_dir}"
+	
 	# The name of the sandbox directory.
 	sandbox_dir='sandbox'
 	sandbox_dirpath="${dist_path}/${sandbox_dir}"
@@ -3199,11 +3203,16 @@ main()
 	done
 
 
+	obj_aocldtl_dirpath="${base_obj_dirpath}/${aocldtl_dir}"
+
+	echo "${script_name}: creating ${obj_aocldtl_dirpath}"
+	mkdir -p ${obj_aocldtl_dirpath}
+
+
 	obj_frame_dirpath="${base_obj_dirpath}/${frame_dir}"
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
 	mkdir -p ${obj_frame_dirpath}
-
 
 	if [ -n "${sandbox_flag}" ]; then
 
@@ -3286,6 +3295,10 @@ main()
 	echo "${script_name}: mirroring ${frame_dirpath} to ${obj_frame_dirpath}"
 	${mirror_tree_sh} ${frame_dirpath} ${obj_frame_dirpath}
 
+	# Mirror framework source tree to its object sub-directory.
+	echo "${script_name}: mirroring ${aocldtl_dirpath} to ${obj_aocldtl_dirpath}"
+	${mirror_tree_sh} ${aocldtl_dirpath} ${obj_aocldtl_dirpath}
+
 	# Mirror the chosen sandbox source tree to its object sub-directory.
 	if [ -n "${sandbox_flag}" ]; then
 
@@ -3356,6 +3369,18 @@ main()
 			 -p 'REFKERN' \
 			 ${refkern_dirpath} \
 			 ${obj_refkern_dirpath} \
+			 ${gen_make_frags_dirpath}/fragment.mk \
+			 ${gen_make_frags_dirpath}/suffix_list \
+			 ${gen_make_frags_dirpath}/ignore_list
+
+	# Generate makefile fragments in the DTL directory.
+	echo "${script_name}: creating makefile fragments in ${obj_aocldtl_dirpath}"
+	${gen_make_frags_sh} \
+			 -h -r -v0 \
+			 -o ${script_name} \
+			 -p 'AOCLDTL' \
+			 ${aocldtl_dirpath} \
+			 ${obj_aocldtl_dirpath} \
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
