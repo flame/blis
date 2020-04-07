@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
 * [Changes in 0.6.1](ReleaseNotes.md#changes-in-061)
 * [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
 * [Changes in 0.5.2](ReleaseNotes.md#changes-in-052)
@@ -35,6 +36,35 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.7.0
+April 7, 2020
+
+Improvements present in 0.7.0:
+
+Framework:
+- Implemented support for multithreading within the sup (skinny/small/unpacked) framework, which previously was single-threaded only. Note that this feature works harmoniously with the selective packing introduced into the sup framework in 0.6.1. (AMD)
+- Renamed `bli_thread_obarrier()` and `bli_thread_obroadcast()` functions to drop the 'o', which was left over from when `thrcomm_t` objects tracked both "inner" and "outer" communicators.
+- Fixed an obscure `int`-to-`packbuf_t` type conversion error that only affects certain C++ compilers (including g++) when compiling application code that includes the BLIS header file `blis.h`. (Ajay Panyala)
+- Added a missing early `return` statement in `bli_thread_partition_2x2()`, which provides a slight optimization. (Kiran Varaganti)
+
+Kernels:
+- Fixed the semantics of the `bli_amaxv()` kernels ('s' and 'd') within the `zen` kernel set. Previously, the kernels (incorrectly) returned the index of the last element whose absolute value was largest (in the event there were multiple of equal value); now, it (correclty) returns the index of the first of such elements. The kernels also now return the index of the first NaN, if one is encountered. (Mat Cross, Devin Matthews)
+
+Build system:
+- Warn the user at configure-time when hardware auto-detection returns the `generic` subconfiguration since this is probably not what they were expecting. (Devin Matthews)
+- Removed unnecessary sorting (and duplicate removal) on `LDFLAGS` in `common.mk`. (Isuru Fernando)
+- Specify the full path to the location of the dynamic library on OSX so that other dynamic libraries that depend on BLIS know where to find the library. (Satish Balay, Jed Brown)
+
+Testing:
+- Updated and reorganized test drivers in `test/sup` so that they work for either single-threaded or multithreaded purposes. (AMD)
+- Updated/optimized octave scripts in `test/sup` for use with octave 5.2.0.
+- Minor updates/tweaks to `test/1m4m`.
+
+Documentation:
+- Updated existing single-threaded sup performance graphs with new data and added multithreaded sup graphs to `docs/PerformanceSmall.md`.
+- Added mention of Gentoo support under the external packages section of the `README.md`.
+- Tweaks to `docs/Multithreading.md` that clarify that setting any `BLIS_*_NT` variable to 1 will be considered manual specification for the purposes of determining whether to auto-factorize via `BLIS_NUM_THREADS`. (AMD)
 
 ## Changes in 0.6.1
 January 14, 2020
