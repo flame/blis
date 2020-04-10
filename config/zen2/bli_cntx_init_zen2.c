@@ -89,8 +89,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
 
 	  // dotv
-	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
-	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
+	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
