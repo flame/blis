@@ -143,6 +143,13 @@ get-frame-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(BUILD_SYMFLAGS) \
                             )
 
+get-aocldtl-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
+                            )
+
+
 get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
@@ -187,6 +194,7 @@ get-refinit-text-for    = "('$(1)' CFLAGS for ref. kernel init)"
 get-refkern-text-for    = "('$(1)' CFLAGS for ref. kernels)"
 get-config-text-for     = "('$(1)' CFLAGS for config code)"
 get-frame-text-for      = "('$(1)' CFLAGS for framework code)"
+get-aocldtl-text-for    = "('$(1)' CFLAGS for AOCL debug and trace code)"
 get-kernel-text-for     = "('$(1)' CFLAGS for kernels)"
 get-sandbox-c99text-for = "('$(1)' CFLAGS for sandboxes)"
 get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
@@ -285,6 +293,7 @@ FRAGMENT_MK        := .fragment.mk
 BUILD_DIR          := build
 CONFIG_DIR         := config
 FRAME_DIR          := frame
+AOCLDTL_DIR        := aocl_dtl
 REFKERN_DIR        := ref_kernels
 KERNELS_DIR        := kernels
 SANDBOX_DIR        := sandbox
@@ -306,6 +315,8 @@ KERNELS_SRC_SUFS   := c s S
 
 FRAME_SRC_SUFS     := c
 
+AOCLDTL_SRC_SUFS   := c
+
 SANDBOX_C99_SUFS   := c
 SANDBOX_CXX_SUFS   := cc cpp cxx
 SANDBOX_SRC_SUFS   := $(SANDBOX_C99_SUFS) $(SANDBOX_CXX_SUFS)
@@ -313,16 +324,20 @@ SANDBOX_SRC_SUFS   := $(SANDBOX_C99_SUFS) $(SANDBOX_CXX_SUFS)
 # Header suffixes.
 FRAME_HDR_SUFS     := h
 
+AOCLDTL_HDR_SUFS   := h
+
 SANDBOX_H99_SUFS   := h
 SANDBOX_HXX_SUFS   := hh hpp hxx
 SANDBOX_HDR_SUFS   := $(SANDBOX_H99_SUFS) $(SANDBOX_HXX_SUFS)
 
 # Combine all header suffixes and remove duplicates via sort().
-ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS) \
-                             $(SANDBOX_HDR_SUFS) )
+ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS)   \
+                             $(SANDBOX_HDR_SUFS) \
+                             $(AOCLDTL_HDR_SUFS))
 
-ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS) \
-                             $(SANDBOX_H99_SUFS) )
+ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS)   \
+                             $(SANDBOX_H99_SUFS) \
+                             $(AOCLDTL_HDR_SUFS))
 
 # The names of scripts that check output from the BLAS test drivers and
 # BLIS test suite.
@@ -351,6 +366,7 @@ SHELL              := bash
 # and optimized kernel code.
 CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
+AOCLDTL_PATH       := $(DIST_PATH)/$(AOCLDTL_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
@@ -360,6 +376,7 @@ SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
 # kernel code, and optimized kernel code.
 CONFIG_FRAG_PATH   := ./obj/$(CONFIG_NAME)/$(CONFIG_DIR)
 FRAME_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(FRAME_DIR)
+AOCLDTL_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(AOCLDTL_DIR)
 REFKERN_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(REFKERN_DIR)
 KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
@@ -800,8 +817,6 @@ ENABLE_VERBOSE := no
 BLIS_ENABLE_TEST_OUTPUT := no
 endif
 
-
-
 #
 # --- Append OS-specific libraries to LDFLAGS ----------------------------------
 #
@@ -838,6 +853,7 @@ MK_CONFIG_SRC      :=
 MK_KERNELS_SRC     :=
 MK_REFKERN_SRC     :=
 MK_FRAME_SRC       :=
+MK_AOCLDTL_SRC     :=
 MK_SANDBOX_SRC     :=
 
 # -- config --
@@ -887,6 +903,7 @@ PARENT_PATH        := $(OBJ_DIR)/$(CONFIG_NAME)
 # reference kernels and portable framework.
 -include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))
 -include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))
+-include $(addsuffix /$(FRAGMENT_MK), $(AOCLDTL_FRAG_PATH))
 
 # -- sandbox --
 

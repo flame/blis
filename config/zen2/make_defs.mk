@@ -61,7 +61,22 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
+#frame pointers are needed to execution tracing
+ifeq ($(ETRACE_ENABLE),1)
+COPTFLAGS      := -O3
+else
 COPTFLAGS      := -O3 -fomit-frame-pointer
+endif
+endif
+
+
+#
+# --- Enable ETRACE across the library if enabled ETRACE_ENABLE=[0,1] -----------------------
+#
+
+ifeq ($(ETRACE_ENABLE),1)
+CDBGFLAGS += -pg -finstrument-functions -DAOCL_DTL_AUTO_TRACE_ENABLE
+LDFLAGS += -ldl
 endif
 
 # Flags specific to optimized kernels.

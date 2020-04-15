@@ -112,6 +112,7 @@ BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 # of source code.
 BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+BASE_OBJ_AOCLDTL_PATH  := $(BASE_OBJ_PATH)/$(AOCLDTL_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
@@ -209,6 +210,11 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
+# Generate object file paths for all of the debgu and trace logger.
+MK_AOCLDTL_OBJS       := $(call gen-obj-paths-from-src,$(AOCLDTL_SRC_SUFS),$(MK_AOCLDTL_SRC),$(AOCLDTL_PATH),$(BASE_OBJ_AOCLDTL_PATH))
+
+
+
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
 MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
@@ -218,6 +224,7 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_KERNELS_OBJS) \
                        $(MK_REFKERN_OBJS) \
                        $(MK_FRAME_OBJS) \
+                       $(MK_AOCLDTL_OBJS) \
                        $(MK_SANDBOX_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
@@ -508,6 +515,18 @@ else
 endif
 endef
 
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
+define make-aocldtl-rule
+$(BASE_OBJ_AOCLDTL_PATH)/%.o: $(AOCLDTL_PATH)/%.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-aocldtl-cflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-aocldtl-text-for,$(1))
+	@$(CC) $(call get-aocldtl-cflags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
 # first argument: a kernel set (name) being targeted (e.g. haswell).
 define make-refinit-rule
 $(BASE_OBJ_REFKERN_PATH)/$(1)/bli_cntx_$(1)_ref.o: $(REFKERN_PATH)/bli_cntx_ref.c $(BLIS_H_FLAT) $(MAKE_DEFS_MK_PATHS)
@@ -582,6 +601,14 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-config-rule,$(conf))))
 # to a singleton family, then CONFIG_LIST contains CONFIG_NAME as its only
 # item.)
 $(foreach conf, $(CONFIG_NAME), $(eval $(call make-frame-rule,$(conf))))
+
+# Instantiate the build rule for debug and trace log. Use the CFLAGS for the
+# configuration family, which exists in the directory whose name is equal to
+# CONFIG_NAME. Note that this doesn't need to be in a loop since we expect
+# CONFIG_NAME to only ever contain a single name. (BTW: If CONFIG_NAME refers
+# to a singleton family, then CONFIG_LIST contains CONFIG_NAME as its only
+# item.)
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-aocldtl-rule,$(conf))))
 
 # Instantiate the build rule for reference kernel initialization and
 # reference kernels for each of the sub-configurations in CONFIG_LIST with
@@ -1053,6 +1080,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	- $(FIND) $(AOCLDTL_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(KERNELS_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 ifneq ($(SANDBOX),)
@@ -1063,6 +1091,8 @@ else
 	@- $(FIND) $(CONFIG_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(FRAME_FRAG_PATH)"
 	@- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+	@echo "Removing makefile fragments from $(AOCLDTL_FRAG_PATH)"
+	@- $(FIND) $(AOCLDTL_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(REFKERN_FRAG_PATH)"
 	@- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(KERNELS_FRAG_PATH)"
