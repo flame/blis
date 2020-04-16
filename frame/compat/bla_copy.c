@@ -5,18 +5,19 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
-    - Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    - Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+	- Redistributions of source code must retain the above copyright
+	  notice, this list of conditions and the following disclaimer.
+	- Redistributions in binary form must reproduce the above copyright
+	  notice, this list of conditions and the following disclaimer in the
+	  documentation and/or other materials provided with the distribution.
+	- Neither the name(s) of the copyright holder(s) nor the names of its
+	  contributors may be used to endorse or promote products derived
+	  from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -62,25 +63,181 @@ void PASTEF77(ch,blasname) \
 \
 	/* If the input increments are negative, adjust the pointers so we can
 	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  BLIS_NO_CONJUGATE, \
-	  n0, \
-	  x0, incx0, \
-	  y0, incy0, \
-	  NULL, \
-	  NULL  \
-	); \
-\
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+	   bli_convert_blas_incv(n0, (ftype*)x, *incx, x0, incx0); \
+	   bli_convert_blas_incv(n0, (ftype*)y, *incy, y0, incy0); \
+	   \
+	   /* Call BLIS interface. */ \
+	   PASTEMAC2(ch, blisname, BLIS_TAPI_EX_SUF) \
+	   (\
+	   BLIS_NO_CONJUGATE, \
+	   n0, \
+	   x0, incx0, \
+	   y0, incy0, \
+	   NULL, \
+	   NULL  \
+	   ); \
+	   \
+	   /* Finalize BLIS. */ \
+	   bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTFUNC_BLAS( copy, copyv )
-#endif
+#ifdef BLIS_CONFIG_ZEN2
 
+void scopy_
+(
+	const f77_int* n,
+	const float*   x, const f77_int* incx,
+	float*   y, const f77_int* incy
+)
+{
+	dim_t  n0;
+	float* x0;
+	float* y0;
+	inc_t  incx0;
+	inc_t  incy0;
+
+	/* Initialize BLIS. */
+//  bli_init_auto();
+
+	/* Convert/typecast negative values of n to zero. */
+	if (*n < 0)
+		n0 = (dim_t)0;
+	else
+		n0 = (dim_t)(*n);
+
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */
+	if (*incx < 0)
+	{
+		/* The semantics of negative stride in BLAS are that the vector
+		operand be traversed in reverse order. (Another way to think
+		of this is that negative strides effectively reverse the order
+		of the vector, but without any explicit data movements.) This
+		is also how BLIS interprets negative strides. The differences
+		is that with BLAS, the caller *always* passes in the 0th (i.e.,
+		top-most or left-most) element of the vector, even when the
+		stride is negative. By contrast, in BLIS, negative strides are
+		used *relative* to the vector address as it is given. Thus, in
+		BLIS, if this backwards traversal is desired, the caller *must*
+		pass in the address to the (n-1)th (i.e., the bottom-most or
+		right-most) element along with a negative stride. */
+
+		x0 = (float*)((x)+(n0 - 1)*(-*incx));
+		incx0 = (inc_t)(*incx);
+
+	}
+	else
+	{
+		x0 = (float*)(x);
+		incx0 = (inc_t)(*incx);
+	}
+
+	if (*incy < 0)
+	{
+		y0 = (y)+(n0 - 1)*(-*incy);
+		incy0 = (inc_t)(*incy);
+
+	}
+	else
+	{
+		y0 = (y);
+		incy0 = (inc_t)(*incy);
+	}
+
+
+	/* Call BLIS kernel */
+	bli_scopyv_zen_int
+	(
+		BLIS_NO_CONJUGATE,
+		n0,
+		x0, incx0,
+		y0, incy0,
+		NULL
+	);
+
+	/* Finalize BLIS. */
+//    bli_finalize_auto();
+}
+
+void dcopy_
+(
+	const f77_int* n,
+	const double*   x, const f77_int* incx,
+	double*   y, const f77_int* incy
+)
+{
+	dim_t  n0;
+	double* x0;
+	double* y0;
+	inc_t  incx0;
+	inc_t  incy0;
+
+	/* Initialize BLIS. */
+//  bli_init_auto();
+
+	/* Convert/typecast negative values of n to zero. */
+	if (*n < 0)
+		n0 = (dim_t)0;
+	else
+		n0 = (dim_t)(*n);
+
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */
+	if (*incx < 0)
+	{
+		/* The semantics of negative stride in BLAS are that the vector
+		operand be traversed in reverse order. (Another way to think
+		of this is that negative strides effectively reverse the order
+		of the vector, but without any explicit data movements.) This
+		is also how BLIS interprets negative strides. The differences
+		is that with BLAS, the caller *always* passes in the 0th (i.e.,
+		top-most or left-most) element of the vector, even when the
+		stride is negative. By contrast, in BLIS, negative strides are
+		used *relative* to the vector address as it is given. Thus, in
+		BLIS, if this backwards traversal is desired, the caller *must*
+		pass in the address to the (n-1)th (i.e., the bottom-most or
+		right-most) element along with a negative stride. */
+
+		x0 = (double*)((x)+(n0 - 1)*(-*incx));
+		incx0 = (inc_t)(*incx);
+
+	}
+	else
+	{
+		x0 = (double*)(x);
+		incx0 = (inc_t)(*incx);
+	}
+
+	if (*incy < 0)
+	{
+		y0 = (y)+(n0 - 1)*(-*incy);
+		incy0 = (inc_t)(*incy);
+
+	}
+	else
+	{
+		y0 = (y);
+		incy0 = (inc_t)(*incy);
+	}
+
+
+	/* Call BLIS kernel */
+	bli_dcopyv_zen_int
+	(
+		BLIS_NO_CONJUGATE,
+		n0,
+		x0, incx0,
+		y0, incy0,
+		NULL
+	);
+
+	/* Finalize BLIS. */
+//    bli_finalize_auto();
+}
+
+INSERT_GENTFUNC_BLAS_CZ(copy, copyv)
+#else
+INSERT_GENTFUNC_BLAS(copy, copyv)
+#endif
+#endif

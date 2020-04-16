@@ -55,6 +55,10 @@ GENTFUNC( double,   d, blasname, blisname ) \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
 
+#define INSERT_GENTFUNC_BLAS_CZ( blasname, blisname ) \
+\
+GENTFUNC( scomplex, c, blasname, blisname ) \
+GENTFUNC( dcomplex, z, blasname, blisname )
 
 // -- Basic one-operand macro with real domain only --
 
