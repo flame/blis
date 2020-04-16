@@ -115,9 +115,9 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
 #else
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    768,    72,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   1024,   256,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],   8160,  4080,  4080,  4080 );
 #endif
 
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
