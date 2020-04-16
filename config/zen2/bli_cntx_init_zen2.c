@@ -83,19 +83,20 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-	  // axpyv
 
+	  // axpyv
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
 
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
-	  // dotxv
+	  
+          // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
-	  // scalv
 
+	  // scalv
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 
@@ -103,7 +104,11 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_SWAPV_KER, BLIS_FLOAT,   bli_sswapv_zen_int8,
 	  BLIS_SWAPV_KER, BLIS_DOUBLE,  bli_dswapv_zen_int8,
 
-	  cntx
+	  //copy
+	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
+	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,	
+	 
+          cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
