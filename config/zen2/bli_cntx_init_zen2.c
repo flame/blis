@@ -135,6 +135,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  //set
 	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
 	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+
 	  cntx
 	);
 

@@ -86,6 +86,11 @@ COPYV_KER_PROT( double,   d, copyv_zen_int )
 SETV_KER_PROT(float,    s, setv_zen_int)
 SETV_KER_PROT(double,   d, setv_zen_int)
 
+// swapv (intrinsics)
+SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
+SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
+
+
 // -- level-1f --
 
 // axpyf (intrinsics)
@@ -203,3 +208,4 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
+
