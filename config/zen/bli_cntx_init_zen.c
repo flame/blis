@@ -108,6 +108,9 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
+	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
+	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
+
 	  cntx
 	);
 
