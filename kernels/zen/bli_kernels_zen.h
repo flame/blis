@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,6 +66,11 @@ SCALV_KER_PROT( double,   d, scalv_zen_int )
 	// scalv (intrinsics unrolled x10)
 	SCALV_KER_PROT( float,    s, scalv_zen_int10 )
 	SCALV_KER_PROT( double,   d, scalv_zen_int10 )
+
+// swapv (intrinsics)
+SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
+SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
+
 
 // -- level-1f --
 
