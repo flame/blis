@@ -112,7 +112,6 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
         temp->pNext = newNode;
     }
 
-    AOCL_DEBUGPRINT("Created file for tid = %d", tid);
     return newNode->fp;
 
 } /* AOCL_FLIST_AddFile */
