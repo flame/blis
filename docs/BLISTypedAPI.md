@@ -1051,6 +1051,7 @@ void bli_?her2
      (
        uplo_t  uploa,
        conj_t  conjx,
+       conj_t  conjy,
        dim_t   m,
        ctype*  alpha,
        ctype*  x, inc_t incx,
@@ -1115,6 +1116,7 @@ void bli_?syr2
      (
        uplo_t  uploa,
        conj_t  conjx,
+       conj_t  conjy,
        dim_t   m,
        ctype*  alpha,
        ctype*  x, inc_t incx,
