@@ -14,15 +14,15 @@
 
 /* Macro for tracing the log If the user wants to enable tracing he has to 
    enable this macro by making it to 1 else 0 */
-#define AOCL_DTL_TRACE_ENABLE       1
+//#define AOCL_DTL_TRACE_ENABLE       1
 
 /* Macro for dumping the log If the user wants to enable dumping he has to 
    enable this macro by making it to 1 else 0 */
-#define AOCL_DTL_DUMP_ENABLE        1
+//#define AOCL_DTL_DUMP_ENABLE        1
 
 /* Macro for logging the logs If the user wants to enable loging information he
    has to enable this macro by making it to 1 else 0 */
-#define AOCL_DTL_LOG_ENABLE         1
+//#define AOCL_DTL_LOG_ENABLE         1
 
 #define AOCL_DTL_TRACE_FILE         "aocldtl_trace.wri"
 #define AOCL_DTL_AUTO_TRACE_FILE    "aocldtl_auto_trace.wri"
