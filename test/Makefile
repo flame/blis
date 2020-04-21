@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -173,6 +173,7 @@ blis: \
        test_hemv_blis.x \
        test_her_blis.x \
        test_her2_blis.x \
+       test_swapv_blis.x \
        test_trmv_blis.x \
        test_trsv_blis.x \
        \
@@ -191,6 +192,7 @@ openblas: \
       test_hemv_openblas.x \
       test_her_openblas.x \
       test_her2_openblas.x \
+      test_swapv_openblas.x \
       test_trmv_openblas.x \
       test_trsv_openblas.x \
       \
@@ -209,6 +211,7 @@ atlas: \
       test_hemv_atlas.x \
       test_her_atlas.x \
       test_her2_atlas.x \
+      test_swapv_atlas.x \
       test_trmv_atlas.x \
       test_trsv_atlas.x \
       \
@@ -226,6 +229,7 @@ mkl:  test_dotv_mkl.x \
       test_hemv_mkl.x \
       test_her_mkl.x \
       test_her2_mkl.x \
+      test_swapv_mkl.x \
       test_trmv_mkl.x \
       test_trsv_mkl.x \
       \
@@ -243,6 +247,7 @@ essl: test_dotv_essl.x \
       test_hemv_essl.x \
       test_her_essl.x \
       test_her2_essl.x \
+      test_swapv_essl.x \
       test_trmv_essl.x \
       test_trsv_essl.x \
       \
@@ -260,6 +265,7 @@ mac:  test_dotv_mac.x \
       test_hemv_mac.x \
       test_her_mac.x \
       test_her2_mac.x \
+      test_swapv_mac.x \
       test_trmv_mac.x \
       test_trsv_mac.x \
       \
@@ -328,4 +334,4 @@ clean: cleanx
 
 cleanx:
 	- $(RM_F) *.o *.x
-
+	
