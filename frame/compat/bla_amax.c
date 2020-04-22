@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,50 +48,199 @@ f77_int PASTEF772(i,chx,blasname) \
        const ftype_x* x, const f77_int* incx  \
      ) \
 { \
-	dim_t    n0; \
-	ftype_x* x0; \
-	inc_t    incx0; \
-	gint_t   bli_index; \
-	f77_int  f77_index; \
+    dim_t    n0; \
+    ftype_x* x0; \
+    inc_t    incx0; \
+    gint_t   bli_index; \
+    f77_int  f77_index; \
 \
-	/* If the vector is empty, return an index of zero. This early check
-	   is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
-	   return 0, which ends up getting incremented to 1 (below) before
-	   being returned, which is not what we want. */ \
-	if ( *n < 1 || *incx <= 0 ) return 0; \
+    /* If the vector is empty, return an index of zero. This early check
+       is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
+       return 0, which ends up getting incremented to 1 (below) before
+       being returned, which is not what we want. */ \
+    if ( *n < 1 || *incx <= 0 ) return 0; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
+    /* Convert/typecast negative values of n to zero. */ \
+    bli_convert_blas_dim1( *n, n0 ); \
 \
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */ \
+    bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  n0, \
-	  x0, incx0, \
-	  &bli_index, \
-	  NULL, \
-	  NULL  \
-	); \
+    /* Call BLIS interface. */ \
+    PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      n0, \
+      x0, incx0, \
+      &bli_index, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	/* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
-	   index. Also, if the BLAS integer size differs from the BLIS
-	   integer size, that typecast occurs here. */ \
-	f77_index = bli_index + 1; \
+    /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
+       index. Also, if the BLAS integer size differs from the BLIS
+       integer size, that typecast occurs here. */ \
+    f77_index = bli_index + 1; \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
 \
-	return f77_index; \
+    return f77_index; \
 }
 
 #ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_CONFIG_ZEN2
+
+f77_int isamax_
+     (
+       const f77_int* n,
+       const float* x, const f77_int* incx
+     )
+{
+    dim_t    n0;
+    float* x0;
+    inc_t    incx0;
+    gint_t   bli_index;
+    f77_int  f77_index;
+
+    /* If the vector is empty, return an index of zero. This early check
+       is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
+       return 0, which ends up getting incremented to 1 (below) before
+       being returned, which is not what we want. */
+    if ( *n < 1 || *incx <= 0 ) return 0;
+
+    /* Initialize BLIS. */
+//  bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+        x0    = ((float*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+
+    }
+    else
+    {
+        x0    = ((float*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+
+    /* Call BLIS kernel. */
+    bli_samaxv_zen_int
+    (
+      n0,
+      x0, incx0,
+      &bli_index,
+      NULL
+    );
+
+    /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
+       index. Also, if the BLAS integer size differs from the BLIS
+       integer size, that typecast occurs here. */ 
+    f77_index = bli_index + 1;
+
+    /* Finalize BLIS. */
+//    bli_finalize_auto();
+
+    return f77_index;
+}
+
+f77_int idamax_
+     (
+       const f77_int* n,
+       const double* x, const f77_int* incx
+     )
+{
+    dim_t    n0;
+    double* x0;
+    inc_t    incx0;
+    gint_t   bli_index;
+    f77_int  f77_index;
+
+    /* If the vector is empty, return an index of zero. This early check
+       is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
+       return 0, which ends up getting incremented to 1 (below) before
+       being returned, which is not what we want. */
+    if ( *n < 1 || *incx <= 0 ) return 0;
+
+    /* Initialize BLIS. */
+//  bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+        x0    = ((double*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+
+    }
+    else
+    {
+        x0    = ((double*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+
+    /* Call BLIS kernel. */
+    bli_damaxv_zen_int
+    (
+      n0,
+      x0, incx0,
+      &bli_index,
+      NULL
+    );
+
+    /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
+       index. Also, if the BLAS integer size differs from the BLIS
+       integer size, that typecast occurs here. */ 
+    f77_index = bli_index + 1;
+
+    /* Finalize BLIS. */
+//    bli_finalize_auto();
+
+    return f77_index;
+}
+
+INSERT_GENTFUNC_BLAS_ZEN2( amax, amaxv )
+#else
 INSERT_GENTFUNC_BLAS( amax, amaxv )
+#endif
 #endif
 
