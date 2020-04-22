@@ -125,7 +125,9 @@ static bool_t bli_cpuid_has_features( uint32_t have, uint32_t want )
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 
-#include "cpuid.h"
+// cpuid.h is now #included in bli_cpuid.c instead of here. See issue #393
+// for more information why this move was made.
+//#include "cpuid.h"
 
 void get_cpu_name( char *cpu_name );
 int  vpu_count( void );

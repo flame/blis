@@ -46,19 +46,21 @@
   #define __arm__
 #endif
 
-#ifndef BLIS_CONFIGURETIME_CPUID
-  #include "blis.h"
-#else
+#ifdef BLIS_CONFIGURETIME_CPUID
   #define BLIS_EXPORT_BLIS
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
   #include "bli_arch.h"
+#else
+  #include "blis.h"
 #endif
 
 // -----------------------------------------------------------------------------
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+
+#include "cpuid.h"
 
 arch_t bli_cpuid_query_id( void )
 {
