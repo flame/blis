@@ -79,7 +79,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  12,
+	  14,
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
@@ -91,7 +91,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
-	  
+
           // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
@@ -106,8 +106,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 
 	  //copy
 	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
-	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,	
-	 
+	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
+
           cntx
 	);
 
@@ -208,7 +208,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
 	  BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
 	  BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,	  
+	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE, 
 	  cntx
 	);
 
