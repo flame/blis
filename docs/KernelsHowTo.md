@@ -278,7 +278,7 @@ void bli_?gemm_ukernel
 The `gemm` microkernel, sometimes simply referred to as "the BLIS microkernel" or "the microkernel", performs the following operation:
 
 ```
-  C11 := beta * C11 + A1 * B1
+  C11 := beta * C11 + alpha * A1 * B1
 ```
 
 where `A1` is an _MR x k_ "micropanel" matrix stored in packed (column-wise) format, `B1` is a _k x NR_ "micropanel" matrix stored in packed (row-wise) format, `C11` is an _MR x NR_ general matrix stored according to its row and column strides `rsc` and `csc`, and `alpha` and beta are scalars.
