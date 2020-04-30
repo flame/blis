@@ -56,10 +56,12 @@ GENTFUNC( double,   d, blasname, blisname ) \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
 
+
 #define INSERT_GENTFUNC_BLAS_ZEN2( blasname, blisname ) \
 \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
+
 // -- Basic one-operand macro with real domain only --
 
 
@@ -79,6 +81,13 @@ GENTFUNCCO( dcomplex, double, z, d, blasname, blisname )
 
 
 // -- Basic one-operand macro with conjugation (used only for dot, ger) --
+
+#define INSERT_GENTFUNCDOT_BLAS_ZEN2( blasname, blisname ) \
+\
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
 
 #define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
