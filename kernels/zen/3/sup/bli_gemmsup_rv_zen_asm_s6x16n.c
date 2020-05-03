@@ -3617,42 +3617,77 @@ void bli_sgemmsup_rv_zen_asm_1x16n
 
 	label(.SCOLSTORED)
 
-	vunpcklps(ymm5, ymm4, ymm0)    //a0b0a1b1 a2b2a3b3
-	vmovsd(mem(rcx),xmm11)
-	vmovsd(mem(rcx, rsi, 1),xmm12)	
-	vmovsd(mem(rcx, rsi, 2),xmm13)
-	vmovsd(mem(rcx, rax, 1),xmm14)
-	vshufpd(imm(0x01), ymm0, ymm0, ymm1)//a1b1
-	vshufpd(imm(0x02), ymm0, ymm0, ymm2)//a2b2
-	vshufpd(imm(0x03), ymm0, ymm0, ymm10)//a3b3
-	vfmadd231ps(xmm11, xmm3, xmm0)
-	vfmadd231ps(xmm12, xmm3, xmm1)
-	vfmadd231ps(xmm13, xmm3, xmm2)
-	vfmadd231ps(xmm14, xmm3, xmm10)
-	vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
-	vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )	
-	vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
-	vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
+	vextractf128(imm(0x0), ymm4, xmm0)//c0-c3
+	vmovss(mem(rcx),xmm7)
+	vmovss(mem(rcx, rsi, 1),xmm6)
+	vmovss(mem(rcx, rsi, 2),xmm11)
+	vmovss(mem(rcx, rax, 1),xmm10)
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vfmadd231ps(xmm7, xmm3, xmm0)//e0
+	vfmadd231ps(xmm6, xmm3, xmm1)//e1
+	vfmadd231ps(xmm11, xmm3, xmm2)//e2
+	vfmadd231ps(xmm10, xmm3, xmm14)//e3
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
 	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
+	vextractf128(imm(0x1), ymm4, xmm0)//e4-e7
+	vmovss(mem(rcx),xmm4)
+	vmovss(mem(rcx, rsi, 1),xmm6)
+	vmovss(mem(rcx, rsi, 2),xmm8)
+	vmovss(mem(rcx, rax, 1),xmm10)
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vfmadd231ps(xmm4, xmm3, xmm0)//e4
+	vfmadd231ps(xmm6, xmm3, xmm1)//e5
+	vfmadd231ps(xmm8, xmm3, xmm2)//e6
+	vfmadd231ps(xmm10, xmm3, xmm14)//e7
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
 	
-	vunpckhps(ymm5, ymm4, ymm0)    //a0b0a1b1 a2b2a3b3
-	vmovsd(mem(rcx),xmm11)
-	vmovsd(mem(rcx, rsi, 1),xmm12)	
-	vmovsd(mem(rcx, rsi, 2),xmm13)
-	vmovsd(mem(rcx, rax, 1),xmm14)
-	vshufpd(imm(0x01), ymm0, ymm0, ymm1)//a1b1
-	vshufpd(imm(0x02), ymm0, ymm0, ymm2)//a2b2
-	vshufpd(imm(0x03), ymm0, ymm0, ymm10)//a3b3
-	vfmadd231ps(xmm11, xmm3, xmm0)
-	vfmadd231ps(xmm12, xmm3, xmm1)
-	vfmadd231ps(xmm13, xmm3, xmm2)
-	vfmadd231ps(xmm14, xmm3, xmm10)
-	vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
-	vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )	
-	vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
-	vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )	
+	lea(mem(rcx, rsi, 4), rcx) // rcx += 4*cs_c
+	
+	vextractf128(imm(0x0), ymm5, xmm0)//c0-c3
+	vmovss(mem(rcx),xmm4)
+	vmovss(mem(rcx, rsi, 1),xmm6)
+	vmovss(mem(rcx, rsi, 2),xmm11)
+	vmovss(mem(rcx, rax, 1),xmm10)
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vfmadd231ps(xmm4, xmm3, xmm0)//e0
+	vfmadd231ps(xmm6, xmm3, xmm1)//e1
+	vfmadd231ps(xmm11, xmm3, xmm2)//e2
+	vfmadd231ps(xmm10, xmm3, xmm14)//e3
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
 	lea(mem(rcx, rsi, 4), rcx) // rcx += 4*cs_c
 
+	vextractf128(imm(0x1), ymm5, xmm0)//e4-e7
+	vmovss(mem(rcx),xmm4)
+	vmovss(mem(rcx, rsi, 1),xmm6)
+	vmovss(mem(rcx, rsi, 2),xmm8)
+	vmovss(mem(rcx, rax, 1),xmm10)
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vfmadd231ps(xmm4, xmm3, xmm0)//e4
+	vfmadd231ps(xmm6, xmm3, xmm1)//e5
+	vfmadd231ps(xmm8, xmm3, xmm2)//e6
+	vfmadd231ps(xmm10, xmm3, xmm14)//e7
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
+	
 	jmp(.SDONE)                        // jump to end.
 	
 	label(.SBETAZERO)
@@ -3669,30 +3704,46 @@ void bli_sgemmsup_rv_zen_asm_1x16n
 
 	label(.SCOLSTORBZ)
 
-	vunpcklps(ymm5, ymm4, ymm0)    //a0b0a1b1 a2b2a3b3
-	vshufpd(imm(0x01), ymm0, ymm0, ymm1)//a1b1
-	vshufpd(imm(0x02), ymm0, ymm0, ymm2)//a2b2
-	vshufpd(imm(0x03), ymm0, ymm0, ymm10)//a3b3
-	vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
-	vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )	
-	vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
-	vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
+	vextractf128(imm(0x0), ymm4, xmm0)//c0-c3
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
 	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
 
-	vunpcklps(ymm5, ymm4, ymm0)    //a0b0a1b1 a2b2a3b3
-	vshufpd(imm(0x01), ymm0, ymm0, ymm1)//a1b1
-	vshufpd(imm(0x02), ymm0, ymm0, ymm2)//a2b2
-	vshufpd(imm(0x03), ymm0, ymm0, ymm10)//a3b3
-	vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
-	vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )	
-	vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
-	vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
-	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c	
-	
+	vextractf128(imm(0x1), ymm4, xmm0)//e4-e7
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
+	vextractf128(imm(0x0), ymm5, xmm0)//c0-c3
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))
+	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c		
+	vextractf128(imm(0x1), ymm5, xmm0)//e4-e7
+	vshufps(imm(0x01), xmm0, xmm0,xmm1)
+	vshufps(imm(0x02), xmm0, xmm0,xmm2)
+	vshufps(imm(0x03), xmm0, xmm0,xmm14)
+	vmovss(xmm0, mem(rcx))
+	vmovss(xmm1, mem(rcx, rsi, 1))
+	vmovss(xmm2, mem(rcx, rsi, 2))
+	vmovss(xmm14, mem(rcx, rax, 1))	
+
 	label(.SDONE)
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
-    lea(mem(r12, rsi, 8), r12)
+        lea(mem(r12, rsi, 8), r12)
 	add(imm(4*16), r14)                 // b_jj = r14 += 8*cs_b
 
 	dec(r11)                           // jj -= 1;
