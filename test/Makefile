@@ -177,6 +177,7 @@ blis: \
        test_trmv_blis.x \
        test_trsv_blis.x \
        test_copyv_blis.x \
+       test_scalv_blis.x \
        \
        test_gemm_blis.x \
        test_hemm_blis.x \
@@ -197,6 +198,7 @@ openblas: \
       test_trmv_openblas.x \
       test_trsv_openblas.x \
       test_copyv_openblas.x \
+      test_scalv_openblas.x \
       \
       test_gemm_openblas.x \
       test_hemm_openblas.x \
@@ -217,6 +219,7 @@ atlas: \
       test_trmv_atlas.x \
       test_trsv_atlas.x \
       test_copyv_atlas.x \
+      test_scalv_atlas.x \
       \
       test_gemm_atlas.x \
       test_hemm_atlas.x \
@@ -236,6 +239,7 @@ mkl:  test_dotv_mkl.x \
       test_trmv_mkl.x \
       test_trsv_mkl.x \
       test_copyv_mkl.x \
+      test_scalv_mkl.x \
       \
       test_gemm_mkl.x \
       test_hemm_mkl.x \
@@ -254,7 +258,8 @@ essl: test_dotv_essl.x \
       test_swapv_essl.x \
       test_trmv_essl.x \
       test_trsv_essl.x \
-      test_copyv_essl.x\
+      test_copyv_essl.x \
+      test_scalv_essl.x \
       \
       test_gemm_essl.x \
       test_hemm_essl.x \
@@ -274,6 +279,7 @@ mac:  test_dotv_mac.x \
       test_trmv_mac.x \
       test_trsv_mac.x \
       test_copyv_mac.x \
+      test_scalv_mac.x \
       \
       test_gemm_mac.x \
       test_hemm_mac.x \

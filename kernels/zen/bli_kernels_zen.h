@@ -75,6 +75,10 @@ SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
 COPYV_KER_PROT( float,    s, copyv_zen_int )
 COPYV_KER_PROT( double,   d, copyv_zen_int )
 
+//
+SETV_KER_PROT(float,    s, setv_zen_int)
+SETV_KER_PROT(double,   d, setv_zen_int)
+
 // -- level-1f --
 
 // axpyf (intrinsics)

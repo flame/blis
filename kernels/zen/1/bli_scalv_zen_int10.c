@@ -81,8 +81,17 @@ void bli_sscalv_zen_int10
 	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
 		float*       zero = bli_s0;
+#ifdef BLIS_CONFIG_ZEN2
+	    bli_ssetv_zen_int
+		(
+		  BLIS_NO_CONJUGATE,
+		  n,
+		  zero,
+		  x, incx,
+		  cntx
+		);
+#else
 		ssetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
-
 		f
 		(
 		  BLIS_NO_CONJUGATE,
@@ -91,6 +100,7 @@ void bli_sscalv_zen_int10
 		  x, incx,
 		  cntx
 		);
+#endif
 		return;
 	}
 
@@ -271,6 +281,16 @@ void bli_dscalv_zen_int10
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
 		double*      zero = bli_d0;
+#ifdef BLIS_CONFIG_ZEN2
+	    bli_dsetv_zen_int
+		(
+		  BLIS_NO_CONJUGATE,
+		  n,
+		  zero,
+		  x, incx,
+		  cntx
+		);
+#else
 		dsetv_ker_ft f    = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 
 		f
@@ -281,6 +301,7 @@ void bli_dscalv_zen_int10
 		  x, incx,
 		  cntx
 		);
+#endif
 		return;
 	}
 
