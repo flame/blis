@@ -63,6 +63,10 @@ err_t bli_gemmsup
 		return BLIS_FAILURE;
 	}
 
+        /*General stride is not yet supported in sup*/
+        if(BLIS_XXX==stor_id)
+            return BLIS_FAILURE;
+
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
