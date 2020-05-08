@@ -1323,14 +1323,18 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
 	#if compiler is AOCC, first grep for clang and then the version number.
 	elif [ "${cc_vendor}" = "clang" ]; then
             cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
-    else
+	elif [ "${cc_vendor}" = "oneAPI" ]; then
+		# Treat Intel oneAPI's clang as clang, not icc.
+		cc_vendor="clang"
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
 
