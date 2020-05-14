@@ -224,7 +224,7 @@ void daxpy_
 //	bli_finalize_auto();
 }
 
-INSERT_GENTFUNC_BLAS_ZEN2( axpy, axpyv )
+INSERT_GENTFUNC_BLAS_CZ( axpy, axpyv )
 
 #else
 INSERT_GENTFUNC_BLAS( axpy, axpyv )

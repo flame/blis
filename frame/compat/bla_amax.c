@@ -238,7 +238,7 @@ f77_int idamax_
     return f77_index;
 }
 
-INSERT_GENTFUNC_BLAS_ZEN2( amax, amaxv )
+INSERT_GENTFUNC_BLAS_CZ( amax, amaxv )
 #else
 INSERT_GENTFUNC_BLAS( amax, amaxv )
 #endif

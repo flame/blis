@@ -203,7 +203,7 @@ void dscal_
 //    bli_finalize_auto();
 }
 
-INSERT_GENTFUNCSCAL_BLAS_ZEN2( scal, scalv )
+INSERT_GENTFUNCSCAL_BLAS_CZ( scal, scalv )
 #else
 INSERT_GENTFUNCSCAL_BLAS( scal, scalv )
 #endif

@@ -236,7 +236,7 @@ void dcopy_
 //    bli_finalize_auto();
 }
 
-INSERT_GENTFUNC_BLAS_ZEN2(copy, copyv)
+INSERT_GENTFUNC_BLAS_CZ(copy, copyv)
 #else
 INSERT_GENTFUNC_BLAS(copy, copyv)
 #endif

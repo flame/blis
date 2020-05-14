@@ -247,7 +247,7 @@ double ddot_
 	return rho;
 }
 
-INSERT_GENTFUNCDOT_BLAS_ZEN2( dot, dotv )
+INSERT_GENTFUNCDOT_BLAS_CZ( dot, dotv )
 #else
 INSERT_GENTFUNCDOT_BLAS( dot, dotv )
 #endif

@@ -229,7 +229,7 @@ void dswap_
 //    bli_finalize_auto();
 }
 
-INSERT_GENTFUNC_BLAS_ZEN2( swap, swapv )
+INSERT_GENTFUNC_BLAS_CZ( swap, swapv )
 
 #else
 INSERT_GENTFUNC_BLAS( swap, swapv )

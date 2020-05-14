@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2020, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -153,6 +154,7 @@ get-aocldtl-cflags-for     = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
 get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
                                    $(call load-var-for,CKVECFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
+                                   $(COMPSIMDFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )

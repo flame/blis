@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,6 +52,10 @@ void PASTEMAC(ch,varname) \
        cntx_t* cntx  \
      ) \
 { \
+	bli_init_once(); \
+\
+	if(cntx == NULL) cntx = bli_gks_query_cntx(); \
+\
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	ctype*  zero       = PASTEMAC(ch,0); \
@@ -127,5 +132,79 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( gemv_unf_var2 )
+#ifdef BLIS_CONFIG_ZEN2
 
+void bli_dgemv_unf_var2
+     (
+       trans_t transa,
+       conj_t  conjx,
+       dim_t   m,
+       dim_t   n,
+       double*  alpha,
+       double*  a, inc_t rs_a, inc_t cs_a,
+       double*  x, inc_t incx,
+       double*  beta,
+       double*  y, inc_t incy,
+       cntx_t* cntx 
+     )
+{
+
+	double*  A1;
+	double*  x1;
+	double*  y1;
+	dim_t   i;
+	dim_t   b_fuse, f;
+	dim_t   n_elem, n_iter;
+	inc_t   rs_at, cs_at;
+	conj_t  conja;
+
+	bli_set_dims_incs_with_trans( transa,
+	                              m, n, rs_a, cs_a,
+	                              &n_elem, &n_iter, &rs_at, &cs_at );
+
+	conja = bli_extract_conj( transa );
+
+	/* If beta is zero, use setv. Otherwise, scale by beta. */
+		/* y = beta * y; */
+	/* beta=0 case is hadled by scalv internally */
+
+		bli_dscalv_zen_int10
+		(
+		  BLIS_NO_CONJUGATE,
+		  n_elem,
+		  beta,
+		  y, incy,
+		  NULL
+		);
+
+	/* Query the context for the kernel function pointer and fusing factor. */
+	b_fuse = 5;
+
+	for ( i = 0; i < n_iter; i += f )
+	{
+		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+		A1 = a + (0  )*rs_at + (i  )*cs_at;
+		x1 = x + (i  )*incx;
+		y1 = y + (0  )*incy;
+
+		/* y = y + alpha * A1 * x1; */
+		bli_daxpyf_zen_int_5
+		(
+		  conja,
+		  conjx,
+		  n_elem,
+		  f,
+		  alpha,
+		  A1, rs_at, cs_at,
+		  x1, incx,
+		  y1, incy,
+		  NULL
+		);
+	}
+}
+
+INSERT_GENTFUNC_BASIC0_SCZ( gemv_unf_var2 )
+#else
+INSERT_GENTFUNC_BASIC0( gemv_unf_var2 )
+#endif

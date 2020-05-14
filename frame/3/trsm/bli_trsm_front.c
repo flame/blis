@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -48,16 +48,11 @@ void bli_trsm_front
      )
 {
 	bli_init_once();
-	int i, j;
+
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
  
-//int m = bli_obj_length(*b);
-//int n = bli_obj_width(*b); 
-//float *L =  a->buffer;
- // float *B =  b->buffer;
-
 #ifdef PRINT_SMALL_TRSM_INFO
         printf("Side:: %c\n", side ? 'R' : 'L');
         if (bli_obj_datatype(*a) == BLIS_FLOAT)

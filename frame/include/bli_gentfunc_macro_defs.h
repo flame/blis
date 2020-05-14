@@ -57,7 +57,7 @@ GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
 
 
-#define INSERT_GENTFUNC_BLAS_ZEN2( blasname, blisname ) \
+#define INSERT_GENTFUNC_BLAS_CZ( blasname, blisname ) \
 \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
@@ -82,7 +82,7 @@ GENTFUNCCO( dcomplex, double, z, d, blasname, blisname )
 
 // -- Basic one-operand macro with conjugation (used only for dot, ger) --
 
-#define INSERT_GENTFUNCDOT_BLAS_ZEN2( blasname, blisname ) \
+#define INSERT_GENTFUNCDOT_BLAS_CZ( blasname, blisname ) \
 \
 GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
@@ -125,7 +125,7 @@ GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 // -- Extended two-operand macro (used only for scal) --
 
 
-#define INSERT_GENTFUNCSCAL_BLAS_ZEN2( blasname, blisname ) \
+#define INSERT_GENTFUNCSCAL_BLAS_CZ( blasname, blisname ) \
 \
 GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
@@ -156,6 +156,14 @@ GENTFUNC( float,    s, tfuncname ) \
 GENTFUNC( double,   d, tfuncname ) \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
+
+
+#define INSERT_GENTFUNC_BASIC0_SCZ( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( scomplex, c, tfuncname ) \
+GENTFUNC( dcomplex, z, tfuncname )
+
 
 // -- (one auxiliary argument) --
 
