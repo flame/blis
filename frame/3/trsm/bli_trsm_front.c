@@ -48,7 +48,7 @@ void bli_trsm_front
      )
 {
 	bli_init_once();
-	int i, j;
+
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
