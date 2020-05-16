@@ -67,6 +67,32 @@ err_t bli_gemmsup
         if(BLIS_XXX==stor_id)
             return BLIS_FAILURE;
 
+	const dim_t m  = bli_obj_length( c );
+	const dim_t n  = bli_obj_width( c );
+	trans_t transa = bli_obj_conjtrans_status( a );
+	trans_t transb = bli_obj_conjtrans_status( b );
+
+	if(bli_obj_is_scomplex(c) && (((m/3) <  (n/8)))){
+		//printf(" gemmsup: Returning with for un-supported dimension  in cgemmsup \n");
+		return BLIS_FAILURE;
+	}
+
+	//Don't use sup for currently unsupported storage types in cgemmsup
+	if(bli_obj_is_scomplex(c) && (!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR) || (stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)))){
+		printf(" gemmsup: Returning with for un-supported storage types in cgemmsup \n");
+		return BLIS_FAILURE;
+	}
+
+	if(bli_obj_is_scomplex(c) && (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))){
+		//printf(" gemmsup: Returning with for un-supported matrix property in cgemmsup \n");
+		return BLIS_FAILURE;
+	}
+
+	if(bli_obj_is_dcomplex(c)){
+		//printf(" gemmsup: Returning with for zgemmsup \n");
+		return BLIS_FAILURE;
+	}
+
 	// Obtain a valid (native) context from the gks if necessary.
 	// NOTE: This must be done before calling the _check() function, since
 	// that function assumes the context pointer is valid.
@@ -78,8 +104,6 @@ err_t bli_gemmsup
 	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
 	{
 		const num_t dt = bli_obj_dt( c );
-		const dim_t m  = bli_obj_length( c );
-		const dim_t n  = bli_obj_width( c );
 		const dim_t k  = bli_obj_width_after_trans( a );
 
 		// Pass in m and n reversed, which simulates a transposition of the
@@ -90,8 +114,6 @@ err_t bli_gemmsup
 	else // ukr_prefers_storage_of( c, ... )
 	{
 		const num_t dt = bli_obj_dt( c );
-		const dim_t m  = bli_obj_length( c );
-		const dim_t n  = bli_obj_width( c );
 		const dim_t k  = bli_obj_width_after_trans( a );
 
 		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) )
