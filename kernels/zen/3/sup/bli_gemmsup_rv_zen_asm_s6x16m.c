@@ -140,15 +140,45 @@ void bli_sgemmsup_rv_zen_asm_6x16m
 			);
 			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
 		}
-
+		
 		if ( 1 == n_left )
-		{
-			bli_sgemv_ex
-			(
-			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
-			  beta, cij, rs_c0, cntx, NULL
-			);
+		{	
+			dim_t ps_a0 = bli_auxinfo_ps_a( data );
+			if ( ps_a0 == 6 * rs_a0 )
+			{
+				bli_sgemv_ex
+				(
+					BLIS_NO_TRANSPOSE, conjb, m0, k0,
+					alpha, ai, rs_a0, cs_a0, bj, rs_b0,
+					beta, cij, rs_c0, cntx, NULL
+				);
+			}
+			else
+			{
+				const dim_t mr = 6;
+
+				// Since A is packed into row panels, we must use a loop over
+				// gemv.
+				dim_t m_iter = ( m0 + mr - 1 ) / mr;
+				dim_t m_left =   m0            % mr;
+
+				float* restrict ai_ii  = ai;
+				float* restrict cij_ii = cij;
+
+				for ( dim_t ii = 0; ii < m_iter; ii += 1 )
+				{
+					dim_t mr_cur = ( bli_is_not_edge_f( ii, m_iter, m_left )
+					                 ? mr : m_left );
+					
+					bli_sgemv_ex 
+					(
+					  BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
+					  alpha, ai_ii, rs_a0, cs_a0, bj, rs_b0,
+					  beta, cij_ii, rs_c0, cntx, NULL
+					);
+					cij_ii += mr*rs_c0; ai_ii += ps_a0;
+				}			
+			}
 		}
 		
 		return;
@@ -173,6 +203,10 @@ void bli_sgemmsup_rv_zen_asm_6x16m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+	
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a4  = ps_a * sizeof( float );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -824,8 +858,10 @@ void bli_sgemmsup_rv_zen_asm_6x16m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a4), rax)               // load ps_a4
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a4
 
 	dec(r11)                           // ii -= 1;
 	jne(.SLOOP6X16I)                    // iterate again if ii != 0.
@@ -841,6 +877,7 @@ void bli_sgemmsup_rv_zen_asm_6x16m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),	  
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -869,9 +906,9 @@ void bli_sgemmsup_rv_zen_asm_6x16m
 		const dim_t      nr_cur = 16;
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
-		float*  cij = c + i_edge*rs_c;
-		float*  ai  = a + i_edge*rs_a;
-		float*  bj  = b;
+		float*  restrict cij = c + i_edge*rs_c;
+		float*  restrict ai  = a + m_iter*ps_a;
+		float*  restrict bj  = b;
 
 		sgemmsup_ker_ft ker_fps[6] =
 		{
@@ -929,6 +966,10 @@ void bli_sgemmsup_rv_zen_asm_6x8m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a4  = ps_a * sizeof( float );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -1352,8 +1393,10 @@ void bli_sgemmsup_rv_zen_asm_6x8m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a4), rax)               // load ps_a4
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a4
 
 	dec(r11)                           // ii -= 1;
 	jne(.SLOOP6X8I)                    // iterate again if ii != 0.
@@ -1370,6 +1413,7 @@ void bli_sgemmsup_rv_zen_asm_6x8m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),	  
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1399,7 +1443,7 @@ void bli_sgemmsup_rv_zen_asm_6x8m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		float* restrict cij = c + i_edge*rs_c;
-		float* restrict ai  = a + i_edge*rs_a;
+		float* restrict ai  = a + m_iter*ps_a;
 		float* restrict bj  = b;
 
 		sgemmsup_ker_ft ker_fps[6] =
@@ -1457,6 +1501,10 @@ void bli_sgemmsup_rv_zen_asm_6x4m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+	
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a4  = ps_a * sizeof( float );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -1827,8 +1875,10 @@ void bli_sgemmsup_rv_zen_asm_6x4m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a4), rax)               // load ps_a4
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a4
 
 	dec(r11)                           // ii -= 1;
 	jne(.SLOOP6X4I)                    // iterate again if ii != 0.
@@ -1845,6 +1895,7 @@ void bli_sgemmsup_rv_zen_asm_6x4m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),	  
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -1874,7 +1925,7 @@ void bli_sgemmsup_rv_zen_asm_6x4m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		float* restrict cij = c + i_edge*rs_c;
-		float* restrict ai  = a + i_edge*rs_a;
+		float* restrict ai  = a + m_iter*ps_a;
 		float* restrict bj  = b;
 
 		sgemmsup_ker_ft ker_fps[6] =
@@ -1932,6 +1983,10 @@ void bli_sgemmsup_rv_zen_asm_6x2m
 	uint64_t cs_b   = cs_b0;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+	
+	// Query the panel stride of A and convert it to units of bytes.
+	uint64_t ps_a   = bli_auxinfo_ps_a( data );
+	uint64_t ps_a4  = ps_a * sizeof( float );
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
 
@@ -2264,8 +2319,10 @@ void bli_sgemmsup_rv_zen_asm_6x2m
 	lea(mem(r12, rdi, 4), r12)         //
 	lea(mem(r12, rdi, 2), r12)         // c_ii = r12 += 6*rs_c
 
-	lea(mem(r14, r8,  4), r14)         //
-	lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	//lea(mem(r14, r8,  4), r14)         //
+	//lea(mem(r14, r8,  2), r14)         // a_ii = r14 += 6*rs_a
+	mov(var(ps_a4), rax)               // load ps_a4
+	lea(mem(r14, rax, 1), r14)         // a_ii = r14 += ps_a4
 
 	dec(r11)                           // ii -= 1;
 	jne(.SLOOP6X2I)                    // iterate again if ii != 0.
@@ -2282,6 +2339,7 @@ void bli_sgemmsup_rv_zen_asm_6x2m
       [a]      "m" (a),
       [rs_a]   "m" (rs_a),
       [cs_a]   "m" (cs_a),
+      [ps_a4]  "m" (ps_a4),	  
       [b]      "m" (b),
       [rs_b]   "m" (rs_b),
       [cs_b]   "m" (cs_b),
@@ -2311,7 +2369,7 @@ void bli_sgemmsup_rv_zen_asm_6x2m
 		const dim_t      i_edge = m0 - ( dim_t )m_left;
 
 		float* restrict cij = c + i_edge*rs_c;
-		float* restrict ai  = a + i_edge*rs_a;
+		float* restrict ai  = a + m_iter*ps_a;
 		float* restrict bj  = b;
 
 		sgemmsup_ker_ft ker_fps[6] =
