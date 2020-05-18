@@ -208,8 +208,6 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	lea(mem(, r8, 8), r8)              // rs_a *= sizeof(dt)
 	lea(mem(, r9, 8), r9)              // cs_a *= sizeof(dt)
 
-	//lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
-
 	mov(var(rs_b), r10)                // load rs_b
 	lea(mem(, r10, 8), r10)            // rs_b *= sizeof(dt)
 
@@ -566,23 +564,23 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORED)
-  /*|----------------|   		|-------|
+  /*|----------------|          |-------|
 	|        |       |          |       |
 	|    3x4 |   3x4 |          |  4x3  |
 	|        |       |          |-------|
-    |----------------|	        |       |
+	|----------------|          |       |
 	                            |  4x3  |
 	                            |-------|
    */
 
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
-	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
+	lea(mem(rsi, rsi, 2), r13) // r13 = 3*rs_a
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
+
 	add(rdi, rcx)
-	
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm8, ymm0, ymm8)
 	add(rdi, rcx)
@@ -1130,15 +1128,14 @@ void bli_cgemmsup_rv_zen_asm_3x4m
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORED)
-  /*|---------   		|-------|
+  /*|--------|          |-------|
 	|        |          |       |
 	|   3x4  |          |  4x3  |
-	|        |          |-------|
-	|---------
+	|--------|          |-------|
    */
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
-	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
+	lea(mem(rsi, rsi, 2), r13) // r13 = 3*rs_a
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
@@ -1549,7 +1546,7 @@ void bli_cgemmsup_rv_zen_asm_3x2m
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
 	// permute even and odd elements
-	 // of xmm6/7, xmm10/11, xmm/14/15
+	// of xmm6/7, xmm10/11, xmm/14/15
 	vpermilps(imm(0xb1), xmm6, xmm6)
 	vpermilps(imm(0xb1), xmm10, xmm10)
 	vpermilps(imm(0xb1), xmm14, xmm14)
@@ -1649,11 +1646,11 @@ void bli_cgemmsup_rv_zen_asm_3x2m
 
 	label(.SCOLSTORED)
 
-  /*|---------          |-------|
+  /*|--------|          |-------|
 	|        |          |       |
 	|   3x2  |          |  2x3  |
 	|        |          |-------|
-    |---------
+	|--------|
    */
 
 	mov(var(cs_c), rsi)        // load cs_c

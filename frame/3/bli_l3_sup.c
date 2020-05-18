@@ -63,30 +63,24 @@ err_t bli_gemmsup
 		return BLIS_FAILURE;
 	}
 
-        /*General stride is not yet supported in sup*/
-        if(BLIS_XXX==stor_id)
-            return BLIS_FAILURE;
+	/*General stride is not yet supported in sup*/
+	if(BLIS_XXX==stor_id)
+		return BLIS_FAILURE;
 
 	const dim_t m  = bli_obj_length( c );
 	const dim_t n  = bli_obj_width( c );
 	trans_t transa = bli_obj_conjtrans_status( a );
 	trans_t transb = bli_obj_conjtrans_status( b );
 
-	if(bli_obj_is_scomplex(c) && (((m/3) <  (n/8)))){
-		//printf(" gemmsup: Returning with for un-supported dimension  in cgemmsup \n");
+	//Don't use sup for currently unsupported storage types and dimension in cgemmsup
+	if(bli_obj_is_scomplex(c) && 
+	(!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR) || (stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)))
+	|| ((m/3) <  (n/8))
+	|| (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))){
+		//printf(" gemmsup: Returning with for un-supported storage types, dimension and matrix property in cgemmsup \n");
 		return BLIS_FAILURE;
 	}
 
-	//Don't use sup for currently unsupported storage types in cgemmsup
-	if(bli_obj_is_scomplex(c) && (!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR) || (stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)))){
-		printf(" gemmsup: Returning with for un-supported storage types in cgemmsup \n");
-		return BLIS_FAILURE;
-	}
-
-	if(bli_obj_is_scomplex(c) && (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))){
-		//printf(" gemmsup: Returning with for un-supported matrix property in cgemmsup \n");
-		return BLIS_FAILURE;
-	}
 
 	if(bli_obj_is_dcomplex(c)){
 		//printf(" gemmsup: Returning with for zgemmsup \n");

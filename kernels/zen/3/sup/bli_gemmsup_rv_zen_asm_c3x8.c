@@ -325,7 +325,7 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
 	// permute even and odd elements
-	 // of ymm6/7, ymm10/11, ymm/14/15
+	// of ymm6/7, ymm10/11
 	vpermilps(imm(0xb1), ymm6, ymm6)
 	vpermilps(imm(0xb1), ymm7, ymm7)
 	vpermilps(imm(0xb1), ymm10, ymm10)
@@ -411,18 +411,18 @@ void bli_cgemmsup_rv_zen_asm_2x8
 
 
 	label(.SCOLSTORED)
-  /*|----------------|   		|-------|
+  /*|----------------|          |-------|
 	|        |       |          |       |
 	|    2x4 |   2x4 |          |  4x2  |
 	|        |       |          |-------|
-    |----------------|	        |       |
+	|----------------|          |       |
 	                            |  4x2  |
 	                            |-------|
 	*/
 
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
-	lea(mem(rsi, rsi, 2), r13)           // r13 = 3*rs_a
+	lea(mem(rsi, rsi, 2), r13) // r13 = 3*rs_a
 
 	CGEMM_INPUT_SCALE_CS_BETA_NZ
 	vaddps(ymm4, ymm0, ymm4)
@@ -458,16 +458,16 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovups(xmm2, mem(rcx))				// store (gamma03-13)
 	lea(mem(rcx, rsi, 1), rcx)
-	
+
 	/******************Transpose bottom tile 4x3***************************/
 	vunpcklpd(ymm9, ymm5, ymm0)        //a8a9b8b9     a12a13b12b13 //gamma04-14 gamma06-16
 	vunpckhpd(ymm9, ymm5, ymm2)        //a10a11b10b11 a14a15b14b15 //gamma05-15 gamma07-17
-	
+
 	vmovups(xmm0, mem(rcx))				// store (gamma04-14)
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovups(xmm2, mem(rcx))				// store (gamma05-15)
 	lea(mem(rcx, rsi, 1), rcx)
-	
+
 	vextractf128(imm(0x1), ymm0, xmm0)
 	vextractf128(imm(0x1), ymm2, xmm2)
 	vmovups(xmm0, mem(rcx))             // store (gamma06-16)
@@ -494,14 +494,14 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORBZ)
-/****2x8 tile going to save into 8x2 tile in C*****/
+	/****2x8 tile going to save into 8x2 tile in C*****/
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
 	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5
 	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7
 
-	/******************Transpose top tile 4x3***************************/
+	/******************Transpose top tile 4x2***************************/
 	vmovups(xmm0, mem(rcx))
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovups(xmm2, mem(rcx))
@@ -759,11 +759,11 @@ void bli_cgemmsup_rv_zen_asm_1x8
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
 	// permute even and odd elements
-	 // of ymm6/7, ymm10/11, ymm/14/15
+	// of ymm6/7
 	vpermilps(imm(0xb1), ymm6, ymm6)
 	vpermilps(imm(0xb1), ymm7, ymm7)
 
-	 // subtract/add even/odd elements
+	// subtract/add even/odd elements
 	vaddsubps(ymm6, ymm4, ymm4)
 	vaddsubps(ymm7, ymm5, ymm5)
 
@@ -875,7 +875,7 @@ void bli_cgemmsup_rv_zen_asm_1x8
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORBZ)
-/****1x8 tile going to save into 8x1 tile in C*****/
+	/****1x8 tile going to save into 8x1 tile in C*****/
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
@@ -892,7 +892,6 @@ void bli_cgemmsup_rv_zen_asm_1x8
 	lea(mem(rcx, rsi, 1), rcx)
 
 	/******************Transpose bottom tile 4x1***************************/
-
 	vmovlpd(xmm5, mem(rcx))				// store (gamma44)
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovhpd(xmm5, mem(rcx))				// store (gamma45)
@@ -1152,7 +1151,7 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
 	// permute even and odd elements
-	 // of ymm6/7, ymm10/11, ymm/14/15
+	 // of ymm6/7
 	vpermilps(imm(0xb1), ymm6, ymm6)
 	vpermilps(imm(0xb1), ymm10, ymm10)
 
@@ -1232,7 +1231,7 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	vunpcklpd(ymm8, ymm4, ymm0)        //a0a1b0b1 a4a4b4b5 //gamma00-10 gamma02-12
 	vunpckhpd(ymm8, ymm4, ymm2)        //a2a3b2b3 a6a7b6b7 //gamma01-11 gamma03-13
 
-	/******************Transpose top tile 4x3***************************/
+	/******************Transpose top tile 4x2***************************/
 	vmovups(xmm0, mem(rcx))				// store (gamma00-10)
 	lea(mem(rcx, rsi, 1), rcx)
 	vmovups(xmm2, mem(rcx))				// store (gamma01-11)
@@ -1264,24 +1263,24 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORBZ)
-/****2x4 tile going to save into 4x2 tile in C*****/
+	/****2x4 tile going to save into 4x2 tile in C*****/
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
-	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5 //gamma40-50 gamma42-52
-	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7 //gamma41-51 gamma43-53
+	vunpcklpd(ymm8, ymm4, ymm0) //a0a1b0b1 a4a4b4b5 //gamma00-10 gamma02-12
+	vunpckhpd(ymm8, ymm4, ymm2) //a2a3b2b3 a6a7b6b7 //gamma01-11 gamma03-13
 
 	/******************Transpose top tile 4x3***************************/
-	vmovups(xmm0, mem(rcx))				// store (gamma40-50)
+	vmovups(xmm0, mem(rcx))				// store (gamma00-10)
 	lea(mem(rcx, rsi, 1), rcx)
-	vmovups(xmm2, mem(rcx))				// store (gamma41-51)
+	vmovups(xmm2, mem(rcx))				// store (gamma01-11)
 	lea(mem(rcx, rsi, 1), rcx)
 
 	vextractf128(imm(0x1), ymm0, xmm0)
 	vextractf128(imm(0x1), ymm2, xmm2)
-	vmovups(xmm0, mem(rcx))				// store (gamma42-52)
+	vmovups(xmm0, mem(rcx))				// store (gamma02-12)
 	lea(mem(rcx, rsi, 1), rcx)
-	vmovups(xmm2, mem(rcx))				// store (gamma43-53)
+	vmovups(xmm2, mem(rcx))				// store (gamma03-13)
 
 
 	label(.SDONE)
@@ -1502,8 +1501,8 @@ void bli_cgemmsup_rv_zen_asm_1x4
 
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
-    // permute even and odd elements
-	 // of ymm6/7, ymm10/11, ymm/14/15
+	// permute even and odd elements
+	// of ymm6/7, ymm10/11, ymm/14/15
 	vpermilps(imm(0xb1), ymm6, ymm6)
 
 	// subtract/add even/odd elements
@@ -1588,7 +1587,7 @@ void bli_cgemmsup_rv_zen_asm_1x4
 
 
 	label(.SCOLSTORBZ)
-/****1x4 tile going to save into 4x1 tile in C*****/
+	/****1x4 tile going to save into 4x1 tile in C*****/
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
@@ -1856,7 +1855,7 @@ void bli_cgemmsup_rv_zen_asm_2x2
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
 	// permute even and odd elements
-	 // of xmm6/7, xmm10/11, xmm/14/15
+	// of xmm6/7
 	vpermilps(imm(0xb1), xmm6, xmm6)
 	vpermilps(imm(0xb1), xmm10, xmm10)
 
@@ -1951,13 +1950,13 @@ void bli_cgemmsup_rv_zen_asm_2x2
 
 	mov(r12, rcx)                      // reset rcx to current utile of c.
 
-	vunpcklpd(xmm8, xmm4, xmm0) //a0a1b0b1  //gamma40-50
-	vunpckhpd(xmm8, xmm4, xmm2) //a2a3b2b3  //gamma41-51
+	vunpcklpd(xmm8, xmm4, xmm0) //a0a1b0b1  //gamma00-10
+	vunpckhpd(xmm8, xmm4, xmm2) //a2a3b2b3  //gamma01-11
 
 	/******************Transpose top tile 4x3***************************/
-	vmovups(xmm0, mem(rcx))				// store (gamma40-50)
+	vmovups(xmm0, mem(rcx))				// store (gamma00-10)
 	lea(mem(rcx, rsi, 1), rcx)
-	vmovups(xmm2, mem(rcx))				// store (gamma41-51)
+	vmovups(xmm2, mem(rcx))				// store (gamma01-11)
 
 	jmp(.SDONE)                        // jump to end.
 
@@ -1980,13 +1979,13 @@ void bli_cgemmsup_rv_zen_asm_2x2
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
-	vunpcklpd(xmm8, xmm4, xmm0) //a0a1b0b1  //gamma40-50
-	vunpckhpd(xmm8, xmm4, xmm2) //a2a3b2b3  //gamma41-51
+	vunpcklpd(xmm8, xmm4, xmm0) //a0a1b0b1  //gamma00-10
+	vunpckhpd(xmm8, xmm4, xmm2) //a2a3b2b3  //gamma01-11
 
-	/******************Transpose top tile 4x3***************************/
-	vmovups(xmm0, mem(rcx))				// store (gamma40-50)
+	/******************Transpose top tile 2x2***************************/
+	vmovups(xmm0, mem(rcx))				// store (gamma00-10)
 	lea(mem(rcx, rsi, 1), rcx)
-	vmovups(xmm2, mem(rcx))				// store (gamma41-51)
+	vmovups(xmm2, mem(rcx))				// store (gamma01-11)
 	label(.SDONE)
 
 	end_asm(
@@ -2259,7 +2258,7 @@ void bli_cgemmsup_rv_zen_asm_1x2
 	vmulps(xmm2, xmm3, xmm3)
 	vaddsubps(xmm3, xmm0, xmm0)
 
-    vaddps(xmm4, xmm0, xmm0)
+	vaddps(xmm4, xmm0, xmm0)
 
 	vmovlpd(xmm0, mem(rcx))
 	vmovhpd(xmm0, mem(rcx, rsi, 1))
@@ -2297,7 +2296,7 @@ void bli_cgemmsup_rv_zen_asm_1x2
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORBZ)
-/****1x2 tile going to save into 2x1 tile in C*****/
+	/****1x2 tile going to save into 2x1 tile in C*****/
 	mov(var(cs_c), rsi)        // load cs_c
 	lea(mem(, rsi, 8), rsi)    // rsi = cs_c * sizeof(dt)
 
