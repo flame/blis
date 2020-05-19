@@ -40,6 +40,6 @@ AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
 // -- level-2 --
 
 //gemv(scalar code)
-GEMV_KER_PROT( double,    d, gemv_zen_basic )
+GEMV_KER_PROT( double,    d, gemv_zen_ref_c )
 
 

@@ -248,7 +248,7 @@ void dgemv_
     {
         if((m0 <1200) && (n0 < 1200))
         {
-            bli_dgemv_zen_basic
+            bli_dgemv_zen_ref_c
             (
                 m0,
                 n0,
