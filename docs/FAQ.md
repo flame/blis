@@ -160,9 +160,18 @@ BLIS was designed for use in a GNU/Linux environment. However, we've gone to gre
 
 ### Can I build BLIS on Windows?
 
-Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows.
-
 If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". If you would like to provide us feedback, you may do so by [opening an issue](http://github.com/flame/blis/issues), or you can join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message.
+
+If you want to build on Windows, there are two options:
+
+1. MSVC ABI compatible DLL with clang
+
+   If you want BLIS to be compatible with DLLs built by MSVC, you need to use `clang.exe` to build BLIS as BLIS does not support building with Visual Studio C compiler (``cl.exe``). To build BLIS, you need a recent clang from [LLVM](https://releases.llvm.org/download.html), an [MSYS2](https://www.msys2.org/) environment (for build tools like `sed`, `bash`), a Visual Studio 2015 or later environment (for C standard library) and Windows SDK.
+   To build `BLIS`, activate the Visual Studio environment from a command prompy and drop in to a bash shell from MSYS2 environment. Then set `AR=llvm-ar`, `AS=llvm-as`, `RANLIB=echo`, `CC=clang` and then follow the instructions for the Linux build.
+
+2. MinGW DLL
+
+   This is the easiest option to compile BLIS on windows, but the DLL might not be compatible with other programs compiled with MSVC. To build `BLIS`, install [MSYS2](https://www.msys2.org) and `mingw-w64` compilers. Then start a `bash` shell from MSYS2 and follow the instructions for the Linux build.
 
 ### Can I build BLIS as a shared library?
 
