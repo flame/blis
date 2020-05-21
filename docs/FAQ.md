@@ -26,7 +26,8 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Does BLIS work with GPUs?](FAQ.md#does-blis-work-with-gpus)
   * [Does BLIS work on (some architecture)?](FAQ.md#does-blis-work-on-some-architecture)
   * [What about distributed-memory parallelism?](FAQ.md#what-about-distributed-memory-parallelism)
-  * [Can I build BLIS on Windows / Mac OS X?](FAQ.md#can-i-build-blis-on-windows--mac-os-x)
+  * [Can I build BLIS on Mac OS X?](FAQ.md#can-i-build-blis-on-mac-os-x)
+  * [Can I build BLIS on Windows?](FAQ.md#can-i-build-blis-on-windows)
   * [Can I build BLIS as a shared library?](FAQ.md#can-i-build-blis-as-a-shared-library)
   * [Can I use the mixed domain / mixed precision support in BLIS?](FAQ.md#can-i-use-the-mixed-domain--mixed-precision-support-in-blis)
   * [Who is involved in the project?](FAQ.md#who-is-involved-in-the-project)
@@ -153,13 +154,15 @@ Please see the BLIS [Hardware Support](HardwareSupport.md) guide for a full list
 
 No. BLIS is a framework for sequential and shared-memory/multicore implementations of BLAS-like operations. If you need distributed-memory dense linear algebra implementations, we recommend the [Elemental](http://libelemental.org/) library.
 
-### Can I build BLIS on Windows / Mac OS X?
+### Can I build BLIS on Mac OS X?
 
 BLIS was designed for use in a GNU/Linux environment. However, we've gone to greath lengths to keep BLIS compatible with other UNIX-like systems as well, such as BSD and OS X. System software requirements for UNIX-like systems are discussed in the BLIS [Build System](BuildSystem.md) guide.
 
+### Can I build BLIS on Windows?
+
 Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows.
 
-If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". And if you'd like to share your experiences, please join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message!
+If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". If you would like to provide us feedback, you may do so by [opening an issue](http://github.com/flame/blis/issues), or you can join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message.
 
 ### Can I build BLIS as a shared library?
 
