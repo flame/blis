@@ -161,9 +161,6 @@ void bli_cgemmsup_rv_zen_asm_3x8m
 			);
 			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
 		}
-		if(n_left!=0)
-			printf("Reached n_left: %ld which is not yet implemented\n",n_left);
-
 		if ( 1 == n_left )
 		{
 			bli_cgemv_ex
