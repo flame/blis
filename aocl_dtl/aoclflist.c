@@ -1,3 +1,14 @@
+/*===================================================================
+ * File Name :  aoclflist.c
+ * 
+ * Description : Linked list of open files assocaited with 
+ *               each thread. This is used to log the data
+ *               to correct file as per the current thread id.
+ *
+ * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * 
+ *==================================================================*/
+
 #include "aocltpdef.h"
 #include "aocldtl.h"
 #include "aoclfal.h"
