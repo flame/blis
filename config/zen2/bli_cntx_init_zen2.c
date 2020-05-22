@@ -92,7 +92,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
 
-          // dotxv
+	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
 
@@ -109,9 +109,9 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
 
 	  //set
-          BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
-          BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
-          cntx
+	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
+	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -149,13 +149,13 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	);
 // -------------------------------------------------------------------------
 
-    //Initialize TRSM blocksize objects with architecture-specific values.
+	//Initialize TRSM blocksize objects with architecture-specific values.
 	//Using different cache block sizes for TRSM instead of common level-3 block sizes.
 	//Tuning is done for double-precision only.
-    //                                          s      d      c      z
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   256 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  4080 );
+	//                                          s      d      c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  4080 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes for level-3 TRSM problems.
@@ -196,7 +196,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
 	(
-	  20,
+	  22,
 	  //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
 	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
 	  BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
@@ -215,9 +215,11 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
+	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  cntx
 	);
 
@@ -227,7 +229,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,      3,
 	                                            9,     9,     3,      3    );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,      4    );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    36,     18   );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,     36   );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,    64   );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040,   1020 );
 

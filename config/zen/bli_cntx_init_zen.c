@@ -131,7 +131,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	a)  If BLIS is run in a multi-instance mode with
 	    CPU freq 2.6/2.2 Ghz
 	    DDR4 clock frequency 2400Mhz
-          mc = 240, kc = 512, and nc = 2040
+	    mc = 240, kc = 512, and nc = 2040
 	    has better performance on EPYC server, over the default block sizes.
 
 	b)  If BLIS is run in Single Instance mode
@@ -219,7 +219,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
 	(
-	  20,
+	  22,
 	  //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
 	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
 	  BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
@@ -238,9 +238,11 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
+	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
 	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
 	  cntx
 	);
 
@@ -250,7 +252,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,    3,
 	                                            9,     9,     3,    3    );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,    4    );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    36,   18   );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,   36   );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,  64   );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040, 1020 );
 

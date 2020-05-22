@@ -75,7 +75,8 @@ err_t bli_gemmsup
 	//Don't use sup for currently unsupported storage types and dimension in cgemmsup
 	if(bli_obj_is_scomplex(c) &&
 	((!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR)
-	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)))
+	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)
+	  ||(stor_id == BLIS_CCC)))
 	|| ((m/3) <  (n/8))
 	|| (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))
 	)){
@@ -86,7 +87,8 @@ err_t bli_gemmsup
 	//Don't use sup for currently unsupported storage types and dimension in zgemmsup
 	if(bli_obj_is_dcomplex(c) &&
 	((!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR)
-	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)))
+	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)
+	  ||(stor_id == BLIS_CCC)))
 	|| ((m/3) <  (n/4))
 	|| (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))
 	)){
