@@ -33,6 +33,13 @@
 
 */
 
+// -- level-1m --
+PACKM_KER_PROT(double, d, packm_8xk_gen_zen)
+PACKM_KER_PROT(double, d, packm_6xk_gen_zen)
+PACKM_KER_PROT(double, d, packm_8xk_nn_zen)
+PACKM_KER_PROT(double, d, packm_6xk_nn_zen)
+
+
 // -- level-1v --
 
 // amaxv (intrinsics)

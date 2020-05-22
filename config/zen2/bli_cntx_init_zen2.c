@@ -63,6 +63,15 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  cntx
 	);
 
+	// packm kernels
+	bli_cntx_set_packm_kers
+	  (
+	    2,
+	    BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_8xk_gen_zen,
+	    BLIS_PACKM_6XK_KER, BLIS_DOUBLE, bli_dpackm_6xk_gen_zen,
+	    cntx
+	  );
+
 	// Update the context with optimized level-1f kernels.
 	bli_cntx_set_l1f_kers
 	(
