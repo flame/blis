@@ -71,97 +71,60 @@ void bli_dpackm_8xk_nn_zen
 
     if (cdim == 8)
     {
-        if ((*kappa_cast) == (1.0))
-        {
-                __m256d ymmSrc_0_0123; // source registers
-                __m256d ymmSrc_0_4567;
-                __m256d ymmSrc_1_0123;
-                __m256d ymmSrc_1_4567;
-                //__m256d ymmKappa = _mm256_broadcast_sd (kappa_cast);
+      // (*kappa_cast) = 1.0 for GEMM
+      __m256d ymmSrc_0_0123; // source registers
+      __m256d ymmSrc_0_4567;
+      __m256d ymmSrc_1_0123;
+      __m256d ymmSrc_1_4567;
 
-                for (; n_iter != 0; --n_iter)
-                {
-                    // Works when inca = 1, which is the case for op(A) = n and op(B) = n
-                    ymmSrc_0_0123 = _mm256_loadu_pd(alpha1 + 0 * inca + 0 * lda);
-                    ymmSrc_0_4567 = _mm256_loadu_pd(alpha1 + 4 * inca + 0 * lda);
+      for (; n_iter != 0; --n_iter)
+	{
+	  // Works when inca = 1, which is the case for op(A) = n and op(B) = n
+	  ymmSrc_0_0123 = _mm256_loadu_pd(alpha1 + 0 * inca + 0 * lda);
+	  ymmSrc_0_4567 = _mm256_loadu_pd(alpha1 + 4 * inca + 0 * lda);
+	  ymmSrc_1_0123 = _mm256_loadu_pd(alpha1 + 0 * inca + 1 * lda);
+	  ymmSrc_1_4567 = _mm256_loadu_pd(alpha1 + 4 * inca + 1 * lda);
 
-                    ymmSrc_1_0123 = _mm256_loadu_pd(alpha1 + 0 * inca + 1 * lda);
-                    ymmSrc_1_4567 = _mm256_loadu_pd(alpha1 + 4 * inca + 1 * lda);
-
-                    // Store
+          // Store
 #if 1
-                    _mm256_storeu_pd((pi1 + 0 + 0 * ldp), ymmSrc_0_0123);
-                    _mm256_storeu_pd((pi1 + 4 + 0 * ldp), ymmSrc_0_4567);
+	  _mm256_storeu_pd((pi1 + 0 + 0 * ldp), ymmSrc_0_0123);
+	  _mm256_storeu_pd((pi1 + 4 + 0 * ldp), ymmSrc_0_4567);
 
-                    _mm256_storeu_pd((pi1 + 0 + 1 * ldp), ymmSrc_1_0123);
-                    _mm256_storeu_pd((pi1 + 4 + 1 * ldp), ymmSrc_1_4567);
+	  _mm256_storeu_pd((pi1 + 0 + 1 * ldp), ymmSrc_1_0123);
+	  _mm256_storeu_pd((pi1 + 4 + 1 * ldp), ymmSrc_1_4567);
 #else
-                    _mm256_stream_pd((pi1 + 0), ymmSrc_0_0123);
-                    _mm256_stream_pd((pi1 + 4), ymmSrc_0_4567);
+	  _mm256_stream_pd((pi1 + 0), ymmSrc_0_0123);
+	  _mm256_stream_pd((pi1 + 4), ymmSrc_0_4567);
 
-                    _mm256_stream_pd((pi1 + 0 + 1 * ldp), ymmSrc_1_0123);
-                    _mm256_stream_pd((pi1 + 4 + 1 * ldp), ymmSrc_1_4567);
+	  _mm256_stream_pd((pi1 + 0 + 1 * ldp), ymmSrc_1_0123);
+	  _mm256_stream_pd((pi1 + 4 + 1 * ldp), ymmSrc_1_4567);
 #endif
-                    alpha1 += 2 * lda;
-                    pi1 += 2 * ldp;
-                }
+	  alpha1 += 2 * lda;
+	  pi1 += 2 * ldp;
+	}
 
-                if (n_left & 1) //for (; n_left != 0; --n_left)
-                {
-                    ymmSrc_0_0123 = _mm256_loadu_pd(alpha1 + 0 * inca);
-                    ymmSrc_0_4567 = _mm256_loadu_pd(alpha1 + 4 * inca);
+      if (n_left & 1) //for (; n_left != 0; --n_left)
+	{
+	  ymmSrc_0_0123 = _mm256_loadu_pd(alpha1 + 0 * inca);
+	  ymmSrc_0_4567 = _mm256_loadu_pd(alpha1 + 4 * inca);
 
-                    _mm256_storeu_pd((pi1 + 0), ymmSrc_0_0123);
-                    _mm256_storeu_pd((pi1 + 4), ymmSrc_0_4567);
+	  _mm256_storeu_pd((pi1 + 0), ymmSrc_0_0123);
+	  _mm256_storeu_pd((pi1 + 4), ymmSrc_0_4567);
 
-                    alpha1 += lda;
-                    pi1 += ldp;
-                }
-        }
-        else
-        {
-            //
-            PRAGMA_SIMD
-	    for (dim_t k = n; k > 0; --k)
-            {
-                ((*(pi1 + 0))) = ((*kappa_cast)) * ((*(alpha1 + 0 * inca)));
-                ((*(pi1 + 1))) = ((*kappa_cast)) * ((*(alpha1 + 1 * inca)));
-                ((*(pi1 + 2))) = ((*kappa_cast)) * ((*(alpha1 + 2 * inca)));
-                ((*(pi1 + 3))) = ((*kappa_cast)) * ((*(alpha1 + 3 * inca)));
-                ((*(pi1 + 4))) = ((*kappa_cast)) * ((*(alpha1 + 4 * inca)));
-                ((*(pi1 + 5))) = ((*kappa_cast)) * ((*(alpha1 + 5 * inca)));
-                ((*(pi1 + 6))) = ((*kappa_cast)) * ((*(alpha1 + 6 * inca)));
-                ((*(pi1 + 7))) = ((*kappa_cast)) * ((*(alpha1 + 7 * inca)));
-
-                alpha1 += lda;
-                pi1 += ldp;
-            }
-        }
+	  alpha1 += lda;
+	  pi1 += ldp;
+	}
     }
     else /* if ( cdim < mnr ) */
     {
       double* restrict a_cast = a;
       double* restrict p_cast = p;
-#if 0
-        if ((*kappa_cast) == 0.0)
-        {
-            for (dim_t j = 0; j < n; ++j)
-                for (dim_t i = 0; i < cdim; ++i)
-                    p_cast[i + j*ldp] = 0.0;
-        }
-        else
-        {
-            for (dim_t j = 0; j < n; ++j)
-                for (dim_t i = 0; i < cdim; ++i)
-                    p_cast[i + j*ldp] = (*kappa_cast) * a_cast[i + j*lda];
-        }
-#else
         // (*kappa_cast == 1.0) for GEMM
-        PRAGMA_SIMD
+
+      PRAGMA_SIMD
         for (dim_t j = 0; j < n; ++j)
             for (dim_t i = 0; i < cdim; ++i)
                 p_cast[i + j*ldp] = a_cast[i + j*lda];
-#endif
 
         /* if ( cdim < mnr ) */
         const dim_t     i = cdim;
@@ -203,93 +166,68 @@ void bli_dpackm_6xk_nn_zen
     cntx_t* restrict cntx
 )
 {
-    double* restrict kappa_cast = kappa;
-    double* restrict alpha1 = a;
-    double* restrict pi1 = p;
+  double* restrict kappa_cast = kappa;
+  double* restrict alpha1 = a;
+  double* restrict pi1 = p;
 
-    if (cdim == 6)
+  if (cdim == 6)
     {
-        //if ( (*kappa_cast) == 1.0 ) // Kappa_cast = 1.0 for dgemm
-        for (dim_t k = n; k != 0; --k)
+      //if ( (*kappa_cast) == 1.0 ) // Kappa_cast = 1.0 for dgemm
+      for (dim_t k = n; k != 0; --k)
         {
-#if 0 // will be disabled for now
-            v4df_t ymmSrc;
-            ymmSrc.d[0] = (*(alpha1 + 0 * inca));
-            ymmSrc.d[1] = (*(alpha1 + 1 * inca));
-            ymmSrc.d[2] = (*(alpha1 + 2 * inca));
-            ymmSrc.d[3] = (*(alpha1 + 3 * inca));
+	  (*(pi1 + 0)) = (*(alpha1 + 0 * inca));
+	  (*(pi1 + 1)) = (*(alpha1 + 1 * inca));
+	  (*(pi1 + 2)) = (*(alpha1 + 2 * inca));
+	  (*(pi1 + 3)) = (*(alpha1 + 3 * inca));
 
-            _mm256_storeu_pd((pi1 + 0), ymmSrc.v);
+	  (*(pi1 + 4)) = (*(alpha1 + 4 * inca));
+	  (*(pi1 + 5)) = (*(alpha1 + 5 * inca));
 
-            // non-temporal causing seg-fault because of factor 6
-            // _mm256_stream_pd ((pi1 + 0), ymmSrc.v);
-
-            ((*(pi1 + 4))) = ((*(alpha1 + 4 * inca)));
-            ((*(pi1 + 5))) = ((*(alpha1 + 5 * inca)));
-
-#else
-            (*(pi1 + 0)) = (*(alpha1 + 0 * inca));
-            (*(pi1 + 1)) = (*(alpha1 + 1 * inca));
-            (*(pi1 + 2)) = (*(alpha1 + 2 * inca));
-            (*(pi1 + 3)) = (*(alpha1 + 3 * inca));
-
-            (*(pi1 + 4)) = (*(alpha1 + 4 * inca));
-            (*(pi1 + 5)) = (*(alpha1 + 5 * inca));
-#endif
-            alpha1 += lda;
-            pi1 += ldp;
+	  alpha1 += lda;
+	  pi1 += ldp;
         }
     }
-    else /* if ( cdim < mnr ) */
+  else /* if ( cdim < mnr ) */
     {
       double* restrict a_cast = a;
       double* restrict p_cast = p;
-#if 0
-        if ((*kappa_cast) == 0.0)
-        {
-            for (dim_t j = 0; j < n; ++j)
-                for (dim_t i = 0; i < cdim; ++i)
-                    p_cast[i + j*ldp] = 0.0;
-        }
-        else
-        {
-            // a will be in row-major, inca != 1 and lda = 1
-            for (dim_t i = 0; i < cdim; ++i)
-                for(dim_t j = 0; j < n; ++j)
-                    p_cast[i + j*ldp] = (*kappa_cast) * a_cast[i * inca + j]; // i * inca + j * lda, lda = 1
-        }
-#else
-        // (*kappa_cast == 1.0) for GEMM
-        // a will be in row-major, inca != 1 and lda = 1
-        for (dim_t i = 0; i < cdim; ++i)
-            for (dim_t j = 0; j < n; ++j)
-                p_cast[i + j*ldp] = a_cast[i * inca + j]; // i * inca + j * lda, lda = 1
-#endif
-        /* if ( cdim < mnr ) */
-       
-            const dim_t     i = cdim;
-            const dim_t     m_edge = 6 - cdim;
-            const dim_t     n_edge = n_max;
-	    //     double* restrict p_cast = p;
-            double* restrict p_edge = p_cast + (i) * 1;
 
-            for (dim_t j = 0; j < n_edge; ++j)
-                for (dim_t i = 0; i < m_edge; ++i)
-                    *(p_edge + i + j*ldp) = 0.0;
-       
+      if ((*kappa_cast) == 0.0)
+	{
+	  for (dim_t j = 0; j < n; ++j)
+	    for (dim_t i = 0; i < cdim; ++i)
+	      p_cast[i + j*ldp] = 0.0;
+	}
+      else
+	{
+	  // (*kappa_cast == 1.0) for GEMM
+	  // a will be in row-major, inca != 1 and lda = 1
+	  for (dim_t i = 0; i < cdim; ++i)
+	    for(dim_t j = 0; j < n; ++j)
+	      p_cast[i + j*ldp] = a_cast[i * inca + j]; // i * inca + j * lda, lda = 1
+	}
+      /* if ( cdim < mnr ) */
+      const dim_t     m_edge = 6 - cdim;
+      const dim_t     n_edge = n_max;
+      //     double* restrict p_cast = p;
+      double* restrict p_edge = p_cast + (cdim) * 1;
+
+      for (dim_t j = 0; j < n_edge; ++j)
+	for (dim_t i = 0; i < m_edge; ++i)
+	  *(p_edge + i + j*ldp) = 0.0;
     }
 
-    if (n < n_max)
+  if (n < n_max)
     {
-        const dim_t     j = n;
-        const dim_t     m_edge = 6;
-        const dim_t     n_edge = n_max - n;
-        double* restrict p_cast = p;
-        double* restrict p_edge = p_cast + (j)*ldp;
+      const dim_t     j = n;
+      const dim_t     m_edge = 6;
+      const dim_t     n_edge = n_max - n;
+      double* restrict p_cast = p;
+      double* restrict p_edge = p_cast + (j)*ldp;
 
-        for (dim_t j = 0; j < n_edge; ++j)
-            for (dim_t i = 0; i < m_edge; ++i)
-                *(p_edge + i + j*ldp) = 0.0;
+      for (dim_t j = 0; j < n_edge; ++j)
+	for (dim_t i = 0; i < m_edge; ++i)
+	  *(p_edge + i + j*ldp) = 0.0;
     }
 }// end of function
 
