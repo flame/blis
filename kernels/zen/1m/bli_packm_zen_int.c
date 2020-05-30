@@ -62,9 +62,8 @@ void bli_dpackm_8xk_nn_zen
     cntx_t* restrict cntx
 )
 {
-    double* restrict kappa_cast = kappa;
-    double* restrict alpha1 = a;
-    double* restrict pi1 = p;
+  double* restrict alpha1 = a;
+  double* restrict pi1 = p;
 
     dim_t           n_iter = n / 2;
     dim_t           n_left = n % 2;
@@ -121,21 +120,22 @@ void bli_dpackm_8xk_nn_zen
       double* restrict p_cast = p;
         // (*kappa_cast == 1.0) for GEMM
 
-      PRAGMA_SIMD
+        PRAGMA_SIMD
         for (dim_t j = 0; j < n; ++j)
             for (dim_t i = 0; i < cdim; ++i)
                 p_cast[i + j*ldp] = a_cast[i + j*lda];
 
-        /* if ( cdim < mnr ) */
+
         const dim_t     i = cdim;
         const dim_t     m_edge = 8 - cdim;
         const dim_t     n_edge = n_max;
 	//     double* restrict p_cast = p;
         double* restrict p_edge = p_cast + (i) * 1;
 
+        PRAGMA_SIMD
         for (dim_t j = 0; j < n_edge; ++j)
             for (dim_t i = 0; i < m_edge; ++i)
-                *(p_edge + i * 1 + j*ldp) = 0.0;
+                *(p_edge + i + j*ldp) = 0.0;
     }
 
     if (n < n_max)
@@ -146,6 +146,7 @@ void bli_dpackm_8xk_nn_zen
         double* restrict p_cast = p;
         double* restrict p_edge = p_cast + (j)*ldp;
 
+	PRAGMA_SIMD
         for (dim_t j = 0; j < n_edge; ++j)
             for (dim_t i = 0; i < m_edge; ++i)
                 *(p_edge + i + j*ldp) = 0.0;
@@ -166,7 +167,6 @@ void bli_dpackm_6xk_nn_zen
     cntx_t* restrict cntx
 )
 {
-  double* restrict kappa_cast = kappa;
   double* restrict alpha1 = a;
   double* restrict pi1 = p;
 
@@ -192,26 +192,20 @@ void bli_dpackm_6xk_nn_zen
       double* restrict a_cast = a;
       double* restrict p_cast = p;
 
-      if ((*kappa_cast) == 0.0)
-	{
-	  for (dim_t j = 0; j < n; ++j)
-	    for (dim_t i = 0; i < cdim; ++i)
-	      p_cast[i + j*ldp] = 0.0;
-	}
-      else
-	{
-	  // (*kappa_cast == 1.0) for GEMM
-	  // a will be in row-major, inca != 1 and lda = 1
-	  for (dim_t i = 0; i < cdim; ++i)
-	    for(dim_t j = 0; j < n; ++j)
-	      p_cast[i + j*ldp] = a_cast[i * inca + j]; // i * inca + j * lda, lda = 1
-	}
-      /* if ( cdim < mnr ) */
+      // (*kappa_cast == 1.0) for GEMM
+      // a will be in row-major, inca != 1 and lda = 1
+      PRAGMA_SIMD
+      for (dim_t i = 0; i < cdim; ++i)
+	for(dim_t j = 0; j < n; ++j)
+	  p_cast[i + j*ldp] = a_cast[i * inca + j]; // i * inca + j * lda, lda = 1
+
+     
       const dim_t     m_edge = 6 - cdim;
       const dim_t     n_edge = n_max;
       //     double* restrict p_cast = p;
       double* restrict p_edge = p_cast + (cdim) * 1;
 
+      PRAGMA_SIMD
       for (dim_t j = 0; j < n_edge; ++j)
 	for (dim_t i = 0; i < m_edge; ++i)
 	  *(p_edge + i + j*ldp) = 0.0;
@@ -225,6 +219,7 @@ void bli_dpackm_6xk_nn_zen
       double* restrict p_cast = p;
       double* restrict p_edge = p_cast + (j)*ldp;
 
+      PRAGMA_SIMD
       for (dim_t j = 0; j < n_edge; ++j)
 	for (dim_t i = 0; i < m_edge; ++i)
 	  *(p_edge + i + j*ldp) = 0.0;
