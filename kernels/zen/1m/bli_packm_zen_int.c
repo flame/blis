@@ -122,7 +122,7 @@ void bli_dpackm_8xk_nn_zen
         {
             //
             PRAGMA_SIMD
-	    for (dim_t k = n; k != 0; --k)
+	    for (dim_t k = n; k > 0; --k)
             {
                 ((*(pi1 + 0))) = ((*kappa_cast)) * ((*(alpha1 + 0 * inca)));
                 ((*(pi1 + 1))) = ((*kappa_cast)) * ((*(alpha1 + 1 * inca)));
