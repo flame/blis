@@ -113,16 +113,16 @@ and high performance." Their statement continues, "The framework will continue
 having an important influence on the design and the instantiation of dense linear
 algebra libraries."
 
- * **Small/skinny matrix support for dgemm now available!** Thanks to
+ * **Multithreaded small/skinny matrix support for dgemm now available!** Thanks to
 contributions made possible by our partnership with AMD, we have dramatically
 accelerated `gemm` for double-precision real matrix problems where one or two
 dimensions is exceedingly small. A natural byproduct of this optimization is
 that the traditional case of small _m = n = k_ (i.e. square matrices) is also
 accelerated, even though it was not targeted specifically. And though only
-`dgemm` was optimized for now, support for other datatypes, other operations,
-and/or multithreading may be implemented in the future. We've also added a new
-[PerformanceSmall](docs/PerformanceSmall.md) document to showcase the
-improvement in performance when some matrix dimensions are small.
+`dgemm` was optimized for now, support for other datatypes and/or other operations
+may be implemented in the future. We've also added new graphs to the
+[PerformanceSmall](docs/PerformanceSmall.md) document to showcase multithreaded
+performance when one or more matrix dimensions are small.
 
  * **Performance comparisons now available!** We recently measured the
 performance of various level-3 operations on a variety of hardware architectures,
@@ -489,6 +489,12 @@ Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
 (Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
 volunteering his time to set up a standalone PPA.)
 
+ * **Gentoo**. [M. Zhou](https://github.com/cdluminate) also maintains the
+[BLIS package](https://packages.gentoo.org/packages/sci-libs/blis) entry for
+[Gentoo](https://www.gentoo.org/), a Linux distribution known for its
+source-based [portage](https://wiki.gentoo.org/wiki/Portage) package manager
+and distribution system.
+
  * **EPEL/Fedora**. There are official BLIS packages in Fedora and EPEL (for
 RHEL7+ and compatible distributions) with versions for 64-bit integers, OpenMP,
 and pthreads, and shims which can be dynamically linked instead of reference
@@ -637,13 +643,13 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf):
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev1.pdf):
 
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
    title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
-   journal     = {ACM Transactions on Mathematical Software},
+   journal     = {SIAM Journal on Scientific Computing},
    note        = {submitted}
 }
 ``` 

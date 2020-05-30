@@ -15,9 +15,11 @@ but many others have contributed code and feedback, including
   Erling Andersen          @erling-d-andersen
   Alex Arslan              @ararslan
   Vernon Austel                                (IBM, T.J. Watson Research Center)
+  Satish Balay             @balay              (Argonne National Laboratory)
   Matthew Brett            @matthew-brett      (University of Birmingham)
   Jed Brown                @jedbrown           (Argonne National Laboratory)
   Robin Christ             @robinchrist
+  Mat Cross                @matcross           (NAG)
   Kay Dewhurst             @jkd2016            (Max Planck Institute, Halle, Germany)
   Jeff Diamond                                 (Oracle)
   Johannes Dieterich       @iotamudelta
@@ -43,23 +45,27 @@ but many others have contributed code and feedback, including
   Tony Kelman              @tkelman
   Lee Killough             @leekillough        (Cray)
   Mike Kistler             @mkistler           (IBM, Austin Research Laboratory)
+  Kyungmin Lee             @kyungminlee        (Ohio State University)
   Michael Lehn             @michael-lehn
-                           @ShmuelLevine
+  Shmuel Levine            @ShmuelLevine
   Dave Love                @loveshack
   Tze Meng Low                                 (The University of Texas at Austin)
   Ye Luo                   @ye-luo             (Argonne National Laboratory)
   Ricardo Magana           @magania            (Hewlett Packard Enterprise)
   Bryan Marker             @bamarker           (The University of Texas at Austin)
+  Simon Lukas Märtens      @ACSimon33          (RWTH Aachen University)
   Devin Matthews           @devinamatthews     (The University of Texas at Austin)
   Stefanos Mavros          @smavros
+  Bhaskar Nallani          @BhaskarNallani     (AMD)
   Nisanth Padinharepatt                        (AMD)
+  Ajay Panyala             @ajaypanyala
   Devangi Parikh           @dnparikh           (The University of Texas at Austin)
   Elmar Peise              @elmar-peise        (RWTH-Aachen)
   Clément Pernet           @ClementPernet
   Ilya Polkovnichenko
   Jack Poulson             @poulson            (Stanford)
   Mathieu Poumeyrol        @kali
-  Christos Psarras         @ChrisPsa           (RWTH-Aachen)
+  Christos Psarras         @ChrisPsa           (RWTH Aachen University)
                            @qnerd
   Michael Rader            @mrader1248
   Pradeep Rao              @pradeeptrgit       (AMD)
@@ -73,7 +79,7 @@ but many others have contributed code and feedback, including
   Nathaniel Smith          @njsmith
   Shaden Smith             @ShadenSmith
   Tyler Smith              @tlrmchlsmth        (The University of Texas at Austin)
-  Paul Springer            @springer13         (RWTH-Aachen)
+  Paul Springer            @springer13         (RWTH Aachen University)
   Adam J. Stewart          @adamjstewart       (University of Illinois at Urbana-Champaign)
   Vladimir Sukarev
   Santanu Thangaraj                            (AMD)

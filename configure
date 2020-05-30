@@ -1323,14 +1323,18 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
 	#if compiler is AOCC, first grep for clang and then the version number.
 	elif [ "${cc_vendor}" = "clang" ]; then
             cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
-    else
+	elif [ "${cc_vendor}" = "oneAPI" ]; then
+		# Treat Intel oneAPI's clang as clang, not icc.
+		cc_vendor="clang"
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
+	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
 
@@ -1448,6 +1452,15 @@ check_compiler()
 			if [ ${cc_revision} -lt 1 ]; then
 				blacklistcc_add "skx"
 			fi
+		fi
+		if [ ${cc_major} -eq 18 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			blacklistcc_add "knl"
+			blacklistcc_add "skx"
+		fi
+		if [ ${cc_major} -ge 19 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			echoerr_unsupportedcc
 		fi
 	fi
 
@@ -2421,8 +2434,22 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
+		#config_name="generic"
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
+
+		# If the auto-detect code returned the "generic" string, it means we
+		# were unable to automatically detect the user's hardware type. While
+		# this is going to be a rare event, it will likely lead the user to
+		# experience much lower performance than expected, and thus we will
+		# warn them about it at the end of the configure output (to increase
+		# the chances that they see it).
+		if [ "${config_name}" = "generic" ]; then
+
+			warn_user_generic=1
+		else
+			warn_user_generic=0
+		fi
 	else
 
 		# Use the command line argument as the configuration name.
@@ -3476,6 +3503,18 @@ main()
 		echo "${script_name}: configured to build within top-level directory of source distribution."
 	fi
 
+	if [ "${warn_user_generic}" = "1" ]; then
+
+		echo "${script_name}: "
+		echo "${script_name}: *** Unable to automatically detect hardware type! ***"
+		echo "${script_name}: "
+		echo "${script_name}: NOTE: configure was unable to identify a subconfiguration"
+		echo "${script_name}: optimized for your hardware. As a result, the 'generic'"
+		echo "${script_name}: subconfiguration (with low-performance reference kernels)"
+		echo "${script_name}: will be used. For support, please open an issue on GitHub"
+		echo "${script_name}: at https://github.com/flame/blis/issues."
+		echo "${script_name}: "
+	fi
 
 	# Exit peacefully.
 	return 0

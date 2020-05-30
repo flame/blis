@@ -66,7 +66,7 @@ void bli_gemm_int
 	{
         if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
-        bli_thread_obarrier( thread );
+        bli_thread_barrier( thread );
 		return;
 	}
 
@@ -80,7 +80,7 @@ void bli_gemm_int
 
         if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
-        bli_thread_obarrier( thread );
+        bli_thread_barrier( thread );
 		return;
 	}
 
