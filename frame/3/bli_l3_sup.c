@@ -57,11 +57,6 @@ err_t bli_gemmsup
 
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-	//Don't use sup for currently unsupported storage types in sgemmsup
-	if(bli_obj_is_float(c) && ((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))){
-		//printf(" gemmsup: Returning with for un-supported storage types in sgemmsup \n");
-		return BLIS_FAILURE;
-	}
 
 	/*General stride is not yet supported in sup*/
 	if(BLIS_XXX==stor_id)
