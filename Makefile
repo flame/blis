@@ -149,8 +149,7 @@ ifeq ($(MK_ENABLE_SHARED),yes)
 MK_LIBS                   += $(LIBBLIS_SO_PATH) \
                              $(LIBBLIS_SO_MAJ_PATH)
 MK_LIBS_INST              += $(LIBBLIS_SO_MMB_INST)
-MK_LIBS_SYML              += $(LIBBLIS_SO_INST) \
-                             $(LIBBLIS_SO_MAJ_INST)
+MK_LIBS_SYML              += $(LIBBLIS_SO_INST)
 endif
 
 # Strip leading, internal, and trailing whitespace.
