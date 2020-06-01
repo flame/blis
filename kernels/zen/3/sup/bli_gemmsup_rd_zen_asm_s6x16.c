@@ -290,9 +290,9 @@ void bli_sgemmsup_rd_zen_asm_2x16
     label(.SBETAZERO)
 
     label(.SROWSTORBZ)
-    vmovups(ymm4, mem(rcx))
+    vmovups(xmm4, mem(rcx))
     add(rdi, rcx)
-    vmovups(ymm5, mem(rcx))
+    vmovups(xmm5, mem(rcx))
 
     label(.SDONE)
     add(imm(4), r15)                   // jj += 4;
@@ -817,9 +817,9 @@ void bli_sgemmsup_rd_zen_asm_2x8
     label(.SBETAZERO)
 
     label(.SROWSTORBZ)
-    vmovups(ymm4, mem(rcx))
+    vmovups(xmm4, mem(rcx))
     add(rdi, rcx)
-    vmovups(ymm5, mem(rcx))
+    vmovups(xmm5, mem(rcx))
 
     label(.SDONE)
 
@@ -1051,7 +1051,7 @@ void bli_sgemmsup_rd_zen_asm_1x8
     label(.SBETAZERO)
 
     label(.SROWSTORBZ)
-    vmovups(ymm4, mem(rcx))
+    vmovups(xmm4, mem(rcx))
 
     label(.SDONE)
     add(imm(4), r15)                   // jj += 4;
@@ -1323,9 +1323,9 @@ void bli_sgemmsup_rd_zen_asm_2x4
     label(.SBETAZERO)
 
     label(.SROWSTORBZ)
-    vmovups(ymm4, mem(rcx))
+    vmovups(xmm4, mem(rcx))
     add(rdi, rcx)
-    vmovups(ymm5, mem(rcx))
+    vmovups(xmm5, mem(rcx))
     label(.SDONE)
     end_asm(
     : // output operands (none)
@@ -1536,7 +1536,7 @@ void bli_sgemmsup_rd_zen_asm_1x4
 
     label(.SBETAZERO)
     label(.SROWSTORBZ)
-    vmovups(ymm4, mem(rcx))
+    vmovups(xmm4, mem(rcx))
 
     label(.SDONE)
 
