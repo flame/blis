@@ -97,8 +97,7 @@ void bli_sgemmsup_rd_zen_asm_2x16
 
     label(.SLOOP3X4J)                  // LOOP OVER jj = [ 0 1 ... ]
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle.
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
     vxorps(ymm7,  ymm7,  ymm7)
@@ -252,7 +251,8 @@ void bli_sgemmsup_rd_zen_asm_2x16
 
     label(.SPOSTACCUM)
                                        // ymm4  ymm7  ymm10 ymm13  
-                                       // ymm5  ymm8  ymm11 ymm14    vhaddps( ymm7, ymm4, ymm0 )
+                                       // ymm5  ymm8  ymm11 ymm14    
+    vhaddps( ymm7, ymm4, ymm0 )
     vextractf128(imm(1), ymm0, xmm1 )
     vaddps( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
     vhaddps( ymm13, ymm10, ymm2 )
@@ -377,8 +377,7 @@ void bli_sgemmsup_rd_zen_asm_1x16
 
     label(.SLOOP3X4J)                  // LOOP OVER jj = [ 0 1 ... ]
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle.
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm7,  ymm7,  ymm7)
     vxorps(ymm10, ymm10, ymm10)
@@ -497,7 +496,8 @@ void bli_sgemmsup_rd_zen_asm_1x16
     jne(.SLOOPKLEFT1)                  // iterate again if i != 0.
 
     label(.SPOSTACCUM)
-                                       // ymm4  ymm7  ymm10 ymm13      vhaddps( ymm7, ymm4, ymm0 )
+                                       // ymm4  ymm7  ymm10 ymm13      
+    vhaddps( ymm7, ymm4, ymm0 )
     vextractf128(imm(1), ymm0, xmm1 )
     vaddps( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
     vhaddps( ymm13, ymm10, ymm2 )
@@ -515,7 +515,8 @@ void bli_sgemmsup_rd_zen_asm_1x16
     vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
     je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
 
-    label(.SROWSTORED)    vfmadd231ps(mem(rcx), ymm3, ymm4)
+    label(.SROWSTORED)    
+    vfmadd231ps(mem(rcx), ymm3, ymm4)
     vmovups(xmm4, mem(rcx))
     jmp(.SDONE)                        // jump to end.
 
@@ -615,8 +616,7 @@ void bli_sgemmsup_rd_zen_asm_2x8
     label(.SLOOP3X4J)                  // LOOP OVER jj = [ 0 1 ... ]
 
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle.
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
     vxorps(ymm7,  ymm7,  ymm7)
@@ -774,7 +774,8 @@ void bli_sgemmsup_rd_zen_asm_2x8
     dec(rsi)                           // i -= 1;
     jne(.SLOOPKLEFT1)                  // iterate again if i != 0.
 
-    label(.SPOSTACCUM)                                       // ymm4  ymm7  ymm10 ymm13  
+    label(.SPOSTACCUM)    
+                                       // ymm4  ymm7  ymm10 ymm13  
                                        // ymm5  ymm8  ymm11 ymm14
     vhaddps( ymm7, ymm4, ymm0 )
     vextractf128(imm(1), ymm0, xmm1 )
@@ -905,8 +906,7 @@ void bli_sgemmsup_rd_zen_asm_1x8
 
     label(.SLOOP3X4J)                  // LOOP OVER jj = [ 0 1 ... ]
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle.
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm7,  ymm7,  ymm7)
     vxorps(ymm10, ymm10, ymm10)
@@ -1120,9 +1120,9 @@ void bli_sgemmsup_rd_zen_asm_2x4
     uint64_t rs_c   = rs_c0;
     uint64_t cs_c   = cs_c0;
     // -------------------------------------------------------------------------
-    begin_asm()                                       // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+    begin_asm()
+                                       // zen2 can execute 4 vxorpd ipc with
+                                       // a latency of 1 cycle
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
     vxorps(ymm7,  ymm7,  ymm7)
@@ -1230,7 +1230,8 @@ void bli_sgemmsup_rd_zen_asm_2x4
                                        // considers k_left1 loop.
                                        // else, we prepare to enter k_iter8 loop.
 
-    label(.SLOOPKITER8)                // EDGE LOOP (ymm)    vmovups(mem(rax       ), ymm0)
+    label(.SLOOPKITER8)                // EDGE LOOP (ymm)    
+    vmovups(mem(rax       ), ymm0)
     vmovups(mem(rax, r8, 1), ymm1)
     add(imm(8*4), rax)                 // a += 4*cs_b = 4*8;
     vmovups(mem(rbx        ), ymm3)
@@ -1385,9 +1386,9 @@ void bli_sgemmsup_rd_zen_asm_1x4
     uint64_t cs_c   = cs_c0;
 
     // -------------------------------------------------------------------------
-    begin_asm()                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+    begin_asm()                        
+                                       // zen2 can execute 4 vxorpd ipc with
+                                       // a latency of 1 cycle
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm7,  ymm7,  ymm7)
     vxorps(ymm10, ymm10, ymm10)
@@ -1602,8 +1603,7 @@ void bli_sgemmsup_rd_zen_asm_2x2
     // -------------------------------------------------------------------------
     begin_asm()
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
     vxorps(ymm6,  ymm6,  ymm6)
@@ -1651,7 +1651,8 @@ void bli_sgemmsup_rd_zen_asm_2x2
     vfmadd231ps(ymm0, ymm3, ymm6)
     vfmadd231ps(ymm1, ymm3, ymm7)
 
-    // ---------------------------------- iteration 2    vmovups(mem(rbx        ), ymm0)
+    // ---------------------------------- iteration 2    
+    vmovups(mem(rbx        ), ymm0)
     vmovups(mem(rbx, r11, 1), ymm1)
     add(imm(8*4), rbx)                 // b += 4*rs_b = 4*8;
     vmovups(mem(rax        ), ymm3)
@@ -1748,15 +1749,19 @@ void bli_sgemmsup_rd_zen_asm_2x2
     vmovsd(mem(rcx), xmm0)////a0a1
     vfmadd231ps(xmm0, xmm3, xmm4)//c*beta+(a0a1)
     vmovsd(xmm4, mem(rcx))//a0a1
-    add(rdi, rcx)    vmovsd(mem(rcx), xmm0)
+    add(rdi, rcx)    
+    vmovsd(mem(rcx), xmm0)
     vfmadd231ps(xmm0, xmm3, xmm6)
     vmovsd(xmm6, mem(rcx))
+        
     jmp(.SDONE)                        // jump to end.
-
-    label(.SBETAZERO)
+        
+    label(.SBETAZERO)    
     label(.SROWSTORBZ)
+        
     vmovsd(xmm4, mem(rcx))
-    add(rdi, rcx)    vmovsd(xmm6, mem(rcx))
+    add(rdi, rcx)    
+    vmovsd(xmm6, mem(rcx))
 
     label(.SDONE)
 
@@ -1822,8 +1827,7 @@ void bli_sgemmsup_rd_zen_asm_1x2
     // -------------------------------------------------------------------------
     begin_asm()
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle.
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
 
@@ -2032,8 +2036,7 @@ void bli_sgemmsup_rd_zen_asm_6x2
     label(.SLOOP3X4I)                  // LOOP OVER ii = [ m_iter ... 1 0 ]
 
                                        // zen2 can execute 4 vxorpd ipc with
-                                       // a latency of 1 cycle, while vzeroall
-                                       // has a latency of 12 cycles.
+                                       // a latency of 1 cycle,
     vxorps(ymm4,  ymm4,  ymm4)
     vxorps(ymm5,  ymm5,  ymm5)
     vxorps(ymm6,  ymm6,  ymm6)
@@ -2494,7 +2497,8 @@ void bli_sgemmsup_rd_zen_asm_3x2
     vfmadd231ps(ymm0, ymm3, ymm8)
     vfmadd231ps(ymm1, ymm3, ymm9)
 
-    // ---------------------------------- iteration 2    vmovups(mem(rbx        ), ymm0)
+    // ---------------------------------- iteration 2    
+    vmovups(mem(rbx        ), ymm0)
     vmovups(mem(rbx, r11, 1), ymm1)
     add(imm(8*4), rbx)                 // b += 4*rs_b = 4*8;
     vmovups(mem(rax        ), ymm3)
@@ -2618,8 +2622,9 @@ void bli_sgemmsup_rd_zen_asm_3x2
     vmovsd(mem(rcx), xmm0)
     vfmadd231ps(xmm0, xmm3, xmm8)
     vmovsd(xmm8, mem(rcx))
-    //add(rdi, rcx)    jmp(.SDONE)                        // jump to end.
-
+    //add(rdi, rcx)    
+    
+    jmp(.SDONE)                        // jump to end.
     label(.SBETAZERO)
 
     label(.SROWSTORBZ)
