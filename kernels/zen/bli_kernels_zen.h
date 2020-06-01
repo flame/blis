@@ -184,3 +184,17 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x2 )
+
+// gemmsup_rv (mkernel in n dim)
+
+
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x8n )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_2x8n )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_1x8n )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x4 )
+GEMMSUP_KER_PROT( scomplex,   c, gemmsup_rv_zen_asm_3x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x4n )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
+GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )

@@ -67,27 +67,23 @@ err_t bli_gemmsup
 	trans_t transa = bli_obj_conjtrans_status( a );
 	trans_t transb = bli_obj_conjtrans_status( b );
 
-	//Don't use sup for currently unsupported storage types and dimension in cgemmsup
+	//Don't use sup for currently unsupported storage types in cgemmsup
 	if(bli_obj_is_scomplex(c) &&
-	((!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR)
-	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)
-	  ||(stor_id == BLIS_CCC)))
-	|| ((m/3) <  (n/8))
-	|| (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))
+	(((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))
+	|| ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE))
+	|| ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
 	)){
-		//printf(" gemmsup: Returning with for un-supported storage types,dimension and matrix property in cgemmsup \n");
+		//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in cgemmsup \n");
 		return BLIS_FAILURE;
 	}
 
-	//Don't use sup for currently unsupported storage types and dimension in zgemmsup
+	//Don't use sup for currently unsupported storage types  in zgemmsup
 	if(bli_obj_is_dcomplex(c) &&
-	((!((stor_id == BLIS_RRR) || (stor_id == BLIS_CRR)
-	  ||(stor_id == BLIS_CCR) || (stor_id == BLIS_RCR)
-	  ||(stor_id == BLIS_CCC)))
-	|| ((m/3) <  (n/4))
-	|| (!((transa == BLIS_NO_TRANSPOSE)&&(transb == BLIS_NO_TRANSPOSE)))
+	(((stor_id == BLIS_RRC)||(stor_id == BLIS_CRC))
+	|| ((transa == BLIS_CONJ_NO_TRANSPOSE) || (transa == BLIS_CONJ_TRANSPOSE))
+	|| ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
 	)){
-		//printf(" gemmsup: Returning with for un-supported storage types,dimension and matrix property in zgemmsup \n");
+		//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
 		return BLIS_FAILURE;
 	}
 

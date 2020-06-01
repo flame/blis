@@ -96,7 +96,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	uint64_t k_left = k0 % 4;
 
 	uint64_t m_iter = m0 / 3;
-	uint64_t m_left = m0 % 3;
 
 	uint64_t rs_a   = rs_a0;
 	uint64_t cs_a   = cs_a0;
@@ -156,9 +155,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
 
@@ -166,9 +162,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 5*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 5*8)) // prefetch c + 2*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -184,7 +177,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	label(.SLOOPKITER)                 // MAIN LOOP
 
 	// ---------------------------------- iteration 0
-	prefetch(0, mem(rdx, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -210,7 +202,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 1
-	prefetch(0, mem(rdx, r9, 1, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -235,7 +226,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 2
-	prefetch(0, mem(rdx, r9, 2, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -261,7 +251,6 @@ void bli_zgemmsup_rv_zen_asm_2x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 3
-	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -584,7 +573,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	uint64_t k_left = k0 % 4;
 
 	uint64_t m_iter = m0 / 3;
-	uint64_t m_left = m0 % 3;
 
 	uint64_t rs_a   = rs_a0;
 	uint64_t cs_a   = cs_a0;
@@ -644,9 +632,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
 
@@ -654,9 +639,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 5*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 5*8)) // prefetch c + 2*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -672,7 +654,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	label(.SLOOPKITER)                 // MAIN LOOP
 
 	// ---------------------------------- iteration 0
-	prefetch(0, mem(rdx, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -691,7 +672,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 1
-	prefetch(0, mem(rdx, r9, 1, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -709,7 +689,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 2
-	prefetch(0, mem(rdx, r9, 2, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
@@ -728,7 +707,6 @@ void bli_zgemmsup_rv_zen_asm_1x4
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 3
-	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -980,7 +958,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	uint64_t k_left = k0 % 4;
 
 	uint64_t m_iter = m0 / 3;
-	uint64_t m_left = m0 % 3;
 
 	uint64_t rs_a   = rs_a0;
 	uint64_t cs_a   = cs_a0;
@@ -1038,9 +1015,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -1049,9 +1023,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 5*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 5*8)) // prefetch c + 2*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -1067,7 +1038,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	label(.SLOOPKITER)                 // MAIN LOOP
 
 	// ---------------------------------- iteration 0
-	prefetch(0, mem(rdx, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1087,7 +1057,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 1
-	prefetch(0, mem(rdx, r9, 1, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1107,7 +1076,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 2
-	prefetch(0, mem(rdx, r9, 2, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1128,7 +1096,6 @@ void bli_zgemmsup_rv_zen_asm_2x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 3
-	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -1379,7 +1346,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	uint64_t k_left = k0 % 4;
 
 	uint64_t m_iter = m0 / 3;
-	uint64_t m_left = m0 % 3;
 
 	uint64_t rs_a   = rs_a0;
 	uint64_t cs_a   = cs_a0;
@@ -1439,9 +1405,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
-	prefetch(0, mem(r12, rdi, 2, 5*8)) // prefetch c + 2*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -1450,9 +1413,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 5*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 5*8)) // prefetch c + 2*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -1468,7 +1428,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	label(.SLOOPKITER)                 // MAIN LOOP
 
 	// ---------------------------------- iteration 0
-	prefetch(0, mem(rdx, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1483,7 +1442,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 1
-	prefetch(0, mem(rdx, r9, 1, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1497,7 +1455,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 2
-	prefetch(0, mem(rdx, r9, 2, 5*8))
 
 	vmovupd(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1512,7 +1469,6 @@ void bli_zgemmsup_rv_zen_asm_1x2
 	add(r9, rax)                       // a += cs_a;
 
 	// ---------------------------------- iteration 3
-	prefetch(0, mem(rdx, rcx, 1, 5*8))
 	lea(mem(rdx, r9,  4), rdx)         // a_prefetch += 4*cs_a;
 
 	vmovupd(mem(rbx, 0*32), ymm0)

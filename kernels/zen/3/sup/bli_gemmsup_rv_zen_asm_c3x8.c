@@ -153,8 +153,6 @@ void bli_cgemmsup_rv_zen_asm_2x8
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -163,15 +161,7 @@ void bli_cgemmsup_rv_zen_asm_2x8
 	lea(mem(, rsi, 4), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 1*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 1*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 1*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 1*8))        // prefetch c + 3*cs_c
-	prefetch(0, mem(rdx, rsi, 1, 1*8)) // prefetch c + 4*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 1*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)        // rdx = c + 5*cs_c;
-	prefetch(0, mem(rdx, rsi, 1, 1*8)) // prefetch c + 6*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 1*8)) // prefetch c + 7*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -627,7 +617,6 @@ void bli_cgemmsup_rv_zen_asm_1x8
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -636,15 +625,7 @@ void bli_cgemmsup_rv_zen_asm_1x8
 	lea(mem(, rsi, 4), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 0*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 0*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 0*8))        // prefetch c + 3*cs_c
-	prefetch(0, mem(rdx, rsi, 1, 0*8)) // prefetch c + 4*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 0*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)        // rdx = c + 5*cs_c;
-	prefetch(0, mem(rdx, rsi, 1, 0*8)) // prefetch c + 6*cs_c
-	prefetch(0, mem(rdx, rsi, 2, 0*8)) // prefetch c + 7*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -1009,8 +990,6 @@ void bli_cgemmsup_rv_zen_asm_2x4
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 5*8)) // prefetch c + 1*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -1019,10 +998,6 @@ void bli_cgemmsup_rv_zen_asm_2x4
 	lea(mem(, rsi, 4), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 1*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 1*8)) // prefetch c + 1*cs_c
-	prefetch(0, mem(r12, rsi, 2, 1*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 1*8))       // prefetch c + 3*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -1394,7 +1369,6 @@ void bli_cgemmsup_rv_zen_asm_1x4
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -1418,7 +1392,6 @@ void bli_cgemmsup_rv_zen_asm_1x4
 	label(.SLOOPKITER)                 // MAIN LOOP
 
 	// ---------------------------------- iteration 0
-	prefetch(0, mem(rdx, 5*8))
 
 	vmovups(mem(rbx,  0*32), ymm0)
 	add(r10, rbx)                      // b += rs_b;
@@ -1716,8 +1689,6 @@ void bli_cgemmsup_rv_zen_asm_2x2
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 3*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(r12, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -1726,8 +1697,6 @@ void bli_cgemmsup_rv_zen_asm_2x2
 	lea(mem(, rsi, 4), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 1*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 1*8)) // prefetch c + 1*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -2099,7 +2068,6 @@ void bli_cgemmsup_rv_zen_asm_1x2
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 3*8))         // prefetch c + 0*rs_c
 
 	jmp(.SPOSTPFETCH)                  // jump to end of pre-fetching c
 	label(.SCOLPFETCH)                 // column-stored pre-fetching c
@@ -2108,8 +2076,6 @@ void bli_cgemmsup_rv_zen_asm_1x2
 	lea(mem(, rsi, 4), rsi)            // cs_c *= sizeof(dt)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 0*8))         // prefetch c + 0*cs_c
-	prefetch(0, mem(r12, rsi, 1, 0*8)) // prefetch c + 1*cs_c
 
 	label(.SPOSTPFETCH)                // done prefetching c
 
@@ -2335,4 +2301,3 @@ void bli_cgemmsup_rv_zen_asm_1x2
 	  "memory"
 	)
 }
-
