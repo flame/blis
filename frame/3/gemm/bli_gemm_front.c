@@ -77,15 +77,7 @@ void bli_gemm_front
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
-
-
+	
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
