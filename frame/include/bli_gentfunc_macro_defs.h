@@ -158,9 +158,8 @@ GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
 
-#define INSERT_GENTFUNC_BASIC0_SCZ( tfuncname ) \
+#define INSERT_GENTFUNC_BASIC0_CZ( tfuncname ) \
 \
-GENTFUNC( float,    s, tfuncname ) \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 

@@ -35,6 +35,7 @@
 
 
 // -- level-1f --
+AXPYF_KER_PROT( float,   s, axpyf_zen_int_5 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
 
 // -- level-2 --
