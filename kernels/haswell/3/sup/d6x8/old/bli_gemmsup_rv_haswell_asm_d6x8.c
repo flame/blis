@@ -257,6 +257,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8
 	prefetch(0, mem(rcx, rdi, 2, 7*8)) // prefetch c + 2*rs_c
 	prefetch(0, mem(rdx, 7*8))         // prefetch c + 3*rs_c
 	prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
+	prefetch(0, mem(rdx, rdi, 2, 7*8)) // prefetch c + 5*rs_c
 
 	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
 	label(.DCOLPFETCH)                 // column-stored prefetching c
