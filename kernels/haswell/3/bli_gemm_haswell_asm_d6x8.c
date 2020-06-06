@@ -89,6 +89,7 @@ void bli_sgemm_haswell_asm_6x16
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -894,6 +895,7 @@ void bli_sgemm_haswell_asm_6x16
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 
@@ -935,6 +937,7 @@ void bli_dgemm_haswell_asm_6x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -1633,6 +1636,7 @@ void bli_dgemm_haswell_asm_6x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 

@@ -108,7 +108,10 @@ err_t bli_gemm_small
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
 #ifdef BLIS_ENABLE_MULTITHREADING
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
     return BLIS_NOT_YET_IMPLEMENTED;
 #endif
     // If alpha is zero, scale by beta and return.
@@ -154,6 +157,7 @@ err_t bli_gemm_small
         return bli_sgemm_small(alpha, a, b, beta, c, cntx, cntl);
     }
 
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -169,6 +173,7 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
@@ -185,6 +190,7 @@ static err_t bli_sgemm_small
             beta,
             c
         );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
 
@@ -1692,12 +1698,18 @@ static err_t bli_sgemm_small
             bli_membrk_release(&rntm,
                                &local_mem_buf_A_s);
         }
-
+		
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
-        return BLIS_NONCONFORMAL_DIMENSIONS;
-
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
+		return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 
 };
 
@@ -1713,6 +1725,8 @@ static err_t bli_dgemm_small
      )
 {
 
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
@@ -1729,11 +1743,18 @@ static err_t bli_dgemm_small
             beta,
             c
         );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
 
-    if(N<3) //Implemenation assumes that N is atleast 3.
+    if (N<3) //Implemenation assumes that N is atleast 3.
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"N < 3, cannot be processed by small gemm"
+			);
         return BLIS_NOT_YET_IMPLEMENTED;
+	}
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
     if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))))
@@ -3287,13 +3308,17 @@ static err_t bli_dgemm_small
         bli_membrk_release(&rntm,
                            &local_mem_buf_A_s);
         }
-
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
         return BLIS_NONCONFORMAL_DIMENSIONS;
-
-
+	}
 };
 
 static err_t bli_sgemm_small_atbn
@@ -3307,7 +3332,9 @@ static err_t bli_sgemm_small_atbn
        cntl_t* cntl
      )
 {
-    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
+	gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
 
@@ -3758,11 +3785,17 @@ static err_t bli_sgemm_small_atbn
                 }
             }
         }
-
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
         return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 }
 
 static err_t bli_dgemm_small_atbn
@@ -3776,6 +3809,8 @@ static err_t bli_dgemm_small_atbn
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
@@ -4190,12 +4225,17 @@ static err_t bli_dgemm_small_atbn
                 }
             }
         }
-
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
-        return BLIS_NONCONFORMAL_DIMENSIONS;
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
+		return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 }
-
 #endif
 

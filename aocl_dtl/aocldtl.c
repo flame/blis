@@ -23,18 +23,18 @@
 #endif
 #endif
 
+/* By default the trace level will be set to ALL User can configure this 
+      parameter at run time using command line argument */
+uint32 gui32TraceLogLevel = AOCL_DTL_LEVEL_ALL;
+
 /* The user can configure the file name in which he wants to dump the data */
 #if AOCL_DTL_TRACE_ENABLE
-
 /* The file name for storing traced log added manually in the code */
 static char *pchDTL_TRACE_FILE = AOCL_DTL_TRACE_FILE;
 
 /* Global file pointer for trace logging */
 AOCL_FLIST_Node *gpTraceFileList = NULL;
 
-/* By default the trace level will be set to ALL User can configure this 
-      parameter at run time using command line argument */
-uint32 gui32TraceLogLevel = AOCL_DTL_LEVEL_ALL;
 #endif
 
 #if AOCL_DTL_LOG_ENABLE
@@ -177,7 +177,7 @@ void DTL_Trace(
 
     if (ui8LogType == TRACE_TYPE_LOG || ui8LogType == TRACE_TYPE_RAW)
     {
-
+#if AOCL_DTL_LOG_ENABLE
         pOutFile = AOCL_FLIST_GetFile(gpLogFileList, AOCL_gettid());
 
         /* If trace file pointer is equal to NULL then return with out dumping data 
@@ -194,11 +194,12 @@ void DTL_Trace(
                 return;
             }
         }
-    }
+#endif /* Logging enabled */
+    } 
     else
     {
-
-        pOutFile = AOCL_FLIST_GetFile(gpTraceFileList, AOCL_gettid());
+#if AOCL_DTL_TRACE_ENABLE
+	 pOutFile = AOCL_FLIST_GetFile(gpTraceFileList, AOCL_gettid());
 
         /* If trace file pointer is equal to NULL then return with out dumping data
          to file */
@@ -214,6 +215,7 @@ void DTL_Trace(
                 return;
             }
         }
+#endif /* Trace Enabled */
     }
 
     /* Log the message only if the log level is less than or equal to global log

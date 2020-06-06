@@ -17,6 +17,7 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  f77_int lda, const double  *B, f77_int ldb,
                  double beta, double  *C, f77_int ldc)
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
    char TA, TB;   
 #ifdef F77_CHAR
    F77_CHAR F77_TA, F77_TB;
@@ -103,10 +104,12 @@ void cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
 
       F77_dgemm(F77_TA, F77_TB, &F77_N, &F77_M, &F77_K, &alpha, B,
                   &F77_ldb, A, &F77_lda, &beta, C, &F77_ldc);
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
    } 
    else  cblas_xerbla(1, "cblas_dgemm", "Illegal Order setting, %d\n", Order);
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
    return;
 }
 #endif

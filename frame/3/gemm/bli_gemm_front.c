@@ -47,12 +47,14 @@ void bli_gemm_front
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	bli_init_once();
 
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-
+	
+		
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
@@ -64,7 +66,11 @@ void bli_gemm_front
 	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
 	{
 		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
-		if ( status == BLIS_SUCCESS ) return;
+		if ( status == BLIS_SUCCESS )
+		{
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+			return;
+		}
 	}
 #endif
 
@@ -283,6 +289,7 @@ void bli_gemm_front
 	}
 #endif
 #endif
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 // -----------------------------------------------------------------------------

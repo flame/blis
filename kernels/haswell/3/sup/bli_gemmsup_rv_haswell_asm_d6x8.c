@@ -112,6 +112,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 #if 0
 	bli_dgemmsup_r_haswell_ref
 	(
@@ -809,6 +810,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_5x8
@@ -827,6 +829,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1435,6 +1438,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_4x8
@@ -1453,6 +1457,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1923,6 +1928,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_3x8
@@ -1941,6 +1947,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -2438,6 +2445,8 @@ void bli_dgemmsup_rv_haswell_asm_3x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_2x8
@@ -2456,6 +2465,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -2839,6 +2849,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_1x8
@@ -2857,6 +2868,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -3205,6 +3217,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_6x6
@@ -3223,6 +3236,7 @@ void bli_dgemmsup_rv_haswell_asm_6x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -3810,6 +3824,7 @@ void bli_dgemmsup_rv_haswell_asm_6x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_5x6
@@ -3828,6 +3843,7 @@ void bli_dgemmsup_rv_haswell_asm_5x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -4434,6 +4450,8 @@ void bli_dgemmsup_rv_haswell_asm_5x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_4x6
@@ -4452,6 +4470,7 @@ void bli_dgemmsup_rv_haswell_asm_4x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -4915,6 +4934,7 @@ void bli_dgemmsup_rv_haswell_asm_4x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_3x6
@@ -4933,6 +4953,7 @@ void bli_dgemmsup_rv_haswell_asm_3x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -5427,6 +5448,7 @@ void bli_dgemmsup_rv_haswell_asm_3x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_2x6
@@ -5445,6 +5467,7 @@ void bli_dgemmsup_rv_haswell_asm_2x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -5841,6 +5864,7 @@ void bli_dgemmsup_rv_haswell_asm_2x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_1x6
@@ -5859,6 +5883,7 @@ void bli_dgemmsup_rv_haswell_asm_1x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -6209,6 +6234,7 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_6x4
@@ -6227,6 +6253,7 @@ void bli_dgemmsup_rv_haswell_asm_6x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -6684,6 +6711,7 @@ void bli_dgemmsup_rv_haswell_asm_6x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_5x4
@@ -6702,6 +6730,7 @@ void bli_dgemmsup_rv_haswell_asm_5x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -7177,6 +7206,7 @@ void bli_dgemmsup_rv_haswell_asm_5x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_4x4
@@ -7195,6 +7225,7 @@ void bli_dgemmsup_rv_haswell_asm_4x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -7576,6 +7607,7 @@ void bli_dgemmsup_rv_haswell_asm_4x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_3x4
@@ -7594,6 +7626,7 @@ void bli_dgemmsup_rv_haswell_asm_3x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -7982,6 +8015,7 @@ void bli_dgemmsup_rv_haswell_asm_3x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_2x4
@@ -8000,6 +8034,7 @@ void bli_dgemmsup_rv_haswell_asm_2x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -8323,6 +8358,7 @@ void bli_dgemmsup_rv_haswell_asm_2x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_1x4
@@ -8341,6 +8377,7 @@ void bli_dgemmsup_rv_haswell_asm_1x4
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -8641,6 +8678,7 @@ void bli_dgemmsup_rv_haswell_asm_1x4
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_6x2
@@ -8659,6 +8697,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -9094,6 +9133,7 @@ void bli_dgemmsup_rv_haswell_asm_6x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_5x2
@@ -9112,6 +9152,7 @@ void bli_dgemmsup_rv_haswell_asm_5x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -9542,6 +9583,7 @@ void bli_dgemmsup_rv_haswell_asm_5x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_4x2
@@ -9560,6 +9602,7 @@ void bli_dgemmsup_rv_haswell_asm_4x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -9929,6 +9972,7 @@ void bli_dgemmsup_rv_haswell_asm_4x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_3x2
@@ -9947,6 +9991,7 @@ void bli_dgemmsup_rv_haswell_asm_3x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -10333,6 +10378,7 @@ void bli_dgemmsup_rv_haswell_asm_3x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_2x2
@@ -10351,6 +10397,7 @@ void bli_dgemmsup_rv_haswell_asm_2x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -10661,6 +10708,7 @@ void bli_dgemmsup_rv_haswell_asm_2x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rv_haswell_asm_1x2
@@ -10679,6 +10727,7 @@ void bli_dgemmsup_rv_haswell_asm_1x2
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -10966,6 +11015,7 @@ void bli_dgemmsup_rv_haswell_asm_1x2
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 // -----------------------------------------------------------------------------
@@ -10997,6 +11047,7 @@ void PASTEMAC(ch,opname) \
        cntx_t*    restrict cntx \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO); \
 	for ( dim_t i = 0; i < mdim; ++i ) \
 	{ \
 		ctype* restrict ci = &c[ i*rs_c ]; \
@@ -11036,6 +11087,7 @@ void PASTEMAC(ch,opname) \
 			} \
 		} \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); \
 }
 
 GENTFUNC( double, d, gemmsup_r_haswell_ref_6x1, 6 )

@@ -88,6 +88,7 @@ void bli_sgemm_haswell_asm_16x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -636,6 +637,7 @@ void bli_sgemm_haswell_asm_16x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 #define DGEMM_INPUT_GS_BETA_NZ \
@@ -674,6 +676,7 @@ void bli_dgemm_haswell_asm_8x6
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -1221,6 +1224,7 @@ void bli_dgemm_haswell_asm_8x6
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 

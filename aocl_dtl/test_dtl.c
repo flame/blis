@@ -14,29 +14,26 @@
 
 int aocl_allocate(double**A, double** B, double** C, int N)
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO, " aocl_allocate()");
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 
 	*A = (double*)malloc(sizeof(double) * N);
 	if (*A == NULL)
 	{
-		AOCL_DTL_LOG(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to A");
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO, " aocl_allocate()");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to A");
 		return 1;
 	}
 
 	*B = (double*)malloc(sizeof(double) * N);
 	if (*B == NULL)
 	{
-		AOCL_DTL_LOG(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to B");
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO, " aocl_allocate()");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to B");
 		return 1;
 	}
 
 	*C = (double*)malloc(sizeof(double) * N);
 	if (*C == NULL)
 	{
-		AOCL_DTL_LOG(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to C");
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO, " aocl_allocate()");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_MAJOR, "Error allocating memory to C");
 		return 1;
 	}
 
@@ -53,11 +50,10 @@ int aocl_allocate(double**A, double** B, double** C, int N)
 
 void sumV(double* A, double* B, double* C, int N)
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO, "sumV()");
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	if ((A == NULL) || (B == NULL) || (C == NULL))
 	{
-		AOCL_DTL_LOG(AOCL_DTL_LEVEL_MAJOR, "Invalid Pointers");
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO, " sumV()");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_MAJOR, "Invalid Pointers");
 		return;
 	}
 	for (int i = 0; i < N; i++)
@@ -65,7 +61,7 @@ void sumV(double* A, double* B, double* C, int N)
 		C[i] += A[i] + B[i];
 	}
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO, "sumV()");
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 int main(void)
@@ -78,22 +74,21 @@ int main(void)
 	printf("Initializing\n");
 	AOCL_DTL_INITIALIZE(AOCL_DTL_LEVEL_ALL);
 
-	AOCL_DTL_TRACE_ENTRY(AOCL_TRACE_LEVEL_1, "Main function()");
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 
 	status = aocl_allocate(&A, &B, &C, 120);
 	if (status != 0)
 	{
 		printf("Error allocating memory\n");
 
-		AOCL_DTL_LOG(AOCL_DTL_LEVEL_MAJOR, "Error in function aocl_allocate()");
-		AOCL_DTL_TRACE_EXIT(AOCL_TRACE_LEVEL_1, "Main function()");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_CRITICAL, "Error in function aocl_allocate()");
 		AOCL_DTL_UNINITIALIZE();
 		exit(1);
 	}
 
 	sumV(A, B, C, 120);
 	
-	AOCL_DTL_TRACE_EXIT(AOCL_TRACE_LEVEL_1, "Main function()");
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 	AOCL_DTL_UNINITIALIZE();
 
 	return 0;

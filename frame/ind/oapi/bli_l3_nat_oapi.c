@@ -57,6 +57,7 @@ void PASTEMAC(opname,imeth) \
        rntm_t* rntm  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
 	bli_init_once(); \
 \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
@@ -73,6 +74,7 @@ void PASTEMAC(opname,imeth) \
 	( \
 	  alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
 }
 
 // If a sandbox was enabled, do not define bli_gemmnat() since it will be

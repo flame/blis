@@ -99,6 +99,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	uint64_t n_left = n0 % 8;
 
 	// First check whether this is a edge case in the n dimension. If so,
@@ -737,6 +738,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8m
 			);
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rd_haswell_asm_6x4m
@@ -755,6 +757,7 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1304,6 +1307,8 @@ void bli_dgemmsup_rd_haswell_asm_6x4m
 			);
 		}
 	}
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
 void bli_dgemmsup_rd_haswell_asm_6x2m
@@ -1322,6 +1327,7 @@ void bli_dgemmsup_rd_haswell_asm_6x2m
        cntx_t*    restrict cntx
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	//void*    a_next = bli_auxinfo_next_a( data );
 	//void*    b_next = bli_auxinfo_next_b( data );
 
@@ -1903,5 +1909,6 @@ void bli_dgemmsup_rd_haswell_asm_6x2m
 			);
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
 }
 
