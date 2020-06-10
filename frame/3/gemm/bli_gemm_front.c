@@ -47,7 +47,7 @@ void bli_gemm_front
        cntl_t* cntl
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
 	bli_init_once();
 
 	obj_t   a_local;
@@ -68,7 +68,7 @@ void bli_gemm_front
 		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
 		if ( status == BLIS_SUCCESS )
 		{
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 			return;
 		}
 	}
@@ -289,7 +289,7 @@ void bli_gemm_front
 	}
 #endif
 #endif
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 
 // -----------------------------------------------------------------------------

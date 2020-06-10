@@ -70,7 +70,7 @@ void bli_gemm_ker_var2
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_6);
 	
 #ifdef BLIS_ENABLE_GEMM_MD
 	// By now, A and B have been packed and cast to the execution precision.
@@ -188,7 +188,7 @@ void bli_gemm_ker_var2
 	   rntm,
 	   thread );
 	
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);
 }
 
 
@@ -214,7 +214,7 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO); \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_6); \
 	const num_t     dt         = PASTEMAC(ch,type); \
 \
 	/* Alias some constants to simpler names. */ \
@@ -412,7 +412,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", ""
 PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: a1", MR, k, a1, 1, MR, "%4.1f", "" ); \
 PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c, cs_c, "%4.1f", "" ); \
 */ \
-AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);		\
+AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);		\
 }
 
 INSERT_GENTFUNC_BASIC0( gemm_ker_var2 )

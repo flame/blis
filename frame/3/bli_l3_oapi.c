@@ -54,14 +54,14 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
 	bli_init_once(); \
 \
 	BLIS_OAPI_EX_DECLS \
 \
 	/* If C has a zero dimension, return early.	*/	\
 	if ( bli_obj_has_zero_dim( c ) ) {\
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 		return;									 \
 	}\
 \
@@ -72,7 +72,7 @@ void PASTEMAC(opname,EX_SUF) \
 		 bli_obj_has_zero_dim( b ) ) \
 	{\
 		bli_scalm( beta, c ); \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)	\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
 		return;\
 	}\
 \
@@ -90,7 +90,7 @@ void PASTEMAC(opname,EX_SUF) \
 		   proceed towards the conventional implementation. */ \
 		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
 		if ( result == BLIS_SUCCESS ) {\
-				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 			return;					   \
 		} \
 	} \

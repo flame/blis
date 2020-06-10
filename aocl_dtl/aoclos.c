@@ -14,6 +14,8 @@
 #if defined(__linux__)
 #include <time.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 #if defined(__linux__)
@@ -29,11 +31,17 @@
 */
 
 uint32 AOCL_gettid(void) __attribute__((no_instrument_function));
+pid_t  AOCL_getpid(void) __attribute__((no_instrument_function));
 uint64 AOCL_getTimestamp(void) __attribute__((no_instrument_function));
 
 uint32 AOCL_gettid(void)
 {
     return syscall(__NR_gettid);
+}
+
+pid_t  AOCL_getpid(void)
+{
+    return getpid();
 }
 
 uint64 AOCL_getTimestamp(void)
@@ -62,6 +70,12 @@ uint64 AOCL_getTimestamp(void)
 uint32 AOCL_gettid(void)
 {
     /* stub for other os's */
+    return 0;
+}
+
+pid_t  AOCL_getpid(void)
+{
+	/* stub for other os's */
     return 0;
 }
 

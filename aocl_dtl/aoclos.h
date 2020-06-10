@@ -20,6 +20,7 @@
 #define AOCL_free free
 
 uint32 AOCL_gettid(void);
+pid_t  AOCL_getpid(void);
 uint64 AOCL_getTimestamp(void);
 
 #endif /* _AOCL_OS_H_ */

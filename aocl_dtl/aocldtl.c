@@ -25,7 +25,7 @@
 
 /* By default the trace level will be set to ALL User can configure this 
       parameter at run time using command line argument */
-uint32 gui32TraceLogLevel = AOCL_DTL_LEVEL_ALL;
+uint32 gui32TraceLogLevel = AOCL_DTL_TRACE_LEVEL;
 
 /* The user can configure the file name in which he wants to dump the data */
 #if AOCL_DTL_TRACE_ENABLE
@@ -71,10 +71,15 @@ void DTL_Initialize(
 {
     /* If user selects invalid trace log level then the dafault trace log level 
       will be AOCL_DTL_LEVEL_ALL */
-    if ((ui32CurrentLogLevel < 1) || (ui32CurrentLogLevel > 4))
+    if ((ui32CurrentLogLevel < 1) || (ui32CurrentLogLevel > AOCL_DTL_LEVEL_ALL))
     {
-        ui32CurrentLogLevel = AOCL_DTL_LEVEL_ALL;
+        gui32TraceLogLevel = AOCL_DTL_LEVEL_ALL;
     }
+	else
+	{
+		/* Assign the user requested log level to the global trace log level */
+		gui32TraceLogLevel = ui32CurrentLogLevel;
+	}
 
 #if AOCL_DTL_TRACE_ENABLE
     /* Create/Open the file to log the traced data */
@@ -86,9 +91,6 @@ void DTL_Initialize(
         AOCL_DEBUGPRINT("Unable to create the trace file %s\n", pchDTL_TRACE_FILE);
         return;
     }
-
-    /* Assign the user requested log level to the global trace log level */
-    gui32TraceLogLevel = ui32CurrentLogLevel;
 #endif
 
 #if AOCL_DTL_LOG_ENABLE
@@ -222,27 +224,39 @@ void DTL_Trace(
       level set while initialization */
     if (ui8LogLevel <= gui32TraceLogLevel)
     {
-        /* this loop is for formating the output log file */
-        for (i = 0; i < ui8LogLevel; i++)
-        {
-            /* print tabs in the output file */
-            fprintf(pOutFile, "\t");
-        }
+		
+		/* Indent as per level if is function call trace */
+		if ((ui8LogLevel >= AOCL_DTL_LEVEL_TRACE_1) &&
+			(ui8LogLevel <= AOCL_DTL_LEVEL_TRACE_8))
+		{
+			fprintf(pOutFile, "%d ", (ui8LogLevel - AOCL_DTL_LEVEL_TRACE_1)+1);
+			/* this loop is for formating the output log file */
+			for (i = 0; i < (ui8LogLevel - AOCL_DTL_LEVEL_TRACE_1); i++)
+			{
+				/* print tabs in the output file */
+				fprintf(pOutFile, "\t");
+			}
+		}
+		else
+		{
+			/* For non call traces we will just start the line with astrix */
+			fprintf(pOutFile, "* \t");
+		}
 
         switch (ui8LogType)
         {
         case TRACE_TYPE_FENTRY:
-            fprintf(pOutFile, "Entering %s()...\n", pi8FunctionName);
+            fprintf(pOutFile, "In %s()...\n", pi8FunctionName);
             break;
 
         case TRACE_TYPE_FEXIT:
             if (pi8Message == NULL)
             { /* Function returned successfully */
-                fprintf(pOutFile, "Returning from %s()\n", pi8FunctionName);
+                fprintf(pOutFile, "Out of %s()\n", pi8FunctionName);
             }
             else
             { /* Function failed to complete, use message to get error */
-                fprintf(pOutFile, "Returning from %s() with error %s\n", pi8FunctionName, pi8Message);
+                fprintf(pOutFile, "Out of %s() with error %s\n", pi8FunctionName, pi8Message);
             }
             break;
 
@@ -430,8 +444,7 @@ void __cyg_profile_func_enter(void *pvThisFunc, void *pvCaller)
         }
     }
 
-    fprintf(pOutFile, "\n%u:%lu:+:%p",
-            AOCL_gettid(),
+    fprintf(pOutFile, "\n%lu:+:%p",
             AOCL_getTimestamp(),
             (void *)(pvThisFunc - info.dli_fbase));
 }
@@ -469,8 +482,7 @@ void __cyg_profile_func_exit(void *pvThisFunc, void *pvCaller)
         }
     }
 
-    fprintf(pOutFile, "\n%u:%lu:-:%p",
-            AOCL_gettid(),
+    fprintf(pOutFile, "\n%lu:-:%p",
             AOCL_getTimestamp(),
             (void *)(pvThisFunc - info.dli_fbase));
 }

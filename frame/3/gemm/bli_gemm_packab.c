@@ -45,7 +45,7 @@ void bli_gemm_packa
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 	obj_t a_pack;
 
 	// Pack matrix A according to the control tree node.
@@ -73,7 +73,7 @@ void bli_gemm_packa
 	  bli_thrinfo_sub_node( thread )
 	);
 	
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 // -----------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void bli_gemm_packb
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 	
 	obj_t b_pack;
 
@@ -118,6 +118,6 @@ void bli_gemm_packb
 	  bli_thrinfo_sub_node( thread )
 	);
 	
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

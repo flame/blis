@@ -74,7 +74,8 @@ void bli_finalize_auto( void )
 
 void bli_init_apis( void )
 {
-	AOCL_DTL_INITIALIZE(AOCL_DTL_LEVEL_ALL);
+	/* Initialzie DTL Libary with trace level set by the user */
+	AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL);
 	// Initialize various sub-APIs.
 	bli_gks_init();
 	bli_ind_init();

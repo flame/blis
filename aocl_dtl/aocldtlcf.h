@@ -24,9 +24,31 @@
    has to enable this macro by making it to 1 else 0 */
 #define AOCL_DTL_LOG_ENABLE         0
 
-#define AOCL_DTL_TRACE_FILE         "aocldtl_trace.wri"
-#define AOCL_DTL_AUTO_TRACE_FILE    "aocldtl_auto_trace.wri"
-#define AOCL_DTL_LOG_FILE           "aocldtl_log.wri"
+/* Select the trace level till which you want to log the data */
+/* By default it will log for all levels */
+#define AOCL_DTL_TRACE_LEVEL         AOCL_DTL_LEVEL_TRACE_5
+
+/* user has to explicitly use the below macros to identify
+   ciriticality of the logged message */
+#define AOCL_DTL_LEVEL_ALL          (14)
+#define AOCL_DTL_LEVEL_TRACE_8      (13)    
+#define AOCL_DTL_LEVEL_TRACE_7      (12)     /* Kernels */
+#define AOCL_DTL_LEVEL_TRACE_6      (11)
+#define AOCL_DTL_LEVEL_TRACE_5      (10)
+#define AOCL_DTL_LEVEL_TRACE_4      (9)
+#define AOCL_DTL_LEVEL_TRACE_3      (8)
+#define AOCL_DTL_LEVEL_TRACE_2      (7)
+#define AOCL_DTL_LEVEL_TRACE_1      (6)       /* BLIS/BLAS API */
+#define AOCL_DTL_LEVEL_VERBOSE      (5)
+#define AOCL_DTL_LEVEL_INFO         (4)
+#define AOCL_DTL_LEVEL_MINOR        (3)
+#define AOCL_DTL_LEVEL_MAJOR        (2)
+#define AOCL_DTL_LEVEL_CRITICAL     (1)
+
+
+#define AOCL_DTL_TRACE_FILE         "aocldtl_trace.txt"
+#define AOCL_DTL_AUTO_TRACE_FILE    "aocldtl_auto_trace.rawfile"
+#define AOCL_DTL_LOG_FILE           "aocldtl_log.txt"
 
 /* The use can use below three macros for different data type while dumping data
  * or specify the size of data type in bytes macro for character data type */
@@ -47,14 +69,7 @@
 /* macro for printing Decimal values */
 #define AOCL_LOG_DECIMAL_VALUE      ('d')
 
-/* user has to explicitly use the below macros to identify
-   ciriticality of the logged message */
-#define AOCL_DTL_LEVEL_ALL          (6)
-#define AOCL_DTL_LEVEL_VERBOSE      (5)
-#define AOCL_DTL_LEVEL_INFO         (4)
-#define AOCL_DTL_LEVEL_MINOR        (3)
-#define AOCL_DTL_LEVEL_MAJOR        (2)
-#define AOCL_DTL_LEVEL_CRITICAL     (1)
+
 
 #endif /* _AOCLDTLCF_H_ */
 

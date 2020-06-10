@@ -46,7 +46,7 @@ void bli_gemm_blk_var1
        thrinfo_t* thread
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 	obj_t a1, c1;
 	dim_t my_start, my_end;
 	dim_t b_alg;
@@ -92,6 +92,6 @@ void bli_gemm_blk_var1
 		);
 	}
 	
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 

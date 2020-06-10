@@ -119,13 +119,12 @@ def decode_symbols_from_trace():
 
     for line in range(len(raw_contents)):
         current_line = raw_contents[line].split(":")
-        if len(current_line) != 4:
+        if len(current_line) != 3:
             continue
 
-        print_string = current_line[0] + " "
-        print_string += current_line[2]
+        print_string = ""
 
-        if current_line[2] == "+":
+        if current_line[1] == "+":
             last_level = "+"
             level.append(1)
         else:
@@ -141,24 +140,24 @@ def decode_symbols_from_trace():
                 print_string += "."
 
         try:
-            print_string += lookup[int(current_line[3], 16)]
+            print_string += lookup[int(current_line[2], 16)]
         except KeyError:
             missing_symbols += 1
-            print_string += current_line[3]
+            print_string += current_line[2]
 
         if line == 1:
-            first_timestamp = int(current_line[1])
+            first_timestamp = int(current_line[0])
             print_string += "(+0us)"
         else:
-            delta_last = int(current_line[1]) - last_timestamp
-            delta_total = int(current_line[1]) - first_timestamp
+            delta_last = int(current_line[0]) - last_timestamp
+            delta_total = int(current_line[0]) - first_timestamp
             print_string += "(+" + str(delta_last) + "us, " + str(delta_total) + "us)"
 
 
         if last_level == "-" and call_only:
             continue
         else:
-            last_timestamp = int(current_line[1])
+            last_timestamp = int(current_line[0])
 
         print (print_string)
     

@@ -108,10 +108,10 @@ err_t bli_gemm_small
        cntl_t* cntl
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	
 #ifdef BLIS_ENABLE_MULTITHREADING
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 #endif
     // If alpha is zero, scale by beta and return.
@@ -157,7 +157,7 @@ err_t bli_gemm_small
         return bli_sgemm_small(alpha, a, b, beta, c, cntx, cntl);
     }
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -173,7 +173,7 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
@@ -190,7 +190,7 @@ static err_t bli_sgemm_small
             beta,
             c
         );
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
         return BLIS_SUCCESS;
     }
 
@@ -1699,7 +1699,7 @@ static err_t bli_sgemm_small
                                &local_mem_buf_A_s);
         }
 		
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
         return BLIS_SUCCESS;
     }
     else

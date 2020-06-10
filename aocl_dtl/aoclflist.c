@@ -78,7 +78,7 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
 {
     AOCL_FLIST_Node *newNode = NULL, *temp = NULL;
     AOCL_FAL_FILE *file = NULL;
-    int8 pchFileName[40];
+    int8 pchFileName[255];
 
     /* We don't want duplicates so we will check if the file already opened for this thread */
     file = AOCL_FLIST_GetFile(*plist, tid);
@@ -89,7 +89,7 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
     }
 
     /* We don't have exiting file, lets try to open new one */
-    sprintf(pchFileName, "%d_%s", tid, pchFilePrefix);
+    sprintf(pchFileName, "P%d_T%d_%s", AOCL_getpid(), tid, pchFilePrefix);
 
     file = AOCL_FAL_Open(pchFileName, "wb");
     if (file == NULL)
