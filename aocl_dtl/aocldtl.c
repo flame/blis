@@ -229,18 +229,12 @@ void DTL_Trace(
 		if ((ui8LogLevel >= AOCL_DTL_LEVEL_TRACE_1) &&
 			(ui8LogLevel <= AOCL_DTL_LEVEL_TRACE_8))
 		{
-			fprintf(pOutFile, "%d ", (ui8LogLevel - AOCL_DTL_LEVEL_TRACE_1)+1);
 			/* this loop is for formating the output log file */
 			for (i = 0; i < (ui8LogLevel - AOCL_DTL_LEVEL_TRACE_1); i++)
 			{
 				/* print tabs in the output file */
 				fprintf(pOutFile, "\t");
 			}
-		}
-		else
-		{
-			/* For non call traces we will just start the line with astrix */
-			fprintf(pOutFile, "* \t");
 		}
 
         switch (ui8LogType)

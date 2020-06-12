@@ -45,22 +45,31 @@ err_t bli_gemmsup
        rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c);
+
 	// Return early if small matrix handling is disabled at configure-time.
 	#ifdef BLIS_DISABLE_SUP_HANDLING
+	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP is Disabled.");
 	return BLIS_FAILURE;
 	#endif
 
 	// Return early if this is a mixed-datatype computation.
 	if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
 	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
-	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) return BLIS_FAILURE;
+	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) {
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP doesn't support Mixed datatypes.");
+		return BLIS_FAILURE;
+	}
 
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
 
 	/*General stride is not yet supported in sup*/
-	if(BLIS_XXX==stor_id)
+	if(BLIS_XXX==stor_id) {
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP doesn't support general stride.");
 		return BLIS_FAILURE;
+	}
 
 	const dim_t m  = bli_obj_length( c );
 	const dim_t n  = bli_obj_width( c );
@@ -74,6 +83,7 @@ err_t bli_gemmsup
 	|| ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
 	)){
 		//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in cgemmsup \n");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for cgemm");
 		return BLIS_FAILURE;
 	}
 
@@ -84,6 +94,7 @@ err_t bli_gemmsup
 	|| ((transb == BLIS_CONJ_NO_TRANSPOSE) || (transb == BLIS_CONJ_TRANSPOSE))
 	)){
 		//printf(" gemmsup: Returning with for un-supported storage types and conjugate property in zgemmsup \n");
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsuppported storage type for zgemm.");
 		return BLIS_FAILURE;
 	}
 
@@ -103,16 +114,20 @@ err_t bli_gemmsup
 
 		// Pass in m and n reversed, which simulates a transposition of the
 		// entire operation pursuant to the microkernel storage preference.
-		if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, m, k, cntx ) )
+		if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, m, k, cntx ) ) {
+			AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Traspostion results in unsupported storage for matrix C.");
 			return BLIS_FAILURE;
+		}
 	}
 	else // ukr_prefers_storage_of( c, ... )
 	{
 		const num_t dt = bli_obj_dt( c );
 		const dim_t k  = bli_obj_width_after_trans( a );
 
-		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) )
+		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) ) {
+			AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Unsupported storage for matrix C.");
 			return BLIS_FAILURE;
+		}
 	}
 
 	// Initialize a local runtime with global settings if necessary. Note
@@ -158,6 +173,8 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 	  cntx,
 	  rntm
 	);
+	
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }
 
 

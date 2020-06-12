@@ -48,6 +48,7 @@ void bli_gemm_front
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_3, alpha, a, b, beta, c);
 	bli_init_once();
 
 	obj_t   a_local;

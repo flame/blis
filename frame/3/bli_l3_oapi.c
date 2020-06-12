@@ -58,6 +58,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_init_once(); \
 \
 	BLIS_OAPI_EX_DECLS \
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
 	/* If C has a zero dimension, return early.	*/	\
 	if ( bli_obj_has_zero_dim( c ) ) {\

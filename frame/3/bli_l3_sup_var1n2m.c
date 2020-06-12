@@ -76,6 +76,7 @@ void bli_gemmsup_ref_var1n
        thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 #if 0
 	obj_t at, bt;
 
@@ -227,6 +228,7 @@ void bli_gemmsup_ref_var1n
 		  thread
 		);
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 
@@ -724,6 +726,7 @@ void bli_gemmsup_ref_var2m
        thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);
 #if 0
 	obj_t at, bt;
 
@@ -875,6 +878,7 @@ void bli_gemmsup_ref_var2m
 		  thread
 		);
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);
 }
 
 

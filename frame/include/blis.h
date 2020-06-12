@@ -205,7 +205,8 @@ extern "C" {
 #include "bli_winsys.h"
 
 #include "aocldtl.h"
-	
+#include "aocldtl_blis.h"
+
 // End extern "C" construct block.
 #ifdef __cplusplus
 }

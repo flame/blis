@@ -52,8 +52,9 @@ void bli_gemm_int
 	obj_t        b_local;
 	obj_t        c_local;
 	gemm_var_oft f;
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
-		
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
+	
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
