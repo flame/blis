@@ -51,6 +51,7 @@ void PASTEMAC(ch,opname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);\
 	/* Inspect whether we are going to be packing matrix B. */ \
 	if ( will_pack == FALSE ) \
 	{ \
@@ -164,6 +165,7 @@ void PASTEMAC(ch,opname) \
 			} \
 		} \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);\
 }
 
 INSERT_GENTFUNC_BASIC0( packm_sup_init_mem_b )
@@ -180,6 +182,7 @@ void PASTEMAC(ch,opname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
 	/* Inspect whether we previously packed matrix A. */ \
 	if ( did_pack == FALSE ) \
 	{ \
@@ -202,6 +205,7 @@ void PASTEMAC(ch,opname) \
 			} \
 		} \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5); \
 }
 
 INSERT_GENTFUNC_BASIC0( packm_sup_finalize_mem_b )
@@ -228,6 +232,7 @@ void PASTEMAC(ch,opname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5);\
 	/* Inspect whether we are going to be packing matrix B. */ \
 	if ( will_pack == FALSE ) \
 	{ \
@@ -297,6 +302,7 @@ void PASTEMAC(ch,opname) \
 		   broker. */ \
 		*p = bli_mem_buffer( mem ); \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5);\
 }
 
 INSERT_GENTFUNC_BASIC0( packm_sup_init_b )
@@ -330,6 +336,7 @@ void PASTEMAC(ch,opname) \
        thrinfo_t* restrict thread  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
 	pack_t schema; \
 	dim_t  k_max; \
 	dim_t  n_max; \
@@ -424,6 +431,7 @@ void PASTEMAC(ch,opname) \
 		/* Barrier so that packing is done before computation. */ \
 		bli_thread_obarrier( thread ); \
 	} \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_5); \
 }
 
 INSERT_GENTFUNC_BASIC0( packm_sup_b )
