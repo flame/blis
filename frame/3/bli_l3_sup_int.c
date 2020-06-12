@@ -46,6 +46,9 @@ err_t bli_gemmsup_int
        thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
+
 #if 0
 	//bli_gemmsup_ref_var2
 	//bli_gemmsup_ref_var1
@@ -80,7 +83,10 @@ err_t bli_gemmsup_int
 
 	// Don't use the small/unpacked implementation if one of the matrices
 	// uses general stride.
-	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
+	if ( stor_id == BLIS_XXX ) {
+		AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_4, "SUP doesn't support general stide.");
+		return BLIS_FAILURE;
+	}
 
 	const bool_t  is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
@@ -237,6 +243,7 @@ err_t bli_gemmsup_int
 	}
 
 	// Return success so that the caller knows that we computed the solution.
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 	return BLIS_SUCCESS;
 }
 
