@@ -167,7 +167,7 @@ If you want to build on Windows, there are two options:
 1. MSVC ABI compatible DLL with clang
 
    If you want BLIS to be compatible with DLLs built by MSVC, you need to use `clang.exe` to build BLIS as BLIS does not support building with Visual Studio C compiler (``cl.exe``). To build BLIS, you need a recent clang from [LLVM](https://releases.llvm.org/download.html), an [MSYS2](https://www.msys2.org/) environment (for build tools like `sed`, `bash`), a Visual Studio 2015 or later environment (for C standard library) and Windows SDK.
-   To build `BLIS`, activate the Visual Studio environment from a command prompy and drop in to a bash shell from MSYS2 environment. Then set `AR=llvm-ar`, `AS=llvm-as`, `RANLIB=echo`, `CC=clang` and then follow the instructions for the Linux build.
+   To build `BLIS`, activate the Visual Studio environment from a command prompt and drop in to a bash shell from MSYS2 environment. Then set `AR=llvm-ar`, `AS=llvm-as`, `RANLIB=echo`, `CC=clang` and then follow the instructions for the Linux build.
 
 2. MinGW DLL
 
