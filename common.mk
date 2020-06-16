@@ -546,7 +546,7 @@ SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
 ifeq ($(CC_VENDOR),clang)
-SOFLAGS    += -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
+SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
 else
 SOFLAGS    += -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif

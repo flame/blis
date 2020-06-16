@@ -32,7 +32,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //          uplo   m     alpha    x        incx  a        lda

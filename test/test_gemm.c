@@ -32,7 +32,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //#define FILE_IN_OUT
@@ -129,7 +133,7 @@ int main( int argc, char** argv )
 	inc_t cs_b;
 	inc_t cs_c;
 
-	while (fscanf(fin, "%ld %ld %ld %ld %ld %ld\n", &m, &k, &n, &cs_a, &cs_b, &cs_c) == 6)
+	while (fscanf(fin, "%lld %lld %lld %lld %lld %lld\n", &m, &k, &n, &cs_a, &cs_b, &cs_c) == 6)
 	  {
 	    if ((m > cs_a) || (k > cs_b) || (m > cs_c)) continue; // leading dimension should be greater than number of rows
 	    
