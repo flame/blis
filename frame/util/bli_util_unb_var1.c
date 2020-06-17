@@ -1019,7 +1019,8 @@ void PASTEMAC(ch,varname) \
 \
 			x1     = x + (j  )*ldx + (0  )*incx; \
 \
-			PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+			/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+			PASTEMAC(ch,kername) \
 			( \
 			  n_elem, \
 			  x1, incx, \
@@ -1046,7 +1047,8 @@ void PASTEMAC(ch,varname) \
 				x0     = x1; \
 				chi1   = x1 + (n_elem-1)*incx; \
 \
-				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
@@ -1086,7 +1088,8 @@ void PASTEMAC(ch,varname) \
 				x2     = x1 + incx; \
 				chi1   = x1; \
 \
-				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
@@ -1118,8 +1121,8 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( randm_unb_var1,  randv )
-INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv )
+INSERT_GENTFUNC_BASIC( randm_unb_var1,  randv_unb_var1 )
+INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv_unb_var1 )
 
 
 #undef  GENTFUNCR

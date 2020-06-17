@@ -42,6 +42,8 @@
 { \
 	bli_drandnp2s( a ); \
 }
+
+#if 0
 #define bli_drandnp2s_prev( a ) \
 { \
 	const double m_max  = 3.0; \
@@ -95,6 +97,8 @@
 	   down to float. */ \
 	a = r_val; \
 }
+#endif
+
 #define bli_drandnp2s( a ) \
 { \
 	const double m_max  = 6.0; \
@@ -108,15 +112,19 @@
 	   represents the largest power of two we will use to generate the
 	   random numbers. */ \
 \
-	/* Generate a random real number t on the interval: [0.0, 6.0]. */ \
-	t = ( ( double ) rand() / ( double ) RAND_MAX ) * m_max2; \
+	do \
+	{ \
+		/* Generate a random real number t on the interval: [0.0, 6.0]. */ \
+		t = ( ( double ) rand() / ( double ) RAND_MAX ) * m_max2; \
 \
-	/* Modify t to guarantee that is never equal to the upper bound of
-	   the interval (in this case, 6.0). */ \
-	if ( t == m_max2 ) t = t - 1.0; \
-\
-	/* Transform the interval into the set of integers, {0,1,2,3,4,5}. */ \
-	t = floor( t ); \
+		/* Transform the interval into the set of integers, {0,1,2,3,4,5}.
+		   Note that 6 is prohibited by the loop guard below. */ \
+		t = floor( t ); \
+	} \
+	/* If t is ever equal to m_max2, we re-randomize. The guard against
+	   m_max2 < t is for sanity and shouldn't happen, unless perhaps there
+	   is weirdness in the typecasting to double when computing t above. */ \
+	while ( m_max2 <= t ); \
 \
 	/* Map values of t == 0 to a final value of 0. */ \
 	if ( t == 0.0 ) r_val = 0.0; \
@@ -126,7 +134,7 @@
 \
 		double s_val; \
 \
-		/* Compute r_val = 2^s where s = +/-(t-1) = {-4,-3,-2,-1,0}. */ \
+		/* Compute r_val = 2^s where s = -(t-1) = {-4,-3,-2,-1,0}. */ \
 		r_val = pow( 2.0, -(t - 1.0) ); \
 \
 		/* Compute a random number to determine the sign of the final
