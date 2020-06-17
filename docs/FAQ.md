@@ -172,7 +172,7 @@ If you want to build on Windows, there are two options:
        Run `call C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat x64`
      * Start the bash shell from the same command prompt. (Run `bash.exe`)
      * Run `export AR=llvm-ar AS=llvm-as RANLIB=echo CC=clang CXX=clang++`
-     * Run `./configure --prefix=/c/blis/ auto`
+     * Run `./configure --prefix=/c/blis/ --disable-static --enable-shared auto`
      * Run `make -j install`
 
 2. MinGW DLL
