@@ -166,7 +166,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm3mh_ukr: ct", 4, 4, ct, rs_ct, cs_ct, "%4.1f
 				                      beta_r, \
 				                      beta_i, \
 				                      *gamma11_r, \
-				                      *gamma11_i ); \
+				                      *gamma11_i, ch ); \
 			} \
 		} \
 		else if ( PASTEMAC(chr,eq1)( beta_r ) ) \

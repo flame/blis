@@ -234,7 +234,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				                      beta_r, \
 				                      beta_i, \
 				                      *gamma11_r, \
-				                      *gamma11_i ); \
+				                      *gamma11_i, ch ); \
 			} \
 		} \
 		else if ( PASTEMAC(chr,eq1)( beta_r ) ) \

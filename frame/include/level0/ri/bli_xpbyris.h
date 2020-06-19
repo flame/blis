@@ -37,23 +37,23 @@
 
 // xpbyris
 
-#define bli_rxxpbyris( xr, xi, br, bi, yr, yi ) \
+#define bli_rxxpbyris( xr, xi, br, bi, yr, yi, chy ) \
 { \
 	(yr) = (xr) + (br) * (yr); \
 }
 
-#define bli_cxxpbyris( xr, xi, br, bi, yr, yi ) \
+#define bli_cxxpbyris( xr, xi, br, bi, yr, yi, chy ) \
 { \
-	const __typeof__(yr) yt_r = (xr) + (br) * (yr) - (bi) * (yi); \
-	const __typeof__(yi) yt_i = (xi) + (bi) * (yr) + (br) * (yi); \
+	const PASTEMAC(chy,ctyper) yt_r = (xr) + (br) * (yr) - (bi) * (yi); \
+	const PASTEMAC(chy,ctyper) yt_i = (xi) + (bi) * (yr) + (br) * (yi); \
 	(yr) = yt_r; \
 	(yi) = yt_i; \
 }
 
-#define bli_crxpbyris( xr, xi, br, bi, yr, yi ) \
+#define bli_crxpbyris( xr, xi, br, bi, yr, yi, chy ) \
 { \
-	const __typeof__(yr) yt_r = (xr) + (br) * (yr); \
-	const __typeof__(yi) yt_i = (xi) + (br) * (yi); \
+	const PASTEMAC(chy,ctyper) yt_r = (xr) + (br) * (yr); \
+	const PASTEMAC(chy,ctyper) yt_i = (xi) + (br) * (yi); \
 	(yr) = yt_r; \
 	(yi) = yt_i; \
 }

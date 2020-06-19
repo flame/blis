@@ -55,14 +55,19 @@
 
 
 // -- Define typeof() operator if using non-GNU compiler --
-
-#ifndef __GNUC__
-  #define typeof __typeof__
-#else
-  #ifndef typeof
-  #define typeof __typeof__
-  #endif
-#endif
+//
+// NOTE: Use of typeof and __typeof__ have been deprecated in BLIS in order
+// to facilitate better portability to other environments and compilers
+// (e.g. MSVC on Windows). Don't use them! (I mean, don't use typeof or
+// __typeof__. But don't use MSVC either if you can't help it.)
+//
+//#ifndef __GNUC__
+//  #define typeof __typeof__
+//#else
+//  #ifndef typeof
+//  #define typeof __typeof__
+//  #endif
+//#endif
 
 
 // -- BLIS Thread Local Storage Keyword --

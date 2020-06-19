@@ -192,7 +192,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			  alpha_r, \
 			  alpha_i, /* alpha_i not referenced */ \
 			  *beta11_r, \
-			  *beta11_i  \
+			  *beta11_i, ch  \
 			); \
 \
 			PASTEMAC(ch,sets)( -*beta11_i, \
@@ -227,7 +227,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			  alpha_r, \
 			  alpha_i, /* alpha_i not referenced */ \
 			  *beta11_r, \
-			  *beta11_i  \
+			  *beta11_i, ch  \
 			); \
 		} \
 	} \

@@ -37,15 +37,15 @@
 
 // axpbyris
 
-#define bli_rxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+#define bli_rxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi, chy ) \
 { \
     (yr) = (ar) * (xr) + (br) * (yr); \
 }
 
-#define bli_cxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi ) \
+#define bli_cxaxpbyris( ar, ai, xr, xi, br, bi, yr, yi, chy ) \
 { \
-    const __typeof__(yr) yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
-    const __typeof__(yi) yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
+    const PASTEMAC(chy,ctyper) yt_r = (ar) * (xr) - (ai) * (xi) + (br) * (yr) - (bi) * (yi); \
+    const PASTEMAC(chy,ctyper) yt_i = (ai) * (xr) + (ar) * (xi) + (bi) * (yr) + (br) * (yi); \
     (yr) = yt_r; \
     (yi) = yt_i; \
 }

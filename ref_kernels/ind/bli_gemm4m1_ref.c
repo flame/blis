@@ -231,7 +231,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm4m1_ukr: bp_i", k, n, \
 			                      beta_r, \
 			                      beta_i, \
 			                      *gamma11_r, \
-			                      *gamma11_i ); \
+			                      *gamma11_i, ch ); \
 		} \
 	} \
 	else if ( PASTEMAC(chr,eq1)( beta_r ) ) \
