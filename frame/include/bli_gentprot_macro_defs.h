@@ -87,6 +87,17 @@ GENTPROTDOT( scomplex, c, u, blasname ) \
 GENTPROTDOT( dcomplex, z, c, blasname ) \
 GENTPROTDOT( dcomplex, z, u, blasname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTPROTDOT_BLAS_SDC( blasname ) \
+\
+GENTPROTDOT( float,    s,  , blasname ) \
+GENTPROTDOT( double,   d,  , blasname ) \
+GENTPROTDOT( scomplex, c, c, blasname ) \
+GENTPROTDOT( scomplex, c, u, blasname ) \
+GENTPROTDOT( dcomplex, z, u, blasname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 

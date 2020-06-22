@@ -89,6 +89,11 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#define INSERT_GENTFUNCDOT_BLAS_CZ_F2C( blasname, blisname ) \
+\
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
 #define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
 \
@@ -99,6 +104,17 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTFUNCDOT_BLAS_SDC( blasname, blisname ) \
+\
+GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 
@@ -204,6 +220,7 @@ GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
 GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
 GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
 GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
+
 
 // -- (three auxiliary arguments) --
 

@@ -47,8 +47,21 @@ BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTPROTDOT_BLAS( dot )
 
+#ifdef AOCL_F2C
+INSERT_GENTPROTDOT_BLAS_SDC( dot )
+
+
+BLIS_EXPORT_BLAS dcomplex zdotc_
+(
+       dcomplex *ret_val,
+       const f77_int* n,
+       const dcomplex*   x, const f77_int* incx,
+       const dcomplex*   y, const f77_int* incy
+);
+#else
+INSERT_GENTPROTDOT_BLAS( dot )
+#endif
 
 // -- "Black sheep" dot product function prototypes --
 
