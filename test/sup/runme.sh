@@ -38,7 +38,7 @@ delay=0.02
 
 # Threadedness to test.
 #threads="st mt"
-threads="st mt"
+threads="st"
 
 # Datatypes to test.
 #dts="d s"
@@ -51,23 +51,40 @@ ops="gemm"
 trans="nn nt tn tt"
 
 # Storage combinations to test.
+# NOTE: mixed storage cases are not yet implemented in test_gemm.c.
 #stors="rrr rrc rcr rcc crr crc ccr ccc"
 stors="rrr ccc"
 
 # Problem shapes to test.
 shapes="sll lsl lls lss sls ssl lll"
 
+# Small problem dimensions to use.
 # FGVZ: figure out how to probe what's in the directory and
 # execute everything that's there?
 sms="6"
 sns="8"
-sks="10"
+sks="4"
+#sks="10"
+
+# Leading dimensions to use (small or large).
+# When a leading dimension is large, it is constant and set to the largest
+# problem size that will be run.
+#ldims="s l"
+ldims="s"
+
+# Packing combinations for blissup. The first char encodes the packing status
+# of matrix A and the second char encodes the packing status of matrix B.
+# NOTE: This string must always contain 'uu' if other implementations are also
+# being tested at the same time.
+#pcombos="uu up pu pp"
+pcombos="uu"
 
 # Implementations to test.
-impls="vendor blissup blislpab openblas eigen"
+impls="vendor blissup blisconv openblas eigen blasfeo libxsmm"
+#impls="vendor blisconv openblas eigen blasfeo libxsmm"
 #impls="vendor"
 #impls="blissup"
-#impls="blislpab"
+#impls="blisconv"
 #impls="openblas"
 #impls="eigen"
 
@@ -95,102 +112,173 @@ for th in ${threads}; do
 
 								for sk in ${sks}; do
 
-									for im in ${impls}; do
+									for ld in ${ldims}; do
 
-										if [ "${th}" = "mt" ]; then
+										for im in ${impls}; do
 
-											# Specify the multithreading depending on which
-											# implementation is about to be tested.
-											if   [ "${im:0:4}" = "blis" ]; then
-												unset  OMP_NUM_THREADS
-												export BLIS_NUM_THREADS=${nt}
-											elif [ "${im}" = "openblas" ]; then
-												unset  OMP_NUM_THREADS
-												export OPENBLAS_NUM_THREADS=${nt}
-											elif [ "${im}" = "eigen" ]; then
-												export OMP_NUM_THREADS=${nt}
-											elif [ "${im}" = "vendor" ]; then
-												unset  OMP_NUM_THREADS
-												export MKL_NUM_THREADS=${nt}
-											fi
-											export nt_use=${nt}
+											for pc in ${pcombos}; do
 
-										else # if [ "${th}" = "st" ];
+												if [ "${th}" = "mt" ]; then
 
-											# Use single-threaded execution.
-											export OMP_NUM_THREADS=1
-											export BLIS_NUM_THREADS=1
-											export OPENBLAS_NUM_THREADS=1
-											export MKL_NUM_THREADS=1
-											export nt_use=1
-										fi
+													# Prohibit attempts to run blasfeo or libxsmm as
+													# multithreaded.
+													if [ "${im}" = "blasfeo" ] || \
+													   [ "${im}" = "libxsmm" ]; then
+														continue;
+													fi
 
-										# Multithreaded OpenBLAS seems to have a problem
-										# running properly if GOMP_CPU_AFFINITY is set.
-										# So we temporarily unset it here if we are about
-										# to execute OpenBLAS, but otherwise restore it.
-										if [ ${im} = "openblas" ]; then
-											unset GOMP_CPU_AFFINITY
-										else
-											export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
-										fi
+													# Specify the multithreading depending on which
+													# implementation is about to be tested.
+													if   [ "${im:0:4}" = "blis" ]; then
+														unset  OMP_NUM_THREADS
+														export BLIS_NUM_THREADS=${nt}
+													elif [ "${im}" = "openblas" ]; then
+														unset  OMP_NUM_THREADS
+														export OPENBLAS_NUM_THREADS=${nt}
+													elif [ "${im}" = "eigen" ]; then
+														export OMP_NUM_THREADS=${nt}
+													elif [ "${im}" = "vendor" ]; then
+														unset  OMP_NUM_THREADS
+														export MKL_NUM_THREADS=${nt}
+													fi
+													export nt_use=${nt}
 
-										# Limit execution of non-BLIS implementations to
-										# rrr/ccc storage cases.
-										if [ "${im:0:4}" != "blis" ] && \
-										   [ "${st}" != "rrr" ] && \
-										   [ "${st}" != "ccc" ]; then
-											continue;
-										fi
+												else # if [ "${th}" = "st" ];
 
-										# Further limit execution of libxsmm to
-										# ccc storage cases.
-										if [ "${im:0:7}" = "libxsmm" ] && \
-										   [ "${st}" != "ccc" ]; then
-											continue;
-										fi
+													# Use single-threaded execution.
+													export OMP_NUM_THREADS=1
+													export BLIS_NUM_THREADS=1
+													export OPENBLAS_NUM_THREADS=1
+													export MKL_NUM_THREADS=1
+													export nt_use=1
+												fi
 
-										# Extract the shape chars for m, n, k.
-										chm=${sh:0:1}
-										chn=${sh:1:1}
-										chk=${sh:2:1}
+												# Isolate the individual chars in the current pcombo
+												# string.
+												packa=${pc:0:1}
+												packb=${pc:1:1}
 
-										# Construct the shape substring (e.g. m6npkp)
-										shstr=""
+												# For blissup implementations, set the BLIS_PACK_A and
+												# BLIS_PACK_B environment variables according to the
+												# chars in the current pcombo string.
+												if [ "${im:0:7}" = "blissup" ]; then
 
-										if [ ${chm} = "s" ]; then
-											shstr="${shstr}m${sm}"
-										else
-											shstr="${shstr}mp"
-										fi
+													# Set BLIS_PACK_A if the pcombo char is 'p'; otherwise
+													# unset the variable altogether.
+													if [ ${packa} = "p" ]; then
+														export BLIS_PACK_A=1
+													else
+														unset BLIS_PACK_A
+													fi
 
-										if [ ${chn} = "s" ]; then
-											shstr="${shstr}n${sn}"
-										else
-											shstr="${shstr}np"
-										fi
+													# Set BLIS_PACK_B if the pcombo char is 'p'; otherwise
+													# unset the variable altogether.
+													if [ ${packb} = "p" ]; then
+														export BLIS_PACK_B=1
+													else
+														unset BLIS_PACK_B
+													fi
+												else
 
-										if [ ${chk} = "s" ]; then
-											shstr="${shstr}k${sk}"
-										else
-											shstr="${shstr}kp"
-										fi
+													# Unset the variables for non-blissup implementations,
+													# just to be paranoid-safe.
+													unset BLIS_PACK_A
+													unset BLIS_PACK_B
+												fi
 
-										# Ex: test_dgemm_nn_rrc_m6npkp_blissup_st.x
+												# Limit execution of non-blissup implementations to the
+												# 'uu' packing combination. (Those implementations don't
+												# use the pcombos string, but since we iterate over its
+												# words for all implementations, we have to designate one
+												# of them as a placeholder to allow those implementations
+												# to execute. The 'uu' string was chosen over the 'pp'
+												# string because it's more likely that this script will be
+												# used to run blissup on unpacked matrices, and so the
+												# sorting for the output files is nicer if the non-blissup
+												# implementations use the 'uu' string, even if it's more
+												# likely that those implementations use packing. Think of
+												# 'uu' as encoding the idea that explicit packing was not
+												# requested.)
+												if [ "${im:0:7}" != "blissup" ] && \
+												   [ "${pc}" != "uu" ]; then
+													continue;
+												fi
 
-										# Construct the name of the test executable.
-										exec_name="${exec_root}_${dt}${op}_${tr}_${st}_${shstr}_${im}_${th}.x"
+												# Multithreaded OpenBLAS seems to have a problem
+												# running properly if GOMP_CPU_AFFINITY is set.
+												# So we temporarily unset it here if we are about
+												# to execute OpenBLAS, but otherwise restore it.
+												if [ ${im} = "openblas" ]; then
+													unset GOMP_CPU_AFFINITY
+												else
+													export GOMP_CPU_AFFINITY="${GOMP_CPU_AFFINITYsave}"
+												fi
 
-										# Construct the name of the output file.
-										out_file="${out_root}_${th}_${dt}${op}_${tr}_${st}_${shstr}_${im}.m"
+												# Limit execution of non-BLIS implementations to
+												# rrr/ccc storage cases.
+												if [ "${im:0:4}" != "blis" ] && \
+												   [ "${st}" != "rrr" ] && \
+												   [ "${st}" != "ccc" ]; then
+													continue;
+												fi
 
-										echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
+												# Further limit execution of libxsmm to
+												# ccc storage cases.
+												if [ "${im:0:7}" = "libxsmm" ] && \
+												   [ "${st}" != "ccc" ]; then
+													continue;
+												fi
 
-										# Run executable.
-										./${exec_name} > ${out_file}
+												# Extract the shape chars for m, n, k.
+												chm=${sh:0:1}
+												chn=${sh:1:1}
+												chk=${sh:2:1}
 
-										sleep ${delay}
+												# Construct the shape substring (e.g. m6npkp)
+												shstr=""
 
+												if [ ${chm} = "s" ]; then
+													shstr="${shstr}m${sm}"
+												else
+													shstr="${shstr}mp"
+												fi
+
+												if [ ${chn} = "s" ]; then
+													shstr="${shstr}n${sn}"
+												else
+													shstr="${shstr}np"
+												fi
+
+												if [ ${chk} = "s" ]; then
+													shstr="${shstr}k${sk}"
+												else
+													shstr="${shstr}kp"
+												fi
+
+												# Construct the ldim substring (e.g. lds or ldl)
+												ldstr="ld${ld}"
+
+												# Construct the pack substring (e.g. uaub, uapb, paub, or papb)
+												packstr="${packa}a${packb}b"
+
+												# Ex: test_dgemm_nn_rrc_m6npkp_blissup_st.x
+												# Ex: test_dgemm_nt_rrr_m6npkp_ldl_blissup_st.x
+
+												# Construct the name of the test executable.
+												exec_name="${exec_root}_${dt}${op}_${tr}_${st}_${shstr}_${ldstr}_${im}_${th}.x"
+
+												# Construct the name of the output file.
+												out_file="${out_root}_${th}_${dt}${op}_${tr}_${st}_${shstr}_${ldstr}_${packstr}_${im}.m"
+
+												echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
+
+												# Run executable.
+												./${exec_name} > ${out_file}
+
+												sleep ${delay}
+
+											done
+										done
 									done
 								done
 							done

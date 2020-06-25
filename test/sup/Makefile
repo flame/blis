@@ -47,8 +47,8 @@
 
 .PHONY: all \
         st mt \
-        blissup-st blislpab-st eigen-st openblas-st vendor-st blasfeo-st libxsmm-st \
-        blissup-mt blislpab-mt eigen-mt openblas-mt vendor-mt \
+        blissup-st blisconv-st eigen-st openblas-st vendor-st blasfeo-st libxsmm-st \
+        blissup-mt blisconv-mt eigen-mt openblas-mt vendor-mt \
         clean cleanx
 
 
@@ -265,6 +265,8 @@ SHAPES := l_l_s \
           l_s_s \
           l_l_l
 
+LDIMS := s l
+
 # Define the small/constant m, n, and k dimensions for single core and multicore
 # experiments.
 SMS_ST := 6
@@ -280,7 +282,8 @@ SKS_MT := 10
 # --- Function definitions -----------------------------------------------------
 #
 
-# A function to strip the underscores from a list of strings.
+# A function to strip the underscores from a list of strings. Note that the
+# word 'a_b_c' is transformed into 'abc', NOT 'a b c'.
 stripu = $(subst _,,$(1))
 
 # Various functions that help us construct the datatype combinations and then
@@ -292,14 +295,22 @@ get-1of3 = $(word 1,$(subst _, ,$(1)))
 get-2of3 = $(word 2,$(subst _, ,$(1)))
 get-3of3 = $(word 3,$(subst _, ,$(1)))
 
-# A function to return the correct PDEFS_ST variable given the shape string.
-get-pdefs = $(strip $(subst l_l_l,$(PDEF_MT_3L), \
-                    $(subst l_l_s,$(PDEF_MT_2L), \
-                    $(subst l_s_l,$(PDEF_MT_2L), \
-                    $(subst s_l_l,$(PDEF_MT_2L), \
-                    $(subst s_s_l,$(PDEF_MT_1L), \
-                    $(subst s_l_s,$(PDEF_MT_1L), \
-                    $(subst l_s_s,$(PDEF_MT_1L),$(1)))))))))
+# A function to return the correct PDEFS variable given the shape string.
+# Note that we have different PDEFS for single-threaded and multithreaded.
+get-pdefs-st = $(strip $(subst l_l_l,$(PDEF_ST_3L), \
+                       $(subst l_l_s,$(PDEF_ST_2L), \
+                       $(subst l_s_l,$(PDEF_ST_2L), \
+                       $(subst s_l_l,$(PDEF_ST_2L), \
+                       $(subst s_s_l,$(PDEF_ST_1L), \
+                       $(subst s_l_s,$(PDEF_ST_1L), \
+                       $(subst l_s_s,$(PDEF_ST_1L),$(1)))))))))
+get-pdefs-mt = $(strip $(subst l_l_l,$(PDEF_MT_3L), \
+                       $(subst l_l_s,$(PDEF_MT_2L), \
+                       $(subst l_s_l,$(PDEF_MT_2L), \
+                       $(subst s_l_l,$(PDEF_MT_2L), \
+                       $(subst s_s_l,$(PDEF_MT_1L), \
+                       $(subst s_l_s,$(PDEF_MT_1L), \
+                       $(subst l_s_s,$(PDEF_MT_1L),$(1)))))))))
 
 # Datatype defs.
 get-dt-cpp = $(strip \
@@ -353,21 +364,29 @@ get-shape-str-k   = $(call get-shape-str-ch,$(call get-3of3,$(1)),$(2))
 get-shape-dim-str = m$(call get-shape-str-m,$(1),$(2))n$(call get-shape-str-n,$(1),$(3))k$(call get-shape-str-k,$(1),$(4))
 
 # Implementation defs.
-# Define a function to return the appropriate -DSTR= and -D[BLIS|BLAS] flags.
+# Define a function to return the appropriate -DSTR=, -D[BLIS|BLAS] cpp flags.
 get-imp-defs = $(strip $(subst  blissup,-DSTR=\"$(1)\" -DBLIS -DSUP, \
-                       $(subst blislpab,-DSTR=\"$(1)\" -DBLIS, \
+                       $(subst blisconv,-DSTR=\"$(1)\" -DBLIS, \
                        $(subst    eigen,-DSTR=\"$(1)\" -DEIGEN, \
                        $(subst openblas,-DSTR=\"$(1)\" -DCBLAS, \
                        $(subst  blasfeo,-DSTR=\"$(1)\" -DCBLAS, \
                        $(subst  libxsmm,-DSTR=\"$(1)\" -DBLAS -DXSMM, \
                        $(subst   vendor,-DSTR=\"$(1)\" -DCBLAS,$(1)))))))))
 
+# Leading dimension defs.
+# Define a function to return the appropriate leading dimension cpp flag.
+get-ldim-defs = $(strip $(subst s,-DLDIM_SMALL, \
+                        $(subst l,-DLDIM_LARGE,$(1))))
+
+get-ldim-str = ld$(1)
+
+# Strip the underscores from the list of transposition and storage combinations.
 TRANS0  = $(call stripu,$(TRANS))
 STORS0  = $(call stripu,$(STORS))
 
-# Limit BLAS and Eigen to only using all row-stored, or all column-stored matrices.
-# Also, limit libxsmm to using all column-stored matrices since it does not offer
-# CBLAS interfaces.
+# Limit BLAS and Eigen to only using all row-stored, or all column-stored
+# matrices. Also, limit libxsmm to using all column-stored matrices since it
+# does not offer CBLAS interfaces.
 BSTORS0 = rrr ccc
 ESTORS0 = rrr ccc
 XSTORS0 = ccc
@@ -377,31 +396,33 @@ XSTORS0 = ccc
 # --- Object and binary file definitons ----------------------------------------
 #
 
-# -- Single-threaded --
+# Define a function to generate an object file name using the various parameter
+# lists.
+get-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),$(foreach ld,$(8),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(call get-ldim-str,$(ld))_$(9)_$(10).o))))))))
 
-get-st-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(8)_st.o)))))))
+# -- Single-threaded --
 
 # Build a list of object files and binaries for each single-threaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blissup)
+BLISSUP_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blissup,st)
 BLISSUP_ST_BINS  := $(patsubst %.o,%.x,$(BLISSUP_ST_OBJS))
 
-BLISLPAB_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blislpab)
+BLISLPAB_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blisconv,st)
 BLISLPAB_ST_BINS := $(patsubst %.o,%.x,$(BLISLPAB_ST_OBJS))
 
-EIGEN_ST_OBJS    := $(call get-st-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),eigen)
+EIGEN_ST_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),eigen,st)
 EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
 
-OPENBLAS_ST_OBJS := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),openblas)
+OPENBLAS_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),openblas,st)
 OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
 
-BLASFEO_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),blasfeo)
+BLASFEO_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blasfeo,st)
 BLASFEO_ST_BINS  := $(patsubst %.o,%.x,$(BLASFEO_ST_OBJS))
 
-LIBXSMM_ST_OBJS  := $(call get-st-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),libxsmm)
+LIBXSMM_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),libxsmm,st)
 LIBXSMM_ST_BINS  := $(patsubst %.o,%.x,$(LIBXSMM_ST_OBJS))
 
-VENDOR_ST_OBJS   := $(call get-st-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),vendor)
+VENDOR_ST_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),vendor,st)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
 # Mark the object files as intermediate so that make will remove them
@@ -416,23 +437,21 @@ VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
 # -- Multithreaded --
 
-get-mt-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(8)_mt.o)))))))
-
 # Build a list of object files and binaries for each multithreaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_MT_OBJS  := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),blissup)
+BLISSUP_MT_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),blissup,mt)
 BLISSUP_MT_BINS  := $(patsubst %.o,%.x,$(BLISSUP_MT_OBJS))
 
-BLISLPAB_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),blislpab)
+BLISLPAB_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),blisconv,mt)
 BLISLPAB_MT_BINS := $(patsubst %.o,%.x,$(BLISLPAB_MT_OBJS))
 
-EIGEN_MT_OBJS    := $(call get-mt-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),eigen)
+EIGEN_MT_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),eigen,mt)
 EIGEN_MT_BINS    := $(patsubst %.o,%.x,$(EIGEN_MT_OBJS))
 
-OPENBLAS_MT_OBJS := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),openblas)
+OPENBLAS_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),openblas,mt)
 OPENBLAS_MT_BINS := $(patsubst %.o,%.x,$(OPENBLAS_MT_OBJS))
 
-VENDOR_MT_OBJS   := $(call get-mt-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),vendor)
+VENDOR_MT_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),vendor,mt)
 VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 #$(error "objs = $(EIGEN_ST_BINS)" )
@@ -452,9 +471,9 @@ VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 all:         st
 
-#blis:        blissup-st blislpab-st
+#blis:        blissup-st blisconv-st
 #blissup:     blissup-st
-#blislpab:    blislpab-st
+#blisconv:    blisconv-st
 #eigen:       eigen-st
 #openblas:    openblas-st
 #blasfeo:     blasfeo-st
@@ -463,11 +482,11 @@ all:         st
 
 # -- Single-threaded --
 
-st:          blissup-st blislpab-st \
+st:          blissup-st blisconv-st \
              eigen-st openblas-st blasfeo-st libxsmm-st vendor-st
 
 blissup-st:  $(BLISSUP_ST_BINS)
-blislpab-st: $(BLISLPAB_ST_BINS)
+blisconv-st: $(BLISLPAB_ST_BINS)
 eigen-st:    $(EIGEN_ST_BINS)
 openblas-st: $(OPENBLAS_ST_BINS)
 blasfeo-st:  $(BLASFEO_ST_BINS)
@@ -476,11 +495,11 @@ vendor-st:   $(VENDOR_ST_BINS)
 
 # -- Multithreaded --
 
-mt:          blissup-mt blislpab-mt \
+mt:          blissup-mt blisconv-mt \
              eigen-mt openblas-mt vendor-mt
 
 blissup-mt:  $(BLISSUP_MT_BINS)
-blislpab-mt: $(BLISLPAB_MT_BINS)
+blisconv-mt: $(BLISLPAB_MT_BINS)
 eigen-mt:    $(EIGEN_MT_BINS)
 openblas-mt: $(OPENBLAS_MT_BINS)
 vendor-mt:   $(VENDOR_MT_BINS)
@@ -489,20 +508,20 @@ vendor-mt:   $(VENDOR_MT_BINS)
 # --- Object file rules --------------------------------------------------------
 
 # Define the implementations for which we will instantiate compilation rules.
-BIMPLS_ST := blissup blislpab openblas blasfeo libxsmm vendor
-BIMPLS_MT := blissup blislpab openblas                 vendor
+BIMPLS_ST := blissup blisconv openblas blasfeo libxsmm vendor
+BIMPLS_MT := blissup blisconv openblas                 vendor
 EIMPLS    := eigen
 
 # -- Single-threaded BLAS --
 
-#      1     2  3   4 567  8
-# test_dgemm_nn_rrr_mpn6kp_blissup_st.x
+#      1     2  3   4 567  8   9
+# test_dgemm_nn_rrr_mpn6kp_lds_blissup_st.x
 
 # Define the function that will be used to instantiate compilation rules
 # for the various single-threaded implementations.
 define make-st-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
-	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
+test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(call get-ldim-str,$(8))_$(9)_st.o: test_gemm.c Makefile
+	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs-st,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-ldim-defs,$(8)) $(call get-imp-defs,$(9)) $(STR_ST) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each BLIS/BLAS/CBLAS
@@ -514,16 +533,17 @@ $(foreach sh,$(SHAPES), \
 $(foreach sm,$(SMS_ST), \
 $(foreach sn,$(SNS_ST), \
 $(foreach sk,$(SKS_ST), \
+$(foreach ld,$(LDIMS), \
 $(foreach impl,$(BIMPLS_ST), \
-$(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+$(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
 
 # -- Multithreaded BLAS --
 
 # Define the function that will be used to instantiate compilation rules
 # for the various multithreaded implementations.
 define make-mt-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
+test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(call get-ldim-str,$(8))_$(9)_mt.o: test_gemm.c Makefile
+	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs-mt,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-ldim-defs,$(8)) $(call get-imp-defs,$(9)) $(STR_MT) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-mt-rule() for each BLIS/BLAS/CBLAS
@@ -535,16 +555,17 @@ $(foreach sh,$(SHAPES), \
 $(foreach sm,$(SMS_MT), \
 $(foreach sn,$(SNS_MT), \
 $(foreach sk,$(SKS_MT), \
+$(foreach ld,$(LDIMS), \
 $(foreach impl,$(BIMPLS_MT), \
-$(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+$(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
 
 # -- Single-threaded Eigen --
 
 # Define the function that will be used to instantiate compilation rules
 # for the single-threaded Eigen implementation.
 define make-eigst-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_st.o: test_gemm.c Makefile
-	$(CXX) $(CXXFLAGS_ST) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_ST) -c $$< -o $$@
+test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(call get-ldim-str,$(8))_$(9)_st.o: test_gemm.c Makefile
+	$(CXX) $(CXXFLAGS_ST) $(ERRCHK) $(N_TRIALS) $(call get-pdefs-st,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-ldim-defs,$(8)) $(call get-imp-defs,$(9)) $(STR_ST) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each Eigen implementation.
@@ -555,16 +576,17 @@ $(foreach sh,$(SHAPES), \
 $(foreach sm,$(SMS_ST), \
 $(foreach sn,$(SNS_ST), \
 $(foreach sk,$(SKS_ST), \
+$(foreach ld,$(LDIMS), \
 $(foreach impl,$(EIMPLS), \
-$(eval $(call make-eigst-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+$(eval $(call make-eigst-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
 
 # -- Multithreaded Eigen --
 
 # Define the function that will be used to instantiate compilation rules
 # for the multithreaded Eigen implementation.
 define make-eigmt-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
+test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(call get-ldim-str,$(8))_$(9)_mt.o: test_gemm.c Makefile
+	$(CXX) $(CXXFLAGS_MT) $(ERRCHK) $(N_TRIALS) $(call get-pdefs-mt,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-ldim-defs,$(8)) $(call get-imp-defs,$(9)) $(STR_MT) -c $$< -o $$@
 endef
 
 # Instantiate the rule function make-st-rule() for each Eigen implementation.
@@ -575,8 +597,9 @@ $(foreach sh,$(SHAPES), \
 $(foreach sm,$(SMS_MT), \
 $(foreach sn,$(SNS_MT), \
 $(foreach sk,$(SKS_MT), \
+$(foreach ld,$(LDIMS), \
 $(foreach impl,$(EIMPLS), \
-$(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
+$(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
 
 
 # --- Executable file rules ----------------------------------------------------
@@ -591,7 +614,7 @@ $(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl))
 test_%_blissup_st.x:  test_%_blissup_st.o  $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_blislpab_st.x: test_%_blislpab_st.o $(LIBBLIS_LINK)
+test_%_blisconv_st.x: test_%_blisconv_st.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_eigen_st.x:    test_%_eigen_st.o    $(LIBBLIS_LINK)
@@ -614,7 +637,7 @@ test_%_vendor_st.x:   test_%_vendor_st.o   $(LIBBLIS_LINK)
 test_%_blissup_mt.x:  test_%_blissup_mt.o  $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
-test_%_blislpab_mt.x: test_%_blislpab_mt.o $(LIBBLIS_LINK)
+test_%_blisconv_mt.x: test_%_blisconv_mt.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<                       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_eigen_mt.x:    test_%_eigen_mt.o    $(LIBBLIS_LINK)
