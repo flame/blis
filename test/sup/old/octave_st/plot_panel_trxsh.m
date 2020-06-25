@@ -7,6 +7,8 @@ function r_val = plot_panel_trxsh ...
        dt_ch, ...
        stor_str, ...
        smalldims, ...
+       ldim_str, ...
+       pack_str, ...
        dirpath, ...
        arch_str, ...
        vend_str, ...
@@ -19,7 +21,7 @@ function r_val = plot_panel_trxsh ...
 % Create filename "templates" for the files that contain the performance
 % results.
 filetemp_blissup  = '%s/output_%s_%s_blissup.m';
-filetemp_blislpab = '%s/output_%s_%s_blislpab.m';
+filetemp_blisconv = '%s/output_%s_%s_blisconv.m';
 filetemp_eigen    = '%s/output_%s_%s_eigen.m';
 filetemp_open     = '%s/output_%s_%s_openblas.m';
 filetemp_bfeo     = '%s/output_%s_%s_blasfeo.m';
@@ -39,7 +41,7 @@ ops( 4, : ) = sprintf( '%s_tt', oproot );
 
 % Generate datatype-specific operation names from the set of operations
 % and datatypes.
-[ opsupnames, opnames ] = gen_opsupnames( ops, stor_str, smalldims );
+[ opsupnames, opnames ] = gen_opsupnames( ops, stor_str, smalldims, ldim_str, pack_str );
 n_opsupnames = size( opsupnames, 1 );
 
 %opsupnames
@@ -75,7 +77,7 @@ for opi = 1:n_opsupnames
 
 	% Construct filenames for the data files from templates.
 	file_blissup  = sprintf( filetemp_blissup,  dirpath, thr_str, opsupname );
-	file_blislpab = sprintf( filetemp_blislpab, dirpath, thr_str, opsupname );
+	file_blisconv = sprintf( filetemp_blisconv, dirpath, thr_str, opsupname );
 	file_eigen    = sprintf( filetemp_eigen,    dirpath, thr_str, opsupname );
 	file_open     = sprintf( filetemp_open,     dirpath, thr_str, opsupname );
 	file_bfeo     = sprintf( filetemp_bfeo,     dirpath, thr_str, opsupname );
@@ -84,7 +86,7 @@ for opi = 1:n_opsupnames
 	% Load the data files.
 	%str = sprintf( '  Loading %s', file_blissup ); disp(str);
 	run( file_blissup )
-	run( file_blislpab )
+	run( file_blisconv )
 	run( file_eigen )
 	run( file_open )
 	run( file_bfeo )
@@ -92,7 +94,7 @@ for opi = 1:n_opsupnames
 
 	% Construct variable names for the variables in the data files.
 	var_blissup  = sprintf( vartemp, thr_str, opname, 'blissup' );
-	var_blislpab = sprintf( vartemp, thr_str, opname, 'blislpab' );
+	var_blisconv = sprintf( vartemp, thr_str, opname, 'blisconv' );
 	var_eigen    = sprintf( vartemp, thr_str, opname, 'eigen' );
 	var_open     = sprintf( vartemp, thr_str, opname, 'openblas' );
 	var_bfeo     = sprintf( vartemp, thr_str, opname, 'blasfeo' );
@@ -101,7 +103,7 @@ for opi = 1:n_opsupnames
 	% Use eval() to instantiate the variable names constructed above,
 	% copying each to a simplified name.
 	data_blissup  = eval( var_blissup );  % e.g. data_st_dgemm_blissup( :, : );
-	data_blislpab = eval( var_blislpab ); % e.g. data_st_dgemm_blislpab( :, : );
+	data_blisconv = eval( var_blisconv ); % e.g. data_st_dgemm_blisconv( :, : );
 	data_eigen = eval( var_eigen );       % e.g. data_st_dgemm_eigen( :, : );
 	data_open = eval( var_open );         % e.g. data_st_dgemm_openblas( :, : );
 	data_bfeo = eval( var_bfeo );         % e.g. data_st_dgemm_blasfeo( :, : );
@@ -120,20 +122,13 @@ for opi = 1:n_opsupnames
 		data_xsmm = zeros( size( data_blissup, 1 ), ...
 		                   size( data_blissup, 2 ) );
 	end
-	%str = sprintf( '  Reading %s', var_blissup ); disp(str);
-	%str = sprintf( '  Reading %s', var_blislpab ); disp(str);
-	%str = sprintf( '  Reading %s', var_eigen ); disp(str);
-	%str = sprintf( '  Reading %s', var_open ); disp(str);
-	%str = sprintf( '  Reading %s', var_bfeo ); disp(str);
-	%str = sprintf( '  Reading %s', var_xsmm ); disp(str);
-	%str = sprintf( '  Reading %s', var_vend ); disp(str);
 
 	% Plot one result in an m x n grid of plots, via the subplot()
 	% function.
 	if 1 == 1
 	plot_l3sup_perf( opsupname, ...
 	                 data_blissup, ...
-	                 data_blislpab, ...
+	                 data_blisconv, ...
 	                 data_eigen, ...
 	                 data_open, ...
 	                 data_bfeo, ...
@@ -147,7 +142,7 @@ for opi = 1:n_opsupnames
 
 	clear data_st_*gemm_*;
 	clear data_blissup;
-	clear data_blislpab;
+	clear data_blisconv;
 	clear data_eigen;
 	clear data_open;
 	clear data_bfeo;
