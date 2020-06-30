@@ -142,6 +142,16 @@ GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
 GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
+// --GEMMT specific kernels ----------------------------------------------------
+#define INSERT_GENTFUNC_L_SD( opname, funcname ) \
+\
+GENTFUNC(float,     s, opname, l, funcname) \
+GENTFUNC(double,    d, opname, l, funcname)
+
+#define INSERT_GENTFUNC_U_SD( opname, funcname ) \
+\
+GENTFUNC(float,     s, opname, u, funcname) \
+GENTFUNC(double,    d, opname, u, funcname)
 
 // -- Macros for functions with one operand ------------------------------------
 
@@ -156,6 +166,12 @@ GENTFUNC( float,    s, tfuncname ) \
 GENTFUNC( double,   d, tfuncname ) \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
+
+
+#define INSERT_GENTFUNC_BASIC0_SD( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( double,   d, tfuncname )
 
 
 #define INSERT_GENTFUNC_BASIC0_CZ( tfuncname ) \

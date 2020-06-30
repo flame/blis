@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,6 +65,7 @@ cntl_t* bli_gemmbp_cntl_create
 	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
 	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2;
 	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
+	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
 	packa_fp = bli_packm_blk_var1;

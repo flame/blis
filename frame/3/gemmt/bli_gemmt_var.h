@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,45 +32,50 @@
 
 */
 
-#ifndef BLIS_L3_IND_H
-#define BLIS_L3_IND_H
-
-// -----------------------------------------------------------------------------
-
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
-/*bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); */
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       cntl_t* cntl, \
+       thrinfo_t* thread  \
+     );
 
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( hemm )
-GENPROT( herk )
-GENPROT( her2k )
-GENPROT( symm )
-GENPROT( syrk )
-GENPROT( syr2k )
-GENPROT( trmm3 )
-GENPROT( trmm )
-GENPROT( trsm )
-
-// -----------------------------------------------------------------------------
-
-//bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
-
-ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
-
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status );
-bool_t  bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
-
-void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
+GENPROT( gemmt_ker_var2 )
 
 
-#endif
 
+//
+// Prototype BLAS-like interfaces with void pointer operands.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       pack_t  schema_a, \
+       pack_t  schema_b, \
+       dim_t   m_off, \
+       dim_t   n_off, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   k, \
+       void*   alpha, \
+       void*   a, inc_t cs_a, inc_t is_a, \
+                  dim_t pd_a, inc_t ps_a, \
+       void*   b, inc_t rs_b, inc_t is_b, \
+                  dim_t pd_b, inc_t ps_b, \
+       void*   beta, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
+     );
+
+INSERT_GENTPROT_GEMMT_SD( gemmt, ker_var2 )

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -102,6 +103,18 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 	PASTEMAC(d,op), \
 	PASTEMAC(z,op)  \
 }
+
+
+#define GENARRAY_T(arrayname) \
+\
+arrayname[BLIS_NUM_FP_TYPES][2] = \
+{ \
+	{PASTEMACT(s,gemmt,l,ker_var2), PASTEMACT(s,gemmt,u,ker_var2)}, \
+	{NULL,NULL}, \
+	{PASTEMACT(d,gemmt,l,ker_var2), PASTEMACT(d,gemmt,u,ker_var2)}, \
+	{NULL,NULL}, \
+}
+
 
 #define GENARRAY_I(arrayname,op) \
 \

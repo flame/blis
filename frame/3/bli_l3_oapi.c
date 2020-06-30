@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -124,6 +124,68 @@ void PASTEMAC(opname,EX_SUF) \
 
 GENFRONT( gemm )
 
+#undef  GENFRONT
+#define GENFRONT( opname ) \
+\
+void PASTEMAC(opname,EX_SUF) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c  \
+       BLIS_OAPI_EX_PARAMS  \
+     ) \
+{ \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+	bli_init_once(); \
+\
+	BLIS_OAPI_EX_DECLS \
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
+\
+	/* If C has a zero dimension, return early.	*/	\
+	if ( bli_obj_has_zero_dim( c ) ) {\
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return;									 \
+	}\
+\
+	/* if alpha or A or B has a zero dimension, \
+	   scale C by beta and return early. */ \
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+		 bli_obj_has_zero_dim( a ) || \
+		 bli_obj_has_zero_dim( b ) ) \
+	{\
+		bli_scalm( beta, c ); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+		return;\
+	}\
+\
+	/* Only proceed with an induced method if each of the operands have a
+	   complex storage datatype. NOTE: Allowing precisions to vary while
+	   using 1m, which is what we do here, is unique to gemm; other level-3
+	   operations use 1m only if all storage datatypes are equal (and they
+	   ignore the computation precision). If any operands are real, skip the
+	   induced method chooser function and proceed directly with native
+	   execution. */ \
+	if ( bli_obj_is_complex( c ) && \
+	     bli_obj_is_complex( a ) && \
+	     bli_obj_is_complex( b ) ) \
+	{ \
+		/* Invoke the operation's "ind" function--its induced method front-end.
+		   For complex problems, it calls the highest priority induced method
+		   that is available (ie: implemented and enabled), and if none are
+		   enabled, it calls native execution. (For real problems, it calls
+		   the operation's native execution interface.) */ \
+		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+	else \
+	{ \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+	} \
+ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+}
+GENFRONT( gemmt )
 
 #undef  GENFRONT
 #define GENFRONT( opname ) \

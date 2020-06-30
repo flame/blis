@@ -6,6 +6,9 @@
  * Merged cblas_f77.h and cblas_fortran_header.h
  *
  * (Heavily hacked down from the original)
+ *
+ * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ *
  */
 
 #ifndef CBLAS_F77_H
@@ -163,5 +166,9 @@
 #define F77_zsyr2k zsyr2k_
 #define F77_ztrmm  ztrmm_
 #define F77_ztrsm  ztrsm_
+#define F77_dgemmt  dgemmt_
+#define F77_sgemmt  sgemmt_
+#define F77_cgemmt  cgemmt_
+#define F77_zgemmt  zgemmt_
 
 #endif /*  CBLAS_F77_H */

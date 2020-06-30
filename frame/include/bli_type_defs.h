@@ -926,11 +926,11 @@ typedef enum
 	BLIS_TRMM3,
 	BLIS_TRMM,
 	BLIS_TRSM,
-
+	BLIS_GEMMT,
 	BLIS_NOID
 } opid_t;
 
-#define BLIS_NUM_LEVEL3_OPS 10
+#define BLIS_NUM_LEVEL3_OPS 11
 
 
 // -- Blocksize ID type --

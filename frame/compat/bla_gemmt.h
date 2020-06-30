@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,45 +32,27 @@
 
 */
 
-#ifndef BLIS_L3_IND_H
-#define BLIS_L3_IND_H
 
-// -----------------------------------------------------------------------------
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
 \
-void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
-/*bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); */
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     );
 
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( hemm )
-GENPROT( herk )
-GENPROT( her2k )
-GENPROT( symm )
-GENPROT( syrk )
-GENPROT( syr2k )
-GENPROT( trmm3 )
-GENPROT( trmm )
-GENPROT( trsm )
-
-// -----------------------------------------------------------------------------
-
-//bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
-
-ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
-
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status );
-bool_t  bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
-
-void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
-
-
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( gemmt )
 #endif
-

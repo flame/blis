@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -121,7 +122,13 @@ GENTPROTSCAL( dcomplex, dcomplex,  , z, blasname ) \
 GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
 GENTPROTSCAL( double,   dcomplex, d, z, blasname )
 
-
+// -- GEMMT specific function --------------------------------------------------
+#define INSERT_GENTPROT_GEMMT_SD(opname, funcname) \
+\
+GENTPROT( float,     s, gemmt, l, funcname ) \
+GENTPROT( double,    d, gemmt, l, funcname ) \
+GENTPROT( float,     s, gemmt, u, funcname ) \
+GENTPROT( double,    d, gemmt, u, funcname )
 
 
 // -- Macros for functions with one operand ------------------------------------
@@ -137,6 +144,8 @@ GENTPROT( float,    s, tfuncname ) \
 GENTPROT( double,   d, tfuncname ) \
 GENTPROT( scomplex, c, tfuncname ) \
 GENTPROT( dcomplex, z, tfuncname )
+
+
 
 // -- (one auxiliary argument) --
 

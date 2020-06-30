@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,45 +32,61 @@
 
 */
 
-#ifndef BLIS_L3_IND_H
-#define BLIS_L3_IND_H
+#ifdef BLIS_ENABLE_BLAS
 
-// -----------------------------------------------------------------------------
-
-#undef  GENPROT
-#define GENPROT( opname ) \
+#define bla_gemmt_check( dt_str, op_str, uploc, transa, transb, n, k, lda, ldb, ldc ) \
+{ \
+	f77_int info = 0; \
+	f77_int nota,  notb; \
+	f77_int conja, conjb; \
+	f77_int ta,    tb; \
+	f77_int lower, upper; \
+	f77_int nrowa, nrowb; \
 \
-void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
-/*bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); */
-
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( hemm )
-GENPROT( herk )
-GENPROT( her2k )
-GENPROT( symm )
-GENPROT( syrk )
-GENPROT( syr2k )
-GENPROT( trmm3 )
-GENPROT( trmm )
-GENPROT( trsm )
-
-// -----------------------------------------------------------------------------
-
-//bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
-
-ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
-
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status );
-
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status );
-bool_t  bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
-
-void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
-
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+\
+	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota ) { nrowa = *n; } \
+	else        { nrowa = *k; } \
+	if ( notb ) { nrowb = *k; } \
+	else        { nrowb = *n; } \
+\
+	if	( !lower && !upper ) \
+		info = 1; \
+	else if ( !nota && !conja && !ta ) \
+		info = 2; \
+	else if ( !notb && !conjb && !tb ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 8; \
+	else if ( *ldb < bli_max( 1, nrowb ) ) \
+		info = 10; \
+	else if ( *ldc < bli_max( 1, *n    ) ) \
+		info = 13; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
 
 #endif
-

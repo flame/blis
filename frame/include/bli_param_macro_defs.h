@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -581,7 +581,19 @@ static bool_t bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 	       ( s1 != 1 || s2 != 1 || s3 != 1 );
 }
 
+// offset-relate
 
+static bool_t bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool_t )
+	       ( ( n_off + n - 1 ) < m_off );
+}
+
+static bool_t bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool_t )
+	       ( ( m_off + m - 1 ) < n_off );
+}
 // diag offset-related
 
 static void bli_negate_diag_offset( doff_t* diagoff )

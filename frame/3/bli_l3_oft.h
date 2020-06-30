@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,6 +58,7 @@ typedef void (*PASTECH(opname,_oft)) \
 );
 
 GENTDEF( gemm )
+GENTDEF( gemmt )
 GENTDEF( her2k )
 GENTDEF( syr2k )
 
