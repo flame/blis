@@ -33,6 +33,7 @@
 
 */
 
+#define BLIS_INLINE static
 #define BLIS_EXPORT_BLIS
 #include "bli_system.h"
 #include "bli_type_defs.h"

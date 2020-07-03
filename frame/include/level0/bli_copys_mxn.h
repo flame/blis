@@ -43,7 +43,7 @@
 
 // xy = ?s
 
-static void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -70,7 +70,7 @@ static void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -97,7 +97,7 @@ static void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -124,7 +124,7 @@ static void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -154,7 +154,7 @@ static void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?d
 
-static void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -181,7 +181,7 @@ static void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -208,7 +208,7 @@ static void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -235,7 +235,7 @@ static void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -265,7 +265,7 @@ static void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?c
 
-static void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -292,7 +292,7 @@ static void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -319,7 +319,7 @@ static void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -346,7 +346,7 @@ static void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -376,7 +376,7 @@ static void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?c
 
-static void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -403,7 +403,7 @@ static void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -430,7 +430,7 @@ static void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -457,7 +457,7 @@ static void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -486,22 +486,22 @@ static void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 }
 
 
-static void bli_scopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_scopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_dcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_ccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );

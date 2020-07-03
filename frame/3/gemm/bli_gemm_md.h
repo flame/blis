@@ -87,7 +87,7 @@ void bli_gemm_md_zgemm
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 {
 	bool_t r_val = FALSE;
 
@@ -107,7 +107,7 @@ static bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-static bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 {
 	bool_t r_val = FALSE;
 
@@ -127,7 +127,7 @@ static bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-static bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 {
 	bool_t r_val = FALSE;
 
@@ -149,7 +149,7 @@ static bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 
 // -----------------------------------------------------------------------------
 
-static void bli_gemm_md_ker_var2_recast
+BLIS_INLINE void bli_gemm_md_ker_var2_recast
      (
        num_t* dt_comp,
        num_t  dt_a,

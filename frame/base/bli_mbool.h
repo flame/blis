@@ -36,14 +36,14 @@
 
 // mbool_t query
 
-static bool_t bli_mbool_get_dt( num_t dt, mbool_t* mb )
+BLIS_INLINE bool_t bli_mbool_get_dt( num_t dt, mbool_t* mb )
 {
 	return mb->v[ dt ];
 }
 
 // mbool_t modification
 
-static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
+BLIS_INLINE void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
 {
 	mb->v[ dt ] = val;
 }

@@ -40,7 +40,7 @@
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \
@@ -108,7 +108,7 @@ INSERT_GENTFUNCRO_BASIC0( scal2bbs_mxn )
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \

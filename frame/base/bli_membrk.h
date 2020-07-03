@@ -39,63 +39,63 @@
 
 // membrk init
 
-static void bli_membrk_init_mutex( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
 {
 	bli_pthread_mutex_init( &(membrk->mutex), NULL );
 }
 
-static void bli_membrk_finalize_mutex( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
 {
 	bli_pthread_mutex_destroy( &(membrk->mutex) );
 }
 
 // membrk query
 
-static pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
+BLIS_INLINE pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
 {
 	return &(membrk->pools[ pool_index ]);
 }
 
-static siz_t bli_membrk_align_size( membrk_t* membrk )
+BLIS_INLINE siz_t bli_membrk_align_size( membrk_t* membrk )
 {
 	return membrk->align_size;
 }
 
-static malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
+BLIS_INLINE malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
 {
 	return membrk->malloc_fp;
 }
 
-static free_ft bli_membrk_free_fp( membrk_t* membrk )
+BLIS_INLINE free_ft bli_membrk_free_fp( membrk_t* membrk )
 {
 	return membrk->free_fp;
 }
 
 // membrk modification
 
-static void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
 {
 	membrk->align_size = align_size;
 }
 
-static void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
 {
 	membrk->malloc_fp = malloc_fp;
 }
 
-static void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 {
 	membrk->free_fp = free_fp;
 }
 
 // membrk action
 
-static void bli_membrk_lock( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_lock( membrk_t* membrk )
 {
 	bli_pthread_mutex_lock( &(membrk->mutex) );
 }
 
-static void bli_membrk_unlock( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_unlock( membrk_t* membrk )
 {
 	bli_pthread_mutex_unlock( &(membrk->mutex) );
 }

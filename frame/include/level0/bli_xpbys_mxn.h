@@ -45,7 +45,7 @@
 
 // -- (xby) = (?ss) ------------------------------------------------------------
 
-static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -80,7 +80,7 @@ static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -115,7 +115,7 @@ static void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -150,7 +150,7 @@ static void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -188,7 +188,7 @@ static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?dd) ------------------------------------------------------------
 
-static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -223,7 +223,7 @@ static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -258,7 +258,7 @@ static void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -293,7 +293,7 @@ static void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -331,7 +331,7 @@ static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?cc) ------------------------------------------------------------
 
-static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -366,7 +366,7 @@ static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -401,7 +401,7 @@ static void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -436,7 +436,7 @@ static void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -474,7 +474,7 @@ static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?zz) ------------------------------------------------------------
 
-static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -509,7 +509,7 @@ static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -544,7 +544,7 @@ static void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -579,7 +579,7 @@ static void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -617,25 +617,25 @@ static void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 
 
-static void bli_sxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict beta,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_dxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict beta,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_cxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict beta,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict beta,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
