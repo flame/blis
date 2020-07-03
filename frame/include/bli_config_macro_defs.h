@@ -225,5 +225,20 @@
 #define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 
+// -- STATIC INLINE FUNCTIONS --------------------------------------------------
+
+// C and C++ have different semantics for defining "inline" functions. In C,
+// the keyword phrase "static inline" accomplishes this, though the "inline"
+// is optional. In C++, the "inline" keyword is required and obviates "static"
+// altogether. Why does this matter? While BLIS is compiled in C99, blis.h may
+// be #included by a source file that is compiled with C++.
+#ifdef __cplusplus
+  #define BLIS_INLINE inline
+#else
+  //#define BLIS_INLINE static inline
+  #define BLIS_INLINE static
+#endif
+
+
 #endif
 

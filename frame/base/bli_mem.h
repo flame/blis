@@ -61,38 +61,38 @@ typedef struct
 // -- mem_t query --------------------------------------------------------------
 //
 
-static pblk_t* bli_mem_pblk( mem_t* mem )
+BLIS_INLINE pblk_t* bli_mem_pblk( mem_t* mem )
 {
 	return &(mem->pblk);
 }
 
-static void* bli_mem_buffer( mem_t* mem )
+BLIS_INLINE void* bli_mem_buffer( mem_t* mem )
 {
 	return bli_pblk_buf( bli_mem_pblk( mem ) );
 }
 
-static packbuf_t bli_mem_buf_type( mem_t* mem )
+BLIS_INLINE packbuf_t bli_mem_buf_type( mem_t* mem )
 {
 	return mem->buf_type;
 }
 
-static pool_t* bli_mem_pool( mem_t* mem )
+BLIS_INLINE pool_t* bli_mem_pool( mem_t* mem )
 {
 	return mem->pool;
 }
 
-static siz_t bli_mem_size( mem_t* mem )
+BLIS_INLINE siz_t bli_mem_size( mem_t* mem )
 {
 	return mem->size;
 }
 
-static bool_t bli_mem_is_alloc( mem_t* mem )
+BLIS_INLINE bool_t bli_mem_is_alloc( mem_t* mem )
 {
 	return ( bool_t )
 	       ( bli_mem_buffer( mem ) != NULL );
 }
 
-static bool_t bli_mem_is_unalloc( mem_t* mem )
+BLIS_INLINE bool_t bli_mem_is_unalloc( mem_t* mem )
 {
 	return ( bool_t )
 	       ( bli_mem_buffer( mem ) == NULL );
@@ -103,27 +103,27 @@ static bool_t bli_mem_is_unalloc( mem_t* mem )
 // -- mem_t modification -------------------------------------------------------
 //
 
-static void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 {
 	mem->pblk = *pblk;
 }
 
-static void bli_mem_set_buffer( void* buf, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buffer( void* buf, mem_t* mem )
 {
 	bli_pblk_set_buf( buf, &(mem->pblk) );
 }
 
-static void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
 {
 	mem->buf_type = buf_type;
 }
 
-static void bli_mem_set_pool( pool_t* pool, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pool( pool_t* pool, mem_t* mem )
 {
 	mem->pool = pool;
 }
 
-static void bli_mem_set_size( siz_t size, mem_t* mem )
+BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 {
 	mem->size = size;
 }
@@ -144,7 +144,7 @@ static void bli_mem_set_size( siz_t size, mem_t* mem )
           .size        = 0, \
         }  \
 
-static void bli_mem_clear( mem_t* mem )
+BLIS_INLINE void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
 	bli_mem_set_buf_type( ( packbuf_t )-1, mem );

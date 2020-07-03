@@ -196,7 +196,7 @@ void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 
-static void bli_thread_range_jrir_rr
+BLIS_INLINE void bli_thread_range_jrir_rr
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -213,7 +213,7 @@ static void bli_thread_range_jrir_rr
 	*end   = n;
 }
 
-static void bli_thread_range_jrir_sl
+BLIS_INLINE void bli_thread_range_jrir_sl
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -229,7 +229,7 @@ static void bli_thread_range_jrir_sl
 	*inc = 1;
 }
 
-static void bli_thread_range_jrir
+BLIS_INLINE void bli_thread_range_jrir
      (
        thrinfo_t* thread,
        dim_t      n,
@@ -251,7 +251,7 @@ static void bli_thread_range_jrir
 }
 
 #if 0
-static void bli_thread_range_weighted_jrir
+BLIS_INLINE void bli_thread_range_weighted_jrir
      (
        thrinfo_t* thread,
        doff_t     diagoff,

@@ -1315,7 +1315,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -1345,7 +1345,7 @@ static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
-static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 

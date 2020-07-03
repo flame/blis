@@ -117,7 +117,7 @@ uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features 
 
 */
 
-static bool_t bli_cpuid_has_features( uint32_t have, uint32_t want )
+BLIS_INLINE bool_t bli_cpuid_has_features( uint32_t have, uint32_t want )
 {
     return ( have & want ) == want;
 }
