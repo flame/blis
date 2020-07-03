@@ -117,7 +117,7 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )
 
 // -----------------------------------------------------------------------------
 
-static void bli_gemmsup_ref_var1n2m_opt_cases
+BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
      (
        num_t    dt,
        trans_t* trans,

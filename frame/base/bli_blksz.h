@@ -35,7 +35,7 @@
 
 // blksz_t query
 
-static dim_t bli_blksz_get_def
+BLIS_INLINE dim_t bli_blksz_get_def
      (
        num_t    dt,
        blksz_t* b
@@ -44,7 +44,7 @@ static dim_t bli_blksz_get_def
 	return b->v[ dt ];
 }
 
-static dim_t bli_blksz_get_max
+BLIS_INLINE dim_t bli_blksz_get_max
      (
        num_t    dt,
        blksz_t* b
@@ -56,7 +56,7 @@ static dim_t bli_blksz_get_max
 
 // blksz_t modification
 
-static void bli_blksz_set_def
+BLIS_INLINE void bli_blksz_set_def
      (
        dim_t    val,
        num_t    dt,
@@ -66,7 +66,7 @@ static void bli_blksz_set_def
 	b->v[ dt ] = val;
 }
 
-static void bli_blksz_set_max
+BLIS_INLINE void bli_blksz_set_max
      (
        dim_t    val,
        num_t    dt,
@@ -76,7 +76,7 @@ static void bli_blksz_set_max
 	b->e[ dt ] = val;
 }
 
-static void bli_blksz_copy
+BLIS_INLINE void bli_blksz_copy
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -85,7 +85,7 @@ static void bli_blksz_copy
 	*b_dst = *b_src;
 }
 
-static void bli_blksz_copy_if_pos
+BLIS_INLINE void bli_blksz_copy_if_pos
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -115,7 +115,7 @@ static void bli_blksz_copy_if_pos
 	if ( e_z > 0 ) bli_blksz_set_max( e_z, BLIS_DCOMPLEX, b_dst );
 }
 
-static void bli_blksz_copy_def_dt
+BLIS_INLINE void bli_blksz_copy_def_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -126,7 +126,7 @@ static void bli_blksz_copy_def_dt
 	bli_blksz_set_def( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_max_dt
+BLIS_INLINE void bli_blksz_copy_max_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -137,7 +137,7 @@ static void bli_blksz_copy_max_dt
 	bli_blksz_set_max( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_dt
+BLIS_INLINE void bli_blksz_copy_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -147,7 +147,7 @@ static void bli_blksz_copy_dt
 	bli_blksz_copy_max_dt( dt_src, b_src, dt_dst, b_dst );
 }
 
-static void bli_blksz_scale_def
+BLIS_INLINE void bli_blksz_scale_def
      (
        dim_t    num,
        dim_t    den,
@@ -160,7 +160,7 @@ static void bli_blksz_scale_def
 	bli_blksz_set_def( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_max
+BLIS_INLINE void bli_blksz_scale_max
      (
        dim_t    num,
        dim_t    den,
@@ -173,7 +173,7 @@ static void bli_blksz_scale_max
 	bli_blksz_set_max( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_def_max
+BLIS_INLINE void bli_blksz_scale_def_max
      (
        dim_t    num,
        dim_t    den,
