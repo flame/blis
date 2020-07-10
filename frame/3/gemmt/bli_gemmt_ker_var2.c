@@ -57,101 +57,8 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY_T(ftypes);
+static FUNCPTR_T GENARRAY_T(ftypes,gemmt,ker_var2);
 
-#undef GENTFUNC
-#define GENTFUNC( ctype, ch, varname) \
-\
-void PASTEMAC(ch, varname) \
-	( \
-	  dim_t m_off, \
-	  dim_t n_off, \
-	  dim_t m_cur, \
-	  dim_t n_cur, \
-	  ctype* ct, inc_t rs_ct, inc_t cs_ct, \
-	  ctype* beta_cast, \
-	  ctype* c, inc_t rs_c, inc_t cs_c \
-	) \
-{ \
-	dim_t start, end; \
-	dim_t m, n, diag; \
-\
-	double beta_val = *beta_cast; \
-\
-	start = ((n_off < m_off) && (m_off < n_off + n_cur)) ? m_off: n_off; \
-	end   = ((n_off < m_off + m_cur) && (m_off + m_cur < n_off + n_cur))? (m_off + m_cur):(n_off + n_cur); \
-\
-	if( beta_val != 0.0 ) \
-	{ \
-		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
-			for(n = 0; n <= diag-n_off; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
-\
-		for(; m < m_cur; m++) \
-			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
-	} \
-	else \
-	{ \
-		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
-			for(n = 0; n <= diag-n_off; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
-\
-		for(; m < m_cur; m++) \
-			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
-	} \
-\
-	return; \
-}
-INSERT_GENTFUNC_BASIC0_SD( update_lower_triang )
-
-#undef GENTFUNC
-#define GENTFUNC( ctype, ch, varname ) \
-\
-void PASTEMAC(ch, varname) \
-	( \
-	  dim_t m_off, \
-	  dim_t n_off, \
-	  dim_t m_cur, \
-	  dim_t n_cur, \
-	  ctype* ct, inc_t rs_ct, inc_t cs_ct, \
-	  ctype* beta_cast, \
-	  ctype* c, inc_t rs_c, inc_t cs_c \
-	) \
-{ \
-	dim_t start, end; \
-	dim_t m, n, diag; \
-\
-	ctype beta_val = *beta_cast; \
-\
-	start = ((n_off < m_off) && (m_off < n_off + n_cur)) ? m_off: n_off; \
-	end   = ((n_off < m_off + m_cur) && (m_off + m_cur < n_off + n_cur))? (m_off + m_cur):(n_off + n_cur); \
-\
-	if( beta_val != 0.0 ) \
-	{ \
-		for(m = 0; m < start-m_off; m++) \
-			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
-\
-	for(diag = start, m= start-m_off; diag < end; diag++, m++) \
-		for(n = diag-n_off; n < n_cur; n++) \
-			c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
-	} \
-	else \
-	{ \
-		for(m = 0; m < start-m_off; m++) \
-			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
-\
-		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
-			for(n = diag-n_off; n < n_cur; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
-	} \
-\
-	return; \
-}
-INSERT_GENTFUNC_BASIC0_SD( update_upper_triang )
 
 void bli_gemmt_ker_var2
      (
@@ -556,7 +463,7 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c,
 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);		\
 }
 
-INSERT_GENTFUNC_L_SD( gemmt, ker_var2 )
+INSERT_GENTFUNC_L( gemmt, ker_var2 )
 
 
 #undef  GENTFUNC
@@ -817,5 +724,5 @@ PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: c after", m_cur, n_cur, c11, rs_c,
 AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);		\
 }
 
-INSERT_GENTFUNC_U_SD( gemmt, ker_var2 )
+INSERT_GENTFUNC_U( gemmt, ker_var2 )
 

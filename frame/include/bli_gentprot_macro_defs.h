@@ -123,13 +123,16 @@ GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
 GENTPROTSCAL( double,   dcomplex, d, z, blasname )
 
 // -- GEMMT specific function --------------------------------------------------
-#define INSERT_GENTPROT_GEMMT_SD(opname, funcname) \
+#define INSERT_GENTPROT_GEMMT(opname, funcname) \
 \
-GENTPROT( float,     s, gemmt, l, funcname ) \
-GENTPROT( double,    d, gemmt, l, funcname ) \
-GENTPROT( float,     s, gemmt, u, funcname ) \
-GENTPROT( double,    d, gemmt, u, funcname )
-
+GENTPROT( float,     s, opname, l, funcname ) \
+GENTPROT( double,    d, opname, l, funcname ) \
+GENTPROT( float,     s, opname, u, funcname ) \
+GENTPROT( double,    d, opname, u, funcname ) \
+GENTPROT( scomplex,  c, opname, l, funcname ) \
+GENTPROT( dcomplex,  z, opname, l, funcname ) \
+GENTPROT( scomplex,  c, opname, u, funcname ) \
+GENTPROT( dcomplex,  z, opname, u, funcname ) 
 
 // -- Macros for functions with one operand ------------------------------------
 

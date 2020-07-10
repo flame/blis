@@ -33,12 +33,18 @@
 
 #include <unistd.h>
 #include "blis.h"
-#include "cblas.h"
 
 //#define FILE_IN_OUT
-//#define CBLAS
 //#define PRINT
 #define MATRIX_INITIALISATION
+#ifdef BLIS_ENABLE_CBLAS
+//#define CBLAS
+#endif
+
+#ifdef CBLAS
+#include "cblas.h"
+#endif
+
 int main( int argc, char** argv )
 {
 	obj_t a, b, c;
@@ -72,19 +78,19 @@ int main( int argc, char** argv )
 
 #ifndef FILE_IN_OUT
 #ifndef PRINT
-	p_begin = 48;
-	p_end   = 10000;
-	p_inc   = 192;
+	p_begin = 200;
+	p_end   = 2000;
+	p_inc   = 100;
 
 	n_input = -1;
 	k_input = -1;
 #else
-	p_begin = 16;
-	p_end   = 16;
-	p_inc   = 1;
+	p_begin = 200;
+	p_end   = 2000;
+	p_inc   = 100;
 
-	k_input = 50;
-	n_input = 50;
+	k_input = -1;
+	n_input = -1;
 #endif
 #endif
 #if 1
@@ -98,7 +104,7 @@ int main( int argc, char** argv )
 	transa = BLIS_NO_TRANSPOSE;
 	transb = BLIS_NO_TRANSPOSE;
 
-	uploc  = BLIS_UPPER;
+	uploc  = BLIS_LOWER;
 
 #ifdef FILE_IN_OUT
 	if (argc < 3)
@@ -157,8 +163,8 @@ int main( int argc, char** argv )
 	    //bli_setsc( 0.0, -1, &alpha );
 	    //bli_setsc( 0.0, 1, &beta );
 
-	    bli_setsc( 1, 0.0, &alpha );
-	    bli_setsc( 1, 0.0, &beta );
+	    bli_setsc( -(1.0), 0.0, &alpha );
+	    bli_setsc(  (1.0), 0.0, &beta );
 
 #else
 	for ( p = p_begin; p <= p_end; p += p_inc )
@@ -182,21 +188,23 @@ int main( int argc, char** argv )
 		bli_obj_create( dt, n, n, 1, n, &c_save );
 
 #endif
+		bli_obj_set_struc( BLIS_TRIANGULAR, &c );
+		bli_obj_set_uplo( uploc, &c );
+
 
 		bli_randm( &a );
 		bli_randm( &b );
 		bli_randm( &c );
-		bli_obj_set_struc( BLIS_TRIANGULAR, &c );
-		bli_obj_set_uplo( uploc, &c );
+
+		//Randomize C and zero the unstored triangle to ensure the
+	        //implementation reads only from the stored region.
+
+		bli_randm( &c );
+		bli_mktrim( &c );
 
 		bli_obj_set_conjtrans( transa, &a );
 		bli_obj_set_conjtrans( transb, &b );
 
-	        //Randomize C and zero the unstored triangle to ensure the
-	        //implementation reads only from the stored region.
-
-		bli_randm( &c );
-	        bli_mktrim( &c );
 
 		bli_setsc(  (0.9/1.0), 0.2, &alpha );
 		bli_setsc( -(1.1/1.0), 0.3, &beta );

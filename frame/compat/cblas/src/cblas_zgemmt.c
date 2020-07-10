@@ -86,8 +86,11 @@ void cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
    } else if (Order == CblasRowMajor)
    {
       RowMajorStrg = 1;
-      if( Uplo == CblasUpper ) UL='U';
-      else if( Uplo == CblasLower ) UL='L';
+      /* In case of row major order,
+       * Swap A & B and induce transpose to C
+       */
+      if( Uplo == CblasUpper ) UL='L';
+      else if( Uplo == CblasLower ) UL='U';
       else
       {
          cblas_xerbla(2, "cblas_zgemmt","Illegal Uplo setting, %d\n", Uplo);

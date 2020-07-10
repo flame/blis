@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-20, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,26 +32,20 @@
 
 */
 
-err_t bli_gemmsup_int
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
-     );
+#undef GENTPROT
+#define GENTPROT(ctype, ch, varname ) \
+\
+void PASTEMAC(ch, varname) \
+	( \
+	  dim_t m_off, \
+	  dim_t n_off, \
+	  dim_t m_cur, \
+	  dim_t n_cur, \
+	  ctype* ct, inc_t rs_ct, inc_t cs_ct, \
+	  ctype* beta_cast, \
+	  ctype* c, inc_t rs_c, inc_t cs_c \
+	);
 
-err_t bli_gemmtsup_int
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
-     );
+INSERT_GENTPROT_BASIC0( update_lower_triang )
+INSERT_GENTPROT_BASIC0( update_upper_triang )
+

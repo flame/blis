@@ -89,6 +89,9 @@ void cblas_sgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
    } else if (Order == CblasRowMajor)
    {
       RowMajorStrg = 1;
+      /* In case of row major order,
+       * Swap A & B and induce transpose to C
+       */
       if(Uplo == CblasUpper) UL = 'L';
       else if(Uplo == CblasLower) UL = 'U';
       else

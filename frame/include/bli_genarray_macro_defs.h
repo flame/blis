@@ -105,16 +105,15 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 }
 
 
-#define GENARRAY_T(arrayname) \
+#define GENARRAY_T(arrayname,opname,varname) \
 \
 arrayname[BLIS_NUM_FP_TYPES][2] = \
 { \
-	{PASTEMACT(s,gemmt,l,ker_var2), PASTEMACT(s,gemmt,u,ker_var2)}, \
-	{NULL,NULL}, \
-	{PASTEMACT(d,gemmt,l,ker_var2), PASTEMACT(d,gemmt,u,ker_var2)}, \
-	{NULL,NULL}, \
+	{PASTEMACT(s,opname,l,varname),PASTEMACT(s,opname,u,varname)}, \
+	{PASTEMACT(c,opname,l,varname),PASTEMACT(c,opname,u,varname)}, \
+	{PASTEMACT(d,opname,l,varname),PASTEMACT(d,opname,u,varname)}, \
+	{PASTEMACT(z,opname,l,varname),PASTEMACT(z,opname,u,varname)}, \
 }
-
 
 #define GENARRAY_I(arrayname,op) \
 \

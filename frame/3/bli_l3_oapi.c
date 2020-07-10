@@ -160,6 +160,25 @@ void PASTEMAC(opname,EX_SUF) \
 		return;\
 	}\
 \
+	/* If the rntm is non-NULL, it may indicate that we should forgo sup
+	   handling altogether. */ \
+	bool_t enable_sup = TRUE; \
+	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+\
+	if ( enable_sup ) \
+	{ \
+		/* Execute the small/unpacked oapi handler. If it finds that the problem
+		   does not fall within the thresholds that define "small", or for some
+		   other reason decides not to use the small/unpacked implementation,
+		   the function returns with BLIS_FAILURE, which causes execution to
+		   proceed towards the conventional implementation. */ \
+		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+		if ( result == BLIS_SUCCESS ) {\
+				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+			return;					   \
+		} \
+	} \
+\
 	/* Only proceed with an induced method if each of the operands have a
 	   complex storage datatype. NOTE: Allowing precisions to vary while
 	   using 1m, which is what we do here, is unique to gemm; other level-3
@@ -171,12 +190,9 @@ void PASTEMAC(opname,EX_SUF) \
 	     bli_obj_is_complex( a ) && \
 	     bli_obj_is_complex( b ) ) \
 	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+		/* GEMMT Todo: Currently we support only native implemenation 
+		 for complex datatypes.*/ \
+		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
 	} \
 	else \
 	{ \

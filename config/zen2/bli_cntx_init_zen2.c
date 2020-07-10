@@ -200,8 +200,9 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Initialize the context with the sup handlers.
 	bli_cntx_set_l3_sup_handlers
 	(
-	1,
+	2,
 	BLIS_GEMM, bli_gemmsup_ref,
+	BLIS_GEMMT, bli_gemmtsup_ref,
 	cntx
 	);
 

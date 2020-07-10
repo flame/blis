@@ -78,4 +78,54 @@ void PASTEMACT(ch,opname,uplo,varname) \
        thrinfo_t* thread  \
      );
 
-INSERT_GENTPROT_GEMMT_SD( gemmt, ker_var2 )
+INSERT_GENTPROT_GEMMT( gemmt, ker_var2 )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+	( \
+	  trans_t trans, \
+	  obj_t*  alpha, \
+	  obj_t*  a, \
+	  obj_t*  b, \
+	  obj_t*  beta, \
+	  obj_t*  c, \
+	  stor3_t eff_id, \
+	  cntx_t* cntx, \
+	  rntm_t* rntm, \
+	  thrinfo_t* thread  \
+	 );
+
+GENPROT( gemmtsup_ref_var1n )
+GENPROT( gemmtsup_ref_var2m )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       bool_t           packa, \
+       bool_t           packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          eff_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
+     );
+
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var1n )
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var2m )	
+
+

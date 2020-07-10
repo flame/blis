@@ -138,10 +138,13 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
                              $(TEST_OBJ_PATH)/%.o, \
                              $(wildcard $(TEST_SRC_PATH)/*.c))
 
+
+CBLAS_HEADER_PATH  = ../frame/compat/cblas/src
+
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
 # get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
-CINCFLAGS      := -I$(INC_PATH)
+CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
 CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
@@ -202,6 +205,7 @@ openblas: \
       test_scalv_openblas.x \
       \
       test_gemm_openblas.x \
+      test_gemmt_openblas.x \
       test_hemm_openblas.x \
       test_herk_openblas.x \
       test_her2k_openblas.x \
