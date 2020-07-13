@@ -92,6 +92,9 @@ CNTX_INIT_PROTS( cortexa57 )
 #ifdef BLIS_CONFIG_CORTEXA53
 CNTX_INIT_PROTS( cortexa53 )
 #endif
+#ifdef BLIS_CONFIG_ARMSVE
+CNTX_INIT_PROTS( armsve )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 CNTX_INIT_PROTS( cortexa15 )
 #endif
