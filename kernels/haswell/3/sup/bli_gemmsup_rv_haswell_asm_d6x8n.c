@@ -889,6 +889,18 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_6x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -1627,6 +1639,18 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_5x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -2274,6 +2298,18 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_4x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -2942,6 +2978,18 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_3x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -3491,6 +3539,18 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_2x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -4004,6 +4064,18 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_1x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
