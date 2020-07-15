@@ -2111,6 +2111,7 @@ void libblis_test_op_driver
 
 	// Loop over the requested storage schemes.
 	for ( sci = 0; sci < n_store_combos; ++sci )
+	//for ( sci = 0; sci < 5; ( sci == 0 || sci == 2 ? sci+=2 : ++sci ) )
 	//for ( sci = 0; sci < 5; ( sci == 2 ? sci+=2 : ++sci ) )
 	//for ( sci = 3; sci < 8; ( sci == 3 ? sci+=2 : ++sci ) )
 	//for ( sci = 0; sci < 1; ++sci )
