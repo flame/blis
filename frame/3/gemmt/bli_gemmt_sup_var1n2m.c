@@ -1297,14 +1297,11 @@ void bli_gemmtsup_ref_var2m
 	}
 
 	bool_t uploc;
-	if ( bli_obj_is_lower( c ) )
-	{
-		uploc = 0;
-	}
+
+	if ( bli_is_notrans ( trans ) )
+		uploc = bli_obj_is_lower( c ) ? 0 : 1;
 	else
-	{
-		uploc = 1;
-	}
+		uploc = bli_obj_is_lower( c ) ? 1 : 0;
 
 	void* restrict buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
@@ -1319,7 +1316,7 @@ void bli_gemmtsup_ref_var2m
 	// function pointer.
 	FUNCPTR_T f = ftypes_var2m[dt][uploc];
 
-#if 1
+#if 0
 	// Optimize some storage/packing cases by transforming them into others.
 	// These optimizations are expressed by changing trans and/or eff_id.
 	bli_gemmsup_ref_var1n2m_opt_cases( dt, &trans, packa, packb, &eff_id, cntx );
