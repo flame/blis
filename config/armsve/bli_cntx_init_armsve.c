@@ -71,6 +71,23 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  cntx
 	);
 
+	// Set packing routine
+	if (vlen==8)
+	  bli_cntx_set_packm_kers
+	  (
+		2,
+		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
+		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+		cntx
+	  );
+	else if (vlen==4)
+	  bli_cntx_set_packm_kers
+	  (
+		1,
+		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_asm_8xk,
+		cntx
+	  );
+
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,  mr_d,    -1,    -1 );
