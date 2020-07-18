@@ -38,7 +38,9 @@
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE 64
+// SVE does not require aligning.
+// Set default alignment to NEON size.
+#define BLIS_SIMD_ALIGN_SIZE 16
 
 #define BLIS_SIMD_NUM_REGISTERS 32
 
