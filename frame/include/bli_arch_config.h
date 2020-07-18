@@ -195,6 +195,9 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_CORTEXA53
 #include "bli_family_cortexa53.h"
 #endif
+#ifdef BLIS_FAMILY_ARMSVE
+#include "bli_family_armsve.h"
+#endif
 #ifdef BLIS_FAMILY_CORTEXA15
 #include "bli_family_cortexa15.h"
 #endif
