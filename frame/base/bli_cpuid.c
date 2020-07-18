@@ -467,6 +467,10 @@ arch_t bli_cpuid_query_id( void )
 			if ( bli_cpuid_is_armsve( model, part, features ) )
 				return BLIS_ARCH_ARMSVE;
 #endif
+#ifdef BLIS_CONFIG_ARMSVE
+			if ( bli_cpuid_is_a64fx( model, part, features ) )
+				return BLIS_ARCH_A64FX;
+#endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
 			return BLIS_ARCH_GENERIC;
@@ -542,6 +546,21 @@ bool bli_cpuid_is_cortexa53
 }
 
 bool bli_cpuid_is_armsve
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_SVE;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
+bool bli_cpuid_is_a64fx
      (
        uint32_t family,
        uint32_t model,

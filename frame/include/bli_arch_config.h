@@ -95,6 +95,9 @@ CNTX_INIT_PROTS( cortexa53 )
 #ifdef BLIS_CONFIG_ARMSVE
 CNTX_INIT_PROTS( armsve )
 #endif
+#ifdef BLIS_CONFIG_A64FX
+CNTX_INIT_PROTS( a64fx )
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 CNTX_INIT_PROTS( cortexa15 )
 #endif
@@ -197,6 +200,9 @@ CNTX_INIT_PROTS( generic )
 #endif
 #ifdef BLIS_FAMILY_ARMSVE
 #include "bli_family_armsve.h"
+#endif
+#ifdef BLIS_FAMILY_A64FX
+#include "bli_family_a64fx.h"
 #endif
 #ifdef BLIS_FAMILY_CORTEXA15
 #include "bli_family_cortexa15.h"

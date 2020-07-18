@@ -1009,6 +1009,7 @@ typedef enum
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
 	BLIS_ARCH_ARMSVE,
+	BLIS_ARCH_A64FX,
 	BLIS_ARCH_CORTEXA15,
 	BLIS_ARCH_CORTEXA9,
 
@@ -1030,7 +1031,7 @@ typedef enum
 
 // NOTE: This value must be updated to reflect the number of enum values
 // listed above for arch_t!
-#define BLIS_NUM_ARCHS 23
+#define BLIS_NUM_ARCHS 24
 
 
 //

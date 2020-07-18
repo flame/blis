@@ -173,9 +173,6 @@ void bli_arch_set_id( void )
 		#endif
 
 		// ARM microarchitectures.
-        #ifdef BLIS_FAMILY_ARMSVE
-        	id = BLIS_ARCH_ARMSVE;
-        #endif
 		#ifdef BLIS_FAMILY_THUNDERX2
 		id = BLIS_ARCH_THUNDERX2;
 		#endif
@@ -184,6 +181,12 @@ void bli_arch_set_id( void )
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA53
 		id = BLIS_ARCH_CORTEXA53;
+		#endif
+		#ifdef BLIS_FAMILY_ARMSVE
+			id = BLIS_ARCH_ARMSVE;
+		#endif
+		#ifdef BLIS_FAMILY_A64FX
+			id = BLIS_ARCH_A64FX;
 		#endif
 		#ifdef BLIS_FAMILY_CORTEXA15
 		id = BLIS_ARCH_CORTEXA15;
@@ -246,6 +249,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa57",
     "cortexa53",
     "armsve",
+    "a64fx",
     "cortexa15",
     "cortexa9",
 

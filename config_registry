@@ -36,6 +36,7 @@ thunderx2:   thunderx2/armv8a
 cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a
 armsve:      armsve/armsve/armv8a
+a64fx:       a64fx/a64fx/armsve/armv8a
 cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
