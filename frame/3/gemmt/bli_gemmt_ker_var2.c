@@ -266,12 +266,18 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
-	dim_t           i, j; \
+	dim_t           i, j, ip; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
+	dim_t 		diagoffc; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
+	/* This flag is set whenever a block that is strictly below 
+	 * diagonal is reached, and is used to determine path during 
+	 * next iterations of loop
+	 */ \
+	bool_t 		flag = 0; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -290,6 +296,29 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
+\
+	diagoffc = m_off - n_off; \
+\
+	/* If there is a zero region above where the diagonal of C intersects
+	 * the left edge of the panel, adjust the pointer to C and A */ \
+	if ( diagoffc < 0 ) \
+	{ \
+		ip 	 = -diagoffc / MR; \
+		i	 = ip * MR; \
+		m	 = m - i; \
+		diagoffc = -diagoffc % MR; \
+		m_off	+= i; \
+		c_cast	 = c_cast + ( i )*rs_c; \
+		a_cast 	 = a_cast + ( ip)*ps_a; \
+	} \
+\
+	/* If there is a zero region to the right of where the diagonal 
+	 * oc C intersects the bottom of the panel, shrink it to prevent
+	 * "no-op" interations from executing. */ \
+	if(( diagoffc + m ) < n ) \
+	{ \
+		n = diagoffc + m; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -360,6 +389,8 @@ void PASTEMACT(ch,opname,uplo,varname) \
 		/* Initialize our next panel of B to be the current panel of B. */ \
 		b2 = b1; \
 \
+		flag = 0; \
+\
 		/* Loop over the m dimension (MR rows at a time). */ \
 		for ( i = ir_start; i < ir_end; i += ir_inc ) \
 		{ \
@@ -390,8 +421,10 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 			if(!bli_gemmt_is_strictly_above_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) \
 			{ \
-				if(bli_gemmt_is_strictly_below_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) \
+				if(flag || bli_gemmt_is_strictly_below_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) \
 				{ \
+					/* we have reached a block that is strictly below diagonal, set the flag */ \
+					flag = 1; \
 					/* Handle interior and edge cases separately. */ \
 					if ( m_cur == MR && n_cur == NR ) \
 					{ \
@@ -527,7 +560,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	dim_t           m_iter, m_left; \
 	dim_t           n_iter, n_left; \
-	dim_t           i, j; \
+	dim_t           i, j, jp; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
 	inc_t           rstep_a; \
@@ -551,6 +584,30 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
+\
+	doff_t diagoffc = m_off - n_off; \
+\
+	/* If there is a zero region to the left of where the diagonal of C
+	 * intersects the top edge of the panel, adjust the pointer to C and B
+	 */ \
+	if ( diagoffc > 0 ) \
+	{ \
+		jp	 = diagoffc / NR; \
+		j	 = jp * NR; \
+		n	 = n - j; \
+		n_off	+= j; \
+		diagoffc = diagoffc % NR; \
+		c_cast	 = c_cast + ( j )*cs_c; \
+		b_cast	 = b_cast + ( jp)*ps_b; \
+	} \
+\
+	/* If there is a zero region below where the diagonal of C intersects
+	 * the right edge of the panel, shrink it to prevent "no-op" 
+	 * iterations from executing. */ \
+	if((-(diagoffc) + n ) < m ) \
+	{ \
+		m = -diagoffc + n; \
+	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
 	PASTEMAC(ch,set0s_mxn)( MR, NR, \
@@ -649,8 +706,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 			m_off_cblock = m_off + i * MR; \
 			n_off_cblock = n_off + j * NR; \
 \
-			if(!bli_gemmt_is_strictly_below_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) \
-			{ \
+			if(bli_gemmt_is_strictly_below_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) break; \
 				if(bli_gemmt_is_strictly_above_diag(m_off_cblock, n_off_cblock, m_cur, n_cur)) \
 				{ \
 					/* Handle interior and edge cases separately. */ \
@@ -712,7 +768,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 					                        beta_cast, \
 						                c11, rs_c,  cs_c ); \
 				} \
-			} \
 		} \
 	} \
 \
