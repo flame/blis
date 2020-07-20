@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -273,6 +273,7 @@ typedef struct test_ops_s
 
 	// level-3
 	test_op_t gemm;
+	test_op_t gemmt;
 	test_op_t hemm;
 	test_op_t herk;
 	test_op_t her2k;
@@ -546,6 +547,7 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 
 // Level-3
 #include "test_gemm.h"
+#include "test_gemmt.h"
 #include "test_hemm.h"
 #include "test_herk.h"
 #include "test_her2k.h"
