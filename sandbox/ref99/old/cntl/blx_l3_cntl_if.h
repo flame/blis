@@ -35,20 +35,19 @@
 void blx_l3_cntl_create_if
      (
        opid_t   family,
+       pack_t   schema_a,
+       pack_t   schema_b,
        obj_t*   a,
        obj_t*   b,
        obj_t*   c,
+       rntm_t*  rntm,
        cntl_t*  cntl_orig,
        cntl_t** cntl_use
      );
 
-void blx_l3_cntl_free_if
+void blx_l3_cntl_free
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl_orig,
-       cntl_t* cntl_use,
+       rntm_t     rntm,
+       cntl_t*    cntl_use,
        thrinfo_t* thread
      );
-

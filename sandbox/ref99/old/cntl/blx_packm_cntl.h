@@ -14,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of copyright holder(s) nor the names
+    - Neither the name(s) of the copyright holder(s) nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -32,14 +32,18 @@
 
 */
 
-#ifndef BLIX_H
-#define BLIX_H
-
-// This header is #included by every file in the ref99 sandbox, and so here
-// we #include any headers that would define prototypes or types that are
-// needed by the ref99 sandbox source code.
-
-#include "blx_gemm.h"
-
-#endif
+cntl_t* blx_packm_cntl_create_node
+     (
+	   rntm_t*   rntm,
+       void_fp   var_func,
+       void_fp   packm_var_func,
+       bszid_t   bmid_m,
+       bszid_t   bmid_n,
+       bool_t    does_invert_diag,
+       bool_t    rev_iter_if_upper,
+       bool_t    rev_iter_if_lower,
+       pack_t    pack_schema,
+       packbuf_t pack_buf_type,
+       cntl_t*   sub_node
+     );
 
