@@ -1144,7 +1144,7 @@ void PASTEMAC(ch,varname) \
 			  thread_pb  \
 			); \
 \
-			/* Alias a_use so that it's clear this is our current block of
+			/* Alias b_use so that it's clear this is our current block of
 			   matrix B. */ \
 			ctype* restrict b_pc_use = b_use; \
 \

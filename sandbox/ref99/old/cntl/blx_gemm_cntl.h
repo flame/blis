@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -15,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of copyright holder(s) nor the names
+    - Neither the name(s) of the copyright holder(s) nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -33,37 +32,41 @@
 
 */
 
-#include "blis.h"
-#include "blix.h"
-
-// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
-// entry point to any sandbox implementation.
-
-// NOTE: We must keep this function named bli_gemmnat() since this is the BLIS
-// API function for which we are providing an alternative implementation via
-// the sandbox.
-
-void bli_gemmnat
+cntl_t* blx_gemm_cntl_create
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
-     )
-{
-    bli_init_once();
+       rntm_t* rntm,
+       opid_t  family,
+       pack_t  schema_a,
+       pack_t  schema_b
+     );
 
-    // Obtain a valid native context from the gks if necessary.
-    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+// -----------------------------------------------------------------------------
 
-	// Initialize a local runtime object if necessary.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { rntm = &rntm_l; bli_thread_init_rntm( rntm ); }
+cntl_t* blx_gemmbp_cntl_create
+     (
+       rntm_t* rntm,
+       opid_t  family,
+       pack_t  schema_a,
+       pack_t  schema_b
+     );
 
-    // Invoke the operation's front end.
-    blx_gemm_front( alpha, a, b, beta, c, cntx, rntm, NULL );
-}
+// -----------------------------------------------------------------------------
+
+void blx_gemm_cntl_free
+     (
+       rntm_t*    rntm,
+       cntl_t*    cntl,
+       thrinfo_t* thread
+     );
+
+// -----------------------------------------------------------------------------
+
+cntl_t* blx_gemm_cntl_create_node
+     (
+       rntm_t* rntm,
+       opid_t  family,
+       bszid_t bszid,
+       void_fp var_func,
+       cntl_t* sub_node
+     );
 

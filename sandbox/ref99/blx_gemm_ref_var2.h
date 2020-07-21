@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,17 +32,42 @@
 
 */
 
-cntl_t* blx_packm_cntl_create_node
+void blx_gemm_ref_var2
      (
-       void_fp   var_func,
-       void_fp   packm_var_func,
-       bszid_t   bmid_m,
-       bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
-       pack_t    pack_schema,
-       packbuf_t pack_buf_type,
-       cntl_t*   sub_node
+       trans_t trans,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       stor3_t eff_id,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
      );
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       bool_t           packa, \
+       bool_t           packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          stor_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
+     );
+
+INSERT_GENTPROT_BASIC0( gemm_ref_var2 )
 
