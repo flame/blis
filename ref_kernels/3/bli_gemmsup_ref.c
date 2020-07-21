@@ -60,43 +60,178 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* NOTE: This microkernel can actually handle arbitrarily large
        values of m, n, and k. */ \
 \
-	/* Traverse c by rows. */ \
-	for ( dim_t i = 0; i < m; ++i ) \
+	if ( bli_is_noconj( conja ) && bli_is_noconj( conjb ) ) \
 	{ \
-		ctype* restrict ci = &c[ i*rs_c ]; \
-		ctype* restrict ai = &a[ i*rs_a ]; \
-\
-		for ( dim_t j = 0; j < n; ++j ) \
+		/* Traverse c by rows. */ \
+		for ( dim_t i = 0; i < m; ++i ) \
 		{ \
-			ctype* restrict cij = &ci[ j*cs_c ]; \
-			ctype* restrict bj  = &b [ j*cs_b ]; \
-			ctype           ab; \
+			ctype* restrict ci = &c[ i*rs_c ]; \
+			ctype* restrict ai = &a[ i*rs_a ]; \
 \
-			PASTEMAC(ch,set0s)( ab ); \
-\
-			/* Perform a dot product to update the (i,j) element of c. */ \
-			for ( dim_t l = 0; l < k; ++l ) \
+			for ( dim_t j = 0; j < n; ++j ) \
 			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
+				ctype* restrict cij = &ci[ j*cs_c ]; \
+				ctype* restrict bj  = &b [ j*cs_b ]; \
+				ctype           ab; \
 \
-				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
+		} \
+	} \
+	else if ( bli_is_noconj( conja ) && bli_is_conj( conjb ) ) \
+	{ \
+		/* Traverse c by rows. */ \
+		for ( dim_t i = 0; i < m; ++i ) \
+		{ \
+			ctype* restrict ci = &c[ i*rs_c ]; \
+			ctype* restrict ai = &a[ i*rs_a ]; \
 \
-			/* If beta is one, add ab into c. If beta is zero, overwrite c
-			   with the result in ab. Otherwise, scale by beta and accumulate
-			   ab to c. */ \
-			if ( PASTEMAC(ch,eq1)( *beta ) ) \
+			for ( dim_t j = 0; j < n; ++j ) \
 			{ \
-				PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				ctype* restrict cij = &ci[ j*cs_c ]; \
+				ctype* restrict bj  = &b [ j*cs_b ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,axpyjs)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
-			else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		} \
+	} \
+	else if ( bli_is_conj( conja ) && bli_is_noconj( conjb ) ) \
+	{ \
+		/* Traverse c by rows. */ \
+		for ( dim_t i = 0; i < m; ++i ) \
+		{ \
+			ctype* restrict ci = &c[ i*rs_c ]; \
+			ctype* restrict ai = &a[ i*rs_a ]; \
+\
+			for ( dim_t j = 0; j < n; ++j ) \
 			{ \
-				PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				ctype* restrict cij = &ci[ j*cs_c ]; \
+				ctype* restrict bj  = &b [ j*cs_b ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dotjs)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
-			else \
+		} \
+	} \
+	else /* if ( bli_is_conj( conja ) && bli_is_conj( conjb ) ) */ \
+	{ \
+		/* Traverse c by rows. */ \
+		for ( dim_t i = 0; i < m; ++i ) \
+		{ \
+			ctype* restrict ci = &c[ i*rs_c ]; \
+			ctype* restrict ai = &a[ i*rs_a ]; \
+\
+			for ( dim_t j = 0; j < n; ++j ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				ctype* restrict cij = &ci[ j*cs_c ]; \
+				ctype* restrict bj  = &b [ j*cs_b ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				} \
+\
+				/* Conjugate the result to simulate conj(a^T) * conj(b). */ \
+				PASTEMAC(ch,conjs)( ab ); \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
 		} \
 	} \
@@ -130,43 +265,178 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* NOTE: This microkernel can actually handle arbitrarily large
        values of m, n, and k. */ \
 \
-	/* Traverse c by columns. */ \
-	for ( dim_t j = 0; j < n; ++j ) \
+	if ( bli_is_noconj( conja ) && bli_is_noconj( conjb ) ) \
 	{ \
-		ctype* restrict cj = &c[ j*cs_c ]; \
-		ctype* restrict bj = &b[ j*cs_b ]; \
-\
-		for ( dim_t i = 0; i < m; ++i ) \
+		/* Traverse c by columns. */ \
+		for ( dim_t j = 0; j < n; ++j ) \
 		{ \
-			ctype* restrict cij = &cj[ i*rs_c ]; \
-			ctype* restrict ai  = &a [ i*rs_a ]; \
-			ctype           ab; \
+			ctype* restrict cj = &c[ j*cs_c ]; \
+			ctype* restrict bj = &b[ j*cs_b ]; \
 \
-			PASTEMAC(ch,set0s)( ab ); \
-\
-			/* Perform a dot product to update the (i,j) element of c. */ \
-			for ( dim_t l = 0; l < k; ++l ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				ctype* restrict aij = &ai[ l*cs_a ]; \
-				ctype* restrict bij = &bj[ l*rs_b ]; \
+				ctype* restrict cij = &cj[ i*rs_c ]; \
+				ctype* restrict ai  = &a [ i*rs_a ]; \
+				ctype           ab; \
 \
-				PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
+		} \
+	} \
+	else if ( bli_is_noconj( conja ) && bli_is_conj( conjb ) ) \
+	{ \
+		/* Traverse c by columns. */ \
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict cj = &c[ j*cs_c ]; \
+			ctype* restrict bj = &b[ j*cs_b ]; \
 \
-			/* If beta is one, add ab into c. If beta is zero, overwrite c
-			   with the result in ab. Otherwise, scale by beta and accumulate
-			   ab to c. */ \
-			if ( PASTEMAC(ch,eq1)( *beta ) ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				ctype* restrict cij = &cj[ i*rs_c ]; \
+				ctype* restrict ai  = &a [ i*rs_a ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,axpyjs)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
-			else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		} \
+	} \
+	else if ( bli_is_conj( conja ) && bli_is_noconj( conjb ) ) \
+	{ \
+		/* Traverse c by columns. */ \
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict cj = &c[ j*cs_c ]; \
+			ctype* restrict bj = &b[ j*cs_b ]; \
+\
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				ctype* restrict cij = &cj[ i*rs_c ]; \
+				ctype* restrict ai  = &a [ i*rs_a ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dotjs)( *aij, *bij, ab ); \
+				} \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
-			else \
+		} \
+	} \
+	else /* if ( bli_is_conj( conja ) && bli_is_conj( conjb ) ) */ \
+	{ \
+		/* Traverse c by columns. */ \
+		for ( dim_t j = 0; j < n; ++j ) \
+		{ \
+			ctype* restrict cj = &c[ j*cs_c ]; \
+			ctype* restrict bj = &b[ j*cs_b ]; \
+\
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				ctype* restrict cij = &cj[ i*rs_c ]; \
+				ctype* restrict ai  = &a [ i*rs_a ]; \
+				ctype           ab; \
+\
+				PASTEMAC(ch,set0s)( ab ); \
+\
+				/* Perform a dot product to update the (i,j) element of c. */ \
+				for ( dim_t l = 0; l < k; ++l ) \
+				{ \
+					ctype* restrict aij = &ai[ l*cs_a ]; \
+					ctype* restrict bij = &bj[ l*rs_b ]; \
+\
+					PASTEMAC(ch,dots)( *aij, *bij, ab ); \
+				} \
+\
+				/* Conjugate the result to simulate conj(a^T) * conj(b). */ \
+				PASTEMAC(ch,conjs)( ab ); \
+\
+				/* If beta is one, add ab into c. If beta is zero, overwrite c
+				   with the result in ab. Otherwise, scale by beta and accumulate
+				   ab to c. */ \
+				if ( PASTEMAC(ch,eq1)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,axpys)( *alpha, ab, *cij ); \
+				} \
+				else if ( PASTEMAC(ch,eq0)( *beta ) ) \
+				{ \
+					PASTEMAC(ch,scal2s)( *alpha, ab, *cij ); \
+				} \
+				else \
+				{ \
+					PASTEMAC(ch,axpbys)( *alpha, ab, *beta, *cij ); \
+				} \
 			} \
 		} \
 	} \

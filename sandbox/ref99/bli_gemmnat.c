@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -14,7 +15,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
+    - Neither the name of copyright holder(s) nor the names
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -33,51 +34,41 @@
 */
 
 #include "blis.h"
+#include "blix.h"
 
-cntl_t* blx_packm_cntl_create_node
+// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
+// entry point to any sandbox implementation.
+
+// NOTE: We must keep this function named bli_gemmnat() since this is the BLIS
+// API function for which we are providing an alternative implementation via
+// the sandbox.
+
+void bli_gemmnat
      (
-       void_fp   var_func,
-       void_fp   packm_var_func,
-       bszid_t   bmid_m,
-       bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
-       pack_t    pack_schema,
-       packbuf_t pack_buf_type,
-       cntl_t*   sub_node
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
      )
 {
-	cntl_t*         cntl;
-	packm_params_t* params;
+    bli_init_once();
 
-	// Allocate a packm_params_t struct.
-	params = bli_malloc_intl( sizeof( packm_params_t ) );
+    // Obtain a valid (native) context from the gks if necessary.
+    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Initialize the packm_params_t struct.
-	params->size              = sizeof( packm_params_t );
-	params->var_func          = packm_var_func;
-	params->bmid_m            = bmid_m;
-	params->bmid_n            = bmid_n;
-	params->does_invert_diag  = does_invert_diag;
-	params->rev_iter_if_upper = rev_iter_if_upper;
-	params->rev_iter_if_lower = rev_iter_if_lower;
-	params->pack_schema       = pack_schema;
-	params->pack_buf_type     = pack_buf_type;
+	// Initialize a local runtime with global settings if necessary. Note
+    // that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_l;
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } 
 
-	// It's important that we set the bszid field to BLIS_NO_PART to indicate
-	// that no blocksize partitioning is performed. bli_cntl_free() will rely
-	// on this information to know how to step through the thrinfo_t tree in
-	// sync with the cntl_t tree.
-	cntl = bli_cntl_create_node
-	(
-	  BLIS_NOID,
-	  BLIS_NO_PART,
-	  var_func,
-	  params,
-	  sub_node
-	);
-
-	return cntl;
+    // Invoke the operation's front end.
+    //blx_gemm_front( alpha, a, b, beta, c, cntx, rntm, NULL );
+    blx_gemm_ref_var2( BLIS_NO_TRANSPOSE,
+	                   alpha, a, b, beta, c,
+	                   BLIS_XXX, cntx, rntm, NULL );
 }
 

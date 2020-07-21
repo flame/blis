@@ -32,37 +32,29 @@
 
 */
 
-cntl_t* blx_gemm_cntl_create
+// gemm internal function type
+typedef void (*gemmint_t)
      (
-       opid_t family,
-       pack_t schema_a,
-       pack_t schema_b
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* blx_gemmbp_cntl_create
-     (
-       opid_t family,
-       pack_t schema_a,
-       pack_t schema_b
-     );
-
-// -----------------------------------------------------------------------------
-
-void blx_gemm_cntl_free
-     (
-       cntl_t* cntl,
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-// -----------------------------------------------------------------------------
-
-cntl_t* blx_gemm_cntl_create_node
+void blx_gemm_thread
      (
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
+       gemmint_t func,
+       opid_t    family,
+       obj_t*    a,
+       obj_t*    b,
+       obj_t*    c,
+       cntx_t*   cntx,
+       rntm_t*   rntm,
+       cntl_t*   cntl
      );
 

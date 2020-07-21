@@ -14,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
+    - Neither the name of copyright holder(s) nor the names
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -32,27 +32,14 @@
 
 */
 
-// gemm internal function type
-typedef void (*gemmint_t)
-     (
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
+#ifndef BLIX_H
+#define BLIX_H
 
-void blx_gemm_thread
-     (
-       gemmint_t func,
-       opid_t    family,
-       obj_t*    a,
-       obj_t*    b,
-       obj_t*    c,
-       cntx_t*   cntx,
-       rntm_t*   rntm,
-       cntl_t*   cntl
-     );
+// This header is #included by every file in the ref99 sandbox, and so here
+// we #include any headers that would define prototypes or types that are
+// needed by the ref99 sandbox source code.
+
+#include "blx_gemm_ref_var2.h"
+
+#endif
 
