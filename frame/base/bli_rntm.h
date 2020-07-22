@@ -47,8 +47,8 @@ typedef struct rntm_s
 
 	dim_t     num_threads;
 	dim_t*    thrloop;
-	dim_t     pack_a;
-	dim_t     pack_b;
+	bool_t    pack_a;
+	bool_t    pack_b;
 	bool_t    l3_sup;
 
 	pool_t*   sba_pool;
@@ -103,11 +103,11 @@ BLIS_INLINE dim_t bli_rntm_pr_ways( rntm_t* rntm )
 
 BLIS_INLINE bool_t bli_rntm_pack_a( rntm_t* rntm )
 {
-	return rntm->pack_a;
+	return ( bool_t )( rntm->pack_a );
 }
 BLIS_INLINE bool_t bli_rntm_pack_b( rntm_t* rntm )
 {
-	return rntm->pack_b;
+	return ( bool_t )( rntm->pack_b );
 }
 
 BLIS_INLINE bool_t bli_rntm_l3_sup( rntm_t* rntm )
