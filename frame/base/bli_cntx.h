@@ -280,7 +280,7 @@ BLIS_INLINE bool_t bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, c
 {
 	mbool_t* mbool = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
 
-	return bli_mbool_get_dt( dt, mbool );
+	return ( bool_t )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
@@ -382,7 +382,7 @@ BLIS_INLINE bool_t bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, 
 {
 	mbool_t* mbool = bli_cntx_get_l3_sup_ker_prefs( stor_id, cntx );
 
-	return bli_mbool_get_dt( dt, mbool );
+	return ( bool_t )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------

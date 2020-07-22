@@ -125,18 +125,18 @@ void bli_pack_init_rntm_from_env
 
 	// Try to read BLIS_PACK_A and BLIS_PACK_B. For each variable, default to
 	// -1 if it is unset.
-	pack_a = bli_env_get_var( "BLIS_PACK_A", -1 );
-	pack_b = bli_env_get_var( "BLIS_PACK_B", -1 );
+	gint_t pack_a_env = bli_env_get_var( "BLIS_PACK_A", -1 );
+	gint_t pack_b_env = bli_env_get_var( "BLIS_PACK_B", -1 );
 
 	// Enforce the default behavior first, then check for affirmative FALSE, and
 	// finally assume anything else is TRUE.
-	if      ( pack_a == -1 ) pack_a = FALSE; // default behavior
-	else if ( pack_a ==  0 ) pack_a = FALSE; // zero is FALSE
-	else                     pack_a = TRUE;  // anything else is TRUE
+	if      ( pack_a_env == -1 ) pack_a = FALSE; // default behavior
+	else if ( pack_a_env ==  0 ) pack_a = FALSE; // zero is FALSE
+	else                         pack_a = TRUE;  // anything else is TRUE
 
-	if      ( pack_b == -1 ) pack_b = FALSE; // default behavior
-	else if ( pack_b ==  0 ) pack_b = FALSE; // zero is FALSE
-	else                     pack_b = TRUE;  // anything else is TRUE
+	if      ( pack_b_env == -1 ) pack_b = FALSE; // default behavior
+	else if ( pack_b_env ==  0 ) pack_b = FALSE; // zero is FALSE
+	else                         pack_b = TRUE;  // anything else is TRUE
 
 #else
 
