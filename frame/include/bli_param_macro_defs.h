@@ -310,7 +310,7 @@ BLIS_INLINE bool_t bli_is_upper_or_lower( uplo_t uplo )
 {
 	return ( bool_t )
 	       ( bli_is_upper( uplo ) ||
-	                   bli_is_lower( uplo ) );
+	         bli_is_lower( uplo ) );
 }
 
 BLIS_INLINE bool_t bli_is_dense( uplo_t uplo )
@@ -328,8 +328,9 @@ BLIS_INLINE bool_t bli_is_zeros( uplo_t uplo )
 BLIS_INLINE uplo_t bli_uplo_toggled( uplo_t uplo )
 {
 	return ( uplo_t )
-	       ( bli_is_upper_or_lower( uplo ) ?
-	         ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT ) : uplo
+	       ( bli_is_upper_or_lower( uplo )
+	         ? ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT )
+	         :     uplo
 	       );
 }
 
@@ -369,7 +370,7 @@ BLIS_INLINE bool_t bli_is_herm_or_symm( struc_t struc )
 {
 	return ( bool_t )
 	       ( bli_is_hermitian( struc ) ||
-	                   bli_is_symmetric( struc ) );
+	         bli_is_symmetric( struc ) );
 }
 
 
@@ -503,7 +504,7 @@ BLIS_INLINE dim_t bli_determine_blocksize_dim_b( dim_t i, dim_t dim, dim_t b_alg
 {
 	return ( dim_t )
 	       ( i == 0 && dim % b_alg != 0 ? dim % b_alg
-	                                          : b_alg );
+	                                    : b_alg );
 }
 
 
@@ -544,23 +545,23 @@ BLIS_INLINE bool_t bli_is_gen_stored( inc_t rs, inc_t cs )
 {
 	return ( bool_t )
 	       ( bli_abs( rs ) != 1 &&
-	                   bli_abs( cs ) != 1 );
+	         bli_abs( cs ) != 1 );
 }
 
 BLIS_INLINE bool_t bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	return ( bool_t )
 	       ( bli_abs( cs ) == bli_abs( rs )
-	                   ? n < m
-	                   : bli_abs( cs ) < bli_abs( rs ) );
+	         ? n < m
+	         : bli_abs( cs ) < bli_abs( rs ) );
 }
 
 BLIS_INLINE bool_t bli_is_col_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	return ( bool_t )
 	       ( bli_abs( rs ) == bli_abs( cs )
-	                   ? m < n
-	                   : bli_abs( rs ) < bli_abs( cs ) );
+	         ? m < n
+	         : bli_abs( rs ) < bli_abs( cs ) );
 }
 
 BLIS_INLINE bool_t bli_has_nonunit_inc1( inc_t s1 )
@@ -611,16 +612,16 @@ BLIS_INLINE bool_t bli_is_strictly_above_diag( doff_t diagoff, trans_t trans, di
 {
 	return ( bool_t )
 	       ( bli_does_trans( trans )
-	                   ? ( ( doff_t )n <= -diagoff )
-	                   : ( ( doff_t )m <= -diagoff ) );
+	         ? ( ( doff_t )n <= -diagoff )
+	         : ( ( doff_t )m <= -diagoff ) );
 }
 
 BLIS_INLINE bool_t bli_is_strictly_below_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
 	return ( bool_t )
 	       ( bli_does_trans( trans )
-	                 ? ( ( doff_t )m <=  diagoff )
-	                 : ( ( doff_t )n <=  diagoff ) );
+	         ? ( ( doff_t )m <=  diagoff )
+	         : ( ( doff_t )n <=  diagoff ) );
 }
 
 BLIS_INLINE bool_t bli_is_outside_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
@@ -780,7 +781,8 @@ BLIS_INLINE bool_t bli_is_n_dim( mdim_t mdim )
 
 BLIS_INLINE mdim_t bli_dim_toggled( mdim_t mdim )
 {
-	return ( mdim == BLIS_M ? BLIS_N : BLIS_M );
+	return ( mdim_t )
+	       ( mdim == BLIS_M ? BLIS_N : BLIS_M );
 }
 
 BLIS_INLINE void bli_toggle_dim( mdim_t* mdim )
@@ -948,15 +950,15 @@ BLIS_INLINE bool_t bli_is_packed( pack_t schema )
 BLIS_INLINE bool_t bli_is_row_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                          BLIS_BITVAL_PACKED_ROWS );
+	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	                                            BLIS_BITVAL_PACKED_ROWS ) );
 }
 
 BLIS_INLINE bool_t bli_is_col_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                          BLIS_BITVAL_PACKED_COLUMNS );
+	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	                                            BLIS_BITVAL_PACKED_COLUMNS ) );
 }
 
 BLIS_INLINE bool_t bli_is_panel_packed( pack_t schema )
@@ -968,37 +970,37 @@ BLIS_INLINE bool_t bli_is_panel_packed( pack_t schema )
 BLIS_INLINE bool_t bli_is_4mi_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI );
 }
 
 BLIS_INLINE bool_t bli_is_3mi_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI );
 }
 
 BLIS_INLINE bool_t bli_is_3ms_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS );
 }
 
 BLIS_INLINE bool_t bli_is_ro_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO );
 }
 
 BLIS_INLINE bool_t bli_is_io_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO );
 }
 
 BLIS_INLINE bool_t bli_is_rpi_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI );
 }
 
 BLIS_INLINE bool_t bli_is_rih_packed( pack_t schema )
@@ -1012,13 +1014,13 @@ BLIS_INLINE bool_t bli_is_rih_packed( pack_t schema )
 BLIS_INLINE bool_t bli_is_1r_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R );
 }
 
 BLIS_INLINE bool_t bli_is_1e_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E );
 }
 
 BLIS_INLINE bool_t bli_is_1m_packed( pack_t schema )
@@ -1031,19 +1033,19 @@ BLIS_INLINE bool_t bli_is_1m_packed( pack_t schema )
 BLIS_INLINE bool_t bli_is_nat_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == 0;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == 0 );
 }
 
 BLIS_INLINE bool_t bli_is_ind_packed( pack_t schema )
 {
 	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) != 0;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) != 0 );
 }
 
 BLIS_INLINE guint_t bli_pack_schema_index( pack_t schema )
 {
 	return ( guint_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT );
 }
 
 
