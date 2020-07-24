@@ -49,6 +49,7 @@
         st mt \
         blissup-st blisconv-st eigen-st openblas-st vendor-st blasfeo-st libxsmm-st \
         blissup-mt blisconv-mt eigen-mt openblas-mt vendor-mt \
+        check-env check-env-mk check-lib \
         clean cleanx
 
 
@@ -485,24 +486,24 @@ all:         st
 st:          blissup-st blisconv-st \
              eigen-st openblas-st blasfeo-st libxsmm-st vendor-st
 
-blissup-st:  $(BLISSUP_ST_BINS)
-blisconv-st: $(BLISLPAB_ST_BINS)
-eigen-st:    $(EIGEN_ST_BINS)
-openblas-st: $(OPENBLAS_ST_BINS)
-blasfeo-st:  $(BLASFEO_ST_BINS)
-libxsmm-st:  $(LIBXSMM_ST_BINS)
-vendor-st:   $(VENDOR_ST_BINS)
+blissup-st:  check-env $(BLISSUP_ST_BINS)
+blisconv-st: check-env $(BLISLPAB_ST_BINS)
+eigen-st:    check-env $(EIGEN_ST_BINS)
+openblas-st: check-env $(OPENBLAS_ST_BINS)
+blasfeo-st:  check-env $(BLASFEO_ST_BINS)
+libxsmm-st:  check-env $(LIBXSMM_ST_BINS)
+vendor-st:   check-env $(VENDOR_ST_BINS)
 
 # -- Multithreaded --
 
 mt:          blissup-mt blisconv-mt \
              eigen-mt openblas-mt vendor-mt
 
-blissup-mt:  $(BLISSUP_MT_BINS)
-blisconv-mt: $(BLISLPAB_MT_BINS)
-eigen-mt:    $(EIGEN_MT_BINS)
-openblas-mt: $(OPENBLAS_MT_BINS)
-vendor-mt:   $(VENDOR_MT_BINS)
+blissup-mt:  check-env $(BLISSUP_MT_BINS)
+blisconv-mt: check-env $(BLISLPAB_MT_BINS)
+eigen-mt:    check-env $(EIGEN_MT_BINS)
+openblas-mt: check-env $(OPENBLAS_MT_BINS)
+vendor-mt:   check-env $(VENDOR_MT_BINS)
 
 
 # --- Object file rules --------------------------------------------------------
@@ -648,6 +649,21 @@ test_%_openblas_mt.x: test_%_openblas_mt.o $(LIBBLIS_LINK)
 
 test_%_vendor_mt.x:   test_%_vendor_mt.o   $(LIBBLIS_LINK)
 	$(CC) $(strip $<  $(VENDORP_LIB)       $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+# -- Environment check rules --
+
+check-env: check-lib
+
+check-env-mk:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-lib: check-env-mk
+ifeq ($(wildcard $(LIBBLIS_LINK)),)
+	$(error Cannot proceed: BLIS library not yet built! Run make first)
+endif
 
 
 # -- Clean rules --
