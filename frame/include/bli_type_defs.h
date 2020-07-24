@@ -1017,7 +1017,7 @@ typedef enum
 
 } arch_t;
 
-#define BLIS_NUM_ARCHS 22
+#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC + 1)
 
 
 //
