@@ -40,10 +40,9 @@
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
 //
-// will be enabled later if required after block size tuning.
 
-//#define BLIS_THREAD_MAX_IR      1
-//#define BLIS_THREAD_MAX_JR      1
+#define BLIS_THREAD_MAX_IR      1
+#define BLIS_THREAD_MAX_JR      1
 
 
 #define BLIS_ENABLE_SMALL_MATRIX
