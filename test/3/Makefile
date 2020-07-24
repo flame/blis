@@ -46,6 +46,7 @@
 #
 
 .PHONY: all \
+        check-env check-env-mk check-lib \
         clean cleanx
 
 
@@ -285,21 +286,21 @@ VENDOR_2S_OBJS   := $(call get-2s-objs,vendor)
 VENDOR_2S_BINS   := $(patsubst %.o,%.x,$(VENDOR_2S_OBJS))
 
 # Define some targets associated with the above object/binary files.
-blis-nat-st: $(BLIS_NAT_ST_BINS)
-blis-nat-1s: $(BLIS_NAT_1S_BINS)
-blis-nat-2s: $(BLIS_NAT_2S_BINS)
+blis-nat-st: check-env $(BLIS_NAT_ST_BINS)
+blis-nat-1s: check-env $(BLIS_NAT_1S_BINS)
+blis-nat-2s: check-env $(BLIS_NAT_2S_BINS)
 
-openblas-st: $(OPENBLAS_ST_BINS)
-openblas-1s: $(OPENBLAS_1S_BINS)
-openblas-2s: $(OPENBLAS_2S_BINS)
+openblas-st: check-env $(OPENBLAS_ST_BINS)
+openblas-1s: check-env $(OPENBLAS_1S_BINS)
+openblas-2s: check-env $(OPENBLAS_2S_BINS)
 
-eigen-st: $(EIGEN_ST_BINS)
-eigen-1s: $(EIGEN_1S_BINS)
-eigen-2s: $(EIGEN_2S_BINS)
+eigen-st: check-env $(EIGEN_ST_BINS)
+eigen-1s: check-env $(EIGEN_1S_BINS)
+eigen-2s: check-env $(EIGEN_2S_BINS)
 
-vendor-st: $(VENDOR_ST_BINS)
-vendor-1s: $(VENDOR_1S_BINS)
-vendor-2s: $(VENDOR_2S_BINS)
+vendor-st: check-env $(VENDOR_ST_BINS)
+vendor-1s: check-env $(VENDOR_1S_BINS)
+vendor-2s: check-env $(VENDOR_2S_BINS)
 
 mkl-st: vendor-st
 mkl-1s: vendor-1s
@@ -317,7 +318,7 @@ armpl-2s: vendor-2s
 .INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_1S_OBJS)   $(VENDOR_2S_OBJS)
 
 
-# --Object file rules --
+# -- Object file rules --
 
 #$(TEST_OBJ_PATH)/%.o: $(TEST_SRC_PATH)/%.c
 #	$(CC) $(CFLAGS) -c $< -o $@
@@ -451,6 +452,21 @@ test_%_$(P1_MAX)_vendor_1s.x:   test_%_$(P1_MAX)_vendor_1s.o   $(LIBBLIS_LINK)
 
 test_%_$(P2_MAX)_vendor_2s.x:   test_%_$(P2_MAX)_vendor_2s.o   $(LIBBLIS_LINK)
 	$(CC) $(strip $<   $(VENDORP_LIB)   $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
+
+
+# -- Environment check rules --
+
+check-env: check-lib
+
+check-env-mk:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-lib: check-env-mk
+ifeq ($(wildcard $(LIBBLIS_LINK)),)
+	$(error Cannot proceed: BLIS library not yet built! Run make first)
+endif
 
 
 # -- Clean rules --
