@@ -48,6 +48,7 @@
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
   #include <stdint.h>
+  #include <stdbool.h>
 #else
   // When stdint.h is not available, manually typedef the types we will use.
   #ifdef _WIN32
@@ -87,19 +88,18 @@ typedef unsigned long int guint_t;
 
 // -- Boolean type --
 
-typedef  gint_t  bool_t;
+typedef bool bool_t;
 
-
-// -- Boolean values --
-
+// BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
+// define these macros in terms of true and false, respectively, which are
+// defined by C99 in stdbool.h.
 #ifndef TRUE
-  #define TRUE  1
+  #define TRUE  true
 #endif
 
 #ifndef FALSE
-  #define FALSE 0
+  #define FALSE false
 #endif
-
 
 // -- Special-purpose integers --
 
