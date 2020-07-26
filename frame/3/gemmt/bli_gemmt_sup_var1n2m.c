@@ -1499,10 +1499,14 @@ void PASTEMACT(ch,opname,uplo,varname) \
                gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 				ctype ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ]  __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
-				const bool_t col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	/* storage-scheme of ct should be same as that of C.
+	  Since update routines only support row-major order,
+	  col_pref flag is used to induce transpose to matrices before 
+	  passing to update routine whenever C is col-stored */ \
+	const bool_t col_pref = (rs_c == 1)? 1 : 0; \
 \
-				const inc_t rs_ct = ( col_pref ? 1 : NR ); \
-				const inc_t cs_ct = ( col_pref ? MR : 1 ); \
+	const inc_t rs_ct = ( col_pref ? 1 : NR ); \
+	const inc_t cs_ct = ( col_pref ? MR : 1 ); \
 \
 	ctype* restrict a_00       = a; \
 	ctype* restrict b_00       = b; \
@@ -1829,11 +1833,23 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							  cntx  \
 							); \
 							/* Scale the bottom edge of C and add the result from above. */ \
-							PASTEMAC(ch,update_lower_triang)( m_off_cblock, n_off_cblock, \
-							mr_cur, nr_cur, \
-							ct, rs_ct, cs_ct, \
-							beta_use, \
-							c_ir, rs_c, cs_c ); \
+							/* If c and ct are col-major, induce transpose and call update for upper-triangle of C */ \
+							if( col_pref ) \
+							{ \
+								PASTEMAC(ch,update_upper_triang)( n_off_cblock, m_off_cblock, \
+								nr_cur, mr_cur, \
+								ct, cs_ct, rs_ct, \
+								beta_use, \
+								c_ir, cs_c, rs_c ); \
+							} \
+							else \
+							{ \
+								PASTEMAC(ch,update_lower_triang)( m_off_cblock, n_off_cblock, \
+								mr_cur, nr_cur, \
+								ct, rs_ct, cs_ct, \
+								beta_use, \
+								c_ir, rs_c, cs_c ); \
+							} \
 						} \
 					} \
 				} \
@@ -1999,7 +2015,11 @@ void PASTEMACT(ch,opname,uplo,varname) \
                gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 	ctype ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( ctype ) ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
-	const bool_t col_pref = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	/* Storage scheme of ct should be same as that of C.
+	   Since update routines only support row-major order,
+	   col_pref flag is used to induce transpose to matrices before
+	   passing to update routine whenever C is col-stored */ \
+	const bool_t col_pref = (rs_c == 1) ? 1 : 0; \
 \
 	const inc_t rs_ct = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct = ( col_pref ? MR : 1 ); \
@@ -2328,11 +2348,24 @@ void PASTEMACT(ch,opname,uplo,varname) \
 							  &aux, \
 							  cntx  \
 							); \
-							PASTEMAC(ch,update_upper_triang)( m_off_cblock, n_off_cblock,  \
-								mr_cur, nr_cur, \
-								ct, rs_ct, cs_ct, \
-								beta_use, \
-								c_ir, rs_c, cs_c ); \
+\
+							/* If c and ct are col-major, induce transpose and call update for lower-triangle of C */ \
+							if( col_pref ) \
+							{ \
+								PASTEMAC(ch,update_lower_triang)( n_off_cblock, m_off_cblock,  \
+									nr_cur, mr_cur, \
+									ct, cs_ct, rs_ct, \
+									beta_use, \
+									c_ir, cs_c, rs_c ); \
+							} \
+							else \
+							{ \
+								PASTEMAC(ch,update_upper_triang)( m_off_cblock, n_off_cblock,  \
+									mr_cur, nr_cur, \
+									ct, rs_ct, cs_ct, \
+									beta_use, \
+									c_ir, rs_c, cs_c ); \
+							} \
 						} \
 					} \
 				} \
