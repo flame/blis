@@ -1357,10 +1357,10 @@ void bli_dgemmsup_rv_haswell_asm_5x8
 	vmovupd(ymm12, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rdx))
-	vmovhpd(xmm0, mem(rdx, rsi, 1))
-	vmovlpd(xmm1, mem(rdx, rsi, 2))
-	vmovhpd(xmm1, mem(rdx, rax, 1))
+	vmovlpd(xmm0, mem(rcx))
+	vmovhpd(xmm0, mem(rcx, rsi, 1))
+	vmovlpd(xmm1, mem(rcx, rsi, 2))
+	vmovhpd(xmm1, mem(rcx, rax, 1))
 #endif
 
 	lea(mem(rdx, rsi, 4), rdx)
