@@ -88,7 +88,8 @@ typedef unsigned long int guint_t;
 
 // -- Boolean type --
 
-typedef bool bool_t;
+// NOTE: bool_t is no longer used and has been replaced with C99's bool type.
+//typedef bool bool_t;
 
 // BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
 // define these macros in terms of true and false, respectively, which are
@@ -1158,7 +1159,7 @@ typedef struct func_s
 
 typedef struct mbool_s
 {
-	bool_t  v[BLIS_NUM_FP_TYPES];
+	bool v[BLIS_NUM_FP_TYPES];
 
 } mbool_t;
 
@@ -1453,13 +1454,13 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
-	bool_t    auto_factor;
+	bool      auto_factor;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-	bool_t    pack_a; // enable/disable packing of left-hand matrix A.
-	bool_t    pack_b; // enable/disable packing of right-hand matrix B.
-	bool_t    l3_sup; // enable/disable small matrix handling in level-3 ops.
+	bool      pack_a; // enable/disable packing of left-hand matrix A.
+	bool      pack_b; // enable/disable packing of right-hand matrix B.
+	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 

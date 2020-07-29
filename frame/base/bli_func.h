@@ -96,7 +96,7 @@ void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_func_is_null_dt( num_t   dt,
-                            func_t* f );
-bool_t bli_func_is_null( func_t* f );
+bool bli_func_is_null_dt( num_t   dt,
+                          func_t* f );
+bool bli_func_is_null( func_t* f );
 

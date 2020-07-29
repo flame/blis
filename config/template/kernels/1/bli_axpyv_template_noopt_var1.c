@@ -105,7 +105,7 @@ void bli_zaxpyv_template_noopt
 	dcomplex*   xp;
 	dcomplex*   yp;
 
-	bool_t      use_ref         = FALSE;
+	bool        use_ref         = FALSE;
 
 	dim_t       n_pre           = 0;
 	dim_t       n_iter;

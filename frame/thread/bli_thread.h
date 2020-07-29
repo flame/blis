@@ -73,7 +73,7 @@ void bli_thread_range_sub
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end
      );
@@ -130,7 +130,7 @@ dim_t bli_thread_range_width_l
        dim_t  bf,
        dim_t  bf_left,
        double area_per_thr,
-       bool_t handle_edge_low
+       bool   handle_edge_low
      );
 siz_t bli_find_area_trap_l
      (
@@ -146,7 +146,7 @@ siz_t bli_thread_range_weighted_sub
        dim_t               m,
        dim_t               n,
        dim_t               bf,
-       bool_t              handle_edge_low,
+       bool                handle_edge_low,
        dim_t*     restrict j_start_thr,
        dim_t*     restrict j_end_thr
      );
@@ -201,7 +201,7 @@ BLIS_INLINE void bli_thread_range_jrir_rr
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -218,7 +218,7 @@ BLIS_INLINE void bli_thread_range_jrir_sl
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -234,7 +234,7 @@ BLIS_INLINE void bli_thread_range_jrir
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -259,7 +259,7 @@ BLIS_INLINE void bli_thread_range_weighted_jrir
        dim_t      m,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc

@@ -94,14 +94,14 @@ BLIS_INLINE guint_t bli_round_to_mult( guint_t val, guint_t mult )
 
 // is_odd, is_even
 
-BLIS_INLINE bool_t bli_is_odd( gint_t a )
+BLIS_INLINE bool bli_is_odd( gint_t a )
 {
-	return ( bool_t )( a % 2 == 1 );
+	return ( bool )( a % 2 == 1 );
 }
 
-BLIS_INLINE bool_t bli_is_even( gint_t a )
+BLIS_INLINE bool bli_is_even( gint_t a )
 {
-	return ( bool_t )( a % 2 == 0 );
+	return ( bool )( a % 2 == 0 );
 }
 
 // swap_dims
@@ -124,7 +124,7 @@ BLIS_INLINE void bli_swap_incs( inc_t* inc1, inc_t* inc2 )
 
 // toggle_bool
 
-BLIS_INLINE void bli_toggle_bool( bool_t* b )
+BLIS_INLINE void bli_toggle_bool( bool* b )
 {
 	if ( *b == TRUE ) *b = FALSE;
 	else              *b = TRUE;

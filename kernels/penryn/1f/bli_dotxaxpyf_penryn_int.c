@@ -96,7 +96,7 @@ void bli_ddotxaxpyf_penryn_int
 	v2df_t            w2v, z2v;
 	v2df_t            psi0v, psi1v, betav, alphav;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( b_n ) ) return;

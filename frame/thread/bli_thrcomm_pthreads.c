@@ -111,7 +111,7 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 {
 #if 0
 	if ( comm == NULL || comm->n_threads == 1 ) return;
-	bool_t my_sense = comm->sense;
+	bool  my_sense = comm->sense;
 	dim_t my_threads_arrived;
 
 #ifdef BLIS_USE_PTHREAD_MUTEX
@@ -129,7 +129,7 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 	}
 	else
 	{
-		volatile bool_t* listener = &comm->sense;
+		volatile bool* listener = &comm->sense;
 		while( *listener == my_sense ) {}
 	}
 #endif

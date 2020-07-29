@@ -68,7 +68,7 @@ void bli_trsv_int( obj_t*  alpha,
 {
 	varnum_t  n;
 	impl_t    i;
-	bool_t    uplo;
+	bool      uplo;
 	FUNCPTR_T f;
 	obj_t     a_local;
 

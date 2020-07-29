@@ -110,7 +110,7 @@ int main( int argc, char** argv )
 	dim_t  bf;
 	dim_t  n_way;
 	char   part_dim_ch;
-	bool_t go_fwd;
+	dim_t  go_fwd;
 	char   out_ch;
 
 	obj_t   a;
@@ -119,8 +119,8 @@ int main( int argc, char** argv )
 	thrinfo_t thrinfo;
 	dim_t  m, n;
 	uplo_t uploa;
-	bool_t part_m_dim, part_n_dim;
-	bool_t go_bwd;
+	dim_t  part_m_dim, part_n_dim;
+	dim_t  go_bwd;
 	dim_t  p;
 	num_t  dt;
 	dim_t  start, end;

@@ -82,7 +82,7 @@ void bli_ddotxf_penryn_int
 	v2df_t            rho0v, rho1v, rho2v, rho3v;
 	v2df_t            x0v, x1v, x2v, x3v, y0v, betav, alphav;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( b_n ) ) return;
