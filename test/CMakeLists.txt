@@ -16,6 +16,10 @@ add_executable(TestGemm test_gemm.c)
 target_link_libraries(TestGemm debug "${PROJECT_NAME}.lib")
 target_link_libraries(TestGemm optimized "${PROJECT_NAME}.lib")
 
+add_executable(TestGemmt test_gemmt.c)
+target_link_libraries(TestGemmt debug "${PROJECT_NAME}.lib")
+target_link_libraries(TestGemmt optimized "${PROJECT_NAME}.lib")
+
 add_executable(TestGemv test_gemv.c)
 target_link_libraries(TestGemv debug "${PROJECT_NAME}.lib")
 target_link_libraries(TestGemv optimized "${PROJECT_NAME}.lib")

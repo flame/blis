@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 
-project(AOCL-LibBlis-Win C)
+project(AOCL-LibBlis-Win-MT C)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
@@ -99,6 +99,7 @@ include_directories(${CMAKE_SOURCE_DIR}/frame/2/trsv)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3/gemm)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3/gemm/ind)
+include_directories(${CMAKE_SOURCE_DIR}/frame/3/gemmt)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3/hemm)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3/her2k)
 include_directories(${CMAKE_SOURCE_DIR}/frame/3/herk)

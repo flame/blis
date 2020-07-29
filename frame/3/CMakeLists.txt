@@ -58,7 +58,7 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_tapi.h
 	)
 
-set(SUBDIRECTORIES "gemm" "hemm" "her2k" "herk" "symm" "syr2k" "syrk" "trmm" "trmm3" "trsm")
+set(SUBDIRECTORIES "gemm" "hemm" "her2k" "herk" "symm" "syr2k" "syrk" "trmm" "trmm3" "trsm" "gemmt")
 
 #Add all subdirectories 
 foreach(VAR ${SUBDIRECTORIES})
