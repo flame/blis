@@ -575,7 +575,7 @@ void bli_gks_init_ref_cntx
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_gks_cntx_l3_nat_ukr_is_ref
+bool bli_gks_cntx_l3_nat_ukr_is_ref
      (
        num_t   dt,
        l3ukr_t ukr_id,

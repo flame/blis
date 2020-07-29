@@ -38,8 +38,8 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool_t           packa,
-       bool_t           packb,
+       bool             packa,
+       bool             packb,
        conj_t           conja,
        conj_t           conjb,
        dim_t            m,
@@ -116,8 +116,8 @@ void bli_gemmsup_ref_var1n
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -235,8 +235,8 @@ void bli_gemmsup_ref_var1n
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -423,7 +423,7 @@ void PASTEMAC(ch,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
+	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -764,8 +764,8 @@ void bli_gemmsup_ref_var2m
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -883,8 +883,8 @@ void bli_gemmsup_ref_var2m
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -1045,7 +1045,7 @@ void PASTEMAC(ch,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
+	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \

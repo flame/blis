@@ -77,7 +77,7 @@ void bli_ddotaxpyv_penryn_int
 	v2df_t            alphav, rhov;
 	v2df_t            x1v, y1v, z1v;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )

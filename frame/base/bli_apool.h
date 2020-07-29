@@ -66,7 +66,7 @@ BLIS_INLINE siz_t bli_apool_def_array_len( apool_t* pool )
 	return pool->def_array_len;
 }
 
-BLIS_INLINE bool_t bli_apool_is_exhausted( apool_t* apool )
+BLIS_INLINE bool bli_apool_is_exhausted( apool_t* apool )
 {
 	pool_t* restrict pool = bli_apool_pool( apool );
 

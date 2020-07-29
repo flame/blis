@@ -86,15 +86,15 @@ BLIS_INLINE siz_t bli_mem_size( mem_t* mem )
 	return mem->size;
 }
 
-BLIS_INLINE bool_t bli_mem_is_alloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_alloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) != NULL );
 }
 
-BLIS_INLINE bool_t bli_mem_is_unalloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_unalloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) == NULL );
 }
 

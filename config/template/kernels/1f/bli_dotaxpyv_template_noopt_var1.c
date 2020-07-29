@@ -123,7 +123,7 @@ void bli_zdotaxpyv_template_noopt
 	dcomplex*   zp;
 	dcomplex    dotxy;
 
-	bool_t      use_ref         = FALSE;
+	bool        use_ref         = FALSE;
 
 	dim_t       n_pre           = 0;
 	dim_t       n_iter;

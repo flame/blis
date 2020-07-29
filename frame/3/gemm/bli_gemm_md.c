@@ -49,12 +49,12 @@ void bli_gemm_md
 {
 	mddm_t doms;
 
-	const bool_t a_is_real = bli_obj_is_real( a );
-	const bool_t a_is_comp = bli_obj_is_complex( a );
-	const bool_t b_is_real = bli_obj_is_real( b );
-	const bool_t b_is_comp = bli_obj_is_complex( b );
-	const bool_t c_is_real = bli_obj_is_real( c );
-	const bool_t c_is_comp = bli_obj_is_complex( c );
+	const bool a_is_real = bli_obj_is_real( a );
+	const bool a_is_comp = bli_obj_is_complex( a );
+	const bool b_is_real = bli_obj_is_real( b );
+	const bool b_is_comp = bli_obj_is_complex( b );
+	const bool c_is_real = bli_obj_is_real( c );
+	const bool c_is_comp = bli_obj_is_complex( c );
 
 	if      ( c_is_real && a_is_real && b_is_real )
 	{
@@ -171,8 +171,8 @@ mddm_t bli_gemm_md_ccr
 	// is equal to the real projection of the execution datatype, and use
 	// that computation datatype to query the corresponding ukernel output
 	// preference.
-	const num_t  dt = BLIS_REAL | bli_obj_comp_prec( c );
-	const bool_t row_pref
+	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
+	const bool  row_pref
 	      = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where
@@ -272,8 +272,8 @@ mddm_t bli_gemm_md_crc
 	// is equal to the real projection of the execution datatype, and use
 	// that computation datatype to query the corresponding ukernel output
 	// preference.
-	const num_t  dt = BLIS_REAL | bli_obj_comp_prec( c );
-	const bool_t col_pref
+	const num_t dt = BLIS_REAL | bli_obj_comp_prec( c );
+	const bool  col_pref
 	      = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, *cntx );
 
 	// We can only perform this case of mixed-domain gemm, C += A*B where

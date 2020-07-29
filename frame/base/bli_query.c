@@ -34,13 +34,12 @@
 
 #include "blis.h"
 
-bool_t bli_obj_equals( obj_t* a,
-                       obj_t* b )
+bool bli_obj_equals( obj_t* a, obj_t* b )
 {
-	bool_t r_val = FALSE;
-	num_t  dt_a;
-	num_t  dt_b;
-	num_t  dt;
+	bool  r_val = FALSE;
+	num_t dt_a;
+	num_t dt_b;
+	num_t dt;
 
 	// The function is not yet implemented for vectors and matrices.
 	if ( !bli_obj_is_1x1( a ) ||
@@ -83,13 +82,12 @@ bool_t bli_obj_equals( obj_t* a,
 	return r_val;
 }
 
-bool_t bli_obj_imag_equals( obj_t* a,
-                            obj_t* b )
+bool bli_obj_imag_equals( obj_t* a, obj_t* b )
 {
 #if 0
-	bool_t r_val = FALSE;
-	num_t  dt_a;
-	num_t  dt_b;
+	bool  r_val = FALSE;
+	num_t dt_a;
+	num_t dt_b;
 
 	dt_a = bli_obj_dt( a );
 	dt_b = bli_obj_dt( b );
@@ -130,7 +128,7 @@ bool_t bli_obj_imag_equals( obj_t* a,
 		}
 	}
 #endif
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// The function is not yet implemented for vectors and matrices.
 	if ( !bli_obj_is_1x1( a ) ||
@@ -154,9 +152,9 @@ bool_t bli_obj_imag_equals( obj_t* a,
 	return r_val;
 }
 
-bool_t bli_obj_imag_is_zero( obj_t* a )
+bool bli_obj_imag_is_zero( obj_t* a )
 {
-	bool_t r_val = TRUE;
+	bool r_val = TRUE;
 
 	// The function is not yet implemented for vectors and matrices.
 	if ( !bli_obj_is_1x1( a ) )

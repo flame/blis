@@ -43,13 +43,13 @@
 /*
 typedef struct rntm_s
 {
-	bool_t    auto_factor;
+	bool      auto_factor;
 
 	dim_t     num_threads;
 	dim_t*    thrloop;
-	bool_t    pack_a;
-	bool_t    pack_b;
-	bool_t    l3_sup;
+	bool      pack_a;
+	bool      pack_b;
+	bool      l3_sup;
 
 	pool_t*   sba_pool;
 	membrk_t* membrk;
@@ -61,7 +61,7 @@ typedef struct rntm_s
 // -- rntm_t query (public API) ------------------------------------------------
 //
 
-BLIS_INLINE bool_t bli_rntm_auto_factor( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_auto_factor( rntm_t* rntm )
 {
 	return rntm->auto_factor;
 }
@@ -101,16 +101,16 @@ BLIS_INLINE dim_t bli_rntm_pr_ways( rntm_t* rntm )
 	return bli_rntm_ways_for( BLIS_KR, rntm );
 }
 
-BLIS_INLINE bool_t bli_rntm_pack_a( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_a( rntm_t* rntm )
 {
-	return ( bool_t )( rntm->pack_a );
+	return ( bool )( rntm->pack_a );
 }
-BLIS_INLINE bool_t bli_rntm_pack_b( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_b( rntm_t* rntm )
 {
-	return ( bool_t )( rntm->pack_b );
+	return ( bool )( rntm->pack_b );
 }
 
-BLIS_INLINE bool_t bli_rntm_l3_sup( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_l3_sup( rntm_t* rntm )
 {
 	return rntm->l3_sup;
 }
@@ -132,13 +132,13 @@ BLIS_INLINE membrk_t* bli_rntm_membrk( rntm_t* rntm )
 #if 0
 BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 {
-	const bool_t nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
-	const bool_t jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
-	const bool_t pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
-	const bool_t ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
-	const bool_t jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
-	const bool_t ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
-	const bool_t pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
+	const bool nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
+	const bool jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
+	const bool pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
+	const bool ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
+	const bool jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
+	const bool ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
+	const bool pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
 
 	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
 	else                                          return FALSE;
@@ -149,7 +149,7 @@ BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
-BLIS_INLINE void bli_rntm_set_auto_factor_only( bool_t auto_factor, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
 	rntm->auto_factor = auto_factor;
 }
@@ -254,20 +254,20 @@ BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 	bli_rntm_clear_num_threads_only( rntm );
 }
 
-BLIS_INLINE void bli_rntm_set_pack_a( bool_t pack_a, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether matrix A should be packed.
+	// Set the bool indicating whether matrix A should be packed.
 	rntm->pack_a = pack_a;
 }
-BLIS_INLINE void bli_rntm_set_pack_b( bool_t pack_b, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pack_b( bool pack_b, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether matrix B should be packed.
+	// Set the bool indicating whether matrix B should be packed.
 	rntm->pack_b = pack_b;
 }
 
-BLIS_INLINE void bli_rntm_set_l3_sup( bool_t l3_sup, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_l3_sup( bool l3_sup, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether level-3 sup handling is enabled.
+	// Set the bool indicating whether level-3 sup handling is enabled.
 	rntm->l3_sup = l3_sup;
 }
 BLIS_INLINE void bli_rntm_enable_l3_sup( rntm_t* rntm )

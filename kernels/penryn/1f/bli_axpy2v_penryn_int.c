@@ -79,7 +79,7 @@ void bli_daxpy2v_penryn_int
 	v2df_t            x1v, y1v, z1v;
 	v2df_t            x2v, y2v, z2v;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim1( n ) ) return;

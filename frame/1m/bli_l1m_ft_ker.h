@@ -55,7 +55,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \

@@ -50,8 +50,8 @@ void bli_trmv_front
 	trmv_t* trmv_cntl;
 	num_t   dt_targ_a;
 	num_t   dt_targ_x;
-	bool_t  a_has_unit_inc;
-	bool_t  x_has_unit_inc;
+	bool    a_has_unit_inc;
+	bool    x_has_unit_inc;
 	obj_t   alpha_local;
 	num_t   dt_alpha;
 

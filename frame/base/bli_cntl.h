@@ -170,21 +170,21 @@ BLIS_INLINE mem_t* bli_cntl_pack_mem( cntl_t* cntl )
 
 // cntl_t query (complex)
 
-BLIS_INLINE bool_t bli_cntl_is_null( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_null( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( cntl == NULL );
 }
 
-BLIS_INLINE bool_t bli_cntl_is_leaf( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_leaf( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
-BLIS_INLINE bool_t bli_cntl_does_part( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_does_part( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
 }
 

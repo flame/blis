@@ -51,8 +51,8 @@ void blx_gemm_ref_var2
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \

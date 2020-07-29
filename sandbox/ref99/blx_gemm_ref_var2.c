@@ -39,8 +39,8 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool_t           packa,
-       bool_t           packb,
+       bool             packa,
+       bool             packb,
        conj_t           conja,
        conj_t           conjb,
        dim_t            m,
@@ -79,8 +79,8 @@ void blx_gemm_ref_var2
 {
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -171,8 +171,8 @@ void blx_gemm_ref_var2
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \

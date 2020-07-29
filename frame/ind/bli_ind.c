@@ -56,9 +56,9 @@ void bli_ind_init( void )
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
 	cntx_t* cntx     = bli_gks_query_cntx_noinit();
 
-	bool_t  c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
+	bool    c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
 	                   ( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
-	bool_t  z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
+	bool    z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
 	                   ( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
 
 	if ( c_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
@@ -137,9 +137,9 @@ void bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt )
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_ind_oper_is_impl( opid_t oper, ind_t method )
+bool bli_ind_oper_is_impl( opid_t oper, ind_t method )
 {
-	bool_t is_impl = FALSE;
+	bool is_impl = FALSE;
 
 	if ( bli_opid_is_level3( oper ) )
 	{
@@ -159,7 +159,7 @@ bool_t bli_ind_oper_is_impl( opid_t oper, ind_t method )
 }
 
 #if 0
-bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt )
+bool bli_ind_oper_has_avail( opid_t oper, num_t dt )
 {
 	ind_t method = bli_ind_oper_find_avail( oper, dt );
 

@@ -45,9 +45,9 @@ typedef void (*FUNCPTR_T)
        uplo_t  uploc,
        trans_t transc,
        pack_t  schema,
-       bool_t  invdiag,
-       bool_t  revifup,
-       bool_t  reviflo,
+       bool    invdiag,
+       bool    revifup,
+       bool    reviflo,
        dim_t   m,
        dim_t   n,
        dim_t   m_max,
@@ -128,9 +128,9 @@ void bli_packm_blk_var1
 	uplo_t    uploc      = bli_obj_uplo( c );
 	trans_t   transc     = bli_obj_conjtrans_status( c );
 	pack_t    schema     = bli_obj_pack_schema( p );
-	bool_t    invdiag    = bli_obj_has_inverted_diag( p );
-	bool_t    revifup    = bli_obj_is_pack_rev_if_upper( p );
-	bool_t    reviflo    = bli_obj_is_pack_rev_if_lower( p );
+	bool      invdiag    = bli_obj_has_inverted_diag( p );
+	bool      revifup    = bli_obj_is_pack_rev_if_upper( p );
+	bool      reviflo    = bli_obj_is_pack_rev_if_lower( p );
 
 	dim_t     m_p        = bli_obj_length( p );
 	dim_t     n_p        = bli_obj_width( p );
@@ -284,9 +284,9 @@ void PASTEMAC(ch,varname) \
        uplo_t  uploc, \
        trans_t transc, \
        pack_t  schema, \
-       bool_t  invdiag, \
-       bool_t  revifup, \
-       bool_t  reviflo, \
+       bool    invdiag, \
+       bool    revifup, \
+       bool    reviflo, \
        dim_t   m, \
        dim_t   n, \
        dim_t   m_max, \
@@ -333,8 +333,8 @@ void PASTEMAC(ch,varname) \
 	dim_t*          m_panel_max; \
 	dim_t*          n_panel_max; \
 	conj_t          conjc; \
-	bool_t          row_stored; \
-	bool_t          col_stored; \
+	bool            row_stored; \
+	bool            col_stored; \
 	inc_t           is_p_use; \
 	dim_t           ss_num; \
 	dim_t           ss_den; \

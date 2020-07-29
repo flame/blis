@@ -36,7 +36,7 @@
 BLIS_EXPORT_BLIS errlev_t bli_error_checking_level( void );
 BLIS_EXPORT_BLIS void     bli_error_checking_level_set( errlev_t new_level );
 
-BLIS_EXPORT_BLIS bool_t    bli_error_checking_is_enabled( void );
+BLIS_EXPORT_BLIS bool     bli_error_checking_is_enabled( void );
 
 void      bli_print_msg( char* str, char* file, guint_t line );
 BLIS_EXPORT_BLIS void      bli_abort( void );

@@ -659,14 +659,14 @@ double libblis_test_gemm_flops
        obj_t* c
      )
 {
-	bool_t a_is_real    = bli_obj_is_real( a );
-	bool_t a_is_complex = bli_obj_is_complex( a );
+	bool   a_is_real    = bli_obj_is_real( a );
+	bool   a_is_complex = bli_obj_is_complex( a );
 
-	bool_t b_is_real    = bli_obj_is_real( b );
-	bool_t b_is_complex = bli_obj_is_complex( b );
+	bool   b_is_real    = bli_obj_is_real( b );
+	bool   b_is_complex = bli_obj_is_complex( b );
 
-	bool_t c_is_real    = bli_obj_is_real( c );
-	bool_t c_is_complex = bli_obj_is_complex( c );
+	bool   c_is_real    = bli_obj_is_real( c );
+	bool   c_is_complex = bli_obj_is_complex( c );
 
 	double m            = ( double )bli_obj_length( c );
 	double n            = ( double )bli_obj_width( c );

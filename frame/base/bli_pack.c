@@ -77,7 +77,7 @@ dim_t bli_pack_get_pack_b( void )
 
 // ----------------------------------------------------------------------------
 
-void bli_pack_set_pack_a( bool_t pack_a )
+void bli_pack_set_pack_a( bool pack_a )
 {
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
@@ -93,7 +93,7 @@ void bli_pack_set_pack_a( bool_t pack_a )
 
 // ----------------------------------------------------------------------------
 
-void bli_pack_set_pack_b( bool_t pack_b )
+void bli_pack_set_pack_b( bool pack_b )
 {
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
@@ -118,8 +118,8 @@ void bli_pack_init_rntm_from_env
 	// function is only called from bli_pack_init(), which is only called
 	// by bli_init_once().
 
-	bool_t pack_a;
-	bool_t pack_b;
+	bool pack_a;
+	bool pack_b;
 
 #if 1 //def BLIS_ENABLE_SELECTIVE_PACKING
 
