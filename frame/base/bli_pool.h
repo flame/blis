@@ -160,9 +160,9 @@ BLIS_INLINE siz_t bli_pool_top_index( pool_t* pool )
 	return pool->top_index;
 }
 
-BLIS_INLINE bool_t bli_pool_is_exhausted( pool_t* pool )
+BLIS_INLINE bool bli_pool_is_exhausted( pool_t* pool )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_pool_top_index( pool ) == bli_pool_num_blocks( pool ) );
 }
 

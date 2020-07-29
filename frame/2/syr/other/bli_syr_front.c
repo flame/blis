@@ -50,8 +50,8 @@ void bli_syr_front
 	her_t*  her_cntl;
 	num_t   dt_targ_x;
 	num_t   dt_targ_c;
-	bool_t  x_has_unit_inc;
-	bool_t  c_has_unit_inc;
+	bool    x_has_unit_inc;
+	bool    c_has_unit_inc;
 	obj_t   alpha_local;
 	num_t   dt_alpha;
 

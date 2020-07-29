@@ -829,7 +829,7 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		const bool_t is_pb = FALSE;
+		const bool is_pb = FALSE;
 
 		// We MUST set the induced method in the context prior to calling
 		// bli_cntx_l3_ukr_prefers_cols_dt() because that function queries
@@ -930,7 +930,7 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		//const bool_t is_pb = FALSE;
+		//const bool is_pb = FALSE;
 
 		// Set the anti-preference field to TRUE when executing a panel-block
 		// algorithm, and FALSE otherwise. This will cause higher-level generic

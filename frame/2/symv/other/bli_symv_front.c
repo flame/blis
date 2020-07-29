@@ -53,9 +53,9 @@ void bli_symv_front
 	num_t   dt_targ_a;
 	num_t   dt_targ_x;
 	num_t   dt_targ_y;
-	bool_t  a_has_unit_inc;
-	bool_t  x_has_unit_inc;
-	bool_t  y_has_unit_inc;
+	bool    a_has_unit_inc;
+	bool    x_has_unit_inc;
+	bool    y_has_unit_inc;
 	obj_t   alpha_local;
 	obj_t   beta_local;
 	num_t   dt_alpha;

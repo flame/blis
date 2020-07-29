@@ -156,7 +156,7 @@ arch_t bli_cpuid_query_id( void )
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cpuid_is_skx
+bool bli_cpuid_is_skx
      (
        uint32_t family,
        uint32_t model,
@@ -196,7 +196,7 @@ bool_t bli_cpuid_is_skx
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_knl
+bool bli_cpuid_is_knl
      (
        uint32_t family,
        uint32_t model,
@@ -215,7 +215,7 @@ bool_t bli_cpuid_is_knl
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_haswell
+bool bli_cpuid_is_haswell
      (
        uint32_t family,
        uint32_t model,
@@ -232,7 +232,7 @@ bool_t bli_cpuid_is_haswell
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_sandybridge
+bool bli_cpuid_is_sandybridge
      (
        uint32_t family,
        uint32_t model,
@@ -247,7 +247,7 @@ bool_t bli_cpuid_is_sandybridge
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_penryn
+bool bli_cpuid_is_penryn
      (
        uint32_t family,
        uint32_t model,
@@ -264,7 +264,6 @@ bool_t bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
-
 bool_t bli_cpuid_is_zen3
      (
        uint32_t family,
@@ -312,7 +311,7 @@ bool_t bli_cpuid_is_zen2
 
 	// Finally, check for specific models:
 	// - 0x30-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0xff );
 
@@ -321,7 +320,7 @@ bool_t bli_cpuid_is_zen2
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_zen
+bool bli_cpuid_is_zen
      (
        uint32_t family,
        uint32_t model,
@@ -340,7 +339,7 @@ bool_t bli_cpuid_is_zen
 
 	// Finally, check for specific models:
 	// - 0x00-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x00 <= model && model <= 0xff );
 
@@ -349,7 +348,7 @@ bool_t bli_cpuid_is_zen
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_excavator
+bool bli_cpuid_is_excavator
      (
        uint32_t family,
        uint32_t model,
@@ -368,7 +367,7 @@ bool_t bli_cpuid_is_excavator
 
 	// Finally, check for specific models:
 	// - 0x60-0x7f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x60 <= model && model <= 0x7f );
 
@@ -377,7 +376,7 @@ bool_t bli_cpuid_is_excavator
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_steamroller
+bool bli_cpuid_is_steamroller
      (
        uint32_t family,
        uint32_t model,
@@ -396,7 +395,7 @@ bool_t bli_cpuid_is_steamroller
 
 	// Finally, check for specific models:
 	// - 0x30-0x3f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0x3f );
 
@@ -405,7 +404,7 @@ bool_t bli_cpuid_is_steamroller
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_piledriver
+bool bli_cpuid_is_piledriver
      (
        uint32_t family,
        uint32_t model,
@@ -425,7 +424,7 @@ bool_t bli_cpuid_is_piledriver
 	// Finally, check for specific models:
 	// - 0x02
 	// - 0x10-0x1f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	model == 0x02 || ( 0x10 <= model && model <= 0x1f );
 
@@ -434,7 +433,7 @@ bool_t bli_cpuid_is_piledriver
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_bulldozer
+bool bli_cpuid_is_bulldozer
      (
        uint32_t family,
        uint32_t model,
@@ -453,7 +452,7 @@ bool_t bli_cpuid_is_bulldozer
 	// Finally, check for specific models:
 	// - 0x00
 	// - 0x01
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( model == 0x00 || model == 0x01 );
 
@@ -525,7 +524,7 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
-bool_t bli_cpuid_is_thunderx2
+bool bli_cpuid_is_thunderx2
      (
        uint32_t family,
        uint32_t model,
@@ -540,7 +539,7 @@ bool_t bli_cpuid_is_thunderx2
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_cortexa57
+bool bli_cpuid_is_cortexa57
      (
        uint32_t family,
        uint32_t model,
@@ -555,7 +554,7 @@ bool_t bli_cpuid_is_cortexa57
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_cortexa53
+bool bli_cpuid_is_cortexa53
      (
        uint32_t family,
        uint32_t model,
@@ -570,7 +569,7 @@ bool_t bli_cpuid_is_cortexa53
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_cortexa15
+bool bli_cpuid_is_cortexa15
      (
        uint32_t family,
        uint32_t model,
@@ -585,7 +584,7 @@ bool_t bli_cpuid_is_cortexa15
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_cortexa9
+bool bli_cpuid_is_cortexa9
      (
        uint32_t family,
        uint32_t model,

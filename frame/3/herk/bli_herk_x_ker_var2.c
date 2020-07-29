@@ -51,7 +51,7 @@ void bli_herk_x_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t       uplo;
+	dim_t        uplo;
 	gemm_var_oft f;
 
 	// Set a bool based on the uplo field of C's root object.

@@ -32,9 +32,9 @@
 
 */
 
-BLIS_INLINE bool_t bli_opid_is_level3( opid_t opid )
+BLIS_INLINE bool bli_opid_is_level3( opid_t opid )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( BLIS_GEMM <= opid && opid <= BLIS_TRSM );
 }
 

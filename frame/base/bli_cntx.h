@@ -276,11 +276,11 @@ BLIS_INLINE mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id, cntx_t* cntx
 	return mbool;
 }
 
-BLIS_INLINE bool_t bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	mbool_t* mbool = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
 
-	return ( bool_t )bli_mbool_get_dt( dt, mbool );
+	return ( bool )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
@@ -303,7 +303,7 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_thresh_dt( num_t dt, threshid_t thresh_id,
 	return thresh_dt;
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, cntx_t* cntx )
 {
 	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
 	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
@@ -378,11 +378,11 @@ BLIS_INLINE mbool_t* bli_cntx_get_l3_sup_ker_prefs( stor3_t stor_id, cntx_t* cnt
 	return mbool;
 }
 
-BLIS_INLINE bool_t bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
 	mbool_t* mbool = bli_cntx_get_l3_sup_ker_prefs( stor_id, cntx );
 
-	return ( bool_t )bli_mbool_get_dt( dt, mbool );
+	return ( bool )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
@@ -493,34 +493,34 @@ BLIS_INLINE void_fp bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+	const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return ( bool_t )
+	return ( bool )
 	       ( prefs == TRUE );
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+	const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
 
 	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return ( bool_t )
+	return ( bool )
 	       ( prefs == FALSE );
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// Note that we use the computation datatype, which may differ from the
 	// storage datatype of C (when performing a mixed datatype operation).
-	const num_t  dt    = bli_obj_comp_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
-	bool_t       r_val = FALSE;
+	const num_t dt    = bli_obj_comp_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
 
 	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
 	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
@@ -528,15 +528,15 @@ BLIS_INLINE bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t u
 	return r_val;
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return ( bool_t )
+	return ( bool )
 	       !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
@@ -549,7 +549,7 @@ BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id
 	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// For induced methods, return the ukernel storage preferences of the
 	// corresponding real micro-kernel.
@@ -562,16 +562,16 @@ BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id
 	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// Note that we use the computation datatype, which may differ from the
 	// storage datatype of C (when performing a mixed datatype operation).
-	const num_t  dt    = bli_obj_comp_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
-	bool_t       r_val = FALSE;
+	const num_t dt    = bli_obj_comp_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+	bool        r_val = FALSE;
 
 	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
 	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
@@ -579,43 +579,43 @@ BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t u
 	return r_val;
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	return ( bool_t )
+	return ( bool )
 	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool_t bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
 
 	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return ( bool_t )
+	return ( bool )
 	       ( prefs == TRUE );
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+	const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
 
 	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return ( bool_t )
+	return ( bool )
 	       ( prefs == FALSE );
 }
 
 #if 0
 // NOTE: These static functions aren't needed yet.
 
-BLIS_INLINE bool_t bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
-	bool_t       r_val = FALSE;
+	const num_t dt    = bli_obj_dt( obj );
+	const bool  ukr_prefers_rows
+	                  = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool  ukr_prefers_cols
+	                  = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
+	bool        r_val = FALSE;
 
 	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
 	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
@@ -623,9 +623,9 @@ BLIS_INLINE bool_t bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t s
 	return r_val;
 }
 
-BLIS_INLINE bool_t bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
 {
-	return ( bool_t )
+	return ( bool )
 	       !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
 }
 #endif

@@ -39,9 +39,9 @@ struct packm_params_s
 	packm_var_oft var_func;
 	bszid_t       bmid_m;
 	bszid_t       bmid_n;
-	bool_t        does_invert_diag;
-	bool_t        rev_iter_if_upper;
-	bool_t        rev_iter_if_lower;
+	bool          does_invert_diag;
+	bool          rev_iter_if_upper;
+	bool          rev_iter_if_lower;
 	pack_t        pack_schema;
 	packbuf_t     pack_buf_type;
 };
@@ -62,17 +62,17 @@ BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_n( cntl_t* cntl )
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_n;
 }
 
-BLIS_INLINE bool_t bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->does_invert_diag;
 }
 
-BLIS_INLINE bool_t bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_upper;
 }
 
-BLIS_INLINE bool_t bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_lower;
 }
@@ -96,9 +96,9 @@ cntl_t* bli_packm_cntl_create_node
        void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
+       bool      does_invert_diag,
+       bool      rev_iter_if_upper,
+       bool      rev_iter_if_lower,
        pack_t    pack_schema,
        packbuf_t pack_buf_type,
        cntl_t*   sub_node

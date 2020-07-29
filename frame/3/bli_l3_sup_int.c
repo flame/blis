@@ -54,7 +54,7 @@ err_t bli_gemmsup_int
 	#else
 	#endif
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-	const bool_t  is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
+	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
 	                                     stor_id == BLIS_CRR );
@@ -82,25 +82,25 @@ err_t bli_gemmsup_int
 	// uses general stride.
 	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
 
-	const bool_t  is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
+	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
 	                                     stor_id == BLIS_CRR );
-	const bool_t  is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
-	const bool_t  row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool    row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
 
-	const bool_t  is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
+	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );
 
 	const dim_t  m           = bli_obj_length( c );
 	const dim_t  n           = bli_obj_width( c );
 	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-	const bool_t auto_factor = bli_rntm_auto_factor( rntm );
+	const bool   auto_factor = bli_rntm_auto_factor( rntm );
 	const dim_t  n_threads   = bli_rntm_num_threads( rntm );
-	bool_t       use_bp      = TRUE;
+	bool         use_bp      = TRUE;
 	dim_t        jc_new;
 	dim_t        ic_new;
 

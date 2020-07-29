@@ -169,12 +169,12 @@ void bli_rntm_set_ways_from_rntm
 	dim_t jr = bli_rntm_jr_ways( rntm );
 	dim_t ir = bli_rntm_ir_ways( rntm );
 
-	bool_t auto_factor = FALSE;
+	bool  auto_factor = FALSE;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	bool_t nt_set   = FALSE;
-	bool_t ways_set = FALSE;
+	bool  nt_set   = FALSE;
+	bool  ways_set = FALSE;
 
 	// If the rntm was fed in as a copy of the global runtime via
 	// bli_rntm_init_from_global(), we know that either:
@@ -281,12 +281,12 @@ void bli_rntm_set_ways_from_rntm_sup
 	dim_t jr = bli_rntm_jr_ways( rntm );
 	dim_t ir = bli_rntm_ir_ways( rntm );
 
-	bool_t auto_factor = FALSE;
+	bool  auto_factor = FALSE;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 
-	bool_t nt_set   = FALSE;
-	bool_t ways_set = FALSE;
+	bool  nt_set   = FALSE;
+	bool  ways_set = FALSE;
 
 	// If the rntm was fed in as a copy of the global runtime via
 	// bli_rntm_init_from_global(), we know that either:

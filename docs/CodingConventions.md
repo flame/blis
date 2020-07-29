@@ -54,9 +54,9 @@ Please either use braces to denote the indentation limits of scope, or to enclos
 
 If at all possible, **please use tabs to denote changing levels of scope!** If you can't use tabs or doing so would be very inconvenient given your editor and setup, please set your indentation to use exactly four spaces per level of indentation. Below is what it would look like if you used tabs (with a tab width set to occupy four spaces), or four actual spaces per indentation level.
 ```c
-bool_t bli_obj_is_real( obj_t* x )
+bool bli_obj_is_real( obj_t* x )
 {
-    bool_t r_val;
+    bool r_val;
 
     if ( bli_obj_is_real( x ) )
         r_val = TRUE;
@@ -67,9 +67,9 @@ bool_t bli_obj_is_real( obj_t* x )
 Ideally, tabs should be used to indicate changes in levels of scope, but then spaces should be used for multi-line statements within the same scope. In the example below, I've marked the characters that should be spaces with `.` (with tabs used for the first level of indentation):
 
 ```c
-bool_t bli_obj_is_complex( obj_t* x )
+bool bli_obj_is_complex( obj_t* x )
 {
-    bool_t r_val;
+    bool r_val;
 
     if ( bli_obj_is_scomplex( x ) ||
     .....bli_obj_is_dcomplex( x ) ) r_val = TRUE;
@@ -123,8 +123,8 @@ Please use blank lines to separate lines of code from the next line of code. How
 Sometimes, to more efficiently display code on the screen, it's helpful to skip certain newlines, such as those in conditional statements. This is fine, just try to line things up in a way that is visually appealing.
 ```c
 {
-    bool_t r_val;
-    dim_t  foo;
+    bool  r_val;
+    dim_t foo;
 
     // This is fine.
     if ( bli_obj_is_real( x ) ) r_val = TRUE;

@@ -87,9 +87,9 @@ void bli_gemm_md_zgemm
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
@@ -107,9 +107,9 @@ BLIS_INLINE bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-BLIS_INLINE bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
@@ -127,9 +127,9 @@ BLIS_INLINE bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-BLIS_INLINE bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
