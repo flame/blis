@@ -34,6 +34,8 @@ target_sources(TestSuite
      ${CMAKE_CURRENT_SOURCE_DIR}/test_dotxv.h
      ${CMAKE_CURRENT_SOURCE_DIR}/test_gemm.c
      ${CMAKE_CURRENT_SOURCE_DIR}/test_gemm.h
+     ${CMAKE_CURRENT_SOURCE_DIR}/test_gemmt.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/test_gemmt.h
      ${CMAKE_CURRENT_SOURCE_DIR}/test_gemm_ukr.c
      ${CMAKE_CURRENT_SOURCE_DIR}/test_gemm_ukr.h
      ${CMAKE_CURRENT_SOURCE_DIR}/test_gemmtrsm_ukr.c

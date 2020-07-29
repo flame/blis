@@ -148,6 +148,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrmm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrmv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrsm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrsv.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_cgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_dgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_sgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_zgemmt.c
 	)
 
 

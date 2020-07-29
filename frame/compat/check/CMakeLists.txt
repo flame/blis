@@ -3,6 +3,7 @@
 target_sources("${PROJECT_NAME}"
     PRIVATE
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_check.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemmt_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemv_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_ger_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_hemm_check.h
