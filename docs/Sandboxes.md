@@ -43,7 +43,22 @@ $ ./configure -s ref99 auto
 Here, we tell `configure` that we want to use the `ref99` sandbox, which
 corresponds to a sub-directory of `sandbox` named `ref99`. (Reminder: the
 `auto` argument is the configuration target and thus unrelated to
-sandboxes.) As `configure` runs, you should get output that includes lines
+sandboxes.)
+
+NOTE: If you want your sandbox implementation to handle *all* problem
+sizes and shapes, you'll need to disable the skinny/unpacked "sup"
+sub-framework within BLIS, which is enabled by default. This can be
+done by passing the `--disable-sup-handling` option to configure:
+```
+$ ./configure --enable-sandbox=ref99 --disable-sup-handling auto
+```
+If you leave sup enabled, the sup implementation will, at runtime, detect
+and handle certain smaller problem sizes upstream of where BLIS calls
+`bli_gemmnat()` while all other problems will fall to your sandbox
+implementation. Thus, you should only leave sup enabled if you are fine
+with those smaller problems being handled by sup.
+
+As `configure` runs, you should get output that includes lines
 similar to:
 ```
 configure: configuring for alternate gemm implementation:
