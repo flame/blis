@@ -84,6 +84,10 @@ BLIS_INLINE bszid_t* bli_cntx_bmults_buf( cntx_t* cntx )
 {
 	return cntx->bmults;
 }
+BLIS_INLINE blksz_t* bli_cntx_trsm_blkszs_buf( cntx_t* cntx )
+{
+	return cntx->trsm_blkszs;
+}
 BLIS_INLINE func_t* bli_cntx_l3_vir_ukrs_buf( cntx_t* cntx )
 {
 	return cntx->l3_vir_ukrs;
@@ -331,6 +335,16 @@ BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_blksz( bszid_t bs_id, cntx_t* cntx )
 
 	// Return the address of the blksz_t identified by bs_id.
 	return blksz;
+}
+
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
+{
+	blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+	blksz_t* blksz  = &blkszs[ bs_id ];
+
+	// Return the address of the blksz_t identified by bs_id.
+	return blksz;
+
 }
 
 BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )

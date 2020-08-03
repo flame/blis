@@ -107,8 +107,8 @@ GENPROT( gemmtsup_ref_var2m )
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \

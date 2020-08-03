@@ -264,7 +264,7 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
-bool_t bli_cpuid_is_zen3
+bool bli_cpuid_is_zen3
      (
        uint32_t family,
        uint32_t model,
@@ -283,7 +283,7 @@ bool_t bli_cpuid_is_zen3
 
 	// Finally, check for specific models:
 	// - 0x00-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x00 <= model && model <= 0xff );
 
@@ -292,7 +292,7 @@ bool_t bli_cpuid_is_zen3
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_zen2
+bool bli_cpuid_is_zen2
      (
        uint32_t family,
        uint32_t model,

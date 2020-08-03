@@ -38,7 +38,7 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        dim_t            k, \
        dim_t            n, \
@@ -57,7 +57,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           did_pack, \
+       bool             did_pack, \
        rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
@@ -71,7 +71,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_finalize_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        stor3_t          stor_id, \
        pack_t* restrict schema, \
        dim_t            k, \
@@ -95,7 +95,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        stor3_t          stor_id, \
        trans_t          transc, \

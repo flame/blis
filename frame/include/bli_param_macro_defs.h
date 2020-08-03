@@ -584,15 +584,15 @@ BLIS_INLINE bool bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 
 // offset-relate
 
-static bool_t bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+BLIS_INLINE bool bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( n_off + n - 1 ) < m_off );
 }
 
-static bool_t bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+BLIS_INLINE bool bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( m_off + m - 1 ) < n_off );
 }
 // diag offset-related
