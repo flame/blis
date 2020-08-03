@@ -505,7 +505,6 @@ eigen-mt:    check-env $(EIGEN_MT_BINS)
 openblas-mt: check-env $(OPENBLAS_MT_BINS)
 vendor-mt:   check-env $(VENDOR_MT_BINS)
 
-# -- Multithreaded --
 
 # --- Object file rules --------------------------------------------------------
 
@@ -540,29 +539,6 @@ $(foreach impl,$(BIMPLS_ST), \
 $(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
 
 # -- Multithreaded BLAS --
-
-# -- Multithreaded BLAS --
-
-# Define the function that will be used to instantiate compilation rules
-# for the various multithreaded implementations.
-define make-mt-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CC) $(CFLAGS) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
-endef
-
-# Instantiate the rule function make-mt-rule() for each BLIS/BLAS/CBLAS
-# implementation.
-$(foreach dt,$(DTS), \
-$(foreach tr,$(TRANS), \
-$(foreach st,$(STORS), \
-$(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_MT), \
-$(foreach sn,$(SNS_MT), \
-$(foreach sk,$(SKS_MT), \
-$(foreach impl,$(BIMPLS_MT), \
-$(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
-
-# -- Single-threaded Eigen --
 
 # Define the function that will be used to instantiate compilation rules
 # for the various multithreaded implementations.
@@ -625,26 +601,6 @@ $(foreach sk,$(SKS_MT), \
 $(foreach ld,$(LDIMS), \
 $(foreach impl,$(EIMPLS), \
 $(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
-
-# -- Multithreaded Eigen --
-
-# Define the function that will be used to instantiate compilation rules
-# for the multithreaded Eigen implementation.
-define make-eigmt-rule
-test_$(1)gemm_$(call stripu,$(2))_$(call stripu,$(3))_$(call get-shape-dim-str,$(4),$(5),$(6),$(7))_$(8)_mt.o: test_gemm.c Makefile
-	$(CXX) $(CXXFLAGS_MT) $(ERRCHK) $(N_TRIALS) $(call get-pdefs,$(4)) $(call get-dt-cpp,$(1)) $(call get-tra-defs,$(2)) $(call get-sto-defs,$(3)) $(call get-shape-defs,$(4),$(5),$(6),$(7)) $(call get-imp-defs,$(8)) $(STR_MT) -c $$< -o $$@
-endef
-
-# Instantiate the rule function make-st-rule() for each Eigen implementation.
-$(foreach dt,$(DTS), \
-$(foreach tr,$(TRANS), \
-$(foreach st,$(STORS), \
-$(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_MT), \
-$(foreach sn,$(SNS_MT), \
-$(foreach sk,$(SKS_MT), \
-$(foreach impl,$(EIMPLS), \
-$(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(impl)))))))))))
 
 
 # --- Executable file rules ----------------------------------------------------

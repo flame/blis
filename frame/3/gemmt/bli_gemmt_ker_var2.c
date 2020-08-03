@@ -124,7 +124,7 @@ void bli_gemmt_ker_var2
 
 	FUNCPTR_T f;
 
-	bool_t    uploc;
+	bool    uploc;
 	if ( bli_obj_is_lower( c ) )
 	{
 		uploc = 0;
@@ -251,7 +251,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -277,7 +277,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	 * diagonal is reached, and is used to determine path during 
 	 * next iterations of loop
 	 */ \
-	bool_t 		flag = 0; \
+	bool   		  flag = 0; \
 	auxinfo_t       aux; \
 \
 	/*
@@ -545,7 +545,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \

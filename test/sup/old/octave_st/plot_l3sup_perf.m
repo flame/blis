@@ -102,7 +102,6 @@ for psize_col = 1:3
 end
 x_axis( :, 1 ) = data_blissup( :, psize_col );
 
-<<<<<<< HEAD
 % Compute the number of data points we have in the x-axis. Note that we
 % only use half the data points for the m = n = k column of graphs.
 %if mod(theid-1,cols) == 6
@@ -111,15 +110,6 @@ x_axis( :, 1 ) = data_blissup( :, psize_col );
 %	np = size( data_blissup, 1 );
 %end
 np = size( data_blissup, 1 );
-=======
-% Compute the number of data points we have in the x-axis. Note that
-% we only use half the data points for the m = n = k column of graphs.
-if mod(theid-1,cols) == 6
-	np = size( data_blissup, 1 ) / 2;
-else
-	np = size( data_blissup, 1 );
-end
->>>>>>> Merged test/sup, test/supmt into test/sup.
 
 has_xsmm = 1;
 if data_xsmm( 1, flopscol ) == 0.0
@@ -188,7 +178,6 @@ end
 xlim( ax1, [x_begin x_end] );
 ylim( ax1, [y_begin y_end] );
 
-<<<<<<< HEAD
 if    10000 <= x_end && x_end < 15000
 	x_tick2 = x_end - 2000;
 	x_tick1 = x_tick2/2;
@@ -199,12 +188,6 @@ elseif 6000 <= x_end && x_end < 10000
 	x_tick1 = x_tick2/2;
 	%xticks( ax1, [ x_tick1 x_tick2 ] );
 	xticks( ax1, [ 2000 4000 6000 8000 ] );
-=======
-if     6000 <= x_end && x_end < 10000
-	x_tick2 = x_end - 2000;
-	x_tick1 = x_tick2/2;
-	xticks( ax1, [ x_tick1 x_tick2 ] );
->>>>>>> Merged test/sup, test/supmt into test/sup.
 elseif 4000 <= x_end && x_end < 6000
 	x_tick2 = x_end - 1000;
 	x_tick1 = x_tick2/2;

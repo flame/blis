@@ -238,20 +238,20 @@ BLIS_EXPORT_BLIS void bli_blksz_reduce_dt_to
      );
 #endif
 
-BLIS_EXPORT_BLIS void bli_blksz_reduce_def_to
+void bli_blksz_reduce_def_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz
      );
 
-BLIS_EXPORT_BLIS void bli_blksz_reduce_max_to
+void bli_blksz_reduce_max_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz
      );
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS dim_t bli_determine_blocksize
+dim_t bli_determine_blocksize
      (
        dir_t   direct,
        dim_t   i,
@@ -261,7 +261,7 @@ BLIS_EXPORT_BLIS dim_t bli_determine_blocksize
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f
+dim_t bli_determine_blocksize_f
      (
        dim_t   i,
        dim_t   dim,
@@ -270,7 +270,7 @@ BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f
        cntx_t* cntx
      );
 
-BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_b
+dim_t bli_determine_blocksize_b
      (
        dim_t   i,
        dim_t   dim,
@@ -312,7 +312,6 @@ BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm_b
 #endif
 
 dim_t bli_determine_blocksize_f_sub
-BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f_sub
      (
        dim_t  i,
        dim_t  dim,
@@ -320,7 +319,7 @@ BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_f_sub
        dim_t  b_max
      );
 
-BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_b_sub
+dim_t bli_determine_blocksize_b_sub
      (
        dim_t  i,
        dim_t  dim,

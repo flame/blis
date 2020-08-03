@@ -39,229 +39,242 @@
 
 void bli_cntx_init_zen( cntx_t* cntx )
 {
-    blksz_t blkszs[ BLIS_NUM_BLKSZS ];
-    blksz_t thresh[ BLIS_NUM_THRESH ];
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	blksz_t thresh[ BLIS_NUM_THRESH ];
 
-    // Set default kernel blocksizes and functions.
-    bli_cntx_init_zen_ref( cntx );
+	// Set default kernel blocksizes and functions.
+	bli_cntx_init_zen_ref( cntx );
 
-    // -------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
-    // Update the context with optimized native gemm micro-kernels and
-    // their storage preferences.
-    bli_cntx_set_l3_nat_ukrs
-    (
-      8,
-      // gemm
-      BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
-      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
-      BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
-      BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
-      // gemmtrsm_l
-      BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
-      // gemmtrsm_u
-      BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
-      BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
-      cntx
-    );
+	// Update the context with optimized native gemm micro-kernels and
+	// their storage preferences.
+	bli_cntx_set_l3_nat_ukrs
+	(
+	  8,
+	  // gemm
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
+	  // gemmtrsm_l
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
+	  // gemmtrsm_u
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+	  cntx
+	);
 
-    // Update the context with optimized level-1f kernels.
-    bli_cntx_set_l1f_kers
-    (
-      4,
-      // axpyf
-      BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
-      BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
-      // dotxf
-      BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-      BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
-      cntx
-    );
+	// Update the context with optimized level-1f kernels.
+	bli_cntx_set_l1f_kers
+	(
+	  4,
+	  // axpyf
+	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
+	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
+	  // dotxf
+	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+	  cntx
+	);
 
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  10,
+	  16,
+#if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+#endif
 	  // axpyv
 #if 0
-      BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
-      BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
 #else
-      BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
-      BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
+	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
 #endif
-      // dotv
-      BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
-      BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
-      // dotxv
-      BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
-      BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
-      // scalv
+	  // dotv
+	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
+	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+	  // dotxv
+	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
+	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+	  // scalv
 #if 0
-      BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
-      BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
 #else
-      BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
-      BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
+	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
-      BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
-      BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
+	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
+	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
 
-      BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
-      BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
-      //set
-      BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
-      BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
-      cntx
-    );
+	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
+	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
+	  //set
+	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
+	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+	  cntx
+	);
 
-    // Initialize level-3 blocksize objects with architecture-specific values.
-    //                                           s      d      c      z
-    bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
+	// Initialize level-3 blocksize objects with architecture-specific values.
+	//                                           s      d      c      z
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 
 /*
-<<<<<<< HEAD
 	Multi Instance performance improvement of DGEMM when binded to a CCX
 	In Multi instance each thread runs a sequential DGEMM.
 
-    a)  If BLIS is run in a multi-instance mode with
-        CPU freq 2.6/2.2 Ghz
-        DDR4 clock frequency 2400Mhz
-             mc = 240, kc = 512, and nc = 2040
-        has better performance on EPYC server, over the default block sizes.
+	a)  If BLIS is run in a multi-instance mode with
+	    CPU freq 2.6/2.2 Ghz
+	    DDR4 clock frequency 2400Mhz
+	    mc = 240, kc = 512, and nc = 2040
+	    has better performance on EPYC server, over the default block sizes.
 
-    b)  If BLIS is run in Single Instance mode
-          mc = 510, kc = 1024 and nc = 4080
+	b)  If BLIS is run in Single Instance mode
+	      mc = 510, kc = 1024 and nc = 4080
 */
 
-      // Zen optmized level 3 cache block sizes
 #ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
-	// Zen optmized level 3 cache block sizes
 	#if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  1020,   510,   510,   255 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  1024,  1024,  1024,  1024 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
+
+	  bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,  510,   144,    72 );
+	  bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,  1024,   256,   256 );
+	  bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+
 	#else
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  2040,  1528 );
+	  bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
+	  bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
+	  bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,   2040,  4080,  4080 );
+
 	#endif
 #else
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
 #endif
-    bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
-    bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
-    // Update the context with the current architecture's register and cache
-    // blocksizes (and multiples) for native execution.
-    bli_cntx_set_blkszs
-    (
-      BLIS_NAT, 7,
-      // level-3
-      BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-      BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-      BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-      BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-      BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-      // level-1f
-      BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
-      BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
-      cntx
-    );
+	// Update the context with the current architecture's register and cache
+	// blocksizes (and multiples) for native execution.
+	bli_cntx_set_blkszs
+	(
+	  BLIS_NAT, 7,
+	  // level-3
+	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  // level-1f
+	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
+	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
+	  cntx
+	);
 
-    // Update the context with the current architecture's register and cache
-    // blocksizes for level-3 TRSM execution.
-    bli_cntx_set_trsm_blkszs
-    (
-      5,
-      // level-3
-      BLIS_NC, &blkszs[ BLIS_NC ],
-      BLIS_KC, &blkszs[ BLIS_KC ],
-      BLIS_MC, &blkszs[ BLIS_MC ],
-      BLIS_NR, &blkszs[ BLIS_NR ],
-      BLIS_MR, &blkszs[ BLIS_MR ],
-      cntx
-    );
+	// Update the context with the current architecture's register and cache
+	// blocksizes for level-3 TRSM execution.
+	bli_cntx_set_trsm_blkszs
+	(
+	  5,
+	  // level-3
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
+	  cntx
+	);
+
+	// -------------------------------------------------------------------------
 
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  256,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  256,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  220,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   380,   110 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   512,  256,   256,   128 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   440,  220,   220,   110 );
 
-    // Initialize sup thresholds with architecture-appropriate values.
-    //                                          s     d     c     z
-    bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   -1,   -1 );
-    bli_blksz_init_easy( &thresh[ BLIS_NT ],   512,  256,   -1,   -1 );
-    bli_blksz_init_easy( &thresh[ BLIS_KT ],   440,  220,   -1,   -1 );
+	// Initialize the context with the sup thresholds.
+	bli_cntx_set_l3_sup_thresh
+	(
+	  3,
+	  BLIS_MT, &thresh[ BLIS_MT ],
+	  BLIS_NT, &thresh[ BLIS_NT ],
+	  BLIS_KT, &thresh[ BLIS_KT ],
+	  cntx
+	);
 
-    // Initialize the context with the sup thresholds.
-    bli_cntx_set_l3_sup_thresh
-    (
-      3,
-      BLIS_MT, &thresh[ BLIS_MT ],
-      BLIS_NT, &thresh[ BLIS_NT ],
-      BLIS_KT, &thresh[ BLIS_KT ],
-      cntx
-    );
+	// Initialize the context with the sup handlers.
+	bli_cntx_set_l3_sup_handlers
+	(
+	  1,
+	  BLIS_GEMM, bli_gemmsup_ref,
+	  cntx
+	);
 
-    // Initialize the context with the sup handlers.
-    bli_cntx_set_l3_sup_handlers
-    (
-      1,
-      BLIS_GEMM, bli_gemmsup_ref,
-      cntx
-    );
+	// Update the context with optimized small/unpacked gemm kernels.
+	bli_cntx_set_l3_sup_kers
+	(
+	  28,
+	  //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
+	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+	  BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
+	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+	  BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+	  BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
+	  BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
+	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+	  BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+	  BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16m, TRUE,
+	  BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+	  BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+	  BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
+	  BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_zen_asm_6x16n, TRUE,
+	  BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
+	  BLIS_RRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
+	  BLIS_RCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
+	  BLIS_CRR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8m, TRUE,
+	  BLIS_RCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
+	  BLIS_CCR, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
+	  BLIS_CCC, BLIS_SCOMPLEX, bli_cgemmsup_rv_zen_asm_3x8n, TRUE,
+	  BLIS_RRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_RCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_CRR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4m, TRUE,
+	  BLIS_RCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+	  BLIS_CCR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+	  BLIS_CCC, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n, TRUE,
+	  cntx
+	);
 
-    // Update the context with optimized small/unpacked gemm kernels.
-    bli_cntx_set_l3_sup_kers
-    (
-      14,
-      //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
-      BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
-      BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
-      BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
-      BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
-      BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16m, TRUE,
-      BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_zen_asm_6x16n, TRUE,
-      cntx
-    );
+	// Initialize level-3 sup blocksize objects with architecture-specific
+	// values.
+	//                                           s      d      c      z
+	bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,     3,    3,
+	                                            9,     9,     3,    3    );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,     8,    4    );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    72,   36   );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,   128,  64   );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,  2040, 1020 );
 
-    // Initialize level-3 sup blocksize objects with architecture-specific
-    // values.
-    //                                           s      d      c      z
-    bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,    -1,    -1,
-                                            9,     9,    -1,    -1 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,    8,    -1,    -1 );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],    144,   72,    -1,    -1 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],    512,   256,    -1,    -1 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],    8160,  4080,    -1,    -1 );
-
-    // Update the context with the current architecture's register and cache
-    // blocksizes for small/unpacked level-3 problems.
-    bli_cntx_set_l3_sup_blkszs
-    (
-      5,
-      BLIS_NC, &blkszs[ BLIS_NC ],
-      BLIS_KC, &blkszs[ BLIS_KC ],
-      BLIS_MC, &blkszs[ BLIS_MC ],
-      BLIS_NR, &blkszs[ BLIS_NR ],
-      BLIS_MR, &blkszs[ BLIS_MR ],
-      cntx
-    );
+	// Update the context with the current architecture's register and cache
+	// blocksizes for small/unpacked level-3 problems.
+	bli_cntx_set_l3_sup_blkszs
+	(
+	  5,
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
+	  cntx
+	);
 }
+

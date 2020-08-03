@@ -38,8 +38,8 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool_t           packa,
-       bool_t           packb,
+       bool             packa,
+       bool             packb,
        conj_t           conja,
        conj_t           conjb,
        dim_t            m,
@@ -116,8 +116,8 @@ void bli_gemmtsup_ref_var1n
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -162,7 +162,7 @@ void bli_gemmtsup_ref_var1n
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	bool_t uploc;
+	bool uploc;
 	if( bli_obj_is_lower( c ) )
 	{
 		uploc = 0;
@@ -246,8 +246,8 @@ void bli_gemmtsup_ref_var1n
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -434,7 +434,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = bli_rntm_calc_num_threads( rntm ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -720,8 +720,8 @@ INSERT_GENTFUNC_L( gemmtsup, ref_var1n )
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -908,7 +908,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = bli_rntm_calc_num_threads( rntm ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -1250,8 +1250,8 @@ void bli_gemmtsup_ref_var2m
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -1296,7 +1296,7 @@ void bli_gemmtsup_ref_var2m
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	bool_t uploc;
+	bool uploc;
 
 	if ( bli_is_notrans ( trans ) )
 		uploc = bli_obj_is_lower( c ) ? 0 : 1;
@@ -1377,8 +1377,8 @@ void bli_gemmtsup_ref_var2m
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -1503,7 +1503,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	  Since update routines only support row-major order,
 	  col_pref flag is used to induce transpose to matrices before 
 	  passing to update routine whenever C is col-stored */ \
-	const bool_t col_pref = (rs_c == 1)? 1 : 0; \
+	const bool col_pref = (rs_c == 1)? 1 : 0; \
 \
 	const inc_t rs_ct = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct = ( col_pref ? MR : 1 ); \
@@ -1553,7 +1553,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = bli_rntm_calc_num_threads( rntm ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -1893,8 +1893,8 @@ INSERT_GENTFUNC_L( gemmtsup, ref_var2m )
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -2019,7 +2019,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	   Since update routines only support row-major order,
 	   col_pref flag is used to induce transpose to matrices before
 	   passing to update routine whenever C is col-stored */ \
-	const bool_t col_pref = (rs_c == 1) ? 1 : 0; \
+	const bool col_pref = (rs_c == 1) ? 1 : 0; \
 \
 	const inc_t rs_ct = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct = ( col_pref ? MR : 1 ); \
@@ -2071,7 +2071,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = bli_rntm_calc_num_threads( rntm ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \

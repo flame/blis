@@ -1062,6 +1062,8 @@ void bli_thread_partition_2x2
     {
         *nt1 = ( work1 >= work2 ? n_thread : 1 );
         *nt2 = ( work1 <  work2 ? n_thread : 1 );
+
+		return;
     }
 
     *nt1 = 1;

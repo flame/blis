@@ -120,9 +120,6 @@ void bli_gemmsup_ref_var1n
 	const bool     packa     = bli_rntm_pack_a( rntm );
 	const bool     packb     = bli_rntm_pack_b( rntm );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
-
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
 
@@ -451,68 +448,6 @@ void PASTEMAC(ch,varname) \
 	/*const dim_t jc_iter = ( m_local + NC - 1 ) / NC;*/ \
 	const dim_t jc_left =   m_local % NC; \
 \
-	/* Initialize a mem_t entry for A and B. Strictly speaking, this is only
-	   needed for the matrix we will be packing (if any), but we do it
-	   unconditionally to be safe. An alternative way of initializing the
-	   mem_t entries is:
-
-	     bli_mem_clear( &mem_a ); \
-	     bli_mem_clear( &mem_b ); \
-	*/ \
-	mem_t mem_a = BLIS_MEM_INITIALIZER; \
-	mem_t mem_b = BLIS_MEM_INITIALIZER; \
-\
-	/* Define an array of bszid_t ids, which will act as our substitute for
-	   the cntl_t tree.
-	   NOTE: These bszid_t values, and their order, match that of the bp
-	   algorithm (variant 2) because they are not used to query actual
-	   blocksizes but rather query the ways of parallelism for the various
-	   loops. For example, the 2nd loop in variant 1 partitions in the m
-	   dimension (in increments of MR), but parallelizes that m dimension
-	   with BLIS_JR_NT. The only difference is that the _packa and _packb
-	   arrays have been adjusted for the semantic difference in order in
-	   which packa and packb nodes are encountered in the thrinfo tree.
-	   That is, this panel-block algorithm partitions an NC x KC submatrix
-	   of A to be packed in the 4th loop, and a KC x MC submatrix of B
-	   to be packed in the 3rd loop. */ \
-	/*                           5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */ \
-	bszid_t bszids_nopack[6] = { BLIS_NC, BLIS_KC,               BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packa [7] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packb [7] = { BLIS_NC, BLIS_KC,               BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packab[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t* restrict bszids; \
-\
-	/* Set the bszids pointer to the correct bszids array above based on which
-	   matrices (if any) are being packed. */ \
-	if ( packa ) { if ( packb ) bszids = bszids_packab; \
-	               else         bszids = bszids_packa; } \
-	else         { if ( packb ) bszids = bszids_packb; \
-	               else         bszids = bszids_nopack; } \
-\
-	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
-\
-	thrinfo_t* restrict thread_jc = NULL; \
-	thrinfo_t* restrict thread_pc = NULL; \
-	thrinfo_t* restrict thread_pa = NULL; \
-	thrinfo_t* restrict thread_ic = NULL; \
-	thrinfo_t* restrict thread_pb = NULL; \
-	thrinfo_t* restrict thread_jr = NULL; \
-\
-	/* Grow the thrinfo_t tree. */ \
-	bszid_t*   restrict bszids_jc = bszids; \
-	                    thread_jc = thread; \
-	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \
-\
-	/* Compute the JC loop thread range for the current thread. */ \
-	dim_t jc_start, jc_end; \
-	bli_thread_range_sub( thread_jc, m, MR, FALSE, &jc_start, &jc_end ); \
-	const dim_t m_local = jc_end - jc_start; \
-\
-	/* Compute number of primary and leftover components of the JC loop. */ \
-	/*const dim_t jc_iter = ( m_local + NC - 1 ) / NC;*/ \
-	const dim_t jc_left =   m_local % NC; \
-\
 	/* Loop over the m dimension (NC rows/columns at a time). */ \
 	/*for ( dim_t jj = 0; jj < jc_iter; jj += 1 )*/ \
 	for ( dim_t jj = jc_start; jj < jc_end; jj += NC ) \
@@ -548,72 +483,6 @@ void PASTEMAC(ch,varname) \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
 			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
-\
-			ctype* a_use; \
-			inc_t  rs_a_use, cs_a_use, ps_a_use; \
-\
-			/* Set the bszid_t array and thrinfo_t pointer based on whether
-			   we will be packing A. If we won't be packing A, we alias to
-			   the _pc variables so that code further down can unconditionally
-			   reference the _pa variables. Note that *if* we will be packing
-			   A, the thrinfo_t node will have already been created by a
-			   previous call to bli_thrinfo_grow(), since bszid values of
-			   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
-			   bszid that is a normal bszid_t value). */ \
-			bszid_t*   restrict bszids_pa; \
-			if ( packa ) { bszids_pa = &bszids_pc[1]; \
-			               thread_pa = bli_thrinfo_sub_node( thread_pc ); } \
-			else         { bszids_pa = &bszids_pc[0]; \
-			               thread_pa = thread_pc; } \
-\
-			/* Determine the packing buffer and related parameters for matrix
-			   A. (If A will not be packed, then a_use will be set to point to
-			   a and the _a_use strides will be set accordingly.) Then call
-			   the packm sup variant chooser, which will call the appropriate
-			   implementation based on the schema deduced from the stor_id.
-			   NOTE: packing matrix A in this panel-block algorithm corresponds
-			   to packing matrix B in the block-panel algorithm. */ \
-			PASTEMAC(ch,packm_sup_a) \
-			( \
-			  packa, \
-			  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix A to */ \
-			  stor_id,                 /* a "panel of B".                  */ \
-			  BLIS_NO_TRANSPOSE, \
-			  NC,     KC,       /* This "panel of B" is (at most) NC x KC. */ \
-			  nc_cur, kc_cur, MR, \
-			  &one_local, \
-			  a_pc,   rs_a,      cs_a, \
-			  &a_use, &rs_a_use, &cs_a_use, \
-			                     &ps_a_use, \
-			  cntx, \
-			  rntm, \
-			  &mem_a, \
-			  thread_pa  \
-			); \
-\
-			/* Alias a_use so that it's clear this is our current block of
-			   matrix A. */ \
-			ctype* restrict a_pc_use = a_use; \
-\
-			/* We don't need to embed the panel stride of A within the auxinfo_t
-			   object because this variant iterates through A in the jr loop,
-			   which occurs here, within the macrokernel, not within the
-			   millikernel. */ \
-			/*bli_auxinfo_set_ps_a( ps_a_use, &aux );*/ \
-\
-			/* Grow the thrinfo_t tree. */ \
-			bszid_t*   restrict bszids_ic = &bszids_pa[1]; \
-			                    thread_ic = bli_thrinfo_sub_node( thread_pa ); \
-			bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic ); \
-\
-			/* Compute the IC loop thread range for the current thread. */ \
-			dim_t ic_start, ic_end; \
-			bli_thread_range_sub( thread_ic, n, NR, FALSE, &ic_start, &ic_end ); \
-			const dim_t n_local = ic_end - ic_start; \
-\
-			/* Compute number of primary and leftover components of the IC loop. */ \
-			/*const dim_t ic_iter = ( n_local + MC - 1 ) / MC;*/ \
-			const dim_t ic_left =   n_local % MC; \
 \
 			ctype* a_use; \
 			inc_t  rs_a_use, cs_a_use, ps_a_use; \
@@ -766,81 +635,6 @@ void PASTEMAC(ch,varname) \
 				dim_t jr_start, jr_end; \
 				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
 \
-				ctype* b_use; \
-				inc_t  rs_b_use, cs_b_use, ps_b_use; \
-\
-				/* Set the bszid_t array and thrinfo_t pointer based on whether
-				   we will be packing A. If we won't be packing A, we alias to
-				   the _pc variables so that code further down can unconditionally
-				   reference the _pa variables. Note that *if* we will be packing
-				   A, the thrinfo_t node will have already been created by a
-				   previous call to bli_thrinfo_grow(), since bszid values of
-				   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
-				   bszid that is a normal bszid_t value). */ \
-				bszid_t*   restrict bszids_pb; \
-				if ( packb ) { bszids_pb = &bszids_ic[1]; \
-							   thread_pb = bli_thrinfo_sub_node( thread_ic ); } \
-				else         { bszids_pb = &bszids_ic[0]; \
-							   thread_pb = thread_ic; } \
-\
-				/* Determine the packing buffer and related parameters for matrix
-				   B. (If B will not be packed, then b_use will be set to point to
-				   b and the _b_use strides will be set accordingly.) Then call
-				   the packm sup variant chooser, which will call the appropriate
-				   implementation based on the schema deduced from the stor_id.
-				   NOTE: packing matrix B in this panel-block algorithm corresponds
-				   to packing matrix A in the block-panel algorithm. */ \
-				PASTEMAC(ch,packm_sup_b) \
-				( \
-				  packb, \
-				  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix B to */ \
-				  stor_id,                 /* a "block of A".                  */ \
-				  BLIS_NO_TRANSPOSE, \
-				  KC,     MC,       /* This "block of A" is (at most) KC x MC. */ \
-				  kc_cur, mc_cur, NR, \
-				  &one_local, \
-				  b_ic,   rs_b,      cs_b, \
-				  &b_use, &rs_b_use, &cs_b_use, \
-				                     &ps_b_use, \
-				  cntx, \
-				  rntm, \
-				  &mem_b, \
-				  thread_pb  \
-				); \
-\
-				/* Alias b_use so that it's clear this is our current block of
-				   matrix B. */ \
-				ctype* restrict b_ic_use = b_use; \
-\
-				/* Embed the panel stride of B within the auxinfo_t object. The
-				   millikernel will query and use this to iterate through
-				   micropanels of B. */ \
-				bli_auxinfo_set_ps_b( ps_b_use, &aux ); \
-\
-				/* Grow the thrinfo_t tree. */ \
-				bszid_t*   restrict bszids_jr = &bszids_pb[1]; \
-				                    thread_jr = bli_thrinfo_sub_node( thread_pb ); \
-				bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr ); \
-\
-				/* Compute number of primary and leftover components of the JR loop. */ \
-				dim_t jr_iter = ( nc_cur + MR - 1 ) / MR; \
-				dim_t jr_left =   nc_cur % MR; \
-\
-				/* Compute the JR loop thread range for the current thread. */ \
-				dim_t jr_start, jr_end; \
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
-\
-				/* An optimization: allow the last jr iteration to contain up to MRE
-				   rows of C and A. (If MRE > MR, the mkernel has agreed to handle
-				   these cases.) Note that this prevents us from declaring jr_iter and
-				   jr_left as const. NOTE: We forgo this optimization when packing A
-				   since packing an extended edge case is not yet supported. */ \
-				if ( !packa && !is_mt ) \
-				if ( MRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= MRE ) \
-				{ \
-					jr_iter--; jr_left += MR; \
-				} \
-\
 				/* Loop over the m dimension (NR columns at a time). */ \
 				/*for ( dim_t j = 0; j < jr_iter; j += 1 )*/ \
 				for ( dim_t j = jr_start; j < jr_end; j += 1 ) \
@@ -882,7 +676,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing A (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packa ) bli_thread_obarrier( thread_pa ); \
+			if ( packa ) bli_thread_barrier( thread_pa ); \
 		} \
 	} \
 \
@@ -975,9 +769,6 @@ void bli_gemmsup_ref_var2m
 
 	const bool     packa     = bli_rntm_pack_a( rntm );
 	const bool     packb     = bli_rntm_pack_b( rntm );
-
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -1281,57 +1072,6 @@ void PASTEMAC(ch,varname) \
 	/*const dim_t jc_iter = ( n_local + NC - 1 ) / NC;*/ \
 	const dim_t jc_left =   n_local % NC; \
 \
-	/* Initialize a mem_t entry for A and B. Strictly speaking, this is only
-	   needed for the matrix we will be packing (if any), but we do it
-	   unconditionally to be safe. An alternative way of initializing the
-	   mem_t entries is:
-
-	     bli_mem_clear( &mem_a ); \
-	     bli_mem_clear( &mem_b ); \
-	*/ \
-	mem_t mem_a = BLIS_MEM_INITIALIZER; \
-	mem_t mem_b = BLIS_MEM_INITIALIZER; \
-\
-	/* Define an array of bszid_t ids, which will act as our substitute for
-	   the cntl_t tree. */ \
-	/*                           5thloop  4thloop         packb  3rdloop         packa  2ndloop  1stloop  ukrloop */ \
-	bszid_t bszids_nopack[6] = { BLIS_NC, BLIS_KC,               BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packa [7] = { BLIS_NC, BLIS_KC,               BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packb [7] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t bszids_packab[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t* restrict bszids; \
-\
-	/* Set the bszids pointer to the correct bszids array above based on which
-	   matrices (if any) are being packed. */ \
-	if ( packa ) { if ( packb ) bszids = bszids_packab; \
-	               else         bszids = bszids_packa; } \
-	else         { if ( packb ) bszids = bszids_packb; \
-	               else         bszids = bszids_nopack; } \
-\
-	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
-\
-	thrinfo_t* restrict thread_jc = NULL; \
-	thrinfo_t* restrict thread_pc = NULL; \
-	thrinfo_t* restrict thread_pb = NULL; \
-	thrinfo_t* restrict thread_ic = NULL; \
-	thrinfo_t* restrict thread_pa = NULL; \
-	thrinfo_t* restrict thread_jr = NULL; \
-\
-	/* Grow the thrinfo_t tree. */ \
-	bszid_t*   restrict bszids_jc = bszids; \
-	                    thread_jc = thread; \
-	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \
-\
-	/* Compute the JC loop thread range for the current thread. */ \
-	dim_t jc_start, jc_end; \
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
-	const dim_t n_local = jc_end - jc_start; \
-\
-	/* Compute number of primary and leftover components of the JC loop. */ \
-	/*const dim_t jc_iter = ( n_local + NC - 1 ) / NC;*/ \
-	const dim_t jc_left =   n_local % NC; \
-\
 	/* Loop over the n dimension (NC rows/columns at a time). */ \
 	/*for ( dim_t jj = 0; jj < jc_iter; jj += 1 )*/ \
 	for ( dim_t jj = jc_start; jj < jc_end; jj += NC ) \
@@ -1409,70 +1149,6 @@ void PASTEMAC(ch,varname) \
 			); \
 \
 			/* Alias b_use so that it's clear this is our current block of
-			   matrix B. */ \
-			ctype* restrict b_pc_use = b_use; \
-\
-			/* We don't need to embed the panel stride of B within the auxinfo_t
-			   object because this variant iterates through B in the jr loop,
-			   which occurs here, within the macrokernel, not within the
-			   millikernel. */ \
-			/*bli_auxinfo_set_ps_b( ps_b_use, &aux );*/ \
-\
-			/* Grow the thrinfo_t tree. */ \
-			bszid_t*   restrict bszids_ic = &bszids_pb[1]; \
-			                    thread_ic = bli_thrinfo_sub_node( thread_pb ); \
-			bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic ); \
-\
-			/* Compute the IC loop thread range for the current thread. */ \
-			dim_t ic_start, ic_end; \
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end ); \
-			const dim_t m_local = ic_end - ic_start; \
-\
-			/* Compute number of primary and leftover components of the IC loop. */ \
-			/*const dim_t ic_iter = ( m_local + MC - 1 ) / MC;*/ \
-			const dim_t ic_left =   m_local % MC; \
-\
-			ctype* b_use; \
-			inc_t  rs_b_use, cs_b_use, ps_b_use; \
-\
-			/* Set the bszid_t array and thrinfo_t pointer based on whether
-			   we will be packing B. If we won't be packing B, we alias to
-			   the _pc variables so that code further down can unconditionally
-			   reference the _pb variables. Note that *if* we will be packing
-			   B, the thrinfo_t node will have already been created by a
-			   previous call to bli_thrinfo_grow(), since bszid values of
-			   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
-			   bszid that is a normal bszid_t value). */ \
-			bszid_t*   restrict bszids_pb; \
-			if ( packb ) { bszids_pb = &bszids_pc[1]; \
-			               thread_pb = bli_thrinfo_sub_node( thread_pc ); } \
-			else         { bszids_pb = &bszids_pc[0]; \
-			               thread_pb = thread_pc; } \
-\
-			/* Determine the packing buffer and related parameters for matrix
-			   B. (If B will not be packed, then a_use will be set to point to
-			   b and the _b_use strides will be set accordingly.) Then call
-			   the packm sup variant chooser, which will call the appropriate
-			   implementation based on the schema deduced from the stor_id. */ \
-			PASTEMAC(ch,packm_sup_b) \
-			( \
-			  packb, \
-			  BLIS_BUFFER_FOR_B_PANEL, /* This algorithm packs matrix B to */ \
-			  stor_id,                 /* a "panel of B."                  */ \
-			  BLIS_NO_TRANSPOSE, \
-			  KC,     NC,       /* This "panel of B" is (at most) KC x NC. */ \
-			  kc_cur, nc_cur, NR, \
-			  &one_local, \
-			  b_pc,   rs_b,      cs_b, \
-			  &b_use, &rs_b_use, &cs_b_use, \
-			                     &ps_b_use, \
-			  cntx, \
-			  rntm, \
-			  &mem_b, \
-			  thread_pb  \
-			); \
-\
-			/* Alias a_use so that it's clear this is our current block of
 			   matrix B. */ \
 			ctype* restrict b_pc_use = b_use; \
 \
@@ -1579,79 +1255,6 @@ void PASTEMAC(ch,varname) \
 				dim_t jr_start, jr_end; \
 				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
 \
-				ctype* a_use; \
-				inc_t  rs_a_use, cs_a_use, ps_a_use; \
-\
-				/* Set the bszid_t array and thrinfo_t pointer based on whether
-				   we will be packing B. If we won't be packing A, we alias to
-				   the _ic variables so that code further down can unconditionally
-				   reference the _pa variables. Note that *if* we will be packing
-				   A, the thrinfo_t node will have already been created by a
-				   previous call to bli_thrinfo_grow(), since bszid values of
-				   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
-				   bszid that is a normal bszid_t value). */ \
-				bszid_t*   restrict bszids_pa; \
-				if ( packa ) { bszids_pa = &bszids_ic[1]; \
-							   thread_pa = bli_thrinfo_sub_node( thread_ic ); } \
-				else         { bszids_pa = &bszids_ic[0]; \
-							   thread_pa = thread_ic; } \
-\
-				/* Determine the packing buffer and related parameters for matrix
-				   A. (If A will not be packed, then a_use will be set to point to
-				   a and the _a_use strides will be set accordingly.) Then call
-				   the packm sup variant chooser, which will call the appropriate
-				   implementation based on the schema deduced from the stor_id. */ \
-				PASTEMAC(ch,packm_sup_a) \
-				( \
-				  packa, \
-				  BLIS_BUFFER_FOR_A_BLOCK, /* This algorithm packs matrix A to */ \
-				  stor_id,                 /* a "block of A."                  */ \
-				  BLIS_NO_TRANSPOSE, \
-				  MC,     KC,       /* This "block of A" is (at most) MC x KC. */ \
-				  mc_cur, kc_cur, MR, \
-				  &one_local, \
-				  a_ic,   rs_a,      cs_a, \
-				  &a_use, &rs_a_use, &cs_a_use, \
-				                     &ps_a_use, \
-				  cntx, \
-				  rntm, \
-				  &mem_a, \
-				  thread_pa  \
-				); \
-\
-				/* Alias a_use so that it's clear this is our current block of
-				   matrix A. */ \
-				ctype* restrict a_ic_use = a_use; \
-\
-				/* Embed the panel stride of A within the auxinfo_t object. The
-				   millikernel will query and use this to iterate through
-				   micropanels of A (if needed). */ \
-				bli_auxinfo_set_ps_a( ps_a_use, &aux ); \
-\
-				/* Grow the thrinfo_t tree. */ \
-				bszid_t*   restrict bszids_jr = &bszids_pa[1]; \
-				                    thread_jr = bli_thrinfo_sub_node( thread_pa ); \
-				bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr ); \
-\
-				/* Compute number of primary and leftover components of the JR loop. */ \
-				dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
-				dim_t jr_left =   nc_cur % NR; \
-\
-				/* Compute the JR loop thread range for the current thread. */ \
-				dim_t jr_start, jr_end; \
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
-\
-				/* An optimization: allow the last jr iteration to contain up to NRE
-				   columns of C and B. (If NRE > NR, the mkernel has agreed to handle
-				   these cases.) Note that this prevents us from declaring jr_iter and
-				   jr_left as const. NOTE: We forgo this optimization when packing B
-				   since packing an extended edge case is not yet supported. */ \
-				if ( !packb && !is_mt ) \
-				if ( NRE != 0 && 1 < jr_iter && jr_left != 0 && jr_left <= NRE ) \
-				{ \
-					jr_iter--; jr_left += NR; \
-				} \
-\
 				/* Loop over the n dimension (NR columns at a time). */ \
 				/*for ( dim_t j = 0; j < jr_iter; j += 1 )*/ \
 				for ( dim_t j = jr_start; j < jr_end; j += 1 ) \
@@ -1693,7 +1296,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* NOTE: This barrier is only needed if we are packing B (since
 			   that matrix is packed within the pc loop of this variant). */ \
-			if ( packb ) bli_thread_obarrier( thread_pb ); \
+			if ( packb ) bli_thread_barrier( thread_pb ); \
 		} \
 	} \
 \

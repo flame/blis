@@ -43,3 +43,15 @@ err_t bli_gemmsup_int
        rntm_t* rntm,
        thrinfo_t* thread
      );
+
+err_t bli_gemmtsup_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
