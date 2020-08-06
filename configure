@@ -299,6 +299,15 @@ print_usage()
 	echo "                 when debugging certain configuration issues, and/or as"
 	echo "                 a sanity check to make sure these lists are constituted"
 	echo "                 as expected."
+    echo " "
+    echo "   --complex-return=gnu|intel"
+    echo " "
+    echo "                 Specify the way in which complex numbers are returned"
+    echo "                 from Fortran functions, either \"gnu\" (return in"
+    echo "                 registers) or \"intel\" (return via hidden argument)."
+    echo "                 If not specified and the environment variable FC is set,"
+    echo "                 attempt to determine the return type from the compiler."
+    echo "                 Otherwise, the default is \"gnu\"."
 	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
@@ -309,6 +318,7 @@ print_usage()
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
 	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
+    echo "   FC            Specifies the Fortran compiler to use (only to determine --complex-return)."
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
@@ -1954,6 +1964,7 @@ main()
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
+	complex_return='default'
 
 	# The sandbox flag and name.
 	sandbox_flag=''
@@ -2142,6 +2153,9 @@ main()
 						show-config-list)
 							show_config_list=1
 							;;
+				        complex-return=*)
+                            complex_return=${OPTARG#*=}
+                            ;;
 						*)
 							print_usage
 							;;
@@ -2996,7 +3010,49 @@ main()
 
 		enable_sandbox_01=0
 	fi
+	
+	# Check the method used for returning complex numbers
+    if [ "x${complex_return}" = "xdefault" ]; then
+        if [ -n "${FC}" ]; then
+            # Determine the complex return type from the given Fortran compiler
 
+            # Query the full vendor version string output. This includes the
+            # version number along with (potentially) a bunch of other textual
+            # clutter.
+            # NOTE: This maybe should use merged stdout/stderr rather than only
+            # stdout. But it works for now.
+            vendor_string="$(${FC} --version 2>/dev/null)"
+        
+            # Query the compiler "vendor" (ie: the compiler's simple name) and
+            # isolate the version number.
+            # The last part ({ read first rest ; echo $first ; }) is a workaround
+            # to OS X's egrep only returning the first match.
+            fc_vendor=$(echo "${vendor_string}" | egrep -o 'ifort|GNU' | { read first rest ; echo $first ; })
+            
+            if [ "x${fc_vendor}" = "xifort" ]; then
+                complex_return='intel'
+            elif [ "x${fc_vendor}" = "xGNU" ]; then
+                complex_return='gnu'
+            else
+                echo "${script_name}: unable to determine Fortran compiler vendor!"
+                complex_return='gnu'
+            fi
+        else
+            complex_return='gnu'
+        fi
+    fi
+	
+    if [ "x${complex_return}" = "xgnu"  ]; then
+        complex_return_intel01='0'
+    elif [ "x${complex_return}" = "xintel" ]; then
+        complex_return_intel01='1'
+	else
+        echo "${script_name}: unknown complex return type \"${complex_return}\"! Cannot continue."
+        echo "${script_name}: *** Acceptable values are \"gnu\" and \"intel\"."
+        exit 1
+	fi
+
+    echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
 	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
@@ -3165,7 +3221,8 @@ main()
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
-		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
+        | sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
+        | sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
 		> "${bli_config_h_out_path}"
 
 

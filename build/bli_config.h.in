@@ -165,5 +165,11 @@
 #define BLIS_DISABLE_SHARED
 #endif
 
+#if @complex_return_intel@
+#define BLIS_ENABLE_COMPLEX_RETURN_INTEL
+#else
+#define BLIS_DISABLE_COMPLEX_RETURN_INTEL
+#endif
+
 
 #endif

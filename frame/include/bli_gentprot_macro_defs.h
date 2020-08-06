@@ -74,17 +74,33 @@ GENTPROTCO( scomplex, float,  c, s, blasname ) \
 GENTPROTCO( dcomplex, double, z, d, blasname )
 
 
+// -- Basic one-operand macro with conjugation (real funcs only, used only for dot, ger) --
+
+
+#define INSERT_GENTPROTDOTR_BLAS( blasname ) \
+\
+GENTPROTDOT( float,    s,  , blasname ) \
+GENTPROTDOT( double,   d,  , blasname )
+
+
+// -- Basic one-operand macro with conjugation (complex funcs only, used only for dot, ger) --
+
+
+#define INSERT_GENTPROTDOTC_BLAS( blasname ) \
+\
+GENTPROTDOT( scomplex, c, c, blasname ) \
+GENTPROTDOT( scomplex, c, u, blasname ) \
+GENTPROTDOT( dcomplex, z, c, blasname ) \
+GENTPROTDOT( dcomplex, z, u, blasname )
+
+
 // -- Basic one-operand macro with conjugation (used only for dot, ger) --
 
 
 #define INSERT_GENTPROTDOT_BLAS( blasname ) \
 \
-GENTPROTDOT( float,    s,  , blasname ) \
-GENTPROTDOT( double,   d,  , blasname ) \
-GENTPROTDOT( scomplex, c, c, blasname ) \
-GENTPROTDOT( scomplex, c, u, blasname ) \
-GENTPROTDOT( dcomplex, z, c, blasname ) \
-GENTPROTDOT( dcomplex, z, u, blasname )
+INSERT_GENTPROTDOTR_BLAS( blasname ) \
+INSERT_GENTPROTDOTC_BLAS( blasname )
 
 
 // -- Basic one-operand macro with real projection --
