@@ -42,6 +42,9 @@ There are many functions that BLIS implements that are not listed here, either b
 
 The object API was given its name (a) because it abstracts the floating-point types of its operands (along with many other properties) within a `typedef struct {...}` data structure, and (b) to contrast it with the other native API in BLIS, the typed API, which is [documented here](BLISTypedAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
 
+In general, this document should be treated more as a reference than a place to learn how to use BLIS in your application. Thus, we highly encourage all readers to first study the [example code](BLISObjectAPI.md#example-code) provided within the BLIS source distribution.
+
+
 ## BLIS types
 
 The following tables list various types used throughout the BLIS object API.
@@ -2211,5 +2214,5 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
 
 # Example code
 
-BLIS provides lots of example code in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include creating and managing objects, printing vectors and matrices, setting and querying object properties, and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
+BLIS provides lots of example code in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include creating and managing objects, printing vectors and matrices, setting and querying object properties, and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above. Please read the `README` contained within the `examples/oapi` directory for further details.
 
