@@ -14,8 +14,8 @@
   * [Initialization and cleanup](BLISObjectAPI.md#initialization-and-cleanup)
 * **[Object management](BLISObjectAPI.md#object-management)**
   * [Object creation function reference](BLISObjectAPI.md#object-creation-function-reference)
-  * [Accessor function reference](BLISObjectAPI.md#accessor-function-reference)
-  * [Mutator function reference](BLISObjectAPI.md#mutator-function-reference)
+  * [Object accessor function reference](BLISObjectAPI.md#object-accessor-function-reference)
+  * [Object mutator function reference](BLISObjectAPI.md#object-mutator-function-reference)
   * [Other object function reference](BLISObjectAPI.md#other-object-function-reference)
 * **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
   * [Operation index](BLISObjectAPI.md#operation-index)
@@ -390,7 +390,7 @@ Initialize a _1 x 1_ object `obj` using internal storage sufficient to hold one 
 Objects initialized via this function should **never** be passed to `bli_obj_free()`.
 
 
-## Accessor function reference
+## Object accessor function reference
 
 Notes for interpreting function descriptions:
   * Object accessor functions allow the caller to query certain properties of objects.
@@ -544,12 +544,12 @@ Return the size, in bytes, of the storage datatype as indicated by `bli_obj_dt()
 
 
 
-## Mutator function reference
+## Object mutator function reference
 
 Notes for interpreting function descriptions:
   * Object mutator functions allow the caller to modify certain properties of objects.
   * The user should be extra careful about modifying properties after objects are created. For typical use of these functions, please study the example code provided in [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi).
-  * The list of mutators below is much shorter than the list of accessor functions provided in the previous section. Most mutator functions should *not* be called by users (unless you know what you are doing). For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
+  * The list of mutators below is much shorter than the list of accessor functions provided in the previous section. Most mutator functions should *not* be called by users (unless you know what you are doing). For a full list of mutator functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
 
 ---
 
