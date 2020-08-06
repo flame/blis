@@ -14,7 +14,9 @@
   * [Initialization and cleanup](BLISObjectAPI.md#initialization-and-cleanup)
 * **[Object management](BLISObjectAPI.md#object-management)**
   * [Object creation function reference](BLISObjectAPI.md#object-creation-function-reference)
-  * [Object accessor function reference](BLISObjectAPI.md#object-accessor-function-reference)
+  * [Accessor function reference](BLISObjectAPI.md#accessor-function-reference)
+  * [Mutator function reference](BLISObjectAPI.md#mutator-function-reference)
+  * [Other object function reference](BLISObjectAPI.md#other-object-function-reference)
 * **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
   * [Operation index](BLISObjectAPI.md#operation-index)
   * [Level-1v operations](BLISObjectAPI.md#level-1v-operations)
@@ -388,14 +390,12 @@ Initialize a _1 x 1_ object `obj` using internal storage sufficient to hold one 
 Objects initialized via this function should **never** be passed to `bli_obj_free()`.
 
 
-## Object accessor function reference
+## Accessor function reference
 
 Notes for interpreting function descriptions:
   * Object accessor functions allow the caller to query certain properties of objects.
   * These functions are only guaranteed to return meaningful values when called upon objects that have been fully initialized/created.
-  * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h).
-
-**Note**: For now, we mostly omit documentation for the corresponding functions used to modify object properties because those functions can easily invalidate the state of an `obj_t` and should be used only in specific instances. If you think you need to manually set the fields of an `obj_t`, please contact BLIS developers so we can give you personalized guidance.
+  * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
 
 ---
 
@@ -423,7 +423,7 @@ Return the precision component of the storage datatype property of `obj`.
 ```c
 trans_t bli_obj_conjtrans_status( obj_t* obj );
 ```
-Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither.
+Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither. Thus, possible return values are `BLIS_NO_TRANSPOSE`, `BLIS_CONJ_NO_TRANSPOSE`, `BLIS_TRANSPOSE`, or `BLIS_CONJ_TRANSPOSE`.
 
 ---
 
@@ -444,23 +444,30 @@ Thus, possible return values are `BLIS_NO_CONJUGATE` or `BLIS_CONJUGATE`.
 ---
 
 ```c
-uplo_t bli_obj_uplo( obj_t* obj );
+struc_t bli_obj_struc( obj_t* obj );
 ```
-Return the `uplo_t` property of `obj`.
+Return the structure property of `obj`.
 
 ---
 
 ```c
-struc_t bli_obj_struc( obj_t* obj );
+uplo_t bli_obj_uplo( obj_t* obj );
 ```
-Return the `struc_t` property of `obj`.
+Return the uplo (i.e., storage) property of `obj`.
 
 ---
 
 ```c
 diag_t bli_obj_diag( obj_t* obj );
 ```
-Return the `diag_t` property of `obj`.
+Return the diagonal property of `obj`.
+
+---
+
+```c
+doff_t bli_obj_diag_offset( obj_t* obj );
+```
+Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
 
 ---
 
@@ -489,13 +496,6 @@ Return the number of rows (or _m_ dimension) of `obj` after taking into account 
 dim_t bli_obj_width_after_trans( obj_t* obj );
 ```
 Return the number of columns (or _n_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
-
----
-
-```c
-doff_t bli_obj_diag_offset( obj_t* obj );
-```
-Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
 
 ---
 
@@ -542,6 +542,90 @@ siz_t bli_obj_elem_size( obj_t* obj );
 ```
 Return the size, in bytes, of the storage datatype as indicated by `bli_obj_dt()`.
 
+
+
+## Mutator function reference
+
+Notes for interpreting function descriptions:
+  * Object mutator functions allow the caller to modify certain properties of objects.
+  * The user should be extra careful about modifying properties after objects are created. For typical use of these functions, please study the example code provided in [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi).
+  * The list of mutators below is much shorter than the list of accessor functions provided in the previous section. Most mutator functions should *not* be called by users (unless you know what you are doing). For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
+
+---
+
+```c
+void bli_obj_set_conjtrans( trans_t trans, obj_t* obj );
+```
+Set both conjugation and transposition properties of `obj` using the corresponding components of `trans`.
+
+---
+
+```c
+void bli_obj_set_onlytrans( trans_t trans, obj_t* obj );
+```
+Set the transposition property of `obj` using the transposition component of `trans`. Leaves the conjugation property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_set_conj( conj_t conj, obj_t* obj );
+```
+Set the conjugation property of `obj` using `conj`. Leaves the transposition property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_apply_trans( trans_t trans, obj_t* obj );
+```
+Apply `trans` to the transposition property of `obj`. For example, applying `BLIS_TRANSPOSE` will toggle the transposition property of `obj` but leave the conjugation property unchanged; applying `BLIS_CONJ_TRANSPOSE` will toggle both the conjugation and transposition properties of `obj`.
+
+---
+
+```c
+void bli_obj_apply_conj( conj_t conj, obj_t* obj );
+```
+Apply `conj` to the conjugation property of `obj`. Specifically, applying `BLIS_CONJUGATE` will toggle the conjugation property of `obj`; applying `BLIS_NO_CONJUGATE` will have no effect. Leaves the transposition property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_set_struc( struc_t struc, obj_t* obj );
+```
+Set the structure property of `obj` to `struc`.
+
+---
+
+```c
+void bli_obj_set_uplo( uplo_t uplo, obj_t* obj );
+```
+Set the uplo (i.e., storage) property of `obj` to `uplo`.
+
+---
+
+```c
+void bli_obj_set_diag( diag_t diag, obj_t* obj );
+```
+Set the diagonal property of `obj` to `diag`.
+
+---
+
+```c
+void bli_obj_set_diag_offset( doff_t doff, obj_t* obj );
+```
+Set the diagonal offset property of `obj` to `doff`. Note that `doff_t` may be typecast from any signed integer.
+
+---
+
+
+## Other object function reference
+
+---
+
+```c
+void bli_obj_induce_trans( obj_t* obj );
+```
+Modify the properties of `obj` to induce a logical transposition. This function operates without regard to whether the transposition property is already set. Therefore, depending on the circumstance, the caller may or may not wish to clear the transposition property after calling this function.
+
 ---
 
 ```c
@@ -566,13 +650,6 @@ Initialize `r` to be a modified shallow copy of `c` that refers only to the real
 void bli_obj_imag_part( obj_t* c, obj_t* i );
 ```
 Initialize `i` to be a modified shallow copy of `c` that refers only to the imaginary part of `c`.
-
----
-
-```c
-void bli_obj_induce_trans( obj_t* obj );
-```
-Modify the properties of `obj` to induce a logical transposition. This function operations without regard to whether the transposition property is already set. Therefore, depending on the circumstance, the caller may or may not wish to clear the transposition property after calling this function. (If needed, the user may call `bli_obj_toggle_trans( obj )` to toggle the transposition status.)
 
 
 # Computational function reference
