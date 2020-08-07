@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,7 +51,7 @@ void bli_herk_x_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t       uplo;
+	dim_t        uplo;
 	gemm_var_oft f;
 
 	// Set a bool based on the uplo field of C's root object.

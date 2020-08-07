@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,7 +85,8 @@
 #elif defined(__bg__)
   #define BLIS_OS_BGP 1
 #elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || \
-      defined(__bsdi__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
+      defined(__bsdi__) || defined(__DragonFly__) || \
+      defined(__FreeBSD_kernel__) || defined(__HAIKU__)
   #define BLIS_OS_BSD 1
 #elif defined(EMSCRIPTEN)
   #define BLIS_OS_EMSCRIPTEN

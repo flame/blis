@@ -48,8 +48,16 @@
 
 int main( int argc, char** argv )
 {
+	rntm_t rntm_g;
 
 	bli_init();
+
+	// Copy the global rntm_t object so that we can use it later when disabling
+	// sup. Starting with a copy of the global rntm_t is actually necessary;
+	// if we start off with a locally-initialized rntm_t, it will not contain
+	// the ways of parallelism that were conveyed via environment variables,
+	// which is necessary when running this driver with multiple BLIS threads.
+	bli_rntm_init_from_global( &rntm_g );
 
 #ifndef ERROR_CHECK
 	bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
@@ -100,17 +108,7 @@ int main( int argc, char** argv )
 	inc_t    rs_a, cs_a;
 	inc_t    rs_b, cs_b;
 
-	if      ( sc == BLIS_RRR ) { rs_c = cs_c = -1; rs_a = cs_a = -1; rs_b = cs_b = -1; }
-	else if ( sc == BLIS_RRC ) { rs_c = cs_c = -1; rs_a = cs_a = -1; rs_b = cs_b =  0; }
-	else if ( sc == BLIS_RCR ) { rs_c = cs_c = -1; rs_a = cs_a =  0; rs_b = cs_b = -1; }
-	else if ( sc == BLIS_RCC ) { rs_c = cs_c = -1; rs_a = cs_a =  0; rs_b = cs_b =  0; }
-	else if ( sc == BLIS_CRR ) { rs_c = cs_c =  0; rs_a = cs_a = -1; rs_b = cs_b = -1; }
-	else if ( sc == BLIS_CRC ) { rs_c = cs_c =  0; rs_a = cs_a = -1; rs_b = cs_b =  0; }
-	else if ( sc == BLIS_CCR ) { rs_c = cs_c =  0; rs_a = cs_a =  0; rs_b = cs_b = -1; }
-	else if ( sc == BLIS_CCC ) { rs_c = cs_c =  0; rs_a = cs_a =  0; rs_b = cs_b =  0; }
-	else                       { bli_abort(); }
-
-	f77_int cbla_storage;
+	f77_int  cbla_storage;
 
 	if      ( sc == BLIS_RRR ) cbla_storage = CblasRowMajor;
 	else if ( sc == BLIS_CCC ) cbla_storage = CblasColMajor;
@@ -173,6 +171,66 @@ int main( int argc, char** argv )
 		if ( k_input < 0 ) k = p / ( dim_t )abs(k_input);
 		else               k =     ( dim_t )    k_input;
 
+#ifdef LDIM_SMALL
+
+		// Setting the row and column strides of a matrix to '0' is a shorthand
+		// request for column storage; using '-1' is shorthand for row storage.
+		//else if ( sc == BLIS_RRC ) { rs_c = cs_c = -1; rs_a = cs_a = -1; rs_b = cs_b =  0; }
+		//else if ( sc == BLIS_RCR ) { rs_c = cs_c = -1; rs_a = cs_a =  0; rs_b = cs_b = -1; }
+		//else if ( sc == BLIS_RCC ) { rs_c = cs_c = -1; rs_a = cs_a =  0; rs_b = cs_b =  0; }
+		//else if ( sc == BLIS_CRR ) { rs_c = cs_c =  0; rs_a = cs_a = -1; rs_b = cs_b = -1; }
+		//else if ( sc == BLIS_CRC ) { rs_c = cs_c =  0; rs_a = cs_a = -1; rs_b = cs_b =  0; }
+		//else if ( sc == BLIS_CCR ) { rs_c = cs_c =  0; rs_a = cs_a =  0; rs_b = cs_b = -1; }
+
+		if      ( sc == BLIS_RRR ) { rs_c = -1;      rs_a = -1;      rs_b = -1;
+		                             cs_c = -1;      cs_a = -1;      cs_b = -1;      }
+		else if ( sc == BLIS_RRC ) { rs_c = -1;      rs_a = -1;      rs_b =  0;
+		                             cs_c = -1;      cs_a = -1;      cs_b =  0;      }
+		else if ( sc == BLIS_RCR ) { rs_c = -1;      rs_a =  0;      rs_b = -1;
+		                             cs_c = -1;      cs_a =  0;      cs_b = -1;      }
+		else if ( sc == BLIS_RCC ) { rs_c = -1;      rs_a =  0;      rs_b =  0;
+		                             cs_c = -1;      cs_a =  0;      cs_b =  0;      }
+		else if ( sc == BLIS_CRR ) { rs_c =  0;      rs_a = -1;      rs_b = -1;
+		                             cs_c =  0;      cs_a = -1;      cs_b = -1;      }
+		else if ( sc == BLIS_CRC ) { rs_c =  0;      rs_a = -1;      rs_b =  0;
+		                             cs_c =  0;      cs_a = -1;      cs_b =  0;      }
+		else if ( sc == BLIS_CCR ) { rs_c =  0;      rs_a =  0;      rs_b = -1;
+		                             cs_c =  0;      cs_a =  0;      cs_b = -1;      }
+		else if ( sc == BLIS_CCC ) { rs_c =  0;      rs_a =  0;      rs_b =  0;
+		                             cs_c =  0;      cs_a =  0;      cs_b =  0;      }
+		else                       { bli_abort(); }
+
+#else // LDIM_LARGE
+
+		#if 0
+		const dim_t m_large = m;
+		const dim_t n_large = n;
+		const dim_t k_large = k;
+		#else
+		const dim_t m_large = p_max;
+		const dim_t n_large = p_max;
+		const dim_t k_large = p_max;
+		#endif
+
+		if      ( sc == BLIS_RRR ) { rs_c = n_large; rs_a = k_large; rs_b = n_large;
+		                             cs_c = 1;       cs_a = 1;       cs_b = 1;       }
+		else if ( sc == BLIS_RRC ) { rs_c = n_large; rs_a = k_large; rs_b = 1;
+		                             cs_c = 1;       cs_a = 1;       cs_b = k_large; }
+		else if ( sc == BLIS_RCR ) { rs_c = n_large; rs_a = 1;       rs_b = n_large;
+		                             cs_c = 1;       cs_a = m_large; cs_b = 1;       }
+		else if ( sc == BLIS_RCC ) { rs_c = n_large; rs_a = 1;       rs_b = 1;
+		                             cs_c = 1;       cs_a = m_large; cs_b = k_large; }
+		else if ( sc == BLIS_CRR ) { rs_c = 1;       rs_a = k_large; rs_b = n_large;
+		                             cs_c = m_large; cs_a = 1;       cs_b = 1;       }
+		else if ( sc == BLIS_CRC ) { rs_c = 1;       rs_a = k_large; rs_b = 1;
+		                             cs_c = m_large; cs_a = 1;       cs_b = k_large; }
+		else if ( sc == BLIS_CCR ) { rs_c = 1;       rs_a = 1;       rs_b = n_large;
+		                             cs_c = m_large; cs_a = m_large; cs_b = 1;       }
+		else if ( sc == BLIS_CCC ) { rs_c = 1;       rs_a = 1;       rs_b = 1;
+		                             cs_c = m_large; cs_a = m_large; cs_b = k_large; }
+		else                       { bli_abort(); }
+#endif
+
 		bli_obj_create( dt, 1, 1, 0, 0, &alpha );
 		bli_obj_create( dt, 1, 1, 0, 0, &beta );
 
@@ -182,12 +240,12 @@ int main( int argc, char** argv )
 		if ( bli_does_notrans( transa ) )
 			bli_obj_create( dt, m, k, rs_a, cs_a, &a );
 		else
-			bli_obj_create( dt, k, m, rs_a, cs_a, &a );
+			bli_obj_create( dt, k, m, cs_a, rs_a, &a );
 
 		if ( bli_does_notrans( transb ) )
 			bli_obj_create( dt, k, n, rs_b, cs_b, &b );
 		else
-			bli_obj_create( dt, n, k, rs_b, cs_b, &b );
+			bli_obj_create( dt, n, k, cs_b, rs_b, &b );
 
 		bli_randm( &a );
 		bli_randm( &b );
@@ -292,8 +350,14 @@ int main( int argc, char** argv )
 			          &beta,
 			          &c );
 	#else
+			// NOTE: We can't use the static initializer and must instead
+			// initialize the rntm_t with the copy from the global rntm_t we
+			// made at the beginning of main(). Please see the comment there
+			// for more info on why BLIS_RNTM_INITIALIZER doesn't work here.
+			//rntm_t rntm = BLIS_RNTM_INITIALIZER;
+			rntm_t rntm = rntm_g;
+
 			// Disable sup and use the expert interface.
-			rntm_t rntm = BLIS_RNTM_INITIALIZER;
 			bli_rntm_disable_l3_sup( &rntm );
 
 			bli_gemm_ex( &alpha,

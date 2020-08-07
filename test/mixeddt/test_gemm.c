@@ -66,12 +66,12 @@ int main( int argc, char** argv )
 	num_t dtc = DTC;
 	num_t dtx = DTX;
 
-	const bool_t a_real    = bli_is_real( dta );
-	const bool_t b_real    = bli_is_real( dtb );
-	const bool_t c_real    = bli_is_real( dtc );
-	const bool_t a_complex = bli_is_complex( dta );
-	const bool_t b_complex = bli_is_complex( dtb );
-	const bool_t c_complex = bli_is_complex( dtc );
+	const bool   a_real    = bli_is_real( dta );
+	const bool   b_real    = bli_is_real( dtb );
+	const bool   c_real    = bli_is_real( dtc );
+	const bool   a_complex = bli_is_complex( dta );
+	const bool   b_complex = bli_is_complex( dtb );
+	const bool   c_complex = bli_is_complex( dtc );
 
 	// Extract the precision component of the computation datatype.
 	prec_t comp_prec = bli_dt_prec( dtx );
@@ -271,9 +271,9 @@ void blas_gemm_md( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c )
 	dom_t   comp_dom;
 	obj_t   at, bt, ct;
 	obj_t   ar,     cr;
-	bool_t  needacc;
-	bool_t  force_proj_a = FALSE;
-	bool_t  force_proj_b = FALSE;
+	bool    needacc;
+	bool    force_proj_a = FALSE;
+	bool    force_proj_b = FALSE;
 
 	
 

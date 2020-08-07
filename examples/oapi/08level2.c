@@ -246,10 +246,11 @@ int main( int argc, char** argv )
 	// displaying junk values in the unstored triangle.
 	bli_setm( &BLIS_ZERO, &a );
 
-	// Mark matrix 'a' as triangular and stored in the lower triangle, and
-	// then randomize that lower triangle.
+	// Mark matrix 'a' as triangular, stored in the lower triangle, and
+	// having a non-unit diagonal. Then randomize that lower triangle.
 	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
 	bli_obj_set_uplo( BLIS_LOWER, &a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 	bli_randm( &a );
 
 	bli_printm( "a: randomized (zeros in upper triangle)", &a, "%4.1f", "" );
@@ -288,10 +289,11 @@ int main( int argc, char** argv )
 	// displaying junk values in the unstored triangle.
 	bli_setm( &BLIS_ZERO, &a );
 
-	// Mark matrix 'a' as triangular and stored in the lower triangle, and
-	// then randomize that lower triangle.
+	// Mark matrix 'a' as triangular, stored in the lower triangle, and
+	// having a non-unit diagonal. Then randomize that lower triangle.
 	bli_obj_set_struc( BLIS_TRIANGULAR, &a );
 	bli_obj_set_uplo( BLIS_LOWER, &a );
+	bli_obj_set_diag( BLIS_NONUNIT_DIAG, &a );
 	bli_randm( &a );
 
 	// Load the diagonal. By setting the diagonal to something of greater

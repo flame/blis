@@ -81,7 +81,7 @@ void bli_daxpyf_penryn_int
 	v2df_t            a10v, a11v, a12v, a13v, y1v;
 	v2df_t            chi0v, chi1v, chi2v, chi3v;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 
 	if ( bli_zero_dim2( m, b_n ) ) return;

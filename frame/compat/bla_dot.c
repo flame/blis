@@ -101,10 +101,16 @@ float PASTEF77(sd,sdot)
        const float*   y, const f77_int* incy
      )
 {
-	float r = ( float )PASTEF77(d,sdot)( n,
-	                                     x, incx,
-	                                     y, incy );
-	return r + *sb;
+	return ( float )
+	       (
+	         ( double )(*sb) +
+	         PASTEF77(d,sdot)
+	         (
+	           n,
+	           x, incx,
+	           y, incy
+	         )
+	       );
 }
 
 // Input vectors stored in single precision, computed in double precision,

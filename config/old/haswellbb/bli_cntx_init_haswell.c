@@ -36,14 +36,33 @@
 #include "blis.h"
 
 // Instantiate prototypes for packm kernels.
+PACKM_KER_PROT(    float,  s, packm_6xk_bb4_haswell_ref )
 PACKM_KER_PROT(    double, d, packm_6xk_bb2_haswell_ref )
 
 // Instantiate prototypes for level-3 kernels.
+GEMM_UKR_PROT(     float,  s, gemmbb_haswell_ref )
+GEMMTRSM_UKR_PROT( float,  s, gemmtrsmbb_l_haswell_ref )
+GEMMTRSM_UKR_PROT( float,  s, gemmtrsmbb_u_haswell_ref )
+TRSM_UKR_PROT(     float,  s, trsmbb_l_haswell_ref )
+TRSM_UKR_PROT(     float,  s, trsmbb_u_haswell_ref )
+
 GEMM_UKR_PROT(     double, d, gemmbb_haswell_ref )
 GEMMTRSM_UKR_PROT( double, d, gemmtrsmbb_l_haswell_ref )
 GEMMTRSM_UKR_PROT( double, d, gemmtrsmbb_u_haswell_ref )
 TRSM_UKR_PROT(     double, d, trsmbb_l_haswell_ref )
 TRSM_UKR_PROT(     double, d, trsmbb_u_haswell_ref )
+
+GEMM_UKR_PROT(     scomplex, c, gemmbb_haswell_ref )
+GEMMTRSM_UKR_PROT( scomplex, c, gemmtrsmbb_l_haswell_ref )
+GEMMTRSM_UKR_PROT( scomplex, c, gemmtrsmbb_u_haswell_ref )
+TRSM_UKR_PROT(     scomplex, c, trsmbb_l_haswell_ref )
+TRSM_UKR_PROT(     scomplex, c, trsmbb_u_haswell_ref )
+
+GEMM_UKR_PROT(     dcomplex, z, gemmbb_haswell_ref )
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsmbb_l_haswell_ref )
+GEMMTRSM_UKR_PROT( dcomplex, z, gemmtrsmbb_u_haswell_ref )
+TRSM_UKR_PROT(     dcomplex, z, trsmbb_l_haswell_ref )
+TRSM_UKR_PROT(     dcomplex, z, trsmbb_u_haswell_ref )
 
 void bli_cntx_init_haswell( cntx_t* cntx )
 {
@@ -73,10 +92,19 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
 #else
-	  3,
+	  12,
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemmbb_haswell_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_FLOAT,    bli_strsmbb_l_haswell_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_FLOAT,    bli_strsmbb_u_haswell_ref,      FALSE,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemmbb_haswell_ref,        FALSE,
 	  BLIS_TRSM_L_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_l_haswell_ref,      FALSE,
 	  BLIS_TRSM_U_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_u_haswell_ref,      FALSE,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemmbb_haswell_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_l_haswell_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_u_haswell_ref,      FALSE,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemmbb_haswell_ref,        FALSE,
+	  BLIS_TRSM_L_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_l_haswell_ref,      FALSE,
+	  BLIS_TRSM_U_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_u_haswell_ref,      FALSE,
 #endif
 	  cntx
 	);
@@ -84,16 +112,23 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	// Update the context with customized virtual [gemm]trsm micro-kernels.
 	bli_cntx_set_l3_vir_ukrs
 	(
-	  2,
+	  8,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_l_haswell_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_u_haswell_ref,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsmbb_l_haswell_ref,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsmbb_u_haswell_ref,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_SCOMPLEX, bli_cgemmtrsmbb_l_haswell_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_SCOMPLEX, bli_cgemmtrsmbb_u_haswell_ref,
+	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_l_haswell_ref,
+	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_u_haswell_ref,
 	  cntx
 	);
 
 	// Update the context with optimized packm kernels.
 	bli_cntx_set_packm_kers
 	(
-	  1,
+	  2,
+	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_6xk_bb4_haswell_ref,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_6xk_bb2_haswell_ref,
 	  cntx
 	);
@@ -115,9 +150,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
 	  10,
+#if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+#endif
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -152,12 +189,12 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 #else
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    12,    -1,    -1 );
-	bli_blksz_init     ( &blkszs[ BLIS_NR ],    -1,     6,    -1,    -1,
-	                                            -1,    12,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,    72,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,   256,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  4080,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    24,    12,    12,     6 );
+	bli_blksz_init     ( &blkszs[ BLIS_NR ],     6,     6,     6,     6,
+	                                            24,    12,     6,     6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,    72,    36 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  2076 );
 #endif
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,     8,     8 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,     8,     8 );

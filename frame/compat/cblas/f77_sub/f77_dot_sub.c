@@ -75,7 +75,7 @@ void PASTEF772(sds,dot,sub)
              float*   rval
      )
 {
-	*rval = *sb + PASTEF77(sds,dot)
+	*rval = PASTEF77(sds,dot)
 	(
 	  n,
 	  sb,

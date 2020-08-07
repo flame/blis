@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -93,6 +93,12 @@ void bli_l3_thrinfo_free
        thrinfo_t* thread
      );
 
+void bli_l3_sup_thrinfo_free
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
+
 // -----------------------------------------------------------------------------
 
 void bli_l3_thrinfo_create_root
@@ -102,6 +108,20 @@ void bli_l3_thrinfo_create_root
        rntm_t*     rntm,
        cntl_t*     cntl,
        thrinfo_t** thread
+     );
+
+void bli_l3_sup_thrinfo_create_root
+     (
+       dim_t       id,
+       thrcomm_t*  gl_comm,
+       rntm_t*     rntm,
+       thrinfo_t** thread
+     );
+
+void bli_l3_sup_thrinfo_update_root
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
      );
 
 void bli_l3_thrinfo_print_gemm_paths

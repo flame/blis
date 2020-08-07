@@ -36,6 +36,8 @@ There are many functions that BLIS implements that are not listed here, either b
 
 For curious readers, the typed API was given its name (a) because it exposes the floating-point types in the names of its functions, and (b) to contrast it with the other native API in BLIS, the object API, which is [documented here](BLISObjectAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
 
+In general, this document should be treated more as a reference than a place to learn how to use BLIS in your application. Thus, we highly encourage all readers to first study the [example code](BLISTypedAPI.md#example-code) provided within the BLIS source distribution.
+
 ## BLIS types
 
 The following tables list various types used throughout the BLIS typed API.
@@ -195,7 +197,7 @@ Notes for interpreting function descriptions:
   * **[Level-1v](BLISTypedAPI.md#level-1v-operations)**: Operations on vectors:
     * [addv](BLISTypedAPI.md#addv), [amaxv](BLISTypedAPI.md#amaxv), [axpyv](BLISTypedAPI.md#axpyv), [axpbyv](BLISTypedAPI.md#axpbyv), [copyv](BLISTypedAPI.md#copyv), [dotv](BLISTypedAPI.md#dotv), [dotxv](BLISTypedAPI.md#dotxv), [invertv](BLISTypedAPI.md#invertv), [scal2v](BLISTypedAPI.md#scal2v), [scalv](BLISTypedAPI.md#scalv), [setv](BLISTypedAPI.md#setv), [subv](BLISTypedAPI.md#subv), [swapv](BLISTypedAPI.md#swapv), [xpbyv](BLISTypedAPI.md#xpbyv)
   * **[Level-1d](BLISTypedAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISTypedAPI.md#subd), [xpbyd](BLISTypedAPI.md#xpbyd)
+    * [addd](BLISTypedAPI.md#addd), [axpyd](BLISTypedAPI.md#axpyd), [copyd](BLISTypedAPI.md#copyd), [invertd](BLISTypedAPI.md#invertd), [scald](BLISTypedAPI.md#scald), [scal2d](BLISTypedAPI.md#scal2d), [setd](BLISTypedAPI.md#setd), [setid](BLISTypedAPI.md#setid), [shiftd](BLISTypedAPI.md#shiftd), [subd](BLISTypedAPI.md#subd), [xpbyd](BLISTypedAPI.md#xpbyd)
   * **[Level-1m](BLISTypedAPI.md#level-1m-operations)**: Element-wise operations on matrices:
     * [addm](BLISTypedAPI.md#addm), [axpym](BLISTypedAPI.md#axpym), [copym](BLISTypedAPI.md#copym), [scalm](BLISTypedAPI.md#scalm), [scal2m](BLISTypedAPI.md#scal2m), [setm](BLISTypedAPI.md#setm), [subm](BLISTypedAPI.md#subm)
   * **[Level-1f](BLISTypedAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
@@ -1051,6 +1053,7 @@ void bli_?her2
      (
        uplo_t  uploa,
        conj_t  conjx,
+       conj_t  conjy,
        dim_t   m,
        ctype*  alpha,
        ctype*  x, inc_t incx,
@@ -1115,6 +1118,7 @@ void bli_?syr2
      (
        uplo_t  uploa,
        conj_t  conjx,
+       conj_t  conjy,
        dim_t   m,
        ctype*  alpha,
        ctype*  x, inc_t incx,
@@ -1873,5 +1877,5 @@ char* bli_info_get_trsm_impl_string( num_t dt );
 
 # Example code
 
-BLIS provides lots of example code in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include printing vectors and matrices and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
+BLIS provides lots of example code in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include printing vectors and matrices and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above. Please read the `README` contained within the `examples/tapi` directory for further details.
 

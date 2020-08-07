@@ -73,7 +73,11 @@
 
 // Prototype reference implementation of small/unpacked matrix handler.
 #include "bli_l3_sup_ref.h"
+#include "bli_l3_sup_int.h"
 #include "bli_l3_sup_vars.h"
+#include "bli_l3_sup_packm_a.h"
+#include "bli_l3_sup_packm_b.h"
+#include "bli_l3_sup_packm_var.h"
 
 // Prototype microkernel wrapper APIs.
 #include "bli_l3_ukr_oapi.h"

@@ -37,7 +37,7 @@
 
 // scal2rihs_mxn
 
-static void bli_cscal2rihs_mxn
+BLIS_INLINE void bli_cscal2rihs_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -158,7 +158,7 @@ static void bli_cscal2rihs_mxn
 	}
 }
 
-static void bli_zscal2rihs_mxn
+BLIS_INLINE void bli_zscal2rihs_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,

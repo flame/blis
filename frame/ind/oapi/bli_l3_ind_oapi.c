@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -60,8 +60,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	func( alpha, a, b, beta, c, cntx, rntm ); \
 }
@@ -96,8 +96,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	func( side, alpha, a, b, beta, c, cntx, rntm ); \
 }
@@ -130,8 +130,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	func( alpha, a, beta, c, cntx, rntm ); \
 }
@@ -163,8 +163,8 @@ void PASTEMAC(opname,imeth) \
 	/* Initialize a local runtime with global settings if necessary. Note
 	   that in the case that a runtime is passed in, we make a local copy. */ \
 	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_thread_init_rntm( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                  rntm = &rntm_l; } \
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
 \
 	func( side, alpha, a, b, cntx, rntm ); \
 }

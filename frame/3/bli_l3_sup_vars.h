@@ -50,7 +50,8 @@ void PASTEMAC0(opname) \
        obj_t*  c, \
        stor3_t eff_id, \
        cntx_t* cntx, \
-       rntm_t* rntm  \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
      );
 
 GENPROT( gemmsup_ref_var1 )
@@ -81,12 +82,125 @@ void PASTEMAC(ch,varname) \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
        stor3_t          eff_id, \
        cntx_t* restrict cntx, \
-       rntm_t* restrict rntm  \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
      );
 
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1 )
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
 
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTEMAC(ch,varname) \
+     ( \
+       bool             packa, \
+       bool             packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          eff_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
+     );
+
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1n )
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
+     (
+       num_t    dt,
+       trans_t* trans,
+       bool     packa,
+       bool     packb,
+       stor3_t* eff_id,
+       cntx_t*  cntx
+     )
+{
+	const bool row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
+
+	// Handle row- and column-preferrential kernels separately.
+	if ( row_pref )
+	{
+		if      ( packa && packb )
+		{
+			if      ( *eff_id == BLIS_RRC )
+			{
+				// Since C is already row-stored, we can use BLIS_RRR kernel instead.
+				*eff_id = BLIS_RRR;
+			}
+			else if ( *eff_id == BLIS_CRC )
+			{
+				// BLIS_RRC when transposed below (both matrices still packed).
+				// This allows us to use the BLIS_RRR kernel instead.
+				*eff_id = BLIS_CCC; // BLIS_RRR when transposed below.
+			}
+			else if ( *eff_id == BLIS_CRR )
+			{
+				// Induce a transpose to make C row-stored.
+				// BLIS_RCC when transposed below (both matrices still packed).
+				// This allows us to use the BLIS_RRR kernel instead.
+				*trans = bli_trans_toggled( *trans );
+				*eff_id = BLIS_CCC; // BLIS_RRR when transposed below.
+			}
+		}
+		else if ( packb )
+		{
+			if      ( *eff_id == BLIS_RRC )
+			{
+				// Since C is already row-stored, we can use BLIS_RRR kernel instead.
+				*eff_id = BLIS_RRR;
+			}
+			else if ( *eff_id == BLIS_CRC )
+			{
+				// BLIS_RRC when transposed below (with packa instead of packb).
+				// No transformation is beneficial here.
+			}
+			else if ( *eff_id == BLIS_RCC )
+			{
+				// C is already row-stored; cancel transposition and use BLIS_RCR
+				// kernel instead.
+				*trans = bli_trans_toggled( *trans );
+				*eff_id = BLIS_RCR;
+			}
+			#if 0
+			// This transformation performs poorly. Theory: packing A (formerly B)
+			// when eff_id == BLIS_RCC (formerly BLIS_CRR) to row storage is slow
+			// and kills the performance?
+			else if ( eff_id == BLIS_CRR )
+			{
+				trans = bli_trans_toggled( trans );
+				eff_id = BLIS_CRC; // BLIS_RRC when transposed below.
+			}
+			#endif
+		}
+		else if ( packa )
+		{
+			if      ( *eff_id == BLIS_CRR )
+			{
+				// Induce a transpose to make C row-stored.
+				// BLIS_RCC when transposed below (both matrices still packed).
+				// This allows us to use the BLIS_RRR kernel instead.
+				*trans = bli_trans_toggled( *trans );
+				*eff_id = BLIS_CCR; // BLIS_RCR when transposed below.
+			}
+		}
+	}
+	else
+	{
+		//bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		printf( "libblis: sup var1n2m_opt_cases not yet implemented for column-preferential kernels.\n" );
+		bli_abort();
+	}
+}
 

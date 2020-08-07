@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -85,11 +85,25 @@ void bli_trmm_front
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
 	}
 
-#if 0
-	// NOTE: This case casts right-side trmm in terms of left side. This
-	// reduces the number of macrokernels exercised to two (trmm_ll and
-	// trmm_lu) but can lead to the microkernel being executed with an
-	// output matrix that is stored counter to its output preference.
+#ifdef BLIS_DISABLE_TRMM_RIGHT
+	// NOTE: This case casts right-side trmm in terms of left side. This is
+	// necessary when the current subconfiguration uses a gemm microkernel
+	// that assumes that the packing kernel will have already duplicated
+	// (broadcast) element of B in the packed copy of B. Supporting
+	// duplication within the logic that packs micropanels from triangular
+	// matrices would be ugly, and so we simply don't support it. As a
+	// consequence, those subconfigurations need a way to force the triangular
+	// matrix to be on the left (and thus the general matrix to the on the
+	// right). So our solution is that in those cases, the subconfigurations
+	// simply #define BLIS_DISABLE_TRMM_RIGHT.
+
+	// NOTE: This case casts right-side trmm in terms of left side. This can
+	// lead to the microkernel being executed on an output matrix with the
+	// microkernel's general stride IO case (unless the microkernel supports
+	// both both row and column IO cases as well).
+
+	// NOTE: Casting right-side trmm in terms of left side reduces the number
+	// of macrokernels exercised to two (trmm_ll and trmm_lu).
 
 	// If A is being multiplied from the right, transpose all operands
 	// so that we can perform the computation as if A were being multiplied
@@ -115,7 +129,8 @@ void bli_trmm_front
 	// micro-kernel to access elements of C in its preferred manner.
 	// NOTE: We disable the optimization for 1x1 matrices since the concept
 	// of row- vs. column storage breaks down.
-	if ( !bli_obj_is_1x1( &c_local ) )
+	//if ( !bli_obj_is_1x1( &c_local ) ) // NOTE: This conditional should NOT
+	                                     // be enabled. See issue #342 comments.
 	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
 	{
 		bli_toggle_side( &side );

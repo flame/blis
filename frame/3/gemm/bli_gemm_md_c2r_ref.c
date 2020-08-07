@@ -56,8 +56,8 @@ void PASTEMAC2(ch,opname,suf) \
 \
 	PASTECH(chr,gemm_ukr_ft) \
 	                  rgemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool_t      col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool_t      row_pref  = !col_pref; \
+	const bool        col_pref  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const bool        row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -86,7 +86,7 @@ void PASTEMAC2(ch,opname,suf) \
 	inc_t             rs_c_use; \
 	inc_t             cs_c_use; \
 \
-	bool_t            using_ct; \
+	bool              using_ct; \
 \
 	/* This virtual microkernel is used by ccr and crc mixed-domain cases
 	   when any of the following conditions are met:

@@ -71,9 +71,9 @@ test_dts="d s z c"
 test_ops="gemm hemm herk trmm trsm"
 
 # Implementations to test.
-#impls="blis"
+impls="blis"
 #impls="other"
-impls="eigen"
+#impls="eigen"
 #impls="all"
 
 if [ "${impls}" = "blis" ]; then

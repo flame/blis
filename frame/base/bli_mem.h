@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,80 +34,120 @@
 
 */
 
+
 #ifndef BLIS_MEM_H
 #define BLIS_MEM_H
 
 
-// Mem entry query
+// mem_t object type (defined in bli_type_defs.h)
 
-static pblk_t* bli_mem_pblk( mem_t* mem )
+/*
+typedef struct mem_s
+{
+	pblk_t    pblk;
+	packbuf_t buf_type;
+	pool_t*   pool;
+	siz_t     size;
+} mem_t;
+
+typedef struct
+{
+	void*     buf;
+	siz_t     block_size;
+} pblk_t;
+*/
+
+//
+// -- mem_t query --------------------------------------------------------------
+//
+
+BLIS_INLINE pblk_t* bli_mem_pblk( mem_t* mem )
 {
 	return &(mem->pblk);
 }
 
-static void* bli_mem_buffer( mem_t* mem )
+BLIS_INLINE void* bli_mem_buffer( mem_t* mem )
 {
 	return bli_pblk_buf( bli_mem_pblk( mem ) );
 }
 
-static packbuf_t bli_mem_buf_type( mem_t* mem )
+BLIS_INLINE packbuf_t bli_mem_buf_type( mem_t* mem )
 {
 	return mem->buf_type;
 }
 
-static pool_t* bli_mem_pool( mem_t* mem )
+BLIS_INLINE pool_t* bli_mem_pool( mem_t* mem )
 {
 	return mem->pool;
 }
 
-static siz_t bli_mem_size( mem_t* mem )
+BLIS_INLINE siz_t bli_mem_size( mem_t* mem )
 {
 	return mem->size;
 }
 
-static bool_t bli_mem_is_alloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_alloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) != NULL );
 }
 
-static bool_t bli_mem_is_unalloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_unalloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) == NULL );
 }
 
 
-// Mem entry modification
+//
+// -- mem_t modification -------------------------------------------------------
+//
 
-static void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 {
 	mem->pblk = *pblk;
 }
 
-static void bli_mem_set_buffer( void* buf, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buffer( void* buf, mem_t* mem )
 {
 	bli_pblk_set_buf( buf, &(mem->pblk) );
 }
 
-static void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
 {
 	mem->buf_type = buf_type;
 }
 
-static void bli_mem_set_pool( pool_t* pool, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pool( pool_t* pool, mem_t* mem )
 {
 	mem->pool = pool;
 }
 
-static void bli_mem_set_size( siz_t size, mem_t* mem )
+BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 {
 	mem->size = size;
 }
 
-static void bli_mem_clear( mem_t* mem )
+//
+// -- mem_t initialization -----------------------------------------------------
+//
+
+// NOTE: This initializer macro must be updated whenever fields are added or
+// removed from the mem_t type definition. An alternative to the initializer is
+// calling bli_mem_clear() at runtime.
+
+#define BLIS_MEM_INITIALIZER \
+        { \
+          .pblk        = BLIS_PBLK_INITIALIZER, \
+          .buf_type    = -1, \
+          .pool        = NULL, \
+          .size        = 0, \
+        }  \
+
+BLIS_INLINE void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
+	bli_mem_set_buf_type( ( packbuf_t )-1, mem );
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 }

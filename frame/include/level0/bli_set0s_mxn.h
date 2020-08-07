@@ -41,7 +41,7 @@
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-static void bli_sset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_sset0s_mxn( const dim_t m, const dim_t n,
                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -49,7 +49,7 @@ static void bli_sset0s_mxn( const dim_t m, const dim_t n,
 	bli_sset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_dset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_dset0s_mxn( const dim_t m, const dim_t n,
                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -57,7 +57,7 @@ static void bli_dset0s_mxn( const dim_t m, const dim_t n,
 	bli_dset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_cset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_cset0s_mxn( const dim_t m, const dim_t n,
                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -65,7 +65,7 @@ static void bli_cset0s_mxn( const dim_t m, const dim_t n,
 	bli_cset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_zset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_zset0s_mxn( const dim_t m, const dim_t n,
                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
