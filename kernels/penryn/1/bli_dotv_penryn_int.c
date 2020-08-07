@@ -71,7 +71,7 @@ void bli_ddotv_penryn_int
 	v2df_t            rho1v;
 	v2df_t            x1v, y1v;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) )

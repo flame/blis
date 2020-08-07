@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -360,7 +360,7 @@ dim_t bli_cntl_calc_num_threads_in
 		bszid_t bszid = bli_cntl_bszid( cntl );
 		dim_t   cur_way;
 
-		// We assume bszid is in {KR,MR,NR,MC,KC,NR} if it is not
+		// We assume bszid is in {NC,KC,MC,NR,MR,KR} if it is not
 		// BLIS_NO_PART.
 		if ( bszid != BLIS_NO_PART )
 			cur_way = bli_rntm_ways_for( bszid, rntm );

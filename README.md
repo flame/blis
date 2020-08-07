@@ -11,6 +11,7 @@ Contents
 * **[What's New](#whats-new)**
 * **[What People Are Saying About BLIS](#what-people-are-saying-about-blis)**
 * **[Key Features](#key-features)**
+* **[How to Download BLIS](#how-to-download-blis)**
 * **[Getting Started](#getting-started)**
 * **[Documentation](#documentation)**
 * **[External Packages](#external-packages)**
@@ -92,16 +93,36 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
- * **Small/skinny matrix support for dgemm now available!** Thanks to
+ * **BLIS awarded SIAM Activity Group on Supercomputing Best Paper Prize for 2020!**
+We are thrilled to announce that the paper that we internally refer to as the
+second BLIS paper,
+
+   "The BLIS Framework: Experiments in Portability." Field G. Van Zee, Tyler Smith, Bryan Marker, Tze Meng Low, Robert A. van de Geijn, Francisco Igual, Mikhail Smelyanskiy, Xianyi Zhang, Michael Kistler, Vernon Austel, John A. Gunnels, Lee Killough. ACM Transactions on Mathematical Software (TOMS), 42(2):12:1--12:19, 2016.
+
+   was selected for the [SIAM Activity Group on Supercomputing Best Paper Prize](https://www.siam.org/prizes-recognition/activity-group-prizes/detail/siag-sc-best-paper-prize)
+for 2020. The prize is awarded once every two years to a paper judged to be
+the most outstanding paper in the field of parallel scientific and engineering
+computing, and has only been awarded once before (in 2016) since its inception
+in 2015 (the committee did not award the prize in 2018). The prize will be
+awarded at the [SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle next February. Robert will
+be present at the conference to accept the prize and give
+[a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266).
+The selection committee sought to recognize the paper, "which validates BLIS,
+a framework relying on the notion of microkernels that enables both productivity
+and high performance." Their statement continues, "The framework will continue
+having an important influence on the design and the instantiation of dense linear
+algebra libraries."
+
+ * **Multithreaded small/skinny matrix support for dgemm now available!** Thanks to
 contributions made possible by our partnership with AMD, we have dramatically
 accelerated `gemm` for double-precision real matrix problems where one or two
 dimensions is exceedingly small. A natural byproduct of this optimization is
 that the traditional case of small _m = n = k_ (i.e. square matrices) is also
 accelerated, even though it was not targeted specifically. And though only
-`dgemm` was optimized for now, support for other datatypes, other operations,
-and/or multithreading may be implemented in the future. We've also added a new
-[PerformanceSmall](docs/PerformanceSmall.md) document to showcase the
-improvement in performance when some matrix dimensions are small.
+`dgemm` was optimized for now, support for other datatypes and/or other operations
+may be implemented in the future. We've also added new graphs to the
+[PerformanceSmall](docs/PerformanceSmall.md) document to showcase multithreaded
+performance when one or more matrix dimensions are small.
 
  * **Performance comparisons now available!** We recently measured the
 performance of various level-3 operations on a variety of hardware architectures,
@@ -281,8 +302,61 @@ details, please see the documentation on [mixed datatype](docs/MixedDatatypes.md
 support and/or our [ACM TOMS](https://toms.acm.org/) journal paper on
 mixed-domain/mixed-precision `gemm` ([linked below](#citations)).
 
+How to Download BLIS
+--------------------
+
+There are a few ways to download BLIS. We list the most common four ways below.
+We **highly recommend** using either Option 1 or 2. Otherwise, we recommend
+Option 3 (over Option 4) so your compiler can perform optimizations specific
+to your hardware.
+
+1. **Download a source repository with `git clone`.**
+Generally speaking, we prefer using `git clone` to clone a `git` repository.
+Having a repository allows the user to periodically pull in the latest changes
+and quickly rebuild BLIS whenever they wish. Also, implicit in cloning a
+repository is that the repository defaults to using the `master` branch, which
+contains the latest "stable" commits since the most recent release. (This is
+in contrast to Option 3 in which the user is opting for code that may be
+slightly out of date.)
+
+   In order to clone a `git` repository of BLIS, please obtain a repository
+URL by clicking on the green button above the file/directory listing near the
+top of this page (as rendered by GitHub). Generally speaking, it will amount
+to executing the following command in your terminal shell:
+   ```
+   git clone https://github.com/flame/blis.git
+   ```
+
+2. **Download a source repository via a zip file.**
+If you are uncomfortable with using `git` but would still like the latest
+stable commits, we recommend that you download BLIS as a zip file.
+
+   In order to download a zip file of the BLIS source distribution, please
+click on the green button above the file listing near the top of this page.
+This should reveal a link for downloading the zip file.
+
+3. **Download a source release via a tarball/zip file.**
+Alternatively, if you would like to stick to the code that is included in
+official releases, you may download either a tarball or zip file of any of
+BLIS's previous [tagged releases](https://github.com/flame/blis/releases).
+We consider this option to be less than ideal for most people since it will
+likely mean you miss out on the latest bugfix or feature commits (in contrast
+to Options 1 or 2), and you also will not be able to update your code with a
+simple `git pull` command (in contrast to Option 1).
+
+4. **Download a binary package specific to your OS.**
+While we don't recommend this as the first choice for most users, we provide
+links to community members who generously maintain BLIS packages for various
+Linux distributions such as Debian Unstable and EPEL/Fedora. Please see the
+[External Packages](#external-packages) section below for more information.
+
 Getting Started
 ---------------
+
+*NOTE: This section assumes you've either cloned a BLIS source code repository
+via `git`, downloaded the latest source code via a zip file, or downloaded the
+source code for a tagged version release---Options 1, 2, or 3, respectively,
+as discussed in [the previous section](#how-to-download-blis).*
 
 If you just want to build a sequential (not parallelized) version of BLIS
 in a hurry and come back and explore other topics later, you can configure
@@ -396,7 +470,7 @@ please read this thorough walkthrough of the configuration system.
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
 
-External packages
+External Packages
 -----------------
 
 Generally speaking, we **highly recommend** building from source whenever
@@ -414,6 +488,12 @@ sponsor and maintain BLIS packages within the Debian Linux distribution. The
 Debian package tracker can be found [here](https://tracker.debian.org/pkg/blis).
 (Also, thanks to [Nico Schlömer](https://github.com/nschloe) for previously
 volunteering his time to set up a standalone PPA.)
+
+ * **Gentoo**. [M. Zhou](https://github.com/cdluminate) also maintains the
+[BLIS package](https://packages.gentoo.org/packages/sci-libs/blis) entry for
+[Gentoo](https://www.gentoo.org/), a Linux distribution known for its
+source-based [portage](https://wiki.gentoo.org/wiki/Portage) package manager
+and distribution system.
 
  * **EPEL/Fedora**. There are official BLIS packages in Fedora and EPEL (for
 RHEL7+ and compatible distributions) with versions for 64-bit integers, OpenMP,
@@ -563,13 +643,13 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf):
+article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev1.pdf):
 
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
    title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
-   journal     = {ACM Transactions on Mathematical Software},
+   journal     = {SIAM Journal on Scientific Computing},
    note        = {submitted}
 }
 ``` 
@@ -596,8 +676,9 @@ This project and its associated research were partially sponsored by grants from
 [Texas Instruments](http://www.ti.com/),
 [AMD](http://www.amd.com/),
 [Oracle](http://www.oracle.com/),
-and
 [Huawei](http://www.huawei.com/),
+and
+[Facebook](http://www.facebook.com/),
 as well as grants from the
 [National Science Foundation](http://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).

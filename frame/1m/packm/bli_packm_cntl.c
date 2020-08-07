@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,9 +42,9 @@ cntl_t* bli_packm_cntl_create_node
        void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
+       bool      does_invert_diag,
+       bool      rev_iter_if_upper,
+       bool      rev_iter_if_lower,
        pack_t    pack_schema,
        packbuf_t pack_buf_type,
        cntl_t*   sub_node

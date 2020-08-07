@@ -108,13 +108,6 @@ __asm__ volatile
 " add x25,x24,x10                            \n\t" //Load address Column 10 of C
 " add x26,x25,x10                            \n\t" //Load address Column 11 of C
 "                                            \n\t"
-" ldr q0, [x0]                               \n\t"
-" ldr q1, [x0, #16]                          \n\t" // Load a
-"                                            \n\t"
-" ldr q2, [x1]                               \n\t" // Load b
-" ldr q3, [x1, #16]                          \n\t"
-" ldr q4, [x1, #32]                          \n\t"
-"                                            \n\t"
 " prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
 " prfm pldl1keep,[x16]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x17]                       \n\t" // Prefetch c.
@@ -164,8 +157,15 @@ __asm__ volatile
 " cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 " beq .SCONSIDERKLEFT                        \n\t"
 "                                            \n\t"
-"add x0, x0, #32                             \n\t" //update address of A
-"add x1, x1, #48                             \n\t" //update address of B
+" ldr q0, [x0]                               \n\t"
+" ldr q1, [x0, #16]                          \n\t" // Load a
+"                                            \n\t"
+" ldr q2, [x1]                               \n\t" // Load b
+" ldr q3, [x1, #16]                          \n\t"
+" ldr q4, [x1, #32]                          \n\t"
+"                                            \n\t"
+" add x0, x0, #32                            \n\t" //update address of A
+" add x1, x1, #48                            \n\t" //update address of B
 "                                            \n\t"
 " cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
 " beq .SLASTITER                             \n\t" // (as loop is do-while-like).
@@ -1166,15 +1166,6 @@ __asm__ volatile
 " prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
 "                                            \n\t"
-" ldr q0, [x0]                               \n\t"
-" ldr q1, [x0, #16]                          \n\t" // Load a
-" ldr q2, [x0, #32]                          \n\t"
-"                                            \n\t"
-" ldr q3, [x1]                               \n\t" // Load b
-" ldr q4, [x1, #16]                          \n\t"
-" ldr q5, [x1, #32]                          \n\t"
-" ldr q6, [x1, #48]                          \n\t"
-"                                            \n\t"
 " dup  v8.2d, xzr                            \n\t" // Vector for accummulating column 0
 " prfm    PLDL1KEEP, [x1, #256]              \n\t" 
 " dup  v9.2d, xzr                            \n\t" // Vector for accummulating column 0
@@ -1214,8 +1205,17 @@ __asm__ volatile
 " cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 " beq .DCONSIDERKLEFT                        \n\t"
 "                                            \n\t"
-"add x0, x0, #48                             \n\t" //update address of A
-"add x1, x1, #64                             \n\t" //update address of B
+" ldr q0, [x0]                               \n\t" // Load a
+" ldr q1, [x0, #16]                          \n\t"
+" ldr q2, [x0, #32]                          \n\t"
+"                                            \n\t"
+" ldr q3, [x1]                               \n\t" // Load b
+" ldr q4, [x1, #16]                          \n\t"
+" ldr q5, [x1, #32]                          \n\t"
+" ldr q6, [x1, #48]                          \n\t"
+"                                            \n\t"
+" add x0, x0, #48                            \n\t" //update address of A
+" add x1, x1, #64                            \n\t" //update address of B
 "                                            \n\t"
 " cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
 " beq .DLASTITER                             \n\t" // (as loop is do-while-like).

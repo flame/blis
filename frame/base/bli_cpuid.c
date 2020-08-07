@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -46,13 +46,15 @@
   #define __arm__
 #endif
 
-#ifndef BLIS_CONFIGURETIME_CPUID
-  #include "blis.h"
-#else
+#ifdef BLIS_CONFIGURETIME_CPUID
+  #define BLIS_INLINE static
   #define BLIS_EXPORT_BLIS
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
+  #include "bli_arch.h"
+#else
+  #include "blis.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -74,6 +76,8 @@ static arch_t bli_env_check( void )
 }
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+
+#include "cpuid.h"
 
 arch_t bli_cpuid_query_id( void )
 {
@@ -131,6 +135,14 @@ arch_t bli_cpuid_query_id( void )
 	// vendor.
 	vendor = bli_cpuid_query( &family, &model, &features );
 
+#if 0
+	printf( "vendor   = %s\n", vendor==1 ? "AMD": "INTEL" );
+	printf("family    = %x\n", family );
+	printf( "model    = %x\n", model );
+	
+	printf( "features = %x\n", features );
+#endif
+
 	if ( vendor == VENDOR_INTEL )
 	{
 		// Check for each Intel configuration that is enabled, check for that
@@ -164,6 +176,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN2
+		if ( bli_cpuid_is_zen2( family, model, features ) )
+			return BLIS_ARCH_ZEN2;
+#endif
 #ifdef BLIS_CONFIG_ZEN
 		if ( bli_cpuid_is_zen( family, model, features ) )
 			return BLIS_ARCH_ZEN;
@@ -198,7 +214,7 @@ arch_t bli_cpuid_query_id( void )
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cpuid_is_skx
+bool bli_cpuid_is_skx
      (
        uint32_t family,
        uint32_t model,
@@ -217,13 +233,28 @@ bool_t bli_cpuid_is_skx
 
 	int nvpu = vpu_count();
 
-	if ( !bli_cpuid_has_features( features, expected ) || nvpu != 2 )
+	if ( bli_cpuid_has_features( features, expected ) )
+	{
+		switch ( nvpu )
+		{
+		case 1:
+			bli_arch_log( "Hardware has 1 FMA unit; using 'haswell' (not 'skx') sub-config.\n" );
+			return FALSE;
+		case 2:
+			bli_arch_log( "Hardware has 2 FMA units; using 'skx' sub-config.\n" );
+			return TRUE;
+		default:
+			bli_arch_log( "Number of FMA units unknown; using 'haswell' (not 'skx') config.\n" );
+			return FALSE;
+		}
+	}
+	else
 		return FALSE;
 
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_knl
+bool bli_cpuid_is_knl
      (
        uint32_t family,
        uint32_t model,
@@ -242,7 +273,7 @@ bool_t bli_cpuid_is_knl
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_haswell
+bool bli_cpuid_is_haswell
      (
        uint32_t family,
        uint32_t model,
@@ -259,7 +290,7 @@ bool_t bli_cpuid_is_haswell
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_sandybridge
+bool bli_cpuid_is_sandybridge
      (
        uint32_t family,
        uint32_t model,
@@ -274,7 +305,7 @@ bool_t bli_cpuid_is_sandybridge
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_penryn
+bool bli_cpuid_is_penryn
      (
        uint32_t family,
        uint32_t model,
@@ -292,7 +323,35 @@ bool_t bli_cpuid_is_penryn
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cpuid_is_zen
+bool bli_cpuid_is_zen2
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX  |
+	                          FEATURE_FMA3 |
+	                          FEATURE_AVX2;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// All Zen2 cores have a family of 0x17.
+	if ( family != 0x17 ) return FALSE;
+
+	// Finally, check for specific models:
+	// - 0x30-0xff (THIS NEEDS UPDATING)
+	const bool is_arch
+	=
+	( 0x30 <= model && model <= 0xff );
+
+	if ( !is_arch ) return FALSE;
+
+	return TRUE;
+}
+
+bool bli_cpuid_is_zen
      (
        uint32_t family,
        uint32_t model,
@@ -311,7 +370,7 @@ bool_t bli_cpuid_is_zen
 
 	// Finally, check for specific models:
 	// - 0x00-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x00 <= model && model <= 0xff );
 
@@ -320,7 +379,7 @@ bool_t bli_cpuid_is_zen
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_excavator
+bool bli_cpuid_is_excavator
      (
        uint32_t family,
        uint32_t model,
@@ -339,7 +398,7 @@ bool_t bli_cpuid_is_excavator
 
 	// Finally, check for specific models:
 	// - 0x60-0x7f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x60 <= model && model <= 0x7f );
 
@@ -348,7 +407,7 @@ bool_t bli_cpuid_is_excavator
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_steamroller
+bool bli_cpuid_is_steamroller
      (
        uint32_t family,
        uint32_t model,
@@ -367,7 +426,7 @@ bool_t bli_cpuid_is_steamroller
 
 	// Finally, check for specific models:
 	// - 0x30-0x3f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0x3f );
 
@@ -376,7 +435,7 @@ bool_t bli_cpuid_is_steamroller
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_piledriver
+bool bli_cpuid_is_piledriver
      (
        uint32_t family,
        uint32_t model,
@@ -396,7 +455,7 @@ bool_t bli_cpuid_is_piledriver
 	// Finally, check for specific models:
 	// - 0x02
 	// - 0x10-0x1f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	model == 0x02 || ( 0x10 <= model && model <= 0x1f );
 
@@ -405,7 +464,7 @@ bool_t bli_cpuid_is_piledriver
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_bulldozer
+bool bli_cpuid_is_bulldozer
      (
        uint32_t family,
        uint32_t model,
@@ -424,7 +483,7 @@ bool_t bli_cpuid_is_bulldozer
 	// Finally, check for specific models:
 	// - 0x00
 	// - 0x01
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( model == 0x00 || model == 0x01 );
 
@@ -473,6 +532,8 @@ arch_t bli_cpuid_query_id( void )
 	printf( "features = %u\n", features );
 #endif
 
+
+
 	if ( vendor == VENDOR_ARM )
 	{
 		if ( model == MODEL_ARMV8 )
@@ -520,7 +581,7 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
-bool_t bli_cpuid_is_thunderx2
+bool bli_cpuid_is_thunderx2
      (
        uint32_t family,
        uint32_t model,
@@ -530,7 +591,7 @@ bool_t bli_cpuid_is_thunderx2
 	return model == BLIS_ARCH_THUNDERX2;
 }
 
-bool_t bli_cpuid_is_cortexa57
+bool bli_cpuid_is_cortexa57
      (
        uint32_t family,
        uint32_t model,
@@ -540,7 +601,7 @@ bool_t bli_cpuid_is_cortexa57
 	return model == BLIS_ARCH_CORTEXA57;
 }
 
-bool_t bli_cpuid_is_cortexa53
+bool bli_cpuid_is_cortexa53
      (
        uint32_t family,
        uint32_t model,
@@ -550,7 +611,7 @@ bool_t bli_cpuid_is_cortexa53
 	return model == BLIS_ARCH_CORTEXA53;
 }
 
-bool_t bli_cpuid_is_cortexa15
+bool bli_cpuid_is_cortexa15
      (
        uint32_t family,
        uint32_t model,
@@ -565,7 +626,7 @@ bool_t bli_cpuid_is_cortexa15
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_cortexa9
+bool bli_cpuid_is_cortexa9
      (
        uint32_t family,
        uint32_t model,
@@ -594,7 +655,7 @@ bool_t bli_cpuid_is_cortexa9
 
    Copyright (C) 2017, The University of Texas at Austin
    Copyright (C) 2017, Devin Matthews
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -924,6 +985,10 @@ void get_cpu_name( char *cpu_name )
 	*( uint32_t* )&cpu_name[32+12] = edx;
 }
 
+// Return the number of FMA units _assuming avx512 is supported_.
+// This needs updating for new processor types, sigh.
+// See https://ark.intel.com/content/www/us/en/ark.html#@Processors
+// and also https://github.com/jeffhammond/vpu-count
 int vpu_count( void )
 {
 	char  cpu_name[48] = {};
@@ -935,49 +1000,59 @@ int vpu_count( void )
 
 	if ( strstr( cpu_name, "Intel(R) Xeon(R)" ) != NULL )
 	{
-		loc = strstr( cpu_name, "Platinum" );
+		if (( loc = strstr( cpu_name, "Platinum" ) ))
+			return 2;
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Gold" );
+			loc = strstr( cpu_name, "Gold" ); // 1 or 2, tested below
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Silver" );
+			if (( loc = strstr( cpu_name, "Silver" ) ))
+				return 1;
 		if ( loc == NULL )
-			loc = strstr( cpu_name, "Bronze" );
+			if (( loc = strstr( cpu_name, "Bronze" ) ))
+				return 1;
 		if ( loc == NULL )
 			loc = strstr( cpu_name, "W" );
 		if ( loc == NULL )
+			if (( loc = strstr( cpu_name, "D" ) ))
+				// Fixme:  May be wrong
+				// <https://github.com/jeffhammond/vpu-count/issues/3#issuecomment-542044651>
+				return 1;
+		if ( loc == NULL )
 			return -1;
 
-		loc = strstr( loc+1, " " );
+		// We may have W-nnnn rather than, say, Gold nnnn
+		if ( 'W' == *loc && '-' == *(loc+1) )
+			loc++;
+		else
+			loc = strstr( loc+1, " " );
 		if ( loc == NULL )
 			return -1;
 
 		strncpy( model_num, loc+1, 4 );
-		model_num[4] = '\0';
+		model_num[4] = '\0'; // Things like i9-10900X matched above
 
 		sku = atoi( model_num );
 
+		// These were derived from ARK listings as of 2019-10-09, but
+		// may not be complete, especially as the ARK Skylake listing
+		// seems to be limited.
 		if      ( 8199 >= sku && sku >= 8100 ) return 2;
 		else if ( 6199 >= sku && sku >= 6100 ) return 2;
 		else if (                sku == 5122 ) return 2;
+		else if ( 6299 >= sku && sku >= 6200 ) return 2; // Cascade Lake Gold
+		else if ( 5299 >= sku && sku >= 5200 ) return 1; // Cascade Lake Gold
 		else if ( 5199 >= sku && sku >= 5100 ) return 1;
 		else if ( 4199 >= sku && sku >= 4100 ) return 1;
 		else if ( 3199 >= sku && sku >= 3100 ) return 1;
+		else if ( 3299 >= sku && sku >= 3200 ) return 2; // Cascade Lake W
+		else if ( 2299 >= sku && sku >= 2200 ) return 2; // Cascade Lake W
 		else if ( 2199 >= sku && sku >= 2120 ) return 2;
+		else if ( 2102 == sku || sku == 2104 ) return 2; // Gold exceptions
 		else if ( 2119 >= sku && sku >= 2100 ) return 1;
 		else return -1;
 	}
-	else if ( strstr( cpu_name, "Intel(R) Core(TM) i9" ) != NULL )
-	{
-		return 1;
-	}
-	else if ( strstr( cpu_name, "Intel(R) Core(TM) i7" ) != NULL )
-	{
-		if ( strstr( cpu_name, "7800X" ) != NULL ||
-		     strstr( cpu_name, "7820X" ) != NULL )
-			return 1;
-		else
-			return -1;
-	}
+	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
+		return 2; // All i7/i9 with avx512?
 	else
 	{
 		return -1;
@@ -1352,3 +1427,4 @@ NUMA node0 CPU(s):   0,1
 Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx sie
 */
 #endif
+

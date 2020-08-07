@@ -68,7 +68,7 @@ void bli_trsm_int
 	{
 		if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
-		bli_thread_obarrier( thread );
+		bli_thread_barrier( thread );
 		return;
 	}
 
@@ -119,7 +119,7 @@ void bli_trsm_int
 	}
 
 	// FGVZ->TMS: Is this barrier still needed?
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 
 	// Create the next node in the thrinfo_t structure.
 	bli_thrinfo_grow( rntm, cntl, thread );

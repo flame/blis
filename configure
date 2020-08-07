@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1323,10 +1323,14 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
+	elif [ "${cc_vendor}" = "oneAPI" ]; then
+		# Treat Intel oneAPI's clang as clang, not icc.
+		cc_vendor="clang"
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
@@ -1430,6 +1434,8 @@ check_compiler()
 			# Thus, this "blacklistcc_add" statement has been moved above.
 			#blacklistcc_add "zen"
 			blacklistcc_add "skx"
+			# gcc 5.x may support POWER9 but it is unverified.
+			blacklistcc_add "power9"
 		fi
 	fi
 
@@ -1443,6 +1449,15 @@ check_compiler()
 			if [ ${cc_revision} -lt 1 ]; then
 				blacklistcc_add "skx"
 			fi
+		fi
+		if [ ${cc_major} -eq 18 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			blacklistcc_add "knl"
+			blacklistcc_add "skx"
+		fi
+		if [ ${cc_major} -ge 19 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			echoerr_unsupportedcc
 		fi
 	fi
 
@@ -1516,19 +1531,37 @@ check_compiler_version_ranges()
 	# comments:
 	#   These older versions of gcc do not explicitly support the Zen (Zen1)
 	#   microarchitecture; the newest microarchitectural value understood by
-	#   these versions is '-march=bdver4' [3]. However, support for them can
-	#   be attained in a roundabout way by starting with the instruction sets
-	#   enabled by '-march=bdver4' and then disabling the instruction sets
-	#   that were removed in the transition from Excavator to Zen, namely:
-	#   FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen via the
-	#   '-march=znver1' option [4].
+	#   these versions is '-march=bdver4' [3]. However, basic support for these
+	#   older versions can be attained in a roundabout way by starting with the
+	#   instruction sets enabled by '-march=bdver4' and then disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, namely: FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen
+	#   via the '-march=znver1' option [4].
 	#
 	#   [3] https://gcc.gnu.org/onlinedocs/gcc-5.5.0/gcc/x86-Options.html#x86-Options
 	#   [4] https://gcc.gnu.org/onlinedocs/gcc-6.1.0/gcc/x86-Options.html#x86-Options
 	#
+	# range: gcc < 9.1 (ie: 8.3 or older)
+	# variable: gcc_older_than_9_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen2
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is either '-march=znver1' (if !gcc_older_than_6_1_0) [5]
+	#   or '-march=bdver4' (if gcc_older_than_6_1_0) [3]. If gcc is 6.1 or
+	#   newer, '-march=znver1' may be used (since the instruction sets it
+	#   enables are a subset of those enabled by '-march=znver2'); otherwise,
+	#   '-march=bdver4' must be used in conjuction with disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, as described in the section above for gcc_older_than_6_1_0.
+	#   Newer versions of gcc support Zen2 via the '-march=znver2' option [6].
+	#
+	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
+	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/x86-Options.html#x86-Options
+	#
 
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
+	gcc_older_than_9_1_0='no'
 
 	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
 
@@ -1547,6 +1580,12 @@ check_compiler_version_ranges()
 		if [ ${cc_major} -lt 6 ]; then
 			echo "${script_name}: note: found ${cc} version older than 6.1."
 			gcc_older_than_6_1_0='yes'
+		fi
+
+		# Check for gcc < 9.1.0 (ie: 8.3 or older).
+		if [ ${cc_major} -lt 9 ]; then
+			echo "${script_name}: note: found ${cc} version older than 9.1."
+			gcc_older_than_9_1_0='yes'
 		fi
 	fi
 
@@ -2388,14 +2427,27 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
+		#config_name="generic"
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
+
+		# If the auto-detect code returned the "generic" string, it means we
+		# were unable to automatically detect the user's hardware type. While
+		# this is going to be a rare event, it will likely lead the user to
+		# experience much lower performance than expected, and thus we will
+		# warn them about it at the end of the configure output (to increase
+		# the chances that they see it).
+		if [ "${config_name}" = "generic" ]; then
+
+			warn_user_generic=1
+		else
+			warn_user_generic=0
+		fi
 	else
 
 		# Use the command line argument as the configuration name.
 		config_name=$1
 
-		#echo "${script_name}: manual configuration requested."
 		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
 
 	fi
@@ -2511,22 +2563,42 @@ main()
 		# but we have it here just in case.
 		if [ $1 = "auto" ]; then
 
-			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
+			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
 			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
 			echo "${script_name}: "
 			exit 1;
 
 		else
 
-			echo "${script_name}: 'user-specified configuration '${conf}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
+			# At this point, we know: (a) config_list is empty; and (b) the user
+			# requested manual configuration. If the config_name given by the
+			# user is present in the configuration blacklist (config_blist),
+			# then we can deduce why the config_list is empty: because the only
+			# subconfig implied by config_name is blacklisted. Thus, we cannot
+			# proceed.
 
+			if [ $(is_in_list "${config_name}" "${config_blist}") == "true" ]; then
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
+				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+
+				# If config_name is NOT present in config_blist, then we know
+				# that config_list is empty simply because config_name is
+				# unregistered.
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
-
 	else
 
 		# This branch executes when the configuration is found to be present
@@ -3037,6 +3109,7 @@ main()
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
 		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
+		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
@@ -3387,6 +3460,18 @@ main()
 		echo "${script_name}: configured to build within top-level directory of source distribution."
 	fi
 
+	if [ "${warn_user_generic}" = "1" ]; then
+
+		echo "${script_name}: "
+		echo "${script_name}: *** Unable to automatically detect hardware type! ***"
+		echo "${script_name}: "
+		echo "${script_name}: NOTE: configure was unable to identify a subconfiguration"
+		echo "${script_name}: optimized for your hardware. As a result, the 'generic'"
+		echo "${script_name}: subconfiguration (with low-performance reference kernels)"
+		echo "${script_name}: will be used. For support, please open an issue on GitHub"
+		echo "${script_name}: at https://github.com/flame/blis/issues."
+		echo "${script_name}: "
+	fi
 
 	# Exit peacefully.
 	return 0

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -89,9 +89,9 @@ void PASTEMAC(ch,varname) \
        uplo_t  uploc, \
        trans_t transc, \
        pack_t  schema, \
-       bool_t  invdiag, \
-       bool_t  revifup, \
-       bool_t  reviflo, \
+       bool    invdiag, \
+       bool    revifup, \
+       bool    reviflo, \
        dim_t   m, \
        dim_t   n, \
        dim_t   m_max, \

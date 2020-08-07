@@ -112,7 +112,7 @@ void bli_zdotv_template_noopt
 	dcomplex*   yp;
 	dcomplex    dotxy;
 
-	bool_t      use_ref         = FALSE;
+	bool        use_ref         = FALSE;
 
 	dim_t       n_pre           = 0;
 	dim_t       n_iter;

@@ -44,6 +44,7 @@ void bli_gemm_front
        cntl_t* cntl
      );
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX
 err_t bli_gemm_small
      (
        obj_t*  alpha,
@@ -54,3 +55,5 @@ err_t bli_gemm_small
        cntx_t* cntx,
        cntl_t* cntl
      );
+#endif
+
