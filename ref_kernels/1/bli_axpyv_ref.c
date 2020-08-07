@@ -34,6 +34,7 @@
 
 #include "blis.h"
 
+#if 0
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
@@ -47,10 +48,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype* restrict psi1; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* If alpha is zero, return. */ \
@@ -74,21 +71,23 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	chi1 = x; \
-	psi1 = y; \
+	ctype* restrict chi1 = x; \
+	ctype* restrict psi1 = y; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpyjs)( *alpha, chi1[i], psi1[i] ); \
+				/*PASTEMAC(ch,axpyjs)( *alpha, chi1[i], psi1[i] );*/ \
+				psi1[i] = fma( *alpha, chi1[i], psi1[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
 				PASTEMAC(ch,axpyjs)( *alpha, *chi1, *psi1 ); \
 \
@@ -101,19 +100,106 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpys)( *alpha, chi1[i], psi1[i] ); \
+				/*PASTEMAC(ch,axpys)( *alpha, chi1[i], psi1[i] );*/ \
+				psi1[i] = fma( *alpha, chi1[i], psi1[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
 				PASTEMAC(ch,axpys)( *alpha, *chi1, *psi1 ); \
 \
 				chi1 += incx; \
 				psi1 += incy; \
+			} \
+		} \
+	} \
+}
+
+//INSERT_GENTFUNC_BASIC2( axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( float,    s, axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( double,   d, axpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+#endif
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+\
+void PASTEMAC3(ch,opname,arch,suf) \
+     ( \
+       conj_t           conjx, \
+       dim_t            n, \
+       ctype*  restrict alpha, \
+       ctype*  restrict x, inc_t incx, \
+       ctype*  restrict y, inc_t incy, \
+       cntx_t* restrict cntx  \
+     ) \
+{ \
+	if ( bli_zero_dim1( n ) ) return; \
+\
+	/* If alpha is zero, return. */ \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
+\
+	/* If alpha is one, use addv. */ \
+	if ( PASTEMAC(ch,eq1)( *alpha ) ) \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t             dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
+\
+		addv_p \
+		( \
+		  conjx, \
+		  n, \
+		  x, incx, \
+		  y, incy, \
+		  cntx  \
+		); \
+		return; \
+	} \
+\
+	if ( bli_is_conj( conjx ) ) \
+	{ \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( *alpha, x[i], y[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( dim_t i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpyjs)( *alpha, *x, *y ); \
+\
+				x += incx; \
+				y += incy; \
+			} \
+		} \
+	} \
+	else \
+	{ \
+		if ( incx == 1 && incy == 1 ) \
+		{ \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpys)( *alpha, x[i], y[i] ); \
+			} \
+		} \
+		else \
+		{ \
+			for ( dim_t i = 0; i < n; ++i ) \
+			{ \
+				PASTEMAC(ch,axpys)( *alpha, *x, *y ); \
+\
+				x += incx; \
+				y += incy; \
 			} \
 		} \
 	} \

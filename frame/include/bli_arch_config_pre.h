@@ -49,6 +49,10 @@
 #define BLIS_CNAME_INFIX  PASTECH(_,BLIS_CNAME)
 #endif
 
+// Combine the CNAME and _ref for convenience to the code that defines
+// reference kernels.
+//#define BLIS_CNAME_REF_SUFFIX  PASTECH2(_,BLIS_CNAME,BLIS_REF_SUFFIX)
+
 // -- Prototype-generating macro definitions -----------------------------------
 
 // Prototype-generating macro for bli_cntx_init_<arch>*() functions.

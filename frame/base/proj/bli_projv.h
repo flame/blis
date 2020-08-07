@@ -32,7 +32,7 @@
 
 */
 
-void bli_projv
+BLIS_EXPORT_BLIS void bli_projv
      (
        obj_t* x,
        obj_t* y

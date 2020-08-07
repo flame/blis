@@ -37,10 +37,10 @@
 
 func_t* bli_func_create
      (
-       void* ptr_s,
-       void* ptr_d,
-       void* ptr_c,
-       void* ptr_z
+       void_fp ptr_s,
+       void_fp ptr_d,
+       void_fp ptr_c,
+       void_fp ptr_z
      )
 {
 	func_t* f;
@@ -62,10 +62,10 @@ func_t* bli_func_create
 void bli_func_init
      (
        func_t* f,
-       void*   ptr_s,
-       void*   ptr_d,
-       void*   ptr_c,
-       void*   ptr_z
+       void_fp ptr_s,
+       void_fp ptr_d,
+       void_fp ptr_c,
+       void_fp ptr_z
      )
 {
 	bli_func_set_dt( ptr_s, BLIS_FLOAT,    f );
@@ -92,16 +92,16 @@ void bli_func_free( func_t* f )
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_func_is_null_dt( num_t   dt,
-                            func_t* f )
+bool bli_func_is_null_dt( num_t   dt,
+                          func_t* f )
 {
 	return ( bli_func_get_dt( dt, f ) == NULL );
 }
 
-bool_t bli_func_is_null( func_t* f )
+bool bli_func_is_null( func_t* f )
 {
-	bool_t r_val = TRUE;
-	num_t  dt;
+	bool  r_val = TRUE;
+	num_t dt;
 
 	// Iterate over all floating-point datatypes. If any is non-null,
 	// return FALSE. Otherwise, if they are all null, return TRUE.

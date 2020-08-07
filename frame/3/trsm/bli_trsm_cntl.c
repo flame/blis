@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,26 +37,28 @@
 
 cntl_t* bli_trsm_cntl_create
      (
-       side_t side,
-       pack_t schema_a,
-       pack_t schema_b
+       rntm_t* rntm,
+       side_t  side,
+       pack_t  schema_a,
+       pack_t  schema_b
      )
 {
 	if ( bli_is_left( side ) )
-		return bli_trsm_l_cntl_create( schema_a, schema_b );
+		return bli_trsm_l_cntl_create( rntm, schema_a, schema_b );
 	else
-		return bli_trsm_r_cntl_create( schema_a, schema_b );
+		return bli_trsm_r_cntl_create( rntm, schema_a, schema_b );
 }
 
 cntl_t* bli_trsm_l_cntl_create
      (
-       pack_t schema_a,
-       pack_t schema_b
+       rntm_t* rntm,
+       pack_t  schema_a,
+       pack_t  schema_b
      )
 {
-	void* macro_kernel_p;
-	void* packa_fp;
-	void* packb_fp;
+	void_fp macro_kernel_p;
+	void_fp packa_fp;
+	void_fp packb_fp;
 
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
@@ -67,9 +69,51 @@ cntl_t* bli_trsm_l_cntl_create
 
 	const opid_t family = BLIS_TRSM;
 
-	// Create two nodes for the macro-kernel.
+	//
+	// Create nodes for packing A and the macro-kernel (gemm branch).
+	//
+
+	cntl_t* gemm_cntl_bu_ke = bli_trsm_cntl_create_node
+	(
+	  rntm,    // the thread's runtime structure
+	  family,  // the operation family
+	  BLIS_MR, // needed for bli_thrinfo_rgrow()
+	  NULL,    // variant function pointer not used
+	  NULL     // no sub-node; this is the leaf of the tree.
+	);
+
+	cntl_t* gemm_cntl_bp_bu = bli_trsm_cntl_create_node
+	(
+	  rntm,
+	  family,
+	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
+	  macro_kernel_p,
+	  gemm_cntl_bu_ke
+	);
+
+	// Create a node for packing matrix A.
+	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
+	(
+	  rntm,
+	  bli_trsm_packa, // trsm operation's packm function for A.
+	  packa_fp,
+	  BLIS_MR,
+	  BLIS_MR,
+	  TRUE,    // do NOT invert diagonal
+	  TRUE,    // reverse iteration if upper?
+	  FALSE,   // reverse iteration if lower?
+	  schema_a, // normally BLIS_PACKED_ROW_PANELS
+	  BLIS_BUFFER_FOR_A_BLOCK,
+	  gemm_cntl_bp_bu
+	);
+
+	//
+	// Create nodes for packing A and the macro-kernel (trsm branch).
+	//
+
 	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
 	(
+	  rntm,    // the thread's runtime structure
 	  family,  // the operation family
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
@@ -78,6 +122,7 @@ cntl_t* bli_trsm_l_cntl_create
 
 	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_p,
@@ -87,7 +132,8 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
-	  bli_trsm_packa,
+	  rntm,
+	  bli_trsm_packa, // trsm operation's packm function for A.
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
@@ -99,18 +145,28 @@ cntl_t* bli_trsm_l_cntl_create
 	  trsm_cntl_bp_bu
 	);
 
+	// -------------------------------------------------------------------------
+
 	// Create a node for partitioning the m dimension by MC.
+	// NOTE: We attach the gemm sub-tree as the main branch.
 	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_MC,
 	  bli_trsm_blk_var1,
-	  trsm_cntl_packa
+	  gemm_cntl_packa
 	);
+
+	// Attach the trsm sub-tree as the auxiliary "prenode" branch.
+	bli_cntl_set_sub_prenode( trsm_cntl_packa, trsm_cntl_op_bp );
+
+	// -------------------------------------------------------------------------
 
 	// Create a node for packing matrix B.
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
+	  rntm,
 	  bli_trsm_packb,
 	  packb_fp,
 	  BLIS_MR,
@@ -126,6 +182,7 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for partitioning the k dimension by KC.
 	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_KC,
 	  bli_trsm_blk_var3,
@@ -135,6 +192,7 @@ cntl_t* bli_trsm_l_cntl_create
 	// Create a node for partitioning the n dimension by NC.
 	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_NC,
 	  bli_trsm_blk_var2,
@@ -146,21 +204,23 @@ cntl_t* bli_trsm_l_cntl_create
 
 cntl_t* bli_trsm_r_cntl_create
      (
-       pack_t schema_a,
-       pack_t schema_b
+	   rntm_t* rntm,
+       pack_t  schema_a,
+       pack_t  schema_b
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
-	void* macro_kernel_p = bli_trsm_xx_ker_var2;
+	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	void* packa_fp = bli_packm_blk_var1;
-	void* packb_fp = bli_packm_blk_var1;
+	void_fp packa_fp = bli_packm_blk_var1;
+	void_fp packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* trsm_cntl_bu_ke = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_MR, // needed for bli_thrinfo_rgrow()
 	  NULL,    // variant function pointer not used
@@ -169,6 +229,7 @@ cntl_t* bli_trsm_r_cntl_create
 
 	cntl_t* trsm_cntl_bp_bu = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_NR, // not used by macro-kernel, but needed for bli_thrinfo_rgrow()
 	  macro_kernel_p,
@@ -178,6 +239,7 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for packing matrix A.
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
+	  rntm,
 	  bli_trsm_packa,
 	  packa_fp,
 	  BLIS_NR,
@@ -193,6 +255,7 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for partitioning the m dimension by MC.
 	cntl_t* trsm_cntl_op_bp = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_MC,
 	  bli_trsm_blk_var1,
@@ -202,6 +265,7 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for packing matrix B.
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
+	  rntm,
 	  bli_trsm_packb,
 	  packb_fp,
 	  BLIS_MR,
@@ -217,6 +281,7 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for partitioning the k dimension by KC.
 	cntl_t* trsm_cntl_mm_op = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_KC,
 	  bli_trsm_blk_var3,
@@ -226,6 +291,7 @@ cntl_t* bli_trsm_r_cntl_create
 	// Create a node for partitioning the n dimension by NC.
 	cntl_t* trsm_cntl_vl_mm = bli_trsm_cntl_create_node
 	(
+	  rntm,
 	  family,
 	  BLIS_NC,
 	  bli_trsm_blk_var2,
@@ -237,23 +303,25 @@ cntl_t* bli_trsm_r_cntl_create
 
 void bli_trsm_cntl_free
      (
-       cntl_t* cntl,
+       rntm_t*    rntm,
+       cntl_t*    cntl,
        thrinfo_t* thread
      )
 {
-	bli_cntl_free( cntl, thread );
+	bli_cntl_free( rntm, cntl, thread );
 }
 
 // -----------------------------------------------------------------------------
 
 cntl_t* bli_trsm_cntl_create_node
      (
+       rntm_t* rntm,
        opid_t  family,
        bszid_t bszid,
-       void*   var_func,
+       void_fp var_func,
        cntl_t* sub_node
      )
 {
-	return bli_cntl_create_node( family, bszid, var_func, NULL, sub_node );
+	return bli_cntl_create_node( rntm, family, bszid, var_func, NULL, sub_node );
 }
 

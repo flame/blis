@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,8 +48,9 @@ typedef struct unpackm_params_s unpackm_params_t;
 
 cntl_t* bli_unpackm_cntl_create_node
      (
-       void*     var_func,
-       void*     unpackm_var_func,
+       rntm_t*   rntm,
+       void_fp   var_func,
+       void_fp   unpackm_var_func,
        cntl_t*   sub_node
      );
 

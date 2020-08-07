@@ -61,15 +61,21 @@ COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
+ifeq ($(GCC_OT_4_9_0),yes)
+# If gcc is older than 4.9.0, we must use a different label for -march.
 CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+endif
 else
 ifeq ($(CC_VENDOR),icc)
 CKVECFLAGS     := -xCORE-AVX2
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
 else
 $(error gcc, icc, or clang is required for this configuration.)
 endif
@@ -78,7 +84,15 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

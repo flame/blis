@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,8 +61,22 @@
 #define BLIS_ENABLE_JRIR_RR
 #endif
 
-#if @enable_packbuf_pools@
-#define BLIS_ENABLE_PACKBUF_POOLS
+#if @enable_pba_pools@
+#define BLIS_ENABLE_PBA_POOLS
+#else
+#define BLIS_DISABLE_PBA_POOLS
+#endif
+
+#if @enable_sba_pools@
+#define BLIS_ENABLE_SBA_POOLS
+#else
+#define BLIS_DISABLE_SBA_POOLS
+#endif
+
+#if @enable_mem_tracing@
+#define BLIS_ENABLE_MEM_TRACING
+#else
+#define BLIS_DISABLE_MEM_TRACING
 #endif
 
 #if @int_type_size@ == 64
@@ -121,10 +135,22 @@
 #endif
 #endif
 
+#if @enable_sup_handling@
+#define BLIS_ENABLE_SUP_HANDLING
+#else
+#define BLIS_DISABLE_SUP_HANDLING
+#endif
+
 #if @enable_memkind@
 #define BLIS_ENABLE_MEMKIND
 #else
 #define BLIS_DISABLE_MEMKIND
+#endif
+
+#if @enable_pragma_omp_simd@
+#define BLIS_ENABLE_PRAGMA_OMP_SIMD
+#else
+#define BLIS_DISABLE_PRAGMA_OMP_SIMD
 #endif
 
 #if @enable_sandbox@
@@ -138,5 +164,6 @@
 #else
 #define BLIS_DISABLE_SHARED
 #endif
+
 
 #endif

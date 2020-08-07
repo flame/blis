@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -128,8 +128,20 @@
 #define PASTEMAC3_(ch1,ch2,ch3,op) bli_ ## ch1 ## ch2 ## ch3 ## op
 #define PASTEMAC3(ch1,ch2,ch3,op)  PASTEMAC3_(ch1,ch2,ch3,op)
 
+#define PASTEMAC4_(ch1,ch2,ch3,ch4,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## op
+#define PASTEMAC4(ch1,ch2,ch3,ch4,op)  PASTEMAC4_(ch1,ch2,ch3,ch4,op)
+
+#define PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## op
+#define PASTEMAC5(ch1,ch2,ch3,ch4,ch5,op)  PASTEMAC5_(ch1,ch2,ch3,ch4,ch5,op)
+
+#define PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op) bli_ ## ch1 ## ch2 ## ch3 ## ch4 ## ch5 ## ch6 ## op
+#define PASTEMAC6(ch1,ch2,ch3,ch4,ch5,ch6,op)  PASTEMAC6_(ch1,ch2,ch3,ch4,ch5,ch6,op)
+
 #define PASTEBLACHK_(op)           bla_ ## op ## _check
 #define PASTEBLACHK(op)            PASTEBLACHK_(op)
+
+#define PASTECH0_(op)              op
+#define PASTECH0(op)               PASTECH0_(op)
 
 #define PASTECH_(ch,op)            ch ## op
 #define PASTECH(ch,op)             PASTECH_(ch,op)
@@ -144,10 +156,10 @@
 #define STRINGIFY_INT( s )         MKSTR( s )
 
 // Fortran-77 name-mangling macros.
-#define PASTEF770(name)                            name ## _
-#define PASTEF77(ch1,name)           ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)      ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)  ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEF770(name)                                      name ## _
+#define PASTEF77(ch1,name)                     ch1        ## name ## _
+#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
+#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
 
 // -- Include other groups of macros
 
@@ -163,6 +175,7 @@
 #include "bli_scalar_macro_defs.h"
 #include "bli_error_macro_defs.h"
 #include "bli_blas_macro_defs.h"
+#include "bli_builtin_macro_defs.h"
 
 #include "bli_oapi_macro_defs.h"
 #include "bli_tapi_macro_defs.h"

@@ -103,7 +103,7 @@ CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
+#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 # Binary executable name.
 TESTSUITE_BIN  := test_libblis.x
@@ -169,7 +169,23 @@ else
 	@./$(TESTSUITE_BIN) > $(TESTSUITE_OUT_FILE)
 endif
 
+run-fast: $(TESTSUITE_BIN)
+ifeq ($(ENABLE_VERBOSE),yes)
+	./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN) -o $(TESTSUITE_FAST_OPS) > $(TESTSUITE_OUT_FILE)
+
+else
+	@echo "Running $(TESTSUITE_BIN) (fast) with output redirected to '$(TESTSUITE_OUT_FILE)'"
+	@./$(TESTSUITE_BIN) -g $(TESTSUITE_FAST_GEN) -o $(TESTSUITE_FAST_OPS) > $(TESTSUITE_OUT_FILE)
+endif
+
 check: run
+ifeq ($(ENABLE_VERBOSE),yes)
+	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+else
+	@- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
+endif
+
+check-fast: run-fast
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(TESTSUITE_CHECK) $(TESTSUITE_OUT_FILE)
 else

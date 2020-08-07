@@ -67,7 +67,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -113,7 +113,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, index ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -174,7 +174,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -232,7 +232,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -282,7 +282,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y, rho ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -349,7 +349,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta  = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -394,7 +394,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -445,7 +445,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_alpha = bli_obj_buffer_for_1x1( dt, &alpha_local ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -490,7 +490,7 @@ void PASTEMAC(opname,EX_SUF) \
 	    PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
@@ -545,7 +545,7 @@ void PASTEMAC(opname,EX_SUF) \
 	buf_beta = bli_obj_buffer_for_1x1( dt, &beta_local ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) f = \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \

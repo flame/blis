@@ -127,7 +127,7 @@ CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
 CFLAGS         += -I$(TEST_SRC_PATH)
 
 # Locate the libblis library to which we will link.
-LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
+#LIBBLIS_LINK   := $(LIB_PATH)/$(LIBBLIS_L)
 
 
 # Which library?
@@ -140,11 +140,11 @@ STR_MT   := -DTHR_STR=\"mt\"
 
 # Problem size specification
 PDEF_ST  := -DP_BEGIN=40 \
-            -DP_END=2000 \
+            -DP_MAX=2000 \
             -DP_INC=40
 
 PDEF_MT  := -DP_BEGIN=160 \
-            -DP_END=8000 \
+            -DP_MAX=8000 \
             -DP_INC=160
 
 # Enumerate possible datatypes and computation precisions.

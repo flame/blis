@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,58 +35,133 @@
 
 #include "blis.h"
 
-void bli_pool_init( dim_t   num_blocks,
-                    siz_t   block_size,
-                    siz_t   align_size,
-                    pool_t* pool )
+//#define BLIS_ENABLE_MEM_TRACING
+
+void bli_pool_init
+     (
+       siz_t            num_blocks,
+       siz_t            block_ptrs_len,
+       siz_t            block_size,
+       siz_t            align_size,
+       siz_t            offset_size,
+       malloc_ft        malloc_fp,
+       free_ft          free_fp,
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs;
-	dim_t   i;
+	// Make sure that block_ptrs_len is at least num_blocks.
+	block_ptrs_len = bli_max( block_ptrs_len, num_blocks );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_init(): allocating block_ptrs (length %d): ",
+	        ( int )block_ptrs_len );
+	#endif
 
 	// Allocate the block_ptrs array.
-	block_ptrs = bli_malloc_intl( num_blocks * sizeof( pblk_t ) );
+	// FGVZ: Do we want to call malloc_fp() for internal data structures as
+	// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
+	pblk_t* restrict block_ptrs
+	=
+	bli_malloc_intl( block_ptrs_len * sizeof( pblk_t ) );
 
 	// Allocate and initialize each entry in the block_ptrs array.
-	for ( i = 0; i < num_blocks; ++i )
+	for ( dim_t i = 0; i < num_blocks; ++i )
 	{
-		bli_pool_alloc_block( block_size, align_size, &(block_ptrs[i]) );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_init(): allocating block %d of size %d (align %d, offset %d).\n",
+		        ( int )i, ( int )block_size, ( int )align_size, ( int )offset_size );
+		fflush( stdout );
+		#endif
+
+		bli_pool_alloc_block
+		(
+		  block_size,
+		  align_size,
+		  offset_size,
+		  malloc_fp,
+		  &(block_ptrs[i])
+		);
 	}
+
+	// NOTE: The semantics of top_index approximate a stack, where a "full"
+	// stack (no blocks checked out) is one where top_index == 0 and an empty
+	// stack (all blocks checked out) one where top_index == num_blocks.
+	// (Here, num_blocks tracks the number of blocks currently allocated as
+	// part of the pool.) This "orientation" of the stack was chosen
+	// intentionally, in contrast to one where top_index == -1 means the
+	// stack is empty and top_index = num_blocks - 1 means the stack is
+	// full. The chosen scheme allows one to conceptualize the stack as a
+	// number line in which blocks are checked out from lowest to highest,
+	// and additional blocks are added at the higher end.
 
 	// Initialize the pool_t structure.
 	bli_pool_set_block_ptrs( block_ptrs, pool );
-	bli_pool_set_block_ptrs_len( num_blocks, pool );
-	bli_pool_set_num_blocks( num_blocks, pool );
+	bli_pool_set_block_ptrs_len( block_ptrs_len, pool );
 	bli_pool_set_top_index( 0, pool );
+	bli_pool_set_num_blocks( num_blocks, pool );
 	bli_pool_set_block_size( block_size, pool );
 	bli_pool_set_align_size( align_size, pool );
+	bli_pool_set_offset_size( offset_size, pool );
+	bli_pool_set_malloc_fp( malloc_fp, pool );
+	bli_pool_set_free_fp( free_fp, pool );
 }
 
-void bli_pool_finalize( pool_t* pool )
+void bli_pool_finalize
+     (
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs;
-	dim_t   num_blocks;
-	dim_t   top_index;
-	dim_t   i;
-
 	// NOTE: This implementation assumes that either:
 	// - all blocks have been checked in by all threads, or
 	// - some subset of blocks have been checked in and the caller
 	//   is bli_pool_reinit().
 
-	// Query the current block_ptrs array.
-	block_ptrs = bli_pool_block_ptrs( pool );
+	// Query the block_ptrs array.
+	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
 
-	// Query the total number of blocks presently allocated.
-	num_blocks = bli_pool_num_blocks( pool );
+	// Query the total number of blocks currently allocated.
+	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
 	// Query the top_index of the pool.
-	top_index  = bli_pool_top_index( pool );
+	const siz_t top_index = bli_pool_top_index( pool );
+
+	// Sanity check: The top_index should be zero.
+	if ( top_index != 0 )
+	{
+		printf( "bli_pool_finalize(): final top_index == %d (expected 0); block_size: %d.\n",
+		        ( int )top_index, ( int )bli_pool_block_size( pool ) );
+		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
+		bli_abort();
+	}
+
+	// Query the free() function pointer for the pool.
+	free_ft free_fp = bli_pool_free_fp( pool );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_finalize(): freeing %d blocks of size %d (align %d, offset %d).\n",
+	        ( int )num_blocks, ( int )bli_pool_block_size( pool ),
+	                           ( int )bli_pool_align_size( pool ),
+	                           ( int )bli_pool_offset_size( pool ) );
+	fflush( stdout );
+	#endif
+
+	// Query the offset size of the pool.
+	const siz_t offset_size = bli_pool_offset_size( pool );
 
 	// Free the individual blocks currently in the pool.
-	for ( i = top_index; i < num_blocks; ++i )
+	for ( dim_t i = 0; i < num_blocks; ++i )
 	{
-		bli_pool_free_block( &(block_ptrs[i]) );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_finalize(): block %d: ", ( int )i );
+		#endif
+
+		bli_pool_free_block( offset_size, free_fp, &(block_ptrs[i]) );
 	}
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_finalize(): freeing block_ptrs (length %d): ",
+	        ( int )( bli_pool_block_ptrs_len( pool ) ) );
+	#endif
 
 	// Free the block_ptrs array.
 	bli_free_intl( block_ptrs );
@@ -100,62 +176,113 @@ void bli_pool_finalize( pool_t* pool )
 	bli_pool_set_top_index( 0, pool );
 	bli_pool_set_block_size( 0, pool );
 	bli_pool_set_align_size( 0, pool );
+	bli_pool_set_offset_size( 0, pool );
 #endif
 }
 
-void bli_pool_reinit( dim_t   num_blocks_new,
-                      siz_t   block_size_new,
-                      siz_t   align_size_new,
-                      pool_t* pool )
+void bli_pool_reinit
+     (
+       siz_t            num_blocks_new,
+       siz_t            block_ptrs_len_new,
+       siz_t            block_size_new,
+       siz_t            align_size_new,
+       siz_t            offset_size_new,
+       pool_t* restrict pool
+     )
 {
+	// Preserve the pointers to malloc() and free() provided when the pool
+	// was first initialized.
+	malloc_ft malloc_fp = bli_pool_malloc_fp( pool );
+	free_ft   free_fp   = bli_pool_free_fp( pool );
+
 	// Finalize the pool as it is currently configured. If some blocks
 	// are still checked out to threads, those blocks are not freed
-	// here, and instead will be freed when the threads are ready to
-	// release the blocks. (This will happen because the threads will
-	// notice that the block size of the pool has changed.)
+	// here, and instead will be freed when the threads attempt to check
+	// those blocks back into the pool. (This condition can be detected
+	// since the block size is encoded into each pblk, which is copied
+	// upon checkout.)
 	bli_pool_finalize( pool );
 
 	// Reinitialize the pool with the new parameters, in particular,
 	// the new block size.
-	bli_pool_init( num_blocks_new, block_size_new, align_size_new, pool );
+	bli_pool_init
+	(
+	  num_blocks_new,
+	  block_ptrs_len_new,
+	  block_size_new,
+	  align_size_new,
+	  offset_size_new,
+	  malloc_fp,
+	  free_fp,
+	  pool
+	);
 }
 
-void bli_pool_checkout_block( siz_t req_size, pblk_t* block, pool_t* pool )
+void bli_pool_checkout_block
+     (
+       siz_t            req_size,
+       pblk_t* restrict block,
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs;
-	dim_t   top_index;
-
+	// If the requested block size is smaller than what the pool was
+	// initialized with, reinitialize the pool to contain blocks of the
+	// requested size.
 	if ( bli_pool_block_size( pool ) < req_size )
 	{
-		const dim_t num_blocks_new = bli_pool_num_blocks( pool );
-		const siz_t align_size_new = bli_pool_align_size( pool );
+		const siz_t num_blocks_new     = bli_pool_num_blocks( pool );
+		const siz_t block_ptrs_len_new = bli_pool_block_ptrs_len( pool );
+		const siz_t align_size_new     = bli_pool_align_size( pool );
+		const siz_t offset_size_new    = bli_pool_offset_size( pool );
 
-		// If the requested block size is smaller than what the pool
-		// was initialized with, reinitialize the pool to contain blocks
-		// of the requested size.
-		bli_pool_reinit( num_blocks_new,
-		                 req_size,
-		                 align_size_new,
-		                 pool );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_checkout_block(): old block size %d < req size %d; "
+		        "reiniting.\n",
+		        ( int )bli_pool_block_size( pool ), ( int )req_size );
+		fflush( stdout );
+		#endif
+
+		bli_pool_reinit
+		(
+		  num_blocks_new,
+		  block_ptrs_len_new,
+		  req_size,
+		  align_size_new,
+		  offset_size_new,
+		  pool
+		);
 	}
 
 	// If the pool is exhausted, add a block.
 	if ( bli_pool_is_exhausted( pool ) )
 	{
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_checkout_block(): pool is exhausted (block size %d); "
+		        "growing by 1.\n", ( int )bli_pool_block_size( pool ) );
+		fflush( stdout );
+		#endif
+
 		bli_pool_grow( 1, pool );
 	}
 
 	// At this point, at least one block is guaranteed to be available.
 
-	// Query the current block_ptrs array.
-	block_ptrs = bli_pool_block_ptrs( pool );
+	// Query the block_ptrs array.
+	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
-	top_index = bli_pool_top_index( pool );
+	const siz_t top_index = bli_pool_top_index( pool );
 
-	// Copy the block at top_index to the caller's pblk_t struct.
-	//bli_pblk_copy( *(block_ptrs[top_index]), *block );
-	*block = block_ptrs[top_index];
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_checkout_block(): checking out block %d of size %d "
+	        "(align %d).\n",
+	        ( int )top_index, ( int )bli_pool_block_size( pool ),
+	                          ( int )bli_pool_align_size( pool ) );
+	fflush( stdout );
+	#endif
+
+	// Copy the pblk_t at top_index to the caller's pblk_t struct.
+	*block = block_ptrs[ top_index ];
 
 	// Notice that we don't actually need to clear the contents of
 	// block_ptrs[top_index]. It will get overwritten eventually when
@@ -166,102 +293,149 @@ void bli_pool_checkout_block( siz_t req_size, pblk_t* block, pool_t* pool )
 	bli_pool_set_top_index( top_index + 1, pool );
 }
 
-void bli_pool_checkin_block( pblk_t* block, pool_t* pool )
+void bli_pool_checkin_block
+     (
+       pblk_t* restrict block,
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs;
-	dim_t   top_index;
+	// If the pblk_t being checked in was allocated with a different block
+	// size than is currently in use in the pool, we simply free it and
+	// return. These "orphaned" blocks are no longer of use because the pool
+	// has since been reinitialized to a different (larger) block size.
+	if ( bli_pblk_block_size( block ) != bli_pool_block_size( pool ) )
+	{
+		// Query the offset size of the pool.
+		const siz_t offset_size = bli_pool_offset_size( pool );
 
-	// Query the current block_ptrs array.
-	block_ptrs = bli_pool_block_ptrs( pool );
+		// Query the free() function pointer for the pool.
+		free_ft free_fp = bli_pool_free_fp( pool );
+
+		bli_pool_free_block( offset_size, free_fp, block );
+		return;
+	}
+
+	// Query the block_ptrs array.
+	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
-	top_index = bli_pool_top_index( pool );
+	const siz_t top_index = bli_pool_top_index( pool );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_checkin_block(): checking in block %d of size %d "
+	        "(align %d, offset %d).\n",
+	        ( int )top_index - 1, ( int )bli_pool_block_size( pool ),
+	                              ( int )bli_pool_align_size( pool ),
+	                              ( int )bli_pool_offset_size( pool ) );
+	fflush( stdout );
+	#endif
 
 	// Copy the caller's pblk_t struct to the block at top_index - 1.
-	//bli_pblk_copy( *(block_ptrs[top_index-1]), *block );
-	block_ptrs[top_index-1] = *block;
+	block_ptrs[ top_index - 1 ] = *block;
 
 	// Decrement the pool's top_index.
 	bli_pool_set_top_index( top_index - 1, pool );
 }
 
-void bli_pool_grow( dim_t num_blocks_add, pool_t* pool )
+void bli_pool_grow
+     (
+       siz_t            num_blocks_add,
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs_cur;
-	dim_t   block_ptrs_len_cur;
-	dim_t   num_blocks_cur;
-
-	pblk_t* block_ptrs_new;
-	dim_t   num_blocks_new;
-
-	siz_t   block_size;
-	siz_t   align_size;
-	dim_t   top_index;
-
-	dim_t   i;
-
-	// If the requested increase is zero (or negative), return early.
-	if ( num_blocks_add < 1 ) return;
+	// If the requested increase is zero, return early.
+	if ( num_blocks_add == 0 ) return;
 
 	// Query the allocated length of the block_ptrs array and also the
-	// total number of blocks allocated.
-	block_ptrs_len_cur = bli_pool_block_ptrs_len( pool );
-	num_blocks_cur     = bli_pool_num_blocks( pool );
+	// total number of blocks currently allocated.
+	const siz_t block_ptrs_len_cur = bli_pool_block_ptrs_len( pool );
+	const siz_t num_blocks_cur     = bli_pool_num_blocks( pool );
 
 	// Compute the total number of allocated blocks that will exist
 	// after we grow the pool.
-	num_blocks_new = num_blocks_cur + num_blocks_add;
+	const siz_t num_blocks_new = num_blocks_cur + num_blocks_add;
 
-	// If the new total number of allocated blocks is larger than the
-	// allocated length of the block_ptrs array, we need to allocate
-	// a new (larger) block_ptrs array.
-	if ( num_blocks_new > block_ptrs_len_cur )
+	// If adding num_blocks_add new blocks will exceed the current capacity
+	// of the block_ptrs array, we need to first put in place a new (larger)
+	// array.
+	if ( block_ptrs_len_cur < num_blocks_new )
 	{
-		// Query the current block_ptrs array.
-		block_ptrs_cur = bli_pool_block_ptrs( pool );
+		// To prevent this from happening often, we double the current
+		// length of the block_ptrs array.
+		const siz_t block_ptrs_len_new = 2 * block_ptrs_len_cur;
 
-		// Allocate a new block_ptrs array of length num_blocks_new.
-		block_ptrs_new = bli_malloc_intl( num_blocks_new * sizeof( pblk_t ) );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_grow(): growing block_ptrs_len (%d -> %d): ",
+		        ( int )block_ptrs_len_cur, ( int )block_ptrs_len_new );
+		#endif
+
+		// Query the current block_ptrs array.
+		pblk_t* restrict block_ptrs_cur = bli_pool_block_ptrs( pool );
+
+		// Allocate a new block_ptrs array.
+		// FGVZ: Do we want to call malloc_fp() for internal data structures as
+		// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
+		pblk_t* restrict block_ptrs_new
+		=
+		bli_malloc_intl( block_ptrs_len_new * sizeof( pblk_t ) );
 
 		// Query the top_index of the pool.
-		top_index = bli_pool_top_index( pool );
+		const siz_t top_index = bli_pool_top_index( pool );
 
 		// Copy the contents of the old block_ptrs array to the new/resized
 		// array. Notice that we can begin with top_index since all entries
-		// from 0 to top_index-1 have been checked out to threads.
-		for ( i = top_index; i < num_blocks_cur; ++i ) 
+		// from 0 to top_index-1 have been (and are currently) checked out
+		// to threads.
+		for ( dim_t i = top_index; i < num_blocks_cur; ++i )
 		{
-//printf( "bli_pool_grow: copying from %lu\n", top_index );
 			block_ptrs_new[i] = block_ptrs_cur[i];
 		}
 
-//printf( "bli_pool_grow: bp_cur: %p\n", block_ptrs_cur );
+		#ifdef BLIS_ENABLE_MEM_TRACING
+		printf( "bli_pool_grow(): freeing prev block_ptrs: " );
+		#endif
+
 		// Free the old block_ptrs array.
 		bli_free_intl( block_ptrs_cur );
 
 		// Update the pool_t struct with the new block_ptrs array and
 		// record its allocated length.
 		bli_pool_set_block_ptrs( block_ptrs_new, pool );
-		bli_pool_set_block_ptrs_len( num_blocks_new, pool );
+		bli_pool_set_block_ptrs_len( block_ptrs_len_new, pool );
 	}
 
 	// At this point, we are guaranteed to have enough unused elements
 	// in the block_ptrs array to accommodate an additional num_blocks_add
 	// blocks.
 
-	// Query the current block_ptrs array (which was possibly just resized).
-	block_ptrs_cur = bli_pool_block_ptrs( pool );
+	// Query the current block_ptrs array (which was mabye just resized).
+	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
 
-	// Query the block size and alignment size of the current pool.
-	block_size = bli_pool_block_size( pool );
-	align_size = bli_pool_align_size( pool );
+	// Query the block size and alignment size of the pool.
+	const siz_t block_size  = bli_pool_block_size( pool );
+	const siz_t align_size  = bli_pool_align_size( pool );
+	const siz_t offset_size = bli_pool_offset_size( pool );
+
+	// Query the malloc() function pointer for the pool.
+	malloc_ft malloc_fp = bli_pool_malloc_fp( pool );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_grow(): growing pool from (%d -> %d).\n",
+	        ( int )num_blocks_cur, ( int )num_blocks_new );
+	fflush( stdout );
+	#endif
 
 	// Allocate the requested additional blocks in the resized array.
-	for ( i = num_blocks_cur; i < num_blocks_new; ++i ) 
+	for ( dim_t i = num_blocks_cur; i < num_blocks_new; ++i )
 	{
-//printf( "libblis: growing pool, block_size = %lu\n", block_size ); fflush( stdout );
-
-		bli_pool_alloc_block( block_size, align_size, &(block_ptrs_cur[i]) );
+		bli_pool_alloc_block
+		(
+		  block_size,
+		  align_size,
+		  offset_size,
+		  malloc_fp,
+		  &(block_ptrs[i])
+		);
 	}
 
 	// Update the pool_t struct with the new number of allocated blocks.
@@ -270,46 +444,46 @@ void bli_pool_grow( dim_t num_blocks_add, pool_t* pool )
 	bli_pool_set_num_blocks( num_blocks_new, pool );
 }
 
-void bli_pool_shrink( dim_t num_blocks_sub, pool_t* pool )
+void bli_pool_shrink
+     (
+       siz_t            num_blocks_sub,
+       pool_t* restrict pool
+     )
 {
-	pblk_t* block_ptrs;
-	dim_t   num_blocks;
-	dim_t   num_blocks_avail;
-	dim_t   num_blocks_new;
+	// If the requested decrease is zero, return early.
+	if ( num_blocks_sub == 0 ) return;
 
-	dim_t   top_index;
-
-	dim_t   i;
-
-	// Query the total number of blocks presently allocated.
-	num_blocks = bli_pool_num_blocks( pool );
+	// Query the total number of blocks currently allocated.
+	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
 	// Query the top_index of the pool.
-	top_index = bli_pool_top_index( pool );
+	const siz_t top_index = bli_pool_top_index( pool );
 
 	// Compute the number of blocks available to be checked out
 	// (and thus available for removal).
-	num_blocks_avail = num_blocks - top_index;
+	const siz_t num_blocks_avail = num_blocks - top_index;
 
 	// If the requested decrease is more than the number of available
-	// blocks in the pool, only remove the number of blocks available.
-	if ( num_blocks_avail < num_blocks_sub )
-		num_blocks_sub = num_blocks_avail;
+	// blocks in the pool, only remove the number of blocks actually
+	// available.
+	num_blocks_sub = bli_min( num_blocks_sub, num_blocks_avail );
 
-	// If the effective requested decrease is zero (or the requested
-	// decrease was negative), return early.
-	if ( num_blocks_sub < 1 ) return;
-
-	// Query the current block_ptrs array.
-	block_ptrs = bli_pool_block_ptrs( pool );
+	// Query the block_ptrs array.
+	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Compute the new total number of blocks.
-	num_blocks_new = num_blocks - num_blocks_sub;
+	const siz_t num_blocks_new = num_blocks - num_blocks_sub;
+
+	// Query the offset size of the pool.
+	const siz_t offset_size = bli_pool_offset_size( pool );
+
+	// Query the free() function pointer for the pool.
+	free_ft free_fp = bli_pool_free_fp( pool );
 
 	// Free the individual blocks.
-	for ( i = num_blocks_new; i < num_blocks; ++i )
+	for ( dim_t i = num_blocks_new; i < num_blocks; ++i )
 	{
-		bli_pool_free_block( &(block_ptrs[i]) );
+		bli_pool_free_block( offset_size, free_fp, &(block_ptrs[i]) );
 	}
 
 	// Update the pool_t struct.
@@ -320,17 +494,33 @@ void bli_pool_shrink( dim_t num_blocks_sub, pool_t* pool )
 	// a re-allocation of block_ptrs is triggered.
 }
 
-void bli_pool_alloc_block( siz_t   block_size,
-                           siz_t   align_size,
-                           pblk_t* block )
+void bli_pool_alloc_block
+     (
+       siz_t            block_size,
+       siz_t            align_size,
+       siz_t            offset_size,
+       malloc_ft        malloc_fp,
+       pblk_t* restrict block
+     )
 {
-	void* buf_sys;
-	void* buf_align;
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_alloc_block(): calling fmalloc_align(): size %d (align %d, offset %d)\n",
+	        ( int )block_size, ( int )align_size, ( int )offset_size );
+	fflush( stdout );
+	#endif
 
-	// Allocate the block. We add the alignment size to ensure we will
-	// have enough usable space after alignment.
-	buf_sys   = bli_malloc_pool( block_size + align_size );
-	buf_align = buf_sys;
+	// Allocate the block via the bli_fmalloc_align() wrapper, which performs
+	// alignment logic and opaquely saves the original pointer so that it can
+	// be recovered when it's time to free the block. Note that we have to
+	// add offset_size to the number of bytes requested since we will skip
+	// that many bytes at the beginning of the allocated memory.
+	void* restrict buf
+	=
+	bli_fmalloc_align( malloc_fp, block_size + offset_size, align_size );
+
+#if 0
+	// NOTE: This code is disabled because it is not needed, since
+	// bli_fmalloc_align() is guaranteed to return an aligned address.
 
 	// Advance the pointer to achieve the necessary alignment, if it is not
 	// already aligned.
@@ -349,56 +539,80 @@ void bli_pool_alloc_block( siz_t   block_size,
 		                         ( uintptr_t )align_size )
 		                     );
 	}
-	
+#endif
+
+	// Advance the pointer by offset_size bytes.
+	buf = ( void* )( ( char* )buf + offset_size );
+
 	// Save the results in the pblk_t structure.
-	bli_pblk_set_buf_sys( buf_sys, block );
-	bli_pblk_set_buf_align( buf_align, block );
+	bli_pblk_set_buf( buf, block );
+	bli_pblk_set_block_size( block_size, block );
 }
 
-void bli_pool_free_block( pblk_t* block )
+void bli_pool_free_block
+     (
+       siz_t            offset_size,
+       free_ft          free_fp,
+       pblk_t* restrict block
+     )
 {
-	void* buf_sys;
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_pool_free_block(): calling ffree_align(): size %d.\n",
+	        ( int )bli_pblk_block_size( block ) );
+	fflush( stdout );
+	#endif
 
-	// Extract the pointer to the block that was originally provided by
-	// the operating system.
-	buf_sys = bli_pblk_buf_sys( block );
+	// Extract the pblk_t buffer, which is the aligned address returned from
+	// bli_fmalloc_align() when the block was allocated.
+	void* restrict buf = bli_pblk_buf( block );
 
-	// Free the block.
-	bli_free_pool( buf_sys );
+	// Undo the pointer advancement by offset_size bytes performed previously
+	// by bli_pool_alloc_block().
+	buf = ( void* )( ( char* )buf - offset_size );
+
+	// Free the block via the bli_ffree_align() wrapper, which recovers the
+	// original pointer that was returned by the pool's malloc() function when
+	// the block was allocated.
+	bli_ffree_align( free_fp, buf );
 }
 
-void bli_pool_print( pool_t* pool )
+void bli_pool_print
+     (
+       pool_t* restrict pool
+     )
 {
 	pblk_t* block_ptrs     = bli_pool_block_ptrs( pool );
-	dim_t   block_ptrs_len = bli_pool_block_ptrs_len( pool );
-	dim_t   top_index      = bli_pool_top_index( pool );
-	dim_t   num_blocks     = bli_pool_num_blocks( pool );
-	dim_t   block_size     = bli_pool_block_size( pool );
-	dim_t   align_size     = bli_pool_align_size( pool );
-	dim_t   i;
+	siz_t   block_ptrs_len = bli_pool_block_ptrs_len( pool );
+	siz_t   top_index      = bli_pool_top_index( pool );
+	siz_t   num_blocks     = bli_pool_num_blocks( pool );
+	siz_t   block_size     = bli_pool_block_size( pool );
+	siz_t   align_size     = bli_pool_align_size( pool );
+	siz_t   offset_size    = bli_pool_offset_size( pool );
 
 	printf( "pool struct ---------------\n" );
 	printf( "  block_ptrs:      %p\n", block_ptrs );
-	printf( "  block_ptrs_len:  %ld\n", ( long )block_ptrs_len );
-	printf( "  top_index:       %ld\n", ( long )top_index );
-	printf( "  num_blocks:      %ld\n", ( long )num_blocks );
-	printf( "  block_size:      %ld\n", ( long )block_size );
-	printf( "  align_size:      %ld\n", ( long )align_size );
+	printf( "  block_ptrs_len:  %d\n", ( int )block_ptrs_len );
+	printf( "  top_index:       %d\n", ( int )top_index );
+	printf( "  num_blocks:      %d\n", ( int )num_blocks );
+	printf( "  block_size:      %d\n", ( int )block_size );
+	printf( "  align_size:      %d\n", ( int )align_size );
+	printf( "  offset_size:     %d\n", ( int )offset_size );
 	printf( "  pblks   sys    align\n" );
-	for ( i = 0; i < num_blocks; ++i )
+
+	for ( dim_t i = 0; i < num_blocks; ++i )
 	{
-		printf( "  %ld: %p %p\n", ( long )i,
-		                          bli_pblk_buf_sys(   &block_ptrs[i] ),
-	                              bli_pblk_buf_align( &block_ptrs[i] ) );
+		printf( "  %d: %p\n", ( int )i, bli_pblk_buf( &block_ptrs[i] ) );
 	}
 }
 
-void bli_pblk_print( pblk_t* pblk )
+void bli_pblk_print
+     (
+       pblk_t* restrict pblk
+     )
 {
-	void* buf_sys   = bli_pblk_buf_sys( pblk );
-	void* buf_align = bli_pblk_buf_align( pblk );
+	void* buf = bli_pblk_buf( pblk );
 
 	printf( "pblk struct ---------------\n" );
-	printf( "     %p %p\n", buf_sys, buf_align );
+	printf( "  block address (aligned): %p\n", buf );
 }
 

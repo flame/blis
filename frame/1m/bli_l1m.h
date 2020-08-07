@@ -66,6 +66,3 @@
 #include "bli_packm.h"
 #include "bli_unpackm.h"
 
-// Other
-#include "bli_scalm.h"
-

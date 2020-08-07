@@ -55,7 +55,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -86,6 +86,7 @@ INSERT_GENTDEF( packm )
 typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      ( \
        conj_t           conja, \
+       pack_t           schema, \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \

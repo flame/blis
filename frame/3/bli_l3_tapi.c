@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,7 +65,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       m_a, n_a; \
 	dim_t       m_b, n_b; \
@@ -72,12 +77,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, k, n, &m_b, &n_b ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_create_with_attached_buffer( dt, m,   n,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   n,   c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_conjtrans( transa, &ao ); \
 	bli_obj_set_conjtrans( transb, &bo ); \
@@ -122,7 +127,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       mn_a; \
 	dim_t       m_b, n_b; \
@@ -130,12 +139,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dim_with_side(   side,   m, n, &mn_a ); \
 	bli_set_dims_with_trans( transb, m, n, &m_b, &n_b ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
-	bli_obj_create_with_attached_buffer( dt, m,    n,    c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,    n,    c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_conj( conja, &ao ); \
@@ -183,17 +192,20 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt_r = PASTEMAC(chr,type); \
 	const num_t dt   = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       m_a, n_a; \
 \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt_r, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt_r, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt_r, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -239,7 +251,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt_r = PASTEMAC(chr,type); \
 	const num_t dt   = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       m_a, n_a; \
 	dim_t       m_b, n_b; \
@@ -247,12 +263,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt,   alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt_r, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt,   alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt_r, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -297,17 +313,20 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       m_a, n_a; \
 \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -352,7 +371,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       m_a, n_a; \
 	dim_t       m_b, n_b; \
@@ -360,12 +383,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
 	bli_set_dims_with_trans( transb, m, k, &m_b, &n_b ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
-	bli_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,   m,   c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploc, &co ); \
 	bli_obj_set_conjtrans( transa, &ao ); \
@@ -414,7 +437,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       mn_a; \
 	dim_t       m_b, n_b; \
@@ -422,12 +449,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dim_with_side(   side,   m, n, &mn_a ); \
 	bli_set_dims_with_trans( transb, m, n, &m_b, &n_b ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
-	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, beta,  &betao  ); \
 \
-	bli_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
-	bli_obj_create_with_attached_buffer( dt, m,    n,    c, rs_c, cs_c, &co ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m_b,  n_b,  b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, m,    n,    c, rs_c, cs_c, &co ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_diag( diaga, &ao ); \
@@ -475,16 +502,18 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo; \
+	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
 \
 	dim_t       mn_a; \
 \
 	bli_set_dim_with_side( side, m, n, &mn_a ); \
 \
-	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
+	bli_obj_init_finish_1x1( dt, alpha, &alphao ); \
 \
-	bli_obj_create_with_attached_buffer( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
-	bli_obj_create_with_attached_buffer( dt, m,    n,    b, rs_b, cs_b, &bo ); \
+	bli_obj_init_finish( dt, mn_a, mn_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_init_finish( dt, m,    n,    b, rs_b, cs_b, &bo ); \
 \
 	bli_obj_set_uplo( uploa, &ao ); \
 	bli_obj_set_diag( diaga, &ao ); \

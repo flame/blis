@@ -244,10 +244,24 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 			# directive.
 			header_path = get_header_path( header, header_dirpaths )
 
-			# If the header was found, we recurse. Otherwise, we output
-			# the #include directive with a comment indicating that it
-			# was skipped.
-			if header_path:
+			# First, check if the header is our root header (and if so, ignore it).
+			# Otherwise, if the header was found, we recurse. Otherwise, we output
+			# the #include directive with a comment indicating that it as skipped
+			if header == root_inputfile:
+
+				markl = result.group(1)
+				markr = result.group(3)
+
+				echov2( "%sthis is the root header '%s'; commenting out / skipping." \
+				        % ( cursp, header ) )
+
+				# If the header found is our root header, then we cannot
+				# recurse into it lest we enter an infinite loop. Output the
+				# line but make sure it's commented out entirely.
+				ostring += "%s #include %c%s%c %c" \
+				           % ( skipstr, markl, header, markr, '\n' )
+
+			elif header_path:
 
 				echov2( "%slocated file '%s'; recursing." \
 				        % ( cursp, header_path ) )
@@ -327,6 +341,7 @@ strip_comments = None
 recursive_flag = None
 verbose_flag   = None
 regex          = None
+root_inputfile = None
 
 def main():
 
@@ -336,6 +351,7 @@ def main():
 	global recursive_flag
 	global verbose_flag
 	global regex
+	global root_inputfile
 
 	# Obtain the script name.
 	path, script_name = os.path.split(sys.argv[0])
@@ -396,6 +412,10 @@ def main():
 	outputfile = args[1]
 	temp_dir   = args[2]
 	dir_list   = args[3]
+
+	# Save the filename (basename) part of the input file (or root file) into a
+	# global variable that we can access later from within flatten_header().
+	root_inputfile = os.path.basename( inputfile )
 
 	# Separate the directories into distinct strings.
 	dir_list = dir_list.split()

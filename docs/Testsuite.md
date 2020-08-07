@@ -20,18 +20,23 @@ This wiki explains how to use the test suite included with the BLIS framework.
 The test suite exists in the `testsuite` directory within the top-level source distribution:
 ```
 $ ls
-CHANGELOG  Makefile      common.mk        configure  mpi_test     testsuite
-CREDITS    README.md     config           frame      obj          version
-INSTALL    bli_config.h  config.mk        kernels    ref_kernels  windows
-LICENSE    build         config_registry  lib        test
+CHANGELOG        Makefile   common.mk        examples     sandbox     version
+CONTRIBUTING.md  README.md  config           frame        so_version  windows
+CREDITS          RELEASING  config_registry  kernels      test
+INSTALL          blastest   configure        mpi_test     testsuite
+LICENSE          build      docs             ref_kernels  travis
+
 ```
-There, you will find a `Makefile`, two input files, and two directories:
+There, you will find a `Makefile`, a script, several input files, and two directories:
 ```
 $ cd testsuite
 $ ls
-Makefile  input.general  input.operations  obj  src
+Makefile            input.general.mixed    input.operations.mixed
+check-blistest.sh   input.general.salt     input.operations.salt
+input.general       input.operations       obj
+input.general.fast  input.operations.fast  src
 ```
-As you would expect, the test suite's source code lives in `src` and the object files, upon being built, are placed in `obj`. The two `input.*` files control how the test suite runs, while the `Makefile` controls how the test suite executable is compiled and linked.
+As you would expect, the test suite's source code lives in `src` and the object files, upon being built, are placed in `obj`. The two `input.*` files control how the test suite runs, while the `Makefile` controls how the test suite executable is compiled and linked. However, only two input files are used at any given time: one `input.general` and one `input.operations`. (We have several pairs so that Travis CI can run multiple variations of tests automatically when new commits are made to github.) You can focus your attention on the general-purpose input files `input.general` and `input.operations`.
 
 ## Compiling
 
@@ -61,7 +66,10 @@ $ make -j4
 After `make` is complete, an executable named `test_libblis.x` is created:
 ```
 $ ls
-Makefile  input.general  input.operations  obj  src  test_libblis.x
+Makefile            input.general.mixed    input.operations.mixed  test_libblis.x
+check-blistest.sh   input.general.salt     input.operations.salt
+input.general       input.operations       obj
+input.general.fast  input.operations.fast  src
 ```
 
 ### Compiling/linking aginst an installed copy of BLIS
@@ -161,9 +169,9 @@ _**Test gemm with mixed-precision operands?**_ This boolean determines whether `
 
 _**Problem size.**_ These values determine the first problem size to test, the maximum problem size to test, and the increment between problem sizes. Note that the maximum problem size only bounds the range of problem sizes; it is not guaranteed to be tested. Example: If the initial problem size is 128, the maximum is 1000, and the increment is 64, then the last problem size to be tested will be 960.
 
-_**Complex level-3 implementations to test.**_ With the exception of the switch marked `native`, these switches control whether experimental complex domain implementations are tested (when applicable). These implementations employ induced methods complex matrix multiplication and apply to some (though not all) of the level-3 operations. If you don't know what these are, you can ignore them. The `native` switch corresponds to native execution of complex domain level-3 operations, which we test by default. We also test the `1m` method, since it is the induced method of choice when complex micro-kernels are not available. Note that all of these induced method tests (including `native`) are automatically disabled if the `c` and `z` datatypes are disabled.
+_**Complex level-3 implementations to test.**_ With the exception of the switch marked `native`, these switches control whether experimental complex domain implementations are tested (when applicable). These implementations employ induced methods complex matrix multiplication and apply to some (though not all) of the level-3 operations. If you don't know what these are, you can ignore them. The `native` switch corresponds to native execution of complex domain level-3 operations, which we test by default. We also test the `1m` method, since it is the induced method of choice when complex microkernels are not available. Note that all of these induced method tests (including `native`) are automatically disabled if the `c` and `z` datatypes are disabled.
 
-_**Simualte application-levle threading.**_ This setting specifies the number of threads the testsuite will spawn, and is meant to allow the user to exercise BLIS as a multithreaded application might if it were to make multiple concurrent calls to BLIS operations. (Note that the threading controlled by this option is orthogonal to, and has no effect on, whatever multithreading may be employed _within_ BLIS, as specified by the environment variables described in the [Multithreading](Multithreading.md) documentation.) When this option is set to 1, the testsuite is run with only one thread. When set to n > 1 threads, the spawned threads will parallelize (in round-robin fashion) the total set of tests specified by the testsuite input files, executing them in roughly the same order as that of a sequential execution.
+_**Simulate application-level threading.**_ This setting specifies the number of threads the testsuite will spawn, and is meant to allow the user to exercise BLIS as a multithreaded application might if it were to make multiple concurrent calls to BLIS operations. (Note that the threading controlled by this option is orthogonal to, and has no effect on, whatever multithreading may be employed _within_ BLIS, as specified by the environment variables described in the [Multithreading](Multithreading.md) documentation.) When this option is set to 1, the testsuite is run with only one thread. When set to n > 1 threads, the spawned threads will parallelize (in round-robin fashion) the total set of tests specified by the testsuite input files, executing them in roughly the same order as that of a sequential execution.
 
 _**Error-checking level.**_ BLIS supports various "levels" of error checking prior to executing most operations. For now, only two error-checking levels are implemented: fully disabled (`'0'`) and fully enabled (`'1'`). Disabling error-checking may improve performance on some systems for small problem sizes, but generally speaking the cost is negligible.
 
@@ -258,9 +266,9 @@ _**Dimensions.**_ The values near the middle of the output show the size of each
 
 _**Performance.**_ The next value output is raw performance, reported in GFLOPS (billions of floating-point operations per second).
 
-_**Residual.**_ The next value, which we loosely refer to as a "residual", reports the result of the numerical correctness test for the operation. The actual method of computing the residual (and hence its exact meaning) depends on the operation being tested. However, these residuals are always computed such that the result should be no more than 2-3 orders of magnitude away from machine precision for the datatype being tested. Thus, "good" results are typically in the neighborhood of `1e-07` for single precision and `1e-15` for double precision.
+_**Residual.**_ The next value, which we loosely refer to as a "residual", reports the result of the numerical correctness test for the operation. The actual method of computing the residual (and hence its exact meaning) depends on the operation being tested. However, these residuals are always computed such that the result should be no more than 2-3 orders of magnitude away from machine precision for the datatype being tested. Thus, "good" results are typically in the neighborhood of `5e-06` for single precision and `1e-16` for double precision (preferrably less).
 
-_**Test result.**_ The BLIS test suite compares the residual to internally-defined accuracy thresholds to categorize the test as either `PASS`, `MARGINAL`, or `FAIL`. The vast majority of tests should result in a `PASS` result, with perhaps a handful resulting in `MARGINAL`.
+_**Test result.**_ The BLIS test suite compares the residual to internally-defined accuracy thresholds to categorize the test as either `PASS`, `MARGINAL`, or `FAIL`. The vast majority of tests should result in a `PASS` result, with perhaps a handful resulting in `MARGINAL`. Usually, a `MARGINAL` result is no cause for concern, especially when similar tests result in `PASS`.
 
 Note that the various sections of output, which line up nicely as columns, are labeled on a line beginning with `%` immediately before the results:
 ```
@@ -268,6 +276,13 @@ Note that the various sections of output, which line up nicely as columns, are l
 blis_sgemm_nn_ccc                            100   100    50   1.447   1.14e-07    PASS
 ```
 These labels are useful as concise reminders of the meaning of each column. They are especially useful in differentiating the various dimensions from each other for operations that contain two or three dimensions.
+
+If you simply want to run the BLIS testsuite and know if there were any failures, you can do so via the `make check` and `make check-fast`. The former uses the `input.general` and `input.operations` files, while the latter uses the `input.general.fast` and `input.operations.fast`. (We generally recommend using the "fast" target since it usually finishes in much less time while still being relatively comprehensive.) A one-line characterization of the test results is output after the tests finish:
+```
+$ make check-fast
+Running test_libblis.x (fast) with output redirected to 'output.testsuite'
+check-blistest.sh: All BLIS tests passed!
+```
 
 # BLAS test drivers
 
@@ -320,9 +335,9 @@ The results can quickly be checked via a script in the top-level `build` directo
 $ ../build/check-blastest.sh
 All BLAS tests passed!
 ```
-This is the message we expect when everything works as expected.
+This is the message we expect when everything works as expected. You can also combine the `make`, `make run`, and script execution into one command: `make check`.
 
-Alternatively, you can perform all of the steps described above (`make ; make run; ../build/check-blastest.sh`) from the top-level directory in one shot. After running `configure` and `make`, simply run `make checkblas`:
+Alternatively, you can execute all of the steps described above (`make ; make run; ../build/check-blastest.sh`, or `make check`) from the top-level directory. After running `configure` and `make`, simply run `make checkblas`:
 ```
 $ ./configure haswell
 # Lots of configure output...
@@ -333,13 +348,14 @@ $ make check
 This will build all of the necessary BLAS test driver object files, link them, and run the drivers. Output will go to the current directory (either the top-level directory of the source distribution, or the out-of-tree build directory from which you ran `configure`), with each output file (prefixed with `out.`) named according to the BLAS driver that generated its contents:
 ```
 $ ls
-CHANGELOG  bli_config.h     frame       out.cblat2  out.sblat3        testsuite
-CREDITS    build            include     out.cblat3  out.zblat1        version
-INSTALL    common.mk        kernels     out.dblat1  out.zblat2        windows
-LICENSE    config           lib         out.dblat2  out.zblat3
-Makefile   config.mk        mpi_test    out.dblat3  output.testsuite
-README.md  config_registry  obj         out.sblat1  ref_kernels
-blastest   configure        out.cblat1  out.sblat2  test
+CHANGELOG        blastest         docs      out.cblat1  out.sblat3   testsuite
+CONTRIBUTING.md  bli_config.h     examples  out.cblat2  out.zblat1   travis
+CREDITS          build            frame     out.cblat3  out.zblat2   version
+INSTALL          common.mk        include   out.dblat1  out.zblat3   windows
+LICENSE          config           kernels   out.dblat2  ref_kernels
+Makefile         config.mk        lib       out.dblat3  sandbox
+README.md        config_registry  mpi_test  out.sblat1  so_version
+RELEASING        configure        obj       out.sblat2  test
 ```
 If any of the tests fail, you'll instead see the message:
 ```
@@ -347,3 +363,4 @@ $ make check
 At least one BLAS test failed. Please see out.* files for details.
 ```
 As the message suggests, you should inspect the `out.*` files for more details about what went wrong.
+

@@ -12,8 +12,8 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [I understand that BLIS is mostly a tool for developers?](FAQ.md#i-understand-that-blis-is-mostly-a-tool-for-developers)
   * [How do I link against BLIS?](FAQ.md#how-do-i-link-against-blis)
   * [Must I use git? Can I download a tarball?](FAQ.md#must-i-use-git-can-i-download-a-tarball)
-  * [What is a micro-kernel?](FAQ.md#what-is-a-micro-kernel)
-  * [What is a macro-kernel?](FAQ.md#what-is-a-macro-kernel)
+  * [What is a microkernel?](FAQ.md#what-is-a-microkernel)
+  * [What is a macrokernel?](FAQ.md#what-is-a-macrokernel)
   * [What is a context?](FAQ.md#what-is-a-context)
   * [I am used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?](FAQ.md#im-used-to-thinking-in-terms-of-column-majorrow-major-storage-and-leading-dimensions-what-is-a-row-stride--column-stride)
   * [What does it mean when a matrix with general stride is column-tilted or row-tilted?](FAQ.md#what-does-it-mean-when-a-matrix-with-general-stride-is-column-tilted-or-row-tilted)
@@ -26,16 +26,17 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Does BLIS work with GPUs?](FAQ.md#does-blis-work-with-gpus)
   * [Does BLIS work on (some architecture)?](FAQ.md#does-blis-work-on-some-architecture)
   * [What about distributed-memory parallelism?](FAQ.md#what-about-distributed-memory-parallelism)
-  * [Can I build BLIS on Windows / Mac OS X?](FAQ.md#can-i-build-blis-on-windows--mac-os-x)
+  * [Can I build BLIS on Mac OS X?](FAQ.md#can-i-build-blis-on-mac-os-x)
+  * [Can I build BLIS on Windows?](FAQ.md#can-i-build-blis-on-windows)
   * [Can I build BLIS as a shared library?](FAQ.md#can-i-build-blis-as-a-shared-library)
   * [Can I use the mixed domain / mixed precision support in BLIS?](FAQ.md#can-i-use-the-mixed-domain--mixed-precision-support-in-blis)
   * [Who is involved in the project?](FAQ.md#who-is-involved-in-the-project)
   * [Who funded the development of BLIS?](FAQ.md#who-funded-the-development-of-blis)
   * [I found a bug. How do I report it?](FAQ.md#i-found-a-bug-how-do-i-report-it)
   * [How do I request a new feature?](FAQ.md#how-do-i-request-a-new-feature)
+  * [What is the difference between this version of BLIS and the one that AMD maintains?](FAQ.md#what-is-the-difference-between-this-version-of-blis-and-the-one-that-amd-maintains)
+  * [Who do I contact if I have a question about the AMD version of BLIS?](FAQ.md#who-do-i-contact-if-i-have-a-question-about-the-amd-version-of-blis)
   * [Where did you get the photo for the BLIS logo / mascot?](FAQ.md#where-did-you-get-the-photo-for-the-blis-logo--mascot)
-
-
 
 ### Why did you create BLIS?
 
@@ -47,7 +48,7 @@ Over time, we wanted more than just a more flexible interface; we wanted an enti
 
 BLIS has numerous advantages to existing BLAS implementations. Many of these advantages are summarized on the [BLIS
 homepage](https://github.com/flame/blis#key-features). But here are a few reasons one might choose BLIS over some other implementation of BLAS:
-  * BLIS facilitates high performance while remaining very portable. BLIS isolates performance-sensitive code to a micro-kernel which contains only one loop and which, when optimized, accelerates virtually all level-3 operations. Thus, BLIS serves as a powerful tool for quickly instantiating BLAS on new or experimental hardware architectures, as well as a flexible "laboratory" in which to conduct research and experiments.
+  * BLIS facilitates high performance while remaining very portable. BLIS isolates performance-sensitive code to a microkernel which contains only one loop and which, when optimized, accelerates virtually all level-3 operations. Thus, BLIS serves as a powerful tool for quickly instantiating BLAS on new or experimental hardware architectures, as well as a flexible "laboratory" in which to conduct research and experiments.
   * BLIS provides robust multithreading support, allowing symmetric multicore/many-core parallelism via either OpenMP or POSIX threads. It also computes proper load balance for structured matrix subpartitions, regardless of the location of the diagonal, or whether the subpartition is lower- or upper-stored.
   * BLIS supports a superset of BLAS functionality, providing operations omitted from the BLAS as well as some complex domain support that is missing in BLAS operations. BLIS is especially useful to researchers who need to develop and prototype new BLAS-like operations that do not exist in the BLAS.
   * BLIS is backwards compatible with BLAS. BLIS contains a BLAS compatibility layer that allows an application to treat BLIS as if it were a traditional BLAS library.
@@ -67,9 +68,9 @@ If automatic hardware detection is requested at configure-time and the build pro
 
 ### I understand that BLIS is mostly a tool for developers?
 
-Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and micro-kernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
+Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and microkernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
 
-The good news, however, is that end-users can use BLIS too. Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge. Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
+The good news, however, is that end-users can use BLIS too. Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge, and many kernels have already been added! Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
 
 ### How do I link against BLIS?
 
@@ -77,34 +78,33 @@ Linking against BLIS is easy! Most people can link to it as if it were a generic
 
 ### Must I use git? Can I download a tarball?
 
-We **strongly encourage** you to obtain the BLIS source code by cloning a `git` repository (via the [git
-clone](BuildSystem.md#obtaining-blis) command). The reason for this is that it will allow you to easily update your local copy of BLIS by executing `git pull`.
+We **strongly encourage** you to obtain the BLIS source code by cloning a `git` repository (via the [git clone](BuildSystem.md#obtaining-blis) command). The reason for this is that it will allow you to easily update your local copy of BLIS by executing `git pull`.
 
 Tarballs and zip files may be obtained from the [releases](https://github.com/flame/blis/releases) page.
 
-### What is a micro-kernel?
+### What is a microkernel?
 
-The micro-kernel (usually short for "`gemm` micro-kernel") is the basic unit of level-3 (matrix-matrix) computation within BLIS. It consists of one loop, where each iteration performs a very small outer product to update a very small matrix. The micro-kernel is typically the only piece of code that must be carefully optimized (via vector intrinsics or assembly code) to enable high performance in most of the level-3 operations such as `gemm`, `hemm`, `herk`, and `trmm`.
+The microkernel (usually short for "`gemm` microkernel") is the basic unit of level-3 (matrix-matrix) computation within BLIS. It consists of one loop, where each iteration performs a very small outer product to update a very small matrix. The microkernel is typically the only piece of code that must be carefully optimized (via vector intrinsics or assembly code) to enable high performance in most of the level-3 operations such as `gemm`, `hemm`, `herk`, and `trmm`.
 
-For a more thorough explanation of the micro-kernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm micro-kernel section](KernelsHowTo.md#gemm-micro-kernel) of the BLIS [Kernels Guide](KernelsHowTo.md).
+For a more thorough explanation of the microkernel and its role in the overall level-3 computations, please read our [ACM TOMS papers](https://github.com/flame/blis#citations). For API and technical reference, please see the [gemm microkernel section](KernelsHowTo.md#gemm-microkernel) of the BLIS [Kernels Guide](KernelsHowTo.md).
 
-### What is a macro-kernel?
+### What is a macrokernel?
 
-The macro-kernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macro-kernel is called. The macro-kernel is implemented as two loops around the micro-kernel.
+The macrokernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macrokernel is called. The macrokernel is implemented as two loops around the microkernel.
 
-The macro-kernels in BLIS correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
+The macrokernels in BLIS correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
 
-For more information on macro-kernels, please read our [ACM TOMS papers](https://github.com/flame/blis#citations).
+For more information on macrokernels, please read our [ACM TOMS papers](https://github.com/flame/blis#citations).
 
 ### What is a context?
 
-As of 0.2.0, BLIS contains a new infrastructure for communicating runtime information (such as kernel addresses and blocksizes) from the highest levels of code all the way down the function stack, even into the kernels themselves. This new data structure is called a *context*, and together with its API, it helped us clean up some hacks and other awkwardness that existed in BLIS prior to 0.2.0. Contexts also lays the groundwork for managing kernels and related kernel information at runtime.
+As of 0.2.0, BLIS contains a new infrastructure for communicating runtime information (such as kernel addresses and blocksizes) from the highest levels of code all the way down the function stack, even into the kernels themselves. This new data structure is called a *context* (defined in code as a `cntx_t` type), and together with its API it helped us clean up some hacks and other awkwardness that existed in BLIS prior to 0.2.0. Contexts also lay the groundwork for managing kernels and related kernel information at runtime.
 
 If you are a kernel developer, you can usually ignore the `cntx_t*` argument that is passed into each kernel, since the kernels already inherently "know" this information (such as register blocksizes). And if you are a user, and the function you want to call takes a `cntx_t*` argument, you can safely pass in `NULL` and BLIS will automatically build a suitable context for you at runtime. 
 
 ### I'm used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?
 
-Traditional BLAS assumes that matrices are stored in column-major order, where a leading dimension measures the distance from one element to the next element in the same row. But column-major order is really just a special case of BLIS's more generalized storage scheme.
+Traditional BLAS assumes that matrices are stored in column-major order (or, as we often say, matrices that are "column-stored"), where a leading dimension measures the distance from one element to the next element in the same row. But column-major order is really just a special case of BLIS's more generalized storage scheme.
 
 In generalized storage, we have a row stride and a column stride. The row stride measures the distance in memory between rows (within a single column) while the column stride measures the distance between columns (within a single row). Column-major storage corresponds to the situation where the row stride equals 1. Since the row stride is unit, you only have to track the column stride (i.e., the leading dimension). Similarly, in row-major order, the column stride is equal to 1 and only the row stride must be tracked.
 
@@ -144,7 +144,7 @@ We have integrated some early foundational support for NUMA *development*, but c
 
 ### Does BLIS work with GPUs?
 
-BLIS does not currently support graphical processing units (GPUs).
+BLIS does not currently support graphical processing units (GPUs). However, others have applied the BLIS approach towards frameworks that provide BLAS-like functionality on GPUs. To see how NVIDIA's implementation compares to an analagous approach based on the principles that underlie BLIS, please see a paper by some of our collaborators, ["Implementing Strassen’s Algorithm with CUTLASSon NVIDIA Volta GPUs"](https://apps.cs.utexas.edu/apps/sites/default/files/tech_reports/GPUStrassen.pdf).
 
 ### Does BLIS work on _(some architecture)_?
 
@@ -154,13 +154,30 @@ Please see the BLIS [Hardware Support](HardwareSupport.md) guide for a full list
 
 No. BLIS is a framework for sequential and shared-memory/multicore implementations of BLAS-like operations. If you need distributed-memory dense linear algebra implementations, we recommend the [Elemental](http://libelemental.org/) library.
 
-### Can I build BLIS on Windows / Mac OS X?
+### Can I build BLIS on Mac OS X?
 
 BLIS was designed for use in a GNU/Linux environment. However, we've gone to greath lengths to keep BLIS compatible with other UNIX-like systems as well, such as BSD and OS X. System software requirements for UNIX-like systems are discussed in the BLIS [Build System](BuildSystem.md) guide.
 
-Support for building in Windows is not directly supported. However, Windows 10 now provides a Linux-like environment. We suspect this is the best route for those trying to build BLIS in Windows.
+### Can I build BLIS on Windows?
 
-If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". And if you'd like to share your experiences, please join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message!
+If all you need is a Windows DLL of BLIS, you may be in luck! BLIS uses [AppVeyor](https://ci.appveyor.com/) to automatically produces dynamically-linked libraries, which are preserved on the site as "artifacts". To try it out, just visit the [BLIS AppVeyor page](https://ci.appveyor.com/project/shpc/blis/), click on the `LIB_TYPE=shared` link for the most recent build, and then click on "Artifacts". If you would like to provide us feedback, you may do so by [opening an issue](http://github.com/flame/blis/issues), or you can join the [blis-devel](http://groups.google.com/group/blis-devel) mailing list and send us a message.
+
+If you want to build on Windows, there are two options:
+
+1. MSVC ABI compatible DLL with clang
+
+   If you want BLIS to be compatible with DLLs built by MSVC, you need to use `clang.exe` to build BLIS as BLIS does not support building with Visual Studio C compiler (``cl.exe``). To build BLIS, you need a recent clang from [LLVM](https://releases.llvm.org/download.html), an [MSYS2](https://www.msys2.org/) environment (for build tools like `sed`, `bash`), a Visual Studio 2015 or later environment (for C standard library) and Windows SDK.
+   To build `BLIS`,
+     * Activate the Visual Studio environment from a command prompt
+       Run `call C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat x64`
+     * Start the bash shell from the same command prompt. (Run `bash.exe`)
+     * Run `export AR=llvm-ar AS=llvm-as RANLIB=echo CC=clang CXX=clang++`
+     * Run `./configure --prefix=/c/blis/ --disable-static --enable-shared auto`
+     * Run `make -j install`
+
+2. MinGW DLL
+
+   This is the easiest option to compile BLIS on windows, but the DLL might not be compatible with other programs compiled with MSVC. To build `BLIS`, install [MSYS2](https://www.msys2.org) and `mingw-w64` compilers. Then start a `bash` shell from MSYS2 and follow the instructions for the Linux build.
 
 ### Can I build BLIS as a shared library?
 
@@ -181,7 +198,7 @@ Lots of people! For a full list of those involved, see the
 
 BLIS was primarily funded by grants from [Microsoft](https://www.microsoft.com/),
 [Intel](https://www.intel.com/), [Texas
-Instruments](https://www.ti.com/), [AMD](https://www.amd.com/), [Huawei](https://www.hauwei.com/us/), and [Oracle](https://www.oracle.com/) as well as grants from the [National Science Foundation](http://www.nsf.gov/) (Awards CCF-0917167 ACI-1148125/1340293, and CCF-1320112).
+Instruments](https://www.ti.com/), [AMD](https://www.amd.com/), [Huawei](https://www.hauwei.com/us/), [Oracle](https://www.oracle.com/), and [Facebook](https://www.facebook.com/) as well as grants from the [National Science Foundation](http://www.nsf.gov/) (Awards CCF-0917167 ACI-1148125/1340293, and CCF-1320112).
 
 Reminder: _Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation (NSF)._
 
@@ -192,6 +209,18 @@ If you think you've found a bug, we request that you [open an issue](http://gith
 ### How do I request a new feature?
 
 Feature requests should also be submitted by [opening a new issue](http://github.com/flame/blis/issues).
+
+### What is the difference between this version of BLIS and the one that AMD maintains?
+
+AMD has chosen BLIS as the open-source foundation for the BLAS component of their [AMD Optimizing CPU Libraries (AOCL)](https://developer.amd.com/amd-aocl/) toolkit. Our group enjoys a great collaboration and partnership with AMD, and we are pleased to have their enthusiastic support for our project.
+
+At a technical level, AMD's fork of BLIS is considered to be a downstream variant. AMD uses their fork to develop optimizations specific to AMD hardware. Occasionally, AMD will submit pull requests to merge their features, enhancements, and fixes back into our "plain vanilla" upstream repository. So our upstream BLIS will eventually contain most of the modifications originally developed by AMD in their fork, but with a lag. Similarly, features introduced into the upstream BLIS may not be immediately available in AMD's fork, but eventually their team will perform a merge and synchronize with our latest code. 
+
+AMD also uses a different versioning system for AOCL which is independent of the versions used by the [upstream BLIS](http://github.com/flame/blis) project.
+
+### Who do I contact if I have a question about the AMD version of BLIS?
+
+For questions or support regarding [AMD's fork of BLIS](https://github.com/amd/blis), please contact the [AMD Optimizing CPU Libraries](https://developer.amd.com/amd-aocl/) group at aoclsupport@amd.com.
 
 ### Where did you get the photo for the BLIS logo / mascot?
 

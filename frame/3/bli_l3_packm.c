@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,13 +45,12 @@ void bli_l3_packm
        thrinfo_t* thread
      )
 {
-	membrk_t* membrk;
 	packbuf_t pack_buf_type;
 	mem_t*    cntl_mem_p;
 	siz_t     size_needed;
 
 	// FGVZ: Not sure why we need this barrier, but we do.
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 
 	// Every thread initializes x_pack and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
@@ -69,9 +69,6 @@ void bli_l3_packm
 	// return early.
 	if ( size_needed == 0 ) return;
 
-	// Query the memory broker from the context.
-	membrk = bli_cntx_get_membrk( cntx );
-
 	// Query the pack buffer type from the control tree node.
 	pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
 
@@ -88,11 +85,15 @@ void bli_l3_packm
 
 		if ( bli_thread_am_ochief( thread ) )
 		{
+			#ifdef BLIS_ENABLE_MEM_TRACING
+			printf( "bli_l3_packm(): acquiring mem pool block\n" );
+			#endif
+
 			// The chief thread acquires a block from the memory broker
 			// and saves the associated mem_t entry to local_mem_s.
 			bli_membrk_acquire_m
 			(
-			  membrk,
+			  rntm,
 			  size_needed,
 			  pack_buf_type,
 			  &local_mem_s
@@ -101,7 +102,7 @@ void bli_l3_packm
 
 		// Broadcast the address of the chief thread's local mem_t entry to
 		// all threads.
-		local_mem_p = bli_thread_obroadcast( thread, &local_mem_s );
+		local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
 
 		// Save the contents of the chief thread's local mem_t entry to the
 		// mem_t field in this thread's control tree node.
@@ -129,10 +130,14 @@ void bli_l3_packm
 				// The chief thread releases the existing block associated with
 				// the mem_t entry in the control tree, and then re-acquires a
 				// new block, saving the associated mem_t entry to local_mem_s.
-				bli_membrk_release( cntl_mem_p );
+				bli_membrk_release
+				(
+				  rntm,
+				  cntl_mem_p
+				);
 				bli_membrk_acquire_m
 				(
-				  membrk,
+				  rntm,
 				  size_needed,
 				  pack_buf_type,
 				  &local_mem_s
@@ -141,7 +146,7 @@ void bli_l3_packm
 
 			// Broadcast the address of the chief thread's local mem_t entry to
 			// all threads.
-			local_mem_p = bli_thread_obroadcast( thread, &local_mem_s );
+			local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
 
 			// Save the chief thread's local mem_t entry to the mem_t field in
 			// this thread's control tree node.
@@ -154,7 +159,7 @@ void bli_l3_packm
 			// will already have the cached values in their local control
 			// trees' mem_t entries, currently pointed to by cntl_mem_p.
 
-			bli_thread_obarrier( thread );
+			bli_thread_barrier( thread );
 		}
 	}
 
@@ -177,6 +182,6 @@ void bli_l3_packm
 	);
 
 	// Barrier so that packing is done before computation.
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 }
 

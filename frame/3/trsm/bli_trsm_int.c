@@ -52,6 +52,9 @@ void bli_trsm_int
 	obj_t        c_local;
 	trsm_var_oft f;
 
+	// Return early if the current control tree node is NULL.
+	if ( bli_cntl_is_null( cntl ) ) return;
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
@@ -65,7 +68,7 @@ void bli_trsm_int
 	{
 		if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
-		bli_thread_obarrier( thread );
+		bli_thread_barrier( thread );
 		return;
 	}
 
@@ -116,7 +119,7 @@ void bli_trsm_int
 	}
 
 	// FGVZ->TMS: Is this barrier still needed?
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 
 	// Create the next node in the thrinfo_t structure.
 	bli_thrinfo_grow( rntm, cntl, thread );

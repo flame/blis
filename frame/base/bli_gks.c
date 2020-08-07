@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,11 +41,11 @@ static cntx_t** gks[ BLIS_NUM_ARCHS ];
 
 // The array of function pointers holding the registered context initialization
 // functions for induced methods.
-static void*    cntx_ind_init[ BLIS_NUM_ARCHS ];
+static void_fp  cntx_ind_init[ BLIS_NUM_ARCHS ];
 
 // The array of function pointers holding the registered context initialization
 // functions for reference kernels.
-static void*    cntx_ref_init[ BLIS_NUM_ARCHS ];
+static void_fp  cntx_ref_init[ BLIS_NUM_ARCHS ];
 
 // Define a function pointer type for context initialization functions.
 typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
@@ -97,6 +97,11 @@ void bli_gks_init( void )
 #endif
 
 		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN2
+		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
+		                                              bli_cntx_init_zen2_ref,
+		                                              bli_cntx_init_zen2_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN
 		bli_gks_register_cntx( BLIS_ARCH_ZEN,         bli_cntx_init_zen,
 		                                              bli_cntx_init_zen_ref,
@@ -124,13 +129,18 @@ void bli_gks_init( void )
 #endif
 
 		// ARM architectures
+#ifdef BLIS_CONFIG_THUNDERX2
+		bli_gks_register_cntx( BLIS_ARCH_THUNDERX2,   bli_cntx_init_thunderx2,
+		                                              bli_cntx_init_thunderx2_ref,
+		                                              bli_cntx_init_thunderx2_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA57
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa57,
 		                                              bli_cntx_init_cortexa57_ref,
 		                                              bli_cntx_init_cortexa57_ind );
 #endif
 #ifdef BLIS_CONFIG_CORTEXA53
-		bli_gks_register_cntx( BLIS_ARCH_CORTEXA57,   bli_cntx_init_cortexa53,
+		bli_gks_register_cntx( BLIS_ARCH_CORTEXA53,   bli_cntx_init_cortexa53,
 		                                              bli_cntx_init_cortexa53_ref,
 		                                              bli_cntx_init_cortexa53_ind );
 #endif
@@ -151,6 +161,11 @@ void bli_gks_init( void )
 #endif
 
 		// IBM architectures
+#ifdef BLIS_CONFIG_POWER9
+		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
+		                                              bli_cntx_init_power9_ref,
+		                                              bli_cntx_init_power9_ind );
+#endif
 #ifdef BLIS_CONFIG_POWER7
 		bli_gks_register_cntx( BLIS_ARCH_POWER7,      bli_cntx_init_power7,
 		                                              bli_cntx_init_power7_ref,
@@ -201,9 +216,17 @@ void bli_gks_finalize( void )
 					// If the current context was allocated, free it.
 					if ( gks_id_ind != NULL )
 					{
+						#ifdef BLIS_ENABLE_MEM_TRACING
+						printf( "bli_gks_finalize(): cntx for ind_t %d: ", ( int )ind );
+						#endif
+
 						bli_free_intl( gks_id_ind );
 					}
 				}
+
+				#ifdef BLIS_ENABLE_MEM_TRACING
+				printf( "bli_gks_finalize(): gks for arch_t %d: ", ( int )id );
+				#endif
 
 				// Free the array of BLIS_NUM_IND_METHODS cntx* elements.
 				bli_free_intl( gks_id );
@@ -222,7 +245,7 @@ void bli_gks_init_index( void )
 	// architecture id elements of the internal arrays to NULL. 
 
 	const size_t gks_size = sizeof( cntx_t* ) * BLIS_NUM_ARCHS;
-	const size_t fpa_size = sizeof( void*   ) * BLIS_NUM_ARCHS;
+	const size_t fpa_size = sizeof( void_fp ) * BLIS_NUM_ARCHS;
 
 	// Set every entry in gks and context init function pointer arrays to
 	// zero/NULL. This is done so that later on we know which ones were
@@ -279,10 +302,10 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 void bli_gks_register_cntx
      (
-       arch_t id,
-       void*  nat_fp,
-       void*  ref_fp,
-       void*  ind_fp
+       arch_t  id,
+       void_fp nat_fp,
+       void_fp ref_fp,
+       void_fp ind_fp
      )
 {
 	// This function is called by bli_gks_init() for each architecture that
@@ -325,6 +348,10 @@ void bli_gks_register_cntx
 	// to register with an architecture id that has already been registered.
 	if ( gks[ id ] != NULL ) return;
 
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_gks_register_cntx(): " );
+	#endif
+
 	// At this point, we know the pointer to the array of cntx_t* is NULL and
 	// needs to be allocated. Allocate the memory and initialize it to
 	// zeros/NULL, storing the address of the alloacted memory at the element
@@ -333,6 +360,10 @@ void bli_gks_register_cntx
 
 	// Alias the allocated array for readability.
 	cntx_t** restrict gks_id = gks[ id ];
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_gks_register_cntx(): " );
+	#endif
 
 	// Allocate memory for a single context and store the address at
 	// the element in the gks[ id ] array that is reserved for native
@@ -549,7 +580,7 @@ void bli_gks_init_ref_cntx
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_gks_cntx_l3_nat_ukr_is_ref
+bool bli_gks_cntx_l3_nat_ukr_is_ref
      (
        num_t   dt,
        l3ukr_t ukr_id,
@@ -564,8 +595,8 @@ bool_t bli_gks_cntx_l3_nat_ukr_is_ref
 
 	// Query each context for the micro-kernel function pointer for the
 	// specified datatype.
-	void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, &ref_cntx );
-	void* fp     = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx );
+	void_fp ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, &ref_cntx );
+	void_fp fp     = bli_cntx_get_l3_nat_ukr_dt( dt, ukr_id, cntx );
 
 	// Return the result.
 	return fp == ref_fp;
@@ -593,7 +624,7 @@ char* bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt )
 	// then query the ukernel function pointer for the given datatype from
 	// that context.
 	cntx_t* cntx  = bli_gks_query_ind_cntx( method, dt );
-	void*   fp    = bli_cntx_get_l3_vir_ukr_dt( dt, ukr, cntx );
+	void_fp fp    = bli_cntx_get_l3_vir_ukr_dt( dt, ukr, cntx );
 
 	// Check whether the ukernel function pointer is NULL for the given
 	// datatype. If it is NULL, return the string for not applicable.
@@ -672,8 +703,8 @@ kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt )
 
 		// Query the native ukernel func_t from both the native and reference
 		// contexts.
-		void* nat_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, nat_cntx );
-		void* ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, &ref_cntx_l );
+		void_fp nat_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, nat_cntx );
+		void_fp ref_fp = bli_cntx_get_l3_nat_ukr_dt( dt, ukr, &ref_cntx_l );
 
 		if ( nat_fp == ref_fp ) return BLIS_REFERENCE_UKERNEL;
 		else                    return BLIS_OPTIMIZED_UKERNEL;

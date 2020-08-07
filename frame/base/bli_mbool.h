@@ -36,14 +36,14 @@
 
 // mbool_t query
 
-static bool_t bli_mbool_get_dt( num_t dt, mbool_t* mb )
+BLIS_INLINE bool bli_mbool_get_dt( num_t dt, mbool_t* mb )
 {
-	return mb->v[ dt ];
+	return ( bool )( mb->v[ dt ] );
 }
 
 // mbool_t modification
 
-static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
+BLIS_INLINE void bli_mbool_set_dt( bool val, num_t dt, mbool_t* mb )
 {
 	mb->v[ dt ] = val;
 }
@@ -52,19 +52,19 @@ static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
 
 mbool_t* bli_mbool_create
      (
-       bool_t b_s,
-       bool_t b_d,
-       bool_t b_c,
-       bool_t b_z
+       bool b_s,
+       bool b_d,
+       bool b_c,
+       bool b_z
      );
 
 void bli_mbool_init
      (
        mbool_t* b,
-       bool_t   b_s,
-       bool_t   b_d,
-       bool_t   b_c,
-       bool_t   b_z
+       bool     b_s,
+       bool     b_d,
+       bool     b_c,
+       bool     b_z
      );
 
 void bli_mbool_free( mbool_t* b );

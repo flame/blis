@@ -33,18 +33,13 @@
 */
 
 
-void     bli_error_init( void );
-void     bli_error_finalize( void );
+BLIS_EXPORT_BLIS errlev_t bli_error_checking_level( void );
+BLIS_EXPORT_BLIS void     bli_error_checking_level_set( errlev_t new_level );
 
-void     bli_error_init_msgs( void );
-void     bli_print_msg( char* str, char* file, guint_t line );
-void     bli_abort( void );
+BLIS_EXPORT_BLIS bool     bli_error_checking_is_enabled( void );
 
-errlev_t bli_error_checking_level( void );
-void     bli_error_checking_level_set( errlev_t new_level );
+void      bli_print_msg( char* str, char* file, guint_t line );
+BLIS_EXPORT_BLIS void      bli_abort( void );
 
-bool_t   bli_error_checking_is_enabled( void );
-
-char*    bli_error_string_for_code( gint_t code );
-
+char*     bli_error_string_for_code( gint_t code );
 

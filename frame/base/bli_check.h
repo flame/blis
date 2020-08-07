@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,7 +34,7 @@
 */
 
 
-err_t bli_check_error_code_helper( gint_t code, char* file, guint_t line );
+BLIS_EXPORT_BLIS err_t bli_check_error_code_helper( gint_t code, char* file, guint_t line );
 
 err_t bli_check_valid_error_level( errlev_t level );
 
@@ -97,6 +98,8 @@ err_t bli_check_packm_schema_on_unpack( obj_t* a );
 err_t bli_check_packv_schema_on_unpack( obj_t* a );
 
 err_t bli_check_object_buffer( obj_t* a );
+
+err_t bli_check_valid_malloc_buf( void* ptr );
 
 err_t bli_check_valid_packbuf( packbuf_t buf_type );
 err_t bli_check_if_exhausted_pool( pool_t* pool );

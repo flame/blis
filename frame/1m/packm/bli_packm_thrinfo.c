@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,32 +35,6 @@
 
 #include "blis.h"
 
-#if 0
-thrinfo_t* bli_packm_thrinfo_create
-     (
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       thrinfo_t* sub_node
-     )
-{
-	thrinfo_t* thread = bli_malloc_intl( sizeof( thrinfo_t ) );
-
-	bli_thrinfo_init
-	(
-	  thread,
-	  ocomm, ocomm_id,
-	  n_way,
-	  work_id,
-	  FALSE,
-	  sub_node
-	);
-
-	return thread;
-}
-#endif
-
 void bli_packm_thrinfo_init
      (
        thrinfo_t* thread,
@@ -67,6 +42,7 @@ void bli_packm_thrinfo_init
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id,
+       bszid_t    bszid,
        thrinfo_t* sub_node
      )
 {
@@ -76,6 +52,7 @@ void bli_packm_thrinfo_init
 	  ocomm, ocomm_id,
 	  n_way, work_id,
 	  FALSE,
+	  BLIS_NO_PART,
 	  sub_node
 	);
 }
@@ -91,18 +68,8 @@ void bli_packm_thrinfo_init_single
 	  &BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
+	  BLIS_NO_PART,
 	  NULL
 	);
 }
 
-#if 0
-void bli_packm_thrinfo_free
-     (
-       thrinfo_t* thread
-     )
-{
-	if ( thread != NULL &&
-	     thread != &BLIS_PACKM_SINGLE_THREADED )
-		bli_free_intl( thread );
-}
-#endif

@@ -45,7 +45,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -100,6 +100,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc, \
+		  schema, \
 		  panel_dim, \
 		  panel_dim_max, \
 		  panel_len, \
@@ -303,8 +304,8 @@ void PASTEMAC(ch,varname) \
 { \
 	doff_t  diagoffc_abs; \
 	dim_t   i, j; \
-	bool_t  row_stored; \
-	bool_t  col_stored; \
+	bool    row_stored; \
+	bool    col_stored; \
 \
 \
 	/* Create flags to incidate row or column storage. Note that the
@@ -338,6 +339,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc, \
+		  schema, \
 		  panel_dim, \
 		  panel_dim_max, \
 		  panel_len, \
@@ -436,6 +438,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc10, \
+		  schema, \
 		  p10_dim, \
 		  panel_dim_max, \
 		  p10_len, \
@@ -455,6 +458,7 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,kername) \
 		( \
 		  conjc12, \
+		  schema, \
 		  p12_dim, \
 		  panel_dim_max, \
 		  p12_len, \
@@ -540,7 +544,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -561,6 +565,7 @@ void PASTEMAC(ch,varname) \
 	PASTEMAC(ch,kername) \
 	( \
 	  conjc, \
+	  schema, \
 	  panel_dim, \
 	  panel_dim_max, \
 	  panel_len, \

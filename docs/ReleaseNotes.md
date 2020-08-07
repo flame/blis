@@ -4,6 +4,10 @@
 
 ## Contents
 
+* [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
+* [Changes in 0.6.1](ReleaseNotes.md#changes-in-061)
+* [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
+* [Changes in 0.5.2](ReleaseNotes.md#changes-in-052)
 * [Changes in 0.5.1](ReleaseNotes.md#changes-in-051)
 * [Changes in 0.5.0](ReleaseNotes.md#changes-in-050)
 * [Changes in 0.4.1](ReleaseNotes.md#changes-in-041)
@@ -32,6 +36,154 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.7.0
+April 7, 2020
+
+Improvements present in 0.7.0:
+
+Framework:
+- Implemented support for multithreading within the sup (skinny/small/unpacked) framework, which previously was single-threaded only. Note that this feature works harmoniously with the selective packing introduced into the sup framework in 0.6.1. (AMD)
+- Renamed `bli_thread_obarrier()` and `bli_thread_obroadcast()` functions to drop the 'o', which was left over from when `thrcomm_t` objects tracked both "inner" and "outer" communicators.
+- Fixed an obscure `int`-to-`packbuf_t` type conversion error that only affects certain C++ compilers (including g++) when compiling application code that includes the BLIS header file `blis.h`. (Ajay Panyala)
+- Added a missing early `return` statement in `bli_thread_partition_2x2()`, which provides a slight optimization. (Kiran Varaganti)
+
+Kernels:
+- Fixed the semantics of the `bli_amaxv()` kernels ('s' and 'd') within the `zen` kernel set. Previously, the kernels (incorrectly) returned the index of the last element whose absolute value was largest (in the event there were multiple of equal value); now, it (correclty) returns the index of the first of such elements. The kernels also now return the index of the first NaN, if one is encountered. (Mat Cross, Devin Matthews)
+
+Build system:
+- Warn the user at configure-time when hardware auto-detection returns the `generic` subconfiguration since this is probably not what they were expecting. (Devin Matthews)
+- Removed unnecessary sorting (and duplicate removal) on `LDFLAGS` in `common.mk`. (Isuru Fernando)
+- Specify the full path to the location of the dynamic library on OSX so that other dynamic libraries that depend on BLIS know where to find the library. (Satish Balay, Jed Brown)
+
+Testing:
+- Updated and reorganized test drivers in `test/sup` so that they work for either single-threaded or multithreaded purposes. (AMD)
+- Updated/optimized octave scripts in `test/sup` for use with octave 5.2.0.
+- Minor updates/tweaks to `test/1m4m`.
+
+Documentation:
+- Updated existing single-threaded sup performance graphs with new data and added multithreaded sup graphs to `docs/PerformanceSmall.md`.
+- Added mention of Gentoo support under the external packages section of the `README.md`.
+- Tweaks to `docs/Multithreading.md` that clarify that setting any `BLIS_*_NT` variable to 1 will be considered manual specification for the purposes of determining whether to auto-factorize via `BLIS_NUM_THREADS`. (AMD)
+
+## Changes in 0.6.1
+January 14, 2020
+
+Improvements present in 0.6.1:
+
+Framework:
+- Added support for pre-broadcast when packing B. This causes elements of B to be repeated (broadcast) in the packed copy of B so that subsequent vector loads will result in the element already being pre-broadcast into the vector register.
+- Added support for selective packing to `gemmsup` (controlled via environment variables and/or the `rntm_t` object). (AMD)
+- Fixed a bug in `sdsdot_sub()` that redundantly added the "alpha" scalar and a separate bug in the order of typecasting intermediate products in `sdsdot_()`. (Simon Lukas Märtens, Devin Matthews)
+- Fixed an obscure bug in `bli_acquire_mpart_mdim()`/`bli_acquire_mpart_ndim()`. (Minh Quan Ho)
+- Fixed a subtle and complicated bug that only manifested via the BLAS test drivers in the `generic` subconfiguration, and possibly any other subconfiguration that did not register complex-domain `gemm` ukernels, or registered ONLY real-domain ukernels as row-preferential. (Dave Love)
+- Always use `sumsqv` to compute `normfv` instead of the "dot product trick" that was previously employed for performance reasons. (Roman Yurchak, Devin Matthews, and Isuru Fernando)
+- Fixed bug in `thrinfo_t` debugging/printing code.
+
+Kernels:
+- Implemented and registered an optimized `dgemm` microkernel for the `power9` kernel set. (Nicholai Tukanov)
+- Pacify a `restrict` warning in the `gemmtrsm4m1` reference ukernel. (Dave Love, Devin Matthews)
+
+Build system:
+- Fixed parsing in `vpu_count()` on some SkylakeX workstations. (Dave Love)
+- Reimplemented `bli_cpuid_query()` for ARM to use `stdio`-based functions instead of `popen()`. (Dave Love)
+- Use `-march=znver1` for clang on `zen2` subconfig.
+- Updated `-march` flags for `sandybridge`, `haswell` subconfigurations to use newer syntax (e.g. `haswell` instead of `core-avx2` and `sandybridge` instead of `corei7-avx`.
+- Correctly use `-qopenmp-simd` for reference kernels when compiling with icc. (Victor Eikjhout)
+- Added `-march` support for select gcc version ranges where flag syntax changes or new flags are added. The ranges we identify are: versions older than 4.9.0; versions older than 6.1.0 (but newer than 4.9.0); versions older than 9.1.0 (but newer than 6.1.0).
+- Use `-funsafe-math-optimizations` and `-ffp-contract=fast` for all reference kernels when using gcc or clang.
+- Updated MC cache blocksizes used by `haswell` subconfig.
+- Updated NC cache blocksizes used by `zen` subconfig.
+- Fixed a typo in the context registration of the `cortexa53` subconfiguration in `bli_gks.c`. (Francisco Igual)
+- Output a more informative error when the user manually targets a subconfiguration that configure places in the configuration blacklist. (Tze Meng Low)
+- Set execute bits of shared library at install-time. (Adam J. Stewart)
+- Added missing thread-related symbols for export to shared libraries. (Kyungmin Lee)
+- Removed (finally) the `attic/windows` directory since we offer Windows DLL support via AppVeyor's build artifacts, and thus that directory was only likely confusing people.
+
+Testing:
+- Fixed latent testsuite microkernel module bug for `power9` subconfig. (Jeff Hammond)
+- Added `test/1m4m` driver directory for test drivers related to the 1m paper.
+- Added libxsmm support to `test/sup drivers`. (Robert van de Geijn)
+- Updated `.travis.yml` and `do_sde.sh` to automatically accept SDE license and download SDE directly from Intel. (Devin Matthews, Jeff Hammond)
+- Updated standalone test drivers to iterate backwards through the specified problem space. This often helps avoid the situation whereby the CPU doesn't immediately throttle up to its maximum clock frequency, which can produce strange discontinuities (sharply rising "cliffs") in performance graphs.
+- Pacify an unused variable warning in `blastest/f2c/lread.c`. (Jeff Hammond)
+- Various other minor fixes/tweaks to test drivers.
+
+Documentation:
+- Added libxsmm results to `docs/PerformanceSmall.md`.
+- Added BLASFEO results to `docs/PerformanceSmall.md`.
+- Added the page size and location of the performance drivers to `docs/Performance.md` and `docs/PerformanceSmall.md`. (Dave Love)
+- Added notes to `docs/Multithreading.md` regarding the nuances of setting multithreading parameters the manual way vs. the automatic way. (Jérémie du Boisberranger)
+- Added a section on reproduction to `docs/Performance.md` and `docs/PerformanceSmall.md`. (Dave Love)
+- Documented Eigen `-march=native` hack in `docs/Performance.md` and `docs/PerformanceSmall.md`. (Sameer Agarwal)
+- Inserted multithreading links and disclaimers to `BuildSystem.md`. (Jeff Diamond)
+- Fixed typo in description for `bli_?axpy2v()` in `docs/BLISTypedAPI.md`. (Shmuel Levine)
+- Added "How to Download BLIS" section to `README.md`. (Jeff Diamond)
+- Various other minor documentation fixes.
+
+## Changes in 0.6.0
+June 3, 2019
+
+Improvements present in 0.6.0:
+
+Framework:
+- Implemented small/skinny/unpacked (sup) framework for accelerated level-3 performance when at least one matrix dimension is small (or very small). For now, only `dgemm` is optimized, and this new implementation currently only targets Intel Haswell through Coffee Lake, and AMD Zen-based Ryzen/Epyc. (The existing kernels should extend without significant modification to Zen2-based Ryzen/Epyc once they are available.) Also, multithreaded parallelism is not yet implemented, though application-level threading should be fine. (AMD)
+- Changed function pointer usages of `void*` to new, typedef'ed type `void_fp`.
+- Allow compile-time disabling of BLAS prototypes in BLIS, in case the application already has access to prototypes.
+- In `bli_system.h`, define `_POSIX_C_SOURCE` to `200809L` if the macro is not already defined. This ensures that things such as pthreads are properly defined by an application that has `#include "blis.h"` but omits the definition of `_POSIX_C_SOURCE` from the command-line compiler options. (Christos Psarras)
+
+Kernels:
+- None.
+
+Build system:
+- Updated the way configure and the top-level Makefile handle installation prefixes (`prefix`, `exec_prefix`, `libdir`, `includedir`, `sharedir`) to better conform with GNU conventions.
+- Improved clang version detection. (Isuru Fernando)
+- Use pthreads on MinGW and Cygwin. (Isuru Fernando)
+
+Testing:
+- Added Eigen support to test drivers in `test/3`.
+- Fix inadvertently hidden `xerbla_()` in blastest drivers when building only shared libraries. (Isuru Fernando, M. Zhou)
+
+Documentation:
+- Added `docs/PerformanceSmall.md` to showcase new BLIS small/skinny `dgemm` performance on Kaby Lake and Epyc.
+- Added Eigen results (3.3.90) to performance graphs showcased in `docs/Performance.md`.
+- Added BLIS thread factorization info to `docs/Performance.md`.
+
+## Changes in 0.5.2
+March 19, 2019
+
+Improvements present in 0.5.2:
+
+Framework:
+- Added support for IC loop parallelism to the `trsm` operation.
+- Implemented a pool-based small block allocator and a corresponding `configure` option (enabled by default), which minimizes the number of calls to `malloc()` and `free()` for the purposes of allocating small blocks (on the order of 100 bytes). These small blocks are used by internal data structures, and the repeated allocation and freeing of these structures could, perhaps, cause memory fragmentation issues in certain application circumstances. This was never reproduced and observed, however, and remains entirely theoretical. Still, the sba should be no slower, and perhaps a little faster, than repeatedly calling `malloc()` and `free()` for these internal data structures. Also, the sba was designed to be thread-safe. (AMD)
+- Refined and extended the output enabled by `--enable-mem-tracing`, which allows a developer to follow memory allocation and release performed by BLIS.
+- Initialize error messages at compile-time rather than at runtime. (Minh Quan Ho)
+- Fixed a potential situation whereby the multithreading parameters in a `rntm_t` object that is passed into an expert interface is ignored.
+- Prevent a redefinition of `ftnlen` in the `f2c_types.h` in blastest. (Jeff Diamond)
+
+Kernels:
+- Adjusted the cache blocksizes in the `zen` sub-configuration for `float`, `scomplex`, and `dcomplex` datatypes. The previous values, taken directly from the `haswell` subconfig, were merely meant to be reasonable placeholders until more suitable values were determined, as had already taken place for the `double` datatype. (AMD)
+- Rewrote reference kernels in terms of simplified indexing annotated by the `#pragma omp simd` directive, which a compiler can use to vectorize certain constant-bounded loops. The `#pragma` is disabled via a preprocessor macro layer if the compiler is found by `configure` to not support `-fopenmp-simd`. (Devin Matthews, Jeff Hammond)
+
+Build system:
+- Added symbol-export annotation macros to all of the function prototypes and global variable declarations for public symbols, and created a new `configure` option, `--export-shared=[public|all]`, that controls which symbols--only those that are meant to be public, or all symbols--are exported to the shared library. (Isuru Fernando)
+- Standardized to using `-O3` in various subconfigs, and also `-funsafe-math-optimizations` for reference kernels. (Dave Love, Jeff Hammond)
+- Disabled TBM, XOP, LWP instructions in all AMD subconfigs. (Devin Matthews)
+- Fixed issues that prevented using BLIS on GNU Hurd. (M. Zhou)
+- Relaxed python3 requirements to allow python 3.4 or later. Previously, python 3.5 or later was required if python3 was being used. (Dave Love)
+- Added `thunderx2` sub-configuration. (Devangi Parikh)
+- Added `power9` sub-configuration. For now, this subconfig only uses reference kernels. (Nicholai Tukanov)
+- Fixed an issue with `configure` failing on OSes--including certain flavors of BSD--that contain a slash '/' character in the output of `uname -s`. (Isuru Fernando, M. Zhou)
+
+Testing:
+- Renamed `test/3m4m` directory to `test/3`.
+- Lots of updates and improvements to Makefiles, shell scripts, and matlab scripts in `test/3`.
+
+Documentation:
+- Added a new `docs/Performance.md` document that showcases single-threaded, single-socket, and dual-socket performance results of `single`, `double`, `scomplex`, and `dcomplex` level-3 operations in BLIS, OpenBLAS, and MKL/ARMPL for Haswell, SkylakeX, ThunderX2, and Epyc hardware architectures. (Note: Other implementations such as Eigen and ATLAS may be added to these graphs in the future.)
+- Updated `README.md` to include new language on external packages. (Dave Love)
+- Updated `docs/Multithreading.md` to be more explicit about the fact that multithreading is disabled by default at configure-time, and the fact that BLIS will run executed single-threaded at runtime by default if no multithreaded specification is given. (M. Zhou)
 
 ## Changes in 0.5.1
 December 18, 2018
@@ -88,7 +240,7 @@ Kernels:
 Build system:
 - Added support for building Windows DLLs via AppVeyor [2], complete with a built-in implementation of pthreads for Windows, as well as an implementation of the `pthread_barrier_*()` APIs for use on OS X. (Isuru Fernando, Devin Matthews, Mathieu Poumeyrol, Matthew Honnibal)
 - Defined a `cortexa53` sub-configuration, which is similar to `cortexa57` except that it uses slightly different compiler flags. (Mathieu Poumeyrol)
-- Added python version checking to configure script.
+- Added python version checking to `configure` script.
 - Added a script to automate the regeneration of the symbols list file (now located in `build/libblis-symbols.def`).
 - Various tweaks in preparation for BLIS's inclusion within Debian. (M. Zhou)
 - Various fixes and cleanups.
@@ -246,16 +398,16 @@ May 2, 2017
 - Implemented the 1m method for inducing complex matrix multiplication. (Please see ACM TOMS publication ["Implementing high-performance complex matrix multiplication via the 1m method"](https://github.com/flame/blis#citations) for more details.)
 - Switched to simpler `trsm_r` implementation.
 - Relaxed constraints that `MC % NR = 0` and `NC % MR = 0`, as this was only needed for the more sophisticated `trsm_r` implementation.
-- Automatic loop thread assignment. (Devin Matthews) 
-- Updates to `.travis.yml` configuration file. (Devin Matthews) 
-- Updates to non-default haswell micro-kernels.
-- Match storage format of the temporary micro-tiles in macro-kernels to that of the micro-kernel storage preference for edge cases.
-- Added support for Intel's Knight's Landing. (Devin Matthews) 
-- Added more flexible options to specify multithreading via the configure script. (Devin Matthews) 
-- OS X compatibility fixes. (Devin Matthews) 
-- Other small changes and fixes. 
+- Automatic loop thread assignment. (Devin Matthews)
+- Updates to `.travis.yml` configuration file. (Devin Matthews)
+- Updates to non-default haswell microkernels.
+- Match storage format of the temporary micro-tiles in macrokernels to that of the microkernel storage preference for edge cases.
+- Added support for Intel's Knight's Landing. (Devin Matthews)
+- Added more flexible options to specify multithreading via the configure script. (Devin Matthews)
+- OS X compatibility fixes. (Devin Matthews)
+- Other small changes and fixes.
 
-Also, thanks to Elmar Peise, Krzysztof Drewniak, and Francisco Igual for their contributions in reporting/fixing certain bugs that were addressed in this version. 
+Also, thanks to Elmar Peise, Krzysztof Drewniak, and Francisco Igual for their contributions in reporting/fixing certain bugs that were addressed in this version.
 
 ## Changes in 0.2.1
 October 5, 2016
@@ -267,9 +419,9 @@ October 5, 2016
 - Reorganized multithreading APIs, including more consistent namespace prefixes: `bli_thrinfo_*()`, `bli_thrcomm_*()`, etc.
 - Added `randnm`, `randnv` operations, which produce random powers of two in a narrow range, and integrated a corresponding option into the testsuite. (suggested by AMD)
 - Reclassified `amaxv` as a level-1v operation and kernel.
-- Added complex `gemm` micro-kernels for haswell, which have register allocations consistent with the existing 6x16 `sgemm` and 6x8 `dgemm` micro-kernels.
-- Adjusted existing micro-kernels to work properly when BLIS is configured to use 32-bit integers. (Devin Matthews)
-- Relaxed alignment constraints in sandybridge and haswell micro-kernels. (Devin Matthews)
+- Added complex `gemm` microkernels for haswell, which have register allocations consistent with the existing 6x16 `sgemm` and 6x8 `dgemm` microkernels.
+- Adjusted existing microkernels to work properly when BLIS is configured to use 32-bit integers. (Devin Matthews)
+- Relaxed alignment constraints in sandybridge and haswell microkernels. (Devin Matthews)
 - Define CBLAS API with `f77_int` instead of `int`, which means the BLAS compatibility integer size is inherited by the CBLAS compatibility layer. (Devin Matthews)
 - Added an alignment switch to the testsuite to globally enable/disable starting address and leading dimension alignment. (suggested by Devin Matthews)
 - Various enhancements to configure script. (Devin Matthews)
@@ -286,22 +438,22 @@ Most of BLIS 0.2.0's changes are contained within a single commit, 537a1f4 (aka 
 - BLIS has been retrofitted with a new data structure, known as a "context," affecting virtually every internal API for every computational operation, as well as many supporting, non-computational functions that must access information within the context.
 - In addition to appearing within these internal APIs, the context--specifically, a pointer to a `cntx_t`--is now present within all user-level datatype-aware APIs, e.g. `bli_zgemm()`, appearing as the last argument.
 - User-level object APIs, e.g. `bli_gemm()`, were unaffected and continue to be "context-free." However, these APIs were duplicated so that corresponding "context-aware" APIs now also exist, differentiated with an `_ex` suffix (for "expert").
-- Contexts are initialized very soon after a computational function is called (if one was not passed in by the caller) and are passed all the way down the function stack, even into the kernels, and thus allow the code at any level to query information about the runtime instantiation of the current operation being executed, such as kernel addresses, micro-kernel storage preferences, and cache/register blocksizes.
+- Contexts are initialized very soon after a computational function is called (if one was not passed in by the caller) and are passed all the way down the function stack, even into the kernels, and thus allow the code at any level to query information about the runtime instantiation of the current operation being executed, such as kernel addresses, microkernel storage preferences, and cache/register blocksizes.
 - Contexts are thread-friendly. For example, consider the situation where a developer wishes two or more threads to execute simultaneously with somewhat different runtime parameters. Contexts also inherently promote thread-safety, such as in the event that the original source of the information stored in the context changes at run-time (see next two bullets).
 - BLIS now consolidates virtually all kernel/hardware information in a new "global kernel structure" (gks) API. This new API will allow the caller to initialize a context in a thread-safe manner according to the currently active kernel configuration. For now, the currently active configuration cannot be changed once the library is built. However, in the future, this API will be expanded to allow run-time management of kernels and related parameters.
 - The most obvious application of this new infrastructure is the run-time detection of hardware (and the implied selection of appropriate kernels). With contexts, kernels may even be "hot swapped" within the gks, and once execution begins on a level-3 operation, the memory allocator will be reinitialized on-the-fly, if necessary, to accommodate the new kernels' blocksizes. If a different application thread is executing with another (previously loaded) kernel, it will finish in a deterministic fashion because its kernel info was loaded into its context before computation began, and also because the blocks it checked out from the memory pools will be unaffected by the newer threads' reinitialization of the allocator.
 
 This version contains other changes that were committed prior to 537a1f4:
 
-- Inline assembly FMA4 micro-kernels for AMD bulldozer. (Etienne Sauvage)
+- Inline assembly FMA4 microkernels for AMD bulldozer. (Etienne Sauvage)
 - A more feature-rich configure script and build system. Certain long-style options are now accepted, including convenient command-line switches for things like enabling debugging symbols. Important definitions were also consolidated into a new makefile fragment, `common.mk`, which can be included by the BLIS build system as well as quasi-independent build systems, such as the BLIS test suite. (Devin Matthews)
-- Updated and improved armv8 micro-kernels. (Francisco Igual)
+- Updated and improved armv8 microkernels. (Francisco Igual)
 - Define `bli_clock()` in terms of `clock_gettime()` intead of `gettimeofday()`, which has been languishing on my to-do list for years, literally. (Devin Matthews)
 - Minor but extensive modifications to parts of the BLAS compatibility layer to avoid potential namespace conflicts with external user code when `blis.h` is included. (Devin Matthews)
 - Fixed a missing BLIS integer type definition (`BLIS_BLAS2BLIS_INT_TYPE_SIZE`) when CBLAS was enabled. Thanks to Tony Kelman reporting this bug.
 - Merged `packm_blk_var2()` into `packm_blk_var1()`. The former's functionality is used by induced methods for complex level-3 operations. (Field Van Zee)
 - Subtle changes to treatment of row and column strides in `bli_obj.c` that pertain to somewhat unusual use cases, in an effort to support certain situations that arise in the context of tensor computations. (Devin Matthews)
-- Fixed an unimplemented `beta == 0` case in the penryn (formerly "dunnington") `sgemm` micro-kernel. (Field Van Zee)
+- Fixed an unimplemented `beta == 0` case in the penryn (formerly "dunnington") `sgemm` microkernel. (Field Van Zee)
 - Enhancements to the internal memory allocator in anticipation of the context retrofit. (Field Van Zee)
 - Implemented so-called "quadratic" matrix partitioning for thread-level parallelism, whereby threads compute thread index ranges to produce partitions of roughly equal area (and thus computation), subject to the (register) blocksize multiple, even when given a structured rectangular subpartition with an arbitrary diagonal offset. Thanks to Devangi Parikh for reporting bugs related to this feature. (Field Van Zee)
 - Enabled use of Travis CI for automatic testing of github commits and pull requests. (Xianyi Zhang)
@@ -313,7 +465,7 @@ Special thanks go to Lee Killough for suggesting the use of a "context" data str
 ## Changes in 0.1.8
 July 29, 2015
 
-This release contains only two commits, but they are non-trivial: we now have configuration support for AMD Excavator (Carrizo) and micro-kernels for Intel Haswell/Broadwell.
+This release contains only two commits, but they are non-trivial: we now have configuration support for AMD Excavator (Carrizo) and microkernels for Intel Haswell/Broadwell.
 
 ## Changes in 0.1.7
 June 19, 2015
@@ -322,20 +474,20 @@ June 19, 2015
 - Implemented default values for all macro constants previously found in `bli_config.h`. The default values are now set in `frame/include/bli_config_macro_defs.h`. Any value #defined in `bli_config.h` will override these defaults.
 - Initial support for configure-time detection of hardware. By specifying the `auto` configuration at configure-time, the configure script chooses a configuration for you. If an optimized configuration does not exist, the reference implementation serves as a fallback.
 - Completely reorganized implementations for complex induced methods and added support for new algorithms.
-- Added optimized micro-kernels for AMD Piledriver family of hardware.
+- Added optimized microkernels for AMD Piledriver family of hardware.
 - Several bugfixes to multithreaded execution.
 - Various other minor tweaks, code reorganizations, and bugfixes.
 
 ## Changes in 0.1.6
 October 23, 2014
 
-- New complex domain AVX micro-kernels are now available and used by default by the sandybridge configuration.
+- New complex domain AVX microkernels are now available and used by default by the sandybridge configuration.
 - Added new high-level 4m and 3m implementations presently known as "4mh" and "3mh".
-- Cleaned up 4m/3m front-end layering and added routines to enable, disable, and query which implementation will be called for a given level-3 operation. The test suite now prints this information in its pre-test summary. 4m (not 4mh) is still the default when complex micro-kernels are not present.
+- Cleaned up 4m/3m front-end layering and added routines to enable, disable, and query which implementation will be called for a given level-3 operation. The test suite now prints this information in its pre-test summary. 4m (not 4mh) is still the default when complex microkernels are not present.
 - Consolidated control tree code and usage so that all level-3 multiplication operations use the same gemm_t structure, leaving only `trsm` to have a custom tree structure and associated code.
-- Re-implemented micro-panel alignment, which was removed in commit c2b2ab6 earlier this year.
+- Re-implemented micropanel alignment, which was removed in commit c2b2ab6 earlier this year.
 - Relaxed the long-standing constraint that `KC` be a multiple of `MR and `NR` by allowing the developer to specify target values and then adjusting them up to the next multiple of `MR` or `NR`, as needed by the affected operations (`hemm`, `symm`, `trmm`, trsm`).
-- Added a new "row preference" flag that the developer can use to signal to the framework that a micro-kernel prefers to output micro-tiles of C that are row-stored (rather than column-stored). Column storage preference is still the default.
+- Added a new "row preference" flag that the developer can use to signal to the framework that a microkernel prefers to output micro-tiles of C that are row-stored (rather than column-stored). Column storage preference is still the default.
 - Changed semantics of blocksize extensions to instead be "maximum" blocksizes (and thus emphasizing the "extended" values rather than the difference).
 - Various other minor tweaks, code reorganizations, and bugfixes.
 
@@ -353,7 +505,7 @@ July 27, 2014
 
 - Added shared library support to build system.
 - Preliminary parallelization of `trsm` (Tyler Smith).
-- Added generic `_void()` micro-kernel wrappers so that users (or developers) can call the micro-kernel without knowing the implementation/developer-specific function names, which are specified at configure-time.
+- Added generic `_void()` microkernel wrappers so that users (or developers) can call the microkernel without knowing the implementation/developer-specific function names, which are specified at configure-time.
 - Added `bli_info_*()` API for querying general information about BLIS, including blocksizes.
 - Reimplemented initialization/finalization for thread safety.
 - Fixed a possible `Inf`/`NaN` issue in several level-3 operations when beta is zero.
@@ -376,7 +528,7 @@ Tyler has been hard at work developing and refining extensions to BLIS that prov
 ## Changes in 0.1.1
 February 25, 2014
 
-I. I am excited to announce that BLIS now provides high-performance complex domain support to ALL level-3 operations when ONLY the same-precision real domain equivalent gemm micro-kernel is present and optimized. In other words, BLIS's productivity lever just got twice as strong: optimize the `dgemm` micro-kernel, and you will get double-precision complex versions of all level-3 operations, for free. Same for `sgemm` micro-kernel and single-precision complex.
+I. I am excited to announce that BLIS now provides high-performance complex domain support to ALL level-3 operations when ONLY the same-precision real domain equivalent gemm microkernel is present and optimized. In other words, BLIS's productivity lever just got twice as strong: optimize the `dgemm` microkernel, and you will get double-precision complex versions of all level-3 operations, for free. Same for `sgemm` microkernel and single-precision complex.
 
 II. We also now offer complex domain support based on the 3m method, but this support is ONLY accessible via separate interfaces. This separation is a safety feature, since the 3m method's numerical properties are inherently less robust. Furthermore, we think the 3m method, as implemented, is somewhat performance-limited on systems with L1 caches that have less than 8-way associativity.
 
@@ -387,12 +539,12 @@ III. The second, user-oriented change facilitates a much more developer-friendly
       `BLIS_SAXPYV_KERNEL_REF`
       `BLIS_DDOTXF_KERNEL_REF`
       `BLIS_ZGEMM_UKERNEL_REF`
-- Developers no longer have to name all datatype instances of a kernel with a common base name; [sdcz] datatype flavors of each kernel or micro-kernel (level-1v, -1f, or 3) may now be named independently. This means you can now, if you wish, encode the datatype-specific register blocksizes in the name of the micro-kernel functions.
+- Developers no longer have to name all datatype instances of a kernel with a common base name; [sdcz] datatype flavors of each kernel or microkernel (level-1v, -1f, or 3) may now be named independently. This means you can now, if you wish, encode the datatype-specific register blocksizes in the name of the microkernel functions.
 - Any datatype instances of any kernel (1v, 1f, or 3) that is left undefined in `bli_kernel.h` will default to the corresponding reference implementation. For example, if `BLIS_DGEMM_UKERNEL` is left undefined, it will be defined to be `BLIS_DGEMM_UKERNEL_REF`.
 - Developers no longer need to name level-1v/-1f kernels with multiple datatype chars to match the number of types the kernel WOULD take in a mixed type environment, as in `bli_dddaxpyv_opt()`. Now, one char is sufficient, as in `bli_daxpyv_opt()`.
 - There is no longer a need to define an obj_t wrapper to go along with your level-1v/-1f kernels. The framework now provides a `_kernel()` function, as in `bli_axpyv_kernel()`, which serves as the `obj_t` wrapper for whatever kernels are specified (or defaulted to) via `bli_kernel.h`.
 - Developers no longer need to prototype their kernels, and thus no longer need to include any prototyping headers from within `bli_kernel.h`. The framework now generates kernel prototypes, with the proper type signature, based on the kernel names defined (or defaulted to) via `bli_kernel.h`.
-- If the complex datatype x (of [cz]) implementation of the gemm micro-kernel is left undefined by `bli_kernel.h`, but its same-precision real domain equivalent IS defined, BLIS will enable the automatic complex domain feature described above in (1a) for the datatype x implementations of all level-3 operations, using only the corresponding real domain gemm micro-kernel. If the complex gemm micro-kernel for x IS defined, then all complex level-3 operations will be defined in terms of that micro-kernel.
+- If the complex datatype x (of [cz]) implementation of the gemm microkernel is left undefined by `bli_kernel.h`, but its same-precision real domain equivalent IS defined, BLIS will enable the automatic complex domain feature described above in (1a) for the datatype x implementations of all level-3 operations, using only the corresponding real domain gemm microkernel. If the complex gemm microkernel for x IS defined, then all complex level-3 operations will be defined in terms of that microkernel.
 
 The net effect of (III) is that your `bli_kernel.h` files can be MUCH simpler and less cluttered. (Extreme example: the reference configuration's `bli_kernel.h` is now completely empty!) I have updated all configurations and kernels that are currently part of BLIS by stripping out unnecessary/outdated definitions and migrating existing definitions to their new names. (If you ever need to reference the complete list of options and macros, please refer to the `bli_kernel.h` inside the template configuration.) Please set aside some time to test and, if necessary, tweak the configurations which you originally developed and submitted. I may have broken some of them. If so, please accept my apologies and contact me for assistance. I will work with you to get them functional again.
 
@@ -403,13 +555,13 @@ I know these changes may be a little disruptive to some, but I think that most d
 ## Changes in 0.1.0
 November 9, 2013
 
-- Added `sgemm` micro-kernel for dunnington.
-- Added `dgemm` micro-kernels and configurations for sandybridge, bgq, mic, power7, piledriver, loonson3a, which were used to gather performance data in our second ACM TOMS paper. Many thanks to Francisco Igual, Tyler Smith, Mike Kistler, and Xianyi Zhang for developing, testing, and contributing these kernels.
+- Added `sgemm` microkernel for dunnington.
+- Added `dgemm` microkernels and configurations for sandybridge, bgq, mic, power7, piledriver, loonson3a, which were used to gather performance data in our second ACM TOMS paper. Many thanks to Francisco Igual, Tyler Smith, Mike Kistler, and Xianyi Zhang for developing, testing, and contributing these kernels.
 - Migrated to signed integer for `dim_t`, `inc_t` (to facilitate calling BLIS from Fortran).
 - Added "template" configuration and kernel set for developers to use as a starting point when developing new kernels from scratch.
 - Improvements to test suite, including section overrides and standalone level-1f/level-3 kernel modules.
 - Improvements to Windows build system (though it may still not yet be functional out-of-the-box). Thanks to Martin Schatz for his help here.
-- Removed support for element "duplication" in level-3 macro-kernels.
+- Removed support for element "duplication" in level-3 macrokernels.
 - Several bug fixes to BLAS compatibility layer. Thanks to Vladimir Sukharev for his numerous bug reports wrt the LAPACK test suite.
 - Various other minor bugfixes.
 
@@ -439,7 +591,7 @@ While neither `bli_config.h` nor `bli_kernel.h` has changed formats since 0.0.7,
 ## Changes in 0.0.7
 April 30, 2013
 
-This version incorporates many small fixes and feature enhancements made during our SC13 collaboration. 
+This version incorporates many small fixes and feature enhancements made during our SC13 collaboration.
 
 ## Changes in 0.0.6
 April 13, 2013
@@ -478,7 +630,7 @@ The compatibility layer is enabled via a configuration option in `bl2_config.h`.
 ## Changes in 0.0.2
 February 11, 2013
 
-Most notably, this version contains the new test suite I've been working on for the last month. 
+Most notably, this version contains the new test suite I've been working on for the last month.
 
 What is the test suite? It is a highly configurable test driver that allows one to test an arbitrary set of BLIS operations, with an arbitrary set of parameter combinations, and matrix/vector storage formats, as well as whichever datatypes you are interested in. (For now, only homogeneous datatyping is supported, which is what most people want.) You can also specify an arbitrary problem size range with arbitrary increments, and arbitrary ratios between dimensions (or anchor a dimension to a single value), and you can output directly to files which store the output in matlab syntax, which makes it easy to generate performance graphs.
 

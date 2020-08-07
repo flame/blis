@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -209,12 +209,12 @@ void libblis_test_dotaxpyv_experiment
 	}
 	else
 	{
-		bli_setsc(  0.0, -0.8, &alpha );
+		bli_setsc(  0.7, -0.1, &alpha );
 	}
 
 	// Randomize x and z, and save z.
-	libblis_test_vobj_randomize( params, FALSE, &x );
-	libblis_test_vobj_randomize( params, FALSE, &z );
+	libblis_test_vobj_randomize( params, TRUE, &x );
+	libblis_test_vobj_randomize( params, TRUE, &z );
 	bli_copyv( &z, &z_save );
 
 	// Create an alias to x for xt. (Note that it doesn't actually need to be
@@ -345,7 +345,7 @@ void libblis_test_dotaxpyv_check
 	//
 	// and
 	//
-	//   normf( z - z_temp )
+	//   normfv( z - z_temp )
 	//
 	// are negligible, where rho_temp and z_temp contain rho and z as
 	// computed by dotv and axpyv, respectively.

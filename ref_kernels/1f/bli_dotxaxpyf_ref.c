@@ -36,7 +36,7 @@
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, ff ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -60,38 +60,147 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* y = beta * y + alpha * A^T w; */ \
 	/* z =        z + alpha * A   x; */ \
 \
-	/* Query the context for the kernel function pointer. */ \
-	const num_t              dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,dotxf_ker_ft) kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
-	PASTECH(ch,axpyf_ker_ft) kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
+	if ( 1 && inca == 1 && incw == 1 && incx == 1 && \
+	     incy == 1 && incz == 1 && b_n == ff ) \
+	{ \
+		ctype r[ ff ]; \
+		ctype ax[ ff ]; \
 \
-	kfp_df \
-	( \
-	  conjat, \
-	  conjw, \
-	  m, \
-	  b_n, \
-	  alpha, \
-	  a, inca, lda, \
-	  w, incw, \
-	  beta, \
-	  y, incy, \
-	  cntx  \
-	); \
+		/* If beta is zero, clear y. Otherwise, scale by beta. */ \
+		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( y[i] ); \
+		} \
+		else \
+		{ \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,scals)( *beta, y[i] ); \
+		} \
 \
-	kfp_af \
-	( \
-	  conja, \
-	  conjx, \
-	  m, \
-	  b_n, \
-	  alpha, \
-	  a, inca, lda, \
-	  x, incx, \
-	  z, incz, \
-	  cntx  \
-	); \
+		/* If the vectors are empty or if alpha is zero, return early. */ \
+		if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+\
+		/* Initialize r vector to 0. */ \
+		for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,set0s)( r[i] ); \
+\
+		/* Scale x by alpha, storing to a temporary array ax. */ \
+		if ( bli_is_conj( conjx ) ) \
+		{ \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < ff; ++i ) \
+				PASTEMAC(ch,scal2js)( *alpha, x[i], ax[i] ); \
+		} \
+		else \
+		{ \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < ff; ++i ) \
+				PASTEMAC(ch,scal2s)( *alpha, x[i], ax[i] ); \
+		} \
+\
+		/* If a must be conjugated, we do so indirectly by first toggling the
+		   effective conjugation of w and then conjugating the resulting dot
+		   products. */ \
+		conj_t conjw_use = conjw; \
+\
+		if ( bli_is_conj( conjat ) ) \
+			bli_toggle_conj( &conjw_use ); \
+\
+		if ( bli_is_noconj( conjw_use ) ) \
+		{ \
+			if ( bli_is_noconj( conja ) ) \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t p = 0; p < m; ++p ) \
+				for ( dim_t i = 0; i < ff; ++i ) \
+				{ \
+					PASTEMAC(ch,axpys)( a[p + i*lda], w[p], r[i] ); \
+					PASTEMAC(ch,axpys)( ax[i], a[p + i*lda], z[p] ); \
+				} \
+			} \
+			else \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t p = 0; p < m; ++p ) \
+				for ( dim_t i = 0; i < ff; ++i ) \
+				{ \
+					PASTEMAC(ch,axpys)( a[p + i*lda], w[p], r[i] ); \
+					PASTEMAC(ch,axpyjs)( ax[i], a[p + i*lda], z[p] ); \
+				} \
+			} \
+		} \
+		else \
+		{ \
+			if ( bli_is_noconj( conja ) ) \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t p = 0; p < m; ++p ) \
+				for ( dim_t i = 0; i < ff; ++i ) \
+				{ \
+					PASTEMAC(ch,axpyjs)( a[p + i*lda], w[p], r[i] ); \
+					PASTEMAC(ch,axpys)( ax[i], a[p + i*lda], z[p] ); \
+				} \
+			} \
+			else \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t p = 0; p < m; ++p ) \
+				for ( dim_t i = 0; i < ff; ++i ) \
+				{ \
+					PASTEMAC(ch,axpyjs)( a[p + i*lda], w[p], r[i] ); \
+					PASTEMAC(ch,axpyjs)( ax[i], a[p + i*lda], z[p] ); \
+				} \
+			} \
+		} \
+\
+		if ( bli_is_conj( conjat ) ) \
+			for ( dim_t i = 0; i < ff; ++i ) PASTEMAC(ch,conjs)( r[i] ); \
+\
+		for ( dim_t i = 0; i < ff; ++i ) \
+		{ \
+			PASTEMAC(ch,axpys)( *alpha, r[i], y[i] ); \
+		} \
+	} \
+	else \
+	{ \
+		/* Query the context for the kernel function pointer. */ \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,dotxf_ker_ft) kfp_df \
+		= \
+		bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+		PASTECH(ch,axpyf_ker_ft) kfp_af \
+		= \
+		bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
+\
+		kfp_df \
+		( \
+		  conjat, \
+		  conjw, \
+		  m, \
+		  b_n, \
+		  alpha, \
+		  a, inca, lda, \
+		  w, incw, \
+		  beta, \
+		  y, incy, \
+		  cntx  \
+		); \
+\
+		kfp_af \
+		( \
+		  conja, \
+		  conjx, \
+		  m, \
+		  b_n, \
+		  alpha, \
+		  a, inca, lda, \
+		  x, incx, \
+		  z, incz, \
+		  cntx  \
+		); \
+	} \
 }
 
-INSERT_GENTFUNC_BASIC2( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-
+//INSERT_GENTFUNC_BASIC2( dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+GENTFUNC( float,    s, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
+GENTFUNC( double,   d, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
+GENTFUNC( scomplex, c, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )
+GENTFUNC( dcomplex, z, dotxaxpyf, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4 )

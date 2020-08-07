@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,6 +66,11 @@ extern "C" {
 #include "bli_macro_defs.h"
 
 
+// -- pragma definitions --
+
+#include "bli_pragma_macro_defs.h"
+
+
 // -- Threading definitions --
 
 #include "bli_thread.h"
@@ -82,6 +88,7 @@ extern "C" {
 #include "bli_l1f_ker_prot.h"
 #include "bli_l1m_ker_prot.h"
 #include "bli_l3_ukr_prot.h"
+#include "bli_l3_sup_ker_prot.h"
 
 #include "bli_arch_config_pre.h"
 #include "bli_arch_config.h"
@@ -104,6 +111,9 @@ extern "C" {
 #include "bli_ind.h"
 #include "bli_membrk.h"
 #include "bli_pool.h"
+#include "bli_array.h"
+#include "bli_apool.h"
+#include "bli_sba.h"
 #include "bli_memsys.h"
 #include "bli_mem.h"
 #include "bli_part.h"
@@ -119,6 +129,8 @@ extern "C" {
 #include "bli_getopt.h"
 #include "bli_opid.h"
 #include "bli_cntl.h"
+#include "bli_env.h"
+#include "bli_pack.h"
 #include "bli_info.h"
 #include "bli_arch.h"
 #include "bli_cpuid.h"

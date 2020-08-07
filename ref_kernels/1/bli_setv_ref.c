@@ -46,51 +46,49 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype  alpha_conj; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
-\
-	chi1 = x; \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
 		if ( incx == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,set0s)( chi1[i] ); \
+				PASTEMAC(ch,set0s)( x[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,set0s)( *chi1 ); \
+				PASTEMAC(ch,set0s)( *x ); \
 \
-				chi1 += incx; \
+				x += incx; \
 			} \
 		} \
 	} \
 	else \
 	{ \
+		ctype alpha_conj; \
+\
 		PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
 \
 		if ( incx == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( alpha_conj, chi1[i] ); \
+				PASTEMAC(ch,copys)( alpha_conj, x[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,copys)( alpha_conj, *chi1 ); \
+				PASTEMAC(ch,copys)( alpha_conj, *x ); \
 \
-				chi1 += incx; \
+				x += incx; \
 			} \
 		} \
 	} \

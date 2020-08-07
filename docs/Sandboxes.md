@@ -43,7 +43,22 @@ $ ./configure -s ref99 auto
 Here, we tell `configure` that we want to use the `ref99` sandbox, which
 corresponds to a sub-directory of `sandbox` named `ref99`. (Reminder: the
 `auto` argument is the configuration target and thus unrelated to
-sandboxes.) As `configure` runs, you should get output that includes lines
+sandboxes.)
+
+NOTE: If you want your sandbox implementation to handle *all* problem
+sizes and shapes, you'll need to disable the skinny/unpacked "sup"
+sub-framework within BLIS, which is enabled by default. This can be
+done by passing the `--disable-sup-handling` option to configure:
+```
+$ ./configure --enable-sandbox=ref99 --disable-sup-handling auto
+```
+If you leave sup enabled, the sup implementation will, at runtime, detect
+and handle certain smaller problem sizes upstream of where BLIS calls
+`bli_gemmnat()` while all other problems will fall to your sandbox
+implementation. Thus, you should only leave sup enabled if you are fine
+with those smaller problems being handled by sup.
+
+As `configure` runs, you should get output that includes lines
 similar to:
 ```
 configure: configuring for alternate gemm implementation:
@@ -52,10 +67,8 @@ configure:   sandbox/ref99
 And when you build BLIS, the last files to be compiled will be the source
 code in the specified sandbox:
 ```
-Compiling obj/haswell/sandbox/ref99/blx_gemm_front.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/ref99/blx_gemm_int.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/ref99/base/blx_blksz.o ('haswell' CFLAGS for sandboxes)
-Compiling obj/haswell/sandbox/ref99/cntl/blx_gemm_cntl.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/blx_gemm_ref_var2.o ('haswell' CFLAGS for sandboxes)
+Compiling obj/haswell/sandbox/ref99/oapi/bli_gemmnat.o ('haswell' CFLAGS for sandboxes)
 ...
 ```
 That's it! After the BLIS library is built, it will contain your chosen
@@ -196,6 +209,12 @@ built with mixed datatype support, then BLIS assumes that the implementation of
 there's no way for it to confirm at runtime that an implementation was written
 to support mixing datatypes. Note that even the `ref99` sandbox included with
 BLIS does not support mixed-datatype computation.
+
+* **Multithreading in ref99.** The current reference sandbox, `ref99`, does not
+currently implement multithreading.
+
+* **Packing matrices in ref99.** The current reference sandbox, `ref99`, does not
+currently implement packing of matrices A or B.
 
 ## Conclusion
 

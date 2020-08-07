@@ -49,7 +49,7 @@
 	   components of packm. */ \
 }
 
-static void bli_cset1ms_mxn
+BLIS_INLINE void bli_cset1ms_mxn
      (
        const pack_t       schema,
        const dim_t        offm,
@@ -120,7 +120,7 @@ static void bli_cset1ms_mxn
 	}
 }
 
-static void bli_zset1ms_mxn
+BLIS_INLINE void bli_zset1ms_mxn
      (
        const pack_t       schema,
        const dim_t        offm,

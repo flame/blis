@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,27 +43,24 @@
 #include "bli_thrcomm_pthreads.h"
 
 
-// thread entry point prototype.
-void* bli_l3_thread_entry( void* data_void );
-
-
 // thrcomm_t query (field only)
 
-static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
+BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 {
 	return comm->n_threads;
 }
 
 
 // Thread communicator prototypes.
-thrcomm_t* bli_thrcomm_create( dim_t n_threads );
-void       bli_thrcomm_free( thrcomm_t* comm );
-void       bli_thrcomm_init( thrcomm_t* comm, dim_t n_threads );
+thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads );
+void       bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm );
+void       bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm );
 void       bli_thrcomm_cleanup( thrcomm_t* comm );
-void       bli_thrcomm_barrier( thrcomm_t* comm, dim_t thread_id );
-void*      bli_thrcomm_bcast( thrcomm_t* comm, dim_t inside_id, void* to_send );
 
-void       bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id );
+BLIS_EXPORT_BLIS void  bli_thrcomm_barrier( dim_t thread_id, thrcomm_t* comm );
+BLIS_EXPORT_BLIS void* bli_thrcomm_bcast( dim_t inside_id, void* to_send, thrcomm_t* comm );
+
+void       bli_thrcomm_barrier_atomic( dim_t thread_id, thrcomm_t* comm );
 
 #endif
 

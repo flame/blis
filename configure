@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2018, Advanced Micro Devices, Inc.
+#  Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -51,8 +51,6 @@ print_usage()
 	#echo " "
 	#echo " BLIS ${version}"
 	echo " "
-	echo " Field G. Van Zee"
-	echo " "
 	echo " Configure BLIS's build system for compilation using a specified"
 	echo " configuration directory."
 	echo " "
@@ -72,30 +70,37 @@ print_usage()
 	echo " "
 	echo "   -p PREFIX, --prefix=PREFIX"
 	echo " "
-	echo "                 The path to which make will install all build products."
-	echo "                 If given, this option implies the following options:"
-	echo "                   --libdir=PREFIX/lib"
-	echo "                   --incdir=PREFIX/include"
+	echo "                 The common installation prefix for all files. If given,"
+	echo "                 this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                   --includedir=PREFIX/include"
 	echo "                   --sharedir=PREFIX/share"
-	echo "                 If not given, PREFIX defaults to \$(HOME)/blis. If PREFIX"
+	echo "                 where EXECPREFIX defaults to PREFIX. If this option is"
+	echo "                 not given, PREFIX defaults to '${prefix_def}'. If PREFIX"
 	echo "                 refers to a directory that does not exist, it will be"
 	echo "                 created."
 	echo " "
+	echo "   --exec-prefix=EXECPREFIX"
+	echo " "
+	echo "                 The installation prefix for libraries. Specifically, if"
+	echo "                 given, this option effectively implies:"
+	echo "                   --libdir=EXECPREFIX/lib"
+	echo "                 If not given, EXECPREFIX defaults to PREFIX, which may be"
+	echo "                 modified by the --prefix option. If EXECPREFIX refers to"
+	echo "                 a directory that does not exist, it will be created."
+	echo " "
 	echo "   --libdir=LIBDIR"
 	echo " "
-	echo "                 The path to which make will install libraries. If given,"
-	echo "                 LIBDIR will override the corresponding directory implied"
-	echo "                 by --prefix; if not not given, LIBDIR defaults to"
-	echo "                 PREFIX/lib. If LIBDIR refers to a directory that does"
-	echo "                 not exist, it will be created."
+	echo "                 The path to which make will install libraries. If not"
+	echo "                 given, LIBDIR defaults to PREFIX/lib. If LIBDIR refers to"
+	echo "                 a directory that does not exist, it will be created."
 	echo " "
 	echo "   --includedir=INCDIR"
 	echo " "
 	echo "                 The path to which make will install development header"
-	echo "                 files. If given, INCDIR will override the corresponding"
-	echo "                 directory implied by --prefix; if not given, INCDIR"
-	echo "                 defaults to PREFIX/include. If INCDIR refers to a"
-	echo "                 directory that does not exist, it will be created."
+	echo "                 files. If not given, INCDIR defaults to PREFIX/include."
+	echo "                 If INCDIR refers to a directory that does not exist, it"
+	echo "                 will be created."
 	echo " "
 	echo "   --sharedir=SHAREDIR"
 	echo " "
@@ -104,18 +109,9 @@ print_usage()
 	echo "                 and LDFLAGS). These files allow certain BLIS makefiles,"
 	echo "                 such as those in the examples or testsuite directories, to"
 	echo "                 operate on an installed copy of BLIS rather than a local"
-	echo "                 (and possibly uninstalled) copy. If given, SHAREDIR will"
-	echo "                 override the corresponding directory implied by --prefix;"
-	echo "                 if not given, SHAREDIR defaults to PREFIX/share. If"
-	echo "                 SHAREDIR refers to a directory that does not exist, it"
-	echo "                 will be created."
-	echo " "
-	echo "   -d DEBUG, --enable-debug[=DEBUG]"
-	echo " "
-	echo "                 Enable debugging symbols in the library. If argument"
-	echo "                 DEBUG is given as 'opt', then optimization flags are"
-	echo "                 kept in the framework, otherwise optimization is"
-	echo "                 turned off."
+	echo "                 (and possibly uninstalled) copy. If not given, SHAREDIR"
+	echo "                 defaults to PREFIX/share. If SHAREDIR refers to a"
+	echo "                 directory that does not exist, it will be created."
 	echo " "
 	echo "   --enable-verbose-make, --disable-verbose-make"
 	echo " "
@@ -129,6 +125,13 @@ print_usage()
 	echo "                 even if the command plus command line arguments exceeds"
 	echo "                 the operating system limit (ARG_MAX)."
 	echo " "
+	echo "   -d DEBUG, --enable-debug[=DEBUG]"
+	echo " "
+	echo "                 Enable debugging symbols in the library. If argument"
+	echo "                 DEBUG is given as 'opt', then optimization flags are"
+	echo "                 kept in the framework, otherwise optimization is"
+	echo "                 turned off."
+	echo " "
 	echo "   --disable-static, --enable-static"
 	echo " "
 	echo "                 Disable (enabled by default) building BLIS as a static"
@@ -141,6 +144,23 @@ print_usage()
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
 	echo " "
+	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
+	echo " "
+	echo "                 Specify the subset of library symbols that are exported"
+	echo "                 within a shared library. Valid values for SYMBOLS are:"
+	echo "                 'public' (the default) and 'all'. By default, only"
+	echo "                 functions and variables that belong to public APIs are"
+	echo "                 exported in shared libraries. However, the user may"
+	echo "                 instead export all symbols in BLIS, even those that were"
+	echo "                 intended for internal use only. Note that the public APIs"
+	echo "                 encompass all functions that almost any user would ever"
+	echo "                 want to call, including the BLAS/CBLAS compatibility APIs"
+	echo "                 as well as the basic and expert interfaces to the typed"
+	echo "                 and object APIs that are unique to BLIS. Also note that"
+	echo "                 changing this option to 'all' will have no effect in some"
+	echo "                 environments, such as when compiling with clang on"
+	echo "                 Windows."
+	echo " "
 	echo "   -t MODEL, --enable-threading[=MODEL], --disable-threading"
 	echo " "
 	echo "                 Enable threading in the library, using threading model"
@@ -148,20 +168,36 @@ print_usage()
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
-	echo "   --disable-packbuf-pools, --enable-packbuf-pools"
+	echo "   --disable-pba-pools, --enable-pba-pools"
+	echo "   --disable-sba-pools, --enable-sba-pools"
 	echo " "
-	echo "                 Disable (enabled by default) use of internal memory"
-	echo "                 pools for managing packing buffers. When disabled,"
-	echo "                 the function specified by BLIS_MALLOC_POOL is called"
-	echo "                 on-demand, whenever a packing buffer is needed, and"
-	echo "                 the buffer is released via the function specified by"
-	echo "                 BLIS_FREE_POOL() when the loop in which it was"
-	echo "                 allocated terminates. When enabled, the memory pools"
-	echo "                 minimize calls to both BLIS_MALLOC_POOL() and"
-	echo "                 BLIS_FREE_POOL(), especially in a multithreaded"
-	echo "                 environment, but does so through a mechanism that may"
-	echo "                 incur additional overhead in some (but not all)"
-	echo "                 situations."
+	echo "                 Disable (enabled by default) use of internal memory pools"
+	echo "                 within the packing block allocator (pba) and/or the small"
+	echo "                 block allocator (sba). The former is used to allocate"
+	echo "                 memory used to pack submatrices while the latter is used"
+	echo "                 to allocate control/thread tree nodes and thread"
+	echo "                 communicators. Both allocations take place in the context"
+	echo "                 of level-3 operations. When the pba is disabled, the"
+	echo "                 malloc()-like function specified by BLIS_MALLOC_POOL is"
+	echo "                 called on-demand whenever a packing block is needed, and"
+	echo "                 when the sba is disabled, the malloc()-like function"
+	echo "                 specified by BLIS_MALLOC_INTL is called whenever a small"
+	echo "                 block is needed, with the two allocators calling free()-"
+	echo "                 like functions BLIS_FREE_POOL and BLIS_FREE_INTL,"
+	echo "                 respectively when blocks are released. When enabled,"
+	echo "                 either or both pools are populated via the same functions"
+	echo "                 mentioned previously, and henceforth blocks are checked"
+	echo "                 out and in. The library quickly reaches a state in which"
+	echo "                 it no longer needs to call malloc() or free(), even"
+	echo "                 across many separate level-3 operation invocations."
+	echo " "
+	echo "   --enable-mem-tracing, --disable-mem-tracing"
+	echo " "
+	echo "                 Enable (disable by default) output to stdout that traces"
+	echo "                 the allocation and freeing of memory, including the names"
+	echo "                 of the functions that triggered the allocation/freeing."
+	echo "                 Enabling this option WILL NEGATIVELY IMPACT PERFORMANCE."
+	echo "                 Please use only for informational/debugging purposes."
 	echo " "
 	echo "   -i SIZE, --int-size=SIZE"
 	echo " "
@@ -205,6 +241,16 @@ print_usage()
 	echo "                 is equal to the computation datatype. This option may"
 	echo "                 only be enabled when mixed domain/precision support is"
 	echo "                 enabled."
+	echo " "
+	echo "   --disable-sup-handling, --enable-sup-handling"
+	echo " "
+	echo "                 Disable (enabled by default) handling of small/skinny"
+	echo "                 matrix problems via separate code branches. When disabled,"
+	echo "                 these small/skinny level-3 operations will be performed by"
+	echo "                 the conventional implementation, which is optimized for"
+	echo "                 medium and large problems. Note that what qualifies as"
+	echo "                 \"small\" depends on thresholds that may vary by sub-"
+	echo "                 configuration."
 	echo " "
 	echo "   -s NAME --enable-sandbox=NAME"
 	echo " "
@@ -262,6 +308,7 @@ print_usage()
 	echo " Environment Variables:"
 	echo " "
 	echo "   CC            Specifies the C compiler to use."
+	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
 	echo "   RANLIB        Specifies the ranlib executable to use."
 	echo "   AR            Specifies the archiver to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
@@ -1000,7 +1047,7 @@ auto_detect()
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
 	# by the main() function in ${main_c}.
-	if [ $is_win = no ]; then
+	if [[ $is_win == no || "$cc_vendor" != "clang" ]]; then
 		ldflags="${LIBPTHREAD--lpthread}"
 	fi
 
@@ -1050,6 +1097,36 @@ has_libmemkind()
 	# Attempt to compile a simple main() program that contains a call
 	# to hbw_malloc() and that links to libmemkind.
 	${found_cc} -o ${binname} ${main_c_filepath} ${LDFLAGS_mk} 2> /dev/null
+
+	# Depending on the return code from the compile step above, we set
+	# enable_memkind accordingly.
+	if [ "$?" == 0 ]; then
+	    rval='yes'
+	else
+	    rval='no'
+	fi
+
+	# Remove the executable generated above.
+	rm -f ./${binname}
+
+	echo "${rval}"
+}
+
+has_pragma_omp_simd()
+{
+	local main_c main_c_filepath binname rval
+
+	# Path to omp-simd detection source file.
+	main_c="omp_simd_detect.c"
+	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+
+	# Binary executable filename.
+	binname="omp_simd-detect.x"
+
+	# Attempt to compile a simple main() program that contains a
+	# #pragma omp simd.
+	${found_cc} -std=c99 -O3 -march=native -fopenmp-simd \
+	            -o ${binname} ${main_c_filepath} 2> /dev/null
 
 	# Depending on the return code from the compile step above, we set
 	# enable_memkind accordingly.
@@ -1198,7 +1275,13 @@ check_python()
 	#
 	# python1: no versions supported
 	# python2: 2.7+
-	# python3: 3.5+
+	# python3: 3.4+
+	#
+	# NOTE: It's actually unclear whether python 3.0 through 3.3.x would work.
+	# Python 3.5 is the oldest python3 that I have available to test with, and
+	# I only know that 3.4 will work thanks to feedback from Dave Love. So it's
+	# quite possible that some of those "unsupported" python3 versions are
+	# sufficient. -FGVZ
 	#
 
 	# Python 1.x is unsupported.
@@ -1213,9 +1296,9 @@ check_python()
 		fi
 	fi
 
-	# Python 3.4.x or older is unsupported.
+	# Python 3.3.x or older is unsupported.
 	if [ ${python_major} -eq 3 ]; then
-		if [ ${python_minor} -lt 5 ]; then
+		if [ ${python_minor} -lt 4 ]; then
 			echoerr_unsupportedpython
 		fi
 	fi
@@ -1240,11 +1323,14 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
 	if [ "${cc_vendor}" = "icc" -o \
-	     "${cc_vendor}" = "gcc" -o \
-	     "${cc_vendor}" = "clang" ]; then
+	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
+	elif [ "${cc_vendor}" = "oneAPI" ]; then
+		# Treat Intel oneAPI's clang as clang, not icc.
+		cc_vendor="clang"
+		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	else
 		cc_version=$(echo "${vendor_string}" | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*' | { read first rest ; echo ${first} ; })
 	fi
@@ -1291,7 +1377,7 @@ check_compiler()
 	# Specific:
 	#
 	#   skx: icc 15.0.1+, gcc 6.0+, clang 3.9+
-	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.5+
+	#   knl: icc 14.0.1+, gcc 5.0+, clang 3.9+
 	#   haswell: any
 	#   sandybridge: any
 	#   penryn: any
@@ -1348,6 +1434,8 @@ check_compiler()
 			# Thus, this "blacklistcc_add" statement has been moved above.
 			#blacklistcc_add "zen"
 			blacklistcc_add "skx"
+			# gcc 5.x may support POWER9 but it is unverified.
+			blacklistcc_add "power9"
 		fi
 	fi
 
@@ -1362,32 +1450,153 @@ check_compiler()
 				blacklistcc_add "skx"
 			fi
 		fi
+		if [ ${cc_major} -eq 18 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			blacklistcc_add "knl"
+			blacklistcc_add "skx"
+		fi
+		if [ ${cc_major} -ge 19 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			echoerr_unsupportedcc
+		fi
 	fi
 
 	# clang
 	if [ "x${cc_vendor}" = "xclang" ]; then
-
-		if [ ${cc_major} -lt 3 ]; then
-			echoerr_unsupportedcc
-		fi
-		if [ ${cc_major} -eq 3 ]; then
-			if [ ${cc_minor} -lt 3 ]; then
+		if [ "$(echo ${vendor_string} | grep -o Apple)" = "Apple" ]; then
+			if [ ${cc_major} -lt 5 ]; then
 				echoerr_unsupportedcc
 			fi
-			if [ ${cc_minor} -lt 5 ]; then
+			# See https://en.wikipedia.org/wiki/Xcode#Toolchain_versions
+			if [ ${cc_major} -eq 5 ]; then
+				# Apple clang 5.0 is clang 3.4svn
 				blacklistcc_add "excavator"
 				blacklistcc_add "zen"
-				blacklistcc_add "knl"
 			fi
-			if [ ${cc_minor} -lt 9 ]; then
+			if [ ${cc_major} -lt 7 ]; then
+				blacklistcc_add "knl"
 				blacklistcc_add "skx"
 			fi
+		else
+			if [ ${cc_major} -lt 3 ]; then
+				echoerr_unsupportedcc
+			fi
+			if [ ${cc_major} -eq 3 ]; then
+				if [ ${cc_minor} -lt 3 ]; then
+					echoerr_unsupportedcc
+				fi
+				if [ ${cc_minor} -lt 5 ]; then
+					blacklistcc_add "excavator"
+					blacklistcc_add "zen"
+				fi
+				if [ ${cc_minor} -lt 9 ]; then
+					blacklistcc_add "knl"
+					blacklistcc_add "skx"
+				fi
+			fi
+			if [ ${cc_major} -lt 4 ]; then
+				# See comment above regarding zen support.
+				#blacklistcc_add "zen"
+				: # explicit no-op since bash can't handle empty loop bodies.
+			fi
 		fi
-		if [ ${cc_major} -lt 4 ]; then
-			# See comment above regarding zen support.
-			#blacklistcc_add "zen"
-			: # explicit no-op since bash can't handle empty loop bodies.
+	fi
+}
+
+check_compiler_version_ranges()
+{
+	local cc
+
+	cc="${found_cc}"
+
+	#
+	# We check for various compiler version ranges that may cause us
+	# issues in properly supporting those compiler versions within the
+	# BLIS build system.
+	#
+	# range: gcc < 4.9.0 (ie: 4.8.5 or older)
+	# variable: gcc_older_than_4_9_0
+	# comments:
+	#   These older versions of gcc may support microarchitectures such as
+	#   sandybridge, but the '-march=' flag uses a different label syntax.
+	#   In newer versions, '-march=sandybridge' is the preferred syntax [1].
+	#   However, in older versions, the syntax for the same compiler option
+	#   is '-march=corei7-avx' [2].
+	#
+	#   [1] https://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options
+	#   [2] https://gcc.gnu.org/onlinedocs/gcc-4.8.5/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options
+	#
+	# range: gcc < 6.1 (ie: 5.5 or older)
+	# variable: gcc_older_than_6_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen (Zen1)
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is '-march=bdver4' [3]. However, basic support for these
+	#   older versions can be attained in a roundabout way by starting with the
+	#   instruction sets enabled by '-march=bdver4' and then disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, namely: FMA4, TBM, XOP, and LWP. Newer versions of gcc support Zen
+	#   via the '-march=znver1' option [4].
+	#
+	#   [3] https://gcc.gnu.org/onlinedocs/gcc-5.5.0/gcc/x86-Options.html#x86-Options
+	#   [4] https://gcc.gnu.org/onlinedocs/gcc-6.1.0/gcc/x86-Options.html#x86-Options
+	#
+	# range: gcc < 9.1 (ie: 8.3 or older)
+	# variable: gcc_older_than_9_1_0
+	# comments:
+	#   These older versions of gcc do not explicitly support the Zen2
+	#   microarchitecture; the newest microarchitectural value understood by
+	#   these versions is either '-march=znver1' (if !gcc_older_than_6_1_0) [5]
+	#   or '-march=bdver4' (if gcc_older_than_6_1_0) [3]. If gcc is 6.1 or
+	#   newer, '-march=znver1' may be used (since the instruction sets it
+	#   enables are a subset of those enabled by '-march=znver2'); otherwise,
+	#   '-march=bdver4' must be used in conjuction with disabling the
+	#   instruction sets that were removed in the transition from Excavator to
+	#   Zen, as described in the section above for gcc_older_than_6_1_0.
+	#   Newer versions of gcc support Zen2 via the '-march=znver2' option [6].
+	#
+	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
+	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.1.0/gcc/x86-Options.html#x86-Options
+	#
+
+	gcc_older_than_4_9_0='no'
+	gcc_older_than_6_1_0='no'
+	gcc_older_than_9_1_0='no'
+
+	echo "${script_name}: checking ${cc} ${cc_version} against known consequential version ranges."
+
+	# gcc
+	if [ "x${cc_vendor}" = "xgcc" ]; then
+
+		# Check for gcc < 4.9.0 (ie: 4.8.5 or older).
+		if [ ${cc_major} -eq 4 ]; then
+			if [ ${cc_minor} -lt 9 ]; then
+				echo "${script_name}: note: found ${cc} version older than 4.9.0."
+				gcc_older_than_4_9_0='yes'
+			fi
 		fi
+
+		# Check for gcc < 6.1.0 (ie: 5.5 or older).
+		if [ ${cc_major} -lt 6 ]; then
+			echo "${script_name}: note: found ${cc} version older than 6.1."
+			gcc_older_than_6_1_0='yes'
+		fi
+
+		# Check for gcc < 9.1.0 (ie: 8.3 or older).
+		if [ ${cc_major} -lt 9 ]; then
+			echo "${script_name}: note: found ${cc} version older than 9.1."
+			gcc_older_than_9_1_0='yes'
+		fi
+	fi
+
+	# icc
+	if [ "x${cc_vendor}" = "xicc" ]; then
+		:
+	fi
+
+	# clang
+	if [ "x${cc_vendor}" = "xclang" ]; then
+		:
 	fi
 }
 
@@ -1444,8 +1653,8 @@ check_assembler()
 	#
 
 	# The assembler on OS X won't recognize AVX-512 without help.
-	if [ "$(uname -s)" == "Darwin" ]; then
-		cflags="-Wa,-march=knl"
+	if [ "${cc_vendor}" == "clang" ]; then
+		cflags="-march=knl"
 	fi
 
 	asm_fp=$(find ${asm_dir} -name "avx512f.s")
@@ -1461,8 +1670,8 @@ check_assembler()
 	#
 
 	# The assembler on OS X won't recognize AVX-512 without help.
-	if [ "$(uname -s)" == "Darwin" ]; then
-		cflags="-Wa,-march=skylake-avx512"
+	if [ "${cc_vendor}" == "clang" ]; then
+		cflags="-march=skylake-avx512"
 	fi
 
 	asm_fp=$(find ${asm_dir} -name "avx512dq.s")
@@ -1679,21 +1888,33 @@ main()
 
 	# -- configure options --
 
-	# The user-given install prefix and a flag indicating it was given.
-	#install_prefix_def="${HOME}/blis"
-	install_prefix_user=${HOME}/blis  # default to this directory.
+	# Define the default prefix so that the print_usage() function can
+	# output it in the --help text.
+	prefix_def='/usr/local'
+
+	# The installation prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	prefix=${prefix_def}
 	prefix_flag=''
 
-	# The user-given install libdir and a flag indicating it was given.
-	install_libdir_user=''
+	# The installation exec_prefix, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	exec_prefix='${prefix}'
+	exec_prefix_flag=''
+
+	# The installation libdir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	libdir='${exec_prefix}/lib'
 	libdir_flag=''
 
-	# The user-given install includedir and a flag indicating it was given.
-	install_incdir_user=''
-	incdir_flag=''
+	# The installation includedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	includedir='${prefix}/include'
+	includedir_flag=''
 
-	# The user-given install sharedir and a flag indicating it was given.
-	install_sharedir_user=''
+	# The installation sharedir, assigned its default value, and a flag to
+	# track whether or not it was given by the user.
+	sharedir='${prefix}/share'
 	sharedir_flag=''
 
 	# The preset value of CFLAGS and LDFLAGS (ie: compiler and linker flags
@@ -1706,7 +1927,7 @@ main()
 	debug_flag=''
 
 	# The threading flag.
-	threading_model='no'
+	threading_model='off'
 
 	# The method of assigning micropanels to threads in the JR and JR loops.
 	thread_part_jrir='slab'
@@ -1720,13 +1941,17 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
-	enable_packbuf_pools='yes'
+	export_shared='public'
+	enable_pba_pools='yes'
+	enable_sba_pools='yes'
+	enable_mem_tracing='no'
 	int_type_size=0
 	blas_int_type_size=32
 	enable_blas='yes'
 	enable_cblas='no'
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
+	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	force_version='no'
 
@@ -1767,7 +1992,7 @@ main()
 
 		# Process our command line options.
 		unset OPTIND
-		while getopts ":hp:d:s:t:r:qci:b:-:" opt; do
+		while getopts ":hp:d:e:s:t:r:qci:b:-:" opt; do
 			case $opt in
 				-)
 					case "$OPTARG" in
@@ -1779,19 +2004,23 @@ main()
 							;;
 						prefix=*)
 							prefix_flag=1
-							install_prefix_user=${OPTARG#*=}
+							prefix=${OPTARG#*=}
+							;;
+						exec-prefix=*)
+							exec_prefix_flag=1
+							exec_prefix=${OPTARG#*=}
 							;;
 						libdir=*)
 							libdir_flag=1
-							install_libdir_user=${OPTARG#*=}
+							libdir=${OPTARG#*=}
 							;;
 						includedir=*)
-							incdir_flag=1
-							install_incdir_user=${OPTARG#*=}
+							includedir_flag=1
+							includedir=${OPTARG#*=}
 							;;
 						sharedir=*)
 							sharedir_flag=1
-							install_sharedir_user=${OPTARG#*=}
+							sharedir=${OPTARG#*=}
 							;;
 						enable-debug)
 							debug_flag=1
@@ -1828,20 +2057,35 @@ main()
 						disable-shared)
 							enable_shared='no'
 							;;
+						export-shared=*)
+							export_shared=${OPTARG#*=}
+							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
+							;;
+						disable-threading)
+							threading_model='off'
 							;;
 						thread-part-jrir=*)
 							thread_part_jrir=${OPTARG#*=}
 							;;
-						disable-threading)
-							threading_model='no'
+						enable-pba-pools)
+							enable_pba_pools='yes'
 							;;
-						enable-packbuf-pools)
-							enable_packbuf_pools='yes'
+						disable-pba-pools)
+							enable_pba_pools='no'
 							;;
-						disable-packbuf-pools)
-							enable_packbuf_pools='no'
+						enable-sba-pools)
+							enable_sba_pools='yes'
+							;;
+						disable-sba-pools)
+							enable_sba_pools='no'
+							;;
+						enable-mem-tracing)
+							enable_mem_tracing='yes'
+							;;
+						disable-mem-tracing)
+							enable_mem_tracing='no'
 							;;
 						enable-sandbox=*)
 							sandbox_flag=1
@@ -1880,6 +2124,12 @@ main()
 						disable-mixed-dt-extra-mem)
 							enable_mixed_dt_extra_mem='no'
 							;;
+						enable-sup-handling)
+							enable_sup_handling='yes'
+							;;
+						disable-sup-handling)
+							enable_sup_handling='no'
+							;;
 						with-memkind)
 							enable_memkind='yes'
 							;;
@@ -1901,11 +2151,14 @@ main()
 					;;
 				p)
 					prefix_flag=1
-					install_prefix_user=$OPTARG
+					prefix=$OPTARG
 					;;
 				d)
 					debug_flag=1
 					debug_type=$OPTARG
+					;;
+				e)
+					export_shared=$OPTARG
 					;;
 				s)
 					sandbox_flag=1
@@ -2048,9 +2301,11 @@ main()
 
 	# Check the compiler's version. Certain versions of certain compilers
 	# will preclude building certain sub-configurations, which are added
-	# to a blacklist.
+	# to a blacklist. We also make note of certain version ranges that
+	# will be useful to know about later.
 	get_compiler_version
 	check_compiler
+	check_compiler_version_ranges
 
 	# Now check the assembler's ability to assemble code. Older versions
 	# of binutils may not be aware of certain instruction sets. Those
@@ -2172,14 +2427,27 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
+		#config_name="generic"
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
+
+		# If the auto-detect code returned the "generic" string, it means we
+		# were unable to automatically detect the user's hardware type. While
+		# this is going to be a rare event, it will likely lead the user to
+		# experience much lower performance than expected, and thus we will
+		# warn them about it at the end of the configure output (to increase
+		# the chances that they see it).
+		if [ "${config_name}" = "generic" ]; then
+
+			warn_user_generic=1
+		else
+			warn_user_generic=0
+		fi
 	else
 
 		# Use the command line argument as the configuration name.
 		config_name=$1
 
-		#echo "${script_name}: manual configuration requested."
 		echo "${script_name}: manual configuration requested; configuring with '${config_name}'."
 
 	fi
@@ -2295,22 +2563,42 @@ main()
 		# but we have it here just in case.
 		if [ $1 = "auto" ]; then
 
-			echo "${script_name}: 'auto-detected configuration '${conf}' is NOT registered!"
+			echo "${script_name}: 'auto-detected configuration '${config_name}' is NOT registered!"
 			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
+			echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
 			echo "${script_name}: "
 			exit 1;
 
 		else
 
-			echo "${script_name}: 'user-specified configuration '${conf}' is NOT registered!"
-			echo "${script_name}: "
-			echo "${script_name}: *** Cannot continue with unregistered configuration '${conf}'. ***"
-			echo "${script_name}: "
-			exit 1;
+			# At this point, we know: (a) config_list is empty; and (b) the user
+			# requested manual configuration. If the config_name given by the
+			# user is present in the configuration blacklist (config_blist),
+			# then we can deduce why the config_list is empty: because the only
+			# subconfig implied by config_name is blacklisted. Thus, we cannot
+			# proceed.
 
+			if [ $(is_in_list "${config_name}" "${config_blist}") == "true" ]; then
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is blacklisted!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with blacklisted configuration '${config_name}'. ***"
+				echo "${script_name}: *** Try updating your compiler and/or assembler (binutils) versions. ***"
+				echo "${script_name}: "
+				exit 1;
+			else
+
+				# If config_name is NOT present in config_blist, then we know
+				# that config_list is empty simply because config_name is
+				# unregistered.
+
+				echo "${script_name}: 'user-specified configuration '${config_name}' is NOT registered!"
+				echo "${script_name}: "
+				echo "${script_name}: *** Cannot continue with unregistered configuration '${config_name}'. ***"
+				echo "${script_name}: "
+				exit 1;
+			fi
 		fi
-
 	else
 
 		# This branch executes when the configuration is found to be present
@@ -2387,57 +2675,55 @@ main()
 	# --without-memkind.
 	has_memkind=$(has_libmemkind)
 
+	# Try to determine whether the chosen compiler supports #pragma omp simd.
+	pragma_omp_simd=$(has_pragma_omp_simd)
+
 
 	# -- Prepare variables for subsitution into template files -----------------
 
-	# Parse the status of the install prefix and echo feedback.
+	# Parse the status of the prefix option and echo feedback.
 	if [ -n "${prefix_flag}" ]; then
-		echo "${script_name}: detected --prefix='${install_prefix_user}'."
+		echo "${script_name}: detected --prefix='${prefix}'."
 	else
-		echo "${script_name}: no install prefix option given; defaulting to '${install_prefix_user}'."
+		echo "${script_name}: no install prefix option given; defaulting to '${prefix}'."
 	fi
 
-	# Set initial (candidate) values for the libdir and includedir using the
-	# install prefix that was determined above.
-	install_libdir=${install_prefix_user}/lib
-	install_incdir=${install_prefix_user}/include
-	install_sharedir=${install_prefix_user}/share
+	# Parse the status of the exec_prefix option and echo feedback.
+	if [ -n "${exec_prefix_flag}" ]; then
+		echo "${script_name}: detected --exec-prefix='${exec_prefix}'."
+	else
+		echo "${script_name}: no install exec_prefix option given; defaulting to PREFIX."
+	fi
 
-	# Set the install libdir, if it was specified. Note that this will override
-	# the default libdir implied by the install prefix, even if both options
-	# were given.
+	# Parse the status of the libdir option and echo feedback.
 	if [ -n "${libdir_flag}" ]; then
-		echo "${script_name}: detected --libdir='${install_libdir_user}'."
-		install_libdir=${install_libdir_user}
+		echo "${script_name}: detected --libdir='${libdir}'."
 	else
-		echo "${script_name}: no install libdir option given; defaulting to PREFIX/lib."
+		echo "${script_name}: no install libdir option given; defaulting to EXECPREFIX/lib."
 	fi
 
-	# Set the install includedir, if it was specified. Note that this will
-	# override the default includedir implied by the install prefix, even if
-	# both options were given.
-	if [ -n "${incdir_flag}" ]; then
-		echo "${script_name}: detected --includedir='${install_incdir_user}'."
-		install_incdir=${install_incdir_user}
+	# Parse the status of the includedir option and echo feedback.
+	if [ -n "${includedir_flag}" ]; then
+		echo "${script_name}: detected --includedir='${includedir}'."
 	else
 		echo "${script_name}: no install includedir option given; defaulting to PREFIX/include."
 	fi
 
-	# Set the install sharedir, if it was specified. Note that this will
-	# override the default sharedir implied by the install prefix, even if
-	# both options were given.
+	# Parse the status of the sharedir option and echo feedback.
 	if [ -n "${sharedir_flag}" ]; then
-		echo "${script_name}: detected --sharedir='${install_sharedir_user}'."
-		install_sharedir=${install_sharedir_user}
+		echo "${script_name}: detected --sharedir='${sharedir}'."
 	else
 		echo "${script_name}: no install sharedir option given; defaulting to PREFIX/share."
 	fi
 
 	# Echo the installation directories that we settled on.
 	echo "${script_name}: final installation directories:"
-	echo "${script_name}:   libdir:     ${install_libdir}"
-	echo "${script_name}:   includedir: ${install_incdir}"
-	echo "${script_name}:   sharedir:   ${install_sharedir}"
+	echo "${script_name}:   prefix:      "${prefix}
+	echo "${script_name}:   exec_prefix: "${exec_prefix}
+	echo "${script_name}:   libdir:      "${libdir}
+	echo "${script_name}:   includedir:  "${includedir}
+	echo "${script_name}:   sharedir:    "${sharedir}
+	echo "${script_name}: NOTE: the variables above can be overridden when running make."
 
 	# Check if CFLAGS is non-empty.
 	if [ -n "${CFLAGS}" ]; then
@@ -2504,6 +2790,23 @@ main()
 		exit 1
 	fi
 
+	# Check if the "export shared" flag was specified.
+	if [ "x${export_shared}" = "xall" ]; then
+		if [ "x${enable_shared}" = "xyes" ]; then
+			echo "${script_name}: exporting all symbols within shared library."
+		else
+			echo "${script_name}: ignoring request to export all symbols within shared library."
+		fi
+	elif [ "x${export_shared}" = "xpublic" ]; then
+		if [ "x${enable_shared}" = "xyes" ]; then
+			echo "${script_name}: exporting only public symbols within shared library."
+		fi
+	else
+		echo "${script_name}: *** Invalid argument '${export_shared}' to --export-shared option given."
+		echo "${script_name}: *** Please use 'public' or 'all'."
+		exit 1
+	fi
+
 	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
@@ -2525,9 +2828,11 @@ main()
 		enable_pthreads='yes'
 		enable_pthreads_01=1
 		threading_model="pthreads" # Standardize the value.
-	elif [ "x${threading_model}" = "xno" ] ||
+	elif [ "x${threading_model}" = "xoff" ] ||
+	     [ "x${threading_model}" = "xno" ] ||
 	     [ "x${threading_model}" = "xnone" ]; then
 		echo "${script_name}: threading is disabled."
+		threading_model="off"
 	else
 		echo "${script_name}: *** Unsupported threading model: ${threading_model}."
 		exit 1
@@ -2549,12 +2854,26 @@ main()
 	fi
 
 	# Convert 'yes' and 'no' flags to booleans.
-	if [ "x${enable_packbuf_pools}" = "xyes" ]; then
-		echo "${script_name}: internal memory pools for packing buffers are enabled."
-		enable_packbuf_pools_01=1
+	if [ "x${enable_pba_pools}" = "xyes" ]; then
+		echo "${script_name}: internal memory pools for packing blocks are enabled."
+		enable_pba_pools_01=1
 	else
-		echo "${script_name}: internal memory pools for packing buffers are disabled."
-		enable_packbuf_pools_01=0
+		echo "${script_name}: internal memory pools for packing blocks are disabled."
+		enable_pba_pools_01=0
+	fi
+	if [ "x${enable_sba_pools}" = "xyes" ]; then
+		echo "${script_name}: internal memory pools for small blocks are enabled."
+		enable_sba_pools_01=1
+	else
+		echo "${script_name}: internal memory pools for small blocks are disabled."
+		enable_sba_pools_01=0
+	fi
+	if [ "x${enable_mem_tracing}" = "xyes" ]; then
+		echo "${script_name}: memory tracing output is enabled."
+		enable_mem_tracing_01=1
+	else
+		echo "${script_name}: memory tracing output is disabled."
+		enable_mem_tracing_01=0
 	fi
 	if [ "x${has_memkind}" = "xyes" ]; then
 		if [ "x${enable_memkind}" = "x" ]; then
@@ -2582,6 +2901,13 @@ main()
 		fi
 		enable_memkind="no"
 		enable_memkind_01=0
+	fi
+	if [ "x${pragma_omp_simd}" = "xyes" ]; then
+		echo "${script_name}: compiler appears to support #pragma omp simd."
+		enable_pragma_omp_simd_01=1
+	else
+		echo "${script_name}: compiler appears to not support #pragma omp simd."
+		enable_pragma_omp_simd_01=0
 	fi
 	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
@@ -2616,6 +2942,13 @@ main()
 
 		enable_mixed_dt_extra_mem_01=0
 		enable_mixed_dt_01=0
+	fi
+	if [ "x${enable_sup_handling}" = "xyes" ]; then
+		echo "${script_name}: small matrix handling is enabled."
+		enable_sup_handling_01=1
+	else
+		echo "${script_name}: small matrix handling is disabled."
+		enable_sup_handling_01=0
 	fi
 
 	# Report integer sizes.
@@ -2665,15 +2998,18 @@ main()
 	fi
 
 
-	# Variables that contain forward slashes, such as paths, need extra
+	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
 	# characters here so that the sed commands below do the right thing.
-	install_libdir_esc=$(echo "${install_libdir}" | sed 's/\//\\\//g')
-	install_incdir_esc=$(echo "${install_incdir}" | sed 's/\//\\\//g')
-	install_sharedir_esc=$(echo "${install_sharedir}" | sed 's/\//\\\//g')
-	dist_path_esc=$(echo "${dist_path}"           | sed 's/\//\\\//g')
-	cc_esc=$(echo "${found_cc}" | sed 's/\//\\\//g')
-	cxx_esc=$(echo "${found_cxx}" | sed 's/\//\\\//g')
+	os_name_esc=$(echo     "${os_name}"     | sed 's/\//\\\//g')
+	prefix_esc=$(echo      "${prefix}"      | sed 's/\//\\\//g')
+	exec_prefix_esc=$(echo "${exec_prefix}" | sed 's/\//\\\//g')
+	libdir_esc=$(echo      "${libdir}"      | sed 's/\//\\\//g')
+	includedir_esc=$(echo  "${includedir}"  | sed 's/\//\\\//g')
+	sharedir_esc=$(echo    "${sharedir}"    | sed 's/\//\\\//g')
+	dist_path_esc=$(echo   "${dist_path}"   | sed 's/\//\\\//g')
+	cc_esc=$(echo          "${found_cc}"    | sed 's/\//\\\//g')
+	cxx_esc=$(echo         "${found_cxx}"   | sed 's/\//\\\//g')
 	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
 
 	# For RANLIB, if the variable is not set, we use a default value of
@@ -2688,7 +3024,7 @@ main()
 	# For Windows builds, clear the libpthread_esc variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
-	if [ $is_win = yes ]; then
+	if [[ $is_win == yes && "$cc_vendor" == "clang" ]]; then
 		libpthread_esc=
 	fi
 
@@ -2730,13 +3066,13 @@ main()
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 
-	if [ ${dist_path} != "./" ]; then
+	if [ "${dist_path}" != "./" ]; then
 
 		# At this point, we know the user did not run "./configure". But we
 		# have not yet ruled out "<fullpath>/configure" or some # equivalent
 		# that uses relative paths. To further rule out these possibilities,
 		# we create a dummy file in the current build directory.
-		touch ./${dummy_file}
+		touch "./${dummy_file}"
 
 		# If the dummy file we just created in the current directory does not
 		# appear in the source distribution path, then we are in a different
@@ -2767,10 +3103,13 @@ main()
 		| sed -e "s/@config_list@/${config_list}/g" \
 		| sed -e "s/@kernel_list@/${kernel_list}/g" \
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
-		| sed -e "s/@os_name@/${os_name}/g" \
+		| sed -e "s/@os_name@/${os_name_esc}/g" \
 		| sed -e "s/@is_win@/${is_win}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
+		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
+		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
+		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
@@ -2780,17 +3119,21 @@ main()
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
-		| sed -e "s/@install_libdir@/${install_libdir_esc}/g" \
-		| sed -e "s/@install_incdir@/${install_incdir_esc}/g" \
-		| sed -e "s/@install_sharedir@/${install_sharedir_esc}/g" \
+		| sed -e "s/@prefix@/${prefix_esc}/g" \
+		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
+		| sed -e "s/@libdir@/${libdir_esc}/g" \
+		| sed -e "s/@includedir@/${includedir_esc}/g" \
+		| sed -e "s/@sharedir@/${sharedir_esc}/g" \
 		| sed -e "s/@enable_verbose@/${enable_verbose}/g" \
 		| sed -e "s/@configured_oot@/${configured_oot}/g" \
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed -e "s/@export_shared@/${export_shared}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
+		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		> "${config_mk_out_path}"
 		
@@ -2809,14 +3152,18 @@ main()
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
 		| sed   -e "s/@enable_jrir_rr@/${enable_jrir_rr_01}/g" \
-		| sed   -e "s/@enable_packbuf_pools@/${enable_packbuf_pools_01}/g" \
+		| sed   -e "s/@enable_pba_pools@/${enable_pba_pools_01}/g" \
+		| sed   -e "s/@enable_sba_pools@/${enable_sba_pools_01}/g" \
+		| sed   -e "s/@enable_mem_tracing@/${enable_mem_tracing_01}/g" \
 		| sed   -e "s/@int_type_size@/${int_type_size}/g" \
 		| sed   -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
 		| sed   -e "s/@enable_blas@/${enable_blas_01}/g" \
 		| sed   -e "s/@enable_cblas@/${enable_cblas_01}/g" \
 		| sed   -e "s/@enable_mixed_dt@/${enable_mixed_dt_01}/g" \
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
+		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		> "${bli_config_h_out_path}"
@@ -3113,6 +3460,18 @@ main()
 		echo "${script_name}: configured to build within top-level directory of source distribution."
 	fi
 
+	if [ "${warn_user_generic}" = "1" ]; then
+
+		echo "${script_name}: "
+		echo "${script_name}: *** Unable to automatically detect hardware type! ***"
+		echo "${script_name}: "
+		echo "${script_name}: NOTE: configure was unable to identify a subconfiguration"
+		echo "${script_name}: optimized for your hardware. As a result, the 'generic'"
+		echo "${script_name}: subconfiguration (with low-performance reference kernels)"
+		echo "${script_name}: will be used. For support, please open an issue on GitHub"
+		echo "${script_name}: at https://github.com/flame/blis/issues."
+		echo "${script_name}: "
+	fi
 
 	# Exit peacefully.
 	return 0

@@ -73,7 +73,7 @@ void PASTEMAC0(varname) \
 	void*     buf_beta  = bli_obj_buffer_for_1x1( dt, beta ); \
 \
 	/* Query a type-specific function pointer, except one that uses
-	   void* instead of typed pointers. */ \
+	   void* for function arguments instead of typed pointers. */ \
 	PASTECH2(opname,_unb,_vft) f = \
 	PASTEMAC(varname,_qfp)( dt ); \
 \

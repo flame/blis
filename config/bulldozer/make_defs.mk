@@ -57,16 +57,16 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -funroll-all-loops
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
 CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mfpmath=sse -mavx -mfma4 -march=bdver1
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma4 -march=bdver1 -mno-tbm -mno-xop -mno-lwp
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mfpmath=sse -mavx -mfma4 -march=bdver1
+CKVECFLAGS     := -mfpmath=sse -mavx -mfma4 -march=bdver1 -mno-tbm -mno-xop -mno-lwp
 else
 $(error gcc or clang are required for this configuration.)
 endif
@@ -74,7 +74,15 @@ endif
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
+ifeq ($(CC_VENDOR),gcc)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else
+ifeq ($(CC_VENDOR),clang)
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+else
 CRVECFLAGS     := $(CKVECFLAGS)
+endif
+endif
 
 # Store all of the variables here to new variables containing the
 # configuration name.

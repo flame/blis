@@ -417,8 +417,9 @@ main()
 	
 	# The arguments to this function. They'll get assigned meaningful
 	# values after getopts.
-	mkfile_frag_tmpl_path=""
 	root_dir=""
+	frag_dir=""
+	mkfile_frag_tmpl_path=""
 	suffix_file=""
 	ignore_file=""
 	

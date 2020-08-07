@@ -15,6 +15,8 @@
 * **[Object management](BLISObjectAPI.md#object-management)**
   * [Object creation function reference](BLISObjectAPI.md#object-creation-function-reference)
   * [Object accessor function reference](BLISObjectAPI.md#object-accessor-function-reference)
+  * [Object mutator function reference](BLISObjectAPI.md#object-mutator-function-reference)
+  * [Other object function reference](BLISObjectAPI.md#other-object-function-reference)
 * **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
   * [Operation index](BLISObjectAPI.md#operation-index)
   * [Level-1v operations](BLISObjectAPI.md#level-1v-operations)
@@ -24,7 +26,7 @@
   * [Level-2 operations](BLISObjectAPI.md#level-2-operations)
   * [Level-3 operations](BLISObjectAPI.md#level-3-operations)
   * [Utility operations](BLISObjectAPI.md#utility-operations)
-  * [Level-3 micro-kernels](BLISObjectAPI.md#level-3-micro-kernels)
+  * [Level-3 microkernels](BLISObjectAPI.md#level-3-microkernels)
 * **[Query function reference](BLISObjectAPI.md#query-function-reference)**
   * [General library information](BLISObjectAPI.md#general-library-information)
   * [Specific configuration](BLISObjectAPI.md#specific-configuration)
@@ -40,6 +42,9 @@ There are many functions that BLIS implements that are not listed here, either b
 
 The object API was given its name (a) because it abstracts the floating-point types of its operands (along with many other properties) within a `typedef struct {...}` data structure, and (b) to contrast it with the other native API in BLIS, the typed API, which is [documented here](BLISTypedAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
 
+In general, this document should be treated more as a reference than a place to learn how to use BLIS in your application. Thus, we highly encourage all readers to first study the [example code](BLISObjectAPI.md#example-code) provided within the BLIS source distribution.
+
+
 ## BLIS types
 
 The following tables list various types used throughout the BLIS object API.
@@ -53,7 +58,6 @@ The following tables list various types used throughout the BLIS object API.
 | `dim_t`           | `gint_t`                 | matrix and vector dimensions.                                        |
 | `inc_t`           | `gint_t`                 | matrix row/column strides and vector increments.                     |
 | `doff_t`          | `gint_t`                 | matrix diagonal offset: if _k_ < 0, diagonal begins at element (-_k_,0); otherwise diagonal begins at element (0,_k_). |
-| `bool_t`          | `gint_t`                 | boolean values: `TRUE` or `FALSE`.                                   |
 | `siz_t`           | `guint_t`                | a byte size or byte offset.                                          |
 
 ### Floating-point types
@@ -174,7 +178,7 @@ The expert interface contains two additional parameters: a `cntx_t*` and `rntm_t
 
 ## Context type
 
-In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 micro-kernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
+In general, it is permissible to pass in `NULL` for a `cntx_t*` parameter when calling an expert interface such as `bli_gemm_ex()`. However, there are cases where `NULL` values are not accepted and may result in a segmentation fault. Specifically, the `cntx_t*` argument appears in the interfaces to the `gemm`, `trsm`, and `gemmtrsm` [level-3 microkernels](KernelsHowTo.md#level-3) along with all [level-1v](KernelsHowTo.md#level-1v) and [level-1f](KernelsHowTo.md#level-1f) kernels. There, as a general rule, a valid pointer must be passed in. Whenever a valid context is needed, the developer may query a default context from the global kernel structure (if a context is not already available in the current scope):
 ```c
 cntx_t* bli_gks_query_cntx( void );
 ```
@@ -260,7 +264,7 @@ void bli_obj_create_without_buffer
        obj_t* obj
      );
 ```
-Partially initialize an _m x n_ object `obj` that will eventually contain elements whose storage type is specified by `dt`. This function does not result in any memory allocation. Before `obj` can be used, the object must be fully initialized by attaching a buffer via `bli_obj_attach_buffer()`. This function is useful when the user wishes to encapsulate existing buffers into one or more `obj_t` objects. 
+Partially initialize an _m x n_ object `obj` that will eventually contain elements whose storage type is specified by `dt`. This function does not result in any memory allocation. Before `obj` can be used, the object must be fully initialized by attaching a buffer via `bli_obj_attach_buffer()`. This function is useful when the user wishes to encapsulate existing buffers into one or more `obj_t` objects.
 An object (partially) initialized via this function should generally not be passed to `bli_obj_free()` even after a buffer is attached to it via `bli_obj_attach_buffer()`, unless the user wishes to pass that buffer into `free()`.
 
 ---
@@ -394,9 +398,7 @@ Objects initialized via this function should **never** be passed to `bli_obj_fre
 Notes for interpreting function descriptions:
   * Object accessor functions allow the caller to query certain properties of objects.
   * These functions are only guaranteed to return meaningful values when called upon objects that have been fully initialized/created.
-  * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h).
-
-**Note**: For now, we mostly omit documentation for the corresponding functions used to modify object properties because those functions can easily invalidate the state of an `obj_t` and should be used only in specific instances. If you think you need to manually set the fields of an `obj_t`, please contact BLIS developers so we can give you personalized guidance.
+  * Many specialized functions are omitted from this section for brevity. For a full list of accessor functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
 
 ---
 
@@ -424,7 +426,7 @@ Return the precision component of the storage datatype property of `obj`.
 ```c
 trans_t bli_obj_conjtrans_status( obj_t* obj );
 ```
-Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither.
+Return the `trans_t` property of `obj`, which may indicate transposition, conjugation, both, or neither. Thus, possible return values are `BLIS_NO_TRANSPOSE`, `BLIS_CONJ_NO_TRANSPOSE`, `BLIS_TRANSPOSE`, or `BLIS_CONJ_TRANSPOSE`.
 
 ---
 
@@ -445,23 +447,30 @@ Thus, possible return values are `BLIS_NO_CONJUGATE` or `BLIS_CONJUGATE`.
 ---
 
 ```c
-uplo_t bli_obj_uplo( obj_t* obj );
+struc_t bli_obj_struc( obj_t* obj );
 ```
-Return the `uplo_t` property of `obj`.
+Return the structure property of `obj`.
 
 ---
 
 ```c
-struc_t bli_obj_struc( obj_t* obj );
+uplo_t bli_obj_uplo( obj_t* obj );
 ```
-Return the `struc_t` property of `obj`.
+Return the uplo (i.e., storage) property of `obj`.
 
 ---
 
 ```c
 diag_t bli_obj_diag( obj_t* obj );
 ```
-Return the `diag_t` property of `obj`.
+Return the diagonal property of `obj`.
+
+---
+
+```c
+doff_t bli_obj_diag_offset( obj_t* obj );
+```
+Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
 
 ---
 
@@ -490,13 +499,6 @@ Return the number of rows (or _m_ dimension) of `obj` after taking into account 
 dim_t bli_obj_width_after_trans( obj_t* obj );
 ```
 Return the number of columns (or _n_ dimension) of `obj` after taking into account the transposition property as indicated by `bli_obj_onlytrans_status()` or `bli_obj_conjtrans_status()`.
-
----
-
-```c
-doff_t bli_obj_diag_offset( obj_t* obj );
-```
-Return the diagonal offset of `obj`. Note that the diagonal offset will be negative, `-i`, if the diagonal begins at element `(-i,0)` and positive `j` if the diagonal begins at element `(0,j)`.
 
 ---
 
@@ -543,6 +545,90 @@ siz_t bli_obj_elem_size( obj_t* obj );
 ```
 Return the size, in bytes, of the storage datatype as indicated by `bli_obj_dt()`.
 
+
+
+## Object mutator function reference
+
+Notes for interpreting function descriptions:
+  * Object mutator functions allow the caller to modify certain properties of objects.
+  * The user should be extra careful about modifying properties after objects are created. For typical use of these functions, please study the example code provided in [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi).
+  * The list of mutators below is much shorter than the list of accessor functions provided in the previous section. Most mutator functions should *not* be called by users (unless you know what you are doing). For a full list of mutator functions, please see [frame/include/bli_obj_macro_defs.h](https://github.com/flame/blis/tree/master/frame/include/bli_obj_macro_defs.h), though most users will most likely not need methods beyond those documented below.
+
+---
+
+```c
+void bli_obj_set_conjtrans( trans_t trans, obj_t* obj );
+```
+Set both conjugation and transposition properties of `obj` using the corresponding components of `trans`.
+
+---
+
+```c
+void bli_obj_set_onlytrans( trans_t trans, obj_t* obj );
+```
+Set the transposition property of `obj` using the transposition component of `trans`. Leaves the conjugation property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_set_conj( conj_t conj, obj_t* obj );
+```
+Set the conjugation property of `obj` using `conj`. Leaves the transposition property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_apply_trans( trans_t trans, obj_t* obj );
+```
+Apply `trans` to the transposition property of `obj`. For example, applying `BLIS_TRANSPOSE` will toggle the transposition property of `obj` but leave the conjugation property unchanged; applying `BLIS_CONJ_TRANSPOSE` will toggle both the conjugation and transposition properties of `obj`.
+
+---
+
+```c
+void bli_obj_apply_conj( conj_t conj, obj_t* obj );
+```
+Apply `conj` to the conjugation property of `obj`. Specifically, applying `BLIS_CONJUGATE` will toggle the conjugation property of `obj`; applying `BLIS_NO_CONJUGATE` will have no effect. Leaves the transposition property of `obj` unchanged.
+
+---
+
+```c
+void bli_obj_set_struc( struc_t struc, obj_t* obj );
+```
+Set the structure property of `obj` to `struc`.
+
+---
+
+```c
+void bli_obj_set_uplo( uplo_t uplo, obj_t* obj );
+```
+Set the uplo (i.e., storage) property of `obj` to `uplo`.
+
+---
+
+```c
+void bli_obj_set_diag( diag_t diag, obj_t* obj );
+```
+Set the diagonal property of `obj` to `diag`.
+
+---
+
+```c
+void bli_obj_set_diag_offset( doff_t doff, obj_t* obj );
+```
+Set the diagonal offset property of `obj` to `doff`. Note that `doff_t` may be typecast from any signed integer.
+
+---
+
+
+## Other object function reference
+
+---
+
+```c
+void bli_obj_induce_trans( obj_t* obj );
+```
+Modify the properties of `obj` to induce a logical transposition. This function operates without regard to whether the transposition property is already set. Therefore, depending on the circumstance, the caller may or may not wish to clear the transposition property after calling this function.
+
 ---
 
 ```c
@@ -559,21 +645,14 @@ However, there is at least one field (one that only developers should be concern
 ```c
 void bli_obj_real_part( obj_t* c, obj_t* r );
 ```
-Initialize `r` to be a modified shallow copy of `c` that refers only to the real part of `c`. 
+Initialize `r` to be a modified shallow copy of `c` that refers only to the real part of `c`.
 
 ---
 
 ```c
 void bli_obj_imag_part( obj_t* c, obj_t* i );
 ```
-Initialize `i` to be a modified shallow copy of `c` that refers only to the imaginary part of `c`. 
-
----
-
-```c
-void bli_obj_induce_trans( obj_t* obj );
-```
-Modify the properties of `obj` to induce a logical transposition. This function operations without regard to whether the transposition property is already set. Therefore, depending on the circumstance, the caller may or may not wish to clear the transposition property after calling this function. (If needed, the user may call `bli_obj_toggle_trans( obj )` to toggle the transposition status.)
+Initialize `i` to be a modified shallow copy of `c` that refers only to the imaginary part of `c`.
 
 
 # Computational function reference
@@ -681,7 +760,7 @@ void bli_axpbyv
        obj_t*  alpha,
        obj_t*  x,
        obj_t*  beta,
-       obj_t*  y 
+       obj_t*  y
      )
 ```
 Perform
@@ -1574,7 +1653,7 @@ Observed object properties: `conj?(alpha)`, `uplo(A)`, `trans?(A)`, `diag(A)`.
 ## Level-3 operations
 
 Level-3 operations perform various level-3 BLAS-like operations.
-**Note**: Each All level-3 operations are implemented through a handful of level-3 micro-kernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
+**Note**: Each All level-3 operations are implemented through a handful of level-3 microkernels. Please see the [Kernels Guide](KernelsHowTo.md) for more details.
 
 
 ---
@@ -2106,7 +2185,7 @@ gint_t bli_info_get_blas_int_type_size( void );
 
 ### Micro-kernel implementation type query
 
-The following routines allow the caller to obtain a string that identifies the implementation type of each micro-kernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`). 
+The following routines allow the caller to obtain a string that identifies the implementation type of each microkernel that is currently active (ie: part of the current active configuration, as identified bi `bli_arch_query_id()`).
 
 ```c
 char* bli_info_get_gemm_ukr_impl_string( ind_t method, num_t dt )
@@ -2117,23 +2196,23 @@ char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
- * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the micro-kernel.
- * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the micro-kernel.
- * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the micro-kernel.
- * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micro-panel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micro-panel of packed matrix B.
- * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the micro-kernel. Computation is ordered such that real and imaginary components of the current micro-panels are completely used before proceeding to the next virtual micro-kernel invocation.
+ * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the microkernel.
+ * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the microkernel.
+ * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the microkernel.
+ * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micropanel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micropanel of packed matrix B.
+ * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that real and imaginary components of the current micropanels are completely used before proceeding to the next virtual microkernel invocation.
  * `BLIS_1M`: Implementation based on the 1m method. (This is the default induced method when real domain kernels are present but complex kernels are missing.)
  * `BLIS_NAT`: Implementation based on "native" execution (ie: NOT an induced method).
 
-**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists. 
+**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists.
 
-Possible micro-kernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
- * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried micro-kernel is provided by the reference implementation.
- * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried micro-kernel is driven by a the "virtual" micro-kernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
- * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried micro-kernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a micro-kernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference micro-kernels.
- * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` micro-kernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based micro-kernels because these micro-kernels perform more a triangular inversion, which is not matrix multiplication.
+Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
+ * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried microkernel is provided by the reference implementation.
+ * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried microkernel is driven by a the "virtual" microkernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
+ * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried microkernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a microkernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference microkernels.
+ * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
 
 # Example code
 
-BLIS provides lots of example code in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include creating and managing objects, printing vectors and matrices, setting and querying object properties, and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
+BLIS provides lots of example code in the [examples/oapi](https://github.com/flame/blis/tree/master/examples/oapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include creating and managing objects, printing vectors and matrices, setting and querying object properties, and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above. Please read the `README` contained within the `examples/oapi` directory for further details.
 

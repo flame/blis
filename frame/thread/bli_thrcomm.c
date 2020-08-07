@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,18 +37,18 @@
 
 void* bli_thrcomm_bcast
      (
-       thrcomm_t* comm,
        dim_t      id,
-       void*      to_send
+       void*      to_send,
+       thrcomm_t* comm
      )
 {   
 	if ( comm == NULL || comm->n_threads == 1 ) return to_send;
 
 	if ( id == 0 ) comm->sent_object = to_send;
 
-	bli_thrcomm_barrier( comm, id );
+	bli_thrcomm_barrier( id, comm );
 	void* object = comm->sent_object;
-	bli_thrcomm_barrier( comm, id );
+	bli_thrcomm_barrier( id, comm );
 
 	return object;
 }
@@ -71,7 +72,7 @@ void* bli_thrcomm_bcast
 
 #endif
 
-void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
+void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 {
 	// Return early if the comm is NULL or if there is only one
 	// thread participating.
@@ -85,7 +86,7 @@ void bli_thrcomm_barrier_atomic( thrcomm_t* comm, dim_t t_id )
 	// fact, if everything else is working, a binary variable is sufficient,
 	// which is what we do here (i.e., 0 is incremented to 1, which is then
 	// decremented back to 0, and so forth).
-	bool_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
+	gint_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
 
 	// Register ourselves (the current thread) as having arrived by
 	// incrementing the barrier_threads_arrived variable. We must perform

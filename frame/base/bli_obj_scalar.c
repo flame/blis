@@ -206,12 +206,12 @@ void bli_obj_scalar_reset
 	//bli_obj_scalar_attach( BLIS_NO_CONJUGATE, &BLIS_ONE, a );
 }
 
-bool_t bli_obj_scalar_has_nonzero_imag
+bool bli_obj_scalar_has_nonzero_imag
      (
        obj_t* a
      )
 {
-	bool_t r_val     = FALSE;
+	bool   r_val     = FALSE;
 	num_t  dt        = bli_obj_scalar_dt( a );
 	void*  scalar_a  = bli_obj_internal_scalar_buffer( a );
 
@@ -234,14 +234,14 @@ bool_t bli_obj_scalar_has_nonzero_imag
 	return r_val;
 }
 
-bool_t bli_obj_scalar_equals
+bool bli_obj_scalar_equals
      (
        obj_t* a,
        obj_t* beta
      )
 {
-	obj_t  scalar_a;
-	bool_t r_val;
+	obj_t scalar_a;
+	bool  r_val;
 
 	bli_obj_scalar_detach( a, &scalar_a );
 

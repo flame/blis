@@ -39,8 +39,7 @@
 //
 // Prototype object-based interface.
 //
-void bli_machval( machval_t mval,
-                  obj_t*    v );
+BLIS_EXPORT_BLIS void bli_machval( machval_t mval, obj_t* v );
 
 
 //
@@ -49,7 +48,7 @@ void bli_machval( machval_t mval,
 #undef  GENTPROTR
 #define GENTPROTR( ctype_v, ctype_vr, chv, chvr, opname ) \
 \
-void PASTEMAC(chv,opname) \
+BLIS_EXPORT_BLIS void PASTEMAC(chv,opname) \
      ( \
        machval_t mval, \
        void*     v     \

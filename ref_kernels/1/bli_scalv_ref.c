@@ -46,10 +46,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype  alpha_conj; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* If alpha is one, return. */ \
@@ -75,24 +71,25 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
+	ctype alpha_conj; \
 \
-	chi1 = x; \
+	PASTEMAC(ch,copycjs)( conjalpha, *alpha, alpha_conj ); \
 \
 	if ( incx == 1 ) \
 	{ \
-		for ( i = 0; i < n; ++i ) \
+		PRAGMA_SIMD \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,scals)( alpha_conj, chi1[i] ); \
+			PASTEMAC(ch,scals)( alpha_conj, x[i] ); \
 		} \
 	} \
 	else \
 	{ \
-		for ( i = 0; i < n; ++i ) \
+		for ( dim_t i = 0; i < n; ++i ) \
 		{ \
-			PASTEMAC(ch,scals)( alpha_conj, *chi1 ); \
+			PASTEMAC(ch,scals)( alpha_conj, *x ); \
 \
-			chi1 += incx; \
+			x += incx; \
 		} \
 	} \
 }

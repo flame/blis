@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -683,10 +684,12 @@ err_t bli_check_valid_3x1_subpart( subpart_t part )
 	err_t e_val = BLIS_SUCCESS;
 
 	if ( part != BLIS_SUBPART0  &&
-	     part != BLIS_SUBPART1T &&
+	     part != BLIS_SUBPART1AND0 &&
 	     part != BLIS_SUBPART1  &&
-	     part != BLIS_SUBPART1B &&
-	     part != BLIS_SUBPART2 )
+	     part != BLIS_SUBPART1AND2 &&
+	     part != BLIS_SUBPART2 &&
+	     part != BLIS_SUBPART1A &&
+	     part != BLIS_SUBPART1B )
 		e_val = BLIS_INVALID_3x1_SUBPART;
 
 	return e_val;
@@ -697,10 +700,12 @@ err_t bli_check_valid_1x3_subpart( subpart_t part )
 	err_t e_val = BLIS_SUCCESS;
 
 	if ( part != BLIS_SUBPART0  &&
-	     part != BLIS_SUBPART1L &&
+	     part != BLIS_SUBPART1AND0 &&
 	     part != BLIS_SUBPART1  &&
-	     part != BLIS_SUBPART1R &&
-	     part != BLIS_SUBPART2 )
+	     part != BLIS_SUBPART1AND2 &&
+	     part != BLIS_SUBPART2 &&
+	     part != BLIS_SUBPART1A &&
+	     part != BLIS_SUBPART1B )
 		e_val = BLIS_INVALID_1x3_SUBPART;
 
 	return e_val;
@@ -776,7 +781,20 @@ err_t bli_check_object_buffer( obj_t* a )
 	return e_val;
 }
 
-// -- Memory allocator checks --------------------------------------------------
+// -- Memory checks ------------------------------------------------------------
+
+err_t bli_check_valid_malloc_buf( void* ptr )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( ptr == NULL )
+		e_val = BLIS_MALLOC_RETURNED_NULL;
+
+	return e_val;
+}
+
+
+// -- Internal memory pool checks ----------------------------------------------
 
 err_t bli_check_valid_packbuf( packbuf_t buf_type )
 {

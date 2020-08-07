@@ -271,8 +271,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 INSERT_GENTFUNC_BASIC_I( printm, fprintm )
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
@@ -291,23 +291,44 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
 \
-	/* Invoke the helper variant, which loops over the appropriate kernel
-	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
-	( \
-	  n, \
-	  x, incx, \
-	  cntx, \
-	  rntm  \
-	); \
+	ctype_r norm; \
+\
+	/* Set the norm to zero. */ \
+	PASTEMAC(chr,set0s)( norm ); \
+\
+	/* Iterate at least once, but continue iterating until the norm is not zero. */ \
+	while ( PASTEMAC(chr,eq0)( norm ) ) \
+	{ \
+		/* Invoke the helper variant, which loops over the appropriate kernel
+		   to implement the current operation. */ \
+		PASTEMAC2(ch,opname,_unb_var1) \
+		( \
+		  n, \
+		  x, incx, \
+		  cntx, \
+		  rntm  \
+		); \
+\
+		/* Check the 1-norm of the randomzied vector. In the unlikely event that
+		   the 1-norm is zero, it means that *all* elements are zero, in which
+		   case we want to re-randomize until the 1-norm is not zero. */ \
+		PASTEMAC2(ch,norm1v,BLIS_TAPI_EX_SUF) \
+		( \
+		  n, \
+		  x, incx, \
+		  &norm, \
+		  cntx, \
+		  rntm  \
+		); \
+	} \
 }
 
-INSERT_GENTFUNC_BASIC0( randv )
-INSERT_GENTFUNC_BASIC0( randnv )
+INSERT_GENTFUNCR_BASIC0( randv )
+INSERT_GENTFUNCR_BASIC0( randnv )
 
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
+#undef  GENTFUNCR
+#define GENTFUNCR( ctype, ctype_r, ch, chr, opname ) \
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
@@ -329,22 +350,47 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	/* Obtain a valid context from the gks if necessary. */ \
 	/*if ( cntx == NULL ) cntx = bli_gks_query_cntx();*/ \
 \
-	/* Invoke the helper variant, which loops over the appropriate kernel
-	   to implement the current operation. */ \
-	PASTEMAC2(ch,opname,_unb_var1) \
-	( \
-	  diagoffx, \
-	  uplox, \
-	  m, \
-	  n, \
-	  x, rs_x, cs_x, \
-	  cntx, \
-	  rntm  \
-	); \
+	ctype_r norm; \
+\
+	/* Set the norm to zero. */ \
+	PASTEMAC(chr,set0s)( norm ); \
+\
+	/* Iterate at least once, but continue iterating until the norm is not zero. */ \
+	while ( PASTEMAC(chr,eq0)( norm ) ) \
+	{ \
+		/* Invoke the helper variant, which loops over the appropriate kernel
+		   to implement the current operation. */ \
+		PASTEMAC2(ch,opname,_unb_var1) \
+		( \
+		  diagoffx, \
+		  uplox, \
+		  m, \
+		  n, \
+		  x, rs_x, cs_x, \
+		  cntx, \
+		  rntm  \
+		); \
+\
+		/* Check the 1-norm of the randomzied matrix. In the unlikely event that
+		   the 1-norm is zero, it means that *all* elements are zero, in which
+		   case we want to re-randomize until the 1-norm is not zero. */ \
+		PASTEMAC2(ch,norm1m,BLIS_TAPI_EX_SUF) \
+		( \
+		  diagoffx, \
+		  BLIS_NONUNIT_DIAG, \
+		  uplox, \
+		  m, \
+		  n, \
+		  x, rs_x, cs_x, \
+		  &norm, \
+		  cntx, \
+		  rntm  \
+		); \
+	} \
 }
 
-INSERT_GENTFUNC_BASIC0( randm )
-INSERT_GENTFUNC_BASIC0( randnm )
+INSERT_GENTFUNCR_BASIC0( randm )
+INSERT_GENTFUNCR_BASIC0( randnm )
 
 
 #undef  GENTFUNCR

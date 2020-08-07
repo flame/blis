@@ -7,7 +7,8 @@ out_root="output"
 sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
-sys="ul252"
+#sys="ul252"
+sys="tx2"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
@@ -72,6 +73,15 @@ elif [ ${sys} = "ul252" ]; then
 	ir_nt=1 # 1st loop
 	#nt=52
 	nt=26
+elif [ ${sys} = "tx2" ]; then
+
+	export GOMP_CPU_AFFINITY="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55"
+
+        jc_nt=8 # 5th loop
+        ic_nt=7 # 3rd loop
+        jr_nt=1 # 2nd loop
+        ir_nt=1 # 1st loop
+        nt=56
 
 fi
 

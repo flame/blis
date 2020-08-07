@@ -34,7 +34,7 @@
 
 // blksz_t query
 
-static dim_t bli_blksz_get_def
+BLIS_INLINE dim_t bli_blksz_get_def
      (
        num_t    dt,
        blksz_t* b
@@ -43,7 +43,7 @@ static dim_t bli_blksz_get_def
 	return b->v[ dt ];
 }
 
-static dim_t bli_blksz_get_max
+BLIS_INLINE dim_t bli_blksz_get_max
      (
        num_t    dt,
        blksz_t* b
@@ -55,7 +55,7 @@ static dim_t bli_blksz_get_max
 
 // blksz_t modification
 
-static void bli_blksz_set_def
+BLIS_INLINE void bli_blksz_set_def
      (
        dim_t    val,
        num_t    dt,
@@ -65,7 +65,7 @@ static void bli_blksz_set_def
 	b->v[ dt ] = val;
 }
 
-static void bli_blksz_set_max
+BLIS_INLINE void bli_blksz_set_max
      (
        dim_t    val,
        num_t    dt,
@@ -75,7 +75,7 @@ static void bli_blksz_set_max
 	b->e[ dt ] = val;
 }
 
-static void bli_blksz_copy
+BLIS_INLINE void bli_blksz_copy
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -84,7 +84,7 @@ static void bli_blksz_copy
 	*b_dst = *b_src;
 }
 
-static void bli_blksz_copy_if_pos
+BLIS_INLINE void bli_blksz_copy_if_pos
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -114,7 +114,7 @@ static void bli_blksz_copy_if_pos
 	if ( e_z > 0 ) bli_blksz_set_max( e_z, BLIS_DCOMPLEX, b_dst );
 }
 
-static void bli_blksz_copy_def_dt
+BLIS_INLINE void bli_blksz_copy_def_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -125,7 +125,7 @@ static void bli_blksz_copy_def_dt
 	bli_blksz_set_def( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_max_dt
+BLIS_INLINE void bli_blksz_copy_max_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -136,7 +136,7 @@ static void bli_blksz_copy_max_dt
 	bli_blksz_set_max( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_dt
+BLIS_INLINE void bli_blksz_copy_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -146,7 +146,7 @@ static void bli_blksz_copy_dt
 	bli_blksz_copy_max_dt( dt_src, b_src, dt_dst, b_dst );
 }
 
-static void bli_blksz_scale_def
+BLIS_INLINE void bli_blksz_scale_def
      (
        dim_t    num,
        dim_t    den,
@@ -159,7 +159,7 @@ static void bli_blksz_scale_def
 	bli_blksz_set_def( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_max
+BLIS_INLINE void bli_blksz_scale_max
      (
        dim_t    num,
        dim_t    den,
@@ -172,7 +172,7 @@ static void bli_blksz_scale_max
 	bli_blksz_set_max( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_def_max
+BLIS_INLINE void bli_blksz_scale_def_max
      (
        dim_t    num,
        dim_t    den,
@@ -186,7 +186,7 @@ static void bli_blksz_scale_def_max
 
 // -----------------------------------------------------------------------------
 
-blksz_t* bli_blksz_create_ed
+BLIS_EXPORT_BLIS blksz_t* bli_blksz_create_ed
      (
        dim_t b_s, dim_t be_s,
        dim_t b_d, dim_t be_d,
@@ -194,13 +194,13 @@ blksz_t* bli_blksz_create_ed
        dim_t b_z, dim_t be_z
      );
 
-blksz_t* bli_blksz_create
+BLIS_EXPORT_BLIS blksz_t* bli_blksz_create
      (
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      );
 
-void bli_blksz_init_ed
+BLIS_EXPORT_BLIS void bli_blksz_init_ed
      (
        blksz_t* b,
        dim_t    b_s, dim_t be_s,
@@ -209,20 +209,20 @@ void bli_blksz_init_ed
        dim_t    b_z, dim_t be_z
      );
 
-void bli_blksz_init
+BLIS_EXPORT_BLIS void bli_blksz_init
      (
        blksz_t* b,
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z,
        dim_t be_s, dim_t be_d, dim_t be_c, dim_t be_z
      );
 
-void bli_blksz_init_easy
+BLIS_EXPORT_BLIS void bli_blksz_init_easy
      (
        blksz_t* b,
        dim_t b_s,  dim_t b_d,  dim_t b_c,  dim_t b_z
      );
 
-void bli_blksz_free
+BLIS_EXPORT_BLIS void bli_blksz_free
      (
        blksz_t* b
      );
@@ -230,7 +230,7 @@ void bli_blksz_free
 // -----------------------------------------------------------------------------
 
 #if 0
-void bli_blksz_reduce_dt_to
+BLIS_EXPORT_BLIS void bli_blksz_reduce_dt_to
      (
        num_t dt_bm, blksz_t* bmult,
        num_t dt_bs, blksz_t* blksz

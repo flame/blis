@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,7 +40,7 @@
 #undef  GENPROT
 #define GENPROT( opname ) \
 \
-void PASTEMAC0(opname) \
+BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        obj_t*   c, \
        obj_t*   p, \
@@ -89,9 +89,9 @@ void PASTEMAC(ch,varname) \
        uplo_t  uploc, \
        trans_t transc, \
        pack_t  schema, \
-       bool_t  invdiag, \
-       bool_t  revifup, \
-       bool_t  reviflo, \
+       bool    invdiag, \
+       bool    revifup, \
+       bool    reviflo, \
        dim_t   m, \
        dim_t   n, \
        dim_t   m_max, \
@@ -101,7 +101,7 @@ void PASTEMAC(ch,varname) \
        void*   p, inc_t rs_p, inc_t cs_p, \
                   inc_t is_p, \
                   dim_t pd_p, inc_t ps_p, \
-       void*   packm_ker, \
+       void_fp packm_ker, \
        cntx_t* cntx, \
        thrinfo_t* thread  \
      );

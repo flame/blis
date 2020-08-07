@@ -57,7 +57,7 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.

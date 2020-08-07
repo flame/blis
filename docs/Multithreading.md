@@ -23,11 +23,17 @@
 
 # Introduction
 
-Our paper [Anatomy of High-Performance Many-Threaded Matrix Multiplication](https://github.com/flame/blis#citations), presented at IPDPS'14, identified 5 loops around the micro-kernel as opportunities for parallelization within level-3 operations such as `gemm`. Within BLIS, we have enabled parallelism for 4 of those loops and have extended it to the rest of the level-3 operations except for `trsm`.
+Our paper [Anatomy of High-Performance Many-Threaded Matrix Multiplication](https://github.com/flame/blis#citations), presented at IPDPS'14, identified five loops around the microkernel as opportunities for parallelization within level-3 operations such as `gemm`. Within BLIS, we have enabled parallelism for four of those loops, with the fifth planned for future work. This software architecture extends naturally to all level-3 operations except for `trsm`, where its application is necessarily limited to three of the five loops due to inter-iteration dependencies.
+
+**IMPORTANT**: Multithreading in BLIS is disabled by default. Furthermore, even when multithreading is enabled, BLIS will default to single-threaded execution at runtime. In order to both *allow* and *invoke* parallelism from within BLIS operations, you must both *enable* multithreading at configure-time and *specify* multithreading at runtime.
+
+To summarize: In order to observe multithreaded parallelism within a BLIS operation, you must do *both* of the following:
+1. Enable multithreading at configure-time. This is discussed in the [next section](docs/Multithreading.md#enabling-multithreading).
+2. Specify multithreading at runtime. This is also discussed [later on](docs/Multithreading.md#specifying-multithreading).
 
 # Enabling multithreading
 
-Note that BLIS disables multithreading by default. In order to extract multithreaded parallelism from BLIS, you must first enable multithreading explicitly at configure-time.
+BLIS disables multithreading by default. In order to allow multithreaded parallelism from BLIS, you must first enable multithreading explicitly at configure-time.
 
 As of this writing, BLIS optionally supports multithreading via either OpenMP or POSIX threads.
 
@@ -96,18 +102,24 @@ There are three broad methods of specifying multithreading in BLIS:
 * [Globally at runtime](Multithreading.md#globally-at-runtime)
 * [Locally at runtime](Multithreading.md#locally-at-runtime) (that is, on a per-call, thread-safe basis)
 
-Within these three broad methods there are two specific ways of expressing a request for parallelism. First, the user may express a single number--the total number of threads, or ways of parallelism, to use within a single operation such as `gemm`. We call this the "automatic" way. Alternatively, the user may express the number of ways of parallelism to obtain within *each loop* of the level-3 operation. We call this the "manual" way. The latter way is actually what BLIS eventually needs before it can perform its multithreading; the former is viable only because we have a heuristic of determing a reasonable instance of the latter when given the former.
+Within these three broad methods there are two specific ways of expressing a request for parallelism. First, the user may express a single number--the total number of threads, or ways of parallelism, to use within a single operation such as `gemm`. We call this the "automatic" way. Alternatively, the user may express the number of ways of parallelism to obtain within *each loop* of the level-3 operation. We call this the "manual" way. The latter way is actually what BLIS eventually needs before it can perform its multithreading; the former is viable only because we have a heuristic of determining a reasonable instance of the latter when given the former.
 This pattern--automatic or manual--holds regardless of which of the three methods is used.
 
 Regardless of which method is employed, and which specific way within each method, after setting the number of threads, the application may call the desired level-3 operation (via either the [typed API](docs/BLISTypedAPI.md) or the [object API](docs/BLISObjectAPI.md)) and the operation will execute in a multithreaded manner. (When calling BLIS via the BLAS API, only the first two (global) methods are available.)
 
-NOTE: Please be aware of what happens if you try to specify both the automatic and manual ways, as it could otherwise confuse new users. Regardless of which broad method is used, **if multithreading is specified via both the automatic and manual ways, the manual way will always take precedence.** Also, specifying parallelism for even *one* loop counts as specifying the manual way (in which case the ways of parallelism for the remaining loops will be assumed to be 1).
+**Note**: Please be aware of what happens if you try to specify both the automatic and manual ways, as it could otherwise confuse new users. Here are the important points:
+ * Regardless of which broad method is used, **if multithreading is specified via both the automatic and manual ways, the values set via the manual way will always take precedence.**
+ * Specifying parallelism for even *one* loop counts as specifying the manual way (in which case the ways of parallelism for the remaining loops will be assumed to be 1). And in the case of the environment variable method, setting the ways of parallelism for a loop to 1 counts as specifying parallelism! If you want to switch from using the manual way to automatic way, you must not only set (`export`) the `BLIS_NUM_THREADS` variable, but you must also `unset` all of the `BLIS_*_NT` variables.
+ * If you have specified multithreading via *both* the automatic and manual ways, BLIS will **not** complain if the values are inconsistent with one another. (For example, you may request 8 total threads be used while also specifying 4 ways of parallelism within each of two matrix multiplication loops, for a total of 16 ways.) Furthermore, you will be able to query these inconsistent values via the runtime API both before and after multithreading executes.
+ * If multithreading is disabled, you **may still** specify multithreading values via either the manual or automatic ways. However, BLIS will silently ignore **all** of these values. A BLIS library that is built with multithreading disabled at configure-time will always run sequentially (from the perspective of a single application thread).
 
 ## Globally via environment variables
 
 The most common method of specifying multithreading in BLIS is globally via environment variables. With this method, the user sets one or more environment variables in the shell before launching the BLIS-linked executable.
 
 Regardless of whether you end up using the automatic or manual way of expressing a request for multithreading, note that the environment variables are read (via `getenv()`) by BLIS **only once**, when the library is initialized. Subsequent to library initialization, the global settings for parallelization may only be changed via the [global runtime API](Multithreading.md#globally-at-runtime). If this constraint is not a problem, then environment variables may work fine for you. Otherwise, please consider [local settings](Multithreading.md#locally-at-runtime). (Local settings may used at any time, regardless of whether global settings were explicitly specified, and local settings always override global settings.)
+
+**Note**: Regardless of which way ([automatic](Multithreading.md#environment-variables-the-automatic-way) or [manual](Multithreading.md#environment-variables-the-manual-way)) environment variables are used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs that are unique to BLIS.
 
 ### Environment variables: the automatic way
 
@@ -119,7 +131,7 @@ $ ./my_blis_program
 ```
 This causes BLIS to automatically determine a reasonable threading strategy based on what is known about the operation and problem size. If `BLIS_NUM_THREADS` is not set, BLIS will attempt to query the value of `OMP_NUM_THREADS`. If neither variable is set, the default number of threads is 1.
 
-**Note:** We *highly* discourage use of the `OMP_NUM_THREADS` environment variable and may remove support for it in the future. If you wish to set parallelism globally via environment variables, please use `BLIS_NUM_THREADS`.
+**Note**: We *highly* discourage use of the `OMP_NUM_THREADS` environment variable and may remove support for it in the future. If you wish to set parallelism globally via environment variables, please use `BLIS_NUM_THREADS`.
 
 ### Environment variables: the manual way
 
@@ -127,7 +139,7 @@ The manual way of specifying parallelism involves communicating which loops with
 
 The below chart describes the five loops used in BLIS's matrix multiplication operations.
 
-| Loop around micro-kernel | Environment variable | Direction | Notes       |
+| Loop around microkernel  | Environment variable | Direction | Notes       |
 |:-------------------------|:---------------------|:----------|:------------|
 | 5th loop                 | `BLIS_JC_NT`         | `n`       |             |
 | 4th loop                 | _N/A_                | `k`       | Not enabled |
@@ -146,13 +158,15 @@ In general, the way to choose how to set these environment variables is as follo
 Next, which combinations of loops to parallelize depends on which caches are shared. Here are some of the more common scenarios:
  * When compute resources have private L3 caches (example: multi-socket systems), try parallelizing  the `JC` loop. This means threads (or thread groups) will pack and compute with different row panels from matrix B.
  * For compute resources that have private L2 caches but that share an L3 cache (example: cores on a socket), try parallelizing the `IC` loop. In this situation, threads will share the same packed row panel from matrix B, but pack and compute with different blocks of matrix A.
- * If compute resources share an L2 cache but have private L1 caches (example: pairs of cores), try parallelizing the `JR` loop. Here, threads share the same packed block of matrix A but read different packed micro-panels of B into their private L1 caches. In some situations, parallelizing the `IR` loop may also be effective.
+ * If compute resources share an L2 cache but have private L1 caches (example: pairs of cores), try parallelizing the `JR` loop. Here, threads share the same packed block of matrix A but read different packed micropanels of B into their private L1 caches. In some situations, parallelizing the `IR` loop may also be effective.
 
 ![The primary algorithm for level-3 operations in BLIS](http://www.cs.utexas.edu/users/field/mm_algorithm_color.png)
 
 ## Globally at runtime
 
 If you still wish to set the parallelization scheme globally, but you want to do so at runtime, BLIS provides a thread-safe API for specifying multithreading. Think of these functions as a way to modify the same internal data structure into which the environment variables are read. (Recall that the environment variables are only read once, when BLIS is initialized).
+
+**Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs that are unique to BLIS.
 
 ### Globally at runtime: the automatic way
 
@@ -193,6 +207,8 @@ In addition to the global methods based on environment variables and runtime fun
 
 As with environment variables and the global runtime API, there are two ways to specify parallelism: the automatic way and the manual way. Both ways involve allocating a BLIS-specific object, initializing the object and encoding the desired parallelization, and then passing a pointer to the object into one of the expert interfaces of either the [typed](docs/BLISTypedAPI.md) or [object](docs/BLISObjectAPI) APIs. We provide examples of utilizing this threading object below.
 
+**Note**: Neither way ([automatic](Multithreading.md#locally-at-runtime-the-automatic-way) nor [manual](Multithreading.md#locally-at-runtime-the-manual-way)) of specifying multithreading via the local runtime API can be used via the BLAS interfaces. The local runtime API may *only* be used via the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs, which are unique to BLIS. (Furthermore, the expert interfaces of each API must be used. This is demonstrated later on in this section.)
+
 ### Initializing a rntm_t
 
 Before specifying the parallelism (automatically or manually), you must first allocate a special BLIS object called a `rntm_t` (runtime). The object is quite small (about 64 bytes), and so we recommend allocating it statically on the function stack:
@@ -210,7 +226,7 @@ bli_rntm_init( &rntm );
 ```
 As of this writing, BLIS treats a default-initialized `rntm_t` as a request for single-threaded execution.
 
-**Note**: If you choose to **not** initialize the `rntm_t` object, you **must** set its parallelism via either the automatic way or the manual way, described below. Passing a completely uninitialized `rntm_t` to a level-3 operation **will almost surely result in undefined behvaior!**
+**Note**: If you choose to **not** initialize the `rntm_t` object, you **must** set its parallelism via either the automatic way or the manual way, described below. Passing a completely uninitialized `rntm_t` to a level-3 operation **will almost surely result in undefined behavior!**
 
 ### Locally at runtime: the automatic way
 
@@ -273,6 +289,8 @@ Also, you may pass in `NULL` for the `rntm_t*` parameter of an expert interface.
    This situation could lead to unexpectedly low multithreaded performance. Suppose the user calls `gemm` on a problem with a large m dimension and small k and n dimensions, and explicitly requests parallelism only in the IC loop, but also suppose that the storage of C does not match that of the microkernel's preference. After BLIS transposes the operation internally, the *effective* m dimension will no longer be large; instead, it will be small (because the original m and n dimension will have been swapped). The multithreaded implementation will then proceed to parallelize this small m dimension.
 
    There are currently no good *and* easy solutions to this problem. Eventually, though, we plan to add support for two microkernels per datatype per configuration--one for use with matrices C that are row-stored, and one for those that are column-stored. This will obviate the logic within BLIS that sometimes induces the operation transposition, and the problem will go away.
+   
+* **Thread affinity when BLIS and MKL are used together.** Some users have reported that when running a program that links both BLIS (configured with OpenMP) and MKL, **and** when OpenMP thread affinity has been specified (e.g. via `OMP_PROC_BIND` and `OMP_PLACES`), that very poor performance is observed. This may be due to incorrect thread masking in this case, causing all threads to run on one physical core. The exact circumstances leading to this behavior have not been identified, but unsetting the OpenMP thread affinity variables appears to be a solution.
 
 # Conclusion
 

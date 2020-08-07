@@ -47,8 +47,8 @@ typedef struct her_s her_t;
 
 #define bli_cntl_sub_her( cntl )      cntl->sub_her
 
-void   bli_her_cntl_init( void );
-void   bli_her_cntl_finalize( void );
+void    bli_her_cntl_init( void );
+void    bli_her_cntl_finalize( void );
 her_t* bli_her_cntl_obj_create( impl_t     impl_type,
                                 varnum_t   var_num,
                                 bszid_t    bszid,

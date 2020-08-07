@@ -52,36 +52,112 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* one  = PASTEMAC(ch,1); \
-	ctype* zero = PASTEMAC(ch,0); \
+	if ( bli_zero_dim1( m ) ) return; \
 \
-	/* Query the context for the kernel function pointer. */ \
-	const num_t              dt     = PASTEMAC(ch,type); \
-	PASTECH(ch,dotxv_ker_ft) kfp_dv = bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx ); \
-	PASTECH(ch,axpyv_ker_ft) kfp_av = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+	if ( incz == 1 && incx == 1 && incy == 1 ) \
+	{ \
+		if ( bli_is_noconj( conjx ) ) \
+		{ \
+			conj_t conjxt_use = conjxt; \
+			ctype  dotxy; \
 \
-	kfp_dv \
-	( \
-	  conjxt, \
-	  conjy, \
-	  m, \
-	  one, \
-	  x, incx, \
-	  y, incy, \
-	  zero, \
-	  rho, \
-	  cntx  \
-	); \
+			PASTEMAC(ch,set0s)( dotxy ); \
 \
-	kfp_av \
-	( \
-	  conjx, \
-	  m, \
-	  alpha, \
-	  x, incx, \
-	  z, incz, \
-	  cntx  \
-	); \
+			if ( bli_is_conj( conjy ) ) \
+				bli_toggle_conj( &conjxt_use ); \
+\
+			if ( bli_is_noconj( conjxt_use ) ) \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
+					PASTEMAC(ch,axpys)( *alpha, x[i], z[i] ); \
+				} \
+			} \
+			else /* bli_is_conj( conjxt_use ) ) */ \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
+					PASTEMAC(ch,axpys)( *alpha, x[i], z[i] ); \
+				} \
+			} \
+\
+			if ( bli_is_conj( conjy ) ) \
+				PASTEMAC(ch,conjs)( dotxy ); \
+\
+			PASTEMAC(ch,copys)( dotxy, *rho ); \
+		} \
+		else /* bli_is_conj( conjx ) ) */ \
+		{ \
+			conj_t conjxt_use = conjxt; \
+			ctype  dotxy; \
+\
+			PASTEMAC(ch,set0s)( dotxy ); \
+\
+			if ( bli_is_conj( conjy ) ) \
+				bli_toggle_conj( &conjxt_use ); \
+\
+			if ( bli_is_noconj( conjxt_use ) ) \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC(ch,dots)( x[i], y[i], dotxy ); \
+					PASTEMAC(ch,axpyjs)( *alpha, x[i], z[i] ); \
+				} \
+			} \
+			else /* bli_is_conj( conjxt_use ) ) */ \
+			{ \
+				PRAGMA_SIMD \
+				for ( dim_t i = 0; i < m; ++i ) \
+				{ \
+					PASTEMAC(ch,dotjs)( x[i], y[i], dotxy ); \
+					PASTEMAC(ch,axpyjs)( *alpha, x[i], z[i] ); \
+				} \
+			} \
+\
+			if ( bli_is_conj( conjy ) ) \
+				PASTEMAC(ch,conjs)( dotxy ); \
+\
+			PASTEMAC(ch,copys)( dotxy, *rho ); \
+		} \
+	} \
+	else \
+	{ \
+\
+		/* Query the context for the kernel function pointer. */ \
+		const num_t              dt     = PASTEMAC(ch,type); \
+		PASTECH(ch,dotv_ker_ft)  kfp_dv \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTV_KER, cntx ); \
+		PASTECH(ch,axpyv_ker_ft) kfp_av \
+		= \
+		bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+\
+		kfp_dv \
+		( \
+		  conjxt, \
+		  conjy, \
+		  m, \
+		  x, incx, \
+		  y, incy, \
+		  rho, \
+		  cntx  \
+		); \
+\
+		kfp_av \
+		( \
+		  conjx, \
+		  m, \
+		  alpha, \
+		  x, incx, \
+		  z, incz, \
+		  cntx  \
+		); \
+	} \
 }
 
 INSERT_GENTFUNC_BASIC2( dotaxpyv, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

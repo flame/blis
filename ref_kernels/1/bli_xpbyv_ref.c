@@ -47,10 +47,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype* restrict psi1; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	/* If beta is zero, use copyv. */ \
@@ -88,26 +84,24 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		return; \
 	} \
 \
-	chi1 = x; \
-	psi1 = y; \
-\
 	if ( bli_is_conj( conjx ) ) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbyjs)( chi1[i], *beta, psi1[i] ); \
+				PASTEMAC(ch,xpbyjs)( x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbyjs)( *chi1, *beta, *psi1 ); \
+				PASTEMAC(ch,xpbyjs)( *x, *beta, *y ); \
 \
-				chi1 += incx; \
-				psi1 += incy; \
+				x += incx; \
+				y += incy; \
 			} \
 		} \
 	} \
@@ -115,19 +109,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( chi1[i], *beta, psi1[i] ); \
+				PASTEMAC(ch,xpbys)( x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,xpbys)( *chi1, *beta, *psi1 ); \
+				PASTEMAC(ch,xpbys)( *x, *beta, *y ); \
 \
-				chi1 += incx; \
-				psi1 += incy; \
+				x += incx; \
+				y += incy; \
 			} \
 		} \
 	} \

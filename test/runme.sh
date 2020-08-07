@@ -9,8 +9,9 @@ l2_ops="gemv ger hemv her her2 trmv trsv"
 l3_ops="gemm hemm herk her2k trmm trsm"
 test_ops="${l2_ops} ${l3_ops}"
 
-# Implementations to test
-test_impls="openblas atlas mkl blis"
+# Implementations to test.
+#test_impls="openblas mkl blis"
+test_impls="blis"
 
 for im in ${test_impls}; do
 

@@ -48,17 +48,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict chi1; \
-	ctype* restrict psi1; \
-	dim_t  i; \
-\
 	if ( bli_zero_dim1( n ) ) return; \
 \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
 	{ \
-		/* If alpha is zero and beta is zero, set to zero. */ \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
+			/* If alpha is zero and beta is zero, set to zero. */ \
+\
 			ctype* zero = PASTEMAC(ch,0); \
 \
 			/* Query the context for the kernel function pointer. */ \
@@ -75,14 +72,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		/* If alpha is zero and beta is one, return. */ \
 		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
+			/* If alpha is zero and beta is one, return. */ \
 			return; \
 		} \
-		/* If alpha is zero, scale by beta. */ \
 		else \
 		{ \
+			/* If alpha is zero, scale by beta. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
 			PASTECH(ch,scalv_ker_ft) scalv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx ); \
@@ -101,9 +99,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 	else if ( PASTEMAC(ch,eq1)( *alpha ) ) \
 	{ \
-		/* If alpha is one and beta is zero, copy. */ \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
+			/* If alpha is one and beta is zero, use copyv. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
 			PASTECH(ch,copyv_ker_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
@@ -118,9 +117,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		/* If alpha is one and beta is one, add. */ \
 		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
+			/* If alpha is one and beta is one, use addv. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t             dt     = PASTEMAC(ch,type); \
 			PASTECH(ch,addv_ker_ft) addv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_ADDV_KER, cntx ); \
@@ -135,9 +135,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		/* If alpha is one, call xpby. */ \
 		else \
 		{ \
+			/* If alpha is one and beta is something else, use xpbyv. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
 			PASTECH(ch,xpbyv_ker_ft) xpbyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_XPBYV_KER, cntx ); \
@@ -156,9 +157,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 	else \
 	{ \
-		/* If beta is zero, call scal2. */ \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
+			/* If alpha is something else and beta is zero, use scal2v. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t               dt       = PASTEMAC(ch,type); \
 			PASTECH(ch,scal2v_ker_ft) scal2v_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCAL2V_KER, cntx ); \
@@ -174,9 +176,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-		/* If beta is one, call axpy. */ \
 		else if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
+			/* If alpha is something else and beta is one, use axpyv. */ \
+\
 			/* Query the context for the kernel function pointer. */ \
 			const num_t              dt      = PASTEMAC(ch,type); \
 			PASTECH(ch,axpyv_ker_ft) axpyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
@@ -192,29 +195,28 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 			return; \
 		} \
-	\
 	} \
 \
-	chi1 = x; \
-	psi1 = y; \
+	/* If execution reaches here, alpha and beta are both non-zero/non-unit. */ \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbyjs)( *alpha, chi1[i], *beta, psi1[i] ); \
+				PASTEMAC(ch,axpbyjs)( *alpha, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbyjs)( *alpha, *chi1, *beta, *psi1 ); \
+				PASTEMAC(ch,axpbyjs)( *alpha, *x, *beta, *y ); \
 \
-				chi1 += incx; \
-				psi1 += incy; \
+				x += incx; \
+				y += incy; \
 			} \
 		} \
 	} \
@@ -222,19 +224,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( incx == 1 && incy == 1 ) \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			PRAGMA_SIMD \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, chi1[i], *beta, psi1[i] ); \
+				PASTEMAC(ch,axpbys)( *alpha, x[i], *beta, y[i] ); \
 			} \
 		} \
 		else \
 		{ \
-			for ( i = 0; i < n; ++i ) \
+			for ( dim_t i = 0; i < n; ++i ) \
 			{ \
-				PASTEMAC(ch,axpbys)( *alpha, *chi1, *beta, *psi1 ); \
+				PASTEMAC(ch,axpbys)( *alpha, *x, *beta, *y ); \
 \
-				chi1 += incx; \
-				psi1 += incy; \
+				x += incx; \
+				y += incy; \
 			} \
 		} \
 	} \

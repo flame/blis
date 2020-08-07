@@ -129,7 +129,7 @@ void bli_zdotxf_template_noopt
 
 	dcomplex    Atx[ bli_zdotxf_fusefac ];
 
-	bool_t      use_ref         = FALSE;
+	bool        use_ref         = FALSE;
 
 	dim_t       m_pre           = 0;
 	dim_t       m_iter;

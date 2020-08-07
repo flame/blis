@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2017, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -311,7 +311,14 @@ GENTFUNCR( scomplex, float,  c, s, normfv_unb_var1, sumsqv_unb_var1 )
 GENTFUNCR( dcomplex, double, z, d, normfv_unb_var1, sumsqv_unb_var1 )
 
 #undef  GENTFUNCR
-#ifdef FE_OVERFLOW
+// We've disabled the dotv-based implementation because that method of
+// computing the sum of the squares of x inherently does not check for
+// overflow. Instead, we use the fallback method based on sumsqv, which
+// takes care to not overflow unnecessarily (ie: takes care for the
+// sqrt( sum of the squares of x ) to not overflow if the sum of the
+// squares of x would normally overflow. See GitHub issue #332 for
+// discussion.
+#if 0 //defined(FE_OVERFLOW) && !defined(__APPLE__)
 #define GENTFUNCR( ctype, ctype_r, ch, chr, varname, kername ) \
 \
 void PASTEMAC(ch,varname) \
@@ -466,7 +473,7 @@ void PASTEMAC(ch,varname) \
 		/* If the absolute value of the current element exceeds that of
 		   the previous largest, save it and its index. If NaN is
 		   encountered, then treat it the same as if it were a valid
-		   value that was smaller than any previously seen. This
+		   value that was larger than any previously seen. This
 		   behavior mimics that of LAPACK's ?lange(). */ \
 		if ( abs_chi1_max < abs_chi1 || bli_isnan( abs_chi1 ) ) \
 		{ \
@@ -1012,7 +1019,8 @@ void PASTEMAC(ch,varname) \
 \
 			x1     = x + (j  )*ldx + (0  )*incx; \
 \
-			PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+			/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+			PASTEMAC(ch,kername) \
 			( \
 			  n_elem, \
 			  x1, incx, \
@@ -1039,7 +1047,8 @@ void PASTEMAC(ch,varname) \
 				x0     = x1; \
 				chi1   = x1 + (n_elem-1)*incx; \
 \
-				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
@@ -1079,7 +1088,8 @@ void PASTEMAC(ch,varname) \
 				x2     = x1 + incx; \
 				chi1   = x1; \
 \
-				PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF) \
+				/*PASTEMAC2(ch,kername,BLIS_TAPI_EX_SUF)*/ \
+				PASTEMAC(ch,kername) \
 				( \
 				  n_elem, \
 				  x1, incx, \
@@ -1111,8 +1121,8 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC( randm_unb_var1,  randv )
-INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv )
+INSERT_GENTFUNC_BASIC( randm_unb_var1,  randv_unb_var1 )
+INSERT_GENTFUNC_BASIC( randnm_unb_var1, randnv_unb_var1 )
 
 
 #undef  GENTFUNCR

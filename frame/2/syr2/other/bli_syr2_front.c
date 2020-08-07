@@ -52,9 +52,9 @@ void bli_syr2_front
 	num_t   dt_targ_x;
 	num_t   dt_targ_y;
 	//num_t   dt_targ_c;
-	bool_t  x_has_unit_inc;
-	bool_t  y_has_unit_inc;
-	bool_t  c_has_unit_inc;
+	bool    x_has_unit_inc;
+	bool    y_has_unit_inc;
+	bool    c_has_unit_inc;
 	obj_t   alpha_local;
 	num_t   dt_alpha;
 

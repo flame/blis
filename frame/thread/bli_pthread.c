@@ -6,6 +6,7 @@
 
    Copyright (C) 2018, Southern Methodist University
    Copyright (C) 2018, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -42,39 +43,57 @@
 // This branch defines a pthread-like API, bli_pthread_*(), and implements it
 // in terms of Windows API calls.
 
-int bli_pthread_mutex_init( bli_pthread_mutex_t*           mutex,
-                            const bli_pthread_mutexattr_t* attr )
+int bli_pthread_mutex_init
+     (
+       bli_pthread_mutex_t*           mutex,
+       const bli_pthread_mutexattr_t* attr
+     )
 {
 	if ( attr ) return EINVAL;
 	InitializeSRWLock( mutex );
 	return 0;
 }
 
-int bli_pthread_mutex_destroy( bli_pthread_mutex_t* mutex )
+int bli_pthread_mutex_destroy
+     (
+       bli_pthread_mutex_t* mutex
+     )
 {
 	return 0;
 }
 
-int bli_pthread_mutex_lock( bli_pthread_mutex_t* mutex )
+int bli_pthread_mutex_lock
+     (
+       bli_pthread_mutex_t* mutex
+     )
 {
 	AcquireSRWLockExclusive( mutex );
 	return 0;
 }
 
-int bli_pthread_mutex_trylock( bli_pthread_mutex_t* mutex )
+int bli_pthread_mutex_trylock
+     (
+       bli_pthread_mutex_t* mutex
+     )
 {
 	return TryAcquireSRWLockExclusive( mutex ) ? 0 : EBUSY;
 }
 
-int bli_pthread_mutex_unlock( bli_pthread_mutex_t* mutex )
+int bli_pthread_mutex_unlock
+     (
+       bli_pthread_mutex_t* mutex
+     )
 {
 	ReleaseSRWLockExclusive( mutex );
 	return 0;
 }
 
-static BOOL bli_init_once_wrapper( bli_pthread_once_t* once,
-                                   void*           param,
-                                   void**          context)
+static BOOL bli_init_once_wrapper
+     (
+       bli_pthread_once_t* once,
+       void*               param,
+       void**              context
+     )
 {
 	( void )once;
 	( void )context;
@@ -83,33 +102,49 @@ static BOOL bli_init_once_wrapper( bli_pthread_once_t* once,
 	return TRUE;
 }
 
-void bli_pthread_once( bli_pthread_once_t* once, void (*init)(void) )
+void bli_pthread_once
+     (
+       bli_pthread_once_t* once,
+       void              (*init)(void)
+     )
 {
 	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
 }
 
-int bli_pthread_cond_init( bli_pthread_cond_t*           cond,
-                           const bli_pthread_condattr_t* attr )
+int bli_pthread_cond_init
+     (
+       bli_pthread_cond_t*           cond,
+       const bli_pthread_condattr_t* attr
+     )
 {
 	if ( attr ) return EINVAL;
 	InitializeConditionVariable( cond );
 	return 0;
 }
 
-int bli_pthread_cond_destroy( bli_pthread_cond_t* cond )
+int bli_pthread_cond_destroy
+     (
+       bli_pthread_cond_t* cond
+     )
 {
 	( void )cond;
 	return 0;
 }
 
-int bli_pthread_cond_wait( bli_pthread_cond_t*  cond,
-                           bli_pthread_mutex_t* mutex )
+int bli_pthread_cond_wait
+     (
+       bli_pthread_cond_t*  cond,
+       bli_pthread_mutex_t* mutex
+     )
 {
 	if ( !SleepConditionVariableSRW( cond, mutex, INFINITE, 0 ) ) return EAGAIN;
 	return 0;
 }
 
-int bli_pthread_cond_broadcast( bli_pthread_cond_t* cond )
+int bli_pthread_cond_broadcast
+     (
+       bli_pthread_cond_t* cond
+     )
 {
 	WakeAllConditionVariable( cond );
 	return 0;
@@ -120,19 +155,26 @@ typedef struct
 	void* (*start_routine)( void* );
 	void*   param;
 	void**  retval;
+
 } bli_thread_param;
 
-static DWORD bli_thread_func( void* param_ )
+static DWORD bli_thread_func
+     (
+       void* param_
+     )
 {
 	bli_thread_param* param = param_;
 	*param->retval = param->start_routine( param->param );
 	return 0;
 }
 
-int bli_pthread_create( bli_pthread_t*            thread,
-                        const bli_pthread_attr_t* attr,
-                        void*                   (*start_routine)(void*),
-                        void*                     arg )
+int bli_pthread_create
+     (
+       bli_pthread_t*            thread,
+       const bli_pthread_attr_t* attr,
+       void*                   (*start_routine)(void*),
+       void*                     arg
+     )
 {
 	if ( attr ) return EINVAL;
 	bli_thread_param param = { start_routine, arg, &thread->retval };
@@ -141,8 +183,11 @@ int bli_pthread_create( bli_pthread_t*            thread,
 	return 0;
 }
 
-int bli_pthread_join( bli_pthread_t thread,
-                      void**        retval )
+int bli_pthread_join
+     (
+       bli_pthread_t thread,
+       void**        retval
+     )
 {
 	if ( !WaitForSingleObject( thread.handle, INFINITE ) ) return EAGAIN;
 	if ( retval ) *retval = thread.retval;

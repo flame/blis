@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,10 +36,6 @@
 
 #ifndef BLIS_MEMSYS_H
 #define BLIS_MEMSYS_H
-
-// -----------------------------------------------------------------------------
-
-membrk_t* bli_memsys_global_membrk( void );
 
 // -----------------------------------------------------------------------------
 
