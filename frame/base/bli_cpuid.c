@@ -479,6 +479,10 @@ arch_t bli_cpuid_query_id( void )
 			if ( bli_cpuid_is_cortexa9( model, part, features ) )
 				return BLIS_ARCH_CORTEXA9;
 #endif
+#ifdef BLIS_CONFIG_ARMV6VFP
+			if ( bli_cpuid_is_armv6vfp( model, part, features ) )
+				return BLIS_ARCH_ARMV6VFP;
+#endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
 			return BLIS_ARCH_GENERIC;

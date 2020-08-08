@@ -39,6 +39,15 @@ matrix:
   - os: osx
     compiler: clang
     env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+  # armv6vfp
+  # For some weird reason, qemu configs like "arm1176" do not work, so we can
+  # not really check we are not leaking illegal neon instructions in the build.
+  # But at least we can check for correctness.
+  - os: linux
+    compiler: arm-linux-gnueabihf-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="armv6vfp" \
+      PACKAGES="gcc-arm-linux-gnueabihf qemu-system-arm qemu-user" \
+      TESTSUITE_WRAPPER="qemu-arm -cpu cortex-a9 -L /usr/arm-linux-gnueabihf/"
   # cortexa15 build and fast testsuite (qemu)
   - os: linux
     compiler: arm-linux-gnueabihf-gcc

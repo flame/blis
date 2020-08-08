@@ -154,6 +154,11 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa9_ref,
 		                                              bli_cntx_init_cortexa9_ind );
 #endif
+#ifdef BLIS_CONFIG_ARMV6VFP
+		bli_gks_register_cntx( BLIS_ARCH_ARMV6VFP,    bli_cntx_init_armv6vfp,
+		                                              bli_cntx_init_armv6vfp_ref,
+		                                              bli_cntx_init_armv6vfp_ind );
+#endif
 
 		// IBM architectures
 #ifdef BLIS_CONFIG_POWER9

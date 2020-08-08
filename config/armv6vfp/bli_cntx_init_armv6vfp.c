@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -34,12 +34,12 @@
 
 #include "blis.h"
 
-void bli_cntx_init_cortexa15( cntx_t* cntx )
+void bli_cntx_init_armv6vfp( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
-	bli_cntx_init_cortexa15_ref( cntx );
+	bli_cntx_init_armv6vfp_ref( cntx );
 
 	// -------------------------------------------------------------------------
 
@@ -47,19 +47,18 @@ void bli_cntx_init_cortexa15( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv7neon_int_4x4, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv7neon_int_4x4, FALSE,
+	  1,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_arm32vfp_asm_4x4, FALSE,
 	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     4,     4,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     4,     4,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   336,   176,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   528,   368,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4096,  4096,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     4,     0,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     4,     0,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   336,     0,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   528,     0,     0,     0 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4096,     0,     0,     0 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

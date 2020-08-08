@@ -717,7 +717,7 @@ read_registry_file()
 				# If kers_ker is empty string, then ker was not found as a key
 				# in the kernel registry. While not common, this can happen
 				# when ker identifies a kernel set that does not correspond to
-				# any configuration. (Example: armv7a and armv8a kernel sets are
+				# any configuration. (Example: armv7neon and armv8a kernel sets are
 				# used by cortexa* configurations, but do not corresond to their
 				# own configurations.)
 				if [ "${kers_ker}" == "" ]; then

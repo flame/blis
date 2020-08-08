@@ -35,7 +35,7 @@
 #include "blis.h"
 
 extern
-void bli_sgemm_armv7a_ker_4x4
+void bli_sgemm_armv7neon_ker_4x4
      (
        uint32_t            k,
        float*     restrict alpha,
@@ -46,7 +46,7 @@ void bli_sgemm_armv7a_ker_4x4
        auxinfo_t* restrict data
      );
 
-void bli_sgemm_armv7a_asm_4x4
+void bli_sgemm_armv7neon_asm_4x4
      (
        dim_t               k0,
        float*     restrict alpha,
@@ -64,13 +64,13 @@ void bli_sgemm_armv7a_asm_4x4
 	uint32_t rs_c = rs_c0;
 	uint32_t cs_c = cs_c0;
 
-	bli_sgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	bli_sgemm_armv7neon_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
 
 
 extern
-void bli_dgemm_armv7a_ker_4x4
+void bli_dgemm_armv7neon_ker_4x4
      (
        uint32_t            k,
        double*    restrict alpha,
@@ -81,7 +81,7 @@ void bli_dgemm_armv7a_ker_4x4
        auxinfo_t* restrict data
      );
 
-void bli_dgemm_armv7a_asm_4x4
+void bli_dgemm_armv7neon_asm_4x4
      (
        dim_t               k0,
        double*    restrict alpha,
@@ -99,13 +99,13 @@ void bli_dgemm_armv7a_asm_4x4
 	uint32_t rs_c = rs_c0;
 	uint32_t cs_c = cs_c0;
 
-	bli_dgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	bli_dgemm_armv7neon_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
 
 
 extern
-void bli_cgemm_armv7a_ker_2x2
+void bli_cgemm_armv7neon_ker_2x2
      (
        uint32_t            k,
        scomplex*  restrict alpha,
@@ -116,7 +116,7 @@ void bli_cgemm_armv7a_ker_2x2
        auxinfo_t* restrict data
      );
 
-void bli_cgemm_armv7a_asm_2x2
+void bli_cgemm_armv7neon_asm_2x2
      (
        dim_t               k0,
        scomplex*  restrict alpha,
@@ -134,13 +134,13 @@ void bli_cgemm_armv7a_asm_2x2
 	uint32_t rs_c = rs_c0;
 	uint32_t cs_c = cs_c0;
 
-	bli_cgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	bli_cgemm_armv7neon_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 
 
 
 extern
-void bli_zgemm_armv7a_ker_2x2
+void bli_zgemm_armv7neon_ker_2x2
      (
        uint32_t            k,
        dcomplex*  restrict alpha,
@@ -151,7 +151,7 @@ void bli_zgemm_armv7a_ker_2x2
        auxinfo_t* restrict data
      );
 
-void bli_zgemm_armv7a_asm_2x2
+void bli_zgemm_armv7neon_asm_2x2
      (
        dim_t               k0,
        dcomplex*  restrict alpha,
@@ -169,6 +169,6 @@ void bli_zgemm_armv7a_asm_2x2
 	uint32_t rs_c = rs_c0;
 	uint32_t cs_c = cs_c0;
 
-	bli_zgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	bli_zgemm_armv7neon_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
 }
 

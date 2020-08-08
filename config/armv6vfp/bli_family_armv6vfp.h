@@ -14,9 +14,9 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
+    - Neither the name of The University of Texas at Austin nor the names
+      of its contributors may be used to endorse or promote products
+      derived from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -38,40 +38,6 @@
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE           16
-
-
-#if 0
-// -- LEVEL-3 MICRO-KERNEL CONSTANTS -------------------------------------------
-
-#define BLIS_SGEMM_UKERNEL             bli_sgemm_armv7neon_int_4x4
-#define BLIS_DEFAULT_MR_S              4
-#define BLIS_DEFAULT_NR_S              4
-#define BLIS_DEFAULT_MC_S              336 
-#define BLIS_DEFAULT_KC_S              528 
-#define BLIS_DEFAULT_NC_S              4096
-
-#define BLIS_DGEMM_UKERNEL             bli_dgemm_armv7neon_int_4x4
-#define BLIS_DEFAULT_MR_D              4
-#define BLIS_DEFAULT_NR_D              4
-#define BLIS_DEFAULT_MC_D              176 
-#define BLIS_DEFAULT_KC_D              368 
-#define BLIS_DEFAULT_NC_D              4096
-
-#define BLIS_DEFAULT_MR_C              8
-#define BLIS_DEFAULT_NR_C              4
-#define BLIS_DEFAULT_MC_C              64
-#define BLIS_DEFAULT_KC_C              128
-#define BLIS_DEFAULT_NC_C              4096
-
-#define BLIS_DEFAULT_MR_Z              8
-#define BLIS_DEFAULT_NR_Z              4
-#define BLIS_DEFAULT_MC_Z              64
-#define BLIS_DEFAULT_KC_Z              128
-#define BLIS_DEFAULT_NC_Z              4096
-#endif
-
-
-
-//#endif
-
+#define BLIS_SIMD_NUM_REGISTERS        16
+#define BLIS_SIMD_SIZE                 8
+#define BLIS_SIMD_ALIGN_SIZE           8
