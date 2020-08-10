@@ -22,8 +22,8 @@ or by setting the same variable as part of the make command:
   make BLIS_INSTALL_PATH=/usr/local
 
 Once the executable files have been built, we recommend reading the code in
-one terminal window alongside the executable output in another. This will
-help you see the effects of each section of code.
+one terminal window alongside the executable output in another terminal.
+This will help you see the effects of each section of code.
 
 This tutorial is not exhaustive or complete; many typed API functions
 were omitted (mostly for brevity's sake) and thus more examples could be

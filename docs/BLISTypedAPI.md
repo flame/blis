@@ -36,6 +36,8 @@ There are many functions that BLIS implements that are not listed here, either b
 
 For curious readers, the typed API was given its name (a) because it exposes the floating-point types in the names of its functions, and (b) to contrast it with the other native API in BLIS, the object API, which is [documented here](BLISObjectAPI.md). (The third API supported by BLIS is the BLAS compatibility layer, which mimics conventional Fortran-77 BLAS.)
 
+In general, this document should be treated more as a reference than a place to learn how to use BLIS in your application. Thus, we highly encourage all readers to first study the [example code](BLISTypedAPI.md#example-code) provided within the BLIS source distribution.
+
 ## BLIS types
 
 The following tables list various types used throughout the BLIS typed API.
@@ -1875,5 +1877,5 @@ char* bli_info_get_trsm_impl_string( num_t dt );
 
 # Example code
 
-BLIS provides lots of example code in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include printing vectors and matrices and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above.
+BLIS provides lots of example code in the [examples/tapi](https://github.com/flame/blis/tree/master/examples/tapi) directory of the BLIS source distribution. The example code in this directory is set up like a tutorial, and so we recommend starting from the beginning. Topics include printing vectors and matrices and calling a representative subset of the computational level-1v, -1m, -2, -3, and utility operations documented above. Please read the `README` contained within the `examples/tapi` directory for further details.
 
