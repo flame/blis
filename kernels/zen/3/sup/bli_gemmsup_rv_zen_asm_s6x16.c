@@ -2479,6 +2479,7 @@ void bli_sgemmsup_rv_zen_asm_1x16
     vmovss(xmm1, mem(rcx, rsi, 1))
     vmovss(xmm2, mem(rcx, rsi, 2))
     vmovss(xmm14, mem(rcx, rax, 1))
+    lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c        
     vextractf128(imm(0x0), ymm5, xmm0)//c0-c3
     vshufps(imm(0x01), xmm0, xmm0,xmm1)
     vshufps(imm(0x02), xmm0, xmm0,xmm2)
