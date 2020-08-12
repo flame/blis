@@ -74,20 +74,6 @@ void bli_gemm_front
 		}
 	}
 #endif
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-	
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-	// Only handle small problems separately for homogeneous datatypes.
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
-	{
-		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
-		if ( status == BLIS_SUCCESS ) return;
-	}
-#endif
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );
