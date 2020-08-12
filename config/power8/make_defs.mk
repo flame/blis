@@ -59,7 +59,7 @@ COPTFLAGS      := -O0
 else
 # Fixme: This should use -O3, but that breaks cpuid dispatch somehow,
 # and we end up executing power9 code on power8.
-COPTFLAGS      := -O2 -funroll-loops
+COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
@@ -73,11 +73,12 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -O3
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -O3 -funroll-loops
 else
 ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -O3 -funroll-loops
 else
+# XLC, PGI?  But I think they'll break the Fortran interface
 CRVECFLAGS     := $(CKVECFLAGS)
 endif
 endif
