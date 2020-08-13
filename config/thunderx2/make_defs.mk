@@ -57,11 +57,11 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3 -mcpu=thunderx2t99
+COPTFLAGS      := -O2 -mcpu=thunderx2t99
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=thunderx2t99
 else
