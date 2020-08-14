@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -53,6 +53,7 @@
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
+  #include "bli_arch.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -229,16 +230,16 @@ bool_t bli_cpuid_is_skx
 
 	if ( bli_cpuid_has_features( features, expected ) )
 	{
-		switch (nvpu)
+		switch ( nvpu )
 		{
 		case 1:
-			bli_log( "Hardware has 1 FMA unit -- not using SKX config\n" );
+			bli_arch_log( "Hardware has 1 FMA unit; using 'haswell' (not 'skx') sub-config.\n" );
 			return FALSE;
 		case 2:
-			bli_log( "Hardware has 2 FMA units -- using SKX config\n" );
+			bli_arch_log( "Hardware has 2 FMA units; using 'skx' sub-config.\n" );
 			return TRUE;
 		default:
-			bli_log( "Number of FMA units unknown -- not using SKX config\n" );
+			bli_arch_log( "Number of FMA units unknown; using 'haswell' (not 'skx') config.\n" );
 			return FALSE;
 		}
 	}
@@ -975,7 +976,7 @@ void get_cpu_name( char *cpu_name )
 // Return the number of FMA units _assuming avx512 is supported_.
 // This needs updating for new processor types, sigh.
 // See https://ark.intel.com/content/www/us/en/ark.html#@Processors
-// and also https://github.com/jeffhammond/vpu-count and
+// and also https://github.com/jeffhammond/vpu-count
 int vpu_count( void )
 {
 	char  cpu_name[48] = {};
@@ -1016,13 +1017,13 @@ int vpu_count( void )
 			return -1;
 
 		strncpy( model_num, loc+1, 4 );
-		model_num[4] = '\0';	// Things like i9-10900X matched above
+		model_num[4] = '\0'; // Things like i9-10900X matched above
 
 		sku = atoi( model_num );
 
 		// These were derived from ARK listings as of 2019-10-09, but
 		// may not be complete, especially as the ARK Skylake listing
-		// seems to be listed.
+		// seems to be limited.
 		if      ( 8199 >= sku && sku >= 8100 ) return 2;
 		else if ( 6199 >= sku && sku >= 6100 ) return 2;
 		else if (                sku == 5122 ) return 2;
@@ -1039,7 +1040,7 @@ int vpu_count( void )
 		else return -1;
 	}
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
-		return 2;				// All i7/i9 with avx512?
+		return 2; // All i7/i9 with avx512?
 	else
 	{
 		return -1;
@@ -1512,19 +1513,3 @@ Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs t
 */
 #endif
 
-void bli_log( char * fmt, ... )
-{
-	va_list ap;
-	char prefix[] = "BLIS: ";
-	char * newfmt;
-
-	if ( bli_dolog && fmt )
-	{
-		int n = strlen( fmt ) + strlen( prefix ) + 1;
-		newfmt = malloc( n );
-		snprintf( newfmt, n, "%s%s", prefix, fmt );
-		va_start( ap, fmt );
-		vfprintf( stderr, newfmt, ap );
-		va_end( ap );
-	}
-}
