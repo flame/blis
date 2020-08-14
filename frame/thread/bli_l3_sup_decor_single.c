@@ -37,6 +37,8 @@
 
 #ifndef BLIS_ENABLE_MULTITHREADING
 
+#define SKIP_THRINFO_TREE
+
 err_t bli_l3_sup_thread_decorator
      (
        l3supint_t func,
@@ -52,34 +54,6 @@ err_t bli_l3_sup_thread_decorator
        rntm_t*    rntm
      )
 {
-#if 0
-
-	return
-	bli_gemmsup_int
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  0
-	);
-
-#else
-
-	// This is part of a hack to support mixed domain in bli_gemm_front().
-	// Sometimes we need to specify a non-standard schema for A and B, and
-	// we decided to transmit them via the schema field in the obj_t's
-	// rather than pass them in as function parameters. Once the values
-	// have been read, we immediately reset them back to their expected
-	// values for unpacked objects.
-	//pack_t schema_a = bli_obj_pack_schema( a );
-	//pack_t schema_b = bli_obj_pack_schema( b );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, a );
-	//bli_obj_set_pack_schema( BLIS_NOT_PACKED, b );
-
 	// For sequential execution, we use only one thread.
 	const dim_t n_threads = 1;
 
@@ -91,14 +65,13 @@ err_t bli_l3_sup_thread_decorator
 	// resize the array_t, if necessary.
 	array_t* restrict array = bli_sba_checkout_array( n_threads );
 
-	// Access the pool_t* for thread 0 and embed it into the rntm. We do
-	// this up-front only so that we can create the global comm below.
+	// Access the pool_t* for thread 0 and embed it into the rntm.
 	bli_sba_rntm_set_pool( 0, array, rntm );
 
 	// Set the packing block allocator field of the rntm.
 	bli_membrk_rntm_set_membrk( rntm );
 
-#if 0
+#ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
 #endif
@@ -109,10 +82,7 @@ err_t bli_l3_sup_thread_decorator
 		// it was already copied in one of the high-level oapi functions.
 		rntm_t* restrict rntm_p = rntm;
 
-		cntl_t*    cntl_use = NULL;
-		//thrinfo_t* thread   = NULL;
-		thrinfo_t* thread   = &BLIS_PACKM_SINGLE_THREADED;
-
+		// There is only one thread id (for the thief thread).
 		const dim_t tid = 0;
 
 		// Use the thread id to access the appropriate pool_t* within the
@@ -123,24 +93,22 @@ err_t bli_l3_sup_thread_decorator
 		// this is redundant since it's already been done above.
 		//bli_sba_rntm_set_pool( tid, array, rntm_p );
 
-		// NOTE: Unlike with the _openmp.c and _pthreads.c variants, we don't
-		// need to alias objects for A, B, and C since they were already aliased
-		// in bli_*_front(). However, we may add aliasing here in the future so
-		// that, with all three (_single.c, _openmp.c, _pthreads.c) implementations
-		// consistently providing local aliases, we can then eliminate aliasing
-		// elsewhere.
-
-		// Create a default control tree for the operation, if needed.
-		//bli_l3_cntl_create_if( family, schema_a, schema_b,
-		//                       a, b, c, rntm_p, cntl, &cntl_use );
-#if 0
-		cntl_use = bli_gemm_cntl_create( rntm_p, family, schema_a, schema_b );
+#ifndef SKIP_THRINFO_TREE
+		thrinfo_t* thread = NULL;
 
 		// Create the root node of the thread's thrinfo_t structure.
-		bli_l3_thrinfo_create_root( tid, gl_comm, rntm_p, cntl_use, &thread );
-#endif
+		bli_l3_sup_thrinfo_create_root( tid, gl_comm, rntm_p, &thread );
+#else
+		// This optimization allows us to use one of the global thrinfo_t
+		// objects for single-threaded execution rather than grow one from
+		// scratch. The key is that bli_thrinfo_sup_grow(), which is called
+		// from within the variants, will immediately return if it detects
+		// that the thrinfo_t* passed into it is either
+		// &BLIS_GEMM_SINGLE_THREADED or &BLIS_PACKM_SINGLE_THREADED.
+		thrinfo_t* thread = &BLIS_GEMM_SINGLE_THREADED;
 
 		( void )tid;
+#endif
 
 		func
 		(
@@ -151,17 +119,12 @@ err_t bli_l3_sup_thread_decorator
 		  c,
 		  cntx,
 		  rntm_p,
-		  cntl_use,
 		  thread
 		);
 
-#if 0
-		// Free the thread's local control tree.
-		//bli_l3_cntl_free( rntm_p, cntl_use, thread );
-		bli_gemm_cntl_free( rntm_p, cntl_use, thread );
-
+#ifndef SKIP_THRINFO_TREE
 		// Free the current thread's thrinfo_t structure.
-		bli_l3_thrinfo_free( rntm_p, thread );
+		bli_l3_sup_thrinfo_free( rntm_p, thread );
 #endif
 	}
 
@@ -176,7 +139,6 @@ err_t bli_l3_sup_thread_decorator
 
 	return BLIS_SUCCESS;
 
-#endif
 }
 
 #endif

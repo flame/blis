@@ -4,6 +4,8 @@
 
 ## Contents
 
+* [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
+* [Changes in 0.6.1](ReleaseNotes.md#changes-in-061)
 * [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
 * [Changes in 0.5.2](ReleaseNotes.md#changes-in-052)
 * [Changes in 0.5.1](ReleaseNotes.md#changes-in-051)
@@ -34,6 +36,90 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.7.0
+April 7, 2020
+
+Improvements present in 0.7.0:
+
+Framework:
+- Implemented support for multithreading within the sup (skinny/small/unpacked) framework, which previously was single-threaded only. Note that this feature works harmoniously with the selective packing introduced into the sup framework in 0.6.1. (AMD)
+- Renamed `bli_thread_obarrier()` and `bli_thread_obroadcast()` functions to drop the 'o', which was left over from when `thrcomm_t` objects tracked both "inner" and "outer" communicators.
+- Fixed an obscure `int`-to-`packbuf_t` type conversion error that only affects certain C++ compilers (including g++) when compiling application code that includes the BLIS header file `blis.h`. (Ajay Panyala)
+- Added a missing early `return` statement in `bli_thread_partition_2x2()`, which provides a slight optimization. (Kiran Varaganti)
+
+Kernels:
+- Fixed the semantics of the `bli_amaxv()` kernels ('s' and 'd') within the `zen` kernel set. Previously, the kernels (incorrectly) returned the index of the last element whose absolute value was largest (in the event there were multiple of equal value); now, it (correclty) returns the index of the first of such elements. The kernels also now return the index of the first NaN, if one is encountered. (Mat Cross, Devin Matthews)
+
+Build system:
+- Warn the user at configure-time when hardware auto-detection returns the `generic` subconfiguration since this is probably not what they were expecting. (Devin Matthews)
+- Removed unnecessary sorting (and duplicate removal) on `LDFLAGS` in `common.mk`. (Isuru Fernando)
+- Specify the full path to the location of the dynamic library on OSX so that other dynamic libraries that depend on BLIS know where to find the library. (Satish Balay, Jed Brown)
+
+Testing:
+- Updated and reorganized test drivers in `test/sup` so that they work for either single-threaded or multithreaded purposes. (AMD)
+- Updated/optimized octave scripts in `test/sup` for use with octave 5.2.0.
+- Minor updates/tweaks to `test/1m4m`.
+
+Documentation:
+- Updated existing single-threaded sup performance graphs with new data and added multithreaded sup graphs to `docs/PerformanceSmall.md`.
+- Added mention of Gentoo support under the external packages section of the `README.md`.
+- Tweaks to `docs/Multithreading.md` that clarify that setting any `BLIS_*_NT` variable to 1 will be considered manual specification for the purposes of determining whether to auto-factorize via `BLIS_NUM_THREADS`. (AMD)
+
+## Changes in 0.6.1
+January 14, 2020
+
+Improvements present in 0.6.1:
+
+Framework:
+- Added support for pre-broadcast when packing B. This causes elements of B to be repeated (broadcast) in the packed copy of B so that subsequent vector loads will result in the element already being pre-broadcast into the vector register.
+- Added support for selective packing to `gemmsup` (controlled via environment variables and/or the `rntm_t` object). (AMD)
+- Fixed a bug in `sdsdot_sub()` that redundantly added the "alpha" scalar and a separate bug in the order of typecasting intermediate products in `sdsdot_()`. (Simon Lukas Märtens, Devin Matthews)
+- Fixed an obscure bug in `bli_acquire_mpart_mdim()`/`bli_acquire_mpart_ndim()`. (Minh Quan Ho)
+- Fixed a subtle and complicated bug that only manifested via the BLAS test drivers in the `generic` subconfiguration, and possibly any other subconfiguration that did not register complex-domain `gemm` ukernels, or registered ONLY real-domain ukernels as row-preferential. (Dave Love)
+- Always use `sumsqv` to compute `normfv` instead of the "dot product trick" that was previously employed for performance reasons. (Roman Yurchak, Devin Matthews, and Isuru Fernando)
+- Fixed bug in `thrinfo_t` debugging/printing code.
+
+Kernels:
+- Implemented and registered an optimized `dgemm` microkernel for the `power9` kernel set. (Nicholai Tukanov)
+- Pacify a `restrict` warning in the `gemmtrsm4m1` reference ukernel. (Dave Love, Devin Matthews)
+
+Build system:
+- Fixed parsing in `vpu_count()` on some SkylakeX workstations. (Dave Love)
+- Reimplemented `bli_cpuid_query()` for ARM to use `stdio`-based functions instead of `popen()`. (Dave Love)
+- Use `-march=znver1` for clang on `zen2` subconfig.
+- Updated `-march` flags for `sandybridge`, `haswell` subconfigurations to use newer syntax (e.g. `haswell` instead of `core-avx2` and `sandybridge` instead of `corei7-avx`.
+- Correctly use `-qopenmp-simd` for reference kernels when compiling with icc. (Victor Eikjhout)
+- Added `-march` support for select gcc version ranges where flag syntax changes or new flags are added. The ranges we identify are: versions older than 4.9.0; versions older than 6.1.0 (but newer than 4.9.0); versions older than 9.1.0 (but newer than 6.1.0).
+- Use `-funsafe-math-optimizations` and `-ffp-contract=fast` for all reference kernels when using gcc or clang.
+- Updated MC cache blocksizes used by `haswell` subconfig.
+- Updated NC cache blocksizes used by `zen` subconfig.
+- Fixed a typo in the context registration of the `cortexa53` subconfiguration in `bli_gks.c`. (Francisco Igual)
+- Output a more informative error when the user manually targets a subconfiguration that configure places in the configuration blacklist. (Tze Meng Low)
+- Set execute bits of shared library at install-time. (Adam J. Stewart)
+- Added missing thread-related symbols for export to shared libraries. (Kyungmin Lee)
+- Removed (finally) the `attic/windows` directory since we offer Windows DLL support via AppVeyor's build artifacts, and thus that directory was only likely confusing people.
+
+Testing:
+- Fixed latent testsuite microkernel module bug for `power9` subconfig. (Jeff Hammond)
+- Added `test/1m4m` driver directory for test drivers related to the 1m paper.
+- Added libxsmm support to `test/sup drivers`. (Robert van de Geijn)
+- Updated `.travis.yml` and `do_sde.sh` to automatically accept SDE license and download SDE directly from Intel. (Devin Matthews, Jeff Hammond)
+- Updated standalone test drivers to iterate backwards through the specified problem space. This often helps avoid the situation whereby the CPU doesn't immediately throttle up to its maximum clock frequency, which can produce strange discontinuities (sharply rising "cliffs") in performance graphs.
+- Pacify an unused variable warning in `blastest/f2c/lread.c`. (Jeff Hammond)
+- Various other minor fixes/tweaks to test drivers.
+
+Documentation:
+- Added libxsmm results to `docs/PerformanceSmall.md`.
+- Added BLASFEO results to `docs/PerformanceSmall.md`.
+- Added the page size and location of the performance drivers to `docs/Performance.md` and `docs/PerformanceSmall.md`. (Dave Love)
+- Added notes to `docs/Multithreading.md` regarding the nuances of setting multithreading parameters the manual way vs. the automatic way. (Jérémie du Boisberranger)
+- Added a section on reproduction to `docs/Performance.md` and `docs/PerformanceSmall.md`. (Dave Love)
+- Documented Eigen `-march=native` hack in `docs/Performance.md` and `docs/PerformanceSmall.md`. (Sameer Agarwal)
+- Inserted multithreading links and disclaimers to `BuildSystem.md`. (Jeff Diamond)
+- Fixed typo in description for `bli_?axpy2v()` in `docs/BLISTypedAPI.md`. (Shmuel Levine)
+- Added "How to Download BLIS" section to `README.md`. (Jeff Diamond)
+- Various other minor documentation fixes.
 
 ## Changes in 0.6.0
 June 3, 2019

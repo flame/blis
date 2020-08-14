@@ -57,11 +57,13 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O3
+COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
 ifeq ($(GCC_OT_4_9_0),yes)

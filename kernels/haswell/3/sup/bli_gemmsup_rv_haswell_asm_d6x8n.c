@@ -80,23 +80,6 @@
 // Prototype reference microkernels.
 GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
-#if 0
-// Define parameters and variables for edge case kernel map.
-#define NUM_MR 4
-#define NUM_NR 4
-#define FUNCPTR_T dgemmsup_ker_ft
-
-static dim_t mrs[NUM_MR] = { 6, 4, 2, 1 };
-static dim_t nrs[NUM_NR] = { 8, 4, 2, 1 };
-static FUNCPTR_T kmap[NUM_MR][NUM_NR] =
-{     /*  8                                 4                                 2                                 1  */
-/* 6 */ { bli_dgemmsup_rv_haswell_asm_6x8n, bli_dgemmsup_rv_haswell_asm_6x4n, bli_dgemmsup_rv_haswell_asm_6x2n, bli_dgemmsup_r_haswell_ref_6x1 },
-/* 4 */	{ bli_dgemmsup_rv_haswell_asm_4x8n, bli_dgemmsup_rv_haswell_asm_4x4n, bli_dgemmsup_rv_haswell_asm_4x2n, bli_dgemmsup_r_haswell_ref_4x1 },
-/* 2 */	{ bli_dgemmsup_rv_haswell_asm_2x8n, bli_dgemmsup_rv_haswell_asm_2x4n, bli_dgemmsup_rv_haswell_asm_2x2n, bli_dgemmsup_r_haswell_ref_2x1 },
-/* 1 */	{ bli_dgemmsup_rv_haswell_asm_1x8n, bli_dgemmsup_rv_haswell_asm_1x4n, bli_dgemmsup_rv_haswell_asm_1x2n, bli_dgemmsup_r_haswell_ref_1x1 },
-};
-#endif
-
 
 void bli_dgemmsup_rv_haswell_asm_6x8n
      (
@@ -116,16 +99,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 {
 	uint64_t m_left = m0 % 6;
 
-#if 0
-	bli_dgemmsup_r_haswell_ref
-	(
-	  conja, conjb, m0, n0, k0,
-	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	  beta, c, rs_c0, cs_c0, data, cntx
-	); return;
-#endif
-
-//printf( "rv_6x8n: %d %d %d\n", (int)m0, (int)n0, (int)k0 ); 
 	// First check whether this is a edge case in the m dimension. If so,
 	// dispatch other ?x8m kernels, as needed.
 	if ( m_left )
@@ -181,7 +154,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		}
 #endif
 
-#if 1
 		dgemmsup_ker_ft ker_fps[6] = 
 		{
 		  NULL,
@@ -202,77 +174,6 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		);
 
 		return;
-#else
-		if ( 5 <= m_left )
-		{
-			const dim_t mr_cur = 5;
-
-			bli_dgemmsup_rv_haswell_asm_5x8n
-			(
-			  conja, conjb, mr_cur, n0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += mr_cur*rs_c0; ai += mr_cur*rs_a0; m_left -= mr_cur;
-		}
-		if ( 4 <= m_left )
-		{
-			const dim_t mr_cur = 4;
-
-			bli_dgemmsup_rv_haswell_asm_4x8n
-			(
-			  conja, conjb, mr_cur, n0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += mr_cur*rs_c0; ai += mr_cur*rs_a0; m_left -= mr_cur;
-		}
-		if ( 3 <= m_left )
-		{
-			const dim_t mr_cur = 3;
-
-			bli_dgemmsup_rv_haswell_asm_3x8n
-			(
-			  conja, conjb, mr_cur, n0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += mr_cur*rs_c0; ai += mr_cur*rs_a0; m_left -= mr_cur;
-		}
-		if ( 2 <= m_left )
-		{
-			const dim_t mr_cur = 2;
-
-			bli_dgemmsup_rv_haswell_asm_2x8n
-			(
-			  conja, conjb, mr_cur, n0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += mr_cur*rs_c0; ai += mr_cur*rs_a0; m_left -= mr_cur;
-		}
-		if ( 1 == m_left )
-		{
-#if 1
-			const dim_t mr_cur = 1;
-
-			bli_dgemmsup_rv_haswell_asm_1x8n
-			(
-			  conja, conjb, mr_cur, n0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-#else
-			bli_dgemv_ex
-			(
-			  BLIS_TRANSPOSE, conja, k0, n0,
-			  alpha, bj, rs_b0, cs_b0, ai, cs_a0,
-			  beta, cij, cs_c0, cntx, NULL
-			);
-#endif
-		}
-		return;
-#endif
 	}
 
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -375,10 +276,10 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
-	prefetch(0, mem(rdx, 7*8))         // prefetch c + 3*rs_c
+	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*rs_c
 	prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
 	prefetch(0, mem(rdx, rdi, 2, 7*8)) // prefetch c + 5*rs_c
 
@@ -389,10 +290,10 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 5*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         5*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 5*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 5*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 5*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         5*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 5*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 5*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -402,9 +303,15 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -422,12 +329,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	// ---------------------------------- iteration 0
 
 #if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, 5*8))
 #endif
-	
+
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
@@ -457,9 +363,8 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	
 	// ---------------------------------- iteration 1
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
@@ -493,13 +398,12 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	
 	// ---------------------------------- iteration 2
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
-	
+
 	vmovupd(mem(rbx,  0*32), ymm0)
 	vmovupd(mem(rbx,  1*32), ymm1)
 	add(r10, rbx)                      // b += rs_b;
@@ -529,13 +433,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	// ---------------------------------- iteration 3
 
-#if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
-	//prefetch(0, mem(rdx, r9, 1, 7*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -585,7 +487,8 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -674,51 +577,51 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
+	vmovupd(ymm6, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm7)
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm7)
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
+	vmovupd(ymm8, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm9)
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm9)
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm10)
-	vmovupd(ymm10, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm10)
+	vmovupd(ymm10, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm11)
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm11)
+	vmovupd(ymm11, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm12)
-	vmovupd(ymm12, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm12)
+	vmovupd(ymm12, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm13)
-	vmovupd(ymm13, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm13)
+	vmovupd(ymm13, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm14)
-	vmovupd(ymm14, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm14)
+	vmovupd(ymm14, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm15)
-	vmovupd(ymm15, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm15)
+	vmovupd(ymm15, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -728,7 +631,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	label(.DCOLSTORED)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -740,11 +643,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm4)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm6)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm8)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm10)
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
@@ -756,18 +659,18 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vfmadd231pd(mem(rdx), xmm3, xmm0)
+	vfmadd231pd(mem(rdx        ), xmm3, xmm0)
 	vfmadd231pd(mem(rdx, rsi, 1), xmm3, xmm1)
 	vfmadd231pd(mem(rdx, rsi, 2), xmm3, xmm2)
 	vfmadd231pd(mem(rdx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rdx))
+	vmovupd(xmm0, mem(rdx        ))
 	vmovupd(xmm1, mem(rdx, rsi, 1))
 	vmovupd(xmm2, mem(rdx, rsi, 2))
 	vmovupd(xmm4, mem(rdx, rax, 1))
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -779,11 +682,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm5)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm5)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm7)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm9)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm11)
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
@@ -795,11 +698,11 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vfmadd231pd(mem(rdx), xmm3, xmm0)
+	vfmadd231pd(mem(rdx        ), xmm3, xmm0)
 	vfmadd231pd(mem(rdx, rsi, 1), xmm3, xmm1)
 	vfmadd231pd(mem(rdx, rsi, 2), xmm3, xmm2)
 	vfmadd231pd(mem(rdx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rdx))
+	vmovupd(xmm0, mem(rdx        ))
 	vmovupd(xmm1, mem(rdx, rsi, 1))
 	vmovupd(xmm2, mem(rdx, rsi, 2))
 	vmovupd(xmm4, mem(rdx, rax, 1))
@@ -823,33 +726,33 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 
-	vmovupd(ymm6, mem(rcx))
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm8, mem(rcx))
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vmovupd(ymm8, mem(rcx, 0*32))
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm10, mem(rcx))
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vmovupd(ymm10, mem(rcx, 0*32))
+	vmovupd(ymm11, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm12, mem(rcx))
-	vmovupd(ymm13, mem(rcx, rsi, 4))
+	vmovupd(ymm12, mem(rcx, 0*32))
+	vmovupd(ymm13, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm14, mem(rcx))
-	vmovupd(ymm15, mem(rcx, rsi, 4))
+	vmovupd(ymm14, mem(rcx, 0*32))
+	vmovupd(ymm15, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -859,7 +762,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -869,7 +772,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm8)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm10)
 
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
@@ -881,14 +784,14 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vmovupd(xmm0, mem(rdx))
+	vmovupd(xmm0, mem(rdx        ))
 	vmovupd(xmm1, mem(rdx, rsi, 1))
 	vmovupd(xmm2, mem(rdx, rsi, 2))
 	vmovupd(xmm4, mem(rdx, rax, 1))
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -898,7 +801,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm9)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm11)
 
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
@@ -910,7 +813,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vmovupd(xmm0, mem(rdx))
+	vmovupd(xmm0, mem(rdx        ))
 	vmovupd(xmm1, mem(rdx, rsi, 1))
 	vmovupd(xmm2, mem(rdx, rsi, 2))
 	vmovupd(xmm4, mem(rdx, rax, 1))
@@ -929,7 +832,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP6X8J)                    // iterate again if jj != 0.
@@ -962,7 +865,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -985,6 +888,18 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_6x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -1011,7 +926,7 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 1
+			#if 1
 			const dim_t nr_cur = 1;
 
 			bli_dgemmsup_r_haswell_ref_6x1
@@ -1020,14 +935,14 @@ void bli_dgemmsup_rv_haswell_asm_6x8n
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
 			  beta, cij, rs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }
@@ -1132,8 +1047,6 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	vxorpd(ymm11, ymm11, ymm11)
 	vxorpd(ymm12, ymm12, ymm12)
 	vxorpd(ymm13, ymm13, ymm13)
-	//vxorpd(ymm14, ymm14, ymm14)
-	//vxorpd(ymm15, ymm15, ymm15)
 #endif
 
 	mov(var(a), rax)                   // load address of a.
@@ -1148,10 +1061,10 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
-	prefetch(0, mem(rdx, 7*8))         // prefetch c + 3*rs_c
+	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*rs_c
 	prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
 
 	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
@@ -1161,10 +1074,10 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 4*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         4*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 4*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 4*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 4*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         4*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 4*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 4*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -1174,20 +1087,15 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
-#else
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
 	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
-	lea(mem(rbx, r10, 8), rdx)         // use rdx for prefetching b.
-	lea(mem(rdx, r10, 8), rdx)         // rdx = b + 16*rs_b;
-
-	#if 0
-	mov(r9, rsi)                       // rsi = rs_b;
-	sal(imm(5), rsi)                   // rsi = 16*rs_b;
-	lea(mem(rax, rsi, 1), rdx)         // rdx = b + 16*rs_b;
-	#endif
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -1204,9 +1112,8 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, 5*8))
 #endif
@@ -1237,9 +1144,8 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	
 	// ---------------------------------- iteration 1
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
@@ -1270,9 +1176,8 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	
 	// ---------------------------------- iteration 2
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
@@ -1303,13 +1208,11 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	// ---------------------------------- iteration 3
 
-#if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
-	//prefetch(0, mem(rdx, r9, 1, 7*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
+#if 0
+	prefetch(0, mem(rdx, 5*8))
 #else
 	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -1356,7 +1259,8 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -1440,43 +1344,43 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
+	vmovupd(ymm6, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm7)
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm7)
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
+	vmovupd(ymm8, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm9)
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm9)
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm10)
-	vmovupd(ymm10, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm10)
+	vmovupd(ymm10, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm11)
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm11)
+	vmovupd(ymm11, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm12)
-	vmovupd(ymm12, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm12)
+	vmovupd(ymm12, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm13)
-	vmovupd(ymm13, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm13)
+	vmovupd(ymm13, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -1486,7 +1390,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	label(.DCOLSTORED)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -1498,33 +1402,18 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm4)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm6)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm8)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm10)
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-#if 0
-	vunpcklpd(ymm14, ymm12, ymm0)
-	vunpckhpd(ymm14, ymm12, ymm1)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vextractf128(imm(0x1), ymm1, xmm4)
-
-	vfmadd231pd(mem(rdx), xmm3, xmm0)
-	vfmadd231pd(mem(rdx, rsi, 1), xmm3, xmm1)
-	vfmadd231pd(mem(rdx, rsi, 2), xmm3, xmm2)
-	vfmadd231pd(mem(rdx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rdx))
-	vmovupd(xmm1, mem(rdx, rsi, 1))
-	vmovupd(xmm2, mem(rdx, rsi, 2))
-	vmovupd(xmm4, mem(rdx, rax, 1))
-#else
-	vmovlpd(mem(rdx), xmm0, xmm0)
+	vmovlpd(mem(rdx        ), xmm0, xmm0)
 	vmovhpd(mem(rdx, rsi, 1), xmm0, xmm0)
 	vmovlpd(mem(rdx, rsi, 2), xmm1, xmm1)
 	vmovhpd(mem(rdx, rax, 1), xmm1, xmm1)
@@ -1532,15 +1421,14 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	vfmadd213pd(ymm12, ymm3, ymm0)
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rdx))
+	vmovlpd(xmm0, mem(rdx        ))
 	vmovhpd(xmm0, mem(rdx, rsi, 1))
 	vmovlpd(xmm1, mem(rdx, rsi, 2))
 	vmovhpd(xmm1, mem(rdx, rax, 1))
-#endif
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -1552,33 +1440,18 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm5)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm5)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm7)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm9)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm11)
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
 
 	//lea(mem(rcx, rsi, 4), rcx)
 
-#if 0
-	vunpcklpd(ymm15, ymm13, ymm0)
-	vunpckhpd(ymm15, ymm13, ymm1)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vextractf128(imm(0x1), ymm1, xmm4)
-
-	vfmadd231pd(mem(rdx), xmm3, xmm0)
-	vfmadd231pd(mem(rdx, rsi, 1), xmm3, xmm1)
-	vfmadd231pd(mem(rdx, rsi, 2), xmm3, xmm2)
-	vfmadd231pd(mem(rdx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rdx))
-	vmovupd(xmm1, mem(rdx, rsi, 1))
-	vmovupd(xmm2, mem(rdx, rsi, 2))
-	vmovupd(xmm4, mem(rdx, rax, 1))
-#else
-	vmovlpd(mem(rdx), xmm0, xmm0)
+	vmovlpd(mem(rdx        ), xmm0, xmm0)
 	vmovhpd(mem(rdx, rsi, 1), xmm0, xmm0)
 	vmovlpd(mem(rdx, rsi, 2), xmm1, xmm1)
 	vmovhpd(mem(rdx, rax, 1), xmm1, xmm1)
@@ -1586,11 +1459,10 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	vfmadd213pd(ymm13, ymm3, ymm0)
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rdx))
+	vmovlpd(xmm0, mem(rdx        ))
 	vmovhpd(xmm0, mem(rdx, rsi, 1))
 	vmovlpd(xmm1, mem(rdx, rsi, 2))
 	vmovhpd(xmm1, mem(rdx, rax, 1))
-#endif
 
 	//lea(mem(rdx, rsi, 4), rdx)
 
@@ -1611,28 +1483,28 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 
-	vmovupd(ymm6, mem(rcx))
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm8, mem(rcx))
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vmovupd(ymm8, mem(rcx, 0*32))
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm10, mem(rcx))
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vmovupd(ymm10, mem(rcx, 0*32))
+	vmovupd(ymm11, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vmovupd(ymm12, mem(rcx))
-	vmovupd(ymm13, mem(rcx, rsi, 4))
+	vmovupd(ymm12, mem(rcx, 0*32))
+	vmovupd(ymm13, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -1642,7 +1514,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -1652,36 +1524,24 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm8)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm10)
 
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-#if 0
-	vunpcklpd(ymm14, ymm12, ymm0)
-	vunpckhpd(ymm14, ymm12, ymm1)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vextractf128(imm(0x1), ymm1, xmm4)
-
-	vmovupd(xmm0, mem(rdx))
-	vmovupd(xmm1, mem(rdx, rsi, 1))
-	vmovupd(xmm2, mem(rdx, rsi, 2))
-	vmovupd(xmm4, mem(rdx, rax, 1))
-#else
 	vmovupd(ymm12, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rdx))
+	vmovlpd(xmm0, mem(rdx        ))
 	vmovhpd(xmm0, mem(rdx, rsi, 1))
 	vmovlpd(xmm1, mem(rdx, rsi, 2))
 	vmovhpd(xmm1, mem(rdx, rax, 1))
-#endif
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -1691,32 +1551,20 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm9)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm11)
 
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
 
 	//lea(mem(rcx, rsi, 4), rcx)
 
-#if 0
-	vunpcklpd(ymm15, ymm13, ymm0)
-	vunpckhpd(ymm15, ymm13, ymm1)
-	vextractf128(imm(0x1), ymm0, xmm2)
-	vextractf128(imm(0x1), ymm1, xmm4)
-
-	vmovupd(xmm0, mem(rdx))
-	vmovupd(xmm1, mem(rdx, rsi, 1))
-	vmovupd(xmm2, mem(rdx, rsi, 2))
-	vmovupd(xmm4, mem(rdx, rax, 1))
-#else
 	vmovupd(ymm13, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rdx))
+	vmovlpd(xmm0, mem(rdx        ))
 	vmovhpd(xmm0, mem(rdx, rsi, 1))
 	vmovlpd(xmm1, mem(rdx, rsi, 2))
 	vmovhpd(xmm1, mem(rdx, rax, 1))
-#endif
 
 	//lea(mem(rdx, rsi, 4), rdx)
 
@@ -1732,7 +1580,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP6X8J)                    // iterate again if jj != 0.
@@ -1765,7 +1613,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -1788,6 +1636,18 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_5x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -1814,7 +1674,7 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 1
+			#if 1
 			const dim_t nr_cur = 1;
 
 			bli_dgemmsup_r_haswell_ref_5x1
@@ -1823,14 +1683,14 @@ void bli_dgemmsup_rv_haswell_asm_5x8n
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
 			  beta, cij, rs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }
@@ -1947,10 +1807,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	lea(mem(r12, rdi, 2), rdx)         //
 	lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
-	prefetch(0, mem(rdx, 7*8))         // prefetch c + 3*rs_c
+	prefetch(0, mem(rdx,         7*8)) // prefetch c + 3*rs_c
 
 	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
 	label(.DCOLPFETCH)                 // column-stored prefetching c
@@ -1959,10 +1819,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 3*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         3*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 3*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 3*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 3*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         3*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 3*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 3*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -1972,11 +1832,15 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-	//lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
-
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -1993,9 +1857,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2020,9 +1885,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	
 	// ---------------------------------- iteration 1
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2047,9 +1913,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	
 	// ---------------------------------- iteration 2
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2075,9 +1942,10 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	// ---------------------------------- iteration 3
 
 #if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -2120,7 +1988,8 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2198,35 +2067,35 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
+	vmovupd(ymm6, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm7)
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm7)
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
+	vmovupd(ymm8, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm9)
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm9)
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm10)
-	vmovupd(ymm10, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm10)
+	vmovupd(ymm10, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm11)
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm11)
+	vmovupd(ymm11, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -2236,7 +2105,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	label(.DCOLSTORED)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -2248,18 +2117,18 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm4)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm6)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm8)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm10)
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -2271,11 +2140,11 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), ymm3, ymm5)
+	vfmadd231pd(mem(rcx        ), ymm3, ymm5)
 	vfmadd231pd(mem(rcx, rsi, 1), ymm3, ymm7)
 	vfmadd231pd(mem(rcx, rsi, 2), ymm3, ymm9)
 	vfmadd231pd(mem(rcx, rax, 1), ymm3, ymm11)
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
@@ -2299,20 +2168,20 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 
-	vmovupd(ymm6, mem(rcx))
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
-	vmovupd(ymm8, mem(rcx))
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vmovupd(ymm8, mem(rcx, 0*32))
+	vmovupd(ymm9, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
-	vmovupd(ymm10, mem(rcx))
-	vmovupd(ymm11, mem(rcx, rsi, 4))
+	vmovupd(ymm10, mem(rcx, 0*32))
+	vmovupd(ymm11, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -2322,7 +2191,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -2332,14 +2201,14 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm8)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm10)
 
-	vmovupd(ymm4, mem(rcx))
+	vmovupd(ymm4, mem(rcx        ))
 	vmovupd(ymm6, mem(rcx, rsi, 1))
 	vmovupd(ymm8, mem(rcx, rsi, 2))
 	vmovupd(ymm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -2349,7 +2218,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 	vperm2f128(imm(0x31), ymm2, ymm0, ymm9)
 	vperm2f128(imm(0x31), ymm3, ymm1, ymm11)
 
-	vmovupd(ymm5, mem(rcx))
+	vmovupd(ymm5, mem(rcx        ))
 	vmovupd(ymm7, mem(rcx, rsi, 1))
 	vmovupd(ymm9, mem(rcx, rsi, 2))
 	vmovupd(ymm11, mem(rcx, rax, 1))
@@ -2368,7 +2237,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP4X8J)                    // iterate again if jj != 0.
@@ -2401,7 +2270,7 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -2424,6 +2293,18 @@ void bli_dgemmsup_rv_haswell_asm_4x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_4x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -2578,7 +2459,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	//lea(mem(r12, rdi, 2), rdx)         //
 	//lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(r12, rdi, 2, 7*8)) // prefetch c + 2*rs_c
 
@@ -2589,10 +2470,10 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 2*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         2*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 2*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 2*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 2*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         2*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 2*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 2*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -2602,11 +2483,15 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-	//lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
-
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -2623,9 +2508,10 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2647,9 +2533,10 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	
 	// ---------------------------------- iteration 1
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2671,9 +2558,10 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	
 	// ---------------------------------- iteration 2
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2695,10 +2583,11 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	// ---------------------------------- iteration 3
 
-#if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -2738,7 +2627,8 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -2811,27 +2701,27 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
+	vmovupd(ymm6, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm7)
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm7)
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm8)
-	vmovupd(ymm8, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm8)
+	vmovupd(ymm8, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm9)
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm9)
+	vmovupd(ymm9, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -2841,7 +2731,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	label(.DCOLSTORED)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -2858,30 +2748,29 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), xmm3, xmm4)
+	vfmadd231pd(mem(rcx        ), xmm3, xmm4)
 	vfmadd231pd(mem(rcx, rsi, 1), xmm3, xmm6)
 	vfmadd231pd(mem(rcx, rsi, 2), xmm3, xmm8)
 	vfmadd231pd(mem(rcx, rax, 1), xmm3, xmm10)
-	vmovupd(xmm4, mem(rcx))
+	vmovupd(xmm4, mem(rcx        ))
 	vmovupd(xmm6, mem(rcx, rsi, 1))
 	vmovupd(xmm8, mem(rcx, rsi, 2))
 	vmovupd(xmm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-	vfmadd231sd(mem(rdx), xmm3, xmm12)
+	vfmadd231sd(mem(rdx        ), xmm3, xmm12)
 	vfmadd231sd(mem(rdx, rsi, 1), xmm3, xmm13)
 	vfmadd231sd(mem(rdx, rsi, 2), xmm3, xmm14)
 	vfmadd231sd(mem(rdx, rax, 1), xmm3, xmm15)
-	vmovsd(xmm12, mem(rdx))
+	vmovsd(xmm12, mem(rdx        ))
 	vmovsd(xmm13, mem(rdx, rsi, 1))
 	vmovsd(xmm14, mem(rdx, rsi, 2))
 	vmovsd(xmm15, mem(rdx, rax, 1))
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -2898,22 +2787,22 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	vbroadcastsd(mem(rbx), ymm3)
 
-	vfmadd231pd(mem(rcx), xmm3, xmm5)
+	vfmadd231pd(mem(rcx        ), xmm3, xmm5)
 	vfmadd231pd(mem(rcx, rsi, 1), xmm3, xmm7)
 	vfmadd231pd(mem(rcx, rsi, 2), xmm3, xmm9)
 	vfmadd231pd(mem(rcx, rax, 1), xmm3, xmm11)
-	vmovupd(xmm5, mem(rcx))
+	vmovupd(xmm5, mem(rcx        ))
 	vmovupd(xmm7, mem(rcx, rsi, 1))
 	vmovupd(xmm9, mem(rcx, rsi, 2))
 	vmovupd(xmm11, mem(rcx, rax, 1))
 
 	//lea(mem(rcx, rsi, 4), rcx)
 
-	vfmadd231sd(mem(rdx), xmm3, xmm12)
+	vfmadd231sd(mem(rdx        ), xmm3, xmm12)
 	vfmadd231sd(mem(rdx, rsi, 1), xmm3, xmm13)
 	vfmadd231sd(mem(rdx, rsi, 2), xmm3, xmm14)
 	vfmadd231sd(mem(rdx, rax, 1), xmm3, xmm15)
-	vmovsd(xmm12, mem(rdx))
+	vmovsd(xmm12, mem(rdx        ))
 	vmovsd(xmm13, mem(rdx, rsi, 1))
 	vmovsd(xmm14, mem(rdx, rsi, 2))
 	vmovsd(xmm15, mem(rdx, rax, 1))
@@ -2937,16 +2826,16 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 
-	vmovupd(ymm6, mem(rcx))
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm7, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
-	vmovupd(ymm8, mem(rcx))
-	vmovupd(ymm9, mem(rcx, rsi, 4))
+	vmovupd(ymm8, mem(rcx, 0*32))
+	vmovupd(ymm9, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -2956,7 +2845,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vunpcklpd(ymm10, ymm8, ymm2)
@@ -2971,21 +2860,21 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	vextractf128(imm(0x1), ymm8, xmm14)
 	vextractf128(imm(0x1), ymm10, xmm15)
 
-	vmovupd(xmm4, mem(rcx))
+	vmovupd(xmm4, mem(rcx        ))
 	vmovupd(xmm6, mem(rcx, rsi, 1))
 	vmovupd(xmm8, mem(rcx, rsi, 2))
 	vmovupd(xmm10, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-	vmovsd(xmm12, mem(rdx))
+	vmovsd(xmm12, mem(rdx        ))
 	vmovsd(xmm13, mem(rdx, rsi, 1))
 	vmovsd(xmm14, mem(rdx, rsi, 2))
 	vmovsd(xmm15, mem(rdx, rax, 1))
 
 	lea(mem(rdx, rsi, 4), rdx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vunpcklpd(ymm11, ymm9, ymm2)
@@ -3000,14 +2889,14 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 	vextractf128(imm(0x1), ymm9, xmm14)
 	vextractf128(imm(0x1), ymm11, xmm15)
 
-	vmovupd(xmm5, mem(rcx))
+	vmovupd(xmm5, mem(rcx        ))
 	vmovupd(xmm7, mem(rcx, rsi, 1))
 	vmovupd(xmm9, mem(rcx, rsi, 2))
 	vmovupd(xmm11, mem(rcx, rax, 1))
 
 	//lea(mem(rcx, rsi, 4), rcx)
 
-	vmovsd(xmm12, mem(rdx))
+	vmovsd(xmm12, mem(rdx        ))
 	vmovsd(xmm13, mem(rdx, rsi, 1))
 	vmovsd(xmm14, mem(rdx, rsi, 2))
 	vmovsd(xmm15, mem(rdx, rax, 1))
@@ -3026,7 +2915,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP4X8J)                    // iterate again if jj != 0.
@@ -3059,7 +2948,7 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -3082,6 +2971,18 @@ void bli_dgemmsup_rv_haswell_asm_3x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_3x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -3228,7 +3129,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	//lea(mem(r12, rdi, 2), rdx)         //
 	//lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(r12, rdi, 1, 7*8)) // prefetch c + 1*rs_c
 
 	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
@@ -3238,10 +3139,10 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 1*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         1*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 1*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 1*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 1*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         1*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 1*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 1*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -3251,11 +3152,15 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-	//lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
-
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -3272,9 +3177,10 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3292,9 +3198,10 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	
 	// ---------------------------------- iteration 1
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3312,9 +3219,10 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	
 	// ---------------------------------- iteration 2
 
-#if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3332,10 +3240,11 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	// ---------------------------------- iteration 3
 
-#if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
-	prefetch(0, mem(rbx, 11*8))
+#if 0
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -3371,7 +3280,8 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3438,19 +3348,19 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm6)
-	vmovupd(ymm6, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm6)
+	vmovupd(ymm6, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm7)
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm7)
+	vmovupd(ymm7, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -3460,34 +3370,34 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	label(.DCOLSTORED)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vfmadd231pd(mem(rcx), xmm3, xmm0)
+	vfmadd231pd(mem(rcx        ), xmm3, xmm0)
 	vfmadd231pd(mem(rcx, rsi, 1), xmm3, xmm1)
 	vfmadd231pd(mem(rcx, rsi, 2), xmm3, xmm2)
 	vfmadd231pd(mem(rcx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rcx))
+	vmovupd(xmm0, mem(rcx        ))
 	vmovupd(xmm1, mem(rcx, rsi, 1))
 	vmovupd(xmm2, mem(rcx, rsi, 2))
 	vmovupd(xmm4, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vfmadd231pd(mem(rcx), xmm3, xmm0)
+	vfmadd231pd(mem(rcx        ), xmm3, xmm0)
 	vfmadd231pd(mem(rcx, rsi, 1), xmm3, xmm1)
 	vfmadd231pd(mem(rcx, rsi, 2), xmm3, xmm2)
 	vfmadd231pd(mem(rcx, rax, 1), xmm3, xmm4)
-	vmovupd(xmm0, mem(rcx))
+	vmovupd(xmm0, mem(rcx        ))
 	vmovupd(xmm1, mem(rcx, rsi, 1))
 	vmovupd(xmm2, mem(rcx, rsi, 2))
 	vmovupd(xmm4, mem(rcx, rax, 1))
@@ -3511,12 +3421,12 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	add(rdi, rcx)
 
-	vmovupd(ymm6, mem(rcx))
-	vmovupd(ymm7, mem(rcx, rsi, 4))
+	vmovupd(ymm6, mem(rcx, 0*32))
+	vmovupd(ymm7, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -3526,26 +3436,26 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vunpcklpd(ymm6, ymm4, ymm0)
 	vunpckhpd(ymm6, ymm4, ymm1)
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vmovupd(xmm0, mem(rcx))
+	vmovupd(xmm0, mem(rcx        ))
 	vmovupd(xmm1, mem(rcx, rsi, 1))
 	vmovupd(xmm2, mem(rcx, rsi, 2))
 	vmovupd(xmm4, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
+	                                   // begin I/O on columns 4-7
 	vunpcklpd(ymm7, ymm5, ymm0)
 	vunpckhpd(ymm7, ymm5, ymm1)
 	vextractf128(imm(0x1), ymm0, xmm2)
 	vextractf128(imm(0x1), ymm1, xmm4)
 
-	vmovupd(xmm0, mem(rcx))
+	vmovupd(xmm0, mem(rcx        ))
 	vmovupd(xmm1, mem(rcx, rsi, 1))
 	vmovupd(xmm2, mem(rcx, rsi, 2))
 	vmovupd(xmm4, mem(rcx, rax, 1))
@@ -3564,7 +3474,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP2X8J)                    // iterate again if jj != 0.
@@ -3597,7 +3507,7 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -3620,6 +3530,18 @@ void bli_dgemmsup_rv_haswell_asm_2x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_2x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;
@@ -3764,7 +3686,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 	//lea(mem(r12, rdi, 2), rdx)         //
 	//lea(mem(rdx, rdi, 1), rdx)         // rdx = c + 3*rs_c;
-	prefetch(0, mem(r12, 7*8))         // prefetch c + 0*rs_c
+	prefetch(0, mem(r12,         7*8)) // prefetch c + 0*rs_c
 
 	jmp(.DPOSTPFETCH)                  // jump to end of prefetching c
 	label(.DCOLPFETCH)                 // column-stored prefetching c
@@ -3773,10 +3695,10 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	lea(mem(, rsi, 8), rsi)            // cs_c *= sizeof(double)
 	lea(mem(r12, rsi, 2), rdx)         //
 	lea(mem(rdx, rsi, 1), rdx)         // rdx = c + 3*cs_c;
-	prefetch(0, mem(r12, 0*8))         // prefetch c + 0*cs_c
+	prefetch(0, mem(r12,         0*8)) // prefetch c + 0*cs_c
 	prefetch(0, mem(r12, rsi, 1, 0*8)) // prefetch c + 1*cs_c
 	prefetch(0, mem(r12, rsi, 2, 0*8)) // prefetch c + 2*cs_c
-	prefetch(0, mem(rdx, 1*8))         // prefetch c + 3*cs_c
+	prefetch(0, mem(rdx,         0*8)) // prefetch c + 3*cs_c
 	prefetch(0, mem(rdx, rsi, 1, 0*8)) // prefetch c + 4*cs_c
 	prefetch(0, mem(rdx, rsi, 2, 0*8)) // prefetch c + 5*cs_c
 	lea(mem(rdx, rsi, 2), rdx)         // rdx = c + 5*cs_c;
@@ -3786,11 +3708,15 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	label(.DPOSTPFETCH)                // done prefetching c
 
 #if 1
-	//lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
-
-	                                   // use byte offsets from rbx to
-	                                   // prefetch lines from next upanel
-	                                   // of b.
+	mov(var(ps_b8), rdx)               // load ps_b8
+	lea(mem(rbx, rdx, 1), rdx)         // rdx = b + ps_b8
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
+	                                   // use rcx, rdx for prefetching lines
+	                                   // from next upanel of b.
+#else
+	lea(mem(rbx, r8,  8), rdx)         // use rdx for prefetching lines
+	lea(mem(rdx, r8,  8), rdx)         // from next upanel of b.
+	lea(mem(r10, r10, 2), rcx)         // rcx = 3*rs_b;
 #endif
 	
 	
@@ -3808,8 +3734,9 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	// ---------------------------------- iteration 0
 
 #if 1
-	//prefetch(0, mem(rdx, 11*8))        // prefetch line of next upanel of b
-	prefetch(0, mem(rbx, 11*8))        // prefetch line of next upanel of b
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3825,8 +3752,9 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	// ---------------------------------- iteration 1
 
 #if 1
-	//prefetch(0, mem(rdx, r10, 1, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 1, 5*8))
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3842,8 +3770,9 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	// ---------------------------------- iteration 2
 
 #if 1
-	//prefetch(0, mem(rdx, r10, 2, 11*8))
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, r10, 2, 5*8))
 #endif
 	
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3859,9 +3788,10 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	// ---------------------------------- iteration 3
 
 #if 1
-	//prefetch(0, mem(rdx, rcx, 1, 11*8))
-	//lea(mem(rdx, r10, 4), rdx)         // a_prefetch += 4*cs_a;
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+#else
+	prefetch(0, mem(rdx, rcx, 1, 5*8))
+	lea(mem(rdx, r10, 4), rdx)         // b_prefetch += 4*rs_b;
 #endif
 
 	vmovupd(mem(rbx, 0*32), ymm0)
@@ -3894,7 +3824,8 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	label(.DLOOPKLEFT)                 // EDGE LOOP
 
 #if 1
-	prefetch(0, mem(rbx, 11*8))
+	prefetch(0, mem(rdx, 5*8))
+	add(r10, rdx)                      // b_prefetch += rs_b;
 #endif
 
 	vmovupd(mem(rbx,  0*32), ymm0)
@@ -3956,11 +3887,11 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	label(.DROWSTORED)
 	
 	
-	vfmadd231pd(mem(rcx), ymm3, ymm4)
-	vmovupd(ymm4, mem(rcx))
+	vfmadd231pd(mem(rcx, 0*32), ymm3, ymm4)
+	vmovupd(ymm4, mem(rcx, 0*32))
 
-	vfmadd231pd(mem(rcx, rsi, 4), ymm3, ymm5)
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vfmadd231pd(mem(rcx, 1*32), ymm3, ymm5)
+	vmovupd(ymm5, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -3970,8 +3901,8 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 	label(.DCOLSTORED)
 
-
-	vmovlpd(mem(rcx), xmm0, xmm0)
+	                                   // begin I/O on columns 0-3
+	vmovlpd(mem(rcx        ), xmm0, xmm0)
 	vmovhpd(mem(rcx, rsi, 1), xmm0, xmm0)
 	vmovlpd(mem(rcx, rsi, 2), xmm1, xmm1)
 	vmovhpd(mem(rcx, rax, 1), xmm1, xmm1)
@@ -3980,15 +3911,15 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	vfmadd213pd(ymm4, ymm3, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rcx))
+	vmovlpd(xmm0, mem(rcx        ))
 	vmovhpd(xmm0, mem(rcx, rsi, 1))
 	vmovlpd(xmm1, mem(rcx, rsi, 2))
 	vmovhpd(xmm1, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
-	vmovlpd(mem(rcx), xmm0, xmm0)
+	                                   // begin I/O on columns 4-7
+	vmovlpd(mem(rcx        ), xmm0, xmm0)
 	vmovhpd(mem(rcx, rsi, 1), xmm0, xmm0)
 	vmovlpd(mem(rcx, rsi, 2), xmm1, xmm1)
 	vmovhpd(mem(rcx, rax, 1), xmm1, xmm1)
@@ -3997,7 +3928,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	vfmadd213pd(ymm5, ymm3, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rcx))
+	vmovlpd(xmm0, mem(rcx        ))
 	vmovhpd(xmm0, mem(rcx, rsi, 1))
 	vmovlpd(xmm1, mem(rcx, rsi, 2))
 	vmovhpd(xmm1, mem(rcx, rax, 1))
@@ -4021,8 +3952,8 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 	label(.DROWSTORBZ)
 	
 	
-	vmovupd(ymm4, mem(rcx))
-	vmovupd(ymm5, mem(rcx, rsi, 4))
+	vmovupd(ymm4, mem(rcx, 0*32))
+	vmovupd(ymm5, mem(rcx, 1*32))
 	//add(rdi, rcx)
 	
 	
@@ -4032,22 +3963,22 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 	label(.DCOLSTORBZ)
 
-
+	                                   // begin I/O on columns 0-3
 	vmovupd(ymm4, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rcx))
+	vmovlpd(xmm0, mem(rcx        ))
 	vmovhpd(xmm0, mem(rcx, rsi, 1))
 	vmovlpd(xmm1, mem(rcx, rsi, 2))
 	vmovhpd(xmm1, mem(rcx, rax, 1))
 
 	lea(mem(rcx, rsi, 4), rcx)
 
-
+	                                   // begin I/O on columns 4-7
 	vmovupd(ymm5, ymm0)
 
 	vextractf128(imm(1), ymm0, xmm1)
-	vmovlpd(xmm0, mem(rcx))
+	vmovlpd(xmm0, mem(rcx        ))
 	vmovhpd(xmm0, mem(rcx, rsi, 1))
 	vmovlpd(xmm1, mem(rcx, rsi, 2))
 	vmovhpd(xmm1, mem(rcx, rax, 1))
@@ -4066,7 +3997,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 
 	//add(imm(8*8), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b8), rbx)               // load ps_b8
-	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b8
+	lea(mem(r14, rbx, 1), r14)         // b_jj = r14 += ps_b8
 
 	dec(r11)                           // jj -= 1;
 	jne(.DLOOP1X8J)                    // iterate again if jj != 0.
@@ -4099,7 +4030,7 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -4122,6 +4053,18 @@ void bli_dgemmsup_rv_haswell_asm_1x8n
 		//double* restrict bj  = b + ( j_edge / 8 ) * ps_b;
 		double* restrict bj  = b + n_iter * ps_b;
 
+		if ( 6 <= n_left )
+		{
+			const dim_t nr_cur = 6;
+
+			bli_dgemmsup_rv_haswell_asm_1x6
+			(
+			  conja, conjb, mr_cur, nr_cur, k0,
+			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+			  beta, cij, rs_c0, cs_c0, data, cntx
+			);
+			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+		}
 		if ( 4 <= n_left )
 		{
 			const dim_t nr_cur = 4;

@@ -48,6 +48,7 @@
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
   #include <stdint.h>
+  #include <stdbool.h>
 #else
   // When stdint.h is not available, manually typedef the types we will use.
   #ifdef _WIN32
@@ -87,19 +88,19 @@ typedef unsigned long int guint_t;
 
 // -- Boolean type --
 
-typedef  gint_t  bool_t;
+// NOTE: bool_t is no longer used and has been replaced with C99's bool type.
+//typedef bool bool_t;
 
-
-// -- Boolean values --
-
+// BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
+// define these macros in terms of true and false, respectively, which are
+// defined by C99 in stdbool.h.
 #ifndef TRUE
-  #define TRUE  1
+  #define TRUE  true
 #endif
 
 #ifndef FALSE
-  #define FALSE 0
+  #define FALSE false
 #endif
-
 
 // -- Special-purpose integers --
 
@@ -1160,7 +1161,7 @@ typedef struct func_s
 
 typedef struct mbool_s
 {
-	bool_t  v[BLIS_NUM_FP_TYPES];
+	bool v[BLIS_NUM_FP_TYPES];
 
 } mbool_t;
 
@@ -1317,7 +1318,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -1347,7 +1348,7 @@ static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
-static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -1453,12 +1454,13 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
+	bool      auto_factor;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-	bool_t    pack_a; // enable/disable packing of left-hand matrix A.
-	bool_t    pack_b; // enable/disable packing of right-hand matrix B.
-	bool_t    l3_sup; // enable/disable small matrix handling in level-3 ops.
+	bool      pack_a; // enable/disable packing of left-hand matrix A.
+	bool      pack_b; // enable/disable packing of right-hand matrix B.
+	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 

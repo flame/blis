@@ -60,8 +60,14 @@ struct thrcomm_s
 {
 	void*   sent_object;
 	dim_t   n_threads;
-
-	bool_t  barrier_sense;
+ 
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	gint_t  barrier_sense;
 	dim_t   barrier_threads_arrived;
 };
 #endif

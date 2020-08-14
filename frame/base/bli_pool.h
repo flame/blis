@@ -70,24 +70,24 @@ typedef struct
 
 // Pool block query
 
-static void* bli_pblk_buf( pblk_t* pblk )
+BLIS_INLINE void* bli_pblk_buf( pblk_t* pblk )
 {
 	return pblk->buf;
 }
 
-static siz_t bli_pblk_block_size( pblk_t* pblk )
+BLIS_INLINE siz_t bli_pblk_block_size( pblk_t* pblk )
 {
 	return pblk->block_size;
 }
 
 // Pool block modification
 
-static void bli_pblk_set_buf( void* buf, pblk_t* pblk )
+BLIS_INLINE void bli_pblk_set_buf( void* buf, pblk_t* pblk )
 {
 	pblk->buf = buf;
 }
 
-static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
+BLIS_INLINE void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
 {
 	pblk->block_size = block_size;
 }
@@ -106,7 +106,7 @@ static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
           .block_size = 0, \
         }  \
 
-static void bli_pblk_clear( pblk_t* pblk )
+BLIS_INLINE void bli_pblk_clear( pblk_t* pblk )
 {
 	bli_pblk_set_buf( NULL, pblk );
 	bli_pblk_set_block_size( 0, pblk );
@@ -115,100 +115,100 @@ static void bli_pblk_clear( pblk_t* pblk )
 
 // Pool entry query
 
-static void* bli_pool_block_ptrs( pool_t* pool )
+BLIS_INLINE void* bli_pool_block_ptrs( pool_t* pool )
 {
 	return pool->block_ptrs;
 }
 
-static siz_t bli_pool_block_ptrs_len( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_ptrs_len( pool_t* pool )
 {
 	return pool->block_ptrs_len;
 }
 
-static siz_t bli_pool_num_blocks( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_num_blocks( pool_t* pool )
 {
 	return pool->num_blocks;
 }
 
-static siz_t bli_pool_block_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_size( pool_t* pool )
 {
 	return pool->block_size;
 }
 
-static siz_t bli_pool_align_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_align_size( pool_t* pool )
 {
 	return pool->align_size;
 }
 
-static siz_t bli_pool_offset_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_offset_size( pool_t* pool )
 {
 	return pool->offset_size;
 }
 
-static malloc_ft bli_pool_malloc_fp( pool_t* pool )
+BLIS_INLINE malloc_ft bli_pool_malloc_fp( pool_t* pool )
 {
 	return pool->malloc_fp;
 }
 
-static free_ft bli_pool_free_fp( pool_t* pool )
+BLIS_INLINE free_ft bli_pool_free_fp( pool_t* pool )
 {
 	return pool->free_fp;
 }
 
-static siz_t bli_pool_top_index( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_top_index( pool_t* pool )
 {
 	return pool->top_index;
 }
 
-static bool_t bli_pool_is_exhausted( pool_t* pool )
+BLIS_INLINE bool bli_pool_is_exhausted( pool_t* pool )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_pool_top_index( pool ) == bli_pool_num_blocks( pool ) );
 }
 
 // Pool entry modification
 
-static void bli_pool_set_block_ptrs( void* block_ptrs, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_ptrs( void* block_ptrs, pool_t* pool ) \
 {
 	pool->block_ptrs = block_ptrs;
 }
 
-static void bli_pool_set_block_ptrs_len( siz_t block_ptrs_len, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_ptrs_len( siz_t block_ptrs_len, pool_t* pool ) \
 {
 	pool->block_ptrs_len = block_ptrs_len;
 }
 
-static void bli_pool_set_num_blocks( siz_t num_blocks, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_num_blocks( siz_t num_blocks, pool_t* pool ) \
 {
 	pool->num_blocks = num_blocks;
 }
 
-static void bli_pool_set_block_size( siz_t block_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_size( siz_t block_size, pool_t* pool ) \
 {
 	pool->block_size = block_size;
 }
 
-static void bli_pool_set_align_size( siz_t align_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_align_size( siz_t align_size, pool_t* pool ) \
 {
 	pool->align_size = align_size;
 }
 
-static void bli_pool_set_offset_size( siz_t offset_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_offset_size( siz_t offset_size, pool_t* pool ) \
 {
 	pool->offset_size = offset_size;
 }
 
-static void bli_pool_set_malloc_fp( malloc_ft malloc_fp, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_malloc_fp( malloc_ft malloc_fp, pool_t* pool ) \
 {
 	pool->malloc_fp = malloc_fp;
 }
 
-static void bli_pool_set_free_fp( free_ft free_fp, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_free_fp( free_ft free_fp, pool_t* pool ) \
 {
 	pool->free_fp = free_fp;
 }
 
-static void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
 {
 	pool->top_index = top_index;
 }

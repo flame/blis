@@ -282,6 +282,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
+#ifdef BLIS_KERNELS_ARMSVE
+#include "bli_kernels_armsve.h"
+#endif
 #ifdef BLIS_KERNELS_ARMV8A
 #include "bli_kernels_armv8a.h"
 #endif

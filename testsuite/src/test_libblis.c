@@ -2109,6 +2109,11 @@ void libblis_test_op_driver
 
 	// Loop over the requested storage schemes.
 	for ( sci = 0; sci < n_store_combos; ++sci )
+	//for ( sci = 0; sci < 5; ( sci == 0 || sci == 2 ? sci+=2 : ++sci ) )
+	//for ( sci = 0; sci < 5; ( sci == 2 ? sci+=2 : ++sci ) )
+	//for ( sci = 3; sci < 8; ( sci == 3 ? sci+=2 : ++sci ) )
+	//for ( sci = 0; sci < 1; ++sci )
+	//for ( sci = 7; sci < 8; ++sci )
 	{
 		// Loop over the requested datatypes.
 		for ( dci = 0; dci < n_dt_combos; ++dci )
@@ -2562,7 +2567,7 @@ void fill_string_with_n_spaces( char* str, unsigned int n_spaces )
 void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, char storage, dim_t m, dim_t n, obj_t* a )
 {
 	dim_t  gs        = params->gs_spacing;
-	bool_t alignment = params->alignment;
+	bool   alignment = params->alignment;
 	siz_t  elem_size = bli_dt_size( dt );
 	dim_t  m_trans   = m;
 	dim_t  n_trans   = n;
@@ -2618,7 +2623,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 #if 0
 cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdiag_t inv_diag, pack_t pack_schema, packbuf_t pack_buf, obj_t* a, obj_t* p, cntx_t* cntx )
 {
-	bool_t does_inv_diag;
+	bool   does_inv_diag;
 	rntm_t rntm;
 
 	if ( inv_diag == BLIS_NO_INVERT_DIAG ) does_inv_diag = FALSE;
@@ -2676,7 +2681,7 @@ void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, di
 
 
 
-void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t* x )
+void libblis_test_vobj_randomize( test_params_t* params, bool normalize, obj_t* x )
 {
 	if ( params->rand_method == BLIS_TEST_RAND_REAL_VALUES )
 		bli_randv( x );
@@ -2705,7 +2710,7 @@ void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t
 
 
 
-void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t* a )
+void libblis_test_mobj_randomize( test_params_t* params, bool normalize, obj_t* a )
 {
 	if ( params->rand_method == BLIS_TEST_RAND_REAL_VALUES )
 		bli_randm( a );
@@ -3071,8 +3076,8 @@ void libblis_test_parse_message( FILE* output_stream, char* message, va_list arg
 
 void libblis_test_parse_command_line( int argc, char** argv )
 {
-	bool_t   gave_option_g = FALSE;
-	bool_t   gave_option_o = FALSE;
+	bool     gave_option_g = FALSE;
+	bool     gave_option_o = FALSE;
 	int      opt;
 	char     opt_ch;
 	getopt_t state;
@@ -3178,7 +3183,7 @@ int libblis_test_op_is_disabled( test_op_t* op )
 	return r_val;
 }
 
-int libblis_test_op_is_done( test_op_t* op )
+bool libblis_test_op_is_done( test_op_t* op )
 {
 	return op->test_done;
 }

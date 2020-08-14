@@ -418,7 +418,8 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_TRSM_L_UKR ],     trsm_l_ukr_name     );
 	gen_func_init( &funcs[ BLIS_TRSM_U_UKR ],     trsm_u_ukr_name     );
 
-	bli_mbool_init( &mbools[ BLIS_GEMM_UKR ],       TRUE,  TRUE,  TRUE,  TRUE  );
+	//                                                  s      d      c      z
+	bli_mbool_init( &mbools[ BLIS_GEMM_UKR ],        TRUE,  TRUE,  TRUE,  TRUE );
 	bli_mbool_init( &mbools[ BLIS_GEMMTRSM_L_UKR ], FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_GEMMTRSM_U_UKR ], FALSE, FALSE, FALSE, FALSE );
 	bli_mbool_init( &mbools[ BLIS_TRSM_L_UKR ],     FALSE, FALSE, FALSE, FALSE );
@@ -427,11 +428,14 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-3 small/unpacked thresholds --------------------------------
 
-	// NOTE: The default thresholds are set very low so that the sup framework
-	// only actives for exceedingly small dimensions. If a sub-configuration
-	// registers optimized sup kernels, then that sub-configuration should also
-	// register new (probably larger) thresholds that are almost surely more
-	// appropriate that these default values.
+	// NOTE: The default thresholds are set to zero so that the sup framework
+	// does not activate by default. Note that the semantic meaning of the
+	// thresholds is that the sup code path is executed if a dimension is
+	// strictly less than its corresponding threshold. So actually, the
+	// thresholds specify the minimum dimension size that will still dispatch
+	// the non-sup/large code path. This "strictly less than" behavior was
+	// chosen over "less than or equal to" so that threshold values of 0 would
+	// effectively disable sup (even for matrix dimensions of 0).
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &thresh[ BLIS_MT ],    0,    0,    0,    0 );
 	bli_blksz_init_easy( &thresh[ BLIS_NT ],    0,    0,    0,    0 );
@@ -486,10 +490,10 @@ void GENBARNAME(cntx_init)
 	gen_func_init( &funcs[ BLIS_RRC ], gemmsup_rv_ukr_name );
 	gen_func_init( &funcs[ BLIS_RCR ], gemmsup_rv_ukr_name );
 	gen_func_init( &funcs[ BLIS_RCC ], gemmsup_rv_ukr_name );
-	gen_func_init( &funcs[ BLIS_CRR ], gemmsup_cv_ukr_name );
-	gen_func_init( &funcs[ BLIS_CRC ], gemmsup_cv_ukr_name );
-	gen_func_init( &funcs[ BLIS_CCR ], gemmsup_cv_ukr_name );
-	gen_func_init( &funcs[ BLIS_CCC ], gemmsup_cv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CRC ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCR ], gemmsup_rv_ukr_name );
+	gen_func_init( &funcs[ BLIS_CCC ], gemmsup_rv_ukr_name );
 
 	// Register the general-stride/generic ukernel to the "catch-all" slot
 	// associated with the BLIS_XXX enum value. This slot will be queried if
@@ -498,16 +502,17 @@ void GENBARNAME(cntx_init)
 
 
 	// Set the l3 sup ukernel storage preferences.
-	bli_mbool_init( &mbools[ BLIS_RRR ], TRUE,  TRUE,  TRUE,  TRUE  );
-	bli_mbool_init( &mbools[ BLIS_RRC ], TRUE,  TRUE,  TRUE,  TRUE  );
-	bli_mbool_init( &mbools[ BLIS_RCR ], TRUE,  TRUE,  TRUE,  TRUE  );
-	bli_mbool_init( &mbools[ BLIS_RCC ], TRUE,  TRUE,  TRUE,  TRUE  );
-	bli_mbool_init( &mbools[ BLIS_CRR ], FALSE, FALSE, FALSE, FALSE );
-	bli_mbool_init( &mbools[ BLIS_CRC ], FALSE, FALSE, FALSE, FALSE );
-	bli_mbool_init( &mbools[ BLIS_CCR ], FALSE, FALSE, FALSE, FALSE );
-	bli_mbool_init( &mbools[ BLIS_CCC ], FALSE, FALSE, FALSE, FALSE );
+	//                                       s      d      c      z
+	bli_mbool_init( &mbools[ BLIS_RRR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RRC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RCR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_RCC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CRR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CRC ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CCR ],  TRUE,  TRUE,  TRUE,  TRUE );
+	bli_mbool_init( &mbools[ BLIS_CCC ],  TRUE,  TRUE,  TRUE,  TRUE );
 
-	bli_mbool_init( &mbools[ BLIS_XXX ], FALSE, FALSE, FALSE, FALSE );
+	bli_mbool_init( &mbools[ BLIS_XXX ],  TRUE,  TRUE,  TRUE,  TRUE );
 
 
 	// -- Set level-1f kernels -------------------------------------------------
@@ -824,7 +829,7 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		const bool_t is_pb = FALSE;
+		const bool is_pb = FALSE;
 
 		// We MUST set the induced method in the context prior to calling
 		// bli_cntx_l3_ukr_prefers_cols_dt() because that function queries
@@ -925,7 +930,7 @@ void GENBAINAME(cntx_init)
 	}
 	else if ( method == BLIS_1M )
 	{
-		//const bool_t is_pb = FALSE;
+		//const bool is_pb = FALSE;
 
 		// Set the anti-preference field to TRUE when executing a panel-block
 		// algorithm, and FALSE otherwise. This will cause higher-level generic

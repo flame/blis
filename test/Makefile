@@ -47,6 +47,7 @@
 
 .PHONY: all \
         blis openblas atlas mkl \
+        check-env check-env-mk check-lib \
         clean cleanx
 
 
@@ -165,7 +166,7 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: \
+blis: check-env \
        test_dotv_blis.x \
        test_axpyv_blis.x \
        test_gemv_blis.x \
@@ -183,7 +184,7 @@ blis: \
        test_trmm_blis.x \
        test_trsm_blis.x
 
-openblas: \
+openblas: check-env \
       test_dotv_openblas.x \
       test_axpyv_openblas.x \
       test_gemv_openblas.x \
@@ -201,7 +202,7 @@ openblas: \
       test_trmm_openblas.x \
       test_trsm_openblas.x
 
-atlas: \
+atlas: check-env \
       test_dotv_atlas.x \
       test_axpyv_atlas.x \
       test_gemv_atlas.x \
@@ -219,7 +220,8 @@ atlas: \
       test_trmm_atlas.x \
       test_trsm_atlas.x
 
-mkl:  test_dotv_mkl.x \
+mkl:  check-env \
+      test_dotv_mkl.x \
       test_axpyv_mkl.x \
       test_gemv_mkl.x \
       test_ger_mkl.x \
@@ -236,7 +238,8 @@ mkl:  test_dotv_mkl.x \
       test_trmm_mkl.x \
       test_trsm_mkl.x
 
-essl: test_dotv_essl.x \
+essl: check-env \
+      test_dotv_essl.x \
       test_axpyv_essl.x \
       test_gemv_essl.x \
       test_ger_essl.x \
@@ -253,7 +256,8 @@ essl: test_dotv_essl.x \
       test_trmm_essl.x \
       test_trsm_essl.x
 
-mac:  test_dotv_mac.x \
+mac:  check-env \
+      test_dotv_mac.x \
       test_axpyv_mac.x \
       test_gemv_mac.x \
       test_ger_mac.x \
@@ -320,6 +324,21 @@ test_%_mac.x: test_%_mac.o $(LIBBLIS_LINK)
 
 test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
 	$(LINKER) $<                             $(LIBBLIS_LINK) $(LDFLAGS) -o $@
+
+
+# -- Environment check rules --
+
+check-env: check-lib
+
+check-env-mk:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-lib: check-env-mk
+ifeq ($(wildcard $(LIBBLIS_LINK)),)
+	$(error Cannot proceed: BLIS library not yet built! Run make first)
+endif
 
 
 # -- Clean rules --

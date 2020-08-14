@@ -65,23 +65,6 @@
 // Prototype reference microkernels.
 GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref )
 
-#if 0
-// Define parameters and variables for edge case kernel map.
-#define NUM_MR 4
-#define NUM_NR 4
-#define FUNCPTR_T dgemmsup_ker_ft
-
-static dim_t mrs[NUM_MR] = { 6, 3, 2, 1 };
-static dim_t nrs[NUM_NR] = { 8, 4, 2, 1 };
-static FUNCPTR_T kmap[NUM_MR][NUM_NR] =
-{     /*  8                                4                                2                                1  */
-/* 6 */ { bli_dgemmsup_rd_haswell_asm_6x8n, bli_dgemmsup_rd_haswell_asm_6x4n, bli_dgemmsup_rd_haswell_asm_6x2n, bli_dgemmsup_r_haswell_ref_6x1 },
-/* 3 */ { bli_dgemmsup_rd_haswell_asm_3x8n, bli_dgemmsup_rd_haswell_asm_3x4n, bli_dgemmsup_rd_haswell_asm_3x2n, bli_dgemmsup_r_haswell_ref_3x1 },
-/* 2 */ { bli_dgemmsup_rd_haswell_asm_2x8n, bli_dgemmsup_rd_haswell_asm_2x4n, bli_dgemmsup_rd_haswell_asm_2x2n, bli_dgemmsup_r_haswell_ref_2x1 },
-/* 1 */ { bli_dgemmsup_rd_haswell_asm_1x8n, bli_dgemmsup_rd_haswell_asm_1x4n, bli_dgemmsup_rd_haswell_asm_1x2n, bli_dgemmsup_r_haswell_ref_1x1 }
-};
-#endif
-
 
 void bli_dgemmsup_rd_haswell_asm_6x8n
      (
@@ -161,6 +144,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			const dim_t mr_cur = 3;
 
 			bli_dgemmsup_rd_haswell_asm_3x8n
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, n0, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -173,6 +157,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			const dim_t mr_cur = 2;
 
 			bli_dgemmsup_rd_haswell_asm_2x8n
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, n0, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -182,23 +167,24 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 		}
 		if ( 1 == m_left )
 		{
-#if 0
+			#if 1
 			const dim_t mr_cur = 1;
 
 			bli_dgemmsup_rd_haswell_asm_1x8n
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, n0, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_TRANSPOSE, conja, k0, n0,
 			  alpha, bj, rs_b0, cs_b0, ai, cs_a0,
 			  beta, cij, cs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 		return;
 	}
@@ -231,7 +217,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 	//vzeroall()                         // zero all xmm/ymm registers.
 	
-	mov(var(a), rdx)                   // load address of a.
+	//mov(var(a), rdx)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
 	lea(mem(, r8, 8), r8)              // rs_a *= sizeof(double)
@@ -247,11 +233,12 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	lea(mem(, r11, 8), r11)            // cs_b *= sizeof(double)
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
+	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
 	
 
 	//mov(var(c), r12)                   // load address of c
-	//mov(var(rs_c), rdi)                // load rs_c
-	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	mov(var(rs_c), rdi)                // load rs_c
+	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 
 
@@ -267,11 +254,9 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 
 
+	mov(var(a), rdx)                   // load address of a
 	mov(var(b), r14)                   // load address of b
 	mov(var(c), r12)                   // load address of c
-
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 	lea(mem(   , r9,  1), rsi)         // rsi = r9 = 3*ii;
 	imul(rdi, rsi)                     // rsi *= rs_c
@@ -309,19 +294,20 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vxorpd(ymm15, ymm15, ymm15)
 #endif
 
+
 	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(rdx), rax)                 // rax = a_ii;
 	lea(mem(r14), rbx)                 // rbx = b_jj;
 
 
 #if 1
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
-	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	lea(mem(r11, r11, 2), rdi)         // rdi = 3*cs_b
+	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 	
@@ -338,13 +324,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 0
-	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
-	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
-	prefetch(0, mem(r10, r11, 2, 0*8)) // prefetch rbx + 6*cs_b
-	prefetch(0, mem(r10, r13, 1, 0*8)) // prefetch rbx + 7*cs_b
-	add(imm(8*8), r10)                 // r10 += 8*rs_b = 8*8;
-#else
+#if 1
 	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
 	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
 #endif
@@ -352,7 +332,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -386,7 +366,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -420,7 +400,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -455,7 +435,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -502,7 +482,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 	
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -551,7 +531,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
 	vmovsd(mem(rax, r8, 2), xmm2)
-	add(imm(1*8), rax)                 // a += 1*cs_b = 1*8;
+	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
 	
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -585,8 +565,6 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 
 	label(.DPOSTACCUM)
-
-
 	
 	                                   // ymm4  ymm7  ymm10 ymm13  
 	                                   // ymm5  ymm8  ymm11 ymm14
@@ -594,14 +572,15 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
-	vaddpd( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
+	vaddpd( xmm0, xmm1, xmm0 )
 
 	vhaddpd( ymm13, ymm10, ymm2 )
 	vextractf128(imm(1), ymm2, xmm1 )
-	vaddpd( xmm2, xmm1, xmm2 )         // xmm2[0] = sum(ymm10); xmm2[1] = sum(ymm13)
+	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm4 )
-
+	                                   // ymm4[0] = sum(ymm4);  ymm4[1] = sum(ymm7)
+	                                   // ymm4[2] = sum(ymm10); ymm4[3] = sum(ymm13)
 
 	vhaddpd( ymm8, ymm5, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
@@ -612,7 +591,8 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm5 )
-
+	                                   // ymm5[0] = sum(ymm5);  ymm5[1] = sum(ymm8)
+	                                   // ymm5[2] = sum(ymm11); ymm5[3] = sum(ymm14)
 
 	vhaddpd( ymm9, ymm6, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
@@ -623,15 +603,14 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm6 )
+	                                   // ymm6[0] = sum(ymm6);  ymm6[1] = sum(ymm9)
+	                                   // ymm6[2] = sum(ymm12); ymm6[3] = sum(ymm15)
 
-	                                   // ymm4 = sum(ymm4) sum(ymm7) sum(ymm10) sum(ymm13)
-	                                   // ymm5 = sum(ymm5) sum(ymm8) sum(ymm11) sum(ymm14)
-	                                   // ymm6 = sum(ymm6) sum(ymm9) sum(ymm12) sum(ymm15)
 
 
 	
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
@@ -716,8 +695,8 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 
 	add(imm(3), r9)                    // ii += 3;
-	cmp(imm(3), r9)                    // compare ii to 3
-	jle(.DLOOP3X4I)                    // if ii <= 3, jump to beginning
+	cmp(imm(6), r9)                    // compare ii to 6
+	jl(.DLOOP3X4I)                     // if ii < 6, jump to beginning
 	                                   // of ii loop; otherwise, loop ends.
 
 
@@ -748,7 +727,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -759,7 +738,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 	consider_edge_cases:
 
-	// Handle edge cases in the m dimension, if they exist.
+	// Handle edge cases in the n dimension, if they exist.
 	if ( n_left )
 	{
 		const dim_t      mr_cur = 6;
@@ -774,6 +753,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			const dim_t nr_cur = 2;
 
 			bli_dgemmsup_rd_haswell_asm_6x2
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -783,24 +763,24 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 0
+			#if 1
 			const dim_t nr_cur = 1;
 
-			//bli_dgemmsup_rd_haswell_asm_6x1n
-			bli_dgemmsup_r_haswell_ref
+			bli_dgemmsup_rd_haswell_asm_6x1
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
 			  beta, cij, rs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }
@@ -865,11 +845,12 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	lea(mem(, r11, 8), r11)            // cs_b *= sizeof(double)
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
+	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
 	
 
 	mov(var(c), r12)                   // load address of c
-	//mov(var(rs_c), rdi)                // load rs_c
-	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	mov(var(rs_c), rdi)                // load rs_c
+	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 
 
@@ -905,19 +886,20 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vxorpd(ymm15, ymm15, ymm15)
 #endif
 
+
 	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(rdx), rax)                 // rax = a_ii;
 	lea(mem(r14), rbx)                 // rbx = b_jj;
 
 
 #if 1
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
-	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 	prefetch(0, mem(rcx, rdi, 2, 3*8)) // prefetch c + 2*rs_c
 #endif
-	lea(mem(r11, r11, 2), rdi)         // rdi = 3*cs_b
+	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 	
@@ -934,13 +916,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 0
-	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
-	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
-	prefetch(0, mem(r10, r11, 2, 0*8)) // prefetch rbx + 6*cs_b
-	prefetch(0, mem(r10, r13, 1, 0*8)) // prefetch rbx + 7*cs_b
-	add(imm(8*8), r10)                 // r10 += 8*rs_b = 8*8;
-#else
+#if 1
 	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
 	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
 #endif
@@ -948,7 +924,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -982,7 +958,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1016,7 +992,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1051,7 +1027,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1098,7 +1074,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 	
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1147,7 +1123,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
 	vmovsd(mem(rax, r8, 2), xmm2)
-	add(imm(1*8), rax)                 // a += 1*cs_b = 1*8;
+	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
 	
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1181,8 +1157,6 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 
 	label(.DPOSTACCUM)
-
-
 	
 	                                   // ymm4  ymm7  ymm10 ymm13  
 	                                   // ymm5  ymm8  ymm11 ymm14
@@ -1190,14 +1164,15 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
-	vaddpd( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
+	vaddpd( xmm0, xmm1, xmm0 )
 
 	vhaddpd( ymm13, ymm10, ymm2 )
 	vextractf128(imm(1), ymm2, xmm1 )
-	vaddpd( xmm2, xmm1, xmm2 )         // xmm2[0] = sum(ymm10); xmm2[1] = sum(ymm13)
+	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm4 )
-
+	                                   // ymm4[0] = sum(ymm4);  ymm4[1] = sum(ymm7)
+	                                   // ymm4[2] = sum(ymm10); ymm4[3] = sum(ymm13)
 
 	vhaddpd( ymm8, ymm5, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
@@ -1208,7 +1183,8 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm5 )
-
+	                                   // ymm5[0] = sum(ymm5);  ymm5[1] = sum(ymm8)
+	                                   // ymm5[2] = sum(ymm11); ymm5[3] = sum(ymm14)
 
 	vhaddpd( ymm9, ymm6, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
@@ -1219,15 +1195,14 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm6 )
-
-	                                   // ymm4 = sum(ymm4) sum(ymm7) sum(ymm10) sum(ymm13)
-	                                   // ymm5 = sum(ymm5) sum(ymm8) sum(ymm11) sum(ymm14)
-	                                   // ymm6 = sum(ymm6) sum(ymm9) sum(ymm12) sum(ymm15)
+	                                   // ymm6[0] = sum(ymm6);  ymm6[1] = sum(ymm9)
+	                                   // ymm6[2] = sum(ymm12); ymm6[3] = sum(ymm15)
 
 
 	
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
@@ -1312,6 +1287,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 
 
+
 	label(.DRETURN)
 
 	
@@ -1337,7 +1313,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -1348,7 +1324,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 	consider_edge_cases:
 
-	// Handle edge cases in the m dimension, if they exist.
+	// Handle edge cases in the n dimension, if they exist.
 	if ( n_left )
 	{
 		const dim_t      mr_cur = 3;
@@ -1363,6 +1339,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 			const dim_t nr_cur = 2;
 
 			bli_dgemmsup_rd_haswell_asm_3x2
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -1372,23 +1349,25 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 0
+			#if 1
 			const dim_t nr_cur = 1;
 
-			bli_dgemmsup_r_haswell_ref_3x1
+			bli_dgemmsup_rd_haswell_asm_3x1
+			//bli_dgemmsup_r_haswell_ref_3x1
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
 			  beta, cij, rs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }
@@ -1453,11 +1432,12 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	lea(mem(, r11, 8), r11)            // cs_b *= sizeof(double)
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
+	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
 	
 
 	mov(var(c), r12)                   // load address of c
-	//mov(var(rs_c), rdi)                // load rs_c
-	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	mov(var(rs_c), rdi)                // load rs_c
+	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 
 
@@ -1489,18 +1469,19 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vxorpd(ymm14, ymm14, ymm14)
 #endif
 
+
 	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(rdx), rax)                 // rax = a_ii;
 	lea(mem(r14), rbx)                 // rbx = b_jj;
 
 
 #if 1
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
 	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
 #endif
-	lea(mem(r11, r11, 2), rdi)         // rdi = 3*cs_b
+	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 	
@@ -1517,20 +1498,14 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 0
-	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
-	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
-	prefetch(0, mem(r10, r11, 2, 0*8)) // prefetch rbx + 6*cs_b
-	prefetch(0, mem(r10, r13, 1, 0*8)) // prefetch rbx + 7*cs_b
-	add(imm(8*8), r10)                 // r10 += 8*rs_b = 8*8;
-#else
+#if 1
 	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
 	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1559,7 +1534,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1588,7 +1563,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1618,7 +1593,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1660,7 +1635,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 	
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1704,7 +1679,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
-	add(imm(1*8), rax)                 // a += 1*cs_b = 1*8;
+	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
 	
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -1734,23 +1709,21 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 
 	label(.DPOSTACCUM)
-
-
 	
 	                                   // ymm4  ymm7  ymm10 ymm13  
 	                                   // ymm5  ymm8  ymm11 ymm14
-	                                   // ymm6  ymm9  ymm12 ymm15
 	
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
-	vaddpd( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
+	vaddpd( xmm0, xmm1, xmm0 )
 
 	vhaddpd( ymm13, ymm10, ymm2 )
 	vextractf128(imm(1), ymm2, xmm1 )
-	vaddpd( xmm2, xmm1, xmm2 )         // xmm2[0] = sum(ymm10); xmm2[1] = sum(ymm13)
+	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm4 )
-
+	                                   // ymm4[0] = sum(ymm4);  ymm4[1] = sum(ymm7)
+	                                   // ymm4[2] = sum(ymm10); ymm4[3] = sum(ymm13)
 
 	vhaddpd( ymm8, ymm5, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
@@ -1761,14 +1734,14 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm5 )
+	                                   // ymm5[0] = sum(ymm5);  ymm5[1] = sum(ymm8)
+	                                   // ymm5[2] = sum(ymm11); ymm5[3] = sum(ymm14)
 
-	                                   // ymm4 = sum(ymm4) sum(ymm7) sum(ymm10) sum(ymm13)
-	                                   // ymm5 = sum(ymm5) sum(ymm8) sum(ymm11) sum(ymm14)
 
 
 	
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
@@ -1777,7 +1750,6 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	
 	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulpd(ymm0, ymm5, ymm5)
-	vmulpd(ymm0, ymm6, ymm6)
 	
 	
 	
@@ -1846,6 +1818,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 
 
+
 	label(.DRETURN)
 
 	
@@ -1871,7 +1844,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -1882,7 +1855,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	consider_edge_cases:
 
-	// Handle edge cases in the m dimension, if they exist.
+	// Handle edge cases in the n dimension, if they exist.
 	if ( n_left )
 	{
 		const dim_t      mr_cur = 2;
@@ -1897,6 +1870,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 			const dim_t nr_cur = 2;
 
 			bli_dgemmsup_rd_haswell_asm_2x2
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -1906,23 +1880,24 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 0
+			#if 1
 			const dim_t nr_cur = 1;
 
-			bli_dgemmsup_r_haswell_ref_2x1
+			bli_dgemmsup_rd_haswell_asm_2x1
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_dgemv_ex
 			(
 			  BLIS_NO_TRANSPOSE, conjb, mr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
 			  beta, cij, rs_c0, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }
@@ -1987,11 +1962,12 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	lea(mem(, r11, 8), r11)            // cs_b *= sizeof(double)
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
+	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
 	
 
 	mov(var(c), r12)                   // load address of c
-	//mov(var(rs_c), rdi)                // load rs_c
-	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	mov(var(rs_c), rdi)                // load rs_c
+	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 
 
@@ -2019,18 +1995,18 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	vxorpd(ymm13, ymm13, ymm13)
 #endif
 
+
 	lea(mem(r12), rcx)                 // rcx = c_iijj;
 	lea(mem(rdx), rax)                 // rax = a_ii;
 	lea(mem(r14), rbx)                 // rbx = b_jj;
 
 
 #if 1
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
-	prefetch(0, mem(rcx, 3*8))         // prefetch c + 0*rs_c
-	prefetch(0, mem(rcx, rdi, 1, 3*8)) // prefetch c + 1*rs_c
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	prefetch(0, mem(rcx,         3*8)) // prefetch c + 0*rs_c
 #endif
-	lea(mem(r11, r11, 2), rdi)         // rdi = 3*cs_b
+	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
 	
@@ -2047,19 +2023,13 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	
 	// ---------------------------------- iteration 0
 
-#if 0
-	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
-	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
-	prefetch(0, mem(r10, r11, 2, 0*8)) // prefetch rbx + 6*cs_b
-	prefetch(0, mem(r10, r13, 1, 0*8)) // prefetch rbx + 7*cs_b
-	add(imm(8*8), r10)                 // r10 += 8*rs_b = 8*8;
-#else
+#if 1
 	prefetch(0, mem(r10,         0*8)) // prefetch rbx + 4*cs_b
 	prefetch(0, mem(r10, r11, 1, 0*8)) // prefetch rbx + 5*cs_b
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2083,7 +2053,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2107,7 +2077,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2132,7 +2102,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 #endif
 
 	vmovupd(mem(rax       ), ymm0)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2169,7 +2139,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	label(.DLOOPKITER4)                // EDGE LOOP (ymm)
 	
 	vmovupd(mem(rax       ), ymm0)
-	add(imm(4*8), rax)                 // a += 4*cs_b = 4*8;
+	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
 	
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2208,7 +2178,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	                                   // which would destory intermediate results.
 	
 	vmovsd(mem(rax       ), xmm0)
-	add(imm(1*8), rax)                 // a += 1*cs_b = 1*8;
+	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
 	
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
@@ -2234,29 +2204,26 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 
 	label(.DPOSTACCUM)
-
-
 	
 	                                   // ymm4  ymm7  ymm10 ymm13  
-	                                   // ymm5  ymm8  ymm11 ymm14
-	                                   // ymm6  ymm9  ymm12 ymm15
 	
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
-	vaddpd( xmm0, xmm1, xmm0 )         // xmm0[0] = sum(ymm4); xmm0[1] = sum(ymm7)
+	vaddpd( xmm0, xmm1, xmm0 )
 
 	vhaddpd( ymm13, ymm10, ymm2 )
 	vextractf128(imm(1), ymm2, xmm1 )
-	vaddpd( xmm2, xmm1, xmm2 )         // xmm2[0] = sum(ymm10); xmm2[1] = sum(ymm13)
+	vaddpd( xmm2, xmm1, xmm2 )
 
 	vperm2f128(imm(0x20), ymm2, ymm0, ymm4 )
+	                                   // ymm4[0] = sum(ymm4);  ymm4[1] = sum(ymm7)
+	                                   // ymm4[2] = sum(ymm10); ymm4[3] = sum(ymm13)
 
-	                                   // ymm4 = sum(ymm4) sum(ymm7) sum(ymm10) sum(ymm13)
 
 
 	
-	mov(var(rs_c), rdi)                // load rs_c
-	lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
+	//mov(var(rs_c), rdi)                // load rs_c
+	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
 	mov(var(alpha), rax)               // load address of alpha
 	mov(var(beta), rbx)                // load address of beta
@@ -2325,6 +2292,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 
 
+
 	label(.DRETURN)
 
 	
@@ -2350,7 +2318,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
       [a_next] "m" (a_next),
       [b_next] "m" (b_next)*/
 	: // register clobber list
-	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
+	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
 	  "xmm0", "xmm1", "xmm2", "xmm3",
 	  "xmm4", "xmm5", "xmm6", "xmm7",
@@ -2361,7 +2329,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 	consider_edge_cases:
 
-	// Handle edge cases in the m dimension, if they exist.
+	// Handle edge cases in the n dimension, if they exist.
 	if ( n_left )
 	{
 		const dim_t      mr_cur = 1;
@@ -2376,6 +2344,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 			const dim_t nr_cur = 2;
 
 			bli_dgemmsup_rd_haswell_asm_1x2
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
@@ -2385,23 +2354,24 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 		}
 		if ( 1 == n_left )
 		{
-#if 0
+			#if 1
 			const dim_t nr_cur = 1;
 
-			bli_dgemmsup_r_haswell_ref_1x1
+			bli_dgemmsup_rd_haswell_asm_1x1
+			//bli_dgemmsup_r_haswell_ref
 			(
 			  conja, conjb, mr_cur, nr_cur, k0,
 			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
 			  beta, cij, rs_c0, cs_c0, data, cntx
 			);
-#else
+			#else
 			bli_ddotxv_ex
 			(
 			  conja, conjb, k0,
 			  alpha, ai, cs_a0, bj, rs_b0,
 			  beta, cij, cntx, NULL
 			);
-#endif
+			#endif
 		}
 	}
 }

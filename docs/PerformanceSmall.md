@@ -35,14 +35,18 @@ sizes tested.
 Each of the 28 graphs within a panel will contain an x-axis that reports
 problem size, with one, two, or all three matrix dimensions equal to the
 problem size (e.g. _m_ = 6; _n_ = _k_, also encoded as `m6npkp`).
-The y-axis will report in units GFLOPS (billions of floating-point operations
-per second) on a single core.
+The y-axis will report in units GFLOPS (or billions of floating-point operations
+per second) per core.
 
-It's also worth pointing out that the top of each graph (e.g. the maximum
-y-axis value depicted) _always_ corresponds to the theoretical peak performance
-under the conditions associated with that graph.
-Theoretical peak performance, in units of GFLOPS, is calculated as the
-product of:
+It's also worth pointing out that the top of some graphs (e.g. the maximum
+y-axis value depicted) correspond to the theoretical peak performance
+under the conditions associated with that graph, while in other graphs the
+y-axis has been adjusted to better show the difference between the various
+curves. (We *strongly* prefer to always use peak performance as the top of
+the graph; however, this is one of the few exceptions where we feel some
+scaling is warranted.)
+Theoretical peak performance on a single core, in units of GFLOPS, is
+calculated as the product of:
 1. the maximum sustainable clock rate in GHz; and
 2. the maximum number of floating-point operations (flops) that can be
 executed per cycle.
@@ -60,30 +64,32 @@ can be issued per cycle (per core);
 register (for the datatype in question); and
 3. 2.0, since an FMA instruction fuses two operations (a multiply and an add).
 
-The problem size range, represented on the x-axis, is sampled in
-increments of 4 up to 800 for the cases where one or two dimensions is small
-(and constant)
-and up to 400 in the case where all dimensions (e.g. _m_, _n_, and _k_) are
-bound to the problem size (i.e., square matrices).
+Typically, organizations and individuals publish performance with square
+matrices, which can miss the problem sizes of interest to many applications.
+Here, in addition to square matrices (shown in the seventh column), we also
+show six other scenarios where one or two `gemm` dimensions (of _m,_ _n_, and
+_k_) is small. In these six columns, the constant small matrix dimensions were
+chosen to be _very_ small--in the neighborhood of 8--intentionally to showcase
+what happens when at least one of the matrices is abnormally "skinny."
 
-Note that the constant small matrix dimensions were chosen to be _very_
-small--in the neighborhood of 8--intentionally to showcase what happens when
-at least one of the matrices is abnormally "skinny." Typically, organizations
-and individuals only publish performance with square matrices, which can miss
-the problem sizes of interest to many applications. Here, in addition to square
-matrices (shown in the seventh column), we also show six other scenarios where
-one or two `gemm` dimensions (of _m,_ _n_, and _k_) is small.
+The problem size range, represented on the x-axis, is sampled in
+increments that vary. These increments (and the overall range) are generally
+large for the cases where two dimensions are small (and constant), medium for
+cases where one dimension is small (and constant), and small for cases where
+all dimensions (e.g. _m_, _n_, and _k_) are variable and bound to the problem
+size (i.e., square matrices).
 
 The legend in each graph contains two entries for BLIS, corresponding to the
 two black lines, one solid and one dotted. The dotted line, **"BLIS conv"**,
 represents the conventional implementation that targets large matrices. This
 was the only implementation available in BLIS prior to the addition to the
 small/skinny matrix support. The solid line, **"BLIS sup"**, makes use of the
-new small/skinny matrix implementation for certain small problems. Whenever
-these results differ by any significant amount (beyond noise), it denotes a
-problem size for which BLIS employed the new small/skinny implementation.
-Put another way, **the delta between these two lines represents the performance
-improvement between BLIS's previous status quo and the new regime.**
+new small/skinny matrix implementation. Sometimes, the performance of
+**"BLIS sup"** drops below that of **"BLIS conv"** for somewhat larger problems.
+However, in practice, we use a threshold to determine when to switch from the
+former to the latter, and therefore the goal is for the performance of
+**"BLIS conv"** to serve as an approximate floor below which BLIS performance
+never drops.
 
 Finally, each point along each curve represents the best of three trials.
 
@@ -119,7 +125,8 @@ and/or install some (or all) of the implementations shown (e.g.
 [BLASFEO](https://github.com/giaf/blasfeo), and
 [libxsmm](https://github.com/hfp/libxsmm)), including BLIS. Be sure to consult
 the detailed notes provided below; they should be *very* helpful in successfully
-building the libraries. The `runme.sh` script in `test/sup` will help you run
+building the libraries. The `runme.sh` script in `test/sup` (or `test/supmt`)
+will help you run
 some (or all) of the test drivers produced by the `Makefile`, and the
 Matlab/Octave function `plot_panel_trxsh()` defined in the `octave` directory
 will help you turn the output of those test drivers into a PDF file of graphs.
@@ -140,20 +147,25 @@ The `runthese.m` file will contain example invocations of the function.
 * Max FMA vector IPC: 2
 * Peak performance:
   * single-core: 57.6 GFLOPS (double-precision), 115.2 GFLOPS (single-precision)
+  * multicore: 57.6 GFLOPS/core (double-precision), 115.2 GFLOPS/core (single-precision)
 * Operating system: Gentoo Linux (Linux kernel 5.2.4)
 * Page size: 4096 bytes
 * Compiler: gcc 8.3.0
-* Results gathered: 23-28 August 2019
+* Results gathered: 3 March 2020
 * Implementations tested:
-  * BLIS 4a0a6e8 (0.6.0-28)
-    * configured with `./configure --enable-cblas auto`
+  * BLIS 90db88e (0.6.1-8)
+    * configured with `./configure --enable-cblas auto` (single-threaded)
+    * configured with `./configure --enable-cblas -t openmp auto` (multithreaded)
     * sub-configuration exercised: `haswell`
-  * OpenBLAS 0.3.7
-    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-  * BLASFEO 01f6b7f
+    * Multithreaded (4 cores) execution requested via `export BLIS_NUM_THREADS=4`
+  * OpenBLAS 0.3.8
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0 USE_LOCKING=1` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=4` (multithreaded)
+    * Multithreaded (4 cores) execution requested via `export OPENBLAS_NUM_THREADS=4`
+  * BLASFEO f9b78c6
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (36b9596)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -165,18 +177,20 @@ The `runthese.m` file will contain example invocations of the function.
     * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
     * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
-    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
-  * MKL 2019 update 4
-    * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
-  * libxsmm 77a295c (1.6.5-6679)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (4 cores) execution requested via `export OMP_NUM_THREADS=4`
+  * MKL 2020 initial release
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (4 cores) execution requested via `export MKL_NUM_THREADS=4`
+  * libxsmm a40a833 (post-1.14)
     * compiled with `make AVX=2`; linked with [netlib BLAS](http://www.netlib.org/blas/) 3.6.0 as the fallback library to better show where libxsmm stops handling the computation internally.
 * Affinity:
-  * N/A.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-3"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * Driver: intel_pstate
   * Governor: performance
   * Hardware limits: 800MHz - 3.8GHz
-  * Adjusted minimum: 3.7GHz
+  * Adjusted minimum: 3.8GHz
 * Comments:
   * libxsmm is highly competitive for very small problems, but quickly gives up once the "large" dimension exceeds about 180-240 (or 64 in the case where all operands are square). Also, libxsmm's `gemm` cannot handle a transposition on matrix A and similarly dispatches the fallback implementation for those cases. libxsmm also does not export CBLAS interfaces, and therefore only appears on the graphs for column-stored matrices.
 
@@ -184,15 +198,21 @@ The `runthese.m` file will contain example invocations of the function.
 
 #### pdf
 
-* [Kaby Lake row-stored](graphs/sup/dgemm_rrr_kbl_nt1.pdf)
-* [Kaby Lake column-stored](graphs/sup/dgemm_ccc_kbl_nt1.pdf)
+* [Kaby Lake single-threaded row-stored](graphs/sup/dgemm_rrr_kbl_nt1.pdf)
+* [Kaby Lake single-threaded column-stored](graphs/sup/dgemm_ccc_kbl_nt1.pdf)
+* [Kaby Lake multithreaded (4 cores) row-stored](graphs/sup/dgemm_rrr_kbl_nt4.pdf)
+* [Kaby Lake multithreaded (4 cores) column-stored](graphs/sup/dgemm_ccc_kbl_nt4.pdf)
 
 #### png (inline)
 
-* **Kaby Lake row-stored**
-![row-stored](graphs/sup/dgemm_rrr_kbl_nt1.png)
-* **Kaby Lake column-stored**
-![column-stored](graphs/sup/dgemm_ccc_kbl_nt1.png)
+* **Kaby Lake single-threaded row-stored**
+![single-threaded row-stored](graphs/sup/dgemm_rrr_kbl_nt1.png)
+* **Kaby Lake single-threaded column-stored**
+![single-threaded column-stored](graphs/sup/dgemm_ccc_kbl_nt1.png)
+* **Kaby Lake multithreaded (4 cores) row-stored**
+![multithreaded row-stored](graphs/sup/dgemm_rrr_kbl_nt4.png)
+* **Kaby Lake multithreaded (4 cores) column-stored**
+![multithreaded column-stored](graphs/sup/dgemm_ccc_kbl_nt4.png)
 
 ---
 
@@ -209,20 +229,25 @@ The `runthese.m` file will contain example invocations of the function.
 * Max FMA vector IPC: 2
 * Peak performance:
   * single-core: 56 GFLOPS (double-precision), 112 GFLOPS (single-precision)
+  * multicore: 49.6 GFLOPS/core (double-precision), 99.2 GFLOPS/core (single-precision)
 * Operating system: Cray Linux Environment 6 (Linux kernel 4.4.103)
 * Page size: 4096 bytes
 * Compiler: gcc 7.3.0
-* Results gathered: 23-28 August 2019
+* Results gathered: 3 March 2020
 * Implementations tested:
-  * BLIS 4a0a6e8 (0.6.0-28)
-    * configured with `./configure --enable-cblas auto`
+  * BLIS 90db88e (0.6.1-8)
+    * configured with `./configure --enable-cblas auto` (single-threaded)
+    * configured with `./configure --enable-cblas -t openmp auto` (multithreaded)
     * sub-configuration exercised: `haswell`
-  * OpenBLAS 0.3.7
-    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-  * BLASFEO 01f6b7f
+    * Multithreaded (12 cores) execution requested via `export BLIS_NUM_THREADS=12`
+  * OpenBLAS 0.3.8
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0 USE_LOCKING=1` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=12` (multithreaded)
+    * Multithreaded (12 cores) execution requested via `export OPENBLAS_NUM_THREADS=12`
+  * BLASFEO f9b78c6
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (36b9596)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -234,13 +259,15 @@ The `runthese.m` file will contain example invocations of the function.
     * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
     * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
-    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
-  * MKL 2019 update 4
-    * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
-  * libxsmm 77a295c (1.6.5-6679)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 cores) execution requested via `export OMP_NUM_THREADS=12`
+  * MKL 2020 initial release
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (12 cores) execution requested via `export MKL_NUM_THREADS=12`
+  * libxsmm a40a833 (post-1.14)
     * compiled with `make AVX=2`; linked with [netlib BLAS](http://www.netlib.org/blas/) 3.6.0 as the fallback library to better show where libxsmm stops handling the computation internally.
 * Affinity:
-  * N/A.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-11"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * No changes made.
 * Comments:
@@ -250,15 +277,21 @@ The `runthese.m` file will contain example invocations of the function.
 
 #### pdf
 
-* [Haswell row-stored](graphs/sup/dgemm_rrr_has_nt1.pdf)
-* [Haswell column-stored](graphs/sup/dgemm_ccc_has_nt1.pdf)
+* [Haswell single-threaded row-stored](graphs/sup/dgemm_rrr_has_nt1.pdf)
+* [Haswell single-threaded column-stored](graphs/sup/dgemm_ccc_has_nt1.pdf)
+* [Haswell multithreaded (12 cores) row-stored](graphs/sup/dgemm_rrr_has_nt12.pdf)
+* [Haswell multithreaded (12 cores) column-stored](graphs/sup/dgemm_ccc_has_nt12.pdf)
 
 #### png (inline)
 
-* **Haswell row-stored**
-![row-stored](graphs/sup/dgemm_rrr_has_nt1.png)
-* **Haswell column-stored**
-![column-stored](graphs/sup/dgemm_ccc_has_nt1.png)
+* **Haswell single-threaded row-stored**
+![single-threaded row-stored](graphs/sup/dgemm_rrr_has_nt1.png)
+* **Haswell single-threaded column-stored**
+![single-threaded column-stored](graphs/sup/dgemm_ccc_has_nt1.png)
+* **Haswell multithreaded (12 cores) row-stored**
+![multithreaded row-stored](graphs/sup/dgemm_rrr_has_nt12.png)
+* **Haswell multithreaded (12 cores) column-stored**
+![multithreaded column-stored](graphs/sup/dgemm_ccc_has_nt12.png)
 
 ---
 
@@ -276,20 +309,26 @@ The `runthese.m` file will contain example invocations of the function.
   * Alternatively, FMA vector IPC is 2 when vectors are limited to 128 bits each.
 * Peak performance:
   * single-core: 24 GFLOPS (double-precision), 48 GFLOPS (single-precision)
+   * multicore: 20.4 GFLOPS/core (double-precision), 40.8 GFLOPS/core (single-precision)
 * Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
 * Page size: 4096 bytes
 * Compiler: gcc 7.4.0
-* Results gathered: 23-28 August 2019
+* Results gathered: 3 March 2020
 * Implementations tested:
-  * BLIS 4a0a6e8 (0.6.0-28)
-    * configured with `./configure --enable-cblas auto`
-    * sub-configuration exercised: `zen`
-  * OpenBLAS 0.3.7
-    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
-  * BLASFEO 01f6b7f
+  * BLIS 90db88e (0.6.1-8)
+    * configured with `./configure --enable-cblas auto` (single-threaded)
+    * configured with `./configure --enable-cblas -t openmp auto` (multithreaded)
+    * sub-configuration exercised: `haswell`
+    * Multithreaded (32 cores) execution requested via `export BLIS_NUM_THREADS=32`
+  * OpenBLAS 0.3.8
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0 USE_LOCKING=1` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=32` (multithreaded)
+    * Multithreaded (32 cores) execution requested via `export OPENBLAS_NUM_THREADS=32`
+  * BLASFEO f9b78c6
     * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
+    * built BLAS library via `make CC=gcc`
   * Eigen 3.3.90
-    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (28 August 2019)
+    * Obtained via the [Eigen git mirror](https://github.com/eigenteam/eigen-git-mirror) (36b9596)
     * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
          ```
          # These lines added after line 67.
@@ -301,13 +340,15 @@ The `runthese.m` file will contain example invocations of the function.
     * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
     * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
-    * Requested threading via `export OMP_NUM_THREADS=1` (single-threaded)
-  * MKL 2019 update 4
-    * Requested threading via `export MKL_NUM_THREADS=1` (single-threaded)
-  * libxsmm 77a295c (1.6.5-6679)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (32 cores) execution requested via `export OMP_NUM_THREADS=32`
+  * MKL 2020 initial release
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (32 cores) execution requested via `export MKL_NUM_THREADS=32`
+  * libxsmm a40a833 (post-1.14)
     * compiled with `make AVX=2`; linked with [netlib BLAS](http://www.netlib.org/blas/) 3.6.0 as the fallback library to better show where libxsmm stops handling the computation internally.
 * Affinity:
-  * N/A.
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-31"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
 * Frequency throttling (via `cpupower`):
   * Driver: acpi-cpufreq
   * Governor: performance
@@ -320,15 +361,21 @@ The `runthese.m` file will contain example invocations of the function.
 
 #### pdf
 
-* [Epyc row-stored](graphs/sup/dgemm_rrr_epyc_nt1.pdf)
-* [Epyc column-stored](graphs/sup/dgemm_ccc_epyc_nt1.pdf)
+* [Epyc single-threaded row-stored](graphs/sup/dgemm_rrr_epyc_nt1.pdf)
+* [Epyc single-threaded column-stored](graphs/sup/dgemm_ccc_epyc_nt1.pdf)
+* [Epyc multithreaded (32 cores) row-stored](graphs/sup/dgemm_rrr_epyc_nt32.pdf)
+* [Epyc multithreaded (32 cores) column-stored](graphs/sup/dgemm_ccc_epyc_nt32.pdf)
 
 #### png (inline)
 
-* **Epyc row-stored**
-![row-stored](graphs/sup/dgemm_rrr_epyc_nt1.png)
-* **Epyc column-stored**
-![column-stored](graphs/sup/dgemm_ccc_epyc_nt1.png)
+* **Epyc single-threaded row-stored**
+![single-threaded row-stored](graphs/sup/dgemm_rrr_epyc_nt1.png)
+* **Epyc single-threaded column-stored**
+![single-threaded column-stored](graphs/sup/dgemm_ccc_epyc_nt1.png)
+* **Epyc multithreaded (32 cores) row-stored**
+![multithreaded row-stored](graphs/sup/dgemm_rrr_epyc_nt32.png)
+* **Epyc multithreaded (32 cores) column-stored**
+![multithreaded column-stored](graphs/sup/dgemm_ccc_epyc_nt32.png)
 
 ---
 

@@ -127,100 +127,100 @@ dim_t bli_cntl_calc_num_threads_in
 
 // cntl_t query (fields only)
 
-static opid_t bli_cntl_family( cntl_t* cntl )
+BLIS_INLINE opid_t bli_cntl_family( cntl_t* cntl )
 {
 	return cntl->family;
 }
 
-static bszid_t bli_cntl_bszid( cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_bszid( cntl_t* cntl )
 {
 	return cntl->bszid;
 }
 
-static void_fp bli_cntl_var_func( cntl_t* cntl )
+BLIS_INLINE void_fp bli_cntl_var_func( cntl_t* cntl )
 {
 	return cntl->var_func;
 }
 
-static cntl_t* bli_cntl_sub_prenode( cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_prenode( cntl_t* cntl )
 {
 	return cntl->sub_prenode;
 }
 
-static cntl_t* bli_cntl_sub_node( cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_node( cntl_t* cntl )
 {
 	return cntl->sub_node;
 }
 
-static void* bli_cntl_params( cntl_t* cntl )
+BLIS_INLINE void* bli_cntl_params( cntl_t* cntl )
 {
 	return cntl->params;
 }
 
-static uint64_t bli_cntl_params_size( cntl_t* cntl )
+BLIS_INLINE uint64_t bli_cntl_params_size( cntl_t* cntl )
 {
 	// The first 64 bytes is always the size of the params structure.
 	return *( ( uint64_t* )(cntl->params) );
 }
 
-static mem_t* bli_cntl_pack_mem( cntl_t* cntl )
+BLIS_INLINE mem_t* bli_cntl_pack_mem( cntl_t* cntl )
 {
 	return &(cntl->pack_mem);
 }
 
 // cntl_t query (complex)
 
-static bool_t bli_cntl_is_null( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_null( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( cntl == NULL );
 }
 
-static bool_t bli_cntl_is_leaf( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_leaf( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
-static bool_t bli_cntl_does_part( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_does_part( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
 }
 
 // cntl_t modification
 
-static void bli_cntl_set_family( opid_t family, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_family( opid_t family, cntl_t* cntl )
 {
 	cntl->family = family;
 }
 
-static void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
 {
 	cntl->bszid = bszid;
 }
 
-static void bli_cntl_set_var_func( void_fp var_func, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_var_func( void_fp var_func, cntl_t* cntl )
 {
 	cntl->var_func = var_func;
 }
 
-static void bli_cntl_set_sub_prenode( cntl_t* sub_prenode, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_sub_prenode( cntl_t* sub_prenode, cntl_t* cntl )
 {
 	cntl->sub_prenode = sub_prenode;
 }
 
-static void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
 {
 	cntl->sub_node = sub_node;
 }
 
-static void bli_cntl_set_params( void* params, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_params( void* params, cntl_t* cntl )
 {
 	cntl->params = params;
 }
 
-static void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
 {
 	cntl->pack_mem = *pack_mem;
 }

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -46,14 +46,15 @@
   #define __arm__
 #endif
 
-#ifndef BLIS_CONFIGURETIME_CPUID
-  #include "blis.h"
-#else
+#ifdef BLIS_CONFIGURETIME_CPUID
+  #define BLIS_INLINE static
   #define BLIS_EXPORT_BLIS
   #include "bli_system.h"
   #include "bli_type_defs.h"
   #include "bli_cpuid.h"
   #include "bli_arch.h"
+#else
+  #include "blis.h"
 #endif
 
 // -----------------------------------------------------------------------------
@@ -75,6 +76,8 @@ static arch_t bli_env_check( void )
 }
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+
+#include "cpuid.h"
 
 arch_t bli_cpuid_query_id( void )
 {
@@ -209,7 +212,7 @@ arch_t bli_cpuid_query_id( void )
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cpuid_is_skx
+bool bli_cpuid_is_skx
      (
        uint32_t family,
        uint32_t model,
@@ -249,7 +252,7 @@ bool_t bli_cpuid_is_skx
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_knl
+bool bli_cpuid_is_knl
      (
        uint32_t family,
        uint32_t model,
@@ -268,7 +271,7 @@ bool_t bli_cpuid_is_knl
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_haswell
+bool bli_cpuid_is_haswell
      (
        uint32_t family,
        uint32_t model,
@@ -285,7 +288,7 @@ bool_t bli_cpuid_is_haswell
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_sandybridge
+bool bli_cpuid_is_sandybridge
      (
        uint32_t family,
        uint32_t model,
@@ -300,7 +303,7 @@ bool_t bli_cpuid_is_sandybridge
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_penryn
+bool bli_cpuid_is_penryn
      (
        uint32_t family,
        uint32_t model,
@@ -318,7 +321,7 @@ bool_t bli_cpuid_is_penryn
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_cpuid_is_zen2
+bool bli_cpuid_is_zen2
      (
        uint32_t family,
        uint32_t model,
@@ -337,7 +340,7 @@ bool_t bli_cpuid_is_zen2
 
 	// Finally, check for specific models:
 	// - 0x30-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0xff );
 
@@ -346,7 +349,7 @@ bool_t bli_cpuid_is_zen2
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_zen
+bool bli_cpuid_is_zen
      (
        uint32_t family,
        uint32_t model,
@@ -365,7 +368,7 @@ bool_t bli_cpuid_is_zen
 
 	// Finally, check for specific models:
 	// - 0x00-0xff (THIS NEEDS UPDATING)
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x00 <= model && model <= 0xff );
 
@@ -374,7 +377,7 @@ bool_t bli_cpuid_is_zen
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_excavator
+bool bli_cpuid_is_excavator
      (
        uint32_t family,
        uint32_t model,
@@ -393,7 +396,7 @@ bool_t bli_cpuid_is_excavator
 
 	// Finally, check for specific models:
 	// - 0x60-0x7f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x60 <= model && model <= 0x7f );
 
@@ -402,7 +405,7 @@ bool_t bli_cpuid_is_excavator
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_steamroller
+bool bli_cpuid_is_steamroller
      (
        uint32_t family,
        uint32_t model,
@@ -421,7 +424,7 @@ bool_t bli_cpuid_is_steamroller
 
 	// Finally, check for specific models:
 	// - 0x30-0x3f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0x3f );
 
@@ -430,7 +433,7 @@ bool_t bli_cpuid_is_steamroller
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_piledriver
+bool bli_cpuid_is_piledriver
      (
        uint32_t family,
        uint32_t model,
@@ -450,7 +453,7 @@ bool_t bli_cpuid_is_piledriver
 	// Finally, check for specific models:
 	// - 0x02
 	// - 0x10-0x1f
-	const bool_t is_arch
+	const bool is_arch
 	=
 	model == 0x02 || ( 0x10 <= model && model <= 0x1f );
 
@@ -459,7 +462,7 @@ bool_t bli_cpuid_is_piledriver
 	return TRUE;
 }
 
-bool_t bli_cpuid_is_bulldozer
+bool bli_cpuid_is_bulldozer
      (
        uint32_t family,
        uint32_t model,
@@ -478,7 +481,7 @@ bool_t bli_cpuid_is_bulldozer
 	// Finally, check for specific models:
 	// - 0x00
 	// - 0x01
-	const bool_t is_arch
+	const bool is_arch
 	=
 	( model == 0x00 || model == 0x01 );
 
@@ -573,7 +576,7 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
-bool_t bli_cpuid_is_thunderx2
+bool bli_cpuid_is_thunderx2
      (
        uint32_t family,
        uint32_t model,
@@ -583,7 +586,7 @@ bool_t bli_cpuid_is_thunderx2
 	return model == BLIS_ARCH_THUNDERX2;
 }
 
-bool_t bli_cpuid_is_cortexa57
+bool bli_cpuid_is_cortexa57
      (
        uint32_t family,
        uint32_t model,
@@ -593,7 +596,7 @@ bool_t bli_cpuid_is_cortexa57
 	return model == BLIS_ARCH_CORTEXA57;
 }
 
-bool_t bli_cpuid_is_cortexa53
+bool bli_cpuid_is_cortexa53
      (
        uint32_t family,
        uint32_t model,
@@ -603,7 +606,7 @@ bool_t bli_cpuid_is_cortexa53
 	return model == BLIS_ARCH_CORTEXA53;
 }
 
-bool_t bli_cpuid_is_cortexa15
+bool bli_cpuid_is_cortexa15
      (
        uint32_t family,
        uint32_t model,
@@ -616,7 +619,7 @@ bool_t bli_cpuid_is_cortexa15
 	return bli_cpuid_has_features( features, expected ) && model == 0xc0f;
 }
 
-bool_t bli_cpuid_is_cortexa9
+bool bli_cpuid_is_cortexa9
      (
        uint32_t family,
        uint32_t model,
@@ -1042,94 +1045,6 @@ int vpu_count( void )
 	else if ( strstr( cpu_name, "Intel(R) Core(TM)" ) != NULL )
 		return 2; // All i7/i9 with avx512?
 	else
-	{
-		return -1;
-	}
-}
-
-#elif defined(__aarch64__)
-
-#if __linux__
-// This is adapted from OpenBLAS.  See
-// https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
-// for the mechanism, but not the magic numbers.
-
-// Fixme:  Could these be missing in older Linux?
-#include <asm/hwcap.h>
-#include <sys/auxv.h>
-
-#ifndef HWCAP_CPUID
-#define HWCAP_CPUID (1 << 11)
-#endif
-
-static uint32_t get_coretype(void) {
-	int implementer, part, midr_el1;
-
-	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
-		// Fixme:  We could try reading /sys and /proc here, as below.
-		// Find out if that could work when the HWCAP test fails.
-		return 0;
-	}
-	// Also available from
-	// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
-	// and split out in /proc/cpuinfo (with a tab before the colon):
-	// CPU part	: 0x0a1
-	__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
-	/*
-	 * MIDR_EL1
-	 *
-	 * 31		   24 23	 20 19			16 15		   4 3		  0
-	 * -----------------------------------------------------------------
-	 * | Implementer | Variant | Architecture | Part Number | Revision |
-	 * -----------------------------------------------------------------
-	 */
-	implementer = (midr_el1 >> 24) & 0xFF;
-	part		= (midr_el1 >> 4)  & 0xFFF;
-	// From Linux arch/arm64/include/asm/cputype.h
-	// ARM_CPU_IMP_ARM 0x41
-	// ARM_CPU_IMP_APM 0x50
-	// ARM_CPU_IMP_CAVIUM 0x43
-	// ARM_CPU_IMP_BRCM 0x42
-	// ARM_CPU_IMP_QCOM 0x51
-	// ARM_CPU_IMP_NVIDIA 0x4E
-	// ARM_CPU_IMP_FUJITSU 0x46
-	// ARM_CPU_IMP_HISI 0x48
-	//
-	// ARM_CPU_PART_AEM_V8 0xD0F
-	// ARM_CPU_PART_FOUNDATION 0xD00
-	// ARM_CPU_PART_CORTEX_A57 0xD07
-	// ARM_CPU_PART_CORTEX_A72 0xD08
-	// ARM_CPU_PART_CORTEX_A53 0xD03
-	// ARM_CPU_PART_CORTEX_A73 0xD09
-	// ARM_CPU_PART_CORTEX_A75 0xD0A
-	// ARM_CPU_PART_CORTEX_A35 0xD04
-	// ARM_CPU_PART_CORTEX_A55 0xD05
-	// ARM_CPU_PART_CORTEX_A76 0xD0B
-	// ARM_CPU_PART_NEOVERSE_N1 0xD0C
-	//
-	// APM_CPU_PART_POTENZA 0x000
-	//
-	// CAVIUM_CPU_PART_THUNDERX 0x0A1
-	// CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
-	// CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
-	// CAVIUM_CPU_PART_THUNDERX2 0x0AF
-	//
-	// BRCM_CPU_PART_VULCAN 0x516
-	//
-	// QCOM_CPU_PART_FALKOR_V1 0x800
-	// QCOM_CPU_PART_FALKOR 0xC00
-	// QCOM_CPU_PART_KRYO 0x200
-	//
-	// NVIDIA_CPU_PART_DENVER 0x003
-	// NVIDIA_CPU_PART_CARMEL 0x004
-	//
-	// FUJITSU_CPU_PART_A64FX 0x001
-	//
-	// HISI_CPU_PART_TSV110 0xD01
-
-	// Fixme:  After merging the vpu_count branch we could report the
-	// part here with bli_dolog.
-	switch(implementer)
 	{
 		case 0x41:		// ARM
 			switch (part)

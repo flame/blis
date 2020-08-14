@@ -61,7 +61,7 @@ COPTFLAGS      := -O2 -mcpu=cortrex-a15
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -O3
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=cortex-a15
 else

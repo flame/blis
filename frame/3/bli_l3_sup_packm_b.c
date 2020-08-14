@@ -40,9 +40,8 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
-       stor3_t          stor_id, \
        dim_t            k, \
        dim_t            n, \
        dim_t            nr, \
@@ -58,8 +57,6 @@ void PASTEMAC(ch,opname) \
 	} \
 	else /* if ( will_pack == TRUE ) */ \
 	{ \
-		packbuf_t pack_buf_type_use; \
-\
 		/* NOTE: This is "rounding up" of the last upanel is actually optional
 		   for the rrc/crc cases, but absolutely necessary for the other cases
 		   since we NEED that last micropanel to have the same ldim (cs_p) as
@@ -68,21 +65,9 @@ void PASTEMAC(ch,opname) \
 		const dim_t k_pack = k; \
 		const dim_t n_pack = ( n / nr + ( n % nr ? 1 : 0 ) ) * nr; \
 \
-		/* Determine the dimensions and strides for the packed matrix B. */ \
-		if ( stor_id == BLIS_RRC || \
-			 stor_id == BLIS_CRC ) \
-		{ \
-			/* stor3_t id values _RRC and _CRC: pack B to plain column storage,
-			   which can use packing buffer type for general usage. */ \
-			pack_buf_type_use = BLIS_BUFFER_FOR_GEN_USE; \
-		} \
-		else \
-		{ \
-			/* All other stor3_t ids: pack A to row-stored column-panels
-			   using the packing buffer type as specified by the caller. */ \
-			/*pack_buf_type_use = BLIS_BUFFER_FOR_B_PANEL;*/ \
-			pack_buf_type_use = pack_buf_type; \
-		} \
+		/* Barrier to make sure all threads are caught up and ready to begin
+		   the packm stage. */ \
+		bli_thread_barrier( thread ); \
 \
 		/* Compute the size of the memory block eneded. */ \
 		siz_t size_needed = sizeof( ctype ) * k_pack * n_pack; \
@@ -91,21 +76,40 @@ void PASTEMAC(ch,opname) \
 		   then we need to acquire a block from the memory broker. */ \
 		if ( bli_mem_is_unalloc( mem ) ) \
 		{ \
-			bli_membrk_acquire_m \
-			( \
-			  rntm, \
-			  size_needed, \
-			  pack_buf_type_use, \
-			  mem  \
-			); \
-		} \
-		else \
-		{ \
-			/* NOTE: This shouldn't execute since the sup code path calls this
-			   function only once, before *any* loops of the gemm algorithm are
-			   encountered. */ \
-			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
+			if ( bli_thread_am_ochief( thread ) ) \
+			{ \
+				/* Acquire directly to the chief thread's mem_t that was
+				   passed in. It needs to be that mem_t struct, and not a
+				   local (temporary) mem_t, since there is no barrier until
+				   after packing is finished, which could allow a race
+				   condition whereby the chief thread exits the current
+				   function before the other threads have a chance to copy
+				   from it. (A barrier would fix that race condition, but
+				   then again, I prefer to keep barriers to a minimum.) */ \
+				bli_membrk_acquire_m \
+				( \
+				  rntm, \
+				  size_needed, \
+				  pack_buf_type, \
+				  mem  \
+				); \
+			} \
 \
+			/* Broadcast the address of the chief thread's passed-in mem_t
+			   to all threads. */ \
+			mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+\
+			/* Non-chief threads: Copy the contents of the chief thread's
+			   passed-in mem_t to the passed-in mem_t for this thread. (The
+			   chief thread already has the mem_t, so it does not need to
+			   perform any copy.) */ \
+			if ( !bli_thread_am_ochief( thread ) ) \
+			{ \
+				*mem = *mem_p; \
+			} \
+		} \
+		else /* if ( bli_mem_is_alloc( mem ) ) */ \
+		{ \
 			/* If the mem_t entry provided by the caller does NOT contain a NULL
 			   buffer, then a block has already been acquired from the memory
 			   broker and cached by the caller. */ \
@@ -118,18 +122,40 @@ void PASTEMAC(ch,opname) \
 \
 			if ( mem_size < size_needed ) \
 			{ \
-				bli_membrk_release \
-				( \
-				  rntm, \
-				  mem \
-				); \
-				bli_membrk_acquire_m \
-				( \
-				  rntm, \
-				  size_needed, \
-				  pack_buf_type_use, \
-				  mem \
-				); \
+				if ( bli_thread_am_ochief( thread ) ) \
+				{ \
+					/* The chief thread releases the existing block associated
+					   with the mem_t, and then re-acquires a new block, saving
+					   the associated mem_t to its passed-in mem_t. (See coment
+					   above for why the acquisition needs to be directly to
+					   the chief thread's passed-in mem_t and not a local
+					   (temporary) mem_t. */ \
+					bli_membrk_release \
+					( \
+					  rntm, \
+					  mem \
+					); \
+					bli_membrk_acquire_m \
+					( \
+					  rntm, \
+					  size_needed, \
+					  pack_buf_type, \
+					  mem \
+					); \
+				} \
+\
+				/* Broadcast the address of the chief thread's passed-in mem_t
+				   to all threads. */ \
+				mem_t* mem_p = bli_thread_broadcast( thread, mem ); \
+\
+				/* Non-chief threads: Copy the contents of the chief thread's
+				   passed-in mem_t to the passed-in mem_t for this thread. (The
+				   chief thread already has the mem_t, so it does not need to
+				   perform any copy.) */ \
+				if ( !bli_thread_am_ochief( thread ) ) \
+				{ \
+					*mem = *mem_p; \
+				} \
 			} \
 			else \
 			{ \
@@ -148,7 +174,7 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           did_pack, \
+       bool             did_pack, \
        rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
@@ -161,15 +187,19 @@ void PASTEMAC(ch,opname) \
 	} \
 	else /* if ( did_pack == TRUE ) */ \
 	{ \
-		/* Check the mem_t entry provided by the caller. Only proceed if it
-		   is allocated, which it should be. */ \
-		if ( bli_mem_is_alloc( mem ) ) \
+		if ( thread != NULL ) \
+		if ( bli_thread_am_ochief( thread ) ) \
 		{ \
-			bli_membrk_release \
-			( \
-			  rntm, \
-			  mem \
-			); \
+			/* Check the mem_t entry provided by the caller. Only proceed if it
+			   is allocated, which it should be. */ \
+			if ( bli_mem_is_alloc( mem ) ) \
+			{ \
+				bli_membrk_release \
+				( \
+				  rntm, \
+				  mem \
+				); \
+			} \
 		} \
 	} \
 }
@@ -182,7 +212,7 @@ INSERT_GENTFUNC_BASIC0( packm_sup_finalize_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        stor3_t          stor_id, \
        pack_t* restrict schema, \
        dim_t            k, \
@@ -281,9 +311,12 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
+       packbuf_t        pack_buf_type, \
        stor3_t          stor_id, \
        trans_t          transc, \
+       dim_t            k_alloc, \
+       dim_t            n_alloc, \
        dim_t            k, \
        dim_t            n, \
        dim_t            nr, \
@@ -292,6 +325,7 @@ void PASTEMAC(ch,opname) \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
      ) \
@@ -300,6 +334,19 @@ void PASTEMAC(ch,opname) \
 	dim_t  k_max; \
 	dim_t  n_max; \
 	dim_t  pd_p; \
+\
+	/* Prepare the packing destination buffer. If packing is not requested,
+	   this function will reduce to a no-op. */ \
+	PASTEMAC(ch,packm_sup_init_mem_b) \
+	( \
+	  will_pack, \
+	  pack_buf_type, \
+	  k_alloc, n_alloc, nr, \
+	  cntx, \
+	  rntm, \
+	  mem, \
+	  thread  \
+	); \
 \
 	/* Determine the packing buffer and related parameters for matrix B. If B
 	   will not be packed, then b_use will be set to point to b and the _b_use
@@ -323,43 +370,39 @@ void PASTEMAC(ch,opname) \
 	if ( will_pack == FALSE ) \
 	{ \
 		/* If we aren't going to pack matrix B, then there's nothing to do. */ \
-/*
-printf( "blis_ packm_sup_b: not packing B.\n" ); \
-*/ \
+\
+		/*
+		printf( "blis_ packm_sup_b: not packing B.\n" ); \
+		*/ \
 	} \
 	else /* if ( will_pack == TRUE ) */ \
 	{ \
 		if ( schema == BLIS_PACKED_COLUMNS ) \
 		{ \
-			/* For plain packing by columns, use copym.
-			   NOTE: We assume kappa = 1; otherwise, we need scal2m. */ \
+			/*
+			printf( "blis_ packm_sup_b: packing B to columns.\n" ); \
+			*/ \
 \
-			/* NOTE: This call to copym must be replaced by a proper packm
-			   variant, implemented as a loop over copym, once multithreading
-			   support is added. */ \
-\
-/*
-printf( "blis_ packm_sup_b: packing B to columns.\n" ); \
-*/ \
-			PASTEMAC2(ch,copym,BLIS_TAPI_EX_SUF) \
+			/* For plain packing by columns, use var2. */ \
+			PASTEMAC(ch,packm_sup_var2) \
 			( \
-			  0, \
-			  BLIS_NONUNIT_DIAG, \
-			  BLIS_DENSE, \
 			  transc, \
+			  schema, \
 			  k, \
 			  n, \
+			  kappa, \
 			  b,  rs_b,  cs_b, \
 			  *p, *rs_p, *cs_p, \
 			  cntx, \
-			  NULL  \
+			  thread  \
 			); \
 		} \
 		else /* if ( schema == BLIS_PACKED_COL_PANELS ) */ \
 		{ \
-/*
-printf( "blis_ packm_sup_b: packing B to col panels.\n" ); \
-*/ \
+			/*
+			printf( "blis_ packm_sup_b: packing B to col panels.\n" ); \
+			*/ \
+\
 			/* For packing to row-stored column panels, use var1. */ \
 			PASTEMAC(ch,packm_sup_var1) \
 			( \
@@ -377,6 +420,9 @@ printf( "blis_ packm_sup_b: packing B to col panels.\n" ); \
 			  thread  \
 			); \
 		} \
+\
+		/* Barrier so that packing is done before computation. */ \
+		bli_thread_barrier( thread ); \
 	} \
 }
 

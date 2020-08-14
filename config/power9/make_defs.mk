@@ -58,13 +58,11 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-# Fixme: This should use -O3, but that breaks cpuid dispatch somehow,
-# and we end up executing power9 code on power8.
-COPTFLAGS      := -O2 -funroll-loops
+COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -O3
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=power9 -mtune=power9 -DXLC=0
 else

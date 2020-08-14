@@ -45,7 +45,7 @@
 
 // thrcomm_t query (field only)
 
-static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
+BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 {
 	return comm->n_threads;
 }

@@ -99,6 +99,7 @@
 
 #include "bla_lsame.h"
 #include "bla_xerbla.h"
+#include "bla_xerbla_array.h"
 
 
 // -- Level-0 BLAS prototypes --

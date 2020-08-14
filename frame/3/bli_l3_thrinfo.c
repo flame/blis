@@ -53,6 +53,15 @@ void bli_l3_thrinfo_free
 	bli_thrinfo_free( rntm, thread );
 }
 
+void bli_l3_sup_thrinfo_free
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     )
+{
+	bli_thrinfo_free( rntm, thread );
+}
+
 // -----------------------------------------------------------------------------
 
 void bli_l3_thrinfo_create_root
@@ -90,6 +99,74 @@ void bli_l3_thrinfo_create_root
 	  bszid,
 	  NULL
 	);
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_l3_sup_thrinfo_create_root
+     (
+       dim_t       id,
+       thrcomm_t*  gl_comm,
+       rntm_t*     rntm,
+       thrinfo_t** thread
+     )
+{
+	// Query the global communicator for the total number of threads to use.
+	dim_t   n_threads  = bli_thrcomm_num_threads( gl_comm );
+
+	// Use the thread id passed in as the global communicator id.
+	dim_t   gl_comm_id = id;
+
+	// Use the BLIS_NC blocksize id to query the top-most ways of parallelism
+	// to obtain. Note that hard-coding BLIS_NC like this is a little bit of a
+	// hack, but it works fine since both of the sup algorithms (bp and pb) use
+	// the cache blocksizes down to the 3rd loop. (See the definitions of
+	// bli_rntm_calc_num_threads_bp() and bli_rntm_calc_num_threads_pb() for
+	// a concise enumeration of these bszid_t ids.)
+	const bszid_t bszid  = BLIS_NC;
+	dim_t         xx_way = bli_rntm_ways_for( BLIS_NC, rntm );
+
+	// Determine the work id for this thrinfo_t node.
+	dim_t   work_id    = gl_comm_id / ( n_threads / xx_way );
+
+	// Create the root thrinfo_t node.
+	*thread = bli_thrinfo_create
+	(
+	  rntm,
+	  gl_comm,
+	  gl_comm_id,
+	  xx_way,
+	  work_id,
+	  TRUE,
+	  bszid,
+	  NULL
+	);
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_l3_sup_thrinfo_update_root
+     (
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     )
+{
+	// Query the current root for the total number of threads to use.
+	const dim_t n_threads  = bli_thread_num_threads( thread );
+
+	// Query the current root for the (global) comm id.
+	const dim_t gl_comm_id = bli_thread_ocomm_id( thread );
+
+	// Query the rntm_t for the updated number of ways of parallelism.
+	const dim_t xx_way     = bli_rntm_ways_for( BLIS_NC, rntm );
+
+	// Recompute the work id for this thrinfo_t node using the updated
+	// number of ways of parallelism.
+	dim_t       work_id    = gl_comm_id / ( n_threads / xx_way );
+
+	// Save the updated ways of parallelism and work id to the thrinfo_t node.
+	bli_thrinfo_set_n_way( xx_way, thread );
+	bli_thrinfo_set_work_id( work_id, thread );
 }
 
 // -----------------------------------------------------------------------------

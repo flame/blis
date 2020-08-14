@@ -52,8 +52,8 @@ void bli_trsm_xx_ker_var2
        thrinfo_t* thread
      )
 {
-	bool_t       side;
-	bool_t       uplo;
+	dim_t        side;
+	dim_t        uplo;
 	trsm_var_oft f;
 
 	// Set two bools: one based on the implied side parameter (the structure

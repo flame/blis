@@ -57,13 +57,11 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-# Use -O2 here to avoid issue #341 -- BLAS check failing, using GCC 8.
-# (It's at least  -ftree-loop-vectorize which causes the trouble.)
 COPTFLAGS      := -O2 -mcpu=cortex-a53
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=cortex-a53
 else

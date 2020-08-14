@@ -60,7 +60,7 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	/* If the rntm is non-NULL, it may indicate that we should forgo sup
 	   handling altogether. */ \
-	bool_t enable_sup = TRUE; \
+	bool enable_sup = TRUE; \
 	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
 \
 	if ( enable_sup ) \

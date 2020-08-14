@@ -40,7 +40,7 @@
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \

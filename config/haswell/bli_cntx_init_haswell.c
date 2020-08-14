@@ -90,9 +90,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
 	  10,
+#if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+#endif
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -161,8 +163,8 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  201,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  100,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  120,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  201,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  201,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh

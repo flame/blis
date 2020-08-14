@@ -62,7 +62,7 @@ static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 // This is solved by making the induced method status array local to threads.
 
 static BLIS_THREAD_LOCAL
-bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
+bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
         /*    c     z    */
@@ -92,7 +92,7 @@ void_fp PASTEMAC(opname,ind_get_avail)( num_t dt ) \
 	return bli_ind_oper_get_avail( optype, dt ); \
 }
 /*
-bool_t PASTEMAC(opname,ind_has_avail)( num_t dt )
+bool PASTEMAC(opname,ind_has_avail)( num_t dt )
 {
 	return bli_ind_oper_has_avail( optype, dt );
 }
@@ -112,10 +112,10 @@ GENFUNC( trsm, BLIS_TRSM )
 // -----------------------------------------------------------------------------
 
 #if 0
-bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
+bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
 {
 	void_fp func;
-	bool_t  stat;
+	bool    stat;
 
 	// If the datatype is real, it is never available.
 	if ( !bli_is_complex( dt ) ) return FALSE;
@@ -147,7 +147,7 @@ ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 	for ( im = 0; im < BLIS_NUM_IND_METHODS; ++im )
 	{
 		void_fp func = bli_l3_ind_oper_get_func( oper, im );
-		bool_t stat = bli_l3_ind_oper_get_enable( oper, im, dt );
+		bool    stat = bli_l3_ind_oper_get_enable( oper, im, dt );
 
 		if ( func != NULL &&
 		     stat == TRUE ) return im;
@@ -161,7 +161,7 @@ ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status )
+void bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status )
 {
 	opid_t iop;
 
@@ -197,7 +197,7 @@ void bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt )
 	}
 }
 
-void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
+void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status )
 {
 	ind_t im;
 
@@ -217,7 +217,7 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
 // A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
 static bli_pthread_mutex_t oper_st_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status )
+void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status )
 {
 	num_t idt;
 
@@ -242,10 +242,10 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t sta
 	bli_pthread_mutex_unlock( &oper_st_mutex );
 }
 
-bool_t bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
+bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 {
-	num_t  idt = bli_ind_map_cdt_to_index( dt );
-	bool_t r_val;
+	num_t idt = bli_ind_map_cdt_to_index( dt );
+	bool  r_val;
 
 	{
 		r_val = bli_l3_ind_oper_st[ method ][ oper ][ idt ];

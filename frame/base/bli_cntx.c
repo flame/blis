@@ -513,9 +513,9 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	   void bli_cntx_set_l3_nat_ukrs
 	   (
 	     dim_t   n_ukrs,
-	     l3ukr_t ukr0_id, num_t dt0, void_fp ukr0_fp, bool_t pref0,
-	     l3ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp, bool_t pref1,
-	     l3ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp, bool_t pref2,
+	     l3ukr_t ukr0_id, num_t dt0, void_fp ukr0_fp, bool pref0,
+	     l3ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp, bool pref1,
+	     l3ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp, bool pref2,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -544,7 +544,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_nat_ukrs(): " );
 	#endif
-	bool_t*  ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool_t  ) );
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
 
 	// -- Begin variable argument section --
 
@@ -560,7 +560,10 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		// - the kernel function pointer, and
 		// - the kernel function storage preference
 		// that we need to store to the context.
-		// NOTE: The type that we pass into the va_arg() macro for the ukr
+
+		// NOTE: Though bool_t is no longer used, the following comment is
+		// being kept for historical reasons.
+		// The type that we pass into the va_arg() macro for the ukr
 		// preference matters. Using 'bool_t' may cause breakage on 64-bit
 		// systems that define int as 32 bits and long int and pointers as
 		// 64 bits. The problem is that TRUE or FALSE are defined as 1 and
@@ -573,7 +576,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		const l3ukr_t  ukr_id   = ( l3ukr_t )va_arg( args, l3ukr_t );
 		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
 		      void_fp  ukr_fp   = ( void_fp )va_arg( args, void_fp );
-		const bool_t   ukr_pref = ( bool_t  )va_arg( args, int     );
+		const bool     ukr_pref = ( bool    )va_arg( args, int     );
 
 		// Store the values in our temporary arrays.
 		ukr_ids[ i ]   = ukr_id;
@@ -610,7 +613,7 @@ void bli_cntx_set_l3_nat_ukrs( dim_t n_ukrs, ... )
 		const l3ukr_t ukr_id   = ukr_ids[ i ];
 		const num_t   ukr_dt   = ukr_dts[ i ];
 		      void_fp ukr_fp   = ukr_fps[ i ];
-		const bool_t  ukr_pref = ukr_prefs[ i ];
+		const bool    ukr_pref = ukr_prefs[ i ];
 
 		// Index into the func_t and mbool_t for the current kernel id
 		// being processed.
@@ -1096,9 +1099,9 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 	   void bli_cntx_set_l3_sup_kers
 	   (
 	     dim_t   n_ukrs,
-	     stor3_t stor_id0, num_t dt0, void* ukr0_fp, bool_t pref0,
-	     stor3_t stor_id1, num_t dt1, void* ukr1_fp, bool_t pref1,
-	     stor3_t stor_id2, num_t dt2, void* ukr2_fp, bool_t pref2,
+	     stor3_t stor_id0, num_t dt0, void* ukr0_fp, bool pref0,
+	     stor3_t stor_id1, num_t dt1, void* ukr1_fp, bool pref1,
+	     stor3_t stor_id2, num_t dt2, void* ukr2_fp, bool pref2,
 	     ...
 	     cntx_t* cntx
 	   );
@@ -1127,7 +1130,7 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_sup_kers(): " );
 	#endif
-	bool_t*  ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool_t  ) );
+	bool*    ukr_prefs = bli_malloc_intl( n_ukrs * sizeof( bool    ) );
 
 	// -- Begin variable argument section --
 
@@ -1147,7 +1150,7 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 		const stor3_t  st3_id   = ( stor3_t )va_arg( args, stor3_t );
 		const num_t    ukr_dt   = ( num_t   )va_arg( args, num_t   );
 		      void*    ukr_fp   = ( void*   )va_arg( args, void*   );
-		const bool_t   ukr_pref = ( bool_t  )va_arg( args, int     );
+		const bool     ukr_pref = ( bool    )va_arg( args, int     );
 
 		// Store the values in our temporary arrays.
 		st3_ids[ i ]   = st3_id;
@@ -1224,7 +1227,7 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 		const stor3_t st3_id   = st3_ids[ i ];
 		const num_t   ukr_dt   = ukr_dts[ i ];
 		      void*   ukr_fp   = ukr_fps[ i ];
-		const bool_t  ukr_pref = ukr_prefs[ i ];
+		const bool    ukr_pref = ukr_prefs[ i ];
 
 		// Index to the func_t and mbool_t for the current stor3_t id
 		// being processed.

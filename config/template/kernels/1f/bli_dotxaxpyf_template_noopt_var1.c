@@ -145,7 +145,7 @@ void bli_zdotxaxpyf_template_noopt
 	dcomplex    At_w[ bli_zdotxaxpyf_fusefac ];
 	dcomplex    alpha_x[ bli_zdotxaxpyf_fusefac ];
 
-	bool_t      use_ref         = FALSE;
+	bool        use_ref         = FALSE;
 
 	dim_t       m_pre           = 0;
 	dim_t       m_iter;
