@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@ void bli_l3_packm
 	siz_t     size_needed;
 
 	// FGVZ: Not sure why we need this barrier, but we do.
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 
 	// Every thread initializes x_pack and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
@@ -102,7 +102,7 @@ void bli_l3_packm
 
 		// Broadcast the address of the chief thread's local mem_t entry to
 		// all threads.
-		local_mem_p = bli_thread_obroadcast( thread, &local_mem_s );
+		local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
 
 		// Save the contents of the chief thread's local mem_t entry to the
 		// mem_t field in this thread's control tree node.
@@ -146,7 +146,7 @@ void bli_l3_packm
 
 			// Broadcast the address of the chief thread's local mem_t entry to
 			// all threads.
-			local_mem_p = bli_thread_obroadcast( thread, &local_mem_s );
+			local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
 
 			// Save the chief thread's local mem_t entry to the mem_t field in
 			// this thread's control tree node.
@@ -159,7 +159,7 @@ void bli_l3_packm
 			// will already have the cached values in their local control
 			// trees' mem_t entries, currently pointed to by cntl_mem_p.
 
-			bli_thread_obarrier( thread );
+			bli_thread_barrier( thread );
 		}
 	}
 
@@ -182,6 +182,6 @@ void bli_l3_packm
 	);
 
 	// Barrier so that packing is done before computation.
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 }
 

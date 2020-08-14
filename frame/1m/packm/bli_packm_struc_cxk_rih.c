@@ -45,7 +45,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -292,8 +292,8 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      ) \
 { \
-	bool_t  row_stored; \
-	bool_t  col_stored; \
+	bool    row_stored; \
+	bool    col_stored; \
 	doff_t  diagoffc_abs; \
 	dim_t   j; \
 \
@@ -530,7 +530,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \

@@ -38,6 +38,8 @@
 
 // -- Define default threading parameters --------------------------------------
 
+// -- Conventional (large code path) values --
+
 #ifndef BLIS_THREAD_RATIO_M
 #define BLIS_THREAD_RATIO_M     2
 #endif
@@ -52,6 +54,26 @@
 
 #ifndef BLIS_THREAD_MAX_JR
 #define BLIS_THREAD_MAX_JR      4
+#endif
+
+#if 0
+// -- Skinny/small possibly-unpacked (sup code path) values --
+
+#ifndef BLIS_THREAD_SUP_RATIO_M
+#define BLIS_THREAD_SUP_RATIO_M   1
+#endif
+
+#ifndef BLIS_THREAD_SUP_RATIO_N
+#define BLIS_THREAD_SUP_RATIO_N   2
+#endif
+
+#ifndef BLIS_THREAD_SUP_MAX_IR
+#define BLIS_THREAD_SUP_MAX_IR    1
+#endif
+
+#ifndef BLIS_THREAD_SUP_MAX_JR
+#define BLIS_THREAD_SUP_MAX_JR    8
+#endif
 #endif
 
 

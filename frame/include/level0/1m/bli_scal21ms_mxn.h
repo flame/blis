@@ -37,7 +37,7 @@
 
 // scal21ms_mxn
 
-static void bli_cscal21ms_mxn
+BLIS_INLINE void bli_cscal21ms_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -118,7 +118,7 @@ static void bli_cscal21ms_mxn
 	}
 }
 
-static void bli_zscal21ms_mxn
+BLIS_INLINE void bli_zscal21ms_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,

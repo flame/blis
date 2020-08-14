@@ -80,7 +80,7 @@ void PASTEMAC(chv,opname) \
 { \
 	static ctype_vr pvals[ BLIS_NUM_MACH_PARAMS ]; \
 \
-	static bool_t   first_time = TRUE; \
+	static bool     first_time = TRUE; \
 \
 	dim_t           val_i      = mval - BLIS_MACH_PARAM_FIRST; \
 	ctype_v*        v_cast     = v; \

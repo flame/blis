@@ -36,7 +36,7 @@
 
 // func_t query
 
-static void_fp bli_func_get_dt
+BLIS_INLINE void_fp bli_func_get_dt
      (
        num_t   dt,
        func_t* func
@@ -47,7 +47,7 @@ static void_fp bli_func_get_dt
 
 // func_t modification
 
-static void bli_func_set_dt
+BLIS_INLINE void bli_func_set_dt
      (
        void_fp fp,
        num_t   dt,
@@ -57,7 +57,7 @@ static void bli_func_set_dt
     func->ptr[ dt ] = fp;
 }
 
-static void bli_func_copy_dt
+BLIS_INLINE void bli_func_copy_dt
      (
        num_t dt_src, func_t* func_src,
        num_t dt_dst, func_t* func_dst
@@ -96,7 +96,7 @@ void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_func_is_null_dt( num_t   dt,
-                            func_t* f );
-bool_t bli_func_is_null( func_t* f );
+bool bli_func_is_null_dt( num_t   dt,
+                          func_t* f );
+bool bli_func_is_null( func_t* f );
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -117,7 +117,7 @@ void bli_trsm_blk_var1
 	// We must execute a barrier here because the upcoming rank-k update
 	// requires the packed matrix B to be fully updated by the trsm
 	// subproblem.
-	bli_thread_obarrier( thread );
+	bli_thread_barrier( thread );
 
 	// Isolate the remaining part of the column panel matrix A, which we do by
 	// acquiring the subpartition ahead of A11 (that is, A21 or A01, depending

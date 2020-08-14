@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,8 +64,14 @@ struct thrcomm_s
 	void*  sent_object;
 	dim_t  n_threads;
 
-	//volatile bool_t  barrier_sense;
-	bool_t barrier_sense;
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	//volatile gint_t  barrier_sense;
+	gint_t barrier_sense;
 	dim_t  barrier_threads_arrived;
 };
 #endif
@@ -78,14 +84,6 @@ barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_
 void        bli_thrcomm_tree_barrier_free( barrier_t* barrier );
 void        bli_thrcomm_tree_barrier( barrier_t* barack );
 #endif
-
-void bli_l3_thread_decorator_thread_check
-     (
-       dim_t      n_threads,
-       dim_t      tid,
-	   thrcomm_t* gl_comm,
-       rntm_t*    rntm
-     );
 
 #endif
 

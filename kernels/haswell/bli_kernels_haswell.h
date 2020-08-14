@@ -65,6 +65,17 @@ GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_haswell_asm_6x8 )
 
 // -- level-3 sup --------------------------------------------------------------
 
+// -- double real --
+
+// gemmsup_r
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_6x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_5x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_4x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_3x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_2x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_1x1 )
+
 // gemmsup_rv
 
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x8 )
@@ -94,13 +105,6 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x2 )
-
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_6x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_5x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_4x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_3x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_2x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_1x1 )
 
 // gemmsup_rv (mkernel in m dim)
 
@@ -132,6 +136,11 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_6x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_3x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_2x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_1x2 )
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_6x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_3x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_2x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_1x1 )
 
 // gemmsup_rd (mkernel in m dim)
 

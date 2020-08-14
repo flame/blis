@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -83,9 +83,11 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
 	  10,
+#if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+#endif
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -115,15 +117,37 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
+
+/*
+	Multi Instance performance improvement of DGEMM when binded to a CCX
+	In Multi instance each thread runs a sequential DGEMM.
+
+	a)  If BLIS is run in a multi-instance mode with
+	    CPU freq 2.6/2.2 Ghz
+	    DDR4 clock frequency 2400Mhz
+          mc = 240, kc = 512, and nc = 2040
+	    has better performance on EPYC server, over the default block sizes.
+
+	b)  If BLIS is run in Single Instance mode
+	      mc = 510, kc = 1024 and nc = 4080
+*/
+
 #ifdef BLIS_ENABLE_ZEN_BLOCK_SIZES
 	// Zen optmized level 3 cache block sizes
+	#if BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  1020,   510,   510,   255 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  1024,  1024,  1024,  1024 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
+	#else
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  2040,  1528 );
+	#endif
 #else
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-#endif
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8160,  4080,  4080,  3056 );
+#endif
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
@@ -149,8 +173,8 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  256,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  100,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  120,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  256,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  220,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh
@@ -159,6 +183,14 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_MT, &thresh[ BLIS_MT ],
 	  BLIS_NT, &thresh[ BLIS_NT ],
 	  BLIS_KT, &thresh[ BLIS_KT ],
+	  cntx
+	);
+
+	// Initialize the context with the sup handlers.
+	bli_cntx_set_l3_sup_handlers
+	(
+	  1,
+	  BLIS_GEMM, bli_gemmsup_ref,
 	  cntx
 	);
 

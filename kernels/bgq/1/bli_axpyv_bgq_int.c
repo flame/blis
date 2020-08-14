@@ -48,7 +48,7 @@ void bli_daxpyv_bgq_int
 
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.
-	bool_t use_ref = FALSE;
+	bool   use_ref = FALSE;
 	if ( incx != 1 || incy != 1 || bli_is_unaligned_to( ( siz_t )x, 32 ) || bli_is_unaligned_to( ( siz_t )y, 32 ) ) {
 		use_ref = TRUE;
 	}

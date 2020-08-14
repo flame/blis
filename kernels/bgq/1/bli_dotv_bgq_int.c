@@ -45,7 +45,7 @@ void bli_ddotv_bgq_int
        cntx_t* restrict cntx
      )
 {
-	bool_t use_ref = FALSE;
+	bool   use_ref = FALSE;
 
 	// If the vector lengths are zero, set rho to zero and return.
 	if ( bli_zero_dim1( n ) ) {

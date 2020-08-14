@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -163,7 +163,7 @@ void bli_error_checking_level_set( errlev_t new_level )
 	bli_pthread_mutex_unlock( &err_mutex );
 }
 
-bool_t bli_error_checking_is_enabled( void )
+bool bli_error_checking_is_enabled( void )
 {
 	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
 }

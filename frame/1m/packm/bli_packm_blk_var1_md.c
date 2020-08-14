@@ -204,8 +204,8 @@ void PASTEMAC2(chc,chp,varname) \
 	dim_t*            m_panel_max; \
 	dim_t*            n_panel_max; \
 	conj_t            conjc; \
-	bool_t            row_stored; \
-	bool_t            col_stored; \
+	bool              row_stored; \
+	bool              col_stored; \
 \
 	ctype_c* restrict c_use; \
 	ctype_p* restrict p_use; \

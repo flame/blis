@@ -52,7 +52,7 @@ void bli_daxpyf_bgq_int
 
     if ( bli_zero_dim2( m, b_n ) ) return;
 
-	bool_t            use_ref = FALSE;
+	bool              use_ref = FALSE;
 //    printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", b_n, fusefac, inca, incx, incy, bli_is_unaligned_to( ( siz_t )a, 32 ), bli_is_unaligned_to( ( siz_t )y, 32));
 	// If there is anything that would interfere with our use of aligned
 	// vector loads/stores, call the reference implementation.

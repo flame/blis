@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2018, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,34 +51,34 @@ typedef struct
 
 // Array entry query
 
-static void* bli_array_buf( array_t* array )
+BLIS_INLINE void* bli_array_buf( array_t* array )
 {
 	return array->buf;
 }
 
-static siz_t bli_array_num_elem( array_t* array )
+BLIS_INLINE siz_t bli_array_num_elem( array_t* array )
 {
 	return array->num_elem;
 }
 
-static siz_t bli_array_elem_size( array_t* array )
+BLIS_INLINE siz_t bli_array_elem_size( array_t* array )
 {
 	return array->elem_size;
 }
 
 // Array entry modification
 
-static void bli_array_set_buf( void* buf, array_t* array ) \
+BLIS_INLINE void bli_array_set_buf( void* buf, array_t* array ) \
 {
 	array->buf = buf;
 }
 
-static void bli_array_set_num_elem( siz_t num_elem, array_t* array ) \
+BLIS_INLINE void bli_array_set_num_elem( siz_t num_elem, array_t* array ) \
 {
 	array->num_elem = num_elem;
 }
 
-static void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
+BLIS_INLINE void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 {
 	array->elem_size = elem_size;
 }

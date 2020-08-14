@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2019, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,6 +33,9 @@
 #
 #
 
+# FLAGS that are specific to the 'zen' architecture are added here.
+# FLAGS that are common for all the AMD architectures are present in
+# amd_config.mk.
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
@@ -42,53 +46,35 @@ THIS_CONFIG    := zen
 # --- Determine the C compiler and related flags ---
 #
 
-# NOTE: The build system will append these variables with various
-# general-purpose/configuration-agnostic flags in common.mk. You
-# may specify additional flags here as needed.
-CPPROCFLAGS    :=
-CMISCFLAGS     :=
-CPICFLAGS      :=
-CWARNFLAGS     :=
+# Include the file containing common flags for all AMD architectures.
+AMD_CONFIG_FILE := amd_config.mk
+AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
+-include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
-ifneq ($(DEBUG_TYPE),off)
-CDBGFLAGS      := -g
-endif
-
-ifeq ($(DEBUG_TYPE),noopt)
-COPTFLAGS      := -O0
-else
-COPTFLAGS      := -O3
-endif
-
-# Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1
-ifeq ($(GCC_OT_6_1_0),yes)
 # If gcc is older than 6.1.0, we must use -march=bdver4 and then remove the
 # Bulldozer instruction sets that were omitted from Zen.
 # Additionally, if gcc is 4.9 (clang 3.5?) or newer, we may want to add
 # Zen-specific instructions back into the mix:
 # -mclzero -madx -mrdseed -mmwaitx -msha -mxsavec -mxsaves -mclflushopt -mpopcnt
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+ifeq ($(GCC_OT_6_1_0),yes)
+CRVECFLAGS += -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+CKVECFLAGS += -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+else
+# If gcc is at least 6.1.0, then we can specify the microarchitecture using
+# the preferred option.
+CRVECFLAGS += -march=znver1
+CKVECFLAGS += -march=znver1
 endif
 else
 ifeq ($(CC_VENDOR),clang)
-CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+# I couldn't find which versions of clang added support for -march=znver1,
+# so we don't even bother attempting the differentiation that appears in the
+# gcc branch above.
+CRVECFLAGS += -march=znver1
+CKVECFLAGS += -march=znver1
 else
 $(error gcc or clang are required for this configuration.)
-endif
-endif
-
-# Flags specific to reference kernels.
-CROPTFLAGS     := $(CKOPTFLAGS)
-ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-else
-ifeq ($(CC_VENDOR),clang)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-else
-CRVECFLAGS     := $(CKVECFLAGS)
 endif
 endif
 

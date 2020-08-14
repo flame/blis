@@ -32,7 +32,7 @@
 
 */
 
-static void bli_gemm_ind_recast_1m_params
+BLIS_INLINE void bli_gemm_ind_recast_1m_params
      (
        num_t* dt_exec,
        pack_t schema_a,

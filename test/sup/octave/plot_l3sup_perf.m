@@ -1,41 +1,62 @@
 function r_val = plot_l3sup_perf( opname, ...
+                                  smalldims, ...
                                   data_blissup, ...
-                                  data_blislpab, ...
+                                  data_blisconv, ...
                                   data_eigen, ...
                                   data_open, ...
+                                  data_vend, vend_str, ...
                                   data_bfeo, ...
                                   data_xsmm, ...
-                                  data_vend, vend_str, ...
                                   nth, ...
                                   rows, cols, ...
                                   cfreq, ...
                                   dfps, ...
                                   theid, impl )
-%if ... %mod(theid-1,cols) == 2 || ...
-%   ... %mod(theid-1,cols) == 3 || ...
-%   ... %mod(theid-1,cols) == 4 || ...
-%   0 == 1 ... %theid >= 19
-%	show_plot = 0;
+
+% Define the column in which the performance rates are found.
+flopscol = size( data_blissup, 2 );
+
+% Check if blasfeo data is available.
+has_bfeo = 1;
+if data_bfeo( 1, flopscol ) == 0.0
+	has_bfeo = 0;
+end
+
+% Check if libxsmm data is available.
+has_xsmm = 1;
+if data_xsmm( 1, flopscol ) == 0.0
+	has_xsmm = 0;
+end
+
+% Define which plot id will have the legend.
+% NOTE: We can draw the legend on any graph as long as it has already been
+% rendered. Since the coordinates are global, we can simply always wait until
+% the final graph to draw the legend.
+%if nth == 1
+%	if has_xsmm == 1
+%		legend_plot_id = 2*cols + 1*5;
+%	else
+%		legend_plot_id = 1*cols + 1*5;
+%	end
 %else
-	show_plot = 1;
+%	legend_plot_id = 0*cols + 1*6;
 %end
+legend_plot_id = cols*rows;
 
-%legend_plot_id = 11;
-legend_plot_id = 1*cols + 1*5;
-
+% Hold the axes.
 if 1
-ax1 = subplot( rows, cols, theid );
-hold( ax1, 'on' );
+	ax1 = subplot( rows, cols, theid );
+	hold( ax1, 'on' );
 end
 
 % Set line properties.
 color_blissup  = 'k'; lines_blissup  = '-';  markr_blissup  = '';
-color_blislpab = 'k'; lines_blislpab = ':';  markr_blislpab = '';
+color_blisconv = 'k'; lines_blisconv = ':';  markr_blisconv = '';
 color_eigen    = 'm'; lines_eigen    = '-.'; markr_eigen    = 'o';
 color_open     = 'r'; lines_open     = '--'; markr_open     = 'o';
+color_vend     = 'b'; lines_vend     = '-.'; markr_vend     = '.';
 color_bfeo     = 'c'; lines_bfeo     = '-';  markr_bfeo     = 'o';
 color_xsmm     = 'g'; lines_xsmm     = '-';  markr_xsmm     = 'o';
-color_vend     = 'b'; lines_vend     = '-.'; markr_vend     = '.';
 
 % Compute the peak performance in terms of the number of double flops
 % executable per cycle and the clock rate.
@@ -54,15 +75,13 @@ titlename = '%s';
 titlename = sprintf( titlename, title_opname );
 
 % Set the legend strings.
-blissup_legend  = sprintf( 'BLIS sup' );
-blislpab_legend = sprintf( 'BLIS conv' );
-eigen_legend    = sprintf( 'Eigen' );
-open_legend     = sprintf( 'OpenBLAS' );
-bfeo_legend     = sprintf( 'BLASFEO' );
-xsmm_legend     = sprintf( 'libxsmm' );
-%vend_legend     = sprintf( 'MKL' );
-%vend_legend     = sprintf( 'ARMPL' );
-vend_legend     = vend_str;
+blissup_lg  = sprintf( 'BLIS sup' );
+blisconv_lg = sprintf( 'BLIS conv' );
+eigen_lg    = sprintf( 'Eigen' );
+open_lg     = sprintf( 'OpenBLAS' );
+vend_lg     = vend_str;
+bfeo_lg     = sprintf( 'BLASFEO' );
+xsmm_lg     = sprintf( 'libxsmm' );
 
 % Set axes range values.
 y_scale = 1.00;
@@ -80,12 +99,11 @@ end
 
 
 %flopscol = 4;
-flopscol = size( data_blissup, 2 );
 msize = 5;
 if 1
-fontsize = 11;
+	fontsize = 12;
 else
-fontsize = 16;
+	fontsize = 16;
 end
 linesize = 0.5;
 legend_loc = 'southeast';
@@ -101,18 +119,14 @@ for psize_col = 1:3
 end
 x_axis( :, 1 ) = data_blissup( :, psize_col );
 
-% Compute the number of data points we have in the x-axis. Note that
-% we only use half the data points for the m = n = k column of graphs.
-if mod(theid-1,cols) == 6
-	np = size( data_blissup, 1 ) / 2;
-else
-	np = size( data_blissup, 1 );
-end
-
-has_xsmm = 1;
-if data_xsmm( 1, flopscol ) == 0.0
-	has_xsmm = 0;
-end
+% Compute the number of data points we have in the x-axis. Note that we
+% only use half the data points for the m = n = k column of graphs.
+%if mod(theid-1,cols) == 6
+%	np = size( data_blissup, 1 ) / 2;
+%else
+%	np = size( data_blissup, 1 );
+%end
+np = size( data_blissup, 1 );
 
 % Grab the last x-axis value.
 x_end = data_blissup( np, psize_col );
@@ -120,68 +134,54 @@ x_end = data_blissup( np, psize_col );
 %data_peak( 1, 1:2 ) = [     0 max_perf_core ];
 %data_peak( 2, 1:2 ) = [ x_end max_perf_core ];
 
-if show_plot == 1
 blissup_ln  = line( x_axis( 1:np, 1 ), data_blissup( 1:np, flopscol ) / nth, ...
-                    'Color',color_blissup, 'LineStyle',lines_blissup, ...
-                    'LineWidth',linesize );
-blislpab_ln = line( x_axis( 1:np, 1 ), data_blislpab( 1:np, flopscol ) / nth, ...
-                    'Color',color_blislpab, 'LineStyle',lines_blislpab, ...
-                    'LineWidth',linesize );
+					'Color',color_blissup, 'LineStyle',lines_blissup, ...
+					'LineWidth',linesize );
+blisconv_ln = line( x_axis( 1:np, 1 ), data_blisconv( 1:np, flopscol ) / nth, ...
+					'Color',color_blisconv, 'LineStyle',lines_blisconv, ...
+					'LineWidth',linesize );
 eigen_ln    = line( x_axis( 1:np, 1 ), data_eigen( 1:np, flopscol ) / nth, ...
-                    'Color',color_eigen, 'LineStyle',lines_eigen, ...
-                    'LineWidth',linesize );
+					'Color',color_eigen, 'LineStyle',lines_eigen, ...
+					'LineWidth',linesize );
 open_ln     = line( x_axis( 1:np, 1 ), data_open( 1:np, flopscol ) / nth, ...
-                    'Color',color_open, 'LineStyle',lines_open, ...
-                    'LineWidth',linesize );
-bfeo_ln     = line( x_axis( 1:np, 1 ), data_bfeo( 1:np, flopscol ) / nth, ...
-                    'Color',color_bfeo, 'LineStyle',lines_bfeo, ...
-                    'LineWidth',linesize );
-if has_xsmm == 1
-xsmm_ln     = line( x_axis( 1:np, 1 ), data_xsmm( 1:np, flopscol ) / nth, ...
-                    'Color',color_xsmm, 'LineStyle',lines_xsmm, ...
-                    'LineWidth',linesize );
-else
-xsmm_ln     = line( nan, nan, ...
-                    'Color',color_xsmm, 'LineStyle',lines_xsmm, ...
-                    'LineWidth',linesize );
-end
+					'Color',color_open, 'LineStyle',lines_open, ...
+					'LineWidth',linesize );
 vend_ln     = line( x_axis( 1:np, 1 ), data_vend( 1:np, flopscol ) / nth, ...
-                    'Color',color_vend, 'LineStyle',lines_vend, ...
-                    'LineWidth',linesize );
+					'Color',color_vend, 'LineStyle',lines_vend, ...
+					'LineWidth',linesize );
+if has_bfeo == 1
+	bfeo_ln     = line( x_axis( 1:np, 1 ), data_bfeo( 1:np, flopscol ) / nth, ...
+						'Color',color_bfeo, 'LineStyle',lines_bfeo, ...
+						'LineWidth',linesize );
 else
-if theid == legend_plot_id
-blissup_ln  = line( nan, nan, ...
-                    'Color',color_blissup, 'LineStyle',lines_blissup, ...
-                    'LineWidth',linesize );
-blislpab_ln = line( nan, nan, ...
-                    'Color',color_blislpab, 'LineStyle',lines_blislpab, ...
-                    'LineWidth',linesize );
-eigen_ln    = line( nan, nan, ...
-                    'Color',color_eigen, 'LineStyle',lines_eigen, ...
-                    'LineWidth',linesize );
-open_ln     = line( nan, nan, ...
-                    'Color',color_open, 'LineStyle',lines_open, ...
-                    'LineWidth',linesize );
-bfeo_ln     = line( nan, nan, ...
-                    'Color',color_bfeo, 'LineStyle',lines_bfeo, ...
-                    'LineWidth',linesize );
-xsmm_ln     = line( nan, nan, ...
-                    'Color',color_xsmm, 'LineStyle',lines_xsmm, ...
-                    'LineWidth',linesize );
-vend_ln     = line( nan, nan, ...
-                    'Color',color_vend, 'LineStyle',lines_vend, ...
-                    'LineWidth',linesize );
+	bfeo_ln     = line( nan, nan, ...
+						'Color',color_bfeo, 'LineStyle',lines_bfeo, ...
+						'LineWidth',linesize );
 end
+if has_xsmm == 1
+	xsmm_ln     = line( x_axis( 1:np, 1 ), data_xsmm( 1:np, flopscol ) / nth, ...
+						'Color',color_xsmm, 'LineStyle',lines_xsmm, ...
+						'LineWidth',linesize );
+else
+	xsmm_ln     = line( nan, nan, ...
+						'Color',color_xsmm, 'LineStyle',lines_xsmm, ...
+						'LineWidth',linesize );
 end
 
 
 xlim( ax1, [x_begin x_end] );
 ylim( ax1, [y_begin y_end] );
 
-if     6000 <= x_end && x_end < 10000
+if    10000 <= x_end && x_end < 15000
 	x_tick2 = x_end - 2000;
 	x_tick1 = x_tick2/2;
-	xticks( ax1, [ x_tick1 x_tick2 ] );
+	%xticks( ax1, [ x_tick1 x_tick2 ] );
+	xticks( ax1, [ 3000 6000 9000 12000 ] );
+elseif 6000 <= x_end && x_end < 10000
+	x_tick2 = x_end - 2000;
+	x_tick1 = x_tick2/2;
+	%xticks( ax1, [ x_tick1 x_tick2 ] );
+	xticks( ax1, [ 2000 4000 6000 8000 ] );
 elseif 4000 <= x_end && x_end < 6000
 	x_tick2 = x_end - 1000;
 	x_tick1 = x_tick2/2;
@@ -197,71 +197,51 @@ elseif 500 <= x_end && x_end < 1000
 	xticks( ax1, [ x_tick1 x_tick2 x_tick3 ] );
 end
 
-if show_plot == 1 || theid == legend_plot_id
-	if nth == 1 && theid == legend_plot_id
-		if has_xsmm == 1
-			leg = legend( ...
-			[ ...
-			  blissup_ln ...
-			  blislpab_ln ...
-			  eigen_ln ...
-			  open_ln ...
-			  bfeo_ln ...
-			  xsmm_ln ...
-			  vend_ln ...
-			], ...
-			blissup_legend, ...
-			blislpab_legend, ...
-			eigen_legend, ...
-			open_legend, ...
-			bfeo_legend, ...
-			xsmm_legend, ...
-			vend_legend, ...
-			'Location', legend_loc );
-			set( leg,'Box','off' );
-			set( leg,'Color','none' );
-			set( leg,'Units','inches' );
-			if impl == 'octave'
+	%                    xpos ypos
+	%set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
+if nth == 1 && theid == legend_plot_id
+	if has_xsmm == 1
+		% single-threaded, with libxsmm (ccc)
+		leg = legend( ...
+		[ blissup_ln  blisconv_ln  eigen_ln  open_ln  vend_ln  bfeo_ln  xsmm_ln ], ...
+		  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, bfeo_lg, xsmm_lg, ...
+		'Location', legend_loc );
+		set( leg,'Box','off','Color','none','Units','inches' );
+		if impl == 'octave'
 			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
-			else
+			set( leg,'Position',[15.35 4.62 1.9 1.20] ); % (1,4tl)
+		else
 			set( leg,'FontSize',fontsize-3 );
 			set( leg,'Position',[18.20 10.20 1.15 0.7 ] ); % (1,4tl)
-			end
-		else
-			leg = legend( ...
-			[ ...
-			  blissup_ln ...
-			  blislpab_ln ...
-			  eigen_ln ...
-			  open_ln ...
-			  bfeo_ln ...
-			  vend_ln ...
-			], ...
-			blissup_legend, ...
-			blislpab_legend, ...
-			eigen_legend, ...
-			open_legend, ...
-			bfeo_legend, ...
-			vend_legend, ...
-			'Location', legend_loc );
-			set( leg,'Box','off' );
-			set( leg,'Color','none' );
-			set( leg,'Units','inches' );
-			if impl == 'octave'
-			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[11.92 6.54 1.15 0.7 ] ); % (1,4tl)
-			else
-			set( leg,'FontSize',fontsize-1 );
-			set( leg,'Position',[18.24 10.15 1.15 0.7 ] ); % (1,4tl)
-			end
 		end
-		set( leg,'Box','off' );
-		set( leg,'Color','none' );
-		set( leg,'Units','inches' );
-		%                    xpos ypos
-		%set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
-	elseif nth > 1 && theid == legend_plot_id
+	else
+		% single-threaded, without libxsmm (rrr, or other)
+		leg = legend( ...
+		[ blissup_ln  blisconv_ln  eigen_ln  open_ln  vend_ln  bfeo_ln  ], ...
+		  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, bfeo_lg, ...
+		'Location', legend_loc );
+		set( leg,'Box','off','Color','none','Units','inches' );
+		if impl == 'octave'
+			set( leg,'FontSize',fontsize );
+			set( leg,'Position',[15.35 7.40 1.9 1.10] ); % (1,4tl)
+		else
+			set( leg,'FontSize',fontsize-1 );
+			set( leg,'Position',[18.24 10.15 1.15 0.7] ); % (1,4tl)
+		end
+	end
+elseif nth > 1 && theid == legend_plot_id
+	% multithreaded
+	leg = legend( ...
+	[ blissup_ln  blisconv_ln  eigen_ln  open_ln  vend_ln ], ...
+	  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, ...
+	'Location', legend_loc );
+	set( leg,'Box','off','Color','none','Units','inches' );
+	if impl == 'octave'
+		set( leg,'FontSize',fontsize );
+		set( leg,'Position',[18.20 10.30 1.9 0.95] ); % (1,4tl)
+	else
+		set( leg,'FontSize',fontsize-1 );
+		set( leg,'Position',[18.24 10.15 1.15 0.7] ); % (1,4tl)
 	end
 end
 
@@ -272,43 +252,61 @@ box( ax1, 'on' );
 titl = title( titlename );
 set( titl, 'FontWeight', 'normal' ); % default font style is now 'bold'.
 
+% The default is to align the plot title across whole figure, not the box.
+% This is a hack to nudge the title back to the center of the box.
 if impl == 'octave'
-tpos = get( titl, 'Position' ); % default is to align across whole figure, not box.
-tpos(1) = tpos(1) + -40;
-set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
+	tpos = get( titl, 'Position' );
+	% For some reason, the titles in the graphs in the last column start
+	% off in a different relative position than the graphs in the other
+	% columns. Here, we manually account for that.
+	if mod(theid-1,cols) == 6
+		tpos(1) = tpos(1) + -10;
+	else
+		tpos(1) = tpos(1) + -40;
+	end
+	set( titl, 'Position', tpos );
+	set( titl, 'FontSize', fontsize );
+else % impl == 'matlab'
+	tpos = get( titl, 'Position' );
+	tpos(1) = tpos(1) + 90;
+	set( titl, 'Position', tpos );
 end
 
+sll_str = sprintf( 'm = %u; n = k', smalldims(1) );
+lsl_str = sprintf( 'n = %u; m = k', smalldims(2) );
+lls_str = sprintf( 'k = %u; m = n', smalldims(3) );
+lss_str = sprintf( 'm; n = %u, k = %u', smalldims(2), smalldims(3) );
+sls_str = sprintf( 'n; m = %u, k = %u', smalldims(1), smalldims(3) );
+ssl_str = sprintf( 'k; m = %u, n = %u', smalldims(1), smalldims(2) );
+lll_str = sprintf( 'm = n = k' );
+
+% Place labels on the bottom row of graphs.
 if theid > (rows-1)*cols
-%xlab = xlabel( ax1,xaxisname );
-%tpos = get( xlab, 'Position' )
-%tpos(2) = tpos(2) + 10;
-%set( xlab, 'Position', tpos );
+	%xlab = xlabel( ax1,xaxisname );
+	%tpos = get( xlab, 'Position' )
+	%tpos(2) = tpos(2) + 10;
+	%set( xlab, 'Position', tpos );
 	if     theid == rows*cols - 6
-	xlab = xlabel( ax1, 'm = 6; n = k' );
+		xlab = xlabel( ax1, sll_str );
 	elseif theid == rows*cols - 5
-	xlab = xlabel( ax1, 'n = 8; m = k' );
+		xlab = xlabel( ax1, lsl_str );
 	elseif theid == rows*cols - 4
-	xlab = xlabel( ax1, 'k = 4; m = n' );
+		xlab = xlabel( ax1, lls_str );
 	elseif theid == rows*cols - 3
-	xlab = xlabel( ax1, 'm; n = 8, k = 4' );
+		xlab = xlabel( ax1, lss_str );
 	elseif theid == rows*cols - 2
-	xlab = xlabel( ax1, 'n; m = 6, k = 4' );
+		xlab = xlabel( ax1, sls_str );
 	elseif theid == rows*cols - 1
-	xlab = xlabel( ax1, 'k; m = 6, n = 8' );
+		xlab = xlabel( ax1, ssl_str );
 	elseif theid == rows*cols - 0
-	xlab = xlabel( ax1, 'm = n = k' );
+		xlab = xlabel( ax1, lll_str );
 	end
 end
 
+% Place labels on the left-hand column of graphs.
 if mod(theid-1,cols) == 0
-ylab = ylabel( ax1,yaxisname );
+	ylab = ylabel( ax1,yaxisname );
 end
-
-%export_fig( filename, colorflag, '-pdf', '-m2', '-painters', '-transparent' );
-%saveas( fig, filename_png );
-
-%hold( ax1, 'off' );
 
 r_val = 0;
 
-end
