@@ -90,17 +90,6 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
-                    if ( k > 11 )
-                    {
-                        svprfd( all_active, alpha1 + lda * 11, SV_PLDL2STRM );
-                        svprfd( all_active, alpha1 + lda * 11 + 8 * inca, SV_PLDL2STRM );
-                    }
-                    if ( k > 2 )
-                    {
-                        svprfd( all_active, alpha1 + lda * 2, SV_PLDL1STRM );
-                        svprfd( all_active, alpha1 + lda * 2 + 8 * inca, SV_PLDL1STRM );
-                    }
-
                     // svld1_f64 retrieves all zero's into z_a0 and z_a8,
                     //   which is not correct.
                     //   qemu-aarch64 or gcc interpretation of svld1_f64
@@ -128,17 +117,6 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
-                    if ( k > 14 )
-                    {
-                        svprfd_gather_index( all_active, alpha1 + lda * 14, z_index, SV_PLDL2STRM );
-                        svprfd_gather_index( all_active, alpha1 + lda * 14 + 8 * inca, z_index, SV_PLDL2STRM );
-                    }
-                    if ( k > 2 )
-                    {
-                        svprfd_gather_index( all_active, alpha1 + lda * 2, z_index, SV_PLDL1STRM );
-                        svprfd_gather_index( all_active, alpha1 + lda * 2 + 8 * inca, z_index, SV_PLDL1STRM );
-                    }
-
                     // gather load from *a
                     z_a0 = svld1_gather_u64offset_f64( all_active, alpha1, z_index );
                     z_a8 = svld1_gather_u64offset_f64( all_active, alpha1_8, z_index );
@@ -164,17 +142,6 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
-                    if ( k > 10 )
-                    {
-                        svprfd( all_active, alpha1 + lda * 10, SV_PLDL2STRM );
-                        svprfd( all_active, alpha1 + lda * 10 + 8 * inca, SV_PLDL2STRM );
-                    }
-                    if ( k > 2 )
-                    {
-                        svprfd( all_active, alpha1 + lda * 2, SV_PLDL1STRM );
-                        svprfd( all_active, alpha1 + lda * 2 + 8 * inca, SV_PLDL1STRM );
-                    }
-
                     // load 16 continuous elments from *a
                     z_a0 = svld1_f64( all_active, alpha1 );
                     z_a8 = svld1_vnum_f64( all_active, alpha1, 1 );
@@ -200,17 +167,6 @@ void bli_dpackm_armsve512_asm_16xk
             {
                 for ( dim_t k = n; k != 0; --k )
                 {
-                    if ( k > 13 )
-                    {
-                        svprfd_gather_index( all_active, alpha1 + lda * 13, z_index, SV_PLDL2STRM );
-                        svprfd_gather_index( all_active, alpha1 + lda * 13 + 8 * inca, z_index, SV_PLDL2STRM );
-                    }
-                    if ( k > 2 )
-                    {
-                        svprfd_gather_index( all_active, alpha1 + lda * 2, z_index, SV_PLDL1STRM );
-                        svprfd_gather_index( all_active, alpha1 + lda * 2 + 8 * inca, z_index, SV_PLDL1STRM );
-                    }
-
                     // gather load from *a
                     z_a0 = svld1_gather_u64offset_f64( all_active, alpha1, z_index );
                     z_a8 = svld1_gather_u64offset_f64( all_active, alpha1_8, z_index );
