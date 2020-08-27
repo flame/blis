@@ -35,6 +35,6 @@
 //#ifndef BLIS_FAMILY_H
 //#define BLIS_FAMILY_H
 
-
+#define BLIS_SIMD_SIZE 16		// 128-bit altivec
 //#endif
 
