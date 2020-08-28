@@ -1407,6 +1407,8 @@ check_compiler()
 
 	echo "${script_name}: checking for blacklisted configurations due to ${cc} ${cc_version}."
 
+        # Fixme: check on a64fx, neoverse, and others
+
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
 
