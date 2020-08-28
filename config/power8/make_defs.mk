@@ -63,7 +63,7 @@ COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -mcpu=power8
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     :=
 else
