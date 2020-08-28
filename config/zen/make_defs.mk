@@ -57,13 +57,10 @@ endif
 # --- Enable ETRACE across the library if enabled ETRACE_ENABLE=[0,1] -----------------------
 #
 
-ifeq ($(ETRACE_ENABLE),1)
-CDBGFLAGS += -pg -finstrument-functions -DAOCL_DTL_AUTO_TRACE_ENABLE
-LDFLAGS += -ldl
-endif
-
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS += -march=znver1
 endif

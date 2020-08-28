@@ -61,26 +61,13 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-#frame pointers are needed to execution tracing
-ifeq ($(ETRACE_ENABLE),1)
 COPTFLAGS      := -O3
-else
-COPTFLAGS      := -O3 -fomit-frame-pointer
-endif
-endif
-
-
-#
-# --- Enable ETRACE across the library if enabled ETRACE_ENABLE=[0,1] -----------------------
-#
-
-ifeq ($(ETRACE_ENABLE),1)
-CDBGFLAGS += -pg -finstrument-functions -DAOCL_DTL_AUTO_TRACE_ENABLE
-LDFLAGS += -ldl
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
 GCC_VERSION := $(strip $(shell gcc -dumpversion | cut -d. -f1))
 #gcc or clang version must be atleast 4.0
