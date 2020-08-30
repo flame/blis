@@ -1439,7 +1439,7 @@ uint32_t bli_cpuid_query
 #else
 // See https://developer.ibm.com/tutorials/optimized-libraries-for-linux-on-power/
 	char * platform = (char*) getauxval (AT_PLATFORM);
-        if ( !platform ) retun 0; // Fixme: can it be null?
+        if ( !platform ) return 0; // Fixme: can it be null?
 	if ( strcmp( platform, "power8" ) == 0 )
 		*part = BLIS_ARCH_POWER8;
 	else if ( strcmp( platform, "power9" ) == 0 )
@@ -1454,15 +1454,17 @@ uint32_t bli_cpuid_query
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t model, part, features;
+#if BLIS_ARCH_POWER9 || BLIS_ARCH_POWER8
 	arch_t envval = bli_env_check();
-
-#ifdef BLIS_CONFIG_POWER9
-	if ( BLIS_CONFIG_POWER9 == envval )
-		return BLIS_CONFIG_POWER9;
 #endif
-#ifdef BLIS_CONFIG_POWER8
-	if ( BLIS_CONFIG_POWER8 == envval )
-		return BLIS_CONFIG_POWER8;
+
+#ifdef BLIS_ARCH_POWER9
+	if ( BLIS_ARCH_POWER9 == envval )
+		return BLIS_ARCH_POWER9;
+#endif
+#ifdef BLIS_ARCH_POWER8
+	if ( BLIS_ARCH_POWER8 == envval )
+		return BLIS_ARCH_POWER8;
 #endif
 
 	(void) bli_cpuid_query( &model, &part, &features );

@@ -1,0 +1,11 @@
+--- config/power9/make_defs.mk~	2020-08-30 19:45:31.000000000 +0200
++++ config/power9/make_defs.mk	2020-08-30 19:50:24.164832529 +0200
+@@ -83,6 +83,8 @@
+ CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+ else
+ CRVECFLAGS     := $(CKVECFLAGS)
++endif
++endif
+ 
+ # Store all of the variables here to new variables containing the
+ # configuration name.

@@ -1014,8 +1014,10 @@ typedef enum
 	BLIS_ARCH_BGQ,
 
 	// Generic architecture/configuration
-	BLIS_ARCH_GENERIC
+	BLIS_ARCH_GENERIC,
 
+  // Number of architectures, must be last
+  BLIS_NUM_ARCHS
 } arch_t;
 
 // NOTE: This value must be updated to reflect the number of enum values

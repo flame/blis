@@ -65,7 +65,7 @@ TRSM_UKR_PROT(     dcomplex, z, trsmbb_u_power9_ref )
 
 void bli_cntx_init_power9( cntx_t* cntx )
 {
-//	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_power9_ref( cntx );
