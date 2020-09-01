@@ -671,16 +671,17 @@ Funding
 -------
 
 This project and its associated research were partially sponsored by grants from
-[Microsoft](http://www.microsoft.com/),
-[Intel](http://www.intel.com/),
-[Texas Instruments](http://www.ti.com/),
-[AMD](http://www.amd.com/),
-[Oracle](http://www.oracle.com/),
-[Huawei](http://www.huawei.com/),
+[Microsoft](https://www.microsoft.com/),
+[Intel](https://www.intel.com/),
+[Texas Instruments](https://www.ti.com/),
+[AMD](https://www.amd.com/),
+[HPE](https://www.hpe.com/),
+[Oracle](https://www.oracle.com/),
+[Huawei](https://www.huawei.com/),
 and
-[Facebook](http://www.facebook.com/),
+[Facebook](https://www.facebook.com/),
 as well as grants from the
-[National Science Foundation](http://www.nsf.gov/) (Awards
+[National Science Foundation](https://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).
 
 _Any opinions, findings and conclusions or recommendations expressed in this
