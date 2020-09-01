@@ -1129,7 +1129,7 @@ static uint32_t get_coretype(void) {
 	// -mtune will speed them up
 	// <https://github.com/xianyi/OpenBLAS/commit/310ea55f29f16771438386fb2f1f140e2fd7e397>
 	// It has Neoverse-N1 as -march=armv8.2-a -mtune=neoverse-n1 (gcc
-	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits.
+	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; as gravitin2, l1d 64k, l2 1024, l3 32M, Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
 	return BLIS_ARCH_CORTEXA57;
 }
 #endif
