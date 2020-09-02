@@ -1411,7 +1411,7 @@ uint32_t bli_cpuid_query
 	*part = BLIS_ARCH_GENERIC;
 	return 0;
 }
-#else
+#else  // __linux__
 #include <sys/auxv.h>
 
 uint32_t bli_cpuid_query
@@ -1454,15 +1454,15 @@ uint32_t bli_cpuid_query
 arch_t bli_cpuid_query_id( void )
 {
 	uint32_t model, part, features;
-#if BLIS_ARCH_POWER9 || BLIS_ARCH_POWER8
+#if defined BLIS_CONFIG_POWER9 || defined BLIS_CONFIG_POWER8
 	arch_t envval = bli_env_check();
 #endif
 
-#ifdef BLIS_ARCH_POWER9
+#ifdef BLIS_CONFIG_POWER9
 	if ( BLIS_ARCH_POWER9 == envval )
 		return BLIS_ARCH_POWER9;
 #endif
-#ifdef BLIS_ARCH_POWER8
+#ifdef BLIS_CONFIG_POWER8
 	if ( BLIS_ARCH_POWER8 == envval )
 		return BLIS_ARCH_POWER8;
 #endif
