@@ -1680,6 +1680,20 @@ check_assembler()
 	if [ "x${knows_avx512dq}" == "xno" ]; then
 		blacklistbu_add "skx"
 	fi
+
+	#
+	# Check zarch support (z13 is in GCC 6+, z14 in 7+) .
+	# OK, it's not an assembler test...
+	#
+	asm_fp=$(find ${asm_dir} -name "dummy.c")
+	knows_z13=$(try_assemble "${cc}" "-march=z13" "${asm_fp}")
+	if [ "x${knows_z13}" == "xno" ]; then
+		blacklistbu_add "z13"
+	fi
+	knows_z14=$(try_assemble "${cc}" "-march=z14" "${asm_fp}")
+	if [ "x${knows_z14}" == "xno" ]; then
+		blacklistbu_add "z14"
+	fi
 }
 
 try_assemble()

@@ -39,6 +39,8 @@ A few remarks / reminders:
 | IBM Blue Gene/Q (QPX int)            | `bgq`                  |  `d`   |            |
 | IBM Power8 (C99)                     | `power8`               | `sdcz` | `sdcz`     |
 | IBM Power9 (C99)                     | `power9`               | `sdcz` | `sdcz`     |
+| IBM S390x Z13 (C99)                  | `z13`                  | `sdcz` | `sdcz`     |
+| IBM S390x Z14 (C99)                  | `z14`                  | `sdcz` | `sdcz`     |
 | template (C99)                       | `template`             | `sdcz` | `sdcz`     |
 
 ## Level-1f kernels

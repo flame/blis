@@ -1013,6 +1013,10 @@ typedef enum
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
+    // IBM S390
+	BLIS_ARCH_Z13,
+	BLIS_ARCH_Z14,
+
 	// Generic architecture/configuration
 	BLIS_ARCH_GENERIC
 
@@ -1020,7 +1024,7 @@ typedef enum
 
 // NOTE: This value must be updated to reflect the number of enum values
 // listed above for arch_t!
-#define BLIS_NUM_ARCHS 22
+#define BLIS_NUM_ARCHS 24
 
 
 //
