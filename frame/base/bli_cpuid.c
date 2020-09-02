@@ -536,6 +536,10 @@ arch_t bli_cpuid_query_id( void )
 		{
 			// Check for each ARMv8 configuration that is enabled, check for that
 			// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_A64FX
+			if ( bli_cpuid_is_a64fx( model, part, features ) )
+				return BLIS_ARCH_A64FX;
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 			if ( bli_cpuid_is_thunderx2( model, part, features ) )
 				return BLIS_ARCH_THUNDERX2;
@@ -577,7 +581,17 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
-bool bli_cpuid_is_thunderx2
+bool_t bli_cpuid_is_a64fx
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	return model == BLIS_ARCH_A64FX;
+}
+
+bool_t bli_cpuid_is_thunderx2
      (
        uint32_t family,
        uint32_t model,
@@ -1065,13 +1079,35 @@ int vpu_count( void )
 #ifndef HWCAP_CPUID
 #define HWCAP_CPUID (1 << 11)
 #endif
+/* From https://www.kernel.org/doc/html/latest/arm64/sve.html and the
+   aarch64 hwcap.h */
+#ifndef HWCAP_SVE
+#define HWCAP_SVE (1 << 22)
+#endif
+/* Maybe also for AT_HWCAP2
+#define HWCAP2_SVE2(1 << 1)
+et al
+) */
 
 static uint32_t get_coretype(void) {
 	int implementer, part, midr_el1;
 
+// Fixme:  Presumably we should be checking the vector length as the
+// imlementation isn't length-agnostic.
+// #ifdef BLI_ARCH_ARMSVE          /* invented -- fixme */
+// 	if (!(getauxval(AT_HWCAP) & HWCAP_SVE)) {
+// 		/* Assuming no support for specific models */
+// 		return BLI_ARCH_ARMSVE;
+// 	}
+// #endif
+
 	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
 		// Fixme:  We could try reading /sys and /proc here, as below.
 		// Find out if that could work when the HWCAP test fails.
+		// https://github.com/xianyi/OpenBLAS/issues/2715 says HWCAP_CPUID
+		// is a Linux 4.11 feature and that sys/.../midr_el1 is a 4.7
+		// feature.  Should caution somewhere about binding to big cores
+		// in big-little CPUs.
 		return 0;
 	}
 	// Also available from
@@ -1117,12 +1153,17 @@ static uint32_t get_coretype(void) {
 	// CAVIUM_CPU_PART_THUNDERX_81XX 0x0A2
 	// CAVIUM_CPU_PART_THUNDERX_83XX 0x0A3
 	// CAVIUM_CPU_PART_THUNDERX2 0x0AF
+	// CAVIUM_CPU_PART_THUNDERX3 0x0B8  // taken from OpenBLAS
 	//
+	// BRCM_CPU_PART_BRAHMA_B53 0x100 
 	// BRCM_CPU_PART_VULCAN 0x516
 	//
 	// QCOM_CPU_PART_FALKOR_V1 0x800
 	// QCOM_CPU_PART_FALKOR 0xC00
 	// QCOM_CPU_PART_KRYO 0x200
+        // QCOM_CPU_PART_KRYO_3XX_SILVER 0x803
+        // QCOM_CPU_PART_KRYO_4XX_GOLD 0x804
+        // QCOM_CPU_PART_KRYO_4XX_SILVER 0x805
 	//
 	// NVIDIA_CPU_PART_DENVER 0x003
 	// NVIDIA_CPU_PART_CARMEL 0x004
@@ -1155,11 +1196,25 @@ static uint32_t get_coretype(void) {
 			switch (part)
 			{
 				case 0x0af: // ThunderX2
+				case 0x0b8: // ThunderX3
 					return BLIS_ARCH_THUNDERX2;
 			}
 			break;
+		case 0x46:      // Fujitsu
+			switch (part)
+			{
+				case 0x001: // A64FX
+					return BLIS_ARCH_A64FX;
+			}
+			break;
+        // Fixme: OpenBLAS 
 	}
-	return BLIS_ARCH_CORTEXA57; // Fixme: Is this the best default?
+	// Fixme: OpenBLAS uses a57 basic config for others, but says
+	// -mtune will speed them up
+	// <https://github.com/xianyi/OpenBLAS/commit/310ea55f29f16771438386fb2f1f140e2fd7e397>
+	// It has Neoverse-N1 as -march=armv8.2-a -mtune=neoverse-n1 (gcc
+	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; as gravitin2, l1d 64k, l2 1024, l3 32M, Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
+	return BLIS_ARCH_CORTEXA57;
 }
 #endif
 
