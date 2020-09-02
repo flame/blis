@@ -176,6 +176,16 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_bgq_ref,
 		                                              bli_cntx_init_bgq_ind );
 #endif
+#ifdef BLIS_CONFIG_Z13
+		bli_gks_register_cntx( BLIS_ARCH_Z13,         bli_cntx_init_z13,
+		                                              bli_cntx_init_z13_ref,
+		                                              bli_cntx_init_z13_ind );
+#endif
+#ifdef BLIS_CONFIG_Z14
+		bli_gks_register_cntx( BLIS_ARCH_Z14,         bli_cntx_init_z14,
+		                                              bli_cntx_init_z14_ref,
+		                                              bli_cntx_init_z14_ind );
+#endif
 
 		// Generic architectures
 #ifdef BLIS_CONFIG_GENERIC

@@ -56,6 +56,7 @@
 #else
   #include "blis.h"
 #endif
+static char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath );
 
 // -----------------------------------------------------------------------------
 
@@ -1333,65 +1334,6 @@ uint32_t bli_cpuid_query
 	return VENDOR_ARM;
 }
 
-char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath )
-{
-	// This function searches for the first line of the file located at
-	// 'filepath' that contains the string 'target' and then copies that
-	// line (actually, the substring of the line starting with 'target')
-	// to 'buffer', which is 'buf_len' bytes long.
-
-	char* r_val = NULL;
-
-	// Allocate a temporary local buffer equal to the size of buffer.
-	char* buf_local = malloc( buf_len * sizeof( char ) );
-
-	// Open the file stream.
-	FILE* stream = fopen( filepath, "r" );
-
-	// Repeatedly read in a line from the stream, storing the contents of
-	// the stream into buf_local.
-	while ( !feof( stream ) )
-	{
-		// Read in the current line, up to buf_len-1 bytes.
-		r_val = fgets( buf_local, buf_len-1, stream );
-
-		//printf( "read line: %s", buf_local );
-
-		// fgets() returns the pointer specified by the first argument (in
-		// this case, buf_local) on success and NULL on error.
-		if ( r_val == NULL ) break;
-
-		// Since fgets() was successful, we can search for the target string
-		// within the current line, as captured in buf_local.
-		r_val = strstr( buf_local, target );
-
-		// If the target string was found in buf_local, we save it to buffer.
-		if ( r_val != NULL )
-		{
-			//printf( "  found match to '%s'\n", target );
-
-			// Copy the string read by fgets() to the caller's buffer.
-			strncpy( buffer, buf_local, buf_len );
-
-			// Make sure that we have a terminating null character by the
-			// end of the buffer.
-			if ( buf_len > 0 ) buffer[ buf_len - 1 ] = '\0';
-
-			// Leave the loop since we found the target string.
-			break;
-		}
-	}
-
-	// Close the file stream.
-	fclose( stream );
-
-	// Free the temporary local buffer.
-	free( buf_local );
-
-	// Return r_val so the caller knows if we failed.
-	return r_val;
-}
-
 // https://sourceforge.net/p/predef/wiki/Architectures/ lists macros
 #elif __PPC64__ /* gcc */ || __ppc64__ /* should be gcc, but failed */ || \
       _ARCH_PPC64 /* xlc */
@@ -1482,9 +1424,16 @@ arch_t bli_cpuid_query_id( void )
 }
 
 #elif __s390x__	 /* gcc */ || __zarch__ /* clang */ || __SYSC_ZARCH__ /* Systems/C */
+
+// Z13 introduced SIMD, so we should compile the generic kernel for
+// that if possible.  z14 vector introduced vector float.  (Fedora
+// appears to target Z12, so s390x must cover non-SIMD Z.)
+
+// Fixme:  See if default block sizes etc. are appropriate; 32x128b
+// SIMD registers <https://www.ibm.com/downloads/cas/WVPALM0N>.
+
 /*
-Example cpuinfo (from Fedora build) in case there's no better way than
-reading it:
+Example cpuinfo (from Fedora build system):
 
 CPU info:
 Architecture:        s390x
@@ -1515,6 +1464,191 @@ L3 cache:            65536K
 L4 cache:            491520K
 NUMA node0 CPU(s):   0,1
 Flags:               esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx sie
+
+And one from a shell, that's completely different.  As with aarch64,
+we could probably have multiple CPU types, but we presumably only have
+ine instruction set.
+
+vendor_id       : IBM/S390
+# processors    : 4
+bogomips per cpu: 3241.00
+max thread id   : 0
+features: esan3 zarch stfle msa ldisp eimm dfp edat etf3eh highgprs te vx vxd vxe gs vxe2 vxp sort dflt sie 
+facilities      : 0 1 2 3 4 6 7 8 9 10 12 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 30 31 32 33 34 35 36 37 38 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 57 58 59 60 61 73 74 75 76 77 80 81 82 128 129 130 131 133 134 135 146 147 148 150 151 152 155 156 168
+cache0          : level=1 type=Data scope=Private size=128K line_size=256 associativity=8
+cache1          : level=1 type=Instruction scope=Private size=128K line_size=256 associativity=8
+cache2          : level=2 type=Data scope=Private size=4096K line_size=256 associativity=8
+cache3          : level=2 type=Instruction scope=Private size=4096K line_size=256 associativity=8
+cache4          : level=3 type=Unified scope=Shared size=262144K line_size=256 associativity=32
+cache5          : level=4 type=Unified scope=Shared size=983040K line_size=256 associativity=60
+processor 0: version = FF,  identification = 200000,  machine = 8561
+processor 1: version = FF,  identification = 200001,  machine = 8561
+processor 2: version = FF,  identification = 200002,  machine = 8561
+processor 3: version = FF,  identification = 200003,  machine = 8561
+
+cpu number      : 0
+physical id     : 0
+core id         : 0
+book id         : 0
+drawer id       : 0
+dedicated       : 0
+address         : 0
+siblings        : 1
+cpu cores       : 1
+version         : FF
+identification  : 200000
+machine         : 8561
+cpu MHz dynamic : 5200
+cpu MHz static  : 5200
+
+...
 */
+
+#if !__linux__
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+
+	*model = MODEL_Z900;
+        return VENDOR_IBM;
+}
+#else  // __linux__
+#include <sys/auxv.h>
+uint32_t bli_cpuid_query
+     (
+       uint32_t* model,
+       uint32_t* part,
+       uint32_t* features
+     )
+{
+
+	*model = MODEL_Z900;
+#if __GLIBC__ && __GLIBC_PREREQ(2, 16)
+// Prefer not reading /proc (following OpenBLAS)
+	{
+		unsigned long hwcap = getauxval( AT_HWCAP );
+		if (( hwcap & HWCAP_S390_VX ) && ( hwcap & HWCAP_S390_VXE ))
+			*model = MODEL_Z14;	// DP SIMD
+		else if ( hwcap & HWCAP_S390_VX )
+			*model = MODEL_Z13;	// SP SIMD
+		// Else no SIMD
+	}
+#else
+	char  mstr[ 200 ];
+	char *r_val;
+	// Given the cpuinfo examples above, presumably we should look at
+	// features/flags rather than the machine id.
+  	r_val = find_string_in( "facilities", mstr, sizeof mstr,
+							"/proc/cpuinfo" );
+	if ( r_val == NULL )
+	{
+		r_val = find_string_in( "flags", mstr, sizeof mstr,
+								"/proc/cpuinfo" );
+		if ( r_val == NULL ) return VENDOR_IBM;
+	}
+	r_val = strstr( r_val, "vx" ); // DP SIMD
+	if ( r_val == NULL ) return VENDOR_IBM;
+	*model = MODEL_Z13;
+	r_val = strstr( r_val, "vxe" ); // SP SIMD
+	if ( r_val != NULL ) *model = MODEL_Z14;
+#endif
+	return VENDOR_IBM;
+}
+#endif  // __linux__
+
+arch_t bli_cpuid_query_id( void )
+{
+	uint32_t model, part, features;
+#if defined BLIS_CONFIG_Z14 || defined BLIS_CONFIG_Z13
+	arch_t envval = bli_env_check();
+#endif
+#ifdef BLIS_CONFIG_Z14
+	if ( BLIS_ARCH_Z14 == envval )
+		return BLIS_ARCH_Z14;
+#endif
+#ifdef BLIS_CONFIG_Z13
+	if ( BLIS_ARCH_Z13 == envval )
+		return BLIS_ARCH_Z13;
+#endif
+
+	(void) bli_cpuid_query( &model, &part, &features );
+
+// NB.  Must use #ifdef, not #if (for configure)
+#ifdef BLIS_CONFIG_Z14
+	if ( model == MODEL_Z14 )
+		return BLIS_ARCH_Z14;
+#endif
+#ifdef BLIS_CONFIG_Z13
+	if ( model == MODEL_Z13 )
+		return BLIS_ARCH_Z13;
+#endif
+	return BLIS_ARCH_GENERIC;
+}
+
+#endif
+
+#if __s390x__ || __zarch__ || __SYSC_ZARCH__ || __arm__ || _M_ARM
+static char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath )
+{
+	// This function searches for the first line of the file located at
+	// 'filepath' that contains the string 'target' and then copies that
+	// line (actually, the substring of the line starting with 'target')
+	// to 'buffer', which is 'buf_len' bytes long.
+
+	char* r_val = NULL;
+
+	// Allocate a temporary local buffer equal to the size of buffer.
+	char* buf_local = malloc( buf_len * sizeof( char ) );
+
+	// Open the file stream.
+	FILE* stream = fopen( filepath, "r" );
+
+	// Repeatedly read in a line from the stream, storing the contents of
+	// the stream into buf_local.
+	while ( !feof( stream ) )
+	{
+		// Read in the current line, up to buf_len-1 bytes.
+		r_val = fgets( buf_local, buf_len-1, stream );
+
+		//printf( "read line: %s", buf_local );
+
+		// fgets() returns the pointer specified by the first argument (in
+		// this case, buf_local) on success and NULL on error.
+		if ( r_val == NULL ) break;
+
+		// Since fgets() was successful, we can search for the target string
+		// within the current line, as captured in buf_local.
+		r_val = strstr( buf_local, target );
+
+		// If the target string was found in buf_local, we save it to buffer.
+		if ( r_val != NULL )
+		{
+			//printf( "  found match to '%s'\n", target );
+
+			// Copy the string read by fgets() to the caller's buffer.
+			strncpy( buffer, buf_local, buf_len );
+
+			// Make sure that we have a terminating null character by the
+			// end of the buffer.
+			if ( buf_len > 0 ) buffer[ buf_len - 1 ] = '\0';
+
+			// Leave the loop since we found the target string.
+			break;
+		}
+	}
+
+	// Close the file stream.
+	fclose( stream );
+
+	// Free the temporary local buffer.
+	free( buf_local );
+
+	// Return r_val so the caller knows if we failed.
+	return r_val;
+}
 #endif
 

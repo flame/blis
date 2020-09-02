@@ -87,7 +87,8 @@ void bli_arch_set_id( void )
     defined BLIS_FAMILY_X86_64  || \
     defined BLIS_FAMILY_ARM64   || \
     defined BLIS_FAMILY_ARM32   || \
-    defined BLIS_FAMILY_POWER
+    defined BLIS_FAMILY_POWER   || \
+    defined BLIS_FAMILY_S390X
 	id = bli_cpuid_query_id();
 #endif
 
@@ -161,6 +162,12 @@ void bli_arch_set_id( void )
 #ifdef BLIS_FAMILY_BGQ
 	id = BLIS_ARCH_BGQ;
 #endif
+#ifdef BLIS_FAMILY_Z13
+	id = BLIS_ARCH_Z13;
+#endif
+#ifdef BLIS_FAMILY_Z14
+	id = BLIS_ARCH_Z14;
+#endif
 
 	// Generic microarchitecture.
 #ifdef BLIS_FAMILY_GENERIC
@@ -207,6 +214,8 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "power8",
     "power7",
     "bgq",
+    "z13",
+    "z14",
 
     "generic"
 };

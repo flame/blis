@@ -117,6 +117,15 @@ CNTX_INIT_PROTS( power7 )
 CNTX_INIT_PROTS( bgq )
 #endif
 
+// -- IBM S/390 --
+
+#ifdef BLIS_CONFIG_Z13
+CNTX_INIT_PROTS( z13 )
+#endif
+#ifdef BLIS_CONFIG_Z14
+CNTX_INIT_PROTS( z14 )
+#endif
+
 // -- Generic --
 
 #ifdef BLIS_CONFIG_GENERIC
@@ -226,6 +235,14 @@ CNTX_INIT_PROTS( generic )
 
 #ifdef BLIS_FAMILY_BGQ
 #include "bli_family_bgq.h"
+#endif
+
+// -- IBM S/390 --
+#ifdef BLIS_CONFIG_Z13
+#include "bli_family_z13.h""
+#endif
+#ifdef BLIS_CONFIG_Z14
+#include "bli_family_z14.h""
 #endif
 
 // -- Generic --

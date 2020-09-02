@@ -75,6 +75,10 @@ bool bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
 bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
+// s390
+bool bli_cpuid_is_z13( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_z13( uint32_t model, uint32_t part, uint32_t features );
+
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
 
 // -----------------------------------------------------------------------------
@@ -160,8 +164,6 @@ enum
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
-char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath );
-
 enum
 {
 	VENDOR_ARM = 0,
@@ -176,6 +178,22 @@ enum
 enum
 {
 	FEATURE_NEON = 0x1
+};
+
+#elif defined __s390x__ ||  defined __s390x__ || defined __zarch__ || \
+	defined __SYSC_ZARCH__
+
+enum
+{
+	VENDOR_IBM = 0,
+	VENDOR_UNKNOWN
+};
+enum
+{
+	MODEL_Z900 = 0,
+	MODEL_Z13,
+	MODEL_Z14,
+	MODEL_UNKNOWN
 };
 
 #endif

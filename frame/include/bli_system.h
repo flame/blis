@@ -62,8 +62,10 @@
 #endif
 
 // Determine if we are on a 64-bit or 32-bit architecture.
-#if defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
-    defined(_ARCH_PPC64)
+// Current 64-bit Unix systems probably define _LP64; there are
+// potentially better macros for GCC.
+#if _LP64 || defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
+    defined(_ARCH_PPC64) || defined(__s390x__)
   #define BLIS_ARCH_64
 #else
   #define BLIS_ARCH_32
