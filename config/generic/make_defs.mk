@@ -79,7 +79,11 @@ endif
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
+# Assume we don't want to restructure loop nests (unrolling the outer
+# with unroll-and-jam from -O3) but do want to unroll the innermost.
+# Just adding -funroll-loops messed up the dblat3 test somehow, giving
+# wrong results.
+CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast -fno-loop-unroll-and-jam -funroll-loops
 else
 ifeq ($(CC_VENDOR),clang)
 CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
