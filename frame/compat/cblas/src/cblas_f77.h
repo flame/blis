@@ -175,4 +175,10 @@
 #define F77_cgemmt  cgemmt_
 #define F77_zgemmt  zgemmt_
 
+/*
+* Aux Function
+*/
+#define F77_scabs1 scabs1_
+#define F77_dcabs1 dcabs1_
+
 #endif /*  CBLAS_F77_H */

@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,50 +32,89 @@
 
 */
 
+#include <unistd.h>
 #include "blis.h"
+#include <time.h>
 
-#ifdef BLIS_ENABLE_BLAS
+#define PRINT
+#define FLOAT
+#define CHECK_CBLAS // Macro to test cblas interface of the function cblas?cabs1
 
-/* scabs1.f -- translated by f2c (version 19991025).
-   You must link the resulting object file with the libraries:
-	-lf2c -lm   (in that order)
-*/
+#ifdef CHECK_CBLAS
+#include "cblas.h"
+#endif
 
-/* Subroutine */ bla_real PASTEF77(s,cabs1)(bla_scomplex *z)
+int main(int argc, char**argv)
 {
-   if ( bli_creal(*z) == 0.0f && bli_cimag(*z) == 0.0f )
-   {
-      /*If input is zero, return zero.
-        As the else part returns -0.0 */
-      return 0.0f;
-   }
-   else
-   {
-      return bli_fabs( bli_creal( *z ) ) +
-           bli_fabs( bli_cimag( *z ) ); /* code */
-   }
-} /* scabs1_ */
+    /* initialize random seed: */
+    srand (time(NULL));
 
-/* dcabs1.f -- translated by f2c (version 19991025).
-   You must link the resulting object file with the libraries:
-	-lf2c -lm   (in that order)
-*/
+    int   r, n_repeats;
+    n_repeats = 5;
 
-/* Subroutine */ bla_double PASTEF77(d,cabs1)(bla_dcomplex *z)
-{
-   if ( bli_creal(*z) == 0.0 && bli_cimag(*z) == 0.0 )
-   {
-      /*If input is zero, return zero.
-        As the else part returns -0.0 */
-      return 0.0;
-   }
-   else
-   {
-      return bli_fabs( bli_zreal( *z ) ) +
-           bli_fabs( bli_zimag( *z ) );
-   }
+#ifdef FLOAT
 
-} /* dcabs1_ */
+    float z_abs = 0.0f;
+
+#else
+
+    double z_abs = 0.0;
 
 #endif
 
+    for ( r = 0; r < n_repeats; ++r )
+    {
+
+#ifdef FLOAT
+
+        float maxRandVal = 1000.0f;
+        scomplex inp;
+        inp.real = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+        inp.imag = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+
+#ifdef BLIS
+    printf( "data_scabs1_BLIS");
+#else
+    printf( "data_scabs1_%s", BLAS );
+#endif
+
+#else
+
+        double maxRandVal = 1000.0;
+        dcomplex inp;
+        inp.real = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+        inp.imag = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+
+#ifdef BLIS
+    printf( "data_dcabs1_BLIS");
+#else
+    printf( "data_dcabs1_%s", BLAS );
+#endif
+
+#endif
+
+#ifdef FLOAT
+
+        #ifdef CHECK_CBLAS
+            z_abs = cblas_scabs1( &inp );
+        #else
+            z_abs = scabs1_( &inp );
+        #endif
+
+#else
+
+        #ifdef CHECK_CBLAS
+            z_abs = cblas_dcabs1( &inp );
+        #else
+            z_abs = dcabs1_( &inp );
+        #endif
+
+#endif
+
+    printf("inp = %lf + %lf i , cabs1 result = %lf \n",
+                                    inp.real, inp.imag, z_abs);
+
+    }
+
+    return 0;
+}
