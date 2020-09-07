@@ -46,14 +46,19 @@ void bli_cntx_init_z14( cntx_t* cntx )
 	// Update the context with optimized native gemm micro-kernels and
 	// their storage preferences.
 	// Fixme: check and update from openblas or the analytic model paper
+	// Defaults are:
 /*
-	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     0,     8,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     0,     4,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],     0,    64,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],     0,   256,     0,     0 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],     0,  4096,     0,     0 );
+        bli_blksz_init_easy( &blkszs[ BLIS_KR ],    1,    1,    1,    1 );
+        bli_blksz_init_easy( &blkszs[ BLIS_MR ],    4,    4,    4,    4 );
+        bli_blksz_init_easy( &blkszs[ BLIS_NR ],   16,    8,    8,    4 );
+        bli_blksz_init_easy( &blkszs[ BLIS_MC ],  256,  128,  128,   64 );
+        bli_blksz_init_easy( &blkszs[ BLIS_KC ],  256,  256,  256,  256 );
+        bli_blksz_init_easy( &blkszs[ BLIS_NC ], 4096, 4096, 4096, 4096 );
+        bli_blksz_init_easy( &blkszs[ BLIS_M2 ], 1000, 1000, 1000, 1000 );
+        bli_blksz_init_easy( &blkszs[ BLIS_N2 ], 1000, 1000, 1000, 1000 );
+        bli_blksz_init_easy( &blkszs[ BLIS_AF ],    8,    8,    8,    8 );
+        bli_blksz_init_easy( &blkszs[ BLIS_DF ],    6,    6,    6,    6 );
+        bli_blksz_init_easy( &blkszs[ BLIS_XF ],    4,    4,    4,    4 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

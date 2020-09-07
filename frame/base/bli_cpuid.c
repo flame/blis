@@ -69,8 +69,11 @@ static arch_t bli_env_check( void )
 	char *envval = getenv( "BLIS_CORETYPE" );
 	for ( arch_t i = 0; i < BLIS_NUM_ARCHS; i++ )
 	{
-		if ( envval && ( 0 == strcmp( envval, bli_arch_string (i) ) ) )
-			return i;
+		if ( envval )
+			if ( 0 == strcmp( envval, bli_arch_string (i) ) )
+				return i;
+			else
+				return BLIS_ARCH_GENERIC;
 	}
 #endif
 	return -1;
@@ -128,6 +131,8 @@ arch_t bli_cpuid_query_id( void )
 		if ( BLIS_ARCH_BULLDOZER == envval )
 			return BLIS_ARCH_BULLDOZER;
 #endif
+		if ( BLIS_ARCH_GENERIC == envval )
+			return BLIS_ARCH_GENERIC;
 
 	// Call the CPUID instruction and parse its results into a family id,
 	// model id, and a feature bit field. The return value encodes the
@@ -518,6 +523,8 @@ arch_t bli_cpuid_query_id( void )
 			if ( BLIS_ARCH_CORTEXA9 == envval )
 				return BLIS_ARCH_CORTEXA9;
 #endif
+			if ( BLIS_ARCH_GENERIC == envval )
+				return BLIS_ARCH_GENERIC;
 
 	vendor = bli_cpuid_query( &model, &part, &features );
 
@@ -1463,6 +1470,8 @@ arch_t bli_cpuid_query_id( void )
 	if ( BLIS_ARCH_POWER8 == envval )
 		return BLIS_ARCH_POWER8;
 #endif
+	if ( BLIS_ARCH_GENERIC == envval )
+		return BLIS_ARCH_GENERIC;
 
 	(void) bli_cpuid_query( &model, &part, &features );
 
@@ -1629,6 +1638,8 @@ arch_t bli_cpuid_query_id( void )
 	if ( BLIS_ARCH_Z13 == envval )
 		return BLIS_ARCH_Z13;
 #endif
+	if ( BLIS_ARCH_GENERIC == envval )
+		return BLIS_ARCH_GENERIC;
 
 	(void) bli_cpuid_query( &model, &part, &features );
 
