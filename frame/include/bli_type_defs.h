@@ -985,7 +985,7 @@ typedef enum
 typedef enum
 {
 	// Intel
-	BLIS_ARCH_SKX = 0,
+	BLIS_ARCH_SKX,
 	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,
@@ -1013,13 +1013,12 @@ typedef enum
 	BLIS_ARCH_BGQ,
 
 	// Generic architecture/configuration
-	BLIS_ARCH_GENERIC
+	BLIS_ARCH_GENERIC,
+	
+	// Number of architectures, must be last
+	BLIS_NUM_ARCHS
 
 } arch_t;
-
-// NOTE: This value must be updated to reflect the number of enum values
-// listed above for arch_t!
-#define BLIS_NUM_ARCHS 21
 
 
 //
