@@ -1125,7 +1125,7 @@ has_pragma_omp_simd()
 
 	# Attempt to compile a simple main() program that contains a
 	# #pragma omp simd.
-	${found_cc} -std=c99 -O3 -march=native -fopenmp-simd \
+	${found_cc} -std=c99 -O3 -fopenmp-simd \
 	            -o ${binname} ${main_c_filepath} 2> /dev/null
 
 	# Depending on the return code from the compile step above, we set
