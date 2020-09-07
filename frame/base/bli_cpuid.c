@@ -497,7 +497,7 @@ arch_t bli_cpuid_query_id( void )
 	return BLIS_ARCH_GENERIC;
 }
 
-bool_t bli_cpuid_is_a64fx
+bool bli_cpuid_is_a64fx
      (
        uint32_t family,
        uint32_t model,
@@ -507,7 +507,7 @@ bool_t bli_cpuid_is_a64fx
 	return model == BLIS_ARCH_A64FX;
 }
 
-bool_t bli_cpuid_is_thunderx2
+bool bli_cpuid_is_thunderx2
      (
        uint32_t family,
        uint32_t model,
