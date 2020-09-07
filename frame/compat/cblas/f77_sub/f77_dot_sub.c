@@ -69,7 +69,8 @@ INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
 
 //
 // Define CBLAS subrotine wrapper interfaces for complex types.
-// For the "intel" complex return type, pass a hidden first parameter.
+// For the "intel" complex return type, pass a hidden first parameter
+// (by address).
 //
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
@@ -82,13 +83,13 @@ void PASTEF773(ch,blasname,chc,sub) \
              ftype*   rval  \
      ) \
 { \
-    PASTEF772(ch,blasname,chc) \
-    ( \
-      rval, \
-      n, \
-      x, incx, \
-      y, incy \
-    ); \
+	PASTEF772(ch,blasname,chc) \
+	( \
+	  rval, \
+	  n, \
+	  x, incx, \
+	  y, incy \
+	); \
 }
 
 INSERT_GENTFUNCDOTC_BLAS( dot, NULL )

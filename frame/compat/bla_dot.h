@@ -55,7 +55,8 @@ INSERT_GENTPROTDOTC_BLAS( dot )
 
 #else
 
-// For the "intel" complex return type, use a hidden parameter to return the result
+// For the "intel" complex return type, we use a hidden parameter (passed by
+// address) to return the result.
 #undef  GENTPROTDOT
 #define GENTPROTDOT( ftype, ch, chc, blasname ) \
 \

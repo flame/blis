@@ -49,41 +49,41 @@ ftype PASTEF772(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
-    dim_t  n0; \
-    ftype* x0; \
-    ftype* y0; \
-    inc_t  incx0; \
-    inc_t  incy0; \
-    ftype  rho; \
+	dim_t  n0; \
+	ftype* x0; \
+	ftype* y0; \
+	inc_t  incx0; \
+	inc_t  incy0; \
+	ftype  rho; \
 \
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
 \
-    /* Convert/typecast negative values of n to zero. */ \
-    bli_convert_blas_dim1( *n, n0 ); \
+	/* Convert/typecast negative values of n to zero. */ \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */ \
-    bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-    bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */ \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
-    /* Call BLIS interface. */ \
-    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-    ( \
-      blis_conjx, \
-      BLIS_NO_CONJUGATE, \
-      n0, \
-      x0, incx0, \
-      y0, incy0, \
-      &rho, \
-      NULL, \
-      NULL  \
-    ); \
+	/* Call BLIS interface. */ \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	( \
+	  blis_conjx, \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  &rho, \
+	  NULL, \
+	  NULL  \
+	); \
 \
-    /* Finalize BLIS. */ \
-    bli_finalize_auto(); \
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
 \
-    return rho; \
+	return rho; \
 }
 
 INSERT_GENTFUNCDOTR_BLAS( dot, dotv )
@@ -106,41 +106,41 @@ void PASTEF772(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      ) \
 { \
-    dim_t  n0; \
-    ftype* x0; \
-    ftype* y0; \
-    inc_t  incx0; \
-    inc_t  incy0; \
-    ftype  rho; \
+	dim_t  n0; \
+	ftype* x0; \
+	ftype* y0; \
+	inc_t  incx0; \
+	inc_t  incy0; \
+	ftype  rho; \
 \
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
 \
-    /* Convert/typecast negative values of n to zero. */ \
-    bli_convert_blas_dim1( *n, n0 ); \
+	/* Convert/typecast negative values of n to zero. */ \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */ \
-    bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-    bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */ \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
-    /* Call BLIS interface. */ \
-    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-    ( \
-      blis_conjx, \
-      BLIS_NO_CONJUGATE, \
-      n0, \
-      x0, incx0, \
-      y0, incy0, \
-      &rho, \
-      NULL, \
-      NULL  \
-    ); \
+	/* Call BLIS interface. */ \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	( \
+	  blis_conjx, \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  &rho, \
+	  NULL, \
+	  NULL  \
+	); \
 \
-    /* Finalize BLIS. */ \
-    bli_finalize_auto(); \
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
 \
-    *rhop = rho; \
+	*rhop = rho; \
 }
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
