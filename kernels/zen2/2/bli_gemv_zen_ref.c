@@ -51,53 +51,70 @@ void bli_dgemv_zen_ref_c
      )
 {
 
-	double* restrict x0 = x;
-	double* restrict y0 = y;
-	double* restrict a0 = a;
+    double* restrict x0 = x;
+    double* restrict y0 = y;
+    double* restrict a0 = a;
 
-	dim_t i,j;
+    dim_t i,j;
 
-	if((incy == 1) && (incx == 1))
-	{
+    if((incy == 1) && (incx == 1))
+    {
 
-	/* n==0 case will be handled in the framework,
-	   where it returns immediately.
-	 * For the first column of A, execute Y = alpha*A*X + beta*Y
-	 */
-		double x0_val = (x0[0]);
-		PRAGMA_SIMD
-		for(i = 0; i < m; i++)
-		{
-			(y0[i]) = (a0[i]) * (x0_val) * (*alpha) + y0[i] * (*beta);	
-		}
-		a0 += lda;
+        /* n==0 case will be handled in the framework,
+           where it returns immediately.
+        * For the first column of A, execute Y = alpha*A*X + beta*Y
+        */
+        double x0_val = (x0[0]);
+        /* if beta = 0, do not scale y with beta */
+        if(PASTEMAC(d,eq0)(*beta))
+        {   PRAGMA_SIMD
+            for(i = 0; i < m; i++)
+                y0[i] = (a0[i]) * (x0_val) * (*alpha);
+        }
+        else
+        {
+            PRAGMA_SIMD
+            for(i = 0; i < m; i++)
+                (y0[i]) = (a0[i]) * (x0_val) * (*alpha) + y0[i] * (*beta);  
+        }
+        a0 += lda;
 
-	/* For remaining columns of A, execute,  Y = alpha*A*X + Y; */
-		for(j = 1; j < n; j++)
-		{
-			const double xp = (x0[j]);
-			PRAGMA_SIMD
-			for(i = 0; i < m; i++)
-			{
-				(y0[i]) += (a0[i]) * xp * (*alpha);	
-			}
-			a0 += lda;
-		}
+        /* For remaining columns of A, execute,  Y = alpha*A*X + Y; */
+        for(j = 1; j < n; j++)
+        {
+            const double xp = (x0[j]);
+            PRAGMA_SIMD
+            for(i = 0; i < m; i++)
+            {
+                (y0[i]) += (a0[i]) * xp * (*alpha); 
+            }
+            a0 += lda;
+        }
 
-	}
-	else
-	{
-		for(j = 0; j < m; j++)
-			PASTEMAC(d,scals)(*beta, *(y0+j*incy))
+    }
+    else
+    {
+        /*if beta = 0, populate y vector with zeroes,
+         * otherwise scale with beta */
+        if(PASTEMAC(d,eq0)(*beta))
+        {
+            for(j = 0; j < m; j++)
+                y0[j*incy] = 0.0;
+        }
+        else
+        {
+            for(j = 0; j < m; j++)
+                PASTEMAC(d,scals)(*beta, *(y0+j*incy))
+        }
 
-		for(j = 0; j < n; j++)
-		{
-			const double xp = *(x0+j*incx);
-			for(i = 0; i < m; i++)
-			{
-				*(y0 + i*incy) += (a0[j*lda+i]) * xp * (*alpha);	
-			}
-		}
-	}
-	return;
+        for(j = 0; j < n; j++)
+        {
+            const double xp = *(x0+j*incx);
+            for(i = 0; i < m; i++)
+            {
+                *(y0 + i*incy) += (a0[j*lda+i]) * xp * (*alpha);    
+            }
+        }
+    }
+    return;
 }
