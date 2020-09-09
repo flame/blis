@@ -103,10 +103,11 @@ second BLIS paper,
 for 2020. The prize is awarded once every two years to a paper judged to be
 the most outstanding paper in the field of parallel scientific and engineering
 computing, and has only been awarded once before (in 2016) since its inception
-in 2015 (the committee did not award the prize in 2018). The prize will be
-awarded at the [SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle next February. Robert will
-be present at the conference to accept the prize and give
-[a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266).
+in 2015 (the committee did not award the prize in 2018). The prize
+[was awarded](https://www.oden.utexas.edu/about/news/ScienceHighPerfomanceComputingSIAMBestPaperPrize/)
+at the [2020 SIAM Conference on Parallel Processing for Scientific Computing](https://www.siam.org/conferences/cm/conference/pp20) in Seattle. Robert was present at
+the conference to give
+[a talk on BLIS](https://meetings.siam.org/sess/dsp_programsess.cfm?SESSIONCODE=68266) and accept the prize alongside other coauthors.
 The selection committee sought to recognize the paper, "which validates BLIS,
 a framework relying on the notion of microkernels that enables both productivity
 and high performance." Their statement continues, "The framework will continue
