@@ -160,6 +160,9 @@ draft](http://www.cs.utexas.edu/users/flame/pubs/blis6_toms_rev2.pdf)).
 What People Are Saying About BLIS
 ---------------------------------
 
+*["I noticed a substantial increase in multithreaded performance on my own
+machine, which was extremely satisfying."](https://groups.google.com/d/msg/blis-discuss/8iu9B5KCxpA/uftpjgIsBwAJ)* ... *["[I was] happy it worked so well!"](https://groups.google.com/d/msg/blis-discuss/8iu9B5KCxpA/uftpjgIsBwAJ)* (Justin Shea)
+
 *["This is an awesome library."](https://github.com/flame/blis/issues/288#issuecomment-447488637)* ... *["I want to thank you and the blis team for your efforts."](https://github.com/flame/blis/issues/288#issuecomment-448074704)* ([@Lephar](https://github.com/Lephar))
 
 *["Any time somebody outside Intel beats MKL by a nontrivial amount, I report it to the MKL team. It is fantastic for any open-source project to get within 10% of MKL... [T]his is why Intel funds BLIS development."](https://github.com/flame/blis/issues/264#issuecomment-428673275)* ([@jeffhammond](https://github.com/jeffhammond))
