@@ -70,10 +70,12 @@ static arch_t bli_env_check( void )
 	for ( arch_t i = 0; i < BLIS_NUM_ARCHS; i++ )
 	{
 		if ( envval )
+			{
 			if ( 0 == strcmp( envval, bli_arch_string (i) ) )
 				return i;
 			else
 				return BLIS_ARCH_GENERIC;
+			}
 	}
 #endif
 	return -1;
