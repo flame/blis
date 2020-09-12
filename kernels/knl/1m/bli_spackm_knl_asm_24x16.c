@@ -115,9 +115,9 @@ void bli_spackm_knl_asm_16xk
        dim_t            cdim_,
        dim_t            n_,
        dim_t            n_max_,
-       void*   restrict kappa_,
-       void*   restrict a_, inc_t inca_, inc_t lda_,
-       void*   restrict p_,              inc_t ldp_,
+       float*  restrict kappa_,
+       float*  restrict a_, inc_t inca_, inc_t lda_,
+       float*  restrict p_,              inc_t ldp_,
        cntx_t* restrict cntx
      )
 {
@@ -382,9 +382,9 @@ void bli_spackm_knl_asm_24xk
        dim_t            cdim_,
        dim_t            n_,
        dim_t            n_max_,
-       void*   restrict kappa_,
-       void*   restrict a_, inc_t inca_, inc_t lda_,
-       void*   restrict p_,              inc_t ldp_,
+       float*  restrict kappa_,
+       float*  restrict a_, inc_t inca_, inc_t lda_,
+       float*  restrict p_,              inc_t ldp_,
        cntx_t* restrict cntx
      )
 {

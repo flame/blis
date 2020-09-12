@@ -41,17 +41,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -82,8 +81,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -93,8 +92,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -115,17 +114,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -160,10 +158,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -173,10 +171,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -197,17 +195,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -246,12 +243,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -261,12 +258,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -287,17 +284,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -340,14 +336,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -357,14 +353,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -385,17 +381,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -442,16 +437,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -461,16 +456,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -491,17 +486,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -552,18 +546,18 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -573,18 +567,18 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -605,17 +599,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -670,20 +663,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 12), *(alpha1 + 12*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 13), *(alpha1 + 13*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 12), *(alpha1 + 12*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 13), *(alpha1 + 13*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -693,20 +686,20 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 12), *(alpha1 + 12*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 13), *(alpha1 + 13*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 12), *(alpha1 + 12*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 13), *(alpha1 + 13*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -727,17 +720,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        conj_t           conjp, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      ) \
 { \
-	ctype* restrict kappa_cast = kappa; \
 	ctype* restrict pi1        = p; \
 	ctype* restrict alpha1     = a; \
 \
-	if ( PASTEMAC(ch,eq1)( *kappa_cast ) ) \
+	if ( PASTEMAC(ch,eq1)( *kappa ) ) \
 	{ \
 		if ( bli_is_conj( conjp ) ) \
 		{ \
@@ -796,22 +788,22 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 12), *(alpha1 + 12*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 13), *(alpha1 + 13*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 14), *(alpha1 + 14*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2js)( *kappa_cast, *(pi1 + 15), *(alpha1 + 15*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 12), *(alpha1 + 12*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 13), *(alpha1 + 13*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 14), *(alpha1 + 14*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2js)( *kappa, *(pi1 + 15), *(alpha1 + 15*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
@@ -821,22 +813,22 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		{ \
 			for ( ; n != 0; --n ) \
 			{ \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 0), *(alpha1 + 0*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 1), *(alpha1 + 1*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 2), *(alpha1 + 2*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 3), *(alpha1 + 3*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 4), *(alpha1 + 4*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 5), *(alpha1 + 5*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 6), *(alpha1 + 6*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 7), *(alpha1 + 7*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 8), *(alpha1 + 8*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 9), *(alpha1 + 9*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 10), *(alpha1 + 10*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 11), *(alpha1 + 11*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 12), *(alpha1 + 12*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 13), *(alpha1 + 13*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 14), *(alpha1 + 14*inca) ); \
-				PASTEMAC3(ch,ch,ch,scal2s)( *kappa_cast, *(pi1 + 15), *(alpha1 + 15*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 0), *(alpha1 + 0*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 1), *(alpha1 + 1*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 2), *(alpha1 + 2*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 3), *(alpha1 + 3*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 4), *(alpha1 + 4*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 5), *(alpha1 + 5*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 6), *(alpha1 + 6*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 7), *(alpha1 + 7*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 8), *(alpha1 + 8*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 9), *(alpha1 + 9*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 10), *(alpha1 + 10*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 11), *(alpha1 + 11*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 12), *(alpha1 + 12*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 13), *(alpha1 + 13*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 14), *(alpha1 + 14*inca) ); \
+				PASTEMAC3(ch,ch,ch,scal2s)( *kappa, *(pi1 + 15), *(alpha1 + 15*inca) ); \
 \
 				pi1    += ldp; \
 				alpha1 += lda; \
