@@ -188,7 +188,7 @@ void bli_sgemm_knl_asm_24x16
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t*          data,
+       auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
