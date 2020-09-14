@@ -184,5 +184,8 @@ SANDBOX           := @sandbox@
 # The name of the pthreads library.
 LIBPTHREAD        := @libpthread@
 
+# Maybe -fno-unroll-and-jam
+NO_UAJ            := @no_uaj@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

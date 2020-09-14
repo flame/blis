@@ -1142,6 +1142,29 @@ has_pragma_omp_simd()
 	echo "${rval}"
 }
 
+has_no_unroll_and_jam()
+{
+	local main_c main_c_filepath binname rval
+
+	main_c="dummy.c"
+	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+
+	binname="dummy.x"
+
+	${found_cc} -std=c99 -O3 -fno-loop-unroll-and-jam \
+	            -o ${binname} ${main_c_filepath} 2>/dev/null
+
+	if [ "$?" == 0 ]; then
+	    rval='yes'
+	else
+	    rval='no'
+	fi
+
+	rm -f ./${binname}
+
+	echo "${rval}"
+}
+
 echoerr()
 {
 	printf "${script_name}: error: %s\n" "$*" #>&2;
@@ -2694,6 +2717,8 @@ main()
 	# Try to determine whether the chosen compiler supports #pragma omp simd.
 	pragma_omp_simd=$(has_pragma_omp_simd)
 
+	# Determine support for -fno-loop-unroll-and-jam
+	no_uaj=$(has_no_unroll_and_jam)
 
 	# -- Prepare variables for subsitution into template files -----------------
 
@@ -2925,6 +2950,13 @@ main()
 		echo "${script_name}: compiler appears to not support #pragma omp simd."
 		enable_pragma_omp_simd_01=0
 	fi
+	if [ "${no_uaj}" = yes ]; then
+		echo "${script_name}: compiler appears to support -fno-loop-unroll-and-jam."
+		no_uaj=-fno-loop-unroll-and-jam
+	else
+		echo "${script_name}: compiler appears not to support -fno-loop-unroll-and-jam."
+		no_uaj=
+	fi
 	if [ "x${enable_blas}" = "xyes" ]; then
 		echo "${script_name}: the BLAS compatibility layer is enabled."
 		enable_blas_01=1
@@ -3151,6 +3183,7 @@ main()
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
+		| sed -e "s/@no_uaj@/${no_uaj}/g" \
 		> "${config_mk_out_path}"
 		
 
