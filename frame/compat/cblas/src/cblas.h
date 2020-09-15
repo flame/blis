@@ -91,6 +91,8 @@ void BLIS_EXPORT_BLAS cblas_scopy(f77_int N, const float *X, f77_int incX,
                  float *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_saxpy(f77_int N, float alpha, const float *X,
                  f77_int incX, float *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_saxpby(f77_int N, float alpha, const float *X,
+                 f77_int incX, float beta, float *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_dswap(f77_int N, double *X, f77_int incX,
                  double *Y, f77_int incY);
@@ -98,6 +100,8 @@ void BLIS_EXPORT_BLAS cblas_dcopy(f77_int N, const double *X, f77_int incX,
                  double *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_daxpy(f77_int N, double alpha, const double *X,
                  f77_int incX, double *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_daxpby(f77_int N, double alpha, const double *X,
+                 f77_int incX, double beta, double *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_cswap(f77_int N, void *X, f77_int incX,
                  void *Y, f77_int incY);
@@ -105,6 +109,9 @@ void BLIS_EXPORT_BLAS cblas_ccopy(f77_int N, const void *X, f77_int incX,
                  void *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_caxpy(f77_int N, const void *alpha, const void *X,
                  f77_int incX, void *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_caxpby(f77_int N, const void *alpha,
+                const void *X, f77_int incX, const void* beta,
+                void *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_zswap(f77_int N, void *X, f77_int incX,
                  void *Y, f77_int incY);
@@ -112,6 +119,9 @@ void BLIS_EXPORT_BLAS cblas_zcopy(f77_int N, const void *X, f77_int incX,
                  void *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_zaxpy(f77_int N, const void *alpha, const void *X,
                  f77_int incX, void *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_zaxpby(f77_int N, const void *alpha,
+                const void *X, f77_int incX, const void *beta,
+                void *Y, f77_int incY);
 
 
 /* 
