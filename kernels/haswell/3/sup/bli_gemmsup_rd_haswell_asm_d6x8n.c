@@ -101,6 +101,13 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 			dgemmsup_ker_ft ker_fp2 = NULL;
 			dim_t           mr1, mr2;
 
+			// These kernels don't make any attempt to optimize the cases of
+			// inflated MR blocksizes because they don't benefit from the
+			// load balancing that the "rv" kernels do. That is, if m0 = 7,
+			// there is no benefit to executing that case as 4x8n followed
+			// by 3x8n because 4x8n isn't implemented, and more generally
+			// because these kernels are implemented as loops over their
+			// true blocksizes, which are MR=3 NR=4.
 			if ( m0 == 7 )
 			{
 				mr1 = 6; mr2 = 1;
