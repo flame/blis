@@ -113,6 +113,7 @@
 #include "bla_amax.h"
 #include "bla_asum.h"
 #include "bla_axpy.h"
+#include "bla_axpby.h"
 #include "bla_copy.h"
 #include "bla_dot.h"
 #include "bla_nrm2.h"
