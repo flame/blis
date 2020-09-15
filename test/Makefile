@@ -172,6 +172,7 @@ all: blis openblas mkl
 blis: check-env \
        test_dotv_blis.x \
        test_axpyv_blis.x \
+       test_axpbyv_blis.x \
        test_gemv_blis.x \
        test_ger_blis.x \
        test_hemv_blis.x \
@@ -194,6 +195,7 @@ blis: check-env \
 openblas: check-env \
       test_dotv_openblas.x \
       test_axpyv_openblas.x \
+      test_axpbyv_openblas.x \
       test_gemv_openblas.x \
       test_ger_openblas.x \
       test_hemv_openblas.x \
@@ -237,6 +239,7 @@ atlas: check-env \
 mkl:  check-env \
       test_dotv_mkl.x \
       test_axpyv_mkl.x \
+      test_axpbyv_mkl.x \
       test_gemv_mkl.x \
       test_ger_mkl.x \
       test_hemv_mkl.x \
