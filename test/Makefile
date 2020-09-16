@@ -1,3 +1,4 @@
+
 #
 #
 #  BLIS    
@@ -113,6 +114,14 @@ MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_core \
                   -lmkl_sequential \
                   -lpthread -lm -ldl
+
+# Uncomment below lines & comment above lines to link with multi-threaded library.
+#MKL_LIB        := -L$(MKL_LIB_PATH) \
+#                  -lmkl_intel_lp64 \
+#                  -lmkl_core \
+#                  -lmkl_gnu_thread \
+#                  -lpthread -lm -ldl -liomp5
+
 
 # ESSL
 # Note: ESSL is named differently for SMP and/or BG
@@ -324,7 +333,7 @@ test_%_mac.o: test_%.c
 	$(CC) $(CFLAGS) -DBLAS=\"mac\" -c $< -o $@
 
 test_%_blis.o: test_%.c
-	$(CC) $(CFLAGS) -DBLIS -c $< -o $@
+	$(CC) $(CFLAGS) -DBLAS=\"aocl\" -c $< -o $@
 
 
 # -- Executable file rules --
@@ -374,4 +383,3 @@ clean: cleanx
 
 cleanx:
 	- $(RM_F) *.o *.x
-	
