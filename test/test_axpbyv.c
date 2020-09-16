@@ -39,16 +39,25 @@
 #endif
 #include "blis.h"
 
-//                n    alpha     x      incx   beta       y        incy
-//void daxpbyv_( int*, double*, double*, int*, double*, double*,   int* );
-#define PRINT
+//#define PRINT
 #ifdef BLIS_ENABLE_CBLAS
-#define CBLAS
+//#define CHECK_CBLAS
 #endif
 
-#ifdef CBLAS
+#ifdef CHECK_CBLAS
 #include "cblas.h"
 #endif
+
+/*
+ * BLIS interface API will be called by default.
+ * To call BLAS API, modify line 159 to '#if 0'.
+ * To call cblas API, modify line 159 to '#if 0'and define the 
+ * macro 'CHECK_CBLAS' in line 44 
+ *
+ *Sample prototype for BLAS interface API is as follows:
+ *                n    alpha     x      incx   beta       y        incy
+ *void daxpbyv_( int*, double*, double*, int*, double*, double*,   int* );
+ */
 
 int main( int argc, char** argv )
 {
@@ -86,7 +95,7 @@ int main( int argc, char** argv )
     n_input = 15;
 #endif
 
-#if 
+#if 1 
     dt = BLIS_FLOAT;
     //dt = BLIS_DOUBLE;
 #else
@@ -163,7 +172,7 @@ int main( int argc, char** argv )
                 float   betap  = *(float *)bli_obj_buffer( &beta  );
                 float*  xp     = bli_obj_buffer( &x );
                 float*  yp     = bli_obj_buffer( &y );
-#ifdef CBLAS
+#ifdef CHECK_CBLAS
                 cblas_saxpby( nn,
                           alphap,
                           xp, incx,
@@ -188,7 +197,7 @@ int main( int argc, char** argv )
                 double   betap  = *(double *)bli_obj_buffer( &beta  );
                 double*  xp     = bli_obj_buffer( &x );
                 double*  yp     = bli_obj_buffer( &y );
-#ifdef CBLAS
+#ifdef CHECK_CBLAS
                 cblas_daxpby( nn,
                           alphap,
                           xp, incx,
@@ -211,7 +220,7 @@ int main( int argc, char** argv )
                 void*    betap  = bli_obj_buffer( &beta  );
                 void*    xp     = bli_obj_buffer( &x );
                 void*    yp     = bli_obj_buffer( &y );
-#ifdef CBLAS
+#ifdef CHECK_CBLAS
                 cblas_caxpby( nn,
                           alphap,
                           xp, incx,
@@ -234,7 +243,7 @@ int main( int argc, char** argv )
                 void*    betap  = bli_obj_buffer( &beta  );
                 void*    xp     = bli_obj_buffer( &x );
                 void*    yp     = bli_obj_buffer( &y );
-#ifdef CBLAS
+#ifdef CHECK_CBLAS
                 cblas_zaxpby( nn,
                           alphap,
                           xp, incx,
