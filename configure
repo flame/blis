@@ -1051,8 +1051,8 @@ auto_detect()
 	autodetect_x="auto-detect.x"
 
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
-	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
-	                 | sed -e 's/#ifdef /-D/g')
+	config_defines=$(egrep '^#ifdef +BLIS_CONFIG_' ${bli_cpuid_c_filepath} \
+	                 | sed -e 's/#ifdef  */-D/g' | sort -u)
 
 	# Set the linker flags. We need pthreads because it is needed for
 	# parts of bli_arch.c unrelated to bli_arch_string(), which is called

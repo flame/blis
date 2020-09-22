@@ -161,6 +161,11 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_power9_ref,
 		                                              bli_cntx_init_power9_ind );
 #endif
+#ifdef BLIS_CONFIG_POWER8
+		bli_gks_register_cntx( BLIS_ARCH_POWER8,      bli_cntx_init_power8,
+		                                              bli_cntx_init_power8_ref,
+		                                              bli_cntx_init_power8_ind );
+#endif
 #ifdef BLIS_CONFIG_POWER7
 		bli_gks_register_cntx( BLIS_ARCH_POWER7,      bli_cntx_init_power7,
 		                                              bli_cntx_init_power7_ref,

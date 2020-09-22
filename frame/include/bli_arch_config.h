@@ -104,6 +104,9 @@ CNTX_INIT_PROTS( cortexa9 )
 #ifdef BLIS_CONFIG_POWER9
 CNTX_INIT_PROTS( power9 )
 #endif
+#ifdef BLIS_CONFIG_POWER8
+CNTX_INIT_PROTS( power8 )
+#endif
 #ifdef BLIS_CONFIG_POWER7
 CNTX_INIT_PROTS( power7 )
 #endif
@@ -198,8 +201,14 @@ CNTX_INIT_PROTS( generic )
 
 // -- IBM Power --
 
+#ifdef BLIS_FAMILY_POWER
+#include "bli_family_power.h"
+#endif
 #ifdef BLIS_FAMILY_POWER9
 #include "bli_family_power9.h"
+#endif
+#ifdef BLIS_FAMILY_POWER8
+#include "bli_family_power8.h"
 #endif
 #ifdef BLIS_FAMILY_POWER7
 #include "bli_family_power7.h"

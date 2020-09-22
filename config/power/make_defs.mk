@@ -1,11 +1,10 @@
-
 #
 #
 #  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2019, The University of Texas at Austin
+#  Copyright (C) 2014, The University of Texas at Austin
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -36,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := power9
+THIS_CONFIG    := power
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -46,8 +45,8 @@ THIS_CONFIG    := power9
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    := 
-CMISCFLAGS     :=  
+CPPROCFLAGS    := -D_GNU_SOURCE
+CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     :=
 
@@ -58,20 +57,15 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS) -O3
+CKOPTFLAGS     := $(COPTFLAGS)
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mcpu=power9 -mtune=power9 -DXLC=0
+CKVECFLAGS     :=
 else
-ifeq ($(CC_VENDOR),IBM)
-CKVECFLAGS     := -qarch=pwr9 -qtune=pwr9 -DXLC=1
-else
-$(info $(CC_VENDOR)) 
-$(error gcc/xlc is required for this configuration.)
-endif
+$(error gcc is required for this configuration.)
 endif
 
 # Flags specific to reference kernels.
