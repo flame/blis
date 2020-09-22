@@ -58,7 +58,7 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	uplo_t blis_uploc, \
+	uplo_t blis_uploc; \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   n0, k0; \
