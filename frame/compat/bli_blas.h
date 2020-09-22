@@ -199,6 +199,10 @@
 #include "bla_trsm_check.h"
 #include "bla_gemmt_check.h"
 
+// -- Batch Extension prototypes -- 
+#include "bla_gemm_batch.h"
+
+
 // -- Fortran-compatible APIs to BLIS functions --
 
 #include "b77_thread.h"
