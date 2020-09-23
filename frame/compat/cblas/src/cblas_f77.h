@@ -41,6 +41,7 @@
 #define F77_zswap      zswap_
 #define F77_zcopy      zcopy_
 #define F77_zaxpy      zaxpy_
+#define F77_zaxpby     zaxpby_
 #define F77_izamax_sub izamaxsub_
 #define F77_sdot_sub   sdotsub_
 #define F77_ddot_sub   ddotsub_
@@ -185,6 +186,11 @@
 #define F77_daxpby     daxpby_
 #define F77_caxpby     caxpby_
 #define F77_zaxpby     zaxpby_
+
+#define F77_isamin_sub isaminsub_
+#define F77_idamin_sub idaminsub_
+#define F77_icamin_sub icaminsub_
+#define F77_izamin_sub izaminsub_
 
 // -- Batch APIs --
 #define F77_sgemm_batch  sgemm_batch_

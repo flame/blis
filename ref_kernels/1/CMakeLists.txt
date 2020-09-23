@@ -1,9 +1,10 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_addv_ref.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_amaxv_ref.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_aminv_ref.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_axpbyv_ref.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_axpyv_ref.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_copyv_ref.c

@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved. ##
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
@@ -78,6 +78,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_icamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_idamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_isamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_izamax.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_icamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_idamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_isamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_izamin.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_sasum.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_saxpy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_scasum.c
@@ -161,7 +165,3 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_daxpby.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_caxpby.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_zaxpby.c
 )
-
-
-
-
