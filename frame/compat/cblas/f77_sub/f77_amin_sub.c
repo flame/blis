@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -34,37 +33,29 @@
 */
 
 #include "blis.h"
+#include "f77_amin_sub.h"
+
 
 //
-// Define function pointer query interfaces.
+// Define CBLAS subrotine wrapper interfaces.
 //
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
+#undef  GENTFUNC
+#define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
-              PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
-\
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
+void PASTEF773(i,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             f77_int* rval  \
+     ) \
 { \
-	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
+  *rval = PASTEF772(i,chx,blasname) \
+  ( \
+    n, \
+    x, incx \
+  ); \
 }
 
-GENFRONT( addv )
-GENFRONT( copyv )
-GENFRONT( subv )
-GENFRONT( amaxv )
-GENFRONT( aminv )
-GENFRONT( axpbyv )
-GENFRONT( axpyv )
-GENFRONT( scal2v )
-GENFRONT( dotv )
-GENFRONT( dotxv )
-GENFRONT( invertv )
-GENFRONT( scalv )
-GENFRONT( setv )
-GENFRONT( swapv )
-GENFRONT( xpbyv )
-
-
+#ifdef BLIS_ENABLE_CBLAS
+INSERT_GENTFUNC_BLAS( amin, NULL )
+#endif

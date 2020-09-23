@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -103,11 +103,6 @@
 #include "bla_xerbla_array.h"
 
 
-// -- Level-0 BLAS prototypes --
-
-#include "bla_cabs1.h"
-
-
 // -- Level-1 BLAS prototypes --
 
 #include "bla_amax.h"
@@ -200,13 +195,20 @@
 #include "bla_trsm_check.h"
 #include "bla_gemmt_check.h"
 
-// -- Batch Extension prototypes -- 
+// -- Batch Extension prototypes --
 #include "bla_gemm_batch.h"
 
 
 // -- Fortran-compatible APIs to BLIS functions --
 
 #include "b77_thread.h"
+
+
+// -- Auxiliary Routines --
+
+#include "bla_cabs1.h"
+#include "bla_amin.h"
+#include "f77_amin_sub.h"
 
 
 #endif // BLIS_ENABLE_BLAS

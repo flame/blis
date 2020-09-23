@@ -38,7 +38,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Makefile for standalone BLIS test drivers.
 #
 
@@ -179,8 +179,8 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 all: blis openblas mkl
 
 blis:  check-env \
-       test_cabs1_blis.x \
        test_dotv_blis.x \
+       test_aminv_blis.x \
        test_axpyv_blis.x \
        test_axpbyv_blis.x \
        test_gemv_blis.x \
@@ -204,8 +204,8 @@ blis:  check-env \
        test_gemm_batch_blis.x
 
 openblas: check-env \
-      test_cabs1_openblas.x \
       test_dotv_openblas.x \
+      test_aminv_openblas.x \
       test_axpyv_openblas.x \
       test_axpbyv_openblas.x \
       test_gemv_openblas.x \
@@ -226,7 +226,7 @@ openblas: check-env \
       test_her2k_openblas.x \
       test_trmm_openblas.x \
       test_trsm_openblas.x \
-      test_gemm_batch_openblas.c
+      test_gemm_batch_openblas.x
 
 atlas: check-env \
       test_dotv_atlas.x \
@@ -250,8 +250,8 @@ atlas: check-env \
       test_trsm_atlas.x
 
 mkl:  check-env \
-      test_cabs1_mkl.x \
       test_dotv_mkl.x \
+      test_aminv_mkl.x \
       test_axpyv_mkl.x \
       test_axpbyv_mkl.x \
       test_gemv_mkl.x \

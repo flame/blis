@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -35,36 +34,62 @@
 
 #include "blis.h"
 
-//
-// Define function pointer query interfaces.
-//
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
+//
+// Define BLAS-to-BLIS interfaces.
+//
+#undef  GENTFUNC
+#define GENTFUNC( ftype_x, chx, blasname, blisname ) \
 \
-GENARRAY_FPA( PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft), \
-              PASTECH(opname,BLIS_TAPI_EX_SUF) ); \
-\
-PASTECH2(opname,BLIS_TAPI_EX_SUF,_vft) \
-PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( num_t dt ) \
+f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     ) \
 { \
-	return PASTECH2(opname,BLIS_TAPI_EX_SUF,_fpa)[ dt ]; \
+    dim_t    n0; \
+    ftype_x* x0; \
+    inc_t    incx0; \
+    gint_t   bli_index; \
+    f77_int  f77_index; \
+\
+    /* If the vector is empty, return an index of zero. This early check
+       is needed to emulate netlib BLAS. Without it, bli_?aminv() will
+       return 0, which ends up getting incremented to 1 (below) before
+       being returned, which is not what we want. */ \
+    if ( *n < 1 || *incx <= 0 ) return 0; \
+\
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
+\
+    /* Convert/typecast negative values of n to zero. */ \
+    bli_convert_blas_dim1( *n, n0 ); \
+\
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */ \
+    bli_convert_blas_incv( n0, (ftype_x*)x, *incx, x0, incx0 ); \
+\
+    /* Call BLIS interface. */ \
+    PASTEMAC2(chx,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      n0, \
+      x0, incx0, \
+      &bli_index, \
+      NULL, \
+      NULL  \
+    ); \
+\
+    /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
+       index. Also, if the BLAS integer size differs from the BLIS
+       integer size, that typecast occurs here. */ \
+    f77_index = bli_index + 1; \
+\
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
+\
+    return f77_index; \
 }
 
-GENFRONT( addv )
-GENFRONT( copyv )
-GENFRONT( subv )
-GENFRONT( amaxv )
-GENFRONT( aminv )
-GENFRONT( axpbyv )
-GENFRONT( axpyv )
-GENFRONT( scal2v )
-GENFRONT( dotv )
-GENFRONT( dotxv )
-GENFRONT( invertv )
-GENFRONT( scalv )
-GENFRONT( setv )
-GENFRONT( swapv )
-GENFRONT( xpbyv )
-
-
+#ifdef BLIS_ENABLE_BLAS
+    INSERT_GENTFUNC_BLAS( amin, aminv )
+#endif
