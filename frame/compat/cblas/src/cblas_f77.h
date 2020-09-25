@@ -7,7 +7,7 @@
  *
  * (Heavily hacked down from the original)
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 
@@ -29,22 +29,18 @@
 #define F77_sswap      sswap_
 #define F77_scopy      scopy_
 #define F77_saxpy      saxpy_
-#define F77_saxpby     saxpby_
 #define F77_isamax_sub isamaxsub_
 #define F77_dswap      dswap_
 #define F77_dcopy      dcopy_
 #define F77_daxpy      daxpy_
-#define F77_daxpby     daxpby_
 #define F77_idamax_sub idamaxsub_
 #define F77_cswap      cswap_
 #define F77_ccopy      ccopy_
 #define F77_caxpy      caxpy_
-#define F77_caxpby     caxpby_
 #define F77_icamax_sub icamaxsub_
 #define F77_zswap      zswap_
 #define F77_zcopy      zcopy_
 #define F77_zaxpy      zaxpy_
-#define F77_zaxpby     zaxpby_
 #define F77_izamax_sub izamaxsub_
 #define F77_sdot_sub   sdotsub_
 #define F77_ddot_sub   ddotsub_
@@ -180,5 +176,21 @@
 */
 #define F77_scabs1 scabs1_
 #define F77_dcabs1 dcabs1_
+
+/*
+ * -- BLAS Extension APIs --
+ */
+
+#define F77_saxpby     saxpby_
+#define F77_daxpby     daxpby_
+#define F77_caxpby     caxpby_
+#define F77_zaxpby     zaxpby_
+
+// -- Batch APIs --
+#define F77_sgemm_batch  sgemm_batch_
+#define F77_dgemm_batch  dgemm_batch_
+#define F77_cgemm_batch  cgemm_batch_
+#define F77_zgemm_batch  zgemm_batch_
+
 
 #endif /*  CBLAS_F77_H */
