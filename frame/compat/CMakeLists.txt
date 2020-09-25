@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
@@ -58,12 +58,16 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsv.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_batch.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_blas.h
 	)
 
-#Add all subdirectories 
+#Add all subdirectories
 #	add_subdirectory(attic)
 	add_subdirectory(blis)
 	add_subdirectory(cblas)
-	add_subdirectory(check)	
-	add_subdirectory(f2c)	
+	add_subdirectory(check)
+	add_subdirectory(f2c)

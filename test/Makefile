@@ -1,12 +1,12 @@
 
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -200,7 +200,8 @@ blis:  check-env \
        test_herk_blis.x \
        test_her2k_blis.x \
        test_trmm_blis.x \
-       test_trsm_blis.x 
+       test_trsm_blis.x \
+       test_gemm_batch_blis.x
 
 openblas: check-env \
       test_cabs1_openblas.x \
@@ -224,7 +225,8 @@ openblas: check-env \
       test_herk_openblas.x \
       test_her2k_openblas.x \
       test_trmm_openblas.x \
-      test_trsm_openblas.x
+      test_trsm_openblas.x \
+      test_gemm_batch_openblas.c
 
 atlas: check-env \
       test_dotv_atlas.x \
@@ -269,7 +271,8 @@ mkl:  check-env \
       test_herk_mkl.x \
       test_her2k_mkl.x \
       test_trmm_mkl.x \
-      test_trsm_mkl.x
+      test_trsm_mkl.x \
+      test_gemm_batch_mkl.x
 
 essl: check-env \
       test_dotv_essl.x \
