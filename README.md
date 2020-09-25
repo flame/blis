@@ -554,7 +554,7 @@ Citations
 For those of you looking for the appropriate article to cite regarding BLIS, we
 recommend citing our
 [first ACM TOMS journal paper](http://dl.acm.org/authorize?N91172) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
 
 ```
 @article{BLIS1,
@@ -564,7 +564,7 @@ recommend citing our
    volume      = {41},
    number      = {3},
    pages       = {14:1--14:33},
-   month       = jun,
+   month       = {June},
    year        = {2015},
    issue_date  = {June 2015},
    url         = {http://doi.acm.org/10.1145/2764454},
@@ -573,7 +573,7 @@ recommend citing our
 
 You may also cite the
 [second ACM TOMS journal paper](http://dl.acm.org/authorize?N16240) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
 
 ```
 @article{BLIS2,
@@ -586,7 +586,7 @@ You may also cite the
    volume      = {42},
    number      = {2},
    pages       = {12:1--12:19},
-   month       = jun,
+   month       = {June},
    year        = {2016},
    issue_date  = {June 2016},
    url         = {http://doi.acm.org/10.1145/2755561},
@@ -594,7 +594,7 @@ You may also cite the
 ``` 
 
 We also have a third paper, submitted to IPDPS 2014, on achieving
-[multithreaded parallelism in BLIS](http://www.cs.utexas.edu/users/flame/pubs/blis3_ipdps14.pdf):
+[multithreaded parallelism in BLIS](https://www.cs.utexas.edu/users/flame/pubs/blis3_ipdps14.pdf):
 
 ```
 @inproceedings{BLIS3,
@@ -609,7 +609,7 @@ We also have a third paper, submitted to IPDPS 2014, on achieving
 
 A fourth paper, submitted to ACM TOMS, also exists, which proposes an
 [analytical model](http://dl.acm.org/citation.cfm?id=2925987) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf))
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf))
 for determining blocksize parameters in BLIS: 
 
 ```
@@ -621,7 +621,7 @@ for determining blocksize parameters in BLIS:
    volume      = {43},
    number      = {2},
    pages       = {12:1--12:18},
-   month       = aug,
+   month       = {August},
    year        = {2016},
    issue_date  = {August 2016},
    url         = {http://doi.acm.org/10.1145/2925987},
@@ -629,7 +629,7 @@ for determining blocksize parameters in BLIS:
 ```
 
 A fifth paper, submitted to ACM TOMS, begins the study of so-called
-[induced methods for complex matrix multiplication](http://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
+[induced methods for complex matrix multiplication](https://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
 
 ```
 @article{BLIS5,
@@ -639,7 +639,7 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
    volume      = {44},
    number      = {1},
    pages       = {7:1--7:36},
-   month       = jul,
+   month       = {July},
    year        = {2017},
    issue_date  = {July 2017},
    url         = {http://doi.acm.org/10.1145/3086466},
@@ -647,19 +647,25 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
 ``` 
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev1.pdf):
+article and derives a [superior induced method](https://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev3.pdf):
 
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
    title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
    journal     = {SIAM Journal on Scientific Computing},
-   note        = {submitted}
+   volume      = {42},
+   number      = {5},
+   pages       = {C221--C244},
+   month       = {September}
+   year        = {2020},
+   issue_date  = {September 2020},
+   url         = {https://doi.org/10.1137/19M1282040}
 }
 ``` 
 
 A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` for
-[mixed-domain and/or mixed-precision](http://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands:
+[mixed-domain and/or mixed-precision](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands:
 
 ```
 @article{BLIS7,
