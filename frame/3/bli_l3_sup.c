@@ -256,7 +256,7 @@ err_t bli_gemmtsup
 
         // Pass in m and n reversed, which simulates a transposition of the
         // entire operation pursuant to the microkernel storage preference.
-        if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx ) ) {
+        if ( !bli_cntx_gemmt_sup_thresh_is_met( dt, n, k, cntx ) ) {
             AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Trasposition results in sizes beyond SUP thresholds.");
             return BLIS_FAILURE;
         }
@@ -266,7 +266,7 @@ err_t bli_gemmtsup
         const num_t dt = bli_obj_dt( c );
         const dim_t k  = bli_obj_width_after_trans( a );
 
-        if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx ) ) {
+        if ( !bli_cntx_gemmt_sup_thresh_is_met( dt, n, k, cntx ) ) {
             AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes beyond SUP thresholds.");
             return BLIS_FAILURE;
         }
