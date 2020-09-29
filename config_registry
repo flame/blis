@@ -39,6 +39,7 @@ cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
 # IBM architectures.
+power10:     power10
 power9:      power9
 bgq:         bgq
 
