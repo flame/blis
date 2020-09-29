@@ -148,6 +148,9 @@ void bli_arch_set_id( void )
 #endif
 
 	// IBM microarchitectures.
+#ifdef BLIS_FAMILY_POWER10
+	id = BLIS_ARCH_POWER10;
+#endif
 #ifdef BLIS_FAMILY_POWER9
 	id = BLIS_ARCH_POWER9;
 #endif
@@ -199,6 +202,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "cortexa15",
     "cortexa9",
 
+    "power10",
     "power9",
     "power7",
     "bgq",
