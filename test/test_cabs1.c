@@ -41,9 +41,11 @@
 
 #include <time.h>
 
-#define PRINT
 #define FLOAT
-#define CHECK_CBLAS // Macro to test cblas interface of the function cblas?cabs1
+
+#ifdef BLIS_ENABLE_CBLAS
+    #define CHECK_CBLAS // Macro to test cblas interface of the function cblas?cabs1
+#endif
 
 #ifdef CHECK_CBLAS
 #include "cblas.h"
