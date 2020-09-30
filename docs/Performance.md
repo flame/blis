@@ -18,6 +18,9 @@
   * **[Zen](Performance.md#zen)**
     * **[Experiment details](Performance.md#zen-experiment-details)**
     * **[Results](Performance.md#zen-results)**
+  * **[Zen2](Performance.md#zen2)**
+    * **[Experiment details](Performance.md#zen2-experiment-details)**
+    * **[Results](Performance.md#zen2-results)**
 * **[Feedback](Performance.md#feedback)**
 
 # Introduction
