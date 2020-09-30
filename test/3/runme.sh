@@ -21,6 +21,7 @@ if [ ${sys} = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
 
+	numactl=""
 	threads="jc1ic1jr1_2400
 	         jc2ic3jr2_6000
 	         jc4ic3jr2_8000"
@@ -30,6 +31,7 @@ elif [ ${sys} = "stampede2" ]; then
 	echo "Need to set GOMP_CPU_AFFINITY."
 	exit 1
 
+	numactl=""
 	threads="jc1ic1jr1_2400
 	         jc4ic6jr1_6000
 	         jc4ic12jr1_8000"
@@ -41,6 +43,7 @@ elif [ ${sys} = "lonestar5" ]; then
 	# A hack to use libiomp5 with gcc.
 	#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
 
+	numactl=""
 	threads="jc1ic1jr1_2400
 	         jc2ic3jr2_6000
 	         jc4ic3jr2_8000"
@@ -50,6 +53,7 @@ elif [ ${sys} = "ul252" ]; then
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-51"
 
+	numactl=""
 	threads="jc1ic1jr1_2400
 	         jc2ic13jr1_6000
 	         jc4ic13jr1_8000"
@@ -59,6 +63,7 @@ elif [ ${sys} = "ul264" ]; then
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-63"
 
+	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_2400
 	         jc1ic8jr4_6000
 	         jc2ic8jr4_8000"
@@ -68,6 +73,7 @@ elif [ ${sys} = "ul2128" ]; then
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-127"
 
+	numactl="numactl --interleave=all"
 	threads="jc1ic1jr1_2400
 	         jc4ic4jr4_6000
 	         jc8ic4jr4_8000"
@@ -87,12 +93,12 @@ test_ops="gemm hemm herk trmm trsm"
 #test_ops="herk"
 
 # Implementations to test.
-impls="blis"
+#impls="blis"
 #impls="openblas"
 #impls="vendor"
 #impls="other"
 #impls="eigen"
-#impls="all"
+impls="all"
 
 if [ "${impls}" = "blis" ]; then
 
@@ -237,11 +243,13 @@ for th in ${threads}; do
 				out_file="${out_root}_${suf}_${dt}${op}_${im}.m"
 
 				#echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
-				echo "Running ./${exec_name} > ${out_file}"
+				echo "Running ${numactl} ./${exec_name} > ${out_file}"
 
-				# Run executable.
-				./${exec_name} > ${out_file}
+				# Run executable with or without numactl, depending on how
+				# the numactl variable was set.
+				${numactl} ./${exec_name} > ${out_file}
 
+				# Bedtime!
 				sleep ${delay}
 
 			done
