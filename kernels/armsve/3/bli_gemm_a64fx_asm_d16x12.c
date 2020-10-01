@@ -135,7 +135,6 @@ __asm__ volatile (
 " b               END_C_PRFML2                    \n\t"
 "                                                 \n\t"
 " C_PRFML2_STRIDED:                               \n\t"
-"                                                 \n\t" // TODO: Prefetch strided w/ PRFD.
 " mov             x10, #8                         \n\t" // Double in bytes, will be destroyed.
 "                                                 \n\t" //  == vector length in doubles.
 " madd            x23, x20, x10, xzr              \n\t" // Column stride in bytes
@@ -317,17 +316,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t" // [MKER][END] This block will be repeated
 "                                                 \n\t"
@@ -366,24 +365,19 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
-"                                                 \n\t" // Before third replica,
-"                                                 \n\t" //   do above prefetching.
-"                                                 \n\t" // X2, X4 will be modified later,
-"                                                 \n\t" //   so shift is different from
-"                                                 \n\t" //   first PRFM block.
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " fmla            z6.d, p0/m, z30.d, z0.d         \n\t" // Row 1:8 column 0 and 1
@@ -414,17 +408,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " sub             x10, x21, #1                    \n\t" // Before final replica,
@@ -460,17 +454,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " subs            x21, x21, #1                    \n\t" // Decrease counter.
@@ -532,17 +526,17 @@ __asm__ volatile (
 " add             x22, x22, x23                   \n\t" // C column forward
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
@@ -591,17 +585,17 @@ __asm__ volatile (
 " prfm            PSTL1STRM, [x22,#64]            \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
@@ -633,17 +627,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " sub             x10, x21, #1                    \n\t" // Before final replica,
@@ -679,17 +673,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t"
 " subs            x21, x21, #1                    \n\t" // Decrease counter.
@@ -733,17 +727,17 @@ __asm__ volatile (
 " fmla            z28.d, p0/m, z30.d, z5.d        \n\t"
 " ld1d            z30.d, p0/z, [x2]               \n\t" // Load next A column (first half)
 " fmla            z19.d, p0/m, z31.d, z0.d        \n\t" // Row 9:15 column 6 and 7
-" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[6, j+1]
+" ld1rd           z0.d, p0/z, [x4, #0]            \n\t" // Load B[0, j+1]
 " fmla            z21.d, p0/m, z31.d, z1.d        \n\t"
-" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[7, j+1]
+" ld1rd           z1.d, p0/z, [x4, #8]            \n\t" // Load B[1, j+1]
 " fmla            z23.d, p0/m, z31.d, z2.d        \n\t" // Row 9:15 column 8 and 9
-" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[8, j+1]
+" ld1rd           z2.d, p0/z, [x4, #16]           \n\t" // Load B[2, j+1]
 " fmla            z25.d, p0/m, z31.d, z3.d        \n\t"
-" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[9, j+1]
+" ld1rd           z3.d, p0/z, [x4, #24]           \n\t" // Load B[3, j+1]
 " fmla            z27.d, p0/m, z31.d, z4.d        \n\t" // Row 9:15 column 10 and 11
-" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[10, j+1]
+" ld1rd           z4.d, p0/z, [x4, #32]           \n\t" // Load B[4, j+1]
 " fmla            z29.d, p0/m, z31.d, z5.d        \n\t"
-" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[11, j+1]
+" ld1rd           z5.d, p0/z, [x4, #40]           \n\t" // Load B[5, j+1]
 " ld1d            z31.d, p1/z, [x2, x11, lsl 3]   \n\t" // Load next A column (last half)
 "                                                 \n\t" // [MKER]End of repeating.
 "                                                 \n\t"
