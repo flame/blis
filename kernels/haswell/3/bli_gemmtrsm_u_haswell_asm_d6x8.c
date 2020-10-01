@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -827,6 +827,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
     cntx_t*    restrict cntx
 )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_9);
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
 
@@ -1518,6 +1519,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_9);
 }
 
 

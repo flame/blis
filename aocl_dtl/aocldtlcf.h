@@ -5,7 +5,7 @@
  *               libaray, all debug features (except auto trace)
  *               can be enabled/disabled in this file.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  * 
  *==================================================================*/
 
@@ -30,7 +30,8 @@
 
 /* user has to explicitly use the below macros to identify
    ciriticality of the logged message */
-#define AOCL_DTL_LEVEL_ALL          (14)
+#define AOCL_DTL_LEVEL_ALL          (15)
+#define AOCL_DTL_LEVEL_TRACE_9      (14)
 #define AOCL_DTL_LEVEL_TRACE_8      (13)    
 #define AOCL_DTL_LEVEL_TRACE_7      (12)     /* Kernels */
 #define AOCL_DTL_LEVEL_TRACE_6      (11)

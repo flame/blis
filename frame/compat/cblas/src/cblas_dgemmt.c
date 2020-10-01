@@ -5,20 +5,20 @@
  * cblas_dgemmt.c
  * This program is a C interface to dgemmt.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 
 #include "cblas.h"
 #include "cblas_f77.h"
 void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-		   enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-		   f77_int N, f77_int K,
-		   double alpha, const double  *A,
+                   enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                   f77_int N, f77_int K,
+                   double alpha, const double  *A,
                    f77_int lda, const double  *B, f77_int ldb,
                    double beta, double  *C, f77_int ldc)
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+        AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    char TA, TB, UL;
 #ifdef F77_CHAR
    F77_CHAR F77_TA, F77_TB, F77_UL;
@@ -51,9 +51,10 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       else
       {
          cblas_xerbla(2, "cblas_dgemmt","Illegal Uplo setting, %d\n", Uplo);
-	 CBLAS_CallFromC = 0;
-	 RowMajorStrg = 0;
-	 return;
+         CBLAS_CallFromC = 0;
+         RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal Uplo setting.");
+         return;
       }
 
       if(TransA == CblasTrans) TA='T';
@@ -64,6 +65,7 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          cblas_xerbla(3, "cblas_dgemmt","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transA setting.");
          return;
       }
 
@@ -75,13 +77,14 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          cblas_xerbla(4, "cblas_dgemmt","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transB setting.");
          return;
       }
 
       #ifdef F77_CHAR
          F77_TA = C2F_CHAR(&TA);
          F77_TB = C2F_CHAR(&TB);
-	 F77_UL = C2F_CHAR(&UL);
+         F77_UL = C2F_CHAR(&UL);
       #endif
 
       F77_dgemmt(F77_UL,F77_TA, F77_TB, &F77_N, &F77_K, &alpha, A,
@@ -97,6 +100,10 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
       else
       {
          cblas_xerbla(2, "cblas_dgemmt","Illegal Uplo setting, %d\n", Uplo);
+         CBLAS_CallFromC = 0;
+         RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal Uplo setting.");
+         return;
       }
 
       if(TransA == CblasTrans) TB='T';
@@ -107,6 +114,7 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          cblas_xerbla(3, "cblas_dgemmt","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transA setting.");
          return;
       }
       if(TransB == CblasTrans) TA='T';
@@ -117,21 +125,26 @@ void cblas_dgemmt( enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
          cblas_xerbla(4, "cblas_dgemmt","Illegal TransB setting, %d\n", TransB);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal transB setting.");
          return;
       }
       #ifdef F77_CHAR
          F77_TA = C2F_CHAR(&TA);
          F77_TB = C2F_CHAR(&TB);
-	 F77_UL = C2F_CHAR(&UL);
+         F77_UL = C2F_CHAR(&UL);
       #endif
 
       F77_dgemmt(F77_UL,F77_TA, F77_TB, &F77_N, &F77_K, &alpha, B,
                   &F77_ldb, A, &F77_lda, &beta, C, &F77_ldc);
-	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    }
-   else  cblas_xerbla(1, "cblas_dgemmt", "Illegal Order setting, %d\n", Order);
-   CBLAS_CallFromC = 0;
-   RowMajorStrg = 0;
+   else
+   {
+      cblas_xerbla(1, "cblas_dgemmt", "Illegal Order setting, %d\n", Order);
+      CBLAS_CallFromC = 0;
+      RowMajorStrg = 0;
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal Order setting.");
+      return;
+   }
    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }

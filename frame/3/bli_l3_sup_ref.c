@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-20, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-20, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,6 +45,8 @@ err_t bli_gemmsup_ref
        rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+//	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_3, alpha, a, b, beta, c);
 	// This function implements the default gemmsup handler. If you are a
 	// BLIS developer and wish to use a different gemmsup handler, please
 	// register a different function pointer in the context in your
@@ -91,8 +93,7 @@ err_t bli_gemmsup_ref
 	//bli_rntm_set_pack_b( 0, rntm );
 #endif
 
-	return
-	bli_l3_sup_thread_decorator
+	err_t err = bli_l3_sup_thread_decorator
 	(
 	  bli_gemmsup_int,
 	  BLIS_GEMM, // operation family id
@@ -104,6 +105,9 @@ err_t bli_gemmsup_ref
 	  cntx,
 	  rntm
 	);
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return err;
 }
 
 err_t bli_gemmtsup_ref
@@ -117,6 +121,8 @@ err_t bli_gemmtsup_ref
        rntm_t* rntm
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+//	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_3, alpha, a, b, beta, c);
 	// This function implements the default gemmsup handler. If you are a
 	// BLIS developer and wish to use a different gemmsup handler, please
 	// register a different function pointer in the context in your
@@ -162,9 +168,7 @@ err_t bli_gemmtsup_ref
 	//bli_rntm_set_pack_a( 0, rntm );
 	//bli_rntm_set_pack_b( 0, rntm );
 #endif
-
-	return
-	bli_l3_sup_thread_decorator
+	err_t err = bli_l3_sup_thread_decorator
 	(
 	  bli_gemmtsup_int,
 	  BLIS_GEMMT, // operation family id
@@ -176,5 +180,8 @@ err_t bli_gemmtsup_ref
 	  cntx,
 	  rntm
 	);
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+	return err;
 }
 
