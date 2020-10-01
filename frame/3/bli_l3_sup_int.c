@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-20, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-20, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,7 +47,7 @@ err_t bli_gemmsup_int
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
+//	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
 
 #if 0
 	//bli_gemmsup_ref_var2
@@ -260,7 +260,7 @@ err_t bli_gemmtsup_int
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
+//	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
 
 #if 0
 	//bli_gemmsup_ref_var2

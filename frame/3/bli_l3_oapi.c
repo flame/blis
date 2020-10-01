@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -119,7 +119,7 @@ void PASTEMAC(opname,EX_SUF) \
 		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
 	} \
  \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 GENFRONT( gemm )
@@ -141,7 +141,7 @@ void PASTEMAC(opname,EX_SUF) \
 	bli_init_once(); \
 \
 	BLIS_OAPI_EX_DECLS \
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
+	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
 	/* If C has a zero dimension, return early.	*/	\
 	if ( bli_obj_has_zero_dim( c ) ) {\
@@ -199,7 +199,7 @@ void PASTEMAC(opname,EX_SUF) \
 		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
 	} \
  \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 GENFRONT( gemmt )
 
@@ -344,9 +344,11 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
+        AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
 	bli_init_once(); \
 \
 	BLIS_OAPI_EX_DECLS \
+	AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, side, alpha, a, b) \
 \
 	/* Only proceed with an induced method if all operands have the same
 	   (complex) datatype. If any datatypes differ, skip the induced method
@@ -366,6 +368,7 @@ void PASTEMAC(opname,EX_SUF) \
 	{ \
 		PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
 	} \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);	\
 }
 
 GENFRONT( trmm )

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,20 +48,29 @@ void bli_trsm_int
        thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
 	obj_t        a_local;
 	obj_t        b_local;
 	obj_t        c_local;
 	trsm_var_oft f;
 
 	// Return early if the current control tree node is NULL.
-	if ( bli_cntl_is_null( cntl ) ) return;
+	if ( bli_cntl_is_null( cntl ) )
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
+		return;
+	}
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
+	if ( bli_obj_has_zero_dim( c ) )
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
+		return;
+	}
 
 	// If A or B has a zero dimension, scale C by beta and return early.
 	if ( bli_obj_has_zero_dim( a ) ||
@@ -69,6 +79,7 @@ void bli_trsm_int
 		if ( bli_thread_am_ochief( thread ) )
 		    bli_scalm( beta, c );
 		bli_thread_barrier( thread );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 		return;
 	}
 
@@ -138,5 +149,6 @@ void bli_trsm_int
 	  cntl,
 	  thread
 	);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 }
 
