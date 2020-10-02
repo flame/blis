@@ -36,7 +36,9 @@
 #include "blis.h"
 
 /*
-   o 16x12 Double precision micro-kernel
+   o 16x12 double precision micro-kernel
+   o Indexed FMLA is used to exploit vector storage of B so that number 
+     of cycles between LD1RQD and FLMA is maximized.
    o Runnable on ARMv8a with SVE 512 feature, compiled with aarch64 GCC.
    o Tested on armie for SVE.
    x TODO: Benchmark with Gem5.

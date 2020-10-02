@@ -49,7 +49,10 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	(
 	  2,
 	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_a64fx_asm_16x12, FALSE,
+	  // Select unindexed kernel for A64fx due to:
+	  // - On this chip indexed FMLA occupies both FP pipelines with half 
+	  //   vector length each (a supposed mutiplexer is not there).
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve512_asm_16x12_unindexed, FALSE,
 	  cntx
 	);
 

@@ -36,19 +36,16 @@
 #include "blis.h"
 
 /*
-   o 16x12 Double precision micro-kernel
+   o 16x12 double precision micro-kernel
+   o This implementation uses unindexed FMLA instructions in its kernel.
    o Runnable on ARMv8a with SVE 512 feature compiled with aarch64 GCC.
-   o Optimizations specific to Fujitsu A64fx chip:
-    - Indexed FMLA instructions removed due to it'll occupy both
-      FP pipelines with half vector length each.
-    - PRFM instructions assume 64-byte (512-bit) block size for L1 & L2.
    o Tested on armie for SVE.
    o Tested & benchmarked on A64fx:
-    - Single threaded GEMM( M=2000 N=1400 K=500 ) yields around 42GFlOps.
+    - Single threaded GEMM( M=2000 N=1400 K=500 ) yields around 45GFlOps.
 
-   July 2020.
+   Sept. 2020.
 */
-void bli_dgemm_a64fx_asm_16x12
+void bli_dgemm_armsve512_asm_16x12_unindexed
      (
        dim_t               k0,
        double*    restrict alpha,
