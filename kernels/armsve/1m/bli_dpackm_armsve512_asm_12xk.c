@@ -100,7 +100,7 @@ void bli_dpackm_armsve512_asm_12xk
                 // 2 pack into 3 case.
                 if ( ldp == mnr )
                 {
-                    for ( ; k >= 1; k -= 2 )
+                    for ( ; k > 1; k -= 2 )
                     {
                         // load 12 continuous elments from *a
                         z_a0 = svld1_f64( all_active, alpha1 );
@@ -148,7 +148,7 @@ void bli_dpackm_armsve512_asm_12xk
                 dim_t k = n;
                 if ( ldp == mnr )
                 {
-                    for ( ; k >= 1; k -= 2 )
+                    for ( ; k > 1; k -= 2 )
                     {
                         // gather load from *a
                         z_a0 = svld1_gather_u64offset_f64( all_active, alpha1, z_index );
@@ -203,7 +203,7 @@ void bli_dpackm_armsve512_asm_12xk
                 dim_t k = n;
                 if ( ldp == mnr )
                 {
-                    for ( ; k >= 1; k -= 2 )    
+                    for ( ; k > 1; k -= 2 )
                     {
                         // load 12 continuous elments from *a
                         z_a0 = svld1_f64( all_active, alpha1 );
@@ -259,7 +259,7 @@ void bli_dpackm_armsve512_asm_12xk
                 dim_t k = n;
                 if ( ldp == mnr )
                 {
-                    for ( ; k >= 1; k -= 2 )
+                    for ( ; k > 1; k -= 2 )
                     {
                         // gather load from *a
                         z_a0 = svld1_gather_u64offset_f64( all_active, alpha1, z_index );
