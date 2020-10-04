@@ -32,8 +32,13 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
+
 #include <time.h>
 
 #define PRINT
@@ -46,75 +51,73 @@
 
 int main(int argc, char**argv)
 {
-    /* initialize random seed: */
-    srand (time(NULL));
+  /* initialize random seed: */
+  srand (time(NULL));
 
-    int   r, n_repeats;
-    n_repeats = 5;
+  int   r, n_repeats;
+  n_repeats = 5;
 
 #ifdef FLOAT
 
-    float z_abs = 0.0f;
+  float z_abs = 0.0f;
 
 #else
 
-    double z_abs = 0.0;
+  double z_abs = 0.0;
 
 #endif
 
-    for ( r = 0; r < n_repeats; ++r )
+  for ( r = 0; r < n_repeats; ++r )
     {
 
 #ifdef FLOAT
 
-        float maxRandVal = 1000.0f;
-        scomplex inp;
-        inp.real = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
-        inp.imag = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+      float maxRandVal = 1000.0f;
+      scomplex inp;
+      inp.real = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+      inp.imag = ((float)rand()/(float)(RAND_MAX)) * maxRandVal - maxRandVal/2;
 
 #ifdef BLIS
-    printf( "data_scabs1_BLIS");
+      printf( "data_scabs1_BLIS");
 #else
-    printf( "data_scabs1_%s", BLAS );
+      printf( "data_scabs1_%s", BLAS );
 #endif
 
 #else
 
-        double maxRandVal = 1000.0;
-        dcomplex inp;
-        inp.real = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
-        inp.imag = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+      double maxRandVal = 1000.0;
+      dcomplex inp;
+      inp.real = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
+      inp.imag = ((double)rand()/(double)(RAND_MAX)) * maxRandVal - maxRandVal/2;
 
 #ifdef BLIS
-    printf( "data_dcabs1_BLIS");
+      printf( "data_dcabs1_BLIS: ");
 #else
-    printf( "data_dcabs1_%s", BLAS );
+      printf( "data_dcabs1_%s: ", BLAS );
 #endif
 
 #endif
 
 #ifdef FLOAT
 
-        #ifdef CHECK_CBLAS
-            z_abs = cblas_scabs1( &inp );
-        #else
-            z_abs = scabs1_( &inp );
-        #endif
+#ifdef CHECK_CBLAS
+      z_abs = cblas_scabs1( &inp );
+#else
+      z_abs = scabs1_( &inp );
+#endif
 
 #else
 
-        #ifdef CHECK_CBLAS
-            z_abs = cblas_dcabs1( &inp );
-        #else
-            z_abs = dcabs1_( &inp );
-        #endif
+#ifdef CHECK_CBLAS
+      z_abs = cblas_dcabs1( &inp );
+#else
+      z_abs = dcabs1_( &inp );
+#endif
 
 #endif
 
-    printf("inp = %lf + %lf i , cabs1 result = %lf \n",
-                                    inp.real, inp.imag, z_abs);
-
+      printf(" z = %lf%+lfi, cabs1(z) = %lf \n", inp.real, inp.imag, z_abs);
     }
 
-    return 0;
+  return 0;
 }
