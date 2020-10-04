@@ -51,8 +51,8 @@
 /*
  * BLIS interface API will be called by default.
  * To call BLAS API, modify line 159 to '#if 0'.
- * To call cblas API, modify line 159 to '#if 0'and define the 
- * macro 'CHECK_CBLAS' in line 44 
+ * To call cblas API, modify line 159 to '#if 0'and define the
+ * macro 'CHECK_CBLAS' in line 44
  *
  *Sample prototype for BLAS interface API is as follows:
  *                n    alpha     x      incx   beta       y        incy
@@ -95,13 +95,12 @@ int main( int argc, char** argv )
     n_input = 15;
 #endif
 
-#if 1 
+
     dt = BLIS_FLOAT;
     //dt = BLIS_DOUBLE;
-#else
+
     //dt = BLIS_SCOMPLEX;
-    dt = BLIS_DCOMPLEX;
-#endif
+    //  dt = BLIS_DCOMPLEX;
 
 
     dt_x = dt_y = dt_alpha = dt_beta = dt;
@@ -109,11 +108,13 @@ int main( int argc, char** argv )
     // Begin with initializing the last entry to zero so that
     // matlab allocates space for the entire array once up-front.
     for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+
 #ifdef BLIS
     printf( "data_axpbyv_blis" );
 #else
     printf( "data_axpbyv_%s", BLAS );
 #endif
+
     printf( "( %2lu, 1:2 ) = [ %4lu %7.2f ];\n",
             ( unsigned long )(p - p_begin)/p_inc + 1,
             ( unsigned long )0, 0.0 );
@@ -159,9 +160,9 @@ int main( int argc, char** argv )
 #ifdef BLIS
 
             bli_axpbyv( &alpha,
-                       &x,
-                   &beta,
-                       &y );
+                        &x,
+                        &beta,
+                        &y );
 #else
             if ( bli_is_float( dt ) )
             {
@@ -180,10 +181,10 @@ int main( int argc, char** argv )
                           yp, incy );
 #else
                 saxpby_( &nn,
-                        &alphap,
-                        xp, &incx,
-                    &betap,
-                        yp, &incy );
+                         &alphap,
+                         xp, &incx,
+                         &betap,
+                         yp, &incy );
 
 #endif
             }
@@ -205,21 +206,21 @@ int main( int argc, char** argv )
                           yp, incy );
 #else
                 daxpby_( &nn,
-                        &alphap,
-                        xp, &incx,
-                    &betap,
-                        yp, &incy );
+                         &alphap,
+                         xp, &incx,
+                         &betap,
+                         yp, &incy );
 #endif
             }
             else if ( bli_is_scomplex( dt ) )
             {
-                f77_int  nn     = bli_obj_length( &x );
-                f77_int  incx   = bli_obj_vector_inc( &x );
-                    f77_int  incy   = bli_obj_vector_inc( &y );
-                void*    alphap = bli_obj_buffer( &alpha );
-                void*    betap  = bli_obj_buffer( &beta  );
-                void*    xp     = bli_obj_buffer( &x );
-                void*    yp     = bli_obj_buffer( &y );
+              f77_int  nn     = bli_obj_length( &x );
+              f77_int  incx   = bli_obj_vector_inc( &x );
+              f77_int  incy   = bli_obj_vector_inc( &y );
+              void*    alphap = bli_obj_buffer( &alpha );
+              void*    betap  = bli_obj_buffer( &beta  );
+              void*    xp     = bli_obj_buffer( &x );
+              void*    yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_caxpby( nn,
                           alphap,
@@ -257,6 +258,7 @@ int main( int argc, char** argv )
                      (dcomplex*)yp, &incy );
 #endif
             }
+
 #endif
 
 #ifdef PRINT
