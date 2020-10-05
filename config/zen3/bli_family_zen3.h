@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,6 +44,11 @@
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
+//To enable framework optimizations for EPYC family processors.
+//With this macro defined, we can call kernels directly from BLAS interfaces
+//for levels 1 & 2.
+//This macro needs to be defined for all EPYC configurations.
+#define BLIS_CONFIG_EPYC
 
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
