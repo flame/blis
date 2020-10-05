@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ void bli_sscalv_zen_int10
 	if ( PASTEMAC(s,eq0)( *alpha ) )
 	{
 		float*       zero = bli_s0;
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
 	    bli_ssetv_zen_int
 		(
 		  BLIS_NO_CONJUGATE,
@@ -281,7 +281,7 @@ void bli_dscalv_zen_int10
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
 		double*      zero = bli_d0;
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
 	    bli_dsetv_zen_int
 		(
 		  BLIS_NO_CONJUGATE,

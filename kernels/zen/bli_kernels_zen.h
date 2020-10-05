@@ -92,9 +92,17 @@ SETV_KER_PROT(double,   d, setv_zen_int)
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
 
+AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
+
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
+
+// -- level-2 ----------------------------------------------------------------
+
+//gemv(scalar code)
+GEMV_KER_PROT( double,   d,  gemv_zen_ref_c )
 
 // -- level-3 sup --------------------------------------------------------------
 // semmsup_rv

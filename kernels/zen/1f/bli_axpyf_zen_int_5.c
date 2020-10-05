@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -101,7 +101,7 @@ void bli_saxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
         for ( i = 0; i < b_n; ++i )
         {
             float* a1   = a + (0  )*inca + (i  )*lda;
@@ -375,7 +375,7 @@ void bli_daxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
         for ( i = 0; i < b_n; ++i )
         {
             double* a1   = a + (0  )*inca + (i  )*lda;
