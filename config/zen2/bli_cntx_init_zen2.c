@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -88,7 +88,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  16,
+	  18,
 #if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
@@ -103,6 +103,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
+	  BLIS_DOTV_KER,   BLIS_SCOMPLEX, bli_cdotv_zen_int5,
+	  BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int5,
 
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
