@@ -63,6 +63,8 @@ DOTV_KER_PROT( double,   d, dotv_zen_int )
 // dotv (intrinsics, unrolled x10)
 DOTV_KER_PROT( float,    s, dotv_zen_int10 )
 DOTV_KER_PROT( double,   d, dotv_zen_int10 )
+DOTV_KER_PROT( scomplex,  c, dotv_zen_int5 )
+DOTV_KER_PROT( dcomplex,  z, dotv_zen_int5 )
 
 // dotxv (intrinsics)
 DOTXV_KER_PROT( float,    s, dotxv_zen_int )
