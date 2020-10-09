@@ -453,7 +453,6 @@ The `runthese.m` file will contain example invocations of the function.
 * [Zen2 sgemm single-threaded column-stored](graphs/sup/sgemm_ccc_zen2_nt1.pdf)
 * [Zen2 dgemm single-threaded row-stored](graphs/sup/dgemm_rrr_zen2_nt1.pdf)
 * [Zen2 dgemm single-threaded column-stored](graphs/sup/dgemm_ccc_zen2_nt1.pdf)
-
 * [Zen2 sgemm multithreaded (32 cores) row-stored](graphs/sup/sgemm_rrr_zen2_nt32.pdf)
 * [Zen2 sgemm multithreaded (32 cores) column-stored](graphs/sup/sgemm_ccc_zen2_nt32.pdf)
 * [Zen2 dgemm multithreaded (32 cores) row-stored](graphs/sup/dgemm_rrr_zen2_nt32.pdf)
@@ -469,7 +468,6 @@ The `runthese.m` file will contain example invocations of the function.
 ![dgemm single-threaded row-stored](graphs/sup/dgemm_rrr_zen2_nt1.png)
 * **Zen2 dgemm single-threaded column-stored**
 ![dgemm single-threaded column-stored](graphs/sup/dgemm_ccc_zen2_nt1.png)
-
 * **Zen2 sgemm multithreaded (32 cores) row-stored**
 ![sgemm multithreaded row-stored](graphs/sup/sgemm_rrr_zen2_nt32.png)
 * **Zen2 sgemm multithreaded (32 cores) column-stored**
