@@ -326,6 +326,11 @@ BLIS_INLINE bool bli_cntx_gemmt_sup_thresh_is_met( num_t dt, dim_t n, dim_t k, c
 
         return FALSE;
     }
+    else if ( bli_is_dcomplex( dt ) )
+    {
+        if ( n < 100 )   return TRUE;
+        else             return FALSE;
+    }
     else
         return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
 }
