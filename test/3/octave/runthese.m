@@ -22,3 +22,5 @@ plot_panel_4x5(2.55,8,64,'2s','../results/epyc/merged20190306_0319_0328/jc2ic8jr
 plot_panel_4x5(3.40,16,1,  'st','../results/zen2/20200929/st',       'zen2','MKL',1); close all; clear all;
 plot_panel_4x5(2.60,16,64, '1s','../results/zen2/20200929/jc4ic4jr4','zen2','MKL',1); close all; clear all;
 plot_panel_4x5(2.60,16,128,'2s','../results/zen2/20200929/jc8ic4jr4','zen2','MKL',1); close all; clear all;
+
+plot_panel_4x5(3.40,16,1,  'st','../results/zen2/20200929/st',       'zen2','MKL',1); close all; clear all; plot_panel_4x5(2.60,16,64, '1s','../results/zen2/20200929/jc4ic4jr4','zen2','MKL',1); close all; clear all; plot_panel_4x5(2.60,16,128,'2s','../results/zen2/20200929/jc8ic4jr4','zen2','MKL',1); close all; clear all;

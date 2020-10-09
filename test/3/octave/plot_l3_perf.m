@@ -85,7 +85,7 @@ else
 	xaxisname = 'm = n = k';
 	fontsize = 20;
 end
-linesize = 0.5;
+linesize = 0.8;
 legend_loc = 'southeast';
 
 %ax1 = subplot( rows, cols, theid );
@@ -188,14 +188,14 @@ set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
 set( titl, 'FontSize', fontsize );
 
 if theid > (rows-1)*cols
-xlab = xlabel( ax1,xaxisname );
-%tpos = get( xlab, 'Position' )
-%tpos(2) = tpos(2) + 10;
-%set( xlab, 'Position', tpos );
+	%tpos = get( xlab, 'Position' )
+	%tpos(2) = tpos(2) + 10;
+	%set( xlab, 'Position', tpos );
+	xlab = xlabel( ax1,xaxisname );
 end
 
 if mod(theid-1,cols) == 0
-ylab = ylabel( ax1,yaxisname );
+	ylab = ylabel( ax1,yaxisname );
 end
 
 r_val = 0;

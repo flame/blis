@@ -243,6 +243,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (26 core) execution requested via `export OMP_NUM_THREADS=26`
@@ -323,6 +324,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
@@ -401,6 +403,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (32 core) execution requested via `export OMP_NUM_THREADS=32`
@@ -483,6 +486,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (64 core) execution requested via `export OMP_NUM_THREADS=64`
