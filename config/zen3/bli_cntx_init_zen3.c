@@ -88,7 +88,7 @@ void bli_cntx_init_zen3( cntx_t* cntx )
     // Update the context with optimized level-1v kernels.
     bli_cntx_set_l1v_kers
     (
-      18,
+      20,
 #if 1
       // amaxv
       BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
@@ -99,6 +99,8 @@ void bli_cntx_init_zen3( cntx_t* cntx )
       // axpyv
       BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
       BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+      BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int5,
+      BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int5,
 
       // dotv
       BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,

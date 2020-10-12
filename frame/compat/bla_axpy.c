@@ -50,37 +50,37 @@ void PASTEF77(ch,blasname) \
              ftype*   y, const f77_int* incy  \
      ) \
 { \
-	dim_t  n0; \
-	ftype* x0; \
-	ftype* y0; \
-	inc_t  incx0; \
-	inc_t  incy0; \
+    dim_t  n0; \
+    ftype* x0; \
+    ftype* y0; \
+    inc_t  incx0; \
+    inc_t  incy0; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Convert/typecast negative values of n to zero. */ \
-	bli_convert_blas_dim1( *n, n0 ); \
+    /* Convert/typecast negative values of n to zero. */ \
+    bli_convert_blas_dim1( *n, n0 ); \
 \
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */ \
+    bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+    bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  BLIS_NO_CONJUGATE, \
-	  n0, \
-	  (ftype*)alpha, \
-	  x0, incx0, \
-	  y0, incy0, \
-	  NULL, \
-	  NULL  \
-	); \
+    /* Call BLIS interface. */ \
+    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      BLIS_NO_CONJUGATE, \
+      n0, \
+      (ftype*)alpha, \
+      x0, incx0, \
+      y0, incy0, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
@@ -94,65 +94,65 @@ void saxpy_
              float*   y, const f77_int* incy
      )
 {
-	dim_t  n0;
-	float* x0;
-	float* y0;
-	inc_t  incx0;
-	inc_t  incy0;
+    dim_t  n0;
+    float* x0;
+    float* y0;
+    inc_t  incx0;
+    inc_t  incy0;
 
-	/* Initialize BLIS. */
-//	bli_init_auto();
+    /* Initialize BLIS. */
+    //	bli_init_auto();
 
-	/* Convert/typecast negative values of n to zero. */
-	        if ( *n < 0 ) n0 = ( dim_t )0;
-        	else              n0 = ( dim_t )(*n);
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
 
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */
-        if ( *incx < 0 )
-        {
-                /* The semantics of negative stride in BLAS are that the vector
-                   operand be traversed in reverse order. (Another way to think
-                   of this is that negative strides effectively reverse the order
-                   of the vector, but without any explicit data movements.) This
-                   is also how BLIS interprets negative strides. The differences
-                   is that with BLAS, the caller *always* passes in the 0th (i.e.,
-                   top-most or left-most) element of the vector, even when the
-                   stride is negative. By contrast, in BLIS, negative strides are
-                   used *relative* to the vector address as it is given. Thus, in
-                   BLIS, if this backwards traversal is desired, the caller *must*
-                   pass in the address to the (n-1)th (i.e., the bottom-most or
-                   right-most) element along with a negative stride. */
-                x0    = ((float*)x) + (n0-1)*(-*incx);
-                incx0 = ( inc_t )(*incx);
-        }
-        else
-        {
-                x0    = ((float*)x);
-                incx0 = ( inc_t )(*incx);
-        }
-        if ( *incy < 0 )
-        {
-                y0    = ((float*)y) + (n0-1)*(-*incy);
-                incy0 = ( inc_t )(*incy);
-        }
-        else
-        {
-                y0    = ((float*)y);
-                incy0 = ( inc_t )(*incy);
-        }
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+            operand be traversed in reverse order. (Another way to think
+            of this is that negative strides effectively reverse the order
+            of the vector, but without any explicit data movements.) This
+            is also how BLIS interprets negative strides. The differences
+            is that with BLAS, the caller *always* passes in the 0th (i.e.,
+            top-most or left-most) element of the vector, even when the
+            stride is negative. By contrast, in BLIS, negative strides are
+            used *relative* to the vector address as it is given. Thus, in
+            BLIS, if this backwards traversal is desired, the caller *must*
+            pass in the address to the (n-1)th (i.e., the bottom-most or
+            right-most) element along with a negative stride. */
+        x0    = ((float*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+    }
+    else
+    {
+        x0    = ((float*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+    if ( *incy < 0 )
+    {
+        y0    = ((float*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+    }
+    else
+    {
+        y0    = ((float*)y);
+        incy0 = ( inc_t )(*incy);
+    }
 
-	bli_saxpyv_zen_int10(
-	  BLIS_NO_CONJUGATE,
-	  n0,
-	  (float*)alpha,
-	  x0, incx0,
-	  y0, incy0,
-	  NULL
-	);
+    bli_saxpyv_zen_int10(
+    BLIS_NO_CONJUGATE,
+    n0,
+    (float*)alpha,
+    x0, incx0,
+    y0, incy0,
+    NULL
+    );
 
-	/* Finalize BLIS. */
-//	bli_finalize_auto();
+    /* Finalize BLIS. */
+    //	bli_finalize_auto();
 }
 
 void daxpy_
@@ -163,68 +163,203 @@ void daxpy_
              double*   y, const f77_int* incy
      )
 {
-	dim_t  n0;
-	double* x0;
-	double* y0;
-	inc_t  incx0;
-	inc_t  incy0;
+    dim_t  n0;
+    double* x0;
+    double* y0;
+    inc_t  incx0;
+    inc_t  incy0;
 
-	/* Initialize BLIS. */
-//	bli_init_auto();
+    /* Initialize BLIS. */
+    //	bli_init_auto();
 
-	/* Convert/typecast negative values of n to zero. */
-	        if ( *n < 0 ) n0 = ( dim_t )0;
-        	else              n0 = ( dim_t )(*n);
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
 
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */
-        if ( *incx < 0 )
-        {
-                /* The semantics of negative stride in BLAS are that the vector
-                   operand be traversed in reverse order. (Another way to think
-                   of this is that negative strides effectively reverse the order
-                   of the vector, but without any explicit data movements.) This
-                   is also how BLIS interprets negative strides. The differences
-                   is that with BLAS, the caller *always* passes in the 0th (i.e.,
-                   top-most or left-most) element of the vector, even when the
-                   stride is negative. By contrast, in BLIS, negative strides are
-                   used *relative* to the vector address as it is given. Thus, in
-                   BLIS, if this backwards traversal is desired, the caller *must*
-                   pass in the address to the (n-1)th (i.e., the bottom-most or
-                   right-most) element along with a negative stride. */
-                x0    = ((double*)x) + (n0-1)*(-*incx);
-                incx0 = ( inc_t )(*incx);
-        }
-        else
-        {
-                x0    = ((double*)x);
-                incx0 = ( inc_t )(*incx);
-        }
-        if ( *incy < 0 )
-        {
-                y0    = ((double*)y) + (n0-1)*(-*incy);
-                incy0 = ( inc_t )(*incy);
-        }
-        else
-        {
-                y0    = ((double*)y);
-                incy0 = ( inc_t )(*incy);
-        }
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+        x0    = ((double*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+    }
+    else
+    {
+        x0    = ((double*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+    if ( *incy < 0 )
+    {
+        y0    = ((double*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+    }
+    else
+    {
+        y0    = ((double*)y);
+        incy0 = ( inc_t )(*incy);
+    }
 
-	bli_daxpyv_zen_int10(
-	  BLIS_NO_CONJUGATE,
-	  n0,
-	  (double*)alpha,
-	  x0, incx0,
-	  y0, incy0,
-	  NULL
-	);
+    bli_daxpyv_zen_int10(
+      BLIS_NO_CONJUGATE,
+      n0,
+      (double*)alpha,
+      x0, incx0,
+      y0, incy0,
+      NULL
+    );
 
-	/* Finalize BLIS. */
-//	bli_finalize_auto();
+    /* Finalize BLIS. */
+    //	bli_finalize_auto();
 }
 
-INSERT_GENTFUNC_BLAS_CZ( axpy, axpyv )
+void caxpy_
+     (
+       const f77_int* n,
+       const scomplex*   alpha,
+       const scomplex*   x, const f77_int* incx,
+             scomplex*   y, const f77_int* incy
+     )
+{
+    dim_t     n0;
+    scomplex* x0;
+    scomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
+
+    /* Initialize BLIS. */
+    //	bli_init_auto();
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+        x0    = ((scomplex*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+    }
+    else
+    {
+        x0    = ((scomplex*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+    if ( *incy < 0 )
+    {
+        y0    = ((scomplex*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+    }
+    else
+    {
+        y0    = ((scomplex*)y);
+        incy0 = ( inc_t )(*incy);
+    }
+
+    bli_caxpyv_zen_int5(
+      BLIS_NO_CONJUGATE,
+      n0,
+      (scomplex*)alpha,
+      x0, incx0,
+      y0, incy0,
+      NULL
+    );
+
+    /* Finalize BLIS. */
+    //	bli_finalize_auto();
+}
+
+void zaxpy_
+     (
+       const f77_int* n,
+       const dcomplex*   alpha,
+       const dcomplex*   x, const f77_int* incx,
+             dcomplex*   y, const f77_int* incy
+     )
+{
+    dim_t  n0;
+    dcomplex* x0;
+    dcomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
+
+    /* Initialize BLIS. */
+    //	bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+            operand be traversed in reverse order. (Another way to think
+            of this is that negative strides effectively reverse the order
+            of the vector, but without any explicit data movements.) This
+            is also how BLIS interprets negative strides. The differences
+            is that with BLAS, the caller *always* passes in the 0th (i.e.,
+            top-most or left-most) element of the vector, even when the
+            stride is negative. By contrast, in BLIS, negative strides are
+            used *relative* to the vector address as it is given. Thus, in
+            BLIS, if this backwards traversal is desired, the caller *must*
+            pass in the address to the (n-1)th (i.e., the bottom-most or
+            right-most) element along with a negative stride. */
+        x0    = ((dcomplex*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+    }
+    else
+    {
+        x0    = ((dcomplex*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+    if ( *incy < 0 )
+    {
+        y0    = ((dcomplex*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+    }
+    else
+    {
+        y0    = ((dcomplex*)y);
+        incy0 = ( inc_t )(*incy);
+    }
+
+    bli_zaxpyv_zen_int5(
+      BLIS_NO_CONJUGATE,
+      n0,
+      (dcomplex*)alpha,
+      x0, incx0,
+      y0, incy0,
+      NULL
+    );
+
+    /* Finalize BLIS. */
+    //	bli_finalize_auto();
+}
 
 #else
 INSERT_GENTFUNC_BLAS( axpy, axpyv )
