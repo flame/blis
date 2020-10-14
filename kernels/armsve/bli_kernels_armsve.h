@@ -35,7 +35,9 @@
 GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
 GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12 )
 GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12_unindexed )
+GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x10_unindexed )
 
 PACKM_KER_PROT( double,   d, packm_armsve256_asm_8xk )
 PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
 PACKM_KER_PROT( double,   d, packm_armsve512_asm_12xk )
+PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )

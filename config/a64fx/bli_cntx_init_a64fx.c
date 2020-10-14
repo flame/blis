@@ -52,14 +52,15 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  // Select unindexed kernel for A64fx due to:
 	  // - On this chip indexed FMLA occupies both FP pipelines with half 
 	  //   vector length each (a supposed mutiplexer is not there).
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve512_asm_16x12_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve512_asm_16x10_unindexed, FALSE,
 	  cntx
 	);
 
 	// Set SVE-512 packing routine.
 	bli_cntx_set_packm_kers
 	(
-	  2,
+	  3,
+	  BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
 	  BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
 	  BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
 	  cntx
@@ -68,10 +69,10 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,    16,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    12,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    10,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   160,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,  1000,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  1600,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
