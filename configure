@@ -1000,7 +1000,7 @@ select_tool()
 
 auto_detect()
 {
-	local cc cflags config_defines detected_config rval
+	local cc cflags config_defines detected_config rval cmd
 
 	# Use the same compiler that was found earlier.
 	cc="${found_cc}"
@@ -1017,40 +1017,57 @@ auto_detect()
 		cflags=
 	fi
 
-	# Locate our source files.
-	bli_arch_c="bli_arch.c"
-	bli_cpuid_c="bli_cpuid.c"
-	main_c="config_detect.c"
+	# Accumulate a list of source files we'll need to compile along with
+	# the top-level (root) directory in which they are located.
+	c_src_pairs=""
+	c_src_pairs="${c_src_pairs} frame:bli_arch.c"
+	c_src_pairs="${c_src_pairs} frame:bli_cpuid.c"
+	c_src_pairs="${c_src_pairs} frame:bli_env.c"
+	c_src_pairs="${c_src_pairs} build:config_detect.c"
 
-	bli_arch_c_filepath=$(find ${dist_path}/frame -name "${bli_arch_c}")
-	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_c}")
-	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+	# Accumulate a list of full filepaths to the source files listed above.
+	c_src_filepaths=""
+	for pair in ${c_src_pairs}; do
 
-	# Locate headers needed directly by the above files.
-	bli_arch_h="bli_arch.h"
-	bli_cpuid_h="bli_cpuid.h"
-	bli_typed_h="bli_type_defs.h"
+		filename=${pair#*:}
+		rootdir=${pair%:*}
 
-	bli_arch_h_filepath=$(find ${dist_path}/frame -name "${bli_arch_h}")
-	bli_cpuid_h_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_h}")
-	bli_typed_h_filepath=$(find ${dist_path}/frame -name "${bli_typed_h}")
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		c_src_filepaths="${c_src_filepaths} ${filepath}"
+	done
 
-	bli_arch_h_path=${bli_arch_h_filepath%/${bli_arch_h}}
-	bli_cpuid_h_path=${bli_cpuid_h_filepath%/${bli_cpuid_h}}
-	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
+	# Accumulate a list of header files we'll need to locate along with
+	# the top-level (root) directory in which they are located.
+	c_hdr_pairs=""
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_system.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_type_defs.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_arch.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_cpuid.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_env.h"
+	# NOTE: These headers are needed by bli_type_defs.h.
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_malloc.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_pthread.h"
 
-	# Locate other headers needed by bli_type_defs.h.
-	bli_pthread_h="bli_pthread.h"
-	bli_pthread_h_filepath=$(find ${dist_path}/frame -name "${bli_pthread_h}")
-	bli_pthread_h_path=${bli_pthread_h_filepath%/${bli_pthread_h}}
-	bli_malloc_h="bli_malloc.h"
-	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
-	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
+	# Accumulate a list of full paths to the header files listed above.
+	# While we are at it, we include the "-I" compiler option to indicate
+	# adding the path to the list of directories to search when encountering
+	# #include directives.
+	c_hdr_paths=""
+	for pair in ${c_hdr_pairs}; do
+
+		filename=${pair#*:}
+		rootdir=${pair%:*}
+
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		path=${filepath%/*}
+		c_hdr_paths="${c_hdr_paths} -I${path}"
+	done
 
 	# Define the executable name.
 	autodetect_x="auto-detect.x"
 
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
+	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
 	                 | sed -e 's/#ifdef /-D/g')
 
@@ -1065,20 +1082,29 @@ auto_detect()
 	# framework.
 	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
 	# pthreads (i.e., barriers).
-	${cc} ${config_defines} \
+
+	cmd="${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
-	      -I${bli_cpuid_h_path} \
-	      -I${bli_arch_h_path} \
-	      -I${bli_typed_h_path} \
-	      -I${bli_pthread_h_path} \
-	      -I${bli_malloc_h_path} \
+	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags} \
-	      ${bli_arch_c_filepath} \
-	      ${bli_cpuid_c_filepath} \
+	      ${c_src_filepaths} \
 	      ${ldflags} \
-	      ${main_c_filepath} \
-	   -o ${autodetect_x}
+	      -o ${autodetect_x}"
+
+	if [ "${debug_auto_detect}" == "no" ]; then
+
+		# Execute the compilation command.
+		eval ${cmd}
+
+	else
+
+		# Debugging stuff. Instead of executing ${cmd}, join the lines together
+		# with tr and trim excess whitespace via awk.
+		cmd=$(echo "${cmd}" | tr '\n' ' ' | awk '{$1=$1;print}')
+		echo "${cmd}"
+		return
+	fi
 
 	# Run the auto-detect program.
 	detected_config=$(./${autodetect_x})
@@ -1995,6 +2021,13 @@ main()
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
 
+	# -- Debugging --
+
+	# A global flag to help debug the compilation command for the executable
+	# that configure builds on-the-fly to perform hardware auto-detection.
+	debug_auto_detect="no"
+
+
 
 	# -- Command line option/argument parsing ----------------------------------
 
@@ -2441,7 +2474,15 @@ main()
 		# Call the auto_detect() function and save the returned string in
 		# config_name.
 		config_name=$(auto_detect)
-		#config_name="generic"
+
+		# Debugging stuff. When confirming the behavior of auto_detect(),
+		# it is useful to output ${config_name}, which in theory could be
+		# set temoprarily to something other than the config_name, such as
+		# the compilation command.
+		if [ "${debug_auto_detect}" = "yes" ]; then
+			echo "auto-detect program compilation command: ${config_name}"
+			exit 1
+		fi
 
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
 

@@ -1571,6 +1571,7 @@ typedef enum
 
 	// Architecture-related errors
 	BLIS_INVALID_ARCH_ID                       = (-150),
+	BLIS_UNINITIALIZED_GKS_CNTX                = (-151),
 
 	// Blocksize-related errors
 	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),

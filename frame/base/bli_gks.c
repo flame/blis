@@ -300,6 +300,25 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 // -----------------------------------------------------------------------------
 
+cntx_t** bli_gks_lookup_id
+     (
+       arch_t id
+     )
+{
+	// Return the address of the array of context pointers for a given
+	// architecture id. This function is only used for sanity check purposes
+	// to ensure that the underlying data structures for a particular id are
+	// initialized.
+
+	// Index into the array of context pointers for the given architecture id.
+	cntx_t** restrict gks_id = gks[ id ];
+
+	// Return the context pointer at gks_id_ind.
+	return gks_id;
+}
+
+// -----------------------------------------------------------------------------
+
 void bli_gks_register_cntx
      (
        arch_t  id,
