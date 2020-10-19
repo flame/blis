@@ -1432,7 +1432,8 @@ uint32_t bli_cpuid_query
 	*part = BLIS_ARCH_GENERIC;
 
 #if 0
-// The easy GCC (and recent clang?) version
+// The easy GCC (and recent clang?) version.  This requires a more
+// recent glibc than in EL7, though.
 #  if __GNUC__ >= 6
 	if ( __builtin_cpu_is( "power9" ) )
 		*part = BLIS_ARCH_POWER9;
