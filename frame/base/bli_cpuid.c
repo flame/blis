@@ -1123,13 +1123,14 @@ static uint32_t get_coretype(void) {
 					return BLIS_ARCH_A64FX;
 			}
 			break;
-        // Fixme: OpenBLAS 
 	}
 	// Fixme: OpenBLAS uses a57 basic config for others, but says
 	// -mtune will speed them up
 	// <https://github.com/xianyi/OpenBLAS/commit/310ea55f29f16771438386fb2f1f140e2fd7e397>
 	// It has Neoverse-N1 as -march=armv8.2-a -mtune=neoverse-n1 (gcc
-	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; as gravitin2, l1d 64k, l2 1024, l3 32M, Features        : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
+	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; assume that's
+	// as graviton2, which has: l1d 64k, l2 1024, l3 32M,
+	// Features : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
 	return BLIS_ARCH_CORTEXA57;
 }
 #endif
@@ -1169,7 +1170,8 @@ uint32_t bli_cpuid_query
 
    When reading /proc/cpuinfo, we should check the entry corresponding
    to the core we're actually running on, in case the system is
-   heterogeneous (big.little).
+   heterogeneous (big.little), though users obviously should bind to
+   big cores.
 
    arch/arm/include/asm/cputype.h has:
 
@@ -1234,7 +1236,7 @@ uint32_t bli_cpuid_query
    char * platform = NULL;
    platform = (char*) getauxval (AT_PLATFORM);
 
-   but that just yields "v7l" on cortexa9.
+   that just yields "v7l" on cortexa9.
 
  */
 
