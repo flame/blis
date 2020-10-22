@@ -16,6 +16,7 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <omp.h>
 #endif
 
 #if defined(__linux__)
@@ -36,7 +37,7 @@ uint64 AOCL_getTimestamp(void) __attribute__((no_instrument_function));
 
 uint32 AOCL_gettid(void)
 {
-    return syscall(__NR_gettid);
+    return omp_get_thread_num();
 }
 
 pid_t  AOCL_getpid(void)
