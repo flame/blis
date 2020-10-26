@@ -355,4 +355,33 @@ void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
+
+
+// Level-2
+
+void AOCL_DTL_log_gemv_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char transa,
+                              const f77_int  m,
+                              const f77_int  n,
+                              const double    alpha,
+                              const f77_int lda,
+                              const f77_int incx,
+                              const double    beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
+    sprintf(buffer, " %c %c %ld %ld %lf %lu %lu %lf %lu",
+            dt_type, transa, (dim_t)m, (dim_t)n,  alpha, (dim_t)lda,  (dim_t)incx, beta, (dim_t)incy);
+
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+
+
 #endif

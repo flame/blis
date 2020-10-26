@@ -8,7 +8,7 @@
  * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights Reserved.
  *
  *=======================================================================*/
-
+#include "blis.h"
 #include "aocltpdef.h"
 #include "aocldtl.h"
 #include "aoclfal.h"
@@ -176,6 +176,8 @@ void DTL_Trace(
 {
     uint8 i = 0;
     AOCL_FAL_FILE *pOutFile = NULL;
+
+    bli_init_auto();
 
     if (ui8LogType == TRACE_TYPE_LOG || ui8LogType == TRACE_TYPE_RAW)
     {

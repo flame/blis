@@ -96,6 +96,7 @@ dcomplex zdotc_
        const dcomplex*   y, const f77_int* incy
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t  n0;
     dcomplex* x0;
     dcomplex* y0;
@@ -127,6 +128,7 @@ dcomplex zdotc_
       NULL
     );
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     /* Finalize BLIS. */
     bli_finalize_auto();
     *ret_val = rho;
@@ -140,6 +142,7 @@ dcomplex zdotc_
        const dcomplex*   y, const f77_int* incy
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t  n0;
     dcomplex* x0;
     dcomplex* y0;
@@ -209,6 +212,8 @@ dcomplex zdotc_
     /* Finalize BLIS. */
 //  bli_finalize_auto();
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
     return rho;
 }
 #endif
@@ -222,6 +227,7 @@ float sdot_
        const float*   y, const f77_int* incy
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t  n0;
     float* x0;
     float* y0;
@@ -290,7 +296,7 @@ float sdot_
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
-
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
 
@@ -301,6 +307,7 @@ double ddot_
        const double*   y, const f77_int* incy
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t  n0;
     double* x0;
     double* y0;
@@ -369,7 +376,7 @@ double ddot_
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
-
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
 
@@ -380,6 +387,7 @@ scomplex cdotu_
        const scomplex*   y, const f77_int* incy
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t  n0;
     scomplex* x0;
     scomplex* y0;
@@ -448,7 +456,7 @@ scomplex cdotu_
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
-
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
 
@@ -465,6 +473,8 @@ dcomplex zdotu_
     inc_t  incx0;
     inc_t  incy0;
     dcomplex  rho;
+
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -528,6 +538,8 @@ dcomplex zdotu_
     /* Finalize BLIS. */
 //  bli_finalize_auto();
 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
     return rho;
 }
 
@@ -545,6 +557,8 @@ scomplex cdotc_
     inc_t  incx0;
     inc_t  incy0;
     scomplex  rho;
+
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -607,6 +621,7 @@ scomplex cdotc_
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return rho;
 }
@@ -659,6 +674,7 @@ double PASTEF77(d,sdot)
     double  rho;
     dim_t   i;
 
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     /* Initialization of BLIS is not required. */
 
     /* Convert/typecast negative values of n to zero. */
@@ -682,6 +698,7 @@ double PASTEF77(d,sdot)
 
     /* Finalization of BLIS is not required, because initialization was
        not required. */
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return rho;
 }
