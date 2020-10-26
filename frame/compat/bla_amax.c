@@ -48,6 +48,7 @@ f77_int PASTEF772(i,chx,blasname) \
        const ftype_x* x, const f77_int* incx  \
      ) \
 { \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
     dim_t    n0; \
     ftype_x* x0; \
     inc_t    incx0; \
@@ -58,7 +59,10 @@ f77_int PASTEF772(i,chx,blasname) \
        is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
        return 0, which ends up getting incremented to 1 (below) before
        being returned, which is not what we want. */ \
-    if ( *n < 1 || *incx <= 0 ) return 0; \
+    if ( *n < 1 || *incx <= 0 ) { \
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "iamax_: vector empty") \
+       return 0;                                   \
+    }\
 \
     /* Initialize BLIS. */ \
     bli_init_auto(); \
@@ -88,6 +92,7 @@ f77_int PASTEF772(i,chx,blasname) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     return f77_index; \
 }
 
@@ -100,6 +105,7 @@ f77_int isamax_
        const float* x, const f77_int* incx
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t    n0;
     float* x0;
     inc_t    incx0;
@@ -110,7 +116,10 @@ f77_int isamax_
        is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
        return 0, which ends up getting incremented to 1 (below) before
        being returned, which is not what we want. */
-    if ( *n < 1 || *incx <= 0 ) return 0;
+    if ( *n < 1 || *incx <= 0 ) {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "isamax_: vector empty");
+      return 0;
+    }
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -157,11 +166,13 @@ f77_int isamax_
 
     /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
        index. Also, if the BLAS integer size differs from the BLIS
-       integer size, that typecast occurs here. */ 
+       integer size, that typecast occurs here. */
     f77_index = bli_index + 1;
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 
     return f77_index;
 }
@@ -172,6 +183,7 @@ f77_int idamax_
        const double* x, const f77_int* incx
      )
 {
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     dim_t    n0;
     double* x0;
     inc_t    incx0;
@@ -182,7 +194,10 @@ f77_int idamax_
        is needed to emulate netlib BLAS. Without it, bli_?amaxv() will
        return 0, which ends up getting incremented to 1 (below) before
        being returned, which is not what we want. */
-    if ( *n < 1 || *incx <= 0 ) return 0;
+    if ( *n < 1 || *incx <= 0 ) {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "idamax_: vector empty");
+      return 0;
+    }
 
     /* Initialize BLIS. */
 //  bli_init_auto();
@@ -229,12 +244,12 @@ f77_int idamax_
 
     /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
        index. Also, if the BLAS integer size differs from the BLIS
-       integer size, that typecast occurs here. */ 
+       integer size, that typecast occurs here. */
     f77_index = bli_index + 1;
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
-
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return f77_index;
 }
 
@@ -243,4 +258,3 @@ INSERT_GENTFUNC_BLAS_CZ( amax, amaxv )
 INSERT_GENTFUNC_BLAS( amax, amaxv )
 #endif
 #endif
-
