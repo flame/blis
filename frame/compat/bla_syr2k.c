@@ -4,8 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2014, The University of Texas at Austin.
+   Copyright (C) 2019-2020, Advanced Micro Devices, Inc.All Rights Reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +58,7 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	uplo_t  blis_uploc; \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \
@@ -125,6 +126,7 @@ void PASTEF77(ch,blasname) \
 	); \
 \
 	/* Finalize BLIS. */ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 }
 
@@ -146,6 +148,7 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	uplo_t  blis_uploc; \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \
@@ -234,6 +237,7 @@ void PASTEF77(ch,blasname) \
 	); \
 \
 	/* Finalize BLIS. */ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 }
 
