@@ -651,6 +651,16 @@ void BLIS_EXPORT_BLAS cblas_zgemm_batch(enum CBLAS_ORDER Order,
                  f77_int *lda_array, const void **B, f77_int *ldb_array,
                  const void *beta_array, void **C, f77_int *ldc_array,
                  f77_int group_count, f77_int *group_size);
+void BLIS_EXPORT_BLAS cblas_cgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
+                 f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_zgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
+                 f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
 
 #ifdef __cplusplus
 }
