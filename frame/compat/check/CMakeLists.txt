@@ -22,6 +22,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_trmm_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trmv_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm_check.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsv_check.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm3m_check.h
 	)
 
 

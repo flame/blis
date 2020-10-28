@@ -201,7 +201,8 @@ blis:  check-env \
        test_her2k_blis.x \
        test_trmm_blis.x \
        test_trsm_blis.x \
-       test_gemm_batch_blis.x
+       test_gemm_batch_blis.x \
+	   test_gemm3m_blis.x
 
 openblas: check-env \
       test_dotv_openblas.x \
@@ -226,7 +227,8 @@ openblas: check-env \
       test_her2k_openblas.x \
       test_trmm_openblas.x \
       test_trsm_openblas.x \
-      test_gemm_batch_openblas.x
+      test_gemm_batch_openblas.x \
+	  test_gemm3m_openblas.x
 
 atlas: check-env \
       test_dotv_atlas.x \
@@ -272,7 +274,8 @@ mkl:  check-env \
       test_her2k_mkl.x \
       test_trmm_mkl.x \
       test_trsm_mkl.x \
-      test_gemm_batch_mkl.x
+      test_gemm_batch_mkl.x \
+	  test_gemm3m_mkl.x
 
 essl: check-env \
       test_dotv_essl.x \

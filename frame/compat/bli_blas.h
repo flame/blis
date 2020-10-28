@@ -197,7 +197,8 @@
 
 // -- Batch Extension prototypes --
 #include "bla_gemm_batch.h"
-
+#include "bla_gemm3m.h"
+#include "bla_gemm3m_check.h"
 
 // -- Fortran-compatible APIs to BLIS functions --
 

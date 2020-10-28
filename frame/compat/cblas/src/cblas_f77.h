@@ -186,6 +186,8 @@
 #define F77_daxpby     daxpby_
 #define F77_caxpby     caxpby_
 #define F77_zaxpby     zaxpby_
+#define F77_cgemm3m    cgemm3m_
+#define F77_zgemm3m    zgemm3m_
 
 #define F77_isamin_sub isaminsub_
 #define F77_idamin_sub idaminsub_
