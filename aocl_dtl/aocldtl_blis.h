@@ -59,6 +59,30 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
                               const char* function_name,
                               int line);
 
+void AOCL_DTL_log_ger_sizes( int8 loglevel,
+                             char dt_type,
+                             const f77_int m,
+                             const f77_int n,
+                             const void* alpha,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const f77_int lda,
+                             const char* filename,
+                             const char* function_name,
+                             int line
+                           );
+
+// Level-1
+void AOCL_DTL_log_copy_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_int n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line
+                              );
+
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)    \
     AOCL_DTL_log_gemm_sizes(loglevel, alpha, a, b, beta, c, __FILE__, __FUNCTION__, __LINE__);
 
@@ -78,6 +102,12 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
   AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
                           __FUNCTION__, __LINE__);
+#define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda) \
+    AOCL_DTL_log_ger_sizes(loglevel, dt_type, m, n, alpha, incx, incy, lda, __FILE__, __FUNCTION__, __LINE__);
+
+// Level-1 Macros
+#define AOCL_DTL_LOG_COPY_INPUTS(loglevel, dt_type, n, incx, incy) \
+    AOCL_DTL_log_copy_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__);
 
 #else
 
@@ -92,6 +122,10 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 #define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)
 
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda)
+
+#define AOCL_DTL_LOG_COPY_INPUTS(loglevel, dt_type, n, incx, incy)
 
 #endif
 

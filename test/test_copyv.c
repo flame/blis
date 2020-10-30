@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -165,6 +165,32 @@ int main(int argc, char** argv)
 					yp, &incy
 				);
 			}
+			else if (bli_is_scomplex(dt))
+			{
+				f77_int nn = bli_obj_length(&x);
+				f77_int incx = bli_obj_vector_inc(&x);
+				scomplex* xp = bli_obj_buffer(&x);
+				f77_int incy = bli_obj_vector_inc(&y);
+				scomplex* yp = bli_obj_buffer(&y);
+
+				ccopy_( &nn,
+					xp, &incx,
+					yp, &incy
+					);
+			}
+			else if(bli_is_dcomplex(dt))
+			{
+				f77_int nn = bli_obj_length(&x);
+				f77_int incx = bli_obj_vector_inc(&x);
+				dcomplex* xp = bli_obj_buffer(&x);
+				f77_int incy = bli_obj_vector_inc(&y);
+				dcomplex* yp = bli_obj_buffer(&y);
+
+				zcopy_( &nn,
+					xp, &incx,
+					yp, &incy
+				      );
+			}
 #endif
 			dtime_save = bli_clock_min_diff(dtime_save, dtime);
 #ifdef BLIS_ACCURACY_TEST
@@ -199,6 +225,7 @@ int main(int argc, char** argv)
 		if (p >= 10000)
 			p_inc = 10000;
 		Gbps = (n * sizeof_dt) / (dtime_save * 1.0e9);
+		if(bli_is_complex(dt)) Gbps *= 2;
 #ifdef BLIS
 		printf("data_copyv_blis\t");
 #else

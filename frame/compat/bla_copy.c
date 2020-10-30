@@ -55,6 +55,9 @@ void PASTEF77(ch,blasname) \
 	inc_t  incx0; \
 	inc_t  incy0; \
 \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, *incx, *incy) \
+\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
@@ -77,6 +80,9 @@ void PASTEF77(ch,blasname) \
 	   NULL  \
 	   ); \
 	   \
+\
+           AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+\
 	   /* Finalize BLIS. */ \
 	   bli_finalize_auto(); \
 }
@@ -97,6 +103,8 @@ void scopy_
 	inc_t  incx0;
 	inc_t  incy0;
 
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy)
 	/* Initialize BLIS. */
 //  bli_init_auto();
 
@@ -156,6 +164,7 @@ void scopy_
 		NULL
 	);
 
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
@@ -173,6 +182,8 @@ void dcopy_
 	inc_t  incx0;
 	inc_t  incy0;
 
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+	AOCL_DTL_LOG_COPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy)
 	/* Initialize BLIS. */
 //  bli_init_auto();
 
@@ -232,6 +243,7 @@ void dcopy_
 		NULL
 	);
 
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
 //    bli_finalize_auto();
 }
