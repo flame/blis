@@ -53,6 +53,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -72,6 +74,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   y, incy, \
 	   cntx  \
 	); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( addv,  BLIS_ADDV_KER )
@@ -90,6 +94,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -108,6 +114,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   index, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( amaxv, BLIS_AMAXV_KER )
@@ -127,6 +134,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -148,6 +157,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   y, incy, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( axpbyv, BLIS_AXPBYV_KER )
@@ -166,6 +176,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -187,6 +199,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   y, incy, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( axpyv,  BLIS_AXPYV_KER )
@@ -207,6 +220,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -228,6 +243,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   rho, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( dotv, BLIS_DOTV_KER )
@@ -249,6 +265,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -272,6 +290,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   rho, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( dotxv, BLIS_DOTXV_KER )
@@ -287,6 +306,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -304,6 +325,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   x, incx, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( invertv, BLIS_INVERTV_KER )
@@ -321,6 +343,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -340,6 +364,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   x, incx, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( scalv, BLIS_SCALV_KER )
@@ -357,6 +382,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -375,6 +402,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   y, incy, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( swapv, BLIS_SWAPV_KER )
@@ -392,6 +420,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -412,6 +442,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	   y, incy, \
 	   cntx  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC( xpbyv, BLIS_XPBYV_KER )

@@ -418,5 +418,65 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 
 }
 
+void AOCL_DTL_log_ger_sizes( int8 loglevel,
+                             char dt_type,
+                             const f77_int m,
+                             const f77_int n,
+                             const void* alpha,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const f77_int lda,
+                             const char* filename,
+                             const char* function_name,
+                             int line
+                          )
+{
+    char buffer[256];
+    double alpha_real, alpha_imag;
 
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+    }
+
+    sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld", dt_type, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda );
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+// Level-1
+
+void AOCL_DTL_log_copy_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_int n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line
+                            )
+{
+    char buffer[256];
+    // {S, D, C, Z} {n, incx, incy}
+    sprintf(buffer, "%c %ld %ld %ld", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
 #endif

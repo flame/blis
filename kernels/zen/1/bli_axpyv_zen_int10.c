@@ -65,6 +65,8 @@ void bli_saxpyv_zen_int10
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
     const dim_t      n_elem_per_reg = 8;
 
     dim_t            i;
@@ -78,7 +80,11 @@ void bli_saxpyv_zen_int10
     __m256           zv[10];
 
     // If the vector dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) ) return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(s,eq0)( *alpha ) )
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+        return;
+    }
 
     // Initialize local pointers.
     x0 = x;
@@ -257,6 +263,7 @@ void bli_saxpyv_zen_int10
             y0 += incy;
         }
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
 // -----------------------------------------------------------------------------
@@ -271,6 +278,8 @@ void bli_daxpyv_zen_int10
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
     const dim_t      n_elem_per_reg = 4;
 
     dim_t            i;
@@ -284,7 +293,11 @@ void bli_daxpyv_zen_int10
     __m256d          zv[10];
 
     // If the vector dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) ) return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(d,eq0)( *alpha ) )
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+        return;
+    }
 
     // Initialize local pointers.
     x0 = x;
@@ -463,6 +476,7 @@ void bli_daxpyv_zen_int10
             y0 += incy;
         }
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
 // -----------------------------------------------------------------------------
@@ -477,6 +491,8 @@ void bli_caxpyv_zen_int5
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
     const dim_t      n_elem_per_reg = 8;
 
     dim_t            i;
@@ -497,7 +513,11 @@ void bli_caxpyv_zen_int5
     conj_t conjx_use = conjx;
 
     // If the vector dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim1( n ) || PASTEMAC(c,eq0)( *alpha ) ) return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(c,eq0)( *alpha ) )
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+        return;
+    }
 
     // Initialize local pointers.
     x0 = (float*)x;
@@ -756,6 +776,7 @@ void bli_caxpyv_zen_int5
         }
 
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
 
 // -----------------------------------------------------------------------------
@@ -770,6 +791,8 @@ void bli_zaxpyv_zen_int5
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4)
+
     const dim_t      n_elem_per_reg = 4;
 
     dim_t            i;
@@ -789,7 +812,11 @@ void bli_zaxpyv_zen_int5
     conj_t conjx_use = conjx;
 
      // If the vector dimension is zero, or if alpha is zero, return early.
-    if ( bli_zero_dim1( n ) || PASTEMAC(z,eq0)( *alpha ) ) return;
+    if ( bli_zero_dim1( n ) || PASTEMAC(z,eq0)( *alpha ) )
+    {
+         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
+         return;
+    }
 
     // Initialize local pointers.
     x0 = (double*)x;
@@ -1057,4 +1084,5 @@ void bli_zaxpyv_zen_int5
             }
         }
     }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
