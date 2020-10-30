@@ -68,6 +68,11 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 #define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)  \
     AOCL_DTL_log_gemmt_sizes(loglevel, alpha, a, b, beta, c,  __FILE__,__FUNCTION__,__LINE__);
 
+#define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )\
+    AOCL_DTL_log_scal_sizes(loglevel, dt_type, alpha, n, incx,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)\
+    AOCL_DTL_log_swap_sizes(loglevel, dt_type, n, incx, incy,  __FILE__,__FUNCTION__,__LINE__);
 
 // Level-2 Macros
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
@@ -81,6 +86,10 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 #define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)
 
 #define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)
+
+#define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )
+
+#define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)
 
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy)
 

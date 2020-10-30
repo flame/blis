@@ -98,6 +98,7 @@ void sscal_
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *alpha, *n, *incx );
     dim_t  n0;
     float* x0;
     inc_t  incx0;
@@ -157,6 +158,7 @@ void dscal_
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SCAL_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *alpha, *n, *incx );
     dim_t  n0;
     double* x0;
     inc_t  incx0;
