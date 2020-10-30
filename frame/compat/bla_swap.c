@@ -49,6 +49,7 @@ void PASTEF77(ch,blasname) \
        ftype*   y, const f77_int* incy  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
@@ -76,6 +77,7 @@ void PASTEF77(ch,blasname) \
       NULL  \
     ); \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 }
@@ -90,6 +92,7 @@ void sswap_
        float*   y, const f77_int* incy
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     dim_t  n0;
     float* x0;
     float* y0;
@@ -154,6 +157,7 @@ void sswap_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 void dswap_
@@ -163,6 +167,7 @@ void dswap_
        double*   y, const f77_int* incy
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     dim_t  n0;
     double* x0;
     double* y0;
@@ -227,6 +232,7 @@ void dswap_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 INSERT_GENTFUNC_BLAS_CZ( swap, swapv )

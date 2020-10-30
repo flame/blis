@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -63,6 +63,7 @@ void PASTEF77(ch,blasname) \
 	inc_t   rs_a, cs_a; \
 	inc_t   rs_c, cs_c; \
 \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
@@ -98,6 +99,7 @@ void PASTEF77(ch,blasname) \
          ) \
 	   ) \
 	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
 \
@@ -125,6 +127,7 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }

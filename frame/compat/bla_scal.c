@@ -49,6 +49,7 @@ void PASTEF772(chx,cha,blasname) \
        ftype_x* x, const f77_int* incx  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
 	dim_t    n0; \
 	ftype_x* x0; \
 	inc_t    incx0; \
@@ -81,6 +82,7 @@ void PASTEF772(chx,cha,blasname) \
 	  NULL  \
 	); \
 \
+  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }
@@ -95,6 +97,7 @@ void sscal_
        float*   x, const f77_int* incx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     dim_t  n0;
     float* x0;
     inc_t  incx0;
@@ -143,6 +146,7 @@ void sscal_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 void dscal_
@@ -152,6 +156,7 @@ void dscal_
        double*   x, const f77_int* incx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
     dim_t  n0;
     double* x0;
     inc_t  incx0;
@@ -201,6 +206,7 @@ void dscal_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 INSERT_GENTFUNCSCAL_BLAS_CZ( scal, scalv )
