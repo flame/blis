@@ -63,6 +63,28 @@ void bli_gemm_check
 	//bli_check_error_code( e_val );
 }
 
+void bli_gemmt_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Check basic properties of the operation.
+
+	bli_gemmt_basic_check( alpha, a, b, beta, c, cntx );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( c );
+	bli_check_error_code( e_val );
+}
+
 void bli_hemm_check
      (
        side_t  side,
@@ -322,6 +344,28 @@ void bli_gemm_basic_check
 	e_val = bli_check_consistent_object_datatypes( c, b );
 	bli_check_error_code( e_val );
 #endif
+}
+
+void bli_gemmt_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform standard checks.
+
+	bli_l3_basic_check( alpha, a, b, beta, c, cntx );
+
+	// Check object dimensions.
+
+	e_val = bli_check_level3_dims( a, b, c );
+	bli_check_error_code( e_val );
 }
 
 void bli_hemm_basic_check

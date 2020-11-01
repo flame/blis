@@ -32,7 +32,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //           uploa  trans, diag,  m     a        lda   x        incx

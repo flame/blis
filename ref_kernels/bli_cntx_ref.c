@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -463,7 +463,8 @@ void GENBARNAME(cntx_init)
 	// operation.
 
 	// Set the gemm slot to the default gemm sup handler.
-	vfuncs[ BLIS_GEMM ] = bli_gemmsup_ref;
+	vfuncs[ BLIS_GEMM ]  = bli_gemmsup_ref;
+	vfuncs[ BLIS_GEMMT ] = bli_gemmtsup_ref;
 
 
 	// -- Set level-3 small/unpacked micro-kernels and preferences -------------

@@ -684,7 +684,7 @@ Notes for interpreting function descriptions:
   * **[Level-2](BLISObjectAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
     * [gemv](BLISObjectAPI.md#gemv), [ger](BLISObjectAPI.md#ger), [hemv](BLISObjectAPI.md#hemv), [her](BLISObjectAPI.md#her), [her2](BLISObjectAPI.md#her2), [symv](BLISObjectAPI.md#symv), [syr](BLISObjectAPI.md#syr), [syr2](BLISObjectAPI.md#syr2), [trmv](BLISObjectAPI.md#trmv), [trsv](BLISObjectAPI.md#trsv)
   * **[Level-3](BLISObjectAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISObjectAPI.md#gemm), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
+    * [gemm](BLISObjectAPI.md#gemm), [gemmt](BLISObjectAPI.md#gemmt), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
   * **[Utility](BLISObjectAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
     * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getijm](BLISObjectAPI.md#getijm), [setijm](BLISObjectAPI.md#setijm)
 
@@ -1676,6 +1676,27 @@ Perform
 where `C` is an _m x n_ matrix, `trans?(A)` is an _m x k_ matrix, and `trans?(B)` is a _k x n_ matrix.
 
 Observed object properties: `trans?(A)`, `trans?(B)`.
+
+---
+
+#### gemmt
+```c
+void bli_gemmt
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)
+```
+where `C` is an _m x m_ matrix, `trans?(A)` is an _m x k_ matrix, and `trans?(B)` is a _k x m_ matrix. This operation is similar to `bli_gemm()` except that it only updates the lower or upper triangle of `C` as specified by `uplo(C)`.
+
+Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
 
 ---
 

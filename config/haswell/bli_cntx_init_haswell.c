@@ -67,6 +67,7 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  // gemmtrsm_l
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
+
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
@@ -90,11 +91,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
 	  10,
-#if 1
+
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-#endif
+
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -106,9 +107,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+
 	  // scalv
 #if 0
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
