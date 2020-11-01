@@ -12,6 +12,8 @@
 
 #if AOCL_DTL_LOG_ENABLE
 
+// Level-3
+
 void AOCL_DTL_log_gemm_sizes(int8 loglevel,
                              obj_t* alpha,
                              obj_t* a,
@@ -34,7 +36,10 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
     guint_t rsc = bli_obj_row_stride( c );
     const num_t dt_exec = bli_obj_dt( c );
     char transa, transb;
-    double alpha_r, alpha_i, beta_r, beta_i;
+    double alpha_r = 0.0;
+    double alpha_i = 0.0;
+    double beta_r = 0.0;
+    double beta_i = 0.0;;
 
     /* The following convention is followed to print trans character
      * BLIS_NO_TRANSPOSE  = 'n';
@@ -444,19 +449,53 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
                               const f77_char transa,
                               const f77_int  m,
                               const f77_int  n,
-                              const double    alpha,
+                              const void*    alpha,
                               const f77_int lda,
                               const f77_int incx,
-                              const double    beta,
+                              const void*    beta,
                               const f77_int incy,
                               const char* filename,
                               const char* function_name,
                               int line)
 {
     char buffer[256];
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(float*)beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+        beta_real = *(double*) beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        beta_real = (float)(((scomplex*)beta)->real);
+        beta_imag = (float)(((scomplex*)beta)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+        beta_real = ((dcomplex*)beta)->real;
+        beta_imag = ((dcomplex*)beta)->imag;
+    }
     // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
-    sprintf(buffer, " %c %c %ld %ld %lf %lu %lu %lf %lu",
-            dt_type, transa, (dim_t)m, (dim_t)n,  alpha, (dim_t)lda,  (dim_t)incx, beta, (dim_t)incy);
+    sprintf(buffer, " %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+            dt_type, transa, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag,
+            (dim_t)lda,  (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -501,6 +540,26 @@ void AOCL_DTL_log_ger_sizes( int8 loglevel,
     }
 
     sprintf(buffer, "%c %ld %ld %lf %lf %ld %ld %ld", dt_type, (dim_t)m, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda );
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+
+void AOCL_DTL_log_dotv_sizes( int8 loglevel,
+                              char dt_type,
+                              char transa,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+
+    // { n, incx, incy}
+    sprintf(buffer, " %c %c %ld %lu %lu", dt_type, transa, (dim_t)n, (dim_t)incx, (dim_t)incy);
+
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 
@@ -558,7 +617,6 @@ void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
-
 
 void AOCL_DTL_log_her2_sizes ( int8 loglevel,
                               char dt_type,

@@ -54,6 +54,8 @@ void PASTEF77(ch,blasname) \
              ftype*    y, const f77_int* incy  \
      ) \
 { \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+    AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *m, *n, (void*)alpha, *lda, *incx, (void*)beta, *incy); \
     trans_t blis_transa; \
     dim_t   m0, n0; \
     dim_t   m_y, n_x; \
@@ -133,6 +135,7 @@ void PASTEF77(ch,blasname) \
       NULL  \
     ); \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 }
@@ -162,7 +165,7 @@ void dgemv_
   inc_t   rs_a, cs_a;
 
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-  AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *transa, *m, *n, *alpha, *lda, *incx, *beta, *incy);
+  AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *transa, *m, *n, (void*)alpha, *lda, *incx, (void*)beta, *incy);
 
   /* Perform BLAS parameter checking. */
   PASTEBLACHK(gemv)
@@ -328,7 +331,7 @@ void sgemv_
   inc_t   rs_a, cs_a;
 
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-  AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *transa, *m, *n, *alpha, *lda, *incx, *beta, *incy);
+  AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *transa, *m, *n, (void*)alpha, *lda, *incx, (void*)beta, *incy);
   /* Perform BLAS parameter checking. */
   PASTEBLACHK(gemv)
     (
@@ -449,7 +452,6 @@ void sgemv_
 
   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
-
 INSERT_GENTFUNC_BLAS_CZ( gemv, gemv )
 #else
 INSERT_GENTFUNC_BLAS( gemv, gemv )

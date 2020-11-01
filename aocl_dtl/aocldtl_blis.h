@@ -66,10 +66,10 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
                               const f77_char transa,
                               const f77_int  m,
                               const f77_int  n,
-                              const double    alpha,
+                              const void*    alpha,
                               const f77_int lda,
                               const f77_int incx,
-                              const double    beta,
+                              const void*    beta,
                               const f77_int incy,
                               const char* filename,
                               const char* function_name,
@@ -161,6 +161,18 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
                               const char* function_name,
                               int line);
 
+void AOCL_DTL_log_dotv_sizes( int8 loglevel,
+                              char dt_type,
+                              char transa,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line
+                              );
+
+// Level-3 Macros
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)    \
     AOCL_DTL_log_gemm_sizes(loglevel, alpha, a, b, beta, c, __FILE__, __FUNCTION__, __LINE__);
 
@@ -214,6 +226,10 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 #define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy) \
     AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
                             __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy) \
+  AOCL_DTL_log_dotv_sizes(loglevel, dt_type, transa, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
+
 #else
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)
@@ -245,6 +261,8 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 #define AOCL_DTL_LOG_AXPBY_INPUTS(loglevel, dt_type, n, alpha, incx, beta, incy)
 
 #define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy)
+
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy)
 
 #endif
 
