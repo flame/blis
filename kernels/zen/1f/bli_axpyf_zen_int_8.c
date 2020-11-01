@@ -4,8 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
    Copyright (C) 2018, The University of Texas at Austin
+   Copyright (C) 2016 - 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are

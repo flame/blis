@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1337,6 +1337,9 @@ get_compiler_version()
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
+	# If compiler is AOCC, first grep for clang and then the version number.
+	elif [ "${cc_vendor}" = "clang" ]; then
+		cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
@@ -3066,6 +3069,7 @@ main()
 	dist_path_esc=$(echo   "${dist_path}"   | sed 's/\//\\\//g')
 	cc_esc=$(echo          "${found_cc}"    | sed 's/\//\\\//g')
 	cxx_esc=$(echo         "${found_cxx}"   | sed 's/\//\\\//g')
+	python_esc=$(echo      "${found_python}"    | sed 's/\//\\\//g')
 	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
 
 	# For RANLIB, if the variable is not set, we use a default value of
@@ -3170,6 +3174,7 @@ main()
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
 		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@PYTHON@/${python_esc}/g" \
 		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
@@ -3269,7 +3274,6 @@ main()
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
 	mkdir -p ${obj_frame_dirpath}
-
 
 	if [ -n "${sandbox_flag}" ]; then
 

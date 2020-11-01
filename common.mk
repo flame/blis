@@ -299,6 +299,10 @@ INCLUDE_DIR        := include
 BLASTEST_DIR       := blastest
 TESTSUITE_DIR      := testsuite
 
+VEND_DIR           := vendor
+VEND_CPP_DIR       := $(VEND_DIR)/cpp
+VEND_TESTCPP_DIR   := $(VEND_DIR)/testcpp
+
 # The filename suffix for reference kernels.
 REFNM              := ref
 
@@ -357,6 +361,10 @@ FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
+
+# Construct paths to some optional C++ template headers contributed by AMD.
+VEND_CPP_PATH      := $(DIST_PATH)/$(VEND_CPP_DIR)
+VEND_TESTCPP_PATH  := $(DIST_PATH)/$(VEND_TESTCPP_DIR)
 
 # Construct paths to the makefile fragments for the four primary directories
 # of source code: the config directory, general framework code, reference

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -67,6 +67,7 @@ void PASTEMAC(opname,imeth) \
 }
 
 GENFRONT( gemm, ind )
+GENFRONT( gemmt, ind )
 GENFRONT( her2k, ind )
 GENFRONT( syr2k, ind )
 

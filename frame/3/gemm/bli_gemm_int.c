@@ -58,15 +58,18 @@ void bli_gemm_int
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
+	if ( bli_obj_has_zero_dim( c ) )
+	{
+		return;
+	}
 
 	// If A or B has a zero dimension, scale C by beta and return early.
 	if ( bli_obj_has_zero_dim( a ) ||
 	     bli_obj_has_zero_dim( b ) )
 	{
-        if ( bli_thread_am_ochief( thread ) )
-		    bli_scalm( beta, c );
-        bli_thread_barrier( thread );
+		if ( bli_thread_am_ochief( thread ) )
+			bli_scalm( beta, c );
+		bli_thread_barrier( thread );
 		return;
 	}
 
@@ -78,9 +81,9 @@ void bli_gemm_int
 		// This should never execute.
 		bli_abort();
 
-        if ( bli_thread_am_ochief( thread ) )
-		    bli_scalm( beta, c );
-        bli_thread_barrier( thread );
+		if ( bli_thread_am_ochief( thread ) )
+			bli_scalm( beta, c );
+		bli_thread_barrier( thread );
 		return;
 	}
 
@@ -93,14 +96,14 @@ void bli_gemm_int
 	// to B.
 	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
 	{
-        bli_obj_scalar_apply_scalar( alpha, &b_local );
+		bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
 	// to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
 	{
-        bli_obj_scalar_apply_scalar( beta, &c_local );
+		bli_obj_scalar_apply_scalar( beta, &c_local );
 	}
 
 	// Create the next node in the thrinfo_t structure.
@@ -129,7 +132,7 @@ void bli_gemm_int
 	  cntx,
 	  rntm,
 	  cntl,
-      thread
+	  thread
 	);
 }
 

@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -918,6 +918,7 @@ typedef enum
 // bli_l3_ind.c to index into arrays.
 //
 	BLIS_GEMM = 0,
+	BLIS_GEMMT,
 	BLIS_HEMM,
 	BLIS_HERK,
 	BLIS_HER2K,
@@ -931,7 +932,7 @@ typedef enum
 	BLIS_NOID
 } opid_t;
 
-#define BLIS_NUM_LEVEL3_OPS 10
+#define BLIS_NUM_LEVEL3_OPS 11
 
 
 // -- Blocksize ID type --

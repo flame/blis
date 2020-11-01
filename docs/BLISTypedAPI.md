@@ -205,7 +205,7 @@ Notes for interpreting function descriptions:
   * **[Level-2](BLISTypedAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
     * [gemv](BLISTypedAPI.md#gemv), [ger](BLISTypedAPI.md#ger), [hemv](BLISTypedAPI.md#hemv), [her](BLISTypedAPI.md#her), [her2](BLISTypedAPI.md#her2), [symv](BLISTypedAPI.md#symv), [syr](BLISTypedAPI.md#syr), [syr2](BLISTypedAPI.md#syr2), [trmv](BLISTypedAPI.md#trmv), [trsv](BLISTypedAPI.md#trsv)
   * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
+    * [gemm](BLISTypedAPI.md#gemm), [gemmt](BLISTypedAPI.md#gemmt), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
   * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
     * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
 
@@ -1207,6 +1207,30 @@ Perform
   C := beta * C + alpha * transa(A) * transb(B)
 ```
 where C is an _m x n_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` is a _k x n_ matrix.
+
+---
+
+#### gemmt
+```c
+void bli_?gemmt
+     (
+       uplo_t  uploc,
+       trans_t transa,
+       trans_t transb,
+       dim_t   m,
+       dim_t   k,
+       ctype*  alpha,
+       ctype*  a, inc_t rsa, inc_t csa,
+       ctype*  b, inc_t rsb, inc_t csb,
+       ctype*  beta,
+       ctype*  c, inc_t rsc, inc_t csc
+     );
+```
+Perform
+```
+  C := beta * C + alpha * transa(A) * transb(B)
+```
+where C is an _m x m_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` is a _k x m_ matrix. This operation is similar to `bli_?gemm()` except that it only updates the lower or upper triangle of `C` as specified by `uploc`.
 
 ---
 
