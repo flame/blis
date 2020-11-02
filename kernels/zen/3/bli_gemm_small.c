@@ -36,8 +36,9 @@
 #include "xmmintrin.h"
 #include "blis.h"
 
-#define AOCL_DTL_TRACE_ENTRY(x) ;
-#define AOCL_DTL_TRACE_EXIT(x)  ;
+#define AOCL_DTL_TRACE_ENTRY(x)      ;
+#define AOCL_DTL_TRACE_EXIT(x)       ;
+#define AOCL_DTL_TRACE_EXIT_ERR(x,y) ;
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
