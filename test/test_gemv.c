@@ -124,7 +124,7 @@ int main( int argc, char** argv )
 
 
 		bli_copym( &y, &y_save );
-	
+
 		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -149,26 +149,151 @@ int main( int argc, char** argv )
 			          &y );
 #else
 
-			f77_char transa = 'N';
-			f77_int  mm     = bli_obj_length( &a );
-			f77_int  nn     = bli_obj_width( &a );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  incx   = bli_obj_vector_inc( &x );
-			f77_int  incy   = bli_obj_vector_inc( &y );
-			double*  alphap = bli_obj_buffer( &alpha );
-			double*  ap     = bli_obj_buffer( &a );
-			double*  xp     = bli_obj_buffer( &x );
-			double*  betap  = bli_obj_buffer( &beta );
-			double*  yp     = bli_obj_buffer( &y );
+#ifdef CBLAS
+            enum CBLAS_ORDER cblas_order;
+            enum CBLAS_TRANSPOSE cblas_transa;
 
-			dgemv_( &transa,
-			        &mm,
-			        &nn,
-			        alphap,
-			        ap, &lda,
-			        xp, &incx,
-			        betap,
-			        yp, &incy );
+            if ( bli_obj_row_stride( &a ) == 1 )
+                    cblas_order = CblasColMajor;
+            else
+                    cblas_order = CblasRowMajor;
+
+            cblas_transa = CblasNoTrans;
+#else
+            f77_char transa = 'N';
+#endif
+
+            if ( bli_is_float( dt ) ){
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                float*  alphap = bli_obj_buffer( &alpha );
+                float*  ap     = bli_obj_buffer( &a );
+                float*  xp     = bli_obj_buffer( &x );
+                float*  betap  = bli_obj_buffer( &beta );
+                float*  yp     = bli_obj_buffer( &y );
+#ifdef CBLAS
+                cblas_sgemv( cblas_order,
+                            cblas_transa,
+                            mm,
+                            nn,
+                            *alphap,
+                            ap, lda,
+                            xp, incx,
+                            *betap,
+                            yp, incy );
+#else
+                sgemv_( &transa,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        xp, &incx,
+                        betap,
+                        yp, &incy );
+#endif
+            }
+            else if ( bli_is_double( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                double*  alphap = bli_obj_buffer( &alpha );
+                double*  ap     = bli_obj_buffer( &a );
+                double*  xp     = bli_obj_buffer( &x );
+                double*  betap  = bli_obj_buffer( &beta );
+                double*  yp     = bli_obj_buffer( &y );
+#ifdef CBLAS
+                cblas_dgemv( cblas_order,
+                            cblas_transa,
+                            mm,
+                            nn,
+                            *alphap,
+                            ap, lda,
+                            xp, incx,
+                            *betap,
+                            yp, incy );
+#else
+                dgemv_( &transa,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        xp, &incx,
+                        betap,
+                        yp, &incy );
+#endif
+            }
+            else if ( bli_is_scomplex( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                scomplex*  alphap = bli_obj_buffer( &alpha );
+                scomplex*  ap     = bli_obj_buffer( &a );
+                scomplex*  xp     = bli_obj_buffer( &x );
+                scomplex*  betap  = bli_obj_buffer( &beta );
+                scomplex*  yp     = bli_obj_buffer( &y );
+#ifdef CBLAS
+                cblas_cgemv( cblas_order,
+                            cblas_transa,
+                            mm,
+                            nn,
+                            alphap,
+                            ap, lda,
+                            xp, incx,
+                            betap,
+                            yp, incy );
+#else
+                cgemv_( &transa,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        xp, &incx,
+                        betap,
+                        yp, &incy );
+#endif
+            }
+            else if ( bli_is_dcomplex( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                dcomplex*  alphap = bli_obj_buffer( &alpha );
+                dcomplex*  ap     = bli_obj_buffer( &a );
+                dcomplex*  xp     = bli_obj_buffer( &x );
+                dcomplex*  betap  = bli_obj_buffer( &beta );
+                dcomplex*  yp     = bli_obj_buffer( &y );
+#ifdef CBLAS
+                cblas_zgemv( cblas_order,
+                            cblas_transa,
+                            mm,
+                            nn,
+                            alphap,
+                            ap, lda,
+                            xp, incx,
+                            betap,
+                            yp, incy );
+#else
+                zgemv_( &transa,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        xp, &incx,
+                        betap,
+                        yp, &incy );
+#endif
+            }
 #endif
 
 #ifdef PRINT

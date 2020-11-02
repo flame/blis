@@ -84,20 +84,20 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	);
 #endif
 
-	// Update the context with optimized level-1f kernels.
-	bli_cntx_set_l1f_kers
-	(
-	  4,
-
-	  // axpyf
-	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
-	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
-
-	  // dotxf
-	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
-	  cntx
-	);
+    // Update the context with optimized level-1f kernels.
+    bli_cntx_set_l1f_kers
+    (
+      6,
+      // axpyf
+      BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
+      BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
+      BLIS_AXPYF_KER,     BLIS_SCOMPLEX, bli_caxpyf_zen_int_5,
+      BLIS_AXPYF_KER,     BLIS_DCOMPLEX, bli_zaxpyf_zen_int_5,
+      // dotxf
+      BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+      BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+      cntx
+    );
 
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
