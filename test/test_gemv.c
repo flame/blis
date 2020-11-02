@@ -161,7 +161,6 @@ int main( int argc, char** argv )
                       &y );
 #else
 
-
 #ifdef CBLAS
             enum CBLAS_ORDER cblas_order;
             enum CBLAS_TRANSPOSE cblas_transa;
