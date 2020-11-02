@@ -64,12 +64,12 @@ int main( int argc, char** argv )
 
     bli_init();
 
-    n_repeats = 1;
+    n_repeats = 3;
 
 #ifndef PRINT
-    p_begin = 10;
-    p_end   = 100;
-    p_inc   = 10;
+    p_begin = 40;
+    p_end   = 4000;
+    p_inc   = 40;
 
     n_input = -1;
 #else
