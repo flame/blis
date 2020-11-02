@@ -106,7 +106,7 @@ int main( int argc, char** argv )
         bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
 
-        // printf("BLIS Library version is : %s\n", bli_info_get_version_str());
+        printf("BLIS Library version is : %s\n", bli_info_get_version_str());
 
 
 
@@ -129,9 +129,9 @@ int main( int argc, char** argv )
             exit(1);
           }
 
-        fprintf(fout, "m\t k\t n\t cs_a\t cs_b\t cs_c\t gflops\t GEMM_Algo\n");
+        fprintf(fout, "m\t k\t n\t cs_a\t cs_b\t cs_c\t gflops\n");
 
-        printf("~~~~~~~~~~_BLAS\t m\t k\t n\t cs_a\t cs_b\t cs_c \t gflops\t GEMM_Algo\n");
+        printf("~~~~~~~~~~_BLAS\t m\t k\t n\t cs_a\t cs_b\t cs_c \t gflops\n");
 
         inc_t cs_a;
         inc_t cs_b;

@@ -1,10 +1,10 @@
 /*===================================================================
  * File Name :  aoclos.c
- * 
+ *
  * Description : Abstraction for os services used by DTL.
  *
  * Copyright (C) 2020, Advanced Micro Devices, Inc
- * 
+ *
  *==================================================================*/
 #include "aocltpdef.h"
 #include "aocldtl.h"
@@ -21,14 +21,14 @@
 
 #if defined(__linux__)
 
-/* 
+/*
     Disable intrumentation for these functions as they will also be
-    called from compiler generated instumation code to trace 
+    called from compiler generated instumation code to trace
     function execution.
 
-    It needs to be part of declration in the C file so can't be 
+    It needs to be part of declration in the C file so can't be
     moved to header file.
-   
+
 */
 
 uint32 AOCL_gettid(void) __attribute__((no_instrument_function));
@@ -37,7 +37,15 @@ uint64 AOCL_getTimestamp(void) __attribute__((no_instrument_function));
 
 uint32 AOCL_gettid(void)
 {
-    return omp_get_thread_num();
+
+#ifdef BLIS_ENABLE_OPENMP
+
+  return omp_get_thread_num();
+
+#else
+  return 0; // will not work for pthread-based parallelization
+
+#endif
 }
 
 pid_t  AOCL_getpid(void)
@@ -52,7 +60,7 @@ uint64 AOCL_getTimestamp(void)
     /* The C11 way */
     if (clock_gettime(CLOCK_REALTIME, &tms))
     {
-        return -1;
+	return -1;
     }
 
     /* seconds, multiplied with 1 million */
@@ -62,7 +70,7 @@ uint64 AOCL_getTimestamp(void)
     /* round up if necessary */
     if (tms.tv_nsec % 1000 >= 500)
     {
-        ++micros;
+	++micros;
     }
     return micros;
 }

@@ -38,7 +38,7 @@
 #endif
 #include "blis.h"
 
-#define PRINT
+//#define PRINT
 
 // #define BLIS   // For blis keep this line and comment CBLAS and BLAS
 #ifdef BLIS_ENABLE_CBLAS
