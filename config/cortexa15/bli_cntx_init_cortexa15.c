@@ -47,17 +47,15 @@ void bli_cntx_init_cortexa15( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  //2,
-	  //BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv7a_int_4x4, FALSE,
-	  //BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv7a_int_4x4, FALSE,
-	  1,
+	  2,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv7a_int_4x4, FALSE,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv7a_int_4x4, FALSE,
 	  cntx
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-#if 0
+#if 1
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     4,     4,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],     4,     4,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   336,   176,    -1,    -1 );
