@@ -53,6 +53,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HER2_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploa), *m, \
+                                (ftype*)alpha, *incx, *incy, *lda) \
     uplo_t  blis_uploa; \
     dim_t   m0; \
     ftype*  x0; \

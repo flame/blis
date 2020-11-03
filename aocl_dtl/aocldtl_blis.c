@@ -460,7 +460,231 @@ void AOCL_DTL_log_ger_sizes( int8 loglevel,
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 
 }
+
+void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void* alpha,
+                              const f77_int lda,
+                              const f77_int incx,
+                              const void* beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    double alpha_real, alpha_imag;
+    double beta_real, beta_imag;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(float*)beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+        beta_real = *(double*)beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        beta_real = (float)(((scomplex*)beta)->real);
+        beta_imag = (float)(((scomplex*)beta)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+        beta_real = ((dcomplex*)beta)->real;
+        beta_imag = ((dcomplex*)beta)->imag;
+    }
+    // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
+    sprintf(buffer, "%c %c %ld %lf %lf %lu %lu %lf %lf %lu",
+            dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
+
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
+
+void AOCL_DTL_log_her2_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void* alpha,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const f77_int lda,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    double alpha_real, alpha_imag;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+    }
+
+    // {S, D, C, Z} {uploa, m, alpha_real, alpha_imag, incx, incy}
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld",
+                    dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
+
 // Level-1
+
+void AOCL_DTL_log_amax_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    // {S, D, C, Z} {n, incx}
+    sprintf(buffer, "%c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+
+void AOCL_DTL_log_asum_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    // {S, D, C, Z} {n, incx}
+    sprintf(buffer, "%c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+
+void AOCL_DTL_log_axpby_sizes ( int8 loglevel,
+                               char dt_type,
+                               const f77_int  n,
+                               const void* alpha,
+                               const f77_int incx,
+                               const void* beta,
+                               const f77_int incy,
+                               const char* filename,
+                               const char* function_name,
+                               int line)
+{
+    char buffer[256];
+    double alpha_real, alpha_imag;
+    double beta_real, beta_imag;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(float*)beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+        beta_real = *(double*)beta;
+        beta_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        beta_real = (float)(((scomplex*)beta)->real);
+        beta_imag = (float)(((scomplex*)beta)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+        beta_real = ((dcomplex*)beta)->real;
+        beta_imag = ((dcomplex*)beta)->imag;
+    }
+
+    // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, beta_real, beta_imag, incy}
+    sprintf(buffer, "%c %ld %lf %lf %ld %lf %lf %ld",
+                    dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx,
+                    beta_real, beta_imag, (dim_t)incy);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+
+}
+
+void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const void* alpha,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line)
+{
+    char buffer[256];
+    double alpha_real, alpha_imag;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+    }
+
+    // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, incy}
+    sprintf(buffer, "%c %ld %lf %lf %ld %ld",
+                    dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
+
+    DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
+}
 
 void AOCL_DTL_log_copy_sizes( int8 loglevel,
                               char dt_type,

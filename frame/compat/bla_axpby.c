@@ -51,6 +51,7 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_AXPBY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, (void*)alpha, *incx, (void*)beta, *incy) \
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
