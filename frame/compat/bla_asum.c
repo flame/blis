@@ -48,6 +48,7 @@ ftype_r PASTEF772(chr,chx,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_ASUM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(chx), *n, *incx) \
     dim_t    n0; \
     ftype_x* x0; \
     inc_t    incx0; \

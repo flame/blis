@@ -59,6 +59,7 @@ void PASTEF77(ch,blasname) \
     /* Initialize BLIS. */ \
     bli_init_auto(); \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *n, (void*)alpha, *incx, *incy) \
     /* Convert/typecast negative values of n to zero. */ \
     bli_convert_blas_dim1( *n, n0 ); \
 \
@@ -95,7 +96,8 @@ void saxpy_
  float*   y, const f77_int* incy
  )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, (float*)alpha, *incx, *incy)
   dim_t  n0;
   float* x0;
   float* y0;
@@ -172,8 +174,8 @@ void daxpy_
   inc_t  incx0;
   inc_t  incy0;
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, (double*)alpha, *incx, *incy)
   /* Initialize BLIS. */
   //    bli_init_auto();
 
@@ -244,7 +246,8 @@ void caxpy_
   inc_t  incx0;
   inc_t  incy0;
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'C', *n, (scomplex*)alpha, *incx, *incy)
 
   /* Initialize BLIS. */
   //    bli_init_auto();
@@ -315,7 +318,8 @@ void zaxpy_
   inc_t  incx0;
   inc_t  incy0;
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_AXPY_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *n, (dcomplex*)alpha, *incx, *incy)
 
   /* Initialize BLIS. */
   //    bli_init_auto();

@@ -49,6 +49,8 @@ f77_int PASTEF772(i,chx,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(chx), *n, *incx) \
+\
     dim_t    n0; \
     ftype_x* x0; \
     inc_t    incx0; \
@@ -105,7 +107,9 @@ f77_int isamax_
        const float* x, const f77_int* incx
      )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx);
+
     dim_t    n0;
     float* x0;
     inc_t    incx0;
@@ -183,7 +187,9 @@ f77_int idamax_
        const double* x, const f77_int* incx
      )
 {
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx);
+
     dim_t    n0;
     double* x0;
     inc_t    incx0;

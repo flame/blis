@@ -107,6 +107,7 @@ void bli_samaxv_zen_int
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
 	float*  minus_one = PASTEMAC(s,m1);
 	dim_t*  zero_i    = PASTEMAC(i,0);
 
@@ -122,6 +123,7 @@ void bli_samaxv_zen_int
 	if ( bli_zero_dim1( n ) )
 	{
 		PASTEMAC(i,copys)( *zero_i, *i_max );
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 		return;
 	}
 
@@ -202,7 +204,7 @@ void bli_samaxv_zen_int
 		max_vec_hi.v    = _mm256_extractf128_ps( max_vec.v, 1 );
 		maxInx_vec_lo.v = _mm256_extractf128_ps( maxInx_vec.v, 0 );
 		maxInx_vec_hi.v = _mm256_extractf128_ps( maxInx_vec.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -210,7 +212,7 @@ void bli_samaxv_zen_int
 
 		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 14 );
 		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 14 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -218,7 +220,7 @@ void bli_samaxv_zen_int
 
 		max_vec_hi.v    = _mm_permute_ps( max_vec_lo.v, 1 );
 		maxInx_vec_hi.v = _mm_permute_ps( maxInx_vec_lo.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( s, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_ps( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -260,6 +262,7 @@ void bli_samaxv_zen_int
 
 	/* Store final index to output variable. */
 	*i_max = i_max_l;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
 
 // -----------------------------------------------------------------------------
@@ -272,6 +275,7 @@ void bli_damaxv_zen_int
        cntx_t* restrict cntx
      )
 {
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 	double* minus_one = PASTEMAC(d,m1);
 	dim_t*  zero_i    = PASTEMAC(i,0);
 
@@ -287,6 +291,7 @@ void bli_damaxv_zen_int
 	if ( bli_zero_dim1( n ) )
 	{
 		PASTEMAC(i,copys)( *zero_i, *i_max );
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 		return;
 	}
 
@@ -367,15 +372,15 @@ void bli_damaxv_zen_int
 		max_vec_hi.v    = _mm256_extractf128_pd( max_vec.v, 1 );
 		maxInx_vec_lo.v = _mm256_extractf128_pd( maxInx_vec.v, 0 );
 		maxInx_vec_hi.v = _mm256_extractf128_pd( maxInx_vec.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
 		maxInx_vec_lo.v = _mm_blendv_pd( maxInx_vec_lo.v, maxInx_vec_hi.v, mask_vec_lo.v );
-		
+
 		max_vec_hi.v    = _mm_permute_pd( max_vec_lo.v, 1 );
 		maxInx_vec_hi.v = _mm_permute_pd( maxInx_vec_lo.v, 1 );
-		
+
 		mask_vec_lo.v = CMP128( d, max_vec_hi.v, max_vec_lo.v, maxInx_vec_hi.v, maxInx_vec_lo.v );
 
 		max_vec_lo.v    = _mm_blendv_pd( max_vec_lo.v, max_vec_hi.v, mask_vec_lo.v );
@@ -416,6 +421,7 @@ void bli_damaxv_zen_int
 
 	/* Store final index to output variable. */
 	*i_max = i_max_l;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
 
 // -----------------------------------------------------------------------------
