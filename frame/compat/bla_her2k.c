@@ -59,6 +59,7 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HER2K_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);\
 	uplo_t  blis_uploc; \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \
@@ -157,6 +158,7 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HER2K_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);\
 	uplo_t  blis_uploc; \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \
