@@ -64,6 +64,7 @@ void PASTEF77(ch,blasname) \
 	inc_t   rs_c, cs_c; \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
@@ -153,6 +154,8 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \
 \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
@@ -188,6 +191,7 @@ void PASTEF77(ch,blasname) \
          ) \
 	   ) \
 	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 		/* Finalize BLIS. */ \
 		bli_finalize_auto(); \
 \
@@ -235,6 +239,7 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }
