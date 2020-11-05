@@ -43,6 +43,22 @@ void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
                              const char* function_name,
                              int line);
 
+void AOCL_DTL_log_hemm_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char side,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const f77_int  n,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void* beta,
+                             const f77_int ldc,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+
 // Level-2 Logging
 
 void AOCL_DTL_log_gemv_sizes( int8 loglevel,
@@ -154,6 +170,10 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 #define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)  \
     AOCL_DTL_log_gemmt_sizes(loglevel, alpha, a, b, beta, c,  __FILE__,__FUNCTION__,__LINE__);
 
+#define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)  \
+    AOCL_DTL_log_hemm_sizes(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc, \
+                            __FILE__, __FUNCTION__, __LINE__);
+
 #define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )\
     AOCL_DTL_log_scal_sizes(loglevel, dt_type, alpha, n, incx,  __FILE__,__FUNCTION__,__LINE__);
 
@@ -164,6 +184,7 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
     AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
                           __FUNCTION__, __LINE__);
+
 #define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda) \
     AOCL_DTL_log_ger_sizes(loglevel, dt_type, m, n, alpha, incx, incy, lda, __FILE__, __FUNCTION__, __LINE__);
 
@@ -200,6 +221,8 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 #define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)
 
 #define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)
+
+#define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)
 
 #define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )
 

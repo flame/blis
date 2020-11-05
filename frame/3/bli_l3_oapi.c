@@ -54,72 +54,72 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
-	bli_init_once(); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
+    BLIS_OAPI_EX_DECLS \
+    AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
-	/* If C has a zero dimension, return early.	*/	\
-	if ( bli_obj_has_zero_dim( c ) ) {\
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
-		return;									 \
-	}\
+    /* If C has a zero dimension, return early.	*/	\
+    if ( bli_obj_has_zero_dim( c ) ) {\
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+        return;									 \
+    }\
 \
-	/* if alpha or A or B has a zero dimension, \
-	   scale C by beta and return early. */ \
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
-		 bli_obj_has_zero_dim( a ) || \
-		 bli_obj_has_zero_dim( b ) ) \
-	{\
-		bli_scalm( beta, c ); \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
-		return;\
-	}\
+    /* if alpha or A or B has a zero dimension, \
+       scale C by beta and return early. */ \
+    if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+         bli_obj_has_zero_dim( a ) || \
+         bli_obj_has_zero_dim( b ) ) \
+    {\
+        bli_scalm( beta, c ); \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+        return;\
+    }\
 \
-	/* If the rntm is non-NULL, it may indicate that we should forgo sup
-	   handling altogether. */ \
-	bool enable_sup = TRUE; \
-	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+    /* If the rntm is non-NULL, it may indicate that we should forgo sup
+       handling altogether. */ \
+    bool enable_sup = TRUE; \
+    if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
 \
-	if ( enable_sup ) \
-	{ \
-		/* Execute the small/unpacked oapi handler. If it finds that the problem
-		   does not fall within the thresholds that define "small", or for some
-		   other reason decides not to use the small/unpacked implementation,
-		   the function returns with BLIS_FAILURE, which causes execution to
-		   proceed towards the conventional implementation. */ \
-		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
-		if ( result == BLIS_SUCCESS ) {\
-				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
-			return;					   \
-		} \
-	} \
+    if ( enable_sup ) \
+    { \
+        /* Execute the small/unpacked oapi handler. If it finds that the problem
+           does not fall within the thresholds that define "small", or for some
+           other reason decides not to use the small/unpacked implementation,
+           the function returns with BLIS_FAILURE, which causes execution to
+           proceed towards the conventional implementation. */ \
+        err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+        if ( result == BLIS_SUCCESS ) {\
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+            return;					   \
+        } \
+    } \
 \
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */ \
-	if ( bli_obj_is_complex( c ) && \
-	     bli_obj_is_complex( a ) && \
-	     bli_obj_is_complex( b ) ) \
-	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if each of the operands have a
+       complex storage datatype. NOTE: Allowing precisions to vary while
+       using 1m, which is what we do here, is unique to gemm; other level-3
+       operations use 1m only if all storage datatypes are equal (and they
+       ignore the computation precision). If any operands are real, skip the
+       induced method chooser function and proceed directly with native
+       execution. */ \
+    if ( bli_obj_is_complex( c ) && \
+         bli_obj_is_complex( a ) && \
+         bli_obj_is_complex( b ) ) \
+    { \
+        /* Invoke the operation's "ind" function--its induced method front-end.
+           For complex problems, it calls the highest priority induced method
+           that is available (ie: implemented and enabled), and if none are
+           enabled, it calls native execution. (For real problems, it calls
+           the operation's native execution interface.) */ \
+        PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
  \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 GENFRONT( gemm )
@@ -137,69 +137,69 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
-	bli_init_once(); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
-	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
+    BLIS_OAPI_EX_DECLS \
+    AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
-	/* If C has a zero dimension, return early.	*/	\
-	if ( bli_obj_has_zero_dim( c ) ) {\
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
-		return;									 \
-	}\
+    /* If C has a zero dimension, return early.	*/	\
+    if ( bli_obj_has_zero_dim( c ) ) {\
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+        return;									 \
+    }\
 \
-	/* if alpha or A or B has a zero dimension, \
-	   scale C by beta and return early. */ \
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
-		 bli_obj_has_zero_dim( a ) || \
-		 bli_obj_has_zero_dim( b ) ) \
-	{\
-		bli_scalm( beta, c ); \
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
-		return;\
-	}\
+    /* if alpha or A or B has a zero dimension, \
+       scale C by beta and return early. */ \
+    if ( bli_obj_equals( alpha, &BLIS_ZERO ) || \
+         bli_obj_has_zero_dim( a ) || \
+         bli_obj_has_zero_dim( b ) ) \
+    {\
+        bli_scalm( beta, c ); \
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)	\
+        return;\
+    }\
 \
-	/* If the rntm is non-NULL, it may indicate that we should forgo sup
-	   handling altogether. */ \
-	bool enable_sup = TRUE; \
-	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
+    /* If the rntm is non-NULL, it may indicate that we should forgo sup
+       handling altogether. */ \
+    bool enable_sup = TRUE; \
+    if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm ); \
 \
-	if ( enable_sup ) \
-	{ \
-		/* Execute the small/unpacked oapi handler. If it finds that the problem
-		   does not fall within the thresholds that define "small", or for some
-		   other reason decides not to use the small/unpacked implementation,
-		   the function returns with BLIS_FAILURE, which causes execution to
-		   proceed towards the conventional implementation. */ \
-		err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
-		if ( result == BLIS_SUCCESS ) {\
-				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
-			return;					   \
-		} \
-	} \
+    if ( enable_sup ) \
+    { \
+        /* Execute the small/unpacked oapi handler. If it finds that the problem
+           does not fall within the thresholds that define "small", or for some
+           other reason decides not to use the small/unpacked implementation,
+           the function returns with BLIS_FAILURE, which causes execution to
+           proceed towards the conventional implementation. */ \
+        err_t result = PASTEMAC(opname,sup)( alpha, a, b, beta, c, cntx, rntm ); \
+        if ( result == BLIS_SUCCESS ) {\
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+            return;					   \
+        } \
+    } \
 \
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */ \
-	if ( bli_obj_is_complex( c ) && \
-	     bli_obj_is_complex( a ) && \
-	     bli_obj_is_complex( b ) ) \
-	{ \
-		/* GEMMT Todo: Currently we support only native implemenation 
-		 for complex datatypes.*/ \
-		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if each of the operands have a
+       complex storage datatype. NOTE: Allowing precisions to vary while
+       using 1m, which is what we do here, is unique to gemm; other level-3
+       operations use 1m only if all storage datatypes are equal (and they
+       ignore the computation precision). If any operands are real, skip the
+       induced method chooser function and proceed directly with native
+       execution. */ \
+    if ( bli_obj_is_complex( c ) && \
+         bli_obj_is_complex( a ) && \
+         bli_obj_is_complex( b ) ) \
+    { \
+        /* GEMMT Todo: Currently we support only native implemenation
+         for complex datatypes.*/ \
+        PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
  \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 GENFRONT( gemmt )
 
@@ -216,32 +216,33 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	bli_init_once(); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
+    BLIS_OAPI_EX_DECLS \
 \
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */ \
-	if ( bli_obj_is_complex( c ) && \
-	     bli_obj_is_complex( a ) && \
-	     bli_obj_is_complex( b ) ) \
-	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if each of the operands have a
+       complex storage datatype. NOTE: Allowing precisions to vary while
+       using 1m, which is what we do here, is unique to gemm; other level-3
+       operations use 1m only if all storage datatypes are equal (and they
+       ignore the computation precision). If any operands are real, skip the
+       induced method chooser function and proceed directly with native
+       execution. */ \
+    if ( bli_obj_is_complex( c ) && \
+         bli_obj_is_complex( a ) && \
+         bli_obj_is_complex( b ) ) \
+    { \
+        /* Invoke the operation's "ind" function--its induced method front-end.
+           For complex problems, it calls the highest priority induced method
+           that is available (ie: implemented and enabled), and if none are
+           enabled, it calls native execution. (For real problems, it calls
+           the operation's native execution interface.) */ \
+        PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( alpha, a, b, beta, c, cntx, rntm ); \
+    } \
 }
 
 GENFRONT( her2k )
@@ -262,29 +263,31 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	bli_init_once(); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
+    BLIS_OAPI_EX_DECLS \
 \
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
-	     bli_obj_dt( b ) == bli_obj_dt( c ) && \
-	     bli_obj_is_complex( c ) ) \
-	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( side, alpha, a, b, beta, c, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if all operands have the same
+       (complex) datatype. If any datatypes differ, skip the induced method
+       chooser function and proceed directly with native execution, which is
+       where mixed datatype support will be implemented (if at all). */ \
+    if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+         bli_obj_dt( b ) == bli_obj_dt( c ) && \
+         bli_obj_is_complex( c ) ) \
+    { \
+        /* Invoke the operation's "ind" function--its induced method front-end.
+           For complex problems, it calls the highest priority induced method
+           that is available (ie: implemented and enabled), and if none are
+           enabled, it calls native execution. (For real problems, it calls
+           the operation's native execution interface.) */ \
+        PASTEMAC(opname,ind)( side, alpha, a, b, beta, c, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( side, alpha, a, b, beta, c, cntx, rntm ); \
+    } \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)\
 }
 
 GENFRONT( hemm )
@@ -304,28 +307,28 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
-	bli_init_once(); \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
+    BLIS_OAPI_EX_DECLS \
 \
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
-	     bli_obj_is_complex( c ) ) \
-	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( alpha, a, beta, c, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if all operands have the same
+       (complex) datatype. If any datatypes differ, skip the induced method
+       chooser function and proceed directly with native execution, which is
+       where mixed datatype support will be implemented (if at all). */ \
+    if ( bli_obj_dt( a ) == bli_obj_dt( c ) && \
+         bli_obj_is_complex( c ) ) \
+    { \
+        /* Invoke the operation's "ind" function--its induced method front-end.
+           For complex problems, it calls the highest priority induced method
+           that is available (ie: implemented and enabled), and if none are
+           enabled, it calls native execution. (For real problems, it calls
+           the operation's native execution interface.) */ \
+        PASTEMAC(opname,ind)( alpha, a, beta, c, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( alpha, a, beta, c, cntx, rntm ); \
+    } \
 }
 
 GENFRONT( herk )
@@ -345,29 +348,29 @@ void PASTEMAC(opname,EX_SUF) \
      ) \
 { \
         AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
-	bli_init_once(); \
+    bli_init_once(); \
 \
-	BLIS_OAPI_EX_DECLS \
-	AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, side, alpha, a, b) \
+    BLIS_OAPI_EX_DECLS \
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, side, alpha, a, b) \
 \
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */ \
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) && \
-	     bli_obj_is_complex( b ) ) \
-	{ \
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */ \
-		PASTEMAC(opname,ind)( side, alpha, a, b, cntx, rntm ); \
-	} \
-	else \
-	{ \
-		PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
-	} \
+    /* Only proceed with an induced method if all operands have the same
+       (complex) datatype. If any datatypes differ, skip the induced method
+       chooser function and proceed directly with native execution, which is
+       where mixed datatype support will be implemented (if at all). */ \
+    if ( bli_obj_dt( a ) == bli_obj_dt( b ) && \
+         bli_obj_is_complex( b ) ) \
+    { \
+        /* Invoke the operation's "ind" function--its induced method front-end.
+           For complex problems, it calls the highest priority induced method
+           that is available (ie: implemented and enabled), and if none are
+           enabled, it calls native execution. (For real problems, it calls
+           the operation's native execution interface.) */ \
+        PASTEMAC(opname,ind)( side, alpha, a, b, cntx, rntm ); \
+    } \
+    else \
+    { \
+        PASTEMAC(opname,nat)( side, alpha, a, b, cntx, rntm ); \
+    } \
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);	\
 }
 
