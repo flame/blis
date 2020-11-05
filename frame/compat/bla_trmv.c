@@ -53,6 +53,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_TRMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploa), \
+			*MKSTR(transa), *MKSTR(diaga), *m, *lda, *incx) \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
 	diag_t  blis_diaga; \

@@ -59,6 +59,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_TRMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), \
+			*MKSTR(uploa), *MKSTR(transa), *MKSTR(diaga), *m, *n, *alpha, *lda, *ldb) \
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
@@ -141,6 +143,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_TRMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa),\
+		       	*MKSTR(transa), *MKSTR(diaga), *m, *n, (void*)alpha, *lda, *ldb) \
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
