@@ -59,6 +59,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa), *m, \
+                            *n, (ftype*)alpha, *lda, *ldb, (ftype*)beta, *ldc) \
     side_t  blis_side; \
     uplo_t  blis_uploa; \
     dim_t   m0, n0; \
@@ -141,6 +143,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa), *m, \
+                            *n, (ftype*)alpha, *lda, *ldb, (ftype*)beta, *ldc) \
     side_t  blis_side; \
     uplo_t  blis_uploa; \
     dim_t   m0, n0; \
