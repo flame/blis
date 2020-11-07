@@ -1,14 +1,50 @@
-function r_val = plot_panel_4x5( cfreq, ...
-                                 dflopspercycle, ...
-                                 nth, ...
-                                 thr_str, ...
-                                 dirpath, ...
-                                 arch_str, ...
-                                 vend_str, ...
-                                 with_eigen )
+function r_val = plot_panel_4x5 ...
+     ( ...
+       cfreq, ...
+       dflopspercycle, ...
+       nth, ...
+       thr_str, ...
+       dirpath, ...
+       arch_str, ...
+       vend_str, ...
+       with_eigen ...
+     )
 
-%cfreq = 1.8;
-%dflopspercycle = 32;
+impl = 'octave';
+%impl = 'matlab';
+
+%sp = 'default';
+subp = 'tight';
+
+if strcmp( subp, 'default' )
+	position  = [100 100 2000 1500];
+	papersize = [14.2 19.0];
+	leg_pos_st = [3.40 8.70 1.9 1.0 ]; % (0,2br)
+	leg_pos_mt = [13.08 13.09 1.9 1.0 ]; % (0,3tr)
+	sp_margins = [ 0.070 0.049 ];
+else
+	position  = [100 100 1864 1540];
+	papersize = [15.6 19.4];
+	leg_pos_st = [1.15 8.70 2.1 1.2 ]; % (dgemm)
+	leg_pos_mt = [12.20 13.60 2.1 1.2 ]; % (strmm)
+	sp_margins = [ 0.068 0.051 ];
+end
+
+%fig = figure('Position', [100, 100, 2000, 1500]);
+fig = figure('Position', position);
+orient( fig, 'portrait' );
+set(gcf,'PaperUnits', 'inches');
+if strcmp( impl, 'octave' )
+	%set(gcf,'PaperSize', [14.2 19.0]);
+	set(gcf,'PaperSize', papersize);
+	%set(gcf,'PaperPositionMode','auto');
+	set(gcf,'PaperPositionMode','auto');
+else % impl == 'matlab'
+	set(gcf,'PaperSize', [13 20.0]);
+	set(gcf,'PaperPosition', [0 0 13 20.0]);
+	set(gcf,'PaperPositionMode','manual');
+end
+set(gcf,'PaperOrientation','landscape');
 
 % Create filename "templates" for the files that contain the performance
 % results.
@@ -33,20 +69,6 @@ ops( 5, : ) = 'trsm';
 % and datatypes.
 opnames = gen_opnames( ops, dts );
 n_opnames = size( opnames, 1 );
-
-fig = figure('Position', [100, 100, 2000, 1500]);
-orient( fig, 'portrait' );
-set(gcf,'PaperUnits', 'inches');
-if 1 == 1 % matlab
-	set(gcf,'PaperSize', [11 15.0]);
-	set(gcf,'PaperPosition', [0 0 11 15.0]);
-	set(gcf,'PaperPositionMode','manual');
-else % octave 4.x
-	set(gcf,'PaperSize', [15 19.0]);
-	set(gcf,'PaperPositionMode','auto');
-end
-set(gcf,'PaperOrientation','landscape');
-
 
 % Iterate over the list of datatype-specific operation names.
 for opi = 1:n_opnames
@@ -108,7 +130,9 @@ for opi = 1:n_opnames
 	              with_eigen, ...
 	              cfreq, ...
 	              dflopspercycle, ...
-	              opi );
+	              opi, ...
+	              leg_pos_st, leg_pos_mt, ...
+	              sp_margins );
 
 end
 
@@ -117,7 +141,9 @@ end
 outfile = sprintf( 'l3_perf_%s_nt%d.pdf', arch_str, nth );
 
 % Output the graph to pdf format.
-%print(gcf, 'gemm_md','-fillpage','-dpdf');
-print(gcf, outfile,'-bestfit','-dpdf');
-
+if strcmp( impl, 'octave' )
+	print( gcf, outfile );
+else
+	print( gcf, outfile, '-bestfit', '-dpdf' );
 end
+

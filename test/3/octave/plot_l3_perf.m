@@ -8,12 +8,18 @@ function r_val = plot_l3_perf( opname, ...
                                with_eigen, ...
                                cfreq, ...
                                dfps, ...
-                               theid )
+                               theid, ...
+                               leg_pos_st, leg_pos_mt, ...
+                               sp_margins )
 
-if 1
-ax1 = subplot( rows, cols, theid );
-hold( ax1, 'on' );
-end
+% Define the column in which the performance rates are found.
+flopscol = size( data_blis, 2 );
+
+% Define which plot id will have the legend.
+% NOTE: We can draw the legend on any graph as long as it has already been
+% rendered. Since the coordinates are global, we can simply always wait until
+% the final graph to draw the legend.
+legend_plot_id = cols*rows;
 
 % Set line properties.
 color_blis = 'k'; lines_blis = '-';  markr_blis = '';
@@ -56,10 +62,6 @@ eige_legend = sprintf( 'Eigen' );
 %vend_legend  = sprintf( 'ARMPL' );
 vend_legend = vend_str;
 
-% Determine the final dimension.
-%n_points = size( data_blis, 1 );
-%x_end = data_blis( n_points, 1 );
-
 % Set axes range values.
 y_scale = 1.00;
 x_begin = 0;
@@ -68,24 +70,29 @@ y_begin = 0;
 y_end   = max_perf_core * y_scale;
 
 % Set axes names.
-xaxisname = '     m = n = k';
 if nth == 1
 	yaxisname = 'GFLOPS';
 else
 	yaxisname = 'GFLOPS/core';
 end
 
-
-%flopscol = 4;
-flopscol = size( data_blis, 2 );
+% Set the marker size, font size, and other items.
 msize = 5;
-if 1
-fontsize = 13;
+if 0
+	xaxisname = '      m = n = k';
+	fontsize = 12;
 else
-fontsize = 16;
+	xaxisname = 'm = n = k';
+	fontsize = 20;
 end
-linesize = 0.5;
+linesize = 0.8;
 legend_loc = 'southeast';
+
+%ax1 = subplot( rows, cols, theid );
+ax1 = subplot_tight( rows, cols, theid, sp_margins );
+
+% Hold the axes.
+hold( ax1, 'on' );
 
 % --------------------------------------------------------------------
 
@@ -133,7 +140,8 @@ end
 
 if rows == 4 && cols == 5
 
-	if nth == 1 && theid == 3
+	if nth == 1 && theid == legend_plot_id
+
 		if with_eigen == 1
 			leg = legend( [ blis_ln open_ln eige_ln vend_ln ], ...
 			              blis_legend, open_legend, eige_legend, vend_legend, ...
@@ -143,10 +151,12 @@ if rows == 4 && cols == 5
 			              blis_legend, open_legend,              vend_legend, ...
 			              'Location', legend_loc );
 		end
-		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize-3 );
-		set( leg,'Position',[11.20 12.81 0.7 0.3 ] ); % (0,2br)
-		%set( leg,'Position',[ 4.20 12.81 0.7 0.3 ] ); % (0,0br)
-	elseif nth > 1 && theid == 4
+		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize );
+		%set( leg,'Position',[3.40 8.70 1.9 1.0 ] ); % (0,2br)
+		set( leg,'Position',leg_pos_st );
+
+	elseif nth > 1 && theid == legend_plot_id
+
 		if with_eigen == 1
 			leg = legend( [ blis_ln open_ln eige_ln vend_ln ], ...
 			              blis_legend, open_legend, eige_legend, vend_legend, ...
@@ -156,20 +166,13 @@ if rows == 4 && cols == 5
 			              blis_legend, open_legend,              vend_legend, ...
 			              'Location', legend_loc );
 		end
-		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize-3 );
-		%set( leg,'Position',[7.70 12.81 0.7 0.3 ] ); % (0,1br)
-		%set( leg,'Position',[11.20 12.81 0.7 0.3 ] ); % (0,2br)
-		set( leg,'Position',[10.47 14.17 0.7 0.3 ] ); % (0,2tl)
+		set( leg,'Box','off','Color','none','Units','inches','FontSize',fontsize );
+		%set( leg,'Position',[16.51 9.70 1.9 1.0 ] ); % (1,4tr)
+		%set( leg,'Position',[13.08 9.70 1.9 1.0 ] ); % (1,3tr)
+		%set( leg,'Position',[13.08 13.09 1.9 1.0 ] ); % (0,3tr)
+		set( leg,'Position',leg_pos_mt );
 	end
 end
-		%set( leg,'Position',[ 4.20 12.75 0.7 0.3 ] ); % (0,0br)
-		%set( leg,'Position',[ 7.70 12.75 0.7 0.3 ] ); % (0,1br)
-		%set( leg,'Position',[10.47 14.28 0.7 0.3 ] ); % (0,2tl)
-		%set( leg,'Position',[11.20 12.75 0.7 0.3 ] ); % (0,2br)
-		%set( leg,'Position',[13.95 14.28 0.7 0.3 ] ); % (0,3tl)
-		%set( leg,'Position',[14.70 12.75 0.7 0.3 ] ); % (0,3br)
-		%set( leg,'Position',[17.45 14.28 0.7 0.3 ] ); % (0,4tl)
-		%set( leg,'Position',[18.22 12.75 0.7 0.3 ] ); % (0,4br)
 
 set( ax1,'FontSize',fontsize );
 set( ax1,'TitleFontSizeMultiplier',1.0 ); % default is 1.1.
@@ -182,23 +185,18 @@ tpos = get( titl, 'Position' ); % default is to align across whole figure, not b
 %tpos(1) = tpos(1) + 100;
 tpos(1) = tpos(1) + 40;
 set( titl, 'Position', tpos ); % here we nudge it back to centered with box.
+set( titl, 'FontSize', fontsize );
 
 if theid > (rows-1)*cols
-xlab = xlabel( ax1,xaxisname );
-%tpos = get( xlab, 'Position' )
-%tpos(2) = tpos(2) + 10;
-%set( xlab, 'Position', tpos );
+	%tpos = get( xlab, 'Position' )
+	%tpos(2) = tpos(2) + 10;
+	%set( xlab, 'Position', tpos );
+	xlab = xlabel( ax1,xaxisname );
 end
 
 if mod(theid-1,cols) == 0
-ylab = ylabel( ax1,yaxisname );
+	ylab = ylabel( ax1,yaxisname );
 end
-
-%export_fig( filename, colorflag, '-pdf', '-m2', '-painters', '-transparent' );
-%saveas( fig, filename_png );
-
-%hold( ax1, 'off' );
 
 r_val = 0;
 
-end

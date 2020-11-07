@@ -4,31 +4,48 @@
 exec_root="test"
 out_root="output"
 
-sys="blis"
+#sys="blis"
 #sys="lonestar5"
 #sys="ul252"
 #sys="ul264"
+sys="ul2128"
 
 if [ ${sys} = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
+
+	numactl=""
 	nt=4
 
 elif [ ${sys} = "lonestar5" ]; then
 
 	export GOMP_CPU_AFFINITY="0-23"
+
+	numactl=""
 	nt=12
 
 elif [ ${sys} = "ul252" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-51"
+
+	numactl="numactl --interleave=all"
 	nt=26
 
 elif [ ${sys} = "ul264" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-63"
+
+	numactl="numactl --interleave=all"
+	nt=32
+
+elif [ ${sys} = "ul2128" ]; then
+
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
+	export GOMP_CPU_AFFINITY="0-127"
+
+	numactl="numactl --interleave=all"
 	nt=32
 
 fi
@@ -94,7 +111,7 @@ pcombos="uu"
 impls="vendor blissup blisconv openblas eigen blasfeo libxsmm"
 #impls="vendor blissup blisconv openblas eigen"
 #impls="vendor"
-impls="blissup"
+#impls="blissup"
 #impls="blisconv"
 #impls="openblas"
 #impls="eigen"
@@ -310,10 +327,10 @@ for th in ${threads}; do
 												# Construct the name of the output file.
 												out_file="${out_root}_${th}_${dt}${op}_${tr}_${st}_${shstr}_${ldstr}_${packstr}_${im}.m"
 
-												echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
+												echo "Running (nt = ${nt_use}) ${numactl} ./${exec_name} > ${out_file}"
 
 												# Run executable.
-												./${exec_name} > ${out_file}
+												${numactl} ./${exec_name} > ${out_file}
 
 												sleep ${delay}
 

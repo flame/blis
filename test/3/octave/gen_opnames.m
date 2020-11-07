@@ -20,4 +20,3 @@ end
 
 r_val = opnames;
 
-end

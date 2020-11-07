@@ -69,7 +69,7 @@ cultivate its use within the community.
 The BLIS framework is primarily developed and maintained by individuals in the
 [Science of High-Performance Computing](http://shpc.ices.utexas.edu/)
 (SHPC) group in the
-[Institute for Computational Engineering and Sciences](https://www.ices.utexas.edu/)
+[Oden Institute for Computational Engineering and Sciences](https://www.oden.utexas.edu/)
 at [The University of Texas at Austin](https://www.utexas.edu/).
 Please visit the [SHPC](http://shpc.ices.utexas.edu/) website for more
 information about our research group, such as a list of
