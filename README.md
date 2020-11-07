@@ -93,6 +93,14 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 What's New
 ----------
 
+ * **Multithreaded small/skinny matrix support for sgemm now available!** Thanks to
+funding and hardware support from Oracle, we have now accelerated `gemm` for
+single-precision real matrix problems where one or two dimensions is exceedingly
+small. This work is similar to the `gemm` optimization announced last year.
+For now, we have only gathered performance results on an AMD Epyc Zen2 system, but
+we hope to publish additional graphs for other architectures in the future. You may
+find these Zen2 graphs via the [PerformanceSmall](docs/PerformanceSmall.md) document.
+
  * **BLIS awarded SIAM Activity Group on Supercomputing Best Paper Prize for 2020!**
 We are thrilled to announce that the paper that we internally refer to as the
 second BLIS paper,
