@@ -73,6 +73,21 @@ void AOCL_DTL_log_herk_sizes( int8 loglevel,
                               const char* function_name,
                               int line);
 
+void AOCL_DTL_log_her2k_sizes(int8 loglevel,
+                              char dt_type,
+                              const f77_char uploc,
+                              const f77_char transa,
+                              const f77_int  m,
+                              const f77_int  k,
+                              const void*    alpha,
+                              const f77_int lda,
+                              const f77_int ldb,
+                              const void*    beta,
+                              const f77_int ldc,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
 void AOCL_DTL_log_symm_sizes( int8 loglevel,
                               char dt_type,
                               const f77_char side,
