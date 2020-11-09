@@ -180,16 +180,20 @@ NRTS := -DN_REPEAT=1000
 all: blis openblas mkl
 
 blis: \
-       bench_gemm_blis.x
+       bench_gemm_blis.x \
+       bench_trsm_blis.x
 
 openblas: \
-      bench_gemm_openblas.x
+      bench_gemm_openblas.x \
+      bench_trsm_openblas.x
 
 atlas: \
-      bench_gemm_atlas.x
+      bench_gemm_atlas.x \
+      bench_trsm_atlas.x
 
 mkl:  \
-      bench_gemm_mkl.x
+      bench_gemm_mkl.x \
+      bench_trsm_mkl.x
 
 
 # --Object file rules --
