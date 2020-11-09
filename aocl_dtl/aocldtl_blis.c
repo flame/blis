@@ -377,8 +377,10 @@ void AOCL_DTL_log_hemm_sizes(int8 loglevel,
                              int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
-    double beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 'c' || dt_type == 'C' )
     {
@@ -397,7 +399,7 @@ void AOCL_DTL_log_hemm_sizes(int8 loglevel,
 
     // {C, Z} { side, uploa, m, n, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
 
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
             (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
@@ -420,23 +422,26 @@ void AOCL_DTL_log_herk_sizes( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag, beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
     if(dt_type == 'c' || dt_type == 'C' )
     {
-        alpha_real = (float)(((scomplex*)alpha)->real);
-        alpha_imag = (float)(((scomplex*)alpha)->imag);
-        beta_real = (float)(((scomplex*)beta)->real);
-        beta_imag = (float)(((scomplex*)beta)->imag);
+        alpha_real = (double)(((scomplex*)alpha)->real);
+        alpha_imag = (double)(((scomplex*)alpha)->imag);
+        beta_real = (double)(((scomplex*)beta)->real);
+        beta_imag = (double)(((scomplex*)beta)->imag);
     }
     else if(dt_type == 'z' || dt_type == 'Z' )
     {
-        alpha_real = ((dcomplex*)alpha)->real;
-        alpha_imag = ((dcomplex*)alpha)->imag;
-        beta_real = ((dcomplex*)beta)->real;
-        beta_imag = ((dcomplex*)beta)->imag;
+        alpha_real = (double)((dcomplex*)alpha)->real;
+        alpha_imag = (double)((dcomplex*)alpha)->imag;
+        beta_real = (double)((dcomplex*)beta)->real;
+        beta_imag = (double)((dcomplex*)beta)->imag;
     }
     // {C, Z} {uploc, transa, m, k, alpha_real, alpha_imag, lda, beta_real, beta_imag, ldc}
-    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %lf %lf %ld",
             dt_type, uploc, transa, (dim_t)m, (dim_t)k,  alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -459,23 +464,26 @@ void AOCL_DTL_log_her2k_sizes(int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag, beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
     if(dt_type == 'c' || dt_type == 'C' )
     {
-        alpha_real = (float)(((scomplex*)alpha)->real);
-        alpha_imag = (float)(((scomplex*)alpha)->imag);
-        beta_real = (float)(((scomplex*)beta)->real);
-        beta_imag = (float)(((scomplex*)beta)->imag);
+        alpha_real = (double)(((scomplex*)alpha)->real);
+        alpha_imag = (double)(((scomplex*)alpha)->imag);
+        beta_real = (double)(((scomplex*)beta)->real);
+        beta_imag = (double)(((scomplex*)beta)->imag);
     }
     else if(dt_type == 'z' || dt_type == 'Z' )
     {
-        alpha_real = ((dcomplex*)alpha)->real;
-        alpha_imag = ((dcomplex*)alpha)->imag;
-        beta_real = ((dcomplex*)beta)->real;
-        beta_imag = ((dcomplex*)beta)->imag;
+        alpha_real = (double)((dcomplex*)alpha)->real;
+        alpha_imag = (double)((dcomplex*)alpha)->imag;
+        beta_real = (double)((dcomplex*)beta)->real;
+        beta_imag = (double)((dcomplex*)beta)->imag;
     }
     // {C, Z} { uploc, transa, m, k, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, uploc, transa, (dim_t)m, (dim_t)k,  alpha_real, alpha_imag, (dim_t)lda,  (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -498,7 +506,10 @@ void AOCL_DTL_log_symm_sizes( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag, beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -530,7 +541,7 @@ void AOCL_DTL_log_symm_sizes( int8 loglevel,
     }
 
     // {S, D, C, Z} { side, uploa, m, n, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, side, uploa, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag, (dim_t)lda,  (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -552,7 +563,8 @@ void AOCL_DTL_log_symv_sizes( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_d, beta_d;
+    double alpha_d = 0.0;
+    double beta_d = 0.0;
     if(dt_type == 's' || dt_type == 'S' )
     {
         alpha_d = *(float*)alpha;
@@ -565,7 +577,7 @@ void AOCL_DTL_log_symv_sizes( int8 loglevel,
     }
 
     // {S, D} { uploa, m, alpha_d, lda, incx, beta_d, incy}
-    sprintf(buffer, " %c %c %ld %lf %lu %lu %lf %lu",
+    sprintf(buffer, " %c %c %ld %lf %ld %ld %lf %ld",
             dt_type, uploa, (dim_t)m, alpha_d, (dim_t)lda,  (dim_t)incx, beta_d, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -621,7 +633,7 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
         beta_imag = ((dcomplex*)beta)->imag;
     }
     // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
-    sprintf(buffer, " %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, transa, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag,
             (dim_t)lda,  (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
@@ -644,7 +656,8 @@ void AOCL_DTL_log_ger_sizes( int8 loglevel,
                           )
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -685,19 +698,20 @@ void AOCL_DTL_log_her_sizes( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
     if(dt_type == 'c' || dt_type == 'C' )
     {
-        alpha_real = (float)(((scomplex*)alpha)->real);
-        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        alpha_real = (double)(((scomplex*)alpha)->real);
+        alpha_imag = (double)(((scomplex*)alpha)->imag);
     }
     else if(dt_type == 'z' || dt_type == 'Z' )
     {
-        alpha_real = ((dcomplex*)alpha)->real;
-        alpha_imag = ((dcomplex*)alpha)->imag;
+        alpha_real = (double)((dcomplex*)alpha)->real;
+        alpha_imag = (double)((dcomplex*)alpha)->imag;
     }
     // {C, Z} {uploa, m alpha_real, alpha_imag incx lda}
-    sprintf(buffer, " %c %c %ld %lf %lf %lu %lu",
+    sprintf(buffer, " %c %c %ld %lf %lf %ld %ld",
             dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -717,7 +731,7 @@ void AOCL_DTL_log_dotv_sizes( int8 loglevel,
     char buffer[256];
 
     // { n, incx, incy}
-    sprintf(buffer, " %c %c %ld %lu %lu", dt_type, transa, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, " %c %c %ld %ld %ld", dt_type, transa, (dim_t)n, (dim_t)incx, (dim_t)incy);
 
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -738,8 +752,10 @@ void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
-    double beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -770,7 +786,7 @@ void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
         beta_imag = ((dcomplex*)beta)->imag;
     }
     // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
-    sprintf(buffer, "%c %c %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
 
@@ -791,7 +807,8 @@ void AOCL_DTL_log_her2_sizes ( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -867,8 +884,10 @@ void AOCL_DTL_log_axpby_sizes ( int8 loglevel,
                                int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
-    double beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -919,7 +938,8 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
                               int line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -979,7 +999,7 @@ void AOCL_DTL_log_scal_sizes( int8 loglevel,
 {
   char buffer[256];
     // {S, D, C, Z} { alpha, n, incx}
-    sprintf(buffer, " %c %lf %ld %lu",
+    sprintf(buffer, " %c %lf %ld %ld",
             dt_type, alpha, (dim_t)n,  (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -997,7 +1017,7 @@ void AOCL_DTL_log_swap_sizes( int8 loglevel,
 {
   char buffer[256];
     // {S, D, C, Z} {n, incx, incy}
-    sprintf(buffer, " %c %ld %lu %lu",
+    sprintf(buffer, " %c %ld %ld %ld",
             dt_type, (dim_t)n,  (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1014,7 +1034,7 @@ void AOCL_DTL_log_nrm2_sizes( int8 loglevel,
 {
   char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, " %c %ld %lu",
+    sprintf(buffer, " %c %ld %ld",
             dt_type, (dim_t)n,  (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1035,7 +1055,8 @@ void AOCL_DTL_log_syr2_sizes(int8 loglevel,
                              int  line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -1058,7 +1079,7 @@ void AOCL_DTL_log_syr2_sizes(int8 loglevel,
         alpha_imag = ((dcomplex*)alpha)->imag;
     }
     // { uploa, m, alpha_real, alpha_imag, incx, incy, lda}
-    sprintf(buffer, " %c %c %ld %lf %lf %lu %lu %lu",
+    sprintf(buffer, " %c %c %ld %lf %lf %ld %ld %ld",
             dt_type, uploa, (dim_t)m,  alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1080,7 +1101,10 @@ void AOCL_DTL_log_syr2k_sizes(int8  loglevel,
                              int  line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag, beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -1111,7 +1135,7 @@ void AOCL_DTL_log_syr2k_sizes(int8  loglevel,
         beta_imag = ((dcomplex*)beta)->imag;
     }
     // { uploc, transa, m, k, alpha_real, alpha_imag, lda, ldb, beta_real, beta_imag, ldc}
-    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %lu %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, uploc, transa, (dim_t)m, (dim_t)k,  alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb, beta_real, beta_imag ,(dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1129,7 +1153,8 @@ void AOCL_DTL_log_syr_sizes(int8  loglevel,
                              int  line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -1152,7 +1177,7 @@ void AOCL_DTL_log_syr_sizes(int8  loglevel,
         alpha_imag = ((dcomplex*)alpha)->imag;
     }
     // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, incx, lda}
-    sprintf(buffer, " %c %c %ld %lf %lf %lu %lu",
+    sprintf(buffer, " %c %c %ld %lf %lf %ld %ld",
             dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)lda);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1173,7 +1198,10 @@ void AOCL_DTL_log_syrk_sizes(int8 loglevel,
                              int  line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag, beta_real, beta_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -1204,7 +1232,7 @@ void AOCL_DTL_log_syrk_sizes(int8 loglevel,
         beta_imag = ((dcomplex*)beta)->imag;
     }
     // {S, D,C, Z} { uploc, transa, m, k, alpha_real, alpha_imag, lda, beta_real, beta_imag, ldc}
-    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %lu %lf %lf %lu",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %lf %lf %ld",
             dt_type, uploc, transa, (dim_t)m, (dim_t)k,  alpha_real, alpha_imag, (dim_t)lda, beta_real, beta_imag, (dim_t)ldc);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1226,7 +1254,8 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
                              int  line)
 {
     char buffer[256];
-    double alpha_real, alpha_imag;
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -1249,7 +1278,7 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
         alpha_imag = ((dcomplex*)alpha)->imag;
     }
     // {S, D,C, Z} { side, uploa, transa, diaga, m, n, alpha_real, alpha_imag, lda, ldb}
-    sprintf(buffer, " %c %c %c %c %c %ld %ld %lf %lf %lu %lu",
+    sprintf(buffer, " %c %c %c %c %c %ld %ld %lf %lf %ld %ld",
             dt_type, side, uploa, transa, diaga, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag, (dim_t)lda, (dim_t)ldb);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1269,7 +1298,7 @@ void AOCL_DTL_log_trmv_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D,C, Z} { side, uploa, transa, diaga, m, lda, incx}
-    sprintf(buffer, " %c %c %c %c %ld %lu %lu",
+    sprintf(buffer, " %c %c %c %c %ld %ld %ld",
             dt_type, uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -1289,7 +1318,7 @@ void AOCL_DTL_log_trsv_sizes(int8 loglevel,
 {
     char buffer[256];
     // {S, D,C, Z} { side, uploa, transa, diaga, m, lda, incx}
-    sprintf(buffer, " %c %c %c %c %ld %lu %lu",
+    sprintf(buffer, " %c %c %c %c %ld %ld %ld",
             dt_type, uploa, transa, diaga, (dim_t)m, (dim_t)lda, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
