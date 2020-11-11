@@ -45,6 +45,14 @@
 #define BLIS_THREAD_MAX_JR      1
 
 
+// To enable framework optimizations for zen3 platform
+// All zen3 specific code should be included in this macro
+#define BLIS_CONFIG_ZEN3
+
+// To enable framework optimizations for zen3 platform
+// All zen3 specific code should be included in this macro
+#define BLIS_CONFIG_ZEN3
+
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
 
@@ -84,8 +92,47 @@
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUTB_ROME 120
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUTB_ROME_COL_PANEL_N 50
 
-// When running HPL with pure MPI without DGEMM threading (Single-threaded
-// BLIS), defining this macro as 1 yields better performance.
-#define AOCL_BLIS_MULTIINSTANCE   0
+// For zen3 architecture we dynamically change block sizes
+// based on number of threads. These values were determined
+// by running benchmarks on zen3 platform.
 
+#ifdef BLIS_ENABLE_MULTITHREADING
+
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm,  c) {           \
+                                                                        \
+    if (bli_is_double(bli_obj_dt(&c))) {                                \
+        const dim_t nt = rntm->num_threads;                             \
+        const dim_t m = bli_obj_length(&c);                             \
+        const dim_t n = bli_obj_width(&c);                              \
+                                                                        \
+        blksz_t blkszs[BLIS_NUM_BLKSZS];                                \
+        if (nt >= 32 && (m > 7800 || n > 7800)) {                       \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   512,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        } else {                                                        \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   256,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        }                                                               \
+    }                                                                   \
+}
+#else
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
+#endif
+  
 #endif
