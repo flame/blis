@@ -133,18 +133,15 @@ void bli_cntx_init_zen3( cntx_t* cntx )
     );
 
     // Initialize level-3 blocksize objects with architecture-specific values.
+	//
+	// These are reference block sizes and may be overridden based on
+	// number of threads used at runtime.
     //                                           s      d      c      z
     bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
     bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
-#if AOCL_BLIS_MULTIINSTANCE
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
-#else
     bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
     bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
     bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
-#endif
 
     bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
