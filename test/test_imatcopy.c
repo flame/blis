@@ -41,7 +41,6 @@
 
 int main( int argc, char** argv )
 {
- //printf("imatcopy_ test.....start\n");
 
  obj_t data;
  obj_t alpha;
@@ -160,6 +159,5 @@ int main( int argc, char** argv )
   bli_obj_free( &alpha );
   bli_obj_free( &data );
  }
- //printf("imatcopy_ test.....end\n");
  return (0);
 }

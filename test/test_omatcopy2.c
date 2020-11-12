@@ -41,7 +41,6 @@
 
 int main( int argc, char** argv )
 {
- //printf("omatcopy2_ test.....start\n");
 
  obj_t data_aptr;
  obj_t data_bptr;
@@ -165,6 +164,5 @@ int main( int argc, char** argv )
   bli_obj_free( &data_aptr );
   bli_obj_free( &data_bptr );
  }
- //printf("omatcopy2_ test.....end\n");
  return (0);
 }

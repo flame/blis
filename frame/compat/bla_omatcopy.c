@@ -62,20 +62,17 @@ static dim_t bli_zoMatCopy_cc(dim_t rows,dim_t cols,const dcomplex alpha,const d
 
 void somatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const float* alpha, const float* aptr, f77_int* lda, float* bptr, f77_int* ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  if ( !(*trans == 'n' || *trans == 'N' ||
   *trans == 't' || *trans == 'T' ||
   *trans == 'c' || *trans == 'C' ||
   *trans == 'r' || *trans == 'R'))
  {
   bli_print_msg( " Invalid value of trans parameter in somatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( *rows <= 0 || *cols <= 0 || alpha == NULL || aptr == NULL || bptr == NULL || *lda < 1 || *ldb < 1 )
  {
   bli_print_msg( " Invalid function parameter in somatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( *trans == 'n' || *trans == 'N')
@@ -98,13 +95,11 @@ void somatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const float* alp
  {
   // do nothing
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void domatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const double* alpha, const double* aptr, f77_int* lda, double* bptr, f77_int* ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if ( !(*trans == 'n' || *trans == 'N' ||
   *trans == 't' || *trans == 'T' ||
@@ -112,13 +107,11 @@ void domatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const double* al
   *trans == 'r' || *trans == 'R'))
  {
   bli_print_msg( " Invalid value of trans parameter in domatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( *rows <= 0 || *cols <= 0 || alpha == NULL || aptr == NULL || bptr == NULL || *lda < 1 || *ldb < 1 )
  {
   bli_print_msg( " Invalid function parameter in domatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( *trans == 'n' || *trans == 'N')
@@ -141,13 +134,11 @@ void domatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const double* al
  {
   // do nothing
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void comatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* alpha, const scomplex* aptr, f77_int* lda, scomplex* bptr, f77_int* ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if ( !(*trans == 'n' || *trans == 'N' ||
   *trans == 't' || *trans == 'T' ||
@@ -155,13 +146,11 @@ void comatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* 
   *trans == 'r' || *trans == 'R'))
  {
   bli_print_msg( " Invalid value of trans parameter in comatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( *rows <= 0 || *cols <= 0 || alpha == NULL || aptr == NULL || bptr == NULL || *lda < 1 || *ldb < 1 )
  {
   bli_print_msg( " Invalid function parameter in comatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( *trans == 'n' || *trans == 'N')
@@ -184,13 +173,11 @@ void comatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const scomplex* 
  {
   // do nothing
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void zomatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* alpha, const dcomplex* aptr, f77_int* lda, dcomplex* bptr, f77_int* ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if ( !(*trans == 'n' || *trans == 'N' ||
   *trans == 't' || *trans == 'T' ||
@@ -198,13 +185,11 @@ void zomatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* 
   *trans == 'r' || *trans == 'R'))
  {
   bli_print_msg( " Invalid value of trans parameter in zomatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( *rows <= 0 || *cols <= 0 || alpha == NULL || aptr == NULL || bptr == NULL || *lda < 1 || *ldb < 1 )
  {
   bli_print_msg( " Invalid function parameter in zomatcopy_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( *trans == 'n' || *trans == 'N')
@@ -227,21 +212,18 @@ void zomatcopy_ (f77_char* trans, f77_int* rows, f77_int* cols, const dcomplex* 
  {
   // do nothing
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 // suffix cn means - column major & non-trans
 static dim_t bli_soMatCopy_cn(dim_t rows,dim_t cols,const float alpha,const float* a,dim_t lda,float* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const float* aptr;
  float* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_soMatCopy_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
 
@@ -284,21 +266,18 @@ static dim_t bli_soMatCopy_cn(dim_t rows,dim_t cols,const float alpha,const floa
   aptr += lda;
   bptr += ldb;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cn means - column major & non-trans
 static dim_t bli_doMatCopy_cn(dim_t rows,dim_t cols,const double alpha,const double* a,dim_t lda,double* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const double* aptr;
  double* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_doMatCopy_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
 
@@ -342,14 +321,12 @@ static dim_t bli_doMatCopy_cn(dim_t rows,dim_t cols,const double alpha,const dou
   bptr += ldb;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cn means - column major & non-trans
 static dim_t bli_coMatCopy_cn(dim_t rows,dim_t cols,const scomplex alpha,const scomplex* a,dim_t lda,scomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const scomplex* aptr;
  scomplex* bptr;
@@ -357,7 +334,6 @@ static dim_t bli_coMatCopy_cn(dim_t rows,dim_t cols,const scomplex alpha,const s
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_coMatCopy_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -403,21 +379,18 @@ static dim_t bli_coMatCopy_cn(dim_t rows,dim_t cols,const scomplex alpha,const s
   bptr += ldb;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cn means - column major & non-trans
 static dim_t bli_zoMatCopy_cn(dim_t rows,dim_t cols,const dcomplex alpha,const dcomplex* a,dim_t lda,dcomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const dcomplex* aptr;
  dcomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_zoMatCopy_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -463,14 +436,12 @@ static dim_t bli_zoMatCopy_cn(dim_t rows,dim_t cols,const dcomplex alpha,const d
   bptr += ldb;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix ct means - column major & trans
 static dim_t bli_soMatCopy_ct(dim_t rows,dim_t cols,const float alpha,const float* a,dim_t lda,float* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const float* aptr;
  float* bptr;
@@ -478,7 +449,6 @@ static dim_t bli_soMatCopy_ct(dim_t rows,dim_t cols,const float alpha,const floa
  //if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < cols || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_soMatCopy_ct() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
 
@@ -520,21 +490,18 @@ static dim_t bli_soMatCopy_ct(dim_t rows,dim_t cols,const float alpha,const floa
   }
   aptr += lda;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix ct means - column major & trans
 static dim_t bli_doMatCopy_ct(dim_t rows,dim_t cols,const double alpha,const double* a,dim_t lda,double* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const double* aptr;
  double* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_doMatCopy_ct() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
 
@@ -577,14 +544,12 @@ static dim_t bli_doMatCopy_ct(dim_t rows,dim_t cols,const double alpha,const dou
   aptr += lda;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix ct means - column major & trans
 static dim_t bli_coMatCopy_ct(dim_t rows,dim_t cols,const scomplex alpha,const scomplex* a,dim_t lda,scomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const scomplex* aptr;
  scomplex* bptr;
@@ -592,7 +557,6 @@ static dim_t bli_coMatCopy_ct(dim_t rows,dim_t cols,const scomplex alpha,const s
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_coMatCopy_ct() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -636,21 +600,18 @@ static dim_t bli_coMatCopy_ct(dim_t rows,dim_t cols,const scomplex alpha,const s
   }
   aptr += lda;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix ct means - column major & trans
 static dim_t bli_zoMatCopy_ct(dim_t rows,dim_t cols,const dcomplex alpha,const dcomplex* a,dim_t lda,dcomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const dcomplex* aptr;
  dcomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_zoMatCopy_ct() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -694,21 +655,18 @@ static dim_t bli_zoMatCopy_ct(dim_t rows,dim_t cols,const dcomplex alpha,const d
   }
   aptr += lda;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cr means - column major & conjugate
 static dim_t bli_coMatCopy_cr(dim_t rows,dim_t cols,const scomplex alpha,const scomplex* a,dim_t lda,scomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const scomplex* aptr;
  scomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_coMatCopy_cr() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -754,21 +712,18 @@ static dim_t bli_coMatCopy_cr(dim_t rows,dim_t cols,const scomplex alpha,const s
   bptr += ldb;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cr means - column major & conjugate
 static dim_t bli_zoMatCopy_cr(dim_t rows,dim_t cols,const dcomplex alpha,const dcomplex* a,dim_t lda,dcomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const dcomplex* aptr;
  dcomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_zoMatCopy_cr() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -814,21 +769,18 @@ static dim_t bli_zoMatCopy_cr(dim_t rows,dim_t cols,const dcomplex alpha,const d
   bptr += ldb;
  }
 
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cc means - column major & conjugate trans
 static dim_t bli_coMatCopy_cc(dim_t rows,dim_t cols,const scomplex alpha,const scomplex* a,dim_t lda,scomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const scomplex* aptr;
  scomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_coMatCopy_cc() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -872,21 +824,18 @@ static dim_t bli_coMatCopy_cc(dim_t rows,dim_t cols,const scomplex alpha,const s
   }
   aptr += lda;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 // suffix cc means - column major & conjugate trans
 static dim_t bli_zoMatCopy_cc(dim_t rows,dim_t cols,const dcomplex alpha,const dcomplex* a,dim_t lda,dcomplex* b,dim_t ldb)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  const dcomplex* aptr;
  dcomplex* bptr;
  if ( rows <= 0 || cols <= 0 || a == NULL || b == NULL || lda < rows || ldb < rows )
  {
   bli_print_msg( " Invalid function parameter in bli_zoMatCopy_cc() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  aptr = a;
@@ -930,7 +879,6 @@ static dim_t bli_zoMatCopy_cc(dim_t rows,dim_t cols,const dcomplex alpha,const d
   }
   aptr += lda;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 

@@ -98,13 +98,11 @@ static void bli_zconjugate(dcomplex* A,dim_t cols,dim_t rows)
 
 void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const float* alpha, const float* A, f77_int* lda, const float* beta, const float* B, f77_int* ldb, float* C, f77_int* ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
 
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters somatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( !(*transa == 'n' || *transa == 'N' ||
@@ -113,7 +111,6 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transa == 'r' || *transa == 'R'))
  {
   bli_print_msg( " Invalid value of transa somatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( !(*transb == 'n' || *transb == 'N' ||
@@ -122,7 +119,6 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transb == 'r' || *transb == 'R'))
  {
   bli_print_msg( " Invalid value of transb somatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  float* aptr;
@@ -132,7 +128,7 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (float *) bli_malloc_user((*m)*(*lda)*sizeof(float));
+  aptr = (float *) bli_malloc_user((*m)*(*lda)*sizeof(float),NULL);
   bli_stranspose(A,aptr,*m,*lda);
  }
  else
@@ -143,7 +139,7 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (float *) bli_malloc_user((*m)*(*ldb)*sizeof(float));
+  bptr = (float *) bli_malloc_user((*m)*(*ldb)*sizeof(float),NULL);
   bli_stranspose(B,bptr,*m,*ldb);
  }
  else
@@ -164,18 +160,15 @@ void somatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  {
   bli_free_user(bptr);
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const double* alpha, const double* A, f77_int* lda, const double* beta, const double* B, f77_int* ldb, double* C, f77_int* ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters domatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( !(*transa == 'n' || *transa == 'N' ||
@@ -184,7 +177,6 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transa == 'r' || *transa == 'R'))
  {
   bli_print_msg( " Invalid value of transa domatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( !(*transb == 'n' || *transb == 'N' ||
@@ -193,7 +185,6 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transb == 'r' || *transb == 'R'))
  {
   bli_print_msg( " Invalid value of transb domatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  double* aptr;
@@ -203,7 +194,7 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (double *) bli_malloc_user((*m)*(*lda)*sizeof(double));
+  aptr = (double *) bli_malloc_user((*m)*(*lda)*sizeof(double),NULL);
   bli_dtranspose(A,aptr,*m,*lda);
  }
  else
@@ -214,7 +205,7 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (double *) bli_malloc_user((*m)*(*ldb)*sizeof(double));
+  bptr = (double *) bli_malloc_user((*m)*(*ldb)*sizeof(double),NULL);
   bli_dtranspose(B,bptr,*m,*ldb);
  }
  else
@@ -235,18 +226,15 @@ void domatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  {
   bli_free_user(bptr);
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const scomplex* alpha, const scomplex* A, f77_int* lda,const scomplex* beta, scomplex* B, f77_int* ldb, scomplex* C, f77_int* ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters comatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
  if ( !(*transa == 'n' || *transa == 'N' ||
@@ -255,7 +243,6 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transa == 'r' || *transa == 'R'))
  {
   bli_print_msg( " Invalid value for transa comatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( !(*transb == 'n' || *transb == 'N' ||
@@ -264,7 +251,6 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transb == 'r' || *transb == 'R'))
  {
   bli_print_msg( " Invalid value of transb domatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  scomplex* aptr;
@@ -274,7 +260,7 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (scomplex *) bli_malloc_user((*m)*(*lda)*sizeof(scomplex));
+  aptr = (scomplex *) bli_malloc_user((*m)*(*lda)*sizeof(scomplex),NULL);
   bli_ctranspose(A,aptr,*m,*lda);
  }
  else
@@ -285,7 +271,7 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (scomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(scomplex));
+  bptr = (scomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(scomplex),NULL);
   bli_ctranspose(B,bptr,*m,*ldb);
  }
  else
@@ -319,18 +305,15 @@ void comatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  {
   bli_free_user(bptr);
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const dcomplex* alpha, const dcomplex* A, f77_int* lda,const dcomplex* beta, dcomplex* B, f77_int* ldb, dcomplex* C, f77_int* ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
  //bli_init_once();
  if( alpha == NULL || A == NULL || beta == NULL || B == NULL || C == NULL || *lda < 1 || *ldb < 1 || *ldc < 1 || *m < 1 || *n < 1)
  {
   bli_print_msg( " Invalid function parameters zomatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid function parameters");
   return ;
  }
 
@@ -340,7 +323,6 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transa == 'r' || *transa == 'R'))
  {
   bli_print_msg( " Invalid value for transa zomatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
  if ( !(*transb == 'n' || *transb == 'N' ||
@@ -349,7 +331,6 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
   *transb == 'r' || *transb == 'R'))
  {
   bli_print_msg( " Invalid value for transb zomatadd_() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Invalid value for trans parameter");
   return ;
  }
 
@@ -360,7 +341,7 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transa == 't' || *transa == 'T' ||
   *transa == 'c' || *transa == 'C')
  {
-  aptr = (dcomplex *) bli_malloc_user((*m)*(*lda)*sizeof(dcomplex));
+  aptr = (dcomplex *) bli_malloc_user((*m)*(*lda)*sizeof(dcomplex),NULL);
   bli_ztranspose(A,aptr,*m,*lda);
  }
  else
@@ -371,7 +352,7 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  if(*transb == 't' || *transb == 'T' ||
   *transb == 'c' || *transb == 'C')
  {
-  bptr = (dcomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(dcomplex));
+  bptr = (dcomplex *) bli_malloc_user((*m)*(*ldb)*sizeof(dcomplex),NULL);
   bli_ztranspose(B,bptr,*m,*ldb);
  }
  else
@@ -405,18 +386,15 @@ void zomatadd_ (f77_char* transa,f77_char* transb, f77_int* m, f77_int* n, const
  {
   bli_free_user(bptr);
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
  return ;
 }
 
 static dim_t bli_soMatAdd_cn(dim_t rows,dim_t cols,const float alpha,float* aptr,dim_t lda,const float beta,float* bptr,dim_t ldb,float* C,dim_t ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  if ( rows <= 0 || cols <= 0 || aptr == NULL || lda < rows || bptr == NULL || ldb < rows || C == NULL || ldc < rows )
  {
   bli_print_msg( " Invalid function parameters bli_soMatAdd_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  for ( i=0; i<cols; i++ )
@@ -429,18 +407,15 @@ static dim_t bli_soMatAdd_cn(dim_t rows,dim_t cols,const float alpha,float* aptr
   bptr += ldb;
   C += ldc;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 static dim_t bli_doMatAdd_cn(dim_t rows,dim_t cols,const double alpha,double* aptr,dim_t lda,const double beta,double* bptr,dim_t ldb,double* C,dim_t ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  if ( rows <= 0 || cols <= 0 || aptr == NULL || lda < rows || bptr == NULL || ldb < rows || C == NULL || ldc < rows )
  {
   bli_print_msg( " Invalid function parameters bli_doMatAdd_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  for ( i=0; i<cols; i++ )
@@ -453,18 +428,15 @@ static dim_t bli_doMatAdd_cn(dim_t rows,dim_t cols,const double alpha,double* ap
   bptr += ldb;
   C += ldc;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 static dim_t bli_coMatAdd_cn(dim_t rows,dim_t cols,const scomplex alpha,scomplex* aptr,dim_t lda,const scomplex beta,scomplex* bptr,dim_t ldb,scomplex* C,dim_t ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  if ( rows <= 0 || cols <= 0 || aptr == NULL || lda < rows || bptr == NULL || ldb < rows || C == NULL || ldc < rows )
  {
   bli_print_msg( " Invalid function parameters bli_coMatAdd_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  for ( i=0; i<cols; i++ )
@@ -479,18 +451,15 @@ static dim_t bli_coMatAdd_cn(dim_t rows,dim_t cols,const scomplex alpha,scomplex
   bptr += ldb;
   C += ldc;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 
 static dim_t bli_zoMatAdd_cn(dim_t rows,dim_t cols,const dcomplex alpha,dcomplex* aptr,dim_t lda,const dcomplex beta,dcomplex* bptr,dim_t ldb,dcomplex* C,dim_t ldc)
 {
- AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
  dim_t i,j;
  if ( rows <= 0 || cols <= 0 || aptr == NULL || lda < rows || bptr == NULL || ldb < rows || C == NULL || ldc < rows )
  {
   bli_print_msg( " Invalid function parameters bli_zoMatAdd_cn() .", __FILE__, __LINE__ );
-  AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "Invalid function parameters");
   return (0);
  }
  for ( i=0; i<cols; i++ )
@@ -504,7 +473,6 @@ static dim_t bli_zoMatAdd_cn(dim_t rows,dim_t cols,const dcomplex alpha,dcomplex
   bptr += ldb;
   C += ldc;
  }
- AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
  return(0);
 }
 #endif

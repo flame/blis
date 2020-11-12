@@ -41,7 +41,6 @@
 
 int main( int argc, char** argv )
 {
- //printf("omatadd_ test.....start\n");
 
  obj_t data_aptr;
  obj_t data_bptr;
@@ -178,6 +177,5 @@ int main( int argc, char** argv )
   bli_obj_free( &data_bptr );
   bli_obj_free( &data_cptr );
  }
- //printf("omatadd_ test.....end\n");
  return (0);
 }
