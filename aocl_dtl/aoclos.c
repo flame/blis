@@ -19,6 +19,11 @@
 #include <omp.h>
 #endif
 
+// BLIS TODO: This is workaround to check if BLIS is built with 
+//            openmp support. Ideally we dont' want any library
+//            specific code in dtl.
+#include <blis.h>
+
 #if defined(__linux__)
 
 /*
@@ -39,9 +44,7 @@ uint32 AOCL_gettid(void)
 {
 
 #ifdef BLIS_ENABLE_OPENMP
-
   return omp_get_thread_num();
-
 #else
   return 0; // will not work for pthread-based parallelization
 
