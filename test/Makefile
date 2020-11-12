@@ -202,7 +202,11 @@ blis:  check-env \
        test_trmm_blis.x \
        test_trsm_blis.x \
        test_gemm_batch_blis.x \
-	   test_gemm3m_blis.x
+       test_gemm3m_blis.x \
+       test_imatcopy_blis.x \
+       test_omatcopy_blis.x \
+       test_omatcopy2_blis.x \
+       test_omatadd_blis.x
 
 openblas: check-env \
       test_dotv_openblas.x \

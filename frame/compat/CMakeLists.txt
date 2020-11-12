@@ -67,6 +67,14 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_batch.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_blas.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_imatcopy.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_imatcopy.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy2.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy2.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.h
 	)
 
 #Add all subdirectories
