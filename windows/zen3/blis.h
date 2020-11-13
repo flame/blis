@@ -58,7 +58,7 @@ extern "C" {
 
 // Determine the target operating system.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  #define BLIS_VERSION_STRING "2.2.1"
+  #define BLIS_VERSION_STRING "3.0"
   #define BLIS_OS_WINDOWS 1
 #elif defined(__gnu_hurd__)
   #define BLIS_OS_GNU 1
@@ -130,14 +130,15 @@ extern "C" {
 #define BLIS_CONFIG_H
 
 // Enabled configuration "family" (config_name)
-#define BLIS_FAMILY_ZEN2
+#define BLIS_FAMILY_ZEN3
 
 
 // Enabled sub-configurations (config_list)
-#define BLIS_CONFIG_ZEN2
+#define BLIS_CONFIG_ZEN3
 
 
 // Enabled kernel sets (kernel_list)
+#define BLIS_KERNELS_ZEN3
 #define BLIS_KERNELS_ZEN2
 #define BLIS_KERNELS_ZEN
 #define BLIS_KERNELS_HASWELL
@@ -191,9 +192,9 @@ extern "C" {
 // determine automatically
 #endif
 
-#if 32 == 64
+#if 64 == 64
 #define BLIS_BLAS_INT_TYPE_SIZE 64
-#elif 32 == 32
+#elif 64 == 32
 #define BLIS_BLAS_INT_TYPE_SIZE 32
 #else
 // determine automatically
@@ -211,7 +212,7 @@ extern "C" {
 
 #ifndef BLIS_ENABLE_CBLAS
 #ifndef BLIS_DISABLE_CBLAS
-#if 0
+#if 1
 #define BLIS_ENABLE_CBLAS
 #else
 #define BLIS_DISABLE_CBLAS
@@ -467,6 +468,21 @@ extern "C" {
 #define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 
+// -- STATIC INLINE FUNCTIONS --------------------------------------------------
+
+// C and C++ have different semantics for defining "inline" functions. In C,
+// the keyword phrase "static inline" accomplishes this, though the "inline"
+// is optional. In C++, the "inline" keyword is required and obviates "static"
+// altogether. Why does this matter? While BLIS is compiled in C99, blis.h may
+// be #included by a source file that is compiled with C++.
+#ifdef __cplusplus
+  #define BLIS_INLINE inline
+#else
+  //#define BLIS_INLINE static inline
+  #define BLIS_INLINE static
+#endif
+
+
 #endif
 
 // end bli_config_macro_defs.h
@@ -491,6 +507,7 @@ extern "C" {
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
 #include <stdint.h> // skipped
+#include <stdbool.h> // skipped
 #else
   // When stdint.h is not available, manually typedef the types we will use.
   #ifdef _WIN32
@@ -530,19 +547,20 @@ typedef unsigned long int guint_t;
 
 // -- Boolean type --
 
-typedef  gint_t  bool_t;
+// NOTE: bool_t is no longer used and has been replaced with C99's bool type.
+#undef bool
+typedef  gint_t  bool;
 
-
-// -- Boolean values --
-
+// BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
+// define these macros in terms of true and false, respectively, which are
+// defined by C99 in stdbool.h.
 #ifndef TRUE
-  #define TRUE  1
+  #define TRUE  true
 #endif
 
 #ifndef FALSE
-  #define FALSE 0
+  #define FALSE false
 #endif
-
 
 // -- Special-purpose integers --
 
@@ -576,39 +594,39 @@ typedef uint32_t objbits_t;  // object information bit field
 
 #ifdef BLIS_ENABLE_C99_COMPLEX
 
-	#if __STDC_VERSION__ >= 199901L
+    #if __STDC_VERSION__ >= 199901L
 #include <complex.h> // skipped
 
-		// Typedef official complex types to BLIS complex type names.
-		typedef  float complex scomplex;
-		typedef double complex dcomplex;
-	#else
-		#error "Configuration requested C99 complex types, but C99 does not appear to be supported."
-	#endif
+        // Typedef official complex types to BLIS complex type names.
+        typedef  float complex scomplex;
+        typedef double complex dcomplex;
+    #else
+        #error "Configuration requested C99 complex types, but C99 does not appear to be supported."
+    #endif
 
 #else // ifndef BLIS_ENABLE_C99_COMPLEX
 
-	// This cpp guard provides a temporary hack to allow libflame
-	// interoperability with BLIS.
-	#ifndef _DEFINED_SCOMPLEX
-	#define _DEFINED_SCOMPLEX
-	typedef struct
-	{
-		float  real;
-		float  imag;
-	} scomplex;
-	#endif
+    // This cpp guard provides a temporary hack to allow libflame
+    // interoperability with BLIS.
+    #ifndef _DEFINED_SCOMPLEX
+    #define _DEFINED_SCOMPLEX
+    typedef struct
+    {
+        float  real;
+        float  imag;
+    } scomplex;
+    #endif
 
-	// This cpp guard provides a temporary hack to allow libflame
-	// interoperability with BLIS.
-	#ifndef _DEFINED_DCOMPLEX
-	#define _DEFINED_DCOMPLEX
-	typedef struct
-	{
-		double real;
-		double imag;
-	} dcomplex;
-	#endif
+    // This cpp guard provides a temporary hack to allow libflame
+    // interoperability with BLIS.
+    #ifndef _DEFINED_DCOMPLEX
+    #define _DEFINED_DCOMPLEX
+    typedef struct
+    {
+        double real;
+        double imag;
+    } dcomplex;
+    #endif
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
@@ -745,7 +763,7 @@ typedef void* void_fp;
 #define BLIS_BITVAL_SINGLE_PREC               0x0
 #define BLIS_BITVAL_DOUBLE_PREC               BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_FLOAT_TYPE              0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT  
+#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT
 #define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_DOMAIN_BIT | BLIS_PRECISION_BIT )
 #define   BLIS_BITVAL_INT_TYPE                0x04
@@ -755,10 +773,10 @@ typedef void* void_fp;
 #define BLIS_BITVAL_NO_CONJ                   0x0
 #define BLIS_BITVAL_CONJ                      BLIS_CONJ_BIT
 #define BLIS_BITVAL_CONJ_TRANS              ( BLIS_CONJ_BIT | BLIS_TRANS_BIT )
-#define BLIS_BITVAL_ZEROS                     0x0 
+#define BLIS_BITVAL_ZEROS                     0x0
 #define BLIS_BITVAL_UPPER                   ( BLIS_UPPER_BIT | BLIS_DIAG_BIT )
 #define BLIS_BITVAL_LOWER                   ( BLIS_LOWER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS  
+#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS
 #define BLIS_BITVAL_NONUNIT_DIAG              0x0
 #define BLIS_BITVAL_UNIT_DIAG                 BLIS_UNIT_DIAG_BIT
 #define BLIS_BITVAL_INVERT_DIAG               BLIS_INVERT_DIAG_BIT
@@ -817,50 +835,50 @@ typedef void* void_fp;
 
 typedef enum
 {
-	BLIS_NO_TRANSPOSE      = 0x0,
-	BLIS_TRANSPOSE         = BLIS_BITVAL_TRANS,
-	BLIS_CONJ_NO_TRANSPOSE = BLIS_BITVAL_CONJ,
-	BLIS_CONJ_TRANSPOSE    = BLIS_BITVAL_CONJ_TRANS
+    BLIS_NO_TRANSPOSE      = 0x0,
+    BLIS_TRANSPOSE         = BLIS_BITVAL_TRANS,
+    BLIS_CONJ_NO_TRANSPOSE = BLIS_BITVAL_CONJ,
+    BLIS_CONJ_TRANSPOSE    = BLIS_BITVAL_CONJ_TRANS
 } trans_t;
 
 typedef enum
 {
-	BLIS_NO_CONJUGATE      = 0x0,
-	BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
+    BLIS_NO_CONJUGATE      = 0x0,
+    BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
 } conj_t;
 
 typedef enum
 {
-	BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
-	BLIS_LOWER             = BLIS_BITVAL_LOWER,
-	BLIS_UPPER             = BLIS_BITVAL_UPPER,
-	BLIS_DENSE             = BLIS_BITVAL_DENSE
+    BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
+    BLIS_LOWER             = BLIS_BITVAL_LOWER,
+    BLIS_UPPER             = BLIS_BITVAL_UPPER,
+    BLIS_DENSE             = BLIS_BITVAL_DENSE
 } uplo_t;
 
 typedef enum
 {
-	BLIS_LEFT              = 0x0,
-	BLIS_RIGHT
+    BLIS_LEFT              = 0x0,
+    BLIS_RIGHT
 } side_t;
 
 typedef enum
 {
-	BLIS_NONUNIT_DIAG      = 0x0,
-	BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
+    BLIS_NONUNIT_DIAG      = 0x0,
+    BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
 } diag_t;
 
 typedef enum
 {
-	BLIS_NO_INVERT_DIAG    = 0x0,
-	BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
+    BLIS_NO_INVERT_DIAG    = 0x0,
+    BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
 } invdiag_t;
 
 typedef enum
 {
-	BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
-	BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
-	BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
-	BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR
+    BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
+    BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
+    BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
+    BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR
 } struc_t;
 
 
@@ -868,26 +886,26 @@ typedef enum
 
 typedef enum
 {
-	BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
-	BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
-	BLIS_SCOMPLEX          = BLIS_BITVAL_SCOMPLEX_TYPE,
-	BLIS_DCOMPLEX          = BLIS_BITVAL_DCOMPLEX_TYPE,
-	BLIS_INT               = BLIS_BITVAL_INT_TYPE,
-	BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
-	BLIS_DT_LO             = BLIS_FLOAT,
-	BLIS_DT_HI             = BLIS_DCOMPLEX
+    BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
+    BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
+    BLIS_SCOMPLEX          = BLIS_BITVAL_SCOMPLEX_TYPE,
+    BLIS_DCOMPLEX          = BLIS_BITVAL_DCOMPLEX_TYPE,
+    BLIS_INT               = BLIS_BITVAL_INT_TYPE,
+    BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
+    BLIS_DT_LO             = BLIS_FLOAT,
+    BLIS_DT_HI             = BLIS_DCOMPLEX
 } num_t;
 
 typedef enum
 {
-	BLIS_REAL              = BLIS_BITVAL_REAL,
-	BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
+    BLIS_REAL              = BLIS_BITVAL_REAL,
+    BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
 } dom_t;
 
 typedef enum
 {
-	BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
-	BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
+    BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
+    BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
 } prec_t;
 
 
@@ -895,31 +913,31 @@ typedef enum
 
 typedef enum
 {
-	BLIS_NOT_PACKED            = BLIS_BITVAL_NOT_PACKED,
-	BLIS_PACKED_UNSPEC         = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_VECTOR         = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_ROWS           = BLIS_BITVAL_PACKED_ROWS,
-	BLIS_PACKED_COLUMNS        = BLIS_BITVAL_PACKED_COLUMNS,
-	BLIS_PACKED_ROW_PANELS     = BLIS_BITVAL_PACKED_ROW_PANELS,
-	BLIS_PACKED_COL_PANELS     = BLIS_BITVAL_PACKED_COL_PANELS,
-	BLIS_PACKED_ROW_PANELS_4MI = BLIS_BITVAL_PACKED_ROW_PANELS_4MI,
-	BLIS_PACKED_COL_PANELS_4MI = BLIS_BITVAL_PACKED_COL_PANELS_4MI,
-	BLIS_PACKED_ROW_PANELS_3MI = BLIS_BITVAL_PACKED_ROW_PANELS_3MI,
-	BLIS_PACKED_COL_PANELS_3MI = BLIS_BITVAL_PACKED_COL_PANELS_3MI,
-	BLIS_PACKED_ROW_PANELS_4MS = BLIS_BITVAL_PACKED_ROW_PANELS_4MS,
-	BLIS_PACKED_COL_PANELS_4MS = BLIS_BITVAL_PACKED_COL_PANELS_4MS,
-	BLIS_PACKED_ROW_PANELS_3MS = BLIS_BITVAL_PACKED_ROW_PANELS_3MS,
-	BLIS_PACKED_COL_PANELS_3MS = BLIS_BITVAL_PACKED_COL_PANELS_3MS,
-	BLIS_PACKED_ROW_PANELS_RO  = BLIS_BITVAL_PACKED_ROW_PANELS_RO,
-	BLIS_PACKED_COL_PANELS_RO  = BLIS_BITVAL_PACKED_COL_PANELS_RO,
-	BLIS_PACKED_ROW_PANELS_IO  = BLIS_BITVAL_PACKED_ROW_PANELS_IO,
-	BLIS_PACKED_COL_PANELS_IO  = BLIS_BITVAL_PACKED_COL_PANELS_IO,
-	BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
-	BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
-	BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
-	BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
-	BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
-	BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R
+    BLIS_NOT_PACKED            = BLIS_BITVAL_NOT_PACKED,
+    BLIS_PACKED_UNSPEC         = BLIS_BITVAL_PACKED_UNSPEC,
+    BLIS_PACKED_VECTOR         = BLIS_BITVAL_PACKED_UNSPEC,
+    BLIS_PACKED_ROWS           = BLIS_BITVAL_PACKED_ROWS,
+    BLIS_PACKED_COLUMNS        = BLIS_BITVAL_PACKED_COLUMNS,
+    BLIS_PACKED_ROW_PANELS     = BLIS_BITVAL_PACKED_ROW_PANELS,
+    BLIS_PACKED_COL_PANELS     = BLIS_BITVAL_PACKED_COL_PANELS,
+    BLIS_PACKED_ROW_PANELS_4MI = BLIS_BITVAL_PACKED_ROW_PANELS_4MI,
+    BLIS_PACKED_COL_PANELS_4MI = BLIS_BITVAL_PACKED_COL_PANELS_4MI,
+    BLIS_PACKED_ROW_PANELS_3MI = BLIS_BITVAL_PACKED_ROW_PANELS_3MI,
+    BLIS_PACKED_COL_PANELS_3MI = BLIS_BITVAL_PACKED_COL_PANELS_3MI,
+    BLIS_PACKED_ROW_PANELS_4MS = BLIS_BITVAL_PACKED_ROW_PANELS_4MS,
+    BLIS_PACKED_COL_PANELS_4MS = BLIS_BITVAL_PACKED_COL_PANELS_4MS,
+    BLIS_PACKED_ROW_PANELS_3MS = BLIS_BITVAL_PACKED_ROW_PANELS_3MS,
+    BLIS_PACKED_COL_PANELS_3MS = BLIS_BITVAL_PACKED_COL_PANELS_3MS,
+    BLIS_PACKED_ROW_PANELS_RO  = BLIS_BITVAL_PACKED_ROW_PANELS_RO,
+    BLIS_PACKED_COL_PANELS_RO  = BLIS_BITVAL_PACKED_COL_PANELS_RO,
+    BLIS_PACKED_ROW_PANELS_IO  = BLIS_BITVAL_PACKED_ROW_PANELS_IO,
+    BLIS_PACKED_COL_PANELS_IO  = BLIS_BITVAL_PACKED_COL_PANELS_IO,
+    BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
+    BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
+    BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
+    BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
+    BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
+    BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R
 } pack_t;
 
 // We combine row and column packing into one "type", and we start
@@ -933,11 +951,11 @@ typedef enum
 
 typedef enum
 {
-	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
-	BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
+    BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
+    BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
 
-	BLIS_PACK_FWD_IF_LOWER = BLIS_BITVAL_PACK_FWD_IF_LOWER,
-	BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
+    BLIS_PACK_FWD_IF_LOWER = BLIS_BITVAL_PACK_FWD_IF_LOWER,
+    BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
 } packord_t;
 
 
@@ -945,10 +963,10 @@ typedef enum
 
 typedef enum
 {
-	BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
-	BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
-	BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
-	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE
+    BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+    BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
+    BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
+    BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE
 } packbuf_t;
 
 
@@ -956,8 +974,8 @@ typedef enum
 
 typedef enum
 {
-	BLIS_FWD,
-	BLIS_BWD
+    BLIS_FWD,
+    BLIS_BWD
 } dir_t;
 
 
@@ -965,22 +983,22 @@ typedef enum
 
 typedef enum
 {
-	BLIS_SUBPART0,
-	BLIS_SUBPART1,
-	BLIS_SUBPART2,
-	BLIS_SUBPART1AND0,
-	BLIS_SUBPART1AND2,
-	BLIS_SUBPART1A,
-	BLIS_SUBPART1B,
-	BLIS_SUBPART00,
-	BLIS_SUBPART10,
-	BLIS_SUBPART20,
-	BLIS_SUBPART01,
-	BLIS_SUBPART11,
-	BLIS_SUBPART21,
-	BLIS_SUBPART02,
-	BLIS_SUBPART12,
-	BLIS_SUBPART22
+    BLIS_SUBPART0,
+    BLIS_SUBPART1,
+    BLIS_SUBPART2,
+    BLIS_SUBPART1AND0,
+    BLIS_SUBPART1AND2,
+    BLIS_SUBPART1A,
+    BLIS_SUBPART1B,
+    BLIS_SUBPART00,
+    BLIS_SUBPART10,
+    BLIS_SUBPART20,
+    BLIS_SUBPART01,
+    BLIS_SUBPART11,
+    BLIS_SUBPART21,
+    BLIS_SUBPART02,
+    BLIS_SUBPART12,
+    BLIS_SUBPART22
 } subpart_t;
 
 
@@ -988,8 +1006,8 @@ typedef enum
 
 typedef enum
 {
-	BLIS_M = 0,
-	BLIS_N = 1
+    BLIS_M = 0,
+    BLIS_N = 1
 } mdim_t;
 
 
@@ -997,17 +1015,17 @@ typedef enum
 
 typedef enum
 {
-	BLIS_MACH_EPS = 0,
-	BLIS_MACH_SFMIN,
-	BLIS_MACH_BASE,
-	BLIS_MACH_PREC,
-	BLIS_MACH_NDIGMANT,
-	BLIS_MACH_RND,
-	BLIS_MACH_EMIN,
-	BLIS_MACH_RMIN,
-	BLIS_MACH_EMAX,
-	BLIS_MACH_RMAX,
-	BLIS_MACH_EPS2
+    BLIS_MACH_EPS = 0,
+    BLIS_MACH_SFMIN,
+    BLIS_MACH_BASE,
+    BLIS_MACH_PREC,
+    BLIS_MACH_NDIGMANT,
+    BLIS_MACH_RND,
+    BLIS_MACH_EMIN,
+    BLIS_MACH_RMIN,
+    BLIS_MACH_EMAX,
+    BLIS_MACH_RMAX,
+    BLIS_MACH_EPS2
 } machval_t;
 
 #define BLIS_NUM_MACH_PARAMS   11
@@ -1019,15 +1037,15 @@ typedef enum
 
 typedef enum
 {
-	BLIS_3MH       = 0,
-	BLIS_3M1,
-	BLIS_4MH,
-	BLIS_4M1B,
-	BLIS_4M1A,
-	BLIS_1M,
-	BLIS_NAT,
-	BLIS_IND_FIRST = 0,
-	BLIS_IND_LAST  = BLIS_NAT
+    BLIS_3MH       = 0,
+    BLIS_3M1,
+    BLIS_4MH,
+    BLIS_4M1B,
+    BLIS_4M1A,
+    BLIS_1M,
+    BLIS_NAT,
+    BLIS_IND_FIRST = 0,
+    BLIS_IND_LAST  = BLIS_NAT
 } ind_t;
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
@@ -1047,32 +1065,33 @@ typedef enum
 
 typedef enum
 {
-	BLIS_ADDV_KER  = 0,
-	BLIS_AMAXV_KER,
-	BLIS_AXPBYV_KER,
-	BLIS_AXPYV_KER,
-	BLIS_COPYV_KER,
-	BLIS_DOTV_KER,
-	BLIS_DOTXV_KER,
-	BLIS_INVERTV_KER,
-	BLIS_SCALV_KER,
-	BLIS_SCAL2V_KER,
-	BLIS_SETV_KER,
-	BLIS_SUBV_KER,
-	BLIS_SWAPV_KER,
-	BLIS_XPBYV_KER
+    BLIS_ADDV_KER  = 0,
+    BLIS_AMAXV_KER,
+    BLIS_AMINV_KER,
+    BLIS_AXPBYV_KER,
+    BLIS_AXPYV_KER,
+    BLIS_COPYV_KER,
+    BLIS_DOTV_KER,
+    BLIS_DOTXV_KER,
+    BLIS_INVERTV_KER,
+    BLIS_SCALV_KER,
+    BLIS_SCAL2V_KER,
+    BLIS_SETV_KER,
+    BLIS_SUBV_KER,
+    BLIS_SWAPV_KER,
+    BLIS_XPBYV_KER
 } l1vkr_t;
 
-#define BLIS_NUM_LEVEL1V_KERS 14
+#define BLIS_NUM_LEVEL1V_KERS 15
 
 
 typedef enum
 {
-	BLIS_AXPY2V_KER = 0,
-	BLIS_DOTAXPYV_KER,
-	BLIS_AXPYF_KER,
-	BLIS_DOTXF_KER,
-	BLIS_DOTXAXPYF_KER
+    BLIS_AXPY2V_KER = 0,
+    BLIS_DOTAXPYV_KER,
+    BLIS_AXPYF_KER,
+    BLIS_DOTXF_KER,
+    BLIS_DOTXAXPYF_KER
 } l1fkr_t;
 
 #define BLIS_NUM_LEVEL1F_KERS 5
@@ -1080,71 +1099,71 @@ typedef enum
 
 typedef enum
 {
-	BLIS_PACKM_0XK_KER  = 0,
-	BLIS_PACKM_1XK_KER  = 1,
-	BLIS_PACKM_2XK_KER  = 2,
-	BLIS_PACKM_3XK_KER  = 3,
-	BLIS_PACKM_4XK_KER  = 4,
-	BLIS_PACKM_5XK_KER  = 5,
-	BLIS_PACKM_6XK_KER  = 6,
-	BLIS_PACKM_7XK_KER  = 7,
-	BLIS_PACKM_8XK_KER  = 8,
-	BLIS_PACKM_9XK_KER  = 9,
-	BLIS_PACKM_10XK_KER = 10,
-	BLIS_PACKM_11XK_KER = 11,
-	BLIS_PACKM_12XK_KER = 12,
-	BLIS_PACKM_13XK_KER = 13,
-	BLIS_PACKM_14XK_KER = 14,
-	BLIS_PACKM_15XK_KER = 15,
-	BLIS_PACKM_16XK_KER = 16,
-	BLIS_PACKM_17XK_KER = 17,
-	BLIS_PACKM_18XK_KER = 18,
-	BLIS_PACKM_19XK_KER = 19,
-	BLIS_PACKM_20XK_KER = 20,
-	BLIS_PACKM_21XK_KER = 21,
-	BLIS_PACKM_22XK_KER = 22,
-	BLIS_PACKM_23XK_KER = 23,
-	BLIS_PACKM_24XK_KER = 24,
-	BLIS_PACKM_25XK_KER = 25,
-	BLIS_PACKM_26XK_KER = 26,
-	BLIS_PACKM_27XK_KER = 27,
-	BLIS_PACKM_28XK_KER = 28,
-	BLIS_PACKM_29XK_KER = 29,
-	BLIS_PACKM_30XK_KER = 30,
-	BLIS_PACKM_31XK_KER = 31,
+    BLIS_PACKM_0XK_KER  = 0,
+    BLIS_PACKM_1XK_KER  = 1,
+    BLIS_PACKM_2XK_KER  = 2,
+    BLIS_PACKM_3XK_KER  = 3,
+    BLIS_PACKM_4XK_KER  = 4,
+    BLIS_PACKM_5XK_KER  = 5,
+    BLIS_PACKM_6XK_KER  = 6,
+    BLIS_PACKM_7XK_KER  = 7,
+    BLIS_PACKM_8XK_KER  = 8,
+    BLIS_PACKM_9XK_KER  = 9,
+    BLIS_PACKM_10XK_KER = 10,
+    BLIS_PACKM_11XK_KER = 11,
+    BLIS_PACKM_12XK_KER = 12,
+    BLIS_PACKM_13XK_KER = 13,
+    BLIS_PACKM_14XK_KER = 14,
+    BLIS_PACKM_15XK_KER = 15,
+    BLIS_PACKM_16XK_KER = 16,
+    BLIS_PACKM_17XK_KER = 17,
+    BLIS_PACKM_18XK_KER = 18,
+    BLIS_PACKM_19XK_KER = 19,
+    BLIS_PACKM_20XK_KER = 20,
+    BLIS_PACKM_21XK_KER = 21,
+    BLIS_PACKM_22XK_KER = 22,
+    BLIS_PACKM_23XK_KER = 23,
+    BLIS_PACKM_24XK_KER = 24,
+    BLIS_PACKM_25XK_KER = 25,
+    BLIS_PACKM_26XK_KER = 26,
+    BLIS_PACKM_27XK_KER = 27,
+    BLIS_PACKM_28XK_KER = 28,
+    BLIS_PACKM_29XK_KER = 29,
+    BLIS_PACKM_30XK_KER = 30,
+    BLIS_PACKM_31XK_KER = 31,
 
-	BLIS_UNPACKM_0XK_KER  = 0,
-	BLIS_UNPACKM_1XK_KER  = 1,
-	BLIS_UNPACKM_2XK_KER  = 2,
-	BLIS_UNPACKM_3XK_KER  = 3,
-	BLIS_UNPACKM_4XK_KER  = 4,
-	BLIS_UNPACKM_5XK_KER  = 5,
-	BLIS_UNPACKM_6XK_KER  = 6,
-	BLIS_UNPACKM_7XK_KER  = 7,
-	BLIS_UNPACKM_8XK_KER  = 8,
-	BLIS_UNPACKM_9XK_KER  = 9,
-	BLIS_UNPACKM_10XK_KER = 10,
-	BLIS_UNPACKM_11XK_KER = 11,
-	BLIS_UNPACKM_12XK_KER = 12,
-	BLIS_UNPACKM_13XK_KER = 13,
-	BLIS_UNPACKM_14XK_KER = 14,
-	BLIS_UNPACKM_15XK_KER = 15,
-	BLIS_UNPACKM_16XK_KER = 16,
-	BLIS_UNPACKM_17XK_KER = 17,
-	BLIS_UNPACKM_18XK_KER = 18,
-	BLIS_UNPACKM_19XK_KER = 19,
-	BLIS_UNPACKM_20XK_KER = 20,
-	BLIS_UNPACKM_21XK_KER = 21,
-	BLIS_UNPACKM_22XK_KER = 22,
-	BLIS_UNPACKM_23XK_KER = 23,
-	BLIS_UNPACKM_24XK_KER = 24,
-	BLIS_UNPACKM_25XK_KER = 25,
-	BLIS_UNPACKM_26XK_KER = 26,
-	BLIS_UNPACKM_27XK_KER = 27,
-	BLIS_UNPACKM_28XK_KER = 28,
-	BLIS_UNPACKM_29XK_KER = 29,
-	BLIS_UNPACKM_30XK_KER = 30,
-	BLIS_UNPACKM_31XK_KER = 31
+    BLIS_UNPACKM_0XK_KER  = 0,
+    BLIS_UNPACKM_1XK_KER  = 1,
+    BLIS_UNPACKM_2XK_KER  = 2,
+    BLIS_UNPACKM_3XK_KER  = 3,
+    BLIS_UNPACKM_4XK_KER  = 4,
+    BLIS_UNPACKM_5XK_KER  = 5,
+    BLIS_UNPACKM_6XK_KER  = 6,
+    BLIS_UNPACKM_7XK_KER  = 7,
+    BLIS_UNPACKM_8XK_KER  = 8,
+    BLIS_UNPACKM_9XK_KER  = 9,
+    BLIS_UNPACKM_10XK_KER = 10,
+    BLIS_UNPACKM_11XK_KER = 11,
+    BLIS_UNPACKM_12XK_KER = 12,
+    BLIS_UNPACKM_13XK_KER = 13,
+    BLIS_UNPACKM_14XK_KER = 14,
+    BLIS_UNPACKM_15XK_KER = 15,
+    BLIS_UNPACKM_16XK_KER = 16,
+    BLIS_UNPACKM_17XK_KER = 17,
+    BLIS_UNPACKM_18XK_KER = 18,
+    BLIS_UNPACKM_19XK_KER = 19,
+    BLIS_UNPACKM_20XK_KER = 20,
+    BLIS_UNPACKM_21XK_KER = 21,
+    BLIS_UNPACKM_22XK_KER = 22,
+    BLIS_UNPACKM_23XK_KER = 23,
+    BLIS_UNPACKM_24XK_KER = 24,
+    BLIS_UNPACKM_25XK_KER = 25,
+    BLIS_UNPACKM_26XK_KER = 26,
+    BLIS_UNPACKM_27XK_KER = 27,
+    BLIS_UNPACKM_28XK_KER = 28,
+    BLIS_UNPACKM_29XK_KER = 29,
+    BLIS_UNPACKM_30XK_KER = 30,
+    BLIS_UNPACKM_31XK_KER = 31
 
 } l1mkr_t;
 
@@ -1154,11 +1173,11 @@ typedef enum
 
 typedef enum
 {
-	BLIS_GEMM_UKR = 0,
-	BLIS_GEMMTRSM_L_UKR,
-	BLIS_GEMMTRSM_U_UKR,
-	BLIS_TRSM_L_UKR,
-	BLIS_TRSM_U_UKR
+    BLIS_GEMM_UKR = 0,
+    BLIS_GEMMTRSM_L_UKR,
+    BLIS_GEMMTRSM_U_UKR,
+    BLIS_TRSM_L_UKR,
+    BLIS_TRSM_U_UKR
 } l3ukr_t;
 
 #define BLIS_NUM_LEVEL3_UKRS 5
@@ -1166,10 +1185,10 @@ typedef enum
 
 typedef enum
 {
-	BLIS_REFERENCE_UKERNEL = 0,
-	BLIS_VIRTUAL_UKERNEL,
-	BLIS_OPTIMIZED_UKERNEL,
-	BLIS_NOTAPPLIC_UKERNEL
+    BLIS_REFERENCE_UKERNEL = 0,
+    BLIS_VIRTUAL_UKERNEL,
+    BLIS_OPTIMIZED_UKERNEL,
+    BLIS_NOTAPPLIC_UKERNEL
 } kimpl_t;
 
 #define BLIS_NUM_UKR_IMPL_TYPES 4
@@ -1356,6 +1375,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN3,
 	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
@@ -1380,9 +1400,7 @@ typedef enum
 
 } arch_t;
 
-// NOTE: This value must be updated to reflect the number of enum values
-// listed above for arch_t!
-#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC+1)
+#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC + 1)
 
 
 //
@@ -1840,7 +1858,7 @@ typedef struct func_s
 
 typedef struct mbool_s
 {
-	bool_t  v[BLIS_NUM_FP_TYPES];
+	bool v[BLIS_NUM_FP_TYPES];
 
 } mbool_t;
 
@@ -1997,7 +2015,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -2027,7 +2045,7 @@ static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
-static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -2135,13 +2153,13 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
-	bool_t    auto_factor;
+	bool      auto_factor;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-	bool_t    pack_a; // enable/disable packing of left-hand matrix A.
-	bool_t    pack_b; // enable/disable packing of right-hand matrix B.
-	bool_t    l3_sup; // enable/disable small matrix handling in level-3 ops.
+	bool      pack_a; // enable/disable packing of left-hand matrix A.
+	bool      pack_b; // enable/disable packing of right-hand matrix B.
+	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 
@@ -2214,13 +2232,13 @@ typedef enum
 	BLIS_INVALID_COL_STRIDE                    = ( -51),
 	BLIS_INVALID_DIM_STRIDE_COMBINATION        = ( -52),
 
-	// Structure-specific errors    
+	// Structure-specific errors
 	BLIS_EXPECTED_GENERAL_OBJECT               = ( -60),
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
-	// Storage-specific errors    
+	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
 	// Partitioning-specific errors
@@ -2234,7 +2252,7 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
-	// Buffer-specific errors 
+	// Buffer-specific errors
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
 	// Memory errors
@@ -4055,6 +4073,8 @@ GENTPROT( double,   d, tfuncname ) \
 GENTPROT( scomplex, c, tfuncname ) \
 GENTPROT( dcomplex, z, tfuncname )
 
+
+
 // -- (one auxiliary argument) --
 
 #define INSERT_GENTPROT_BASIC( tfuncname, varname ) \
@@ -4695,14 +4715,14 @@ GENTPROT3U12( dcomplex, dcomplex, scomplex, dcomplex, z, z, c, z, funcname )
 
 // round
 
-static double bli_round( double a )
+BLIS_INLINE double bli_round( double a )
 {
 	return round( a );
 }
 
 // round_to_mult
 
-static guint_t bli_round_to_mult( guint_t val, guint_t mult )
+BLIS_INLINE guint_t bli_round_to_mult( guint_t val, guint_t mult )
 {
 	return ( guint_t )
 	       ( ( ( ( guint_t )val +
@@ -4722,19 +4742,19 @@ static guint_t bli_round_to_mult( guint_t val, guint_t mult )
 
 // is_odd, is_even
 
-static bool_t bli_is_odd( gint_t a )
+BLIS_INLINE bool bli_is_odd( gint_t a )
 {
-	return ( a % 2 == 1 );
+	return ( bool )( a % 2 == 1 );
 }
 
-static bool_t bli_is_even( gint_t a )
+BLIS_INLINE bool bli_is_even( gint_t a )
 {
-	return ( a % 2 == 0 );
+	return ( bool )( a % 2 == 0 );
 }
 
 // swap_dims
 
-static void bli_swap_dims( dim_t* dim1, dim_t* dim2 )
+BLIS_INLINE void bli_swap_dims( dim_t* dim1, dim_t* dim2 )
 {
 	dim_t temp = *dim1;
 	*dim1 = *dim2;
@@ -4743,7 +4763,7 @@ static void bli_swap_dims( dim_t* dim1, dim_t* dim2 )
 
 // swap_incs
 
-static void bli_swap_incs( inc_t* inc1, inc_t* inc2 )
+BLIS_INLINE void bli_swap_incs( inc_t* inc1, inc_t* inc2 )
 {
 	inc_t temp = *inc1;
 	*inc1 = *inc2;
@@ -4752,7 +4772,7 @@ static void bli_swap_incs( inc_t* inc1, inc_t* inc2 )
 
 // toggle_bool
 
-static void bli_toggle_bool( bool_t* b )
+BLIS_INLINE void bli_toggle_bool( bool* b )
 {
 	if ( *b == TRUE ) *b = FALSE;
 	else              *b = TRUE;
@@ -4806,19 +4826,19 @@ static void bli_toggle_bool( bool_t* b )
 
 // buffer
 
-static bool_t bli_is_aligned_to( siz_t p, siz_t size )
+BLIS_INLINE bool bli_is_aligned_to( siz_t p, siz_t size )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( p % size == 0 );
 }
 
-static bool_t bli_is_unaligned_to( siz_t p, siz_t size )
+BLIS_INLINE bool bli_is_unaligned_to( siz_t p, siz_t size )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( p % size != 0 );
 }
 
-static siz_t bli_offset_past_alignment( siz_t p, siz_t size )
+BLIS_INLINE siz_t bli_offset_past_alignment( siz_t p, siz_t size )
 {
 	return ( siz_t )
 	       ( p % size );
@@ -4827,125 +4847,125 @@ static siz_t bli_offset_past_alignment( siz_t p, siz_t size )
 
 // datatype
 
-static bool_t bli_is_float( num_t dt )
+BLIS_INLINE bool bli_is_float( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_FLOAT );
 }
 
-static bool_t bli_is_double( num_t dt )
+BLIS_INLINE bool bli_is_double( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_DOUBLE );
 }
 
-static bool_t bli_is_scomplex( num_t dt )
+BLIS_INLINE bool bli_is_scomplex( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_SCOMPLEX );
 }
 
-static bool_t bli_is_dcomplex( num_t dt )
+BLIS_INLINE bool bli_is_dcomplex( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_DCOMPLEX );
 }
 
-static bool_t bli_is_constant( num_t dt )
+BLIS_INLINE bool bli_is_constant( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_CONSTANT );
 }
 
-static bool_t bli_is_int( num_t dt )
+BLIS_INLINE bool bli_is_int( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( dt == BLIS_INT );
 }
 
-static bool_t bli_is_real( num_t dt )
+BLIS_INLINE bool bli_is_real( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_float( dt ) ||
 	                   bli_is_double( dt ) );
 }
 
-static bool_t bli_is_complex( num_t dt )
+BLIS_INLINE bool bli_is_complex( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_scomplex( dt ) ||
 	                   bli_is_dcomplex( dt ) );
 }
 
-static bool_t bli_is_single_prec( num_t dt )
+BLIS_INLINE bool bli_is_single_prec( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_float( dt ) ||
 	                   bli_is_scomplex( dt ) );
 }
 
-static bool_t bli_is_double_prec( num_t dt )
+BLIS_INLINE bool bli_is_double_prec( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_double( dt ) ||
 	                   bli_is_dcomplex( dt ) );
 }
 
-static dom_t bli_dt_domain( num_t dt )
+BLIS_INLINE dom_t bli_dt_domain( num_t dt )
 {
 	return ( dom_t )
 	       ( dt & BLIS_DOMAIN_BIT );
 }
 
-static bool_t bli_dt_dom_is_real( num_t dt )
+BLIS_INLINE bool bli_dt_dom_is_real( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_REAL );
 }
 
-static bool_t bli_dt_dom_is_complex( num_t dt )
+BLIS_INLINE bool bli_dt_dom_is_complex( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_COMPLEX );
 }
 
-static prec_t bli_dt_prec( num_t dt )
+BLIS_INLINE prec_t bli_dt_prec( num_t dt )
 {
 	return ( prec_t )
 	       ( dt & BLIS_PRECISION_BIT );
 }
 
-static bool_t bli_dt_prec_is_single( num_t dt )
+BLIS_INLINE bool bli_dt_prec_is_single( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_SINGLE_PREC );
 }
 
-static bool_t bli_dt_prec_is_double( num_t dt )
+BLIS_INLINE bool bli_dt_prec_is_double( num_t dt )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_DOUBLE_PREC );
 }
 
-static num_t bli_dt_proj_to_real( num_t dt )
+BLIS_INLINE num_t bli_dt_proj_to_real( num_t dt )
 {
 	return ( num_t )
 	       ( dt & ~BLIS_BITVAL_COMPLEX );
 }
 
-static num_t bli_dt_proj_to_complex( num_t dt )
+BLIS_INLINE num_t bli_dt_proj_to_complex( num_t dt )
 {
 	return ( num_t )
 	       ( dt | BLIS_BITVAL_COMPLEX );
 }
 
-static num_t bli_dt_proj_to_single_prec( num_t dt )
+BLIS_INLINE num_t bli_dt_proj_to_single_prec( num_t dt )
 {
 	return ( num_t )
 	       ( dt & ~BLIS_BITVAL_DOUBLE_PREC );
 }
 
-static num_t bli_dt_proj_to_double_prec( num_t dt )
+BLIS_INLINE num_t bli_dt_proj_to_double_prec( num_t dt )
 {
 	return ( num_t )
 	       ( dt | BLIS_BITVAL_DOUBLE_PREC );
@@ -4954,79 +4974,79 @@ static num_t bli_dt_proj_to_double_prec( num_t dt )
 
 // trans
 
-static bool_t bli_is_notrans( trans_t trans )
+BLIS_INLINE bool bli_is_notrans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( trans == BLIS_NO_TRANSPOSE );
 }
 
-static bool_t bli_is_trans( trans_t trans )
+BLIS_INLINE bool bli_is_trans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( trans == BLIS_TRANSPOSE );
 }
 
-static bool_t bli_is_conjnotrans( trans_t trans )
+BLIS_INLINE bool bli_is_conjnotrans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( trans == BLIS_CONJ_NO_TRANSPOSE );
 }
 
-static bool_t bli_is_conjtrans( trans_t trans )
+BLIS_INLINE bool bli_is_conjtrans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( trans == BLIS_CONJ_TRANSPOSE );
 }
 
-static bool_t bli_does_notrans( trans_t trans )
+BLIS_INLINE bool bli_does_notrans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( (~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
 }
 
-static bool_t bli_does_trans( trans_t trans )
+BLIS_INLINE bool bli_does_trans( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
 }
 
-static bool_t bli_does_noconj( trans_t trans )
+BLIS_INLINE bool bli_does_noconj( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( (~trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
 }
 
-static bool_t bli_does_conj( trans_t trans )
+BLIS_INLINE bool bli_does_conj( trans_t trans )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
 }
 
-static trans_t bli_extract_trans( trans_t trans )
+BLIS_INLINE trans_t bli_extract_trans( trans_t trans )
 {
 	return ( trans_t )
 	       ( trans & BLIS_TRANS_BIT );
 }
 
-static conj_t bli_extract_conj( trans_t trans )
+BLIS_INLINE conj_t bli_extract_conj( trans_t trans )
 {
 	return ( conj_t )
 	       ( trans & BLIS_CONJ_BIT );
 }
 
-static trans_t bli_trans_toggled( trans_t trans )
+BLIS_INLINE trans_t bli_trans_toggled( trans_t trans )
 {
 	return ( trans_t )
 	       ( trans ^ BLIS_TRANS_BIT );
 }
 
-static trans_t bli_trans_toggled_conj( trans_t trans )
+BLIS_INLINE trans_t bli_trans_toggled_conj( trans_t trans )
 {
 	return ( trans_t )
 	       ( trans ^ BLIS_CONJ_BIT );
 }
 
-static void bli_toggle_trans( trans_t* trans )
+BLIS_INLINE void bli_toggle_trans( trans_t* trans )
 {
 	*trans = bli_trans_toggled( *trans );
 }
@@ -5034,24 +5054,24 @@ static void bli_toggle_trans( trans_t* trans )
 
 // side
 
-static bool_t bli_is_left( side_t side )
+BLIS_INLINE bool bli_is_left( side_t side )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( side == BLIS_LEFT );
 }
 
-static bool_t bli_is_right( side_t side )
+BLIS_INLINE bool bli_is_right( side_t side )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( side == BLIS_RIGHT );
 }
 
-static side_t bli_side_toggled( side_t side )
+BLIS_INLINE side_t bli_side_toggled( side_t side )
 {
 	return ( bli_is_left( side ) ? BLIS_RIGHT : BLIS_LEFT );
 }
 
-static void bli_toggle_side( side_t* side )
+BLIS_INLINE void bli_toggle_side( side_t* side )
 {
 	*side = bli_side_toggled( *side );
 }
@@ -5059,46 +5079,47 @@ static void bli_toggle_side( side_t* side )
 
 // uplo
 
-static bool_t bli_is_lower( uplo_t uplo )
+BLIS_INLINE bool bli_is_lower( uplo_t uplo )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( uplo == BLIS_LOWER );
 }
 
-static bool_t bli_is_upper( uplo_t uplo )
+BLIS_INLINE bool bli_is_upper( uplo_t uplo )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( uplo == BLIS_UPPER );
 }
 
-static bool_t bli_is_upper_or_lower( uplo_t uplo )
+BLIS_INLINE bool bli_is_upper_or_lower( uplo_t uplo )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_upper( uplo ) ||
-	                   bli_is_lower( uplo ) );
+	         bli_is_lower( uplo ) );
 }
 
-static bool_t bli_is_dense( uplo_t uplo )
+BLIS_INLINE bool bli_is_dense( uplo_t uplo )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( uplo == BLIS_DENSE );
 }
 
-static bool_t bli_is_zeros( uplo_t uplo )
+BLIS_INLINE bool bli_is_zeros( uplo_t uplo )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( uplo == BLIS_ZEROS );
 }
 
-static uplo_t bli_uplo_toggled( uplo_t uplo )
+BLIS_INLINE uplo_t bli_uplo_toggled( uplo_t uplo )
 {
 	return ( uplo_t )
-	       ( bli_is_upper_or_lower( uplo ) ?
-	         ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT ) : uplo
+	       ( bli_is_upper_or_lower( uplo )
+	         ? ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT )
+	         :     uplo
 	       );
 }
 
-static void bli_toggle_uplo( uplo_t* uplo )
+BLIS_INLINE void bli_toggle_uplo( uplo_t* uplo )
 {
 	*uplo = bli_uplo_toggled( *uplo );
 }
@@ -5106,65 +5127,65 @@ static void bli_toggle_uplo( uplo_t* uplo )
 
 // structure
 
-static bool_t bli_is_general( struc_t struc )
+BLIS_INLINE bool bli_is_general( struc_t struc )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( struc == BLIS_GENERAL );
 }
 
-static bool_t bli_is_hermitian( struc_t struc )
+BLIS_INLINE bool bli_is_hermitian( struc_t struc )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( struc == BLIS_HERMITIAN );
 }
 
-static bool_t bli_is_symmetric( struc_t struc )
+BLIS_INLINE bool bli_is_symmetric( struc_t struc )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( struc == BLIS_SYMMETRIC );
 }
 
-static bool_t bli_is_triangular( struc_t struc )
+BLIS_INLINE bool bli_is_triangular( struc_t struc )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( struc == BLIS_TRIANGULAR );
 }
 
-static bool_t bli_is_herm_or_symm( struc_t struc )
+BLIS_INLINE bool bli_is_herm_or_symm( struc_t struc )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_hermitian( struc ) ||
-	                   bli_is_symmetric( struc ) );
+	         bli_is_symmetric( struc ) );
 }
 
 
 // conj
 
-static bool_t bli_is_noconj( conj_t conj )
+BLIS_INLINE bool bli_is_noconj( conj_t conj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( conj == BLIS_NO_CONJUGATE );
 }
 
-static bool_t bli_is_conj( conj_t conj )
+BLIS_INLINE bool bli_is_conj( conj_t conj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( conj == BLIS_CONJUGATE );
 }
 
-static conj_t bli_conj_toggled( conj_t conj )
+BLIS_INLINE conj_t bli_conj_toggled( conj_t conj )
 {
 	return ( conj_t )
 	       ( conj ^ BLIS_CONJ_BIT );
 }
 
-static conj_t bli_apply_conj( conj_t conjapp, conj_t conj )
+BLIS_INLINE conj_t bli_apply_conj( conj_t conjapp, conj_t conj )
 {
 	return ( conj_t )
 	       ( conj ^ conjapp );
 }
 
-static void bli_toggle_conj( conj_t* conj )
+BLIS_INLINE void bli_toggle_conj( conj_t* conj )
 {
 	*conj = bli_conj_toggled( *conj );
 }
@@ -5172,82 +5193,82 @@ static void bli_toggle_conj( conj_t* conj )
 
 // diag
 
-static bool_t bli_is_nonunit_diag( diag_t diag )
+BLIS_INLINE bool bli_is_nonunit_diag( diag_t diag )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( diag == BLIS_NONUNIT_DIAG );
 }
 
-static bool_t bli_is_unit_diag( diag_t diag )
+BLIS_INLINE bool bli_is_unit_diag( diag_t diag )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( diag == BLIS_UNIT_DIAG );
 }
 
 
 // dimension-related
 
-static bool_t bli_zero_dim1( dim_t m )
+BLIS_INLINE bool bli_zero_dim1( dim_t m )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 0 );
 }
 
-static bool_t bli_zero_dim2( dim_t m, dim_t n )
+BLIS_INLINE bool bli_zero_dim2( dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 0 || n == 0 );
 }
 
-static bool_t bli_zero_dim3( dim_t m, dim_t n, dim_t k )
+BLIS_INLINE bool bli_zero_dim3( dim_t m, dim_t n, dim_t k )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 0 || n == 0 || k == 0 );
 }
 
-static bool_t bli_nonzero_dim( dim_t m )
+BLIS_INLINE bool bli_nonzero_dim( dim_t m )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m > 0 );
 }
 
-static bool_t bli_vector_dim( dim_t m, dim_t n )
+BLIS_INLINE bool bli_vector_dim( dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 1 ? n : m );
 }
 
-static bool_t bli_is_vector( dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_vector( dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 1 || n == 1 );
 }
 
-static bool_t bli_is_row_vector( dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_row_vector( dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( m == 1 );
 }
 
-static bool_t bli_is_col_vector( dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_col_vector( dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( n == 1 );
 }
 
-static void bli_set_dim_with_side( side_t side, dim_t m, dim_t n, dim_t* dim )
+BLIS_INLINE void bli_set_dim_with_side( side_t side, dim_t m, dim_t n, dim_t* dim )
 {
 	if ( bli_is_left( side ) ) *dim = m;
 	else                       *dim = n;
 }
 
-static void bli_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, dim_t* mt, dim_t* nt )
+BLIS_INLINE void bli_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, dim_t* mt, dim_t* nt )
 {
 	if ( bli_does_notrans( trans ) ) { *mt = m; *nt = n; }
 	else                             { *mt = n; *nt = m; }
 }
 
-static void bli_set_dims_incs_with_trans( trans_t trans,
+BLIS_INLINE void bli_set_dims_incs_with_trans( trans_t trans,
                                           dim_t  m,  dim_t  n,  inc_t  rs,  inc_t  cs,
                                           dim_t* mt, dim_t* nt, inc_t* rst, inc_t* cst )
 {
@@ -5258,205 +5279,205 @@ static void bli_set_dims_incs_with_trans( trans_t trans,
 
 // blocksize-related
 
-static dim_t bli_determine_blocksize_dim_f( dim_t i, dim_t dim, dim_t b_alg )
+BLIS_INLINE dim_t bli_determine_blocksize_dim_f( dim_t i, dim_t dim, dim_t b_alg )
 {
 	return ( dim_t )
 	       ( bli_min( b_alg, dim - i ) );
 }
 
-static dim_t bli_determine_blocksize_dim_b( dim_t i, dim_t dim, dim_t b_alg )
+BLIS_INLINE dim_t bli_determine_blocksize_dim_b( dim_t i, dim_t dim, dim_t b_alg )
 {
 	return ( dim_t )
 	       ( i == 0 && dim % b_alg != 0 ? dim % b_alg
-	                                          : b_alg );
+	                                    : b_alg );
 }
 
 
 // stride-related
 
-static inc_t bli_vector_inc( trans_t trans, dim_t m, dim_t n, inc_t rs, inc_t cs )
+BLIS_INLINE inc_t bli_vector_inc( trans_t trans, dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
 	return ( inc_t )
 	       ( bli_does_notrans( trans ) ? ( m == 1 ? cs : rs )
 	                                   : ( m == 1 ? rs : cs ) );
 }
 
-static bool_t bli_is_row_stored( inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_row_stored( inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_abs( cs ) == 1 );
 }
 
-static bool_t bli_is_col_stored( inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_col_stored( inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_abs( rs ) == 1 );
 }
 
-static bool_t bli_is_row_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_row_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( cs == 1 && ( rs > 1 || n == 1 ) );
 }
 
-static bool_t bli_is_col_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_col_stored_f( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( rs == 1 && ( cs > 1 || m == 1 ) );
 }
 
-static bool_t bli_is_gen_stored( inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_gen_stored( inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_abs( rs ) != 1 &&
-	                   bli_abs( cs ) != 1 );
+	         bli_abs( cs ) != 1 );
 }
 
-static bool_t bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_row_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_abs( cs ) == bli_abs( rs )
-	                   ? n < m
-	                   : bli_abs( cs ) < bli_abs( rs ) );
+	         ? n < m
+	         : bli_abs( cs ) < bli_abs( rs ) );
 }
 
-static bool_t bli_is_col_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
+BLIS_INLINE bool bli_is_col_tilted( dim_t m, dim_t n, inc_t rs, inc_t cs )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_abs( rs ) == bli_abs( cs )
-	                   ? m < n
-	                   : bli_abs( rs ) < bli_abs( cs ) );
+	         ? m < n
+	         : bli_abs( rs ) < bli_abs( cs ) );
 }
 
-static bool_t bli_has_nonunit_inc1( inc_t s1 )
+BLIS_INLINE bool bli_has_nonunit_inc1( inc_t s1 )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( s1 != 1 );
 }
 
-static bool_t bli_has_nonunit_inc2( inc_t s1, inc_t s2 )
+BLIS_INLINE bool bli_has_nonunit_inc2( inc_t s1, inc_t s2 )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( s1 != 1 || s2 != 1 );
 }
 
-static bool_t bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
+BLIS_INLINE bool bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( s1 != 1 || s2 != 1 || s3 != 1 );
 }
 
 // offset-relate
 
-static bool_t bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+BLIS_INLINE bool bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( n_off + n - 1 ) < m_off );
 }
 
-static bool_t bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+BLIS_INLINE bool bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( m_off + m - 1 ) < n_off );
 }
 // diag offset-related
 
-static void bli_negate_diag_offset( doff_t* diagoff )
+BLIS_INLINE void bli_negate_diag_offset( doff_t* diagoff )
 {
 	*diagoff = -(*diagoff);
 }
 
-static void bli_shift_diag_offset_to_grow_uplo( uplo_t uplo, doff_t* diagoff )
+BLIS_INLINE void bli_shift_diag_offset_to_grow_uplo( uplo_t uplo, doff_t* diagoff )
 {
 	if      ( bli_is_upper( uplo ) ) *diagoff -= 1;
 	else if ( bli_is_lower( uplo ) ) *diagoff += 1;
 }
 
-static void bli_shift_diag_offset_to_shrink_uplo( uplo_t uplo, doff_t* diagoff )
+BLIS_INLINE void bli_shift_diag_offset_to_shrink_uplo( uplo_t uplo, doff_t* diagoff )
 {
 	if      ( bli_is_upper( uplo ) ) *diagoff += 1;
 	else if ( bli_is_lower( uplo ) ) *diagoff -= 1;
 }
 
-static bool_t bli_diag_offset_with_trans( trans_t trans, doff_t diagoff )
+BLIS_INLINE bool bli_diag_offset_with_trans( trans_t trans, doff_t diagoff )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_does_trans( trans ) ? -diagoff : diagoff );
 }
 
-static bool_t bli_is_strictly_above_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_strictly_above_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_does_trans( trans )
-	                   ? ( ( doff_t )n <= -diagoff )
-	                   : ( ( doff_t )m <= -diagoff ) );
+	         ? ( ( doff_t )n <= -diagoff )
+	         : ( ( doff_t )m <= -diagoff ) );
 }
 
-static bool_t bli_is_strictly_below_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_strictly_below_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_does_trans( trans )
-	                 ? ( ( doff_t )m <=  diagoff )
-	                 : ( ( doff_t )n <=  diagoff ) );
+	         ? ( ( doff_t )m <=  diagoff )
+	         : ( ( doff_t )n <=  diagoff ) );
 }
 
-static bool_t bli_is_outside_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_outside_diag( doff_t diagoff, trans_t trans, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_strictly_above_diag( diagoff, trans, m, n ) ||
 	         bli_is_strictly_below_diag( diagoff, trans, m, n ) );
 }
 
-static bool_t bli_is_stored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_stored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_above_diag( diagoff, trans, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_below_diag( diagoff, trans, m, n ) ) );
 }
 
-static bool_t bli_is_unstored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_unstored_subpart( doff_t diagoff, trans_t trans, uplo_t uplo, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_below_diag( diagoff, trans, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_above_diag( diagoff, trans, m, n ) ) );
 }
 
-static bool_t bli_is_strictly_above_diag_n( doff_t diagoff, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_strictly_above_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( doff_t )m <= -diagoff );
 }
 
-static bool_t bli_is_strictly_below_diag_n( doff_t diagoff, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_strictly_below_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( doff_t )n <=  diagoff );
 }
 
-static bool_t bli_intersects_diag_n( doff_t diagoff, dim_t m, dim_t n )
+BLIS_INLINE bool bli_intersects_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( !bli_is_strictly_above_diag_n( diagoff, m, n ) &&
 	         !bli_is_strictly_below_diag_n( diagoff, m, n ) );
 }
 
-static bool_t bli_is_outside_diag_n( doff_t diagoff, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_outside_diag_n( doff_t diagoff, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_strictly_above_diag_n( diagoff, m, n ) ||
 	         bli_is_strictly_below_diag_n( diagoff, m, n ) );
 }
 
-static bool_t bli_is_stored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_stored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_above_diag_n( diagoff, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_below_diag_n( diagoff, m, n ) ) );
 }
 
-static bool_t bli_is_unstored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
+BLIS_INLINE bool bli_is_unstored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, dim_t n )
 {
-	return ( bool_t )
+	return ( bool )
 	( ( bli_is_upper( uplo ) && bli_is_strictly_below_diag_n( diagoff, m, n ) ) ||
 	  ( bli_is_lower( uplo ) && bli_is_strictly_above_diag_n( diagoff, m, n ) ) );
 }
@@ -5464,7 +5485,7 @@ static bool_t bli_is_unstored_subpart_n( doff_t diagoff, uplo_t uplo, dim_t m, d
 
 // pruning-related
 
-static void bli_prune_unstored_region_top_l( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offm_inc )
+BLIS_INLINE void bli_prune_unstored_region_top_l( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offm_inc )
 {
 	*offm_inc = 0;
 
@@ -5478,7 +5499,7 @@ static void bli_prune_unstored_region_top_l( doff_t* diagoff, dim_t* m, dim_t* n
 	}
 }
 
-static void bli_prune_unstored_region_right_l( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offn_inc )
+BLIS_INLINE void bli_prune_unstored_region_right_l( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offn_inc )
 {
 	*offn_inc = 0;
 
@@ -5490,7 +5511,7 @@ static void bli_prune_unstored_region_right_l( doff_t* diagoff, dim_t* m, dim_t*
 	}
 }
 
-static void bli_prune_unstored_region_left_u( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offn_inc )
+BLIS_INLINE void bli_prune_unstored_region_left_u( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offn_inc )
 {
 	*offn_inc = 0;
 
@@ -5504,7 +5525,7 @@ static void bli_prune_unstored_region_left_u( doff_t* diagoff, dim_t* m, dim_t* 
 	}
 }
 
-static void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offm_inc )
+BLIS_INLINE void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, dim_t* n, dim_t* offm_inc )
 {
 	*offm_inc = 0;
 
@@ -5519,20 +5540,20 @@ static void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, dim_t
 
 // thread range-related
 
-static void bli_rotate180_trapezoid( doff_t* diagoff, uplo_t* uplo, dim_t* m, dim_t* n )
+BLIS_INLINE void bli_rotate180_trapezoid( doff_t* diagoff, uplo_t* uplo, dim_t* m, dim_t* n )
 {
 	*diagoff = *n - *diagoff - *m;
 	bli_toggle_uplo( uplo );
 }
 
-static void bli_reflect_about_diag( doff_t* diagoff, uplo_t* uplo, dim_t* m, dim_t* n )
+BLIS_INLINE void bli_reflect_about_diag( doff_t* diagoff, uplo_t* uplo, dim_t* m, dim_t* n )
 {
 	bli_swap_dims( m, n );
 	bli_negate_diag_offset( diagoff );
 	bli_toggle_uplo( uplo );
 }
 
-static void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
+BLIS_INLINE void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 {
 	dim_t start2 = n - *start;
 	dim_t end2   = n - *end;
@@ -5543,24 +5564,25 @@ static void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 
 // mdim_t-related
 
-static bool_t bli_is_m_dim( mdim_t mdim )
+BLIS_INLINE bool bli_is_m_dim( mdim_t mdim )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( mdim == BLIS_M );
 }
 
-static bool_t bli_is_n_dim( mdim_t mdim )
+BLIS_INLINE bool bli_is_n_dim( mdim_t mdim )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( mdim == BLIS_N );
 }
 
-static mdim_t bli_dim_toggled( mdim_t mdim )
+BLIS_INLINE mdim_t bli_dim_toggled( mdim_t mdim )
 {
-	return ( mdim == BLIS_M ? BLIS_N : BLIS_M );
+	return ( mdim_t )
+	       ( mdim == BLIS_M ? BLIS_N : BLIS_M );
 }
 
-static void bli_toggle_dim( mdim_t* mdim )
+BLIS_INLINE void bli_toggle_dim( mdim_t* mdim )
 {
 	*mdim = bli_dim_toggled( *mdim );
 }
@@ -5568,7 +5590,7 @@ static void bli_toggle_dim( mdim_t* mdim )
 
 // stor3_t-related
 
-static stor3_t bli_stor3_from_strides( inc_t rs_c, inc_t cs_c,
+BLIS_INLINE stor3_t bli_stor3_from_strides( inc_t rs_c, inc_t cs_c,
                                        inc_t rs_a, inc_t cs_a,
                                        inc_t rs_b, inc_t cs_b  )
 {
@@ -5579,16 +5601,16 @@ static stor3_t bli_stor3_from_strides( inc_t rs_c, inc_t cs_c,
 	     bli_is_gen_stored( rs_b, cs_b ) ) return BLIS_XXX;
 
 	// Otherwise, compute and return the stor3_t id as follows.
-	const bool_t c_is_col = bli_is_col_stored( rs_c, cs_c );
-	const bool_t a_is_col = bli_is_col_stored( rs_a, cs_a );
-	const bool_t b_is_col = bli_is_col_stored( rs_b, cs_b );
+	const bool c_is_col = bli_is_col_stored( rs_c, cs_c );
+	const bool a_is_col = bli_is_col_stored( rs_a, cs_a );
+	const bool b_is_col = bli_is_col_stored( rs_b, cs_b );
 
 	return ( stor3_t )( 4 * c_is_col +
 	                    2 * a_is_col +
 	                    1 * b_is_col );
 }
 
-static stor3_t bli_stor3_trans( stor3_t id )
+BLIS_INLINE stor3_t bli_stor3_trans( stor3_t id )
 {
 #if 1
 	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
@@ -5612,7 +5634,7 @@ static stor3_t bli_stor3_trans( stor3_t id )
 #endif
 }
 
-static stor3_t bli_stor3_transa( stor3_t id )
+BLIS_INLINE stor3_t bli_stor3_transa( stor3_t id )
 {
 #if 0
 	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
@@ -5634,7 +5656,7 @@ static stor3_t bli_stor3_transa( stor3_t id )
 #endif
 }
 
-static stor3_t bli_stor3_transb( stor3_t id )
+BLIS_INLINE stor3_t bli_stor3_transb( stor3_t id )
 {
 #if 0
 	stor3_t map[ BLIS_NUM_3OP_RC_COMBOS ]
@@ -5660,43 +5682,43 @@ static stor3_t bli_stor3_transb( stor3_t id )
 
 // index-related
 
-static bool_t bli_is_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
+BLIS_INLINE bool bli_is_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i == n_iter - 1 && n_left != 0 );
 }
 
-static bool_t bli_is_not_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
+BLIS_INLINE bool bli_is_not_edge_f( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i != n_iter - 1 || n_left == 0 );
 }
 
-static bool_t bli_is_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
+BLIS_INLINE bool bli_is_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i == 0 && n_left != 0 );
 }
 
-static bool_t bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
+BLIS_INLINE bool bli_is_not_edge_b( dim_t i, dim_t n_iter, dim_t n_left )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i != 0 || n_left == 0 );
 }
 
-static bool_t bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter_sl( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i == end_iter - 1 );
 }
 
-static bool_t bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter_rr( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( i == end_iter - 1 - ( ( end_iter - tid - 1 ) % nth ) );
 }
 
-static bool_t bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
+BLIS_INLINE bool bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 {
 #ifdef BLIS_ENABLE_JRIR_SLAB
 	return bli_is_last_iter_sl( i, end_iter, tid, nth );
@@ -5708,7 +5730,7 @@ static bool_t bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth )
 
 // packbuf_t-related
 
-static guint_t bli_packbuf_index( packbuf_t buf_type )
+BLIS_INLINE guint_t bli_packbuf_index( packbuf_t buf_type )
 {
 	return ( guint_t )
 	       ( ( buf_type & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT );
@@ -5716,111 +5738,111 @@ static guint_t bli_packbuf_index( packbuf_t buf_type )
 
 // pack_t-related
 
-static bool_t bli_is_packed( pack_t schema )
+BLIS_INLINE bool bli_is_packed( pack_t schema )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( schema & BLIS_PACK_BIT );
 }
 
-static bool_t bli_is_row_packed( pack_t schema )
+BLIS_INLINE bool bli_is_row_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                          BLIS_BITVAL_PACKED_ROWS );
+	return ( bool )
+	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	                                            BLIS_BITVAL_PACKED_ROWS ) );
 }
 
-static bool_t bli_is_col_packed( pack_t schema )
+BLIS_INLINE bool bli_is_col_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                          BLIS_BITVAL_PACKED_COLUMNS );
+	return ( bool )
+	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+	                                            BLIS_BITVAL_PACKED_COLUMNS ) );
 }
 
-static bool_t bli_is_panel_packed( pack_t schema )
+BLIS_INLINE bool bli_is_panel_packed( pack_t schema )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( schema & BLIS_PACK_PANEL_BIT );
 }
 
-static bool_t bli_is_4mi_packed( pack_t schema )
+BLIS_INLINE bool bli_is_4mi_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_4MI );
 }
 
-static bool_t bli_is_3mi_packed( pack_t schema )
+BLIS_INLINE bool bli_is_3mi_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MI );
 }
 
-static bool_t bli_is_3ms_packed( pack_t schema )
+BLIS_INLINE bool bli_is_3ms_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_3MS );
 }
 
-static bool_t bli_is_ro_packed( pack_t schema )
+BLIS_INLINE bool bli_is_ro_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RO );
 }
 
-static bool_t bli_is_io_packed( pack_t schema )
+BLIS_INLINE bool bli_is_io_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_IO );
 }
 
-static bool_t bli_is_rpi_packed( pack_t schema )
+BLIS_INLINE bool bli_is_rpi_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_RPI );
 }
 
-static bool_t bli_is_rih_packed( pack_t schema )
+BLIS_INLINE bool bli_is_rih_packed( pack_t schema )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_ro_packed( schema ) ||
 	         bli_is_io_packed( schema ) ||
 	         bli_is_rpi_packed( schema ) );
 }
 
-static bool_t bli_is_1r_packed( pack_t schema )
+BLIS_INLINE bool bli_is_1r_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1R );
 }
 
-static bool_t bli_is_1e_packed( pack_t schema )
+BLIS_INLINE bool bli_is_1e_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == BLIS_BITVAL_1E );
 }
 
-static bool_t bli_is_1m_packed( pack_t schema )
+BLIS_INLINE bool bli_is_1m_packed( pack_t schema )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_is_1r_packed( schema ) ||
 	         bli_is_1e_packed( schema ) );
 }
 
-static bool_t bli_is_nat_packed( pack_t schema )
+BLIS_INLINE bool bli_is_nat_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) == 0;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) == 0 );
 }
 
-static bool_t bli_is_ind_packed( pack_t schema )
+BLIS_INLINE bool bli_is_ind_packed( pack_t schema )
 {
-	return ( bool_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) != 0;
+	return ( bool )
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) != 0 );
 }
 
-static guint_t bli_pack_schema_index( pack_t schema )
+BLIS_INLINE guint_t bli_pack_schema_index( pack_t schema )
 {
 	return ( guint_t )
-	       ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT;
+	       ( ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT );
 }
 
 
@@ -5830,7 +5852,7 @@ static guint_t bli_pack_schema_index( pack_t schema )
 // Increment a pointer by an integer fraction:
 //   p0 + (num/dem)
 // where p0 is a pointer to a datatype of size sizeof_p0.
-static void_fp bli_ptr_inc_by_frac( void_fp p0, siz_t sizeof_p0, dim_t num, dim_t den )
+BLIS_INLINE void_fp bli_ptr_inc_by_frac( void_fp p0, siz_t sizeof_p0, dim_t num, dim_t den )
 {
 	return ( void_fp )
 	       ( ( char* )p0 + ( ( num * ( dim_t )sizeof_p0 ) / den ) );
@@ -5841,8 +5863,7 @@ static void_fp bli_ptr_inc_by_frac( void_fp p0, siz_t sizeof_p0, dim_t num, dim_
 // Set dimensions, increments, effective uplo/diagoff, etc for ONE matrix
 // argument.
 
-static
-void  bli_set_dims_incs_uplo_1m
+BLIS_INLINE void bli_set_dims_incs_uplo_1m
      (
        doff_t  diagoffa, diag_t diaga,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -5936,8 +5957,7 @@ void  bli_set_dims_incs_uplo_1m
 // Set dimensions, increments, effective uplo/diagoff, etc for ONE matrix
 // argument (without column-wise stride optimization).
 
-static
-void  bli_set_dims_incs_uplo_1m_noswap
+BLIS_INLINE void bli_set_dims_incs_uplo_1m_noswap
      (
        doff_t  diagoffa, diag_t diaga,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -6022,8 +6042,7 @@ void  bli_set_dims_incs_uplo_1m_noswap
 
 // Set dimensions and increments for TWO matrix arguments.
 
-static
-void  bli_set_dims_incs_2m
+BLIS_INLINE void bli_set_dims_incs_2m
      (
        trans_t transa,
        dim_t  m,      dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -6058,8 +6077,7 @@ void  bli_set_dims_incs_2m
 // Set dimensions, increments, effective uplo/diagoff, etc for TWO matrix
 // arguments.
 
-static
-void  bli_set_dims_incs_uplo_2m
+BLIS_INLINE void bli_set_dims_incs_uplo_2m
      (
        doff_t  diagoffa, diag_t diaga, trans_t transa,
        uplo_t  uploa,    dim_t  m,          dim_t  n,      inc_t  rs_a, inc_t  cs_a,
@@ -6166,8 +6184,7 @@ void  bli_set_dims_incs_uplo_2m
 // Set dimensions, increments, etc for ONE matrix argument when operating
 // on the diagonal.
 
-static
-void  bli_set_dims_incs_1d
+BLIS_INLINE void bli_set_dims_incs_1d
      (
        doff_t diagoffx,
        dim_t  m,    dim_t  n,      inc_t  rs_x, inc_t  cs_x,
@@ -6190,8 +6207,7 @@ void  bli_set_dims_incs_1d
 
 // Set dimensions, increments, etc for TWO matrix arguments when operating
 // on diagonals.
-static
-void  bli_set_dims_incs_2d
+BLIS_INLINE void bli_set_dims_incs_2d
      (
        doff_t diagoffx, trans_t transx,
        dim_t  m, dim_t  n, inc_t  rs_x, inc_t  cs_x,
@@ -6234,556 +6250,556 @@ void  bli_set_dims_incs_2d
 
 // Info query
 
-static num_t bli_obj_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt( obj_t* obj )
 {
 	return ( num_t )
 	       ( obj->info & BLIS_DATATYPE_BITS );
 }
 
-static bool_t bli_obj_is_float( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_float( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_FLOAT_TYPE );
 }
 
-static bool_t bli_obj_is_double( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_double( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DOUBLE_TYPE );
 }
 
-static bool_t bli_obj_is_scomplex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_scomplex( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_SCOMPLEX_TYPE );
 }
 
-static bool_t bli_obj_is_dcomplex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_dcomplex( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_DCOMPLEX_TYPE );
 }
 
-static bool_t bli_obj_is_int( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_int( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_INT_TYPE );
 }
 
-static bool_t bli_obj_is_const( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_const( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_dt( obj ) == BLIS_BITVAL_CONST_TYPE );
 }
 
-static dom_t bli_obj_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_domain( obj_t* obj )
 {
 	return ( dom_t )
 	       ( obj->info & BLIS_DOMAIN_BIT );
 }
 
-static prec_t bli_obj_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_prec( obj_t* obj )
 {
 	return ( prec_t )
 	       ( obj->info & BLIS_PRECISION_BIT );
 }
 
-static bool_t bli_obj_is_single_prec( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_single_prec( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_prec( obj ) == BLIS_BITVAL_SINGLE_PREC );
 }
 
-static bool_t bli_obj_is_double_prec( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_double_prec( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_prec( obj ) == BLIS_BITVAL_DOUBLE_PREC );
 }
 
-static num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_single_prec( obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_SINGLE_PREC );
 }
 
-static num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_double_prec( obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) | BLIS_BITVAL_DOUBLE_PREC );
 }
 
-static bool_t bli_obj_is_real( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_real( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_domain( obj ) == BLIS_BITVAL_REAL &&
 	         !bli_obj_is_const( obj ) );
 }
 
-static bool_t bli_obj_is_complex( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_complex( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_domain( obj ) == BLIS_BITVAL_COMPLEX &&
 	         !bli_obj_is_const( obj ) );
 }
 
-static num_t bli_obj_dt_proj_to_real( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_real( obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) & ~BLIS_BITVAL_COMPLEX );
 }
 
-static num_t bli_obj_dt_proj_to_complex( obj_t* obj )
+BLIS_INLINE num_t bli_obj_dt_proj_to_complex( obj_t* obj )
 {
 	return ( num_t )
 	       ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
-static num_t bli_obj_target_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_target_dt( obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-static dom_t bli_obj_target_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_target_domain( obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-static prec_t bli_obj_target_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_target_prec( obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
 }
 
-static num_t bli_obj_exec_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_exec_dt( obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-static dom_t bli_obj_exec_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_exec_domain( obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-static prec_t bli_obj_exec_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_exec_prec( obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
 }
 
-static num_t bli_obj_comp_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_comp_dt( obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info & BLIS_COMP_DT_BITS ) >> BLIS_COMP_DT_SHIFT );
 }
 
-static dom_t bli_obj_comp_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_comp_domain( obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info & BLIS_COMP_DOMAIN_BIT ) >> BLIS_COMP_DT_SHIFT );
 }
 
-static prec_t bli_obj_comp_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_comp_prec( obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info & BLIS_COMP_PREC_BIT ) >> BLIS_COMP_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-static num_t bli_obj_scalar_dt( obj_t* obj )
+BLIS_INLINE num_t bli_obj_scalar_dt( obj_t* obj )
 {
 	return ( num_t )
 	       ( ( obj->info2 & BLIS_SCALAR_DT_BITS ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-static dom_t bli_obj_scalar_domain( obj_t* obj )
+BLIS_INLINE dom_t bli_obj_scalar_domain( obj_t* obj )
 {
 	return ( dom_t )
 	       ( ( obj->info2 & BLIS_SCALAR_DOMAIN_BIT ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
 // NOTE: This function queries info2.
-static prec_t bli_obj_scalar_prec( obj_t* obj )
+BLIS_INLINE prec_t bli_obj_scalar_prec( obj_t* obj )
 {
 	return ( prec_t )
 	       ( ( obj->info2 & BLIS_SCALAR_PREC_BIT ) >> BLIS_SCALAR_DT_SHIFT );
 }
 
-static trans_t bli_obj_conjtrans_status( obj_t* obj )
+BLIS_INLINE trans_t bli_obj_conjtrans_status( obj_t* obj )
 {
 	return ( trans_t )
 	       ( obj->info & BLIS_CONJTRANS_BITS );
 }
 
-static trans_t bli_obj_onlytrans_status( obj_t* obj )
+BLIS_INLINE trans_t bli_obj_onlytrans_status( obj_t* obj )
 {
 	return ( trans_t )
 	       ( obj->info & BLIS_TRANS_BIT );
 }
 
-static bool_t bli_obj_has_trans( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_trans( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_TRANS );
 }
 
-static bool_t bli_obj_has_notrans( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_notrans( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_onlytrans_status( obj ) == BLIS_BITVAL_NO_TRANS );
 }
 
-static conj_t bli_obj_conj_status( obj_t* obj )
+BLIS_INLINE conj_t bli_obj_conj_status( obj_t* obj )
 {
 	return ( conj_t )
 	       ( obj->info & BLIS_CONJ_BIT );
 }
 
-static bool_t bli_obj_has_conj( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_conj( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_CONJ );
 }
 
-static bool_t bli_obj_has_noconj( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_noconj( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_conj_status( obj ) == BLIS_BITVAL_NO_CONJ );
 }
 
-static uplo_t bli_obj_uplo( obj_t* obj )
+BLIS_INLINE uplo_t bli_obj_uplo( obj_t* obj )
 {
 	return ( uplo_t )
 	       ( obj->info & BLIS_UPLO_BITS );
 }
 
-static bool_t bli_obj_is_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_upper( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_UPPER );
 }
 
-static bool_t bli_obj_is_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_lower( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_LOWER );
 }
 
-static bool_t bli_obj_is_upper_or_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_upper_or_lower( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_is_upper( obj ) ||
 	         bli_obj_is_lower( obj ) );
 }
 
-static bool_t bli_obj_is_dense( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_dense( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_DENSE );
 }
 
-static bool_t bli_obj_is_zeros( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_zeros( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_uplo( obj ) == BLIS_BITVAL_ZEROS );
 }
 
-static diag_t bli_obj_diag( obj_t* obj )
+BLIS_INLINE diag_t bli_obj_diag( obj_t* obj )
 {
 	return ( diag_t )
 	       ( obj->info & BLIS_UNIT_DIAG_BIT );
 }
 
-static bool_t bli_obj_has_nonunit_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_nonunit_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_diag( obj ) == BLIS_BITVAL_NONUNIT_DIAG );
 }
 
-static bool_t bli_obj_has_unit_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_unit_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
 }
 
-static bool_t bli_obj_has_inverted_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_has_inverted_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
 }
 
-static bool_t bli_obj_is_pack_rev_if_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_pack_rev_if_upper( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
 }
 
-static bool_t bli_obj_is_pack_rev_if_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_pack_rev_if_lower( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
 }
 
-static pack_t bli_obj_pack_schema( obj_t* obj )
+BLIS_INLINE pack_t bli_obj_pack_schema( obj_t* obj )
 {
 	return ( pack_t )
 	       ( obj->info & BLIS_PACK_SCHEMA_BITS );
 }
 
-static bool_t bli_obj_is_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_packed( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( obj->info & BLIS_PACK_BIT );
 }
 
-static bool_t bli_obj_is_row_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_packed( obj_t* obj )
 {
-	return ( bool_t )
-	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                 BLIS_BITVAL_PACKED_ROWS    );
+	return ( bool )
+	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+                                                   BLIS_BITVAL_PACKED_ROWS    ) );
 }
 
-static bool_t bli_obj_is_col_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_packed( obj_t* obj )
 {
-	return ( bool_t )
-	       ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                 BLIS_BITVAL_PACKED_COLUMNS );
+	return ( bool )
+	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
+                                                   BLIS_BITVAL_PACKED_COLUMNS ) );
 }
 
-static bool_t bli_obj_is_panel_packed( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_panel_packed( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( obj->info & BLIS_PACK_PANEL_BIT );
 }
 
-static packbuf_t bli_obj_pack_buffer_type( obj_t* obj )
+BLIS_INLINE packbuf_t bli_obj_pack_buffer_type( obj_t* obj )
 {
 	return ( packbuf_t )
 	       ( obj->info & BLIS_PACK_BUFFER_BITS );
 }
 
-static struc_t bli_obj_struc( obj_t* obj )
+BLIS_INLINE struc_t bli_obj_struc( obj_t* obj )
 {
 	return ( struc_t )
 	       ( obj->info & BLIS_STRUC_BITS );
 }
 
-static bool_t bli_obj_is_general( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_general( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_GENERAL );
 }
 
-static bool_t bli_obj_is_hermitian( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_hermitian( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_HERMITIAN );
 }
 
-static bool_t bli_obj_is_symmetric( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_symmetric( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_SYMMETRIC );
 }
 
-static bool_t bli_obj_is_triangular( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_triangular( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_struc( obj ) == BLIS_BITVAL_TRIANGULAR );
 }
 
 // Info modification
 
-static void bli_obj_apply_trans( trans_t trans, obj_t* obj )
+BLIS_INLINE void bli_obj_apply_trans( trans_t trans, obj_t* obj )
 {
 	obj->info = ( objbits_t )
 	            ( obj->info ^ trans );
 }
 
-static void bli_obj_apply_conj( conj_t conj, obj_t* obj )
+BLIS_INLINE void bli_obj_apply_conj( conj_t conj, obj_t* obj )
 {
 	obj->info = ( objbits_t )
 	            ( obj->info ^ conj );
 }
 
-static void bli_obj_set_conjtrans( trans_t trans, obj_t* obj )
+BLIS_INLINE void bli_obj_set_conjtrans( trans_t trans, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_CONJTRANS_BITS ) | trans;
+	            ( ( obj->info & ~BLIS_CONJTRANS_BITS ) | trans );
 }
 
-static void bli_obj_set_onlytrans( trans_t trans, obj_t* obj )
+BLIS_INLINE void bli_obj_set_onlytrans( trans_t trans, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_TRANS_BIT ) | trans;
+	            ( ( obj->info & ~BLIS_TRANS_BIT ) | trans );
 }
 
-static void bli_obj_set_conj( conj_t conj, obj_t* obj )
+BLIS_INLINE void bli_obj_set_conj( conj_t conj, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_CONJ_BIT ) | conj;
+	            ( ( obj->info & ~BLIS_CONJ_BIT ) | conj );
 }
 
-static void bli_obj_set_uplo( uplo_t uplo, obj_t* obj )
+BLIS_INLINE void bli_obj_set_uplo( uplo_t uplo, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_UPLO_BITS ) | uplo;
+	            ( ( obj->info & ~BLIS_UPLO_BITS ) | uplo );
 }
 
-static void bli_obj_set_diag( diag_t diag, obj_t* obj )
+BLIS_INLINE void bli_obj_set_diag( diag_t diag, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag;
+	            ( ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag );
 }
 
-static void bli_obj_set_invert_diag( invdiag_t invdiag, obj_t* obj )
+BLIS_INLINE void bli_obj_set_invert_diag( invdiag_t invdiag, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag;
+	            ( ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag );
 }
 
-static void bli_obj_set_dt( num_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_DATATYPE_BITS ) | dt;
+	            ( ( obj->info & ~BLIS_DATATYPE_BITS ) | dt );
 }
 
-static void bli_obj_set_target_dt( num_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_target_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_TARGET_DT_BITS ) |
-	            ( dt << BLIS_TARGET_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_TARGET_DT_BITS ) |
+	              ( dt << BLIS_TARGET_DT_SHIFT ) );
 }
 
-static void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) |
-	            ( dt << BLIS_TARGET_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) |
+	              ( dt << BLIS_TARGET_DT_SHIFT ) );
 }
 
-static void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_TARGET_PREC_BIT ) |
-	            ( dt << BLIS_TARGET_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_TARGET_PREC_BIT ) |
+	              ( dt << BLIS_TARGET_DT_SHIFT ) );
 }
 
-static void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_EXEC_DT_BITS ) |
-	            ( dt << BLIS_EXEC_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_EXEC_DT_BITS ) |
+	              ( dt << BLIS_EXEC_DT_SHIFT ) );
 }
 
-static void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) |
-	            ( dt << BLIS_EXEC_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) |
+	              ( dt << BLIS_EXEC_DT_SHIFT ) );
 }
 
-static void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_EXEC_PREC_BIT ) |
-	            ( dt << BLIS_EXEC_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_EXEC_PREC_BIT ) |
+	              ( dt << BLIS_EXEC_DT_SHIFT ) );
 }
 
-static void bli_obj_set_comp_dt( num_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_comp_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_COMP_DT_BITS ) |
-	            ( dt << BLIS_COMP_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_COMP_DT_BITS ) |
+	              ( dt << BLIS_COMP_DT_SHIFT ) );
 }
 
-static void bli_obj_set_comp_domain( dom_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_comp_domain( dom_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_COMP_DOMAIN_BIT ) |
-	            ( dt << BLIS_COMP_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_COMP_DOMAIN_BIT ) |
+	              ( dt << BLIS_COMP_DT_SHIFT ) );
 }
 
-static void bli_obj_set_comp_prec( prec_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_comp_prec( prec_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_COMP_PREC_BIT ) |
-	            ( dt << BLIS_COMP_DT_SHIFT );
+	            ( ( obj->info & ~BLIS_COMP_PREC_BIT ) |
+	              ( dt << BLIS_COMP_DT_SHIFT ) );
 }
 
 // NOTE: This function queries and modifies info2.
-static void bli_obj_set_scalar_dt( num_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_scalar_dt( num_t dt, obj_t* obj )
 {
 	obj->info2 = ( objbits_t )
-	             ( obj->info2 & ~BLIS_SCALAR_DT_BITS ) |
-	             ( dt << BLIS_SCALAR_DT_SHIFT );
+	             ( ( obj->info2 & ~BLIS_SCALAR_DT_BITS ) |
+	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
 }
 
 // NOTE: This function queries and modifies info2.
-static void bli_obj_set_scalar_domain( dom_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_scalar_domain( dom_t dt, obj_t* obj )
 {
 	obj->info2 = ( objbits_t )
-	             ( obj->info2 & ~BLIS_SCALAR_DOMAIN_BIT ) |
-	             ( dt << BLIS_SCALAR_DT_SHIFT );
+	             ( ( obj->info2 & ~BLIS_SCALAR_DOMAIN_BIT ) |
+	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
 }
 
 // NOTE: This function queries and modifies info2.
-static void bli_obj_set_scalar_prec( prec_t dt, obj_t* obj )
+BLIS_INLINE void bli_obj_set_scalar_prec( prec_t dt, obj_t* obj )
 {
 	obj->info2 = ( objbits_t )
-	             ( obj->info2 & ~BLIS_SCALAR_PREC_BIT ) |
-	             ( dt << BLIS_SCALAR_DT_SHIFT );
+	             ( ( obj->info2 & ~BLIS_SCALAR_PREC_BIT ) |
+	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
 }
 
-static void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema;
+	            ( ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema );
 }
 
-static void bli_obj_set_pack_order_if_upper( packord_t ordif, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_order_if_upper( packord_t ordif, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif;
+	            ( ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif );
 }
 
-static void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif;
+	            ( ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif );
 }
 
 // NOTE: The packbuf_t bitfield in the obj_t is currently unused. Instead,
 // packbuf_t is stored/used from the context in order to support various
 // induced methods. (Though ideally the packbuf_t field would only be
 // present in the control tree).
-static void bli_obj_set_pack_buffer_type( packbuf_t buf_type, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_buffer_type( packbuf_t buf_type, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type;
+	            ( ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type );
 }
 
-static void bli_obj_set_struc( struc_t struc, obj_t* obj )
+BLIS_INLINE void bli_obj_set_struc( struc_t struc, obj_t* obj )
 {
 	obj->info = ( objbits_t )
-	            ( obj->info & ~BLIS_STRUC_BITS ) | struc;
+	            ( ( obj->info & ~BLIS_STRUC_BITS ) | struc );
 }
 
-static void bli_obj_toggle_trans( obj_t* obj )
+BLIS_INLINE void bli_obj_toggle_trans( obj_t* obj )
 {
 	bli_obj_apply_trans( BLIS_TRANSPOSE, obj );
 }
 
-static void bli_obj_toggle_conj( obj_t* obj )
+BLIS_INLINE void bli_obj_toggle_conj( obj_t* obj )
 {
 	bli_obj_apply_conj( BLIS_CONJUGATE, obj );
 }
 
-static void bli_obj_toggle_uplo( obj_t* obj )
+BLIS_INLINE void bli_obj_toggle_uplo( obj_t* obj )
 {
 	obj->info = ( objbits_t )
 	            ( obj->info ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT;
@@ -6791,63 +6807,70 @@ static void bli_obj_toggle_uplo( obj_t* obj )
 
 // Root matrix query
 
-static obj_t* bli_obj_root( obj_t* obj )
+BLIS_INLINE obj_t* bli_obj_root( obj_t* obj )
 {
-	return ( obj->root );
+	return ( obj_t* )( obj->root );
 }
 
-static bool_t bli_obj_root_is_general( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_general( obj_t* obj )
 {
-	return bli_obj_is_general( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_general( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_hermitian( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_hermitian( obj_t* obj )
 {
-	return bli_obj_is_hermitian( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_hermitian( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_symmetric( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_symmetric( obj_t* obj )
 {
-	return bli_obj_is_symmetric( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_symmetric( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_triangular( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_triangular( obj_t* obj )
 {
-	return bli_obj_is_triangular( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_triangular( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_herm_or_symm( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_herm_or_symm( obj_t* obj )
 {
-	return bli_obj_is_hermitian( bli_obj_root( obj ) ) ||
-	       bli_obj_is_symmetric( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_hermitian( bli_obj_root( obj ) ) ||
+	         bli_obj_is_symmetric( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_upper( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_upper( obj_t* obj )
 {
-	return bli_obj_is_upper( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_upper( bli_obj_root( obj ) ) );
 }
 
-static bool_t bli_obj_root_is_lower( obj_t* obj )
+BLIS_INLINE bool bli_obj_root_is_lower( obj_t* obj )
 {
-	return bli_obj_is_lower( bli_obj_root( obj ) );
+	return ( bool )
+	       ( bli_obj_is_lower( bli_obj_root( obj ) ) );
 }
 
 // Root matrix modification
 
-static void bli_obj_set_as_root( obj_t* obj )
+BLIS_INLINE void bli_obj_set_as_root( obj_t* obj )
 {
 	obj->root = obj;
 }
 
 // Diagonal offset query
 
-static doff_t bli_obj_diag_offset( obj_t* obj )
+BLIS_INLINE doff_t bli_obj_diag_offset( obj_t* obj )
 {
 	return ( doff_t )
 	       ( obj->diag_off );
 }
 
-static doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
+BLIS_INLINE doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
 {
 	return ( doff_t )
 	       ( bli_obj_has_trans( obj ) ? -bli_obj_diag_offset( obj )
@@ -6856,106 +6879,109 @@ static doff_t bli_obj_diag_offset_after_trans( obj_t* obj )
 
 // Diagonal offset modification
 
-static void bli_obj_set_diag_offset( doff_t offset, obj_t* obj )
+BLIS_INLINE void bli_obj_set_diag_offset( doff_t offset, obj_t* obj )
 {
 	obj->diag_off = ( doff_t )offset;
 }
 
-static void bli_obj_negate_diag_offset( obj_t* obj )
+BLIS_INLINE void bli_obj_negate_diag_offset( obj_t* obj )
 {
 	obj->diag_off = -(obj->diag_off);
 }
 
-static void bli_obj_inc_diag_offset( doff_t offset, obj_t* obj )
+BLIS_INLINE void bli_obj_inc_diag_offset( doff_t offset, obj_t* obj )
 {
 	obj->diag_off += ( doff_t )offset;
 }
 
 // Dimension query
 
-static dim_t bli_obj_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length( obj_t* obj )
 {
 	return ( obj->dim[ BLIS_M ] );
 }
 
-static dim_t bli_obj_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width( obj_t* obj )
 {
 	return ( obj->dim[ BLIS_N ] );
 }
 
-static dim_t bli_obj_dim( mdim_t mdim, obj_t* obj )
+BLIS_INLINE dim_t bli_obj_dim( mdim_t mdim, obj_t* obj )
 {
 	return ( obj->dim[ mdim ] );
 }
 
-static dim_t bli_obj_min_dim( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_min_dim( obj_t* obj )
 {
 	return bli_min( bli_obj_length( obj ),
-	                bli_obj_width(  obj ) );
+	                bli_obj_width( obj ) );
 }
 
-static dim_t bli_obj_max_dim( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_max_dim( obj_t* obj )
 {
 	return bli_max( bli_obj_length( obj ),
-	                bli_obj_width(  obj ) );
+	                bli_obj_width( obj ) );
 }
 
-static dim_t bli_obj_length_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_after_trans( obj_t* obj )
 {
-	return ( bli_obj_has_trans( obj ) ? bli_obj_width(  obj )
+	return ( bli_obj_has_trans( obj ) ? bli_obj_width( obj )
 	                                  : bli_obj_length( obj ) );
 }
 
-static dim_t bli_obj_width_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_after_trans( obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_length( obj )
-	                                  : bli_obj_width(  obj ) );
+	                                  : bli_obj_width( obj ) );
 }
 
-static bool_t bli_obj_is_1x1( obj_t* x )
+BLIS_INLINE bool bli_obj_is_1x1( obj_t* x )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_length( x ) == 1 &&
-	                   bli_obj_width(  x ) == 1 );
+	         bli_obj_width( x ) == 1 );
 }
 
 // Stride/increment query
 
-static inc_t bli_obj_row_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_row_stride( obj_t* obj )
 {
 	return ( obj->rs );
 }
 
-static inc_t bli_obj_col_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_col_stride( obj_t* obj )
 {
 	return ( obj->cs );
 }
 
-static inc_t bli_obj_imag_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_imag_stride( obj_t* obj )
 {
 	return ( obj->is );
 }
 
-static inc_t bli_obj_row_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_row_stride_mag( obj_t* obj )
 {
-	return ( bli_abs( obj->rs ) );
+	return ( inc_t )
+	       ( bli_abs( obj->rs ) );
 }
 
-static inc_t bli_obj_col_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_col_stride_mag( obj_t* obj )
 {
-	return ( bli_abs( obj->cs ) );
+	return ( inc_t )
+	       ( bli_abs( obj->cs ) );
 }
 
-static inc_t bli_obj_imag_stride_mag( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_imag_stride_mag( obj_t* obj )
 {
-	return ( bli_abs( obj->is ) );
+	return ( inc_t )
+	       ( bli_abs( obj->is ) );
 }
 
 // Note: The purpose of these functions is to obtain the length and width
 // of the smallest submatrices of an object that could still encompass
 // the stored data above (if obj is upper) or below (if obj is lower)
 // the diagonal.
-static dim_t bli_obj_length_stored( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_stored( obj_t* obj )
 {
 	return ( dim_t )
 	       ( bli_obj_is_upper( obj )
@@ -6966,7 +6992,7 @@ static dim_t bli_obj_length_stored( obj_t* obj )
 	       );
 }
 
-static dim_t bli_obj_width_stored( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_stored( obj_t* obj )
 {
 	return ( dim_t )
 	       ( bli_obj_is_lower( obj )
@@ -6977,90 +7003,89 @@ static dim_t bli_obj_width_stored( obj_t* obj )
 	       );
 }
 
-static dim_t bli_obj_length_stored_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_length_stored_after_trans( obj_t* obj )
 {
-	return ( bli_obj_has_trans( obj ) ? bli_obj_width_stored(  obj )
+	return ( bli_obj_has_trans( obj ) ? bli_obj_width_stored( obj )
 	                                  : bli_obj_length_stored( obj ) );
 }
 
-static dim_t bli_obj_width_stored_after_trans( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_width_stored_after_trans( obj_t* obj )
 {
 	return ( bli_obj_has_trans( obj ) ? bli_obj_length_stored( obj )
-	                                  : bli_obj_width_stored(  obj ) );
+	                                  : bli_obj_width_stored( obj ) );
 }
 
-static dim_t bli_obj_vector_dim( obj_t* x )
+BLIS_INLINE dim_t bli_obj_vector_dim( obj_t* x )
 {
-	return ( bli_obj_length( x ) == 1 ? bli_obj_width(  x )
+	return ( bli_obj_length( x ) == 1 ? bli_obj_width( x )
 	                                  : bli_obj_length( x ) );
 }
 
-static inc_t bli_obj_vector_inc( obj_t* x )
+BLIS_INLINE inc_t bli_obj_vector_inc( obj_t* x )
 {
-	return ( bli_obj_is_1x1( x ) ? 1 : \
+	return ( bli_obj_is_1x1( x ) ? 1 :
 	         ( bli_obj_length( x ) == 1 ? bli_obj_col_stride( x )
 	                                    : bli_obj_row_stride( x ) )
 	       );
 }
 
-static bool_t bli_obj_is_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_vector( obj_t* x )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_length( x ) == 1 ||
-	                   bli_obj_width(  x ) == 1 );
+	         bli_obj_width(  x ) == 1 );
 }
 
-static bool_t bli_obj_is_row_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_row_vector( obj_t* x )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_length( x ) == 1 );
 }
 
-static bool_t bli_obj_is_col_vector( obj_t* x )
+BLIS_INLINE bool bli_obj_is_col_vector( obj_t* x )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_width( x ) == 1 );
 }
 
-static bool_t bli_obj_has_zero_dim( obj_t* x )
+BLIS_INLINE bool bli_obj_has_zero_dim( obj_t* x )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_length( x ) == 0 ||
-	                   bli_obj_width(  x ) == 0 );
+	         bli_obj_width(  x ) == 0 );
 }
 
 // Dimension modification
 
-static void bli_obj_set_length( dim_t m, obj_t* obj )
+BLIS_INLINE void bli_obj_set_length( dim_t m, obj_t* obj )
 {
 	obj->dim[ BLIS_M ] = m;
 }
 
-static void bli_obj_set_width( dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_width( dim_t n, obj_t* obj )
 {
 	obj->dim[ BLIS_N ] = n;
 }
 
-static void bli_obj_set_dim( mdim_t mdim, dim_t dim_val, obj_t* obj )
+BLIS_INLINE void bli_obj_set_dim( mdim_t mdim, dim_t dim_val, obj_t* obj )
 {
 	obj->dim[ mdim ] = dim_val;
 }
 
-static void bli_obj_set_dims( dim_t m, dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_dims( dim_t m, dim_t n, obj_t* obj )
 {
 	bli_obj_set_length( m, obj );
 	bli_obj_set_width( n, obj );
 }
 
-static void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, obj_t* obj )
 {
-	//if ( bli_does_notrans( trans ) )
-	if ( ( ~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS )
+	if ( bli_does_notrans( trans ) )
 	{
 		bli_obj_set_length( m, obj );
 		bli_obj_set_width( n, obj );
 	}
-	else
+	else // if ( bli_does_trans( trans ) )
 	{
 		bli_obj_set_length( n, obj );
 		bli_obj_set_width( m, obj );
@@ -7077,96 +7102,96 @@ static void bli_obj_set_dims_with_trans( trans_t trans, dim_t m, dim_t n, obj_t*
 // "obj" macros are used on packed matrices.
 //
 
-static bool_t bli_obj_is_row_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_stored( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_col_stride_mag( obj ) == 1 );
 }
 
-static bool_t bli_obj_is_col_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_stored( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) == 1 );
 }
 
-static bool_t bli_obj_is_gen_stored( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_gen_stored( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) != 1 &&
 	         bli_obj_col_stride_mag( obj ) != 1 );
 }
 
-static bool_t bli_obj_is_row_tilted( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_row_tilted( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_col_stride_mag( obj ) < bli_obj_row_stride_mag( obj ) );
 }
 
-static bool_t bli_obj_is_col_tilted( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_col_tilted( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_row_stride_mag( obj ) < bli_obj_col_stride_mag( obj ) );
 }
 
 // Stride/increment modification
 
-static void bli_obj_set_row_stride( inc_t rs, obj_t* obj )
+BLIS_INLINE void bli_obj_set_row_stride( inc_t rs, obj_t* obj )
 {
 	obj->rs = rs;
 }
 
-static void bli_obj_set_col_stride( inc_t cs, obj_t* obj )
+BLIS_INLINE void bli_obj_set_col_stride( inc_t cs, obj_t* obj )
 {
 	obj->cs = cs;
 }
 
-static void bli_obj_set_strides( inc_t rs, inc_t cs, obj_t* obj )
+BLIS_INLINE void bli_obj_set_strides( inc_t rs, inc_t cs, obj_t* obj )
 {
 	bli_obj_set_row_stride( rs, obj );
 	bli_obj_set_col_stride( cs, obj );
 }
 
-static void bli_obj_set_imag_stride( inc_t is, obj_t* obj )
+BLIS_INLINE void bli_obj_set_imag_stride( inc_t is, obj_t* obj )
 {
 	obj->is = is;
 }
 
 // Offset query
 
-static dim_t bli_obj_row_off( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_row_off( obj_t* obj )
 {
 	return ( obj->off[ BLIS_M ] );
 }
 
-static dim_t bli_obj_col_off( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_col_off( obj_t* obj )
 {
 	return ( obj->off[ BLIS_N ] );
 }
 
-static dim_t bli_obj_off( mdim_t mdim, obj_t* obj )
+BLIS_INLINE dim_t bli_obj_off( mdim_t mdim, obj_t* obj )
 {
 	return ( obj->off[ mdim ] );
 }
 
 // Offset modification
 
-static void bli_obj_set_off( mdim_t mdim, dim_t offset, obj_t* obj )
+BLIS_INLINE void bli_obj_set_off( mdim_t mdim, dim_t offset, obj_t* obj )
 {
 	obj->off[ mdim ] = offset;
 }
 
-static void bli_obj_set_offs( dim_t offm, dim_t offn, obj_t* obj )
+BLIS_INLINE void bli_obj_set_offs( dim_t offm, dim_t offn, obj_t* obj )
 {
 	bli_obj_set_off( BLIS_M, offm, obj );
 	bli_obj_set_off( BLIS_N, offn, obj );
 }
 
-static void bli_obj_inc_off( mdim_t mdim, dim_t offset, obj_t* obj )
+BLIS_INLINE void bli_obj_inc_off( mdim_t mdim, dim_t offset, obj_t* obj )
 {
 	obj->off[ mdim ] += offset;
 }
 
-static void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
+BLIS_INLINE void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
 {
 	bli_obj_inc_off( BLIS_M, offm, obj );
 	bli_obj_inc_off( BLIS_N, offn, obj );
@@ -7174,56 +7199,57 @@ static void bli_obj_inc_offs( dim_t offm, dim_t offn, obj_t* obj )
 
 // Diagonal offset predicates
 
-static bool_t bli_obj_is_strictly_above_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_strictly_above_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( doff_t )bli_obj_length( obj ) <= -bli_obj_diag_offset( obj ) );
 }
 
-static bool_t bli_obj_is_strictly_below_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_strictly_below_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( doff_t )bli_obj_width( obj ) <= bli_obj_diag_offset( obj ) );
 }
 
-static bool_t bli_obj_is_outside_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_outside_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_is_strictly_above_diag( obj ) ||
 	         bli_obj_is_strictly_below_diag( obj ) );
 }
 
-static bool_t bli_obj_intersects_diag( obj_t* obj )
+BLIS_INLINE bool bli_obj_intersects_diag( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( !bli_obj_is_strictly_above_diag( obj ) &&
 	         !bli_obj_is_strictly_below_diag( obj ) );
 }
 
-static bool_t bli_obj_is_unstored_subpart( obj_t* obj )
+BLIS_INLINE bool bli_obj_is_unstored_subpart( obj_t* obj )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( ( bli_obj_root_is_lower( obj ) && bli_obj_is_strictly_above_diag( obj ) ) ||
 	         ( bli_obj_root_is_upper( obj ) && bli_obj_is_strictly_below_diag( obj ) ) );
 }
 
 // Buffer address query
 
-static void* bli_obj_buffer( obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer( obj_t* obj )
 {
-	return ( obj->buffer );
+	return ( void* )
+	       ( obj->buffer );
 }
 
 // Buffer address modification
 
-static void bli_obj_set_buffer( void* p, obj_t* obj )
+BLIS_INLINE void bli_obj_set_buffer( void* p, obj_t* obj )
 {
 	obj->buffer = p;
 }
 
 // Bufferless scalar field query
 
-static void* bli_obj_internal_scalar_buffer( obj_t* obj )
+BLIS_INLINE void* bli_obj_internal_scalar_buffer( obj_t* obj )
 {
 	return ( void* )
 	       ( &( obj->scalar ) );
@@ -7231,50 +7257,51 @@ static void* bli_obj_internal_scalar_buffer( obj_t* obj )
 
 // Bufferless scalar field modification
 
-static void bli_obj_copy_internal_scalar( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_copy_internal_scalar( obj_t* a, obj_t* b )
 {
 	b->scalar = a->scalar;
 }
 
 // Element size query
 
-static siz_t bli_obj_elem_size( obj_t* obj )
+BLIS_INLINE siz_t bli_obj_elem_size( obj_t* obj )
 {
-	return ( obj->elem_size );
+	return ( siz_t )
+	       ( obj->elem_size );
 }
 
 // Element size modification
 
-static void bli_obj_set_elem_size( siz_t size, obj_t* obj )
+BLIS_INLINE void bli_obj_set_elem_size( siz_t size, obj_t* obj )
 {
 	obj->elem_size = size;
 }
 
 // Packed matrix info query
 
-static dim_t bli_obj_padded_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_padded_length( obj_t* obj )
 {
 	return ( obj->m_padded );
 }
 
-static dim_t bli_obj_padded_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_padded_width( obj_t* obj )
 {
 	return ( obj->n_padded );
 }
 
 // Packed matrix info modification
 
-static void bli_obj_set_padded_length( dim_t m, obj_t* obj )
+BLIS_INLINE void bli_obj_set_padded_length( dim_t m, obj_t* obj )
 {
 	obj->m_padded = m;
 }
 
-static void bli_obj_set_padded_width( dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_padded_width( dim_t n, obj_t* obj )
 {
 	obj->n_padded = n;
 }
 
-static void bli_obj_set_padded_dims( dim_t m, dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_padded_dims( dim_t m, dim_t n, obj_t* obj )
 {
 	bli_obj_set_padded_length( m, obj );
 	bli_obj_set_padded_width( n, obj );
@@ -7282,57 +7309,57 @@ static void bli_obj_set_padded_dims( dim_t m, dim_t n, obj_t* obj )
 
 // Packed panel info query
 
-static dim_t bli_obj_panel_length( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_panel_length( obj_t* obj )
 {
 	return ( obj->m_panel );
 }
 
-static dim_t bli_obj_panel_width( obj_t* obj )
+BLIS_INLINE dim_t bli_obj_panel_width( obj_t* obj )
 {
 	return ( obj->n_panel );
 }
 
-static inc_t bli_obj_panel_dim( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_panel_dim( obj_t* obj )
 {
 	return ( obj->pd );
 }
 
-static inc_t bli_obj_panel_stride( obj_t* obj )
+BLIS_INLINE inc_t bli_obj_panel_stride( obj_t* obj )
 {
 	return ( obj->ps );
 }
 
 // Packed panel info modification
 
-static void bli_obj_set_panel_length( dim_t m, obj_t* obj )
+BLIS_INLINE void bli_obj_set_panel_length( dim_t m, obj_t* obj )
 {
 	obj->m_panel = m;
 }
 
-static void bli_obj_set_panel_width( dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_panel_width( dim_t n, obj_t* obj )
 {
 	obj->n_panel = n;
 }
 
-static void bli_obj_set_panel_dims( dim_t m, dim_t n, obj_t* obj )
+BLIS_INLINE void bli_obj_set_panel_dims( dim_t m, dim_t n, obj_t* obj )
 {
 	bli_obj_set_panel_length( m, obj );
 	bli_obj_set_panel_width( n, obj );
 }
 
-static void bli_obj_set_panel_dim( inc_t pd, obj_t* obj )
+BLIS_INLINE void bli_obj_set_panel_dim( inc_t pd, obj_t* obj )
 {
 	obj->pd = pd;
 }
 
-static void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
+BLIS_INLINE void bli_obj_set_panel_stride( inc_t ps, obj_t* obj )
 {
 	obj->ps = ps;
 }
 
 // stor3_t-related
 
-static stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
+BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 {
 	const inc_t rs_c = bli_obj_row_stride( c );
 	const inc_t cs_c = bli_obj_col_stride( c );
@@ -7375,7 +7402,7 @@ static stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 // NOTE: This is intended only for use in the BLAS compatibility API and typed
 // BLIS API.
 
-static void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t rs, inc_t cs, obj_t* obj )
+BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t rs, inc_t cs, obj_t* obj )
 {
 	bli_obj_set_as_root( obj );
 
@@ -7408,7 +7435,7 @@ static void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t rs, 
 // NOTE: This is intended only for use in the BLAS compatibility API and typed
 // BLIS API.
 
-static void bli_obj_init_finish_1x1( num_t dt, void* p, obj_t* obj )
+BLIS_INLINE void bli_obj_init_finish_1x1( num_t dt, void* p, obj_t* obj )
 {
 	bli_obj_set_as_root( obj );
 
@@ -7421,7 +7448,7 @@ static void bli_obj_init_finish_1x1( num_t dt, void* p, obj_t* obj )
 
 // Toggle the region referenced (or "stored").
 
-static void bli_obj_toggle_region_ref( obj_t* obj )
+BLIS_INLINE void bli_obj_toggle_region_ref( obj_t* obj )
 {
 	if      ( bli_obj_is_upper( obj ) ) bli_obj_inc_diag_offset( -1, obj );
 	else if ( bli_obj_is_lower( obj ) ) bli_obj_inc_diag_offset(  1, obj );
@@ -7429,10 +7456,9 @@ static void bli_obj_toggle_region_ref( obj_t* obj )
 	bli_obj_toggle_uplo( obj );
 }
 
-static void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
+BLIS_INLINE void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
 {
-	//if ( bli_does_trans( trans ) &&
-	if ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS &&
+	if ( bli_does_trans( trans ) &&
 	     bli_obj_is_upper_or_lower( obj ) )
 	{
 		bli_obj_toggle_uplo( obj );
@@ -7442,7 +7468,7 @@ static void bli_obj_toggle_uplo_if_trans( trans_t trans, obj_t* obj )
 
 // Initialize object with default properties (info field).
 
-static void bli_obj_set_defaults( obj_t* obj )
+BLIS_INLINE void bli_obj_set_defaults( obj_t* obj )
 {
 	obj->info = 0x0;
 	obj->info = obj->info | BLIS_BITVAL_DENSE | BLIS_BITVAL_GENERAL;
@@ -7450,7 +7476,7 @@ static void bli_obj_set_defaults( obj_t* obj )
 
 // Acquire buffer at object's submatrix offset (offset-aware buffer query).
 
-static void* bli_obj_buffer_at_off( obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer_at_off( obj_t* obj )
 {
 	return ( void* )
 	       (
@@ -7465,7 +7491,7 @@ static void* bli_obj_buffer_at_off( obj_t* obj )
 
 // Acquire buffer from BLIS_CONSTANT object.
 
-static void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
 {
 	void* p;
 
@@ -7480,7 +7506,7 @@ static void* bli_obj_buffer_for_const( num_t dt, obj_t* obj )
 
 // Acquire buffer from scalar (1x1) object, including BLIS_CONSTANT objects.
 
-static void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
+BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 {
 	return ( void* )
 	       ( bli_obj_is_const( obj ) ? bli_obj_buffer_for_const( dt, obj )
@@ -7490,16 +7516,16 @@ static void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 
 // Make a full alias (shallow copy).
 
-static void bli_obj_alias_to( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_to( obj_t* a, obj_t* b )
 {
 	bli_obj_init_full_shallow_copy_of( a, b );
 }
 
 // Check if two objects are aliases of one another.
 
-static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
+BLIS_INLINE bool bli_obj_is_alias_of( obj_t* a, obj_t* b )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_obj_buffer( a ) == bli_obj_buffer( b ) );
 }
 
@@ -7507,7 +7533,7 @@ static bool_t bli_obj_is_alias_of( obj_t* a, obj_t* b )
 // Create an alias with a trans value applied.
 // (Note: trans may include a conj component.)
 
-static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
 {
 	bli_obj_alias_to( a, b );
 	bli_obj_apply_trans( trans, b );
@@ -7515,7 +7541,7 @@ static void bli_obj_alias_with_trans( trans_t trans, obj_t* a, obj_t* b )
 
 // Create an alias with a conj value applied.
 
-static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
 {
 	bli_obj_alias_to( a, b );
 	bli_obj_apply_conj( conja, b );
@@ -7523,7 +7549,7 @@ static void bli_obj_alias_with_conj( conj_t conja, obj_t* a, obj_t* b )
 
 // Alias only the real part.
 
-static void bli_obj_real_part( obj_t* c, obj_t* r )
+BLIS_INLINE void bli_obj_real_part( obj_t* c, obj_t* r )
 {
 	bli_obj_alias_to( c, r );
 
@@ -7556,7 +7582,7 @@ static void bli_obj_real_part( obj_t* c, obj_t* r )
 
 // Alias only the imaginary part.
 
-static void bli_obj_imag_part( obj_t* c, obj_t* i )
+BLIS_INLINE void bli_obj_imag_part( obj_t* c, obj_t* i )
 {
 	if ( bli_obj_is_complex( c ) )
 	{
@@ -7595,7 +7621,7 @@ static void bli_obj_imag_part( obj_t* c, obj_t* i )
 // chosen buffer (possibly using an auxiliary datatype if the object is
 // BLIS_CONSTANT).
 
-static void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* dt, void** buf )
+BLIS_INLINE void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* dt, void** buf )
 {
 	if ( bli_obj_is_const( obj ) )
 	{
@@ -7611,14 +7637,14 @@ static void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* dt, v
 
 // Swap all object fields (metadata/properties).
 
-static void bli_obj_swap( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_swap( obj_t* a, obj_t* b )
 {
 	obj_t t = *b; *b = *a; *a = t;
 }
 
 // Swap object pack schemas.
 
-static void bli_obj_swap_pack_schemas( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_swap_pack_schemas( obj_t* a, obj_t* b )
 {
 	const pack_t schema_a = bli_obj_pack_schema( a );
 	const pack_t schema_b = bli_obj_pack_schema( b );
@@ -7630,7 +7656,7 @@ static void bli_obj_swap_pack_schemas( obj_t* a, obj_t* b )
 // Induce a transposition on an object: swap dimensions, increments, and
 // offsets, then clear the trans bit.
 
-static void bli_obj_induce_trans( obj_t* obj )
+BLIS_INLINE void bli_obj_induce_trans( obj_t* obj )
 {
 	// Induce transposition among basic fields.
 	dim_t  m        = bli_obj_length( obj );
@@ -7666,7 +7692,7 @@ static void bli_obj_induce_trans( obj_t* obj )
 	// respectively.
 }
 
-static void bli_obj_induce_fast_trans( obj_t* obj )
+BLIS_INLINE void bli_obj_induce_fast_trans( obj_t* obj )
 {
 	// NOTE: This function is only used in situations where the matrices
 	// are guaranteed to not have structure or be packed.
@@ -7697,7 +7723,7 @@ static void bli_obj_induce_fast_trans( obj_t* obj )
 // and column strides are left unchanged (which, of course, drastically
 // changes the effect of the macro).
 
-static void bli_obj_reflect_about_diag( obj_t* obj )
+BLIS_INLINE void bli_obj_reflect_about_diag( obj_t* obj )
 {
 	dim_t  m        = bli_obj_length( obj );
 	dim_t  n        = bli_obj_width( obj );
@@ -9902,7 +9928,7 @@ static void bli_obj_reflect_about_diag( obj_t* obj )
 
 // scal2ris_mxn
 
-static void bli_cscal2ris_mxn
+BLIS_INLINE void bli_cscal2ris_mxn
      (
        const conj_t       conjx,
        const dim_t        m,
@@ -9967,7 +9993,7 @@ static void bli_cscal2ris_mxn
 	}
 }
 
-static void bli_zscal2ris_mxn
+BLIS_INLINE void bli_zscal2ris_mxn
      (
        const conj_t       conjx,
        const dim_t        m,
@@ -14158,7 +14184,7 @@ static void bli_zscal2ris_mxn
 
 // xy = ?s
 
-static void bli_ssadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ssadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14185,7 +14211,7 @@ static void bli_ssadds_mxn( const dim_t m, const dim_t n, float*    restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dsadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dsadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14212,7 +14238,7 @@ static void bli_dsadds_mxn( const dim_t m, const dim_t n, double*   restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_csadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_csadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14239,7 +14265,7 @@ static void bli_csadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zsadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zsadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14269,7 +14295,7 @@ static void bli_zsadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 
 // xy = ?d
 
-static void bli_sdadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sdadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14296,7 +14322,7 @@ static void bli_sdadds_mxn( const dim_t m, const dim_t n, float*    restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_ddadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ddadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14323,7 +14349,7 @@ static void bli_ddadds_mxn( const dim_t m, const dim_t n, double*   restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cdadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cdadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14350,7 +14376,7 @@ static void bli_cdadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zdadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zdadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14380,7 +14406,7 @@ static void bli_zdadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 
 // xy = ?c
 
-static void bli_scadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_scadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14407,7 +14433,7 @@ static void bli_scadds_mxn( const dim_t m, const dim_t n, float*    restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dcadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dcadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14434,7 +14460,7 @@ static void bli_dcadds_mxn( const dim_t m, const dim_t n, double*   restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_ccadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ccadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14461,7 +14487,7 @@ static void bli_ccadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zcadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zcadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14491,7 +14517,7 @@ static void bli_zcadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 
 // xy = ?z
 
-static void bli_szadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_szadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14518,7 +14544,7 @@ static void bli_szadds_mxn( const dim_t m, const dim_t n, float*    restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dzadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dzadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14545,7 +14571,7 @@ static void bli_dzadds_mxn( const dim_t m, const dim_t n, double*   restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_czadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_czadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14572,7 +14598,7 @@ static void bli_czadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, 
 		            *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zzadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zzadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14602,22 +14628,22 @@ static void bli_zzadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 
 
 
-static void bli_sadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sadds_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                          float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_ssadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_dadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dadds_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                          double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_ddadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_cadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cadds_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                          scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_ccadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_zadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                          dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_zzadds_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
@@ -14820,7 +14846,7 @@ static void bli_zadds_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, c
 // - The first char encodes the type of x.
 // - The second char encodes the type of y.
 
-static void bli_sset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_sset0s_mxn( const dim_t m, const dim_t n,
                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -14828,7 +14854,7 @@ static void bli_sset0s_mxn( const dim_t m, const dim_t n,
 	bli_sset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_dset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_dset0s_mxn( const dim_t m, const dim_t n,
                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -14836,7 +14862,7 @@ static void bli_dset0s_mxn( const dim_t m, const dim_t n,
 	bli_dset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_cset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_cset0s_mxn( const dim_t m, const dim_t n,
                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -14844,7 +14870,7 @@ static void bli_cset0s_mxn( const dim_t m, const dim_t n,
 	bli_cset0s( *(y + i*rs_y + j*cs_y) );
 }
 
-static void bli_zset0s_mxn( const dim_t m, const dim_t n,
+BLIS_INLINE void bli_zset0s_mxn( const dim_t m, const dim_t n,
                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	for ( dim_t j = 0; j < n; ++j )
@@ -14868,7 +14894,7 @@ static void bli_zset0s_mxn( const dim_t m, const dim_t n,
 
 // xy = ?s
 
-static void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14895,7 +14921,7 @@ static void bli_sscopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14922,7 +14948,7 @@ static void bli_dscopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14949,7 +14975,7 @@ static void bli_cscopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -14979,7 +15005,7 @@ static void bli_zscopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?d
 
-static void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15006,7 +15032,7 @@ static void bli_sdcopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15033,7 +15059,7 @@ static void bli_ddcopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15060,7 +15086,7 @@ static void bli_cdcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15090,7 +15116,7 @@ static void bli_zdcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?c
 
-static void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15117,7 +15143,7 @@ static void bli_sccopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15144,7 +15170,7 @@ static void bli_dccopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15171,7 +15197,7 @@ static void bli_cccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15201,7 +15227,7 @@ static void bli_zccopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 
 // xy = ?c
 
-static void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15228,7 +15254,7 @@ static void bli_szcopys_mxn( const dim_t m, const dim_t n, float*    restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15255,7 +15281,7 @@ static void bli_dzcopys_mxn( const dim_t m, const dim_t n, double*   restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15282,7 +15308,7 @@ static void bli_czcopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x,
 		             *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                            dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 #ifdef BLIS_ENABLE_CR_CASES
@@ -15311,22 +15337,22 @@ static void bli_zzcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x,
 }
 
 
-static void bli_scopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_scopys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_sscopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_dcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dcopys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_ddcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_ccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_ccopys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_cccopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
 }
-static void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_zzcopys_mxn( m, n, x, rs_x, cs_x, y, rs_y, cs_y );
@@ -15345,7 +15371,7 @@ static void bli_zcopys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \
@@ -15409,7 +15435,7 @@ INSERT_GENTFUNC_BASIC0( scal2s_mxn )
 
 // -- (xby) = (?ss) ------------------------------------------------------------
 
-static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15444,7 +15470,7 @@ static void bli_sssxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15479,7 +15505,7 @@ static void bli_dssxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15514,7 +15540,7 @@ static void bli_cssxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             float*    restrict beta,
                                                             float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15552,7 +15578,7 @@ static void bli_zssxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?dd) ------------------------------------------------------------
 
-static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15587,7 +15613,7 @@ static void bli_sddxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15622,7 +15648,7 @@ static void bli_dddxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15657,7 +15683,7 @@ static void bli_cddxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             double*   restrict beta,
                                                             double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15695,7 +15721,7 @@ static void bli_zddxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?cc) ------------------------------------------------------------
 
-static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15730,7 +15756,7 @@ static void bli_sccxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15765,7 +15791,7 @@ static void bli_dccxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15800,7 +15826,7 @@ static void bli_cccxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             scomplex* restrict beta,
                                                             scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15838,7 +15864,7 @@ static void bli_zccxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 // -- (xby) = (?zz) ------------------------------------------------------------
 
-static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15873,7 +15899,7 @@ static void bli_szzxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15908,7 +15934,7 @@ static void bli_dzzxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15943,7 +15969,7 @@ static void bli_czzxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x
 		              *(y + ii*rs_y + jj*cs_y) );
 	}
 }
-static void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                             dcomplex* restrict beta,
                                                             dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -15981,25 +16007,25 @@ static void bli_zzzxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x
 
 
 
-static void bli_sxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_sxpbys_mxn( const dim_t m, const dim_t n, float*    restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           float*    restrict beta,
                                                           float*    restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_sssxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_dxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_dxpbys_mxn( const dim_t m, const dim_t n, double*   restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           double*   restrict beta,
                                                           double*   restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_dddxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_cxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_cxpbys_mxn( const dim_t m, const dim_t n, scomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           scomplex* restrict beta,
                                                           scomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
 	bli_cccxpbys_mxn( m, n, x, rs_x, cs_x, beta, y, rs_y, cs_y );
 }
-static void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
+BLIS_INLINE void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, const inc_t rs_x, const inc_t cs_x,
                                                           dcomplex* restrict beta,
                                                           dcomplex* restrict y, const inc_t rs_y, const inc_t cs_y )
 {
@@ -16293,7 +16319,7 @@ static void bli_zxpbys_mxn( const dim_t m, const dim_t n, dcomplex* restrict x, 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const dim_t        m, \
        const dim_t        n, \
@@ -16337,7 +16363,7 @@ INSERT_GENTFUNC_BASIC0( bcastbbs_mxn )
 #undef  GENTFUNCRO
 #define GENTFUNCRO( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \
@@ -16405,7 +16431,7 @@ INSERT_GENTFUNCRO_BASIC0( scal2bbs_mxn )
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const conj_t       conjx, \
        const dim_t        m, \
@@ -16511,7 +16537,7 @@ INSERT_GENTFUNCCO_BASIC0( scal2bbs_mxn )
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname ) \
 \
-static void PASTEMAC(ch,opname) \
+BLIS_INLINE void PASTEMAC(ch,opname) \
      ( \
        const dim_t        m, \
        const dim_t        n, \
@@ -16707,7 +16733,7 @@ INSERT_GENTFUNC_BASIC0( set0bbs_mxn )
 
 // scal2ri3s_mxn
 
-static void bli_cscal2ri3s_mxn
+BLIS_INLINE void bli_cscal2ri3s_mxn
      (
        const conj_t       conjx,
        const dim_t        m,
@@ -16777,7 +16803,7 @@ static void bli_cscal2ri3s_mxn
 	}
 }
 
-static void bli_zscal2ri3s_mxn
+BLIS_INLINE void bli_zscal2ri3s_mxn
      (
        const conj_t       conjx,
        const dim_t        m,
@@ -17033,7 +17059,7 @@ static void bli_zscal2ri3s_mxn
 
 // scal2rihs_mxn
 
-static void bli_cscal2rihs_mxn
+BLIS_INLINE void bli_cscal2rihs_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -17154,7 +17180,7 @@ static void bli_cscal2rihs_mxn
 	}
 }
 
-static void bli_zscal2rihs_mxn
+BLIS_INLINE void bli_zscal2rihs_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -18689,7 +18715,7 @@ static void bli_zscal2rihs_mxn
 
 // scal21ms_mxn
 
-static void bli_cscal21ms_mxn
+BLIS_INLINE void bli_cscal21ms_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -18769,7 +18795,7 @@ static void bli_cscal21ms_mxn
 	}
 }
 
-static void bli_zscal21ms_mxn
+BLIS_INLINE void bli_zscal21ms_mxn
      (
        const pack_t       schema,
        const conj_t       conjx,
@@ -19228,7 +19254,7 @@ static void bli_zscal21ms_mxn
 	 \
 }
 
-static void bli_cset1ms_mxn
+BLIS_INLINE void bli_cset1ms_mxn
      (
        const pack_t       schema,
        const dim_t        offm,
@@ -19296,7 +19322,7 @@ static void bli_cset1ms_mxn
 	}
 }
 
-static void bli_zset1ms_mxn
+BLIS_INLINE void bli_zset1ms_mxn
      (
        const pack_t       schema,
        const dim_t        offm,
@@ -19927,8 +19953,14 @@ struct thrcomm_s
 {
 	void*   sent_object;
 	dim_t   n_threads;
-
-	bool_t  barrier_sense;
+ 
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	gint_t  barrier_sense;
 	dim_t   barrier_threads_arrived;
 };
 #endif
@@ -19973,8 +20005,14 @@ struct thrcomm_s
 	void*  sent_object;
 	dim_t  n_threads;
 
-	//volatile bool_t  barrier_sense;
-	bool_t barrier_sense;
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	//volatile gint_t  barrier_sense;
+	gint_t barrier_sense;
 	dim_t  barrier_threads_arrived;
 };
 #endif
@@ -20020,8 +20058,14 @@ struct thrcomm_s
 //	bli_pthread_mutex_t mutex;
 //#endif
 
-	//volatile bool_t  barrier_sense;
-	bool_t barrier_sense;
+	// NOTE: barrier_sense was originally a gint_t-based bool_t, but upon
+	// redefining bool_t as bool we discovered that some gcc __atomic built-ins
+	// don't allow the use of bool for the variables being operated upon.
+	// (Specifically, this was observed of __atomic_fetch_xor(), but it likely
+	// applies to all other related built-ins.) Thus, we get around this by
+	// redefining barrier_sense as a gint_t.
+	//volatile gint_t  barrier_sense;
+	gint_t barrier_sense;
 	dim_t  barrier_threads_arrived;
 };
 #endif
@@ -20037,7 +20081,7 @@ typedef struct thrcomm_s thrcomm_t;
 
 // thrcomm_t query (field only)
 
-static dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
+BLIS_INLINE dim_t bli_thrcomm_num_threads( thrcomm_t* comm )
 {
 	return comm->n_threads;
 }
@@ -20085,7 +20129,7 @@ struct thrinfo_s
 	// this is field is true, but when nodes are created that share the same
 	// communicators as other nodes (such as with packm nodes), this is set
 	// to false.
-	bool_t             free_comm;
+	bool               free_comm;
 
 	// The bszid_t to help identify the node. This is mostly only useful when
 	// debugging or tracing the allocation and release of thrinfo_t nodes.
@@ -20104,108 +20148,108 @@ typedef struct thrinfo_s thrinfo_t;
 
 // thrinfo_t query (field only)
 
-static dim_t bli_thread_num_threads( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_num_threads( thrinfo_t* t )
 {
 	return (t->ocomm)->n_threads;
 }
 
-static dim_t bli_thread_ocomm_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
 {
 	return t->ocomm_id;
 }
 
-static dim_t bli_thread_n_way( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_n_way( thrinfo_t* t )
 {
 	return t->n_way;
 }
 
-static dim_t bli_thread_work_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_work_id( thrinfo_t* t )
 {
 	return t->work_id;
 }
 
-static thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
+BLIS_INLINE thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
 {
 	return t->ocomm;
 }
 
-static bool_t bli_thrinfo_needs_free_comm( thrinfo_t* t )
+BLIS_INLINE bool bli_thrinfo_needs_free_comm( thrinfo_t* t )
 {
 	return t->free_comm;
 }
 
-static dim_t bli_thread_bszid( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_bszid( thrinfo_t* t )
 {
 	return t->bszid;
 }
 
-static thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
 {
 	return t->sub_node;
 }
 
-static thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
 {
 	return t->sub_prenode;
 }
 
 // thrinfo_t query (complex)
 
-static bool_t bli_thread_am_ochief( thrinfo_t* t )
+BLIS_INLINE bool bli_thread_am_ochief( thrinfo_t* t )
 {
 	return t->ocomm_id == 0;
 }
 
 // thrinfo_t modification
 
-static void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
 {
 	t->ocomm = ocomm;
 }
 
-static void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
 {
 	t->ocomm_id = ocomm_id;
 }
 
-static void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
 {
 	t->n_way = n_way;
 }
 
-static void bli_thrinfo_set_work_id( dim_t work_id, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_work_id( dim_t work_id, thrinfo_t* t )
 {
 	t->work_id = work_id;
 }
 
-static void bli_thrinfo_set_free_comm( bool_t free_comm, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_free_comm( bool free_comm, thrinfo_t* t )
 {
 	t->free_comm = free_comm;
 }
 
-static void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
 {
 	t->bszid = bszid;
 }
 
-static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 {
 	t->sub_node = sub_node;
 }
 
-static void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
 {
 	t->sub_prenode = sub_prenode;
 }
 
 // other thrinfo_t-related functions
 
-static void* bli_thread_broadcast( thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thread_broadcast( thrinfo_t* t, void* p )
 {
 	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
-static void bli_thread_barrier( thrinfo_t* t )
+BLIS_INLINE void bli_thread_barrier( thrinfo_t* t )
 {
 	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
@@ -20222,7 +20266,7 @@ thrinfo_t* bli_thrinfo_create
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       bool_t     free_comm,
+       bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
      );
@@ -20234,7 +20278,7 @@ void bli_thrinfo_init
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       bool_t     free_comm,
+       bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
      );
@@ -20737,7 +20781,7 @@ void bli_thread_range_sub
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end
      );
@@ -20794,7 +20838,7 @@ dim_t bli_thread_range_width_l
        dim_t  bf,
        dim_t  bf_left,
        double area_per_thr,
-       bool_t handle_edge_low
+       bool   handle_edge_low
      );
 siz_t bli_find_area_trap_l
      (
@@ -20810,7 +20854,7 @@ siz_t bli_thread_range_weighted_sub
        dim_t               m,
        dim_t               n,
        dim_t               bf,
-       bool_t              handle_edge_low,
+       bool                handle_edge_low,
        dim_t*     restrict j_start_thr,
        dim_t*     restrict j_end_thr
      );
@@ -20856,16 +20900,16 @@ BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
 BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
 
-void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 
-static void bli_thread_range_jrir_rr
+BLIS_INLINE void bli_thread_range_jrir_rr
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -20877,12 +20921,12 @@ static void bli_thread_range_jrir_rr
 	*end   = n;
 }
 
-static void bli_thread_range_jrir_sl
+BLIS_INLINE void bli_thread_range_jrir_sl
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -20893,12 +20937,12 @@ static void bli_thread_range_jrir_sl
 	*inc = 1;
 }
 
-static void bli_thread_range_jrir
+BLIS_INLINE void bli_thread_range_jrir
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -20915,7 +20959,7 @@ static void bli_thread_range_jrir
 }
 
 #if 0
-static void bli_thread_range_weighted_jrir
+BLIS_INLINE void bli_thread_range_weighted_jrir
      (
        thrinfo_t* thread,
        doff_t     diagoff,
@@ -20923,7 +20967,7 @@ static void bli_thread_range_weighted_jrir
        dim_t      m,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -21298,6 +21342,15 @@ void PASTEMAC(ch,opname) \
        cntx_t* restrict cntx  \
      ); \
 
+#define AMINV_KER_PROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       dim_t            n, \
+       ctype*  restrict x, inc_t incx, \
+       dim_t*  restrict index, \
+       cntx_t* restrict cntx  \
+     ); \
 
 #define AXPBYV_KER_PROT( ctype, ch, opname ) \
 \
@@ -21836,6 +21889,9 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
+#ifdef BLIS_CONFIG_ZEN3
+CNTX_INIT_PROTS( zen3 )
+#endif
 #ifdef BLIS_CONFIG_ZEN2
 CNTX_INIT_PROTS( zen2 )
 #endif
@@ -21933,19 +21989,30 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
-#ifdef BLIS_FAMILY_ZEN2
-// begin bli_family_zen2.h
+#ifdef BLIS_FAMILY_ZEN3
+// begin bli_family_zen3.h
 
 
-#ifndef BLI_FAMILY_ZEN2_
-#define BLI_FAMILY_ZEN2_
+#ifndef BLI_FAMILY_ZEN3_
+#define BLI_FAMILY_ZEN3_
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
+//
+
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
+//To enable framework optimizations for EPYC family processors.
+//With this macro defined, we can call kernels directly from BLAS interfaces
+//for levels 1 & 2.
+//This macro needs to be defined for all EPYC configurations.
+#define BLIS_CONFIG_EPYC
+
+// To enable framework optimizations for zen3 platform
+// All zen3 specific code should be included in this macro
+#define BLIS_CONFIG_ZEN3
 
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
@@ -21957,9 +22024,9 @@ CNTX_INIT_PROTS( generic )
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
 #define BLIS_SMALL_MATRIX_THRES_TRSM   32768 //128(128+128) => m*(m+n)
-#define BLIS_SMALL_MATRIX_A_THRES_TRSM	128
-#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
-#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
+#define BLIS_SMALL_MATRIX_A_THRES_TRSM  128
+#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK    96
+#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK    128
 
 #define BLIS_ENABLE_SMALL_MATRIX_ROME
 #define BLIS_SMALL_MATRIX_THRES_ROME       400
@@ -21986,13 +22053,54 @@ CNTX_INIT_PROTS( generic )
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUTB_ROME 120
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_XAUTB_ROME_COL_PANEL_N 50
 
-// When running HPL with pure MPI without DGEMM threading (Single-threaded
-// BLIS), defining this macro as 1 yields better performance.
-#define AOCL_BLIS_MULTIINSTANCE   0
+// For zen3 architecture we dynamically change block sizes
+// based on number of threads. These values were determined
+// by running benchmarks on zen3 platform.
 
+#ifdef BLIS_ENABLE_MULTITHREADING
+
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm,  c) {           \
+                                                                        \
+    if (bli_is_double(bli_obj_dt(&c))) {                                \
+        const dim_t nt = rntm->num_threads;                             \
+        const dim_t m = bli_obj_length(&c);                             \
+        const dim_t n = bli_obj_width(&c);                              \
+                                                                        \
+        blksz_t blkszs[BLIS_NUM_BLKSZS];                                \
+        if (nt >= 32 && (m > 7800 || n > 7800)) {                       \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   512,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        } else {                                                        \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   256,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        }                                                               \
+    }                                                                   \
+}
+#else
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
 #endif
-
-// end bli_family_zen2.h
+  
+#endif
+// end bli_family_zen3.h
+#endif
+#ifdef BLIS_FAMILY_ZEN2
+#include "bli_family_zen2.h" // skipped
 #endif
 #ifdef BLIS_FAMILY_ZEN
 #include "bli_family_zen.h" // skipped
@@ -22100,6 +22208,17 @@ GEMMTRSM_UKR_PROT( double,   d, gemmtrsm_u_haswell_asm_6x8 )
 
 // -- level-3 sup --------------------------------------------------------------
 
+// -- double real --
+
+// gemmsup_r
+
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_6x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_5x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_4x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_3x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_2x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_1x1 )
+
 // gemmsup_rv
 
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_6x8 )
@@ -22129,13 +22248,6 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_4x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_3x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_2x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_haswell_asm_1x2 )
-
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_6x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_5x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_4x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_3x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_2x1 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_r_haswell_ref_1x1 )
 
 // gemmsup_rv (mkernel in m dim)
 
@@ -22168,6 +22280,11 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_3x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_2x2 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_1x2 )
 
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_6x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_3x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_2x1 )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_1x1 )
+
 // gemmsup_rd (mkernel in m dim)
 
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_6x8m )
@@ -22192,23 +22309,6 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rd_haswell_asm_1x8n )
 
 // -- AMD64 architectures --
 
-#ifdef BLIS_KERNELS_ZEN2
-// begin bli_kernels_zen2.h
-
-
-
-// -- level-1f --
-AXPYF_KER_PROT( float,   s, axpyf_zen_int_5 )
-AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
-
-// -- level-2 --
-
-//gemv(scalar code)
-GEMV_KER_PROT( double,    d, gemv_zen_ref_c )
-
-
-// end bli_kernels_zen2.h
-#endif
 #ifdef BLIS_KERNELS_ZEN
 // begin bli_kernels_zen.h
 
@@ -22230,17 +22330,21 @@ AMAXV_KER_PROT( double,   d, amaxv_zen_int )
 AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 
-	// axpyv (intrinsics unrolled x10)
-	AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
-	AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
+// axpyv (intrinsics unrolled x10)
+AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
+AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int5 )
 
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
 DOTV_KER_PROT( double,   d, dotv_zen_int )
 
-	// dotv (intrinsics, unrolled x10)
-	DOTV_KER_PROT( float,    s, dotv_zen_int10 )
-	DOTV_KER_PROT( double,   d, dotv_zen_int10 )
+// dotv (intrinsics, unrolled x10)
+DOTV_KER_PROT( float,    s, dotv_zen_int10 )
+DOTV_KER_PROT( double,   d, dotv_zen_int10 )
+DOTV_KER_PROT( scomplex,  c, dotv_zen_int5 )
+DOTV_KER_PROT( dcomplex,  z, dotv_zen_int5 )
 
 // dotxv (intrinsics)
 DOTXV_KER_PROT( float,    s, dotxv_zen_int )
@@ -22250,9 +22354,9 @@ DOTXV_KER_PROT( double,   d, dotxv_zen_int )
 SCALV_KER_PROT( float,    s, scalv_zen_int )
 SCALV_KER_PROT( double,   d, scalv_zen_int )
 
-	// scalv (intrinsics unrolled x10)
-	SCALV_KER_PROT( float,    s, scalv_zen_int10 )
-	SCALV_KER_PROT( double,   d, scalv_zen_int10 )
+// scalv (intrinsics unrolled x10)
+SCALV_KER_PROT( float,    s, scalv_zen_int10 )
+SCALV_KER_PROT( double,   d, scalv_zen_int10 )
 
 // swapv (intrinsics)
 SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
@@ -22272,9 +22376,19 @@ SETV_KER_PROT(double,   d, setv_zen_int)
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
 
+AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
+AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_5 )
+AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_5 )
+
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
+
+// -- level-2 ----------------------------------------------------------------
+
+//gemv(scalar code)
+GEMV_KER_PROT( double,   d,  gemv_zen_ref_c )
 
 // -- level-3 sup --------------------------------------------------------------
 // semmsup_rv
@@ -22294,7 +22408,7 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
@@ -22883,12 +22997,12 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_reset
        obj_t* a
      );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_scalar_has_nonzero_imag
+BLIS_EXPORT_BLIS bool bli_obj_scalar_has_nonzero_imag
      (
        obj_t* a
      );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_scalar_equals
+BLIS_EXPORT_BLIS bool bli_obj_scalar_equals
      (
        obj_t* a,
        obj_t* beta
@@ -22900,7 +23014,7 @@ BLIS_EXPORT_BLIS bool_t bli_obj_scalar_equals
 
 // blksz_t query
 
-static dim_t bli_blksz_get_def
+BLIS_INLINE dim_t bli_blksz_get_def
      (
        num_t    dt,
        blksz_t* b
@@ -22909,7 +23023,7 @@ static dim_t bli_blksz_get_def
 	return b->v[ dt ];
 }
 
-static dim_t bli_blksz_get_max
+BLIS_INLINE dim_t bli_blksz_get_max
      (
        num_t    dt,
        blksz_t* b
@@ -22921,7 +23035,7 @@ static dim_t bli_blksz_get_max
 
 // blksz_t modification
 
-static void bli_blksz_set_def
+BLIS_INLINE void bli_blksz_set_def
      (
        dim_t    val,
        num_t    dt,
@@ -22931,7 +23045,7 @@ static void bli_blksz_set_def
 	b->v[ dt ] = val;
 }
 
-static void bli_blksz_set_max
+BLIS_INLINE void bli_blksz_set_max
      (
        dim_t    val,
        num_t    dt,
@@ -22941,7 +23055,7 @@ static void bli_blksz_set_max
 	b->e[ dt ] = val;
 }
 
-static void bli_blksz_copy
+BLIS_INLINE void bli_blksz_copy
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -22950,7 +23064,7 @@ static void bli_blksz_copy
 	*b_dst = *b_src;
 }
 
-static void bli_blksz_copy_if_pos
+BLIS_INLINE void bli_blksz_copy_if_pos
      (
        blksz_t* b_src,
        blksz_t* b_dst
@@ -22980,7 +23094,7 @@ static void bli_blksz_copy_if_pos
 	if ( e_z > 0 ) bli_blksz_set_max( e_z, BLIS_DCOMPLEX, b_dst );
 }
 
-static void bli_blksz_copy_def_dt
+BLIS_INLINE void bli_blksz_copy_def_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -22991,7 +23105,7 @@ static void bli_blksz_copy_def_dt
 	bli_blksz_set_def( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_max_dt
+BLIS_INLINE void bli_blksz_copy_max_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -23002,7 +23116,7 @@ static void bli_blksz_copy_max_dt
 	bli_blksz_set_max( val, dt_dst, b_dst );
 }
 
-static void bli_blksz_copy_dt
+BLIS_INLINE void bli_blksz_copy_dt
      (
        num_t dt_src, blksz_t* b_src,
        num_t dt_dst, blksz_t* b_dst
@@ -23012,7 +23126,7 @@ static void bli_blksz_copy_dt
 	bli_blksz_copy_max_dt( dt_src, b_src, dt_dst, b_dst );
 }
 
-static void bli_blksz_scale_def
+BLIS_INLINE void bli_blksz_scale_def
      (
        dim_t    num,
        dim_t    den,
@@ -23025,7 +23139,7 @@ static void bli_blksz_scale_def
 	bli_blksz_set_def( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_max
+BLIS_INLINE void bli_blksz_scale_max
      (
        dim_t    num,
        dim_t    den,
@@ -23038,7 +23152,7 @@ static void bli_blksz_scale_max
 	bli_blksz_set_max( ( val * num ) / den, dt, b );
 }
 
-static void bli_blksz_scale_def_max
+BLIS_INLINE void bli_blksz_scale_def_max
      (
        dim_t    num,
        dim_t    den,
@@ -23146,7 +23260,7 @@ dim_t bli_determine_blocksize_b
 
 #ifdef AOCL_BLIS_ZEN
 
-dim_t bli_determine_blocksize_trsm
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm
      (
        dir_t   direct,
        dim_t   i,
@@ -23156,7 +23270,7 @@ dim_t bli_determine_blocksize_trsm
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_trsm_f
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm_f
      (
        dim_t   i,
        dim_t   dim,
@@ -23165,7 +23279,7 @@ dim_t bli_determine_blocksize_trsm_f
        cntx_t* cntx
      );
 
-dim_t bli_determine_blocksize_trsm_b
+BLIS_EXPORT_BLIS dim_t bli_determine_blocksize_trsm_b
      (
        dim_t   i,
        dim_t   dim,
@@ -23200,7 +23314,7 @@ dim_t bli_determine_blocksize_b_sub
 
 // func_t query
 
-static void_fp bli_func_get_dt
+BLIS_INLINE void_fp bli_func_get_dt
      (
        num_t   dt,
        func_t* func
@@ -23211,7 +23325,7 @@ static void_fp bli_func_get_dt
 
 // func_t modification
 
-static void bli_func_set_dt
+BLIS_INLINE void bli_func_set_dt
      (
        void_fp fp,
        num_t   dt,
@@ -23221,7 +23335,7 @@ static void bli_func_set_dt
     func->ptr[ dt ] = fp;
 }
 
-static void bli_func_copy_dt
+BLIS_INLINE void bli_func_copy_dt
      (
        num_t dt_src, func_t* func_src,
        num_t dt_dst, func_t* func_dst
@@ -23260,9 +23374,9 @@ void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool_t bli_func_is_null_dt( num_t   dt,
-                            func_t* f );
-bool_t bli_func_is_null( func_t* f );
+bool bli_func_is_null_dt( num_t   dt,
+                          func_t* f );
+bool bli_func_is_null( func_t* f );
 
 // end bli_func.h
 // begin bli_mbool.h
@@ -23272,14 +23386,14 @@ bool_t bli_func_is_null( func_t* f );
 
 // mbool_t query
 
-static bool_t bli_mbool_get_dt( num_t dt, mbool_t* mb )
+BLIS_INLINE bool bli_mbool_get_dt( num_t dt, mbool_t* mb )
 {
-	return mb->v[ dt ];
+	return ( bool )( mb->v[ dt ] );
 }
 
 // mbool_t modification
 
-static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
+BLIS_INLINE void bli_mbool_set_dt( bool val, num_t dt, mbool_t* mb )
 {
 	mb->v[ dt ] = val;
 }
@@ -23288,19 +23402,19 @@ static void bli_mbool_set_dt( bool_t val, num_t dt, mbool_t* mb )
 
 mbool_t* bli_mbool_create
      (
-       bool_t b_s,
-       bool_t b_d,
-       bool_t b_c,
-       bool_t b_z
+       bool b_s,
+       bool b_d,
+       bool b_c,
+       bool b_z
      );
 
 void bli_mbool_init
      (
        mbool_t* b,
-       bool_t   b_s,
-       bool_t   b_d,
-       bool_t   b_c,
-       bool_t   b_z
+       bool     b_s,
+       bool     b_d,
+       bool     b_c,
+       bool     b_z
      );
 
 void bli_mbool_free( mbool_t* b );
@@ -23323,81 +23437,81 @@ void bli_mbool_free( mbool_t* b );
 // -- cntx_t query (fields only) -----------------------------------------------
 //
 
-static blksz_t* bli_cntx_blkszs_buf( cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_blkszs_buf( cntx_t* cntx )
 {
-	return cntx->blkszs;
+    return cntx->blkszs;
 }
-static bszid_t* bli_cntx_bmults_buf( cntx_t* cntx )
+BLIS_INLINE bszid_t* bli_cntx_bmults_buf( cntx_t* cntx )
 {
-	return cntx->bmults;
+    return cntx->bmults;
 }
-static blksz_t* bli_cntx_trsm_blkszs_buf( cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_trsm_blkszs_buf( cntx_t* cntx )
 {
-	return cntx->trsm_blkszs;
+    return cntx->trsm_blkszs;
 }
-static func_t* bli_cntx_l3_vir_ukrs_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_l3_vir_ukrs_buf( cntx_t* cntx )
 {
-	return cntx->l3_vir_ukrs;
+    return cntx->l3_vir_ukrs;
 }
-static func_t* bli_cntx_l3_nat_ukrs_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_l3_nat_ukrs_buf( cntx_t* cntx )
 {
-	return cntx->l3_nat_ukrs;
+    return cntx->l3_nat_ukrs;
 }
-static mbool_t* bli_cntx_l3_nat_ukrs_prefs_buf( cntx_t* cntx )
+BLIS_INLINE mbool_t* bli_cntx_l3_nat_ukrs_prefs_buf( cntx_t* cntx )
 {
-	return cntx->l3_nat_ukrs_prefs;
+    return cntx->l3_nat_ukrs_prefs;
 }
-static blksz_t* bli_cntx_l3_sup_thresh_buf( cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_l3_sup_thresh_buf( cntx_t* cntx )
 {
-	return cntx->l3_sup_thresh;
+    return cntx->l3_sup_thresh;
 }
-static void** bli_cntx_l3_sup_handlers_buf( cntx_t* cntx )
+BLIS_INLINE void** bli_cntx_l3_sup_handlers_buf( cntx_t* cntx )
 {
-	return cntx->l3_sup_handlers;
+    return cntx->l3_sup_handlers;
 }
-static blksz_t* bli_cntx_l3_sup_blkszs_buf( cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_l3_sup_blkszs_buf( cntx_t* cntx )
 {
-	return cntx->l3_sup_blkszs;
+    return cntx->l3_sup_blkszs;
 }
-static func_t* bli_cntx_l3_sup_kers_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_l3_sup_kers_buf( cntx_t* cntx )
 {
-	return cntx->l3_sup_kers;
+    return cntx->l3_sup_kers;
 }
-static mbool_t* bli_cntx_l3_sup_kers_prefs_buf( cntx_t* cntx )
+BLIS_INLINE mbool_t* bli_cntx_l3_sup_kers_prefs_buf( cntx_t* cntx )
 {
-	return cntx->l3_sup_kers_prefs;
+    return cntx->l3_sup_kers_prefs;
 }
-static func_t* bli_cntx_l1f_kers_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_l1f_kers_buf( cntx_t* cntx )
 {
-	return cntx->l1f_kers;
+    return cntx->l1f_kers;
 }
-static func_t* bli_cntx_l1v_kers_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_l1v_kers_buf( cntx_t* cntx )
 {
-	return cntx->l1v_kers;
+    return cntx->l1v_kers;
 }
-static func_t* bli_cntx_packm_kers_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_packm_kers_buf( cntx_t* cntx )
 {
-	return cntx->packm_kers;
+    return cntx->packm_kers;
 }
-static func_t* bli_cntx_unpackm_kers_buf( cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_unpackm_kers_buf( cntx_t* cntx )
 {
-	return cntx->unpackm_kers;
+    return cntx->unpackm_kers;
 }
-static ind_t bli_cntx_method( cntx_t* cntx )
+BLIS_INLINE ind_t bli_cntx_method( cntx_t* cntx )
 {
-	return cntx->method;
+    return cntx->method;
 }
-static pack_t bli_cntx_schema_a_block( cntx_t* cntx )
+BLIS_INLINE pack_t bli_cntx_schema_a_block( cntx_t* cntx )
 {
-	return cntx->schema_a_block;
+    return cntx->schema_a_block;
 }
-static pack_t bli_cntx_schema_b_panel( cntx_t* cntx )
+BLIS_INLINE pack_t bli_cntx_schema_b_panel( cntx_t* cntx )
 {
-	return cntx->schema_b_panel;
+    return cntx->schema_b_panel;
 }
-static pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
+BLIS_INLINE pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 {
-	return cntx->schema_c_panel;
+    return cntx->schema_c_panel;
 }
 
 // -----------------------------------------------------------------------------
@@ -23406,26 +23520,26 @@ static pack_t bli_cntx_schema_c_panel( cntx_t* cntx )
 // -- cntx_t modification (fields only) ----------------------------------------
 //
 
-static void bli_cntx_set_method( ind_t method, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_method( ind_t method, cntx_t* cntx )
 {
-	cntx->method = method;
+    cntx->method = method;
 }
-static void bli_cntx_set_schema_a_block( pack_t schema, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_schema_a_block( pack_t schema, cntx_t* cntx )
 {
-	cntx->schema_a_block = schema;
+    cntx->schema_a_block = schema;
 }
-static void bli_cntx_set_schema_b_panel( pack_t schema, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_schema_b_panel( pack_t schema, cntx_t* cntx )
 {
-	cntx->schema_b_panel = schema;
+    cntx->schema_b_panel = schema;
 }
-static void bli_cntx_set_schema_c_panel( pack_t schema, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_schema_c_panel( pack_t schema, cntx_t* cntx )
 {
-	cntx->schema_c_panel = schema;
+    cntx->schema_c_panel = schema;
 }
-static void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cntx )
 {
-	bli_cntx_set_schema_a_block( sa, cntx );
-	bli_cntx_set_schema_b_panel( sb, cntx );
+    bli_cntx_set_schema_a_block( sa, cntx );
+    bli_cntx_set_schema_b_panel( sb, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -23434,460 +23548,480 @@ static void bli_cntx_set_schema_ab_blockpanel( pack_t sa, pack_t sb, cntx_t* cnt
 // -- cntx_t query (complex) ---------------------------------------------------
 //
 
-static blksz_t* bli_cntx_get_blksz( bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_blksz( bszid_t bs_id, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
-	blksz_t* blksz  = &blkszs[ bs_id ];
+    blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
 
-	// Return the address of the blksz_t identified by bs_id.
-	return blksz;
+    // Return the address of the blksz_t identified by bs_id.
+    return blksz;
 }
 
-static dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+    blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
+    dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
 
-	// Return the main (default) blocksize value for the datatype given.
-	return bs_dt;
+    // Return the main (default) blocksize value for the datatype given.
+    return bs_dt;
 }
 
-static dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+    blksz_t* blksz  = bli_cntx_get_blksz( bs_id, cntx );
+    dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
 
-	// Return the auxiliary (maximum) blocksize value for the datatype given.
-	return bs_dt;
+    // Return the auxiliary (maximum) blocksize value for the datatype given.
+    return bs_dt;
 }
 
-static bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, cntx_t* cntx )
 {
-	bszid_t* restrict bmults = bli_cntx_bmults_buf( cntx );
-	bszid_t           bm_id  = bmults[ bs_id ];
+    bszid_t* restrict bmults = bli_cntx_bmults_buf( cntx );
+    bszid_t           bm_id  = bmults[ bs_id ];
 
-	return bm_id;
+    return bm_id;
 }
 
-static blksz_t* bli_cntx_get_bmult( bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_bmult( bszid_t bs_id, cntx_t* cntx )
 {
-	bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
-	blksz_t* restrict bmult  = bli_cntx_get_blksz( bm_id, cntx );
+    bszid_t           bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
+    blksz_t* restrict bmult  = bli_cntx_get_blksz( bm_id, cntx );
 
-	return bmult;
+    return bmult;
 }
 
-static dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	blksz_t* bmult  = bli_cntx_get_bmult( bs_id, cntx );
-	dim_t    bm_dt  = bli_blksz_get_def( dt, bmult );
+    blksz_t* bmult  = bli_cntx_get_bmult( bs_id, cntx );
+    dim_t    bm_dt  = bli_blksz_get_def( dt, bmult );
 
-	return bm_dt;
-}
-
-// -----------------------------------------------------------------------------
-
-static func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
-	func_t* func  = &funcs[ ukr_id ];
-
-	return func;
-}
-
-static void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* func = bli_cntx_get_l3_vir_ukrs( ukr_id, cntx );
-
-	return bli_func_get_dt( dt, func );
-}
-
-static func_t* bli_cntx_get_l3_nat_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
-	func_t* func  = &funcs[ ukr_id ];
-
-	return func;
-}
-
-static void_fp bli_cntx_get_l3_nat_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	func_t* func = bli_cntx_get_l3_nat_ukrs( ukr_id, cntx );
-
-	return bli_func_get_dt( dt, func );
+    return bm_dt;
 }
 
 // -----------------------------------------------------------------------------
 
-static mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l3_vir_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
-	mbool_t* mbool  = &mbools[ ukr_id ];
+    func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
+    func_t* func  = &funcs[ ukr_id ];
 
-	return mbool;
+    return func;
 }
 
-static bool_t bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	mbool_t* mbool = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
+    func_t* func = bli_cntx_get_l3_vir_ukrs( ukr_id, cntx );
 
-	return bli_mbool_get_dt( dt, mbool );
+    return bli_func_get_dt( dt, func );
 }
 
-// -----------------------------------------------------------------------------
-
-static blksz_t* bli_cntx_get_l3_sup_thresh( threshid_t thresh_id, cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l3_nat_ukrs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	blksz_t* threshs = bli_cntx_l3_sup_thresh_buf( cntx );
-	blksz_t* thresh  = &threshs[ thresh_id ];
+    func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
+    func_t* func  = &funcs[ ukr_id ];
 
-	// Return the address of the blksz_t identified by thresh_id.
-	return thresh;
+    return func;
 }
 
-static dim_t bli_cntx_get_l3_sup_thresh_dt( num_t dt, threshid_t thresh_id, cntx_t* cntx )
+BLIS_INLINE void_fp bli_cntx_get_l3_nat_ukr_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
-	blksz_t* threshs   = bli_cntx_get_l3_sup_thresh( thresh_id, cntx );
-	dim_t    thresh_dt = bli_blksz_get_def( dt, threshs );
+    func_t* func = bli_cntx_get_l3_nat_ukrs( ukr_id, cntx );
 
-	// Return the main (default) threshold value for the datatype given.
-	return thresh_dt;
-}
-
-static bool_t bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, cntx_t* cntx )
-{
-	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
-	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
-	if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
-
-	return FALSE;
+    return bli_func_get_dt( dt, func );
 }
 
 // -----------------------------------------------------------------------------
 
-static void* bli_cntx_get_l3_sup_handler( opid_t op, cntx_t* cntx )
+BLIS_INLINE mbool_t* bli_cntx_get_l3_nat_ukr_prefs( l3ukr_t ukr_id, cntx_t* cntx )
 {
-	void** funcs = bli_cntx_l3_sup_handlers_buf( cntx );
-	void*  func  = funcs[ op ];
+    mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
+    mbool_t* mbool  = &mbools[ ukr_id ];
 
-	return func;
+    return mbool;
+}
+
+BLIS_INLINE bool bli_cntx_get_l3_nat_ukr_prefs_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    mbool_t* mbool = bli_cntx_get_l3_nat_ukr_prefs( ukr_id, cntx );
+
+    return ( bool )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
 
-static blksz_t* bli_cntx_get_l3_sup_blksz( bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_thresh( threshid_t thresh_id, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_l3_sup_blkszs_buf( cntx );
-	blksz_t* blksz  = &blkszs[ bs_id ];
+    blksz_t* threshs = bli_cntx_l3_sup_thresh_buf( cntx );
+    blksz_t* thresh  = &threshs[ thresh_id ];
 
-	// Return the address of the blksz_t identified by bs_id.
-	return blksz;
+    // Return the address of the blksz_t identified by thresh_id.
+    return thresh;
 }
 
-static blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_thresh_dt( num_t dt, threshid_t thresh_id, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
-	blksz_t* blksz  = &blkszs[ bs_id ];
+    blksz_t* threshs   = bli_cntx_get_l3_sup_thresh( thresh_id, cntx );
+    dim_t    thresh_dt = bli_blksz_get_def( dt, threshs );
 
-	// Return the address of the blksz_t identified by bs_id.
-	return blksz;
-
+    // Return the main (default) threshold value for the datatype given.
+    return thresh_dt;
 }
 
-static dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, cntx_t* cntx )
 {
-	blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
+    if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
+    if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
+    if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
 
-	// Return the main (default) blocksize value for the datatype given.
-	return bs_dt;
+    return FALSE;
 }
 
-static dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
+// -- gemmt specific function
+BLIS_INLINE bool bli_cntx_gemmt_sup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
 {
-	blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
-	dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
+    if( bli_is_double( dt ))
+    {
+        if ( n < 300 )       return TRUE;
+        if ( (k / n ) > 50 ) return TRUE;
 
-	// Return the auxiliary (maximum) blocksize value for the datatype given.
-	return bs_dt;
+        return FALSE;
+    }
+    else if ( bli_is_dcomplex( dt ) )
+    {
+        if ( n < 100 )   return TRUE;
+        else             return FALSE;
+    }
+    else
+        return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
+}
+
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE void* bli_cntx_get_l3_sup_handler( opid_t op, cntx_t* cntx )
+{
+    void** funcs = bli_cntx_l3_sup_handlers_buf( cntx );
+    void*  func  = funcs[ op ];
+
+    return func;
 }
 
 // -----------------------------------------------------------------------------
 
-static func_t* bli_cntx_get_l3_sup_kers( stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_l3_sup_blksz( bszid_t bs_id, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l3_sup_kers_buf( cntx );
-	func_t* func  = &funcs[ stor_id ];
+    blksz_t* blkszs = bli_cntx_l3_sup_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
 
-	return func;
+    // Return the address of the blksz_t identified by bs_id.
+    return blksz;
 }
 
-static void* bli_cntx_get_l3_sup_ker_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE blksz_t* bli_cntx_get_trsm_blksz( bszid_t bs_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_l3_sup_kers( stor_id, cntx );
+    blksz_t* blkszs = bli_cntx_trsm_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
 
-	return bli_func_get_dt( dt, func );
+    // Return the address of the blksz_t identified by bs_id.
+    return blksz;
+
 }
 
-// -----------------------------------------------------------------------------
-
-static mbool_t* bli_cntx_get_l3_sup_ker_prefs( stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_def_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	mbool_t* mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
-	mbool_t* mbool  = &mbools[ stor_id ];
+    blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
+    dim_t    bs_dt  = bli_blksz_get_def( dt, blksz );
 
-	return mbool;
+    // Return the main (default) blocksize value for the datatype given.
+    return bs_dt;
 }
 
-static bool_t bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE dim_t bli_cntx_get_l3_sup_blksz_max_dt( num_t dt, bszid_t bs_id, cntx_t* cntx )
 {
-	mbool_t* mbool = bli_cntx_get_l3_sup_ker_prefs( stor_id, cntx );
+    blksz_t* blksz  = bli_cntx_get_l3_sup_blksz( bs_id, cntx );
+    dim_t    bs_dt  = bli_blksz_get_max( dt, blksz );
 
-	return bli_mbool_get_dt( dt, mbool );
-}
-
-// -----------------------------------------------------------------------------
-
-static func_t* bli_cntx_get_l1f_kers( l1fkr_t ker_id, cntx_t* cntx )
-{
-	func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
-	func_t* func  = &funcs[ ker_id ];
-
-	return func;
-}
-
-static void_fp bli_cntx_get_l1f_ker_dt( num_t dt, l1fkr_t ker_id, cntx_t* cntx )
-{
-	func_t* func = bli_cntx_get_l1f_kers( ker_id, cntx );
-
-	return bli_func_get_dt( dt, func );
+    // Return the auxiliary (maximum) blocksize value for the datatype given.
+    return bs_dt;
 }
 
 // -----------------------------------------------------------------------------
 
-static func_t* bli_cntx_get_l1v_kers( l1vkr_t ker_id, cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l3_sup_kers( stor3_t stor_id, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
-	func_t* func  = &funcs[ ker_id ];
+    func_t* funcs = bli_cntx_l3_sup_kers_buf( cntx );
+    func_t* func  = &funcs[ stor_id ];
 
-	return func;
+    return func;
 }
 
-static void_fp bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
+BLIS_INLINE void* bli_cntx_get_l3_sup_ker_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
-	func_t* func = bli_cntx_get_l1v_kers( ker_id, cntx );
+    func_t* func = bli_cntx_get_l3_sup_kers( stor_id, cntx );
 
-	return bli_func_get_dt( dt, func );
-}
-
-// -----------------------------------------------------------------------------
-
-static func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
-{
-	func_t* func = NULL;
-
-	// Only index to the requested packm func_t if the packm kernel being
-	// requested is one that is explicitly supported.
-	if ( 0 <= ( gint_t )ker_id &&
-	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
-	{
-		func_t* funcs = bli_cntx_packm_kers_buf( cntx );
-
-		func = &funcs[ ker_id ];
-	}
-
-	return func;
-}
-
-static void_fp bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
-{
-	void_fp fp = NULL;
-
-	// Only query the context for the packm func_t (and then extract the
-	// datatype-specific function pointer) if the packm kernel being
-	// requested is one that is explicitly supported.
-	if ( 0 <= ( gint_t )ker_id &&
-	          ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
-	{
-		func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
-
-		fp = bli_func_get_dt( dt, func );
-	}
-
-	return fp;
-}
-
-static func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
-{
-	func_t* func = NULL;
-
-	// Only index to the requested unpackm func_t if the unpackm kernel being
-	// requested is one that is explicitly supported.
-	if ( 0 <= ( gint_t )ker_id &&
-	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
-	{
-		func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
-
-		func = &funcs[ ker_id ];
-	}
-
-	return func;
-}
-
-static void_fp bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
-{
-	void_fp fp = NULL;
-
-	// Only query the context for the unpackm func_t (and then extract the
-	// datatype-specific function pointer) if the unpackm kernel being
-	// requested is one that is explicitly supported.
-	if ( 0 <= ( gint_t )ker_id &&
-	          ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
-	{
-		func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
-
-		fp = bli_func_get_dt( dt, func );
-	}
-
-	return fp;
+    return bli_func_get_dt( dt, func );
 }
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE mbool_t* bli_cntx_get_l3_sup_ker_prefs( stor3_t stor_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+    mbool_t* mbools = bli_cntx_l3_sup_kers_prefs_buf( cntx );
+    mbool_t* mbool  = &mbools[ stor_id ];
 
-	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return ( bool_t )
-	       ( prefs == TRUE );
+    return mbool;
 }
 
-static bool_t bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_get_l3_sup_ker_prefs_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+    mbool_t* mbool = bli_cntx_get_l3_sup_ker_prefs( stor_id, cntx );
 
-	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return ( bool_t )
-	       ( prefs == FALSE );
-}
-
-static bool_t bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	// Note that we use the computation datatype, which may differ from the
-	// storage datatype of C (when performing a mixed datatype operation).
-	const num_t  dt    = bli_obj_comp_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
-	bool_t       r_val = FALSE;
-
-	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
-
-	return r_val;
-}
-
-static bool_t bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	return ( bool_t )
-	       !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+    return ( bool )bli_mbool_get_dt( dt, mbool );
 }
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l1f_kers( l1fkr_t ker_id, cntx_t* cntx )
 {
-	// For induced methods, return the ukernel storage preferences of the
-	// corresponding real micro-kernel.
-	// NOTE: This projection to real domain becomes unnecessary if you
-	// set the exec_dt for 1m to the real projection of the storage
-	// datatype.
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_dt_proj_to_real( dt );
+    func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
+    func_t* func  = &funcs[ ker_id ];
 
-	return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+    return func;
 }
 
-static bool_t bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+BLIS_INLINE void_fp bli_cntx_get_l1f_ker_dt( num_t dt, l1fkr_t ker_id, cntx_t* cntx )
 {
-	// For induced methods, return the ukernel storage preferences of the
-	// corresponding real micro-kernel.
-	// NOTE: This projection to real domain becomes unnecessary if you
-	// set the exec_dt for 1m to the real projection of the storage
-	// datatype.
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	    dt = bli_dt_proj_to_real( dt );
+    func_t* func = bli_cntx_get_l1f_kers( ker_id, cntx );
 
-	return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
-}
-
-static bool_t bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	// Note that we use the computation datatype, which may differ from the
-	// storage datatype of C (when performing a mixed datatype operation).
-	const num_t  dt    = bli_obj_comp_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
-	bool_t       r_val = FALSE;
-
-	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
-
-	return r_val;
-}
-
-static bool_t bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
-{
-	return ( bool_t )
-	       !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
+    return bli_func_get_dt( dt, func );
 }
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE func_t* bli_cntx_get_l1v_kers( l1vkr_t ker_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+    func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
+    func_t* func  = &funcs[ ker_id ];
 
-	// A ukernel preference of TRUE means the ukernel prefers row storage.
-	return ( bool_t )
-	       ( prefs == TRUE );
+    return func;
 }
 
-static bool_t bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE void_fp bli_cntx_get_l1v_ker_dt( num_t dt, l1vkr_t ker_id, cntx_t* cntx )
 {
-	const bool_t prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+    func_t* func = bli_cntx_get_l1v_kers( ker_id, cntx );
 
-	// A ukernel preference of FALSE means the ukernel prefers column storage.
-	return ( bool_t )
-	       ( prefs == FALSE );
+    return bli_func_get_dt( dt, func );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE func_t* bli_cntx_get_packm_kers( l1mkr_t ker_id, cntx_t* cntx )
+{
+    func_t* func = NULL;
+
+    // Only index to the requested packm func_t if the packm kernel being
+    // requested is one that is explicitly supported.
+    if ( 0 <= ( gint_t )ker_id &&
+              ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
+    {
+        func_t* funcs = bli_cntx_packm_kers_buf( cntx );
+
+        func = &funcs[ ker_id ];
+    }
+
+    return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+    void_fp fp = NULL;
+
+    // Only query the context for the packm func_t (and then extract the
+    // datatype-specific function pointer) if the packm kernel being
+    // requested is one that is explicitly supported.
+    if ( 0 <= ( gint_t )ker_id &&
+              ( gint_t )ker_id < BLIS_NUM_PACKM_KERS )
+    {
+        func_t* func = bli_cntx_get_packm_kers( ker_id, cntx );
+
+        fp = bli_func_get_dt( dt, func );
+    }
+
+    return fp;
+}
+
+BLIS_INLINE func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
+{
+    func_t* func = NULL;
+
+    // Only index to the requested unpackm func_t if the unpackm kernel being
+    // requested is one that is explicitly supported.
+    if ( 0 <= ( gint_t )ker_id &&
+              ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+    {
+        func_t* funcs = bli_cntx_unpackm_kers_buf( cntx );
+
+        func = &funcs[ ker_id ];
+    }
+
+    return func;
+}
+
+BLIS_INLINE void_fp bli_cntx_get_unpackm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+{
+    void_fp fp = NULL;
+
+    // Only query the context for the unpackm func_t (and then extract the
+    // datatype-specific function pointer) if the unpackm kernel being
+    // requested is one that is explicitly supported.
+    if ( 0 <= ( gint_t )ker_id &&
+              ( gint_t )ker_id < BLIS_NUM_UNPACKM_KERS )
+    {
+        func_t* func = bli_cntx_get_unpackm_kers( ker_id, cntx );
+
+        fp = bli_func_get_dt( dt, func );
+    }
+
+    return fp;
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+
+    // A ukernel preference of TRUE means the ukernel prefers row storage.
+    return ( bool )
+           ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    const bool prefs = bli_cntx_get_l3_nat_ukr_prefs_dt( dt, ukr_id, cntx );
+
+    // A ukernel preference of FALSE means the ukernel prefers column storage.
+    return ( bool )
+           ( prefs == FALSE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    // Note that we use the computation datatype, which may differ from the
+    // storage datatype of C (when performing a mixed datatype operation).
+    const num_t dt    = bli_obj_comp_dt( obj );
+    const bool  ukr_prefers_rows
+                      = bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+    const bool  ukr_prefers_cols
+                      = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+    bool        r_val = FALSE;
+
+    if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+    else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+    return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    return ( bool )
+           !bli_cntx_l3_nat_ukr_prefers_storage_of( obj, ukr_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    // For induced methods, return the ukernel storage preferences of the
+    // corresponding real micro-kernel.
+    // NOTE: This projection to real domain becomes unnecessary if you
+    // set the exec_dt for 1m to the real projection of the storage
+    // datatype.
+    if ( bli_cntx_method( cntx ) != BLIS_NAT )
+        dt = bli_dt_proj_to_real( dt );
+
+    return bli_cntx_l3_nat_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_cols_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    // For induced methods, return the ukernel storage preferences of the
+    // corresponding real micro-kernel.
+    // NOTE: This projection to real domain becomes unnecessary if you
+    // set the exec_dt for 1m to the real projection of the storage
+    // datatype.
+    if ( bli_cntx_method( cntx ) != BLIS_NAT )
+        dt = bli_dt_proj_to_real( dt );
+
+    return bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    // Note that we use the computation datatype, which may differ from the
+    // storage datatype of C (when performing a mixed datatype operation).
+    const num_t dt    = bli_obj_comp_dt( obj );
+    const bool  ukr_prefers_rows
+                      = bli_cntx_l3_vir_ukr_prefers_rows_dt( dt, ukr_id, cntx );
+    const bool  ukr_prefers_cols
+                      = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, ukr_id, cntx );
+    bool        r_val = FALSE;
+
+    if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+    else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+
+    return r_val;
+}
+
+BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t ukr_id, cntx_t* cntx )
+{
+    return ( bool )
+           !bli_cntx_l3_vir_ukr_prefers_storage_of( obj, ukr_id, cntx );
+}
+
+// -----------------------------------------------------------------------------
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+    const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+    // A ukernel preference of TRUE means the ukernel prefers row storage.
+    return ( bool )
+           ( prefs == TRUE );
+}
+
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_cols_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
+{
+    const bool prefs = bli_cntx_get_l3_sup_ker_prefs_dt( dt, stor_id, cntx );
+
+    // A ukernel preference of FALSE means the ukernel prefers column storage.
+    return ( bool )
+           ( prefs == FALSE );
 }
 
 #if 0
 // NOTE: These static functions aren't needed yet.
 
-static bool_t bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
 {
-	const num_t  dt    = bli_obj_dt( obj );
-	const bool_t ukr_prefers_rows
-	                   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
-	const bool_t ukr_prefers_cols
-	                   = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
-	bool_t       r_val = FALSE;
+    const num_t dt    = bli_obj_dt( obj );
+    const bool  ukr_prefers_rows
+                      = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+    const bool  ukr_prefers_cols
+                      = bli_cntx_l3_sup_ker_prefers_cols_dt( dt, stor_id, cntx );
+    bool        r_val = FALSE;
 
-	if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
+    if      ( bli_obj_is_row_stored( obj ) && ukr_prefers_rows ) r_val = TRUE;
+    else if ( bli_obj_is_col_stored( obj ) && ukr_prefers_cols ) r_val = TRUE;
 
-	return r_val;
+    return r_val;
 }
 
-static bool_t bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_id, cntx_t* cntx )
 {
-	return ( bool_t )
-	       !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
+    return ( bool )
+           !bli_cntx_l3_sup_ker_prefers_storage_of( obj, stor_id, cntx );
 }
 #endif
 
@@ -23900,92 +24034,92 @@ static bool_t bli_cntx_l3_sup_ker_dislikes_storage_of( obj_t* obj, stor3_t stor_
 // NOTE: The framework does not use any of the following functions. We provide
 // them in order to facilitate creating/modifying custom contexts.
 
-static void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
-	bszid_t* bmults = bli_cntx_bmults_buf( cntx );
+    blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+    bszid_t* bmults = bli_cntx_bmults_buf( cntx );
 
-	blkszs[ bs_id ] = *blksz;
-	bmults[ bs_id ] = mult_id;
+    blkszs[ bs_id ] = *blksz;
+    bmults[ bs_id ] = mult_id;
 }
 
-static void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
-	blksz_t* blksz  = &blkszs[ bs_id ];
+    blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
 
-	bli_blksz_set_def( bs, dt, blksz );
+    bli_blksz_set_def( bs, dt, blksz );
 }
 
-static void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )
 {
-	blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
-	blksz_t* blksz  = &blkszs[ bs_id ];
+    blksz_t* blkszs = bli_cntx_blkszs_buf( cntx );
+    blksz_t* blksz  = &blkszs[ bs_id ];
 
-	bli_blksz_set_max( bs, dt, blksz );
+    bli_blksz_set_max( bs, dt, blksz );
 }
 
-static void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_vir_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
+    func_t* funcs = bli_cntx_l3_vir_ukrs_buf( cntx );
 
-	funcs[ ukr_id ] = *func;
+    funcs[ ukr_id ] = *func;
 }
 
-static void bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_nat_ukr( l3ukr_t ukr_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
+    func_t* funcs = bli_cntx_l3_nat_ukrs_buf( cntx );
 
-	funcs[ ukr_id ] = *func;
+    funcs[ ukr_id ] = *func;
 }
 
-static void bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr_id, mbool_t* prefs, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l3_nat_ukr_prefs( l3ukr_t ukr_id, mbool_t* prefs, cntx_t* cntx )
 {
-	mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
+    mbool_t* mbools = bli_cntx_l3_nat_ukrs_prefs_buf( cntx );
 
-	mbools[ ukr_id ] = *prefs;
+    mbools[ ukr_id ] = *prefs;
 }
 
-static void bli_cntx_set_l1f_ker( l1fkr_t ker_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l1f_ker( l1fkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
+    func_t* funcs = bli_cntx_l1f_kers_buf( cntx );
 
-	funcs[ ker_id ] = *func;
+    funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_l1v_ker( l1vkr_t ker_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_l1v_ker( l1vkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
+    func_t* funcs = bli_cntx_l1v_kers_buf( cntx );
 
-	funcs[ ker_id ] = *func;
+    funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_packm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_get_packm_kers( ker_id, cntx );
+    func_t* funcs = bli_cntx_get_packm_kers( ker_id, cntx );
 
-	funcs[ ker_id ] = *func;
+    funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_packm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_packm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
+    func_t* func = ( func_t* )bli_cntx_get_packm_kers( ker_id, cntx );
 
-	bli_func_set_dt( fp, dt, func );
+    bli_func_set_dt( fp, dt, func );
 }
 
-static void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_unpackm_ker( l1mkr_t ker_id, func_t* func, cntx_t* cntx )
 {
-	func_t* funcs = bli_cntx_get_unpackm_kers( ker_id, cntx );
+    func_t* funcs = bli_cntx_get_unpackm_kers( ker_id, cntx );
 
-	funcs[ ker_id ] = *func;
+    funcs[ ker_id ] = *func;
 }
 
-static void bli_cntx_set_unpackm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_unpackm_ker_dt( void_fp fp, num_t dt, l1mkr_t ker_id, cntx_t* cntx )
 {
-	func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
+    func_t* func = ( func_t* )bli_cntx_get_unpackm_kers( ker_id, cntx );
 
-	bli_func_set_dt( fp, dt, func );
+    bli_func_set_dt( fp, dt, func );
 }
 
 // -----------------------------------------------------------------------------
@@ -24033,56 +24167,56 @@ BLIS_EXPORT_BLIS void bli_cntx_print( cntx_t* cntx );
 // -- rntm_t query (public API) ------------------------------------------------
 //
 
-static bool_t bli_rntm_auto_factor( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_auto_factor( rntm_t* rntm )
 {
 	return rntm->auto_factor;
 }
 
-static dim_t bli_rntm_num_threads( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_num_threads( rntm_t* rntm )
 {
 	return rntm->num_threads;
 }
 
-static dim_t bli_rntm_ways_for( bszid_t bszid, rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, rntm_t* rntm )
 {
 	return rntm->thrloop[ bszid ];
 }
 
-static dim_t bli_rntm_jc_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_jc_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_NC, rntm );
 }
-static dim_t bli_rntm_pc_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_pc_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KC, rntm );
 }
-static dim_t bli_rntm_ic_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ic_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_MC, rntm );
 }
-static dim_t bli_rntm_jr_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_jr_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_NR, rntm );
 }
-static dim_t bli_rntm_ir_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ir_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_MR, rntm );
 }
-static dim_t bli_rntm_pr_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_pr_ways( rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KR, rntm );
 }
 
-static bool_t bli_rntm_pack_a( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_a( rntm_t* rntm )
 {
-	return rntm->pack_a;
+	return ( bool )( rntm->pack_a );
 }
-static bool_t bli_rntm_pack_b( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_b( rntm_t* rntm )
 {
-	return rntm->pack_b;
+	return ( bool )( rntm->pack_b );
 }
 
-static bool_t bli_rntm_l3_sup( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_l3_sup( rntm_t* rntm )
 {
 	return rntm->l3_sup;
 }
@@ -24091,26 +24225,26 @@ static bool_t bli_rntm_l3_sup( rntm_t* rntm )
 // -- rntm_t query (internal use only) -----------------------------------------
 //
 
-static pool_t* bli_rntm_sba_pool( rntm_t* rntm )
+BLIS_INLINE pool_t* bli_rntm_sba_pool( rntm_t* rntm )
 {
 	return rntm->sba_pool;
 }
 
-static membrk_t* bli_rntm_membrk( rntm_t* rntm )
+BLIS_INLINE membrk_t* bli_rntm_membrk( rntm_t* rntm )
 {
 	return rntm->membrk;
 }
 
 #if 0
-static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
+BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 {
-	const bool_t nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
-	const bool_t jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
-	const bool_t pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
-	const bool_t ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
-	const bool_t jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
-	const bool_t ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
-	const bool_t pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
+	const bool nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
+	const bool jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
+	const bool pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
+	const bool ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
+	const bool jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
+	const bool ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
+	const bool pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
 
 	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
 	else                                          return FALSE;
@@ -24121,47 +24255,47 @@ static dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
-static void bli_rntm_set_auto_factor_only( bool_t auto_factor, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_auto_factor_only( bool auto_factor, rntm_t* rntm )
 {
 	rntm->auto_factor = auto_factor;
 }
 
-static void bli_rntm_set_num_threads_only( dim_t nt, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_num_threads_only( dim_t nt, rntm_t* rntm )
 {
 	rntm->num_threads = nt;
 }
 
-static void bli_rntm_set_ways_for_only( bszid_t loop, dim_t n_ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_ways_for_only( bszid_t loop, dim_t n_ways, rntm_t* rntm )
 {
 	rntm->thrloop[ loop ] = n_ways;
 }
 
-static void bli_rntm_set_jc_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_jc_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_NC, ways, rntm );
 }
-static void bli_rntm_set_pc_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pc_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_KC, ways, rntm );
 }
-static void bli_rntm_set_ic_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_ic_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_MC, ways, rntm );
 }
-static void bli_rntm_set_jr_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_jr_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_NR, ways, rntm );
 }
-static void bli_rntm_set_ir_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_ir_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_MR, ways, rntm );
 }
-static void bli_rntm_set_pr_ways_only( dim_t ways, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pr_ways_only( dim_t ways, rntm_t* rntm )
 {
 	bli_rntm_set_ways_for_only( BLIS_KR, ways, rntm );
 }
 
-static void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
@@ -24172,29 +24306,29 @@ static void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_
 	bli_rntm_set_pr_ways_only(  1, rntm );
 }
 
-static void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
 {
 	rntm->sba_pool = sba_pool;
 }
 
-static void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
 {
 	rntm->membrk = membrk;
 }
 
-static void bli_rntm_clear_num_threads_only( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
 	bli_rntm_set_num_threads_only( -1, rntm );
 }
-static void bli_rntm_clear_ways_only( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
 	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
 }
-static void bli_rntm_clear_sba_pool( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
 {
 	bli_rntm_set_sba_pool( NULL, rntm );
 }
-static void bli_rntm_clear_membrk( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_membrk( rntm_t* rntm )
 {
 	bli_rntm_set_membrk( NULL, rntm );
 }
@@ -24203,7 +24337,7 @@ static void bli_rntm_clear_membrk( rntm_t* rntm )
 // -- rntm_t modification (public API) -----------------------------------------
 //
 
-static void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
 {
 	// Record the total number of threads to use.
 	bli_rntm_set_num_threads_only( nt, rntm );
@@ -24212,7 +24346,7 @@ static void bli_rntm_set_num_threads( dim_t nt, rntm_t* rntm )
 	bli_rntm_clear_ways_only( rntm );
 }
 
-static void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir, rntm_t* rntm )
 {
 	// Record the number of ways of parallelism per loop.
 	bli_rntm_set_jc_ways_only( jc, rntm );
@@ -24226,27 +24360,27 @@ static void bli_rntm_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir,
 	bli_rntm_clear_num_threads_only( rntm );
 }
 
-static void bli_rntm_set_pack_a( bool_t pack_a, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pack_a( bool pack_a, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether matrix A should be packed.
+	// Set the bool indicating whether matrix A should be packed.
 	rntm->pack_a = pack_a;
 }
-static void bli_rntm_set_pack_b( bool_t pack_b, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pack_b( bool pack_b, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether matrix B should be packed.
+	// Set the bool indicating whether matrix B should be packed.
 	rntm->pack_b = pack_b;
 }
 
-static void bli_rntm_set_l3_sup( bool_t l3_sup, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_l3_sup( bool l3_sup, rntm_t* rntm )
 {
-	// Set the bool_t indicating whether level-3 sup handling is enabled.
+	// Set the bool indicating whether level-3 sup handling is enabled.
 	rntm->l3_sup = l3_sup;
 }
-static void bli_rntm_enable_l3_sup( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_enable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( TRUE, rntm );
 }
-static void bli_rntm_disable_l3_sup( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_disable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( FALSE, rntm );
 }
@@ -24255,15 +24389,15 @@ static void bli_rntm_disable_l3_sup( rntm_t* rntm )
 // -- rntm_t modification (internal use only) ----------------------------------
 //
 
-static void bli_rntm_clear_pack_a( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_pack_a( rntm_t* rntm )
 {
 	bli_rntm_set_pack_a( FALSE, rntm );
 }
-static void bli_rntm_clear_pack_b( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_pack_b( rntm_t* rntm )
 {
 	bli_rntm_set_pack_b( FALSE, rntm );
 }
-static void bli_rntm_clear_l3_sup( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( TRUE, rntm );
 }
@@ -24288,7 +24422,7 @@ static void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .membrk      = NULL, \
         }  \
 
-static void bli_rntm_init( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {
 	bli_rntm_set_auto_factor_only( TRUE, rntm );
 
@@ -24304,7 +24438,7 @@ static void bli_rntm_init( rntm_t* rntm )
 
 // -- rntm_t total thread calculation ------------------------------------------
 
-static dim_t bli_rntm_calc_num_threads
+BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
        rntm_t*  restrict rntm
      )
@@ -24375,7 +24509,7 @@ dim_t bli_rntm_calc_num_threads_in
 void    bli_gks_init( void );
 void    bli_gks_finalize( void );
 
-void    bli_gks_init_index( void );
+BLIS_EXPORT_BLIS void    bli_gks_init_index( void );
 
 cntx_t* bli_gks_lookup_nat_cntx( arch_t id );
 cntx_t* bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );
@@ -24390,7 +24524,7 @@ BLIS_EXPORT_BLIS cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
 
 BLIS_EXPORT_BLIS void    bli_gks_init_ref_cntx( cntx_t* cntx );
 
-bool_t   bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, l3ukr_t ukr_id, cntx_t* cntx );
+bool    bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, l3ukr_t ukr_id, cntx_t* cntx );
 
 BLIS_EXPORT_BLIS char*    bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt );
 BLIS_EXPORT_BLIS kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt );
@@ -24435,17 +24569,17 @@ GENPROT( trsm )
 
 // -----------------------------------------------------------------------------
 
-//bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
+//bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
 
 ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
 
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status );
+void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status );
 
 void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status );
+void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status );
 
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status );
-bool_t  bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
+void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status );
+bool    bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
 
 void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
 
@@ -24809,8 +24943,8 @@ BLIS_EXPORT_BLIS void    bli_ind_disable_all_dt( num_t dt );
 
 BLIS_EXPORT_BLIS void    bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
 
-BLIS_EXPORT_BLIS bool_t  bli_ind_oper_is_impl( opid_t oper, ind_t method );
-//bool_t bli_ind_oper_has_avail( opid_t oper, num_t dt );
+BLIS_EXPORT_BLIS bool    bli_ind_oper_is_impl( opid_t oper, ind_t method );
+//bool bli_ind_oper_has_avail( opid_t oper, num_t dt );
 BLIS_EXPORT_BLIS void_fp bli_ind_oper_get_avail( opid_t oper, num_t dt );
 BLIS_EXPORT_BLIS ind_t   bli_ind_oper_find_avail( opid_t oper, num_t dt );
 BLIS_EXPORT_BLIS char*   bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
@@ -24830,63 +24964,63 @@ num_t  bli_ind_map_cdt_to_index( num_t dt );
 
 // membrk init
 
-static void bli_membrk_init_mutex( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
 {
 	bli_pthread_mutex_init( &(membrk->mutex), NULL );
 }
 
-static void bli_membrk_finalize_mutex( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
 {
 	bli_pthread_mutex_destroy( &(membrk->mutex) );
 }
 
 // membrk query
 
-static pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
+BLIS_INLINE pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
 {
 	return &(membrk->pools[ pool_index ]);
 }
 
-static siz_t bli_membrk_align_size( membrk_t* membrk )
+BLIS_INLINE siz_t bli_membrk_align_size( membrk_t* membrk )
 {
 	return membrk->align_size;
 }
 
-static malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
+BLIS_INLINE malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
 {
 	return membrk->malloc_fp;
 }
 
-static free_ft bli_membrk_free_fp( membrk_t* membrk )
+BLIS_INLINE free_ft bli_membrk_free_fp( membrk_t* membrk )
 {
 	return membrk->free_fp;
 }
 
 // membrk modification
 
-static void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
 {
 	membrk->align_size = align_size;
 }
 
-static void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
 {
 	membrk->malloc_fp = malloc_fp;
 }
 
-static void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
+BLIS_INLINE void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
 {
 	membrk->free_fp = free_fp;
 }
 
 // membrk action
 
-static void bli_membrk_lock( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_lock( membrk_t* membrk )
 {
 	bli_pthread_mutex_lock( &(membrk->mutex) );
 }
 
-static void bli_membrk_unlock( membrk_t* membrk )
+BLIS_INLINE void bli_membrk_unlock( membrk_t* membrk )
 {
 	bli_pthread_mutex_unlock( &(membrk->mutex) );
 }
@@ -24977,24 +25111,24 @@ void bli_membrk_compute_pool_block_sizes_dt
 
 // Pool block query
 
-static void* bli_pblk_buf( pblk_t* pblk )
+BLIS_INLINE void* bli_pblk_buf( pblk_t* pblk )
 {
 	return pblk->buf;
 }
 
-static siz_t bli_pblk_block_size( pblk_t* pblk )
+BLIS_INLINE siz_t bli_pblk_block_size( pblk_t* pblk )
 {
 	return pblk->block_size;
 }
 
 // Pool block modification
 
-static void bli_pblk_set_buf( void* buf, pblk_t* pblk )
+BLIS_INLINE void bli_pblk_set_buf( void* buf, pblk_t* pblk )
 {
 	pblk->buf = buf;
 }
 
-static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
+BLIS_INLINE void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
 {
 	pblk->block_size = block_size;
 }
@@ -25013,7 +25147,7 @@ static void bli_pblk_set_block_size( siz_t block_size, pblk_t* pblk )
           .block_size = 0, \
         }  \
 
-static void bli_pblk_clear( pblk_t* pblk )
+BLIS_INLINE void bli_pblk_clear( pblk_t* pblk )
 {
 	bli_pblk_set_buf( NULL, pblk );
 	bli_pblk_set_block_size( 0, pblk );
@@ -25022,100 +25156,100 @@ static void bli_pblk_clear( pblk_t* pblk )
 
 // Pool entry query
 
-static void* bli_pool_block_ptrs( pool_t* pool )
+BLIS_INLINE void* bli_pool_block_ptrs( pool_t* pool )
 {
 	return pool->block_ptrs;
 }
 
-static siz_t bli_pool_block_ptrs_len( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_ptrs_len( pool_t* pool )
 {
 	return pool->block_ptrs_len;
 }
 
-static siz_t bli_pool_num_blocks( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_num_blocks( pool_t* pool )
 {
 	return pool->num_blocks;
 }
 
-static siz_t bli_pool_block_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_size( pool_t* pool )
 {
 	return pool->block_size;
 }
 
-static siz_t bli_pool_align_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_align_size( pool_t* pool )
 {
 	return pool->align_size;
 }
 
-static siz_t bli_pool_offset_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_offset_size( pool_t* pool )
 {
 	return pool->offset_size;
 }
 
-static malloc_ft bli_pool_malloc_fp( pool_t* pool )
+BLIS_INLINE malloc_ft bli_pool_malloc_fp( pool_t* pool )
 {
 	return pool->malloc_fp;
 }
 
-static free_ft bli_pool_free_fp( pool_t* pool )
+BLIS_INLINE free_ft bli_pool_free_fp( pool_t* pool )
 {
 	return pool->free_fp;
 }
 
-static siz_t bli_pool_top_index( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_top_index( pool_t* pool )
 {
 	return pool->top_index;
 }
 
-static bool_t bli_pool_is_exhausted( pool_t* pool )
+BLIS_INLINE bool bli_pool_is_exhausted( pool_t* pool )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_pool_top_index( pool ) == bli_pool_num_blocks( pool ) );
 }
 
 // Pool entry modification
 
-static void bli_pool_set_block_ptrs( void* block_ptrs, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_ptrs( void* block_ptrs, pool_t* pool ) \
 {
 	pool->block_ptrs = block_ptrs;
 }
 
-static void bli_pool_set_block_ptrs_len( siz_t block_ptrs_len, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_ptrs_len( siz_t block_ptrs_len, pool_t* pool ) \
 {
 	pool->block_ptrs_len = block_ptrs_len;
 }
 
-static void bli_pool_set_num_blocks( siz_t num_blocks, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_num_blocks( siz_t num_blocks, pool_t* pool ) \
 {
 	pool->num_blocks = num_blocks;
 }
 
-static void bli_pool_set_block_size( siz_t block_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_block_size( siz_t block_size, pool_t* pool ) \
 {
 	pool->block_size = block_size;
 }
 
-static void bli_pool_set_align_size( siz_t align_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_align_size( siz_t align_size, pool_t* pool ) \
 {
 	pool->align_size = align_size;
 }
 
-static void bli_pool_set_offset_size( siz_t offset_size, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_offset_size( siz_t offset_size, pool_t* pool ) \
 {
 	pool->offset_size = offset_size;
 }
 
-static void bli_pool_set_malloc_fp( malloc_ft malloc_fp, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_malloc_fp( malloc_ft malloc_fp, pool_t* pool ) \
 {
 	pool->malloc_fp = malloc_fp;
 }
 
-static void bli_pool_set_free_fp( free_ft free_fp, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_free_fp( free_ft free_fp, pool_t* pool ) \
 {
 	pool->free_fp = free_fp;
 }
 
-static void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
+BLIS_INLINE void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
 {
 	pool->top_index = top_index;
 }
@@ -25210,34 +25344,34 @@ void bli_pblk_print
 
 // Array entry query
 
-static void* bli_array_buf( array_t* array )
+BLIS_INLINE void* bli_array_buf( array_t* array )
 {
 	return array->buf;
 }
 
-static siz_t bli_array_num_elem( array_t* array )
+BLIS_INLINE siz_t bli_array_num_elem( array_t* array )
 {
 	return array->num_elem;
 }
 
-static siz_t bli_array_elem_size( array_t* array )
+BLIS_INLINE siz_t bli_array_elem_size( array_t* array )
 {
 	return array->elem_size;
 }
 
 // Array entry modification
 
-static void bli_array_set_buf( void* buf, array_t* array ) \
+BLIS_INLINE void bli_array_set_buf( void* buf, array_t* array ) \
 {
 	array->buf = buf;
 }
 
-static void bli_array_set_num_elem( siz_t num_elem, array_t* array ) \
+BLIS_INLINE void bli_array_set_num_elem( siz_t num_elem, array_t* array ) \
 {
 	array->num_elem = num_elem;
 }
 
-static void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
+BLIS_INLINE void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 {
 	array->elem_size = elem_size;
 }
@@ -25288,22 +25422,22 @@ void bli_array_set_elem
 
 // apool entry query
 
-static pool_t* bli_apool_pool( apool_t* apool )
+BLIS_INLINE pool_t* bli_apool_pool( apool_t* apool )
 {
 	return &(apool->pool);
 }
 
-static  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
+BLIS_INLINE  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 {
 	return &(apool->mutex);
 }
 
-static siz_t bli_apool_def_array_len( apool_t* pool )
+BLIS_INLINE siz_t bli_apool_def_array_len( apool_t* pool )
 {
 	return pool->def_array_len;
 }
 
-static bool_t bli_apool_is_exhausted( apool_t* apool )
+BLIS_INLINE bool bli_apool_is_exhausted( apool_t* apool )
 {
 	pool_t* restrict pool = bli_apool_pool( apool );
 
@@ -25312,19 +25446,19 @@ static bool_t bli_apool_is_exhausted( apool_t* apool )
 
 // apool action
 
-static void bli_apool_lock( apool_t* apool )
+BLIS_INLINE void bli_apool_lock( apool_t* apool )
 {
 	bli_pthread_mutex_lock( bli_apool_mutex( apool ) );
 }
 
-static void bli_apool_unlock( apool_t* apool )
+BLIS_INLINE void bli_apool_unlock( apool_t* apool )
 {
 	bli_pthread_mutex_unlock( bli_apool_mutex( apool ) );
 }
 
 // apool entry modification
 
-static void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
+BLIS_INLINE void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
 {
 	pool->def_array_len = def_array_len;
 }
@@ -25453,40 +25587,40 @@ void bli_memsys_finalize( void );
 // -- mem_t query --------------------------------------------------------------
 //
 
-static pblk_t* bli_mem_pblk( mem_t* mem )
+BLIS_INLINE pblk_t* bli_mem_pblk( mem_t* mem )
 {
 	return &(mem->pblk);
 }
 
-static void* bli_mem_buffer( mem_t* mem )
+BLIS_INLINE void* bli_mem_buffer( mem_t* mem )
 {
 	return bli_pblk_buf( bli_mem_pblk( mem ) );
 }
 
-static packbuf_t bli_mem_buf_type( mem_t* mem )
+BLIS_INLINE packbuf_t bli_mem_buf_type( mem_t* mem )
 {
 	return mem->buf_type;
 }
 
-static pool_t* bli_mem_pool( mem_t* mem )
+BLIS_INLINE pool_t* bli_mem_pool( mem_t* mem )
 {
 	return mem->pool;
 }
 
-static siz_t bli_mem_size( mem_t* mem )
+BLIS_INLINE siz_t bli_mem_size( mem_t* mem )
 {
 	return mem->size;
 }
 
-static bool_t bli_mem_is_alloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_alloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) != NULL );
 }
 
-static bool_t bli_mem_is_unalloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_unalloc( mem_t* mem )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_mem_buffer( mem ) == NULL );
 }
 
@@ -25495,27 +25629,27 @@ static bool_t bli_mem_is_unalloc( mem_t* mem )
 // -- mem_t modification -------------------------------------------------------
 //
 
-static void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pblk( pblk_t* pblk, mem_t* mem )
 {
 	mem->pblk = *pblk;
 }
 
-static void bli_mem_set_buffer( void* buf, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buffer( void* buf, mem_t* mem )
 {
 	bli_pblk_set_buf( buf, &(mem->pblk) );
 }
 
-static void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
+BLIS_INLINE void bli_mem_set_buf_type( packbuf_t buf_type, mem_t* mem )
 {
 	mem->buf_type = buf_type;
 }
 
-static void bli_mem_set_pool( pool_t* pool, mem_t* mem )
+BLIS_INLINE void bli_mem_set_pool( pool_t* pool, mem_t* mem )
 {
 	mem->pool = pool;
 }
 
-static void bli_mem_set_size( siz_t size, mem_t* mem )
+BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 {
 	mem->size = size;
 }
@@ -25536,17 +25670,10 @@ static void bli_mem_set_size( siz_t size, mem_t* mem )
           .size        = 0, \
         }  \
 
-static void bli_mem_clear( mem_t* mem )
+BLIS_INLINE void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
-#ifdef __cplusplus
-	packbuf_t pb;
-	//C++ has more strong type checking. Using -1 will result in error
-	//Pass actual type instead
-	bli_mem_set_buf_type ( pb, mem );
-#else
 	bli_mem_set_buf_type( ( packbuf_t )-1, mem );
-#endif
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 }
@@ -25674,11 +25801,11 @@ void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
 // begin bli_query.h
 
 
-BLIS_EXPORT_BLIS bool_t bli_obj_equals( obj_t* a, obj_t* b );
+BLIS_EXPORT_BLIS bool bli_obj_equals( obj_t* a, obj_t* b );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_imag_equals( obj_t* a, obj_t* b );
+BLIS_EXPORT_BLIS bool bli_obj_imag_equals( obj_t* a, obj_t* b );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_imag_is_zero( obj_t* a );
+BLIS_EXPORT_BLIS bool bli_obj_imag_is_zero( obj_t* a );
 // end bli_query.h
 // begin bli_auxinfo.h
 
@@ -25689,44 +25816,44 @@ BLIS_EXPORT_BLIS bool_t bli_obj_imag_is_zero( obj_t* a );
 
 // auxinfo_t field query
 
-static pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
 {
 	return ai->schema_a;
 }
-static pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
 {
 	return ai->schema_b;
 }
 
-static void* bli_auxinfo_next_a( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_a( auxinfo_t* ai )
 {
 	return ai->a_next;
 }
-static void* bli_auxinfo_next_b( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_b( auxinfo_t* ai )
 {
 	return ai->b_next;
 }
 
-static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_a( auxinfo_t* ai )
 {
 	return ai->is_a;
 }
-static inc_t bli_auxinfo_is_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_b( auxinfo_t* ai )
 {
 	return ai->is_b;
 }
 
-static inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
 {
 	return ai->ps_a;
 }
-static inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
 {
 	return ai->ps_b;
 }
 
 #if 0
-static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
 {
 	return ai->dt_on_output;
 }
@@ -25735,49 +25862,49 @@ static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
 
 // auxinfo_t field modification
 
-static void bli_auxinfo_set_schema_a( pack_t schema, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_schema_a( pack_t schema, auxinfo_t* ai )
 {
 	ai->schema_a = schema;
 }
-static void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
 {
 	ai->schema_b = schema;
 }
 
-static void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
 {
 	ai->a_next = p;
 }
-static void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
 {
 	ai->b_next = p;
 }
-static void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
 {
 	ai->a_next = ap;
 	ai->b_next = bp;
 }
 
-static void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
 {
 	ai->is_a = is;
 }
-static void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
 {
 	ai->is_b = is;
 }
 
-static void bli_auxinfo_set_ps_a( inc_t ps, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_ps_a( inc_t ps, auxinfo_t* ai )
 {
 	ai->ps_a = ps;
 }
-static void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
 {
 	ai->ps_b = ps;
 }
 
 #if 0
-static void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
 {
 	ai->dt_on_output = dt_on_output;
 }
@@ -25804,7 +25931,7 @@ BLIS_EXPORT_BLIS void bli_param_map_blis_to_netlib_machval( machval_t machval, c
 // NOTE: These static functions were converted from regular functions in order
 // to reduce function call overhead within the BLAS compatibility layer.
 
-static void bli_param_map_netlib_to_blis_side( char side, side_t* blis_side )
+BLIS_INLINE void bli_param_map_netlib_to_blis_side( char side, side_t* blis_side )
 {
 	if      ( side == 'l' || side == 'L' ) *blis_side = BLIS_LEFT;
 	else if ( side == 'r' || side == 'R' ) *blis_side = BLIS_RIGHT;
@@ -25823,7 +25950,7 @@ static void bli_param_map_netlib_to_blis_side( char side, side_t* blis_side )
 	}
 }
 
-static void bli_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
+BLIS_INLINE void bli_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 {
 	if      ( uplo == 'l' || uplo == 'L' ) *blis_uplo = BLIS_LOWER;
 	else if ( uplo == 'u' || uplo == 'U' ) *blis_uplo = BLIS_UPPER;
@@ -25835,7 +25962,7 @@ static void bli_param_map_netlib_to_blis_uplo( char uplo, uplo_t* blis_uplo )
 	}
 }
 
-static void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans )
+BLIS_INLINE void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans )
 {
 	if      ( trans == 'n' || trans == 'N' ) *blis_trans = BLIS_NO_TRANSPOSE;
 	else if ( trans == 't' || trans == 'T' ) *blis_trans = BLIS_TRANSPOSE;
@@ -25848,7 +25975,7 @@ static void bli_param_map_netlib_to_blis_trans( char trans, trans_t* blis_trans 
 	}
 }
 
-static void bli_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
+BLIS_INLINE void bli_param_map_netlib_to_blis_diag( char diag, diag_t* blis_diag )
 {
 	if      ( diag == 'n' || diag == 'N' ) *blis_diag = BLIS_NONUNIT_DIAG;
 	else if ( diag == 'u' || diag == 'U' ) *blis_diag = BLIS_UNIT_DIAG;
@@ -25983,10 +26110,10 @@ err_t bli_check_valid_kc_mod_mult( blksz_t* kc, blksz_t* kr );
 BLIS_EXPORT_BLIS errlev_t bli_error_checking_level( void );
 BLIS_EXPORT_BLIS void     bli_error_checking_level_set( errlev_t new_level );
 
-BLIS_EXPORT_BLIS bool_t    bli_error_checking_is_enabled( void );
+BLIS_EXPORT_BLIS bool     bli_error_checking_is_enabled( void );
 
 void      bli_print_msg( char* str, char* file, guint_t line );
-void      bli_abort( void );
+BLIS_EXPORT_BLIS void      bli_abort( void );
 
 char*     bli_error_string_for_code( gint_t code );
 
@@ -26165,9 +26292,9 @@ BLIS_EXPORT_BLIS int bli_getopt( int argc, char** const argv, const char* optstr
 // begin bli_opid.h
 
 
-static bool_t bli_opid_is_level3( opid_t opid )
+BLIS_INLINE bool bli_opid_is_level3( opid_t opid )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( BLIS_GEMM <= opid && opid <= BLIS_TRSM );
 }
 
@@ -26248,100 +26375,100 @@ dim_t bli_cntl_calc_num_threads_in
 
 // cntl_t query (fields only)
 
-static opid_t bli_cntl_family( cntl_t* cntl )
+BLIS_INLINE opid_t bli_cntl_family( cntl_t* cntl )
 {
 	return cntl->family;
 }
 
-static bszid_t bli_cntl_bszid( cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_bszid( cntl_t* cntl )
 {
 	return cntl->bszid;
 }
 
-static void_fp bli_cntl_var_func( cntl_t* cntl )
+BLIS_INLINE void_fp bli_cntl_var_func( cntl_t* cntl )
 {
 	return cntl->var_func;
 }
 
-static cntl_t* bli_cntl_sub_prenode( cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_prenode( cntl_t* cntl )
 {
 	return cntl->sub_prenode;
 }
 
-static cntl_t* bli_cntl_sub_node( cntl_t* cntl )
+BLIS_INLINE cntl_t* bli_cntl_sub_node( cntl_t* cntl )
 {
 	return cntl->sub_node;
 }
 
-static void* bli_cntl_params( cntl_t* cntl )
+BLIS_INLINE void* bli_cntl_params( cntl_t* cntl )
 {
 	return cntl->params;
 }
 
-static uint64_t bli_cntl_params_size( cntl_t* cntl )
+BLIS_INLINE uint64_t bli_cntl_params_size( cntl_t* cntl )
 {
 	// The first 64 bytes is always the size of the params structure.
 	return *( ( uint64_t* )(cntl->params) );
 }
 
-static mem_t* bli_cntl_pack_mem( cntl_t* cntl )
+BLIS_INLINE mem_t* bli_cntl_pack_mem( cntl_t* cntl )
 {
 	return &(cntl->pack_mem);
 }
 
 // cntl_t query (complex)
 
-static bool_t bli_cntl_is_null( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_null( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( cntl == NULL );
 }
 
-static bool_t bli_cntl_is_leaf( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_is_leaf( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_sub_node( cntl ) == NULL );
 }
 
-static bool_t bli_cntl_does_part( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_does_part( cntl_t* cntl )
 {
-	return ( bool_t )
+	return ( bool )
 	       ( bli_cntl_bszid( cntl ) != BLIS_NO_PART );
 }
 
 // cntl_t modification
 
-static void bli_cntl_set_family( opid_t family, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_family( opid_t family, cntl_t* cntl )
 {
 	cntl->family = family;
 }
 
-static void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_bszid( bszid_t bszid, cntl_t* cntl )
 {
 	cntl->bszid = bszid;
 }
 
-static void bli_cntl_set_var_func( void_fp var_func, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_var_func( void_fp var_func, cntl_t* cntl )
 {
 	cntl->var_func = var_func;
 }
 
-static void bli_cntl_set_sub_prenode( cntl_t* sub_prenode, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_sub_prenode( cntl_t* sub_prenode, cntl_t* cntl )
 {
 	cntl->sub_prenode = sub_prenode;
 }
 
-static void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_sub_node( cntl_t* sub_node, cntl_t* cntl )
 {
 	cntl->sub_node = sub_node;
 }
 
-static void bli_cntl_set_params( void* params, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_params( void* params, cntl_t* cntl )
 {
 	cntl->params = params;
 }
 
-static void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
+BLIS_INLINE void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
 {
 	cntl->pack_mem = *pack_mem;
 }
@@ -26353,7 +26480,7 @@ static void bli_cntl_set_pack_mem( mem_t* pack_mem, cntl_t* cntl )
 #ifndef BLIS_ENV_H
 #define BLIS_ENV_H
 
-dim_t bli_env_get_var( const char* env, dim_t fallback );
+gint_t bli_env_get_var( const char* env, gint_t fallback );
 //void  bli_env_set_var( const char* env, dim_t value );
 
 #endif
@@ -26370,8 +26497,8 @@ void  bli_pack_finalize( void );
 
 BLIS_EXPORT_BLIS dim_t bli_pack_get_pack_a( void );
 BLIS_EXPORT_BLIS dim_t bli_pack_get_pack_b( void );
-BLIS_EXPORT_BLIS void  bli_pack_set_pack_a( bool_t pack_a );
-BLIS_EXPORT_BLIS void  bli_pack_set_pack_b( bool_t pack_b );
+BLIS_EXPORT_BLIS void  bli_pack_set_pack_a( bool pack_a );
+BLIS_EXPORT_BLIS void  bli_pack_set_pack_b( bool pack_b );
 
 void  bli_pack_init_rntm_from_env( rntm_t* rntm );
 
@@ -26458,14 +26585,14 @@ BLIS_EXPORT_BLIS char* bli_info_get_trsm_impl_string( num_t dt );
 
 BLIS_EXPORT_BLIS arch_t bli_arch_query_id( void );
 
-void   bli_arch_set_id_once( void );
-void   bli_arch_set_id( void );
+void bli_arch_set_id_once( void );
+void bli_arch_set_id( void );
 
 BLIS_EXPORT_BLIS char*  bli_arch_string( arch_t id );
 
-void   bli_arch_set_logging( bool_t dolog );
-bool_t bli_arch_get_logging( void );
-void   bli_arch_log( char*, ... );
+void bli_arch_set_logging( bool dolog );
+bool bli_arch_get_logging( void );
+void bli_arch_log( char*, ... );
 
 #endif
 
@@ -26484,36 +26611,37 @@ void   bli_arch_log( char*, ... );
 	BLIS_ARCH_CORTEXA9  = 12,
 	BLIS_ARCH_GENERIC   = 13
   } arch_t;
-  typedef uint64_t bool_t;
+  typedef uint64_t bool;
   #define bli_abort abort
 #endif
 
 #ifndef BLIS_CPUID_H
 #define BLIS_CPUID_H
 
-arch_t    bli_cpuid_query_id( void );
+arch_t bli_cpuid_query_id( void );
 
 // Intel
-bool_t    bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
-bool_t    bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
-bool_t    bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
-bool_t    bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t features );
-bool_t    bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_skx( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_knl( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_haswell( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features );
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t features );
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
-BLIS_EXPORT_BLIS bool_t    bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_steamroller( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features );
+bool bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
 
 // ARM
-bool_t    bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
-bool_t    bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
-bool_t    bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
-bool_t    bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
-bool_t    bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
 
@@ -26527,7 +26655,7 @@ uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features 
 
 
 
-static bool_t bli_cpuid_has_features( uint32_t have, uint32_t want )
+BLIS_INLINE bool bli_cpuid_has_features( uint32_t have, uint32_t want )
 {
     return ( have & want ) == want;
 }
@@ -27468,7 +27596,7 @@ void PASTEMAC(opname,_check) \
      );
 
 GENTPROT( amaxv )
-
+GENTPROT( aminv )
 
 #undef  GENTPROT
 #define GENTPROT( opname ) \
@@ -27569,14 +27697,14 @@ GENTPROT( xpbyv )
 void bli_l1v_xy_check
      (
        obj_t*  x,
-       obj_t*  y 
+       obj_t*  y
      );
 
 void bli_l1v_axy_check
      (
        obj_t*  alpha,
        obj_t*  x,
-       obj_t*  y 
+       obj_t*  y
      );
 
 void bli_l1v_xby_check
@@ -27600,18 +27728,18 @@ void bli_l1v_dot_check
        obj_t*  x,
        obj_t*  y,
        obj_t*  beta,
-       obj_t*  rho 
+       obj_t*  rho
      );
 
 void bli_l1v_x_check
      (
-       obj_t*  x 
+       obj_t*  x
      );
 
 void bli_l1v_ax_check
      (
        obj_t*  alpha,
-       obj_t*  x 
+       obj_t*  x
      );
 
 void bli_l1v_xi_check
@@ -27667,6 +27795,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
      );
 
 INSERT_GENTDEF( amaxv )
+INSERT_GENTDEF( aminv )
 
 // axpbyv
 
@@ -27853,7 +27982,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( addv )
 GENTPROT( copyv )
@@ -27871,6 +28000,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENTPROT( amaxv )
+GENTPROT( aminv )
 
 
 #undef  GENTPROT
@@ -27897,7 +28027,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( axpyv )
 GENTPROT( scal2v )
@@ -27912,7 +28042,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  y, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotv )
 
@@ -27928,7 +28058,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  beta, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotxv )
 
@@ -27940,7 +28070,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( invertv )
 
@@ -27953,7 +28083,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( scalv )
 GENTPROT( setv )
@@ -27967,7 +28097,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( swapv )
 
@@ -28031,7 +28161,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( addv )
 GENTPROT( copyv )
@@ -28049,6 +28179,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENTPROT( amaxv )
+GENTPROT( aminv )
 
 
 #undef  GENTPROT
@@ -28075,7 +28206,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( axpyv )
 GENTPROT( scal2v )
@@ -28090,7 +28221,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  y, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotv )
 
@@ -28106,7 +28237,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  beta, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotxv )
 
@@ -28118,7 +28249,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( invertv )
 
@@ -28131,7 +28262,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( scalv )
 GENTPROT( setv )
@@ -28145,7 +28276,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( swapv )
 
@@ -28229,6 +28360,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ); \
 
 INSERT_GENTPROT_BASIC0( amaxv )
+INSERT_GENTPROT_BASIC0( aminv )
 
 
 #undef  GENTPROT
@@ -28399,6 +28531,7 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      );
 
 INSERT_GENTDEF( amaxv )
+INSERT_GENTDEF( aminv )
 
 // axpbyv
 
@@ -28605,6 +28738,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ); \
 
 INSERT_GENTPROT_BASIC0( amaxv )
+INSERT_GENTPROT_BASIC0( aminv )
 
 
 #undef  GENTPROT
@@ -28775,6 +28909,7 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      );
 
 INSERT_GENTDEF( amaxv )
+INSERT_GENTDEF( aminv )
 
 // axpbyv
 
@@ -28934,6 +29069,7 @@ GENPROT( addv )
 GENPROT( copyv )
 GENPROT( subv )
 GENPROT( amaxv )
+GENPROT( aminv )
 GENPROT( axpbyv )
 GENPROT( axpyv )
 GENPROT( scal2v )
@@ -31026,7 +31162,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32088,50 +32224,50 @@ struct packm_params_s
 	packm_var_oft var_func;
 	bszid_t       bmid_m;
 	bszid_t       bmid_n;
-	bool_t        does_invert_diag;
-	bool_t        rev_iter_if_upper;
-	bool_t        rev_iter_if_lower;
+	bool          does_invert_diag;
+	bool          rev_iter_if_upper;
+	bool          rev_iter_if_lower;
 	pack_t        pack_schema;
 	packbuf_t     pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
 
-static packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
+BLIS_INLINE packm_var_oft bli_cntl_packm_params_var_func( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->var_func;
 }
 
-static bszid_t bli_cntl_packm_params_bmid_m( cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_m( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_m;
 }
 
-static bszid_t bli_cntl_packm_params_bmid_n( cntl_t* cntl )
+BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_n( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_n;
 }
 
-static bool_t bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_does_invert_diag( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->does_invert_diag;
 }
 
-static bool_t bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_upper( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_upper;
 }
 
-static bool_t bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_lower( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_lower;
 }
 
-static pack_t bli_cntl_packm_params_pack_schema( cntl_t* cntl )
+BLIS_INLINE pack_t bli_cntl_packm_params_pack_schema( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_schema;
 }
 
-static packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
+BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_buf_type;
 }
@@ -32145,9 +32281,9 @@ cntl_t* bli_packm_cntl_create_node
        void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
+       bool      does_invert_diag,
+       bool      rev_iter_if_upper,
+       bool      rev_iter_if_lower,
        pack_t    pack_schema,
        packbuf_t pack_buf_type,
        cntl_t*   sub_node
@@ -32296,9 +32432,9 @@ void PASTEMAC(ch,varname) \
        uplo_t  uploc, \
        trans_t transc, \
        pack_t  schema, \
-       bool_t  invdiag, \
-       bool_t  revifup, \
-       bool_t  reviflo, \
+       bool    invdiag, \
+       bool    revifup, \
+       bool    reviflo, \
        dim_t   m, \
        dim_t   n, \
        dim_t   m_max, \
@@ -32331,7 +32467,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32388,7 +32524,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32422,7 +32558,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32479,7 +32615,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32513,7 +32649,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32570,7 +32706,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32604,7 +32740,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32661,7 +32797,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32695,7 +32831,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -32752,7 +32888,7 @@ void PASTEMAC(ch,varname) \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       bool_t          invdiag, \
+       bool            invdiag, \
        dim_t           m_panel, \
        dim_t           n_panel, \
        dim_t           m_panel_max, \
@@ -36363,8 +36499,8 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -36386,17 +36522,17 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )
 
 // -----------------------------------------------------------------------------
 
-static void bli_gemmsup_ref_var1n2m_opt_cases
+BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
      (
        num_t    dt,
        trans_t* trans,
-       bool_t   packa,
-       bool_t   packb,
+       bool     packa,
+       bool     packb,
        stor3_t* eff_id,
        cntx_t*  cntx
      )
 {
-	const bool_t row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
+	const bool row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
 
 	// Handle row- and column-preferrential kernels separately.
 	if ( row_pref )
@@ -36482,7 +36618,7 @@ static void bli_gemmsup_ref_var1n2m_opt_cases
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        dim_t            m, \
        dim_t            k, \
@@ -36501,7 +36637,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           did_pack, \
+       bool             did_pack, \
        rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
@@ -36515,7 +36651,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_finalize_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        stor3_t          stor_id, \
        pack_t* restrict schema, \
        dim_t            m, \
@@ -36539,7 +36675,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        stor3_t          stor_id, \
        trans_t          transc, \
@@ -36569,7 +36705,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        dim_t            k, \
        dim_t            n, \
@@ -36588,7 +36724,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           did_pack, \
+       bool             did_pack, \
        rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
        thrinfo_t* restrict thread  \
@@ -36602,7 +36738,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_finalize_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        stor3_t          stor_id, \
        pack_t* restrict schema, \
        dim_t            k, \
@@ -36626,7 +36762,7 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool_t           will_pack, \
+       bool             will_pack, \
        packbuf_t        pack_buf_type, \
        stor3_t          stor_id, \
        trans_t          transc, \
@@ -37004,7 +37140,7 @@ INSERT_GENTPROT_BASIC0( gemm4mb_ker_var2 ) // 4m1b
 // begin bli_gemm_ind_opt.h
 
 
-static void bli_gemm_ind_recast_1m_params
+BLIS_INLINE void bli_gemm_ind_recast_1m_params
      (
        num_t* dt_exec,
        pack_t schema_a,
@@ -37152,9 +37288,9 @@ void bli_gemm_md_zgemm
 
 // -----------------------------------------------------------------------------
 
-static bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
@@ -37172,9 +37308,9 @@ static bool_t bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-static bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
@@ -37192,9 +37328,9 @@ static bool_t bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 	return r_val;
 }
 
-static bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
+BLIS_INLINE bool bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 {
-	bool_t r_val = FALSE;
+	bool r_val = FALSE;
 
 	// NOTE: The last conditional subexpression is necessary if/when we
 	// allow the user to specify the computation domain. (The computation
@@ -37214,7 +37350,7 @@ static bool_t bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 
 // -----------------------------------------------------------------------------
 
-static void bli_gemm_md_ker_var2_recast
+BLIS_INLINE void bli_gemm_md_ker_var2_recast
      (
        num_t* dt_comp,
        num_t  dt_a,
@@ -37963,8 +38099,8 @@ GENPROT( gemmtsup_ref_var2m )
 \
 void PASTEMACT(ch,opname,uplo,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -39648,20 +39784,6 @@ BLIS_EXPORT_BLAS int PASTEF770(xerbla_array)(const bla_character *srname, const 
 // end bla_xerbla_array.h
 
 
-// -- Level-0 BLAS prototypes --
-
-// begin bla_cabs1.h
-
-
-#ifdef BLIS_ENABLE_BLAS
-
-BLIS_EXPORT_BLAS bla_real   PASTEF77(s,cabs1)(bla_scomplex *z);
-BLIS_EXPORT_BLAS bla_double PASTEF77(d,cabs1)(bla_dcomplex *z);
-
-#endif
-// end bla_cabs1.h
-
-
 // -- Level-1 BLAS prototypes --
 
 // begin bla_amax.h
@@ -39729,6 +39851,30 @@ INSERT_GENTPROT_BLAS( axpy )
 #endif
 
 // end bla_axpy.h
+// begin bla_axpby.h
+
+
+
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype*   alpha, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   beta, \
+             ftype*   y, const f77_int* incy \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( axpby )
+#endif
+
+// end bla_axpby.h
 // begin bla_copy.h
 
 
@@ -41450,6 +41596,126 @@ INSERT_GENTPROT_BLAS( gemmt )
 #endif
 // end bla_gemmt_check.h
 
+// -- Batch Extension prototypes --
+// begin bla_gemm_batch.h
+
+
+
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa_array, \
+       const f77_char* transb_array, \
+       const f77_int*  m_array, \
+       const f77_int*  n_array, \
+       const f77_int*  k_array, \
+       const ftype*    alpha_array, \
+       const ftype**   a_array, const f77_int* lda_array, \
+       const ftype**   b_array, const f77_int* ldb_array, \
+       const ftype*    beta_array, \
+             ftype**   c_array, const f77_int* ldc_array, \
+       const f77_int*  group_count, \
+       const f77_int*  group_size \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( gemm_batch )
+#endif
+
+// end bla_gemm_batch.h
+// begin bla_gemm3m.h
+
+
+
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( gemm3m )
+#endif
+
+// end bla_gemm3m.h
+// begin bla_gemm3m_check.h
+
+
+#ifdef BLIS_ENABLE_BLAS
+
+#define bla_gemm3m_check( dt_str, op_str, transa, transb, m, n, k, lda, ldb, ldc ) \
+{ \
+	f77_int info = 0; \
+	f77_int nota,  notb; \
+	f77_int conja, conjb; \
+	f77_int ta,    tb; \
+	f77_int nrowa, nrowb; \
+\
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota ) { nrowa = *m; } \
+	else        { nrowa = *k; } \
+	if ( notb ) { nrowb = *k; } \
+	else        { nrowb = *n; } \
+\
+	if      ( !nota && !conja && !ta ) \
+		info = 1; \
+	else if ( !notb && !conjb && !tb ) \
+		info = 2; \
+	else if ( *m < 0 ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 8; \
+	else if ( *ldb < bli_max( 1, nrowb ) ) \
+		info = 10; \
+	else if ( *ldc < bli_max( 1, *m    ) ) \
+		info = 13; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
+
+#endif
+// end bla_gemm3m_check.h
+
 // -- Fortran-compatible APIs to BLIS functions --
 
 // begin b77_thread.h
@@ -41459,7 +41725,7 @@ INSERT_GENTPROT_BLAS( gemmt )
 //
 // Prototype Fortran-compatible BLIS interfaces.
 //
-//
+
 //BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_ways)
 //     (
 //       const f77_int* jc,
@@ -41475,6 +41741,59 @@ INSERT_GENTPROT_BLAS( gemmt )
 //     );
 
 // end b77_thread.h
+
+
+// -- Auxiliary Routines --
+
+// begin bla_cabs1.h
+
+
+#ifdef BLIS_ENABLE_BLAS
+
+BLIS_EXPORT_BLAS bla_real   PASTEF77(s,cabs1)(bla_scomplex *z);
+BLIS_EXPORT_BLAS bla_double PASTEF77(d,cabs1)(bla_dcomplex *z);
+
+#endif
+// end bla_cabs1.h
+// begin bla_amin.h
+
+
+
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype_x, chx, blasname ) \
+\
+BLIS_EXPORT_BLAS f77_int PASTEF772(i,chx,blasname) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx  \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( amin )
+#endif// end bla_amin.h
+// begin f77_amin_sub.h
+
+
+//
+// Prototype CBLAS subroutine wrapper interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype_x, chx, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF773(i,chx,blasname,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype_x* x, const f77_int* incx, \
+             f77_int* rval  \
+     );
+
+#ifdef BLIS_ENABLE_CBLAS
+INSERT_GENTPROT_BLAS( amin )
+#endif
+// end f77_amin_sub.h
 
 
 #endif // BLIS_ENABLE_BLAS
@@ -41502,6 +41821,8 @@ INSERT_GENTPROT_BLAS( gemmt )
 // (probably via blis.h) allows applications to access CBLAS
 // prototypes and definitions.
 // begin cblas.h
+
+
 #ifndef CBLAS_H
 #define CBLAS_H
 #include <stddef.h> // skipped
@@ -41617,14 +41938,15 @@ INSERT_GENTPROT_BLAS( gemmt )
 #define BLIS_CONFIG_H
 
 // Enabled configuration "family" (config_name)
-#define BLIS_FAMILY_ZEN2
+#define BLIS_FAMILY_ZEN3
 
 
 // Enabled sub-configurations (config_list)
-#define BLIS_CONFIG_ZEN2
+#define BLIS_CONFIG_ZEN3
 
 
 // Enabled kernel sets (kernel_list)
+#define BLIS_KERNELS_ZEN3
 #define BLIS_KERNELS_ZEN2
 #define BLIS_KERNELS_ZEN
 #define BLIS_KERNELS_HASWELL
@@ -41678,9 +42000,9 @@ INSERT_GENTPROT_BLAS( gemmt )
 // determine automatically
 #endif
 
-#if 32 == 64
+#if 64 == 64
 #define BLIS_BLAS_INT_TYPE_SIZE 64
-#elif 32 == 32
+#elif 64 == 32
 #define BLIS_BLAS_INT_TYPE_SIZE 32
 #else
 // determine automatically
@@ -41698,7 +42020,7 @@ INSERT_GENTPROT_BLAS( gemmt )
 
 #ifndef BLIS_ENABLE_CBLAS
 #ifndef BLIS_DISABLE_CBLAS
-#if 0
+#if 1
 #define BLIS_ENABLE_CBLAS
 #else
 #define BLIS_DISABLE_CBLAS
@@ -41954,6 +42276,21 @@ INSERT_GENTPROT_BLAS( gemmt )
 #define BLIS_EXPORT_BLAS BLIS_EXPORT
 
 
+// -- STATIC INLINE FUNCTIONS --------------------------------------------------
+
+// C and C++ have different semantics for defining "inline" functions. In C,
+// the keyword phrase "static inline" accomplishes this, though the "inline"
+// is optional. In C++, the "inline" keyword is required and obviates "static"
+// altogether. Why does this matter? While BLIS is compiled in C99, blis.h may
+// be #included by a source file that is compiled with C++.
+#ifdef __cplusplus
+  #define BLIS_INLINE inline
+#else
+  //#define BLIS_INLINE static inline
+  #define BLIS_INLINE static
+#endif
+
+
 #endif
 
 // end bli_config_macro_defs.h
@@ -41974,6 +42311,7 @@ INSERT_GENTPROT_BLAS( gemmt )
 #elif __STDC_VERSION__ >= 199901L
   // For C99 (or later), include stdint.h.
 #include <stdint.h> // skipped
+#include <stdbool.h> // skipped
 #else
   // When stdint.h is not available, manually typedef the types we will use.
   #ifdef _WIN32
@@ -42013,19 +42351,19 @@ typedef unsigned long int guint_t;
 
 // -- Boolean type --
 
-typedef  gint_t  bool_t;
+// NOTE: bool_t is no longer used and has been replaced with C99's bool type.
+//typedef bool bool_t;
 
-
-// -- Boolean values --
-
+// BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
+// define these macros in terms of true and false, respectively, which are
+// defined by C99 in stdbool.h.
 #ifndef TRUE
-  #define TRUE  1
+  #define TRUE  true
 #endif
 
 #ifndef FALSE
-  #define FALSE 0
+  #define FALSE false
 #endif
-
 
 // -- Special-purpose integers --
 
@@ -42059,39 +42397,39 @@ typedef uint32_t objbits_t;  // object information bit field
 
 #ifdef BLIS_ENABLE_C99_COMPLEX
 
-	#if __STDC_VERSION__ >= 199901L
+    #if __STDC_VERSION__ >= 199901L
 #include <complex.h> // skipped
 
-		// Typedef official complex types to BLIS complex type names.
-		typedef  float complex scomplex;
-		typedef double complex dcomplex;
-	#else
-		#error "Configuration requested C99 complex types, but C99 does not appear to be supported."
-	#endif
+        // Typedef official complex types to BLIS complex type names.
+        typedef  float complex scomplex;
+        typedef double complex dcomplex;
+    #else
+        #error "Configuration requested C99 complex types, but C99 does not appear to be supported."
+    #endif
 
 #else // ifndef BLIS_ENABLE_C99_COMPLEX
 
-	// This cpp guard provides a temporary hack to allow libflame
-	// interoperability with BLIS.
-	#ifndef _DEFINED_SCOMPLEX
-	#define _DEFINED_SCOMPLEX
-	typedef struct
-	{
-		float  real;
-		float  imag;
-	} scomplex;
-	#endif
+    // This cpp guard provides a temporary hack to allow libflame
+    // interoperability with BLIS.
+    #ifndef _DEFINED_SCOMPLEX
+    #define _DEFINED_SCOMPLEX
+    typedef struct
+    {
+        float  real;
+        float  imag;
+    } scomplex;
+    #endif
 
-	// This cpp guard provides a temporary hack to allow libflame
-	// interoperability with BLIS.
-	#ifndef _DEFINED_DCOMPLEX
-	#define _DEFINED_DCOMPLEX
-	typedef struct
-	{
-		double real;
-		double imag;
-	} dcomplex;
-	#endif
+    // This cpp guard provides a temporary hack to allow libflame
+    // interoperability with BLIS.
+    #ifndef _DEFINED_DCOMPLEX
+    #define _DEFINED_DCOMPLEX
+    typedef struct
+    {
+        double real;
+        double imag;
+    } dcomplex;
+    #endif
 
 #endif // BLIS_ENABLE_C99_COMPLEX
 
@@ -42228,7 +42566,7 @@ typedef void* void_fp;
 #define BLIS_BITVAL_SINGLE_PREC               0x0
 #define BLIS_BITVAL_DOUBLE_PREC               BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_FLOAT_TYPE              0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT  
+#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT
 #define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_DOMAIN_BIT | BLIS_PRECISION_BIT )
 #define   BLIS_BITVAL_INT_TYPE                0x04
@@ -42238,10 +42576,10 @@ typedef void* void_fp;
 #define BLIS_BITVAL_NO_CONJ                   0x0
 #define BLIS_BITVAL_CONJ                      BLIS_CONJ_BIT
 #define BLIS_BITVAL_CONJ_TRANS              ( BLIS_CONJ_BIT | BLIS_TRANS_BIT )
-#define BLIS_BITVAL_ZEROS                     0x0 
+#define BLIS_BITVAL_ZEROS                     0x0
 #define BLIS_BITVAL_UPPER                   ( BLIS_UPPER_BIT | BLIS_DIAG_BIT )
 #define BLIS_BITVAL_LOWER                   ( BLIS_LOWER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS  
+#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS
 #define BLIS_BITVAL_NONUNIT_DIAG              0x0
 #define BLIS_BITVAL_UNIT_DIAG                 BLIS_UNIT_DIAG_BIT
 #define BLIS_BITVAL_INVERT_DIAG               BLIS_INVERT_DIAG_BIT
@@ -42300,50 +42638,50 @@ typedef void* void_fp;
 
 typedef enum
 {
-	BLIS_NO_TRANSPOSE      = 0x0,
-	BLIS_TRANSPOSE         = BLIS_BITVAL_TRANS,
-	BLIS_CONJ_NO_TRANSPOSE = BLIS_BITVAL_CONJ,
-	BLIS_CONJ_TRANSPOSE    = BLIS_BITVAL_CONJ_TRANS
+    BLIS_NO_TRANSPOSE      = 0x0,
+    BLIS_TRANSPOSE         = BLIS_BITVAL_TRANS,
+    BLIS_CONJ_NO_TRANSPOSE = BLIS_BITVAL_CONJ,
+    BLIS_CONJ_TRANSPOSE    = BLIS_BITVAL_CONJ_TRANS
 } trans_t;
 
 typedef enum
 {
-	BLIS_NO_CONJUGATE      = 0x0,
-	BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
+    BLIS_NO_CONJUGATE      = 0x0,
+    BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
 } conj_t;
 
 typedef enum
 {
-	BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
-	BLIS_LOWER             = BLIS_BITVAL_LOWER,
-	BLIS_UPPER             = BLIS_BITVAL_UPPER,
-	BLIS_DENSE             = BLIS_BITVAL_DENSE
+    BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
+    BLIS_LOWER             = BLIS_BITVAL_LOWER,
+    BLIS_UPPER             = BLIS_BITVAL_UPPER,
+    BLIS_DENSE             = BLIS_BITVAL_DENSE
 } uplo_t;
 
 typedef enum
 {
-	BLIS_LEFT              = 0x0,
-	BLIS_RIGHT
+    BLIS_LEFT              = 0x0,
+    BLIS_RIGHT
 } side_t;
 
 typedef enum
 {
-	BLIS_NONUNIT_DIAG      = 0x0,
-	BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
+    BLIS_NONUNIT_DIAG      = 0x0,
+    BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
 } diag_t;
 
 typedef enum
 {
-	BLIS_NO_INVERT_DIAG    = 0x0,
-	BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
+    BLIS_NO_INVERT_DIAG    = 0x0,
+    BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
 } invdiag_t;
 
 typedef enum
 {
-	BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
-	BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
-	BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
-	BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR
+    BLIS_GENERAL           = BLIS_BITVAL_GENERAL,
+    BLIS_HERMITIAN         = BLIS_BITVAL_HERMITIAN,
+    BLIS_SYMMETRIC         = BLIS_BITVAL_SYMMETRIC,
+    BLIS_TRIANGULAR        = BLIS_BITVAL_TRIANGULAR
 } struc_t;
 
 
@@ -42351,26 +42689,26 @@ typedef enum
 
 typedef enum
 {
-	BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
-	BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
-	BLIS_SCOMPLEX          = BLIS_BITVAL_SCOMPLEX_TYPE,
-	BLIS_DCOMPLEX          = BLIS_BITVAL_DCOMPLEX_TYPE,
-	BLIS_INT               = BLIS_BITVAL_INT_TYPE,
-	BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
-	BLIS_DT_LO             = BLIS_FLOAT,
-	BLIS_DT_HI             = BLIS_DCOMPLEX
+    BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
+    BLIS_DOUBLE            = BLIS_BITVAL_DOUBLE_TYPE,
+    BLIS_SCOMPLEX          = BLIS_BITVAL_SCOMPLEX_TYPE,
+    BLIS_DCOMPLEX          = BLIS_BITVAL_DCOMPLEX_TYPE,
+    BLIS_INT               = BLIS_BITVAL_INT_TYPE,
+    BLIS_CONSTANT          = BLIS_BITVAL_CONST_TYPE,
+    BLIS_DT_LO             = BLIS_FLOAT,
+    BLIS_DT_HI             = BLIS_DCOMPLEX
 } num_t;
 
 typedef enum
 {
-	BLIS_REAL              = BLIS_BITVAL_REAL,
-	BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
+    BLIS_REAL              = BLIS_BITVAL_REAL,
+    BLIS_COMPLEX           = BLIS_BITVAL_COMPLEX
 } dom_t;
 
 typedef enum
 {
-	BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
-	BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
+    BLIS_SINGLE_PREC       = BLIS_BITVAL_SINGLE_PREC,
+    BLIS_DOUBLE_PREC       = BLIS_BITVAL_DOUBLE_PREC
 } prec_t;
 
 
@@ -42378,31 +42716,31 @@ typedef enum
 
 typedef enum
 {
-	BLIS_NOT_PACKED            = BLIS_BITVAL_NOT_PACKED,
-	BLIS_PACKED_UNSPEC         = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_VECTOR         = BLIS_BITVAL_PACKED_UNSPEC,
-	BLIS_PACKED_ROWS           = BLIS_BITVAL_PACKED_ROWS,
-	BLIS_PACKED_COLUMNS        = BLIS_BITVAL_PACKED_COLUMNS,
-	BLIS_PACKED_ROW_PANELS     = BLIS_BITVAL_PACKED_ROW_PANELS,
-	BLIS_PACKED_COL_PANELS     = BLIS_BITVAL_PACKED_COL_PANELS,
-	BLIS_PACKED_ROW_PANELS_4MI = BLIS_BITVAL_PACKED_ROW_PANELS_4MI,
-	BLIS_PACKED_COL_PANELS_4MI = BLIS_BITVAL_PACKED_COL_PANELS_4MI,
-	BLIS_PACKED_ROW_PANELS_3MI = BLIS_BITVAL_PACKED_ROW_PANELS_3MI,
-	BLIS_PACKED_COL_PANELS_3MI = BLIS_BITVAL_PACKED_COL_PANELS_3MI,
-	BLIS_PACKED_ROW_PANELS_4MS = BLIS_BITVAL_PACKED_ROW_PANELS_4MS,
-	BLIS_PACKED_COL_PANELS_4MS = BLIS_BITVAL_PACKED_COL_PANELS_4MS,
-	BLIS_PACKED_ROW_PANELS_3MS = BLIS_BITVAL_PACKED_ROW_PANELS_3MS,
-	BLIS_PACKED_COL_PANELS_3MS = BLIS_BITVAL_PACKED_COL_PANELS_3MS,
-	BLIS_PACKED_ROW_PANELS_RO  = BLIS_BITVAL_PACKED_ROW_PANELS_RO,
-	BLIS_PACKED_COL_PANELS_RO  = BLIS_BITVAL_PACKED_COL_PANELS_RO,
-	BLIS_PACKED_ROW_PANELS_IO  = BLIS_BITVAL_PACKED_ROW_PANELS_IO,
-	BLIS_PACKED_COL_PANELS_IO  = BLIS_BITVAL_PACKED_COL_PANELS_IO,
-	BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
-	BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
-	BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
-	BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
-	BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
-	BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R
+    BLIS_NOT_PACKED            = BLIS_BITVAL_NOT_PACKED,
+    BLIS_PACKED_UNSPEC         = BLIS_BITVAL_PACKED_UNSPEC,
+    BLIS_PACKED_VECTOR         = BLIS_BITVAL_PACKED_UNSPEC,
+    BLIS_PACKED_ROWS           = BLIS_BITVAL_PACKED_ROWS,
+    BLIS_PACKED_COLUMNS        = BLIS_BITVAL_PACKED_COLUMNS,
+    BLIS_PACKED_ROW_PANELS     = BLIS_BITVAL_PACKED_ROW_PANELS,
+    BLIS_PACKED_COL_PANELS     = BLIS_BITVAL_PACKED_COL_PANELS,
+    BLIS_PACKED_ROW_PANELS_4MI = BLIS_BITVAL_PACKED_ROW_PANELS_4MI,
+    BLIS_PACKED_COL_PANELS_4MI = BLIS_BITVAL_PACKED_COL_PANELS_4MI,
+    BLIS_PACKED_ROW_PANELS_3MI = BLIS_BITVAL_PACKED_ROW_PANELS_3MI,
+    BLIS_PACKED_COL_PANELS_3MI = BLIS_BITVAL_PACKED_COL_PANELS_3MI,
+    BLIS_PACKED_ROW_PANELS_4MS = BLIS_BITVAL_PACKED_ROW_PANELS_4MS,
+    BLIS_PACKED_COL_PANELS_4MS = BLIS_BITVAL_PACKED_COL_PANELS_4MS,
+    BLIS_PACKED_ROW_PANELS_3MS = BLIS_BITVAL_PACKED_ROW_PANELS_3MS,
+    BLIS_PACKED_COL_PANELS_3MS = BLIS_BITVAL_PACKED_COL_PANELS_3MS,
+    BLIS_PACKED_ROW_PANELS_RO  = BLIS_BITVAL_PACKED_ROW_PANELS_RO,
+    BLIS_PACKED_COL_PANELS_RO  = BLIS_BITVAL_PACKED_COL_PANELS_RO,
+    BLIS_PACKED_ROW_PANELS_IO  = BLIS_BITVAL_PACKED_ROW_PANELS_IO,
+    BLIS_PACKED_COL_PANELS_IO  = BLIS_BITVAL_PACKED_COL_PANELS_IO,
+    BLIS_PACKED_ROW_PANELS_RPI = BLIS_BITVAL_PACKED_ROW_PANELS_RPI,
+    BLIS_PACKED_COL_PANELS_RPI = BLIS_BITVAL_PACKED_COL_PANELS_RPI,
+    BLIS_PACKED_ROW_PANELS_1E  = BLIS_BITVAL_PACKED_ROW_PANELS_1E,
+    BLIS_PACKED_COL_PANELS_1E  = BLIS_BITVAL_PACKED_COL_PANELS_1E,
+    BLIS_PACKED_ROW_PANELS_1R  = BLIS_BITVAL_PACKED_ROW_PANELS_1R,
+    BLIS_PACKED_COL_PANELS_1R  = BLIS_BITVAL_PACKED_COL_PANELS_1R
 } pack_t;
 
 // We combine row and column packing into one "type", and we start
@@ -42416,11 +42754,11 @@ typedef enum
 
 typedef enum
 {
-	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
-	BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
+    BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
+    BLIS_PACK_REV_IF_UPPER = BLIS_BITVAL_PACK_REV_IF_UPPER,
 
-	BLIS_PACK_FWD_IF_LOWER = BLIS_BITVAL_PACK_FWD_IF_LOWER,
-	BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
+    BLIS_PACK_FWD_IF_LOWER = BLIS_BITVAL_PACK_FWD_IF_LOWER,
+    BLIS_PACK_REV_IF_LOWER = BLIS_BITVAL_PACK_REV_IF_LOWER
 } packord_t;
 
 
@@ -42428,10 +42766,10 @@ typedef enum
 
 typedef enum
 {
-	BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
-	BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
-	BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
-	BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE
+    BLIS_BUFFER_FOR_A_BLOCK = BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+    BLIS_BUFFER_FOR_B_PANEL = BLIS_BITVAL_BUFFER_FOR_B_PANEL,
+    BLIS_BUFFER_FOR_C_PANEL = BLIS_BITVAL_BUFFER_FOR_C_PANEL,
+    BLIS_BUFFER_FOR_GEN_USE = BLIS_BITVAL_BUFFER_FOR_GEN_USE
 } packbuf_t;
 
 
@@ -42439,8 +42777,8 @@ typedef enum
 
 typedef enum
 {
-	BLIS_FWD,
-	BLIS_BWD
+    BLIS_FWD,
+    BLIS_BWD
 } dir_t;
 
 
@@ -42448,22 +42786,22 @@ typedef enum
 
 typedef enum
 {
-	BLIS_SUBPART0,
-	BLIS_SUBPART1,
-	BLIS_SUBPART2,
-	BLIS_SUBPART1AND0,
-	BLIS_SUBPART1AND2,
-	BLIS_SUBPART1A,
-	BLIS_SUBPART1B,
-	BLIS_SUBPART00,
-	BLIS_SUBPART10,
-	BLIS_SUBPART20,
-	BLIS_SUBPART01,
-	BLIS_SUBPART11,
-	BLIS_SUBPART21,
-	BLIS_SUBPART02,
-	BLIS_SUBPART12,
-	BLIS_SUBPART22
+    BLIS_SUBPART0,
+    BLIS_SUBPART1,
+    BLIS_SUBPART2,
+    BLIS_SUBPART1AND0,
+    BLIS_SUBPART1AND2,
+    BLIS_SUBPART1A,
+    BLIS_SUBPART1B,
+    BLIS_SUBPART00,
+    BLIS_SUBPART10,
+    BLIS_SUBPART20,
+    BLIS_SUBPART01,
+    BLIS_SUBPART11,
+    BLIS_SUBPART21,
+    BLIS_SUBPART02,
+    BLIS_SUBPART12,
+    BLIS_SUBPART22
 } subpart_t;
 
 
@@ -42471,8 +42809,8 @@ typedef enum
 
 typedef enum
 {
-	BLIS_M = 0,
-	BLIS_N = 1
+    BLIS_M = 0,
+    BLIS_N = 1
 } mdim_t;
 
 
@@ -42480,17 +42818,17 @@ typedef enum
 
 typedef enum
 {
-	BLIS_MACH_EPS = 0,
-	BLIS_MACH_SFMIN,
-	BLIS_MACH_BASE,
-	BLIS_MACH_PREC,
-	BLIS_MACH_NDIGMANT,
-	BLIS_MACH_RND,
-	BLIS_MACH_EMIN,
-	BLIS_MACH_RMIN,
-	BLIS_MACH_EMAX,
-	BLIS_MACH_RMAX,
-	BLIS_MACH_EPS2
+    BLIS_MACH_EPS = 0,
+    BLIS_MACH_SFMIN,
+    BLIS_MACH_BASE,
+    BLIS_MACH_PREC,
+    BLIS_MACH_NDIGMANT,
+    BLIS_MACH_RND,
+    BLIS_MACH_EMIN,
+    BLIS_MACH_RMIN,
+    BLIS_MACH_EMAX,
+    BLIS_MACH_RMAX,
+    BLIS_MACH_EPS2
 } machval_t;
 
 #define BLIS_NUM_MACH_PARAMS   11
@@ -42502,15 +42840,15 @@ typedef enum
 
 typedef enum
 {
-	BLIS_3MH       = 0,
-	BLIS_3M1,
-	BLIS_4MH,
-	BLIS_4M1B,
-	BLIS_4M1A,
-	BLIS_1M,
-	BLIS_NAT,
-	BLIS_IND_FIRST = 0,
-	BLIS_IND_LAST  = BLIS_NAT
+    BLIS_3MH       = 0,
+    BLIS_3M1,
+    BLIS_4MH,
+    BLIS_4M1B,
+    BLIS_4M1A,
+    BLIS_1M,
+    BLIS_NAT,
+    BLIS_IND_FIRST = 0,
+    BLIS_IND_LAST  = BLIS_NAT
 } ind_t;
 
 #define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
@@ -42530,32 +42868,33 @@ typedef enum
 
 typedef enum
 {
-	BLIS_ADDV_KER  = 0,
-	BLIS_AMAXV_KER,
-	BLIS_AXPBYV_KER,
-	BLIS_AXPYV_KER,
-	BLIS_COPYV_KER,
-	BLIS_DOTV_KER,
-	BLIS_DOTXV_KER,
-	BLIS_INVERTV_KER,
-	BLIS_SCALV_KER,
-	BLIS_SCAL2V_KER,
-	BLIS_SETV_KER,
-	BLIS_SUBV_KER,
-	BLIS_SWAPV_KER,
-	BLIS_XPBYV_KER
+    BLIS_ADDV_KER  = 0,
+    BLIS_AMAXV_KER,
+    BLIS_AMINV_KER,
+    BLIS_AXPBYV_KER,
+    BLIS_AXPYV_KER,
+    BLIS_COPYV_KER,
+    BLIS_DOTV_KER,
+    BLIS_DOTXV_KER,
+    BLIS_INVERTV_KER,
+    BLIS_SCALV_KER,
+    BLIS_SCAL2V_KER,
+    BLIS_SETV_KER,
+    BLIS_SUBV_KER,
+    BLIS_SWAPV_KER,
+    BLIS_XPBYV_KER
 } l1vkr_t;
 
-#define BLIS_NUM_LEVEL1V_KERS 14
+#define BLIS_NUM_LEVEL1V_KERS 15
 
 
 typedef enum
 {
-	BLIS_AXPY2V_KER = 0,
-	BLIS_DOTAXPYV_KER,
-	BLIS_AXPYF_KER,
-	BLIS_DOTXF_KER,
-	BLIS_DOTXAXPYF_KER
+    BLIS_AXPY2V_KER = 0,
+    BLIS_DOTAXPYV_KER,
+    BLIS_AXPYF_KER,
+    BLIS_DOTXF_KER,
+    BLIS_DOTXAXPYF_KER
 } l1fkr_t;
 
 #define BLIS_NUM_LEVEL1F_KERS 5
@@ -42563,71 +42902,71 @@ typedef enum
 
 typedef enum
 {
-	BLIS_PACKM_0XK_KER  = 0,
-	BLIS_PACKM_1XK_KER  = 1,
-	BLIS_PACKM_2XK_KER  = 2,
-	BLIS_PACKM_3XK_KER  = 3,
-	BLIS_PACKM_4XK_KER  = 4,
-	BLIS_PACKM_5XK_KER  = 5,
-	BLIS_PACKM_6XK_KER  = 6,
-	BLIS_PACKM_7XK_KER  = 7,
-	BLIS_PACKM_8XK_KER  = 8,
-	BLIS_PACKM_9XK_KER  = 9,
-	BLIS_PACKM_10XK_KER = 10,
-	BLIS_PACKM_11XK_KER = 11,
-	BLIS_PACKM_12XK_KER = 12,
-	BLIS_PACKM_13XK_KER = 13,
-	BLIS_PACKM_14XK_KER = 14,
-	BLIS_PACKM_15XK_KER = 15,
-	BLIS_PACKM_16XK_KER = 16,
-	BLIS_PACKM_17XK_KER = 17,
-	BLIS_PACKM_18XK_KER = 18,
-	BLIS_PACKM_19XK_KER = 19,
-	BLIS_PACKM_20XK_KER = 20,
-	BLIS_PACKM_21XK_KER = 21,
-	BLIS_PACKM_22XK_KER = 22,
-	BLIS_PACKM_23XK_KER = 23,
-	BLIS_PACKM_24XK_KER = 24,
-	BLIS_PACKM_25XK_KER = 25,
-	BLIS_PACKM_26XK_KER = 26,
-	BLIS_PACKM_27XK_KER = 27,
-	BLIS_PACKM_28XK_KER = 28,
-	BLIS_PACKM_29XK_KER = 29,
-	BLIS_PACKM_30XK_KER = 30,
-	BLIS_PACKM_31XK_KER = 31,
+    BLIS_PACKM_0XK_KER  = 0,
+    BLIS_PACKM_1XK_KER  = 1,
+    BLIS_PACKM_2XK_KER  = 2,
+    BLIS_PACKM_3XK_KER  = 3,
+    BLIS_PACKM_4XK_KER  = 4,
+    BLIS_PACKM_5XK_KER  = 5,
+    BLIS_PACKM_6XK_KER  = 6,
+    BLIS_PACKM_7XK_KER  = 7,
+    BLIS_PACKM_8XK_KER  = 8,
+    BLIS_PACKM_9XK_KER  = 9,
+    BLIS_PACKM_10XK_KER = 10,
+    BLIS_PACKM_11XK_KER = 11,
+    BLIS_PACKM_12XK_KER = 12,
+    BLIS_PACKM_13XK_KER = 13,
+    BLIS_PACKM_14XK_KER = 14,
+    BLIS_PACKM_15XK_KER = 15,
+    BLIS_PACKM_16XK_KER = 16,
+    BLIS_PACKM_17XK_KER = 17,
+    BLIS_PACKM_18XK_KER = 18,
+    BLIS_PACKM_19XK_KER = 19,
+    BLIS_PACKM_20XK_KER = 20,
+    BLIS_PACKM_21XK_KER = 21,
+    BLIS_PACKM_22XK_KER = 22,
+    BLIS_PACKM_23XK_KER = 23,
+    BLIS_PACKM_24XK_KER = 24,
+    BLIS_PACKM_25XK_KER = 25,
+    BLIS_PACKM_26XK_KER = 26,
+    BLIS_PACKM_27XK_KER = 27,
+    BLIS_PACKM_28XK_KER = 28,
+    BLIS_PACKM_29XK_KER = 29,
+    BLIS_PACKM_30XK_KER = 30,
+    BLIS_PACKM_31XK_KER = 31,
 
-	BLIS_UNPACKM_0XK_KER  = 0,
-	BLIS_UNPACKM_1XK_KER  = 1,
-	BLIS_UNPACKM_2XK_KER  = 2,
-	BLIS_UNPACKM_3XK_KER  = 3,
-	BLIS_UNPACKM_4XK_KER  = 4,
-	BLIS_UNPACKM_5XK_KER  = 5,
-	BLIS_UNPACKM_6XK_KER  = 6,
-	BLIS_UNPACKM_7XK_KER  = 7,
-	BLIS_UNPACKM_8XK_KER  = 8,
-	BLIS_UNPACKM_9XK_KER  = 9,
-	BLIS_UNPACKM_10XK_KER = 10,
-	BLIS_UNPACKM_11XK_KER = 11,
-	BLIS_UNPACKM_12XK_KER = 12,
-	BLIS_UNPACKM_13XK_KER = 13,
-	BLIS_UNPACKM_14XK_KER = 14,
-	BLIS_UNPACKM_15XK_KER = 15,
-	BLIS_UNPACKM_16XK_KER = 16,
-	BLIS_UNPACKM_17XK_KER = 17,
-	BLIS_UNPACKM_18XK_KER = 18,
-	BLIS_UNPACKM_19XK_KER = 19,
-	BLIS_UNPACKM_20XK_KER = 20,
-	BLIS_UNPACKM_21XK_KER = 21,
-	BLIS_UNPACKM_22XK_KER = 22,
-	BLIS_UNPACKM_23XK_KER = 23,
-	BLIS_UNPACKM_24XK_KER = 24,
-	BLIS_UNPACKM_25XK_KER = 25,
-	BLIS_UNPACKM_26XK_KER = 26,
-	BLIS_UNPACKM_27XK_KER = 27,
-	BLIS_UNPACKM_28XK_KER = 28,
-	BLIS_UNPACKM_29XK_KER = 29,
-	BLIS_UNPACKM_30XK_KER = 30,
-	BLIS_UNPACKM_31XK_KER = 31
+    BLIS_UNPACKM_0XK_KER  = 0,
+    BLIS_UNPACKM_1XK_KER  = 1,
+    BLIS_UNPACKM_2XK_KER  = 2,
+    BLIS_UNPACKM_3XK_KER  = 3,
+    BLIS_UNPACKM_4XK_KER  = 4,
+    BLIS_UNPACKM_5XK_KER  = 5,
+    BLIS_UNPACKM_6XK_KER  = 6,
+    BLIS_UNPACKM_7XK_KER  = 7,
+    BLIS_UNPACKM_8XK_KER  = 8,
+    BLIS_UNPACKM_9XK_KER  = 9,
+    BLIS_UNPACKM_10XK_KER = 10,
+    BLIS_UNPACKM_11XK_KER = 11,
+    BLIS_UNPACKM_12XK_KER = 12,
+    BLIS_UNPACKM_13XK_KER = 13,
+    BLIS_UNPACKM_14XK_KER = 14,
+    BLIS_UNPACKM_15XK_KER = 15,
+    BLIS_UNPACKM_16XK_KER = 16,
+    BLIS_UNPACKM_17XK_KER = 17,
+    BLIS_UNPACKM_18XK_KER = 18,
+    BLIS_UNPACKM_19XK_KER = 19,
+    BLIS_UNPACKM_20XK_KER = 20,
+    BLIS_UNPACKM_21XK_KER = 21,
+    BLIS_UNPACKM_22XK_KER = 22,
+    BLIS_UNPACKM_23XK_KER = 23,
+    BLIS_UNPACKM_24XK_KER = 24,
+    BLIS_UNPACKM_25XK_KER = 25,
+    BLIS_UNPACKM_26XK_KER = 26,
+    BLIS_UNPACKM_27XK_KER = 27,
+    BLIS_UNPACKM_28XK_KER = 28,
+    BLIS_UNPACKM_29XK_KER = 29,
+    BLIS_UNPACKM_30XK_KER = 30,
+    BLIS_UNPACKM_31XK_KER = 31
 
 } l1mkr_t;
 
@@ -42637,11 +42976,11 @@ typedef enum
 
 typedef enum
 {
-	BLIS_GEMM_UKR = 0,
-	BLIS_GEMMTRSM_L_UKR,
-	BLIS_GEMMTRSM_U_UKR,
-	BLIS_TRSM_L_UKR,
-	BLIS_TRSM_U_UKR
+    BLIS_GEMM_UKR = 0,
+    BLIS_GEMMTRSM_L_UKR,
+    BLIS_GEMMTRSM_U_UKR,
+    BLIS_TRSM_L_UKR,
+    BLIS_TRSM_U_UKR
 } l3ukr_t;
 
 #define BLIS_NUM_LEVEL3_UKRS 5
@@ -42649,10 +42988,10 @@ typedef enum
 
 typedef enum
 {
-	BLIS_REFERENCE_UKERNEL = 0,
-	BLIS_VIRTUAL_UKERNEL,
-	BLIS_OPTIMIZED_UKERNEL,
-	BLIS_NOTAPPLIC_UKERNEL
+    BLIS_REFERENCE_UKERNEL = 0,
+    BLIS_VIRTUAL_UKERNEL,
+    BLIS_OPTIMIZED_UKERNEL,
+    BLIS_NOTAPPLIC_UKERNEL
 } kimpl_t;
 
 #define BLIS_NUM_UKR_IMPL_TYPES 4
@@ -42839,6 +43178,7 @@ typedef enum
 	BLIS_ARCH_PENRYN,
 
 	// AMD
+	BLIS_ARCH_ZEN3,
 	BLIS_ARCH_ZEN2,
 	BLIS_ARCH_ZEN,
 	BLIS_ARCH_EXCAVATOR,
@@ -42863,9 +43203,7 @@ typedef enum
 
 } arch_t;
 
-// NOTE: This value must be updated to reflect the number of enum values
-// listed above for arch_t!
-#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC+1)
+#define BLIS_NUM_ARCHS (BLIS_ARCH_GENERIC + 1)
 
 
 //
@@ -43323,7 +43661,7 @@ typedef struct func_s
 
 typedef struct mbool_s
 {
-	bool_t  v[BLIS_NUM_FP_TYPES];
+	bool v[BLIS_NUM_FP_TYPES];
 
 } mbool_t;
 
@@ -43480,7 +43818,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -43510,7 +43848,7 @@ static void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->n_panel   = a->n_panel;
 }
 
-static void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
 	b->root      = a->root;
 
@@ -43618,13 +43956,13 @@ typedef struct cntx_s
 typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
-	bool_t    auto_factor;
+	bool      auto_factor;
 
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
-	bool_t    pack_a; // enable/disable packing of left-hand matrix A.
-	bool_t    pack_b; // enable/disable packing of right-hand matrix B.
-	bool_t    l3_sup; // enable/disable small matrix handling in level-3 ops.
+	bool      pack_a; // enable/disable packing of left-hand matrix A.
+	bool      pack_b; // enable/disable packing of right-hand matrix B.
+	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
 
 	// "Internal" fields: these should not be exposed to the end-user.
 
@@ -43697,13 +44035,13 @@ typedef enum
 	BLIS_INVALID_COL_STRIDE                    = ( -51),
 	BLIS_INVALID_DIM_STRIDE_COMBINATION        = ( -52),
 
-	// Structure-specific errors    
+	// Structure-specific errors
 	BLIS_EXPECTED_GENERAL_OBJECT               = ( -60),
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
-	// Storage-specific errors    
+	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
 	// Partitioning-specific errors
@@ -43717,7 +44055,7 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
-	// Buffer-specific errors 
+	// Buffer-specific errors
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
 	// Memory errors
@@ -43812,6 +44150,8 @@ void BLIS_EXPORT_BLAS cblas_scopy(f77_int N, const float *X, f77_int incX,
                  float *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_saxpy(f77_int N, float alpha, const float *X,
                  f77_int incX, float *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_saxpby(f77_int N, float alpha, const float *X,
+                 f77_int incX, float beta, float *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_dswap(f77_int N, double *X, f77_int incX,
                  double *Y, f77_int incY);
@@ -43819,6 +44159,8 @@ void BLIS_EXPORT_BLAS cblas_dcopy(f77_int N, const double *X, f77_int incX,
                  double *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_daxpy(f77_int N, double alpha, const double *X,
                  f77_int incX, double *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_daxpby(f77_int N, double alpha, const double *X,
+                 f77_int incX, double beta, double *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_cswap(f77_int N, void *X, f77_int incX,
                  void *Y, f77_int incY);
@@ -43826,6 +44168,9 @@ void BLIS_EXPORT_BLAS cblas_ccopy(f77_int N, const void *X, f77_int incX,
                  void *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_caxpy(f77_int N, const void *alpha, const void *X,
                  f77_int incX, void *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_caxpby(f77_int N, const void *alpha,
+                const void *X, f77_int incX, const void* beta,
+                void *Y, f77_int incY);
 
 void BLIS_EXPORT_BLAS cblas_zswap(f77_int N, void *X, f77_int incX,
                  void *Y, f77_int incY);
@@ -43833,6 +44178,9 @@ void BLIS_EXPORT_BLAS cblas_zcopy(f77_int N, const void *X, f77_int incX,
                  void *Y, f77_int incY);
 void BLIS_EXPORT_BLAS cblas_zaxpy(f77_int N, const void *alpha, const void *X,
                  f77_int incX, void *Y, f77_int incY);
+void BLIS_EXPORT_BLAS cblas_zaxpby(f77_int N, const void *alpha,
+                const void *X, f77_int incX, const void *beta,
+                void *Y, f77_int incY);
 
 
 
@@ -44151,8 +44499,8 @@ void BLIS_EXPORT_BLAS cblas_strsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  float alpha, const float *A, f77_int lda,
                  float *B, f77_int ldb);
 void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-		 f77_int N, f77_int K, float alpha, const float *A,
+         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+         f77_int N, f77_int K, float alpha, const float *A,
                  f77_int lda, const float *B, f77_int ldb,
                  float beta, float *C, f77_int ldc);
 
@@ -44186,8 +44534,8 @@ void BLIS_EXPORT_BLAS cblas_dtrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  double alpha, const double *A, f77_int lda,
                  double *B, f77_int ldb);
 void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-		 f77_int N, f77_int K, double alpha, const double *A,
+         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+         f77_int N, f77_int K, double alpha, const double *A,
                  f77_int lda, const double *B, f77_int ldb,
                  double beta, double *C, f77_int ldc);
 
@@ -44221,8 +44569,8 @@ void BLIS_EXPORT_BLAS cblas_ctrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
 void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-		 f77_int N, f77_int K, const void *alpha, const void *A,
+         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+         f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
 
@@ -44256,8 +44604,8 @@ void BLIS_EXPORT_BLAS cblas_ztrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
 void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
-		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
-		 f77_int N, f77_int K, const void *alpha, const void *A,
+         enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+         f77_int N, f77_int K, const void *alpha, const void *A,
                  f77_int lda, const void *B, f77_int ldb,
                  const void *beta, void *C, f77_int ldc);
 
@@ -44295,6 +44643,65 @@ void BLIS_EXPORT_BLAS cblas_zher2k(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
 
 void BLIS_EXPORT_BLAS cblas_xerbla(f77_int p, const char *rout, const char *form, ...);
 
+
+
+BLIS_EXPORT_BLAS float  cblas_scabs1( const void *z);
+BLIS_EXPORT_BLAS double  cblas_dcabs1( const void *z);
+
+
+
+
+// -- Batch APIs -------
+void BLIS_EXPORT_BLAS cblas_sgemm_batch(enum CBLAS_ORDER Order,
+                 enum CBLAS_TRANSPOSE *TransA_array,
+                 enum CBLAS_TRANSPOSE *TransB_array,
+                 f77_int *M_array, f77_int *N_array,
+                 f77_int *K_array, const float *alpha_array, const float **A,
+                 f77_int *lda_array, const float **B, f77_int *ldb_array,
+                 const float *beta_array, float **C, f77_int *ldc_array,
+                 f77_int group_count, f77_int *group_size);
+void BLIS_EXPORT_BLAS cblas_dgemm_batch(enum CBLAS_ORDER Order,
+                 enum CBLAS_TRANSPOSE *TransA_array,
+                 enum CBLAS_TRANSPOSE *TransB_array,
+                 f77_int *M_array, f77_int *N_array,
+                 f77_int *K_array, const double *alpha_array,
+                 const double **A,f77_int *lda_array,
+                 const double **B, f77_int *ldb_array,
+                 const double *beta_array, double **C, f77_int *ldc_array,
+                 f77_int group_count, f77_int *group_size);
+void BLIS_EXPORT_BLAS cblas_cgemm_batch(enum CBLAS_ORDER Order,
+                 enum CBLAS_TRANSPOSE *TransA_array,
+                 enum CBLAS_TRANSPOSE *TransB_array,
+                 f77_int *M_array, f77_int *N_array,
+                 f77_int *K_array, const void *alpha_array, const void **A,
+                 f77_int *lda_array, const void **B, f77_int *ldb_array,
+                 const void *beta_array, void **C, f77_int *ldc_array,
+                 f77_int group_count, f77_int *group_size);
+void BLIS_EXPORT_BLAS cblas_zgemm_batch(enum CBLAS_ORDER Order,
+                 enum CBLAS_TRANSPOSE *TransA_array,
+                 enum CBLAS_TRANSPOSE *TransB_array,
+                 f77_int *M_array, f77_int *N_array,
+                 f77_int *K_array, const void *alpha_array, const void **A,
+                 f77_int *lda_array, const void **B, f77_int *ldb_array,
+                 const void *beta_array, void **C, f77_int *ldc_array,
+                 f77_int group_count, f77_int *group_size);
+void BLIS_EXPORT_BLAS cblas_cgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
+                 f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
+void BLIS_EXPORT_BLAS cblas_zgemm3m(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
+                 f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
+
+// -- AMIN APIs -------
+BLIS_EXPORT_BLAS f77_int cblas_isamin(f77_int N, const float  *X, f77_int incX);
+BLIS_EXPORT_BLAS f77_int cblas_idamin(f77_int N, const double *X, f77_int incX);
+BLIS_EXPORT_BLAS f77_int cblas_icamin(f77_int N, const void   *X, f77_int incX);
+BLIS_EXPORT_BLAS f77_int cblas_izamin(f77_int N, const void   *X, f77_int incX);
+
 #ifdef __cplusplus
 }
 #endif
@@ -44316,6 +44723,7 @@ void BLIS_EXPORT_BLAS cblas_xerbla(f77_int p, const char *rout, const char *form
 BLIS_EXPORT_BLIS void bli_sleep( unsigned int secs );
 
 // end bli_winsys.h
+// end bli_winsys.h
 #define sswap_ sswap
 #define dswap_ dswap
 #define sscal_ sscal
@@ -44326,10 +44734,18 @@ BLIS_EXPORT_BLIS void bli_sleep( unsigned int secs );
 #define ddot_ ddot
 #define scopy_ scopy
 #define dcopy_ dcopy
+#define caxpy_ caxpy
 #define saxpy_ saxpy
+#define zaxpy_ zaxpy
 #define daxpy_ daxpy
 #define isamax_ isamax
 #define idamax_ idamax
+#define cdotc_ cdotc
+#define zdotc_ zdotc
+#define cdotu_ cdotu
+#define zdotu_ zdotu
+
+
 // begin aocldtl.h
 
 
@@ -44356,8 +44772,9 @@ BLIS_EXPORT_BLIS void bli_sleep( unsigned int secs );
 #define AOCL_DTL_TRACE_LEVEL         AOCL_DTL_LEVEL_TRACE_5
 
 
-#define AOCL_DTL_LEVEL_ALL          (14)
-#define AOCL_DTL_LEVEL_TRACE_8      (13)    
+#define AOCL_DTL_LEVEL_ALL          (15)
+#define AOCL_DTL_LEVEL_TRACE_9      (14)
+#define AOCL_DTL_LEVEL_TRACE_8      (13)
 #define AOCL_DTL_LEVEL_TRACE_7      (12)     
 #define AOCL_DTL_LEVEL_TRACE_6      (11)
 #define AOCL_DTL_LEVEL_TRACE_5      (10)
@@ -44699,23 +45116,521 @@ void DTL_DumpData(
 
 #if AOCL_DTL_LOG_ENABLE
 void AOCL_DTL_log_gemm_sizes(int8 loglevel,
-							 obj_t* alpha,
-							 obj_t* a,
-							 obj_t* b,
-							 obj_t* beta,
-							 obj_t* c,
-							 const char* filename,
-							 const char* functionn_name,
-							 int line);
-	
-#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)	\
+                             obj_t* alpha,
+                             obj_t* a,
+                             obj_t* b,
+                             obj_t* beta,
+                             obj_t* c,
+                             const char* filename,
+                             const char* functionn_name,
+                             int line);
+
+void AOCL_DTL_log_trsm_sizes(int8 loglevel,
+                             side_t side,
+                             obj_t* alpha,
+                             obj_t* a,
+                             obj_t* b,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
+                             obj_t* alpha,
+                             obj_t* a,
+                             obj_t* b,
+                             obj_t* beta,
+                             obj_t* c,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_hemm_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char side,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const f77_int  n,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void* beta,
+                             const f77_int ldc,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+// Level-3 Logging
+void AOCL_DTL_log_herk_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploc,
+                              const f77_char transa,
+                              const f77_int  m,
+                              const f77_int  k,
+                              const void*   alpha,
+                              const f77_int lda,
+                              const void*  beta,
+                              const f77_int ldc,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_her2k_sizes(int8 loglevel,
+                              char dt_type,
+                              const f77_char uploc,
+                              const f77_char transa,
+                              const f77_int  m,
+                              const f77_int  k,
+                              const void*    alpha,
+                              const f77_int lda,
+                              const f77_int ldb,
+                              const void*    beta,
+                              const f77_int ldc,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_symm_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char side,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const f77_int  n,
+                              const void*    alpha,
+                              const f77_int lda,
+                              const f77_int ldb,
+                              const void*    beta,
+                              const f77_int ldc,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+// Level-2 Logging
+
+void AOCL_DTL_log_gemv_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char transa,
+                              const f77_int  m,
+                              const f77_int  n,
+                              const void*    alpha,
+                              const f77_int lda,
+                              const f77_int incx,
+                              const void*    beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_ger_sizes( int8 loglevel,
+                             char dt_type,
+                             const f77_int m,
+                             const f77_int n,
+                             const void* alpha,
+                             const f77_int incx,
+                             const f77_int incy,
+                             const f77_int lda,
+                             const char* filename,
+                             const char* function_name,
+                             int line
+                           );
+
+void AOCL_DTL_log_her_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void* alpha,
+                              const f77_int  incx,
+                              const f77_int lda,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_symv_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void*    alpha,
+                              const f77_int lda,
+                              const f77_int incx,
+                              const void*    beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void* alpha,
+                              const f77_int lda,
+                              const f77_int incx,
+                              const void* beta,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_her2_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_char uploa,
+                              const f77_int  m,
+                              const void* alpha,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const f77_int lda,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+// Level-1 Logging
+
+void AOCL_DTL_log_copy_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_int n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_scal_sizes( int8 loglevel,
+                              char dt_type,
+                              const double alpha,
+                              const f77_int  n,
+                              const f77_int  incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_swap_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int  incx,
+                              const f77_int  incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_nrm2_sizes( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int  incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_amax_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_asum_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_axpby_sizes ( int8 loglevel,
+                               char dt_type,
+                               const f77_int  n,
+                               const void* alpha,
+                               const f77_int incx,
+                               const void* beta,
+                               const f77_int incy,
+                               const char* filename,
+                               const char* function_name,
+                               int line);
+
+void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
+                              char dt_type,
+                              const f77_int  n,
+                              const void* alpha,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line);
+
+void AOCL_DTL_log_dotv_sizes( int8 loglevel,
+                              char dt_type,
+                              char transa,
+                              const f77_int  n,
+                              const f77_int incx,
+                              const f77_int incy,
+                              const char* filename,
+                              const char* function_name,
+                              int line
+                              );
+
+//Level-2 logging
+void AOCL_DTL_log_syr_sizes(int8  loglevel,
+                            char dt_type,
+                            const f77_char  uploa,
+                            const f77_int   m,
+                            const void*     alpha,
+                            const f77_int   incx,
+                            const f77_int   lda,
+                            const char*     filename,
+                            const char*     function_name,
+                            int line);
+
+void AOCL_DTL_log_syr2_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_int  m,
+                             const void*    alpha,
+                             const f77_int  incx,
+                             const f77_int  incy,
+                             const f77_int  lda,
+                             const char*    filename,
+                             const char*    function_name,
+                             int  line);
+
+void AOCL_DTL_log_trmv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+void AOCL_DTL_log_trsv_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int m,
+                             const f77_int lda,
+                             const f77_int incx,
+                             const char* filename,
+                             const char* function_name,
+                             int line);
+
+// Level-3 Logging
+void AOCL_DTL_log_syrk_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char uploc,
+                             const f77_char transa,
+                             const f77_int  m,
+                             const f77_int  k,
+                             const void*    alpha,
+                             const f77_int  lda,
+                             const void*    beta,
+                             const f77_int  ldc,
+                             const char*    filename,
+                             const char*    function_name,
+                             int line);
+
+void AOCL_DTL_log_syr2k_sizes(int8  loglevel,
+                             char   dt_type,
+                             const f77_char uploc,
+                             const f77_char transa,
+                             const f77_int  m,
+                             const f77_int  k,
+                             const void*    alpha,
+                             const f77_int  lda,
+                             const f77_int  ldb,
+                             const void*    beta,
+                             const f77_int  ldc,
+                             const char*    filename,
+                             const char*    function_name,
+                             int  line);
+
+void AOCL_DTL_log_trmm_sizes(int8 loglevel,
+                             char dt_type,
+                             const f77_char side,
+                             const f77_char uploa,
+                             const f77_char transa,
+                             const f77_char diaga,
+                             const f77_int  m,
+                             const f77_int  n,
+                             const void*    alpha,
+                             const f77_int  lda,
+                             const f77_int  ldb,
+                             const char*    filename,
+                             const char*    function_name,
+                             int  line);
+
+#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)    \
     AOCL_DTL_log_gemm_sizes(loglevel, alpha, a, b, beta, c, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)     \
+    AOCL_DTL_log_trsm_sizes(loglevel, side, alpha, a, b, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)  \
+    AOCL_DTL_log_gemmt_sizes(loglevel, alpha, a, b, beta, c,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)  \
+    AOCL_DTL_log_hemm_sizes(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc, \
+                            __FILE__, __FUNCTION__, __LINE__);
+
+// Level-3 Macros
+#define	AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)\
+  AOCL_DTL_log_herk_sizes(loglevel, dt_type, transa, uploc, m, k, alpha, lda, beta, ldc, __FILE__,\
+                          __FUNCTION__, __LINE__);
+
+#define	AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)\
+  AOCL_DTL_log_her2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc, __FILE__,\
+                          __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_SYMM_INPUTS(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc)\
+  AOCL_DTL_log_symm_sizes(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc, __FILE__,\
+                          __FUNCTION__, __LINE__);
+
+// Level-2 Macros
+#define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
+    AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
+                          __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda) \
+    AOCL_DTL_log_ger_sizes(loglevel, dt_type, m, n, alpha, incx, incy, lda, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_HER_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda )\
+    AOCL_DTL_log_her_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SYMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy)\
+  AOCL_DTL_log_symv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, __FILE__,\
+                          __FUNCTION__, __LINE__);
+
+// Level-1 Macros
+#define AOCL_DTL_LOG_COPY_INPUTS(loglevel, dt_type, n, incx, incy) \
+    AOCL_DTL_log_copy_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )\
+    AOCL_DTL_log_scal_sizes(loglevel, dt_type, alpha, n, incx,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)\
+    AOCL_DTL_log_swap_sizes(loglevel, dt_type, n, incx, incy,  __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_NRM2_INPUTS(loglevel, dt_type, n, incx)\
+    AOCL_DTL_log_nrm2_sizes(loglevel, dt_type, n, incx, __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_HEMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy) \
+    AOCL_DTL_log_hemv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, \
+                          __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_HER2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
+    AOCL_DTL_log_her2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, \
+                          __FILE__, __FUNCTION__, __LINE__);
+
+// Level-1 Macros
+#define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx) \
+    AOCL_DTL_log_amax_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_ASUM_INPUTS(loglevel, dt_type, n, incx) \
+    AOCL_DTL_log_asum_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_AXPBY_INPUTS(loglevel, dt_type, n, alpha, incx, beta, incy) \
+    AOCL_DTL_log_axpby_sizes(loglevel, dt_type, n, alpha, incx, beta, incy, __FILE__,\
+                            __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy) \
+    AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
+                            __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy) \
+  AOCL_DTL_log_dotv_sizes(loglevel, dt_type, transa, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
+
+#define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
+    AOCL_DTL_log_syr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, __FILE__,\
+                            __FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SYR2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc) \
+    AOCL_DTL_log_syr2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta,\
+                            ldc, __FILE__, __FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SYR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda) \
+    AOCL_DTL_log_syr_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,\
+                            __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_SYRK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc) \
+    AOCL_DTL_log_syrk_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc, __FILE__,\
+                            __FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TRMM_INPUTS(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb) \
+    AOCL_DTL_log_trmm_sizes(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__,\
+                            __FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TRMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx) \
+    AOCL_DTL_log_trmv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
+                            __FILE__,__FUNCTION__,__LINE__);
+
+#define AOCL_DTL_LOG_TRSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx ) \
+    AOCL_DTL_log_trsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
+                            __FILE__,__FUNCTION__,__LINE__);
 #else
+
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)
-#endif
+
+#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)
+
+#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)
+
+#define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)
+
+#define	AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)
+
+#define	AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)
+
+#define AOCL_DTL_LOG_SYMM_INPUTS(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc)
+
+#define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda)
+
+#define AOCL_DTL_LOG_HER_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda )
+
+#define AOCL_DTL_LOG_SYMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_COPY_INPUTS(loglevel, dt_type, n, incx, incy)
+
+#define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )
+
+#define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)
+
+#define AOCL_DTL_LOG_NRM2_INPUTS(loglevel, dt_type, n, incx)
+
+#define AOCL_DTL_LOG_HEMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy)
+
+#define AOCL_DTL_LOG_HER2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda)
+
+#define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx)
+
+#define AOCL_DTL_LOG_ASUM_INPUTS(loglevel, dt_type, n, incx)
+
+#define AOCL_DTL_LOG_AXPBY_INPUTS(loglevel, dt_type, n, alpha, incx, beta, incy)
+
+#define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy)
+
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy)
+
+#define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) 
+
+#define AOCL_DTL_LOG_SYR2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)
+
+#define AOCL_DTL_LOG_SYR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda)
+
+#define AOCL_DTL_LOG_SYRK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)
+
+#define AOCL_DTL_LOG_TRMM_INPUTS(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb)
+
+#define AOCL_DTL_LOG_TRMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx)
+
+#define AOCL_DTL_LOG_TRSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx )
 
 #endif
 
+
+#endif
 // end aocldtl_blis.h
 
 // End extern "C" construct block.

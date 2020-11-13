@@ -5,7 +5,7 @@ target_sources("${PROJECT_NAME}"
 	 ${CMAKE_CURRENT_SOURCE_DIR}/bli_kernels_zen.h
      )
 
-set(SUBDIRECTORIES "1" "1f" "1m" "3")
+set(SUBDIRECTORIES "1" "1f" "1m" "2" "3")
 
 #Add all subdirectories 
 foreach(VAR ${SUBDIRECTORIES})

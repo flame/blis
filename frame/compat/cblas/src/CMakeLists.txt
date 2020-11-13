@@ -166,4 +166,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_caxpby.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_zaxpby.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_cgemm3m.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_zgemm3m.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_dcabs1.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_scabs1.c
 )
