@@ -891,6 +891,16 @@ err_t bli_check_valid_arch_id( arch_t id )
 	return e_val;
 }
 
+err_t bli_check_initialized_gks_cntx( cntx_t** cntx )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( cntx == NULL )
+		e_val = BLIS_UNINITIALIZED_GKS_CNTX;
+
+	return e_val;
+}
+
 // -- Architecture-related errors ----------------------------------------------
 
 err_t bli_check_valid_mc_mod_mult( blksz_t* mc, blksz_t* mr )

@@ -136,7 +136,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
 #else
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,    72,    36 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
 #endif
@@ -163,10 +163,17 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 
 	// -------------------------------------------------------------------------
 
-	// Initialize sup thresholds with architecture-appropriate values. s d c z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   380,   110 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   200,  256,   256,   128 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   240,  220,   220,   110 );
+	// Initialize sup thresholds with architecture-appropriate values.
+	//                                          s     d     c     z
+#if 1
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],  500,  249,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],  500,  249,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],  500,  249,   -1,   -1 );
+#else
+	bli_blksz_init_easy( &thresh[ BLIS_MT ], 100000, 100000,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ], 100000, 100000,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ], 100000, 100000,   -1,   -1 );
+#endif
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh
@@ -178,14 +185,15 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  cntx
 	);
 
+#if 0
 	// Initialize the context with the sup handlers.
 	bli_cntx_set_l3_sup_handlers
 	(
 	  1,
-	  BLIS_GEMM,  bli_gemmsup_ref,
-	  //BLIS_GEMMT, bli_gemmtsup_ref,
+	  BLIS_GEMM, bli_gemmsup_ref,
 	  cntx
 	);
+#endif
 
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
@@ -242,12 +250,12 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],    6,     6,    -1,     -1,
-	                                            9,     9,    -1,     -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],   16,     8,    -1,     -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  144,    72,    -1,     -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  512,   256,    -1,     -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 8160,  4080,    -1,     -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR ],     6,     6,    -1,    -1,
+	                                             9,     9,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   168,    72,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes for small/unpacked level-3 problems.

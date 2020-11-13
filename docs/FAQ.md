@@ -8,6 +8,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Why did you create BLIS?](FAQ.md#why-did-you-create-blis)
   * [Why should I use BLIS instead of GotoBLAS / OpenBLAS / ATLAS / MKL / ESSL / ACML / Accelerate?](FAQ.md#why-should-i-use-blis-instead-of-gotoblas--openblas--atlas--mkl--essl--acml--accelerate)
   * [How is BLIS related to FLAME / libflame?](FAQ.md#how-is-blis-related-to-flame--libflame)
+  * [What is the difference between BLIS and the AMD fork of BLIS found in AOCL?](FAQ.md#what-is-the-difference-between-blis-and-the-amd-fork-of-blis-found-in-aocl)
   * [Does BLIS automatically detect my hardware?](FAQ.md#does-blis-automatically-detect-my-hardware)
   * [I understand that BLIS is mostly a tool for developers?](FAQ.md#i-understand-that-blis-is-mostly-a-tool-for-developers)
   * [How do I link against BLIS?](FAQ.md#how-do-i-link-against-blis)
@@ -59,6 +60,12 @@ homepage](https://github.com/flame/blis#key-features). But here are a few reason
 ### How is BLIS related to FLAME / `libflame`?
 
 As explained [above](FAQ.md#why-did-you-create-blis?), BLIS was initially a layer within `libflame` that allowed more convenient interfacing to the BLAS. So in some ways, BLIS is a spin-off project. Prior to developing BLIS, [its author](http://www.cs.utexas.edu/users/field/) worked as the primary maintainer of `libflame`. If you look closely, you can also see that the design of BLIS was influenced by some of the more useful and innovative aspects of `libflame`, such as internal object abstractions and control trees. Also, various members of the [SHPC research group](http://shpc.ices.utexas.edu/people.html) and its [collaborators](http://shpc.ices.utexas.edu/collaborators.html) routinely provide insight, feedback, and also contribute code (especially kernels) to the BLIS project.
+
+### What is the difference between BLIS and the AMD fork of BLIS found in AOCL?
+
+BLIS, also known as "vanilla BLIS" or "upstream BLIS," is maintained by its [original developer](https://github.com/fgvanzee) (with the [support of others](http://shpc.ices.utexas.edu/collaborators.html)) in the [Science of High-Performance Computing](http://shpc.ices.utexas.edu/) (SHPC) group within the [The Oden Institute for Computational Engineering and Sciences](http://www.oden.utexas.edu/) at [The University of Texas at Austin](http://www.utexas.edu/). In 2015, [AMD](https://www.amd.com/) reorganized many of their software library efforts around existing open source projects. BLIS was chosen as the basis for their [CPU BLAS library](https://developer.amd.com/amd-aocl/blas-library/), and an AMD-maintained [fork of BLIS](https://github.com/amd/blis) was established.
+
+AMD BLIS sometimes contains certain optimizations specific to AMD hardware. Many of these optimizations are (eventually) merged back into upstream BLIS. However, for various reasons, some changes may remain unique to AMD BLIS for quite some time. Thus, if you want the latest optimizations for AMD hardware, feel free to try AMD BLIS. However, please note that neither The University of Texas at Austin nor BLIS's developers can endorse or offer direct support for any outside fork of BLIS, including AMD BLIS.
 
 ### Does BLIS automatically detect my hardware?
 

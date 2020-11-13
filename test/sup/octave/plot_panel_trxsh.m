@@ -11,25 +11,41 @@ function r_val = plot_panel_trxsh ...
        pack_str, ...
        dirpath, ...
        arch_str, ...
-       vend_str, ...
-       impl ...
+       vend_str ...
      )
 
-if 1 == 1
-	%fig = figure('Position', [100, 100, 2400, 1500]);
-	fig = figure('Position', [100, 100, 2400, 1200]);
-	orient( fig, 'portrait' );
-	set(gcf,'PaperUnits', 'inches');
-	if impl == 'matlab'
-		set(gcf,'PaperSize', [11.5 20.4]);
-		set(gcf,'PaperPosition', [0 0 11.5 20.4]);
-		set(gcf,'PaperPositionMode','manual');
-	else % impl == 'octave' % octave 4.x
-	   set(gcf,'PaperSize', [12 22.0]);
-	   set(gcf,'PaperPositionMode','auto');
-	end
-	set(gcf,'PaperOrientation','landscape');
+impl = 'octave';
+
+%subp = 'default';
+subp = 'tight';
+
+if strcmp( subp, 'default' )
+	position = [100 100 2400 1200];
+	papersize = [12 22.0];
+	sp_margins = [ 0.070 0.049 ];
+else
+	position     = [100 100 2308 1202];
+	papersize    = [12.5 24.0];
+	fontsize     = 14;
+	leg_pos_st   = [10.85  7.43 1.3 1.2 ];
+	leg_pos_st_x = [14.15  4.35 1.3 1.4 ];
+	leg_pos_mt   = [10.85  7.66 1.3 1.0 ];
+	sp_margins   = [ 0.063 0.033 ];
 end
+
+%fig = figure('Position', [100, 100, 2400, 1500]);
+fig = figure('Position', position);
+orient( fig, 'portrait' );
+set(gcf,'PaperUnits', 'inches');
+if impl == 'octave'
+	set(gcf,'PaperSize', papersize);
+	set(gcf,'PaperPositionMode','auto');
+else % impl == 'matlab'
+	set(gcf,'PaperSize', [11.5 20.4]);
+	set(gcf,'PaperPosition', [0 0 11.5 20.4]);
+	set(gcf,'PaperPositionMode','manual');
+end
+set(gcf,'PaperOrientation','landscape');
 
 % Create filename "templates" for the files that contain the performance
 % results.
@@ -92,7 +108,8 @@ for opi = 1:n_opsupnames
 
 	% Only read libxsmm data for single-threaded cases, and cases that use column
 	% storage since that's the only format that libxsmm supports.
-	if nth == 1 && stor_str == 'ccc'
+	%if nth == 1 && stor_str == 'ccc'
+	if nth == 1 && strcmp( stor_str, 'ccc' )
 		data_xsmm = load_data( filetemp_xsmm,     dirpath, thr_str, opsupname, vartemp, opname, 'libxsmm' );
 	else
 		data_xsmm = zeros( size( data_blissup, 1 ), size( data_blissup, 2 ) );
@@ -113,31 +130,19 @@ for opi = 1:n_opsupnames
 	                 4, 7, ...
 	                 cfreq, ...
 	                 dflopspercycle, ...
-	                 opi, impl );
-
-	% Clear the variables created for the return values of load_data().
-	%clear data_blissup;
-	%clear data_blisconv;
-	%clear data_eigen;
-	%clear data_open;
-	%clear data_vend;
-	%clear data_bfeo;
-	%clear data_xsmm;
-
-	% Clear the variables used in the raw data files.
-	%clear data_st_*gemm_*;
-	%clear data_mt_*gemm_*;
+	                 opi, impl, ...
+	                 fontsize, ...
+	                 leg_pos_st, leg_pos_st_x, leg_pos_mt, ...
+	                 sp_margins );
 end
 
 % Construct the name of the file to which we will output the graph.
 outfile = sprintf( 'l3sup_%s_%s_%s_nt%d.pdf', oproot, stor_str, arch_str, nth );
 
 % Output the graph to pdf format.
-%print(gcf, 'gemm_md','-fillpage','-dpdf');
-%print(gcf, outfile,'-bestfit','-dpdf');
-if impl == 'octave'
+if strcmp( impl, 'octave' )
 	print(gcf, outfile);
-else % if impl == 'matlab'
+else
 	print(gcf, outfile,'-bestfit','-dpdf');
 end
 

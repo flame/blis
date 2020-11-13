@@ -12,9 +12,12 @@
   * **[Haswell](PerformanceSmall.md#haswell)**
     * **[Experiment details](PerformanceSmall.md#haswell-experiment-details)**
     * **[Results](PerformanceSmall.md#haswell-results)**
-  * **[Epyc](PerformanceSmall.md#epyc)**
-    * **[Experiment details](PerformanceSmall.md#epyc-experiment-details)**
-    * **[Results](PerformanceSmall.md#epyc-results)**
+  * **[Zen](PerformanceSmall.md#zen)**
+    * **[Experiment details](PerformanceSmall.md#zen-experiment-details)**
+    * **[Results](PerformanceSmall.md#zen-results)**
+  * **[Zen2](PerformanceSmall.md#zen2)**
+    * **[Experiment details](PerformanceSmall.md#zen2-experiment-details)**
+    * **[Results](PerformanceSmall.md#zen2-results)**
 * **[Feedback](PerformanceSmall.md#feedback)**
 
 # Introduction
@@ -295,9 +298,9 @@ The `runthese.m` file will contain example invocations of the function.
 
 ---
 
-## Epyc
+## Zen
 
-### Epyc experiment details
+### Zen experiment details
 
 * Location: Oracle cloud
 * Processor model: AMD Epyc 7551 (Zen1)
@@ -318,7 +321,7 @@ The `runthese.m` file will contain example invocations of the function.
   * BLIS 90db88e (0.6.1-8)
     * configured with `./configure --enable-cblas auto` (single-threaded)
     * configured with `./configure --enable-cblas -t openmp auto` (multithreaded)
-    * sub-configuration exercised: `haswell`
+    * sub-configuration exercised: `zen`
     * Multithreaded (32 cores) execution requested via `export BLIS_NUM_THREADS=32`
   * OpenBLAS 0.3.8
     * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0 USE_LOCKING=1` (single-threaded)
@@ -357,25 +360,122 @@ The `runthese.m` file will contain example invocations of the function.
 * Comments:
   * libxsmm is highly competitive for very small problems, but quickly gives up once the "large" dimension exceeds about 180-240 (or 64 in the case where all operands are square). Also, libxsmm's `gemm` cannot handle a transposition on matrix A and similarly dispatches the fallback implementation for those cases. libxsmm also does not export CBLAS interfaces, and therefore only appears on the graphs for column-stored matrices.
 
-### Epyc results
+### Zen results
 
 #### pdf
 
-* [Epyc single-threaded row-stored](graphs/sup/dgemm_rrr_epyc_nt1.pdf)
-* [Epyc single-threaded column-stored](graphs/sup/dgemm_ccc_epyc_nt1.pdf)
-* [Epyc multithreaded (32 cores) row-stored](graphs/sup/dgemm_rrr_epyc_nt32.pdf)
-* [Epyc multithreaded (32 cores) column-stored](graphs/sup/dgemm_ccc_epyc_nt32.pdf)
+* [Zen single-threaded row-stored](graphs/sup/dgemm_rrr_zen_nt1.pdf)
+* [Zen single-threaded column-stored](graphs/sup/dgemm_ccc_zen_nt1.pdf)
+* [Zen multithreaded (32 cores) row-stored](graphs/sup/dgemm_rrr_zen_nt32.pdf)
+* [Zen multithreaded (32 cores) column-stored](graphs/sup/dgemm_ccc_zen_nt32.pdf)
 
 #### png (inline)
 
-* **Epyc single-threaded row-stored**
-![single-threaded row-stored](graphs/sup/dgemm_rrr_epyc_nt1.png)
-* **Epyc single-threaded column-stored**
-![single-threaded column-stored](graphs/sup/dgemm_ccc_epyc_nt1.png)
-* **Epyc multithreaded (32 cores) row-stored**
-![multithreaded row-stored](graphs/sup/dgemm_rrr_epyc_nt32.png)
-* **Epyc multithreaded (32 cores) column-stored**
-![multithreaded column-stored](graphs/sup/dgemm_ccc_epyc_nt32.png)
+* **Zen single-threaded row-stored**
+![single-threaded row-stored](graphs/sup/dgemm_rrr_zen_nt1.png)
+* **Zen single-threaded column-stored**
+![single-threaded column-stored](graphs/sup/dgemm_ccc_zen_nt1.png)
+* **Zen multithreaded (32 cores) row-stored**
+![multithreaded row-stored](graphs/sup/dgemm_rrr_zen_nt32.png)
+* **Zen multithreaded (32 cores) column-stored**
+![multithreaded column-stored](graphs/sup/dgemm_ccc_zen_nt32.png)
+
+---
+
+## Zen2
+
+### Zen2 experiment details
+
+* Location: Oracle cloud
+* Processor model: AMD Epyc 7742 (Zen2 "Rome")
+* Core topology: two sockets, 8 Core Complex Dies (CCDs) per socket, 2 Core Complexes (CCX) per CCD, 4 cores per CCX, 128 cores total
+* SMT status: enabled, but not utilized
+* Max clock rate: 2.25GHz (base, documented); 3.4GHz boost (single-core, documented); 2.6GHz boost (multicore, estimated)
+* Max vector register length: 256 bits (AVX2)
+* Max FMA vector IPC: 2
+  * Alternatively, FMA vector IPC is 4 when vectors are limited to 128 bits each.
+* Peak performance:
+  * single-core: 54.4 GFLOPS (double-precision), 108.8 GFLOPS (single-precision)
+  * multicore (estimated): 41.6 GFLOPS/core (double-precision), 83.2 GFLOPS/core (single-precision)
+* Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
+* Compiler: gcc 9.3.0
+* Results gathered: 8 October 2020
+* Implementations tested:
+  * BLIS a0849d3 (0.7.0-67)
+    * configured with `./configure --enable-cblas auto` (single-threaded)
+    * configured with `./configure --enable-cblas -t openmp auto` (multithreaded)
+    * sub-configuration exercised: `zen2`
+    * Multithreaded (32 cores) execution requested via `export BLIS_NUM_THREADS=32`
+  * OpenBLAS 0.3.10
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0 USE_LOCKING=1` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=32` (multithreaded)
+    * Multithreaded (32 cores) execution requested via `export OPENBLAS_NUM_THREADS=32`
+  * BLASFEO 5b26d40
+    * configured `Makefile.rule` with: `BLAS_API=1 FORTRAN_BLAS_API=1 CBLAS_API=1`.
+    * built BLAS library via `make CC=gcc`
+  * Eigen 3.3.90
+    * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen) (24 September 2020)
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 60.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
+    * configured and built BLAS library via `mkdir build; cd build; CC=gcc cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (32 cores) execution requested via `export OMP_NUM_THREADS=32`
+  * MKL 2020 update 3
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (32 cores) execution requested via `export MKL_NUM_THREADS=32`
+  * libxsmm f0ab9cb (post-1.16.1)
+    * compiled with `make AVX=2`; linked with [netlib BLAS](http://www.netlib.org/blas/) 3.6.0 as the fallback library to better show where libxsmm stops handling the computation internally.
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-31"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
+  * All executables were run through `numactl --interleave=all`.
+* Frequency throttling (via `cpupower`):
+  * Driver: acpi-cpufreq
+  * Governor: performance
+  * Hardware limits (steps): 1.5GHz, 2.0GHz, 2.25GHz
+  * Adjusted minimum: 2.25GHz
+* Comments:
+  * None.
+
+### Zen2 results
+
+#### pdf
+
+* [Zen2 sgemm single-threaded row-stored](graphs/sup/sgemm_rrr_zen2_nt1.pdf)
+* [Zen2 sgemm single-threaded column-stored](graphs/sup/sgemm_ccc_zen2_nt1.pdf)
+* [Zen2 dgemm single-threaded row-stored](graphs/sup/dgemm_rrr_zen2_nt1.pdf)
+* [Zen2 dgemm single-threaded column-stored](graphs/sup/dgemm_ccc_zen2_nt1.pdf)
+* [Zen2 sgemm multithreaded (32 cores) row-stored](graphs/sup/sgemm_rrr_zen2_nt32.pdf)
+* [Zen2 sgemm multithreaded (32 cores) column-stored](graphs/sup/sgemm_ccc_zen2_nt32.pdf)
+* [Zen2 dgemm multithreaded (32 cores) row-stored](graphs/sup/dgemm_rrr_zen2_nt32.pdf)
+* [Zen2 dgemm multithreaded (32 cores) column-stored](graphs/sup/dgemm_ccc_zen2_nt32.pdf)
+
+#### png (inline)
+
+* **Zen2 sgemm single-threaded row-stored**
+![sgemm single-threaded row-stored](graphs/sup/sgemm_rrr_zen2_nt1.png)
+* **Zen2 sgemm single-threaded column-stored**
+![sgemm single-threaded column-stored](graphs/sup/sgemm_ccc_zen2_nt1.png)
+* **Zen2 dgemm single-threaded row-stored**
+![dgemm single-threaded row-stored](graphs/sup/dgemm_rrr_zen2_nt1.png)
+* **Zen2 dgemm single-threaded column-stored**
+![dgemm single-threaded column-stored](graphs/sup/dgemm_ccc_zen2_nt1.png)
+* **Zen2 sgemm multithreaded (32 cores) row-stored**
+![sgemm multithreaded row-stored](graphs/sup/sgemm_rrr_zen2_nt32.png)
+* **Zen2 sgemm multithreaded (32 cores) column-stored**
+![sgemm multithreaded column-stored](graphs/sup/sgemm_ccc_zen2_nt32.png)
+* **Zen2 dgemm multithreaded (32 cores) row-stored**
+![dgemm multithreaded row-stored](graphs/sup/dgemm_rrr_zen2_nt32.png)
+* **Zen2 dgemm multithreaded (32 cores) column-stored**
+![dgemm multithreaded column-stored](graphs/sup/dgemm_ccc_zen2_nt32.png)
 
 ---
 

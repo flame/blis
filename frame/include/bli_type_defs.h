@@ -1009,6 +1009,7 @@ typedef enum
 	BLIS_ARCH_CORTEXA9,
 
 	// IBM/Power
+	BLIS_ARCH_POWER10,
 	BLIS_ARCH_POWER9,
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
@@ -1020,7 +1021,7 @@ typedef enum
 
 // NOTE: This value must be updated to reflect the number of enum values
 // listed above for arch_t!
-#define BLIS_NUM_ARCHS 21
+#define BLIS_NUM_ARCHS 22
 
 
 //
@@ -1571,6 +1572,7 @@ typedef enum
 
 	// Architecture-related errors
 	BLIS_INVALID_ARCH_ID                       = (-150),
+	BLIS_UNINITIALIZED_GKS_CNTX                = (-151),
 
 	// Blocksize-related errors
 	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),

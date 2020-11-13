@@ -36,12 +36,3 @@
 
 // gemm (asm d12x6)
 GEMM_UKR_PROT( double,   d, gemm_power9_asm_12x6 )
-
-// gemm (asm d18x4)
-GEMM_UKR_PROT( double,   d, gemm_power9_asm_18x4 )
-
-// gemm (asm d4x16)
-GEMM_UKR_PROT( double,   d, gemm_power9_asm_16x4 )
-
-// gemm (asm d4x16)
-GEMM_UKR_PROT( double,   d, gemm_power9_asm_4x16 )

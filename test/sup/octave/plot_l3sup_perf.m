@@ -11,7 +11,10 @@ function r_val = plot_l3sup_perf( opname, ...
                                   rows, cols, ...
                                   cfreq, ...
                                   dfps, ...
-                                  theid, impl )
+                                  theid, impl, ...
+                                  fontsize, ...
+                                  leg_pos_st, leg_pos_st_x, leg_pos_mt, ...
+                                  sp_margins )
 
 % Define the column in which the performance rates are found.
 flopscol = size( data_blissup, 2 );
@@ -32,22 +35,7 @@ end
 % NOTE: We can draw the legend on any graph as long as it has already been
 % rendered. Since the coordinates are global, we can simply always wait until
 % the final graph to draw the legend.
-%if nth == 1
-%	if has_xsmm == 1
-%		legend_plot_id = 2*cols + 1*5;
-%	else
-%		legend_plot_id = 1*cols + 1*5;
-%	end
-%else
-%	legend_plot_id = 0*cols + 1*6;
-%end
 legend_plot_id = cols*rows;
-
-% Hold the axes.
-if 1
-	ax1 = subplot( rows, cols, theid );
-	hold( ax1, 'on' );
-end
 
 % Set line properties.
 color_blissup  = 'k'; lines_blissup  = '-';  markr_blissup  = '';
@@ -97,16 +85,16 @@ else
 	yaxisname = 'GFLOPS/core';
 end
 
-
-%flopscol = 4;
+% Set the marker size, line size, and other items.
 msize = 5;
-if 1
-	fontsize = 12;
-else
-	fontsize = 16;
-end
-linesize = 0.5;
+linesize = 0.8;
 legend_loc = 'southeast';
+
+%ax1 = subplot( rows, cols, theid );
+ax1 = subplot_tight( rows, cols, theid, sp_margins );
+
+% Hold the axes.
+hold( ax1, 'on' );
 
 % --------------------------------------------------------------------
 
@@ -199,6 +187,7 @@ end
 
 	%                    xpos ypos
 	%set( leg,'Position',[11.32 6.36 1.15 0.7 ] ); % (1,4tl)
+
 if nth == 1 && theid == legend_plot_id
 	if has_xsmm == 1
 		% single-threaded, with libxsmm (ccc)
@@ -207,13 +196,9 @@ if nth == 1 && theid == legend_plot_id
 		  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, bfeo_lg, xsmm_lg, ...
 		'Location', legend_loc );
 		set( leg,'Box','off','Color','none','Units','inches' );
-		if impl == 'octave'
-			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[15.35 4.62 1.9 1.20] ); % (1,4tl)
-		else
-			set( leg,'FontSize',fontsize-3 );
-			set( leg,'Position',[18.20 10.20 1.15 0.7 ] ); % (1,4tl)
-		end
+		set( leg,'FontSize',fontsize );
+		%set( leg,'Position',[15.35 4.62 1.9 1.20] );
+		set( leg,'Position',leg_pos_st_x );
 	else
 		% single-threaded, without libxsmm (rrr, or other)
 		leg = legend( ...
@@ -221,13 +206,9 @@ if nth == 1 && theid == legend_plot_id
 		  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, bfeo_lg, ...
 		'Location', legend_loc );
 		set( leg,'Box','off','Color','none','Units','inches' );
-		if impl == 'octave'
-			set( leg,'FontSize',fontsize );
-			set( leg,'Position',[15.35 7.40 1.9 1.10] ); % (1,4tl)
-		else
-			set( leg,'FontSize',fontsize-1 );
-			set( leg,'Position',[18.24 10.15 1.15 0.7] ); % (1,4tl)
-		end
+		set( leg,'FontSize',fontsize );
+		%set( leg,'Position',[15.35 7.40 1.9 1.10] );
+		set( leg,'Position',leg_pos_st );
 	end
 elseif nth > 1 && theid == legend_plot_id
 	% multithreaded
@@ -236,13 +217,9 @@ elseif nth > 1 && theid == legend_plot_id
 	  blissup_lg, blisconv_lg, eigen_lg, open_lg, vend_lg, ...
 	'Location', legend_loc );
 	set( leg,'Box','off','Color','none','Units','inches' );
-	if impl == 'octave'
-		set( leg,'FontSize',fontsize );
-		set( leg,'Position',[18.20 10.30 1.9 0.95] ); % (1,4tl)
-	else
-		set( leg,'FontSize',fontsize-1 );
-		set( leg,'Position',[18.24 10.15 1.15 0.7] ); % (1,4tl)
-	end
+	set( leg,'FontSize',fontsize );
+	%set( leg,'Position',[18.20 10.30 1.9 0.95] );
+	set( leg,'Position',leg_pos_mt );
 end
 
 set( ax1,'FontSize',fontsize );
@@ -256,16 +233,18 @@ set( titl, 'FontWeight', 'normal' ); % default font style is now 'bold'.
 % This is a hack to nudge the title back to the center of the box.
 if impl == 'octave'
 	tpos = get( titl, 'Position' );
-	% For some reason, the titles in the graphs in the last column start
-	% off in a different relative position than the graphs in the other
-	% columns. Here, we manually account for that.
-	if mod(theid-1,cols) == 6
-		tpos(1) = tpos(1) + -10;
-	else
-		tpos(1) = tpos(1) + -40;
-	end
+	% For some reason, the titles in the graphs in certain columns start
+	% off in a different relative position. Here, we manually fix that.
+	%modid = mod(theid-1,cols);
+	%if     modid == 0 || modid == 1 || modid == 2
+	%	tpos(1) = tpos(1) + 0;
+	%elseif modid == 3 || modid == 4 || modid == 5
+	%	tpos(1) = tpos(1) + 0;
+	%else
+	%	tpos(1) = tpos(1) + 0;
+	%end
 	set( titl, 'Position', tpos );
-	set( titl, 'FontSize', fontsize );
+	set( titl, 'FontSize', fontsize-1 );
 else % impl == 'matlab'
 	tpos = get( titl, 'Position' );
 	tpos(1) = tpos(1) + 90;

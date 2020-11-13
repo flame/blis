@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,34 +32,8 @@
 
 */
 
-#ifndef BLIS_GKS_H
-#define BLIS_GKS_H
+#define BLIS_POOL_ADDR_ALIGN_SIZE_A 4096
+#define BLIS_POOL_ADDR_ALIGN_SIZE_B 4096
 
-void    bli_gks_init( void );
-void    bli_gks_finalize( void );
-
-void    bli_gks_init_index( void );
-
-cntx_t* bli_gks_lookup_nat_cntx( arch_t id );
-cntx_t* bli_gks_lookup_ind_cntx( arch_t id, ind_t ind );
-cntx_t** bli_gks_lookup_id( arch_t id );
-void    bli_gks_register_cntx( arch_t id, void_fp nat_fp, void_fp ref_fp, void_fp ind_fp );
-
-BLIS_EXPORT_BLIS cntx_t* bli_gks_query_cntx( void );
-BLIS_EXPORT_BLIS cntx_t* bli_gks_query_nat_cntx( void );
-
-cntx_t* bli_gks_query_cntx_noinit( void );
-
-BLIS_EXPORT_BLIS cntx_t* bli_gks_query_ind_cntx( ind_t ind, num_t dt );
-
-BLIS_EXPORT_BLIS void    bli_gks_init_ref_cntx( cntx_t* cntx );
-
-bool    bli_gks_cntx_l3_nat_ukr_is_ref( num_t dt, l3ukr_t ukr_id, cntx_t* cntx );
-
-BLIS_EXPORT_BLIS char*    bli_gks_l3_ukr_impl_string( l3ukr_t ukr, ind_t method, num_t dt );
-BLIS_EXPORT_BLIS kimpl_t bli_gks_l3_ukr_impl_type( l3ukr_t ukr, ind_t method, num_t dt );
-
-//char*   bli_gks_l3_ukr_avail_impl_string( l3ukr_t ukr, num_t dt );
-
-#endif
-
+#define BLIS_POOL_ADDR_OFFSET_SIZE_A 192
+#define BLIS_POOL_ADDR_OFFSET_SIZE_B 152

@@ -64,12 +64,12 @@ compared to conventional approaches to developing BLAS libraries, as well as a
 much-needed refinement of the BLAS interface, and thus constitutes a major
 advance in dense linear algebra computation. While BLIS remains a
 work-in-progress, we are excited to continue its development and further
-cultivate its use within the community. 
+cultivate its use within the community.
 
 The BLIS framework is primarily developed and maintained by individuals in the
 [Science of High-Performance Computing](http://shpc.ices.utexas.edu/)
 (SHPC) group in the
-[Institute for Computational Engineering and Sciences](https://www.ices.utexas.edu/)
+[Oden Institute for Computational Engineering and Sciences](https://www.oden.utexas.edu/)
 at [The University of Texas at Austin](https://www.utexas.edu/).
 Please visit the [SHPC](http://shpc.ices.utexas.edu/) website for more
 information about our research group, such as a list of
@@ -92,6 +92,14 @@ all of which are available for free via the [edX platform](http://www.edx.org/).
 
 What's New
 ----------
+
+ * **Multithreaded small/skinny matrix support for sgemm now available!** Thanks to
+funding and hardware support from Oracle, we have now accelerated `gemm` for
+single-precision real matrix problems where one or two dimensions is exceedingly
+small. This work is similar to the `gemm` optimization announced last year.
+For now, we have only gathered performance results on an AMD Epyc Zen2 system, but
+we hope to publish additional graphs for other architectures in the future. You may
+find these Zen2 graphs via the [PerformanceSmall](docs/PerformanceSmall.md) document.
 
  * **BLIS awarded SIAM Activity Group on Supercomputing Best Paper Prize for 2020!**
 We are thrilled to announce that the paper that we internally refer to as the
@@ -211,7 +219,7 @@ seeking to implement tensor contractions on multidimensional arrays.)
 Furthermore, since BLIS tracks stride information for each matrix, operands of
 different storage formats can be used within the same operation invocation. By
 contrast, BLAS requires column-major storage. And while the CBLAS interface
-supports row-major storage, it does not allow mixing storage formats. 
+supports row-major storage, it does not allow mixing storage formats.
 
  * **Rich support for the complex domain.** BLIS operations are developed and
 expressed in their most general form, which is typically in the complex domain.
@@ -253,7 +261,7 @@ of BLIS's native APIs directly. BLIS's typed API will feel familiar to many
 veterans of BLAS since these interfaces use BLAS-like calling sequences. And
 many will find BLIS's object-based APIs a delight to use when customizing
 or writing their own BLIS operations. (Objects are relatively lightweight
-`structs` and passed by address, which helps tame function calling overhead.) 
+`structs` and passed by address, which helps tame function calling overhead.)
 
  * **Multilayered API, exposed kernels, and sandboxes.** The BLIS framework
 exposes its
@@ -276,7 +284,7 @@ a nearly-complete template for instantiating high-performance BLAS-like
 libraries. Furthermore, the framework is extensible, allowing developers to
 leverage existing components to support new operations as they are identified.
 If such operations require new kernels for optimal efficiency, the framework
-and its APIs will be adjusted and extended accordingly. 
+and its APIs will be adjusted and extended accordingly.
 
  * **Code re-use.** Auto-generation approaches to achieving the aforementioned
 goals tend to quickly lead to code bloat due to the multiple dimensions of
@@ -445,14 +453,14 @@ about BLIS, please read this FAQ. If you can't find the answer to your question,
 please feel free to join the [blis-devel](https://groups.google.com/group/blis-devel)
 mailing list and post a question. We also have a
 [blis-discuss](https://groups.google.com/group/blis-discuss) mailing list that
-anyone can post to (even without joining). 
+anyone can post to (even without joining).
 
 **Documents for github contributors:**
 
  * **[Contributing bug reports, feature requests, PRs, etc](CONTRIBUTING.md).**
 Interested in contributing to BLIS? Please read this document before getting
 started. It provides a general overview of how best to report bugs, propose new
-features, and offer code patches. 
+features, and offer code patches.
 
  * **[Coding Conventions](docs/CodingConventions.md).** If you are interested or
 planning on contributing code to BLIS, please read this document so that you can
@@ -553,8 +561,8 @@ Citations
 
 For those of you looking for the appropriate article to cite regarding BLIS, we
 recommend citing our
-[first ACM TOMS journal paper](http://dl.acm.org/authorize?N91172) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
+[first ACM TOMS journal paper]( https://dl.acm.org/doi/10.1145/2764454?cid=81314495332)
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
 
 ```
 @article{BLIS1,
@@ -564,16 +572,16 @@ recommend citing our
    volume      = {41},
    number      = {3},
    pages       = {14:1--14:33},
-   month       = jun,
+   month       = {June},
    year        = {2015},
    issue_date  = {June 2015},
    url         = {http://doi.acm.org/10.1145/2764454},
 }
-``` 
+```
 
 You may also cite the
-[second ACM TOMS journal paper](http://dl.acm.org/authorize?N16240) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
+[second ACM TOMS journal paper]( https://dl.acm.org/doi/10.1145/2755561?cid=81314495332)
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
 
 ```
 @article{BLIS2,
@@ -586,15 +594,16 @@ You may also cite the
    volume      = {42},
    number      = {2},
    pages       = {12:1--12:19},
-   month       = jun,
+   month       = {June},
    year        = {2016},
    issue_date  = {June 2016},
    url         = {http://doi.acm.org/10.1145/2755561},
 }
-``` 
+```
 
 We also have a third paper, submitted to IPDPS 2014, on achieving
-[multithreaded parallelism in BLIS](http://www.cs.utexas.edu/users/flame/pubs/blis3_ipdps14.pdf):
+[multithreaded parallelism in BLIS](https://dl.acm.org/doi/10.1109/IPDPS.2014.110)
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis3_ipdps14.pdf)):
 
 ```
 @inproceedings{BLIS3,
@@ -603,14 +612,15 @@ We also have a third paper, submitted to IPDPS 2014, on achieving
    title       = {Anatomy of High-Performance Many-Threaded Matrix Multiplication},
    booktitle   = {28th IEEE International Parallel \& Distributed Processing Symposium
                   (IPDPS 2014)},
-   year        = 2014,
+   year        = {2014},
+   url         = {https://doi.org/10.1109/IPDPS.2014.110},
 }
 ```
 
 A fourth paper, submitted to ACM TOMS, also exists, which proposes an
-[analytical model](http://dl.acm.org/citation.cfm?id=2925987) 
-([unofficial backup link](http://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf))
-for determining blocksize parameters in BLIS: 
+[analytical model](https://dl.acm.org/doi/10.1145/2925987)
+for determining blocksize parameters in BLIS
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/TOMS-BLIS-Analytical.pdf)):
 
 ```
 @article{BLIS4,
@@ -621,7 +631,7 @@ for determining blocksize parameters in BLIS:
    volume      = {43},
    number      = {2},
    pages       = {12:1--12:18},
-   month       = aug,
+   month       = {August},
    year        = {2016},
    issue_date  = {August 2016},
    url         = {http://doi.acm.org/10.1145/2925987},
@@ -629,7 +639,8 @@ for determining blocksize parameters in BLIS:
 ```
 
 A fifth paper, submitted to ACM TOMS, begins the study of so-called
-[induced methods for complex matrix multiplication](http://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
+[induced methods for complex matrix multiplication]( https://dl.acm.org/doi/10.1145/3086466?cid=81314495332)
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf):
 
 ```
 @article{BLIS5,
@@ -639,27 +650,36 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
    volume      = {44},
    number      = {1},
    pages       = {7:1--7:36},
-   month       = jul,
+   month       = {July},
    year        = {2017},
    issue_date  = {July 2017},
    url         = {http://doi.acm.org/10.1145/3086466},
 }
-``` 
+```
 
 A sixth paper, submitted to ACM TOMS, revisits the topic of the previous
-article and derives a [superior induced method](http://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev1.pdf):
+article and derives a
+[superior induced method](https://epubs.siam.org/doi/10.1137/19M1282040)
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis6_sisc_rev3.pdf):
 
 ```
 @article{BLIS6,
    author      = {Field G. {V}an~{Z}ee},
    title       = {Implementing High-Performance Complex Matrix Multiplication via the 1m Method},
    journal     = {SIAM Journal on Scientific Computing},
-   note        = {submitted}
+   volume      = {42},
+   number      = {5},
+   pages       = {C221--C244},
+   month       = {September}
+   year        = {2020},
+   issue_date  = {September 2020},
+   url         = {https://doi.org/10.1137/19M1282040}
 }
-``` 
+```
 
 A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` for
-[mixed-domain and/or mixed-precision](http://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands:
+[mixed-domain and/or mixed-precision](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands
+([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf):
 
 ```
 @article{BLIS7,
