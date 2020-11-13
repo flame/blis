@@ -1,12 +1,24 @@
 ##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
 
+add_executable(TestAminv test_aminv.c)
+target_link_libraries(TestAminv debug "${PROJECT_NAME}.lib")
+target_link_libraries(TestAminv optimized "${PROJECT_NAME}.lib")
+
 add_executable(TestAxpyv test_axpyv.c)
 target_link_libraries(TestAxpyv debug "${PROJECT_NAME}.lib")
 target_link_libraries(TestAxpyv optimized "${PROJECT_NAME}.lib")
 
+add_executable(TestAxpbyv test_axpbyv.c)
+target_link_libraries(TestAxpbyv debug "${PROJECT_NAME}.lib")
+target_link_libraries(TestAxpbyv optimized "${PROJECT_NAME}.lib")
+
 add_executable(TestCopyv test_copyv.c)
 target_link_libraries(TestCopyv debug "${PROJECT_NAME}.lib")
 target_link_libraries(TestCopyv optimized "${PROJECT_NAME}.lib")
+
+add_executable(TestCabs1 test_cabs1.c)
+target_link_libraries(TestCabs1 debug "${PROJECT_NAME}.lib")
+target_link_libraries(TestCabs1 optimized "${PROJECT_NAME}.lib")
 
 add_executable(TestDotv test_dotv.c)
 target_link_libraries(TestDotv debug "${PROJECT_NAME}.lib")
@@ -15,6 +27,10 @@ target_link_libraries(TestDotv optimized "${PROJECT_NAME}.lib")
 add_executable(TestGemm test_gemm.c)
 target_link_libraries(TestGemm debug "${PROJECT_NAME}.lib")
 target_link_libraries(TestGemm optimized "${PROJECT_NAME}.lib")
+
+add_executable(TestGemmBatch test_gemm_batch.c)
+target_link_libraries(TestGemmBatch debug "${PROJECT_NAME}.lib")
+target_link_libraries(TestGemmBatch optimized "${PROJECT_NAME}.lib")
 
 add_executable(TestGemm3m test_gemm3m.c)
 target_link_libraries(TestGemm3m debug "${PROJECT_NAME}.lib")

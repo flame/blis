@@ -79,7 +79,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.h
 
 #Add all subdirectories
 #	add_subdirectory(attic)
-    add_subdirectory(blis)
+#   add_subdirectory(blis)
     add_subdirectory(cblas)
     add_subdirectory(check)
     add_subdirectory(f2c)
