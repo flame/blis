@@ -1681,6 +1681,27 @@ Observed object properties: `trans?(A)`, `trans?(B)`.
 
 ---
 
+#### gemmt
+```c
+void bli_gemmt
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)
+```
+where `C` is an _m x m_ matrix, `trans?(A)` is an _m x k_ matrix, and `trans?(B)` is a _k x m_ matrix. This operation is similar to `bli_gemm()` except that it only updates the lower or upper triangle of `C` as specified by `uplo(C)`.
+
+Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
+
+---
+
 #### hemm
 ```c
 void bli_hemm

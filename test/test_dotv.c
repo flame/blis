@@ -33,7 +33,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //        res             n     x      incx      y        incy

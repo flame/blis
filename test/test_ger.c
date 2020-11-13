@@ -32,7 +32,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //          m     n     alpha    x        incx  y        incy  a        lda

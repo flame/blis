@@ -60,10 +60,8 @@ ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
 else
 ifeq ($(CC_VENDOR),clang)
-#CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma -march=znver1 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
 CKVECFLAGS     := -mavx2 -mfpmath=sse -mfma
-# When compiling with AOCC, add these flags to the default flags set above.
-ifeq ($(strip $(shell clang -v |& head -1 | grep -c 'AOCC.LLVM.2.0.0')),1)
+ifeq ($(strip $(shell clang -v |& head -1 | grep -c 'AOCC.LLVM')),1)
 CKVECFLAGS     += -mllvm -disable-licm-vrp
 endif
 else

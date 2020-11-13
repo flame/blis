@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -250,9 +250,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
-//#ifdef BLIS_KERNELS_ZEN2
-//#include "bli_kernels_zen2.h"
-//#endif
+#ifdef BLIS_KERNELS_ZEN2
+#include "bli_kernels_zen2.h"
+#endif
 #ifdef BLIS_KERNELS_ZEN
 #include "bli_kernels_zen.h"
 #endif

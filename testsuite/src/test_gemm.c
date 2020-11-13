@@ -259,6 +259,9 @@ void libblis_test_gemm_experiment
 	libblis_test_mobj_randomize( params, TRUE, &b );
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
+//bli_setm( &BLIS_ONE, &a );
+//bli_setsc(  1.0,  0.0, &alpha );
+//bli_setsc(  0.0,  0.0, &beta );
 
 //bli_setm( &BLIS_ONE, &a );
 //bli_setsc(  1.0,  0.0, &alpha );

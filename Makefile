@@ -249,6 +249,12 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
+# If requested, include AMD's C++ template header files in the list of headers
+# to install.
+ifeq ($(INSTALL_HH),yes)
+HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
+endif
+
 
 
 #
@@ -892,6 +898,19 @@ else
 	@- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
 endif
 
+
+# --- AMD's C++ template header test rules ---
+
+# NOTE: The targets below won't work as intended for an out-of-tree build,
+# and so it's disabled for now.
+
+#testcpp: testvendcpp
+
+# Recursively run the test for AMD's C++ template header.
+#testvendcpp:
+#	$(MAKE) -C $(VEND_TESTCPP_PATH)
+
+
 # --- Install header rules ---
 
 install-headers: check-env $(MK_INCL_DIR_INST)
@@ -1167,11 +1186,13 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+#	- $(MAKE) -C $(VEND_TESTCPP_DIR) clean
 else
 	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)"
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+#	@$(MAKE) -C $(VEND_TESTCPP_DIR) clean
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 

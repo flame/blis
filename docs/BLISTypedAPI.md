@@ -1213,6 +1213,30 @@ where C is an _m x n_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` 
 
 ---
 
+#### gemmt
+```c
+void bli_?gemmt
+     (
+       uplo_t  uploc,
+       trans_t transa,
+       trans_t transb,
+       dim_t   m,
+       dim_t   k,
+       ctype*  alpha,
+       ctype*  a, inc_t rsa, inc_t csa,
+       ctype*  b, inc_t rsb, inc_t csb,
+       ctype*  beta,
+       ctype*  c, inc_t rsc, inc_t csc
+     );
+```
+Perform
+```
+  C := beta * C + alpha * transa(A) * transb(B)
+```
+where C is an _m x m_ matrix, `transa(A)` is an _m x k_ matrix, and `transb(B)` is a _k x m_ matrix. This operation is similar to `bli_?gemm()` except that it only updates the lower or upper triangle of `C` as specified by `uploc`.
+
+---
+
 #### hemm
 ```c
 void bli_?hemm

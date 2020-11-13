@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,7 +41,7 @@
 // of executing one iteration of a for loop, plus the overhead of calling a
 // function that does nothing (ie: the _cntx_init_stage() function).
 
-// -- gemm/her2k/syr2k ---------------------------------------------------------
+// -- gemm/her2k/syr2k/gemmt ---------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, cname, imeth ) \
@@ -80,6 +80,7 @@ void PASTEMAC(opname,imeth) \
 #ifndef BLIS_ENABLE_SANDBOX
 GENFRONT( gemm, gemm, nat )
 #endif
+GENFRONT( gemmt, gemm, nat )
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
 
