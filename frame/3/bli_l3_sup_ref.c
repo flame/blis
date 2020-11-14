@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -96,6 +96,72 @@ err_t bli_gemmsup_ref
 	(
 	  bli_gemmsup_int,
 	  BLIS_GEMM, // operation family id
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  rntm
+	);
+}
+
+// -----------------------------------------------------------------------------
+
+err_t bli_gemmtsup_ref
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     )
+{
+	// This function implements the default gemmtsup handler. If you are a
+	// BLIS developer and wish to use a different gemmtsup handler, please
+	// register a different function pointer in the context in your
+	// sub-configuration's bli_cntx_init_*() function.
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemmt_check( alpha, a, b, beta, c, cntx );
+
+#if 0
+	// NOTE: This special case handling is done within the variants.
+
+	// If alpha is zero, scale by beta and return.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
+	// If A or B has a zero dimension, scale C by beta and return early.
+	if ( bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return BLIS_SUCCESS;
+	}
+#endif
+
+	// Parse and interpret the contents of the rntm_t object to properly
+	// set the ways of parallelism for each loop.
+	bli_rntm_set_ways_from_rntm_sup
+	(
+	  bli_obj_length( c ),
+	  bli_obj_width( c ),
+	  bli_obj_width( a ),
+	  rntm
+	);
+
+	return
+	bli_l3_sup_thread_decorator
+	(
+	  bli_gemmtsup_int,
+	  BLIS_GEMMT, // operation family id
 	  alpha,
 	  a,
 	  b,

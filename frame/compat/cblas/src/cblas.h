@@ -448,6 +448,11 @@ void BLIS_EXPORT_BLAS cblas_strsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  float alpha, const float *A, f77_int lda,
                  float *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, float alpha, const float *A,
+                 f77_int lda, const float *B, f77_int ldb,
+                 float beta, float *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -478,6 +483,11 @@ void BLIS_EXPORT_BLAS cblas_dtrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  double alpha, const double *A, f77_int lda,
                  double *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, double alpha, const double *A,
+                 f77_int lda, const double *B, f77_int ldb,
+                 double beta, double *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_cgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -508,6 +518,11 @@ void BLIS_EXPORT_BLAS cblas_ctrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -538,6 +553,11 @@ void BLIS_EXPORT_BLAS cblas_ztrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+                 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+                 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
 
 
 /* 

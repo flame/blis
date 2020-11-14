@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,48 +37,49 @@
 
 static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
-        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
-/* 3mh  */ { bli_gemm3mh,  bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
+        /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
+/* 3mh  */ { bli_gemm3mh,  NULL,         bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
              bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL         },
-/* 3m1  */ { bli_gemm3m1,  bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
+/* 3m1  */ { bli_gemm3m1,  NULL,         bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
              bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
-/* 4mh  */ { bli_gemm4mh,  bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
+/* 4mh  */ { bli_gemm4mh,  NULL,         bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
              bli_syrk4mh,  bli_syr2k4mh, bli_trmm34mh, NULL,         NULL         },
-/* 4mb  */ { bli_gemm4mb,  NULL,         NULL,         NULL,         NULL,         
+/* 4mb  */ { bli_gemm4mb,  NULL,         NULL,         NULL,         NULL,         NULL,
              NULL,         NULL,         NULL,         NULL,         NULL         },
-/* 4m1  */ { bli_gemm4m1,  bli_hemm4m1,  bli_herk4m1,  bli_her2k4m1, bli_symm4m1,
+/* 4m1  */ { bli_gemm4m1,  NULL,         bli_hemm4m1,  bli_herk4m1,  bli_her2k4m1, bli_symm4m1,
              bli_syrk4m1,  bli_syr2k4m1, bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  },
-/* 1m   */ { bli_gemm1m,   bli_hemm1m,   bli_herk1m,   bli_her2k1m,  bli_symm1m,
+/* 1m   */ { bli_gemm1m,   NULL,         bli_hemm1m,   bli_herk1m,   bli_her2k1m,  bli_symm1m,
              bli_syrk1m,   bli_syr2k1m,  bli_trmm31m,  bli_trmm1m,   bli_trsm1m   },
-/* nat  */ { bli_gemmnat,  bli_hemmnat,  bli_herknat,  bli_her2knat, bli_symmnat,
+/* nat  */ { bli_gemmnat,  bli_gemmtnat, bli_hemmnat,  bli_herknat,  bli_her2knat, bli_symmnat,
              bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
 };
 
 //
 // NOTE: "2" is used instead of BLIS_NUM_FP_TYPES/2.
 //
-// BLIS provides APIs to modify this state during runtime. So, one application thread
-// can modify the state, before another starts the corresponding BLIS operation.
-// This is solved by making the induced method status array local to threads.
+// BLIS provides APIs to modify this state during runtime. So, it's possible for one
+// application thread to modify the state before another starts the corresponding
+// BLIS operation. This is solved by making the induced method status array local to
+// threads.
 
 static BLIS_THREAD_LOCAL
 bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
-        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
+        /*   gemm  gemmt  hemm  herk  her2k  symm  syrk  syr2k  trmm3  trmm  trsm  */
         /*    c     z    */
-/* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 3m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 3m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 4mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4mb  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 4mb  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 4m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 4m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 1m   */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 1m   */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* nat  */ { {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},
+/* nat  */ { {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},
              {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE},   {TRUE,TRUE}    },
 };
 
@@ -99,6 +100,7 @@ bool PASTEMAC(opname,ind_has_avail)( num_t dt )
 */
 
 GENFUNC( gemm, BLIS_GEMM )
+GENFUNC( gemmt, BLIS_GEMMT )
 GENFUNC( hemm, BLIS_HEMM )
 GENFUNC( herk, BLIS_HERK )
 GENFUNC( her2k, BLIS_HER2K )

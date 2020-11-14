@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -185,6 +186,7 @@
 #include "bla_syr2k.h"
 #include "bla_trmm.h"
 #include "bla_trsm.h"
+#include "bla_gemmt.h"
 
 #include "bla_gemm_check.h"
 #include "bla_hemm_check.h"
@@ -195,6 +197,7 @@
 #include "bla_syr2k_check.h"
 #include "bla_trmm_check.h"
 #include "bla_trsm_check.h"
+#include "bla_gemmt_check.h"
 
 // -- Fortran-compatible APIs to BLIS functions --
 

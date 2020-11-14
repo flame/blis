@@ -51,6 +51,7 @@ void PASTEMAC(opname,_check) \
     );
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( her2k )
 GENPROT( syr2k )
 
@@ -94,6 +95,16 @@ GENPROT( syrk )
 // -----------------------------------------------------------------------------
 
 void bli_gemm_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     );
+
+void bli_gemmt_basic_check
      (
        obj_t*  alpha,
        obj_t*  a,
