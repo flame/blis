@@ -45,6 +45,12 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+#if @enable_system@
+#define BLIS_ENABLE_SYSTEM
+#else
+#define BLIS_DISABLE_SYSTEM
+#endif
+
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
 #endif

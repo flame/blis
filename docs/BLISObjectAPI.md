@@ -31,6 +31,7 @@
   * [Specific configuration](BLISObjectAPI.md#specific-configuration)
   * [General configuration](BLISObjectAPI.md#general-configuration)
   * [Kernel information](BLISObjectAPI.md#kernel-information)
+  * [Clock functions](BLISObjectAPI.md#clock-functions)
 * **[Example code](BLISObjectAPI.md#example-code)**
 
 
@@ -2234,6 +2235,54 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
  * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried microkernel is driven by a the "virtual" microkernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
  * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried microkernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a microkernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference microkernels.
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
+
+
+## Clock functions
+
+---
+
+#### clock
+```c
+double bli_clock
+     (
+       void
+     );
+```
+Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
+
+**Note:** On Linux, `bli_clock()` is implemented in terms of `clock_gettime()` using the `clockid_t` value of `CLOCK_MONOTONIC`. On OS X, `bli_clock` is implemented in terms of `mach_absolute_time()`. And on Windows, `bli_clock` is implemented in terms of `QueryPerformanceFrequency()`. Please see [frame/base/bli_clock.c](https://github.com/flame/blis/blob/master/frame/base/bli_clock.c) for more details.
+**Note:** This function is returns meaningless values when BLIS is configured with `--disable-system`.
+
+---
+
+#### clock_min_diff
+```c
+double bli_clock_min_diff
+     (
+       double time_prev_min,
+       double time_start
+     );
+```
+This function computes an intermediate value, `time_diff`, equal to `bli_clock() - time_start`, and then tentatively prepares to return the minimum value of `time_diff` and `time_min`. If that minimum value is extremely small (close to zero), the function returns `time_min` instead.
+
+This function is meant to be used in conjuction with `bli_clock()` for
+performance timing within applications--specifically in loops where only
+the fastest timing is of interest. For example:
+```c
+double t_save = DBL_MAX;
+for( i = 0; i < 3; ++i )
+{
+   double t = bli_clock();
+   bli_gemm( ... );
+   t_save = bli_clock_min_diff( t_save, t );
+}
+double gflops = ( 2.0 * m * k * n ) / ( t_save * 1.0e9 );
+```
+This code calls `bli_gemm()` three times and computes the performance, in GFLOPS, of the fastest of the three executions.
+
+---
+
+
 
 # Example code
 

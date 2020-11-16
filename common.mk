@@ -500,7 +500,8 @@ LIBMEMKIND := -lmemkind
 
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
-# to initialize itself in a thread-safe manner.
+# to initialize itself in a thread-safe manner. The one exception to this
+# rule: if --disable-system is given at configure-time, LIBPTHREAD is empty.
 LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
@@ -730,6 +731,10 @@ CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
 # --- Threading flags ---
+
+# NOTE: We don't have to explicitly omit -pthread when --disable-system is given
+# since that option forces --enable-threading=none, and thus -pthread never gets
+# added to begin with.
 
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(THREADING_MODEL),auto)

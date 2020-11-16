@@ -168,6 +168,18 @@ print_usage()
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
+	echo "   --enable-system, --disable-system"
+	echo " "
+	echo "                 Enable conventional operating system support, such as"
+	echo "                 pthreads for thread-safety. The default state is enabled."
+	echo "                 However, in rare circumstances you may wish to configure"
+	echo "                 BLIS for use with a minimal or nonexistent operating"
+	echo "                 system (e.g. hardware simulators). In these situations,"
+	echo "                 --disable-system may be used to jettison all compile-time"
+	echo "                 and link-time dependencies outside of the standard C"
+	echo "                 library. When disabled, this option also forces the use"
+	echo "                 of --disable-threading."
+	echo " "
 	echo "   --disable-pba-pools, --enable-pba-pools"
 	echo "   --disable-sba-pools, --enable-sba-pools"
 	echo " "
@@ -1071,11 +1083,17 @@ auto_detect()
 	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
 	                 | sed -e 's/#ifdef /-D/g')
 
-	# Set the linker flags. We need pthreads because it is needed for
-	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
-	# by the main() function in ${main_c}.
-	if [[ $is_win == no || "$cc_vendor" != "clang" ]]; then
+	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
+	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
+	# bli_arch_string(), which is called by the main() function in ${main_c}.
+	if [[ "$is_win" == "no" || "$cc_vendor" != "clang" ]]; then
 		ldflags="${LIBPTHREAD--lpthread}"
+	fi
+
+	# However, if --disable-system was given, we override the choice made above
+	# and do not use any pthread link flags.
+	if [[ "$enable_system" == "no" ]]; then
+		ldflags=
 	fi
 
 	# Compile the auto-detect program using source code inside the
@@ -1965,6 +1983,9 @@ main()
 	debug_type=''
 	debug_flag=''
 
+	# The system flag.
+	enable_system='yes'
+
 	# The threading flag.
 	threading_model='off'
 
@@ -2106,6 +2127,12 @@ main()
 							;;
 						export-shared=*)
 							export_shared=${OPTARG#*=}
+							;;
+						enable-system)
+							enable_system='yes'
+							;;
+						disable-system)
+							enable_system='no'
 							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
@@ -2865,6 +2892,19 @@ main()
 		exit 1
 	fi
 
+	# Check if we are building with or without operating system support.
+	if [ "x${enable_system}" = "xyes" ]; then
+		echo "${script_name}: enabling operating system support."
+		enable_system_01=1
+	else
+		echo "${script_name}: disabling operating system support."
+		echo "${script_name}: WARNING: all threading will be disabled!"
+		enable_system_01=0
+
+		# Force threading to be disabled.
+		threading_model='off'
+	fi
+
 	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
@@ -3125,7 +3165,13 @@ main()
 	# For Windows builds, clear the libpthread_esc variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
-	if [[ $is_win == yes && "$cc_vendor" == "clang" ]]; then
+	if [[ "$is_win" == "yes" && "$cc_vendor" == "clang" ]]; then
+		libpthread_esc=
+	fi
+
+	# We also clear the libpthread_esc variable for systemless builds
+	# (--disable-system).
+	if [[ "$enable_system" == "no" ]]; then
 		libpthread_esc=
 	fi
 
@@ -3220,6 +3266,7 @@ main()
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@prefix@/${prefix_esc}/g" \
 		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
@@ -3250,6 +3297,7 @@ main()
 		| perl -pe "s/\@config_name_define\@/${config_name_define}/g" \
 		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
+		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \

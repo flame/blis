@@ -26,6 +26,7 @@
   * [Specific configuration](BLISTypedAPI.md#specific-configuration)
   * [General configuration](BLISTypedAPI.md#general-configuration)
   * [Kernel information](BLISTypedAPI.md#kernel-information)
+  * [Clock functions](BLISTypedAPI.md#clock-functions)
 * **[Example code](BLISTypedAPI.md#example-code)**
 
 
@@ -1901,6 +1902,54 @@ char* bli_info_get_trmm_impl_string( num_t dt );
 char* bli_info_get_trmm3_impl_string( num_t dt );
 char* bli_info_get_trsm_impl_string( num_t dt );
 ```
+
+
+## Clock functions
+
+---
+
+#### clock
+```c
+double bli_clock
+     (
+       void
+     );
+```
+Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
+
+**Note:** On Linux, `bli_clock()` is implemented in terms of `clock_gettime()` using the `clockid_t` value of `CLOCK_MONOTONIC`. On OS X, `bli_clock` is implemented in terms of `mach_absolute_time()`. And on Windows, `bli_clock` is implemented in terms of `QueryPerformanceFrequency()`. Please see [frame/base/bli_clock.c](https://github.com/flame/blis/blob/master/frame/base/bli_clock.c) for more details.
+**Note:** This function is returns meaningless values when BLIS is configured with `--disable-system`.
+
+---
+
+#### clock_min_diff
+```c
+double bli_clock_min_diff
+     (
+       double time_prev_min,
+       double time_start
+     );
+```
+This function computes an intermediate value, `time_diff`, equal to `bli_clock() - time_start`, and then tentatively prepares to return the minimum value of `time_diff` and `time_min`. If that minimum value is extremely small (close to zero), the function returns `time_min` instead.
+
+This function is meant to be used in conjuction with `bli_clock()` for
+performance timing within applications--specifically in loops where only
+the fastest timing is of interest. For example:
+```c
+double t_save = DBL_MAX;
+for( i = 0; i < 3; ++i )
+{
+   double t = bli_clock();
+   bli_gemm( ... );
+   t_save = bli_clock_min_diff( t_save, t );
+}
+double gflops = ( 2.0 * m * k * n ) / ( t_save * 1.0e9 );
+```
+This code calls `bli_gemm()` three times and computes the performance, in GFLOPS, of the fastest of the three executions.
+
+---
+
+
 
 # Example code
 
