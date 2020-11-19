@@ -42,7 +42,7 @@
 
 //           uplo   m     alpha    x        incx  y        incy  a        lda
 //void dsyr2_( char*, int*, double*, double*, int*, double*, int*, double*, int* );
- 
+
 //#define PRINT
 
 int main( int argc, char** argv )
@@ -126,7 +126,7 @@ int main( int argc, char** argv )
 
 
 		bli_copym( &a, &a_save );
-	
+
 		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -140,7 +140,7 @@ int main( int argc, char** argv )
 			bli_printm( "x", &x, "%4.1f", "" );
 			bli_printm( "y", &y, "%4.1f", "" );
 			bli_printm( "a", &a, "%4.1f", "" );
-#endif 
+#endif
 
 #ifdef BLIS
 
@@ -192,6 +192,23 @@ int main( int argc, char** argv )
 				        yp, &incy,
 				        ap, &lda );
 			}
+
+			f77_char uplo   = 'L';
+			f77_int  mm     = bli_obj_length( &a );
+			f77_int  incx   = bli_obj_vector_inc( &x );
+			f77_int  incy   = bli_obj_vector_inc( &y );
+			f77_int  lda    = bli_obj_col_stride( &a );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  xp     = bli_obj_buffer( &x );
+			scomplex*  yp     = bli_obj_buffer( &y );
+			scomplex*  ap     = bli_obj_buffer( &a );
+
+			cher2_( &uplo,
+			        &mm,
+			        alphap,
+			        xp, &incx,
+			        yp, &incy,
+			        ap, &lda );
 
 #endif
 
