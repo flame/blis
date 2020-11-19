@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -80,11 +81,8 @@ int main( int argc, char** argv )
 	m_input = 6;
 #endif
 
-#if 1
-	dt_alpha = dt_x = dt_y = dt_a = BLIS_DOUBLE;
-#else
-	dt_alpha = dt_x = dt_y = dt_a = BLIS_DCOMPLEX;
-#endif
+	// her2 supports complex and double complex
+	dt_alpha = dt_x = dt_y = dt_a = BLIS_SCOMPLEX;
 
 	uplo = BLIS_LOWER;
 
@@ -162,17 +160,18 @@ int main( int argc, char** argv )
 			f77_int  incx   = bli_obj_vector_inc( &x );
 			f77_int  incy   = bli_obj_vector_inc( &y );
 			f77_int  lda    = bli_obj_col_stride( &a );
-			double*  alphap = bli_obj_buffer( &alpha );
-			double*  xp     = bli_obj_buffer( &x );
-			double*  yp     = bli_obj_buffer( &y );
-			double*  ap     = bli_obj_buffer( &a );
+			scomplex*  alphap = bli_obj_buffer( &alpha );
+			scomplex*  xp     = bli_obj_buffer( &x );
+			scomplex*  yp     = bli_obj_buffer( &y );
+			scomplex*  ap     = bli_obj_buffer( &a );
 
-			dsyr2_( &uplo,
+			cher2_( &uplo,
 			        &mm,
 			        alphap,
 			        xp, &incx,
 			        yp, &incy,
 			        ap, &lda );
+
 #endif
 
 #ifdef PRINT
