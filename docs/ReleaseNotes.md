@@ -45,7 +45,7 @@ Improvements present in 0.8.0:
 
 Framework:
 - Implemented support for the level-3 operation `gemmt`, which performs a `gemm` on only the lower or only the upper triangle of a square matrix C. For now, only the conventional/large code path (and not the sup code path) is provided. This support also includes `gemmt` APIs in the BLAS and CBLAS compatibility layers. (AMD)
-- Added a C++ template header, `blis.hh`, containing a BLAS-inspired wrapper to a set of polymorphic CBLAS-like function wrappers defined in another header, `cblas.hh`. These headers are installed only when running the `install` target with `INSTALL_HH` set to `yes`.
+- Added a C++ template header, `blis.hh`, containing a BLAS-inspired wrapper to a set of polymorphic CBLAS-like function wrappers defined in another header, `cblas.hh`. These headers are installed only when running the `install` target with `INSTALL_HH` set to `yes`. (AMD)
 - Disallow `randv`, `randm`, `randnv`, and `randnm` from producing vectors and matrices with 1-norms of zero.
 - Changed the behavior of user-initialized `rntm_t` objects so that packing of A and B is disabled by default. (Kiran Varaganti)
 - Transitioned to using `bool` keyword instead of the previous integer-based `bool_t` typedef. (RuQing Xu)
