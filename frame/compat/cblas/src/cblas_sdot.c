@@ -16,6 +16,7 @@
 float cblas_sdot( f77_int N, const float *X,
                       f77_int incX, const float *Y, f77_int incY)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    float dot;
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
@@ -92,10 +93,11 @@ float cblas_sdot( f77_int N, const float *X,
 
         /* Finalize BLIS. */
 //      bli_finalize_auto();
-
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return dot;
 #else
    F77_sdot_sub( &F77_N, X, &F77_incX, Y, &F77_incY, &dot);
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return dot;
 #endif
 }   
