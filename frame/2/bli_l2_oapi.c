@@ -53,6 +53,7 @@ void PASTEMAC(opname,EX_SUF) \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2); \
 	bli_init_once(); \
 \
 	BLIS_OAPI_EX_DECLS \
@@ -108,6 +109,7 @@ void PASTEMAC(opname,EX_SUF) \
 	   cntx, \
 	   rntm  \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2); \
 }
 
 GENFRONT( gemv )
