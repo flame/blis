@@ -142,6 +142,7 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *side, *uploa, *transa, *diaga, *m, *n, (void*)alpha, *lda, *ldb); \
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \

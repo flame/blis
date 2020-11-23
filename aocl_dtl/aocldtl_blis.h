@@ -15,30 +15,48 @@
 
 #if AOCL_DTL_LOG_ENABLE
 void AOCL_DTL_log_gemm_sizes(int8 loglevel,
-                             obj_t* alpha,
-                             obj_t* a,
-                             obj_t* b,
-                             obj_t* beta,
-                             obj_t* c,
+                             char dt,
+                             const f77_char transa,
+                             const f77_char transb,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void* beta,
+                             const f77_int ldc,
                              const char* filename,
                              const char* functionn_name,
                              int line);
 
 void AOCL_DTL_log_trsm_sizes(int8 loglevel,
-                             side_t side,
-                             obj_t* alpha,
-                             obj_t* a,
-                             obj_t* b,
+                             char dt,
+                             f77_char side,
+                             f77_char uploa,
+                             f77_char transa,
+                             f77_char diaga,
+                             const f77_int m,
+                             const f77_int n,
+                             const void* alpha,
+                             f77_int lda,
+                             f77_int ldb,
                              const char* filename,
                              const char* function_name,
                              int line);
 
 void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
-                             obj_t* alpha,
-                             obj_t* a,
-                             obj_t* b,
-                             obj_t* beta,
-                             obj_t* c,
+                             char dt_type,
+                             char uplo,
+                             char transa,
+                             char transb,
+                             const f77_int n,
+                             const f77_int k,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void* beta,
+                             const f77_int ldc,
                              const char* filename,
                              const char* function_name,
                              int line);
@@ -359,25 +377,25 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
                              const char*    function_name,
                              int  line);
 
-#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)    \
-    AOCL_DTL_log_gemm_sizes(loglevel, alpha, a, b, beta, c, __FILE__, __FUNCTION__, __LINE__);
+#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
+    AOCL_DTL_log_gemm_sizes(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, __FILE__, __FUNCTION__, __LINE__);
 
-#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)     \
-    AOCL_DTL_log_trsm_sizes(loglevel, side, alpha, a, b, __FILE__, __FUNCTION__, __LINE__);
+#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb)     \
+    AOCL_DTL_log_trsm_sizes(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__, __FUNCTION__, __LINE__);
 
-#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)  \
-    AOCL_DTL_log_gemmt_sizes(loglevel, alpha, a, b, beta, c,  __FILE__,__FUNCTION__,__LINE__);
+#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc)  \
+    AOCL_DTL_log_gemmt_sizes(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc,  __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)  \
     AOCL_DTL_log_hemm_sizes(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc, \
                             __FILE__, __FUNCTION__, __LINE__);
 
 // Level-3 Macros
-#define	AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)\
+#define AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)\
   AOCL_DTL_log_herk_sizes(loglevel, dt_type, transa, uploc, m, k, alpha, lda, beta, ldc, __FILE__,\
                           __FUNCTION__, __LINE__);
 
-#define	AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)\
+#define AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)\
   AOCL_DTL_log_her2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc, __FILE__,\
                           __FUNCTION__, __LINE__);
 
@@ -468,17 +486,17 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
                             __FILE__,__FUNCTION__,__LINE__);
 #else
 
-#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, alpha, a, b, beta, c)
+#define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)
 
-#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, side, alpha, a, b)
+#define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb)
 
-#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, alpha, a, b, beta, c)
+#define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc)
 
 #define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)
 
-#define	AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)
+#define AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)
 
-#define	AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)
+#define AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)
 
 #define AOCL_DTL_LOG_SYMM_INPUTS(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc)
 

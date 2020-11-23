@@ -15,348 +15,180 @@
 // Level-3
 
 void AOCL_DTL_log_gemm_sizes(int8 loglevel,
-                             obj_t* alpha,
-                             obj_t* a,
-                             obj_t* b,
-                             obj_t* beta,
-                             obj_t* c,
+                             char dt_type,
+                             const f77_char transa,
+                             const f77_char transb,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k,
+                             const void* alpha,
+                             const f77_int lda,
+                             const f77_int ldb,
+                             const void* beta,
+                             const f77_int ldc,
                              const char* filename,
                              const char* function_name,
                              int line)
 {
     char buffer[256];
-    gint_t m = bli_obj_length( c );
-    gint_t n = bli_obj_width( c );
-    gint_t k = bli_obj_length( b );
-    guint_t csa = bli_obj_col_stride( a );
-    guint_t csb = bli_obj_col_stride( b );
-    guint_t csc = bli_obj_col_stride( c );
-    guint_t rsa = bli_obj_row_stride( a );
-    guint_t rsb = bli_obj_row_stride( b );
-    guint_t rsc = bli_obj_row_stride( c );
-    const num_t dt_exec = bli_obj_dt( c );
-    char transa, transb;
-    double alpha_r = 0.0;
-    double alpha_i = 0.0;
-    double beta_r = 0.0;
-    double beta_i = 0.0;;
 
-    /* The following convention is followed to print trans character
-     * BLIS_NO_TRANSPOSE  = 'n';
-     * BLIS_TRANSPOSE     = 't';
-     * BLIS_CONJ_NO_TRANS = 'c';
-     * BLIS_CONJ_TRANS    = 'h';
-     */
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
-    if(bli_obj_has_trans(a))
+    if( dt_type == 'S' || dt_type == 's' )
     {
-        if(bli_obj_has_conj(a))
-            transa = 'h';
-        else
-            transa = 't';
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(float*)beta;
+        beta_imag = 0.0;
     }
-    else
+    else if( dt_type == 'D' || dt_type == 'd' )
     {
-        if(bli_obj_has_conj(a))
-            transa = 'c';
-        else
-            transa = 'n';
+        alpha_real = *(double*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(double*) beta;
+        beta_imag = 0.0;
+    }
+    else if( dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        beta_real = (float)(((scomplex*)beta)->real);
+        beta_imag = (float)(((scomplex*)beta)->imag);
+    }
+    else if( dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+        beta_real = ((dcomplex*)beta)->real;
+        beta_imag = ((dcomplex*)beta)->imag;
     }
 
-    if(bli_obj_has_trans(b))
-    {
-        if(bli_obj_has_conj(b))
-            transb = 'h';
-        else
-            transb = 't';
-    }
-    else
-    {
-        if(bli_obj_has_conj(b))
-            transb = 'c';
-        else
-            transb = 'n';
-    }
-
-    char dt_type = 'D'; // to indicate data-type of this GEMM operation
-
-    if ( bli_is_float(dt_exec) )
-      {
-        float* alpha_cast = (float*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-        float* beta_cast  = (float*)bli_obj_buffer_for_1x1( dt_exec, beta );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-        beta_r  = *beta_cast;
-        beta_i  = 0.0;
-
-        dt_type = 'S';
-      }
-    else if ( bli_is_double(dt_exec) )
-      {
-        double* alpha_cast = (double*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-        double* beta_cast  = (double*)bli_obj_buffer_for_1x1( dt_exec, beta );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-        beta_r  = *beta_cast;
-        beta_i  = 0.0;
-        dt_type = 'D';
-      }
-    else if(bli_is_scomplex(dt_exec))
-      {
-        scomplex* alpha_cast = (scomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        scomplex* beta_cast  = (scomplex*)bli_obj_buffer_for_1x1(dt_exec, beta);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-        beta_r  = (double)(beta_cast->real);
-        beta_i  = (double)(beta_cast-> imag);
-        dt_type = 'C';
-      }
-    else
-      {
-        dcomplex* alpha_cast = (dcomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        dcomplex* beta_cast  = (dcomplex*)bli_obj_buffer_for_1x1(dt_exec, beta);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-        beta_r  = (double)(beta_cast->real);
-        beta_i  = (double)(beta_cast-> imag);
-        dt_type = 'Z';
-      }
-
-
-// {S,D,C,Z} {m n k cs_a cs_b cs_c rs_a rs_b rs_c transa transb alpha_real alpha_imaginary beta_real beta_imaginary}
-
-    sprintf(buffer, " %c %ld %ld %ld %lu %lu %lu %lu %lu %lu %c %c %lf %lf %lf %lf",
-            dt_type, m, n, k,
-                 csa, csb, csc,
-                 rsa, rsb, rsc,
-                 transa, transb,
-                 alpha_r, alpha_i,
-                 beta_r, beta_i);
+    //{S, D, C, Z} m, n, k, lda, ldb, ldc, transa, transb, alpha_real, alpha_imag, beta_real, beta_imag
+    sprintf(buffer, "%c %ld %ld %ld %ld %ld %ld %c %c %lf %lf %lf %lf",
+                    dt_type,
+                    (dim_t)m, (dim_t)n, (dim_t)k,
+                    (dim_t)lda, (dim_t)ldb, (dim_t)ldc,
+                    transa, transb,
+                    alpha_real, alpha_imag, beta_real, beta_imag
+                    );
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 
 void AOCL_DTL_log_trsm_sizes(int8 loglevel,
-                 side_t side,
-                 obj_t* alpha,
-                 obj_t* a,
-                 obj_t* b,
+                 char dt_type,
+                 f77_char side,
+                 f77_char uploa,
+                 f77_char transa,
+                 f77_char diaga,
+                 const f77_int m,
+                 const f77_int n,
+                 const void* alpha,
+                 f77_int lda,
+                 f77_int ldb,
                  const char* filename,
                  const char* function_name,
                  int line)
 {
     char buffer[256];
-    gint_t m = bli_obj_length(b);
-    gint_t n = bli_obj_width(b);
-    guint_t csa = bli_obj_col_stride(a);
-    guint_t csb = bli_obj_col_stride(b);
-    guint_t rsa = bli_obj_row_stride(a);
-    guint_t rsb = bli_obj_row_stride(b);
-    const num_t dt_exec = bli_obj_dt(b);
-    char transa;
-    char diaga;
-    double alpha_r, alpha_i;
 
-    /* The following convention is followed to print trans character
-     * BLIS_NO_TRANSPOSE  = 'n';
-     * BLIS_TRANSPOSE     = 't';
-     * BLIS_CONJ_NO_TRANS = 'c';
-     * BLIS_CONJ_TRANS    = 'h';
-     */
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
 
-    if(bli_obj_has_trans(a))
+    if( dt_type == 'S' || dt_type == 's' )
     {
-        if(bli_obj_has_conj(a))
-            transa = 'h';
-        else
-            transa = 't';
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
     }
-    else
+    else if( dt_type == 'D' || dt_type == 'd' )
     {
-        if(bli_obj_has_conj(a))
-            transa = 'c';
-        else
-            transa = 'n';
+        alpha_real = *(double*)alpha;
+        alpha_imag = 0.0;
+    }
+    else if( dt_type == 'C' || dt_type == 'c' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+    }
+    else if( dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
     }
 
-    if( bli_obj_has_unit_diag(a) ) diaga = 'u';
-    else                 diaga = 'n';
-
-
-    char dt_type = 'D'; // to indicate data-type of this TRSM operation
-
-    if ( bli_is_float(dt_exec) )
-      {
-        float* alpha_cast = (float*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-
-        dt_type = 'S';
-      }
-    else if ( bli_is_double(dt_exec) )
-      {
-        double* alpha_cast = (double*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-
-        dt_type = 'D';
-      }
-    else if( bli_is_scomplex(dt_exec) )
-      {
-        scomplex* alpha_cast = (scomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-
-        dt_type = 'C';
-      }
-    else
-      {
-        dcomplex* alpha_cast = (dcomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-
-        dt_type = 'Z';
-      }
-
-// {S,D,C,Z} {side : L or R} {Triangular: U or L} {m n cs_a cs_b rs_a rs_b transa diaga{unit u, non-unit - u}
-    // alpha_real alpha_imaginary }
-    sprintf(buffer, " %c %c %c %ld %ld %lu %lu %lu %lu %c %c %lf %lf",
-            dt_type, (bli_is_right(side) ? 'R' : 'L'),
-            ( bli_obj_is_upper(a) ? 'U' : bli_obj_is_lower(a) ? 'L' : 'N'),
-            m, n,
-            csa, csb,
-            rsa, rsb,
-            transa,
-            diaga,
-            alpha_r, alpha_i);
+    //{S, D, C, Z} side, uplo, transa, diaga, m, n, lda, ldb, alpha_real, alpha_imag
+    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf",dt_type,
+                    side, uploa, transa, diaga,
+                    (dim_t)m, (dim_t)n, (dim_t)lda, (dim_t)ldb,
+                    alpha_real, alpha_imag
+                    );
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
 
 void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
-                 obj_t* alpha,
-                 obj_t* a,
-                 obj_t* b,
-                 obj_t* beta,
-                 obj_t* c,
+                 char dt_type,
+                 char uplo,
+                 char transa,
+                 char transb,
+                 const f77_int n,
+                 const f77_int k,
+                 const void* alpha,
+                 const f77_int lda,
+                 const f77_int ldb,
+                 const void* beta,
+                 const f77_int ldc,
                  const char* filename,
                  const char* function_name,
                  int line)
 {
     char buffer[256];
-    gint_t n = bli_obj_length(c);
-    gint_t k = bli_obj_width_after_trans(a);
-    guint_t csa = bli_obj_col_stride(a);
-    guint_t csb = bli_obj_col_stride(b);
-    guint_t csc = bli_obj_col_stride(c);
-    guint_t rsa = bli_obj_row_stride(a);
-    guint_t rsb = bli_obj_row_stride(b);
-    guint_t rsc = bli_obj_row_stride(c);
-    const num_t dt_exec = bli_obj_dt(c);
-    char transa, transb;
-    double alpha_r, alpha_i, beta_r, beta_i;
 
-    /* The following convention is followed to print trans character
-     * BLIS_NO_TRANSPOSE  = 'n';
-     * BLIS_TRANSPOSE     = 't';
-     * BLIS_CONJ_NO_TRANS = 'c';
-     * BLIS_CONJ_TRANS    = 'h';
-     */
-    if(bli_obj_has_trans(a))
-    {
-        if(bli_obj_has_conj(a))
-            transa = 'h';
-        else
-            transa = 't';
-    }
-    else
-    {
-        if(bli_obj_has_conj(a))
-            transa = 'c';
-        else
-            transa = 'n';
-    }
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+    double beta_real = 0.0;
+    double beta_imag = 0.0;
 
-    if(bli_obj_has_trans(b))
+    if( dt_type == 's' || dt_type == 'S' )
     {
-        if(bli_obj_has_conj(b))
-            transb = 'h';
-        else
-            transb = 't';
+        alpha_real = *(float*)alpha;
+        alpha_imag = 0.0;
+        beta_real = *(float*)beta;
+        beta_imag = 0.0;
     }
-    else
+    else if( dt_type == 'd' || dt_type == 'D' )
     {
-        if(bli_obj_has_conj(b))
-            transb = 'c';
-        else
-            transb = 'n';
+        alpha_real = *(double*) alpha;
+        alpha_imag = 0.0;
+        beta_real = *(double*) beta;
+        beta_imag = 0.0;
+    }
+    else if( dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+        beta_real = (float)(((scomplex*)beta)->real);
+        beta_imag = (float)(((scomplex*)beta)->imag);
+    }
+    else if( dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+        beta_real = ((dcomplex*)beta)->real;
+        beta_imag = ((dcomplex*)beta)->imag;
     }
 
-    char triangC;
-    char dt_type = 'D'; // to indicate data-type of this GEMMT operation
-
-    if(bli_obj_is_lower(c)) triangC = 'l';
-    else                    triangC = 'u';
-
-    if ( bli_is_float(dt_exec) )
-      {
-        float* alpha_cast = (float*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-        float* beta_cast  = (float*)bli_obj_buffer_for_1x1( dt_exec, beta );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-        beta_r  = *beta_cast;
-        beta_i  = 0.0;
-
-        dt_type = 'S';
-      }
-    else if ( bli_is_double(dt_exec) )
-      {
-        double* alpha_cast = (double*)bli_obj_buffer_for_1x1( dt_exec, alpha );
-        double* beta_cast  = (double*)bli_obj_buffer_for_1x1( dt_exec, beta );
-
-        alpha_r = *alpha_cast;
-        alpha_i = 0.0;
-        beta_r  = *beta_cast;
-        beta_i  = 0.0;
-        dt_type = 'D';
-      }
-    else if(bli_is_scomplex(dt_exec))
-      {
-        scomplex* alpha_cast = (scomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        scomplex* beta_cast  = (scomplex*)bli_obj_buffer_for_1x1(dt_exec, beta);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-        beta_r  = (double)(beta_cast->real);
-        beta_i  = (double)(beta_cast-> imag);
-
-        dt_type = 'C';
-      }
-    else
-      {
-        dcomplex* alpha_cast = (dcomplex*)bli_obj_buffer_for_1x1(dt_exec, alpha);
-        dcomplex* beta_cast  = (dcomplex*)bli_obj_buffer_for_1x1(dt_exec, beta);
-        alpha_r = (double)(alpha_cast->real);
-        alpha_i = (double)(alpha_cast->imag);
-        beta_r  = (double)(beta_cast->real);
-        beta_i  = (double)(beta_cast-> imag);
-
-        dt_type = 'Z';
-      }
-
-    // {S,D,C,Z} {triangC : l or u} {n k cs_a cs_b cs_c rs_a rs_b rs_c transa transb alpha_real alpha_imaginary
+    // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary
     // beta_real, beta_imaginary}
-    sprintf(buffer, " %c %c %ld %ld %lu %lu %lu %lu %lu %lu %c %c %lf %lf %lf %lf",
-            dt_type, triangC, n, k,
-                csa, csb, csc,
-                rsa, rsb, rsc,
+    sprintf(buffer, " %c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf",
+            dt_type, uplo, (dim_t)n, (dim_t)k,
+                (dim_t)lda, (dim_t)ldb, (dim_t)ldc,
                 transa, transb,
-                alpha_r, alpha_i,
-                beta_r, beta_i);
+                alpha_real, alpha_imag,
+                beta_real, beta_imag);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 }
