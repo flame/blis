@@ -1040,6 +1040,18 @@ dim_t bli_next_prime_factor( bli_prime_factors_t* factors )
     return tmp;
 }
 
+bool bli_is_prime( dim_t n )
+{
+	bli_prime_factors_t factors;
+
+	bli_prime_factorization( n, &factors );
+
+	dim_t f = bli_next_prime_factor( &factors );
+
+	if ( f == n ) return TRUE;
+	else          return FALSE;
+}
+
 #if 0
 #include "limits.h"
 #endif
