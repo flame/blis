@@ -14,6 +14,7 @@
 void cblas_cdotc_sub( f77_int N, const void *X, f77_int incX,
                     const void *Y, f77_int incY,void *dotc)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
 #else 
@@ -21,6 +22,8 @@ void cblas_cdotc_sub( f77_int N, const void *X, f77_int incX,
    #define F77_incX incX
    #define F77_incY incY
 #endif
+   AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'c','C', N, incX, incY);
    F77_cdotc_sub( &F77_N, (scomplex*)X, &F77_incX, (scomplex*)Y, &F77_incY, (scomplex*)dotc);
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
 #endif
