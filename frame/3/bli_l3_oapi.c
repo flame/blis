@@ -58,7 +58,6 @@ void PASTEMAC(opname,EX_SUF) \
     bli_init_once(); \
 \
     BLIS_OAPI_EX_DECLS \
-    AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
     /* If C has a zero dimension, return early.	*/	\
     if ( bli_obj_has_zero_dim( c ) ) {\
@@ -141,7 +140,6 @@ void PASTEMAC(opname,EX_SUF) \
     bli_init_once(); \
 \
     BLIS_OAPI_EX_DECLS \
-    AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c); \
 \
     /* If C has a zero dimension, return early.	*/	\
     if ( bli_obj_has_zero_dim( c ) ) {\
@@ -351,7 +349,6 @@ void PASTEMAC(opname,EX_SUF) \
     bli_init_once(); \
 \
     BLIS_OAPI_EX_DECLS \
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, side, alpha, a, b) \
 \
     /* Only proceed with an induced method if all operands have the same
        (complex) datatype. If any datatypes differ, skip the induced method

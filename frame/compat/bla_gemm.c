@@ -143,6 +143,8 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+\
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
