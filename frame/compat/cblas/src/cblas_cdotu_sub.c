@@ -22,7 +22,6 @@ void cblas_cdotu_sub( f77_int N, const void *X,
    #define F77_incX incX
    #define F77_incY incY
 #endif
-   AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'c','N', N, incX, incY);
    F77_cdotu_sub( &F77_N, (scomplex*)X, &F77_incX, (scomplex*)Y, &F77_incY, (scomplex*)dotu);
    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 }
