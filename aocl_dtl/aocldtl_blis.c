@@ -435,7 +435,6 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
     double alpha_imag = 0.0;
     double beta_real = 0.0;
     double beta_imag = 0.0;
-    f77_char transaUpdate = transa;
 
     if(dt_type == 's' || dt_type == 'S' )
     {
@@ -465,32 +464,10 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
         beta_real = ((dcomplex*)beta)->real;
         beta_imag = ((dcomplex*)beta)->imag;
     }
-    /* The following convention is followed to print trans character
-     * BLIS_NO_TRANSPOSE  = 'n';
-     * BLIS_TRANSPOSE     = 't';
-     * BLIS_CONJ_NO_TRANS = 'c';
-     * BLIS_CONJ_TRANS    = 'h';
-    */
-    if( transa == BLIS_NO_TRANSPOSE )
-    {
-        transaUpdate = 'n';
-    }
-    else if( transa == BLIS_TRANSPOSE )
-    {
-        transaUpdate = 't';
-    }
-    else if( transa == BLIS_CONJ_NO_TRANSPOSE )
-    {
-        transaUpdate = 'c';
-    }
-    else if( transa == BLIS_CONJ_NO_TRANSPOSE )
-    {
-     transaUpdate = 'h';
-    }
 
     // {S, D,C, Z} { transa, m, n, alpha, lda, incx, beta, incy}
     sprintf(buffer, " %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
-            dt_type, transaUpdate, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag,
+            dt_type, transa, (dim_t)m, (dim_t)n,  alpha_real, alpha_imag,
             (dim_t)lda,  (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
 

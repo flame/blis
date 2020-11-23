@@ -79,8 +79,8 @@ int main( int argc, char** argv )
     dt = BLIS_FLOAT;
     //dt = BLIS_DOUBLE;
 #else
-    //dt = BLIS_SCOMPLEX;
-    dt = BLIS_DCOMPLEX;
+    dt = BLIS_SCOMPLEX;
+    //dt = BLIS_DCOMPLEX;
 #endif
 
     // Begin with initializing the last entry to zero so that
@@ -123,8 +123,8 @@ int main( int argc, char** argv )
 #ifdef BLIS
 
             bli_swapv( &x,
-                      &y
-                      );
+                       &y
+                );
 #else
             if ( bli_is_float( dt ) )
             {
@@ -135,8 +135,8 @@ int main( int argc, char** argv )
                 float*  yp     = bli_obj_buffer( &y );
 
                 sswap_( &nn,
-                               xp, &incx,
-                               yp, &incy );
+                        xp, &incx,
+                        yp, &incy );
 
             }
             else if ( bli_is_double( dt ) )
@@ -149,9 +149,36 @@ int main( int argc, char** argv )
                 double*  yp     = bli_obj_buffer( &y );
 
                 dswap_( &nn,
-                               xp, &incx,
-                               yp, &incy );
+                        xp, &incx,
+                        yp, &incy );
             }
+            else if ( bli_is_scomplex( dt ) )
+            {
+                f77_int nn     = bli_obj_length( &x );
+                f77_int incx   = bli_obj_vector_inc( &x );
+                f77_int incy   = bli_obj_vector_inc( &y );
+                scomplex*  xp  = bli_obj_buffer( &x );
+                scomplex*  yp  = bli_obj_buffer( &y );
+
+                cswap_( &nn,
+                        xp, &incx,
+                        yp, &incy );
+
+            }
+            else if ( bli_is_dcomplex( dt ) )
+            {
+
+                f77_int  nn     = bli_obj_length( &x );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                dcomplex*  xp   = bli_obj_buffer( &x );
+                dcomplex*  yp   = bli_obj_buffer( &y );
+
+                zswap_( &nn,
+                        xp, &incx,
+                        yp, &incy );
+            }
+
 #endif
 
 #ifdef PRINT
@@ -165,6 +192,7 @@ int main( int argc, char** argv )
         }
 
         gflops = ( n ) / ( dtime_save * 1.0e9 );
+        if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
 #ifdef BLIS
         printf( "data_swapv_blis" );

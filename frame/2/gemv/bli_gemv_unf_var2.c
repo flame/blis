@@ -114,7 +114,6 @@ void PASTEMAC(ch,varname) \
         x1 = x + (i  )*incx; \
         y1 = y + (0  )*incy; \
 \
-        AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_3, *MKSTR(ch), conja, n_elem, f, (void*)alpha, lda, incx, (void*)beta, incy); \
         /* y = y + alpha * A1 * x1; */ \
         kfp_af \
         ( \
@@ -181,7 +180,6 @@ void bli_dgemv_unf_var2
     /* Query the context for the kernel function pointer and fusing factor. */
     b_fuse = 5;
 
-    AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_3, 'd', conja, n_elem, b_fuse, (void*)alpha, cs_at, incx, (void*)beta, incy);
     for ( i = 0; i < n_iter; i += f )
     {
         f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
@@ -254,7 +252,6 @@ void bli_sgemv_unf_var2
     /* Query the context for the kernel function pointer and fusing factor. */
     b_fuse = 5;
 
-    AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_3, 's', conja, n_elem, b_fuse, (void*)alpha, cs_at, incx, (void*)beta, incy);
     for ( i = 0; i < n_iter; i += f )
     {
         f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
@@ -329,7 +326,6 @@ void bli_zgemv_unf_var2
     /* fusing factor */
     b_fuse = 5;
 
-    AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_3, 'z', conja, n_elem, b_fuse, (void*)alpha, cs_at, incx, (void*)beta, incy);
     for ( i = 0; i < n_iter; i += f )
     {
         f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
@@ -401,7 +397,6 @@ void bli_cgemv_unf_var2
     /* fusing factor. */
     b_fuse = 5;
 
-    AOCL_DTL_LOG_GEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_3, 'c', conja, n_elem, b_fuse, (void*)alpha, cs_at, incx, (void*)beta, incy);
     for ( i = 0; i < n_iter; i += f )
     {
         f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
