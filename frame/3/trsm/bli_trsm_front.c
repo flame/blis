@@ -52,9 +52,11 @@ void bli_trsm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+#if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
 	if ( status == BLIS_SUCCESS ) return;
+#endif
 #endif
 
 	// Check parameters.

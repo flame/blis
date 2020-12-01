@@ -40,14 +40,21 @@
 
 // -- Conventional (large code path) values --
 
+// These BLIS_THREAD_RATIO_? macros distort the amount of work in the m and n
+// dimensions for the purposes of factorizing the total number of threads into
+// ways of parallelism in the ic and jc loops. See bli_rntm.c to see how these
+// macros are used.
 #ifndef BLIS_THREAD_RATIO_M
-#define BLIS_THREAD_RATIO_M     2
+#define BLIS_THREAD_RATIO_M     1
 #endif
 
 #ifndef BLIS_THREAD_RATIO_N
 #define BLIS_THREAD_RATIO_N     1
 #endif
 
+// These BLIS_THREAD_MAX_?R macros place a ceiling on the maximum amount of
+// parallelism allowed when performing automatic factorization. See bli_rntm.c
+// to see how these macros are used.
 #ifndef BLIS_THREAD_MAX_IR
 #define BLIS_THREAD_MAX_IR      1
 #endif

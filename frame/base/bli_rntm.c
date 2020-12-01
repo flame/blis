@@ -236,8 +236,12 @@ void bli_rntm_set_ways_from_rntm
 
 		pc = 1;
 
+		//printf( "m n = %d %d  BLIS_THREAD_RATIO_M _N = %d %d\n", (int)m, (int)n, (int)BLIS_THREAD_RATIO_M, (int)BLIS_THREAD_RATIO_N );
+
 		bli_thread_partition_2x2( nt, m*BLIS_THREAD_RATIO_M,
 		                              n*BLIS_THREAD_RATIO_N, &ic, &jc );
+
+		//printf( "jc ic = %d %d\n", (int)jc, (int)ic );
 
 		for ( ir = BLIS_THREAD_MAX_IR ; ir > 1 ; ir-- )
 		{

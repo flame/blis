@@ -33,19 +33,17 @@
 
 */
 
-//#ifndef BLIS_FAMILY_H
-//#define BLIS_FAMILY_H
-
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
-#define BLIS_ENABLE_ZEN_BLOCK_SIZES
+
+// Vanilla BLIS disables AMD's small matrix handling by default.
+#if 0
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
-
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
@@ -64,6 +62,8 @@
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES 90
 
 #define D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO 22
+#endif
+
 
 #if 0
 // Allow the sup implementation to combine some small edge case iterations in
@@ -75,7 +75,4 @@
 #define BLIS_ENABLE_SUP_MR_EXT 1
 #define BLIS_ENABLE_SUP_NR_EXT 0
 #endif
-
-
-//#endif
 

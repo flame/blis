@@ -174,6 +174,22 @@ void bli_thread_partition_2x2
        dim_t* restrict nt1,
        dim_t* restrict nt2
      );
+void bli_thread_partition_2x2_slow
+     (
+       dim_t           n_thread,
+       dim_t           work1,
+       dim_t           work2,
+       dim_t* restrict nt1,
+       dim_t* restrict nt2
+     );
+void bli_thread_partition_2x2_fast
+     (
+       dim_t           n_thread,
+       dim_t           work1,
+       dim_t           work2,
+       dim_t* restrict nt1,
+       dim_t* restrict nt2
+     );
 
 // -----------------------------------------------------------------------------
 
