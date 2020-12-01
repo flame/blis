@@ -138,89 +138,6 @@ dcomplex zdotc_
     *ret_val = rho;
     return rho;
 }
-#else
-dcomplex zdotc_
-     (
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy
-     )
-{
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'C', *n, *incx, *incy);
-    dim_t  n0;
-    dcomplex* x0;
-    dcomplex* y0;
-    inc_t  incx0;
-    inc_t  incy0;
-    dcomplex  rho;
-
-    /* Initialize BLIS. */
-//  bli_init_auto();
-
-    /* Convert/typecast negative values of n to zero. */
-    if ( *n < 0 ) n0 = ( dim_t )0;
-    else              n0 = ( dim_t )(*n);
-
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-
-    if ( *incx < 0 )
-    {
-        /* The semantics of negative stride in BLAS are that the vector
-        operand be traversed in reverse order. (Another way to think
-        of this is that negative strides effectively reverse the order
-        of the vector, but without any explicit data movements.) This
-        is also how BLIS interprets negative strides. The differences
-        is that with BLAS, the caller *always* passes in the 0th (i.e.,
-        top-most or left-most) element of the vector, even when the
-        stride is negative. By contrast, in BLIS, negative strides are
-        used *relative* to the vector address as it is given. Thus, in
-        BLIS, if this backwards traversal is desired, the caller *must*
-        pass in the address to the (n-1)th (i.e., the bottom-most or
-        right-most) element along with a negative stride. */
-
-        x0    = ((dcomplex*)x) + (n0-1)*(-*incx);
-        incx0 = ( inc_t )(*incx);
-
-    }
-    else
-    {
-        x0    = ((dcomplex*)x);
-        incx0 = ( inc_t )(*incx);
-    }
-
-    if ( *incy < 0 )
-    {
-        y0    = ((dcomplex*)y) + (n0-1)*(-*incy);
-        incy0 = ( inc_t )(*incy);
-
-    }
-    else
-    {
-        y0    = ((dcomplex*)y);
-        incy0 = ( inc_t )(*incy);
-    }
-
-    /* Call BLIS kernel. */
-    bli_zdotv_zen_int5
-    (
-      BLIS_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
-
-    /* Finalize BLIS. */
-//  bli_finalize_auto();
-
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-
-    return rho;
-}
 #endif
 
 #ifdef BLIS_CONFIG_EPYC
@@ -635,6 +552,89 @@ scomplex cdotc_
 
     return rho;
 }
+dcomplex zdotc_
+     (
+       const f77_int* n,
+       const dcomplex*   x, const f77_int* incx,
+       const dcomplex*   y, const f77_int* incy
+     )
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
+    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', 'C', *n, *incx, *incy);
+    dim_t  n0;
+    dcomplex* x0;
+    dcomplex* y0;
+    inc_t  incx0;
+    inc_t  incy0;
+    dcomplex  rho;
+
+    /* Initialize BLIS. */
+//  bli_init_auto();
+
+    /* Convert/typecast negative values of n to zero. */
+    if ( *n < 0 ) n0 = ( dim_t )0;
+    else              n0 = ( dim_t )(*n);
+
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */
+
+    if ( *incx < 0 )
+    {
+        /* The semantics of negative stride in BLAS are that the vector
+        operand be traversed in reverse order. (Another way to think
+        of this is that negative strides effectively reverse the order
+        of the vector, but without any explicit data movements.) This
+        is also how BLIS interprets negative strides. The differences
+        is that with BLAS, the caller *always* passes in the 0th (i.e.,
+        top-most or left-most) element of the vector, even when the
+        stride is negative. By contrast, in BLIS, negative strides are
+        used *relative* to the vector address as it is given. Thus, in
+        BLIS, if this backwards traversal is desired, the caller *must*
+        pass in the address to the (n-1)th (i.e., the bottom-most or
+        right-most) element along with a negative stride. */
+
+        x0    = ((dcomplex*)x) + (n0-1)*(-*incx);
+        incx0 = ( inc_t )(*incx);
+
+    }
+    else
+    {
+        x0    = ((dcomplex*)x);
+        incx0 = ( inc_t )(*incx);
+    }
+
+    if ( *incy < 0 )
+    {
+        y0    = ((dcomplex*)y) + (n0-1)*(-*incy);
+        incy0 = ( inc_t )(*incy);
+
+    }
+    else
+    {
+        y0    = ((dcomplex*)y);
+        incy0 = ( inc_t )(*incy);
+    }
+
+    /* Call BLIS kernel. */
+    bli_zdotv_zen_int5
+    (
+      BLIS_CONJUGATE,
+      BLIS_NO_CONJUGATE,
+      n0,
+      x0, incx0,
+      y0, incy0,
+      &rho,
+      NULL
+    );
+
+    /* Finalize BLIS. */
+//  bli_finalize_auto();
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+
+    return rho;
+}
+
 #else
 #ifdef AOCL_F2C
 INSERT_GENTFUNCDOT_BLAS_SDC( dot, dotv )
