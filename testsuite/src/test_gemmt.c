@@ -107,7 +107,7 @@ void libblis_test_gemmt_deps
 	libblis_test_copym( tdata, params, &(op->ops->copym) );
 	libblis_test_scalm( tdata, params, &(op->ops->scalm) );
 	libblis_test_gemv( tdata, params, &(op->ops->gemv) );
-	libblis_test_gemm( tdata, params, &(op->ops->gemv) );
+	libblis_test_gemm( tdata, params, &(op->ops->gemm) );
 }
 
 
