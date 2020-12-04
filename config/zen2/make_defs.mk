@@ -72,15 +72,21 @@ CKVECFLAGS += -march=znver2
 endif
 else
 ifeq ($(CC_VENDOR),clang)
-# I couldn't find which versions of clang added support for -march=znver1
-# or -march=znver2, so we don't even bother attempting the differentiation
-# that appears in the gcc branch above.
-CRVECFLAGS += -march=znver1
-CKVECFLAGS += -march=znver1
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
+CKVECFLAGS += -march=znver2
 else
-$(error gcc or clang are required for this configuration.)
-endif
-endif
+#if compiling with clang
+VENDOR_STRING := $(strip $(shell ${CC_VENDOR} --version | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*'))
+CC_MAJOR := $(shell (echo ${VENDOR_STRING} | cut -d. -f1))
+#clang 9.0 or later:
+ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
+CKVECFLAGS += -march=znver2
+else
+CKVECFLAGS += -march=znver1
+endif # ge 9
+endif # AOCC 2
+endif # Clang
+endif # gcc
 
 # Store all of the variables here to new variables containing the
 # configuration name.

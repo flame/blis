@@ -95,7 +95,23 @@ CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 endif
 else
 ifeq ($(CC_VENDOR),clang)
-ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2.0.0')),1)
+
+# AOCC clang has various formats for the version line
+
+# AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
+# AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
+# AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
+# AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
+# AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
+
+# For our prupose we just want to know if it version 2x or 3x
+
+# for version 3x we will enable znver3
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC_3')),1)
+CKVECFLAGS += -march=znver3
+else
+# for version 2x we will enable znver2
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
 CKVECFLAGS += -march=znver2
 else
 #if compiling with clang
@@ -106,10 +122,11 @@ ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
 CKVECFLAGS += -march=znver2
 else
 CKVECFLAGS += -march=znver1
-endif
-endif
-endif
-endif
+endif # ge 9
+endif # aocc 2
+endif # aocc 3
+endif # clang
+endif # gcc
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
