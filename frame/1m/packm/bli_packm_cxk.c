@@ -74,8 +74,9 @@ void PASTEMAC(ch,opname) \
 		   the outer (panel_dim_max - panel_dim) rows or columns of the
 		   micropanel. (Note that these rows/columns correspond to values
 		   beyond the edge of matrix A.) The kernel intrinsically knows its
-		   own panel_dim_max, since that corresponds to the packm kernel's
-		   leading dimension. However, we *do* need to pass in panel_len_max
+		   own panel_dim_max, since that corresponds to the packm micropanel's
+		   normal width (corresponding to the gemm microkernel's register
+		   blocksize (mr or nr). However, we *do* need to pass in panel_len_max
 		   because the bottom-right edge case of trsm_lu will need all
 		   elements above the extended diagonal and beyond (to the right of)
 		   the bottom-right element to be initialized to zero so the trsm
