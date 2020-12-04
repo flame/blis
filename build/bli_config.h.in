@@ -153,6 +153,12 @@
 #define BLIS_DISABLE_MEMKIND
 #endif
 
+#if @enable_trsm_preinversion@
+#define BLIS_ENABLE_TRSM_PREINVERSION
+#else
+#define BLIS_DISABLE_TRSM_PREINVERSION
+#endif
+
 #if @enable_pragma_omp_simd@
 #define BLIS_ENABLE_PRAGMA_OMP_SIMD
 #else

@@ -401,8 +401,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		
 		movddup(mem(3+3*4)*8(rax), xmm3) // load xmm3 = (1/alpha33)
 		
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
 		mulpd(xmm3, xmm11) // xmm11 *= (1/alpha33);
 		mulpd(xmm3, xmm15) // xmm15 *= (1/alpha33);
+#else
+		divpd(xmm3, xmm11) // xmm11 /= alpha33;
+		divpd(xmm3, xmm15) // xmm15 /= alpha33;
+#endif
 		
 		movaps(xmm11, mem(rbx, 6*16)) // store ( beta30 beta31 ) = xmm11
 		movaps(xmm15, mem(rbx, 7*16)) // store ( beta32 beta33 ) = xmm15
@@ -425,8 +430,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		mulpd(xmm15, xmm7) // xmm7 = alpha23 * ( beta32 beta33 )
 		subpd(xmm3, xmm10) // xmm10 -= xmm3
 		subpd(xmm7, xmm14) // xmm14 -= xmm7
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
 		mulpd(xmm2, xmm10) // xmm10 *= (1/alpha22);
 		mulpd(xmm2, xmm14) // xmm14 *= (1/alpha22);
+#else
+		divpd(xmm2, xmm10) // xmm10 /= alpha22;
+		divpd(xmm2, xmm14) // xmm14 /= alpha22;
+#endif
 		
 		movaps(xmm10, mem(rbx, 4*16)) // store ( beta20 beta21 ) = xmm10
 		movaps(xmm14, mem(rbx, 5*16)) // store ( beta22 beta23 ) = xmm14
@@ -455,8 +465,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		addpd(xmm7, xmm6) // xmm6 += xmm7;
 		subpd(xmm2, xmm9) // xmm9  -= xmm2
 		subpd(xmm6, xmm13) // xmm13 -= xmm6
-		mulpd(xmm1, xmm9) // xmm9  *= (1/alpha11);
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		mulpd(xmm1, xmm9)  // xmm9  *= (1/alpha11);
 		mulpd(xmm1, xmm13) // xmm13 *= (1/alpha11);
+#else
+		divpd(xmm1, xmm9)  // xmm9  /= alpha11;
+		divpd(xmm1, xmm13) // xmm13 /= alpha11;
+#endif
 		
 		movaps(xmm9, mem(rbx, 2*16)) // store ( beta10 beta11 ) = xmm9
 		movaps(xmm13, mem(rbx, 3*16)) // store ( beta12 beta13 ) = xmm13
@@ -491,8 +506,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		addpd(xmm7, xmm5) // xmm5 += xmm7;
 		subpd(xmm1, xmm8) // xmm8  -= xmm1
 		subpd(xmm5, xmm12) // xmm12 -= xmm5
-		mulpd(xmm0, xmm8) // xmm8  *= (1/alpha00);
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		mulpd(xmm0, xmm8)  // xmm8  *= (1/alpha00);
 		mulpd(xmm0, xmm12) // xmm12 *= (1/alpha00);
+#else
+		divpd(xmm0, xmm8)  // xmm8  /= alpha00;
+		divpd(xmm0, xmm12) // xmm12 /= alpha00;
+#endif
 		
 		movaps(xmm8, mem(rbx, 0*16)) // store ( beta00 beta01 ) = xmm8
 		movaps(xmm12, mem(rbx, 1*16)) // store ( beta02 beta03 ) = xmm12

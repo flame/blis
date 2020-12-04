@@ -298,6 +298,20 @@ print_usage()
 	echo "                 which may be ignored in select situations if the"
 	echo "                 implementation has a good reason to do so."
 	echo " "
+	echo "   --disable-trsm-preinversion, --enable-trsm-preinversion"
+	echo " "
+	echo "                 Disable (enabled by default) pre-inversion of triangular"
+	echo "                 matrix diagonals when performing trsm. When pre-inversion"
+	echo "                 is enabled, diagonal elements are inverted outside of the"
+	echo "                 microkernel (e.g. during packing) so that the microkernel"
+	echo "                 can use multiply instructions. When disabled, division"
+	echo "                 instructions are used within the microkernel. Executing"
+	echo "                 these division instructions within the microkernel will"
+	echo "                 incur a performance penalty, but numerical robustness will"
+	echo "                 improve for certain cases involving denormal numbers that"
+	echo "                 would otherwise result in overflow in the pre-inverted"
+	echo "                 values."
+	echo " "
 	echo "   --force-version=STRING"
 	echo " "
 	echo "                 Force configure to use an arbitrary version string"
@@ -2013,6 +2027,7 @@ main()
 	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
+	enable_trsm_preinversion='yes'
 	force_version='no'
 	complex_return='default'
 
@@ -2209,6 +2224,12 @@ main()
 							;;
 						without-memkind)
 							enable_memkind='no'
+							;;
+						enable-trsm-preinversion)
+							enable_trsm_preinversion='yes'
+							;;
+						disable-trsm-preinversion)
+							enable_trsm_preinversion='no'
 							;;
 						force-version=*)
 							force_version=${OPTARG#*=}
@@ -3048,6 +3069,13 @@ main()
 		echo "${script_name}: small matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
+	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
+		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
+		enable_trsm_preinversion_01=1
+	else
+		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
+		enable_trsm_preinversion_01=0
+	fi
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
@@ -3313,6 +3341,7 @@ main()
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
 		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
