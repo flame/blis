@@ -82,7 +82,7 @@ CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 endif
 else
 ifeq ($(CC_VENDOR),clang)
-ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2.0.0')),1)
+ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
 CKVECFLAGS += -march=znver2
 else
 #if compiling with clang
