@@ -552,7 +552,7 @@ Contributing
 ------------
 
 For information on how to contribute to our project, including preferred
-[coding conventions](docs/CodingConventions), please refer to the
+[coding conventions](docs/CodingConventions.md), please refer to the
 [CONTRIBUTING](CONTRIBUTING.md) file at the top-level of the BLIS source
 distribution.
 
