@@ -1359,7 +1359,11 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG' | { read first rest ; echo $first ; })
+	if [ "${cc_vendor}" = "crosstool-NG" ]; then
+	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
+	     cc_vendor="gcc"
+	fi
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
