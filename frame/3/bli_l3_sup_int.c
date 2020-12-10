@@ -188,8 +188,8 @@ err_t bli_gemmsup_int
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
 		// Also, recalculate the automatic thread factorization.
-		if         ( mu >= nu )    use_bp = TRUE;
-		else /* if ( mu <  nu ) */ use_bp = FALSE;
+		if         ( mu >= nu )    use_bp = FALSE; //TRUE; // VK
+		else /* if ( mu <  nu ) */ use_bp = TRUE;  //FALSE;
 
 		// If the parallel thread factorization was automatic, we update it
 		// with a new factorization based on the matrix dimensions in units
@@ -215,7 +215,6 @@ err_t bli_gemmsup_int
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
 			bli_l3_sup_thrinfo_update_root( rntm, thread );
 		}
-
 
 		if ( use_bp )
 		{
