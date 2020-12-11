@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,6 +56,9 @@
 	vmulpd(ymm2, ymm3, ymm3) \
 	vaddsubpd(ymm3, ymm0, ymm0)
 
+#define ZGEMM_INPUT_RS_BETA_ONE \
+	vmovupd(mem(rcx), ymm0)
+
 #define ZGEMM_OUTPUT_RS \
 	vmovupd(ymm0, mem(rcx)) \
 
@@ -66,8 +69,11 @@
 	vmulpd(ymm2, ymm3, ymm3) \
 	vaddsubpd(ymm3, ymm0, ymm0)
 
+#define ZGEMM_INPUT_RS_BETA_ONE_NEXT \
+	vmovupd(mem(rcx, rsi, 8), ymm0)
+
 #define ZGEMM_OUTPUT_RS_NEXT \
-	vmovupd(ymm0, mem(rcx, rsi, 8)) \
+	vmovupd(ymm0, mem(rcx, rsi, 8))
 
 /*
    rrr:
@@ -173,6 +179,41 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	uint64_t cs_c   = cs_c0;
 
 	if ( m_iter == 0 ) goto consider_edge_cases;
+
+	//handling case when alpha and beta are real and +/-1.
+	uint64_t alpha_real_one = *((uint64_t*)(&alpha->real));
+	uint64_t beta_real_one = *((uint64_t*)(&beta->real));
+
+	uint64_t alpha_real_one_abs = ((alpha_real_one << 1) >> 1);
+	uint64_t beta_real_one_abs  = ((beta_real_one << 1) >> 1);
+
+	char alpha_mul_type = BLIS_MUL_DEFAULT;
+	char beta_mul_type  = BLIS_MUL_DEFAULT;
+
+	if((alpha_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS) && (alpha->imag==0))// (alpha is real and +/-1)
+	{
+		alpha_mul_type = BLIS_MUL_ONE; //alpha real and 1
+		if(alpha_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
+		{
+			alpha_mul_type = BLIS_MUL_MINUS_ONE; //alpha real and -1
+		}
+	}
+
+	if(beta->imag == 0)// beta is real
+	{
+		if(beta_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS)// (beta +/-1)
+		{
+			beta_mul_type = BLIS_MUL_ONE;
+			if(beta_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
+			{
+				beta_mul_type = BLIS_MUL_MINUS_ONE;
+			}
+		}
+		else if(beta_real_one == 0)
+		{
+			beta_mul_type = BLIS_MUL_ZERO;
+		}
+	}
 
 	// -------------------------------------------------------------------------
 
@@ -442,10 +483,30 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	vaddsubpd(ymm14, ymm12, ymm12)
 	vaddsubpd(ymm15, ymm13, ymm13)
 
+	//if(alpha_mul_type == BLIS_MUL_MINUS_ONE)
+	mov(var(alpha_mul_type), al)
+	cmp(imm(0xFF), al)
+	jne(.ALPHA_NOT_MINUS1)
+
+	// when alpha = -1 and real.
+	vxorpd(ymm0, ymm0, ymm0) // set ymm0 to zero.
+	vsubpd(ymm4, ymm0, ymm4)
+	vsubpd(ymm5, ymm0, ymm5)
+	vsubpd(ymm8, ymm0, ymm8)
+	vsubpd(ymm9, ymm0, ymm9)
+	vsubpd(ymm12, ymm0, ymm12)
+	vsubpd(ymm13, ymm0, ymm13)
+	jmp(.ALPHA_REAL_ONE)
+
+	label(.ALPHA_NOT_MINUS1)
+	//when alpha is real and +/-1, multiplication is skipped.
+	cmp(imm(2), al)//if(alpha_mul_type != BLIS_MUL_DEFAULT) skip below multiplication.
+	jne(.ALPHA_REAL_ONE)
+
 	/* (ar + ai) x AB */
-	mov(var(alpha), rax) // load address of alpha
-	vbroadcastsd(mem(rax), ymm0) // load alpha_r and duplicate
-	vbroadcastsd(mem(rax, 8), ymm1) // load alpha_i and duplicate
+	mov(var(alpha), rax)             // load address of alpha
+	vbroadcastsd(mem(rax), ymm0)     // load alpha_r and duplicate
+	vbroadcastsd(mem(rax, 8), ymm1)  // load alpha_i and duplicate
 
 	vpermilpd(imm(0x5), ymm4, ymm3)
 	vmulpd(ymm0, ymm4, ymm4)
@@ -477,32 +538,93 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm13, ymm13)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
-	mov(var(beta), rbx) // load address of beta
-	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
-	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
+	label(.ALPHA_REAL_ONE)
+	// Beta multiplication
+	/* (br + bi)x C + ((ar + ai) x AB) */
+	mov(var(cs_c), rsi)                // load cs_c
+	lea(mem(, rsi, 4), rsi)            // rsi = cs_c * sizeof(dt)
 
-	mov(var(cs_c), rsi)        // load cs_c
-	lea(mem(, rsi, 4), rsi)    // rsi = cs_c * sizeof(dt)
-
-	lea(mem(rcx, rdi, 4), rdx)         // load address of c +  4*rs_c;
-	lea(mem(rsi, rsi, 2), rax)         // rax = 3*cs_c;
-
-	// now avoid loading C if beta == 0
-	vxorpd(ymm0, ymm0, ymm0) // set ymm0 to zero.
-	vucomisd(xmm0, xmm1) // set ZF if beta_r == 0.
-	sete(r13b) // r13b = ( ZF == 1 ? 1 : 0 );
-	vucomisd(xmm0, xmm2) // set ZF if beta_i == 0.
-	sete(r15b) // r15b = ( ZF == 1 ? 1 : 0 );
-	and(r13b, r15b) // set ZF if r13b & r15b == 1.
-	jne(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
+	mov(var(beta_mul_type), al)
+	cmp(imm(0), al)                    //if(beta_mul_type == BLIS_MUL_ZERO)
+	je(.SBETAZERO)                     //jump to beta == 0 case
 
 	lea(mem(r8, r8, 2), r13)           // r13 = 3*rs_a
 
-	cmp(imm(16), rdi)                   // set ZF if (16*rs_c) ==16.
+	cmp(imm(16), rdi)                  // set ZF if (16*rs_c) ==16.
 	jz(.SCOLSTORED)                    // jump to column storage case
 
 	label(.SROWSTORED)
+	cmp(imm(2), al)                    // if(beta_mul_type == BLIS_MUL_DEFAULT)
+	je(.ROW_BETA_NOT_REAL_ONE)         // jump to beta handling with multiplication.
+
+	cmp(imm(0xFF), al)                 // if(beta_mul_type == BLIS_MUL_MINUS_ONE)
+	je(.ROW_BETA_REAL_MINUS1)          // jump to beta real = -1 section.
+
+	//CASE 1: beta is real = 1
+	ZGEMM_INPUT_RS_BETA_ONE
+	vaddpd(ymm4, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vaddpd(ymm5, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	add(rdi, rcx) // rcx = c + 1*rs_c
+
+	ZGEMM_INPUT_RS_BETA_ONE
+	vaddpd(ymm8, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vaddpd(ymm9, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	add(rdi, rcx) // rcx = c + 2*rs_c
+
+	ZGEMM_INPUT_RS_BETA_ONE
+	vaddpd(ymm12, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vaddpd(ymm13, ymm0, ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	jmp(.SDONE)
+
+
+	//CASE 2: beta is real = -1
+	label(.ROW_BETA_REAL_MINUS1)
+	ZGEMM_INPUT_RS_BETA_ONE
+	vsubpd(ymm0, ymm4, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vsubpd(ymm0, ymm5, ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	add(rdi, rcx) // rcx = c + 1*rs_c
+
+	ZGEMM_INPUT_RS_BETA_ONE
+	vsubpd(ymm0, ymm8, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vsubpd(ymm0, ymm9, ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	add(rdi, rcx) // rcx = c + 2*rs_c
+
+	ZGEMM_INPUT_RS_BETA_ONE
+	vsubpd(ymm0, ymm12, ymm0)
+	ZGEMM_OUTPUT_RS
+
+	ZGEMM_INPUT_RS_BETA_ONE_NEXT
+	vsubpd(ymm0, ymm13,  ymm0)
+	ZGEMM_OUTPUT_RS_NEXT
+	jmp(.SDONE)
+
+
+	//CASE 3: Default case with multiplication
+	// beta not equal to (+/-1) or zero, do normal multiplication.
+	label(.ROW_BETA_NOT_REAL_ONE)
+	mov(var(beta), rbx)             // load address of beta
+	vbroadcastsd(mem(rbx), ymm1)    // load beta_r and duplicate
+	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate
 
 	ZGEMM_INPUT_SCALE_RS_BETA_NZ
 	vaddpd(ymm4, ymm0, ymm0)
@@ -529,10 +651,12 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	ZGEMM_INPUT_SCALE_RS_BETA_NZ_NEXT
 	vaddpd(ymm13, ymm0, ymm0)
 	ZGEMM_OUTPUT_RS_NEXT
-
 	jmp(.SDONE)                        // jump to end.
 
 	label(.SCOLSTORED)
+	mov(var(beta), rbx)              // load address of beta
+	vbroadcastsd(mem(rbx), ymm1)     // load beta_r and duplicate
+	vbroadcastsd(mem(rbx, 8), ymm2)  // load beta_i and duplicate
 	/*|--------|           |-------|
 	  |        |           |       |
 	  |    3x4 |           |  4x3  |
@@ -679,6 +803,8 @@ void bli_zgemmsup_rv_zen_asm_3x4m
 	end_asm(
 	: // output operands (none)
 	: // input operands
+      [alpha_mul_type] "m" (alpha_mul_type),
+      [beta_mul_type] "m" (beta_mul_type),
       [m_iter] "m" (m_iter),
       [k_iter] "m" (k_iter),
       [k_left] "m" (k_left),
@@ -1025,7 +1151,7 @@ void bli_zgemmsup_rv_zen_asm_3x2m
 	vmulpd(ymm1, ymm3, ymm3)
 	vaddsubpd(ymm3, ymm12, ymm12)
 
-	/* (ßr + ßi)x C + ((ar + ai) x AB) */
+	/* (br + bi)x C + ((ar + ai) x AB) */
 	mov(var(beta), rbx) // load address of beta
 	vbroadcastsd(mem(rbx), ymm1) // load beta_r and duplicate
 	vbroadcastsd(mem(rbx, 8), ymm2) // load beta_i and duplicate

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -123,6 +123,41 @@ void bli_zgemmsup_rv_zen_asm_3x4n
 
 	if ( n_iter == 0 ) goto consider_edge_cases;
 
+	//handling case when alpha and beta are real and +/-1.
+	uint64_t alpha_real_one = *((uint64_t*)(&alpha->real));
+	uint64_t beta_real_one = *((uint64_t*)(&beta->real));
+
+	uint64_t alpha_real_one_abs = ((alpha_real_one << 1) >> 1);
+	uint64_t beta_real_one_abs  = ((beta_real_one << 1) >> 1);
+
+	char alpha_mul_type = BLIS_MUL_DEFAULT;
+	char beta_mul_type  = BLIS_MUL_DEFAULT;
+
+	if((alpha_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS) && (alpha->imag==0))// (alpha is real and +/-1)
+	{
+		alpha_mul_type = BLIS_MUL_ONE; //alpha real and 1
+		if(alpha_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
+		{
+			alpha_mul_type = BLIS_MUL_MINUS_ONE; //alpha real and -1
+		}
+	}
+
+	if(beta->imag == 0)// beta is real
+	{
+		if(beta_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS)// (beta +/-1)
+		{
+			beta_mul_type = BLIS_MUL_ONE;
+			if(beta_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
+			{
+				beta_mul_type = BLIS_MUL_MINUS_ONE;
+			}
+		}
+		else if(beta_real_one == 0)
+		{
+			beta_mul_type = BLIS_MUL_ZERO;
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	//scratch registers
 	__m256d ymm0, ymm1, ymm2, ymm3;
@@ -217,45 +252,60 @@ void bli_zgemmsup_rv_zen_asm_3x4n
 		ymm12 = _mm256_addsub_pd( ymm12, ymm14);
 		ymm13 = _mm256_addsub_pd( ymm13, ymm15);
 
-		// alpha, beta multiplication.
+		//When alpha_real = -1.0, instead of multiplying with -1, sign is changed.
+		if(alpha_mul_type == BLIS_MUL_MINUS_ONE)// equivalent to  if(alpha->real == -1.0)
+		{
+			ymm0 = _mm256_setzero_pd();
+			ymm4 = _mm256_sub_pd(ymm0,ymm4);
+			ymm5 = _mm256_sub_pd(ymm0, ymm5);
+			ymm8 = _mm256_sub_pd(ymm0, ymm8);
+			ymm9 = _mm256_sub_pd(ymm0, ymm9);
+			ymm12 = _mm256_sub_pd(ymm0, ymm12);
+			ymm13 = _mm256_sub_pd(ymm0, ymm13);
+		}
 
-		/* (ar + ai) x AB */
-		ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
-		ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
+		//when alpha is real and +/-1, multiplication is skipped.
+		if(alpha_mul_type == BLIS_MUL_DEFAULT)
+		{
+			// alpha, beta multiplication.
+			/* (ar + ai) x AB */
+			ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
+			ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
 
-		ymm3 = _mm256_permute_pd(ymm4, 5);
-		ymm4 = _mm256_mul_pd(ymm0, ymm4);
-		ymm3 =_mm256_mul_pd(ymm1, ymm3);
-		ymm4 = _mm256_addsub_pd(ymm4, ymm3);
+			ymm3 = _mm256_permute_pd(ymm4, 5);
+			ymm4 = _mm256_mul_pd(ymm0, ymm4);
+			ymm3 =_mm256_mul_pd(ymm1, ymm3);
+			ymm4 = _mm256_addsub_pd(ymm4, ymm3);
 
-		ymm3 = _mm256_permute_pd(ymm5, 5);
-		ymm5 = _mm256_mul_pd(ymm0, ymm5);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm3);
+			ymm3 = _mm256_permute_pd(ymm5, 5);
+			ymm5 = _mm256_mul_pd(ymm0, ymm5);
+			ymm3 = _mm256_mul_pd(ymm1, ymm3);
+			ymm5 = _mm256_addsub_pd(ymm5, ymm3);
 
-		ymm3 = _mm256_permute_pd(ymm8, 5);
-		ymm8 = _mm256_mul_pd(ymm0, ymm8);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm8 = _mm256_addsub_pd(ymm8, ymm3);
+			ymm3 = _mm256_permute_pd(ymm8, 5);
+			ymm8 = _mm256_mul_pd(ymm0, ymm8);
+			ymm3 = _mm256_mul_pd(ymm1, ymm3);
+			ymm8 = _mm256_addsub_pd(ymm8, ymm3);
 
-		ymm3 = _mm256_permute_pd(ymm9, 5);
-		ymm9 = _mm256_mul_pd(ymm0, ymm9);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm9 = _mm256_addsub_pd(ymm9, ymm3);
+			ymm3 = _mm256_permute_pd(ymm9, 5);
+			ymm9 = _mm256_mul_pd(ymm0, ymm9);
+			ymm3 = _mm256_mul_pd(ymm1, ymm3);
+			ymm9 = _mm256_addsub_pd(ymm9, ymm3);
 
-		ymm3 = _mm256_permute_pd(ymm12, 5);
-		ymm12 = _mm256_mul_pd(ymm0, ymm12);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm12 = _mm256_addsub_pd(ymm12, ymm3);
+			ymm3 = _mm256_permute_pd(ymm12, 5);
+			ymm12 = _mm256_mul_pd(ymm0, ymm12);
+			ymm3 = _mm256_mul_pd(ymm1, ymm3);
+			ymm12 = _mm256_addsub_pd(ymm12, ymm3);
 
-		ymm3 = _mm256_permute_pd(ymm13, 5);
-		ymm13 = _mm256_mul_pd(ymm0, ymm13);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm13 = _mm256_addsub_pd(ymm13, ymm3);
+			ymm3 = _mm256_permute_pd(ymm13, 5);
+			ymm13 = _mm256_mul_pd(ymm0, ymm13);
+			ymm3 = _mm256_mul_pd(ymm1, ymm3);
+			ymm13 = _mm256_addsub_pd(ymm13, ymm3);
+		}
 
 		if(tc_inc_row == 1) //col stored
 		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
+			if(beta_mul_type == BLIS_MUL_ZERO)
 			{
 				//transpose left 3x2
 				_mm_storeu_pd((double *)(tC ), _mm256_castpd256_pd128(ymm4));
@@ -364,8 +414,30 @@ void bli_zgemmsup_rv_zen_asm_3x4n
 		}
 		else
 		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
+			if(beta_mul_type == BLIS_MUL_ZERO)
 			{
+				_mm256_storeu_pd((double *)(tC), ymm4);
+				_mm256_storeu_pd((double *)(tC + 2), ymm5);
+				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+				_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+				_mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
+			}
+			else if(beta_mul_type == BLIS_MUL_ONE)// equivalent to  if(beta->real == 1.0)
+			{
+				ymm2 = _mm256_loadu_pd((double const *)(tC));
+				ymm4 = _mm256_add_pd(ymm4,ymm2);
+				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
+				ymm5 = _mm256_add_pd(ymm5,ymm2);
+				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
+				ymm8 = _mm256_add_pd(ymm8,ymm2);
+				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
+				ymm9 = _mm256_add_pd(ymm9,ymm2);
+				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
+				ymm12 = _mm256_add_pd(ymm12,ymm2);
+				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2 +2));
+				ymm13 = _mm256_add_pd(ymm13,ymm2);
+
 				_mm256_storeu_pd((double *)(tC), ymm4);
 				_mm256_storeu_pd((double *)(tC + 2), ymm5);
 				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
