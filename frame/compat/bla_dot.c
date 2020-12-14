@@ -139,7 +139,6 @@ dcomplex zdotc_
     return rho;
 }
 #endif
-
 #ifdef BLIS_CONFIG_EPYC
 
 float sdot_
@@ -552,6 +551,7 @@ scomplex cdotc_
 
     return rho;
 }
+#ifndef AOCL_F2C
 dcomplex zdotc_
      (
        const f77_int* n,
@@ -634,7 +634,7 @@ dcomplex zdotc_
 
     return rho;
 }
-
+#endif
 #else
 #ifdef AOCL_F2C
 INSERT_GENTFUNCDOT_BLAS_SDC( dot, dotv )
