@@ -35,7 +35,7 @@
 #include "blis.h"
 #include "f77_dot_sub.h"
 
-
+#ifdef BLIS_ENABLE_CBLAS
 //
 // Define CBLAS subrotine wrapper interfaces.
 //
@@ -58,28 +58,41 @@ void PASTEF773(ch,blasname,chc,sub) \
 	); \
 }
 
-#ifdef BLIS_ENABLE_CBLAS
-#ifdef AOCL_F2C
-INSERT_GENTFUNCDOT_BLAS_SDC( dot, NULL )
+INSERT_GENTFUNCDOTR_BLAS( dot, NULL )
 
-void PASTEF773(z,dot,c,sub)
-     (
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy,
-             dcomplex*   rval
-     )
-{
-	PASTEF772(z,dot,c)
-	(
-	rval,
-	  n,
-	  x, incx,
-	  y, incy
-	);
-}
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+
+INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
+
 #else
-INSERT_GENTFUNCDOT_BLAS( dot, NULL )
+
+//
+// Define CBLAS subrotine wrapper interfaces for complex types.
+// For the "intel" complex return type, pass a hidden first parameter
+// (by address).
+//
+#undef  GENTFUNCDOT
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
+\
+void PASTEF773(ch,blasname,chc,sub) \
+     ( \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy, \
+             ftype*   rval  \
+     ) \
+{ \
+	PASTEF772(ch,blasname,chc) \
+	( \
+	  rval, \
+	  n, \
+	  x, incx, \
+	  y, incy \
+	); \
+}
+
+INSERT_GENTFUNCDOTC_BLAS( dot, NULL )
+
 #endif
 
 // -- "Black sheep" dot product function definitions --

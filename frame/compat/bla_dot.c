@@ -90,58 +90,7 @@ ftype PASTEF772(ch,blasname,chc) \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-#ifdef AOCL_F2C
-dcomplex zdotc_
-     (
-       dcomplex *ret_val,
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy
-     )
-{
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
-    AOCL_DTL_LOG_DOTV_INPUTS(AOCL_DTL_LEVEL_TRACE_1,'Z', 'C', *n, *incx, *incy);
-    dim_t  n0;
-    dcomplex* x0;
-    dcomplex* y0;
-    inc_t  incx0;
-    inc_t  incy0;
-    dcomplex  rho;
-
-    /* Initialize BLIS. */
-    bli_init_auto();
-
-    /* Convert/typecast negative values of n to zero. */
-    bli_convert_blas_dim1( *n, n0 );
-
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-    bli_convert_blas_incv( n0, (dcomplex*)x, *incx, x0, incx0 );
-    bli_convert_blas_incv( n0, (dcomplex*)y, *incy, y0, incy0 );
-
-    /* Call BLIS interface. */
-    PASTEMAC2(z,dotv,_ex)
-    (
-      BLIS_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL,
-      NULL
-    );
-
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-    /* Finalize BLIS. */
-    bli_finalize_auto();
-    *ret_val = rho;
-    return rho;
-}
-#endif
-
 #ifdef BLIS_CONFIG_EPYC
-
 float sdot_
      (
        const f77_int* n,
@@ -303,7 +252,13 @@ double ddot_
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
     return rho;
 }
+#else
+INSERT_GENTFUNCDOTR_BLAS( dot, dotv )
+#endif
 
+#ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+#ifdef BLIS_CONFIG_EPYC
 scomplex cdotu_
      (
        const f77_int* n,
@@ -634,14 +589,63 @@ dcomplex zdotc_
 
     return rho;
 }
+#else
+INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
+#endif
+#else
+// For the "intel" complex return type, use a hidden parameter to return the result
+#undef  GENTFUNCDOT
+#define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
+\
+void PASTEF772(ch,blasname,chc) \
+     ( \
+       ftype*         rhop, \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     ) \
+{ \
+	dim_t  n0; \
+	ftype* x0; \
+	ftype* y0; \
+	inc_t  incx0; \
+	inc_t  incy0; \
+	ftype  rho; \
+\
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
+\
+	/* Convert/typecast negative values of n to zero. */ \
+	bli_convert_blas_dim1( *n, n0 ); \
+\
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */ \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+\
+	/* Call BLIS interface. */ \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	( \
+	  blis_conjx, \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  x0, incx0, \
+	  y0, incy0, \
+	  &rho, \
+	  NULL, \
+	  NULL  \
+	); \
+\
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
+\
+	*rhop = rho; \
+}
 
-#else
-#ifdef AOCL_F2C
-INSERT_GENTFUNCDOT_BLAS_SDC( dot, dotv )
-#else
-INSERT_GENTFUNCDOT_BLAS( dot, dotv )
+INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 #endif
 #endif
+
 
 // -- "Black sheep" dot product function definitions --
 
