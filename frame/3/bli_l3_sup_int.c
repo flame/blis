@@ -191,6 +191,13 @@ err_t bli_gemmsup_int
 		if         ( mu >= nu )    use_bp = FALSE; //TRUE; // VK
 		else /* if ( mu <  nu ) */ use_bp = TRUE;  //FALSE;
 
+		// In zgemm, mkernel outperforms nkernel for both m > n and n < m.
+		// mkernel is forced for zgemm.
+		if(bli_is_dcomplex(dt))
+		{
+			use_bp = TRUE;//mkernel
+		}
+
 		// If the parallel thread factorization was automatic, we update it
 		// with a new factorization based on the matrix dimensions in units
 		// of micropanels.
