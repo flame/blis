@@ -459,18 +459,20 @@ static doublereal c_b52 = 0.;
     integer lenx, leny;
     extern /* Subroutine */ int ctest_(integer *, doublecomplex *, 
 	    doublecomplex *, doublecomplex *, doublereal *);
-#ifdef AOCL_F2C
-    extern /* Double Complex */ doublecomplex zdotc_(doublecomplex*, integer *,
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+    extern /* Double Complex */ doublecomplex zdotc_(integer *, 
+	    doublecomplex *, integer *, doublecomplex *, integer *);
+    extern /* Double Complex */ doublecomplex zdotu_(integer *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
 #else
-    extern /* Double Complex */ doublecomplex zdotc_(integer *, 
+    extern /* Double Complex */ void zdotc_(doublecomplex*, integer *,
+	    doublecomplex *, integer *, doublecomplex *, integer *);
+    extern /* Double Complex */ void zdotu_(doublecomplex*, integer *,
 	    doublecomplex *, integer *, doublecomplex *, integer *);
 #endif
     integer ksize;
     extern /* Subroutine */ int zcopy_(integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *);
-    extern /* Double Complex */ doublecomplex zdotu_(integer *, 
-	    doublecomplex *, integer *, doublecomplex *, integer *);
     extern /* Subroutine */ int zswap_(integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *), zaxpy_(integer *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
@@ -513,11 +515,11 @@ static doublereal c_b52 = 0.;
 	    }
 	    if (combla_1.icase == 1) {
 /*              .. ZDOTC .. */
-#ifdef AOCL_F2C
-		z__1 = zdotc_(&z__1, &combla_1.n, cx, &combla_1.incx, cy, &
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
+		z__1 = zdotc_(&combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 #else
-		z__1 = zdotc_(&combla_1.n, cx, &combla_1.incx, cy, &
+		zdotc_(&z__1, &combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 #endif
 		cdot[0].r = z__1.r, cdot[0].i = z__1.i;
@@ -525,8 +527,13 @@ static doublereal c_b52 = 0.;
 			 sfac);
 	    } else if (combla_1.icase == 2) {
 /*              .. ZDOTU .. */
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
 		z__1 = zdotu_(&combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
+#else
+		zdotu_(&z__1, &combla_1.n, cx, &combla_1.incx, cy, &
+			combla_1.incy);
+#endif
 		cdot[0].r = z__1.r, cdot[0].i = z__1.i;
 		ctest_(&c__1, cdot, &ct7[kn + (ki << 2) - 5], &csize1[kn - 1],
 			 sfac);

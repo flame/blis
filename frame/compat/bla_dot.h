@@ -31,7 +31,7 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-
+#ifdef BLIS_ENABLE_BLAS
 
 //
 // Prototype BLAS-to-BLIS interfaces.
@@ -46,21 +46,29 @@ BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
        const ftype*   y, const f77_int* incy  \
      );
 
-#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROTDOTR_BLAS( dot )
 
-#ifdef AOCL_F2C
-INSERT_GENTPROTDOT_BLAS_SDC( dot )
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
 
+INSERT_GENTPROTDOTC_BLAS( dot )
 
-BLIS_EXPORT_BLAS dcomplex zdotc_
-(
-       dcomplex *ret_val,
-       const f77_int* n,
-       const dcomplex*   x, const f77_int* incx,
-       const dcomplex*   y, const f77_int* incy
-);
 #else
-INSERT_GENTPROTDOT_BLAS( dot )
+
+// For the "intel" complex return type, we use a hidden parameter (passed by
+// address) to return the result.
+#undef  GENTPROTDOT
+#define GENTPROTDOT( ftype, ch, chc, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF772(ch,blasname,chc) \
+     ( \
+       ftype*         rhop, \
+       const f77_int* n, \
+       const ftype*   x, const f77_int* incx, \
+       const ftype*   y, const f77_int* incy  \
+     );
+
+INSERT_GENTPROTDOTC_BLAS( dot )
+
 #endif
 
 // -- "Black sheep" dot product function prototypes --
