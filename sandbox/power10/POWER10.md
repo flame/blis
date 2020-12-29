@@ -4,7 +4,7 @@ This is a special BLIS Sandbox that allows users to call low precision POWER10 `
 
 #### Introduction
 
-This document describes how the low precision POWER10 `gemm` kernels are implemented. The document will also demonstrate how to call the `gemm` kernels. **A main point about this sandbox is that it does not have many of the features that BLIS provides such as multithreading, test suite, mixed domain/precision, etc....**
+This document describes how the low precision POWER10 `gemm` kernels are implemented. The document will also demonstrate how to call the `gemm` kernels. 
 
 #### Implementation
 
@@ -45,6 +45,15 @@ void bli_?gemm
        ctype_out*  c, inc_t rsc, inc_t csc
      );
 ```
+
+
+#### How To Build The Sandbox
+
+Add the following flags when running the configure script to build BLIS correctly.
+
+`CFLAGS="-fPIC -std=c99 -D_ISOC11_SOURCE -D_POSIX_C_SOURCE=200112L" -s power10`
+
+Ensure that you have GCC 10.2 or greater.
 
 
 
