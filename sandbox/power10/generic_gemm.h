@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,7 +32,27 @@
 
 */
 
-// gemm
-GEMM_UKR_PROT( double,   d, gemm_power10_mma_8x8  )
-GEMM_UKR_PROT( float,    s, gemm_power10_mma_8x16 )
+// Prototypes and template for the 5-loop gemm algorithm
+
+#include "bli_sandbox.h"
+
+#define GEMM_PASTEMAC_(ch)           bli_ ## ch ## gemm_
+#define GEMM_PASTEMAC(ch)            GEMM_PASTEMAC_(ch)
+
+#define GENERIC_GEMM_PROTO(ch, DTYPE_IN, DTYPE_OUT) \
+void GEMM_PASTEMAC(ch) \
+    ( \
+        dim_t MR, dim_t NR, dim_t KC, dim_t NC, dim_t MC, \
+        int m, int n, int k, \
+        DTYPE_IN* restrict A, int rs_a, int cs_a, int A_align, \
+        DTYPE_IN* restrict B, int rs_b, int cs_b, int B_align, \
+        DTYPE_OUT* restrict C, int rs_c, int cs_c, \
+        DTYPE_OUT* alpha, DTYPE_OUT* beta \
+    )
+
+GENERIC_GEMM_PROTO(sb, bfloat16, float);
+GENERIC_GEMM_PROTO(sh, float16, float);
+GENERIC_GEMM_PROTO(i16, int16_t, int);
+GENERIC_GEMM_PROTO(i8, int8_t, int);
+GENERIC_GEMM_PROTO(i4, nibbles, int);
 

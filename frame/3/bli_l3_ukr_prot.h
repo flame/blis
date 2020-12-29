@@ -36,16 +36,18 @@
 // Define template prototypes for level-3 micro-kernels.
 //
 
-#define GEMM_UKR_PROT( ctype, ch, opname ) \
+#define GEMM_UKR_PROT( ctype, ch, opname ) GEMM_UKR_PROT2(ctype, ctype, ch, opname)
+
+#define GEMM_UKR_PROT2( ctype_in, ctype_out, ch, opname ) \
 \
 void PASTEMAC(ch,opname) \
      ( \
        dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       ctype_out* restrict alpha, \
+       ctype_in*  restrict a, \
+       ctype_in*  restrict b, \
+       ctype_out* restrict beta, \
+       ctype_out* restrict c, inc_t rs_c, inc_t cs_c, \
        auxinfo_t* restrict data, \
        cntx_t*    restrict cntx  \
      );
