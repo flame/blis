@@ -602,9 +602,9 @@ BLIS_INLINE void bli_shift_diag_offset_to_shrink_uplo( uplo_t uplo, doff_t* diag
 	else if ( bli_is_lower( uplo ) ) *diagoff -= 1;
 }
 
-BLIS_INLINE bool bli_diag_offset_with_trans( trans_t trans, doff_t diagoff )
+BLIS_INLINE doff_t bli_diag_offset_with_trans( trans_t trans, doff_t diagoff )
 {
-	return ( bool )
+	return ( doff_t )
 	       ( bli_does_trans( trans ) ? -diagoff : diagoff );
 }
 
