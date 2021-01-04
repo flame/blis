@@ -1,4 +1,1152 @@
-commit 68b88aca6692c75a9f686187e6c4a4e196ae60a9 (HEAD -> master, tag: 0.7.0)
+commit 9b387f6d5a010969727ec583c0cdd067a5274ed8 (HEAD -> master, tag: 0.8.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 19 13:33:37 2020 -0600
+
+    Version file update (0.8.0)
+
+commit 2928ec750d3a3e1e5d55de5b57ddc04e9d0bd796 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 18 18:31:35 2020 -0600
+
+    ReleaseNotes.md update in advance of next version.
+    
+    Details:
+    - Updated docs/ReleaseNotes.md in preparation for next version.
+
+commit b9899bedff6854639468daa7a973bb14ca131a74 (origin/amd, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 18 16:52:41 2020 -0600
+
+    CREDITS file update.
+
+commit 88ad84143414644df4c56733b1cf91a36bfacaf8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 14 09:39:48 2020 -0600
+
+    Squash-merge 'pr' into 'squash'. (#457)
+    
+    Merged contributions from AMD's AOCL BLIS (#448).
+    
+    Details:
+    - Added support for level-3 operation gemmt, which performs a gemm on
+      only the lower or upper triangle of a square matrix C. For now, only
+      the conventional/large code path will be supported (in vanilla BLIS).
+      This was accomplished by leveraging the existing variant logic for
+      herk. However, some of the infrastructure to support a gemmtsup is
+      included in this commit, including
+      - A bli_gemmtsup() front-end, similar to bli_gemmsup().
+      - A bli_gemmtsup_ref() reference handler function.
+      - A bli_gemmtsup_int() variant chooser function (with variant calls
+        commented out).
+    - Added support for inducing complex domain gemmt via the 1m method.
+    - Added gemmt APIs to the BLAS and CBLAS compatiblity layers.
+    - Added gemmt test module to testsuite.
+    - Added standalone gemmt test driver to 'test' directory.
+    - Documented gemmt APIs in BLISObjectAPI.md and BLISTypedAPI.md.
+    - Added a C++ template header (blis.hh) containing a BLAS-inspired
+      wrapper to a set of polymorphic CBLAS-like function wrappers defined
+      in another header (cblas.hh). These two headers are installed if
+      running the 'install' target with INSTALL_HH is set to 'yes'. (Also
+      added a set of unit tests that exercise blis.hh, although they are
+      disabled for now because they aren't compatible with out-of-tree
+      builds.) These files now live in the 'vendor' top-level directory.
+    - Various updates to 'zen' and 'zen2' subconfigurations, particularly
+      within the context initialization functions.
+    - Added s and d copyv, setv, and swapv kernels to kernels/zen/1, and
+      various minor updates to dotv and scalv kernels. Also added various
+      sup kernels contributed by AMD to kernels/zen/3. However, these
+      kernels are (for now) not yet used, in part because they caused
+      AppVeyor clang failures, and also because I have not found time to
+      review and vet them.
+    - Output the python found during configure into the definition of PYTHON
+      in build/config.mk (via build/config.mk.in).
+    - Added early-return checks (A, B, or C with zero dimension; alpha = 0)
+      to bli_gemm_front.c.
+    - Implemented explicit beta = 0 handling in for the sgemm ukernel in
+      bli_gemm_armv7a_int_d4x4.c, which was previously missing. This latent
+      bug surfaced because the gemmt module verifies its computation using
+      gemm with its beta parameter set to zero, which, on a cortexa15 system
+      caused the gemm kernel code to unconditionally multiply the
+      uninitialized C data by beta. The C matrix likely contained
+      non-numeric values such as NaN, which then would have resulted in a
+      false failure.
+    - Fixed a bug whereby the implementation for bli_herk_determine_kc(),
+      in bli_l3_blocksize.c, was inadvertantly being defined in terms of
+      helper functions meant for trmm. This bug was probably harmless since
+      the trmm code should have also done the right thing for herk.
+    - Used cpp macros to neutralize the various AOCL_DTL_TRACE_ macros in
+      kernels/zen/3/bli_gemm_small.c since those macros are not used in
+      vanilla BLIS.
+    - Added cpp guard to definition of bli_mem_clear() in bli_mem.h to
+      accommodate C++'s stricter type checking.
+    - Added cpp guard to test/*.c drivers that facilitate compilation on
+      Windows systems.
+    - Various whitespace changes.
+
+commit 234b8b0cf48f1ee965bd7999b291fc7add3b9a54
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 12 19:11:16 2020 -0600
+
+    Increased dotxaxpyf testsuite thresholds.
+    
+    Details:
+    - Increased the test thresholds used by the dotxaxpyf testsuite module
+      by a factor of five in order to avoid residuals that unnecessarily
+      fall in the MARGINAL range. This commit should fix #455. Thanks to
+      @nagsingh for reporting this issue.
+
+commit ed612dd82c50063cfd23576a6b2465213d31b14b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 7 13:09:42 2020 -0600
+
+    Updated README.md with sgemmsup blurb.
+    
+    Details:
+    - Added an entry to the "What's New" section of the README.md to
+      announce the availability of sgemmsup.
+
+commit e14424f55b15d67e8d18384aea45a11b9b772e02
+Merge: 0cfe1aac eccdd75a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 7 13:02:50 2020 -0600
+
+    Merge branch 'dev'
+
+commit 0cfe1aac222008a78dff3ee03ef5183413936706
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 30 17:10:36 2020 -0500
+
+    Relocated operation index to ToC in API docs.
+    
+    Details:
+    - Moved the "Operation index" section of both the BLISObjectAPI.md and
+      BLISTypedAPI.md docs to appear immediately after the table of contents
+      of each document. This allows the reader to quickly jump to the
+      documentation for any operation without having to scroll through much
+      of the document (when rendered via a web browser).
+    - Fixed a mistake in the BLISObjectAPI.md for the setd operation, which
+      does *not* observe the diag property of its matrix argument. Thanks to
+      Jeff Diamond for reporting this.
+
+commit 2a0682f8e5998be536da313525292f0da6193147
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Oct 18 18:04:03 2020 -0500
+
+    Implemented runtime subconfig selection (#451).
+    
+    Details:
+    - Implemented support for the user manually overriding the automatic
+      subconfiguration selection that happens at runtime. This override
+      can be requested by setting the BLIS_ARCH_TYPE environment variable.
+      The variable must be set to the arch_t id (as enumerated in
+      bli_type_defs.h) corresponding to the desired subconfiguration. If a
+      value outside this enumerated range is given, BLIS will abort with an
+      error message. If the value is in the valid range but corresponds to a
+      subconfiguration that was not activated at configure-time/compile-time,
+      BLIS will abort with a (different) error message. Thanks to decandia50
+      for suggesting this feature via issue #451.
+    - Defined a new function bli_gks_lookup_id to return the address of an
+      internal data structure within the gks. If this address is NULL, then
+      it indicates that the subconfig corresponding to the arch_t id passed
+      into the function was not compiled into BLIS. This function is used
+      in the second of the two abort scenarios described above.
+    - Defined the enumerated error code BLIS_UNINITIALIZED_GKS_CNTX, which
+      is returned for the latter of the two abort scenarios mentioned above,
+      along with a corresponding error message and a function to perform
+      the error check.
+    - Added cpp macro branching to bli_env.c to support compilation of the
+      auto-detect.x executable during configure-time. This cpp branch is
+      similar to the cpp code already found in bli_arch.c and bli_cpuid.c.
+    - Cleaned up the auto_detect() function to facilitate easier maintenance
+      going forward. Also added a convenient debug switch that outputs the
+      compilation command for the auto-detect.x executable and exits.
+
+commit eccdd75a2d8a0c46e91e94036179c49aa5fa601c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 9 15:44:16 2020 -0500
+
+    Whitespace tweak in docs/PerformanceSmall.md.
+
+commit 7677e9ba60ac27496e3421c2acc7c239e3f860e9
+Merge: addcd46b a0849d39
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 9 15:41:25 2020 -0500
+
+    Merge branch 'dev' of github.com:flame/blis into dev
+
+commit addcd46b0559d401aa7d33d4c7e6f63f5313a8e0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 9 15:41:09 2020 -0500
+
+    Added Epyc 7742 Zen2 ("Rome") sup perf results.
+    
+    Details:
+    - Added single-threaded and multithreaded sup performance results to
+      docs/PerformanceSmall.md for both sgemm and dgemm. These results were
+      gathered on an Epyc 7742 "Rome" server featuring AMD's Zen2
+      microarchitecture. Special thanks to Jeff Diamond for facilitating
+      access to the system via the Oracle Cloud.
+    - Updates to octave scripts in test/sup/octave for use with Octave 5.2
+      and for use with subplot_tight().
+    - Minor updates to octave scripts in test/3/octave.
+    - Renamed files containing the previous Zen performance results for
+      consistency with the new results.
+    - Decreased line thickness slightly in large/conventional Zen2 graphs.
+      I'm done tweaking those this time. Really.
+    - Added missing line regarding eigen header installation for each
+      microarchitecture section.
+
+commit a0849d390d04067b82af937cda8191b049b98915
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Oct 9 20:22:17 2020 +0000
+
+    Register l3 sup kernels in zen2 subconfig.
+    
+    Details:
+    - Registered full suite of sgemm and dgemm sup millikernels, blocksizes,
+      and crossover thresholds in bli_cntx_init_zen2.c.
+    - Minor updates to test/sup/runme.sh for running on Zen2 Epyc 7742
+      system.
+
+commit d98368c32d5fbfaab8966ee331d9bcb5c4fe7a59
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 8 19:05:51 2020 -0500
+
+    Another tweak to line thickness of Zen2 graphs.
+
+commit 1855dfbdaafa37892b36c97fd317fd5d8da76676
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 8 19:01:00 2020 -0500
+
+    Tweaked line thickness in Zen2 graphs once more.
+    
+    Details:
+    - Decreased (relative to previous commit) line thickness in recent Zen2
+      graphs.
+
+commit 0991611e7ed82889c53a5c3f1ef1d49552c50d61
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 8 18:54:49 2020 -0500
+
+    Increased line thickness in recent Zen2 graphs.
+    
+    Details:
+    - Increased the width of the lines in the graphs introduced in 74ec6b8.
+
+commit 8273cbacd7799e9af59e5320d66055f2f5d9cb31
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 7 14:51:33 2020 -0500
+
+    README.md, docs/FAQ.md updates.
+    
+    Details:
+    - Added a frequently asked question to docs/FAQ.md regarding the
+      difference between upstream (vanilla) BLIS and AMD BLIS.
+    - Updated the name of ICES in the README.md to reflect the Oden
+      rebranding.
+
+commit a178a822ad3d5021489a0e61f909d8550ae12a8f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 30 16:00:52 2020 -0500
+
+    Added Zen2 links to docs/Performance.md Contents.
+
+commit 74ec6b8f457cabe37d2382aaab35ba04fc737948
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 30 15:54:18 2020 -0500
+
+    Added Epyc 7742 Zen2 ("Rome") performance results.
+    
+    Details:
+    - Added single-threaded and multithreaded performance results to
+      docs/Performance.md. These results were gathered on an Epyc 7742
+      "Rome" server with AMD's Zen2 microarchitecture. Special thanks
+      to Jeff Diamond for facilitating access to the system via the
+      Oracle Cloud.
+    - Renamed files containing the previous Zen performance results for
+      consistency with the new results.
+
+commit bc4a213a2c3dcf8bbfcbb3a1ef3e9fc9e3226c34
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 30 15:28:20 2020 -0500
+
+    Updated matlab (now octave) plot code in test/3.
+    
+    Details:
+    - Renamed test/3/matlab to test/3/octave.
+    - Within test/3, updated and tuned plot_l3_perf.m and plot_panel_4x5.m
+      files for use with octave (which is free and doesn't crash on me
+      mid-way through my use of subplot).
+    - Updated runthese.m scratchpad for zen2 invocations.
+    - Added Nikolay S.'s subplot_tight() function, along with its license.
+
+commit c77ddc418187e1884fa6bcfe570eee295b9cb8bc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 30 20:15:43 2020 +0000
+
+    Added optional numactl usage to test/3/runme.sh.
+
+commit 2d8ec164e7ae4f0c461c27309dc1f5d1966eb003
+Author: Nicholai Tukanov <nicholai@utexas.edu>
+Date:   Tue Sep 29 16:52:18 2020 -0500
+
+    Add POWER10 support to BLIS (#450)
+
+commit 4fd8d9fec2052257bf2a5c6e0d48ae619ff6c3e4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 28 23:39:05 2020 +0000
+
+    Tweaked zen2 subconfig's MC cache blocksizes.
+    
+    Details:
+    - Updated the MC cache blocksizes registered by the 'zen2' subconfig.
+    - Minor updates to test/3/Makefile and test/3/runme.sh.
+
+commit 5efcdeffd58af621476d179afc0c19c0f912baa8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 25 14:25:24 2020 -0500
+
+    More minor README.md updates.
+
+commit 9e940f8aad6f065ea1689e791b9a4e1fb7900c40
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 25 13:53:35 2020 -0500
+
+    Added 1m SISC bibtex to README.md.
+    
+    Details:
+    - Added final citation info to 1m bibtex in README.md file.
+    - Updated draft 1m paper link.
+    - Changed some http to https.
+
+commit e293cae2d1b9067261f613f25eaa0e871356b317
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 15 16:09:11 2020 -0500
+
+    Implemented sgemmsup assembly kernels.
+    
+    Details:
+    - Created a set of single-precision real millikernels and microkernels
+      comparable to the dgemmsup kernels that already exist within BLIS.
+    - Added prototypes for all kernels within bli_kernels_haswell.h.
+    - Registered entry-point millikernels in bli_cntx_init_haswell.c and
+      bli_cntx_init_zen.c.
+    - Added sgemmsup support to the Makefile, runme.sh script, and source
+      file in test/sup. This included edits that allow for separate "small"
+      dimensions for single- and double-precision as well as for single-
+      vs. multithreaded execution.
+
+commit 2765c6f37c11cb7f71cd4b81c64cea6130636c68
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 12 17:48:15 2020 -0500
+
+    Type saga continues; fixed sgemm ukernel signature.
+    
+    Details:
+    - Changed double* pointers in sgemm function signature to float*. At
+      this point I've lost track of whether this was my fault or another
+      dormant bug like the one described in ece9f6a, but at this point I
+      no longer care. It's one of those days (aka I didn't ask for this).
+
+commit 0779559509e0a1af077530d09ed151dac54f32ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 12 17:37:21 2020 -0500
+
+    Fixed missing restrict in knl sgemm prototype.
+    
+    Details:
+    - Added a missing 'restrict' qualifier in the sgemm ukernel prototype
+      for knl. (Not sure how that code was ever compiling before now.)
+
+commit ece9f6a3ef1b26b53ecf968cd069df7a85b139fb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 12 17:22:42 2020 -0500
+
+    Fixed dormant type bugs in bli_kernels_knl.h.
+    
+    Details:
+    - Fixed dormant type mismatches in the use of the prototype-generating
+      macros in bli_kernels_knl.h. Specifically, some float prototypes
+      were incorrectly using double as their ctype. This didn't actually
+      matter until the type changes in 645d771, as previously those types
+      were not used since packm was prototyped with void* pointers.
+
+commit 8ebb3b60e1c4c045ddb48e02de6e246cecde24a4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 12 17:00:47 2020 -0500
+
+    Fixed accidental breakage in 645d771.
+    
+    Details:
+    - In trying to clean up kappa_cast variables in the reference packm
+      kernels, which I initally believed to be redundant given the other
+      void* -> ctype* changes in 645d771, I accidentally ended up violating
+      restrict semantics for 1e/1r packing and possibly other packm kernels.
+      (Normally, my pre-commit testsuite run would have caught this, but I
+      was unknowingly using an edited input.operations file in which I'd
+      disabled most tests as part of unrelated work.) This commit reverts
+      the kappa_cast changes in 645d771.
+
+commit 645d771a14ae89aa7131d6f8f4f4a8090329d05e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Sep 12 15:31:56 2020 -0500
+
+    Minor packm kernel type cleanup (void* -> ctype*).
+    
+    Details:
+    - Changed all void* function arguments in reference packm kernels to
+      those of the native type (ctype*). These pointers no longer need to
+      be void* and are better represented by their native types anyway.
+      (See below for details.) Updated knl packm kernels accordingly.
+    - In the definition of the PACKM_KER_PROT prototype macro template in
+      frame/1m/bli_l1m_ker_prot.h, changed the pointer types for kappa, a,
+      and p from void* to ctype*. They were originally void* because these
+      function signatures had to share the same type so they could all be
+      stored in a single array of that shared type, from which they were
+      queried and called by packm_cxk(). This is no longer how the function
+      pointers are stored, and so it no longer makes sense to force the
+      caller of packm kernels to use void*, only so that the implementor
+      of the packm kernels can typecast back to the native datatype within
+      the kernel definition. This change has no effect internally within
+      BLIS because currently all packm kernels are called after querying
+      the function addresses from the context and then typecasting to the
+      appropriate function pointer type, which is based upon type-specific
+      function pointers like float* and double*.
+    - Removed a comment in frame/1m/bli_l1m_ft_ker.h that was outdated and
+      misleading due to changes to the handling of packm kernels since
+      moving them into the context.
+
+commit 54bf6c35542a297e25bc8efec6067a6df80536f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 10 15:42:01 2020 -0500
+
+    Minor README.md update.
+    
+    Details:
+    - Added a new entry to the "What people are saying about BLIS" section.
+
+commit e50b4d40462714ae33df284655a2faf7fa35f37c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 9 14:12:53 2020 -0500
+
+    Minor update to README.md (SIAM Best Paper Prize).
+
+commit a8efb72074691e2610372108becd88b4b392299e
+Merge: b0c4da17 97e87f2c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Sep 7 16:18:19 2020 -0500
+
+    Merge pull request #434 from flame/intel-zdot
+    
+    Add an option to change the complex return type.
+
+commit 97e87f2c9f3878a05e1b7c6ec237ee88d9a72a42
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 7 15:56:42 2020 -0500
+
+    Whitespace/comment updates to #434 PR.
+
+commit b0c4da1732b6c6a9ff66f70c36e4722e0f9645ae
+Merge: 810e90ee b1b5870d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Sep 7 15:47:54 2020 -0500
+
+    Merge pull request #436 from flame/s390x
+    
+    Add checks so that s390x is detected as 64-bit.
+
+commit 810e90ee806510c57504f0cf8eeaf608d38bd9dd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 1 16:11:40 2020 -0500
+
+    Minor README.md update.
+    
+    Details:
+    - Added HPE to list of funders.
+    - Changed http to https in funders' website links.
+
+commit 7d411282196e036991c26e52cb5e5f85769c8059
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 13 17:50:58 2020 -0500
+
+    Use -O2 for all framework code. (#435)
+    
+    It seems that -O3 might be causing intermittent problems with the f2c'ed packed and banded code. -O3 is retained for kernel code. Fixes #341 and fixes #342.
+
+commit 9c5b485d356367b0a1288761cd623f52036e7344
+Author: Dave Love <dave.love@manchester.ac.uk>
+Date:   Fri Aug 7 20:11:18 2020 +0000
+
+    Don't override -mcpu with -march on ARM (#353)
+    
+    * Use -mcpu for ARM
+    See the GCC doc about -march, -mtune, and -mpu and maybe
+    https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/compiler-flags-across-architectures-march-mtune-and-mcpu
+    
+    * Fix typo in flags
+    
+    * Fix typo in cortexa9 flags
+    
+    * Modify cortexa53 compilation flags to fix failing BLAS check (#341)
+
+commit c253d14a72a746b670b3ffbb6e81bcafc73d1133
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Aug 7 09:39:04 2020 -0500
+
+    Also handle Intel-style complex return in CBLAS interface.
+
+commit 5d653a11a0cc71305d0995507b1733995856f475
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 6 17:58:26 2020 -0500
+
+    Update Multithreading.md
+    
+    Addresses the issue raised in #426.
+
+commit b1b5870dd3f9b1c78cf5f58a53514d73f001fc4c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 6 17:34:20 2020 -0500
+
+    Add checks so that s390x is detected as 64-bit.
+
+commit 882dcb11bfc9ea50aa2f9044621833efd90d42be
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 6 17:28:14 2020 -0500
+
+    Mention example code at top of documentation docs.
+    
+    Details:
+    - Steer the reader towards the example code section of each
+      documentation doc (object and typed).
+    - Trivial update to examples/oapi/README, examples/tapi/README.
+
+commit f4894512e5bf56ff83701c07dd02972e300741a5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 6 17:20:00 2020 -0500
+
+    Very minor updates to previous commit.
+
+commit adedb893ae8dfacd1dc54035979e15c44d589dbb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 6 17:14:01 2020 -0500
+
+    Documented mutator functions in BLISObjectAPI.md.
+    
+    Details:
+    - Added documentation for commonly-used object mutator functions in
+      BLISObjectAPI.md. Previously, only accessor functions were documented.
+      Thanks to Jeff Diamond for pointing out this omission.
+    - Explicitly set the 'diag' property of objects in oapi example modules
+      (08level2.c and 09level3.c).
+
+commit 5b5278ff494888509543a79c09ea82089f6c95d9
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 6 14:19:37 2020 -0500
+
+    Use #ifdef instead of #if as macro may be undefined.
+
+commit 7fdc0fc893d0c6727b725ea842053b65be2c20ba
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 6 14:03:55 2020 -0500
+
+    Add an option to change the complex return type.
+    
+    ifort apparently does not return complex numbers in registers as in C/C++ (or gfortran), but instead creates a "hidden" first parameter for the return value. The option --complex-return=gnu|intel has been added, as well as a guess based on a provided FC if not specified (otherwise default to gnu). This option affects the signatures of cdotc, cdotu, zdotc, and zdotu, and a single library cannot be used with both GNU and Intel Fortran compilers. Fixes #433.
+
+commit 6e522e5823b762d4be09b6acdca30faafba56758
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jul 30 19:31:37 2020 -0500
+
+    Mention disabling of sup in docs/Sandboxes.md.
+    
+    Details:
+    - Added language to remind the reader to disable sup if the intended
+      behavior is for the sandbox implementation to handle all problem
+      sizes, even the smaller ones that would normally be handled by the
+      sup code path.
+
+commit 00e14cb6d849e963a2e1ac35e7dbbe186af00a58
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 29 14:24:34 2020 -0500
+
+    Replaced use of bool_t type with C99 bool.
+    
+    Details:
+    - Textually replaced nearly all non-comment instances of bool_t with the
+      C99 bool type. A few remaining instances, such as those in the files
+      bli_herk_x_ker_var2.c, bli_trmm_xx_ker_var2.c, and
+      bli_trsm_xx_ker_var2.c, were promoted to dim_t since they were being
+      used not for boolean purposes but to index into an array.
+    - This commit constitutes the third phase of a transition toward using
+      C99's bool instead of bool_t, which was raised in issue #420. The first
+      phase, which cleaned up various typecasts in preparation for using
+      bool as the basis for bool_t (instead of gint_t), was implemented by
+      commit a69a4d7. The second phase, which redefined the bool_t typedef
+      in terms of bool (from gint_t), was implemented by commit 2c554c2.
+
+commit 2c554c2fce885f965a425e727a0314d3ba66c06d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 24 15:57:19 2020 -0500
+
+    Redefined bool_t typedef in terms of C99 bool.
+    
+    Details:
+    - Changed the typedef that defines bool_t from:
+    
+        typedef gint_t bool_t;
+    
+      where gint_t is a signed integer that forms the basis of most other
+      integers in BLIS, to:
+    
+        typedef bool bool_t;
+    
+    - Changed BLIS's TRUE and FALSE macro definitions from being in terms of
+      integer literals:
+    
+        #define TRUE  1
+        #define FALSE 0
+    
+      to being in terms of C99 boolean constants:
+    
+        #define TRUE  true
+        #define FALSE false
+    
+      which are provided by stdbool.h.
+    - This commit constitutes the second phase of a transition toward using
+      C99's bool instead of bool_t, which will address issue #420. The first
+      phase, which cleaned up various typecasts in preparation for using
+      bool as the basis for bool_t (instead of gint_t), was implemented by
+      commit a69a4d7.
+
+commit e01dd125581cec87f61e15590922de0dc938ec42
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 24 15:41:46 2020 -0500
+
+    Fail-safe updates to Makefiles in 'test' dir.
+    
+    Details:
+    - Updated Makefiles in test, test/3, and test/sup so that running any of
+      the usual targets without having first built BLIS results in a helpful
+      error message. For example, if BLIS is not yet configured, make will
+      output:
+    
+        Makefile:327: *** Cannot proceed: config.mk not detected! Run
+        configure first.  Stop.
+    
+      Similarly, if BLIS is configured but not yet built, make will output:
+    
+        Makefile:340: *** Cannot proceed: BLIS library not yet built! Run
+        make first.  Stop.
+    
+      In previous commits, these actions would result in a rather cryptic
+      make error such as:
+    
+        make: *** No rule to make target 'test_sgemm_2400_asm_blis_st.x',
+        needed by 'blis-nat-st'.  Stop.
+
+commit b4f47f7540062da3463e2cb91083c12fdda0d30a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jul 24 13:56:13 2020 -0500
+
+    Add BLIS_EXPORT_BLIS to bli_abort. (#429)
+    
+    Fixes #428.
+
+commit a69a4d7e2f4607c919db30b14535234ce169c789
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 22 16:13:09 2020 -0500
+
+    Cleaned up bool_t usage and various typecasts.
+    
+    Details:
+    - Fixed various typecasts in
+    
+        frame/base/bli_cntx.h
+        frame/base/bli_mbool.h
+        frame/base/bli_rntm.h
+        frame/include/bli_misc_macro_defs.h
+        frame/include/bli_obj_macro_defs.h
+        frame/include/bli_param_macro_defs.h
+    
+      that were missing or being done improperly/incompletely. For example,
+      many return values were being typecast as
+        (bool_t)x && y
+      rather than
+        (bool_t)(x && y)
+      Thankfully, none of these deficiencies had manifested as actual bugs
+      at the time of this commit.
+    - Changed the return type of bli_env_get_var() from dim_t to gint_t.
+      This reflects the fact that bli_env_get_var() needs to be able to
+      return a signed integer, and even though dim_t is currently defined
+      as a signed integer, it does not intuitively appear to necessarily be
+      signed by inspection (i.e., an integer named "dim_t" for matrix
+      "dimension"). Also, updated use of bli_env_get_var() within
+      bli_pack.c to reflect the changed return type.
+    - Redefined type of thrcomm_t.barrier_sense field from bool_t to gint_t
+      and added comments to the bli_thrcomm_*.h files that will explain a
+      planned replacement of bool_t with C99's bool type.
+    - Note: These changes are being made to facilitate the substitution of
+      'bool' for 'bool_t', which will eliminate the namespace conflict with
+      arm_sve.h as reported in issue #420. This commit implements the first
+      phase of that transition. Thanks to RuQing Xu for reporting this
+      issue.
+    - CREDITS file update.
+
+commit a6437a5c11d364c6c88af527294d29734d7cc7d6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jul 20 19:21:07 2020 -0500
+
+    Replaced broken ref99 sandbox w/ simpler version.
+    
+    Details:
+    - The 'ref99' sandbox was broken by multiple refactorings and internal
+      API changes over the last two years. Rather than try to fix it, I've
+      replaced it with a much simpler version based on var2 of gemmsup.
+      Why not fix the previous implementation? It occurred to me that the
+      old implementation was trying to be a lightly simplified duplication
+      of what exists in the framework. Duplication aside, this sandbox
+      would have worked fine if it had been completely independent of the
+      framework code. The problem was that it was only partially
+      independent, with many function calls calling a function in BLIS
+      rather than a duplicated/simplified version within the sandbox. (And
+      the reason I didn't make it fully independent to begin with was that
+      it seemed unnecessarily duplicative at the time.) Maintaining two
+      versions of the same implementation is problematic for obvious
+      reasons, especially when it wasn't even done properly to begin with.
+      This explains the reimplementation in this commit. The only catch is
+      that the newer implementation is single-threaded only and does not
+      perform any packing on either input matrix (A or B). Basically, it's
+      only meant to be a simple placeholder that shows how you could plug
+      in your own implementation. Thanks to Francisco Igual for reporting
+      this brokenness.
+    - Updated the three reference gemmsup kernels (defined in
+      ref_kernels/3/bli_gemmsup_ref.c) so that they properly handle
+      conjugation of conja and/or conjb. The general storage kernel, which
+      is currently identical to the column-storage kernel, is used in the
+      new ref99 sandbox to provide basic support for all datatypes
+      (including scomplex and dcomplex).
+    - Minor updates to docs/Sandboxes.md, including adding the threading
+      and packing limitations to the Caveats section.
+    - Fixed a comment typo in bli_l3_sup_var1n2m.c (upon which the new
+      sandbox implementation is based).
+
+commit bca040be9da542dd9c75d91890fa7731841d733d
+Merge: 2605eb4d 171ecc1d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jul 20 09:27:30 2020 -0500
+
+    Merge pull request #425 from gmargari/patch-1
+    
+    Update Multithreading.md
+
+commit 171ecc1dc6f055ea39da30e508f711b49a734359
+Author: Giorgos Margaritis <gmargari@protonmail.com>
+Date:   Mon Jul 20 12:24:06 2020 +0300
+
+    Update Multithreading.md
+
+commit 2605eb4d99d3813c37a624c011aa2459324a6d89
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 15 15:25:19 2020 -0500
+
+    Added missing rv_d?x6 edge cases to sup kernel.
+    
+    Details:
+    - Added support to bli_gemmsup_rv_haswell_asm_d6x8n.c for handling
+      various n = 6 edge cases with a single sup kernel call. Previously,
+      only n = {4,2,1} were handled explicitly as single kernel calls;
+      that is, cases where n = 6 were previously being executed via two
+      kernel calls (n = 4 and n = 2).
+    - Added commented debug line to testsuite's test_libblis.c.
+
+commit 72f6ed0637dfcb021de04ac7d214d5c87e55d799
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 3 17:55:54 2020 -0500
+
+    Declare/define static functions via BLIS_INLINE.
+    
+    Details:
+    - Updated all static function definitions to use the cpp macro
+      BLIS_INLINE instead of the static keyword. This allows blis.h to
+      use a different keyword (inline) to define these functions when
+      compiling with C++, which might otherwise trigger "defined but
+      not used" warning messages. Thanks to Giorgos Margaritis for
+      reporting this issue and Devin Matthews for suggesting the fix.
+    - Updated the following files, which are used by configure's
+      hardware auto-detection facility, to unconditionally #define
+      BLIS_INLINE to the static keyword (since we know BLIS will be
+      compiled with C, not C++):
+        build/detect/config/config_detect.c
+        frame/base/bli_arch.c
+        frame/base/bli_cpuid.c
+    - CREDITS file update.
+
+commit 5fc701ac5f94c6300febbb2f24e731aa34f0f34a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 1 15:48:58 2020 -0500
+
+    Added -fomit-frame-pointer option to CKOPTFLAGS.
+    
+    Details:
+    - Added the -fomit-frame-pointer compiler option to the CKOPTFLAGS
+      variable in the following make_defs.mk files:
+        config/haswell/make_defs.mk
+        config/skx/make_defs.mk
+      as well as comments that mention why the compiler option is needed.
+      This option is needed to prevent the compiler from using the rbp
+      frame register (in the very early portion of kernel code, typically
+      where k_iter and k_left are defined and computed), which, as of
+      1c719c9, is used explicitly by the gemmsup millikernels. Thanks to
+      Devin Matthews for identifying this missing option and to Jeff
+      Diamond for reporting the original bug in #417.
+    - The file
+        config/zen/amd_config.mk
+      which feeds into the make_defs.mk for both zen and zen2 subconfigs,
+      was also touched, but only to add a commented-out compiler option
+      (and the aforementioned explanatory comment) since that file already
+      uses -fomit-frame-pointer in COPTFLAGS, which forms the basis of
+      CKOPTFLAGS.
+
+commit 6af59b705782dada47e45df6634b479fe781d4fe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jul 1 14:54:23 2020 -0500
+
+    Fixed disabled edge case optimization in gemmsup.
+    
+    Details:
+    - Fixed an inadvertently disabled edge case optimization in the two
+      gemmsup variants in bli_l3_sup_var1n2m.c. Background: These edge case
+      optimizations allow the last millikernel operation in the jr loop to
+      be executed with inflated an register blocksize if it is the last
+      (or only) iteration. For example, if mr=6 and nr=8 and the gemmsup
+      problem is m=8, n=100, k=100. (In this case, the panel-block variant
+      (var1n) is executed, which places the jr loop in the m dimension.)
+      In principle, this problem could be executed as two millikernels: one
+      with dimensions 6x100x100, and one as 2x100x100. However, with the
+      support for inflated blocksizes in the kernel, the entire 8x100x100
+      problem can be passed to the millikernel function, which will then
+      execute it more favorably as two 4x100x100 millikernel sub-calls.
+      Now, this optimization is disabled under certain circumstances, such
+      as when multithreading. Previously, the is_mt predicate was being set
+      incorrectly such that it was non-zero even when running
+      single-threaded.
+    - Upon fixing the is_mt issue above, another bit of code needed to be
+      moved so that the result of the optimization could have an impact on
+      the assignment of loop bounds ranges to threads.
+
+commit b37634540fab0f9b8d4751b8356ee2e17c9e3b00
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 25 16:05:12 2020 -0500
+
+    Support ldims, packing in sup/test drivers.
+    
+    Details:
+    - Updated the test/sup source file (test_gemm.c) and Makefile to support
+      building matrices with small or large leading dimensions, and updated
+      runme.sh to support executing both kinds of test drivers.
+    - Updated runme.sh to allow for executing sup drivers with unpacked (the
+      default) or packed matrices (via setting BLIS_PACK_A, BLIS_PACK_B
+      environment variables), and for capturing output to files that encode
+      both the leading dimension (small or large) and packing status into
+      the filenames.
+    - Consolidated octave scripts in test/sup/octave_st, test/sup/octave_mt
+      into test/sup/octave and updated the octave code in that consolidated
+      directory to read the new output filename format (encoding ldim and
+      packing). Also added comments and streamlined code, particularly in
+      plot_panel_trxsh.m. Tested the octave scripts with octave 5.2.0.
+    - Moved old octave_st, octave_mt directories to test/sup/old.
+
+commit ceb9b95a96cc3844ecb43d9af48ab289584e76b6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 18 17:15:25 2020 -0500
+
+    Fixed incorrect link to shiftd in BLISTypedAPI.md.
+    
+    Details:
+    - Previously, the entry for shiftd in the Operation index section of
+      BLISTypedAPI.md was incorrectly linking to the shiftd operation entry
+      in BLISObjectAPI.md. This has been fixed. Thanks to Jeff Diamond for
+      helping find this incorrect link.
+
+commit b3c42016818797f79e55b32c8b7d090f9d0aa0ea
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 18 14:00:56 2020 -0500
+
+    CREDITS file update.
+
+commit 31af73c11abae03248d959da0f81eacea015b57a
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Thu Jun 18 13:35:54 2020 -0500
+
+    Expand windows instructions (#414)
+    
+    * Expand windows instructions
+    
+    * Windows: both static and shared don't work at the same time
+
+commit b5b604e106076028279e6d94dc0e51b8ad48e802
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jun 17 16:42:24 2020 -0500
+
+    Ensure random objects' 1-norms are non-zero.
+    
+    Details:
+    - Fixed an innocuous bug that manifested when running the testsuite on
+      extremely small matrices with randomization via the "powers of 2 in
+      narrow precision range" option enabled. When the randomization
+      function emits a perfect 0.0 to fill a 1x1 matrix, the testsuite will
+      then compute 0.0/0.0 during the normalization process, which leads to
+      NaN residuals. The solution entails smarter implementaions of randv,
+      randnv, randm, and randnm, each of which will compute the 1-norm of
+      the vector or matrix in question. If the object has a 1-norm of 0.0,
+      the object is re-randomized until the 1-norm is not 0.0. Thanks to
+      Kiran Varaganti for reporting this issue (#413).
+    - Updated the implementation of randm_unb_var1() so that it loops over
+      a call to the randv_unb_var1() implementation directly rather than
+      calling it indirectly via randv(). This was done to avoid the overhead
+      of multiple calls to norm1v() when randomizing the rows/columns of a
+      matrix.
+    - Updated comments.
+
+commit 35e38fb693e7cbf2f3d7e0505a63b2c05d3f158d
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Tue Jun 16 10:59:41 2020 -0500
+
+    FIx typo in FAQ
+
+commit 1c719c91a3ef0be29a918097652beef35647d4b2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jun 4 17:21:08 2020 -0500
+
+    Bugfixes, cleanup of sup dgemm ukernels.
+    
+    Details:
+    - Fixed a few not-really-bugs:
+      - Previously, the d6x8m kernels were still prefetching the next upanel
+        of A using MR*rs_a instead of ps_a (same for prefetching of next
+        upanel of B in d6x8n kernels using NR*cs_b instead of ps_b). Given
+        that the upanels might be packed, using ps_a or ps_b is the correct
+        way to compute the prefetch address.
+      - Fixed an obscure bug in the rd_d6x8m kernel that, by dumb luck,
+        executed as intended even though it was based on a faulty pointer
+        management. Basically, in the rd_d6x8m kernel, the pointer for B
+        (stored in rdx) was loaded only once, outside of the jj loop, and in
+        the second iteration its new position was calculated by incrementing
+        rdx by the *absolute* offset (four columns), which happened to be the
+        same as the relative offset (also four columns) that was needed. It
+        worked only because that loop only executed twice. A similar issue
+        was fixed in the rd_d6x8n kernels.
+    - Various cleanups and additions, including:
+      - Factored out the loading of rs_c into rdi in rd_d6x8[mn] kernels so
+        that it is loaded only once outside of the loops rather than
+        multiple times inside the loops.
+      - Changed outer loop in rd kernels so that the jump/comparison and
+        loop bounds more closely mimic what you'd see in higher-level source
+        code. That is, something like:
+          for( i = 0; i < 6; i+=3 )
+        rather than something like:
+          for( i = 0; i <= 3; i+=3 )
+      - Switched row-based IO to use byte offsets instead of byte column
+        strides (e.g. via rsi register), which were known to be 8 anyway
+        since otherwise that conditional branch wouldn't have executed.
+      - Cleaned up and homogenized prefetching a bit.
+      - Updated the comments that show the before and after of the
+        in-register transpositions.
+      - Added comments to column-based IO cases to indicate which columns
+        are being accessed/updated.
+      - Added rbp register to clobber lists.
+      - Removed some dead (commented out) code.
+      - Fixed some copy-paste typos in comments in the rv_6x8n kernels.
+      - Cleaned up whitespace (including leading ws -> tabs).
+      - Moved edge case (non-milli) kernels to their own directory, d6x8,
+        and split them into separate files based on the "NR" value of the
+        kernels (Mx8, Mx4, Mx2, etc.).
+      - Moved config-specific reference Mx1 kernels into their own file
+        (e.g. bli_gemmsup_r_haswell_ref_dMx1.c) inside the d6x8 directory.
+      - Added rd_dMx1 assembly kernels, which seems marginally faster than
+        the corresponding reference kernels.
+      - Updated comments in ref_kernels/bli_cntx_ref.c and changed to using
+        the row-oriented reference kernels for all storage combos.
+
+commit 943a21def0bedc1732c0a2453afe7c90d7f62e95
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Thu May 21 14:09:21 2020 -0500
+
+    Add build instructions for Windows (#404)
+
+commit fbef422f0d968df10e598668b427af230cfe07e8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 21 10:30:41 2020 -0500
+
+    Separate OS X and Windows into separate FAQs.
+    
+    Details:
+    - Separated the unified Mac OS X / Windows frequently asked question
+      into two separate questions, one for each OS.
+
+commit 28be1a4265ea67e3f177c391aba3dbbcf840bd52
+Author: Guodong Xu <guodong.xu@linaro.org>
+Date:   Thu May 21 02:22:22 2020 +0800
+
+    avoid loading twice in armv8a gemm kernel (#403)
+    
+    This bug happens at a corner case, when k_iter == 0 and we jump to
+    CONSIDERKLEFT.
+    
+    In current design, first row/col. of a and b are loaded twice.
+    
+    The fix is to rearrange a and b (first row/col.) loading instructions.
+    
+    Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+
+commit d51245e58b0beff2717156b980007c90337150d8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 8 18:00:54 2020 -0500
+
+    Add support for Intel oneAPI in configure.
+    
+    Details:
+    - Properly select cc_vendor based on the output of invoking CC with the
+      --version option, including cases where CC is the variant of clang
+      that is included with Intel oneAPI. (However, we continue to treat
+      the compiler as clang for other purposes, not icc.) Thanks to Ajay
+      Panyala and Devin Matthews for reporting on this issue via #402.
+
+commit 787adad73bd5eb65c12c39d732723a1ac0448748
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 8 16:18:20 2020 -0500
+
+    Defined netlib equivalent of xerbla_array().
+    
+    Details:
+    - Added a function definition for xerbla_array_(), which largely mirrors
+      its netlib implementation. Thanks to Isuru Fernando for suggesting the
+      addition of this function.
+
+commit c53b5153bee585685bf95ce22e058a7af72ecef0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 5 12:39:12 2020 -0500
+
+    Documented Perl prerequisite for build system.
+    
+    Details:
+    - Added Perl to list of prerequisites for building BLIS. This is in part
+      (and perhaps completely?) due to some substitution commands used at
+      the end of configure that include '\n' characters that are not
+      properly interpreted by the version of sed included on some versions
+      of OS X. This new documentation addresses issue #398.
+
+commit f032d5d4a6ed34c8c3e5ba1ed0b14d1956d0097c
+Author: Guodong Xu <guodong.xu@linaro.org>
+Date:   Thu Apr 30 01:08:46 2020 +0800
+
+    New kernel set for Arm SVE using assembly (#396)
+    
+    Here adds two kernels for Arm SVE vector extensions.
+    1. a gemm  kernel for double at sizes 8x8.
+    2. a packm kernel for double at dimension 8xk.
+    
+    To achive best performance, variable length agonostic programming
+    is not used. Vector length (VL) of 256 bits is mandated in both kernels.
+    Kernels to support other VLs can be added later.
+    
+    "SVE is a vector extension for AArch64 execution mode for the A64
+    instruction set of the Armv8 architecture. Unlike other SIMD architectures,
+    SVE does not define the size of the vector registers, but constrains into
+    a range of possible values, from a minimum of 128 bits up to a maximum of
+    2048 in 128-bit wide units. Therefore, any CPU vendor can implement the
+    extension by choosing the vector register size that better suits the
+    workloads the CPU is targeting. Instructions are provided specifically
+    to query an implementation for its register size, to guarantee that
+    the applications can run on different implementations of the ISA without
+    the need to recompile the code."  [1]
+    
+    [1] https://developer.arm.com/solutions/hpc/resources/hpc-white-papers/arm-scalable-vector-extensions-and-application-to-machine-learning
+    
+    Signed-off-by: Guodong Xu <guodong.xu@linaro.org>
+
+commit 4d87eb24e8e1f5a21e04586f6df4f427bae0091b
+Author: Yingbo Ma <mayingbo5@gmail.com>
+Date:   Mon Apr 27 17:02:47 2020 -0400
+
+    Update KernelsHowTo.md (#395)
+
+commit 477ce91c5281df2bbfaddc4d86312fb8c8f879e2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 22 14:26:49 2020 -0500
+
+    Moved #include "cpuid.h" to bli_cpuid.c.
+    
+    Details:
+    - Relocated the #include "cpuid.h" directive from bli_cpuid.h to
+      bli_cpuid.c. This was done because cpuid.h (which is pulled into
+      the post-build blis.h developer header) doesn't protect its
+      definitions with a preprocessor guard of the form:
+    
+        #ifndef FOOBAR_H
+        #define FOOBAR_H
+        // header contents.
+        #endif
+    
+      and as a result, applications (previously) could not #include both
+      blis.h and cpuid.h (since the former was already including the
+      latter). Thanks to Bhaskar Nallani for raising this issue via #393
+      and to Devin Matthews for suggesting this fix.
+    - CREDITS file update.
+
+commit 8bde63ffd7474a97c3a3b0b0dc1eae45be0ab889
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Apr 18 12:50:12 2020 -0500
+
+    Adding missing conjy to her2/syr2 in typed API doc.
+    
+    Details:
+    - Fixed a missing argument (conjy) in the function signatures of
+      bli_?her2() and bli_?syr2() in docs/BLISTypedAPI.md. Thanks to Robert
+      van de Geijn for reporting this omission.
+
+commit 976902406b610afdbacb2d80a7a2b4b43ff30321
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 17 15:11:10 2020 -0500
+
+    Disable packing by default in expert rntm_t init.
+    
+    Details:
+    - Changed the behavior of bli_rntm_init() as well as the static
+      initializer, BLIS_RNTM_INITIALIZER, so that user-initialized rntm_t
+      objects by default specify the disabling of packing for A and B.
+      Packing of A/B was already disabled by default when calling non-expert
+      APIs (and enabled only when the user set environment variables
+      BLIS_PACK_A or BLIS_PACK_B). With this commit, the default behavior of
+      using user-initialized rntm_t objects with expert APIs comes into line
+      with the default behavior of non-expert APIs--that is, they now both
+      lead to the avoidance of packing in the sup code path. (Note: The
+      conventional code path is unaffected by the environment variables
+      BLIS_PACK_A/BLIS_PACK_B and/or the disabling of packing in a rntm_t
+      object when calling an expert API.) This addresses issue #392. Thanks
+      to Kiran Varaganti for bringing this inconsistency to our attention.
+    - The above change was accomplished by changing the the definitions of
+      static functions bli_rntm_clear_pack_a() and bli_rntm_clear_pack_b()
+      in bli_rntm.h, which are both for internal use only.
+
+commit 5f2aee7c5fa5d562acaf8fbde3df0e2a04e1dd1b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 7 14:55:15 2020 -0500
+
+    README.md update to promote supmt dgemm.
+    
+    Details:
+    - Updated the sup entry in the "What's New" section of the README.md
+      file to promote the multithreaded dgemm sup feature introduced in
+      c0558fd.
+
+commit f5923cd9ff5fbd91190277dea8e52027174a1d57
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 7 14:41:45 2020 -0500
+
+    CHANGELOG update (0.7.0)
+
+commit 68b88aca6692c75a9f686187e6c4a4e196ae60a9 (tag: 0.7.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Tue Apr 7 14:41:44 2020 -0500
 
@@ -13,7 +1161,7 @@ Date:   Tue Apr 7 14:37:43 2020 -0500
     Details:
     - Updated docs/ReleaseNotes.md in preparation for next version.
 
-commit 2cb604ba472049ad498df72d4a2dc47a161d4c3c (origin/master, origin/dev, origin/amd, origin/HEAD, dev, amd)
+commit 2cb604ba472049ad498df72d4a2dc47a161d4c3c
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Apr 6 16:42:14 2020 -0500
 

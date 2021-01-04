@@ -2828,7 +2828,6 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)
@@ -2845,7 +2844,6 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)
@@ -2862,7 +2860,6 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)
@@ -2879,7 +2876,6 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	add(r10, rbx)                      // b += rs_b;
 
 	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)
@@ -2914,7 +2910,6 @@ void bli_dgemmsup_rv_haswell_asm_1x6
 	add(r10, rbx)                      // b += rs_b;
 	
 	vbroadcastsd(mem(rax        ), ymm2)
-	vbroadcastsd(mem(rax, r8,  1), ymm3)
 	add(r9, rax)                       // a += cs_a;
 	vfmadd231pd(ymm0, ymm2, ymm4)
 	vfmadd231pd(ymm1, ymm2, ymm5)

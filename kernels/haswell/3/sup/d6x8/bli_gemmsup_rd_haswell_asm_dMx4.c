@@ -1297,7 +1297,6 @@ void bli_dgemmsup_rd_haswell_asm_1x4
 	                                   // which would destory intermediate results.
 	
 	vmovsd(mem(rax       ), xmm0)
-	vmovsd(mem(rax, r8, 1), xmm1)
 	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
 	
 	vmovsd(mem(rbx        ), xmm3)

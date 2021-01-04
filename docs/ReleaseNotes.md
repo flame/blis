@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.8.0](ReleaseNotes.md#changes-in-080)
 * [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
 * [Changes in 0.6.1](ReleaseNotes.md#changes-in-061)
 * [Changes in 0.6.0](ReleaseNotes.md#changes-in-060)
@@ -36,6 +37,64 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.8.0
+November 19, 2020
+
+Improvements present in 0.8.0:
+
+Framework:
+- Implemented support for the level-3 operation `gemmt`, which performs a `gemm` on only the lower or only the upper triangle of a square matrix C. For now, only the conventional/large code path (and not the sup code path) is provided. This support also includes `gemmt` APIs in the BLAS and CBLAS compatibility layers. (AMD)
+- Added a C++ template header, `blis.hh`, containing a BLAS-inspired wrapper to a set of polymorphic CBLAS-like function wrappers defined in another header, `cblas.hh`. These headers are installed only when running the `install` target with `INSTALL_HH` set to `yes`. (AMD)
+- Disallow `randv`, `randm`, `randnv`, and `randnm` from producing vectors and matrices with 1-norms of zero.
+- Changed the behavior of user-initialized `rntm_t` objects so that packing of A and B is disabled by default. (Kiran Varaganti)
+- Transitioned to using `bool` keyword instead of the previous integer-based `bool_t` typedef. (RuQing Xu)
+- Updated all inline function definitions to use the cpp macro `BLIS_INLINE` instead of the `static` keyword. (Giorgos Margaritis, Devin Matthews)
+- Relocated `#include "cpuid.h"` directive from `bli_cpuid.h` to `bli_cpuid.c` so that applications can `#include` both `blis.h` and `cpuid.h`. (Bhaskar Nallani, Devin Matthews)
+- Defined `xerbla_array_()` to complement the netlib routine `xerbla_array()`. (Isuru Fernando)
+- Replaced the previously broken `ref99` sandbox with a simpler, functioning alternative. (Francisco Igual)
+- Fixed a harmless bug whereby `herk` was calling `trmm`-related code for determining the blocksize of KC in the 4th loop.
+
+Kernels:
+- Implemented a full set of `sgemmsup` assembly millikernels and microkernels for `haswell` kernel set.
+- Implemented POWER10 `sgemm` and `dgemm` microkernels. (Nicholai Tukanov)
+- Added two kernels (`dgemm` and `dpackm`) that employ ARM SVE vector extensions. (Guodong Xu)
+- Implemented explicit beta = 0 handling in the `sgemm` microkernel in `bli_gemm_armv7a_int_d4x4.c`. This omission was causing testsuite failures in the new `gemmt` testsuite module for `cortexa15` builds given that the `gemmt` correctness check relies on `gemm` with beta = 0.
+- Updated `void*` function arguments in reference `packm` kernels to use the native pointer type, and fixed a related dormant type bug in `bli_kernels_knl.h`.
+- Fixed missing `restrict` qualifier in `sgemm` microkernel prototype for `knl` kernel set header.
+- Added some missing n = 6 edge cases to `dgemmsup` kernels.
+- Fixed an erroneously disabled edge case optimization in `gemmsup` variant code.
+- Various bugfixes and cleanups to `dgemmsup` kernels.
+
+Build system:
+- Implemented runtime subconfiguration selection override via `BLIS_ARCH_TYPE`. (decandia50)
+- Output the python found during `configure` into the `PYTHON` variable set in `build/config.mk`. (AMD)
+- Added configure support for Intel oneAPI via the `CC` environment variable. (Ajay Panyala, Devin Matthews)
+- Use `-O2` for all framework code, potentially avoiding intermitten issues with `f2c`'ed packed and banded code. (Devin Matthews)
+- Tweaked `zen2` subconfiguration's cache blocksizes and registered full suite of `sgemm` and `dgemm` millikernels.
+- Use the `-fomit-frame-pointer` compiler optimization option in the `haswell` and `skx` subconfigurations. (Jeff Diamond, Devin Matthews)
+- Tweaked Makefiles in `test`, `test/3`, and `test/sup` so that running any of the usual targets without having first built BLIS results in a helpful error message.
+- Add support for `--complex-return=[gnu|intel]` to `configure`, which allows the user to toggle between the GNU and Intel return value conventions for functions such as `cdotc`, `cdotu`, `zdotc`, and `zdotu`.
+- Updates to `cortexa9`, `cortexa53` compilation flags. (Dave Love)
+
+Testing:
+- Added a `gemmt` module to the testsuite and a standalone test driver to the `test` directory, both of which exercise the new `gemmt` functionality. (AMD)
+- Support creating matrices with small or large leading dimensions in `test/sup` test drivers.
+- Support executing `test/sup` drivers with unpacked or packed matrices.
+- Added optional `numactl` usage to `test/3/runme.sh`.
+- Updated and/or consolidated octave scripts in `test/3` and `test/sup`.
+- Increased `dotxaxpyf` testsuite thresholds to avoid false `MARGINAL` results during normal execution. (nagsingh)
+
+Documentation:
+- Added Epyc 7742 Zen2 ("Rome") performance results (single- and multithreaded) to `Performance.md` and `PerformanceSmall.md`. (Jeff Diamond)
+- Documented `gemmt` APIs in `BLISObjectAPI.md` and `BLISTypedAPI.md`. (AMD)
+- Documented commonly-used object mutator functions in `BLISObjectAPI.md`. (Jeff Diamond)
+- Relocated the operation indices of `BLISObjectAPI.md` and `BLISTypedAPI.md` to appear immediately after their respective tables of contents. (Jeff Diamond)
+- Added missing perl prerequisite to `BuildSystem.md`. (pkubaj, Dilyn Corner)
+- Fixed missing `conjy` parameter in `BLISTypedAPI.md` documentation for `her2` and `syr2`. (Robert van de Geijn)
+- Fixed incorrect link to `shiftd` in `BLISTypedAPI.md`. (Jeff Diamond)
+- Mention example code at the top of `BLISObjectAPI.md` and `BLISTypedAPI.md`.
+- Minor updates to `README.md`, `FAQ.md`, `Multithreading.md`, and `Sandboxes.md` documents.
 
 ## Changes in 0.7.0
 April 7, 2020

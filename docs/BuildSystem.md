@@ -28,6 +28,7 @@ The BLIS build system was designed for use with GNU/Linux (or some other sane UN
   * GNU `make` (3.81 or later)
   * a working C99 compiler
   * Perl (any version)
+  * `git` (1.8.5 or later, only required if cloning from Github)
 
 BLIS also requires a POSIX threads library at link-time (`-lpthread` or `libpthread.so`). This requirement holds even when configuring BLIS with multithreading disabled (the default) or with multithreading via OpenMP (`--enable-multithreading=openmp`). (Note: BLIS implements basic pthreads functionality automatically for Windows builds via [AppVeyor](https://ci.appveyor.com/project/shpc/blis/).)
 
