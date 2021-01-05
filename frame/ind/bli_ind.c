@@ -58,10 +58,7 @@ void bli_ind_init( void )
 	// - the complex domain kernel is the (unoptimized) reference kernel
 	// - the real domain kernel is NOT the (unoptimized) reference kernel
 	// The second condition means that BLIS will not bother to use an induced
-	// method if the real domain kernel upon which that induced method would
-	// rely is unoptimized. (There is no point in using an induced method based
-	// on a reference real domain kernel when we can use the reference complex
-	// domain kernel instead.)
+	// method if both the real and complex domain kernels are reference.
 
 	bool s_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx );
 	bool d_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx );
