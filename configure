@@ -1756,13 +1756,13 @@ set_default_version()
 			echo "${script_name}: using string from unmodified version file."
 
 			# Use what's in the version file as-is.
-			version=$(cat "${version_file}")
+			version="AOCL BLIS $(cat "${version_file}")"
 		else
 
 			echo "${script_name}: got back ${git_describe_str}."
 
 			# Strip off the commit hash label.
-			new_version_str=$(echo ${git_describe_str} | cut -d- -f-2)
+			new_version_str=$(echo ${git_describe_str} | cut -d- -f2)
 
 			echo "${script_name}: truncating to ${new_version_str}."
 
@@ -1770,14 +1770,14 @@ set_default_version()
 			#echo "${new_version_str}" > ${version_file}
 
 			# Set the version variable.
-			version="${new_version_str}"
+			version="AOCL BLIS ${new_version_str}"
 		fi
 	else
 
 		echo "${script_name}: could not find '${gitdir}' directory; using unmodified version file."
 
 		# Use what's in the version file as-is.
-		version=$(cat "${version_file}")
+		version="AOCL BLIS $(cat "${version_file}")"
 	fi
 }
 

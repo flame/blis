@@ -1070,7 +1070,7 @@ BLIS_CONFIG_H   := ./bli_config.h
 
 # Define a C preprocessor macro to communicate the current version so that it
 # can be embedded into the library and queried later.
-VERS_DEF       := -DBLIS_VERSION_STRING=\"$(VERSION)\"
+VERS_DEF       := -DBLIS_VERSION_STRING=\""$(VERSION)\""
 
 # Define a C preprocessor flag that is *only* defined when BLIS is being
 # compiled. (In other words, an application that #includes blis.h will not
