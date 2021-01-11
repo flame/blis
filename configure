@@ -2593,11 +2593,11 @@ main()
 
 			reducedclist="${kernel}"
 
-		# Otherwise, use the first name.
+		# Otherwise, use the last name.
 		else
 
-			first_config=${configs%% *}
-			reducedclist="${first_config}"
+			last_config=${configs##* }
+			reducedclist="${last_config}"
 		fi
 
 		# Create a new "kernel:subconfig" pair and add it to the kconfig_map
