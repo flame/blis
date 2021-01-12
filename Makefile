@@ -166,6 +166,7 @@ MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 # Set the path to the subdirectory of the share installation directory.
 MK_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/blis
 
+PC_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/pkgconfig
 
 
 #
@@ -265,6 +266,8 @@ endif
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE)
 
+PC_IN_FILE  := blis.pc.in
+PC_OUT_FILE := blis.pc
 
 
 #
@@ -928,7 +931,7 @@ endif
 
 # --- Install share rules ---
 
-install-share: check-env $(MK_SHARE_DIR_INST)
+install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
 $(MK_SHARE_DIR_INST): $(FRAGS_TO_INSTALL) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -947,6 +950,21 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
+$(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
+	$(MKDIR) $(@)
+ifeq ($(ENABLE_VERBOSE),no)
+	@echo "Installing $(PC_OUT_FILE) into $(@)/"
+endif
+	$(shell cat "$(PC_IN_FILE)" \
+	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@prefix@#$(prefix)#g" \
+	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
+	| sed -e "s#@libdir@#$(libdir)#g" \
+	| sed -e "s#@includedir@#$(includedir)#g" \
+	| sed -e "s#@CFLAGS@#$(CFLAGS)#g" \
+	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
+	> "$(PC_OUT_FILE)" )
+	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
 
 # --- Install library rules ---
 
@@ -1201,6 +1219,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
+	- $(RM_F) $(PC_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
@@ -1209,6 +1228,8 @@ else
 	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)"
 	@- $(RM_F) $(CONFIG_MK_FILE)
+	@echo "Removing $(PC_OUT_FILE)"
+	@- $(RM_F) $(PC_OUT_FILE)
 	@echo "Removing $(OBJ_DIR)"
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)"

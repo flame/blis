@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: BLIS
+Description: BLAS-like Library Instantiation Software Framework
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} @LDFLAGS@
+Cflags: -I${includedir}/blis @CFLAGS@
