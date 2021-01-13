@@ -8,4 +8,4 @@ Description: BLAS-like Library Instantiation Software Framework
 Version: @PACKAGE_VERSION@
 Libs: -L${libdir} -lblis
 Libs.private: @LDFLAGS@
-Cflags: -I${includedir}/blis @CFLAGS@
+Cflags: -I${includedir}/blis

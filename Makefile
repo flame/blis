@@ -961,7 +961,6 @@ endif
 	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
 	| sed -e "s#@libdir@#$(libdir)#g" \
 	| sed -e "s#@includedir@#$(includedir)#g" \
-	| sed -e "s#@CFLAGS@#$(CFLAGS)#g" \
 	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
 	> "$(PC_OUT_FILE)" )
 	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
