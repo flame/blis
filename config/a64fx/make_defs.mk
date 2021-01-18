@@ -61,7 +61,7 @@ COPTFLAGS      := -O3 -ftree-vectorize -march=armv8-a+sve
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := -O0 -march=armv8-a+sve
 CKVECFLAGS     :=
 
 # Flags specific to reference kernels.

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Dept. Physics, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,16 +31,40 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
+#include "blis.h"
 
-GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12 )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12_unindexed )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve512_asm_16x10_unindexed_bg )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve512_asm_10x16_unindexed_bg )
+void bli_dgemmsup_rv_armsve512_asm_10x16_unindexed_bg
+     (
+       conj_t              conja,
+       conj_t              conjb,
+       dim_t               m0t,
+       dim_t               n0t,
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict at, inc_t rs_at0, inc_t cs_at0,
+       double*    restrict bt, inc_t rs_bt0, inc_t cs_bt0,
+       double*    restrict beta,
+       double*    restrict ct, inc_t rs_ct0, inc_t cs_ct0,
+       auxinfo_t* restrict datat,
+       cntx_t*    restrict cntx
+     )
+{
+  auxinfo_t data;
+  bli_auxinfo_set_next_a( bli_auxinfo_next_b( datat ), &data );
+  bli_auxinfo_set_next_b( bli_auxinfo_next_a( datat ), &data );
+  bli_dgemmsup_cv_armsve512_asm_16x10_unindexed_bg
+  (
+    conjb, conja,
+    n0t, m0t, k0,
+    alpha,
+    bt, cs_bt0, rs_bt0,
+    at, cs_at0, rs_at0,
+    beta,
+    ct, cs_ct0, rs_ct0,
+    &data,
+    cntx
+  );
+}
 
-PACKM_KER_PROT( double,   d, packm_armsve256_asm_8xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_12xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
