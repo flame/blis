@@ -151,15 +151,33 @@
 #define DGEMM_2VX10_MKER_LOOP_PREFETCH_CCOL_5X_2(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,ACOLFH,ACOLLH,ADDRC,LDC,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,ADDRB,TDB) \
   DGEMM_2VX10_MKER_LOOP_PREFETCH_CCOL_5X_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,ACOLFH,ACOLLH,ADDRC,LDC,BV2,BV3,BV4,BV5,BV6,BV7,BV0,BV1,ADDRB,TDB)
 
-
 /*
-   o 16x10 double precision supplimentary micro-kernel.
    o This implementation uses unindexed FMLA instructions in its kernel.
    o Runnable on ARMv8a with SVE 512 feature compiled with aarch64 GCC.
+*/
+void bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
+     (
+       uint64_t            conja,
+       uint64_t            conjb,
+       uint64_t            m_loc,
+       uint64_t            k_mker,
+       uint64_t            k_left,
+       double*    restrict alpha,
+       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a,
+       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b,
+       double*    restrict beta,
+       double*    restrict caddr, uint64_t rs_c, uint64_t cs_c,
+       double*             a_next,
+       double*             b_next
+     );
+
+/*
+   o 16x10 double precision supplimentary kernel.
+   o C-wrap around the asm kernel for n-loop.
 
    Jan. 2021.
 */
-void bli_dgemmsup_cv_armsve512_asm_16x10_unindexed_bg
+void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
      (
        conj_t              conja,
        conj_t              conjb,
@@ -219,6 +237,7 @@ void bli_dgemmsup_cv_armsve512_asm_16x10_unindexed_bg
   uint64_t k_left = k0 % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
+  uint64_t rs_a   = 1;
   uint64_t cs_a   = cs_a0;
   uint64_t rs_b   = rs_b0;
   uint64_t cs_b   = cs_b0;
@@ -256,7 +275,39 @@ void bli_dgemmsup_cv_armsve512_asm_16x10_unindexed_bg
 #undef B
 #undef C
 
-__asm__ volatile (
+      bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
+      (
+        conja != BLIS_NO_CONJUGATE,
+        conjb != BLIS_NO_CONJUGATE,
+        m_loc, k_mker, k_left,
+        alpha,
+        aaddr, rs_a, cs_a,
+        baddr, rs_b, cs_b,
+        beta,
+        caddr, rs_c, cs_c,
+        a_next,
+        b_next
+      );
+    }
+
+}
+
+void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
+     (
+       uint64_t            conja,
+       uint64_t            conjb,
+       uint64_t            m_loc,
+       uint64_t            k_mker,
+       uint64_t            k_left,
+       double*    restrict alpha,
+       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a,
+       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b,
+       double*    restrict beta,
+       double*    restrict caddr, uint64_t rs_c, uint64_t cs_c,
+       double*             a_next,
+       double*             b_next
+     )
+{ __asm__ volatile (
 " ldr             x9, %[m_loc]                    \n\t" // Shape M, from input
 "                                                 \n\t" // Shape N is fixed to be 10
 " ldr             x8, %[k_left]                   \n\t" // Shape K to be contracted
@@ -937,8 +988,5 @@ DGEMM_FMLA2(z24,z25,z30,z31,z27) // Column 9
  "z20","z21","z22","z23",
  "z24","z25","z26","z27",
  "z28","z29","z30","z31"
-);
-    }
-
-}
+); }
 

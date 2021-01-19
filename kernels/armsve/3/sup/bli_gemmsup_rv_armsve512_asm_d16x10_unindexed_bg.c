@@ -35,7 +35,7 @@
 */
 #include "blis.h"
 
-void bli_dgemmsup_rv_armsve512_asm_10x16_unindexed_bg
+void bli_dgemmsup_rv_armsve512_10x16_unindexed_bg
      (
        conj_t              conja,
        conj_t              conjb,
@@ -54,7 +54,7 @@ void bli_dgemmsup_rv_armsve512_asm_10x16_unindexed_bg
   auxinfo_t data;
   bli_auxinfo_set_next_a( bli_auxinfo_next_b( datat ), &data );
   bli_auxinfo_set_next_b( bli_auxinfo_next_a( datat ), &data );
-  bli_dgemmsup_cv_armsve512_asm_16x10_unindexed_bg
+  bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   (
     conjb, conja,
     n0t, m0t, k0,
