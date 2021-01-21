@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -95,6 +95,7 @@ SETV_KER_PROT(double,   d, setv_zen_int)
 // axpyf (intrinsics)
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x4 )
 
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )

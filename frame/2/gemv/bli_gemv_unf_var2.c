@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -177,8 +177,8 @@ void bli_dgemv_unf_var2
           NULL
         );
 
-    /* Query the context for the kernel function pointer and fusing factor. */
-    b_fuse = 5;
+    /* Fusing factor. */
+    b_fuse = 4;
 
     for ( i = 0; i < n_iter; i += f )
     {
@@ -189,7 +189,7 @@ void bli_dgemv_unf_var2
         y1 = y + (0  )*incy;
 
         /* y = y + alpha * A1 * x1; */
-        bli_daxpyf_zen_int_5
+        bli_daxpyf_zen_int_16x4
         (
           conja,
           conjx,
