@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -145,6 +145,9 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
 \
+	dim_t       m0_a, n0_a; \
+	dim_t       m0_b, n0_b; \
+\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
@@ -180,6 +183,71 @@ void PASTEF77(ch,blasname) \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
 \
+	if( n0 == 1 ) \
+	{ \
+		if(bli_is_notrans(blis_transa)) \
+		{ \
+			PASTEMAC(ch,gemv_unf_var2)( \
+					BLIS_NO_TRANSPOSE, \
+					bli_extract_conj(blis_transb), \
+					m0, k0, \
+					(ftype*)alpha, \
+					(ftype*)a, rs_a, cs_a,\
+					(ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
+					(ftype*) beta, \
+					c, rs_c, \
+					NULL \
+					); \
+		} \
+		else \
+		{ \
+			PASTEMAC(ch,gemv_unf_var1)( \
+					blis_transa, \
+					bli_extract_conj(blis_transb), \
+					k0, m0, \
+					(ftype*)alpha, \
+					(ftype*)a, rs_a, cs_a, \
+					(ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
+					(ftype*)beta, \
+					c, rs_c, \
+					NULL \
+					); \
+		} \
+		return; \
+	} \
+	else if( m0 == 1 ) \
+	{ \
+		if(bli_is_notrans(blis_transb)) \
+		{ \
+			PASTEMAC(ch,gemv_unf_var1)( \
+					blis_transb, \
+					bli_extract_conj(blis_transa), \
+					n0, k0, \
+					(ftype*)alpha, \
+					(ftype*)b, cs_b, rs_b, \
+					(ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
+					(ftype*)beta, \
+					c, cs_c, \
+					NULL \
+					); \
+		} \
+		else \
+		{ \
+			PASTEMAC(ch,gemv_unf_var2)( \
+					blis_transb, \
+					bli_extract_conj(blis_transa), \
+					k0, n0, \
+					(ftype*)alpha, \
+					(ftype*)b, cs_b, rs_b, \
+					(ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
+					(ftype*)beta, \
+					c, cs_c, \
+					NULL \
+					); \
+		} \
+		return; \
+	} \
+\
 	const num_t dt     = PASTEMAC(ch,type); \
 \
 	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
@@ -187,9 +255,6 @@ void PASTEF77(ch,blasname) \
 	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
 	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
 	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
-\
-	dim_t       m0_a, n0_a; \
-	dim_t       m0_b, n0_b; \
 \
 	bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a ); \
 	bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b ); \
