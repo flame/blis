@@ -172,13 +172,6 @@ void bli_gemm_front
 	  rntm
 	);
 
-#ifdef BLIS_CONFIG_ZEN3
-	// On AMD Zen3 platform we support changing
-	// the blocksize at runtime to get optimial
-	// performance
-	BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c_local);
-#endif
-
 	obj_t* cp    = &c_local;
 	obj_t* betap = beta;
 
