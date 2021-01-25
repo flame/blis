@@ -100,7 +100,6 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 }
 
 INSERT_GENTFUNC_BASIC0( gemm )
-INSERT_GENTFUNC_BASIC0( gemmt )
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, struca ) \
@@ -409,6 +408,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 }
 
 INSERT_GENTFUNC_BASIC0( syr2k )
+INSERT_GENTFUNC_BASIC0( gemmt )
 
 
 #undef  GENTFUNC
