@@ -651,7 +651,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in $(LDFLAGS)
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
@@ -661,7 +661,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	@$(RM_F) $@.in
 else
 	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 endif
 
