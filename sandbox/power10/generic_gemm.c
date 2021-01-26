@@ -52,8 +52,8 @@ void GEMM_PASTEMAC(ch) \
     DTYPE_OUT zero  = 0.0; \
     DTYPE_OUT beta_  = *beta; \
     \
-    DTYPE_IN * restrict btilde_sys = ( DTYPE_IN *) aligned_alloc( PAGE_SIZE, B_align + KC * NC * sizeof( DTYPE_IN ) ); \
-    DTYPE_IN * restrict atilde_sys = ( DTYPE_IN *) aligned_alloc( PAGE_SIZE, A_align + MC * KC * sizeof( DTYPE_IN ) ); \
+    DTYPE_IN * restrict btilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, B_align + KC * NC * sizeof( DTYPE_IN ) ); \
+    DTYPE_IN * restrict atilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, A_align + MC * KC * sizeof( DTYPE_IN ) ); \
     \
     DTYPE_IN * restrict btilde_usr = ( DTYPE_IN *)((char *)btilde_sys + B_align); \
     DTYPE_IN * restrict atilde_usr = ( DTYPE_IN *)((char *)atilde_sys + A_align); \
@@ -79,13 +79,13 @@ void GEMM_PASTEMAC(ch) \
     \
     for ( int jc=0; jc<n; jc+=NC ) \
     { \
-        int jb = min( NC, n-jc ); \
+        int jb = bli_min( NC, n-jc ); \
         DTYPE_IN * restrict apanel = A; \
         DTYPE_IN * restrict bpanel = bblock; \
         \
         for ( int pc=0; pc<k; pc+=KC ) \
         { \
-            int pb = min( KC, k-pc ); \
+            int pb = bli_min( KC, k-pc ); \
             ch ## _packB \
             (NR, pb, jb, bpanel, rs_b, cs_b, btilde_usr); \
             \
@@ -98,7 +98,7 @@ void GEMM_PASTEMAC(ch) \
             \
             for ( int ic=0; ic<m; ic+=MC ) \
             { \
-                int ib = min( MC, m-ic ); \
+                int ib = bli_min( MC, m-ic ); \
                 \
                 ch ## _packA \
                 ( MR, ib, pb, ablock, rs_a, cs_a, atilde_usr ); \
@@ -108,13 +108,13 @@ void GEMM_PASTEMAC(ch) \
                 \
                 for ( int jr=0; jr<jb; jr+=NR ) \
                 { \
-                    int jrb = min( NR, jb-jr ); \
+                    int jrb = bli_min( NR, jb-jr ); \
                     DTYPE_OUT * restrict cmicrotile = cmicrotile_col; \
                     DTYPE_IN  * restrict amicropanel = atilde_usr; \
                     \
                     for ( int ir=0; ir<ib; ir+=MR ) \
                     {    \
-                        int irb = min( MR, ib-ir ); \
+                        int irb = bli_min( MR, ib-ir ); \
                         \
                         if (jrb == NR && irb == MR) \
                             UK_FUNC (new_pb, alpha, amicropanel, bmicropanel, beta, cmicrotile, rs_c, cs_c, NULL, NULL); \

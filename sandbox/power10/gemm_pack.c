@@ -99,7 +99,7 @@ void PACK_FUNC_NAME(ch, A) \
     DTYPE_IN* adest = apack; \
     for (int i=0; i<m; i+=MR) \
     { \
-        int ib = min(MR, m-i); \
+        int ib = bli_min(MR, m-i); \
         if (ib == MR) /* Full size column height */ \
         { \
             p_idx = 0; \
@@ -189,7 +189,7 @@ void PACK_FUNC_NAME(ch, B) \
 \
     for( int j=0; j<n; j += NR ) \
     { \
-        int jb = min(NR, n-j); \
+        int jb = bli_min(NR, n-j); \
 \
         if ( jb == NR ) /* Full column width micro-panel.*/  \
         { \
@@ -320,7 +320,7 @@ void PACK_FUNC_NAME(ch, A) \
     /* Each panel must be packed in this format */ \
     for (int i=0; i<m; i+=MR) \
     { \
-        int ib = min(MR, m-i); \
+        int ib = bli_min(MR, m-i); \
 \
         if (ib == MR) /* Full size column height */ \
         { \
@@ -465,7 +465,7 @@ void PACK_FUNC_NAME(ch, B) \
 \
     for( int j=0; j<n; j += NR ) \
     { \
-        int jb = min(NR, n-j); \
+        int jb = bli_min(NR, n-j); \
 \
         if ( jb == NR ) /* Full column width micro-panel.*/ \
         { \
@@ -658,7 +658,7 @@ void PACK_FUNC_NAME(ch, A) \
     int i = 0; /* i is used for byte addressing */ \
     for(int int4_i=0; int4_i<m; int4_i+=MR) { /* pack panels */ \
 \
-        int ib = min(MR, m-int4_i); \
+        int ib = bli_min(MR, m-int4_i); \
         p_idx = 0; \
 \
         if (ib == MR) { /* full size */ \
@@ -769,7 +769,7 @@ void PACK_FUNC_NAME(ch, B) \
     int j = 0; \
 \
     for(int int4_j=0; int4_j<n; int4_j+=NR) { /* pack panels */ \
-        int jb = min(NR, n-int4_j); \
+        int jb = bli_min(NR, n-int4_j); \
 \
         p_idx = 0; \
         if (jb == NR) { /* full size */ \

@@ -37,7 +37,7 @@
 #define GEMM_FUNC_NAME_(ch)    bli_ ## ch ## gemm
 #define GEMM_FUNC_NAME(ch)     GEMM_FUNC_NAME_(ch)
 
-#define GEMM_FUNC_PROT(ch, DTYPE_IN, DTYPE_OUT) \
+#define GEMM_FUNC_PROT(DTYPE_IN, DTYPE_OUT, ch) \
     void GEMM_FUNC_NAME(ch) \
         ( \
             trans_t transa, \

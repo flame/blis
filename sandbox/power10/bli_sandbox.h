@@ -78,15 +78,13 @@ typedef union
     } bits;
 } float16;
 
-#define PAGE_SIZE 4096
+#define P10_PG_SIZE 4096
 
-#define min( x, y ) ( ( x ) < ( y ) ? x : y )
-
-GEMM_UKR_PROT2( bfloat16, float, sb, gemm_power10_mma_8x16 )
-GEMM_UKR_PROT2( float16, float, sh, gemm_power10_mma_8x16 )
-GEMM_UKR_PROT2( int16_t, int, i16, gemm_power10_mma_8x16 )
-GEMM_UKR_PROT2( int8_t, int, i8, gemm_power10_mma_8x16 )
-GEMM_UKR_PROT2( nibbles, int, i4, gemm_power10_mma_8x16 )
+GEMM_UKR_PROT2( bfloat16,   float,  sb, gemm_power10_mma_8x16 )
+GEMM_UKR_PROT2(  float16,   float,  sh, gemm_power10_mma_8x16 )
+GEMM_UKR_PROT2(  int16_t, int32_t, i16, gemm_power10_mma_8x16 )
+GEMM_UKR_PROT2(   int8_t, int32_t,  i8, gemm_power10_mma_8x16 )
+GEMM_UKR_PROT2(  nibbles, int32_t,  i4, gemm_power10_mma_8x16 )
 
 /* Creates a function that initializes a matrix of type ctype with random vals */
 #define RandomMatrixMacro(ch, ctype, rand_func) \
@@ -108,10 +106,10 @@ GEMM_UKR_PROT2( nibbles, int, i4, gemm_power10_mma_8x16 )
                 (ctype) rand_func() % (upper - lower + 1) + lower; \
     }
 
-GEMM_FUNC_PROT( sh,   float16,   float);
-GEMM_FUNC_PROT( sb,  bfloat16,   float);
-GEMM_FUNC_PROT(i16,   int16_t, int32_t);
-GEMM_FUNC_PROT( i8,    int8_t, int32_t);
-GEMM_FUNC_PROT( i4,   nibbles, int32_t);
+GEMM_FUNC_PROT(  float16,   float,  sh);
+GEMM_FUNC_PROT( bfloat16,   float,  sb);
+GEMM_FUNC_PROT(  int16_t, int32_t, i16);
+GEMM_FUNC_PROT(   int8_t, int32_t,  i8);
+GEMM_FUNC_PROT(  nibbles, int32_t,  i4);
 
 #endif
