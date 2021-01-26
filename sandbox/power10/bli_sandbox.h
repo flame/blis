@@ -108,10 +108,10 @@ GEMM_UKR_PROT2( nibbles, int, i4, gemm_power10_mma_8x16 )
                 (ctype) rand_func() % (upper - lower + 1) + lower; \
     }
 
-GEMM_FUNC_PROT( sh,   float16, float);
-GEMM_FUNC_PROT( sb,  bfloat16, float);
-GEMM_FUNC_PROT(i16,   int16_t,   int);
-GEMM_FUNC_PROT( i8,    int8_t,   int);
-GEMM_FUNC_PROT( i4,   nibbles,   int);
+GEMM_FUNC_PROT( sh,   float16,   float);
+GEMM_FUNC_PROT( sb,  bfloat16,   float);
+GEMM_FUNC_PROT(i16,   int16_t, int32_t);
+GEMM_FUNC_PROT( i8,    int8_t, int32_t);
+GEMM_FUNC_PROT( i4,   nibbles, int32_t);
 
 #endif

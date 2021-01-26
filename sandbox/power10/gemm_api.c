@@ -72,6 +72,6 @@ void GEMM_FUNC_NAME(ch) \
 //          ch       dt_in   dt_out           MR   NR     MC     KC     NC
 GEMM_FUNC(  sb,   bfloat16,   float,   0,  0,  8,  16,  1664,  1026,  4096);
 GEMM_FUNC(  sh,    float16,   float,   0,  0,  8,  16,  1664,  1026,  4096);
-GEMM_FUNC( i16,    int16_t,     int,   0,  0,  8,  16,  1664,  1026,  4096);
-GEMM_FUNC(  i8,     int8_t,     int,   0,  0,  8,  16,  1664,  1026,  4096);
-GEMM_FUNC(  i4,    nibbles,     int,   0,  0,  8,  16,  1664,  1026,  4096);
+GEMM_FUNC( i16,    int16_t, int32_t,   0,  0,  8,  16,  1664,  1026,  4096);
+GEMM_FUNC(  i8,     int8_t, int32_t,   0,  0,  8,  16,  1664,  1026,  4096);
+GEMM_FUNC(  i4,    nibbles, int32_t,   0,  0,  8,  16,  1664,  1026,  4096);

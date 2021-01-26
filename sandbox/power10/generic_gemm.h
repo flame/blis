@@ -50,9 +50,9 @@ void GEMM_PASTEMAC(ch) \
         DTYPE_OUT* alpha, DTYPE_OUT* beta \
     )
 
-GENERIC_GEMM_PROTO(sb, bfloat16, float);
-GENERIC_GEMM_PROTO(sh, float16, float);
-GENERIC_GEMM_PROTO(i16, int16_t, int);
-GENERIC_GEMM_PROTO(i8, int8_t, int);
-GENERIC_GEMM_PROTO(i4, nibbles, int);
+GENERIC_GEMM_PROTO( sb, bfloat16,   float);
+GENERIC_GEMM_PROTO( sh,  float16,   float);
+GENERIC_GEMM_PROTO(i16,  int16_t, int32_t);
+GENERIC_GEMM_PROTO( i8,   int8_t, int32_t);
+GENERIC_GEMM_PROTO( i4,  nibbles, int32_t);
 

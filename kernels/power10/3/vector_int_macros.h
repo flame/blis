@@ -44,7 +44,7 @@
 
 typedef __vector float fv4sf_t;
 typedef __vector double dv4sf_t;
-typedef __vector int iv4sf_t;
+typedef __vector int32_t iv4sf_t;
 typedef __vector unsigned char vec_t;
 
 #define SAVE_ACC(v_t, ACC, rs_c, j)                \
