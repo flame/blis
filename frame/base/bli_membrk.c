@@ -574,10 +574,17 @@ void bli_membrk_compute_pool_block_sizes_dt
 	// Compute pool block sizes
 	//
 
+	// If defined in architectural configuration (bli_kernel.h), it means
+	// that their micro-kernels will not perform any invalid speculative
+	// prefetch, thus we can skip this padding to reduce memory footprint.
+#ifdef BLIS_UKERNELS_NO_SPECULATIVE_PREFETCH
+	max_packmnr_dt = 0;
+#else
 	// We add an extra micro-panel of space to the block sizes for A and B
 	// just to be sure any pre-loading performed by the micro-kernel does
 	// not cause a segmentation fault.
 	max_packmnr_dt = bli_max( packmr_dt, packnr_dt );
+#endif  // BLIS_UKERNELS_NO_SPECULATIVE_PREFETCH
 
 	*bs_a = ( pool_mc_dt + max_packmnr_dt ) * pool_kc_dt * size_dt;
 	*bs_b = ( pool_nc_dt + max_packmnr_dt ) * pool_kc_dt * size_dt;
