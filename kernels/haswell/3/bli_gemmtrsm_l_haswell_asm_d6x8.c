@@ -374,8 +374,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	
 	vbroadcastss(mem(0+0*6)*4(rax), ymm0) // ymm0 = (1/alpha00)
 	
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	vmulps(ymm0, ymm4, ymm4) // ymm4 *= (1/alpha00)
 	vmulps(ymm0, ymm5, ymm5) // ymm5 *= (1/alpha00)
+#else
+	vdivps(ymm0, ymm4, ymm4) // ymm4 /= alpha00
+	vdivps(ymm0, ymm5, ymm5) // ymm5 /= alpha00
+#endif
 	
 	vmovups(ymm4, mem(rcx)) // store ( beta00..beta07 ) = ymm4
 	vmovups(ymm5, mem(rdx)) // store ( beta08..beta0F ) = ymm5
@@ -393,8 +398,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	vsubps(ymm2, ymm6, ymm6) // ymm6 -= ymm2
 	vsubps(ymm3, ymm7, ymm7) // ymm7 -= ymm3
 	
-	vmulps(ymm6, ymm1, ymm6) // ymm6 *= (1/alpha11)
-	vmulps(ymm7, ymm1, ymm7) // ymm7 *= (1/alpha11)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulps(ymm1, ymm6, ymm6) // ymm6 *= (1/alpha11)
+	vmulps(ymm1, ymm7, ymm7) // ymm7 *= (1/alpha11)
+#else
+	vdivps(ymm1, ymm6, ymm6) // ymm6 /= alpha11
+	vdivps(ymm1, ymm7, ymm7) // ymm7 /= alpha11
+#endif
 	
 	vmovups(ymm6, mem(rcx)) // store ( beta10..beta17 ) = ymm6
 	vmovups(ymm7, mem(rdx)) // store ( beta18..beta1F ) = ymm7
@@ -417,8 +427,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	vsubps(ymm2, ymm8, ymm8) // ymm8 -= ymm2
 	vsubps(ymm3, ymm9, ymm9) // ymm9 -= ymm3
 	
-	vmulps(ymm8, ymm0, ymm8) // ymm8 *= (1/alpha22)
-	vmulps(ymm9, ymm0, ymm9) // ymm9 *= (1/alpha22)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulps(ymm0, ymm8, ymm8) // ymm8 *= (1/alpha22)
+	vmulps(ymm0, ymm9, ymm9) // ymm9 *= (1/alpha22)
+#else
+	vdivps(ymm0, ymm8, ymm8) // ymm8 /= alpha22
+	vdivps(ymm0, ymm9, ymm9) // ymm9 /= alpha22
+#endif
 	
 	vmovups(ymm8, mem(rcx)) // store ( beta20..beta27 ) = ymm8
 	vmovups(ymm9, mem(rdx)) // store ( beta28..beta2F ) = ymm9
@@ -446,8 +461,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	vsubps(ymm2, ymm10, ymm10) // ymm10 -= ymm2
 	vsubps(ymm3, ymm11, ymm11) // ymm11 -= ymm3
 	
-	vmulps(ymm10, ymm1, ymm10) // ymm10 *= (1/alpha33)
-	vmulps(ymm11, ymm1, ymm11) // ymm11 *= (1/alpha33)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulps(ymm1, ymm10, ymm10) // ymm10 *= (1/alpha33)
+	vmulps(ymm1, ymm11, ymm11) // ymm11 *= (1/alpha33)
+#else
+	vdivps(ymm1, ymm10, ymm10) // ymm10 /= alpha33
+	vdivps(ymm1, ymm11, ymm11) // ymm11 /= alpha33
+#endif
 	
 	vmovups(ymm10, mem(rcx)) // store ( beta30..beta37 ) = ymm10
 	vmovups(ymm11, mem(rdx)) // store ( beta38..beta3F ) = ymm11
@@ -480,8 +500,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	vsubps(ymm2, ymm12, ymm12) // ymm12 -= ymm2
 	vsubps(ymm3, ymm13, ymm13) // ymm13 -= ymm3
 	
-	vmulps(ymm12, ymm0, ymm12) // ymm12 *= (1/alpha44)
-	vmulps(ymm13, ymm0, ymm13) // ymm13 *= (1/alpha44)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulps(ymm0, ymm12, ymm12) // ymm12 *= (1/alpha44)
+	vmulps(ymm0, ymm13, ymm13) // ymm13 *= (1/alpha44)
+#else
+	vdivps(ymm0, ymm12, ymm12) // ymm12 /= alpha44
+	vdivps(ymm0, ymm13, ymm13) // ymm13 /= alpha44
+#endif
 	
 	vmovups(ymm12, mem(rcx)) // store ( beta40..beta47 ) = ymm12
 	vmovups(ymm13, mem(rdx)) // store ( beta48..beta4F ) = ymm13
@@ -519,8 +544,13 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
 	vsubps(ymm2, ymm14, ymm14) // ymm14 -= ymm2
 	vsubps(ymm3, ymm15, ymm15) // ymm15 -= ymm3
 	
-	vmulps(ymm14, ymm1, ymm14) // ymm14 *= (1/alpha55)
-	vmulps(ymm15, ymm1, ymm15) // ymm15 *= (1/alpha55)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulps(ymm1, ymm14, ymm14) // ymm14 *= (1/alpha55)
+	vmulps(ymm1, ymm15, ymm15) // ymm15 *= (1/alpha55)
+#else
+	vdivps(ymm1, ymm14, ymm14) // ymm14 /= alpha55
+	vdivps(ymm1, ymm15, ymm15) // ymm15 /= alpha55
+#endif
 	
 	vmovups(ymm14, mem(rcx)) // store ( beta50..beta57 ) = ymm14
 	vmovups(ymm15, mem(rdx)) // store ( beta58..beta5F ) = ymm15
@@ -1129,8 +1159,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	
 	vbroadcastsd(mem(0+0*6)*8(rax), ymm0) // ymm0 = (1/alpha00)
 	
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
 	vmulpd(ymm0, ymm4, ymm4) // ymm4 *= (1/alpha00)
 	vmulpd(ymm0, ymm5, ymm5) // ymm5 *= (1/alpha00)
+#else
+	vdivpd(ymm0, ymm4, ymm4) // ymm4 /= alpha00
+	vdivpd(ymm0, ymm5, ymm5) // ymm5 /= alpha00
+#endif
 	
 	vmovupd(ymm4, mem(rcx)) // store ( beta00..beta03 ) = ymm4
 	vmovupd(ymm5, mem(rdx)) // store ( beta04..beta07 ) = ymm5
@@ -1148,8 +1183,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	vsubpd(ymm2, ymm6, ymm6) // ymm6 -= ymm2
 	vsubpd(ymm3, ymm7, ymm7) // ymm7 -= ymm3
 	
-	vmulpd(ymm6, ymm1, ymm6) // ymm6 *= (1/alpha11)
-	vmulpd(ymm7, ymm1, ymm7) // ymm7 *= (1/alpha11)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulpd(ymm1, ymm6, ymm6) // ymm6 *= (1/alpha11)
+	vmulpd(ymm1, ymm7, ymm7) // ymm7 *= (1/alpha11)
+#else
+	vdivpd(ymm1, ymm6, ymm6) // ymm6 /= alpha11
+	vdivpd(ymm1, ymm7, ymm7) // ymm7 /= alpha11
+#endif
 	
 	vmovupd(ymm6, mem(rcx)) // store ( beta10..beta13 ) = ymm6
 	vmovupd(ymm7, mem(rdx)) // store ( beta14..beta17 ) = ymm7
@@ -1172,8 +1212,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	vsubpd(ymm2, ymm8, ymm8) // ymm8 -= ymm2
 	vsubpd(ymm3, ymm9, ymm9) // ymm9 -= ymm3
 	
-	vmulpd(ymm8, ymm0, ymm8) // ymm8 *= (1/alpha22)
-	vmulpd(ymm9, ymm0, ymm9) // ymm9 *= (1/alpha22)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulpd(ymm0, ymm8, ymm8) // ymm8 *= (1/alpha22)
+	vmulpd(ymm0, ymm9, ymm9) // ymm9 *= (1/alpha22)
+#else
+	vdivpd(ymm0, ymm8, ymm8) // ymm8 /= alpha22
+	vdivpd(ymm0, ymm9, ymm9) // ymm9 /= alpha22
+#endif
 	
 	vmovupd(ymm8, mem(rcx)) // store ( beta20..beta23 ) = ymm8
 	vmovupd(ymm9, mem(rdx)) // store ( beta24..beta27 ) = ymm9
@@ -1201,8 +1246,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	vsubpd(ymm2, ymm10, ymm10) // ymm10 -= ymm2
 	vsubpd(ymm3, ymm11, ymm11) // ymm11 -= ymm3
 	
-	vmulpd(ymm10, ymm1, ymm10) // ymm10 *= (1/alpha33)
-	vmulpd(ymm11, ymm1, ymm11) // ymm11 *= (1/alpha33)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulpd(ymm1, ymm10, ymm10) // ymm10 *= (1/alpha33)
+	vmulpd(ymm1, ymm11, ymm11) // ymm11 *= (1/alpha33)
+#else
+	vdivpd(ymm1, ymm10, ymm10) // ymm10 /= alpha33
+	vdivpd(ymm1, ymm11, ymm11) // ymm11 /= alpha33
+#endif
 	
 	vmovupd(ymm10, mem(rcx)) // store ( beta30..beta33 ) = ymm10
 	vmovupd(ymm11, mem(rdx)) // store ( beta34..beta37 ) = ymm11
@@ -1235,8 +1285,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	vsubpd(ymm2, ymm12, ymm12) // ymm12 -= ymm2
 	vsubpd(ymm3, ymm13, ymm13) // ymm13 -= ymm3
 	
-	vmulpd(ymm12, ymm0, ymm12) // ymm12 *= (1/alpha44)
-	vmulpd(ymm13, ymm0, ymm13) // ymm13 *= (1/alpha44)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulpd(ymm0, ymm12, ymm12) // ymm12 *= (1/alpha44)
+	vmulpd(ymm0, ymm13, ymm13) // ymm13 *= (1/alpha44)
+#else
+	vdivpd(ymm0, ymm12, ymm12) // ymm12 /= alpha44
+	vdivpd(ymm0, ymm13, ymm13) // ymm13 /= alpha44
+#endif
 	
 	vmovupd(ymm12, mem(rcx)) // store ( beta40..beta43 ) = ymm12
 	vmovupd(ymm13, mem(rdx)) // store ( beta44..beta47 ) = ymm13
@@ -1274,8 +1329,13 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
 	vsubpd(ymm2, ymm14, ymm14) // ymm14 -= ymm2
 	vsubpd(ymm3, ymm15, ymm15) // ymm15 -= ymm3
 	
-	vmulpd(ymm14, ymm1, ymm14) // ymm14 *= (1/alpha55)
-	vmulpd(ymm15, ymm1, ymm15) // ymm15 *= (1/alpha55)
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	vmulpd(ymm1, ymm14, ymm14) // ymm14 *= (1/alpha55)
+	vmulpd(ymm1, ymm15, ymm15) // ymm15 *= (1/alpha55)
+#else
+	vdivpd(ymm1, ymm14, ymm14) // ymm14 /= alpha55
+	vdivpd(ymm1, ymm15, ymm15) // ymm15 /= alpha55
+#endif
 	
 	vmovupd(ymm14, mem(rcx)) // store ( beta50..beta53 ) = ymm14
 	vmovupd(ymm15, mem(rdx)) // store ( beta54..beta57 ) = ymm15

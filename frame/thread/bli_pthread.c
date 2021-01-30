@@ -36,9 +36,142 @@
 
 #include "blis.h"
 
-#include <errno.h>
+#if defined(BLIS_DISABLE_SYSTEM)
 
-#if defined(_MSC_VER)
+// This branch defines a pthread-like API, bli_pthread_*(), and implements it
+// in terms of "dummy" code that doesn't depend on POSIX threads or any other
+// threading mechanism. See issue #454 to see the use case that prompted this
+// feature.
+// NOTE: THIS CODE DOES NOT IMPLEMENT THREADING AND IS NOT THREAD-SAFE!
+
+// -- pthread_create(), pthread_join() --
+
+int bli_pthread_create
+     (
+       bli_pthread_t*            thread,
+       const bli_pthread_attr_t* attr,
+       void*                   (*start_routine)(void*),
+       void*                     arg
+     )
+{
+	//return pthread_create( thread, attr, start_routine, arg );
+	start_routine( arg );
+	return 0;
+}
+
+int bli_pthread_join
+     (
+       bli_pthread_t thread,
+       void**        retval
+     )
+{
+	//return pthread_join( thread, retval );
+	return 0;
+}
+
+// -- pthread_mutex_*() --
+
+int bli_pthread_mutex_init
+     (
+       bli_pthread_mutex_t*           mutex,
+       const bli_pthread_mutexattr_t* attr
+     )
+{
+	//return pthread_mutex_init( mutex, attr );
+	return 0;
+}
+
+int bli_pthread_mutex_destroy
+     (
+       bli_pthread_mutex_t* mutex
+     )
+{
+	//return pthread_mutex_destroy( mutex );
+	return 0;
+}
+
+int bli_pthread_mutex_lock
+     (
+       bli_pthread_mutex_t* mutex
+     )
+{
+	//return pthread_mutex_lock( mutex );
+	return 0;
+}
+
+int bli_pthread_mutex_trylock
+     (
+       bli_pthread_mutex_t* mutex
+     )
+{
+	//return pthread_mutex_trylock( mutex );
+	return 0;
+}
+
+int bli_pthread_mutex_unlock
+     (
+       bli_pthread_mutex_t* mutex
+     )
+{
+	//return pthread_mutex_unlock( mutex );
+	return 0;
+}
+
+// -- pthread_cond_*() --
+
+int bli_pthread_cond_init
+     (
+       bli_pthread_cond_t*           cond,
+       const bli_pthread_condattr_t* attr
+     )
+{
+	//return pthread_cond_init( cond, attr );
+	return 0;
+}
+
+int bli_pthread_cond_destroy
+     (
+       bli_pthread_cond_t* cond
+     )
+{
+	//return pthread_cond_destroy( cond );
+	return 0;
+}
+
+int bli_pthread_cond_wait
+     (
+       bli_pthread_cond_t*  cond,
+       bli_pthread_mutex_t* mutex
+     )
+{
+	//return pthread_cond_wait( cond, mutex );
+	return 0;
+}
+
+int bli_pthread_cond_broadcast
+     (
+       bli_pthread_cond_t* cond
+     )
+{
+	//return pthread_cond_broadcast( cond );
+	return 0;
+}
+
+// -- pthread_once() --
+
+void bli_pthread_once
+     (
+       bli_pthread_once_t* once,
+       void              (*init)(void)
+     )
+{
+	//pthread_once( once, init );
+	init();
+}
+
+#elif defined(_MSC_VER) // !defined(BLIS_DISABLE_SYSTEM)
+
+#include <errno.h>
 
 // This branch defines a pthread-like API, bli_pthread_*(), and implements it
 // in terms of Windows API calls.
@@ -194,7 +327,7 @@ int bli_pthread_join
 	return 0;
 }
 
-#else // !defined(_MSC_VER)
+#else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
 // This branch defines a pthreads-like API, bli_pthreads_*(), and implements it
 // in terms of the corresponding pthreads_*() types, macros, and function calls. 
@@ -317,9 +450,44 @@ void bli_pthread_once
 #endif // _MSC_VER
 
 
+
+
 // -- pthread_barrier_*() --
 
-#if defined(__APPLE__) || defined(_MSC_VER)
+#if defined(BLIS_DISABLE_SYSTEM)
+
+int bli_pthread_barrier_init
+     (
+       bli_pthread_barrier_t*           barrier,
+       const bli_pthread_barrierattr_t* attr,
+       unsigned int                     count
+     )
+{
+	//return pthread_barrier_init( barrier, attr, count );
+	return 0;
+}
+
+int bli_pthread_barrier_destroy
+     (
+       bli_pthread_barrier_t* barrier
+     )
+{
+	//return pthread_barrier_destroy( barrier );
+	return 0;
+}
+
+int bli_pthread_barrier_wait
+     (
+       bli_pthread_barrier_t* barrier
+     )
+{
+	//return pthread_barrier_wait( barrier );
+	return 0;
+}
+
+#elif defined(__APPLE__) || defined(_MSC_VER) // !defined(BLIS_DISABLE_SYSTEM)
+
+#include <errno.h>
 
 // For OS X and Windows, we define barriers ourselves in terms of the rest
 // of the API, though for slightly different reasons: For Windows, we must
@@ -382,7 +550,7 @@ int bli_pthread_barrier_wait
 	}
 }
 
-#else // !( defined(__APPLE__) || defined(_MSC_VER) )
+#else // !defined(BLIS_DISABLE_SYSTEM) && !defined(__APPLE__) && !defined(_MSC_VER)
 
 // Linux environments implement the pthread_barrier* sub-API. So, if we're
 // on Linux, we can simply call those functions, just as we did before for
@@ -414,4 +582,5 @@ int bli_pthread_barrier_wait
 	return pthread_barrier_wait( barrier );
 }
 
-#endif // defined(__APPLE__) || defined(_MSC_VER)
+#endif
+

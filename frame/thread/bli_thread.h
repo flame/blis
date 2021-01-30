@@ -164,8 +164,25 @@ typedef struct
 void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
 
 dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
+bool  bli_is_prime( dim_t n );
 
 void bli_thread_partition_2x2
+     (
+       dim_t           n_thread,
+       dim_t           work1,
+       dim_t           work2,
+       dim_t* restrict nt1,
+       dim_t* restrict nt2
+     );
+void bli_thread_partition_2x2_slow
+     (
+       dim_t           n_thread,
+       dim_t           work1,
+       dim_t           work2,
+       dim_t* restrict nt1,
+       dim_t* restrict nt2
+     );
+void bli_thread_partition_2x2_fast
      (
        dim_t           n_thread,
        dim_t           work1,
