@@ -45,7 +45,7 @@ THIS_CONFIG    := a64fx
 # NOTE: The build system will append these variables with various
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
-CPPROCFLAGS    := -D_GNU_SOURCE
+CPPROCFLAGS    := -D_GNU_SOURCE -D_A64FX
 CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     :=

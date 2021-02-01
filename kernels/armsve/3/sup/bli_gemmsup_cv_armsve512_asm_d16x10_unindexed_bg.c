@@ -231,6 +231,23 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   assert(1 == rs_a0);
   // assert(1 == cs_b0);
 
+#ifdef _A64FX
+  // Set A's prefetch controller and prefetch distance.
+  uint64_t pf_ctrl_a, pf_dist_a;
+  pf_ctrl_a = (0x9 << 60) | (0x8);
+  pf_dist_a =((cs_a0 * 8) << 32) |
+              (cs_a0 * 8 * 4);
+  __asm__ (
+  "msr  S3_3_C11_C6_2, %[ctrl] \n\t"
+  "msr  S3_3_C11_C7_2, %[dist] \n\t"
+: // output (none).
+: // input
+  [ctrl] "r" (pf_ctrl_a),
+  [dist] "r" (pf_dist_a),
+: // clobber
+  );
+#endif
+
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
   uint64_t k_mker = k0 / 4;
@@ -326,6 +343,19 @@ void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexe
 " ldr             x4, %[baddr]                    \n\t" // Load address of B
 " ldr             x5, %[rs_b]                     \n\t" // Leading dimension of B
 " ldr             x25, %[cs_b]                    \n\t" // Trailing dimension of B
+#ifdef _A64FX
+" mov x26, 0x3      \n\t" // A64FX: Use cache sector 3 for C_r microtile
+" lsl x26, x26, 56  \n\t"
+" orr x6, x6, x26   \n\t"
+"                   \n\t"
+" mov x26, 0x2      \n\t" // A64FX: Use cache sector 2 for B_r microtile
+" lsl x26, x26, 56  \n\t"
+" orr x4, x4, x26   \n\t"
+"                   \n\t"
+" mov x26, 0xa      \n\t" // A64FX: Prefetch injection mode for A_r microtile
+" lsl x26, x26, 60  \n\t" //        according to control#2 register.
+" orr x2, x2, x26   \n\t"
+#endif
 "                                                 \n\t"
 " b.ne            C_PRFML2_STRIDED                \n\t"
 "                                                 \n\t" // Registers occupied: X0-9, X20, X21

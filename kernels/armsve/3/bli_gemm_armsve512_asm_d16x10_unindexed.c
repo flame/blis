@@ -163,6 +163,19 @@ __asm__ volatile (
 " mov             x3, #16                         \n\t" // LdA is 16 from packing, can be input
 " ldr             x4, %[baddr]                    \n\t" // Load address of B
 " mov             x5, #10                         \n\t" // LdB is 10 from packing, can be input
+#ifdef _A64FX
+" mov x26, 0x3      \n\t" // A64FX: Use cache sector 3 for C_r microtile
+" lsl x26, x26, 56  \n\t"
+" orr x6, x6, x26   \n\t"
+"                   \n\t"
+" mov x26, 0x2      \n\t" // A64FX: Use cache sector 2 for B_r micropanel
+" lsl x26, x26, 56  \n\t"
+" orr x2, x2, x26   \n\t"
+"                   \n\t"
+" mov x26, 0x1      \n\t" // A64FX: Use cache sector 1 for A_r micropanel
+" lsl x26, x26, 56  \n\t"
+" orr x4, x4, x26   \n\t"
+#endif
 "                                                 \n\t"
 " b.ne            C_PRFML2_STRIDED                \n\t"
 "                                                 \n\t" // Registers occupied: X0-9, X20, X21
