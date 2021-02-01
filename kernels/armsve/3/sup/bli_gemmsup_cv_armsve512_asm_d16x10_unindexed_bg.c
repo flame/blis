@@ -234,16 +234,28 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
 #ifdef _A64FX
   // Set A's prefetch controller and prefetch distance.
   uint64_t pf_ctrl_a, pf_dist_a;
+  uint64_t pf_ctrl_b, pf_dist_b;
   pf_ctrl_a = (0x9 << 60) | (0x8);
   pf_dist_a =((cs_a0 * 8) << 32) |
               (cs_a0 * 8 * 4);
+  if ((cs_b0 * 8) & (0x3f << 58))
+    pf_ctrl_b = (0x9 << 60) | (0x8);
+  else
+    pf_ctrl_b = (0x9 << 60) | (cs_b0 * 8);
+  pf_dist_b =((rs_b0 * 8) << 32) |
+              (rs_b0 * 8 * 4);
+
   __asm__ (
-  "msr  S3_3_C11_C6_2, %[ctrl] \n\t"
-  "msr  S3_3_C11_C7_2, %[dist] \n\t"
+  "msr  S3_3_C11_C6_2, %[ctrl_a] \n\t"
+  "msr  S3_3_C11_C7_2, %[dist_a] \n\t"
+  "msr  S3_3_C11_C6_3, %[ctrl_b] \n\t"
+  "msr  S3_3_C11_C7_3, %[dist_b] \n\t"
 : // output (none).
 : // input
-  [ctrl] "r" (pf_ctrl_a),
-  [dist] "r" (pf_dist_a),
+  [ctrl_a] "r" (pf_ctrl_a),
+  [dist_a] "r" (pf_dist_a),
+  [ctrl_b] "r" (pf_ctrl_b),
+  [dist_b] "r" (pf_dist_b)
 : // clobber
   );
 #endif
@@ -348,8 +360,8 @@ void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexe
 " lsl x26, x26, 56  \n\t"
 " orr x6, x6, x26   \n\t"
 "                   \n\t"
-" mov x26, 0x2      \n\t" // A64FX: Use cache sector 2 for B_r microtile
-" lsl x26, x26, 56  \n\t"
+" mov x26, 0xb      \n\t" // A64FX: Prefetch injection mode for B_r microtile
+" lsl x26, x26, 60  \n\t" //        according to control#3 register.
 " orr x4, x4, x26   \n\t"
 "                   \n\t"
 " mov x26, 0xa      \n\t" // A64FX: Prefetch injection mode for A_r microtile
