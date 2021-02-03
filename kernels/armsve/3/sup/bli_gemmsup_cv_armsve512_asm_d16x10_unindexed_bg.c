@@ -235,13 +235,13 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   // Set A's prefetch controller and prefetch distance.
   uint64_t pf_ctrl_a, pf_dist_a;
   uint64_t pf_ctrl_b, pf_dist_b;
-  pf_ctrl_a = (0x9 << 60) | (0x8);
+  pf_ctrl_a = ((uint64_t)0x9 << 60) | (0x8);
   pf_dist_a =((cs_a0 * 8) << 32) |
               (cs_a0 * 8 * 4);
-  if ((cs_b0 * 8) & (0x3f << 58))
-    pf_ctrl_b = (0x9 << 60) | (0x8);
+  if ((cs_b0 * 8) & ((uint64_t)0x3f << 58))
+    pf_ctrl_b = ((uint64_t)0x9 << 60) | (0x8);
   else
-    pf_ctrl_b = (0x9 << 60) | (cs_b0 * 8);
+    pf_ctrl_b = ((uint64_t)0x9 << 60) | (cs_b0 * 8);
   pf_dist_b =((rs_b0 * 8) << 32) |
               (rs_b0 * 8 * 4);
 
