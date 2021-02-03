@@ -4,8 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
    Copyright (C) 2018, The University of Texas at Austin
+   Copyright (C) 2017 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -78,8 +78,12 @@ void bli_sdotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(s,eq0)( *alpha ) )
 	{
+
+#ifdef BLIS_CONFIG_EPYC
+		sscalv_ker_ft f = bli_sscalv_zen_int10;
+#else
 		sscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
-		
+#endif
 		f
 		(
 		  BLIS_NO_CONJUGATE,
@@ -95,8 +99,11 @@ void bli_sdotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
+#ifdef BLIS_CONFIG_EPYC
+		sdotxv_ker_ft f = bli_sdotxv_zen_int;
+#else
 		sdotxv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
-
+#endif
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
 			float* a1   = a + (0  )*inca + (i  )*lda;
@@ -468,8 +475,11 @@ void bli_ddotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(d,eq0)( *alpha ) )
 	{
-		dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
-		
+#ifdef BLIS_CONFIG_EPYC
+        dscalv_ker_ft f = bli_dscalv_zen_int10;
+#else
+        dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
+#endif
 		f
 		(
 		  BLIS_NO_CONJUGATE,
@@ -485,8 +495,11 @@ void bli_ddotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-		ddotxv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
-
+#ifdef BLIS_CONFIG_EPYC
+		ddotxv_ker_ft f = bli_ddotxv_zen_int;
+#else
+		bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
+#endif
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
 			double* a1   = a + (0  )*inca + (i  )*lda;
