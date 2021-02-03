@@ -115,7 +115,7 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
@@ -199,3 +199,26 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
+
+err_t bli_dgemm_small
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+// gemm square matrix size friendly implementation
+err_t bli_gemm_sqp
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );

@@ -35,7 +35,6 @@
 
 #include "blis.h"
 
-
 //
 // Define BLAS-to-BLIS interfaces.
 //
