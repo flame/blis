@@ -79,12 +79,7 @@ void bli_sdotxf_zen_int_8
 	if ( bli_zero_dim1( m ) || PASTEMAC(s,eq0)( *alpha ) )
 	{
 
-#ifdef BLIS_CONFIG_EPYC
-		sscalv_ker_ft f = bli_sscalv_zen_int10;
-#else
-		sscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_SCALV_KER, cntx );
-#endif
-		f
+		bli_sscalv_zen_int10
 		(
 		  BLIS_NO_CONJUGATE,
 		  b_n,
@@ -99,18 +94,13 @@ void bli_sdotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-#ifdef BLIS_CONFIG_EPYC
-		sdotxv_ker_ft f = bli_sdotxv_zen_int;
-#else
-		sdotxv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_DOTXV_KER, cntx );
-#endif
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
 			float* a1   = a + (0  )*inca + (i  )*lda;
 			float* x1   = x + (0  )*incx;
 			float* psi1 = y + (i  )*incy;
 
-			f
+			bli_sdotxv_zen_int
 			(
 			  conjat,
 			  conjx,
@@ -475,12 +465,7 @@ void bli_ddotxf_zen_int_8
 	// simplifies to updating y.
 	if ( bli_zero_dim1( m ) || PASTEMAC(d,eq0)( *alpha ) )
 	{
-#ifdef BLIS_CONFIG_EPYC
-        dscalv_ker_ft f = bli_dscalv_zen_int10;
-#else
-        dscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_SCALV_KER, cntx );
-#endif
-		f
+		bli_dscalv_zen_int10
 		(
 		  BLIS_NO_CONJUGATE,
 		  b_n,
@@ -495,18 +480,13 @@ void bli_ddotxf_zen_int_8
 	// operation as a loop over dotxv.
 	if ( b_n != fuse_fac )
 	{
-#ifdef BLIS_CONFIG_EPYC
-		ddotxv_ker_ft f = bli_ddotxv_zen_int;
-#else
-		bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTXV_KER, cntx );
-#endif
 		for ( dim_t i = 0; i < b_n; ++i )
 		{
 			double* a1   = a + (0  )*inca + (i  )*lda;
 			double* x1   = x + (0  )*incx;
 			double* psi1 = y + (i  )*incy;
 
-			f
+			bli_ddotxv_zen_int
 			(
 			  conjat,
 			  conjx,
