@@ -60,16 +60,16 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      );
 
-static err_t bli_dgemm_small
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-     );
+/* static err_t bli_dgemm_small */
+/*      ( */
+/*        obj_t*  alpha, */
+/*        obj_t*  a, */
+/*        obj_t*  b, */
+/*        obj_t*  beta, */
+/*        obj_t*  c, */
+/*        cntx_t* cntx, */
+/*        cntl_t* cntl */
+/*      ); */
 
 static err_t bli_sgemm_small_atbn
      (
@@ -1713,7 +1713,7 @@ static err_t bli_sgemm_small
 
 };
 
-static err_t bli_dgemm_small
+/*static*/ err_t bli_dgemm_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -1725,43 +1725,21 @@ static err_t bli_dgemm_small
      )
 {
 
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	
-    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
-    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
-    gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
-    gint_t L = M * N;
+  gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+  gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+  gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+  gint_t L = M * N;
 
-    // when N is equal to 1 call GEMV instead of GEMM
-    if (N == 1)
-    {
-        bli_gemv
-        (
-            alpha,
-            a,
-            b,
-            beta,
-            c
-        );
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-        return BLIS_SUCCESS;
-    }
 
-    if (N<3) //Implemenation assumes that N is atleast 3.
-	{
-		AOCL_DTL_TRACE_EXIT_ERR(
-			AOCL_DTL_LEVEL_INFO,
-			"N < 3, cannot be processed by small gemm"
-			);
-        return BLIS_NOT_YET_IMPLEMENTED;
-	}
-
-#ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
-    if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))))
-#else
-    if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
-        || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
-#endif   
+/* #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME */
+/*     if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME)))) */
+/* #else */
+/*     if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES)) */
+/*         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0))) */
+/* #endif    */
+  if(L && K ) // Non-zero dimensions will be handled by either sup or native kernels
     {
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
