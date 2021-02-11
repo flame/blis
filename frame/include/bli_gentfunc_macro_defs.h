@@ -56,11 +56,11 @@ GENTFUNC( double,   d, blasname, blisname ) \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
 
-#define INSERT_GENTFUNC_BLAS_SDC( blasname, blisname ) \
+#define INSERT_GENTFUNC_BLAS_SC( blasname, blisname ) \
 \
 GENTFUNC( float,    s, blasname, blisname ) \
-GENTFUNC( double,   d, blasname, blisname ) \
 GENTFUNC( scomplex, c, blasname, blisname )
+
 
 #define INSERT_GENTFUNC_BLAS_CZ( blasname, blisname ) \
 \
