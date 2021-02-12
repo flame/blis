@@ -33,6 +33,13 @@
 
 */
 
+// -- level-1m -----------------------------------------------------------------
+
+// packm(asm)
+PACKM_KER_PROT(double,   d, packm_haswell_asm_6xk )
+PACKM_KER_PROT(double,   d, packm_haswell_asm_8xk )
+
+
 // -- level-3 ------------------------------------------------------------------
 
 // gemm (asm d6x8)

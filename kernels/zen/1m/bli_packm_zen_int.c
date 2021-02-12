@@ -56,9 +56,9 @@ void bli_dpackm_8xk_nn_zen
     dim_t            cdim,
     dim_t            n,
     dim_t            n_max,
-    void*   restrict kappa,
-    void*   restrict a, inc_t inca, inc_t lda,  // inca = 1
-    void*   restrict p, inc_t ldp,
+    double*   restrict kappa,
+    double*   restrict a, inc_t inca, inc_t lda,  // inca = 1
+    double*   restrict p, inc_t ldp,
     cntx_t* restrict cntx
 )
 {
@@ -161,9 +161,9 @@ void bli_dpackm_6xk_nn_zen
     dim_t            cdim,
     dim_t            n,
     dim_t            n_max,
-    void*   restrict kappa,
-    void*   restrict a, inc_t inca, inc_t lda,
-    void*   restrict p, inc_t ldp,
+    double*   restrict kappa,
+    double*   restrict a, inc_t inca, inc_t lda,
+    double*   restrict p, inc_t ldp,
     cntx_t* restrict cntx
 )
 {
@@ -236,9 +236,9 @@ void bli_dpackm_8xk_gen_zen
     dim_t            cdim,
     dim_t            n,
     dim_t            n_max,
-    void*   restrict kappa,
-    void*   restrict a, inc_t inca, inc_t lda,
-    void*   restrict p, inc_t ldp,
+    double*   restrict kappa,
+    double*   restrict a, inc_t inca, inc_t lda,
+    double*   restrict p, inc_t ldp,
     cntx_t* restrict cntx
 )
 {
@@ -412,9 +412,9 @@ void bli_dpackm_6xk_gen_zen
     dim_t            cdim,
     dim_t            n,
     dim_t            n_max,
-    void*   restrict kappa,
-    void*   restrict a, inc_t inca, inc_t lda,
-    void*   restrict p, inc_t ldp,
+    double*   restrict kappa,
+    double*   restrict a, inc_t inca, inc_t lda,
+    double*   restrict p, inc_t ldp,
     cntx_t* restrict cntx
 )
 {
