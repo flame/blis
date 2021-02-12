@@ -346,6 +346,22 @@ void dgemm_
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
+    if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+    {
+	bli_dgemm_ref_k1_nn( m0, n0, k0,
+			  (double*)alpha,
+			  (double*)a, *lda,
+			  (double*)b, *ldb,
+			  (double*)beta,
+			  c, *ldc
+			);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	/* Finalize BLIS */
+	bli_finalize_auto();
+
+	return;
+    }
+
     if (n0 == 1)
     {
 	if (bli_is_notrans(blis_transa))

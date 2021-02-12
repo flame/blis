@@ -235,4 +235,17 @@ err_t bli_gemm_sqp
        obj_t*  c,
        cntx_t* cntx,
        cntl_t* cntl
+      );
+
+void bli_dgemm_ref_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      double* alpha,
+      double* a, const inc_t lda,
+      double* b, const inc_t ldb,
+      double* beta,
+      double* c, const inc_t ldc
      );
+
