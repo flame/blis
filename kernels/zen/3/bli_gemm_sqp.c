@@ -35,9 +35,9 @@
 #include "immintrin.h"
 
 #define BLIS_LOADFIRST 0
-#define ENABLE_PREFETCH 1
+#define BLIS_ENABLE_PREFETCH 1
 
-#define MX8 8
+#define BLIS_MX8 8
 #define DEBUG_3M_SQP 0
 
 typedef struct  {
@@ -50,8 +50,11 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 static err_t bli_dgemm_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc, bool isTransA, double alpha);
 
 /*
-* The bli_gemm_sqp (square packed) function would focus of square matrix sizes, where m=n=k.
-* Custom 8mxn block kernels with single load and store of C matrix, to perform gemm computation.
+* The bli_gemm_sqp (square packed) function performs dgemm and 3m zgemm.
+* It focuses on square matrix sizes, where m=n=k. But supports non-square matrix sizes as well.
+* Currently works for m multiple of 8 & column major storage and kernels. It has custom dgemm
+* 8mxn block column preferred kernels with single load and store of C matrix to perform dgemm
+* , which is also used as real kernel in 3m complex gemm computation.
 */
 err_t bli_gemm_sqp
      (
@@ -133,6 +136,7 @@ err_t bli_gemm_sqp
         {
             return BLIS_NOT_YET_IMPLEMENTED;
         }
+        /* 3m zgemm implementation for C = AxB and C = AtxB */
         return bli_zgemm_sqp_m8( m, n, k, ap, lda, bp, ldb, cp, ldc, alpha_real, beta_real, isTransA);
     }
     else if(dt == BLIS_DOUBLE)
@@ -149,6 +153,7 @@ err_t bli_gemm_sqp
         {
             return BLIS_NOT_YET_IMPLEMENTED;
         }
+        /* dgemm implementation with 8mx5n major kernel and column preferred storage */
         return bli_dgemm_m8( m, n, k, ap, lda, bp, ldb, cp, ldc, isTransA, (*alpha_cast));
     }
 
@@ -156,7 +161,10 @@ err_t bli_gemm_sqp
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
-/*  core dgemm kernel 8mx5n with single load and store of C matrix block
+/************************************************************************************************************/
+/************************** dgemm kernels (8mxn) column preffered  ******************************************/
+/************************************************************************************************************/
+/*  Main dgemm kernel 8mx5n with single load and store of C matrix block
     alpha = +/-1 and beta = +/-1,0 handled while packing.*/
 inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc)
 {
@@ -178,7 +186,7 @@ inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
         double* pcldc = pc + ldc; double* pcldc2 = pcldc + ldc; double* pcldc3 = pcldc2 + ldc; double* pcldc4 = pcldc3 + ldc;
         double* pbldb = pb + ldb; double* pbldb2 = pbldb + ldb; double* pbldb3 = pbldb2 + ldb; double* pbldb4 = pbldb3 + ldb;
 
-#if ENABLE_PREFETCH
+#if BLIS_ENABLE_PREFETCH
         _mm_prefetch((char*)(pc), _MM_HINT_T0);
         _mm_prefetch((char*)(pcldc), _MM_HINT_T0);
         _mm_prefetch((char*)(pcldc2), _MM_HINT_T0);
@@ -193,6 +201,7 @@ inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
         _mm_prefetch((char*)(pbldb3), _MM_HINT_T0);
         _mm_prefetch((char*)(pbldb4), _MM_HINT_T0);
 #endif
+        /* C matrix column major load */
 #if BLIS_LOADFIRST
         cv0 = _mm256_loadu_pd(pc);     cx0 = _mm256_loadu_pd(pc + 4);
         cv1 = _mm256_loadu_pd(pcldc);  cx1 = _mm256_loadu_pd(pcldc + 4);
@@ -246,6 +255,7 @@ inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
         bv0 = _mm256_loadu_pd(pcldc4); bv1 = _mm256_loadu_pd(pcldc4 + 4);
         cv4 = _mm256_add_pd(cv4, bv0); cx4 = _mm256_add_pd(cx4, bv1);
 #endif
+        /* C matrix column major store */
         _mm256_storeu_pd(pc, cv0);
         _mm256_storeu_pd(pc + 4, cx0);
 
@@ -484,7 +494,7 @@ void bli_prepackA_8(double* pa, double* aPacked, gint_t k, guint_t lda, bool isT
             for (gint_t p = 0; p < k; p += 1) {
                 av0 = _mm256_loadu_pd(pa);       av1 = _mm256_loadu_pd(pa + 4); pa += lda;
                 _mm256_storeu_pd(aPacked, av0);  _mm256_storeu_pd(aPacked + 4, av1);
-                aPacked += MX8;
+                aPacked += BLIS_MX8;
             }
         }
         else if(alpha==-1.0)
@@ -494,7 +504,7 @@ void bli_prepackA_8(double* pa, double* aPacked, gint_t k, guint_t lda, bool isT
                 av0 = _mm256_loadu_pd(pa);       av1 = _mm256_loadu_pd(pa + 4); pa += lda;
                 av0 = _mm256_sub_pd(ymm0,av0);   av1 = _mm256_sub_pd(ymm0,av1); // a = 0 - a;
                 _mm256_storeu_pd(aPacked, av0);  _mm256_storeu_pd(aPacked + 4, av1);
-                aPacked += MX8;
+                aPacked += BLIS_MX8;
             }
         }
     }
@@ -503,13 +513,13 @@ void bli_prepackA_8(double* pa, double* aPacked, gint_t k, guint_t lda, bool isT
         if(alpha==1.0)
         {
             //A Transpose case:
-            for (gint_t i = 0; i < MX8 ; i++)
+            for (gint_t i = 0; i < BLIS_MX8 ; i++)
             {
                 gint_t idx = i * lda;
                 for (gint_t p = 0; p < k; p ++)
                 {
                     double ar_ = *(pa+idx+p);
-                    gint_t sidx = p * MX8;
+                    gint_t sidx = p * BLIS_MX8;
                     *(aPacked + sidx + i) = ar_;
                 }
             }
@@ -517,13 +527,13 @@ void bli_prepackA_8(double* pa, double* aPacked, gint_t k, guint_t lda, bool isT
         else if(alpha==-1.0)
         {
             //A Transpose case:
-            for (gint_t i = 0; i < MX8 ; i++)
+            for (gint_t i = 0; i < BLIS_MX8 ; i++)
             {
                 gint_t idx = i * lda;
                 for (gint_t p = 0; p < k; p ++)
                 {
                     double ar_ = *(pa+idx+p);
-                    gint_t sidx = p * MX8;
+                    gint_t sidx = p * BLIS_MX8;
                     *(aPacked + sidx + i) = -ar_;
                 }
             }
@@ -554,25 +564,32 @@ void bli_prepackA_8x4(double* pa, double* aPacked, gint_t k, guint_t lda)
     }
 }
 
-/* dgemm real kernel, which handles m multiple of 8.
-m multiple of 4 and 1 to be implemented later */
+/************************************************************************************************************/
+/***************************************** dgemm_sqp implementation******************************************/
+/************************************************************************************************************/
+/* dgemm_sqp implementation packs A matrix based on lda and m size. dgemm_sqp focuses mainly on square matrixes
+   but also supports non-square matrix. Current support is limiteed to m multiple of 8 and column storage.
+   C = AxB and C = AtxB is handled in the design. AtxB case is done by transposing A matrix while packing A.
+   In majority of use-case, alpha are +/-1, so instead of explicitly multiplying alpha its done
+   during packing itself by changing sign.
+*/
 static err_t bli_dgemm_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc, bool isTransA, double alpha)
 {
     double* aPacked;
     double* aligned = NULL;
 
 	bool pack_on = false;
-	if((m!=MX8)||(m!=lda)||isTransA)
+	if((m!=BLIS_MX8)||(m!=lda)||isTransA)
 	{
 		pack_on = true;
 	}
 
 	if(pack_on==true)
 	{
-		aligned = (double*)bli_malloc_user(sizeof(double) * k * MX8);
+		aligned = (double*)bli_malloc_user(sizeof(double) * k * BLIS_MX8);
 	}
 
-    for (gint_t i = 0; i < m; i += MX8) //this loop can be threaded. no of workitems = m/8
+    for (gint_t i = 0; i < m; i += BLIS_MX8) //this loop can be threaded. no of workitems = m/8
     {
         inc_t j = 0;
         double* ci = c + i;
@@ -677,11 +694,13 @@ void bli_sub_m(gint_t m, gint_t n, double* w, double* c)
     }
 }
 
-/****************************************************************/
-/* mmm_sqp implementation, which calls dgemm_sqp as real kernel */
-/****************************************************************/
-
-
+/************************************************************************************************************/
+/***************************************** 3m_sqp implementation   ******************************************/
+/************************************************************************************************************/
+/* 3m_sqp implementation packs A, B and C matrix and uses dgemm_sqp real kernel implementation.
+   3m_sqp focuses mainly on square matrixes but also supports non-square matrix. Current support is limiteed to
+   m multiple of 8 and column storage.
+*/
 static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc, double alpha, double beta, bool isTransA)
 {
     /* B matrix */
@@ -845,7 +864,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
     }
     ci = (double*)mci.alignedBuf;
 
-    for (inc_t i = 0; i < (2*m); i += (2*MX8)) //this loop can be threaded.
+    for (inc_t i = 0; i < (2*m); i += (2*BLIS_MX8)) //this loop can be threaded.
     {
         ////////////// operation 1 /////////////////
 
@@ -860,7 +879,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 		{
 			//A No transpose case:
 			for (gint_t p = 0; p < k; p += 1) {
-				for (gint_t ii = 0; ii < (2*MX8) ; ii += 2) { //real + imag : Rkernel needs 8 elements each.
+				for (gint_t ii = 0; ii < (2*BLIS_MX8) ; ii += 2) { //real + imag : Rkernel needs 8 elements each.
 					double ar_ = a[(p * lda) + i + ii];
 					double ai_ = a[(p * lda) + i + ii+1];
 					*par = ar_;
@@ -873,14 +892,14 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 		else
 		{
             //A Transpose case:
-			for (gint_t ii = 0; ii < MX8 ; ii++)
+			for (gint_t ii = 0; ii < BLIS_MX8 ; ii++)
 			{
 				gint_t idx = ((i/2) + ii) * lda;
 				for (gint_t s = 0; s < (k*2); s += 2)
 				{
 					double ar_ = a[ idx + s];
 					double ai_ = a[ idx + s + 1];
-					gint_t sidx = s * (MX8/2);
+					gint_t sidx = s * (BLIS_MX8/2);
 					*(par + sidx + ii) = ar_;
 					*(pai + sidx + ii) = ai_;
 					*(pas + sidx + ii) = ar_ + ai_;
@@ -898,7 +917,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 			{
 				for (j = 0; j < n; j++)
                 {
-					for (gint_t ii = 0; ii < (2*MX8); ii += 2)
+					for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
                     {
 						double cr_ = c[(j * ldc) + i + ii];
 						double ci_ = c[(j * ldc) + i + ii + 1];
@@ -913,7 +932,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
                 //beta = -1.0
 				for (j = 0; j < n; j++)
                 {
-					for (gint_t ii = 0; ii < (2*MX8); ii += 2)
+					for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
                     {
 						double cr_ = -c[(j * ldc) + i + ii];
 						double ci_ = -c[(j * ldc) + i + ii + 1];
@@ -928,7 +947,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 		{
 			for (j = 0; j < n; j++)
             {
-				for (gint_t ii = 0; ii < (2*MX8); ii += 2)
+				for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
                 {
 					double cr_ = beta*c[(j * ldc) + i + ii];
 					double ci_ = beta*c[(j * ldc) + i + ii + 1];
@@ -940,7 +959,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 		}
 
         //Ci := rgemm( SA, SB, Ci )
-        bli_dgemm_m8(MX8, n, k, as, MX8, bs, k, ci, MX8, false, 1.0);
+        bli_dgemm_m8(BLIS_MX8, n, k, as, BLIS_MX8, bs, k, ci, BLIS_MX8, false, 1.0);
 
 
 
@@ -948,18 +967,18 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         //Wr: = dgemm_sqp(Ar, Br, 0)  // Wr output 8xn
         double* wr = w;
         for (j = 0; j < n; j++) {
-            for (gint_t ii = 0; ii < MX8; ii += 1) {
+            for (gint_t ii = 0; ii < BLIS_MX8; ii += 1) {
                 *wr = 0;
                 wr++;
             }
         }
         wr = w;
 
-        bli_dgemm_m8(MX8, n, k, ar, MX8, br, k, wr, MX8, false, 1.0);
+        bli_dgemm_m8(BLIS_MX8, n, k, ar, BLIS_MX8, br, k, wr, BLIS_MX8, false, 1.0);
         //Cr : = addm(Wr, Cr)
-        bli_add_m(MX8, n, wr, cr);
+        bli_add_m(BLIS_MX8, n, wr, cr);
         //Ci : = subm(Wr, Ci)
-        bli_sub_m(MX8, n, wr, ci);
+        bli_sub_m(BLIS_MX8, n, wr, ci);
 
 
 
@@ -968,18 +987,18 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         //Wi : = dgemm_sqp(Ai, Bi, 0)  // Wi output 8xn
         double* wi = w;
         for (j = 0; j < n; j++) {
-            for (gint_t ii = 0; ii < MX8; ii += 1) {
+            for (gint_t ii = 0; ii < BLIS_MX8; ii += 1) {
                 *wi = 0;
                 wi++;
             }
         }
         wi = w;
 
-        bli_dgemm_m8(MX8, n, k, ai, MX8, bi, k, wi, MX8, false, 1.0);
+        bli_dgemm_m8(BLIS_MX8, n, k, ai, BLIS_MX8, bi, k, wi, BLIS_MX8, false, 1.0);
         //Cr : = subm(Wi, Cr)
-        bli_sub_m(MX8, n, wi, cr);
+        bli_sub_m(BLIS_MX8, n, wi, cr);
         //Ci : = subm(Wi, Ci)
-        bli_sub_m(MX8, n, wi, ci);
+        bli_sub_m(BLIS_MX8, n, wi, ci);
 
 
         pcr = cr;
@@ -987,7 +1006,7 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 
         for (j = 0; j < n; j++)
         {
-            for (gint_t ii = 0; ii < (2*MX8); ii += 2)
+            for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
             {
                 c[(j * ldc) + i + ii]     = *pcr;
                 c[(j * ldc) + i + ii + 1] = *pci;
