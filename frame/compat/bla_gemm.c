@@ -452,8 +452,28 @@ void dgemm_
     bli_obj_set_conjtrans(blis_transb, &bo);
 
     //cntx_t* cntx = bli_gks_query_cntx();
+    dim_t nt = bli_thread_get_num_threads(); // get number of threads
+    if (nt > 1)
+      {
+	// Will call parallelized dgemm code - sup & native
+	PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+		(
+			&alphao,
+			&ao,
+			&bo,
+			&betao,
+			&co,
+			NULL,
+			NULL
+		 );
 
-    //if ( (m0 == 128) && (n0 > 2) )
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	/* Finalize BLIS. */
+	bli_finalize_auto();
+	return;
+      }
+
+    // The code below will be called when number of threads = 1.
 
     if (bli_is_notrans(blis_transa))
       {
@@ -582,6 +602,30 @@ void zgemm_
 
 	bli_obj_set_conjtrans( blis_transa, &ao );
 	bli_obj_set_conjtrans( blis_transb, &bo );
+
+	dim_t nt = bli_thread_get_num_threads(); // get number of threads
+	if (nt > 1)
+	  {
+	    // Will call parallelized zgemm code - sup & native
+	    PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+	      (
+	       &alphao,
+	       &ao,
+	       &bo,
+	       &betao,
+	       &co,
+	       NULL,
+	       NULL
+	       );
+
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    /* Finalize BLIS. */
+	    bli_finalize_auto();
+	    return;
+	  }
+
+    // The code below will be called when number of threads = 1.
+
 
 	dim_t m8rem = m0&7;
 	if( ((blis_transa==BLIS_TRANSPOSE) || (blis_transa==BLIS_NO_TRANSPOSE)) && (blis_transb==BLIS_NO_TRANSPOSE) &&(m8rem==0)&&(n0>40))
