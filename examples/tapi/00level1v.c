@@ -175,7 +175,7 @@ int main( int argc, char** argv )
 	free( y );
 	free( z );
 	free( w );
-	free( z );
+	free( a );
 
 	return 0;
 }
