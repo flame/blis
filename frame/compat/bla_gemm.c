@@ -218,7 +218,6 @@ void PASTEF77(ch,blasname) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }
-
 #endif
 
 #ifdef BLIS_ENABLE_BLAS
