@@ -475,28 +475,42 @@ void dgemm_
 
     // The code below will be called when number of threads = 1.
 
-    if (bli_is_notrans(blis_transa))
+    if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
       {
-	if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
+	err_t status;
+	if (bli_is_notrans(blis_transa))
 	  {
-	    err_t status =  bli_dgemm_small( &alphao,
-					     &ao,
-					     &bo,
-					     &betao,
-					     &co,
-					     NULL, //cntx,
-					     NULL
-					     );
-	    if (status == BLIS_SUCCESS)
-	      {
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-		/* Finalize BLIS. */
-		bli_finalize_auto();
+	    status =  bli_dgemm_small( &alphao,
+					   &ao,
+					   &bo,
+					   &betao,
+					   &co,
+					   NULL, //cntx,
+					   NULL
+					   );
+	  }
+	else
+	  {
+	    status =  bli_dgemm_small_At ( &alphao,
+					           &ao,
+					           &bo,
+					           &betao,
+					           &co,
+					           NULL, //cntx,
+					           NULL
+					         );
+	  }
 
-		return;
-	      }
+	if (status == BLIS_SUCCESS)
+	  {
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    /* Finalize BLIS. */
+	    bli_finalize_auto();
+
+	    return;
 	  }
       }
+
 
     err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 	if (status == BLIS_SUCCESS)
