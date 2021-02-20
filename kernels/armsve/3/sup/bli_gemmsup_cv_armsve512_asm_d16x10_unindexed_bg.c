@@ -151,11 +151,41 @@
 #define DGEMM_2VX10_MKER_LOOP_PREFETCH_CCOL_5X_2(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,ACOLFH,ACOLLH,ADDRC,LDC,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,ADDRB,TDB) \
   DGEMM_2VX10_MKER_LOOP_PREFETCH_CCOL_5X_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,ACOLFH,ACOLLH,ADDRC,LDC,BV2,BV3,BV4,BV5,BV6,BV7,BV0,BV1,ADDRB,TDB)
 
+#ifndef _A64FX
+#define DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(ZF,PFST,PLFT,ADDRB,TDB,TAG) \
+" index           "#ZF".d, xzr, "#TDB"            \n\t" /* Prefetch B the same line... */ \
+" add             x22, x16, "#ADDRB"              \n\t" /* For the next microkernel. */ \
+" prfd            PLDL1KEEP, "#PFST", [x22, "#ZF".d, lsl #3] \n\t" /* [0:8] */ \
+" madd            x22, "#TDB", x12, x22           \n\t" \
+" prfd            PLDL1KEEP, "#PLFT", [x22, "#ZF".d, lsl #3] \n\t" /* [8:10] */ \
+" add             x22, x17, "#ADDRB"              \n\t" /* For the next micropanel. */ \
+" prfd            PLDL2KEEP, "#PFST", [x22, "#ZF".d, lsl #3] \n\t" /* [0:8] */ \
+" madd            x22, "#TDB", x12, x22           \n\t" \
+" prfd            PLDL2KEEP, "#PLFT", [x22, "#ZF".d, lsl #3] \n\t" /* [8:10] */
+#else
+#define DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(ZF,PFST,PLFT,ADDRB,TDB,TAG) \
+" index           "#ZF".d, xzr, "#TDB"            \n\t" \
+" add             x22, x16, "#ADDRB"              \n\t" \
+" mov             x27, 0x"#TAG"                   \n\t" \
+" lsl             x27, x27, #56                   \n\t" \
+" orr             x22, x22, x27                   \n\t" \
+" prfd            PLDL1KEEP, "#PFST", [x22, "#ZF".d, lsl #3] \n\t" /* [0:8] */ \
+" madd            x22, "#TDB", x12, x22           \n\t" \
+" prfd            PLDL1KEEP, "#PLFT", [x22, "#ZF".d, lsl #3] \n\t" /* [8:10] */ \
+" add             x22, x17, "#ADDRB"              \n\t" \
+" mov             x27, 0x"#TAG"                   \n\t" \
+" lsl             x27, x27, #56                   \n\t" \
+" orr             x22, x22, x27                   \n\t" \
+" prfd            PLDL2KEEP, "#PFST", [x22, "#ZF".d, lsl #3] \n\t" /* [0:8] */ \
+" madd            x22, "#TDB", x12, x22           \n\t" \
+" prfd            PLDL2KEEP, "#PLFT", [x22, "#ZF".d, lsl #3] \n\t" /* [8:10] */
+#endif
+
 /*
    o This implementation uses unindexed FMLA instructions in its kernel.
    o Runnable on ARMv8a with SVE 512 feature compiled with aarch64 GCC.
 */
-void bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
+void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
      (
        uint64_t            conja,
        uint64_t            conjb,
@@ -163,8 +193,8 @@ void bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
        uint64_t            k_mker,
        uint64_t            k_left,
        double*    restrict alpha,
-       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a,
-       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b,
+       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a, uint64_t ps_a,
+       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b, uint64_t ps_b,
        double*    restrict beta,
        double*    restrict caddr, uint64_t rs_c, uint64_t cs_c,
        double*             a_next,
@@ -195,6 +225,8 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
 {
   void* a_next0 = bli_auxinfo_next_a( data );
   void* b_next0 = bli_auxinfo_next_b( data );
+  uint64_t ps_a = bli_auxinfo_ps_a( data );
+  uint64_t ps_b = bli_auxinfo_ps_b( data );
 
   dim_t m0_mker = m0 / 16;
   dim_t m0_left = m0 % 16;
@@ -202,25 +234,30 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   dim_t n0_left = n0 % 10;
 
   // Edge cases.
-#define A(i, j) a[ (i)*rs_a0 + (j)*cs_a0 ]
-#define B(i, j) b[ (i)*rs_b0 + (j)*cs_b0 ]
-#define C(i, j) c[ (i)*rs_c0 + (j)*cs_c0 ]
   if ( m0_left )
   {
     ++m0_mker;
   }
   if ( n0_left )
   {
-    // C[0:m0, n0_mker*10:n0]
-    for (dim_t j = n0_mker*10; j < n0; ++j)
-      for (dim_t l = 0; l < k0; ++l) {
-        double Blj = B(l, j) * *alpha;
-        for (dim_t i = 0; i < m0; ++i) {
-          if (l == 0)
-            C(i, j) *= *beta;
-          C(i, j) += A(i, l) * Blj;
-        }
-      }
+    // A[:, ::]
+    // B[::, n0_mker*10:n0] => n0_mker * 10 panels.
+    // C[: , n0_mker*10:n0]
+    double *ai = a;
+    double *bi = b + n0_mker * ps_b;
+    double *ci = c + 0 * rs_c0 + n0_mker * 10 * cs_c0;
+    bli_dgemmsup_c_a64fx_ref // TODO: Fix function name.
+    (
+      conja, conjb,
+      m0, n0_left, k0,
+      alpha,
+      ai, rs_a0, cs_a0,
+      bi, rs_b0, cs_b0,
+      beta,
+      ci, rs_c0, cs_c0,
+      data, // Ensure this is not used.
+      cntx
+    );
   }
   // Return if it's a pure edge case.
   if ( !(m0_mker * n0_mker) )
@@ -235,13 +272,14 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   // Set A's prefetch controller and prefetch distance.
   uint64_t pf_ctrl_a, pf_dist_a;
   uint64_t pf_ctrl_b, pf_dist_b;
-  pf_ctrl_a = ((uint64_t)0x9 << 60) | (0x8);
+  pf_ctrl_a = ((uint64_t)0x8 << 60) | (0x8);
   pf_dist_a =((cs_a0 * 8) << 32) |
               (cs_a0 * 8 * 4);
   if ((cs_b0 * 8) & ((uint64_t)0x3f << 58))
-    pf_ctrl_b = ((uint64_t)0x9 << 60) | (0x8);
+    // TODO: Handle this situation.
+    pf_ctrl_b = ((uint64_t)0x8 << 60) | (0x8);
   else
-    pf_ctrl_b = ((uint64_t)0x9 << 60) | (cs_b0 * 8);
+    pf_ctrl_b = ((uint64_t)0x8 << 60) | (cs_b0 * 8);
   pf_dist_b =((rs_b0 * 8) << 32) |
               (rs_b0 * 8 * 4);
 
@@ -271,38 +309,29 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
   uint64_t rs_b   = rs_b0;
   uint64_t cs_b   = cs_b0;
 
-  for ( int64_t in0_mker = 0; in0_mker < n0_mker; ++in0_mker )
-    for ( int64_t im0_mker = 0; im0_mker < m0_mker; ++im0_mker )
+  for ( int64_t im0_mker = 0; im0_mker < m0_mker; ++im0_mker )
+    for ( int64_t in0_mker = 0; in0_mker < n0_mker; ++in0_mker )
     {
-      uint64_t m_loc;
-      m_loc = 16;
+      uint64_t m_loc = 16;
       if ( m0_left && im0_mker == m0_mker - 1 )
       {
         // Edge case.
         m_loc = m0_left;
       }
 
-      double *aaddr = &A(im0_mker*16, 0);
-      double *baddr = &B(0, in0_mker*10);
-      double *caddr = &C(im0_mker*16, in0_mker*10);
+      double *ai = a + im0_mker * 16 * rs_a;
+      double *bi = b + in0_mker * ps_b;
+      double *ci = c + im0_mker * 16 * rs_a + in0_mker * 10 * cs_a;
 
-      int64_t im0_mker_next = im0_mker + 1;
-      int64_t in0_mker_next = in0_mker;
-      if ( im0_mker_next >= m0_mker )
-      {
-        im0_mker_next = 0;
-        in0_mker_next += 1;
-      }
-      void* a_next = &A(im0_mker_next*16, 0);
-      void* b_next = &B(0, in0_mker_next*10);
-      if ( in0_mker_next >= n0_mker )
+      void* a_next = NULL;
+      void* b_next = NULL;
+      // NOTE: Prefetches at this moment are based on an assumption that
+      //       im0_mker == 1.
+      if ( in0_mker == n0_mker - 1 )
       {
         a_next = a_next0;
         b_next = b_next0;
       }
-#undef A
-#undef B
-#undef C
 
       bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexed_bg
       (
@@ -310,10 +339,10 @@ void __attribute__ ((optimize(1))) bli_dgemmsup_cv_armsve512_16x10_unindexed_bg
         conjb != BLIS_NO_CONJUGATE,
         m_loc, k_mker, k_left,
         alpha,
-        aaddr, rs_a, cs_a,
-        baddr, rs_b, cs_b,
+        ai, rs_a, cs_a, ps_a,
+        bi, rs_b, cs_b, ps_b,
         beta,
-        caddr, rs_c, cs_c,
+        ci, rs_c, cs_c,
         a_next,
         b_next
       );
@@ -329,43 +358,55 @@ void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexe
        uint64_t            k_mker,
        uint64_t            k_left,
        double*    restrict alpha,
-       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a,
-       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b,
+       double*    restrict aaddr, uint64_t rs_a, uint64_t cs_a, uint64_t ps_a,
+       double*    restrict baddr, uint64_t rs_b, uint64_t cs_b, uint64_t ps_b,
        double*    restrict beta,
        double*    restrict caddr, uint64_t rs_c, uint64_t cs_c,
        double*             a_next,
        double*             b_next
      )
 { __asm__ volatile (
-" ldr             x9, %[m_loc]                    \n\t" // Shape M, from input
+" ldr             x9,  %[m_loc]                   \n\t" // Shape M, from input
 "                                                 \n\t" // Shape N is fixed to be 10
-" ldr             x8, %[k_left]                   \n\t" // Shape K to be contracted
+" ldr             x8,  %[k_left]                  \n\t" // Shape K to be contracted
 " ldr             x21, %[k_mker]                  \n\t" // Size of K-microblock
 "                                                 \n\t"
+" ldr             x6,  %[caddr]                   \n\t" // Load address of C
 " ldr             x20, %[rs_c]                    \n\t" // Row-skip of C
-" ldr             x6, %[caddr]                    \n\t" // Load address of C
-" ldr             x7, %[cs_c]                     \n\t" // LdC, which is called column-skip in BLIS
+" ldr             x7,  %[cs_c]                    \n\t" // LdC, which is called column-skip in BLIS
 " cmp             x20, #1                         \n\t"
 "                                                 \n\t"
-" ldr             x0, %[alpha]                    \n\t" // Alpha address
-" ldr             x1, %[beta]                     \n\t" // Beta address
+" ldr             x0,  %[alpha]                   \n\t" // Alpha address
+" ldr             x1,  %[beta]                    \n\t" // Beta address
 "                                                 \n\t"
-" ldr             x2, %[aaddr]                    \n\t" // Load address of A
-" ldr             x3, %[cs_a]                     \n\t" // Leading dimension of A
-" ldr             x4, %[baddr]                    \n\t" // Load address of B
-" ldr             x5, %[rs_b]                     \n\t" // Leading dimension of B
+" ldr             x2,  %[aaddr]                   \n\t" // Load address of A
+" ldr             x3,  %[cs_a]                    \n\t" // Leading dimension of A
+"                                                 \n\t" // Row-skip of A is fixed to be 1.
+" ldr             x4,  %[baddr]                   \n\t" // Load address of B
+" ldr             x5,  %[rs_b]                    \n\t" // Leading dimension of B
 " ldr             x25, %[cs_b]                    \n\t" // Trailing dimension of B
+"                                                 \n\t"
+" ldr             x17, %[ps_b]                    \n\t" // B's panel stride
+" ldr             x18, %[a_next]                  \n\t" // Pointer to next A pack
+" ldr             x19, %[b_next]                  \n\t" // Pointer to next B pack
+"                                                 \n\t"
 #ifdef _A64FX
 " mov x26, 0x3      \n\t" // A64FX: Use cache sector 3 for C_r microtile
 " lsl x26, x26, 56  \n\t"
 " orr x6, x6, x26   \n\t"
 "                   \n\t"
-" mov x26, 0xb      \n\t" // A64FX: Prefetch injection mode for B_r microtile
-" lsl x26, x26, 60  \n\t" //        according to control#3 register.
+// " mov x26, 0xb      \n\t" // A64FX: Prefetch injection mode for B_r microtile
+// " lsl x26, x26, 60  \n\t" //        according to control#3 register.
+" mov x26, 0x6      \n\t" // A64FX: Disable hardware prefetching for B.
+" lsl x26, x26, 60  \n\t" //
+// " mov x26, 0x2      \n\t" // A64FX: Tag B address
+// " lsl x26, x26, 56  \n\t" //        as 2.
 " orr x4, x4, x26   \n\t"
 "                   \n\t"
-" mov x26, 0xa      \n\t" // A64FX: Prefetch injection mode for A_r microtile
-" lsl x26, x26, 60  \n\t" //        according to control#2 register.
+// " mov x26, 0xa      \n\t" // A64FX: Prefetch injection mode for A_r microtile
+// " lsl x26, x26, 60  \n\t" //        according to control#2 register.
+" mov x26, 0x1      \n\t" // A64FX: Tag A address
+" lsl x26, x26, 56  \n\t" //        as 1.
 " orr x2, x2, x26   \n\t"
 #endif
 "                                                 \n\t"
@@ -467,48 +508,25 @@ void __attribute__ ((noinline)) bli_dgemmsup_cv_armsve512_16x10_asm_ukr_unindexe
 "                                                 \n\t"
 " END_C_PRFML2:                                   \n\t"
 "                                                 \n\t"
-" ldr             x18, %[a_next]                  \n\t" // Pointer to next A pack
-" ldr             x19, %[b_next]                  \n\t" // Pointer to next B pack
-" mov             x12, #8                         \n\t" // Double in bytes
-"                                                 \n\t"
+" mov             x12, #2                         \n\t" // 10-8=2.
 " mov             x11, xzr                        \n\t"
 " incd            x11                             \n\t" // Determine vector length, in doubles.
 "                                                 \n\t"
 " whilelo         p0.d, xzr, x9                   \n\t" // First half from M argument.
 " whilelo         p1.d, x11, x9                   \n\t" // Second half, could be all-false.
+" whilelo         p2.d, xzr, x12                  \n\t" // 10-8=2.
+"                                                 \n\t"
+" mov             x12, #8                         \n\t" // Double in bytes
+" mov             x16, #4                         \n\t"
+" madd            x16, x16, x12, xzr              \n\t"
+" madd            x16, x16, x5, xzr               \n\t" // K=4 microkernel skip in bits.
 " fmov            d0, #1.0                        \n\t" // Exact floating-point 1.0.
 " fmov            x14, d0                         \n\t" // Hard float to avoid conflict with SVE.
-"                                                 \n\t"
-" prfm            PLDL1STRM, [x2]                 \n\t" // Prefetch A for first microkernel
-" prfm            PLDL1STRM, [x2, #64]            \n\t"
-" prfm            PLDL1STRM, [x2, #128]           \n\t"
-// " prfm            PLDL1STRM, [x2, #192]           \n\t"
-// " prfm            PLDL1STRM, [x2, #256]           \n\t"
-// " prfm            PLDL1STRM, [x2, #320]           \n\t"
-// " prfm            PLDL1STRM, [x2, #384]           \n\t"
-// " prfm            PLDL1STRM, [x2, #448]           \n\t"
-" prfm            PLDL1STRM, [x4]                 \n\t" // Prefetch B for first microkernel
-" prfm            PLDL1STRM, [x4, #64]            \n\t"
-" prfm            PLDL1STRM, [x4, #128]           \n\t"
-// " prfm            PLDL1STRM, [x4, #192]           \n\t"
-// " prfm            PLDL1STRM, [x4, #256]           \n\t"
-// " prfm            PLDL1STRM, [x4, #320]           \n\t"
 "                                                 \n\t"
 "                                                 \n\t" // SVE Register configuration:
 "                                                 \n\t" // Z[30-31]: A columns
 "                                                 \n\t" // Z[0-5]: B elements broadcasted
 "                                                 \n\t" // Z[6-29]: C change buffer
-"                                                 \n\t"
-" fmov            z6.d, p0/m, #0.0                \n\t"
-" fmov            z7.d, p0/m, #0.0                \n\t"
-" fmov            z8.d, p0/m, #0.0                \n\t"
-" fmov            z9.d, p0/m, #0.0                \n\t"
-" fmov            z10.d, p0/m, #0.0               \n\t"
-" fmov            z11.d, p0/m, #0.0               \n\t"
-" fmov            z12.d, p0/m, #0.0               \n\t"
-" fmov            z13.d, p0/m, #0.0               \n\t"
-" fmov            z14.d, p0/m, #0.0               \n\t"
-" fmov            z15.d, p0/m, #0.0               \n\t"
 "                                                 \n\t"
 " FIRST_BCOL:                                     \n\t" // Load B[0:8, 0].
 " madd            x26, x25, x12, xzr              \n\t" // B's row stride in bits.
@@ -531,6 +549,17 @@ DGEMM_BADDR_GENERIC(x24,x4,x26,7)
 " ld1d            z28.d, p0/z, [x2]               \n\t"
 " ld1d            z29.d, p1/z, [x2, #1, MUL VL]   \n\t"
 "                                                 \n\t"
+" CLEAR_CCOLS:                                    \n\t" // Clear registers.
+" fmov            z6.d, p0/m, #0.0                \n\t"
+" fmov            z7.d, p0/m, #0.0                \n\t"
+" fmov            z8.d, p0/m, #0.0                \n\t"
+" fmov            z9.d, p0/m, #0.0                \n\t"
+" fmov            z10.d, p0/m, #0.0               \n\t"
+" fmov            z11.d, p0/m, #0.0               \n\t"
+" fmov            z12.d, p0/m, #0.0               \n\t"
+" fmov            z13.d, p0/m, #0.0               \n\t"
+" fmov            z14.d, p0/m, #0.0               \n\t"
+" fmov            z15.d, p0/m, #0.0               \n\t"
 " fmov            z16.d, p0/m, #0.0               \n\t"
 " fmov            z17.d, p0/m, #0.0               \n\t"
 " fmov            z18.d, p0/m, #0.0               \n\t"
@@ -550,33 +579,19 @@ DGEMM_BADDR_GENERIC(x24,x4,x26,7)
 " cmp             x22, #1                         \n\t"
 " b.eq            K_MKER_LOOP_FINAL               \n\t"
 "                                                 \n\t"
+DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(z30,p0,p2,x4,x25,2)
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " ld1d            z30.d, p0/z, [x2]               \n\t"
 " ld1d            z31.d, p1/z, [x2, #1, MUL VL]   \n\t"
 DGEMM_2VX10_MKER_LOOP_PLAIN_1(z6,z8,z10,z12,z14,z16,z18,z20,z22,z24,z7,z9,z11,z13,z15,z17,z19,z21,z23,z25,z28,z29,z0,z1,z2,z3,z4,z5,z26,z27,x4,x25)
 "                                                 \n\t"
+DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(z28,p0,p2,x4,x25,4)
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " ld1d            z28.d, p0/z, [x2]               \n\t"
 " ld1d            z29.d, p1/z, [x2, #1, MUL VL]   \n\t"
 DGEMM_2VX10_MKER_LOOP_PLAIN_2(z6,z8,z10,z12,z14,z16,z18,z20,z22,z24,z7,z9,z11,z13,z15,z17,z19,z21,z23,z25,z30,z31,z0,z1,z2,z3,z4,z5,z26,z27,x4,x25)
 "                                                 \n\t"
-// " prfm            PLDL1STRM, [x2, #384]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #448]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #512]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #576]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #640]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #704]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #768]           \n\t" // [NO_REPEAT] Prefetch A
-// " prfm            PLDL1STRM, [x2, #832]           \n\t" // [NO_REPEAT] Prefetch A
-// "                                                 \n\t"
-// TODO: Tune and prefetch B.
-// " prfm            PLDL1STRM, [x4, #192]           \n\t" // [NO_REPEAT] Prefetch B
-// " prfm            PLDL1STRM, [x4, #256]           \n\t" // [NO_REPEAT] Prefetch B
-// " prfm            PLDL1STRM, [x4, #320]           \n\t" // [NO_REPEAT] Prefetch B
-// " prfm            PLDL1STRM, [x4, #384]           \n\t" // [NO_REPEAT] Prefetch B
-// " prfm            PLDL1STRM, [x4, #448]           \n\t" // [NO_REPEAT] Prefetch B
-// " prfm            PLDL1STRM, [x4, #512]           \n\t" // [NO_REPEAT] Prefetch B
-"                                                 \n\t"
+DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(z30,p0,p2,x4,x25,5)
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " ld1d            z30.d, p0/z, [x2]               \n\t"
 " ld1d            z31.d, p1/z, [x2, #1, MUL VL]   \n\t"
@@ -586,6 +601,7 @@ DGEMM_2VX10_MKER_LOOP_PLAIN_3(z6,z8,z10,z12,z14,z16,z18,z20,z22,z24,z7,z9,z11,z1
 " adds            x10, x10, x8                    \n\t" //  check if this iteration is final
 " b.eq            FIN_LOOP_POPPED                 \n\t"
 "                                                 \n\t"
+DGEMM_2VX10_BGEN_PREFETCH_NEXT_MKER(z28,p0,p2,x4,x25,6)
 " madd            x2, x3, x12, x2                 \n\t" // A address forward
 " ld1d            z28.d, p0/z, [x2]               \n\t"
 " ld1d            z29.d, p1/z, [x2, #1, MUL VL]   \n\t"
@@ -696,12 +712,10 @@ DGEMM_FMLA2(z24,z25,z30,z31,z27) // Column 9
 " ld1rd           z31.d, p0/z, [x1]               \n\t" // Beta, to the vector.
 "                                                 \n\t"
 " PRFM_NEXT:                                      \n\t" // Prefetch next A and B.
-" prfm            PLDL2STRM, [x18]                \n\t" // Prefetch 2 panels to
-// " prfm            PLDL2STRM, [x18, #64]           \n\t" //   "confirm" the stream prefetcher.
-// " prfm            PLDL2STRM, [x18, #128]          \n\t"
-" prfm            PLDL2STRM, [x19]                \n\t"
-// " prfm            PLDL2STRM, [x19, #64]           \n\t"
-// " prfm            PLDL2STRM, [x19, #128]          \n\t"
+" prfm            PLDL2KEEP, [x18]                \n\t" // Prefetch 2 panels to
+" prfm            PLDL2KEEP, [x18, #64]           \n\t" //   "confirm" the stream prefetcher.
+" prfm            PLDL2KEEP, [x19]                \n\t"
+" prfm            PLDL2KEEP, [x19, #64]           \n\t"
 "                                                 \n\t"
 "                                                 \n\t"
 " cmp             x14, x15                        \n\t" // (R&)Write data back to C memory.
@@ -1017,13 +1031,14 @@ DGEMM_FMLA2(z24,z25,z30,z31,z27) // Column 9
  [cs_a]   "m" (cs_a),   // 10
  [rs_b]   "m" (rs_b),   // 11
  [cs_b]   "m" (cs_b),   // 12
- [a_next] "m" (a_next), // 13
- [b_next] "m" (b_next)  // 14
+ [ps_b]   "m" (ps_b),   // 13
+ [a_next] "m" (a_next), // 14
+ [b_next] "m" (b_next)  // 15
 :// Register clobber list
  "x0","x1","x2","x3","x4","x5","x6","x7","x8",
  "x9","x10","x11","x12","x14","x15",
  "x16","x17","x18","x19","x20","x21","x22","x23",
- "x24","x25", "x26", ///< Additional registers used when this kernel becomes a sup.
+ "x24","x25", "x26", "x27", ///< Additional registers used when this kernel becomes a sup.
  "z0","z1","z2","z3","z4","z5","z6","z7",
  "z8","z9","z10","z11","z12","z13","z14","z15",
  "z16","z17","z18","z19",
