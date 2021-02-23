@@ -206,9 +206,9 @@
 #include "bla_imatcopy.h"
 
 // -- Fortran-compatible APIs to BLIS functions --
-
+#ifndef _WIN32
 #include "b77_thread.h"
-
+#endif
 
 // -- Auxiliary Routines --
 

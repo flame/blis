@@ -2,7 +2,6 @@
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
-${CMAKE_CURRENT_SOURCE_DIR}/cblas.h
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_caxpy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ccopy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_cdotc_sub.c
@@ -72,7 +71,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_dtrsm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_dtrsv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_dzasum.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_dznrm2.c
-${CMAKE_CURRENT_SOURCE_DIR}/cblas_f77.h
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_globals.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_icamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_idamax.c

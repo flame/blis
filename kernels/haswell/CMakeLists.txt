@@ -1,8 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
-
-target_sources("${PROJECT_NAME}" 
-     PRIVATE 
-	 ${CMAKE_CURRENT_SOURCE_DIR}/bli_kernels_haswell.h)
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 add_subdirectory(3)
 

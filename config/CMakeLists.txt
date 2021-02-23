@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc ##
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved. ##
 
 if(${TARGET_ARCH} STREQUAL zen3)
 message("The configuration is : ${TARGET_ARCH}")
@@ -9,6 +9,9 @@ add_subdirectory(zen2)
 elseif(${TARGET_ARCH} STREQUAL zen)
 message("The configuration is : ${TARGET_ARCH}")
 add_subdirectory(zen)
+elseif(${TARGET_ARCH} STREQUAL amd64)
+message("The configuration is : ${TARGET_ARCH}")
+add_subdirectory(amd64)
 else(${TARGET_ARCH} STREQUAL haswell)
 message("The configuration is : ${TARGET_ARCH}")
 add_subdirectory(haswell)

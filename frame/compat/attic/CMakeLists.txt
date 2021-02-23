@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
@@ -36,6 +36,6 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_tpmv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_tpmv.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_tpsv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_tpsv.h
-	)
-	
+    )
+
 

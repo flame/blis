@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 add_subdirectory("thread")
 add_subdirectory("base")
