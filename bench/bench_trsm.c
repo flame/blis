@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,6 +151,10 @@ int main( int argc, char** argv )
             transa = BLIS_TRANSPOSE;
         else if('n' == transa_c || 'N' == transa_c)
             transa = BLIS_NO_TRANSPOSE;
+        else if ('c' == transa_c || 'C' == transa_c)
+            transa = BLIS_CONJ_NO_TRANSPOSE;
+        else if ('h' == transa_c || 'H' == transa_c) 
+            transa = BLIS_CONJ_TRANSPOSE;
         else
         {
             printf("Invalid entry for the argument 'transa':%c\n",transa_c);
