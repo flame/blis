@@ -135,5 +135,11 @@
 #else
 #define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
 #endif
-  
+
+// This feature enables us to achieve better performance
+// by using lesser number of threads than what is specified
+// by application for smaller sizes.
+// Disabling this feature by default.
+
+//#define AOCL_DYNAMIC
 #endif

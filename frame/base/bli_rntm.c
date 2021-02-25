@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -472,6 +473,76 @@ dim_t bli_rntm_calc_num_threads_in
 	return n_threads_in;
 }
 
+#ifdef AOCL_DYNAMIC
+//calculates the optimum number of threads using m, n, k dimensions.
+//This function modifies only the local copy of rntm with optimum threads.
+//Global rntm will remain unchanged. As a result, num_threads set by
+//application is available in global_rntm data structure.
+
+void bli_nthreads_optimum(
+		obj_t*  a,
+		obj_t*  b,
+		obj_t*  c,
+		opid_t  family,
+		rntm_t* rntm
+		)
+{
+
+	if( family == BLIS_GEMM && bli_obj_is_double(c))
+	{
+		dim_t n_threads = bli_rntm_num_threads(rntm);
+
+		dim_t m = bli_obj_length(c);
+		dim_t n = bli_obj_width(c);
+		dim_t k = bli_obj_width_after_trans(a);
+
+		dim_t n_threads_ideal;
+
+		if( k >= 128)
+		{
+			if(n <= 15) n_threads_ideal = 8;
+			else	    n_threads_ideal = 16;
+		}
+		else
+		{
+			if(m > 10000)
+			{
+				if(n >= 96) n_threads_ideal = 16;
+				else       n_threads_ideal = 8;
+			}
+			else if( m > 1000)
+			{
+				if(n < 15) n_threads_ideal = 4;
+				else       n_threads_ideal = 8;
+			}
+			else if(m > 210)
+			{
+				if(n < 10) n_threads_ideal = 1;
+				else	   n_threads_ideal = 4;
+			}
+			else if(m > 150)
+			{
+				if(n < 15) n_threads_ideal = 1;
+				else	   n_threads_ideal = 4;
+			}
+			else
+			{
+				if(n < 20) n_threads_ideal = 1;
+				else       n_threads_ideal = 4;
+			}
+		}
+
+		dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
+
+		bli_pthread_mutex_lock( &global_rntm_mutex );
+
+		bli_rntm_set_num_threads_only( n_threads_opt, rntm );
+
+		bli_pthread_mutex_unlock( &global_rntm_mutex );
+	}
+	return;
+}
+#endif
 #if 0
 	for ( ; *bszid_cur != BLIS_KR; bszid_cur++ )
 	{
