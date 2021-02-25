@@ -673,17 +673,17 @@ DGEMM_2VX10_MKER_LOOP_PLAIN_RESIDUAL(z6,z8,z10,z12,z14,z16,z18,z20,z22,z24,z7,z9
 "                                                 \n\t"
 " madd            x26, x25, x12, xzr              \n\t" // B's row stride in bits.
 DGEMM_BADDR_GENERIC(x24,x4,x26,8)
-DGEMM_FMLA2_LD1RD(z6,z7,z30,z31,z0,x24,0) // Column 0
+DGEMM_FMLA2_LD1RD(z6,z7,z28,z29,z0,x24,0) // Column 0
 DGEMM_BADDR_GENERIC(x24,x4,x26,9)
-DGEMM_FMLA2_LD1RD(z8,z9,z30,z31,z1,x24,0) // Column 1
-DGEMM_FMLA2(z10,z11,z30,z31,z2) // Column 2
-DGEMM_FMLA2(z12,z13,z30,z31,z3) // Column 3
-DGEMM_FMLA2(z14,z15,z30,z31,z4) // Column 4
-DGEMM_FMLA2(z16,z17,z30,z31,z5) // Column 5
-DGEMM_FMLA2(z18,z19,z30,z31,z26) // Column 6
-DGEMM_FMLA2(z20,z21,z30,z31,z27) // Column 7
-DGEMM_FMLA2(z22,z23,z30,z31,z0) // Column 8
-DGEMM_FMLA2(z24,z25,z30,z31,z1) // Column 9
+DGEMM_FMLA2_LD1RD(z8,z9,z28,z29,z1,x24,0) // Column 1
+DGEMM_FMLA2(z10,z11,z28,z29,z2) // Column 2
+DGEMM_FMLA2(z12,z13,z28,z29,z3) // Column 3
+DGEMM_FMLA2(z14,z15,z28,z29,z4) // Column 4
+DGEMM_FMLA2(z16,z17,z28,z29,z5) // Column 5
+DGEMM_FMLA2(z18,z19,z28,z29,z26) // Column 6
+DGEMM_FMLA2(z20,z21,z28,z29,z27) // Column 7
+DGEMM_FMLA2(z22,z23,z28,z29,z0) // Column 8
+DGEMM_FMLA2(z24,z25,z28,z29,z1) // Column 9
 " b               WRITE_MEM                       \n\t"
 "                                                 \n\t"
 " FIN_LOOP_POPPED:                                \n\t" // Final K-loop popped from inside microkernels
