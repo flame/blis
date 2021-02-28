@@ -96,11 +96,15 @@ void bli_spackm_haswell_asm_16xk
 	const uint64_t ldp    = ldp0;
 
 	const bool     gs     = ( inca0 != 1 && lda0 != 1 );
+
+	// NOTE: If/when this kernel ever supports scaling by kappa within the
+	// assembly region, this constraint should be lifted.
+	const bool     unitk  = bli_seq1( *kappa );
 	
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs )
+	if ( cdim0 == mnr && !gs && unitk )
 	{
 		begin_asm()
 		
@@ -177,10 +181,10 @@ void bli_spackm_haswell_asm_16xk
 
 
 		                                   // begin IO on rows 0-3
-		vmovups(mem(r12,         0*4), ymm4)
-		vmovups(mem(r12,  r8, 1, 0*4), ymm6)
-		vmovups(mem(r12,  r8, 2, 0*4), ymm8)
-		vmovups(mem(r12, r13, 1, 0*4), ymm10)
+		vmovups(mem(r12,         0), ymm4)
+		vmovups(mem(r12,  r8, 1, 0), ymm6)
+		vmovups(mem(r12,  r8, 2, 0), ymm8)
+		vmovups(mem(r12, r13, 1, 0), ymm10)
 
 		vunpcklps(ymm6, ymm4, ymm0)
 		vunpcklps(ymm10, ymm8, ymm1)
@@ -216,10 +220,10 @@ void bli_spackm_haswell_asm_16xk
 
 
 		                                   // begin IO on rows 4-7
-		vmovups(mem(r12,         0*4), ymm4)
-		vmovups(mem(r12,  r8, 1, 0*4), ymm6)
-		vmovups(mem(r12,  r8, 2, 0*4), ymm8)
-		vmovups(mem(r12, r13, 1, 0*4), ymm10)
+		vmovups(mem(r12,         0), ymm4)
+		vmovups(mem(r12,  r8, 1, 0), ymm6)
+		vmovups(mem(r12,  r8, 2, 0), ymm8)
+		vmovups(mem(r12, r13, 1, 0), ymm10)
 
 		vunpcklps(ymm6, ymm4, ymm0)
 		vunpcklps(ymm10, ymm8, ymm1)
@@ -255,10 +259,10 @@ void bli_spackm_haswell_asm_16xk
 
 
 		                                   // begin IO on rows 8-11
-		vmovups(mem(r12,         0*4), ymm4)
-		vmovups(mem(r12,  r8, 1, 0*4), ymm6)
-		vmovups(mem(r12,  r8, 2, 0*4), ymm8)
-		vmovups(mem(r12, r13, 1, 0*4), ymm10)
+		vmovups(mem(r12,         0), ymm4)
+		vmovups(mem(r12,  r8, 1, 0), ymm6)
+		vmovups(mem(r12,  r8, 2, 0), ymm8)
+		vmovups(mem(r12, r13, 1, 0), ymm10)
 
 		vunpcklps(ymm6, ymm4, ymm0)
 		vunpcklps(ymm10, ymm8, ymm1)
@@ -294,10 +298,10 @@ void bli_spackm_haswell_asm_16xk
 
 
 		                                   // begin IO on rows 12-15
-		vmovups(mem(r12,         0*4), ymm4)
-		vmovups(mem(r12,  r8, 1, 0*4), ymm6)
-		vmovups(mem(r12,  r8, 2, 0*4), ymm8)
-		vmovups(mem(r12, r13, 1, 0*4), ymm10)
+		vmovups(mem(r12,         0), ymm4)
+		vmovups(mem(r12,  r8, 1, 0), ymm6)
+		vmovups(mem(r12,  r8, 2, 0), ymm8)
+		vmovups(mem(r12, r13, 1, 0), ymm10)
 
 		vunpcklps(ymm6, ymm4, ymm0)
 		vunpcklps(ymm10, ymm8, ymm1)
@@ -346,14 +350,14 @@ void bli_spackm_haswell_asm_16xk
 
 		label(.SKLEFTROWU)                 // EDGE LOOP (k_left)
 
-		vmovss(mem(rax,         0*4), xmm0)
-		vmovss(mem(rax,  r8, 1, 0*4), xmm2)
-		vmovss(mem(rax,  r8, 2, 0*4), xmm4)
-		vmovss(mem(rax, r13, 1, 0*4), xmm6)
-		vmovss(mem(rax,  r8, 4, 0*4), xmm1)
-		vmovss(mem(rax, r15, 1, 0*4), xmm3)
-		vmovss(mem(rax, r13, 2, 0*4), xmm5)
-		vmovss(mem(rax, rdx, 1, 0*4), xmm7)
+		vmovss(mem(rax,         0), xmm0)
+		vmovss(mem(rax,  r8, 1, 0), xmm2)
+		vmovss(mem(rax,  r8, 2, 0), xmm4)
+		vmovss(mem(rax, r13, 1, 0), xmm6)
+		vmovss(mem(rax,  r8, 4, 0), xmm1)
+		vmovss(mem(rax, r15, 1, 0), xmm3)
+		vmovss(mem(rax, r13, 2, 0), xmm5)
+		vmovss(mem(rax, rdx, 1, 0), xmm7)
 
 		vmovss(xmm0, mem(rbx, 0*4))
 		vmovss(xmm2, mem(rbx, 1*4))
@@ -366,14 +370,14 @@ void bli_spackm_haswell_asm_16xk
 
 		lea(mem(rax, r8, 8), r12)         // r12 = a + 8*inca
 
-		vmovss(mem(r12,         0*4), xmm0)
-		vmovss(mem(r12,  r8, 1, 0*4), xmm2)
-		vmovss(mem(r12,  r8, 2, 0*4), xmm4)
-		vmovss(mem(r12, r13, 1, 0*4), xmm6)
-		vmovss(mem(r12,  r8, 4, 0*4), xmm1)
-		vmovss(mem(r12, r15, 1, 0*4), xmm3)
-		vmovss(mem(r12, r13, 2, 0*4), xmm5)
-		vmovss(mem(r12, rdx, 1, 0*4), xmm7)
+		vmovss(mem(r12,         0), xmm0)
+		vmovss(mem(r12,  r8, 1, 0), xmm2)
+		vmovss(mem(r12,  r8, 2, 0), xmm4)
+		vmovss(mem(r12, r13, 1, 0), xmm6)
+		vmovss(mem(r12,  r8, 4, 0), xmm1)
+		vmovss(mem(r12, r15, 1, 0), xmm3)
+		vmovss(mem(r12, r13, 2, 0), xmm5)
+		vmovss(mem(r12, rdx, 1, 0), xmm7)
 
 		add(r10, rax)                      // a += lda;
 
@@ -509,12 +513,8 @@ void bli_spackm_haswell_asm_16xk
 		  "memory"
 		)
 	}
-	else // if ( cdim0 < mnr || gs )
+	else // if ( cdim0 < mnr || gs || !unitk )
 	{
-		// An out-of-the-way sanity check in case someone tries to run this
-		// kernel without unit kappa.
-		if ( *kappa != 1.0 ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
 		PASTEMAC(sscal2m,BLIS_TAPI_EX_SUF)
 		(
 		  0,

@@ -97,10 +97,14 @@ void bli_dpackm_haswell_asm_6xk
 
 	const bool     gs     = ( inca0 != 1 && lda0 != 1 );
 
+	// NOTE: If/when this kernel ever supports scaling by kappa within the
+	// assembly region, this constraint should be lifted.
+	const bool     unitk  = bli_deq1( *kappa );
+
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs )
+	if ( cdim0 == mnr && !gs && unitk )
 	{
 		begin_asm()
 		
@@ -172,10 +176,10 @@ void bli_dpackm_haswell_asm_6xk
 
 		label(.DKITERROWU)                 // MAIN LOOP (k_iter)
 
-		vmovupd(mem(rax,         0*8), ymm0)
-		vmovupd(mem(rax,  r8, 1, 0*8), ymm2)
-		vmovupd(mem(rax,  r8, 2, 0*8), ymm4)
-		vmovupd(mem(rax, r12, 1, 0*8), ymm6)
+		vmovupd(mem(rax,         0), ymm0)
+		vmovupd(mem(rax,  r8, 1, 0), ymm2)
+		vmovupd(mem(rax,  r8, 2, 0), ymm4)
+		vmovupd(mem(rax, r12, 1, 0), ymm6)
 
 		vunpcklpd(ymm2, ymm0, ymm10)
 		vunpckhpd(ymm2, ymm0, ymm11)
@@ -191,8 +195,8 @@ void bli_dpackm_haswell_asm_6xk
 		vmovupd(ymm4, mem(rbx, 2*48))
 		vmovupd(ymm6, mem(rbx, 3*48))
 
-		vmovupd(mem(rax,  r8, 4, 0*8), ymm1)
-		vmovupd(mem(rax, rcx, 1, 0*8), ymm3)
+		vmovupd(mem(rax,  r8, 4, 0), ymm1)
+		vmovupd(mem(rax, rcx, 1, 0), ymm3)
 
 		add(r14, rax)                      // a += 4*lda;
 
@@ -223,12 +227,12 @@ void bli_dpackm_haswell_asm_6xk
 
 		label(.DKLEFTROWU)                 // EDGE LOOP (k_left)
 
-		vmovsd(mem(rax,         0*8), xmm0)
-		vmovsd(mem(rax,  r8, 1, 0*8), xmm2)
-		vmovsd(mem(rax,  r8, 2, 0*8), xmm4)
-		vmovsd(mem(rax, r12, 1, 0*8), xmm6)
-		vmovsd(mem(rax,  r8, 4, 0*8), xmm1)
-		vmovsd(mem(rax, rcx, 1, 0*8), xmm3)
+		vmovsd(mem(rax,         0), xmm0)
+		vmovsd(mem(rax,  r8, 1, 0), xmm2)
+		vmovsd(mem(rax,  r8, 2, 0), xmm4)
+		vmovsd(mem(rax, r12, 1, 0), xmm6)
+		vmovsd(mem(rax,  r8, 4, 0), xmm1)
+		vmovsd(mem(rax, rcx, 1, 0), xmm3)
 
 		add(r10, rax)                      // a += lda;
 
@@ -340,12 +344,8 @@ void bli_dpackm_haswell_asm_6xk
 		  "memory"
 		)
 	}
-	else // if ( cdim0 < mnr || gs )
+	else // if ( cdim0 < mnr || gs || !unitk )
 	{
-		// An out-of-the-way sanity check in case someone tries to run this
-		// kernel without unit kappa.
-		if ( *kappa != 1.0 ) bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
 		PASTEMAC(dscal2m,BLIS_TAPI_EX_SUF)
 		(
 		  0,

@@ -39,23 +39,23 @@
 #include "bli_x86_asm_macros.h"
 
 // Prototype reference packm kernels.
-PACKM_KER_PROT( double,   d, packm_8xk_haswell_ref )
+PACKM_KER_PROT( dcomplex, z, packm_4xk_haswell_ref )
 
-void bli_dpackm_haswell_asm_8xk
+void bli_zpackm_haswell_asm_4xk
      (
        conj_t              conja,
        pack_t              schema,
        dim_t               cdim0,
        dim_t               k0,
        dim_t               k0_max,
-       double*    restrict kappa,
-       double*    restrict a, inc_t inca0, inc_t lda0,
-       double*    restrict p,              inc_t ldp0,
+       dcomplex*  restrict kappa,
+       dcomplex*  restrict a, inc_t inca0, inc_t lda0,
+       dcomplex*  restrict p,              inc_t ldp0,
        cntx_t*    restrict cntx
      )
 {
 #if 0
-	bli_dpackm_8xk_haswell_ref
+	bli_zpackm_4xk_haswell_ref
 	(
 	  conja, schema, cdim0, k0, k0_max,
 	  kappa, a, inca0, lda0, p, ldp0, cntx
@@ -64,7 +64,7 @@ void bli_dpackm_haswell_asm_8xk
 #endif
 
 	// This is the panel dimension assumed by the packm kernel.
-	const dim_t      mnr   = 8;
+	const dim_t      mnr   = 4;
 
 	// This is the "packing" dimension assumed by the packm kernel.
 	// This should be equal to ldp.
@@ -99,12 +99,12 @@ void bli_dpackm_haswell_asm_8xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_deq1( *kappa );
+	const bool     unitk  = bli_zeq1( *kappa );
 
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs && unitk )
+	if ( cdim0 == mnr && !gs && !bli_does_conj( conja ) && unitk )
 	{
 		begin_asm()
 		
@@ -112,169 +112,171 @@ void bli_dpackm_haswell_asm_8xk
 
 		mov(var(inca), r8)                 // load inca
 		mov(var(lda), r10)                 // load lda
-		lea(mem(, r8,  8), r8)             // inca *= sizeof(double)
-		lea(mem(, r10, 8), r10)            // lda *= sizeof(double)
+		lea(mem(   , r8,  2), r8)
+		lea(mem(   , r8,  8), r8)          // inca *= sizeof(dcomplex)
+		lea(mem(   , r10, 2), r10)
+		lea(mem(   , r10, 8), r10)         // lda *= sizeof(dcomplex)
 
 		mov(var(p), rbx)                   // load address of p.
 
 		lea(mem(   , r10, 4), r14)         // r14 = 4*lda
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
-		vmovsd(mem(rdx), xmm1)             // load 1.0
-		
+		vbroadcastsd(mem(rdx, 0), ymm1)    // load 1.0 and duplicate
+		vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to 0.0.
+
 		mov(var(kappa), rcx)               // load address of kappa
-		vmovsd(mem(rcx), xmm0)             // load kappa
+		vbroadcastsd(mem(rcx, 0), ymm10)   // load kappa_r and duplicate
+		vbroadcastsd(mem(rcx, 8), ymm11)   // load kappa_i and duplicate
 		
 
 										   // now branch on kappa == 1.0
 		
-		vucomisd(xmm0, xmm1)               // set ZF if kappa == 1.0
-		je(.DKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
+		vucomisd(xmm1, xmm10)              // set ZF if kappa_r == 1.0.
+		sete(r12b)                         // r12b = ( ZF == 1 ? 1 : 0 );
+		vucomisd(xmm0, xmm11)              // set ZF if kappa_i == 0.0.
+		sete(r13b)                         // r13b = ( ZF == 1 ? 1 : 0 );
+		and(r12b, r13b)                    // set ZF if r12b & r13b == 1.
+		jne(.ZKAPPAUNIT)                   // if ZF = 1, jump to kappa == 1.0 case
 
 
 
-		label(.DKAPPANONU)
+		label(.ZKAPPANONU)
 
-		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
-		jz(.DCOLNONU)                      // jump to column storage case
+		cmp(imm(16), r8)                   // set ZF if (16*inca) == 16.
+		jz(.ZCOLNONU)                      // jump to column storage case
 		
 		// -- kappa non-unit, row storage on A -------------------------------------
 
-		label(.DROWNONU)
+		label(.ZROWNONU)
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.ZDONE)                        // jump to end.
 
 
 		// -- kappa non-unit, column storage on A ----------------------------------
 
-		label(.DCOLNONU)
+		label(.ZCOLNONU)
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.ZDONE)                        // jump to end.
 		
 
 
 
-		label(.DKAPPAUNIT)
+		label(.ZKAPPAUNIT)
 
-		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
-		jz(.DCOLUNIT)                      // jump to column storage case
+		cmp(imm(16), r8)                   // set ZF if (16*inca) == 16.
+		jz(.ZCOLUNIT)                      // jump to column storage case
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
 		
-		label(.DROWUNIT)
+		label(.ZROWUNIT)
 
 		lea(mem(r8,  r8,  2), r12)         // r12 = 3*inca
-		lea(mem(r12, r8,  2), rcx)         // rcx = 5*inca
-		lea(mem(r12, r8,  4), rdx)         // rdx = 7*inca
+		//lea(mem(r12, r8,  2), rcx)         // rcx = 5*inca
+		//lea(mem(r12, r8,  4), rdx)         // rdx = 7*inca
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DCONKLEFTROWU)                 // if i == 0, jump to code that
+		je(.ZCONKLEFTROWU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.DKITERROWU)                 // MAIN LOOP (k_iter)
+		label(.ZKITERROWU)                 // MAIN LOOP (k_iter)
 
-		vmovupd(mem(rax,         0), ymm0)
-		vmovupd(mem(rax,  r8, 1, 0), ymm2)
-		vmovupd(mem(rax,  r8, 2, 0), ymm4)
-		vmovupd(mem(rax, r12, 1, 0), ymm6)
+		vmovupd(mem(rax,         0), ymm8)
+		vmovupd(mem(rax,  r8, 1, 0), ymm10)
+		vmovupd(mem(rax,  r8, 2, 0), ymm12)
+		vmovupd(mem(rax, r12, 1, 0), ymm14)
 
-		vunpcklpd(ymm2, ymm0, ymm10)
-		vunpckhpd(ymm2, ymm0, ymm11)
-		vunpcklpd(ymm6, ymm4, ymm12)
-		vunpckhpd(ymm6, ymm4, ymm13)
-		vinsertf128(imm(0x1), xmm12, ymm10, ymm0)
-		vinsertf128(imm(0x1), xmm13, ymm11, ymm2)
-		vperm2f128(imm(0x31), ymm12, ymm10, ymm4)
-		vperm2f128(imm(0x31), ymm13, ymm11, ymm6)
+		vextractf128(imm(0x1), ymm8,  xmm9)
+		vextractf128(imm(0x1), ymm10, xmm11)
+		vextractf128(imm(0x1), ymm12, xmm13)
+		vextractf128(imm(0x1), ymm14, xmm15)
 
-		vmovupd(ymm0, mem(rbx, 0*64))
-		vmovupd(ymm2, mem(rbx, 1*64))
-		vmovupd(ymm4, mem(rbx, 2*64))
-		vmovupd(ymm6, mem(rbx, 3*64))
+		vmovupd(xmm8,  mem(rbx, 0*16+0*64))
+		vmovupd(xmm10, mem(rbx, 1*16+0*64))
+		vmovupd(xmm12, mem(rbx, 2*16+0*64))
+		vmovupd(xmm14, mem(rbx, 3*16+0*64))
 
-		vmovupd(mem(rax,  r8, 4, 0), ymm1)
-		vmovupd(mem(rax, rcx, 1, 0), ymm3)
-		vmovupd(mem(rax, r12, 2, 0), ymm5)
-		vmovupd(mem(rax, rdx, 1, 0), ymm7)
+		vmovupd(xmm9,  mem(rbx, 0*16+1*64))
+		vmovupd(xmm11, mem(rbx, 1*16+1*64))
+		vmovupd(xmm13, mem(rbx, 2*16+1*64))
+		vmovupd(xmm15, mem(rbx, 3*16+1*64))
+
+		vmovupd(mem(rax,         32), ymm8)
+		vmovupd(mem(rax,  r8, 1, 32), ymm10)
+		vmovupd(mem(rax,  r8, 2, 32), ymm12)
+		vmovupd(mem(rax, r12, 1, 32), ymm14)
 
 		add(r14, rax)                      // a += 4*lda;
 
-		vunpcklpd(ymm3, ymm1, ymm10)
-		vunpckhpd(ymm3, ymm1, ymm11)
-		vunpcklpd(ymm7, ymm5, ymm12)
-		vunpckhpd(ymm7, ymm5, ymm13)
-		vinsertf128(imm(0x1), xmm12, ymm10, ymm1)
-		vinsertf128(imm(0x1), xmm13, ymm11, ymm3)
-		vperm2f128(imm(0x31), ymm12, ymm10, ymm5)
-		vperm2f128(imm(0x31), ymm13, ymm11, ymm7)
+		vextractf128(imm(0x1), ymm8,  xmm9)
+		vextractf128(imm(0x1), ymm10, xmm11)
+		vextractf128(imm(0x1), ymm12, xmm13)
+		vextractf128(imm(0x1), ymm14, xmm15)
 
-		vmovupd(ymm1, mem(rbx, 0*64+32))
-		vmovupd(ymm3, mem(rbx, 1*64+32))
-		vmovupd(ymm5, mem(rbx, 2*64+32))
-		vmovupd(ymm7, mem(rbx, 3*64+32))
+		vmovupd(xmm8,  mem(rbx, 0*16+2*64))
+		vmovupd(xmm10, mem(rbx, 1*16+2*64))
+		vmovupd(xmm12, mem(rbx, 2*16+2*64))
+		vmovupd(xmm14, mem(rbx, 3*16+2*64))
 
-		add(imm(4*8*8), rbx)               // p += 4*ldp = 4*8;
+		vmovupd(xmm9,  mem(rbx, 0*16+3*64))
+		vmovupd(xmm11, mem(rbx, 1*16+3*64))
+		vmovupd(xmm13, mem(rbx, 2*16+3*64))
+		vmovupd(xmm15, mem(rbx, 3*16+3*64))
+
+		add(imm(4*4*16), rbx)              // p += 4*ldp = 4*4;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKITERROWU)                   // iterate again if i != 0.
+		jne(.ZKITERROWU)                   // iterate again if i != 0.
 
 
 
-		label(.DCONKLEFTROWU)
+		label(.ZCONKLEFTROWU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DDONE)                         // if i == 0, we're done; jump to end.
+		je(.ZDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.DKLEFTROWU)                 // EDGE LOOP (k_left)
+		label(.ZKLEFTROWU)                 // EDGE LOOP (k_left)
 
-		vmovsd(mem(rax,         0), xmm0)
-		vmovsd(mem(rax,  r8, 1, 0), xmm2)
-		vmovsd(mem(rax,  r8, 2, 0), xmm4)
-		vmovsd(mem(rax, r12, 1, 0), xmm6)
-		vmovsd(mem(rax,  r8, 4, 0), xmm1)
-		vmovsd(mem(rax, rcx, 1, 0), xmm3)
-		vmovsd(mem(rax, r12, 2, 0), xmm5)
-		vmovsd(mem(rax, rdx, 1, 0), xmm7)
+		vmovups(mem(rax,         0), xmm0)
+		vmovups(mem(rax,  r8, 1, 0), xmm2)
+		vmovups(mem(rax,  r8, 2, 0), xmm4)
+		vmovups(mem(rax, r12, 1, 0), xmm6)
 
 		add(r10, rax)                      // a += lda;
 
-		vmovsd(xmm0, mem(rbx, 0*8))
-		vmovsd(xmm2, mem(rbx, 1*8))
-		vmovsd(xmm4, mem(rbx, 2*8))
-		vmovsd(xmm6, mem(rbx, 3*8))
-		vmovsd(xmm1, mem(rbx, 4*8))
-		vmovsd(xmm3, mem(rbx, 5*8))
-		vmovsd(xmm5, mem(rbx, 6*8))
-		vmovsd(xmm7, mem(rbx, 7*8))
+		vmovups(xmm0, mem(rbx, 0*16+0*64))
+		vmovups(xmm2, mem(rbx, 1*16+0*64))
+		vmovups(xmm4, mem(rbx, 2*16+0*64))
+		vmovups(xmm6, mem(rbx, 3*16+0*64))
 
-		add(imm(8*8), rbx)                 // p += ldp = 8;
+		add(imm(4*16), rbx)                // p += ldp = 4;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKLEFTROWU)                   // iterate again if i != 0.
+		jne(.ZKLEFTROWU)                   // iterate again if i != 0.
 
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.ZDONE)                        // jump to end.
 
 
 		// -- kappa unit, column storage on A --------------------------------------
 
-		label(.DCOLUNIT)
+		label(.ZCOLUNIT)
 		
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DCONKLEFTCOLU)                 // if i == 0, jump to code that
+		je(.ZCONKLEFTCOLU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.DKITERCOLU)                 // MAIN LOOP (k_iter)
+		label(.ZKITERCOLU)                 // MAIN LOOP (k_iter)
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
@@ -296,39 +298,39 @@ void bli_dpackm_haswell_asm_8xk
 		add(r14, rax)                      // a += 4*lda;
 		vmovupd(ymm6, mem(rbx, 3*64+ 0))
 		vmovupd(ymm7, mem(rbx, 3*64+32))
-		add(imm(4*8*8), rbx)               // p += 4*ldp = 4*8;
+		add(imm(4*4*16), rbx)               // p += 4*ldp = 4*4;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKITERCOLU)                   // iterate again if i != 0.
+		jne(.ZKITERCOLU)                   // iterate again if i != 0.
 
 
 
-		label(.DCONKLEFTCOLU)
+		label(.ZCONKLEFTCOLU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DDONE)                         // if i == 0, we're done; jump to end.
+		je(.ZDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.DKLEFTCOLU)                 // EDGE LOOP (k_left)
+		label(.ZKLEFTCOLU)                 // EDGE LOOP (k_left)
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
 		add(r10, rax)                      // a += lda;
 		vmovupd(ymm0, mem(rbx, 0*64+ 0))
 		vmovupd(ymm1, mem(rbx, 0*64+32))
-		add(imm(8*8), rbx)                 // p += ldp = 8;
+		add(imm(4*16), rbx)                // p += ldp = 4;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKLEFTCOLU)                   // iterate again if i != 0.
+		jne(.ZKLEFTCOLU)                   // iterate again if i != 0.
 
 
-		//jmp(.DDONE)                        // jump to end.
+		//jmp(.ZDONE)                        // jump to end.
 
 
 
-		label(.DDONE)
+		label(.ZDONE)
 		
 		
 
@@ -354,9 +356,9 @@ void bli_dpackm_haswell_asm_8xk
 		  "memory"
 		)
 	}
-	else // if ( cdim0 < mnr || gs || !unitk )
+	else // if ( cdim0 < mnr || gs || bli_does_conj( conja ) || !unitk )
 	{
-		PASTEMAC(dscal2m,BLIS_TAPI_EX_SUF)
+		PASTEMAC(zscal2m,BLIS_TAPI_EX_SUF)
 		(
 		  0,
 		  BLIS_NONUNIT_DIAG,
@@ -375,12 +377,12 @@ void bli_dpackm_haswell_asm_8xk
 		{
 			// Handle zero-filling along the "long" edge of the micropanel.
 
-			const dim_t      i      = cdim0;
-			const dim_t      m_edge = mnr - cdim0;
-			const dim_t      n_edge = k0_max;
-			double* restrict p_edge = p + (i  )*1;
+			const dim_t        i      = cdim0;
+			const dim_t        m_edge = mnr - cdim0;
+			const dim_t        n_edge = k0_max;
+			dcomplex* restrict p_edge = p + (i  )*1;
 
-			bli_dset0s_mxn
+			bli_zset0s_mxn
 			(
 			  m_edge,
 			  n_edge,
@@ -393,12 +395,12 @@ void bli_dpackm_haswell_asm_8xk
 	{
 		// Handle zero-filling along the "short" (far) edge of the micropanel.
 
-		const dim_t      j      = k0;
-		const dim_t      m_edge = mnr;
-		const dim_t      n_edge = k0_max - k0;
-		double* restrict p_edge = p + (j  )*ldp;
+		const dim_t        j      = k0;
+		const dim_t        m_edge = mnr;
+		const dim_t        n_edge = k0_max - k0;
+		dcomplex* restrict p_edge = p + (j  )*ldp;
 
-		bli_dset0s_mxn
+		bli_zset0s_mxn
 		(
 		  m_edge,
 		  n_edge,

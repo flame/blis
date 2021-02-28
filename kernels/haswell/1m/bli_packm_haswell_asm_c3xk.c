@@ -39,23 +39,23 @@
 #include "bli_x86_asm_macros.h"
 
 // Prototype reference packm kernels.
-PACKM_KER_PROT( double,   d, packm_6xk_haswell_ref )
+PACKM_KER_PROT( scomplex, c, packm_3xk_haswell_ref )
 
-void bli_spackm_haswell_asm_6xk
+void bli_cpackm_haswell_asm_3xk
      (
        conj_t              conja,
        pack_t              schema,
        dim_t               cdim0,
        dim_t               k0,
        dim_t               k0_max,
-       float*     restrict kappa,
-       float*     restrict a, inc_t inca0, inc_t lda0,
-       float*     restrict p,              inc_t ldp0,
+       scomplex*  restrict kappa,
+       scomplex*  restrict a, inc_t inca0, inc_t lda0,
+       scomplex*  restrict p,              inc_t ldp0,
        cntx_t*    restrict cntx
      )
 {
 #if 0
-	bli_spackm_6xk_haswell_ref
+	bli_cpackm_3xk_haswell_ref
 	(
 	  conja, schema, cdim0, k0, k0_max,
 	  kappa, a, inca0, lda0, p, ldp0, cntx
@@ -64,11 +64,11 @@ void bli_spackm_haswell_asm_6xk
 #endif
 
 	// This is the panel dimension assumed by the packm kernel.
-	const dim_t      mnr   = 6;
+	const dim_t      mnr   = 3;
 
 	// This is the "packing" dimension assumed by the packm kernel.
 	// This should be equal to ldp.
-	//const dim_t    packmnr = 8;
+	//const dim_t    packmnr = 6;
 
 	// Define a local copy of 1.0 so we can test for unit kappa.
 	float            one_l = 1.0;
@@ -76,9 +76,9 @@ void bli_spackm_haswell_asm_6xk
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	const uint64_t k_iter = k0 / 8;
+	const uint64_t k_iter = k0 / 4;
 #if 1
-	const uint64_t k_left = k0 % 8;
+	const uint64_t k_left = k0 % 4;
 #else
 	const uint64_t k_left = k0;
 #endif
@@ -99,12 +99,12 @@ void bli_spackm_haswell_asm_6xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_seq1( *kappa );
-	
+	const bool     unitk  = bli_ceq1( *kappa );
+
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs && unitk )
+	if ( cdim0 == mnr && !gs && !bli_does_conj( conja ) && unitk )
 	{
 		begin_asm()
 		
@@ -112,255 +112,209 @@ void bli_spackm_haswell_asm_6xk
 
 		mov(var(inca), r8)                 // load inca
 		mov(var(lda), r10)                 // load lda
-		lea(mem(, r8,  4), r8)             // inca *= sizeof(float)
-		lea(mem(, r10, 4), r10)            // lda *= sizeof(float)
+		lea(mem(, r8,  8), r8)             // inca *= sizeof(scomplex)
+		lea(mem(, r10, 8), r10)            // lda *= sizeof(scomplex)
 
 		mov(var(p), rbx)                   // load address of p.
 
-		lea(mem(   , r10, 8), r14)         // r14 = 8*lda
+		lea(mem(   , r10, 4), r14)         // r14 = 4*lda
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
-		vmovss(mem(rdx), xmm1)             // load 1.0
+		vbroadcastss(mem(rdx, 0), ymm1)    // load 1.0 and duplicate
+		vxorps(ymm0, ymm0, ymm0)           // set ymm0 to 0.0.
 		
 		mov(var(kappa), rcx)               // load address of kappa
-		vmovss(mem(rcx), xmm0)             // load kappa
+		vbroadcastss(mem(rcx, 0), ymm10)   // load kappa_r and duplicate
+		vbroadcastss(mem(rcx, 8), ymm11)   // load kappa_i and duplicate
 		
 
 										   // now branch on kappa == 1.0
 		
-		vucomiss(xmm0, xmm1)               // set ZF if kappa == 1.0
-		je(.SKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
+		vucomiss(xmm1, xmm10)              // set ZF if kappa_r == 1.0.
+		sete(r12b)                         // r12b = ( ZF == 1 ? 1 : 0 );
+		vucomiss(xmm0, xmm11)              // set ZF if kappa_i == 0.0.
+		sete(r13b)                         // r13b = ( ZF == 1 ? 1 : 0 );
+		and(r12b, r13b)                    // set ZF if r12b & r13b == 1.
+		jne(.CKAPPAUNIT)                   // if ZF = 1, jump to beta == 0 case
 
 
 
-		label(.SKAPPANONU)
+		label(.CKAPPANONU)
 
-		cmp(imm(4), r8)                    // set ZF if (4*inca) == 4.
-		jz(.SCOLNONU)                      // jump to column storage case
+		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
+		jz(.CCOLNONU)                      // jump to column storage case
 		
 		// -- kappa non-unit, row storage on A -------------------------------------
 
-		label(.SROWNONU)
+		label(.CROWNONU)
 
-		jmp(.SDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 
 
 		// -- kappa non-unit, column storage on A ----------------------------------
 
-		label(.SCOLNONU)
+		label(.CCOLNONU)
 
-		jmp(.SDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 		
 
 
 
-		label(.SKAPPAUNIT)
+		label(.CKAPPAUNIT)
 
-		cmp(imm(4), r8)                    // set ZF if (4*inca) == 4.
-		jz(.SCOLUNIT)                      // jump to column storage case
+		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
+		jz(.CCOLUNIT)                      // jump to column storage case
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
 		
-		label(.SROWUNIT)
+		label(.CROWUNIT)
 
-		lea(mem(r8,  r8,  2), r13)         // r13 = 3*inca
-		lea(mem(r13, r8,  2), r15)         // r15 = 5*inca
-		//lea(mem(r13, r8,  4), rdx)         // rdx = 7*inca
+		//lea(mem(r8,  r8,  2), r12)         // r12 = 3*inca
+		//lea(mem(r12, r8,  2), rcx)         // rcx = 5*inca
+		//lea(mem(r12, r8,  4), rdx)         // rdx = 7*inca
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.SCONKLEFTROWU)                 // if i == 0, jump to code that
+		je(.CCONKLEFTROWU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.SKITERROWU)                 // MAIN LOOP (k_iter)
+		label(.CKITERROWU)                 // MAIN LOOP (k_iter)
 
-		                                   // begin IO on rows 0-3
-		vmovups(mem(rax,         0), ymm4)
-		vmovups(mem(rax,  r8, 1, 0), ymm6)
-		vmovups(mem(rax,  r8, 2, 0), ymm8)
-		vmovups(mem(rax, r13, 1, 0), ymm10)
+		vmovupd(mem(rax,         0), ymm0)
+		vmovupd(mem(rax,  r8, 1, 0), ymm2)
+		vmovupd(mem(rax,  r8, 2, 0), ymm4)
 
-		vunpcklps(ymm6, ymm4, ymm0)
-		vunpcklps(ymm10, ymm8, ymm1)
-		vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-		vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-		vblendps(imm(0x33), ymm2, ymm1, ymm1)
+		add(r14, rax)                      // a += 4*lda;
 
-		vextractf128(imm(0x1), ymm0, xmm2)
-		vmovups(xmm0, mem(rbx, 0*24))      // store ( gamma00..gamma30 )
-		vmovups(xmm2, mem(rbx, 4*24))      // store ( gamma04..gamma34 )
+		vunpcklpd(ymm2, ymm0, ymm10)
+		vunpckhpd(ymm2, ymm0, ymm11)
+		vunpcklpd(ymm6, ymm4, ymm12)
+		vunpckhpd(ymm6, ymm4, ymm13)
+		vinsertf128(imm(0x1), xmm12, ymm10, ymm0)
+		vinsertf128(imm(0x1), xmm13, ymm11, ymm2)
+		vperm2f128(imm(0x31), ymm12, ymm10, ymm4)
+		vperm2f128(imm(0x31), ymm13, ymm11, ymm6)
 
-		vextractf128(imm(0x1), ymm1, xmm2)
-		vmovups(xmm1, mem(rbx, 1*24))      // store ( gamma01..gamma31 )
-		vmovups(xmm2, mem(rbx, 5*24))      // store ( gamma05..gamma35 )
+		vextractf128(imm(0x1), ymm0, xmm1)
+		vextractf128(imm(0x1), ymm2, xmm3)
+		vextractf128(imm(0x1), ymm4, xmm5)
+		vextractf128(imm(0x1), ymm6, xmm7)
 
-		vunpckhps(ymm6, ymm4, ymm0)
-		vunpckhps(ymm10, ymm8, ymm1)
-		vshufps(imm(0x4e), ymm1, ymm0, ymm2)
-		vblendps(imm(0xcc), ymm2, ymm0, ymm0)
-		vblendps(imm(0x33), ymm2, ymm1, ymm1)
+		vmovupd(xmm0, mem(rbx, 0*24))
+		vmovupd(xmm2, mem(rbx, 1*24))
+		vmovupd(xmm4, mem(rbx, 2*24))
+		vmovupd(xmm6, mem(rbx, 3*24))
 
-		vextractf128(imm(0x1), ymm0, xmm2)
-		vmovups(xmm0, mem(rbx, 2*24))      // store ( gamma02..gamma32 )
-		vmovups(xmm2, mem(rbx, 6*24))      // store ( gamma06..gamma36 )
+		vmovsd(xmm1, mem(rbx, 0*24+16))
+		vmovsd(xmm3, mem(rbx, 1*24+16))
+		vmovsd(xmm5, mem(rbx, 2*24+16))
+		vmovsd(xmm7, mem(rbx, 3*24+16))
 
-		vextractf128(imm(0x1), ymm1, xmm2)
-		vmovups(xmm1, mem(rbx, 3*24))      // store ( gamma03..gamma33 )
-		vmovups(xmm2, mem(rbx, 7*24))      // store ( gamma07..gamma37 )
-
-		                                   // begin IO on rows 4-5
-		vmovups(mem(rax,  r8, 4, 0), ymm12)
-		vmovups(mem(rax, r15, 1, 0), ymm14)
-
-		vunpcklps(ymm14, ymm12, ymm0)
-		vextractf128(imm(0x1), ymm0, xmm2)
-		vmovlpd(xmm0, mem(rbx, 0*24+16))   // store ( gamma40..gamma50 )
-		vmovhpd(xmm0, mem(rbx, 1*24+16))   // store ( gamma41..gamma51 )
-		vmovlpd(xmm2, mem(rbx, 4*24+16))   // store ( gamma44..gamma54 )
-		vmovhpd(xmm2, mem(rbx, 5*24+16))   // store ( gamma45..gamma55 )
-
-		vunpckhps(ymm14, ymm12, ymm0)
-		vextractf128(imm(0x1), ymm0, xmm2)
-		vmovlpd(xmm0, mem(rbx, 2*24+16))   // store ( gamma42..gamma52 )
-		vmovhpd(xmm0, mem(rbx, 3*24+16))   // store ( gamma43..gamma53 )
-		vmovlpd(xmm2, mem(rbx, 6*24+16))   // store ( gamma46..gamma56 )
-		vmovhpd(xmm2, mem(rbx, 7*24+16))   // store ( gamma47..gamma57 )
-
-
-		add(r14, rax)                      // a += 8*lda;
-		add(imm(8*6*4), rbx)               // p += 8*ldp = 8*6;
+		add(imm(4*3*8), rbx)               // p += 4*ldp = 4*3;
 
 		dec(rsi)                           // i -= 1;
-		jne(.SKITERROWU)                   // iterate again if i != 0.
+		jne(.CKITERROWU)                   // iterate again if i != 0.
 
 
 
-		label(.SCONKLEFTROWU)
+		label(.CCONKLEFTROWU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.SDONE)                         // if i == 0, we're done; jump to end.
+		je(.CDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.SKLEFTROWU)                 // EDGE LOOP (k_left)
+		label(.CKLEFTROWU)                 // EDGE LOOP (k_left)
 
-		vmovss(mem(rax,         0), xmm0)
-		vmovss(mem(rax,  r8, 1, 0), xmm2)
-		vmovss(mem(rax,  r8, 2, 0), xmm4)
-		vmovss(mem(rax, r13, 1, 0), xmm6)
-		vmovss(mem(rax,  r8, 4, 0), xmm1)
-		vmovss(mem(rax, r15, 1, 0), xmm3)
-
-		vmovss(xmm0, mem(rbx, 0*4))
-		vmovss(xmm2, mem(rbx, 1*4))
-		vmovss(xmm4, mem(rbx, 2*4))
-		vmovss(xmm6, mem(rbx, 3*4))
-		vmovss(xmm1, mem(rbx, 4*4))
-		vmovss(xmm3, mem(rbx, 5*4))
+		vmovsd(mem(rax,         0), xmm0)
+		vmovsd(mem(rax,  r8, 1, 0), xmm2)
+		vmovsd(mem(rax,  r8, 2, 0), xmm4)
 
 		add(r10, rax)                      // a += lda;
-		add(imm(6*4), rbx)                 // p += ldp = 6;
+
+		vmovsd(xmm0, mem(rbx, 0*8))
+		vmovsd(xmm2, mem(rbx, 1*8))
+		vmovsd(xmm4, mem(rbx, 2*8))
+
+		add(imm(3*8), rbx)                 // p += ldp = 3;
 
 		dec(rsi)                           // i -= 1;
-		jne(.SKLEFTROWU)                   // iterate again if i != 0.
+		jne(.CKLEFTROWU)                   // iterate again if i != 0.
 
 
-		jmp(.SDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 
 
 		// -- kappa unit, column storage on A --------------------------------------
 
-		label(.SCOLUNIT)
+		label(.CCOLUNIT)
 		
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
-		lea(mem(r13, r10, 2), r15)         // r15 = 5*lda
-		lea(mem(r13, r10, 4), rdx)         // rdx = 7*lda
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.SCONKLEFTCOLU)                 // if i == 0, jump to code that
+		je(.CCONKLEFTCOLU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.SKITERCOLU)                 // MAIN LOOP (k_iter)
+		label(.CKITERCOLU)                 // MAIN LOOP (k_iter)
 
-		vmovups(mem(rax,          0), xmm0)
+		vmovupd(mem(rax,          0), xmm0)
 		vmovsd( mem(rax,         16), xmm1)
-		vmovups(xmm0, mem(rbx, 0*24+ 0))
+		vmovupd(xmm0, mem(rbx, 0*24+ 0))
 		vmovsd( xmm1, mem(rbx, 0*24+16))
 
-		vmovups(mem(rax, r10, 1,  0), xmm2)
+		vmovupd(mem(rax, r10, 1,  0), xmm2)
 		vmovsd( mem(rax, r10, 1, 16), xmm3)
-		vmovups(xmm2, mem(rbx, 1*24+ 0))
+		vmovupd(xmm2, mem(rbx, 1*24+ 0))
 		vmovsd( xmm3, mem(rbx, 1*24+16))
 
-		vmovups(mem(rax, r10, 2,  0), xmm4)
+		vmovupd(mem(rax, r10, 2,  0), xmm4)
 		vmovsd( mem(rax, r10, 2, 16), xmm5)
-		vmovups(xmm4, mem(rbx, 2*24+ 0))
+		vmovupd(xmm4, mem(rbx, 2*24+ 0))
 		vmovsd( xmm5, mem(rbx, 2*24+16))
 
-		vmovups(mem(rax, r13, 1,  0), xmm6)
+		vmovupd(mem(rax, r13, 1,  0), xmm6)
 		vmovsd( mem(rax, r13, 1, 16), xmm7)
-		vmovups(xmm6, mem(rbx, 3*24+ 0))
+		add(r14, rax)                      // a += 4*lda;
+		vmovupd(xmm6, mem(rbx, 3*24+ 0))
 		vmovsd( xmm7, mem(rbx, 3*24+16))
-
-		vmovups(mem(rax, r10, 4,  0), xmm8)
-		vmovsd( mem(rax, r10, 4, 16), xmm9)
-		vmovups(xmm8, mem(rbx, 4*24+ 0))
-		vmovsd( xmm9, mem(rbx, 4*24+16))
-
-		vmovups(mem(rax, r15, 1,  0), xmm10)
-		vmovsd( mem(rax, r15, 1, 16), xmm11)
-		vmovups(xmm10, mem(rbx, 5*24+ 0))
-		vmovsd( xmm11, mem(rbx, 5*24+16))
-
-		vmovups(mem(rax, r13, 2,  0), xmm12)
-		vmovsd( mem(rax, r13, 2, 16), xmm13)
-		vmovups(xmm12, mem(rbx, 6*24+ 0))
-		vmovsd( xmm13, mem(rbx, 6*24+16))
-
-		vmovups(mem(rax, rdx, 1,  0), xmm14)
-		vmovsd( mem(rax, rdx, 1, 16), xmm15)
-		vmovups(xmm14, mem(rbx, 7*24+ 0))
-		vmovsd( xmm15, mem(rbx, 7*24+16))
-
-		add(r14, rax)                      // a += 8*lda;
-		add(imm(8*6*4), rbx)               // p += 8*ldp = 8*6;
+		add(imm(4*3*8), rbx)               // p += 4*ldp = 4*3;
 
 		dec(rsi)                           // i -= 1;
-		jne(.SKITERCOLU)                   // iterate again if i != 0.
+		jne(.CKITERCOLU)                   // iterate again if i != 0.
 
 
 
-		label(.SCONKLEFTCOLU)
+		label(.CCONKLEFTCOLU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.SDONE)                         // if i == 0, we're done; jump to end.
+		je(.CDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.SKLEFTCOLU)                 // EDGE LOOP (k_left)
+		label(.CKLEFTCOLU)                 // EDGE LOOP (k_left)
 
-		vmovups(mem(rax,          0), xmm0)
+		vmovupd(mem(rax,          0), xmm0)
 		vmovsd( mem(rax,         16), xmm1)
 		add(r10, rax)                      // a += lda;
-		vmovups(xmm0, mem(rbx, 0*24+ 0))
+		vmovupd(xmm0, mem(rbx, 0*24+ 0))
 		vmovsd( xmm1, mem(rbx, 0*24+16))
-		add(imm(6*4), rbx)                 // p += ldp = 6;
+		add(imm(3*8), rbx)                 // p += ldp = 3;
 
 		dec(rsi)                           // i -= 1;
-		jne(.SKLEFTCOLU)                   // iterate again if i != 0.
+		jne(.CKLEFTCOLU)                   // iterate again if i != 0.
 
 
-		//jmp(.SDONE)                        // jump to end.
+		//jmp(.CDONE)                        // jump to end.
 
 
 
-		label(.SDONE)
+		label(.CDONE)
 		
 		
 
@@ -386,9 +340,9 @@ void bli_spackm_haswell_asm_6xk
 		  "memory"
 		)
 	}
-	else // if ( cdim0 < mnr || gs || !unitk )
+	else // if ( cdim0 < mnr || gs || bli_does_conj( conja ) || !unitk )
 	{
-		PASTEMAC(sscal2m,BLIS_TAPI_EX_SUF)
+		PASTEMAC(cscal2m,BLIS_TAPI_EX_SUF)
 		(
 		  0,
 		  BLIS_NONUNIT_DIAG,
@@ -407,12 +361,12 @@ void bli_spackm_haswell_asm_6xk
 		{
 			// Handle zero-filling along the "long" edge of the micropanel.
 
-			const dim_t      i      = cdim0;
-			const dim_t      m_edge = mnr - cdim0;
-			const dim_t      n_edge = k0_max;
-			float*  restrict p_edge = p + (i  )*1;
+			const dim_t        i      = cdim0;
+			const dim_t        m_edge = mnr - cdim0;
+			const dim_t        n_edge = k0_max;
+			scomplex* restrict p_edge = p + (i  )*1;
 
-			bli_sset0s_mxn
+			bli_cset0s_mxn
 			(
 			  m_edge,
 			  n_edge,
@@ -421,16 +375,18 @@ void bli_spackm_haswell_asm_6xk
 		}
 	}
 
+//bli_dfprintm( stdout, "packm 6xk ker: a_packed", cdim0, k0_max, p, 1, ldp0, "%5.2f", "" );
+
 	if ( k0 < k0_max )
 	{
 		// Handle zero-filling along the "short" (far) edge of the micropanel.
 
-		const dim_t      j      = k0;
-		const dim_t      m_edge = mnr;
-		const dim_t      n_edge = k0_max - k0;
-		float*  restrict p_edge = p + (j  )*ldp;
+		const dim_t        j      = k0;
+		const dim_t        m_edge = mnr;
+		const dim_t        n_edge = k0_max - k0;
+		scomplex* restrict p_edge = p + (j  )*ldp;
 
-		bli_sset0s_mxn
+		bli_cset0s_mxn
 		(
 		  m_edge,
 		  n_edge,

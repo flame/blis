@@ -39,23 +39,23 @@
 #include "bli_x86_asm_macros.h"
 
 // Prototype reference packm kernels.
-PACKM_KER_PROT( double,   d, packm_8xk_haswell_ref )
+PACKM_KER_PROT( scomplex, c, packm_8xk_haswell_ref )
 
-void bli_dpackm_haswell_asm_8xk
+void bli_cpackm_haswell_asm_8xk
      (
        conj_t              conja,
        pack_t              schema,
        dim_t               cdim0,
        dim_t               k0,
        dim_t               k0_max,
-       double*    restrict kappa,
-       double*    restrict a, inc_t inca0, inc_t lda0,
-       double*    restrict p,              inc_t ldp0,
+       scomplex*  restrict kappa,
+       scomplex*  restrict a, inc_t inca0, inc_t lda0,
+       scomplex*  restrict p,              inc_t ldp0,
        cntx_t*    restrict cntx
      )
 {
 #if 0
-	bli_dpackm_8xk_haswell_ref
+	bli_cpackm_8xk_haswell_ref
 	(
 	  conja, schema, cdim0, k0, k0_max,
 	  kappa, a, inca0, lda0, p, ldp0, cntx
@@ -71,8 +71,8 @@ void bli_dpackm_haswell_asm_8xk
 	//const dim_t    packmnr = 8;
 
 	// Define a local copy of 1.0 so we can test for unit kappa.
-	double           one_l = 1.0;
-	double* restrict one   = &one_l;
+	float            one_l = 1.0;
+	float*  restrict one   = &one_l;
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -99,12 +99,12 @@ void bli_dpackm_haswell_asm_8xk
 
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
-	const bool     unitk  = bli_deq1( *kappa );
+	const bool     unitk  = bli_ceq1( *kappa );
 
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs && unitk )
+	if ( cdim0 == mnr && !gs && !bli_does_conj( conja ) && unitk )
 	{
 		begin_asm()
 		
@@ -112,57 +112,63 @@ void bli_dpackm_haswell_asm_8xk
 
 		mov(var(inca), r8)                 // load inca
 		mov(var(lda), r10)                 // load lda
-		lea(mem(, r8,  8), r8)             // inca *= sizeof(double)
-		lea(mem(, r10, 8), r10)            // lda *= sizeof(double)
+		lea(mem(, r8,  8), r8)             // inca *= sizeof(scomplex)
+		lea(mem(, r10, 8), r10)            // lda *= sizeof(scomplex)
 
 		mov(var(p), rbx)                   // load address of p.
 
 		lea(mem(   , r10, 4), r14)         // r14 = 4*lda
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
-		vmovsd(mem(rdx), xmm1)             // load 1.0
+		vbroadcastss(mem(rdx, 0), ymm1)    // load 1.0 and duplicate
+		vxorps(ymm0, ymm0, ymm0)           // set ymm0 to 0.0.
 		
 		mov(var(kappa), rcx)               // load address of kappa
-		vmovsd(mem(rcx), xmm0)             // load kappa
+		vbroadcastss(mem(rcx, 0), ymm10)   // load kappa_r and duplicate
+		vbroadcastss(mem(rcx, 8), ymm11)   // load kappa_i and duplicate
 		
 
 										   // now branch on kappa == 1.0
 		
-		vucomisd(xmm0, xmm1)               // set ZF if kappa == 1.0
-		je(.DKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
+		vucomiss(xmm1, xmm10)              // set ZF if kappa_r == 1.0.
+		sete(r12b)                         // r12b = ( ZF == 1 ? 1 : 0 );
+		vucomiss(xmm0, xmm11)              // set ZF if kappa_i == 0.0.
+		sete(r13b)                         // r13b = ( ZF == 1 ? 1 : 0 );
+		and(r12b, r13b)                    // set ZF if r12b & r13b == 1.
+		jne(.CKAPPAUNIT)                   // if ZF = 1, jump to beta == 0 case
 
 
 
-		label(.DKAPPANONU)
+		label(.CKAPPANONU)
 
 		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
-		jz(.DCOLNONU)                      // jump to column storage case
+		jz(.CCOLNONU)                      // jump to column storage case
 		
 		// -- kappa non-unit, row storage on A -------------------------------------
 
-		label(.DROWNONU)
+		label(.CROWNONU)
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 
 
 		// -- kappa non-unit, column storage on A ----------------------------------
 
-		label(.DCOLNONU)
+		label(.CCOLNONU)
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 		
 
 
 
-		label(.DKAPPAUNIT)
+		label(.CKAPPAUNIT)
 
 		cmp(imm(8), r8)                    // set ZF if (8*inca) == 8.
-		jz(.DCOLUNIT)                      // jump to column storage case
+		jz(.CCOLUNIT)                      // jump to column storage case
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
 		
-		label(.DROWUNIT)
+		label(.CROWUNIT)
 
 		lea(mem(r8,  r8,  2), r12)         // r12 = 3*inca
 		lea(mem(r12, r8,  2), rcx)         // rcx = 5*inca
@@ -170,11 +176,11 @@ void bli_dpackm_haswell_asm_8xk
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DCONKLEFTROWU)                 // if i == 0, jump to code that
+		je(.CCONKLEFTROWU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.DKITERROWU)                 // MAIN LOOP (k_iter)
+		label(.CKITERROWU)                 // MAIN LOOP (k_iter)
 
 		vmovupd(mem(rax,         0), ymm0)
 		vmovupd(mem(rax,  r8, 1, 0), ymm2)
@@ -219,19 +225,19 @@ void bli_dpackm_haswell_asm_8xk
 		add(imm(4*8*8), rbx)               // p += 4*ldp = 4*8;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKITERROWU)                   // iterate again if i != 0.
+		jne(.CKITERROWU)                   // iterate again if i != 0.
 
 
 
-		label(.DCONKLEFTROWU)
+		label(.CCONKLEFTROWU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DDONE)                         // if i == 0, we're done; jump to end.
+		je(.CDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.DKLEFTROWU)                 // EDGE LOOP (k_left)
+		label(.CKLEFTROWU)                 // EDGE LOOP (k_left)
 
 		vmovsd(mem(rax,         0), xmm0)
 		vmovsd(mem(rax,  r8, 1, 0), xmm2)
@@ -256,25 +262,25 @@ void bli_dpackm_haswell_asm_8xk
 		add(imm(8*8), rbx)                 // p += ldp = 8;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKLEFTROWU)                   // iterate again if i != 0.
+		jne(.CKLEFTROWU)                   // iterate again if i != 0.
 
 
-		jmp(.DDONE)                        // jump to end.
+		jmp(.CDONE)                        // jump to end.
 
 
 		// -- kappa unit, column storage on A --------------------------------------
 
-		label(.DCOLUNIT)
+		label(.CCOLUNIT)
 		
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 
 		mov(var(k_iter), rsi)              // i = k_iter;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DCONKLEFTCOLU)                 // if i == 0, jump to code that
+		je(.CCONKLEFTCOLU)                 // if i == 0, jump to code that
 		                                   // contains the k_left loop.
 
 
-		label(.DKITERCOLU)                 // MAIN LOOP (k_iter)
+		label(.CKITERCOLU)                 // MAIN LOOP (k_iter)
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
@@ -299,19 +305,19 @@ void bli_dpackm_haswell_asm_8xk
 		add(imm(4*8*8), rbx)               // p += 4*ldp = 4*8;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKITERCOLU)                   // iterate again if i != 0.
+		jne(.CKITERCOLU)                   // iterate again if i != 0.
 
 
 
-		label(.DCONKLEFTCOLU)
+		label(.CCONKLEFTCOLU)
 
 		mov(var(k_left), rsi)              // i = k_left;
 		test(rsi, rsi)                     // check i via logical AND.
-		je(.DDONE)                         // if i == 0, we're done; jump to end.
+		je(.CDONE)                         // if i == 0, we're done; jump to end.
 		                                   // else, we prepare to enter k_left loop.
 
 
-		label(.DKLEFTCOLU)                 // EDGE LOOP (k_left)
+		label(.CKLEFTCOLU)                 // EDGE LOOP (k_left)
 
 		vmovupd(mem(rax,          0), ymm0)
 		vmovupd(mem(rax,         32), ymm1)
@@ -321,14 +327,14 @@ void bli_dpackm_haswell_asm_8xk
 		add(imm(8*8), rbx)                 // p += ldp = 8;
 
 		dec(rsi)                           // i -= 1;
-		jne(.DKLEFTCOLU)                   // iterate again if i != 0.
+		jne(.CKLEFTCOLU)                   // iterate again if i != 0.
 
 
-		//jmp(.DDONE)                        // jump to end.
+		//jmp(.CDONE)                        // jump to end.
 
 
 
-		label(.DDONE)
+		label(.CDONE)
 		
 		
 
@@ -354,9 +360,9 @@ void bli_dpackm_haswell_asm_8xk
 		  "memory"
 		)
 	}
-	else // if ( cdim0 < mnr || gs || !unitk )
+	else // if ( cdim0 < mnr || gs || bli_does_conj( conja ) || !unitk )
 	{
-		PASTEMAC(dscal2m,BLIS_TAPI_EX_SUF)
+		PASTEMAC(cscal2m,BLIS_TAPI_EX_SUF)
 		(
 		  0,
 		  BLIS_NONUNIT_DIAG,
@@ -375,12 +381,12 @@ void bli_dpackm_haswell_asm_8xk
 		{
 			// Handle zero-filling along the "long" edge of the micropanel.
 
-			const dim_t      i      = cdim0;
-			const dim_t      m_edge = mnr - cdim0;
-			const dim_t      n_edge = k0_max;
-			double* restrict p_edge = p + (i  )*1;
+			const dim_t        i      = cdim0;
+			const dim_t        m_edge = mnr - cdim0;
+			const dim_t        n_edge = k0_max;
+			scomplex* restrict p_edge = p + (i  )*1;
 
-			bli_dset0s_mxn
+			bli_cset0s_mxn
 			(
 			  m_edge,
 			  n_edge,
@@ -393,12 +399,12 @@ void bli_dpackm_haswell_asm_8xk
 	{
 		// Handle zero-filling along the "short" (far) edge of the micropanel.
 
-		const dim_t      j      = k0;
-		const dim_t      m_edge = mnr;
-		const dim_t      n_edge = k0_max - k0;
-		double* restrict p_edge = p + (j  )*ldp;
+		const dim_t        j      = k0;
+		const dim_t        m_edge = mnr;
+		const dim_t        n_edge = k0_max - k0;
+		scomplex* restrict p_edge = p + (j  )*ldp;
 
-		bli_dset0s_mxn
+		bli_cset0s_mxn
 		(
 		  m_edge,
 		  n_edge,
