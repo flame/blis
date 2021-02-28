@@ -64,13 +64,15 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  cntx
 	);
 
-#if 0
-	// Update the context with optimized level-1m (packm) kernels.
+#if 1
+	// Update the context with optimized packm kernels.
 	bli_cntx_set_packm_kers
 	(
-	  2,
-	  BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_8xk_gen_zen,
-	  BLIS_PACKM_6XK_KER, BLIS_DOUBLE, bli_dpackm_6xk_gen_zen,
+	  4,
+	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,  bli_spackm_haswell_asm_6xk,
+	  BLIS_PACKM_16XK_KER, BLIS_FLOAT,  bli_spackm_haswell_asm_16xk,
+	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE, bli_dpackm_haswell_asm_6xk,
+	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE, bli_dpackm_haswell_asm_8xk,
 	  cntx
 	);
 #endif
