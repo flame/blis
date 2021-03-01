@@ -216,13 +216,6 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
        cntx_t*    restrict cntx
      )
 {
-  static int called = 0;
-  if ( !called )
-  {
-    called = 1;
-    fprintf(stderr, "m0=%ld, n0=%ld, k0=%ld, rs_a0=%ld, cs_a0=%ld, rs_b0=%ld, cs_b0=%ld, rs_c0=%ld, cs_c0=%ld\n",
-            m0, n0, k0, rs_a0, cs_a0, rs_b0, cs_b0, rs_c0, cs_c0);
-  }
   // r*r requires B to be stored in rows.
   assert(cs_b0 == 1);
 
