@@ -1296,7 +1296,8 @@ where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as 
 void bli_?her2k
      (
        uplo_t  uploc,
-       trans_t transab,
+       trans_t transa,
+       trans_t transb,
        dim_t   m,
        dim_t   k,
        ctype*  alpha,
@@ -1308,9 +1309,9 @@ void bli_?her2k
 ```
 Perform
 ```
-  C := beta * C + alpha * transab(A) * transab(B)^H + conj(alpha) * transab(B) * transab(A)^H
+  C := beta * C + alpha * transa(A) * transb(B)^H + conj(alpha) * transb(B) * transa(A)^H
 ```
-where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploc` and `transab(A)` and `transab(B)` are _m x k_ matrices.
+where C is an _m x m_ Hermitian matrix stored in the lower or upper triangle as specified by `uploc` and `transa(A)` and `transb(B)` are _m x k_ matrices.
 
 **Note:** The floating-point type of `beta` is always the real projection of the floating-point types of `A` and `C`.
 
@@ -1372,7 +1373,8 @@ where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as 
 void bli_?syr2k
      (
        uplo_t  uploc,
-       trans_t transab,
+       trans_t transa,
+       trans_t transb,
        dim_t   m,
        dim_t   k,
        ctype*  alpha,
@@ -1384,9 +1386,9 @@ void bli_?syr2k
 ```
 Perform
 ```
-  C := beta * C + alpha * transab(A) * transab(B)^T + alpha * transab(B) * transab(A)^T
+  C := beta * C + alpha * transa(A) * transb(B)^T + alpha * transb(B) * transa(A)^T
 ```
-where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa` and `transab(A)` and `transab(B)` are _m x k_ matrices.
+where C is an _m x m_ symmetric matrix stored in the lower or upper triangle as specified by `uploa` and `transa(A)` and `transb(B)` are _m x k_ matrices.
 
 ---
 
