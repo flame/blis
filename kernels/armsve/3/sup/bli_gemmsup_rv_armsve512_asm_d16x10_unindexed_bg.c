@@ -78,10 +78,13 @@
 // " add             "#ADDRC", "#ADDRC", "#LDC"      \n\t" /* C column forward */ \
 //   DGEMM_FMLA2_LD1RD(CCOLFH,CCOLLH,ACOLFH,ACOLLH,BV,SHIFT)
 
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8) \
+#define DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
   DGEMM_FMLA2_LD1RD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV0,BADDR,64) \
   DGEMM_FMLA2_LD1RD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV1,BADDR,72) \
+" add             "#BTEMP", "#B4KS", "#BADDR"     \n\t" \
 " add             "#BADDR", "#BRS8", "#BADDR"     \n\t" /* B address forward */ \
+" prfm            PLDL1KEEP, ["#BADDR"]           \n\t" \
+" prfm            PLDL1KEEP, ["#BTEMP"]           \n\t" \
   DGEMM_FMLA2_LD1RD(C2FH,C2LH,PT,ACOLFH,ACOLLH,BV2,BADDR,0) \
   DGEMM_FMLA2_LD1RD(C3FH,C3LH,PT,ACOLFH,ACOLLH,BV3,BADDR,8) \
   DGEMM_FMLA2_LD1RD(C4FH,C4LH,PT,ACOLFH,ACOLLH,BV4,BADDR,16) \
@@ -93,14 +96,14 @@
   DGEMM_FMLA2_LD1RD(C9FH,C9LH,PT,ACOLFH,ACOLLH,BV1,BADDR,56)
 
 // Second through forth microkernels are the first one with B vectors rotated.
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_2(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV2,BV3,BV4,BV5,BV6,BV7,BV0,BV1,BADDR,BRS8)
+#define DGEMM_2VX10_MKER_LOOP_PLAIN_2(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
+  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV2,BV3,BV4,BV5,BV6,BV7,BV0,BV1,BADDR,BRS8,B4KS,BTEMP)
 
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_3(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV4,BV5,BV6,BV7,BV0,BV1,BV2,BV3,BADDR,BRS8)
+#define DGEMM_2VX10_MKER_LOOP_PLAIN_3(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
+  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV4,BV5,BV6,BV7,BV0,BV1,BV2,BV3,BADDR,BRS8,B4KS,BTEMP)
 
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_4(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV6,BV7,BV0,BV1,BV2,BV3,BV4,BV5,BADDR,BRS8)
+#define DGEMM_2VX10_MKER_LOOP_PLAIN_4(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
+  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV6,BV7,BV0,BV1,BV2,BV3,BV4,BV5,BADDR,BRS8,B4KS,BTEMP)
 // NOTE:
 //  The microkernel (PLAIN_1-4 as a whole) satisfies on entry/exit
 //  (sth. akin to loop-invariant):
@@ -133,10 +136,11 @@
 " prfd PLD"#LV"STRM, "#PLH", ["#ATEMP", "#ZIDX".d, lsl #3]\n\t"
 
 #define DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,A4KS,APS,ACS,AVSKIP,ATEMP) \
+/*
 " add            "#ATEMP", "#AADDR", "#A4KS"      \n\t" \
 DGEMM_ACOL_GATHER_PRFM(L1,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) \
 " add            "#ATEMP", "#AADDR", "#APS"       \n\t" \
-DGEMM_ACOL_GATHER_PRFM(L2,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) \
+DGEMM_ACOL_GATHER_PRFM(L2,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) */ \
 " add            "#AADDR", "#AADDR", "#ACS"       \n\t" /* Forward A's address to the next column. */ \
 DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP)
 
@@ -286,6 +290,14 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " ldr             x5, %[ci]                       \n\t"
 " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
+#ifdef _A64FX
+" mov             x16, 0x1                        \n\t" // Tag C address.
+" lsl             x16, x16, #56                   \n\t"
+" orr             x5, x5, x16                     \n\t"
+" mov             x16, 0x2                        \n\t" // Tag A address.
+" lsl             x16, x16, #56                   \n\t"
+" orr             x0, x0, x16                     \n\t"
+#endif
 "                                                 \n\t"
 " mov             x8, #8                          \n\t" // Multiply some address skips by sizeof(double).
 " madd            x2, x8, x2, xzr                 \n\t" // cs_a
@@ -295,7 +307,9 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " mov             x8, #64                         \n\t"
 " madd            x14, x8, x1, xzr                \n\t" // A-column's logical 1-vector skip.
 " mov             x8, #4                          \n\t"
-" madd            x15, x8, x2, xzr                \n\t" // Logical K=4 microkernel skip.
+" madd            x15, x8, x2, xzr                \n\t" // Logical K=4 microkernel skip for A.
+" mov             x8, #4                          \n\t"
+" madd            x17, x8, x4, xzr                \n\t" // Logical K=4 microkernel skip for B.
 "                                                 \n\t"
 " ldr             x8, %[m_mker]                   \n\t" // Number of M-loops.
 " ptrue           p0.d                            \n\t"
@@ -318,6 +332,20 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " ldr             x11, %[bi]                      \n\t" // B's address.
 " ldr             x12, %[k_mker]                  \n\t"
 " ldr             x13, %[k_left]                  \n\t"
+#ifdef _A64FX
+" mov             x16, 0x3                        \n\t" // Tag B address.
+" lsl             x16, x16, #56                   \n\t"
+" orr             x11, x11, x16                   \n\t"
+#endif
+"                                                 \n\t"
+" mov             x16, x11                        \n\t" // Prefetch first kernel of B.
+" prfm            PLDL1KEEP, [x16]                \n\t"
+" add             x16, x16, x4                    \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
+" add             x16, x16, x4                    \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
+" add             x16, x16, x4                    \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 "                                                 \n\t"
 " ld1rd           z20.d, p0/z, [x11]              \n\t" // (Partial) first B row.
 " ld1rd           z21.d, p0/z, [x11, #8]          \n\t"
@@ -344,15 +372,15 @@ CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 "                                                 \n\t"
 " index           z31.d, xzr, x1                  \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+DGEMM_2VX10_MKER_LOOP_PLAIN_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
 "                                                 \n\t"
 " index           z29.d, xzr, x1                  \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+DGEMM_2VX10_MKER_LOOP_PLAIN_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
 "                                                 \n\t"
 " index           z31.d, xzr, x1                  \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+DGEMM_2VX10_MKER_LOOP_PLAIN_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
 "                                                 \n\t"
 " sub             x16, x12, #1                    \n\t" // Before final replica,
 " adds            x16, x16, x13                   \n\t" //  check if this iteration is final
@@ -360,7 +388,7 @@ DGEMM_2VX10_MKER_LOOP_PLAIN_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,
 "                                                 \n\t"
 " index           z29.d, xzr, x1                  \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+DGEMM_2VX10_MKER_LOOP_PLAIN_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
 "                                                 \n\t"
 " subs            x12, x12, #1                    \n\t" // Decrease counter.
 " b.ne            K_MKER_LOOP                     \n\t"
@@ -425,13 +453,21 @@ DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 " ldr             x1, %[a_next]                   \n\t" // Final Millikernel loop, x1 and x2 not needed.
 " ldr             x2, %[b_next]                   \n\t"
 " prfm            PLDL2KEEP, [x1]                 \n\t"
-" prfm            PLDL2KEEP, [x1, #64]            \n\t"
-" prfm            PLDL2KEEP, [x1, #128]           \n\t"
-" prfm            PLDL2KEEP, [x1, #192]           \n\t"
+" prfm            PLDL2KEEP, [x1, 256*1]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*3]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*4]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*5]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*6]          \n\t"
+" prfm            PLDL2KEEP, [x1, 256*7]          \n\t"
 " prfm            PLDL2KEEP, [x2]                 \n\t"
-" prfm            PLDL2KEEP, [x2, #64]            \n\t"
-" prfm            PLDL2KEEP, [x2, #128]           \n\t"
-" prfm            PLDL2KEEP, [x2, #192]           \n\t"
+" prfm            PLDL2KEEP, [x2, 256*1]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*2]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*3]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*4]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*5]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*6]          \n\t"
+" prfm            PLDL2KEEP, [x2, 256*7]          \n\t"
 "                                                 \n\t"
 " WRITE_MEM:                                      \n\t"
 "                                                 \n\t"
@@ -505,7 +541,7 @@ DGEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x10,x7,x13,x16)
   [a_next] "m" (a_next),
   [b_next] "m" (b_next)
 : "x0","x1","x2","x3","x4","x5","x6","x7","x8",
-  "x9","x10","x11","x12","x14","x15","x16",
+  "x9","x10","x11","x12","x14","x15","x16","x17",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
   "z16","z17","z18","z19",
