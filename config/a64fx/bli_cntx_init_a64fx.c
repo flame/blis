@@ -108,19 +108,19 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	bli_cntx_set_l3_sup_kers
 	(
 	  4,
-	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_16x10_unindexed, TRUE,
-	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_16x10_unindexed, TRUE,
-	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_16x10_unindexed, TRUE,
-	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_16x10_unindexed, TRUE,
+	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
+	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
+	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
+	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
 	  cntx
 	);
 
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    16,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   128,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,    10,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,    16,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   120,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,   256,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  4080,    -1,    -1 );
 

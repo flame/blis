@@ -70,14 +70,6 @@
   DGEMM_FMLA2(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV) \
 " ld1rd     "#BV".d, "#PT"/z, ["#BADDR", #"#SHIFT"]\n\t" /* Next B     */
 
-// #define DGEMM_FMLA2_LD1RD_FIRST_HALF(CCOLFH,CCOLLH,ACOLFH,ACOLLH,BV,SHIFT,ADDRC) \
-// " prfm            PSTL1STRM, ["#ADDRC"]           \n\t" /* Prefetch C column 0:7 */ \
-//   DGEMM_FMLA2_LD1RD(CCOLFH,CCOLLH,ACOLFH,ACOLLH,BV,SHIFT)
-// #define DGEMM_FMLA2_LD1RD_LAST__HALF(CCOLFH,CCOLLH,ACOLFH,ACOLLH,BV,SHIFT,ADDRC,LDC) \
-// " prfm            PSTL1STRM, ["#ADDRC", #64]      \n\t" /* Prefetch C column 8:15 */ \
-// " add             "#ADDRC", "#ADDRC", "#LDC"      \n\t" /* C column forward */ \
-//   DGEMM_FMLA2_LD1RD(CCOLFH,CCOLLH,ACOLFH,ACOLLH,BV,SHIFT)
-
 #define DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
   DGEMM_FMLA2_LD1RD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV0,BADDR,64) \
   DGEMM_FMLA2_LD1RD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV1,BADDR,72) \
@@ -512,7 +504,7 @@ DGEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x10,x7,x13,x16)
 " END_WRITE_MEM:                                  \n\t"
 " subs            x8, x8, #1                      \n\t"
 " b.eq            END_EXEC                        \n\t"
-"                                                 \n\t" // Address of C already forwarded to next column.
+"                                                 \n\t"
 " add             x0, x0, x3                      \n\t" // Forward A's base address to the next logic panel.
 " add             x5, x5, x13                     \n\t" // Forward C's base address to the next logic panel.
 " add             x5, x5, x13                     \n\t"
