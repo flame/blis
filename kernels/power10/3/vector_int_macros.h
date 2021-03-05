@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,7 +32,40 @@
 
 */
 
-// gemm
-GEMM_UKR_PROT( double,   d, gemm_power10_mma_8x8  )
-GEMM_UKR_PROT( float,    s, gemm_power10_mma_8x16 )
+// Common include/defines across microkernels
 
+#include "blis.h"
+
+#define PREFETCH1(x, y) __asm__ volatile ("dcbt %0, %1" : : "r" (x), "b" (y) : "memory");
+
+#define LOAD_VECTORS \
+        ca = (vec_t *) A0; \
+        rb = (vec_t *) B0; 
+
+typedef __vector float fv4sf_t;
+typedef __vector double dv4sf_t;
+typedef __vector int32_t iv4sf_t;
+typedef __vector unsigned char vec_t;
+
+#define SAVE_ACC(v_t, ACC, rs_c, j)                \
+    __builtin_mma_disassemble_acc ( (void *) result, ACC);       \
+    rowC = (v_t *) &C0[j];                        \
+    rowC[0] = alpha_ * result[0] + beta_ * rowC[0];    \
+    rowC = (v_t *) &C0[rs_c+j];                     \
+    rowC[0] = alpha_ * result[1] + beta_ * rowC[0];    \
+    rowC = (v_t *) &C0[2*rs_c+j];                   \
+    rowC[0] = alpha_ * result[2] + beta_ * rowC[0] ;   \
+    rowC = (v_t *) &C0[3*rs_c+j];                   \
+    rowC[0] = alpha_ * result[3] + beta_ * rowC[0] ;
+
+#define SAVE_ACC_bz(v_t, ACC, rs_c, j)                     \
+    __builtin_mma_disassemble_acc ( (void *) result, ACC);     \
+    rowC = (v_t *) &C0[j];                      \
+    rowC[0] = alpha_ * result[0];                      \
+    rowC = (v_t *) &C0[rs_c+j];                     \
+    rowC[0] = alpha_ * result[1];                      \
+    rowC = (v_t *) &C0[2*rs_c+j];                   \
+    rowC[0] = alpha_ * result[2];                      \
+    rowC = (v_t *) &C0[3*rs_c+j];                   \
+    rowC[0] = alpha_ * result[3];
+    

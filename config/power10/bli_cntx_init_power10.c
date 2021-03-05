@@ -122,9 +122,9 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   576,   576,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  1408,  1408,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  8192,  8184,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   832,   320,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  1026,   960,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4096,  4096,    -1,    -1 );
 
 
 	// Update the context with the current architecture's register and cache

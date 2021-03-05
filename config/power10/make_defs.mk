@@ -66,8 +66,12 @@ CKOPTFLAGS     := $(COPTFLAGS) -O3
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=power10 -mtune=power10
 else
+ifeq ($(CC_VENDOR),clang)
+CKVECFLAGS     := -mcpu=power10 -mtune=power10
+else
 $(info $(CC_VENDOR)) 
-$(error gcc is required for this configuration.)
+$(error gcc, clang is required for this configuration.)
+endif
 endif
 
 # Flags specific to reference kernels.
@@ -77,4 +81,3 @@ CRVECFLAGS     := $(CKVECFLAGS)
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))
-

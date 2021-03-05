@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,7 +32,22 @@
 
 */
 
-// gemm
-GEMM_UKR_PROT( double,   d, gemm_power10_mma_8x8  )
-GEMM_UKR_PROT( float,    s, gemm_power10_mma_8x16 )
+// Prototypes and template for the low precision POWER10 GEMM API
 
+#define GEMM_FUNC_NAME_(ch)    bli_ ## ch ## gemm
+#define GEMM_FUNC_NAME(ch)     GEMM_FUNC_NAME_(ch)
+
+#define GEMM_FUNC_PROT(DTYPE_IN, DTYPE_OUT, ch) \
+    void GEMM_FUNC_NAME(ch) \
+        ( \
+            trans_t transa, \
+            trans_t transb, \
+            dim_t   m, \
+            dim_t   n, \
+            dim_t   k, \
+            DTYPE_OUT*  alpha, \
+            DTYPE_IN*  a, inc_t rsa, inc_t csa, \
+            DTYPE_IN*  b, inc_t rsb, inc_t csb, \
+            DTYPE_OUT*  beta, \
+            DTYPE_OUT*  c, inc_t rsc, inc_t csc \
+        ) 
