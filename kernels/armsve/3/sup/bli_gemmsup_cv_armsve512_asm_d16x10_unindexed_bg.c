@@ -37,10 +37,10 @@
 #include "blis.h"
 
 #define CLEAR_COL4(Z0,Z1,Z2,Z3) \
-" fmov            "#Z0".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z1".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z2".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z3".d, p0/m, #0.0              \n\t"
+" dup             "#Z0".d, #0                      \n\t" \
+" dup             "#Z1".d, #0                      \n\t" \
+" dup             "#Z2".d, #0                      \n\t" \
+" dup             "#Z3".d, #0                      \n\t"
 
 #define CLEAR_COL20(Z00,Z01,Z02,Z03,Z04,Z05,Z06,Z07,Z08,Z09,Z10,Z11,Z12,Z13,Z14,Z15,Z16,Z17,Z18,Z19) \
   CLEAR_COL4(Z00,Z01,Z02,Z03) \
@@ -135,14 +135,20 @@
 " add             "#ATEMP", "#AADDR", "#AVSKIP"   \n\t" \
 " prfd PLD"#LV"STRM, "#PLH", ["#ATEMP", "#ZIDX".d, lsl #3]\n\t"
 
-#define DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,A4KS,APS,ACS,AVSKIP,ATEMP) \
+#define DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(ZFH,ZLH,PFH,PLH,AADDR,A4KS,ACS,ATEMP) \
+" add             "#ATEMP", "#AADDR", "#A4KS"     \n\t" \
+" add             "#AADDR", "#AADDR", "#ACS"      \n\t" /* Forward A's address to the next column. */ \
+  DGEMM_ACOL_CONTIGUOUS_LOAD(ZFH,ZLH,PFH,PLH,AADDR) \
+/*" prfm            PLDL1STRM, ["#ATEMP"]           \n\t"*/
+
+#define DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_G(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,A4KS,APS,ACS,AVSKIP,ATEMP) \
 /*
-" add            "#ATEMP", "#AADDR", "#A4KS"      \n\t" \
-DGEMM_ACOL_GATHER_PRFM(L1,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) \
-" add            "#ATEMP", "#AADDR", "#APS"       \n\t" \
-DGEMM_ACOL_GATHER_PRFM(L2,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) */ \
-" add            "#AADDR", "#AADDR", "#ACS"       \n\t" /* Forward A's address to the next column. */ \
-DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP)
+" add             "#ATEMP", "#AADDR", "#A4KS"     \n\t" \
+  DGEMM_ACOL_GATHER_PRFM(L1,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) \
+" add             "#ATEMP", "#AADDR", "#APS"      \n\t" \
+  DGEMM_ACOL_GATHER_PRFM(L2,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) */ \
+" add             "#AADDR", "#AADDR", "#ACS"      \n\t" /* Forward A's address to the next column. */ \
+  DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP)
 
 #define DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(ZFH,ZLH,PFH,PLH,CADDR,CCS) \
   DGEMM_ACOL_CONTIGUOUS_LOAD(ZFH,ZLH,PFH,PLH,CADDR) \
@@ -312,6 +318,15 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
 " madd            x3, x8, x3, xzr                 \n\t" // ps_b
 " madd            x4, x8, x4, xzr                 \n\t" // cs_a
 " madd            x7, x8, x7, xzr                 \n\t" // cs_c
+" mov             x8, #4                          \n\t"
+" madd            x15, x8, x4, xzr                \n\t" // Logical K=4 microkernel skip for A.
+"                                                 \n\t"
+#ifdef _A64FX
+" mov             x16, 0x20                       \n\t" // Higher 6bit for Control#2:
+" lsl             x16, x16, #58                   \n\t" // Valid|Strong|Strong|NoAlloc|Load|Strong
+" orr             x16, x16, x4                    \n\t" // Stride.
+" msr             S3_3_C11_C6_2, x16              \n\t" // Write system register.
+#endif
 "                                                 \n\t"
 " ldr             x8, %[m_curr]                   \n\t" // Size of first dimension.
 " mov             x9, xzr                         \n\t"
@@ -322,15 +337,31 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
 "                                                 \n\t"
 " ldr             x8, %[n_mker]                   \n\t" // Number of N-loops.
 "                                                 \n\t"
+" ldr             x20, %[ai]                      \n\t" // Parameters to be reloaded
+" ldr             x21, %[k_mker]                  \n\t" //  within each millikernel loop.
+" ldr             x22, %[k_left]                  \n\t"
+" ldr             x23, %[alpha]                   \n\t"
+" ldr             x24, %[beta]                    \n\t"
+" ldr             x25, %[a_next]                  \n\t"
+" ldr             x26, %[b_next]                  \n\t"
+" ldr             x23, [x23]                      \n\t" // Directly load alpha and beta.
+" ldr             x24, [x24]                      \n\t"
+"                                                 \n\t"
 " MILLIKER_MLOOP:                                 \n\t"
 "                                                 \n\t"
-" ldr             x10, %[ai]                      \n\t" // A's address.
 " mov             x11, x0                         \n\t" // B's address.
-" ldr             x12, %[k_mker]                  \n\t"
-" ldr             x13, %[k_left]                  \n\t"
+// " ldr             x10, %[ai]                      \n\t" // A's address.
+" mov             x10, x20                        \n\t"
+// " ldr             x12, %[k_mker]                  \n\t"
+" mov             x12, x21                        \n\t"
+// " ldr             x13, %[k_left]                  \n\t"
+" mov             x13, x22                        \n\t"
 #ifdef _A64FX
 " mov             x16, 0x3                        \n\t" // Tag A address.
 " lsl             x16, x16, #56                   \n\t"
+" orr             x10, x10, x16                   \n\t"
+" mov             x16, 0xa                        \n\t" // Control#2 for A address.
+" lsl             x16, x16, #60                   \n\t"
 " orr             x10, x10, x16                   \n\t"
 #endif
 "                                                 \n\t"
@@ -357,6 +388,37 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
 " sub             x14, x14, x2                    \n\t" // Restore x14 to load edge.
 "                                                 \n\t"
 DGEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p1,p2,x10)
+" add             x16, x10, x4                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t" // Prefetch 3/4 of A.
+" add             x16, x10, x4                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x10, x4                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+"                                                 \n\t"
+" CCOL_PRFM:                                      \n\t"
+" cmp             x6, #1                          \n\t"
+" b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
+" mov             x16, x5                         \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" add             x16, x16, x7                    \n\t"
+" prfm            PLDL1STRM, [x16]                \n\t"
+" END_CCOL_PRFM:                                  \n\t"
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
 "                                                 \n\t"
@@ -368,24 +430,20 @@ CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 // " cmp             x12, #1                         \n\t"
 // " b.eq            K_FINAL_LOOP                    \n\t"
 "                                                 \n\t"
-" add             x10, x10, x4                    \n\t" // Forward A.
-DGEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p1,p2,x10)
+DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z30,z31,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
 "                                                 \n\t"
-" add             x10, x10, x4                    \n\t" // Forward A.
-DGEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p1,p2,x10)
+DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z28,z29,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
 "                                                 \n\t"
-" add             x10, x10, x4                    \n\t" // Forward A.
-DGEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p1,p2,x10)
+DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z30,z31,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
 "                                                 \n\t"
 " sub             x16, x12, #1                    \n\t" // Before final replica,
 " adds            x16, x16, x13                   \n\t" //  check if this iteration is final
 " b.eq            FIN_LOOP_POPPED                 \n\t"
 "                                                 \n\t"
-" add             x10, x10, x4                    \n\t" // Forward A.
-DGEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p1,p2,x10)
+DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z28,z29,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
 "                                                 \n\t"
 " subs            x12, x12, #1                    \n\t" // Decrease counter.
@@ -434,13 +492,11 @@ DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 "                                                 \n\t"
 " WRITE_MEM_PREP:                                 \n\t"
 "                                                 \n\t"
-" ldr             x10, %[ai]                      \n\t"
+// " ldr             x10, %[ai]                      \n\t"
+" mov             x10, x20                        \n\t"
 " add             x11, x0, x3                     \n\t"
-" ldr             x12, %[alpha]                   \n\t" // Load alpha & beta.
-" ldr             x13, %[beta]                    \n\t"
-" ld1rd           z30.d, p0/z, [x12]              \n\t"
-" ld1rd           z31.d, p0/z, [x13]              \n\t"
-" ldr             x12, [x12]                      \n\t"
+" dup             z30.d, x23                      \n\t" // Broadcast alpha & beta into vectors.
+" dup             z31.d, x24                      \n\t"
 "                                                 \n\t"
 " cmp             x8, #1                          \n\t"
 " b.eq            PREFETCH_ABNEXT                 \n\t"
@@ -467,8 +523,10 @@ DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 " b               WRITE_MEM                       \n\t"
 "                                                 \n\t"
 " PREFETCH_ABNEXT:                                \n\t"
-" ldr             x1, %[a_next]                   \n\t" // Final Millikernel loop, x1 and x2 not needed.
-" ldr             x2, %[b_next]                   \n\t"
+// " ldr             x1, %[a_next]                   \n\t" // Final Millikernel loop, x1 and x2 not needed.
+" mov             x1, x25                         \n\t"
+// " ldr             x2, %[b_next]                   \n\t"
+" mov             x2, x26                         \n\t"
 " prfm            PLDL2KEEP, [x1]                 \n\t"
 " prfm            PLDL2KEEP, [x1, 256*1]          \n\t"
 " prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
@@ -490,7 +548,7 @@ DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 "                                                 \n\t"
 " fmov            d28, #1.0                       \n\t"
 " fmov            x16, d28                        \n\t"
-" cmp             x16, x12                        \n\t"
+" cmp             x16, x23                        \n\t"
 " b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
 SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19,z30)
@@ -557,6 +615,7 @@ DGEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x5,x7,x13,x16)
   [b_next] "m" (b_next)
 : "x0","x1","x2","x3","x4","x5","x6","x7","x8",
   "x9","x10","x11","x12","x14","x15","x16","x17",
+  "x20","x21","x22","x23","x24","x25","x26",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
   "z16","z17","z18","z19",
