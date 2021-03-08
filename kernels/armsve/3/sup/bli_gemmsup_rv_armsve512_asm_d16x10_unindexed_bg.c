@@ -36,165 +36,11 @@
 #include "blis.h"
 #include <assert.h>
 
-#define CLEAR_COL4(Z0,Z1,Z2,Z3) \
-" fmov            "#Z0".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z1".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z2".d, p0/m, #0.0              \n\t" \
-" fmov            "#Z3".d, p0/m, #0.0              \n\t"
+// Double-precision composite instructions.
+#include "../armsve_asm_macros_double.h"
 
-#define CLEAR_COL20(Z00,Z01,Z02,Z03,Z04,Z05,Z06,Z07,Z08,Z09,Z10,Z11,Z12,Z13,Z14,Z15,Z16,Z17,Z18,Z19) \
-  CLEAR_COL4(Z00,Z01,Z02,Z03) \
-  CLEAR_COL4(Z04,Z05,Z06,Z07) \
-  CLEAR_COL4(Z08,Z09,Z10,Z11) \
-  CLEAR_COL4(Z12,Z13,Z14,Z15) \
-  CLEAR_COL4(Z16,Z17,Z18,Z19)
-
-#define SCALE_COL4(Z0,Z1,Z2,Z3,ZFACTOR) \
-" fmul            "#Z0".d, "#Z0".d, "#ZFACTOR".d   \n\t" \
-" fmul            "#Z1".d, "#Z1".d, "#ZFACTOR".d   \n\t" \
-" fmul            "#Z2".d, "#Z2".d, "#ZFACTOR".d   \n\t" \
-" fmul            "#Z3".d, "#Z3".d, "#ZFACTOR".d   \n\t"
-
-#define SCALE_COL20(Z00,Z01,Z02,Z03,Z04,Z05,Z06,Z07,Z08,Z09,Z10,Z11,Z12,Z13,Z14,Z15,Z16,Z17,Z18,Z19,ZFACTOR) \
-  SCALE_COL4(Z00,Z01,Z02,Z03,ZFACTOR) \
-  SCALE_COL4(Z04,Z05,Z06,Z07,ZFACTOR) \
-  SCALE_COL4(Z08,Z09,Z10,Z11,ZFACTOR) \
-  SCALE_COL4(Z12,Z13,Z14,Z15,ZFACTOR) \
-  SCALE_COL4(Z16,Z17,Z18,Z19,ZFACTOR)
-
-#define DGEMM_FMLA2(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV) \
-" fmla   "#CCOLFH".d, "#PT"/m, "#ACOLFH".d, "#BV".d\n\t" /* A Row 1:8  */ \
-" fmla   "#CCOLLH".d, "#PT"/m, "#ACOLLH".d, "#BV".d\n\t" /* A Row 9:15 */
-
-#define DGEMM_FMLA2_LD1RD(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV,BADDR,SHIFT) \
-  DGEMM_FMLA2(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV) \
-" ld1rd     "#BV".d, "#PT"/z, ["#BADDR", #"#SHIFT"]\n\t" /* Next B     */
-
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
-  DGEMM_FMLA2_LD1RD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV0,BADDR,64) \
-  DGEMM_FMLA2_LD1RD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV1,BADDR,72) \
-" add             "#BTEMP", "#B4KS", "#BADDR"     \n\t" \
-" add             "#BADDR", "#BRS8", "#BADDR"     \n\t" /* B address forward */ \
-" prfm            PLDL1KEEP, ["#BADDR"]           \n\t" \
-" prfm            PLDL1KEEP, ["#BTEMP"]           \n\t" \
-  DGEMM_FMLA2_LD1RD(C2FH,C2LH,PT,ACOLFH,ACOLLH,BV2,BADDR,0) \
-  DGEMM_FMLA2_LD1RD(C3FH,C3LH,PT,ACOLFH,ACOLLH,BV3,BADDR,8) \
-  DGEMM_FMLA2_LD1RD(C4FH,C4LH,PT,ACOLFH,ACOLLH,BV4,BADDR,16) \
-  DGEMM_FMLA2_LD1RD(C5FH,C5LH,PT,ACOLFH,ACOLLH,BV5,BADDR,24) \
-  DGEMM_FMLA2_LD1RD(C6FH,C6LH,PT,ACOLFH,ACOLLH,BV6,BADDR,32) \
-  DGEMM_FMLA2_LD1RD(C7FH,C7LH,PT,ACOLFH,ACOLLH,BV7,BADDR,40) \
-  \
-  DGEMM_FMLA2_LD1RD(C8FH,C8LH,PT,ACOLFH,ACOLLH,BV0,BADDR,48) \
-  DGEMM_FMLA2_LD1RD(C9FH,C9LH,PT,ACOLFH,ACOLLH,BV1,BADDR,56)
-
-// Second through forth microkernels are the first one with B vectors rotated.
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_2(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV2,BV3,BV4,BV5,BV6,BV7,BV0,BV1,BADDR,BRS8,B4KS,BTEMP)
-
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_3(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV4,BV5,BV6,BV7,BV0,BV1,BV2,BV3,BADDR,BRS8,B4KS,BTEMP)
-
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_4(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8,B4KS,BTEMP) \
-  DGEMM_2VX10_MKER_LOOP_PLAIN_1(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV6,BV7,BV0,BV1,BV2,BV3,BV4,BV5,BADDR,BRS8,B4KS,BTEMP)
-// NOTE:
-//  The microkernel (PLAIN_1-4 as a whole) satisfies on entry/exit
-//  (sth. akin to loop-invariant):
-//   - BV[0-5] holds B[0:5, 4*k_cur]
-//   - Stream LOAD stops at B[0, 4*k_cur+1]
-
-// For rows left behind microkernels.
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_RESIDUAL(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BRS8) \
-  DGEMM_FMLA2_LD1RD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV0,BADDR,64) \
-  DGEMM_FMLA2_LD1RD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV1,BADDR,72) \
-" add             "#BADDR", "#BRS8", "#BADDR"     \n\t" /* B address forward */ \
-  DGEMM_FMLA2_LD1RD(C8FH,C8LH,PT,ACOLFH,ACOLLH,BV0,BADDR,0) \
-  DGEMM_FMLA2_LD1RD(C9FH,C9LH,PT,ACOLFH,ACOLLH,BV1,BADDR,8) \
-  \
-  DGEMM_FMLA2_LD1RD(C2FH,C2LH,PT,ACOLFH,ACOLLH,BV2,BADDR,16) \
-  DGEMM_FMLA2_LD1RD(C3FH,C3LH,PT,ACOLFH,ACOLLH,BV3,BADDR,24) \
-  DGEMM_FMLA2_LD1RD(C4FH,C4LH,PT,ACOLFH,ACOLLH,BV4,BADDR,32) \
-  DGEMM_FMLA2_LD1RD(C5FH,C5LH,PT,ACOLFH,ACOLLH,BV5,BADDR,40) \
-  DGEMM_FMLA2_LD1RD(C6FH,C6LH,PT,ACOLFH,ACOLLH,BV6,BADDR,48) \
-  DGEMM_FMLA2_LD1RD(C7FH,C7LH,PT,ACOLFH,ACOLLH,BV7,BADDR,56)
-
-#define DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP) \
-" ld1d "#ZFH".d, "#PFH"/z, ["#AADDR", "#ZIDX".d, lsl #3]\n\t" \
-" add             "#ATEMP", "#AADDR", "#AVSKIP"   \n\t" \
-" ld1d "#ZLH".d, "#PLH"/z, ["#ATEMP", "#ZIDX".d, lsl #3]\n\t"
-
-#define DGEMM_ACOL_GATHER_PRFM(LV,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP) \
-" prfd PLD"#LV"STRM, "#PFH", ["#AADDR", "#ZIDX".d, lsl #3]\n\t" \
-" add             "#ATEMP", "#AADDR", "#AVSKIP"   \n\t" \
-" prfd PLD"#LV"STRM, "#PLH", ["#ATEMP", "#ZIDX".d, lsl #3]\n\t"
-
-#define DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,A4KS,APS,ACS,AVSKIP,ATEMP) \
-/*
-" add            "#ATEMP", "#AADDR", "#A4KS"      \n\t" \
-DGEMM_ACOL_GATHER_PRFM(L1,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) \
-" add            "#ATEMP", "#AADDR", "#APS"       \n\t" \
-DGEMM_ACOL_GATHER_PRFM(L2,ZIDX,PFH,PLH,ATEMP,AVSKIP,ATEMP) */ \
-" add            "#AADDR", "#AADDR", "#ACS"       \n\t" /* Forward A's address to the next column. */ \
-DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP)
-
-#define DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(ZFH,ZLH,PFH,PLH,CADDR,CCS) \
-" ld1d  "#ZFH".d, "#PFH"/z, ["#CADDR"]            \n\t" \
-" ld1d  "#ZLH".d, "#PLH"/z, ["#CADDR", #1, mul vl]\n\t" \
-" add             "#CADDR", "#CADDR", "#CCS"      \n\t" /* Forward C address (load) to next column. */
-
-#define DGEMM_CCOL_CONTIGUOUS_STORE_FWD(ZFH,ZLH,PFH,PLH,CADDR,CCS) \
-" st1d    "#ZFH".d, "#PFH", ["#CADDR"]            \n\t" \
-" st1d    "#ZLH".d, "#PLH", ["#CADDR", #1, mul vl]\n\t" \
-" add             "#CADDR", "#CADDR", "#CCS"      \n\t" /* Forward C address (store) to next column. */
-
-#define DGEMM_CCOL_FMAD(ZFH,ZLH,PFH,PLH,CFH,CLH,ZSCALE) \
-" fmad   "#ZFH".d, "#PFH"/m, "#ZSCALE".d, "#CFH".d\n\t" \
-" fmad   "#ZLH".d, "#PLH"/m, "#ZSCALE".d, "#CLH".d\n\t"
-
-#define DGEMM_C_LOAD_UKER_C(Z0FH,Z1FH,Z2FH,Z3FH,Z4FH,Z0LH,Z1LH,Z2LH,Z3LH,Z4LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(Z0FH,Z0LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(Z1FH,Z1LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(Z2FH,Z2LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(Z3FH,Z3LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_LOAD_FWD(Z4FH,Z4LH,PFH,PLH,CADDR,CCS)
-
-#define DGEMM_C_STORE_UKER_C(Z0FH,Z1FH,Z2FH,Z3FH,Z4FH,Z0LH,Z1LH,Z2LH,Z3LH,Z4LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_STORE_FWD(Z0FH,Z0LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_STORE_FWD(Z1FH,Z1LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_STORE_FWD(Z2FH,Z2LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_STORE_FWD(Z3FH,Z3LH,PFH,PLH,CADDR,CCS) \
-  DGEMM_CCOL_CONTIGUOUS_STORE_FWD(Z4FH,Z4LH,PFH,PLH,CADDR,CCS)
-
-#define DGEMM_C_FMAD_UKER(Z0FH,Z1FH,Z2FH,Z3FH,Z4FH,Z0LH,Z1LH,Z2LH,Z3LH,Z4LH,PFH,PLH,C0FH,C1FH,C2FH,C3FH,C4FH,C0LH,C1LH,C2LH,C3LH,C4LH,ZSCALE) \
-  DGEMM_CCOL_FMAD(Z0FH,Z0LH,PFH,PLH,C0FH,C0LH,ZSCALE) \
-  DGEMM_CCOL_FMAD(Z1FH,Z1LH,PFH,PLH,C1FH,C1LH,ZSCALE) \
-  DGEMM_CCOL_FMAD(Z2FH,Z2LH,PFH,PLH,C2FH,C2LH,ZSCALE) \
-  DGEMM_CCOL_FMAD(Z3FH,Z3LH,PFH,PLH,C3FH,C3LH,ZSCALE) \
-  DGEMM_CCOL_FMAD(Z4FH,Z4LH,PFH,PLH,C4FH,C4LH,ZSCALE)
-
-#define DGEMM_CCOL_GATHER_LOAD_FWD(ZFH,ZLH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,CADDR,CVSKIP,CTEMP) \
-" add             "#CADDR", "#CADDR", "#CCS"      \n\t"
-
-#define DGEMM_CCOL_SCATTER_STORE_FWD(ZFH,ZLH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-" st1d "#ZFH".d, "#PFH", ["#CADDR", "#ZIDX".d, lsl #3]\n\t" \
-" add             "#CTEMP", "#CADDR", "#CVSKIP"   \n\t" \
-" st1d "#ZLH".d, "#PLH", ["#CTEMP", "#ZIDX".d, lsl #3]\n\t" \
-" add             "#CADDR", "#CADDR", "#CCS"      \n\t"
-
-#define DGEMM_C_LOAD_UKER_G(Z0FH,Z1FH,Z2FH,Z3FH,Z4FH,Z0LH,Z1LH,Z2LH,Z3LH,Z4LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_GATHER_LOAD_FWD(Z0FH,Z0LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_GATHER_LOAD_FWD(Z1FH,Z1LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_GATHER_LOAD_FWD(Z2FH,Z2LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_GATHER_LOAD_FWD(Z3FH,Z3LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_GATHER_LOAD_FWD(Z4FH,Z4LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP)
-
-#define DGEMM_C_STORE_UKER_G(Z0FH,Z1FH,Z2FH,Z3FH,Z4FH,Z0LH,Z1LH,Z2LH,Z3LH,Z4LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_SCATTER_STORE_FWD(Z0FH,Z0LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_SCATTER_STORE_FWD(Z1FH,Z1LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_SCATTER_STORE_FWD(Z2FH,Z2LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_SCATTER_STORE_FWD(Z3FH,Z3LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-  DGEMM_CCOL_SCATTER_STORE_FWD(Z4FH,Z4LH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP)
-
+// 2vx10 microkernels.
+#include "../armsve_asm_2vx10.h"
 
 void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
      (
@@ -300,8 +146,8 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " madd            x14, x8, x1, xzr                \n\t" // A-column's logical 1-vector skip.
 " mov             x8, #4                          \n\t"
 " madd            x15, x8, x2, xzr                \n\t" // Logical K=4 microkernel skip for A.
-" mov             x8, #4                          \n\t"
-" madd            x17, x8, x4, xzr                \n\t" // Logical K=4 microkernel skip for B.
+// " mov             x8, #4                          \n\t"
+// " madd            x17, x8, x4, xzr                \n\t" // Logical K=4 microkernel skip for B.
 "                                                 \n\t"
 " ldr             x8, %[m_mker]                   \n\t" // Number of M-loops.
 " ptrue           p0.d                            \n\t"
@@ -350,7 +196,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 "                                                 \n\t"
 " index           z29.d, xzr, x1                  \n\t" // First A column.
 "                                                 \n\t" // Skips passed to index is not multiplied by 8.
-DGEMM_ACOL_GATHER_LOAD(z28,z29,z29,p1,p2,x10,x14,x16)
+GEMM_ACOL_GATHER_LOAD(z28,z29,z29,p1,p2,x10,x14,x16)
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
 "                                                 \n\t"
@@ -359,73 +205,60 @@ CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 "                                                 \n\t"
 " K_MKER_LOOP:                                    \n\t" // Unroll the 4-loop.
 "                                                 \n\t"
-// " cmp             x12, #1                         \n\t"
-// " b.eq            K_FINAL_LOOP                    \n\t"
-"                                                 \n\t"
 " index           z31.d, xzr, x1                  \n\t"
-DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
+GEMMSUP_ACOL_PREFETCH_NEXT_LOAD_G(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16,noprfm,noprfm)
+GEMM_2VX10_MKER_LOOP_PLAIN_C_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
 "                                                 \n\t"
 " index           z29.d, xzr, x1                  \n\t"
-DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
+GEMMSUP_ACOL_PREFETCH_NEXT_LOAD_G(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16,noprfm,noprfm)
+GEMM_2VX10_MKER_LOOP_PLAIN_C_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
 "                                                 \n\t"
 " index           z31.d, xzr, x1                  \n\t"
-DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
+GEMMSUP_ACOL_PREFETCH_NEXT_LOAD_G(z30,z31,z31,p1,p2,x10,x15,x3,x2,x14,x16,noprfm,noprfm)
+GEMM_2VX10_MKER_LOOP_PLAIN_C_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
 "                                                 \n\t"
-" sub             x16, x12, #1                    \n\t" // Before final replica,
-" adds            x16, x16, x13                   \n\t" //  check if this iteration is final
-" b.eq            FIN_LOOP_POPPED                 \n\t"
+" subs            x12, x12, #1                    \n\t" // Decrease counter before final replica.
+" b.eq            FIN_MKER_LOOP                   \n\t" // Branch early to avoid reading excess mem.
 "                                                 \n\t"
 " index           z29.d, xzr, x1                  \n\t"
-DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4,x17,x16)
+GEMMSUP_ACOL_PREFETCH_NEXT_LOAD_G(z28,z29,z29,p1,p2,x10,x15,x3,x2,x14,x16,noprfm,noprfm)
+GEMM_2VX10_MKER_LOOP_PLAIN_C_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+" b               K_MKER_LOOP                     \n\t"
 "                                                 \n\t"
-" subs            x12, x12, #1                    \n\t" // Decrease counter.
-" b.ne            K_MKER_LOOP                     \n\t"
-" b               K_LEFT_LOOP                     \n\t"
+" FIN_MKER_LOOP:                                  \n\t"
+GEMM_2VX10_MKER_LOOP_PLAIN_C_4_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
+" add             x10, x10, x2                    \n\t" // Forward A to fill the blank.
 "                                                 \n\t"
 " K_LEFT_LOOP:                                    \n\t"
-" cmp             x13, #1                         \n\t"
-" b.eq            FIN_LOOP                        \n\t"
 " cmp             x13, #0                         \n\t"
 " b.eq            WRITE_MEM_PREP                  \n\t"
 "                                                 \n\t"
-" add             x10, x10, x2                    \n\t"
 " index           z31.d, xzr, x1                  \n\t"
-DGEMM_ACOL_GATHER_LOAD(z30,z31,z31,p1,p2,x10,x14,x16)
-DGEMM_2VX10_MKER_LOOP_PLAIN_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x4)
-" mov             z28.d, z30.d                    \n\t"
-" mov             z29.d, z31.d                    \n\t"
-"                                                 \n\t"
+GEMM_ACOL_GATHER_LOAD(z30,z31,z31,p1,p2,x10,x14,x16)
+" ld1rd           z20.d, p0/z, [x11]              \n\t"
+" ld1rd           z21.d, p0/z, [x11, #8]          \n\t"
+" ld1rd           z22.d, p0/z, [x11, #16]         \n\t"
+" ld1rd           z23.d, p0/z, [x11, #24]         \n\t"
+" ld1rd           z24.d, p0/z, [x11, #32]         \n\t"
+" ld1rd           z25.d, p0/z, [x11, #40]         \n\t"
+" ld1rd           z26.d, p0/z, [x11, #48]         \n\t"
+" ld1rd           z27.d, p0/z, [x11, #56]         \n\t"
+" ld1rd           z28.d, p0/z, [x11, #64]         \n\t"
+" ld1rd           z29.d, p0/z, [x11, #72]         \n\t"
+GEMM_FMLA2(z0,z1,p0,z30,z31,z20)
+GEMM_FMLA2(z2,z3,p0,z30,z31,z21)
+GEMM_FMLA2(z4,z5,p0,z30,z31,z22)
+GEMM_FMLA2(z6,z7,p0,z30,z31,z23)
+GEMM_FMLA2(z8,z9,p0,z30,z31,z24)
+GEMM_FMLA2(z10,z11,p0,z30,z31,z25)
+GEMM_FMLA2(z12,z13,p0,z30,z31,z26)
+GEMM_FMLA2(z14,z15,p0,z30,z31,z27)
+GEMM_FMLA2(z16,z17,p0,z30,z31,z28)
+GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
+" add             x10, x10, x2                    \n\t" // Forward A.
+" add             x11, x11, x4                    \n\t" // Forward B.
 " sub             x13, x13, #1                    \n\t"
 " b               K_LEFT_LOOP                     \n\t" // Next column / row.
-"                                                 \n\t"
-" FIN_LOOP:                                       \n\t"
-DGEMM_FMLA2_LD1RD(z0,z1,p0,z28,z29,z20,x11,64) // Column 0
-DGEMM_FMLA2_LD1RD(z2,z3,p0,z28,z29,z21,x11,72) // Column 1
-DGEMM_FMLA2(z4,z5,p0,z28,z29,z22) // Column 2
-DGEMM_FMLA2(z6,z7,p0,z28,z29,z23) // Column 3
-DGEMM_FMLA2(z8,z9,p0,z28,z29,z24) // Column 4
-DGEMM_FMLA2(z10,z11,p0,z28,z29,z25) // Column 5
-DGEMM_FMLA2(z12,z13,p0,z28,z29,z26) // Column 6
-DGEMM_FMLA2(z14,z15,p0,z28,z29,z27) // Column 7
-DGEMM_FMLA2(z16,z17,p0,z28,z29,z20) // Column 8
-DGEMM_FMLA2(z18,z19,p0,z28,z29,z21) // Column 9
-" b               WRITE_MEM_PREP                  \n\t"
-"                                                 \n\t"
-" FIN_LOOP_POPPED:                                \n\t"
-DGEMM_FMLA2_LD1RD(z0,z1,p0,z30,z31,z26,x11,64) // Column 0
-DGEMM_FMLA2_LD1RD(z2,z3,p0,z30,z31,z27,x11,72) // Column 1
-DGEMM_FMLA2(z4,z5,p0,z30,z31,z20) // Column 2
-DGEMM_FMLA2(z6,z7,p0,z30,z31,z21) // Column 3
-DGEMM_FMLA2(z8,z9,p0,z30,z31,z22) // Column 4
-DGEMM_FMLA2(z10,z11,p0,z30,z31,z23) // Column 5
-DGEMM_FMLA2(z12,z13,p0,z30,z31,z24) // Column 6
-DGEMM_FMLA2(z14,z15,p0,z30,z31,z25) // Column 7
-DGEMM_FMLA2(z16,z17,p0,z30,z31,z26) // Column 8
-DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 "                                                 \n\t"
 " WRITE_MEM_PREP:                                 \n\t"
 "                                                 \n\t"
@@ -479,13 +312,13 @@ SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 " WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
 " mov             x13, #64                        \n\t" // C-column's logical 1-vector skip is 64.
-DGEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x9,x7)
-DGEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
-DGEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x9,x7)
+GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x9,x7)
+GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
+GEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x9,x7)
 "                                                 \n\t"
-DGEMM_C_STORE_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x10,x7)
-DGEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
-DGEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x10,x7)
+GEMM_C_STORE_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x10,x7)
+GEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
+GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x10,x7)
 " b               END_WRITE_MEM                   \n\t"
 "                                                 \n\t"
 " WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
@@ -493,13 +326,13 @@ DGEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x10,x7)
 " mov             x12, #64                        \n\t"
 " madd            x13, x12, x6, xzr               \n\t" // C-column's logical 1-vector skip.
 " index           z30.d, xzr, x6                  \n\t" // Skips passed to index is not multiplied by 8.
-DGEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x9,x7,x13,x16)
-DGEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
-DGEMM_C_LOAD_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x9,x7,x13,x16)
+GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x9,x7,x13,x16)
+GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
+GEMM_C_LOAD_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x9,x7,x13,x16)
 "                                                 \n\t"
-DGEMM_C_STORE_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x10,x7,x13,x16)
-DGEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
-DGEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x10,x7,x13,x16)
+GEMM_C_STORE_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x10,x7,x13,x16)
+GEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
+GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x10,x7,x13,x16)
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t"
 " subs            x8, x8, #1                      \n\t"
@@ -533,7 +366,7 @@ DGEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x10,x7,x13,x16)
   [a_next] "m" (a_next),
   [b_next] "m" (b_next)
 : "x0","x1","x2","x3","x4","x5","x6","x7","x8",
-  "x9","x10","x11","x12","x14","x15","x16","x17",
+  "x9","x10","x11","x12","x14","x15","x16",//"x17",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
   "z16","z17","z18","z19",
