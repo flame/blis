@@ -49,7 +49,7 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve512_asm_32x10_unindexed, FALSE,
 	  // Select unindexed kernel for A64fx due to:
 	  // - On this chip indexed FMLA occupies both FP pipelines with half 
 	  //   vector length each (a supposed mutiplexer is not there).
@@ -69,11 +69,11 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,    16,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   160,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,  1000,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  1600,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    10,    10,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   320,   160,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  2000,  1000,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  1600,  1600,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

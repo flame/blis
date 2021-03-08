@@ -33,14 +33,14 @@
 
 
 */
-// Specify to use double precision.
-#define DT    "d"
-#define LD1   "ld1d"
-#define ST1   "st1d"
-#define LD1R  "ld1rd"
-#define PRFG  "prfd"
-#define SZ    "8"
-#define OFFS  "lsl #3"
+// Specify to use single precision.
+#define DT    "s"
+#define LD1   "ld1w"
+#define ST1   "st1w"
+#define LD1R  "ld1rw"
+#define PRFG  "prfw"
+#define SZ    "4"
+#define OFFS  "uxtw #2"
 // Include macros.
 #include "armsve_asm_macros.h"
 

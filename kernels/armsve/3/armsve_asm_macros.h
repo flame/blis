@@ -58,9 +58,9 @@
 " fmla  "#CCOLFH"."DT", "#PT"/m, "#ACOLFH"."DT", "#BV"."DT" \n\t" /* A Row 0 :VL */ \
 " fmla  "#CCOLLH"."DT", "#PT"/m, "#ACOLLH"."DT", "#BV"."DT" \n\t" /* A Row VL:2VL */
 
-#define GEMM_FMLA2_LD1R(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV,BADDR,SHIFT) \
+#define GEMM_FMLA2_LD1R(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV,BADDR,NSHIFT) \
   GEMM_FMLA2(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV) \
-" "LD1R"  "#BV"."DT", "#PT"/z, ["#BADDR", #"#SHIFT"]\n\t"
+" "LD1R"  "#BV"."DT", "#PT"/z, ["#BADDR", #"#NSHIFT"*"SZ"]\n\t"
 
 #define GEMM_FMLA2_LD1R_G_ELMFWD(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV,BELMADDR,BCSBIT) \
   GEMM_FMLA2(CCOLFH,CCOLLH,PT,ACOLFH,ACOLLH,BV) \
@@ -72,16 +72,16 @@
 " "LD1"  "#ZLH"."DT", "#PLH"/z, ["#AADDR", #1, mul vl]\n\t"
 
 #define GEMM_ACOL_GATHER_LOAD(ZFH,ZLH,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP) \
-" "LD1"  "#ZFH"."DT", "#PFH"/z, ["#AADDR", "#ZIDX"."DT", lsl #"LOGSZ"]\n\t" \
+" "LD1"  "#ZFH"."DT", "#PFH"/z, ["#AADDR", "#ZIDX"."DT", "OFFS"]\n\t" \
 " add    "#ATEMP", "#AADDR", "#AVSKIP" \n\t" \
-" "LD1"  "#ZLH"."DT", "#PLH"/z, ["#ATEMP", "#ZIDX"."DT", lsl #"LOGSZ"]\n\t"
+" "LD1"  "#ZLH"."DT", "#PLH"/z, ["#ATEMP", "#ZIDX"."DT", "OFFS"]\n\t"
 
 // Prefetch or not.
 #define GEMM_ACOL_GATHER_noprfm(LV,PROP,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP)
 #define GEMM_ACOL_GATHER_prfm(LV,PROP,ZIDX,PFH,PLH,AADDR,AVSKIP,ATEMP) \
-" "PRFG" PLD"#LV""#PROP", "#PFH", ["#AADDR", "#ZIDX"."DT", lsl #"LOGSZ"] \n\t" \
+" "PRFG" PLD"#LV""#PROP", "#PFH", ["#AADDR", "#ZIDX"."DT", "OFFS"] \n\t" \
 " add    "#ATEMP", "#AADDR", "#AVSKIP" \n\t" \
-" "PRFG" PLD"#LV""#PROP", "#PLH", ["#ATEMP", "#ZIDX"."DT", lsl #"LOGSZ"] \n\t"
+" "PRFG" PLD"#LV""#PROP", "#PLH", ["#ATEMP", "#ZIDX"."DT", "OFFS"] \n\t"
 
 #define GEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(ZFH,ZLH,PFH,PLH,AADDR,A4KS,ACS,ATEMP,PREFMODE) \
 " add  "#ATEMP", "#AADDR", "#A4KS" \n\t" \
@@ -115,9 +115,9 @@
 " add  "#CADDR", "#CADDR", "#CCS"      \n\t"
 
 #define GEMM_CCOL_SCATTER_STORE_FWD(ZFH,ZLH,ZIDX,PFH,PLH,CADDR,CCS,CVSKIP,CTEMP) \
-" "ST1" "#ZFH"."DT", "#PFH", ["#CADDR", "#ZIDX"."DT", lsl #"LOGSZ"]\n\t" \
+" "ST1" "#ZFH"."DT", "#PFH", ["#CADDR", "#ZIDX"."DT", "OFFS"]\n\t" \
 " add   "#CTEMP", "#CADDR", "#CVSKIP"   \n\t" \
-" "ST1" "#ZLH"."DT", "#PLH", ["#CTEMP", "#ZIDX"."DT", lsl #"LOGSZ"]\n\t" \
+" "ST1" "#ZLH"."DT", "#PLH", ["#CTEMP", "#ZIDX"."DT", "OFFS"]\n\t" \
 " add   "#CADDR", "#CADDR", "#CCS"      \n\t"
 
 
