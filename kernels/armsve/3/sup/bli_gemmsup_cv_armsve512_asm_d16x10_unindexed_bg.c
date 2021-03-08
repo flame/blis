@@ -102,24 +102,23 @@
 // NOTE:
 //  The microkernel (PLAIN_1-4 as a whole) satisfies on entry/exit
 //  (sth. akin to loop-invariant):
-//   - BV[0-5] holds B[0:5, 4*k_cur]
-//   - Stream LOAD stops at B[0, 4*k_cur+1]
+//   - BV[0-7] holds B[0:7, 4*k_cur]
+//   - B's address stops at B[0, 4*k_cur+1]
 
-// For rows left behind microkernels.
-#define DGEMM_2VX10_MKER_LOOP_PLAIN_G_RESIDUAL(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BELMADDR,BRS8,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV0,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV1,BELMADDR,BCS8) \
+// Final loop inside K=4 microkernels.
+#define DGEMM_2VX10_MKER_LOOP_PLAIN_G_4_RESIDUAL(C0FH,C1FH,C2FH,C3FH,C4FH,C5FH,C6FH,C7FH,C8FH,C9FH,C0LH,C1LH,C2LH,C3LH,C4LH,C5LH,C6LH,C7LH,C8LH,C9LH,PT,ACOLFH,ACOLLH,BV0,BV1,BV2,BV3,BV4,BV5,BV6,BV7,BADDR,BELMADDR,BRS8,BCS8) \
+  DGEMM_FMLA2_LD1RD_G_ELMFWD(C0FH,C0LH,PT,ACOLFH,ACOLLH,BV6,BELMADDR,BCS8) \
+  DGEMM_FMLA2_LD1RD_G_ELMFWD(C1FH,C1LH,PT,ACOLFH,ACOLLH,BV7,BELMADDR,BCS8) \
 " add             "#BADDR", "#BRS8", "#BADDR"     \n\t" /* B address forward */ \
 " mov             "#BELMADDR", "#BADDR"           \n\t" \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C8FH,C8LH,PT,ACOLFH,ACOLLH,BV0,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C9FH,C9LH,PT,ACOLFH,ACOLLH,BV1,BELMADDR,BCS8) \
-  \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C2FH,C2LH,PT,ACOLFH,ACOLLH,BV2,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C3FH,C3LH,PT,ACOLFH,ACOLLH,BV3,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C4FH,C4LH,PT,ACOLFH,ACOLLH,BV4,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C5FH,C5LH,PT,ACOLFH,ACOLLH,BV5,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C6FH,C6LH,PT,ACOLFH,ACOLLH,BV6,BELMADDR,BCS8) \
-  DGEMM_FMLA2_LD1RD_G_ELMFWD(C7FH,C7LH,PT,ACOLFH,ACOLLH,BV7,BELMADDR,BCS8)
+  DGEMM_FMLA2(C2FH,C2LH,PT,ACOLFH,ACOLLH,BV0) \
+  DGEMM_FMLA2(C3FH,C3LH,PT,ACOLFH,ACOLLH,BV1) \
+  DGEMM_FMLA2(C4FH,C4LH,PT,ACOLFH,ACOLLH,BV2) \
+  DGEMM_FMLA2(C5FH,C5LH,PT,ACOLFH,ACOLLH,BV3) \
+  DGEMM_FMLA2(C6FH,C6LH,PT,ACOLFH,ACOLLH,BV4) \
+  DGEMM_FMLA2(C7FH,C7LH,PT,ACOLFH,ACOLLH,BV5) \
+  DGEMM_FMLA2(C8FH,C8LH,PT,ACOLFH,ACOLLH,BV6) \
+  DGEMM_FMLA2(C9FH,C9LH,PT,ACOLFH,ACOLLH,BV7)
 
 #define DGEMM_ACOL_CONTIGUOUS_LOAD(ZFH,ZLH,PFH,PLH,AADDR) \
 " ld1d  "#ZFH".d, "#PFH"/z, ["#AADDR"]            \n\t" \
@@ -365,6 +364,9 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
 " orr             x10, x10, x16                   \n\t"
 #endif
 "                                                 \n\t"
+" cmp             x12, #0                         \n\t" // Don't preload if no microkernel there.
+" b.eq            END_CCOL_PRFM                   \n\t"
+"                                                 \n\t"
 " mov             x14, x11                        \n\t"
 " ld1rd           z20.d, p0/z, [x14]              \n\t" // Load 8/10 of first B row.
 " add             x14, x14, x2                    \n\t"
@@ -425,10 +427,7 @@ CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 " cmp             x12, #0                         \n\t" // If no 4-microkernel can be applied
 " b.eq            K_LEFT_LOOP                     \n\t"
 "                                                 \n\t"
-" K_MKER_LOOP:                                    \n\t" // Unroll the 4-loop.
-"                                                 \n\t"
-// " cmp             x12, #1                         \n\t"
-// " b.eq            K_FINAL_LOOP                    \n\t"
+" K_MKER_LOOP:                                    \n\t"
 "                                                 \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z30,z31,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_1(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
@@ -439,56 +438,56 @@ DGEMM_2VX10_MKER_LOOP_PLAIN_G_2(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z30,z31,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
 "                                                 \n\t"
-" sub             x16, x12, #1                    \n\t" // Before final replica,
-" adds            x16, x16, x13                   \n\t" //  check if this iteration is final
-" b.eq            FIN_LOOP_POPPED                 \n\t"
+" subs            x12, x12, #1                    \n\t" // Decrease counter before final replica.
+" b.eq            FIN_MKER_LOOP                   \n\t" // Branch early to avoid reading excess mem.
 "                                                 \n\t"
 DGEMMSUP_ACOL_PREFETCH_NEXT_LOAD_C(z28,z29,p1,p2,x10,x15,x4,x16)
 DGEMM_2VX10_MKER_LOOP_PLAIN_G_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
+" b               K_MKER_LOOP                     \n\t"
 "                                                 \n\t"
-" subs            x12, x12, #1                    \n\t" // Decrease counter.
-" b.ne            K_MKER_LOOP                     \n\t"
-" b               K_LEFT_LOOP                     \n\t"
+" FIN_MKER_LOOP:                                  \n\t"
+DGEMM_2VX10_MKER_LOOP_PLAIN_G_4_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
+" add             x10, x10, x4                    \n\t" // Forward A to fill the blank.
 "                                                 \n\t"
 " K_LEFT_LOOP:                                    \n\t"
-" cmp             x13, #1                         \n\t"
-" b.eq            FIN_LOOP                        \n\t"
-" cmp             x13, #0                         \n\t"
+" cmp             x13, #0                         \n\t" // End of execution.
 " b.eq            WRITE_MEM_PREP                  \n\t"
 "                                                 \n\t"
-" add             x10, x10, x4                    \n\t"
 DGEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p1,p2,x10)
-DGEMM_2VX10_MKER_LOOP_PLAIN_G_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x11,x14,x1,x2)
-" mov             z28.d, z30.d                    \n\t"
-" mov             z29.d, z31.d                    \n\t"
-"                                                 \n\t"
+" mov             x14, x11                        \n\t"
+" ld1rd           z20.d, p0/z, [x14]              \n\t" // Load 10/10 B.
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z21.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z22.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z23.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z24.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z25.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z26.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z27.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z28.d, p0/z, [x14]              \n\t"
+" add             x14, x14, x2                    \n\t"
+" ld1rd           z29.d, p0/z, [x14]              \n\t"
+DGEMM_FMLA2(z0,z1,p0,z30,z31,z20)
+DGEMM_FMLA2(z2,z3,p0,z30,z31,z21)
+DGEMM_FMLA2(z4,z5,p0,z30,z31,z22)
+DGEMM_FMLA2(z6,z7,p0,z30,z31,z23)
+DGEMM_FMLA2(z8,z9,p0,z30,z31,z24)
+DGEMM_FMLA2(z10,z11,p0,z30,z31,z25)
+DGEMM_FMLA2(z12,z13,p0,z30,z31,z26)
+DGEMM_FMLA2(z14,z15,p0,z30,z31,z27)
+DGEMM_FMLA2(z16,z17,p0,z30,z31,z28)
+DGEMM_FMLA2(z18,z19,p0,z30,z31,z29)
+" add             x10, x10, x4                    \n\t" // Forward A.
+" add             x11, x11, x1                    \n\t" // Forward B.
 " sub             x13, x13, #1                    \n\t"
 " b               K_LEFT_LOOP                     \n\t" // Next column / row.
-"                                                 \n\t"
-" FIN_LOOP:                                       \n\t"
-DGEMM_FMLA2_LD1RD_G_ELMFWD(z0,z1,p0,z28,z29,z20,x14,x2) // Column 0
-DGEMM_FMLA2_LD1RD_G_ELMFWD(z2,z3,p0,z28,z29,z21,x14,x2) // Column 1
-DGEMM_FMLA2(z4,z5,p0,z28,z29,z22) // Column 2
-DGEMM_FMLA2(z6,z7,p0,z28,z29,z23) // Column 3
-DGEMM_FMLA2(z8,z9,p0,z28,z29,z24) // Column 4
-DGEMM_FMLA2(z10,z11,p0,z28,z29,z25) // Column 5
-DGEMM_FMLA2(z12,z13,p0,z28,z29,z26) // Column 6
-DGEMM_FMLA2(z14,z15,p0,z28,z29,z27) // Column 7
-DGEMM_FMLA2(z16,z17,p0,z28,z29,z20) // Column 8
-DGEMM_FMLA2(z18,z19,p0,z28,z29,z21) // Column 9
-" b               WRITE_MEM_PREP                  \n\t"
-"                                                 \n\t"
-" FIN_LOOP_POPPED:                                \n\t"
-DGEMM_FMLA2_LD1RD_G_ELMFWD(z0,z1,p0,z30,z31,z26,x14,x2) // Column 0
-DGEMM_FMLA2_LD1RD_G_ELMFWD(z2,z3,p0,z30,z31,z27,x14,x2) // Column 1
-DGEMM_FMLA2(z4,z5,p0,z30,z31,z20) // Column 2
-DGEMM_FMLA2(z6,z7,p0,z30,z31,z21) // Column 3
-DGEMM_FMLA2(z8,z9,p0,z30,z31,z22) // Column 4
-DGEMM_FMLA2(z10,z11,p0,z30,z31,z23) // Column 5
-DGEMM_FMLA2(z12,z13,p0,z30,z31,z24) // Column 6
-DGEMM_FMLA2(z14,z15,p0,z30,z31,z25) // Column 7
-DGEMM_FMLA2(z16,z17,p0,z30,z31,z26) // Column 8
-DGEMM_FMLA2(z18,z19,p0,z30,z31,z27) // Column 9
 "                                                 \n\t"
 " WRITE_MEM_PREP:                                 \n\t"
 "                                                 \n\t"
