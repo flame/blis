@@ -9,8 +9,6 @@
 
 #cmakedefine BLIS_ENABLE_OPENMP
 
-#cmakedefine BLIS_ENABLE_PTHREADS
-
 #cmakedefine BLIS_ENABLE_JRIR_SLAB
 
 #cmakedefine BLIS_ENABLE_JRIR_RR

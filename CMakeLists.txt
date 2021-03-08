@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.##
 
 cmake_minimum_required(VERSION 3.0.0)
 
@@ -88,7 +88,7 @@ option(BLIS_ENABLE_ILP64 "ENABLE BLIS ILP64" OFF)
 option(ENABLE_INT_TYPE_SIZE "Integer size type" OFF)
 option(ENABLE_BLASTEST "Enable the blastest" OFF)
 option(ENABLE_TESTCPP_TESTING "Enabling testcpp" OFF)
-option (ENABLE_NO_UNDERSCORE_API "export APIs without underscore" OFF)
+option (ENABLE_NO_UNDERSCORE_API "export APIs without underscore" ON)
 option (ENABLE_UPPERCASE "export APIs with uppercase" OFF)
 
 if(ENABLE_NO_UNDERSCORE_API)

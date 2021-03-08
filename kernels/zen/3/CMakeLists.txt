@@ -5,6 +5,8 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_small.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_syrk_small.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_trsm_small.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_ref_k1.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_sqp.c
     )
 
 add_subdirectory(sup)
