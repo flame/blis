@@ -42,7 +42,7 @@
 // 2vx10 microkernels.
 #include "../armsve_asm_2vx10.h"
 
-void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
+void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
      (
        conj_t              conja,
        conj_t              conjb,
@@ -58,6 +58,12 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
        cntx_t*    restrict cntx
      )
 {
+  static int called = 0;
+  if ( !called )
+  {
+    fprintf(stderr, "rv called.\n");
+    called = 1;
+  }
   // r*r requires B to be stored in rows.
   assert(cs_b0 == 1);
 
@@ -72,7 +78,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
     double *ai = a;
     double *bi = b + n0_mker * 10 * cs_b0;
     double *ci = c + n0_mker * 10 * cs_c0;
-    bli_dgemmsup_r_a64fx_ref // TODO: Fix function name.
+    bli_dgemmsup_r_armsve_ref // TODO: Fix function name.
     (
       conja, conjb,
       m0, n0_left, k0,
@@ -89,6 +95,17 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
   if ( !n0_mker )
     return;
 
+  // Determine VL.
+  uint64_t vlen2;
+  __asm__ (
+    " mov  x0, xzr          \n\t"
+    " incd x0, ALL, MUL #2  \n\t"
+    " mov  %[vlen2], x0     \n\t"
+  : [vlen2] "=r" (vlen2)
+  :
+  : "x0"
+   );
+
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t rs_a   = rs_a0;
@@ -98,14 +115,14 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 
   uint64_t k_mker = k0 / 4;
   uint64_t k_left = k0 % 4;
-  uint64_t m_mker = m0 / 16;
-  uint64_t m_left = m0 % 16;
+  uint64_t m_mker = m0 / vlen2;
+  uint64_t m_left = m0 % vlen2;
   if ( m_left )
   {
     // Edge case on A side can be handled with one more (predicated) loop.
     m_mker++;
   } else
-    m_left = 16;
+    m_left = vlen2;
   uint64_t ps_a = bli_auxinfo_ps_a( data );
   // uint64_t ps_b = bli_auxinfo_ps_b( data );
 
@@ -122,7 +139,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " ldr             x0, %[ai]                       \n\t"
 " ldr             x1, %[rs_a]                     \n\t" // Row-skip of A (element skip of A[:, l]).
 " ldr             x2, %[cs_a]                     \n\t" // Column-skip of A.
-" ldr             x3, %[ps_a]                     \n\t" // Panel-skip (16*k) of A.
+" ldr             x3, %[ps_a]                     \n\t" // Panel-skip (vlen2*k) of A.
 " ldr             x4, %[rs_b]                     \n\t" // Row-Skip of B.
 "                                                 \n\t" // Element skip of B[l, :] is guaranteed to be 1.
 " ldr             x5, %[ci]                       \n\t"
@@ -142,7 +159,8 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve512_16x10_unindexed
 " madd            x3, x8, x3, xzr                 \n\t" // ps_a
 " madd            x4, x8, x4, xzr                 \n\t" // rs_b
 " madd            x7, x8, x7, xzr                 \n\t" // cs_c
-" mov             x8, #64                         \n\t"
+" mov             x8, xzr                         \n\t"
+" incb            x8                              \n\t"
 " madd            x14, x8, x1, xzr                \n\t" // A-column's logical 1-vector skip.
 " mov             x8, #4                          \n\t"
 " madd            x15, x8, x2, xzr                \n\t" // Logical K=4 microkernel skip for A.
@@ -311,7 +329,8 @@ SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
-" mov             x13, #64                        \n\t" // C-column's logical 1-vector skip is 64.
+" mov             x13, xzr                        \n\t" // C-column's physical 1-vector skip.
+" incb            x13                             \n\t"
 GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x9,x7)
 GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
 GEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x9,x7)
@@ -323,7 +342,8 @@ GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x10,x7)
 "                                                 \n\t"
 " WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-30] - Z30 as index.
-" mov             x12, #64                        \n\t"
+" mov             x12, xzr                        \n\t"
+" incb            x12                             \n\t"
 " madd            x13, x12, x6, xzr               \n\t" // C-column's logical 1-vector skip.
 " index           z30.d, xzr, x6                  \n\t" // Skips passed to index is not multiplied by 8.
 GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x9,x7,x13,x16)

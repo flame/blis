@@ -105,10 +105,10 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	bli_cntx_set_l3_sup_kers
 	(
 	  4,
-	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
-	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
-	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
-	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armsve512_10x16_unindexed, TRUE,
+	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
+	  BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
+	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
+	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armsve_10x2v_unindexed, TRUE,
 	  cntx
 	);
 

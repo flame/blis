@@ -33,8 +33,8 @@
 
 
 */
-#include <assert.h>
 #include "blis.h"
+#include <assert.h>
 
 // Double-precision composite instructions.
 #include "../armsve_asm_macros_double.h"
@@ -42,7 +42,7 @@
 // 2vx10 microkernels.
 #include "../armsve_asm_2vx10.h"
 
-void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unindexed
+void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve_2vx10_unindexed
      (
        conj_t              conja,
        conj_t              conjb,
@@ -58,6 +58,12 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
        cntx_t*    restrict cntx
      )
 {
+  static int called = 0;
+  if ( !called )
+  {
+    fprintf(stderr, "rv called.\n");
+    called = 1;
+  }
   // c*c requires A to be stored in columns.
   assert( rs_a0 == 1 );
 
@@ -72,7 +78,7 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
     double *ai = a;
     double *bi = b + n0_mker * 10 * cs_b0;
     double *ci = c + n0_mker * 10 * cs_c0;
-    bli_dgemmsup_c_a64fx_ref // TODO: Fix function name.
+    bli_dgemmsup_c_armsve_ref // TODO: Fix function name.
     (
       conja, conjb,
       m0, n0_left, k0,
@@ -89,6 +95,17 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
   if ( !n0_mker )
     return;
 
+  // Determine VL.
+  uint64_t vlen2;
+  __asm__ (
+    " mov  x0, xzr          \n\t"
+    " incd x0, ALL, MUL #2  \n\t"
+    " mov  %[vlen2], x0     \n\t"
+  : [vlen2] "=r" (vlen2)
+  :
+  : "x0"
+   );
+
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t rs_a   = 1;
@@ -100,28 +117,28 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve512_16x10_unin
   uint64_t k_left = k0 % 4;
   uint64_t n_mker = n0_mker;
 
-  dim_t m0_mker = m0 / 16;
-  dim_t m0_left = m0 % 16;
+  dim_t m0_mker = m0 / vlen2;
+  dim_t m0_left = m0 % vlen2;
   if ( m0_left )
   {
     // Edge case on A side can be handled with one more (predicated) loop.
     m0_mker++;
   } else
-    m0_left = 16;
+    m0_left = vlen2;
   // uint64_t ps_a = bli_auxinfo_ps_a( data );
   uint64_t ps_b = bli_auxinfo_ps_b( data );
 
   for ( dim_t im0_mker = 0; im0_mker < m0_mker; ++im0_mker )
   {
-    uint64_t m_curr = 16;
+    uint64_t m_curr = vlen2;
     if ( im0_mker == m0_mker - 1 )
     {
       // Last m-loop. Maybe unnecessary.
       m_curr = m0_left;
     }
-    double *ai = a + im0_mker * 16 * rs_a0;
+    double *ai = a + im0_mker * vlen2 * rs_a0;
     double *bi = b;
-    double *ci = c + im0_mker * 16 * rs_c0;
+    double *ci = c + im0_mker * vlen2 * rs_c0;
 
     void* a_next = bli_auxinfo_next_a( data );
     void* b_next = bli_auxinfo_next_b( data );
@@ -394,7 +411,8 @@ SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
-" mov             x13, #64                        \n\t" // C-column's logical 1-vector skip is 64.
+" mov             x13, xzr                        \n\t" // C-column's physical 1-vector skip.
+" incb            x13                             \n\t"
 GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,x9,x7)
 GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p1,p2,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
 GEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x9,x7)
@@ -406,7 +424,8 @@ GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p1,p2,x5,x7)
 "                                                 \n\t"
 " WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-30] - Z30 as index.
-" mov             x12, #64                        \n\t"
+" mov             x12, xzr                        \n\t"
+" incb            x12                             \n\t"
 " madd            x13, x12, x6, xzr               \n\t" // C-column's logical 1-vector skip.
 " index           z30.d, xzr, x6                  \n\t" // Skips passed to index is not multiplied by 8.
 GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p1,p2,x9,x7,x13,x16)
@@ -459,7 +478,7 @@ GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p1,p2,x5,x7,x13,x16)
   }
 }
 
-void bli_dgemmsup_rv_armsve512_10x16_unindexed
+void bli_dgemmsup_rv_armsve_10x2v_unindexed
      (
        conj_t              conjat,
        conj_t              conjbt,
@@ -480,7 +499,7 @@ void bli_dgemmsup_rv_armsve512_10x16_unindexed
   bli_auxinfo_set_next_b( bli_auxinfo_next_a( datat ), &data );
   bli_auxinfo_set_ps_a( bli_auxinfo_ps_b( datat ), &data );
   bli_auxinfo_set_ps_b( bli_auxinfo_ps_a( datat ), &data );
-  bli_dgemmsup_cv_armsve512_16x10_unindexed
+  bli_dgemmsup_cv_armsve_2vx10_unindexed
   (
     conjbt, conjat,
     n0t, m0t, k0,
