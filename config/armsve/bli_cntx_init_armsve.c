@@ -41,23 +41,22 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_armsve_ref( cntx );
 
-	// Get SVE vector length, in number of 64-bit words.
-	uint64_t vlen;
-	__asm__ volatile (
-" mov  x0, xzr  \n\t"
-" incd x0       \n\t"
-" str  x0, %[v] \n\t"
-	: [v] "=m" (vlen)
-	: );
-	// Determine kernel based on SVE vector length.
-	// Now that we have 256 and 512 bits supported.
-	void_fp bli_dgemm_armsve_asm_use;
-	uint64_t mr_d = 0, nr_d = 0, mc_d = 0, nc_d = 0;
-	switch (vlen) {
-		case 4:  bli_dgemm_armsve_asm_use = bli_dgemm_armsve256_asm_8x8;   mr_d = 8;  nr_d = 8;  mc_d = 160; nc_d = 3072; break;
-		case 8:  bli_dgemm_armsve_asm_use = bli_dgemm_armsve512_asm_16x12; mr_d = 16; nr_d = 12; mc_d = 160; nc_d = 3072; break;
-		default: bli_dgemm_armsve_asm_use = bli_dgemm_armv8a_asm_6x8;      mr_d = 6;  nr_d = 8;  mc_d = 120; nc_d = 3072; break;
-	}
+	// Get SVE vector lengths.
+	uint64_t wlen, dlen;
+	__asm__ (
+	  " mov  x0, xzr     \n\t"
+	  " incw x0          \n\t"
+	  " mov  %[wlen], x0 \n\t" // Single.
+	  " mov  x0, xzr     \n\t"
+	  " incd x0          \n\t"
+	  " mov  %[dlen], x0 \n\t" // Double.
+	: [wlen] "=r" (wlen),
+	  [dlen] "=r" (dlen)
+	: 
+	: "x0"
+	 );
+	dim_t mr_s = wlen * 2;
+	dim_t mr_d = dlen * 2;
 
 	// -------------------------------------------------------------------------
 
@@ -66,21 +65,23 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_use,  FALSE,
+	  // These are vector-length agnostic kernels. Yet knowing mr is required at runtime.
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
 	  cntx
 	);
 
-	// Set packing routine
-	if (vlen==8)
+	// Set packing routines if applicable.
+	if (dlen==8)
 	  bli_cntx_set_packm_kers
 	  (
-		2,
+		3,
+		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
 		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
 		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
 		cntx
 	  );
-	else if (vlen==4)
+	else if (dlen==4)
 	  bli_cntx_set_packm_kers
 	  (
 		1,
@@ -90,11 +91,11 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,  mr_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,  nr_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,  mc_d,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  nc_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],  mr_s,  mr_d,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    10,    10,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   640,   320,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  1024,  1024,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3000,  3000,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.

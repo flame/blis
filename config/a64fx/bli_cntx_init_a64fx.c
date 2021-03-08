@@ -49,11 +49,8 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	bli_cntx_set_l3_nat_ukrs
 	(
 	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve512_asm_32x10_unindexed, FALSE,
-	  // Select unindexed kernel for A64fx due to:
-	  // - On this chip indexed FMLA occupies both FP pipelines with half 
-	  //   vector length each (a supposed mutiplexer is not there).
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve512_asm_16x10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
 	  cntx
 	);
 
@@ -90,9 +87,9 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  201,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  201,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  201,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,   65,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,   65,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,   65,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh

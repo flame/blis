@@ -33,10 +33,8 @@
 */
 
 GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12 )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x12_unindexed )
-GEMM_UKR_PROT( double,   d, gemm_armsve512_asm_16x10_unindexed )
-GEMM_UKR_PROT( float,    s, gemm_armsve512_asm_32x10_unindexed )
+GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )
+GEMM_UKR_PROT( float,    s, gemm_armsve_asm_2vx10_unindexed )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve512_16x10_unindexed )
 GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve512_16x10_unindexed )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve512_10x16_unindexed )
