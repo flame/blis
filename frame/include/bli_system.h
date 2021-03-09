@@ -6,6 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -71,7 +72,6 @@
 
 // Determine the target operating system.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  #define BLIS
   #define BLIS_OS_WINDOWS 1
 #elif defined(__gnu_hurd__)
   #define BLIS_OS_GNU 1
