@@ -73,6 +73,20 @@ err_t bli_gemmsup_ref
 	}
 #endif
 
+	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+
+	// Don't use the small/unpacked implementation if one of the matrices
+	// uses general stride. NOTE: We check for this here, in bli_gemmsup_ref()
+	// (and not in the calling function, bli_gemmsup()), because we consider
+	// this way of handling general stride to be part of the implementation
+	// and not necessarily a general-purpose solution that would apply to all
+	// possible gemmsup handlers. Similarly, we check for it here (and not in
+	// the internal thread entry point, bli_gemmsup_int()) because we don't
+	// want to have to manage the multiple return values from the threads,
+	// which we would have to process into a single return value and then
+	// return from the parallel/threaded region.
+	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
+
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
 	bli_rntm_set_ways_from_rntm_sup
