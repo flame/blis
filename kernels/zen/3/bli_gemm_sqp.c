@@ -37,6 +37,7 @@
 #define BLIS_LOADFIRST 0
 #define BLIS_ENABLE_PREFETCH 1
 
+#define MEM_ALLOC 1//malloc performs better than bli_malloc.
 #define BLIS_MX8 8
 #define DEBUG_3M_SQP 0
 
@@ -44,6 +45,7 @@ typedef struct  {
     siz_t data_size;
     siz_t size;
     void* alignedBuf;
+    void* unalignedBuf;
 }mem_block;
 
 static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc, double alpha, double beta, bool isTransA);
@@ -67,7 +69,7 @@ err_t bli_gemm_sqp
        cntl_t* cntl
      )
 {
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 
     // if row major format return.
     if ((bli_obj_row_stride( a ) != 1) ||
@@ -88,7 +90,7 @@ err_t bli_gemm_sqp
     }
 
     num_t dt = bli_obj_dt(c);
-	gint_t m = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t m = bli_obj_length( c ); // number of rows of Matrix C
     gint_t n = bli_obj_width( c );  // number of columns of Matrix C
     gint_t k = bli_obj_length( b ); // number of rows of Matrix B
 
@@ -157,7 +159,7 @@ err_t bli_gemm_sqp
         return bli_dgemm_m8( m, n, k, ap, lda, bp, ldb, cp, ldc, isTransA, (*alpha_cast));
     }
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -578,36 +580,36 @@ static err_t bli_dgemm_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t lda, 
     double* aPacked;
     double* aligned = NULL;
 
-	bool pack_on = false;
-	if((m!=BLIS_MX8)||(m!=lda)||isTransA)
-	{
-		pack_on = true;
-	}
+    bool pack_on = false;
+    if((m!=BLIS_MX8)||(m!=lda)||isTransA)
+    {
+        pack_on = true;
+    }
 
-	if(pack_on==true)
-	{
-		aligned = (double*)bli_malloc_user(sizeof(double) * k * BLIS_MX8);
-	}
+    if(pack_on==true)
+    {
+        aligned = (double*)bli_malloc_user(sizeof(double) * k * BLIS_MX8);
+    }
 
     for (gint_t i = 0; i < m; i += BLIS_MX8) //this loop can be threaded. no of workitems = m/8
     {
         inc_t j = 0;
         double* ci = c + i;
-		if(pack_on==true)
-		{
-			aPacked = aligned;
+        if(pack_on==true)
+        {
+            aPacked = aligned;
             double *pa = a + i;
             if(isTransA==true)
             {
                 pa = a + (i*lda);
             }
-			bli_prepackA_8(pa, aPacked, k, lda, isTransA, alpha);
-			//bli_prepackA_8x4(a + i, aPacked, k, lda);
-		}
-		else
+            bli_prepackA_8(pa, aPacked, k, lda, isTransA, alpha);
+            //bli_prepackA_8x4(a + i, aPacked, k, lda);
+        }
+        else
         {
-			aPacked = a+i;
-		}
+            aPacked = a+i;
+        }
 
         j = bli_kernel_8mx5n(n, k, j, aPacked, lda, b, ldb, ci, ldc);
         if (j <= n - 4)
@@ -644,13 +646,24 @@ gint_t bli_getaligned(mem_block* mem_req)
     {
         return -1;
     }
-    memSize += 128;
+    memSize += 128;// extra 128 bytes added for alignment. Could be minimized to 64.
+#if MEM_ALLOC
+    mem_req->unalignedBuf = (double*)malloc(memSize);
+    if (mem_req->unalignedBuf == NULL)
+    {
+        return -1;
+    }
 
+    int64_t address = (int64_t)mem_req->unalignedBuf;
+    address += (-address) & 63; //64 bytes alignment done.
+    mem_req->alignedBuf = (double*)address;
+#else
     mem_req->alignedBuf = bli_malloc_user( memSize );
     if (mem_req->alignedBuf == NULL)
     {
         return -1;
     }
+#endif
     return 0;
 }
 
@@ -676,21 +689,416 @@ void bli_add_m(gint_t m,gint_t n,double* w,double* c)
 {
     double* pc = c;
     double* pw = w;
-    for (gint_t i = 0; i < m*n; i++)
+    gint_t count = m*n;
+    gint_t i = 0;
+    __m256d cv0, wv0;
+
+    for (; i <= (count-4); i+=4)
+    {
+        cv0 = _mm256_loadu_pd(pc);
+        wv0 = _mm256_loadu_pd(pw); pw += 4;
+        cv0 = _mm256_add_pd(cv0,wv0);
+        _mm256_storeu_pd(pc, cv0); pc += 4;
+    }
+    for (; i < count; i++)
     {
         *pc = *pc + *pw;
         pc++; pw++;
     }
+
+
 }
 
 void bli_sub_m(gint_t m, gint_t n, double* w, double* c)
 {
     double* pc = c;
     double* pw = w;
-    for (gint_t i = 0; i < m * n; i++)
+    gint_t count = m*n;
+    gint_t i = 0;
+    __m256d cv0, wv0;
+
+    for (; i <= (count-4); i+=4)
+    {
+        cv0 = _mm256_loadu_pd(pc);
+        wv0 = _mm256_loadu_pd(pw); pw += 4;
+        cv0 = _mm256_sub_pd(cv0,wv0);
+        _mm256_storeu_pd(pc, cv0); pc += 4;
+    }
+    for (; i < count; i++)
     {
         *pc = *pc - *pw;
         pc++; pw++;
+    }
+}
+
+void bli_packX_real_imag(double* pb, guint_t n, guint_t k, guint_t ldb, double* pbr, double* pbi, double mul)
+{
+    gint_t j, p;
+    __m256d av0, av1, zerov;
+    __m256d tv0, tv1;
+
+    if((mul ==1.0)||(mul==-1.0))
+    {
+        if(mul ==1.0)
+        {
+            for (j = 0; j < n; j++)
+            {
+                for (p = 0; p <= ((k*2)-8); p += 8)
+                {
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);
+                    av1 = _mm256_loadu_pd(pbp+4);
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);
+
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = *(pb + p) ;
+                    double bi = *(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    pbr++; pbi++;
+                }
+                pb = pb + ldb;
+            }
+        }
+        else
+        {
+            zerov = _mm256_setzero_pd();
+            for (j = 0; j < n; j++)
+            {
+                for (p = 0; p <= ((k*2)-8); p += 8)
+                {
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);
+                    av1 = _mm256_loadu_pd(pbp+4);
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);
+
+                    //negate
+                    av0 = _mm256_sub_pd(zerov,av0);
+                    av1 = _mm256_sub_pd(zerov,av1);
+
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = -*(pb + p) ;
+                    double bi = -*(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    pbr++; pbi++;
+                }
+                pb = pb + ldb;
+            }
+        }
+    }
+    else
+    {
+        for (j = 0; j < n; j++)
+        {
+            for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+            {
+                double br_ = mul * (*(pb + p));
+                double bi_ = mul * (*(pb + p + 1));
+                *pbr = br_;
+                *pbi = bi_;
+                pbr++; pbi++;
+            }
+            pb = pb + ldb;
+        }
+    }
+}
+
+void bli_packX_real_imag_sum(double* pb, guint_t n, guint_t k, guint_t ldb, double* pbr, double* pbi, double* pbs, double mul)
+{
+    gint_t j, p;
+    __m256d av0, av1, zerov;
+    __m256d tv0, tv1, sum;
+
+    if((mul ==1.0)||(mul==-1.0))
+    {
+        if(mul ==1.0)
+        {
+            for (j = 0; j < n; j++)
+            {
+                for (p = 0; p <= ((k*2)-8); p += 8)
+                {
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);
+                    av1 = _mm256_loadu_pd(pbp+4);
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);
+                    sum = _mm256_add_pd(av0, av1);
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                    _mm256_storeu_pd(pbs, sum); pbs += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = *(pb + p) ;
+                    double bi = *(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    *pbs = br + bi;
+
+                    pbr++; pbi++; pbs++;
+                }
+                pb = pb + ldb;
+            }
+        }
+        else
+        {
+            zerov = _mm256_setzero_pd();
+            for (j = 0; j < n; j++)
+            {
+                for (p = 0; p <= ((k*2)-8); p += 8)
+                {
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);
+                    av1 = _mm256_loadu_pd(pbp+4);
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);
+
+                    //negate
+                    av0 = _mm256_sub_pd(zerov,av0);
+                    av1 = _mm256_sub_pd(zerov,av1);
+
+                    sum = _mm256_add_pd(av0, av1);
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                    _mm256_storeu_pd(pbs, sum); pbs += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = -*(pb + p) ;
+                    double bi = -*(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    *pbs = br + bi;
+
+                    pbr++; pbi++; pbs++;
+                }
+                pb = pb + ldb;
+            }
+        }
+    }
+    else
+    {
+        for (j = 0; j < n; j++)
+        {
+            for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+            {
+                double br_ = mul * (*(pb + p));
+                double bi_ = mul * (*(pb + p + 1));
+                *pbr = br_;
+                *pbi = bi_;
+                *pbs = br_ + bi_;
+
+                pbr++; pbi++; pbs++;
+            }
+            pb = pb + ldb;
+        }
+    }
+}
+
+void bli_packA_real_imag_sum(double *pa, gint_t i, guint_t k, guint_t lda, double *par, double *pai, double *pas, bool isTransA)
+{
+    __m256d av0, av1, av2, av3;
+    __m256d tv0, tv1, sum;
+    gint_t p;
+    if(isTransA==false)
+    {
+        pa = pa +i;
+        for (p = 0; p < k; p += 1)
+        {
+            //for (int ii = 0; ii < MX8 * 2; ii += 2) //real + imag : Rkernel needs 8 elements each.
+    #if 1
+            av0 = _mm256_loadu_pd(pa);
+            av1 = _mm256_loadu_pd(pa+4);
+            av2 = _mm256_loadu_pd(pa+8);
+            av3 = _mm256_loadu_pd(pa+12);
+
+            tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+            tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+            av0 = _mm256_unpacklo_pd(tv0, tv1);
+            av1 = _mm256_unpackhi_pd(tv0, tv1);
+            sum = _mm256_add_pd(av0, av1);
+            _mm256_storeu_pd(par, av0); par += 4;
+            _mm256_storeu_pd(pai, av1); pai += 4;
+            _mm256_storeu_pd(pas, sum); pas += 4;
+
+            tv0 = _mm256_permute2f128_pd(av2, av3, 0x20);
+            tv1 = _mm256_permute2f128_pd(av2, av3, 0x31);
+            av2 = _mm256_unpacklo_pd(tv0, tv1);
+            av3 = _mm256_unpackhi_pd(tv0, tv1);
+            sum = _mm256_add_pd(av2, av3);
+            _mm256_storeu_pd(par, av2); par += 4;
+            _mm256_storeu_pd(pai, av3); pai += 4;
+            _mm256_storeu_pd(pas, sum); pas += 4;
+    #else  //method 2
+            __m128d high, low, real, img, sum;
+            av0 = _mm256_loadu_pd(pa);
+            av1 = _mm256_loadu_pd(pa+4);
+            av2 = _mm256_loadu_pd(pa+8);
+            av3 = _mm256_loadu_pd(pa+12);
+            high = _mm256_extractf128_pd(av0, 1);
+            low = _mm256_castpd256_pd128(av0);
+            real = _mm_shuffle_pd(low, high, 0b00);
+            img = _mm_shuffle_pd(low, high, 0b11);
+            sum = _mm_add_pd(real, img);
+            _mm_storeu_pd(par, real); par += 2;
+            _mm_storeu_pd(pai, img); pai += 2;
+            _mm_storeu_pd(pas, sum); pas += 2;
+
+            high = _mm256_extractf128_pd(av1, 1);
+            low = _mm256_castpd256_pd128(av1);
+            real = _mm_shuffle_pd(low, high, 0b00);
+            img = _mm_shuffle_pd(low, high, 0b11);
+            sum = _mm_add_pd(real, img);
+            _mm_storeu_pd(par, real); par += 2;
+            _mm_storeu_pd(pai, img); pai += 2;
+            _mm_storeu_pd(pas, sum); pas += 2;
+
+            high = _mm256_extractf128_pd(av2, 1);
+            low = _mm256_castpd256_pd128(av2);
+            real = _mm_shuffle_pd(low, high, 0b00);
+            img = _mm_shuffle_pd(low, high, 0b11);
+            sum = _mm_add_pd(real, img);
+            _mm_storeu_pd(par, real); par += 2;
+            _mm_storeu_pd(pai, img); pai += 2;
+            _mm_storeu_pd(pas, sum); pas += 2;
+
+            high = _mm256_extractf128_pd(av3, 1);
+            low = _mm256_castpd256_pd128(av3);
+            real = _mm_shuffle_pd(low, high, 0b00);
+            img = _mm_shuffle_pd(low, high, 0b11);
+            sum = _mm_add_pd(real, img);
+            _mm_storeu_pd(par, real); par += 2;
+            _mm_storeu_pd(pai, img); pai += 2;
+            _mm_storeu_pd(pas, sum); pas += 2;
+    #endif
+            pa = pa + lda;
+        }
+    }
+    else
+    {
+        gint_t idx = (i/2) * lda;
+        pa = pa + idx;
+
+#if 0
+        for (int p = 0; p <= ((2*k)-8); p += 8)
+        {
+            //for (int ii = 0; ii < MX8 * 2; ii += 2) //real + imag : Rkernel needs 8 elements each.
+            av0 = _mm256_loadu_pd(pa);
+            av1 = _mm256_loadu_pd(pa+4);
+            av2 = _mm256_loadu_pd(pa+8);
+            av3 = _mm256_loadu_pd(pa+12);
+
+            //transpose 4x4
+            tv0 = _mm256_unpacklo_pd(av0, av1);
+            tv1 = _mm256_unpackhi_pd(av0, av1);
+            tv2 = _mm256_unpacklo_pd(av2, av3);
+            tv3 = _mm256_unpackhi_pd(av2, av3);
+
+            av0 = _mm256_permute2f128_pd(tv0, tv2, 0x20);
+            av1 = _mm256_permute2f128_pd(tv1, tv3, 0x20);
+            av2 = _mm256_permute2f128_pd(tv0, tv2, 0x31);
+            av3 = _mm256_permute2f128_pd(tv1, tv3, 0x31);
+
+            //get real, imag and sum
+            tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+            tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+            av0 = _mm256_unpacklo_pd(tv0, tv1);
+            av1 = _mm256_unpackhi_pd(tv0, tv1);
+            sum = _mm256_add_pd(av0, av1);
+            _mm256_storeu_pd(par, av0); par += 4;
+            _mm256_storeu_pd(pai, av1); pai += 4;
+            _mm256_storeu_pd(pas, sum); pas += 4;
+
+            tv0 = _mm256_permute2f128_pd(av2, av3, 0x20);
+            tv1 = _mm256_permute2f128_pd(av2, av3, 0x31);
+            av2 = _mm256_unpacklo_pd(tv0, tv1);
+            av3 = _mm256_unpackhi_pd(tv0, tv1);
+            sum = _mm256_add_pd(av2, av3);
+            _mm256_storeu_pd(par, av2); par += 4;
+            _mm256_storeu_pd(pai, av3); pai += 4;
+            _mm256_storeu_pd(pas, sum); pas += 4;
+
+            pa = pa + lda;
+        }
+#endif
+        //A Transpose case:
+        for (gint_t ii = 0; ii < BLIS_MX8 ; ii++)
+        {
+            gint_t idx = ii * lda;
+            gint_t sidx;
+            for (p = 0; p <= ((k*2)-8); p += 8)
+            {
+                double ar0_ = *(pa + idx + p);
+                double ai0_ = *(pa + idx + p + 1);
+
+                double ar1_ = *(pa + idx + p + 2);
+                double ai1_ = *(pa + idx + p + 3);
+
+                double ar2_ = *(pa + idx + p + 4);
+                double ai2_ = *(pa + idx + p + 5);
+
+                double ar3_ = *(pa + idx + p + 6);
+                double ai3_ = *(pa + idx + p + 7);
+
+                sidx = (p/2) * BLIS_MX8;
+                *(par + sidx + ii) = ar0_;
+                *(pai + sidx + ii) = ai0_;
+                *(pas + sidx + ii) = ar0_ + ai0_;
+
+                sidx = ((p+2)/2) * BLIS_MX8;
+                *(par + sidx + ii) = ar1_;
+                *(pai + sidx + ii) = ai1_;
+                *(pas + sidx + ii) = ar1_ + ai1_;
+
+                sidx = ((p+4)/2) * BLIS_MX8;
+                *(par + sidx + ii) = ar2_;
+                *(pai + sidx + ii) = ai2_;
+                *(pas + sidx + ii) = ar2_ + ai2_;
+
+                sidx = ((p+6)/2) * BLIS_MX8;
+                *(par + sidx + ii) = ar3_;
+                *(pai + sidx + ii) = ai3_;
+                *(pas + sidx + ii) = ar3_ + ai3_;
+
+            }
+
+            for (; p < (k*2); p += 2)
+            {
+                double ar_ = *(pa + idx + p);
+                double ai_ = *(pa + idx + p + 1);
+                gint_t sidx = (p/2) * BLIS_MX8;
+                *(par + sidx + ii) = ar_;
+                *(pai + sidx + ii) = ai_;
+                *(pas + sidx + ii) = ar_ + ai_;
+            }
+        }
     }
 }
 
@@ -755,66 +1163,16 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
     c = &cx[0][0];
 #endif
 
-	/* Split    b  (br, bi) and
+    /* Split    b  (br, bi) and
        compute  bs = br + bi    */
     double* pbr = br;
     double* pbi = bi;
     double* pbs = bs;
 
-    gint_t j, p;
+    gint_t j;
 
-    /* b matrix real and imag packing and compute to be vectorized. */
-	if((alpha ==1.0)||(alpha==-1.0))
-	{
-		if(alpha ==1.0)
-		{
-			for (j = 0; j < n; j++)
-			{
-				for (p = 0; p < (k*2); p += 2)// (real + imag)*k
-				{
-					double br_ = b[(j * ldb) + p];
-					double bi_ = b[(j * ldb) + p + 1];
-					*pbr = br_;
-					*pbi = bi_;
-					*pbs = br_ + bi_;
-
-					pbr++; pbi++; pbs++;
-				}
-			}
-		}
-		else
-		{
-			for (j = 0; j < n; j++)
-			{
-				for (p = 0; p < (k*2); p += 2)// (real + imag)*k
-				{
-					double br_ = -b[(j * ldb) + p];
-					double bi_ = -b[(j * ldb) + p + 1];
-					*pbr = br_;
-					*pbi = bi_;
-					*pbs = br_ + bi_;
-
-					pbr++; pbi++; pbs++;
-				}
-			}
-		}
-	}
-	else
-	{
-		for (j = 0; j < n; j++)
-		{
-			for (p = 0; p < (k*2); p += 2)// (real + imag)*k
-			{
-				double br_ = alpha * b[(j * ldb) + p];
-				double bi_ = alpha * b[(j * ldb) + p + 1];
-				*pbr = br_;
-				*pbi = bi_;
-				*pbs = br_ + bi_;
-
-				pbr++; pbi++; pbs++;
-			}
-		}
-	}
+    /* b matrix real and imag packing and compute. */
+    bli_packX_real_imag_sum(b, n, k, ldb, pbr, pbi, pbs, alpha);
 
     /* Workspace memory allocation currently done dynamically
     This needs to be taken from already allocated memory pool in application for better performance */
@@ -874,89 +1232,15 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         double* pai = ai;
         double* pas = as;
 
-        /* a matrix real and imag packing and compute to be vectorized. */
-		if(isTransA==false)
-		{
-			//A No transpose case:
-			for (gint_t p = 0; p < k; p += 1) {
-				for (gint_t ii = 0; ii < (2*BLIS_MX8) ; ii += 2) { //real + imag : Rkernel needs 8 elements each.
-					double ar_ = a[(p * lda) + i + ii];
-					double ai_ = a[(p * lda) + i + ii+1];
-					*par = ar_;
-					*pai = ai_;
-					*pas = ar_ + ai_;
-					par++; pai++; pas++;
-				}
-			}
-		}
-		else
-		{
-            //A Transpose case:
-			for (gint_t ii = 0; ii < BLIS_MX8 ; ii++)
-			{
-				gint_t idx = ((i/2) + ii) * lda;
-				for (gint_t s = 0; s < (k*2); s += 2)
-				{
-					double ar_ = a[ idx + s];
-					double ai_ = a[ idx + s + 1];
-					gint_t sidx = s * (BLIS_MX8/2);
-					*(par + sidx + ii) = ar_;
-					*(pai + sidx + ii) = ai_;
-					*(pas + sidx + ii) = ar_ + ai_;
-				}
-			}
-		}
+        /* a matrix real and imag packing and compute. */
+        bli_packA_real_imag_sum(a, i, k, lda, par, pai, pas, isTransA);
 
         double* pcr = cr;
         double* pci = ci;
 
         //Split Cr and Ci and beta multiplication done.
-		if((beta ==1.0)||(beta==-1.0))
-		{
-			if(beta ==1.0)
-			{
-				for (j = 0; j < n; j++)
-                {
-					for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
-                    {
-						double cr_ = c[(j * ldc) + i + ii];
-						double ci_ = c[(j * ldc) + i + ii + 1];
-						*pcr = cr_;
-						*pci = ci_;
-						pcr++; pci++;
-					}
-				}
-			}
-			else
-			{
-                //beta = -1.0
-				for (j = 0; j < n; j++)
-                {
-					for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
-                    {
-						double cr_ = -c[(j * ldc) + i + ii];
-						double ci_ = -c[(j * ldc) + i + ii + 1];
-						*pcr = cr_;
-						*pci = ci_;
-						pcr++; pci++;
-					}
-				}
-			}
-		}
-		else
-		{
-			for (j = 0; j < n; j++)
-            {
-				for (gint_t ii = 0; ii < (2*BLIS_MX8); ii += 2)
-                {
-					double cr_ = beta*c[(j * ldc) + i + ii];
-					double ci_ = beta*c[(j * ldc) + i + ii + 1];
-					*pcr = cr_;
-					*pci = ci_;
-					pcr++; pci++;
-				}
-			}
-		}
+        double* pc = c + i;
+        bli_packX_real_imag(pc, n, BLIS_MX8, ldc, pcr, pci, beta);
 
         //Ci := rgemm( SA, SB, Ci )
         bli_dgemm_m8(BLIS_MX8, n, k, as, BLIS_MX8, bs, k, ci, BLIS_MX8, false, 1.0);
@@ -1028,7 +1312,20 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         printf("\n");
     }
 #endif
+#if MEM_ALLOC
+    free(mar.unalignedBuf);
+    free(mai.unalignedBuf);
+    free(mas.unalignedBuf);
 
+    free(mw.unalignedBuf);
+
+    free(mcr.unalignedBuf);
+    free(mci.unalignedBuf);
+
+    free(mbr.unalignedBuf);
+    free(mbi.unalignedBuf);
+    free(mbs.unalignedBuf);
+#else
     /* free workspace buffers */
     bli_free_user(mbr.alignedBuf);
     bli_free_user(mbi.alignedBuf);
@@ -1039,6 +1336,6 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
     bli_free_user(mw.alignedBuf);
     bli_free_user(mcr.alignedBuf);
     bli_free_user(mci.alignedBuf);
-
+#endif
     return BLIS_SUCCESS;
 }
