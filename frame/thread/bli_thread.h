@@ -61,10 +61,6 @@
 void bli_thread_init( void );
 void bli_thread_finalize( void );
 
-#ifdef _MSC_VER
-#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
-#endif
-
 // Thread range-related prototypes.
 
 BLIS_EXPORT_BLIS
