@@ -176,6 +176,54 @@ void bli_pthread_once
 // This branch defines a pthread-like API, bli_pthread_*(), and implements it
 // in terms of Windows API calls.
 
+// -- pthread_create(), pthread_join() --
+
+typedef struct
+{
+	void* (*start_routine)( void* );
+	void*   param;
+	void**  retval;
+
+} bli_thread_param;
+
+static DWORD bli_thread_func
+     (
+       void* param_
+     )
+{
+	bli_thread_param* param = param_;
+	*param->retval = param->start_routine( param->param );
+	return 0;
+}
+
+int bli_pthread_create
+     (
+       bli_pthread_t*            thread,
+       const bli_pthread_attr_t* attr,
+       void*                   (*start_routine)(void*),
+       void*                     arg
+     )
+{
+	if ( attr ) return EINVAL;
+	bli_thread_param param = { start_routine, arg, &thread->retval };
+	thread->handle = CreateThread( NULL, 0, bli_thread_func, &param, 0, NULL );
+	if ( !thread->handle ) return EAGAIN;
+	return 0;
+}
+
+int bli_pthread_join
+     (
+       bli_pthread_t thread,
+       void**        retval
+     )
+{
+	if ( !WaitForSingleObject( thread.handle, INFINITE ) ) return EAGAIN;
+	if ( retval ) *retval = thread.retval;
+	return 0;
+}
+
+// -- pthread_mutex_*() --
+
 int bli_pthread_mutex_init
      (
        bli_pthread_mutex_t*           mutex,
@@ -221,28 +269,7 @@ int bli_pthread_mutex_unlock
 	return 0;
 }
 
-static BOOL bli_init_once_wrapper
-     (
-       bli_pthread_once_t* once,
-       void*               param,
-       void**              context
-     )
-{
-	( void )once;
-	( void )context;
-	typedef void (*callback)( void );
-	((callback)param)();
-	return TRUE;
-}
-
-void bli_pthread_once
-     (
-       bli_pthread_once_t* once,
-       void              (*init)(void)
-     )
-{
-	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
-}
+// -- pthread_cond_*() --
 
 int bli_pthread_cond_init
      (
@@ -283,48 +310,29 @@ int bli_pthread_cond_broadcast
 	return 0;
 }
 
-typedef struct
-{
-	void* (*start_routine)( void* );
-	void*   param;
-	void**  retval;
+// -- pthread_once() --
 
-} bli_thread_param;
-
-static DWORD bli_thread_func
+static BOOL bli_init_once_wrapper
      (
-       void* param_
+       bli_pthread_once_t* once,
+       void*               param,
+       void**              context
      )
 {
-	bli_thread_param* param = param_;
-	*param->retval = param->start_routine( param->param );
-	return 0;
+	( void )once;
+	( void )context;
+	typedef void (*callback)( void );
+	((callback)param)();
+	return TRUE;
 }
 
-int bli_pthread_create
+void bli_pthread_once
      (
-       bli_pthread_t*            thread,
-       const bli_pthread_attr_t* attr,
-       void*                   (*start_routine)(void*),
-       void*                     arg
+       bli_pthread_once_t* once,
+       void              (*init)(void)
      )
 {
-	if ( attr ) return EINVAL;
-	bli_thread_param param = { start_routine, arg, &thread->retval };
-	thread->handle = CreateThread( NULL, 0, bli_thread_func, &param, 0, NULL );
-	if ( !thread->handle ) return EAGAIN;
-	return 0;
-}
-
-int bli_pthread_join
-     (
-       bli_pthread_t thread,
-       void**        retval
-     )
-{
-	if ( !WaitForSingleObject( thread.handle, INFINITE ) ) return EAGAIN;
-	if ( retval ) *retval = thread.retval;
-	return 0;
+	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
 }
 
 #else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
