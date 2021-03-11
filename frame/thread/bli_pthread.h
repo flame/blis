@@ -219,12 +219,27 @@ BLIS_EXPORT_BLIS int bli_pthread_cond_broadcast
        bli_pthread_cond_t* cond
      );
 
-// -- pthread_once_*() --
+// -- pthread_once() --
 
 BLIS_EXPORT_BLIS void bli_pthread_once
      (
        bli_pthread_once_t* once,
        void              (*init)(void)
+     );
+
+// -- pthread_self() --
+
+BLIS_EXPORT_BLIS bli_pthread_t bli_pthread_self
+     (
+       void
+     );
+
+// -- pthread_equal() --
+
+BLIS_EXPORT_BLIS int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
      );
 
 // -- pthread_barrier_*() --

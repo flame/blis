@@ -169,6 +169,30 @@ void bli_pthread_once
 	init();
 }
 
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
+     (
+       void
+     )
+{
+	return 0;
+}
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	// We don't bother comparing t1 and t2 since we must, by definition, be
+	// executing the same thread if there is not threading mechanism on the
+	// system.
+	return 1;
+}
+
 #elif defined(_MSC_VER) // !defined(BLIS_DISABLE_SYSTEM)
 
 #include <errno.h>
@@ -335,6 +359,35 @@ void bli_pthread_once
 	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
 }
 
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
+     (
+       void
+     )
+{
+	bli_pthread_t t;
+
+	// Note: BLIS will only ever use bli_pthread_self() in conjunction with
+	// bli_pthread_equal(), and thus setting the .retval field is unnecessary.
+	// Despite this, we set it to NULL anyway.
+	t.handle = GetCurrentThread();
+	t.retval = NULL;
+
+	return t;
+}
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	return ( int )CompareObjectHandles( t1.handle, t2.handle );
+}
+
 #else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
 // This branch defines a pthreads-like API, bli_pthreads_*(), and implements it
@@ -453,6 +506,27 @@ void bli_pthread_once
      )
 {
 	pthread_once( once, init );
+}
+
+// -- pthread_self() --
+
+bli_pthread_t bli_pthread_self
+     (
+       void
+     )
+{
+	return pthread_self();
+}
+
+// -- pthread_equal() --
+
+int bli_pthread_equal
+     (
+       bli_pthread_t t1,
+       bli_pthread_t t2
+     )
+{
+	return pthread_equal( t1, t2 );
 }
 
 #endif // _MSC_VER
