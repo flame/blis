@@ -38,7 +38,7 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-
+#define ENABLE_INDUCED_METHOD 0
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNC
@@ -639,10 +639,26 @@ void zgemm_
 	  }
 
     // The code below will be called when number of threads = 1.
+#if ENABLE_INDUCED_METHOD
+	/* 3m_sqp is optimal for certain matrix shapes.
+	   Initial study that it works well for square sizes and sizes closer to square shape.
 
-
-	dim_t m8rem = m0&7;
-	if( ((blis_transa==BLIS_TRANSPOSE) || (blis_transa==BLIS_NO_TRANSPOSE)) && (blis_transb==BLIS_NO_TRANSPOSE) &&(m8rem==0)&&(n0>40))
+	   * Usage of 3m_sqp is restricted to sizes, where it is found efficient compared to native, sup and other induced method.
+	   * Further investigation is necessary to make the usage choices more generic.  */
+	bool sqp_on = false;
+	if((m0==n0)&&(n0==k0)&&(m0==128))
+	{
+		sqp_on = true;
+	}
+#if 0
+    // though this range is giving 60 gflops/s in standalone, while integration in app cause performance degradation.
+	// to be enabled after fixing.
+	if((m0>=4200) && (m0<=4600) && (n0==326)&&(k0==1120)) //to be tuned further.
+	{
+		sqp_on = true;
+	}
+#endif
+	if( ((blis_transa==BLIS_TRANSPOSE) || (blis_transa==BLIS_NO_TRANSPOSE)) && (blis_transb==BLIS_NO_TRANSPOSE) && (sqp_on==true))
 	{
 		//sqp algo is found better for n > 40
 		if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
@@ -660,6 +676,7 @@ void zgemm_
 		return;
 	}
 	else
+#endif//ENABLE_INDUCED_METHOD
 	{
 		err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 		if(status==BLIS_SUCCESS)
