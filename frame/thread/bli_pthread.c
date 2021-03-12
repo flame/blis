@@ -169,6 +169,14 @@ void bli_pthread_once
 	init();
 }
 
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
 // -- pthread_self() --
 
 bli_pthread_t bli_pthread_self
@@ -192,6 +200,7 @@ int bli_pthread_equal
 	// system.
 	return 1;
 }
+#endif
 
 #elif defined(_MSC_VER) // !defined(BLIS_DISABLE_SYSTEM)
 
@@ -359,6 +368,14 @@ void bli_pthread_once
 	InitOnceExecuteOnce( once, bli_init_once_wrapper, init, NULL );
 }
 
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
 // -- pthread_self() --
 
 bli_pthread_t bli_pthread_self
@@ -387,6 +404,7 @@ int bli_pthread_equal
 {
 	return ( int )CompareObjectHandles( t1.handle, t2.handle );
 }
+#endif
 
 #else // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
@@ -508,6 +526,14 @@ void bli_pthread_once
 	pthread_once( once, init );
 }
 
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
 // -- pthread_self() --
 
 bli_pthread_t bli_pthread_self
@@ -528,8 +554,9 @@ int bli_pthread_equal
 {
 	return pthread_equal( t1, t2 );
 }
+#endif
 
-#endif // _MSC_VER
+#endif // !defined(BLIS_DISABLE_SYSTEM) && !defined(_MSC_VER)
 
 
 

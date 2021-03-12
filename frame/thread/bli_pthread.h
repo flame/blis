@@ -227,6 +227,14 @@ BLIS_EXPORT_BLIS void bli_pthread_once
        void              (*init)(void)
      );
 
+#if 0
+// NOTE: This part of the API is disabled because (1) we don't actually need
+// _self() or _equal() yet, and (2) when we do try to include these functions,
+// AppVeyor for some reason fails on all the Windows/clang builds with the
+// error:
+//    libblis.a(bli_pthread.o) : error LNK2019: unresolved external symbol
+//     __imp_CompareObjectHandles referenced in function bli_pthread_equal
+
 // -- pthread_self() --
 
 BLIS_EXPORT_BLIS bli_pthread_t bli_pthread_self
@@ -241,6 +249,7 @@ BLIS_EXPORT_BLIS int bli_pthread_equal
        bli_pthread_t t1,
        bli_pthread_t t2
      );
+#endif
 
 // -- pthread_barrier_*() --
 
