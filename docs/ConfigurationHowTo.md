@@ -677,14 +677,14 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
           BLIS_ARCH_POWER7,
           BLIS_ARCH_BGQ,
 
-          BLIS_ARCH_GENERIC
+          BLIS_ARCH_GENERIC,
+
+          BLIS_NUM_ARCHS
 
       } arch_t;
       ```
-      Additionally, you'll need to update the definition of `BLIS_NUM_ARCHS` to reflect the new total number of enumerated `arch_t` values:
-      ```c
-      #define BLIS_NUM_ARCHS 16
-      ```
+      Notice that the total number of `arch_t` values, `BLIS_NUM_ARCHS`, is updated automatically.
+
 
 
    * **`frame/base/bli_gks.c`**. We must also update the global kernel structure, or gks, to register the new sub-configuration during library initialization. Sub-configuration registration occurs in `bli_gks_init()`. For `knl`, updating this function amounts to inserting the following lines
