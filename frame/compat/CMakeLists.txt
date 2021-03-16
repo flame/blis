@@ -1,9 +1,11 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_amax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_amax.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_amin.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_amin.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_asum.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_asum.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_axpy.c
@@ -14,6 +16,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_dot.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_dot.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm3m.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm3m.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemmt.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_gemv.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_ger.c
@@ -56,12 +62,24 @@ ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsm.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/bla_trsv.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_gemm_batch.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_axpby.h
 ${CMAKE_CURRENT_SOURCE_DIR}/bli_blas.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_imatcopy.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_imatcopy.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy2.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatcopy2.h
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.c
+${CMAKE_CURRENT_SOURCE_DIR}/bla_omatadd.h
 	)
 
-#Add all subdirectories 
+#Add all subdirectories
 #	add_subdirectory(attic)
-	add_subdirectory(blis)
-	add_subdirectory(cblas)
-	add_subdirectory(check)	
-	add_subdirectory(f2c)	
+#   add_subdirectory(blis)
+    add_subdirectory(cblas)
+    add_subdirectory(check)
+    add_subdirectory(f2c)

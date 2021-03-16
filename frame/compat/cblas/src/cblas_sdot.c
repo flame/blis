@@ -8,7 +8,7 @@
  *
  * Written by Keita Teranishi.  2/11/1998
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 #include "cblas.h"
@@ -16,6 +16,7 @@
 float cblas_sdot( f77_int N, const float *X,
                       f77_int incX, const float *Y, f77_int incY)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    float dot;
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
@@ -24,7 +25,7 @@ float cblas_sdot( f77_int N, const float *X,
    #define F77_incX incX
    #define F77_incY incY
 #endif
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
         dim_t  n0;
         float* x0;
         float* y0;
@@ -92,10 +93,11 @@ float cblas_sdot( f77_int N, const float *X,
 
         /* Finalize BLIS. */
 //      bli_finalize_auto();
-
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return dot;
 #else
    F77_sdot_sub( &F77_N, X, &F77_incX, Y, &F77_incY, &dot);
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return dot;
 #endif
 }   

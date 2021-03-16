@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,21 +37,21 @@
 
 static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
-        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
+        /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm   gemmt*/
 /* 3mh  */ { bli_gemm3mh,  bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
-             bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL         },
+             bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL        , NULL  },
 /* 3m1  */ { bli_gemm3m1,  bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
-             bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
+             bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  , NULL },
 /* 4mh  */ { bli_gemm4mh,  bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
-             bli_syrk4mh,  bli_syr2k4mh, bli_trmm34mh, NULL,         NULL         },
+             bli_syrk4mh,  bli_syr2k4mh, bli_trmm34mh, NULL,         NULL         , NULL },
 /* 4mb  */ { bli_gemm4mb,  NULL,         NULL,         NULL,         NULL,         
-             NULL,         NULL,         NULL,         NULL,         NULL         },
+             NULL,         NULL,         NULL,         NULL,         NULL         , NULL },
 /* 4m1  */ { bli_gemm4m1,  bli_hemm4m1,  bli_herk4m1,  bli_her2k4m1, bli_symm4m1,
-             bli_syrk4m1,  bli_syr2k4m1, bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  },
+             bli_syrk4m1,  bli_syr2k4m1, bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  , NULL },
 /* 1m   */ { bli_gemm1m,   bli_hemm1m,   bli_herk1m,   bli_her2k1m,  bli_symm1m,
-             bli_syrk1m,   bli_syr2k1m,  bli_trmm31m,  bli_trmm1m,   bli_trsm1m   },
+             bli_syrk1m,   bli_syr2k1m,  bli_trmm31m,  bli_trmm1m,   bli_trsm1m   , NULL },
 /* nat  */ { bli_gemmnat,  bli_hemmnat,  bli_herknat,  bli_her2knat, bli_symmnat,
-             bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
+             bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  , bli_gemmtnat },
 };
 
 //
@@ -62,13 +62,13 @@ static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 // This is solved by making the induced method status array local to threads.
 
 static BLIS_THREAD_LOCAL
-bool_t bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
+bool bli_l3_ind_oper_st[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS][2] =
 {
         /*   gemm   hemm   herk   her2k  symm   syrk,  syr2k  trmm3  trmm   trsm  */
         /*    c     z    */
 /* 3mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
-/* 3m1  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
+/* 3m1  */ { {FALSE,FALSE},   {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
 /* 4mh  */ { {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE},
              {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}, {FALSE,FALSE}  },
@@ -92,13 +92,14 @@ void_fp PASTEMAC(opname,ind_get_avail)( num_t dt ) \
 	return bli_ind_oper_get_avail( optype, dt ); \
 }
 /*
-bool_t PASTEMAC(opname,ind_has_avail)( num_t dt )
+bool PASTEMAC(opname,ind_has_avail)( num_t dt )
 {
 	return bli_ind_oper_has_avail( optype, dt );
 }
 */
 
 GENFUNC( gemm, BLIS_GEMM )
+GENFUNC( gemmt, BLIS_GEMMT )
 GENFUNC( hemm, BLIS_HEMM )
 GENFUNC( herk, BLIS_HERK )
 GENFUNC( her2k, BLIS_HER2K )
@@ -112,10 +113,10 @@ GENFUNC( trsm, BLIS_TRSM )
 // -----------------------------------------------------------------------------
 
 #if 0
-bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
+bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt )
 {
 	void_fp func;
-	bool_t  stat;
+	bool    stat;
 
 	// If the datatype is real, it is never available.
 	if ( !bli_is_complex( dt ) ) return FALSE;
@@ -147,7 +148,7 @@ ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 	for ( im = 0; im < BLIS_NUM_IND_METHODS; ++im )
 	{
 		void_fp func = bli_l3_ind_oper_get_func( oper, im );
-		bool_t stat = bli_l3_ind_oper_get_enable( oper, im, dt );
+		bool    stat = bli_l3_ind_oper_get_enable( oper, im, dt );
 
 		if ( func != NULL &&
 		     stat == TRUE ) return im;
@@ -161,7 +162,7 @@ ind_t bli_l3_ind_oper_find_avail( opid_t oper, num_t dt )
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status )
+void bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status )
 {
 	opid_t iop;
 
@@ -197,7 +198,7 @@ void bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt )
 	}
 }
 
-void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
+void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status )
 {
 	ind_t im;
 
@@ -217,7 +218,7 @@ void bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status )
 // A mutex to allow synchronous access to the bli_l3_ind_oper_st array.
 static bli_pthread_mutex_t oper_st_mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
 
-void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status )
+void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status )
 {
 	num_t idt;
 
@@ -242,10 +243,10 @@ void bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t sta
 	bli_pthread_mutex_unlock( &oper_st_mutex );
 }
 
-bool_t bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
+bool bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt )
 {
-	num_t  idt = bli_ind_map_cdt_to_index( dt );
-	bool_t r_val;
+	num_t idt = bli_ind_map_cdt_to_index( dt );
+	bool  r_val;
 
 	{
 		r_val = bli_l3_ind_oper_st[ method ][ oper ][ idt ];

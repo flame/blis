@@ -1,6 +1,9 @@
 ##Copyright (C) 2020, Advanced Micro Devices, Inc ##
 
-if(${TARGET_ARCH} STREQUAL zen2)
+if(${TARGET_ARCH} STREQUAL zen3)
+message("The configuration is : ${TARGET_ARCH}")
+add_subdirectory(zen3)
+elseif(${TARGET_ARCH} STREQUAL zen2)
 message("The configuration is : ${TARGET_ARCH}")
 add_subdirectory(zen2)
 elseif(${TARGET_ARCH} STREQUAL zen)

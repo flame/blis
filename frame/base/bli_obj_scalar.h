@@ -76,12 +76,12 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_reset
        obj_t* a
      );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_scalar_has_nonzero_imag
+BLIS_EXPORT_BLIS bool bli_obj_scalar_has_nonzero_imag
      (
        obj_t* a
      );
 
-BLIS_EXPORT_BLIS bool_t bli_obj_scalar_equals
+BLIS_EXPORT_BLIS bool bli_obj_scalar_equals
      (
        obj_t* a,
        obj_t* beta

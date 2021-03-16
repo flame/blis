@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,12 +46,18 @@ void bli_scopyv_zen_int
 	cntx_t* restrict cntx
 )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2)
+
 	const dim_t   num_elem_per_reg = 8;
 	__m256  xv[16];
 	dim_t i = 0;
 
 	// If the vector dimension is zero return early.
-	if (bli_zero_dim1(n)) return;
+	if (bli_zero_dim1(n))
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
+		return;
+	}
 
 	if (incx == 1 && incy == 1)
 	{
@@ -182,6 +188,7 @@ void bli_scopyv_zen_int
 			y += incy;
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
 }
 
 // -----------------------------------------------------------------------------
@@ -195,12 +202,17 @@ void bli_dcopyv_zen_int
 	cntx_t* restrict cntx
 )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2)
 	const dim_t      num_elem_per_reg = 4;
 	__m256d  xv[16];
 	dim_t i = 0;
 
 	// If the vector dimension is zero return early.
-	if (bli_zero_dim1(n)) return;
+	if (bli_zero_dim1(n))
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
+		return;
+	}
 
 	if (incx == 1 && incy == 1)
 	{
@@ -326,5 +338,6 @@ void bli_dcopyv_zen_int
 			y += incy;
 		}
 	}
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2)
 }
 

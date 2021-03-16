@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -47,6 +47,8 @@ void bli_trsm_front
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
+//	AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_3, side, alpha, a, b);
 	bli_init_once();
 
 	obj_t   a_local;
@@ -90,7 +92,11 @@ for (i = 0; i < m; i++) //no. of cols of B
 #endif
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
-	if ( status == BLIS_SUCCESS ) return;
+	if ( status == BLIS_SUCCESS )
+	{
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+		return;
+	}
 #endif
 
 	// Check parameters.
@@ -101,6 +107,7 @@ for (i = 0; i < m; i++) //no. of cols of B
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
 		bli_scalm( alpha, b );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 		return;
 	}
 
@@ -209,5 +216,6 @@ for (i = 0; i < m; i++) //no. of cols of B
 	  rntm,
 	  cntl
 	);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 

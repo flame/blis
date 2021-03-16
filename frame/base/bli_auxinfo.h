@@ -38,44 +38,44 @@
 
 // auxinfo_t field query
 
-static pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
 {
 	return ai->schema_a;
 }
-static pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
 {
 	return ai->schema_b;
 }
 
-static void* bli_auxinfo_next_a( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_a( auxinfo_t* ai )
 {
 	return ai->a_next;
 }
-static void* bli_auxinfo_next_b( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_b( auxinfo_t* ai )
 {
 	return ai->b_next;
 }
 
-static inc_t bli_auxinfo_is_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_a( auxinfo_t* ai )
 {
 	return ai->is_a;
 }
-static inc_t bli_auxinfo_is_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_b( auxinfo_t* ai )
 {
 	return ai->is_b;
 }
 
-static inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
 {
 	return ai->ps_a;
 }
-static inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
 {
 	return ai->ps_b;
 }
 
 #if 0
-static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
 {
 	return ai->dt_on_output;
 }
@@ -84,49 +84,49 @@ static inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
 
 // auxinfo_t field modification
 
-static void bli_auxinfo_set_schema_a( pack_t schema, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_schema_a( pack_t schema, auxinfo_t* ai )
 {
 	ai->schema_a = schema;
 }
-static void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
 {
 	ai->schema_b = schema;
 }
 
-static void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
 {
 	ai->a_next = p;
 }
-static void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
 {
 	ai->b_next = p;
 }
-static void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
 {
 	ai->a_next = ap;
 	ai->b_next = bp;
 }
 
-static void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_is_a( inc_t is, auxinfo_t* ai )
 {
 	ai->is_a = is;
 }
-static void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_is_b( inc_t is, auxinfo_t* ai )
 {
 	ai->is_b = is;
 }
 
-static void bli_auxinfo_set_ps_a( inc_t ps, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_ps_a( inc_t ps, auxinfo_t* ai )
 {
 	ai->ps_a = ps;
 }
-static void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
 {
 	ai->ps_b = ps;
 }
 
 #if 0
-static void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
 {
 	ai->dt_on_output = dt_on_output;
 }

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -102,16 +103,12 @@
 #include "bla_xerbla_array.h"
 
 
-// -- Level-0 BLAS prototypes --
-
-#include "bla_cabs1.h"
-
-
 // -- Level-1 BLAS prototypes --
 
 #include "bla_amax.h"
 #include "bla_asum.h"
 #include "bla_axpy.h"
+#include "bla_axpby.h"
 #include "bla_copy.h"
 #include "bla_dot.h"
 #include "bla_nrm2.h"
@@ -185,6 +182,7 @@
 #include "bla_syr2k.h"
 #include "bla_trmm.h"
 #include "bla_trsm.h"
+#include "bla_gemmt.h"
 
 #include "bla_gemm_check.h"
 #include "bla_hemm_check.h"
@@ -195,10 +193,28 @@
 #include "bla_syr2k_check.h"
 #include "bla_trmm_check.h"
 #include "bla_trsm_check.h"
+#include "bla_gemmt_check.h"
+
+// -- Batch Extension prototypes --
+#include "bla_gemm_batch.h"
+#include "bla_gemm3m.h"
+#include "bla_gemm3m_check.h"
+// -- Transpose and Copy Routines --
+#include "bla_omatadd.h"
+#include "bla_omatcopy.h"
+#include "bla_omatcopy2.h"
+#include "bla_imatcopy.h"
 
 // -- Fortran-compatible APIs to BLIS functions --
 
 #include "b77_thread.h"
+
+
+// -- Auxiliary Routines --
+
+#include "bla_cabs1.h"
+#include "bla_amin.h"
+#include "f77_amin_sub.h"
 
 
 #endif // BLIS_ENABLE_BLAS

@@ -1453,15 +1453,6 @@ check_compiler()
 				blacklistcc_add "skx"
 			fi
 		fi
-		if [ ${cc_major} -eq 18 ]; then
-			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
-			blacklistcc_add "knl"
-			blacklistcc_add "skx"
-		fi
-		if [ ${cc_major} -ge 19 ]; then
-			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
-			echoerr_unsupportedcc
-		fi
 	fi
 
 	# clang
@@ -3050,7 +3041,7 @@ main()
 	#create a AOCL specific #define
 	#This macro is enabled only for zen family configurations.
 	#This enables us to use different cache block sizes for TRSM instead of common level-3 block sizes.
-	uconf=$(echo ${config_name} | grep -c 'zen' | cut -d. -f1)
+	uconf=$(echo ${config_name} | grep -c 'zen\|amd64' | cut -d. -f1)
 	if [[ $uconf == 1 ]]; then
 		enable_aocl_zen='yes'
 		enable_aocl_zen_01=1

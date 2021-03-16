@@ -163,7 +163,7 @@ void bli_error_checking_level_set( errlev_t new_level )
 	bli_pthread_mutex_unlock( &err_mutex );
 }
 
-bool_t bli_error_checking_is_enabled( void )
+bool bli_error_checking_is_enabled( void )
 {
 	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
 }

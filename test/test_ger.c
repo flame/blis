@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -46,155 +47,218 @@
 
 int main( int argc, char** argv )
 {
-	obj_t a, x, y;
-	obj_t a_save;
-	obj_t alpha;
-	dim_t m, n;
-	dim_t p;
-	dim_t p_begin, p_end, p_inc;
-	int   m_input, n_input;
-	num_t dt_a, dt_x, dt_y;
-	num_t dt_alpha;
-	int   r, n_repeats;
+    obj_t a, x, y;
+    obj_t a_save;
+    obj_t alpha;
+    dim_t m, n;
+    dim_t p;
+    dim_t p_begin, p_end, p_inc;
+    int   m_input, n_input;
+    num_t dt_a, dt_x, dt_y, dt;
+    num_t dt_alpha;
+    int   r, n_repeats;
 
-	double dtime;
-	double dtime_save;
-	double gflops;
+    double dtime;
+    double dtime_save;
+    double gflops;
 
-	//bli_init();
+    //bli_init();
 
-	n_repeats = 3;
+    n_repeats = 3;
 
 #ifndef PRINT
-	p_begin = 40;
-	p_end   = 2000;
-	p_inc   = 40;
+    p_begin = 40;
+    p_end   = 4000;
+    p_inc   = 40;
 
-	m_input = -1;
-	n_input = -1;
+    m_input = -1;
+    n_input = -1;
 #else
-	p_begin = 16;
-	p_end   = 16;
-	p_inc   = 1;
+    p_begin = 16;
+    p_end   = 16;
+    p_inc   = 1;
 
-	m_input = 15;
-	n_input = 15;
+    m_input = 15;
+    n_input = 15;
 #endif
 
-	dt_alpha = dt_x = dt_y = dt_a = BLIS_DOUBLE;
+    dt = dt_alpha = dt_x = dt_y = dt_a = BLIS_FLOAT;
 
-	// Begin with initializing the last entry to zero so that
-	// matlab allocates space for the entire array once up-front.
-	for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
+    // Begin with initializing the last entry to zero so that
+    // matlab allocates space for the entire array once up-front.
+    for ( p = p_begin; p + p_inc <= p_end; p += p_inc ) ;
 #ifdef BLIS
-	printf( "data_ger_blis" );
+    printf( "data_ger_blis" );
 #else
-	printf( "data_ger_%s", BLAS );
+    printf( "data_ger_%s", BLAS );
 #endif
-	printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
-	        ( unsigned long )(p - p_begin)/p_inc + 1,
-	        ( unsigned long )0,
-	        ( unsigned long )0, 0.0 );
+    printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+            ( unsigned long )(p - p_begin)/p_inc + 1,
+            ( unsigned long )0,
+            ( unsigned long )0, 0.0 );
 
-	//for ( p = p_begin; p <= p_end; p += p_inc )
-	for ( p = p_end; p_begin <= p; p -= p_inc )
-	{
+    //for ( p = p_begin; p <= p_end; p += p_inc )
+    for ( p = p_end; p_begin <= p; p -= p_inc )
+    {
 
-		if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
-		else               m =     ( dim_t )    m_input;
-		if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
-		else               n =     ( dim_t )    n_input;
-
-
-		bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
-
-		bli_obj_create( dt_x, m, 1, 0, 0, &x );
-		bli_obj_create( dt_y, n, 1, 0, 0, &y );
-		bli_obj_create( dt_a, m, n, 0, 0, &a );
-		bli_obj_create( dt_a, m, n, 0, 0, &a_save );
-
-		bli_randm( &x );
-		bli_randm( &y );
-		bli_randm( &a );
+        if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
+        else               m =     ( dim_t )    m_input;
+        if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
+        else               n =     ( dim_t )    n_input;
 
 
-		bli_setsc(  (2.0/1.0), 0.0, &alpha );
+        bli_obj_create( dt_alpha, 1, 1, 0, 0, &alpha );
+
+        bli_obj_create( dt_x, m, 1, 0, 0, &x );
+        bli_obj_create( dt_y, n, 1, 0, 0, &y );
+        bli_obj_create( dt_a, m, n, 0, 0, &a );
+        bli_obj_create( dt_a, m, n, 0, 0, &a_save );
+
+        bli_randm( &x );
+        bli_randm( &y );
+        bli_randm( &a );
 
 
-		bli_copym( &a, &a_save );
-	
-		dtime_save = DBL_MAX;
-
-		for ( r = 0; r < n_repeats; ++r )
-		{
-			bli_copym( &a_save, &a );
+        bli_setsc(  (0.9/1.0), -1.1, &alpha );
 
 
-			dtime = bli_clock();
+        bli_copym( &a, &a_save );
+    
+        dtime_save = DBL_MAX;
+
+        for ( r = 0; r < n_repeats; ++r )
+        {
+            bli_copym( &a_save, &a );
+
+
+            dtime = bli_clock();
 
 #ifdef PRINT
-			bli_printm( "x", &x, "%4.1f", "" );
-			bli_printm( "y", &y, "%4.1f", "" );
-			bli_printm( "a", &a, "%4.1f", "" );
+            bli_printm( "x", &x, "%4.1f", "" );
+            bli_printm( "y", &y, "%4.1f", "" );
+            bli_printm( "a", &a, "%4.1f", "" );
 #endif
 
 #ifdef BLIS
 
-			bli_ger( &alpha,
-			         &x,
-			         &y,
-			         &a );
+            bli_ger( &alpha,
+                     &x,
+                     &y,
+                     &a );
 #else
 
-			f77_int  mm     = bli_obj_length( &a );
-			f77_int  nn     = bli_obj_width( &a );
-			f77_int  incx   = bli_obj_vector_inc( &x );
-			f77_int  incy   = bli_obj_vector_inc( &y );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			double*  alphap = bli_obj_buffer( &alpha );
-			double*  xp     = bli_obj_buffer( &x );
-			double*  yp     = bli_obj_buffer( &y );
-			double*  ap     = bli_obj_buffer( &a );
+            if(bli_is_float(dt))
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                float*  alphap = bli_obj_buffer( &alpha );
+                float*  xp     = bli_obj_buffer( &x );
+                float*  yp     = bli_obj_buffer( &y );
+                float*  ap     = bli_obj_buffer( &a );
 
-			dger_( &mm,
-			       &nn,
-			       alphap,
-			       xp, &incx,
-			       yp, &incy,
-			       ap, &lda );
+                sger_( &mm,
+                       &nn,
+                       alphap,
+                       xp, &incx,
+                       yp, &incy,
+                       ap, &lda );
+            }
+            else if(bli_is_double(dt))
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                double*  alphap = bli_obj_buffer( &alpha );
+                double*  xp     = bli_obj_buffer( &x );
+                double*  yp     = bli_obj_buffer( &y );
+                double*  ap     = bli_obj_buffer( &a );
+
+                dger_( &mm,
+                       &nn,
+                       alphap,
+                       xp, &incx,
+                       yp, &incy,
+                       ap, &lda );
+            }
+            else if(bli_is_scomplex(dt))
+            {
+                 f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                scomplex*  alphap = bli_obj_buffer( &alpha );
+                scomplex*  xp     = bli_obj_buffer( &x );
+                scomplex*  yp     = bli_obj_buffer( &y );
+                scomplex*  ap     = bli_obj_buffer( &a );
+
+                cgeru_( &mm,
+                       &nn,
+                       alphap,
+                       xp, &incx,
+                       yp, &incy,
+                       ap, &lda );
+            }
+            else if(bli_is_dcomplex(dt))
+            {
+                f77_int  mm     = bli_obj_length( &a );
+                f77_int  nn     = bli_obj_width( &a );
+                f77_int  incx   = bli_obj_vector_inc( &x );
+                f77_int  incy   = bli_obj_vector_inc( &y );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                dcomplex*  alphap = bli_obj_buffer( &alpha );
+                dcomplex*  xp     = bli_obj_buffer( &x );
+                dcomplex*  yp     = bli_obj_buffer( &y );
+                dcomplex*  ap     = bli_obj_buffer( &a );
+
+                zgeru_( &mm,
+                       &nn,
+                       alphap,
+                       xp, &incx,
+                       yp, &incy,
+                       ap, &lda );
+            }
+
 #endif
 
 #ifdef PRINT
-			bli_printm( "a after", &a, "%4.1f", "" );
-			exit(1);
+            bli_printm( "a after", &a, "%4.1f", "" );
+            exit(1);
 #endif
 
 
-			dtime_save = bli_clock_min_diff( dtime_save, dtime );
-		}
+            dtime_save = bli_clock_min_diff( dtime_save, dtime );
+        }
 
-		gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );
+        gflops = ( 2.0 * m * n ) / ( dtime_save * 1.0e9 );
+
+	if(bli_is_complex(dt)) gflops *= 4.0;
 
 #ifdef BLIS
-		printf( "data_ger_blis" );
+        printf( "data_ger_blis" );
 #else
-		printf( "data_ger_%s", BLAS );
+        printf( "data_ger_%s", BLAS );
 #endif
-		printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
-		        ( unsigned long )(p - p_begin)/p_inc + 1,
-		        ( unsigned long )m,
-		        ( unsigned long )n, gflops );
+        printf( "( %2lu, 1:3 ) = [ %4lu %4lu %7.2f ];\n",
+                ( unsigned long )(p - p_begin)/p_inc + 1,
+                ( unsigned long )m,
+                ( unsigned long )n, gflops );
 
-		bli_obj_free( &alpha );
+        bli_obj_free( &alpha );
 
-		bli_obj_free( &x );
-		bli_obj_free( &y );
-		bli_obj_free( &a );
-		bli_obj_free( &a_save );
-	}
+        bli_obj_free( &x );
+        bli_obj_free( &y );
+        bli_obj_free( &a );
+        bli_obj_free( &a_save );
+    }
 
-	//bli_finalize();
+    //bli_finalize();
 
-	return 0;
+    return 0;
 }
 

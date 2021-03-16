@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc.## 
+##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PRIVATE
@@ -78,6 +78,10 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_icamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_idamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_isamax.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_izamax.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_icamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_idamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_isamin.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_izamin.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_sasum.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_saxpy.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_scasum.c
@@ -148,8 +152,20 @@ ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrmm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrmv.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrsm.c
 ${CMAKE_CURRENT_SOURCE_DIR}/cblas_ztrsv.c
-	)
-
-
-	
-
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_cgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_dgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_sgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_zgemmt.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_sgemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_dgemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_cgemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_zgemm_batch.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_saxpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_daxpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_caxpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_zaxpby.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_cgemm3m.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_zgemm3m.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_dcabs1.c
+${CMAKE_CURRENT_SOURCE_DIR}/cblas_scabs1.c
+)

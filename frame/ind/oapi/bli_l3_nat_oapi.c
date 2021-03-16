@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ void PASTEMAC(opname,imeth) \
        rntm_t* rntm  \
      ) \
 { \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
 	bli_init_once(); \
 \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
@@ -74,13 +74,14 @@ void PASTEMAC(opname,imeth) \
 	( \
 	  alpha, a, b, beta, c, cntx, rntm, NULL \
 	); \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 // If a sandbox was enabled, do not define bli_gemmnat() since it will be
 // defined in the sandbox environment.
 #ifndef BLIS_ENABLE_SANDBOX
 GENFRONT( gemm, gemm, nat )
+GENFRONT( gemmt, gemm, nat )
 #endif
 GENFRONT( her2k, gemm, nat )
 GENFRONT( syr2k, gemm, nat )
@@ -178,6 +179,7 @@ void PASTEMAC(opname,imeth) \
        rntm_t* rntm  \
      ) \
 { \
+        AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2)  \
 	bli_init_once(); \
 \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
@@ -194,6 +196,7 @@ void PASTEMAC(opname,imeth) \
 	( \
 	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 GENFRONT( trmm, gemm, nat )
@@ -214,6 +217,8 @@ void PASTEMAC(opname,imeth) \
        rntm_t* rntm  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
@@ -230,6 +235,8 @@ void PASTEMAC(opname,imeth) \
 	( \
 	  side, alpha, a, b, cntx, rntm, NULL \
 	); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 GENFRONT( trsm, trsm, nat )

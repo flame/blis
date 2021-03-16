@@ -18,4 +18,6 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_util_tapi_ex.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_util_unb_var1.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_util_unb_var1.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_util_update.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_util_update.h
 	)

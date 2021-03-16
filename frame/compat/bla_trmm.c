@@ -4,8 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2014, The University of Texas at Austin.
+   Copyright (C) 2019-2020, Advanced Micro Devices, Inc.All Rights Reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +58,9 @@ void PASTEF77(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_TRMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), \
+			*MKSTR(uploa), *MKSTR(transa), *MKSTR(diaga), *m, *n, *alpha, *lda, *ldb) \
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
@@ -117,6 +120,7 @@ void PASTEF77(ch,blasname) \
 	); \
 \
 	/* Finalize BLIS. */ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 }
 
@@ -138,6 +142,9 @@ void PASTEF77(ch,blasname) \
              ftype*    b, const f77_int* ldb  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+	AOCL_DTL_LOG_TRMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa),\
+		       	*MKSTR(transa), *MKSTR(diaga), *m, *n, (void*)alpha, *lda, *ldb) \
 	side_t  blis_side; \
 	uplo_t  blis_uploa; \
 	trans_t blis_transa; \
@@ -212,6 +219,7 @@ void PASTEF77(ch,blasname) \
 	); \
 \
 	/* Finalize BLIS. */ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	bli_finalize_auto(); \
 }
 

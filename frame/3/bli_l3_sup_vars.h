@@ -94,8 +94,8 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -117,17 +117,17 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )
 
 // -----------------------------------------------------------------------------
 
-static void bli_gemmsup_ref_var1n2m_opt_cases
+BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
      (
        num_t    dt,
        trans_t* trans,
-       bool_t   packa,
-       bool_t   packb,
+       bool     packa,
+       bool     packb,
        stor3_t* eff_id,
        cntx_t*  cntx
      )
 {
-	const bool_t row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
+	const bool row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
 
 	// Handle row- and column-preferrential kernels separately.
 	if ( row_pref )

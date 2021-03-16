@@ -8,12 +8,11 @@
  *
  * Written by Keita Teranishi.  2/11/1998
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  */
 
 #include "cblas.h"
 #include "cblas_f77.h"
-
 void cblas_saxpy( f77_int N, float alpha, const float *X,
                        f77_int incX, float *Y, f77_int incY)
 {
@@ -25,7 +24,7 @@ void cblas_saxpy( f77_int N, float alpha, const float *X,
    #define F77_incY incY
 #endif
 
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
     dim_t  n0;
     float* x0;
     float* y0;

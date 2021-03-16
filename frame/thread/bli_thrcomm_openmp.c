@@ -87,7 +87,7 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 #if 0
 	if ( comm == NULL || comm->n_threads == 1 )
 		return;
-	bool_t my_sense = comm->barrier_sense;
+	gint_t my_sense = comm->barrier_sense;
 	dim_t my_threads_arrived;
 
 	_Pragma( "omp atomic capture" )
@@ -100,7 +100,7 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 	}
 	else
 	{
-		volatile bool_t* listener = &comm->barrier_sense;
+		volatile gint_t* listener = &comm->barrier_sense;
 		while ( *listener == my_sense ) {}
 	}
 #endif

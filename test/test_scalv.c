@@ -43,112 +43,133 @@
 
 int main(int argc, char** argv)
 {
-	obj_t a, alpha;
-	dim_t n, p;
-	dim_t p_begin, p_end, p_inc;
-	int   n_input;
-	num_t dt;
-	int   r, n_repeats;
+    obj_t a, alpha;
+    dim_t n, p;
+    dim_t p_begin, p_end, p_inc;
+    int   n_input;
+    num_t dt;
+    int   r, n_repeats;
 
-	double dtime;
-	double dtime_save;
-	double gflops;
+    double dtime;
+    double dtime_save;
+    double gflops;
 
-	//bli_init();
-	//bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
+    //bli_init();
+    //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-	n_repeats = 100000;
+    n_repeats = 100000;
 
 #ifndef PRINT
-	p_begin = 200;
-	p_end = 100000;
-	p_inc = 200;
+    p_begin = 200;
+    p_end = 100000;
+    p_inc = 200;
 
-	n_input = -1;
+    n_input = -1;
 #else
-	p_begin = 16;
-	p_end = 16;
-	p_inc = 1;
+    p_begin = 16;
+    p_end = 16;
+    p_inc = 1;
 
-	n_input = 4;
+    n_input = 4;
 #endif
 
 #if 1
     dt = BLIS_FLOAT;
     //dt = BLIS_DOUBLE;
 #else
-    //dt = BLIS_SCOMPLEX;
-      dt = BLIS_DCOMPLEX;
+    dt = BLIS_SCOMPLEX;
+    // dt = BLIS_DCOMPLEX;
 #endif
 #ifdef BLIS
-	printf( "data_scalv_blis\t n\t gflops\n" );
+    printf( "data_scalv_blis\t n\t gflops\n" );
 #else
-	printf( "data_scalv_%s\t n\t gflops\n", BLAS );
+    printf( "data_scalv_%s\t n\t gflops\n", BLAS );
 #endif
 
-	for (p = p_begin; p <= p_end; p += p_inc)
-	{
-		if (n_input < 0) n = p * (dim_t)abs(n_input);
-		else               n = (dim_t)n_input;
+    for (p = p_begin; p <= p_end; p += p_inc)
+    {
+        if (n_input < 0) n = p * (dim_t)abs(n_input);
+        else               n = (dim_t)n_input;
 
 
-		bli_obj_create(dt, 1, 1, 0, 0, &alpha);
-		bli_obj_create(dt, 1, n, 0, 0, &a);
+        bli_obj_create(dt, 1, 1, 0, 0, &alpha);
+        bli_obj_create(dt, 1, n, 0, 0, &a);
 
-		bli_randm(&a);
-		bli_setsc((2.0), 0.0, &alpha);
-		dtime_save = DBL_MAX;
+        bli_randm(&a);
+        bli_setsc((2.0), 0.0, &alpha);
+        dtime_save = DBL_MAX;
 
-		for (r = 0; r < n_repeats; ++r)
-		{
-			dtime = bli_clock();
+        for (r = 0; r < n_repeats; ++r)
+        {
+            dtime = bli_clock();
 #ifdef BLIS
-		bli_scalm(&BLIS_TWO, &a);
+            bli_scalm(&BLIS_TWO, &a);
 #else
-		if ( bli_is_float( dt ) )
-		{
-			f77_int nn     = bli_obj_length( &a );
-			f77_int inca   = bli_obj_vector_inc( &a );
-			float*  scalar = bli_obj_buffer( &alpha );
-			float*  ap     = bli_obj_buffer( &a );
+            if ( bli_is_float( dt ) )
+            {
+                f77_int nn     = bli_obj_length( &a );
+                f77_int inca   = bli_obj_vector_inc( &a );
+                float*  scalar = bli_obj_buffer( &alpha );
+                float*  ap     = bli_obj_buffer( &a );
 
-			sscal_( &nn, scalar,
-				 ap, &inca );
-		}
-		else if ( bli_is_double( dt ) )
-		{
-			f77_int  nn     = bli_obj_length( &a );
-			f77_int  inca   = bli_obj_vector_inc( &a );
-			double*  scalar = bli_obj_buffer( &alpha );
-			double*  ap     = bli_obj_buffer( &a );
+                sscal_( &nn, scalar,
+                        ap, &inca );
+            }
+            else if ( bli_is_double( dt ) )
+            {
+                f77_int  nn     = bli_obj_length( &a );
+                f77_int  inca   = bli_obj_vector_inc( &a );
+                double*  scalar = bli_obj_buffer( &alpha );
+                double*  ap     = bli_obj_buffer( &a );
 
-			dscal_( &nn, scalar,
-				 ap, &inca );
-			}
+                dscal_( &nn, scalar,
+                        ap, &inca );
+            }
+            else if ( bli_is_scomplex( dt ) )
+            {
+                f77_int nn       = bli_obj_length( &a );
+                f77_int inca     = bli_obj_vector_inc( &a );
+                scomplex* scalar = bli_obj_buffer( &alpha );
+                scomplex* ap     = bli_obj_buffer( &a );
+
+                cscal_( &nn, scalar,
+                        ap, &inca );
+            }
+            else if ( bli_is_dcomplex( dt ) )
+            {
+                f77_int  nn      = bli_obj_length( &a );
+                f77_int  inca    = bli_obj_vector_inc( &a );
+                dcomplex* scalar = bli_obj_buffer( &alpha );
+                dcomplex* ap    = bli_obj_buffer( &a );
+
+                zscal_( &nn, scalar,
+                        ap, &inca );
+            }
+
 #endif
-			dtime_save = bli_clock_min_diff(dtime_save, dtime);
-		}
+            dtime_save = bli_clock_min_diff(dtime_save, dtime);
+        }
 // Size of the vectors are incrementd by 1000, to test wide range of inputs.
-		if (p == 10000)
-		    p_inc = 10000;
+        if (p == 10000)
+            p_inc = 10000;
 
-		if (p == 1000)
-		    p_inc = 1000;
+        if (p == 1000)
+            p_inc = 1000;
 
-		gflops = n / (dtime_save * 1.0e9);
+        gflops = n / (dtime_save * 1.0e9);
+        if ( bli_is_complex( dt ) ) gflops *= 4.0;
+
 #ifdef BLIS
-	printf( "data_scalv_blis\t" );
+        printf( "data_scalv_blis\t" );
 #else
-	printf( "data_scalv_%s\t", BLAS );
+        printf( "data_scalv_%s\t", BLAS );
 #endif
-		printf(" %4lu\t %7.2f \n",
-			(unsigned long)n, gflops);
+        printf(" %4lu\t %7.2f \n",
+               (unsigned long)n, gflops);
 
-		bli_obj_free(&alpha);
-		bli_obj_free(&a);
-	}
-	return 0;
+        bli_obj_free(&alpha);
+        bli_obj_free(&a);
+    }
+    return 0;
 }
-
-
 

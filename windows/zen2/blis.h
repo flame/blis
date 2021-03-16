@@ -58,8 +58,7 @@ extern "C" {
 
 // Determine the target operating system.
 #if defined(_WIN32) || defined(__CYGWIN__)
-  #define BLIS_VERSION_STRING "2.2"
-  #define BLIS
+  #define BLIS_VERSION_STRING "2.2.1"
   #define BLIS_OS_WINDOWS 1
 #elif defined(__gnu_hurd__)
   #define BLIS_OS_GNU 1
@@ -1291,11 +1290,11 @@ typedef enum
 	BLIS_TRMM3,
 	BLIS_TRMM,
 	BLIS_TRSM,
-
+	BLIS_GEMMT,
 	BLIS_NOID
 } opid_t;
 
-#define BLIS_NUM_LEVEL3_OPS 10
+#define BLIS_NUM_LEVEL3_OPS 11
 
 
 // -- Blocksize ID type --
@@ -2392,11 +2391,12 @@ typedef enum
 #define MKSTR(s1)                  #s1
 #define STRINGIFY_INT( s )         MKSTR( s )
 
+#define PASTEMACT(ch1, ch2, ch3, ch4)   bli_ ## ch1 ## ch2 ## _ ## ch3 ## _ ## ch4
 // Fortran-77 name-mangling macros.
-#define PASTEF770(name)                                      name ## _
-#define PASTEF77(ch1,name)                     ch1        ## name ## _
-#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name ## _
-#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name ## _
+#define PASTEF770(name)                                      name
+#define PASTEF77(ch1,name)                     ch1        ## name
+#define PASTEF772(ch1,ch2,name)                ch1 ## ch2 ## name
+#define PASTEF773(ch1,ch2,ch3,name)     ch1 ## ch2 ## ch3 ## name
 
 // -- Include other groups of macros
 
@@ -2462,6 +2462,17 @@ arrayname[BLIS_NUM_FP_TYPES] = \
 	PASTEMAC(c,op), \
 	PASTEMAC(d,op), \
 	PASTEMAC(z,op)  \
+}
+
+
+#define GENARRAY_T(arrayname,opname,varname) \
+\
+arrayname[BLIS_NUM_FP_TYPES][2] = \
+{ \
+	{PASTEMACT(s,opname,l,varname),PASTEMACT(s,opname,u,varname)}, \
+	{PASTEMACT(c,opname,l,varname),PASTEMACT(c,opname,u,varname)}, \
+	{PASTEMACT(d,opname,l,varname),PASTEMACT(d,opname,u,varname)}, \
+	{PASTEMACT(z,opname,l,varname),PASTEMACT(z,opname,u,varname)}, \
 }
 
 #define GENARRAY_I(arrayname,op) \
@@ -2718,6 +2729,11 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#define INSERT_GENTFUNCDOT_BLAS_CZ_F2C( blasname, blisname ) \
+\
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
 #define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
 \
@@ -2728,6 +2744,17 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTFUNCDOT_BLAS_SDC( blasname, blisname ) \
+\
+GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 
@@ -2771,6 +2798,24 @@ GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
 GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
+// --GEMMT specific kernels ----------------------------------------------------
+
+#define INSERT_GENTFUNC_L( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, l, funcname) \
+GENTFUNC(double,      d, opname, l, funcname) \
+GENTFUNC(scomplex,    c, opname, l, funcname) \
+GENTFUNC(dcomplex,    z, opname, l, funcname)
+
+
+#define INSERT_GENTFUNC_U( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, u, funcname) \
+GENTFUNC(double,      d, opname, u, funcname) \
+GENTFUNC(scomplex,    c, opname, u, funcname) \
+GENTFUNC(dcomplex,    z, opname, u, funcname)
+
+
 
 // -- Macros for functions with one operand ------------------------------------
 
@@ -2787,11 +2832,16 @@ GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
 
+#define INSERT_GENTFUNC_BASIC0_SD( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( double,   d, tfuncname )
+
+
 #define INSERT_GENTFUNC_BASIC0_CZ( tfuncname ) \
 \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
-
 
 // -- (one auxiliary argument) --
 
@@ -2810,6 +2860,7 @@ GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
 GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
 GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
 GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
+
 
 // -- (three auxiliary arguments) --
 
@@ -3932,6 +3983,17 @@ GENTPROTDOT( scomplex, c, u, blasname ) \
 GENTPROTDOT( dcomplex, z, c, blasname ) \
 GENTPROTDOT( dcomplex, z, u, blasname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTPROTDOT_BLAS_SDC( blasname ) \
+\
+GENTPROTDOT( float,    s,  , blasname ) \
+GENTPROTDOT( double,   d,  , blasname ) \
+GENTPROTDOT( scomplex, c, c, blasname ) \
+GENTPROTDOT( scomplex, c, u, blasname ) \
+GENTPROTDOT( dcomplex, z, u, blasname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 
@@ -3967,8 +4029,17 @@ GENTPROTSCAL( dcomplex, dcomplex,  , z, blasname ) \
 GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
 GENTPROTSCAL( double,   dcomplex, d, z, blasname )
 
-
-
+// -- GEMMT specific function --------------------------------------------------
+#define INSERT_GENTPROT_GEMMT(opname, funcname) \
+\
+GENTPROT( float,     s, opname, l, funcname ) \
+GENTPROT( double,    d, opname, l, funcname ) \
+GENTPROT( float,     s, opname, u, funcname ) \
+GENTPROT( double,    d, opname, u, funcname ) \
+GENTPROT( scomplex,  c, opname, l, funcname ) \
+GENTPROT( dcomplex,  z, opname, l, funcname ) \
+GENTPROT( scomplex,  c, opname, u, funcname ) \
+GENTPROT( dcomplex,  z, opname, u, funcname ) 
 
 // -- Macros for functions with one operand ------------------------------------
 
@@ -5275,7 +5346,19 @@ static bool_t bli_has_nonunit_inc3( inc_t s1, inc_t s2, inc_t s3 )
 	       ( s1 != 1 || s2 != 1 || s3 != 1 );
 }
 
+// offset-relate
 
+static bool_t bli_gemmt_is_strictly_below_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool_t )
+	       ( ( n_off + n - 1 ) < m_off );
+}
+
+static bool_t bli_gemmt_is_strictly_above_diag( dim_t m_off, dim_t n_off, dim_t m, dim_t n )
+{
+	return ( bool_t )
+	       ( ( m_off + m - 1 ) < n_off );
+}
 // diag offset-related
 
 static void bli_negate_diag_offset( doff_t* diagoff )
@@ -12750,6 +12833,8 @@ static void bli_zscal2ris_mxn
 { \
 	bli_drandnp2s( a ); \
 }
+
+#if 0
 #define bli_drandnp2s_prev( a ) \
 { \
 	const double m_max  = 3.0; \
@@ -12795,6 +12880,8 @@ static void bli_zscal2ris_mxn
 	 \
 	a = r_val; \
 }
+#endif
+
 #define bli_drandnp2s( a ) \
 { \
 	const double m_max  = 6.0; \
@@ -12804,14 +12891,16 @@ static void bli_zscal2ris_mxn
 \
 	 \
 \
-	 \
-	t = ( ( double ) rand() / ( double ) RAND_MAX ) * m_max2; \
+	do \
+	{ \
+		 \
+		t = ( ( double ) rand() / ( double ) RAND_MAX ) * m_max2; \
 \
+		 \
+		t = floor( t ); \
+	} \
 	 \
-	if ( t == m_max2 ) t = t - 1.0; \
-\
-	 \
-	t = floor( t ); \
+	while ( m_max2 <= t ); \
 \
 	 \
 	if ( t == 0.0 ) r_val = 0.0; \
@@ -24333,6 +24422,7 @@ void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
 
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( hemm )
 GENPROT( herk )
 GENPROT( her2k )
@@ -24385,7 +24475,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(syrk,imeth) (              obj_t* alpha, obj_t* a
 BLIS_EXPORT_BLIS void PASTEMAC(syr2k,imeth)(              obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx, rntm_t* rntm ); \
 BLIS_EXPORT_BLIS void PASTEMAC(trmm3,imeth)( side_t side, obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx, rntm_t* rntm ); \
 BLIS_EXPORT_BLIS void PASTEMAC(trmm,imeth) ( side_t side, obj_t* alpha, obj_t* a, obj_t* b,                        cntx_t* cntx, rntm_t* rntm ); \
-BLIS_EXPORT_BLIS void PASTEMAC(trsm,imeth) ( side_t side, obj_t* alpha, obj_t* a, obj_t* b,                        cntx_t* cntx, rntm_t* rntm );
+BLIS_EXPORT_BLIS void PASTEMAC(trsm,imeth) ( side_t side, obj_t* alpha, obj_t* a, obj_t* b,                        cntx_t* cntx, rntm_t* rntm ); \
+BLIS_EXPORT_BLIS void PASTEMAC(gemmt,imeth) (              obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c, cntx_t* cntx, rntm_t* rntm ); \
 
 GENPROT( nat )
 GENPROT( ind )
@@ -35155,6 +35246,7 @@ typedef void (*PASTECH(opname,_oft)) \
 );
 
 GENTDEF( gemm )
+GENTDEF( gemmt )
 GENTDEF( her2k )
 GENTDEF( syr2k )
 
@@ -35476,6 +35568,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( her2k )
 GENPROT( syr2k )
 
@@ -35582,6 +35675,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( her2k )
 GENPROT( syr2k )
 
@@ -35692,7 +35786,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      );
 
 INSERT_GENTPROT_BASIC0( gemm )
-
+INSERT_GENTPROT_BASIC0( gemmt )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
@@ -35897,7 +35991,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      );
 
 INSERT_GENTPROT_BASIC0( gemm )
-
+INSERT_GENTPROT_BASIC0( gemmt )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
@@ -36076,7 +36170,7 @@ typedef err_t (*PASTECH(opname,_oft)) \
 );
 
 GENTDEF( gemmsup )
-
+GENTDEF( gemmtsup )
 #endif
 
 // end bli_l3_sup_oft.h
@@ -36137,6 +36231,17 @@ err_t bli_gemmsup
        rntm_t* rntm
      );
 
+err_t bli_gemmtsup
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
 // end bli_l3_sup.h
 
 // Prototype reference implementation of small/unpacked matrix handler.
@@ -36154,11 +36259,34 @@ err_t bli_gemmsup_ref
        rntm_t* rntm
      );
 
+err_t bli_gemmtsup_ref
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
 // end bli_l3_sup_ref.h
 // begin bli_l3_sup_int.h
 
 
 err_t bli_gemmsup_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
+
+err_t bli_gemmtsup_int
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -37736,7 +37864,129 @@ INSERT_GENTPROT_BASIC0( trsm_ru_ker_var2 )
 // end bli_trsm_var.h
 
 // end bli_trsm.h
+// begin bli_gemmt.h
 
+
+// begin bli_gemmt_front.h
+
+
+void bli_gemmt_front
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl
+     );
+
+
+// end bli_gemmt_front.h
+
+// begin bli_gemmt_var.h
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+     ( \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       cntl_t* cntl, \
+       thrinfo_t* thread  \
+     );
+
+GENPROT( gemmt_ker_var2 )
+
+
+
+//
+// Prototype BLAS-like interfaces with void pointer operands.
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       pack_t  schema_a, \
+       pack_t  schema_b, \
+       dim_t   m_off, \
+       dim_t   n_off, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   k, \
+       void*   alpha, \
+       void*   a, inc_t cs_a, inc_t is_a, \
+                  dim_t pd_a, inc_t ps_a, \
+       void*   b, inc_t rs_b, inc_t is_b, \
+                  dim_t pd_b, inc_t ps_b, \
+       void*   beta, \
+       void*   c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
+     );
+
+INSERT_GENTPROT_GEMMT( gemmt, ker_var2 )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC0(opname) \
+	( \
+	  trans_t trans, \
+	  obj_t*  alpha, \
+	  obj_t*  a, \
+	  obj_t*  b, \
+	  obj_t*  beta, \
+	  obj_t*  c, \
+	  stor3_t eff_id, \
+	  cntx_t* cntx, \
+	  rntm_t* rntm, \
+	  thrinfo_t* thread  \
+	 );
+
+GENPROT( gemmtsup_ref_var1n )
+GENPROT( gemmtsup_ref_var2m )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname, uplo, varname ) \
+\
+void PASTEMACT(ch,opname,uplo,varname) \
+     ( \
+       bool_t           packa, \
+       bool_t           packb, \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       stor3_t          eff_id, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
+     );
+
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var1n )
+INSERT_GENTPROT_GEMMT( gemmtsup, ref_var2m )	
+
+
+// end bli_gemmt_var.h
+// end bli_gemmt.h
 // end bli_l3.h
 
 
@@ -39132,6 +39382,28 @@ INSERT_GENTPROTR_BASIC0( sumsqv_unb_var1 )
 
 // end bli_util_unb_var1.h
 
+//Routines to copy certain portion of a matrix to another
+// begin bli_util_update.h
+
+
+#undef GENTPROT
+#define GENTPROT(ctype, ch, varname ) \
+\
+void PASTEMAC(ch, varname) \
+	( \
+	  dim_t m_off, \
+	  dim_t n_off, \
+	  dim_t m_cur, \
+	  dim_t n_cur, \
+	  ctype* ct, inc_t rs_ct, inc_t cs_ct, \
+	  ctype* beta_cast, \
+	  ctype* c, inc_t rs_c, inc_t cs_c \
+	);
+
+INSERT_GENTPROT_BASIC0( update_lower_triang )
+INSERT_GENTPROT_BASIC0( update_upper_triang )
+
+// end bli_util_update.h
 // end bli_util.h
 
 
@@ -39497,8 +39769,21 @@ BLIS_EXPORT_BLAS ftype PASTEF772(ch,blasname,chc) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTPROTDOT_BLAS( dot )
 
+#ifdef AOCL_F2C
+INSERT_GENTPROTDOT_BLAS_SDC( dot )
+
+
+BLIS_EXPORT_BLAS dcomplex zdotc_
+(
+       dcomplex *ret_val,
+       const f77_int* n,
+       const dcomplex*   x, const f77_int* incx,
+       const dcomplex*   y, const f77_int* incy
+);
+#else
+INSERT_GENTPROTDOT_BLAS( dot )
+#endif
 
 // -- "Black sheep" dot product function prototypes --
 
@@ -40676,6 +40961,34 @@ INSERT_GENTPROT_BLAS( trsm )
 #endif
 
 // end bla_trsm.h
+// begin bla_gemmt.h
+
+
+
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROT
+#define GENTPROT( ftype, ch, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* uploc, \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROT_BLAS( gemmt )
+#endif
+// end bla_gemmt.h
 
 // begin bla_gemm_check.h
 
@@ -41074,6 +41387,68 @@ INSERT_GENTPROT_BLAS( trsm )
 
 #endif
 // end bla_trsm_check.h
+// begin bla_gemmt_check.h
+
+
+#ifdef BLIS_ENABLE_BLAS
+
+#define bla_gemmt_check( dt_str, op_str, uploc, transa, transb, n, k, lda, ldb, ldc ) \
+{ \
+	f77_int info = 0; \
+	f77_int nota,  notb; \
+	f77_int conja, conjb; \
+	f77_int ta,    tb; \
+	f77_int lower, upper; \
+	f77_int nrowa, nrowb; \
+\
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+\
+	lower = PASTEF770(lsame)( uploc,  "L", (ftnlen)1, (ftnlen)1 ); \
+	upper = PASTEF770(lsame)( uploc,  "U", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota ) { nrowa = *n; } \
+	else        { nrowa = *k; } \
+	if ( notb ) { nrowb = *k; } \
+	else        { nrowb = *n; } \
+\
+	if	( !lower && !upper ) \
+		info = 1; \
+	else if ( !nota && !conja && !ta ) \
+		info = 2; \
+	else if ( !notb && !conjb && !tb ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 8; \
+	else if ( *ldb < bli_max( 1, nrowb ) ) \
+		info = 10; \
+	else if ( *ldc < bli_max( 1, *n    ) ) \
+		info = 13; \
+\
+	if ( info != 0 ) \
+	{ \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
+	} \
+}
+
+#endif
+// end bla_gemmt_check.h
 
 // -- Fortran-compatible APIs to BLIS functions --
 
@@ -41084,20 +41459,20 @@ INSERT_GENTPROT_BLAS( trsm )
 //
 // Prototype Fortran-compatible BLIS interfaces.
 //
-
-BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_ways)
-     (
-       const f77_int* jc,
-       const f77_int* pc,
-       const f77_int* ic,
-       const f77_int* jr,
-       const f77_int* ir
-     );
-
-BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_num_threads)
-     (
-       const f77_int* nt
-     );
+//
+//BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_ways)
+//     (
+//       const f77_int* jc,
+//       const f77_int* pc,
+//       const f77_int* ic,
+//       const f77_int* jr,
+//       const f77_int* ir
+//     );
+//
+//BLIS_EXPORT_BLAS void PASTEF770(bli_thread_set_num_threads)
+//     (
+//       const f77_int* nt
+//     );
 
 // end b77_thread.h
 
@@ -42398,11 +42773,11 @@ typedef enum
 	BLIS_TRMM3,
 	BLIS_TRMM,
 	BLIS_TRSM,
-
+	BLIS_GEMMT,
 	BLIS_NOID
 } opid_t;
 
-#define BLIS_NUM_LEVEL3_OPS 10
+#define BLIS_NUM_LEVEL3_OPS 11
 
 
 // -- Blocksize ID type --
@@ -43775,6 +44150,11 @@ void BLIS_EXPORT_BLAS cblas_strsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  float alpha, const float *A, f77_int lda,
                  float *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_sgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+		 f77_int N, f77_int K, float alpha, const float *A,
+                 f77_int lda, const float *B, f77_int ldb,
+                 float beta, float *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_dgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -43805,6 +44185,11 @@ void BLIS_EXPORT_BLAS cblas_dtrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  double alpha, const double *A, f77_int lda,
                  double *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_dgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+		 f77_int N, f77_int K, double alpha, const double *A,
+                 f77_int lda, const double *B, f77_int ldb,
+                 double beta, double *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_cgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -43835,6 +44220,11 @@ void BLIS_EXPORT_BLAS cblas_ctrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_cgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+		 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
 
 void BLIS_EXPORT_BLAS cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, f77_int M, f77_int N,
@@ -43865,6 +44255,11 @@ void BLIS_EXPORT_BLAS cblas_ztrsm(enum CBLAS_ORDER Order, enum CBLAS_SIDE Side,
                  enum CBLAS_DIAG Diag, f77_int M, f77_int N,
                  const void *alpha, const void *A, f77_int lda,
                  void *B, f77_int ldb);
+void BLIS_EXPORT_BLAS cblas_zgemmt(enum CBLAS_ORDER Order, enum CBLAS_UPLO Uplo,
+		 enum CBLAS_TRANSPOSE TransA, enum CBLAS_TRANSPOSE TransB,
+		 f77_int N, f77_int K, const void *alpha, const void *A,
+                 f77_int lda, const void *B, f77_int ldb,
+                 const void *beta, void *C, f77_int ldc);
 
 
 
@@ -43921,7 +44316,20 @@ void BLIS_EXPORT_BLAS cblas_xerbla(f77_int p, const char *rout, const char *form
 BLIS_EXPORT_BLIS void bli_sleep( unsigned int secs );
 
 // end bli_winsys.h
-
+#define sswap_ sswap
+#define dswap_ dswap
+#define sscal_ sscal
+#define dscal_ dscal
+#define dgemv_ dgemv
+#define sgemv_ sgemv
+#define sdot_ sdot
+#define ddot_ ddot
+#define scopy_ scopy
+#define dcopy_ dcopy
+#define saxpy_ saxpy
+#define daxpy_ daxpy
+#define isamax_ isamax
+#define idamax_ idamax
 // begin aocldtl.h
 
 
@@ -44046,7 +44454,11 @@ typedef pid_t                   AOCL_TID;
 #include <memory.h> // skipped
 #include <time.h> // skipped
 #include <math.h> // skipped
+#ifndef _WIN32
 #include <sys/types.h> // skipped
+#else
+typedef int pid_t;
+#endif
 
 typedef double                  Double;
 typedef float                   Float;

@@ -73,7 +73,7 @@ void bli_thread_range_sub
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end
      );
@@ -130,7 +130,7 @@ dim_t bli_thread_range_width_l
        dim_t  bf,
        dim_t  bf_left,
        double area_per_thr,
-       bool_t handle_edge_low
+       bool   handle_edge_low
      );
 siz_t bli_find_area_trap_l
      (
@@ -146,7 +146,7 @@ siz_t bli_thread_range_weighted_sub
        dim_t               m,
        dim_t               n,
        dim_t               bf,
-       bool_t              handle_edge_low,
+       bool                handle_edge_low,
        dim_t*     restrict j_start_thr,
        dim_t*     restrict j_end_thr
      );
@@ -192,16 +192,16 @@ BLIS_EXPORT_BLIS dim_t bli_thread_get_num_threads( void );
 BLIS_EXPORT_BLIS void  bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir );
 BLIS_EXPORT_BLIS void  bli_thread_set_num_threads( dim_t value );
 
-void  bli_thread_init_rntm_from_env( rntm_t* rntm );
+BLIS_EXPORT_BLIS void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 // -----------------------------------------------------------------------------
 
-static void bli_thread_range_jrir_rr
+BLIS_INLINE void bli_thread_range_jrir_rr
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -213,12 +213,12 @@ static void bli_thread_range_jrir_rr
 	*end   = n;
 }
 
-static void bli_thread_range_jrir_sl
+BLIS_INLINE void bli_thread_range_jrir_sl
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -229,12 +229,12 @@ static void bli_thread_range_jrir_sl
 	*inc = 1;
 }
 
-static void bli_thread_range_jrir
+BLIS_INLINE void bli_thread_range_jrir
      (
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc
@@ -251,7 +251,7 @@ static void bli_thread_range_jrir
 }
 
 #if 0
-static void bli_thread_range_weighted_jrir
+BLIS_INLINE void bli_thread_range_weighted_jrir
      (
        thrinfo_t* thread,
        doff_t     diagoff,
@@ -259,7 +259,7 @@ static void bli_thread_range_weighted_jrir
        dim_t      m,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end,
        dim_t*     inc

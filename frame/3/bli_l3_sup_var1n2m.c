@@ -38,8 +38,8 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool_t           packa,
-       bool_t           packb,
+       bool             packa,
+       bool             packb,
        conj_t           conja,
        conj_t           conjb,
        dim_t            m,
@@ -117,8 +117,8 @@ void bli_gemmsup_ref_var1n
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -237,8 +237,8 @@ void bli_gemmsup_ref_var1n
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -425,7 +425,7 @@ void PASTEMAC(ch,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -620,10 +620,6 @@ void PASTEMAC(ch,varname) \
 				dim_t jr_iter = ( nc_cur + MR - 1 ) / MR; \
 				dim_t jr_left =   nc_cur % MR; \
 \
-				/* Compute the JR loop thread range for the current thread. */ \
-				dim_t jr_start, jr_end; \
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
-\
 				/* An optimization: allow the last jr iteration to contain up to MRE
 				   rows of C and A. (If MRE > MR, the mkernel has agreed to handle
 				   these cases.) Note that this prevents us from declaring jr_iter and
@@ -634,6 +630,10 @@ void PASTEMAC(ch,varname) \
 				{ \
 					jr_iter--; jr_left += MR; \
 				} \
+\
+				/* Compute the JR loop thread range for the current thread. */ \
+				dim_t jr_start, jr_end; \
+				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
 \
 				/* Loop over the m dimension (NR columns at a time). */ \
 				/*for ( dim_t j = 0; j < jr_iter; j += 1 )*/ \
@@ -767,8 +767,8 @@ void bli_gemmsup_ref_var2m
 #else
 	const num_t    dt        = bli_obj_dt( c );
 
-	const bool_t   packa     = bli_rntm_pack_a( rntm );
-	const bool_t   packb     = bli_rntm_pack_b( rntm );
+	const bool     packa     = bli_rntm_pack_a( rntm );
+	const bool     packb     = bli_rntm_pack_b( rntm );
 
 	const conj_t   conja     = bli_obj_conj_status( a );
 	const conj_t   conjb     = bli_obj_conj_status( b );
@@ -887,8 +887,8 @@ void bli_gemmsup_ref_var2m
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool_t           packa, \
-       bool_t           packb, \
+       bool             packa, \
+       bool             packb, \
        conj_t           conja, \
        conj_t           conjb, \
        dim_t            m, \
@@ -1049,7 +1049,7 @@ void PASTEMAC(ch,varname) \
 	               else         bszids = bszids_nopack; } \
 \
 	/* Determine whether we are using more than one thread. */ \
-	const bool_t is_mt = bli_rntm_calc_num_threads( rntm ); \
+	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
 	thrinfo_t* restrict thread_jc = NULL; \
 	thrinfo_t* restrict thread_pc = NULL; \
@@ -1148,7 +1148,7 @@ void PASTEMAC(ch,varname) \
 			  thread_pb  \
 			); \
 \
-			/* Alias a_use so that it's clear this is our current block of
+			/* Alias b_use so that it's clear this is our current block of
 			   matrix B. */ \
 			ctype* restrict b_pc_use = b_use; \
 \
@@ -1240,10 +1240,6 @@ void PASTEMAC(ch,varname) \
 				dim_t jr_iter = ( nc_cur + NR - 1 ) / NR; \
 				dim_t jr_left =   nc_cur % NR; \
 \
-				/* Compute the JR loop thread range for the current thread. */ \
-				dim_t jr_start, jr_end; \
-				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
-\
 				/* An optimization: allow the last jr iteration to contain up to NRE
 				   columns of C and B. (If NRE > NR, the mkernel has agreed to handle
 				   these cases.) Note that this prevents us from declaring jr_iter and
@@ -1254,6 +1250,10 @@ void PASTEMAC(ch,varname) \
 				{ \
 					jr_iter--; jr_left += NR; \
 				} \
+\
+				/* Compute the JR loop thread range for the current thread. */ \
+				dim_t jr_start, jr_end; \
+				bli_thread_range_sub( thread_jr, jr_iter, 1, FALSE, &jr_start, &jr_end ); \
 \
 				/* Loop over the n dimension (NR columns at a time). */ \
 				/*for ( dim_t j = 0; j < jr_iter; j += 1 )*/ \

@@ -51,22 +51,22 @@ typedef struct
 
 // apool entry query
 
-static pool_t* bli_apool_pool( apool_t* apool )
+BLIS_INLINE pool_t* bli_apool_pool( apool_t* apool )
 {
 	return &(apool->pool);
 }
 
-static  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
+BLIS_INLINE  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 {
 	return &(apool->mutex);
 }
 
-static siz_t bli_apool_def_array_len( apool_t* pool )
+BLIS_INLINE siz_t bli_apool_def_array_len( apool_t* pool )
 {
 	return pool->def_array_len;
 }
 
-static bool_t bli_apool_is_exhausted( apool_t* apool )
+BLIS_INLINE bool bli_apool_is_exhausted( apool_t* apool )
 {
 	pool_t* restrict pool = bli_apool_pool( apool );
 
@@ -75,19 +75,19 @@ static bool_t bli_apool_is_exhausted( apool_t* apool )
 
 // apool action
 
-static void bli_apool_lock( apool_t* apool )
+BLIS_INLINE void bli_apool_lock( apool_t* apool )
 {
 	bli_pthread_mutex_lock( bli_apool_mutex( apool ) );
 }
 
-static void bli_apool_unlock( apool_t* apool )
+BLIS_INLINE void bli_apool_unlock( apool_t* apool )
 {
 	bli_pthread_mutex_unlock( bli_apool_mutex( apool ) );
 }
 
 // apool entry modification
 
-static void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
+BLIS_INLINE void bli_apool_set_def_array_len( siz_t def_array_len, apool_t* pool ) \
 {
 	pool->def_array_len = def_array_len;
 }

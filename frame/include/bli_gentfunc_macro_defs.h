@@ -89,6 +89,11 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#define INSERT_GENTFUNCDOT_BLAS_CZ_F2C( blasname, blisname ) \
+\
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
 #define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
 \
@@ -99,6 +104,17 @@ GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTFUNCDOT_BLAS_SDC( blasname, blisname ) \
+\
+GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 
@@ -142,6 +158,24 @@ GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
 GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
+// --GEMMT specific kernels ----------------------------------------------------
+
+#define INSERT_GENTFUNC_L( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, l, funcname) \
+GENTFUNC(double,      d, opname, l, funcname) \
+GENTFUNC(scomplex,    c, opname, l, funcname) \
+GENTFUNC(dcomplex,    z, opname, l, funcname)
+
+
+#define INSERT_GENTFUNC_U( opname, funcname ) \
+\
+GENTFUNC(float,       s, opname, u, funcname) \
+GENTFUNC(double,      d, opname, u, funcname) \
+GENTFUNC(scomplex,    c, opname, u, funcname) \
+GENTFUNC(dcomplex,    z, opname, u, funcname)
+
+
 
 // -- Macros for functions with one operand ------------------------------------
 
@@ -158,11 +192,16 @@ GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
 
+#define INSERT_GENTFUNC_BASIC0_SD( tfuncname ) \
+\
+GENTFUNC( float,    s, tfuncname ) \
+GENTFUNC( double,   d, tfuncname )
+
+
 #define INSERT_GENTFUNC_BASIC0_CZ( tfuncname ) \
 \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
-
 
 // -- (one auxiliary argument) --
 
@@ -181,6 +220,7 @@ GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
 GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
 GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
 GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
+
 
 // -- (three auxiliary arguments) --
 

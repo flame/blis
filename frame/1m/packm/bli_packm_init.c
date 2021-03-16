@@ -53,9 +53,9 @@ siz_t bli_packm_init
 
 	bszid_t   bmult_id_m;
 	bszid_t   bmult_id_n;
-	bool_t    does_invert_diag;
-	bool_t    rev_iter_if_upper;
-	bool_t    rev_iter_if_lower;
+	bool      does_invert_diag;
+	bool      rev_iter_if_upper;
+	bool      rev_iter_if_lower;
 	pack_t    schema;
 	//packbuf_t pack_buf_type;
 	siz_t     size_needed;

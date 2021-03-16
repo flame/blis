@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -56,3 +57,5 @@
 // Prototype level-1m implementations.
 #include "bli_util_unb_var1.h"
 
+//Routines to copy certain portion of a matrix to another
+#include "bli_util_update.h"

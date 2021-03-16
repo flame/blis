@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,66 +58,70 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	side_t  blis_side; \
-	uplo_t  blis_uploa; \
-	dim_t   m0, n0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
-	inc_t   rs_c, cs_c; \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa), *m, \
+                            *n, (ftype*)alpha, *lda, *ldb, (ftype*)beta, *ldc) \
+    side_t  blis_side; \
+    uplo_t  blis_uploa; \
+    dim_t   m0, n0; \
+    inc_t   rs_a, cs_a; \
+    inc_t   rs_b, cs_b; \
+    inc_t   rs_c, cs_c; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  side, \
-	  uploa, \
-	  m, \
-	  n, \
-	  lda, \
-	  ldb, \
-	  ldc  \
-	); \
+    /* Perform BLAS parameter checking. */ \
+    PASTEBLACHK(blasname) \
+    ( \
+      MKSTR(ch), \
+      MKSTR(blasname), \
+      side, \
+      uploa, \
+      m, \
+      n, \
+      lda, \
+      ldb, \
+      ldc  \
+    ); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
-	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+    bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
+    bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
-	/* Typecast BLAS integers to BLIS integers. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-	bli_convert_blas_dim1( *n, n0 ); \
+    /* Typecast BLAS integers to BLIS integers. */ \
+    bli_convert_blas_dim1( *m, m0 ); \
+    bli_convert_blas_dim1( *n, n0 ); \
 \
-	/* Set the row and column strides of the matrix operands. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
-	rs_b = 1; \
-	cs_b = *ldb; \
-	rs_c = 1; \
-	cs_c = *ldc; \
+    /* Set the row and column strides of the matrix operands. */ \
+    rs_a = 1; \
+    cs_a = *lda; \
+    rs_b = 1; \
+    cs_b = *ldb; \
+    rs_c = 1; \
+    cs_c = *ldc; \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  blis_side, \
-	  blis_uploa, \
-	  BLIS_NO_CONJUGATE, \
-	  BLIS_NO_TRANSPOSE, \
-	  m0, \
-	  n0, \
-	  (ftype*)alpha, \
-	  (ftype*)a, rs_a, cs_a, \
-	  (ftype*)b, rs_b, cs_b, \
-	  (ftype*)beta, \
-	  (ftype*)c, rs_c, cs_c, \
-	  NULL, \
-	  NULL  \
-	); \
+    /* Call BLIS interface. */ \
+    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      blis_side, \
+      blis_uploa, \
+      BLIS_NO_CONJUGATE, \
+      BLIS_NO_TRANSPOSE, \
+      m0, \
+      n0, \
+      (ftype*)alpha, \
+      (ftype*)a, rs_a, cs_a, \
+      (ftype*)b, rs_b, cs_b, \
+      (ftype*)beta, \
+      (ftype*)c, rs_c, cs_c, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
 }
 
 #else
@@ -138,88 +142,92 @@ void PASTEF77(ch,blasname) \
              ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	side_t  blis_side; \
-	uplo_t  blis_uploa; \
-	dim_t   m0, n0; \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(side), *MKSTR(uploa), *m, \
+                            *n, (ftype*)alpha, *lda, *ldb, (ftype*)beta, *ldc) \
+    side_t  blis_side; \
+    uplo_t  blis_uploa; \
+    dim_t   m0, n0; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  side, \
-	  uploa, \
-	  m, \
-	  n, \
-	  lda, \
-	  ldb, \
-	  ldc  \
-	); \
+    /* Perform BLAS parameter checking. */ \
+    PASTEBLACHK(blasname) \
+    ( \
+      MKSTR(ch), \
+      MKSTR(blasname), \
+      side, \
+      uploa, \
+      m, \
+      n, \
+      lda, \
+      ldb, \
+      ldc  \
+    ); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
-	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+    bli_param_map_netlib_to_blis_side( *side,  &blis_side ); \
+    bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
-	/* Typecast BLAS integers to BLIS integers. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-	bli_convert_blas_dim1( *n, n0 ); \
+    /* Typecast BLAS integers to BLIS integers. */ \
+    bli_convert_blas_dim1( *m, m0 ); \
+    bli_convert_blas_dim1( *n, n0 ); \
 \
-	/* Set the row and column strides of the matrix operands. */ \
-	const inc_t rs_a = 1; \
-	const inc_t cs_a = *lda; \
-	const inc_t rs_b = 1; \
-	const inc_t cs_b = *ldb; \
-	const inc_t rs_c = 1; \
-	const inc_t cs_c = *ldc; \
+    /* Set the row and column strides of the matrix operands. */ \
+    const inc_t rs_a = 1; \
+    const inc_t cs_a = *lda; \
+    const inc_t rs_b = 1; \
+    const inc_t cs_b = *ldb; \
+    const inc_t rs_c = 1; \
+    const inc_t cs_c = *ldc; \
 \
-	const num_t   dt     = PASTEMAC(ch,type); \
+    const num_t   dt     = PASTEMAC(ch,type); \
 \
-	const conj_t  conja  = BLIS_NO_CONJUGATE; \
-	const trans_t transb = BLIS_NO_TRANSPOSE; \
-	const struc_t struca = BLIS_HERMITIAN; \
+    const conj_t  conja  = BLIS_NO_CONJUGATE; \
+    const trans_t transb = BLIS_NO_TRANSPOSE; \
+    const struc_t struca = BLIS_HERMITIAN; \
 \
-	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
-	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
-	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
-	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
-	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+    obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
-	dim_t       mn0_a; \
-	dim_t       m0_b, n0_b; \
+    dim_t       mn0_a; \
+    dim_t       m0_b, n0_b; \
 \
-	bli_set_dim_with_side( blis_side, m0, n0, &mn0_a ); \
-	bli_set_dims_with_trans( transb,  m0, n0, &m0_b, &n0_b ); \
+    bli_set_dim_with_side( blis_side, m0, n0, &mn0_a ); \
+    bli_set_dims_with_trans( transb,  m0, n0, &m0_b, &n0_b ); \
 \
-	bli_obj_init_finish_1x1( dt, (ftype*)alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, (ftype*)beta,  &betao  ); \
+    bli_obj_init_finish_1x1( dt, (ftype*)alpha, &alphao ); \
+    bli_obj_init_finish_1x1( dt, (ftype*)beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, mn0_a, mn0_a, (ftype*)a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m0_b,  n0_b,  (ftype*)b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m0,    n0,    (ftype*)c, rs_c, cs_c, &co ); \
+    bli_obj_init_finish( dt, mn0_a, mn0_a, (ftype*)a, rs_a, cs_a, &ao ); \
+    bli_obj_init_finish( dt, m0_b,  n0_b,  (ftype*)b, rs_b, cs_b, &bo ); \
+    bli_obj_init_finish( dt, m0,    n0,    (ftype*)c, rs_c, cs_c, &co ); \
 \
-	bli_obj_set_uplo( blis_uploa, &ao ); \
-	bli_obj_set_conj( conja, &ao ); \
-	bli_obj_set_conjtrans( transb, &bo ); \
+    bli_obj_set_uplo( blis_uploa, &ao ); \
+    bli_obj_set_conj( conja, &ao ); \
+    bli_obj_set_conjtrans( transb, &bo ); \
 \
-	bli_obj_set_struc( struca, &ao ); \
+    bli_obj_set_struc( struca, &ao ); \
 \
-	PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
-	( \
-	  blis_side, \
-	  &alphao, \
-	  &ao, \
-	  &bo, \
-	  &betao, \
-	  &co, \
-	  NULL, \
-	  NULL  \
-	); \
+    PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
+    ( \
+      blis_side, \
+      &alphao, \
+      &ao, \
+      &bo, \
+      &betao, \
+      &co, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
 }
 
 #endif

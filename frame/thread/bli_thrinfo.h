@@ -56,7 +56,7 @@ struct thrinfo_s
 	// this is field is true, but when nodes are created that share the same
 	// communicators as other nodes (such as with packm nodes), this is set
 	// to false.
-	bool_t             free_comm;
+	bool               free_comm;
 
 	// The bszid_t to help identify the node. This is mostly only useful when
 	// debugging or tracing the allocation and release of thrinfo_t nodes.
@@ -75,108 +75,108 @@ typedef struct thrinfo_s thrinfo_t;
 
 // thrinfo_t query (field only)
 
-static dim_t bli_thread_num_threads( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_num_threads( thrinfo_t* t )
 {
 	return (t->ocomm)->n_threads;
 }
 
-static dim_t bli_thread_ocomm_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
 {
 	return t->ocomm_id;
 }
 
-static dim_t bli_thread_n_way( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_n_way( thrinfo_t* t )
 {
 	return t->n_way;
 }
 
-static dim_t bli_thread_work_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_work_id( thrinfo_t* t )
 {
 	return t->work_id;
 }
 
-static thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
+BLIS_INLINE thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
 {
 	return t->ocomm;
 }
 
-static bool_t bli_thrinfo_needs_free_comm( thrinfo_t* t )
+BLIS_INLINE bool bli_thrinfo_needs_free_comm( thrinfo_t* t )
 {
 	return t->free_comm;
 }
 
-static dim_t bli_thread_bszid( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_bszid( thrinfo_t* t )
 {
 	return t->bszid;
 }
 
-static thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
 {
 	return t->sub_node;
 }
 
-static thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
 {
 	return t->sub_prenode;
 }
 
 // thrinfo_t query (complex)
 
-static bool_t bli_thread_am_ochief( thrinfo_t* t )
+BLIS_INLINE bool bli_thread_am_ochief( thrinfo_t* t )
 {
 	return t->ocomm_id == 0;
 }
 
 // thrinfo_t modification
 
-static void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm( thrcomm_t* ocomm, thrinfo_t* t )
 {
 	t->ocomm = ocomm;
 }
 
-static void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_ocomm_id( dim_t ocomm_id, thrinfo_t* t )
 {
 	t->ocomm_id = ocomm_id;
 }
 
-static void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_n_way( dim_t n_way, thrinfo_t* t )
 {
 	t->n_way = n_way;
 }
 
-static void bli_thrinfo_set_work_id( dim_t work_id, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_work_id( dim_t work_id, thrinfo_t* t )
 {
 	t->work_id = work_id;
 }
 
-static void bli_thrinfo_set_free_comm( bool_t free_comm, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_free_comm( bool free_comm, thrinfo_t* t )
 {
 	t->free_comm = free_comm;
 }
 
-static void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_bszid( bszid_t bszid, thrinfo_t* t )
 {
 	t->bszid = bszid;
 }
 
-static void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_sub_node( thrinfo_t* sub_node, thrinfo_t* t )
 {
 	t->sub_node = sub_node;
 }
 
-static void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
+BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t* t )
 {
 	t->sub_prenode = sub_prenode;
 }
 
 // other thrinfo_t-related functions
 
-static void* bli_thread_broadcast( thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thread_broadcast( thrinfo_t* t, void* p )
 {
 	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
-static void bli_thread_barrier( thrinfo_t* t )
+BLIS_INLINE void bli_thread_barrier( thrinfo_t* t )
 {
 	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
@@ -193,7 +193,7 @@ thrinfo_t* bli_thrinfo_create
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       bool_t     free_comm,
+       bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
      );
@@ -205,7 +205,7 @@ void bli_thrinfo_init
        dim_t      ocomm_id,
        dim_t      n_way,
        dim_t      work_id, 
-       bool_t     free_comm,
+       bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
      );

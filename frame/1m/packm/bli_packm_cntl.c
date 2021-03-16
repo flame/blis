@@ -42,9 +42,9 @@ cntl_t* bli_packm_cntl_create_node
        void_fp   packm_var_func,
        bszid_t   bmid_m,
        bszid_t   bmid_n,
-       bool_t    does_invert_diag,
-       bool_t    rev_iter_if_upper,
-       bool_t    rev_iter_if_lower,
+       bool      does_invert_diag,
+       bool      rev_iter_if_upper,
+       bool      rev_iter_if_lower,
        pack_t    pack_schema,
        packbuf_t pack_buf_type,
        cntl_t*   sub_node

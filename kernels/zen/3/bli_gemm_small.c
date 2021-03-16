@@ -233,7 +233,7 @@ static err_t bli_sgemm_small
         float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
 
         /*Beta Zero Check*/
-        bool_t is_beta_non_zero=0;
+        bool is_beta_non_zero=0;
         if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
             is_beta_non_zero = 1;
         }
@@ -1805,7 +1805,7 @@ static err_t bli_dgemm_small
         //checking whether beta value is zero.
         //if true, we should perform C=alpha * A*B operation
         //instead of C = beta * C + alpha * (A * B)
-        bool_t is_beta_non_zero = 0;
+        bool is_beta_non_zero = 0;
         if(!bli_obj_equals(beta, &BLIS_ZERO))
                 is_beta_non_zero = 1;
 
@@ -3362,7 +3362,7 @@ static err_t bli_sgemm_small_atbn
     float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
 
     /*Beta Zero Check*/
-    bool_t is_beta_non_zero=0;
+    bool is_beta_non_zero=0;
     if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
         is_beta_non_zero = 1;
     }
@@ -3843,7 +3843,7 @@ static err_t bli_dgemm_small_atbn
     //check if beta is zero
     //if true, we need to perform C = alpha * (A * B)
     //instead of C = beta * C  + alpha * (A * B)
-    bool_t is_beta_non_zero = 0;
+    bool is_beta_non_zero = 0;
     if(!bli_obj_equals(beta,&BLIS_ZERO))
         is_beta_non_zero = 1;
 

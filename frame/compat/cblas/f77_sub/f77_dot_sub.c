@@ -59,8 +59,28 @@ void PASTEF773(ch,blasname,chc,sub) \
 }
 
 #ifdef BLIS_ENABLE_CBLAS
-INSERT_GENTFUNCDOT_BLAS( dot, NULL )
+#ifdef AOCL_F2C
+INSERT_GENTFUNCDOT_BLAS_SDC( dot, NULL )
 
+void PASTEF773(z,dot,c,sub)
+     (
+       const f77_int* n,
+       const dcomplex*   x, const f77_int* incx,
+       const dcomplex*   y, const f77_int* incy,
+             dcomplex*   rval
+     )
+{
+	PASTEF772(z,dot,c)
+	(
+	rval,
+	  n,
+	  x, incx,
+	  y, incy
+	);
+}
+#else
+INSERT_GENTFUNCDOT_BLAS( dot, NULL )
+#endif
 
 // -- "Black sheep" dot product function definitions --
 

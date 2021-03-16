@@ -17,6 +17,7 @@ void cblas_cgemv(enum CBLAS_ORDER order,
                  const void  *X, f77_int incX, const void *beta,
                  void  *Y, f77_int incY)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    char TA;
 #ifdef F77_CHAR
    F77_CHAR F77_TA;
@@ -52,6 +53,7 @@ void cblas_cgemv(enum CBLAS_ORDER order,
       else if (TransA == CblasConjTrans) TA = 'C';
       else 
       {
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal TransA setting.");
          cblas_xerbla(2, "cblas_cgemv","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
@@ -128,6 +130,7 @@ void cblas_cgemv(enum CBLAS_ORDER order,
       }
       else 
       {
+         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal TransA setting.");
          cblas_xerbla(2, "cblas_cgemv","Illegal TransA setting, %d\n", TransA);
          CBLAS_CallFromC = 0;
          RowMajorStrg = 0;
@@ -136,12 +139,14 @@ void cblas_cgemv(enum CBLAS_ORDER order,
       #ifdef F77_CHAR
          F77_TA = C2F_CHAR(&TA);
       #endif
-      if (TransA == CblasConjTrans)
+      if (TransA == CblasConjTrans){
          F77_cgemv(F77_TA, &F77_N, &F77_M, (scomplex*)ALPHA, (scomplex*)A, &F77_lda, (scomplex*)stx,
                 &F77_incX, (scomplex*)BETA, (scomplex*)Y, &F77_incY);
-      else
+      }
+      else{
          F77_cgemv(F77_TA, &F77_N, &F77_M, (scomplex*)alpha, (scomplex*)A, &F77_lda, (scomplex*)x,
                 &F77_incX, (scomplex*)beta, (scomplex*)Y, &F77_incY);
+      }
 
       if (TransA == CblasConjTrans)
       {
@@ -157,9 +162,14 @@ void cblas_cgemv(enum CBLAS_ORDER order,
          }
       }
    }
-   else cblas_xerbla(1, "cblas_cgemv", "Illegal Order setting, %d\n", order);
+   else
+   {
+      AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_1, "Illegal Order setting.");
+      cblas_xerbla(1, "cblas_cgemv", "Illegal Order setting, %d\n", order);
+   }
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return;
 }
 #endif

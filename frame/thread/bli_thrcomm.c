@@ -86,7 +86,7 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 	// fact, if everything else is working, a binary variable is sufficient,
 	// which is what we do here (i.e., 0 is incremented to 1, which is then
 	// decremented back to 0, and so forth).
-	bool_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
+	gint_t orig_sense = __atomic_load_n( &comm->barrier_sense, __ATOMIC_RELAXED );
 
 	// Register ourselves (the current thread) as having arrived by
 	// incrementing the barrier_threads_arrived variable. We must perform

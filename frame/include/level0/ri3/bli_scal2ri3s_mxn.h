@@ -37,7 +37,7 @@
 
 // scal2ri3s_mxn
 
-static void bli_cscal2ri3s_mxn
+BLIS_INLINE void bli_cscal2ri3s_mxn
      (
        const conj_t       conjx,
        const dim_t        m,
@@ -108,7 +108,7 @@ static void bli_cscal2ri3s_mxn
 	}
 }
 
-static void bli_zscal2ri3s_mxn
+BLIS_INLINE void bli_zscal2ri3s_mxn
      (
        const conj_t       conjx,
        const dim_t        m,

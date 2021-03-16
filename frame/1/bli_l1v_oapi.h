@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -45,7 +46,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( addv )
 GENTPROT( copyv )
@@ -63,6 +64,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENTPROT( amaxv )
+GENTPROT( aminv )
 
 
 #undef  GENTPROT
@@ -89,7 +91,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( axpyv )
 GENTPROT( scal2v )
@@ -104,7 +106,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  y, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotv )
 
@@ -120,7 +122,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  beta, \
        obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( dotxv )
 
@@ -132,7 +134,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( invertv )
 
@@ -145,7 +147,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  alpha, \
        obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( scalv )
 GENTPROT( setv )
@@ -159,7 +161,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
        obj_t*  x, \
        obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
-     ); 
+     );
 
 GENTPROT( swapv )
 

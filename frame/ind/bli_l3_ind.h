@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -41,9 +42,10 @@
 #define GENPROT( opname ) \
 \
 void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
-/*bool_t PASTEMAC(opname,ind_has_avail)( num_t dt ); */
+/*bool PASTEMAC(opname,ind_has_avail)( num_t dt ); */
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( hemm )
 GENPROT( herk )
 GENPROT( her2k )
@@ -56,17 +58,17 @@ GENPROT( trsm )
 
 // -----------------------------------------------------------------------------
 
-//bool_t bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
+//bool bli_l3_ind_oper_is_avail( opid_t oper, ind_t method, num_t dt );
 
 ind_t   bli_l3_ind_oper_find_avail( opid_t oper, num_t dt );
 
-void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool_t status );
+void    bli_l3_ind_set_enable_dt( ind_t method, num_t dt, bool status );
 
 void    bli_l3_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
-void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool_t status );
+void    bli_l3_ind_oper_set_enable_all( opid_t oper, num_t dt, bool status );
 
-void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool_t status );
-bool_t  bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
+void    bli_l3_ind_oper_set_enable( opid_t oper, ind_t method, num_t dt, bool status );
+bool    bli_l3_ind_oper_get_enable( opid_t oper, ind_t method, num_t dt );
 
 void_fp bli_l3_ind_oper_get_func( opid_t oper, ind_t method );
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -69,6 +69,7 @@ void bli_trsm_lu_ker_var2
        thrinfo_t* thread
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 	num_t     dt_exec   = bli_obj_exec_dt( c );
 
 	doff_t    diagoffa  = bli_obj_diag_offset( a );
@@ -134,6 +135,7 @@ void bli_trsm_lu_ker_var2
 	   cntx,
 	   rntm,
 	   thread );
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
 }
 
 
@@ -158,6 +160,7 @@ void PASTEMAC(ch,varname) \
        thrinfo_t* thread  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_8); \
 	const num_t     dt          = PASTEMAC(ch,type); \
 \
 	/* Alias some constants to simpler names. */ \
@@ -179,7 +182,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool_t    col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -237,11 +240,19 @@ void PASTEMAC(ch,varname) \
 	     ( bli_is_odd( PACKNR ) && bli_is_odd( MR ) ) ) bli_abort(); \
 \
 	/* If any dimension is zero, return immediately. */ \
-	if ( bli_zero_dim3( m, n, k ) ) return; \
+	if ( bli_zero_dim3( m, n, k ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_8); \
+		return; \
+	} \
 \
 	/* Safeguard: If matrix A is below the diagonal, it is implicitly zero.
 	   So we do nothing. */ \
-	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) return; \
+	if ( bli_is_strictly_below_diag_n( diagoffa, m, k ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_8) \
+		return; \
+	} \
 \
 	/* Compute k_full as k inflated up to a multiple of MR. This is
 	   needed because some parameter combinations of trsm reduce k
@@ -582,6 +593,7 @@ PASTEMAC(ch,fprintm)( stdout, "trsm_lu_ker_var2: b11 after (diag)", MR, NR, b11,
 PASTEMAC(ch,fprintm)( stdout, "trsm_lu_ker_var2: b11 after (diag)", MR, NR, b11, NR, 1, "%5.2f", "" ); \
 PASTEMAC(ch,fprintm)( stdout, "trsm_lu_ker_var2: ct after (diag)", m_cur, n_cur, ct, rs_ct, cs_ct, "%5.2f", "" ); \
 */ \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_8); \
 }
 
 INSERT_GENTFUNC_BASIC0( trsm_lu_ker_var2 )

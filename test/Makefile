@@ -1,11 +1,12 @@
+
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -37,7 +38,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Makefile for standalone BLIS test drivers.
 #
 
@@ -47,6 +48,7 @@
 
 .PHONY: all \
         blis openblas atlas mkl \
+        check-env check-env-mk check-lib \
         clean cleanx
 
 
@@ -113,6 +115,14 @@ MKL_LIB        := -L$(MKL_LIB_PATH) \
                   -lmkl_sequential \
                   -lpthread -lm -ldl
 
+# Uncomment below lines & comment above lines to link with multi-threaded library.
+#MKL_LIB        := -L$(MKL_LIB_PATH) \
+#                  -lmkl_intel_lp64 \
+#                  -lmkl_core \
+#                  -lmkl_gnu_thread \
+#                  -lpthread -lm -ldl -liomp5
+
+
 # ESSL
 # Note: ESSL is named differently for SMP and/or BG
 #ESSL_TYPE      :=       # This is the 32b library on POWER
@@ -138,10 +148,13 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
                              $(TEST_OBJ_PATH)/%.o, \
                              $(wildcard $(TEST_SRC_PATH)/*.c))
 
+
+CBLAS_HEADER_PATH  = ../frame/compat/cblas/src
+
 # Override the value of CINCFLAGS so that the value of CFLAGS returned by
 # get-user-cflags-for() is not cluttered up with include paths needed only
 # while building BLIS.
-CINCFLAGS      := -I$(INC_PATH)
+CINCFLAGS      := -I$(INC_PATH) -I$(CBLAS_HEADER_PATH)
 
 # Use the CFLAGS for the configuration family.
 CFLAGS         := $(call get-user-cflags-for,$(CONFIG_NAME))
@@ -165,9 +178,11 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 #all: blis openblas atlas mkl
 all: blis openblas mkl
 
-blis: \
+blis:  check-env \
        test_dotv_blis.x \
+       test_aminv_blis.x \
        test_axpyv_blis.x \
+       test_axpbyv_blis.x \
        test_gemv_blis.x \
        test_ger_blis.x \
        test_hemv_blis.x \
@@ -180,15 +195,24 @@ blis: \
        test_scalv_blis.x \
        \
        test_gemm_blis.x \
+       test_gemmt_blis.x \
        test_hemm_blis.x \
        test_herk_blis.x \
        test_her2k_blis.x \
        test_trmm_blis.x \
-       test_trsm_blis.x 
+       test_trsm_blis.x \
+       test_gemm_batch_blis.x \
+       test_gemm3m_blis.x \
+       test_imatcopy_blis.x \
+       test_omatcopy_blis.x \
+       test_omatcopy2_blis.x \
+       test_omatadd_blis.x
 
-openblas: \
+openblas: check-env \
       test_dotv_openblas.x \
+      test_aminv_openblas.x \
       test_axpyv_openblas.x \
+      test_axpbyv_openblas.x \
       test_gemv_openblas.x \
       test_ger_openblas.x \
       test_hemv_openblas.x \
@@ -201,13 +225,16 @@ openblas: \
       test_scalv_openblas.x \
       \
       test_gemm_openblas.x \
+      test_gemmt_openblas.x \
       test_hemm_openblas.x \
       test_herk_openblas.x \
       test_her2k_openblas.x \
       test_trmm_openblas.x \
-      test_trsm_openblas.x
+      test_trsm_openblas.x \
+      test_gemm_batch_openblas.x \
+	  test_gemm3m_openblas.x
 
-atlas: \
+atlas: check-env \
       test_dotv_atlas.x \
       test_axpyv_atlas.x \
       test_gemv_atlas.x \
@@ -228,8 +255,11 @@ atlas: \
       test_trmm_atlas.x \
       test_trsm_atlas.x
 
-mkl:  test_dotv_mkl.x \
+mkl:  check-env \
+      test_dotv_mkl.x \
+      test_aminv_mkl.x \
       test_axpyv_mkl.x \
+      test_axpbyv_mkl.x \
       test_gemv_mkl.x \
       test_ger_mkl.x \
       test_hemv_mkl.x \
@@ -242,13 +272,17 @@ mkl:  test_dotv_mkl.x \
       test_scalv_mkl.x \
       \
       test_gemm_mkl.x \
+      test_gemmt_mkl.x \
       test_hemm_mkl.x \
       test_herk_mkl.x \
       test_her2k_mkl.x \
       test_trmm_mkl.x \
-      test_trsm_mkl.x
+      test_trsm_mkl.x \
+      test_gemm_batch_mkl.x \
+	  test_gemm3m_mkl.x
 
-essl: test_dotv_essl.x \
+essl: check-env \
+      test_dotv_essl.x \
       test_axpyv_essl.x \
       test_gemv_essl.x \
       test_ger_essl.x \
@@ -268,7 +302,8 @@ essl: test_dotv_essl.x \
       test_trmm_essl.x \
       test_trsm_essl.x
 
-mac:  test_dotv_mac.x \
+mac:  check-env \
+      test_dotv_mac.x \
       test_axpyv_mac.x \
       test_gemv_mac.x \
       test_ger_mac.x \
@@ -311,7 +346,7 @@ test_%_mac.o: test_%.c
 	$(CC) $(CFLAGS) -DBLAS=\"mac\" -c $< -o $@
 
 test_%_blis.o: test_%.c
-	$(CC) $(CFLAGS) -DBLIS -c $< -o $@
+	$(CC) $(CFLAGS) -DBLAS=\"aocl\" -c $< -o $@
 
 
 # -- Executable file rules --
@@ -340,10 +375,24 @@ test_%_blis.x: test_%_blis.o $(LIBBLIS_LINK)
 	$(LINKER) $<                             $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 
 
+# -- Environment check rules --
+
+check-env: check-lib
+
+check-env-mk:
+ifeq ($(CONFIG_MK_PRESENT),no)
+	$(error Cannot proceed: config.mk not detected! Run configure first)
+endif
+
+check-lib: check-env-mk
+ifeq ($(wildcard $(LIBBLIS_LINK)),)
+	$(error Cannot proceed: BLIS library not yet built! Run make first)
+endif
+
+
 # -- Clean rules --
 
 clean: cleanx
 
 cleanx:
 	- $(RM_F) *.o *.x
-	

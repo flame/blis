@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -43,8 +44,17 @@
 
 /* Subroutine */ bla_real PASTEF77(s,cabs1)(bla_scomplex *z)
 {
-    return bli_fabs( bli_creal( *z ) ) +
-           bli_fabs( bli_cimag( *z ) );
+   if ( bli_creal(*z) == 0.0f && bli_cimag(*z) == 0.0f )
+   {
+      /*If input is zero, return zero.
+        As the else part returns -0.0 */
+      return 0.0f;
+   }
+   else
+   {
+      return bli_fabs( bli_creal( *z ) ) +
+           bli_fabs( bli_cimag( *z ) ); /* code */
+   }
 } /* scabs1_ */
 
 /* dcabs1.f -- translated by f2c (version 19991025).
@@ -54,8 +64,18 @@
 
 /* Subroutine */ bla_double PASTEF77(d,cabs1)(bla_dcomplex *z)
 {
-    return bli_fabs( bli_zreal( *z ) ) +
+   if ( bli_creal(*z) == 0.0 && bli_cimag(*z) == 0.0 )
+   {
+      /*If input is zero, return zero.
+        As the else part returns -0.0 */
+      return 0.0;
+   }
+   else
+   {
+      return bli_fabs( bli_zreal( *z ) ) +
            bli_fabs( bli_zimag( *z ) );
+   }
+
 } /* dcabs1_ */
 
 #endif

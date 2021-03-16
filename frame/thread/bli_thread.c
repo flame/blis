@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -70,7 +70,7 @@ void bli_thread_range_sub
        thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
-       bool_t     handle_edge_low,
+       bool       handle_edge_low,
        dim_t*     start,
        dim_t*     end
      )
@@ -301,7 +301,7 @@ dim_t bli_thread_range_width_l
        dim_t  bf,
        dim_t  bf_left,
        double area_per_thr,
-       bool_t handle_edge_low
+       bool   handle_edge_low
      )
 {
 	dim_t width;
@@ -510,7 +510,7 @@ siz_t bli_thread_range_weighted_sub
        dim_t               m,
        dim_t               n,
        dim_t               bf,
-       bool_t              handle_edge_low,
+       bool                handle_edge_low,
        dim_t*     restrict j_start_thr,
        dim_t*     restrict j_end_thr
      )
@@ -667,7 +667,7 @@ siz_t bli_thread_range_mdim
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
 	obj_t*   x;
-	bool_t   use_weighted;
+	bool     use_weighted;
 
 	// Use the operation family to choose the one of the two matrices
 	// being partitioned that potentially has structure, and also to
@@ -677,10 +677,11 @@ siz_t bli_thread_range_mdim
 	// function will mistakenly skip over unstored regions of the
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ) { x = a; use_weighted = FALSE; }
-	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ) { x = a; use_weighted = TRUE;  }
-	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
+	if      ( family == BLIS_GEMM  ) { x = a; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK  ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM  ) { x = a; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/  { x = a; use_weighted = FALSE; }
 
 	if ( use_weighted )
 	{
@@ -726,7 +727,7 @@ siz_t bli_thread_range_ndim
 
 	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
 	obj_t*   x;
-	bool_t   use_weighted;
+	bool     use_weighted;
 
 	// Use the operation family to choose the one of the two matrices
 	// being partitioned that potentially has structure, and also to
@@ -736,10 +737,11 @@ siz_t bli_thread_range_ndim
 	// function will mistakenly skip over unstored regions of the
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
-	if      ( family == BLIS_GEMM ) { x = b; use_weighted = FALSE; }
-	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
-	else if ( family == BLIS_TRMM ) { x = b; use_weighted = TRUE;  }
-	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
+	if      ( family == BLIS_GEMM  ) { x = b; use_weighted = FALSE; }
+	else if ( family == BLIS_HERK  ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_TRMM  ) { x = b; use_weighted = TRUE;  }
+	else    /*family == BLIS_TRSM*/  { x = b; use_weighted = FALSE; }
 
 	if ( use_weighted )
 	{
@@ -1134,7 +1136,7 @@ void bli_thread_partition_2x2
     // Loop over how many prime factors to assign to the first factor in the
     // pair, for each prime factor. The total number of iterations is
     // \Prod_{i=0}^{nfact-1} mult[i].
-    bool_t done = FALSE;
+    bool   done = FALSE;
     while ( !done )
     {
         dim_t x = 1;
@@ -1295,9 +1297,9 @@ void bli_thread_init_rntm_from_env
 	// function is only called from bli_thread_init(), which is only called
 	// by bli_init_once().
 
-	bool_t auto_factor = FALSE;
-	dim_t  nt;
-	dim_t  jc, pc, ic, jr, ir;
+	bool  auto_factor = FALSE;
+	dim_t nt;
+	dim_t jc, pc, ic, jr, ir;
 
 #ifdef BLIS_ENABLE_MULTITHREADING
 

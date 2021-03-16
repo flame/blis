@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -52,62 +53,66 @@ void PASTEF77(ch,blasname) \
              ftype*    y, const f77_int* incy  \
      ) \
 { \
-	uplo_t  blis_uploa; \
-	dim_t   m0; \
-	ftype*  x0; \
-	ftype*  y0; \
-	inc_t   incx0; \
-	inc_t   incy0; \
-	inc_t   rs_a, cs_a; \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
+    AOCL_DTL_LOG_HEMV_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploa), *m, \
+                                (ftype*)alpha, *lda, *incx, (ftype*)beta, *incy) \
+    uplo_t  blis_uploa; \
+    dim_t   m0; \
+    ftype*  x0; \
+    ftype*  y0; \
+    inc_t   incx0; \
+    inc_t   incy0; \
+    inc_t   rs_a, cs_a; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  uploa, \
-	  m, \
-	  lda, \
-	  incx, \
-	  incy  \
-	); \
+    /* Perform BLAS parameter checking. */ \
+    PASTEBLACHK(blasname) \
+    ( \
+      MKSTR(ch), \
+      MKSTR(blasname), \
+      uploa, \
+      m, \
+      lda, \
+      incx, \
+      incy  \
+    ); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+    bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
 \
-	/* Convert/typecast negative values of m to zero. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
+    /* Convert/typecast negative values of m to zero. */ \
+    bli_convert_blas_dim1( *m, m0 ); \
 \
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
-	bli_convert_blas_incv( m0, (ftype*)y, *incy, y0, incy0 ); \
+    /* If the input increments are negative, adjust the pointers so we can
+       use positive increments instead. */ \
+    bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
+    bli_convert_blas_incv( m0, (ftype*)y, *incy, y0, incy0 ); \
 \
-	/* Set the row and column strides of A. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
+    /* Set the row and column strides of A. */ \
+    rs_a = 1; \
+    cs_a = *lda; \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  blis_uploa, \
-	  BLIS_NO_CONJUGATE, \
-	  BLIS_NO_CONJUGATE, \
-	  m0, \
-	  (ftype*)alpha, \
-	  (ftype*)a,  rs_a, cs_a, \
-	  x0, incx0, \
-	  (ftype*)beta, \
-	  y0, incy0, \
-	  NULL, \
-	  NULL  \
-	); \
+    /* Call BLIS interface. */ \
+    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      blis_uploa, \
+      BLIS_NO_CONJUGATE, \
+      BLIS_NO_CONJUGATE, \
+      m0, \
+      (ftype*)alpha, \
+      (ftype*)a,  rs_a, cs_a, \
+      x0, incx0, \
+      (ftype*)beta, \
+      y0, incy0, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */ \
+    bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS

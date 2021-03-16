@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -62,7 +63,7 @@ void PASTEMAC(opname,_check) \
      );
 
 GENTPROT( amaxv )
-
+GENTPROT( aminv )
 
 #undef  GENTPROT
 #define GENTPROT( opname ) \
@@ -163,14 +164,14 @@ GENTPROT( xpbyv )
 void bli_l1v_xy_check
      (
        obj_t*  x,
-       obj_t*  y 
+       obj_t*  y
      );
 
 void bli_l1v_axy_check
      (
        obj_t*  alpha,
        obj_t*  x,
-       obj_t*  y 
+       obj_t*  y
      );
 
 void bli_l1v_xby_check
@@ -194,18 +195,18 @@ void bli_l1v_dot_check
        obj_t*  x,
        obj_t*  y,
        obj_t*  beta,
-       obj_t*  rho 
+       obj_t*  rho
      );
 
 void bli_l1v_x_check
      (
-       obj_t*  x 
+       obj_t*  x
      );
 
 void bli_l1v_ax_check
      (
        obj_t*  alpha,
-       obj_t*  x 
+       obj_t*  x
      );
 
 void bli_l1v_xi_check

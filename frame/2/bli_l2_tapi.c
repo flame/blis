@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -57,6 +58,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2); \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -67,7 +70,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	bli_set_dims_with_trans( transa, m, n, &m_y, &n_x ); \
 \
 	/* If y has zero elements, return early. */ \
-	if ( bli_zero_dim1( m_y ) ) return; \
+	if ( bli_zero_dim1( m_y ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -85,6 +92,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  cntx, \
 		  NULL  \
 		); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 		return; \
 	} \
 \
@@ -118,6 +126,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  y, incy, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
@@ -139,12 +148,18 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x or y has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -170,6 +185,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  a, rs_a, cs_a, \
 	  cntx \
 	); \
+\
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+\
 }
 
 INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
@@ -192,6 +210,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -212,6 +232,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  cntx, \
 		  NULL  \
 		); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 		return; \
 	} \
 \
@@ -246,6 +267,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  y, incy, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC4( hemv, hemv, BLIS_CONJUGATE,    hemv_unf_var1, hemv_unf_var3 )
@@ -266,6 +288,8 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
@@ -273,7 +297,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	ctype alpha_local; \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(chr,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || PASTEMAC(chr,eq0)( *alpha ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Make a local copy of alpha, cast into the complex domain. This
 	   allows us to use the same underlying her variants to implement
@@ -311,6 +339,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  a, rs_a, cs_a, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -330,12 +359,18 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -368,6 +403,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  a, rs_a, cs_a, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 )
@@ -389,12 +425,18 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, or if alpha is zero, return early. */ \
-	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
+	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -429,6 +471,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  a, rs_a, cs_a, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC4( her2, her2, BLIS_CONJUGATE,    her2_unf_var1, her2_unf_var4 )
@@ -450,12 +493,18 @@ void PASTEMAC2(ch,opname,EX_SUF) \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2) \
+\
 	bli_init_once(); \
 \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* If x has zero elements, return early. */ \
-	if ( bli_zero_dim1( m ) ) return; \
+	if ( bli_zero_dim1( m ) ) \
+	{ \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
+		return; \
+	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
@@ -472,6 +521,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 		  cntx, \
 		  NULL  \
 		); \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 		return; \
 	} \
 \
@@ -503,6 +553,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  x, incx, \
 	  cntx \
 	); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2) \
 }
 
 INSERT_GENTFUNC_BASIC3( trmv, trmv, trmv_unf_var1, trmv_unf_var2 )

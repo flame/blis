@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,15 +33,60 @@
 
 */
 
-//#ifndef BLIS_FAMILY_H
-//#define BLIS_FAMILY_H
+#ifndef BLIS_FAMILY_AMD64_H
+#define BLIS_FAMILY_AMD64_H
+
+//To enable framework optimizations for EPYC family processors.
+//With this macro defined, we can call kernels directly from
+//BLAS interfaces for levels 1 & 2.
+//This macro needs to be defined for all EPYC configurations.
+#define BLIS_CONFIG_EPYC
 
 
-// -- MEMORY ALLOCATION --------------------------------------------------------
+// For zen3 architecture we dynamically change block sizes
+// based on number of threads. These values were determined
+// by running benchmarks on zen3 platform.
 
-#define BLIS_SIMD_ALIGN_SIZE 16
+#ifdef BLIS_ENABLE_MULTITHREADING
 
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm,  c) {           \
+                                                                        \
+    if (bli_is_double(bli_obj_dt(&c))) {                                \
+        const dim_t nt = rntm->num_threads;                             \
+        const dim_t m = bli_obj_length(&c);                             \
+        const dim_t n = bli_obj_width(&c);                              \
+                                                                        \
+        blksz_t blkszs[BLIS_NUM_BLKSZS];                                \
+        if (nt >= 32 && (m > 7800 || n > 7800)) {                       \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   512,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        } else {                                                        \
+            bli_blksz_init_easy(&blkszs[BLIS_MC],   144,    72,   144,    72 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_KC],   256,   256,   256,   256 ); \
+            bli_blksz_init_easy(&blkszs[BLIS_NC],  4080,  4080,  4080,  4080 ); \
+                                                                        \
+            bli_cntx_set_blkszs(                                        \
+                BLIS_NAT, 3,                                            \
+                BLIS_NC, &blkszs[BLIS_NC], BLIS_NR,                     \
+                BLIS_KC, &blkszs[BLIS_KC], BLIS_KR,                     \
+                BLIS_MC, &blkszs[BLIS_MC], BLIS_MR,                     \
+                cntx);                                                  \
+        }                                                               \
+    }                                                                   \
+}
+#else
+#define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
+#endif
 
+// Place holder for bundle configuration.
 
-//#endif
+#endif
 

@@ -1,22 +1,22 @@
 /*===================================================================
  * File Name :  aocldtlcf.h
- * 
+ *
  * Description : This is configuration file for debug and trace
  *               libaray, all debug features (except auto trace)
  *               can be enabled/disabled in this file.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
- * 
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+ *
  *==================================================================*/
 
 #ifndef _AOCLDTLCF_H_
 #define _AOCLDTLCF_H_
 
-/* Macro for tracing the log If the user wants to enable tracing he has to 
+/* Macro for tracing the log If the user wants to enable tracing he has to
    enable this macro by making it to 1 else 0 */
 #define AOCL_DTL_TRACE_ENABLE       0
 
-/* Macro for dumping the log If the user wants to enable dumping he has to 
+/* Macro for dumping the log If the user wants to enable dumping he has to
    enable this macro by making it to 1 else 0 */
 #define AOCL_DTL_DUMP_ENABLE        0
 
@@ -30,8 +30,9 @@
 
 /* user has to explicitly use the below macros to identify
    ciriticality of the logged message */
-#define AOCL_DTL_LEVEL_ALL          (14)
-#define AOCL_DTL_LEVEL_TRACE_8      (13)    
+#define AOCL_DTL_LEVEL_ALL          (15)
+#define AOCL_DTL_LEVEL_TRACE_9      (14)
+#define AOCL_DTL_LEVEL_TRACE_8      (13)
 #define AOCL_DTL_LEVEL_TRACE_7      (12)     /* Kernels */
 #define AOCL_DTL_LEVEL_TRACE_6      (11)
 #define AOCL_DTL_LEVEL_TRACE_5      (10)

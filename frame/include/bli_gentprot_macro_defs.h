@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -86,6 +87,17 @@ GENTPROTDOT( scomplex, c, u, blasname ) \
 GENTPROTDOT( dcomplex, z, c, blasname ) \
 GENTPROTDOT( dcomplex, z, u, blasname )
 
+#ifdef AOCL_F2C
+
+#define INSERT_GENTPROTDOT_BLAS_SDC( blasname ) \
+\
+GENTPROTDOT( float,    s,  , blasname ) \
+GENTPROTDOT( double,   d,  , blasname ) \
+GENTPROTDOT( scomplex, c, c, blasname ) \
+GENTPROTDOT( scomplex, c, u, blasname ) \
+GENTPROTDOT( dcomplex, z, u, blasname )
+
+#endif
 
 // -- Basic one-operand macro with real projection --
 
@@ -121,8 +133,17 @@ GENTPROTSCAL( dcomplex, dcomplex,  , z, blasname ) \
 GENTPROTSCAL( float,    scomplex, s, c, blasname ) \
 GENTPROTSCAL( double,   dcomplex, d, z, blasname )
 
-
-
+// -- GEMMT specific function --------------------------------------------------
+#define INSERT_GENTPROT_GEMMT(opname, funcname) \
+\
+GENTPROT( float,     s, opname, l, funcname ) \
+GENTPROT( double,    d, opname, l, funcname ) \
+GENTPROT( float,     s, opname, u, funcname ) \
+GENTPROT( double,    d, opname, u, funcname ) \
+GENTPROT( scomplex,  c, opname, l, funcname ) \
+GENTPROT( dcomplex,  z, opname, l, funcname ) \
+GENTPROT( scomplex,  c, opname, u, funcname ) \
+GENTPROT( dcomplex,  z, opname, u, funcname ) 
 
 // -- Macros for functions with one operand ------------------------------------
 
@@ -137,6 +158,8 @@ GENTPROT( float,    s, tfuncname ) \
 GENTPROT( double,   d, tfuncname ) \
 GENTPROT( scomplex, c, tfuncname ) \
 GENTPROT( dcomplex, z, tfuncname )
+
+
 
 // -- (one auxiliary argument) --
 

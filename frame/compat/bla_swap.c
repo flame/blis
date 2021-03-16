@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,6 +49,7 @@ void PASTEF77(ch,blasname) \
        ftype*   y, const f77_int* incy  \
      ) \
 { \
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
     dim_t  n0; \
     ftype* x0; \
     ftype* y0; \
@@ -76,12 +77,13 @@ void PASTEF77(ch,blasname) \
       NULL  \
     ); \
 \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
     /* Finalize BLIS. */ \
     bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
 
 void sswap_
      (
@@ -90,6 +92,8 @@ void sswap_
        float*   y, const f77_int* incy
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SWAP_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx, *incy);
     dim_t  n0;
     float* x0;
     float* y0;
@@ -154,6 +158,7 @@ void sswap_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 void dswap_
@@ -163,6 +168,8 @@ void dswap_
        double*   y, const f77_int* incy
      )
 {
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+    AOCL_DTL_LOG_SWAP_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *n, *incx, *incy);
     dim_t  n0;
     double* x0;
     double* y0;
@@ -227,6 +234,7 @@ void dswap_
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 }
 
 INSERT_GENTFUNC_BLAS_CZ( swap, swapv )

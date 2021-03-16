@@ -7,8 +7,8 @@
  * It calls the fortran wrapper before calling ddot.
  *
  * Written by Keita Teranishi.  2/11/1998
- * 
- * Copyright (C) 2020, Advanced Micro Devices, Inc.
+ *
+ * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
  *
  */
 #include "cblas.h"
@@ -16,6 +16,7 @@
 double cblas_ddot( f77_int N, const double *X,
                       f77_int incX, const double *Y, f77_int incY)
 {
+   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
    double dot;
 #ifdef F77_INT
    F77_INT F77_N=N, F77_incX=incX, F77_incY=incY;
@@ -24,7 +25,7 @@ double cblas_ddot( f77_int N, const double *X,
    #define F77_incX incX
    #define F77_incY incY
 #endif
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
         dim_t  n0;
         double* x0;
         double* y0;
@@ -77,7 +78,6 @@ double cblas_ddot( f77_int N, const double *X,
         y0    = ((double*)Y);
         incy0 = ( inc_t )(F77_incY);
     }
-
         /* Call BLIS kernel. */
         bli_ddotv_zen_int10
         (
@@ -92,11 +92,12 @@ double cblas_ddot( f77_int N, const double *X,
 
         /* Finalize BLIS. */
 //      bli_finalize_auto();
-
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
         return dot;
 
 #else
    F77_ddot_sub( &F77_N, X, &F77_incX, Y, &F77_incY, &dot);
+   AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
    return dot;
 #endif
 }   

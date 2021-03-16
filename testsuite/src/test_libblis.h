@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -198,7 +198,7 @@ typedef struct
 	int           dim_aux[ MAX_NUM_DIMENSIONS ];
 	unsigned int  n_params;
 	char          params[ MAX_NUM_PARAMETERS ];
-	bool_t        test_done;
+	bool          test_done;
 
 } test_op_t;
 
@@ -273,6 +273,7 @@ typedef struct test_ops_s
 
 	// level-3
 	test_op_t gemm;
+	test_op_t gemmt;
 	test_op_t hemm;
 	test_op_t herk;
 	test_op_t her2k;
@@ -422,8 +423,8 @@ void libblis_test_vobj_create( test_params_t* params, num_t dt, char storage, di
 
 // --- Randomize/initialize object ---
 
-void libblis_test_vobj_randomize( test_params_t* params, bool_t normalize, obj_t* x );
-void libblis_test_mobj_randomize( test_params_t* params, bool_t normalize, obj_t* a );
+void libblis_test_vobj_randomize( test_params_t* params, bool normalize, obj_t* x );
+void libblis_test_mobj_randomize( test_params_t* params, bool normalize, obj_t* a );
 void libblis_test_mobj_load_diag( test_params_t* params, obj_t* a );
 void libblis_test_ceil_pow2( obj_t* alpha );
 
@@ -460,22 +461,22 @@ void libblis_test_parse_command_line( int argc, char** argv );
 void libblis_test_check_empty_problem( obj_t* c, double* perf, double* resid );
 int  libblis_test_op_is_disabled( test_op_t* op );
 
-int libblis_test_op_is_done( test_op_t* op );
-int libblis_test_util_is_disabled( test_op_t* op );
-int libblis_test_l1v_is_disabled( test_op_t* op );
-int libblis_test_l1m_is_disabled( test_op_t* op );
-int libblis_test_l1f_is_disabled( test_op_t* op );
-int libblis_test_l2_is_disabled( test_op_t* op );
-int libblis_test_l3ukr_is_disabled( test_op_t* op );
-int libblis_test_l3_is_disabled( test_op_t* op );
-int libblis_test_dt_str_has_sp_char( test_params_t* params );
-int libblis_test_dt_str_has_sp_char_str( int n, char* str );
-int libblis_test_dt_str_has_dp_char( test_params_t* params );
-int libblis_test_dt_str_has_dp_char_str( int n, char* str );
-int libblis_test_dt_str_has_rd_char( test_params_t* params );
-int libblis_test_dt_str_has_rd_char_str( int n, char* str );
-int libblis_test_dt_str_has_cd_char( test_params_t* params );
-int libblis_test_dt_str_has_cd_char_str( int n, char* str );
+bool libblis_test_op_is_done( test_op_t* op );
+int  libblis_test_util_is_disabled( test_op_t* op );
+int  libblis_test_l1v_is_disabled( test_op_t* op );
+int  libblis_test_l1m_is_disabled( test_op_t* op );
+int  libblis_test_l1f_is_disabled( test_op_t* op );
+int  libblis_test_l2_is_disabled( test_op_t* op );
+int  libblis_test_l3ukr_is_disabled( test_op_t* op );
+int  libblis_test_l3_is_disabled( test_op_t* op );
+int  libblis_test_dt_str_has_sp_char( test_params_t* params );
+int  libblis_test_dt_str_has_sp_char_str( int n, char* str );
+int  libblis_test_dt_str_has_dp_char( test_params_t* params );
+int  libblis_test_dt_str_has_dp_char_str( int n, char* str );
+int  libblis_test_dt_str_has_rd_char( test_params_t* params );
+int  libblis_test_dt_str_has_rd_char_str( int n, char* str );
+int  libblis_test_dt_str_has_cd_char( test_params_t* params );
+int  libblis_test_dt_str_has_cd_char_str( int n, char* str );
 
 unsigned int libblis_test_count_combos
      (
@@ -546,6 +547,7 @@ char libblis_test_proj_dtchar_to_precchar( char dt_char );
 
 // Level-3
 #include "test_gemm.h"
+#include "test_gemmt.h"
 #include "test_hemm.h"
 #include "test_herk.h"
 #include "test_her2k.h"
