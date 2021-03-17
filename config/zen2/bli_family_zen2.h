@@ -33,19 +33,16 @@
 
 */
 
-#ifndef BLI_FAMILY_ZEN2_
-#define BLI_FAMILY_ZEN2_
-
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
-
+// Vanilla BLIS disables AMD's small matrix handling by default.
+#if 0
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
-
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
@@ -85,6 +82,5 @@
 // When running HPL with pure MPI without DGEMM threading (Single-threaded
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0
-
 #endif
 

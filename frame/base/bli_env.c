@@ -70,6 +70,10 @@ gint_t bli_env_get_var( const char* env, gint_t fallback )
 }
 
 #if 0
+#ifdef _MSC_VER
+#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
+#endif
+
 void bli_env_set_var( const char* env, dim_t value )
 {
 	dim_t       r_val;

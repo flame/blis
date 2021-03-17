@@ -78,13 +78,6 @@ err_t bli_gemmsup_int
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
 
-	// Don't use the small/unpacked implementation if one of the matrices
-	// uses general stride.
-	if ( stor_id == BLIS_XXX )
-	{
-		return BLIS_FAILURE;
-	}
-
 	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
@@ -258,13 +251,6 @@ err_t bli_gemmtsup_int
      )
 {
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-
-	// Don't use the small/unpacked implementation if one of the matrices
-	// uses general stride.
-	if ( stor_id == BLIS_XXX )
-	{
-		return BLIS_FAILURE;
-	}
 
 	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
 	                                     stor_id == BLIS_RRC ||

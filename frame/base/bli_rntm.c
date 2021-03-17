@@ -220,15 +220,28 @@ void bli_rntm_set_ways_from_rntm
 	}
 	else if ( ways_set == FALSE && nt_set == TRUE )
 	{
-		// If the ways were not set but the number of threas was set, then
+		// If the ways were not set but the number of thread was set, then
 		// we attempt to automatically generate a thread factorization that
-		// will work given the problem size. Thus, here we only set the
-		// ways and leave the number of threads unchanged.
+		// will work given the problem size.
+
+#ifdef BLIS_DISABLE_AUTO_PRIME_NUM_THREADS
+		// If use of prime numbers is disallowed for automatic thread
+		// factorizations, we first check if the number of threads requested
+		// is prime. If it is prime, and it exceeds a minimum threshold, then
+		// we reduce the number of threads by one so that the number is not
+		// prime. This will allow for automatic thread factorizations to span
+		// two dimensions (loops), which tends to be more efficient.
+		if ( bli_is_prime( nt ) && BLIS_NT_MAX_PRIME < nt ) nt -= 1;
+#endif
 
 		pc = 1;
 
+		//printf( "m n = %d %d  BLIS_THREAD_RATIO_M _N = %d %d\n", (int)m, (int)n, (int)BLIS_THREAD_RATIO_M, (int)BLIS_THREAD_RATIO_N );
+
 		bli_thread_partition_2x2( nt, m*BLIS_THREAD_RATIO_M,
 		                              n*BLIS_THREAD_RATIO_N, &ic, &jc );
+
+		//printf( "jc ic = %d %d\n", (int)jc, (int)ic );
 
 		for ( ir = BLIS_THREAD_MAX_IR ; ir > 1 ; ir-- )
 		{
@@ -332,10 +345,19 @@ void bli_rntm_set_ways_from_rntm_sup
 	}
 	else if ( ways_set == FALSE && nt_set == TRUE )
 	{
-		// If the ways were not set but the number of threas was set, then
+		// If the ways were not set but the number of thread was set, then
 		// we attempt to automatically generate a thread factorization that
-		// will work given the problem size. Thus, here we only set the
-		// ways and leave the number of threads unchanged.
+		// will work given the problem size.
+
+#ifdef BLIS_DISABLE_AUTO_PRIME_NUM_THREADS
+		// If use of prime numbers is disallowed for automatic thread
+		// factorizations, we first check if the number of threads requested
+		// is prime. If it is prime, and it exceeds a minimum threshold, then
+		// we reduce the number of threads by one so that the number is not
+		// prime. This will allow for automatic thread factorizations to span
+		// two dimensions (loops), which tends to be more efficient.
+		if ( bli_is_prime( nt ) && BLIS_NT_MAX_PRIME < nt ) nt -= 1;
+#endif
 
 		pc = 1;
 

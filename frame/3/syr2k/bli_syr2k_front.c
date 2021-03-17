@@ -105,23 +105,13 @@ void bli_syr2k_front
 	// bli_l3_cntl_create_if()). This allows us to access the schemas from
 	// the control tree, which hopefully reduces some confusion, particularly
 	// in bli_packm_init().
-	if ( bli_cntx_method( cntx ) == BLIS_NAT )
-	{
-		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
-		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &bt_local );
-		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &b_local );
-		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &at_local );
-	}
-	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	{
-		pack_t schema_a = bli_cntx_schema_a_block( cntx );
-		pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+	pack_t schema_a = bli_cntx_schema_a_block( cntx );
+	pack_t schema_b = bli_cntx_schema_b_panel( cntx );
 
-		bli_obj_set_pack_schema( schema_a, &a_local );
-		bli_obj_set_pack_schema( schema_b, &bt_local );
-		bli_obj_set_pack_schema( schema_a, &b_local );
-		bli_obj_set_pack_schema( schema_b, &at_local );
-	}
+	bli_obj_set_pack_schema( schema_a, &a_local );
+	bli_obj_set_pack_schema( schema_b, &bt_local );
+	bli_obj_set_pack_schema( schema_a, &b_local );
+	bli_obj_set_pack_schema( schema_b, &at_local );
 
 	// Invoke herk twice, using beta only the first time.
 

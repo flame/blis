@@ -57,7 +57,6 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      );
 
 INSERT_GENTPROT_BASIC0( gemm )
-INSERT_GENTPROT_BASIC0( gemmt )
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
@@ -160,6 +159,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      );
 
 INSERT_GENTPROT_BASIC0( syr2k )
+INSERT_GENTPROT_BASIC0( gemmt )
 
 
 #undef  GENTPROT

@@ -49,20 +49,24 @@ static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 
 void bli_ind_init( void )
 {
-	// Enable the default induced method (1m) if one or both complex domain
-	// gemm micro-kernels are unoptimized in the native context.
-
 	// NOTE: Instead of calling bli_gks_query_cntx(), we call
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
 	cntx_t* cntx     = bli_gks_query_cntx_noinit();
 
-	bool    c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
-	                   ( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
-	bool    z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref
-	                   ( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
+	// For each precision, enable the default induced method (1m) if both of
+	// the following conditions are met:
+	// - the complex domain kernel is the (unoptimized) reference kernel
+	// - the real domain kernel is NOT the (unoptimized) reference kernel
+	// The second condition means that BLIS will not bother to use an induced
+	// method if both the real and complex domain kernels are reference.
 
-	if ( c_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
-	if ( z_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
+	bool s_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_FLOAT,    BLIS_GEMM_UKR, cntx );
+	bool d_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DOUBLE,   BLIS_GEMM_UKR, cntx );
+	bool c_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_SCOMPLEX, BLIS_GEMM_UKR, cntx );
+	bool z_is_ref = bli_gks_cntx_l3_nat_ukr_is_ref( BLIS_DCOMPLEX, BLIS_GEMM_UKR, cntx );
+
+	if ( c_is_ref && !s_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_SCOMPLEX );
+	if ( z_is_ref && !d_is_ref ) bli_ind_enable_dt( BLIS_1M, BLIS_DCOMPLEX );
 }
 
 void bli_ind_finalize( void )

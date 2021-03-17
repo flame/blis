@@ -110,8 +110,11 @@ Regardless of which method is employed, and which specific way within each metho
 **Note**: Please be aware of what happens if you try to specify both the automatic and manual ways, as it could otherwise confuse new users. Here are the important points:
  * Regardless of which broad method is used, **if multithreading is specified via both the automatic and manual ways, the values set via the manual way will always take precedence.**
  * Specifying parallelism for even *one* loop counts as specifying the manual way (in which case the ways of parallelism for the remaining loops will be assumed to be 1). And in the case of the environment variable method, setting the ways of parallelism for a loop to 1 counts as specifying parallelism! If you want to switch from using the manual way to automatic way, you must not only set (`export`) the `BLIS_NUM_THREADS` variable, but you must also `unset` all of the `BLIS_*_NT` variables.
- * If you have specified multithreading via *both* the automatic and manual ways, BLIS will **not** complain if the values are inconsistent with one another. (For example, you may request 8 total threads be used while also specifying 4 ways of parallelism within each of two matrix multiplication loops, for a total of 16 ways.) Furthermore, you will be able to query these inconsistent values via the runtime API both before and after multithreading executes.
+ * If you have specified multithreading via *both* the automatic and manual ways, BLIS will **not** complain if the values are inconsistent with one another. (For example, you may request 12 total threads be used while also specifying 2 and 4 ways of parallelism within the JC and IC loops, respectively, for a total of 8 ways.) Furthermore, you will be able to query these inconsistent values via the runtime API both before and after multithreading executes.
  * If multithreading is disabled, you **may still** specify multithreading values via either the manual or automatic ways. However, BLIS will silently ignore **all** of these values. A BLIS library that is built with multithreading disabled at configure-time will always run sequentially (from the perspective of a single application thread).
+
+Furthermore:
+* For small numbers of threads, the number requested will be honored faithfully. However, if you request a larger number of threads that happens to also be prime, BLIS will reduce the number by one in order to allow more more efficient thread factorizations. This behavior can be overridden by configuring BLIS with the `BLIS_ENABLE_AUTO_PRIME_NUM_THREADS` macro defined in the `bli_family_*.h` file of the relevant subconfiguration. Similarly, the threshold beyond which BLIS will reduce primes by one can be set via `BLIS_NT_MAX_PRIME`. (This latter value is ignored if the former macro is defined.)
 
 ## Globally via environment variables
 
@@ -119,7 +122,7 @@ The most common method of specifying multithreading in BLIS is globally via envi
 
 Regardless of whether you end up using the automatic or manual way of expressing a request for multithreading, note that the environment variables are read (via `getenv()`) by BLIS **only once**, when the library is initialized. Subsequent to library initialization, the global settings for parallelization may only be changed via the [global runtime API](Multithreading.md#globally-at-runtime). If this constraint is not a problem, then environment variables may work fine for you. Otherwise, please consider [local settings](Multithreading.md#locally-at-runtime). (Local settings may used at any time, regardless of whether global settings were explicitly specified, and local settings always override global settings.)
 
-**Note**: Regardless of which way ([automatic](Multithreading.md#environment-variables-the-automatic-way) or [manual](Multithreading.md#environment-variables-the-manual-way)) environment variables are used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs that are unique to BLIS.
+**Note**: Regardless of which way ([automatic](Multithreading.md#environment-variables-the-automatic-way) or [manual](Multithreading.md#environment-variables-the-manual-way)) environment variables are used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs that are unique to BLIS.
 
 ### Environment variables: the automatic way
 
@@ -166,7 +169,7 @@ Next, which combinations of loops to parallelize depends on which caches are sha
 
 If you still wish to set the parallelization scheme globally, but you want to do so at runtime, BLIS provides a thread-safe API for specifying multithreading. Think of these functions as a way to modify the same internal data structure into which the environment variables are read. (Recall that the environment variables are only read once, when BLIS is initialized).
 
-**Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs that are unique to BLIS.
+**Note**: Regardless of which way ([automatic](Multithreading.md#globally-at-runtime-the-automatic-way) or [manual](Multithreading.md#globally-at-runtime-the-manual-way)) the global runtime API is used to specify multithreading, that specification will affect operation of BLIS through **both** the BLAS compatibility layer as well as the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs that are unique to BLIS.
 
 ### Globally at runtime: the automatic way
 
@@ -207,7 +210,7 @@ In addition to the global methods based on environment variables and runtime fun
 
 As with environment variables and the global runtime API, there are two ways to specify parallelism: the automatic way and the manual way. Both ways involve allocating a BLIS-specific object, initializing the object and encoding the desired parallelization, and then passing a pointer to the object into one of the expert interfaces of either the [typed](docs/BLISTypedAPI.md) or [object](docs/BLISObjectAPI) APIs. We provide examples of utilizing this threading object below.
 
-**Note**: Neither way ([automatic](Multithreading.md#locally-at-runtime-the-automatic-way) nor [manual](Multithreading.md#locally-at-runtime-the-manual-way)) of specifying multithreading via the local runtime API can be used via the BLAS interfaces. The local runtime API may *only* be used via the native [typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md) APIs, which are unique to BLIS. (Furthermore, the expert interfaces of each API must be used. This is demonstrated later on in this section.)
+**Note**: Neither way ([automatic](Multithreading.md#locally-at-runtime-the-automatic-way) nor [manual](Multithreading.md#locally-at-runtime-the-manual-way)) of specifying multithreading via the local runtime API can be used via the BLAS interfaces. The local runtime API may *only* be used via the native ([typed](docs/BLISTypedAPI.md) and [object](docs/BLISObjectAPI.md)) APIs, which are unique to BLIS. (Furthermore, the expert interfaces of each API must be used. This is demonstrated later on in this section.)
 
 ### Initializing a rntm_t
 
