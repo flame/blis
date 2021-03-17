@@ -150,5 +150,5 @@ void GEMM_PASTEMAC(ch) \
 GENERIC_GEMM( sb, bfloat16, float,   (pb/2 + pb%2), 2,  bli_sbgemm_power10_mma_8x16);
 GENERIC_GEMM(i16,  int16_t,   int,   (pb/2 + pb%2), 2, bli_i16gemm_power10_mma_8x16);
 GENERIC_GEMM( sh,  float16, float,   (pb/2 + pb%2), 2,  bli_shgemm_power10_mma_8x16); 
-GENERIC_GEMM( i8,   int8_t,   int, (pb/4 + pb%4>0), 4,  bli_i8gemm_power10_mma_8x16);
-GENERIC_GEMM( i4,  nibbles,   int, (pb/8 + pb%8>0), 8,  bli_i4gemm_power10_mma_8x16);
+GENERIC_GEMM( i8,   int8_t,   int, (pb/4 + (pb%4>0)), 4,  bli_i8gemm_power10_mma_8x16);
+GENERIC_GEMM( i4,  nibbles,   int, (pb/8 + (pb%8>0)), 8,  bli_i4gemm_power10_mma_8x16);
