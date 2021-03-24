@@ -6,8 +6,7 @@ function r_val = plot_panel_4x5 ...
        thr_str, ...
        dirpath, ...
        arch_str, ...
-       vend_str, ...
-       with_eigen ...
+       vend_str  ...
      )
 
 impl = 'octave';
@@ -25,8 +24,12 @@ if strcmp( subp, 'default' )
 else
 	position  = [100 100 1864 1540];
 	papersize = [15.6 19.4];
-	leg_pos_st = [1.15 8.70 2.1 1.2 ]; % (dgemm)
-	leg_pos_mt = [12.20 13.60 2.1 1.2 ]; % (strmm)
+	%leg_pos_st = [1.15 8.70 2.1 1.2 ]; % (dgemm)
+	leg_pos_st = [1.60 8.80 2.1 1.2 ]; % (dgemm)
+	%leg_pos_mt = [12.20 13.60 2.1 1.2 ]; % (strmm)
+	%leg_pos_mt = [5.30 12.60 2.1 1.2 ]; % (ssymm)
+	%leg_pos_mt = [8.50 13.62 2.1 1.2 ]; % (ssyrk)
+	leg_pos_mt = [5.30 5.10 2.1 1.2 ]; % (chemm)
 	sp_margins = [ 0.068 0.051 ];
 end
 
@@ -46,12 +49,21 @@ else % impl == 'matlab'
 end
 set(gcf,'PaperOrientation','landscape');
 
+% Define the implementation strings. These appear in both the filenames of the
+% files that contain the performance results as well as the variable names
+% within those files.
+blis_str = 'asm_blis';
+open_str = 'openblas';
+vend_str = 'vendor';
+eige_str = 'eigen';
+
 % Create filename "templates" for the files that contain the performance
 % results.
-filetemp_blis = '%s/output_%s_%s_asm_blis.m';
-filetemp_open = '%s/output_%s_%s_openblas.m';
-filetemp_eige = '%s/output_%s_%s_eigen.m';
-filetemp_vend = '%s/output_%s_%s_vendor.m';
+filetemp      = '%s/output_%s_%s_%s.m'
+filetemp_blis = sprintf( filetemp, '%s', '%s', '%s', blis_str );
+filetemp_open = sprintf( filetemp, '%s', '%s', '%s', open_str );
+filetemp_vend = sprintf( filetemp, '%s', '%s', '%s', vend_str );
+filetemp_eige = sprintf( filetemp, '%s', '%s', '%s', eige_str );
 
 % Create a variable name "template" for the variables contained in the
 % files outlined above.
@@ -79,45 +91,11 @@ for opi = 1:n_opnames
 
 	str = sprintf( 'Plotting %d: %s', opi, opname ); disp(str);
 
-	% Construct filenames for the data files from templates.
-	file_blis = sprintf( filetemp_blis, dirpath, thr_str, opname );
-	file_open = sprintf( filetemp_open, dirpath, thr_str, opname );
-	file_vend = sprintf( filetemp_vend, dirpath, thr_str, opname );
-
-	% Load the data files.
-	%str = sprintf( '  Loading %s', file_blis ); disp(str);
-	run( file_blis )
-	%str = sprintf( '  Loading %s', file_open ); disp(str);
-	run( file_open )
-	%str = sprintf( '  Loading %s', file_vend ); disp(str);
-	run( file_vend )
-
-	% Construct variable names for the variables in the data files.
-	var_blis = sprintf( vartemp, thr_str, opname, 'asm_blis' );
-	var_open = sprintf( vartemp, thr_str, opname, 'openblas' );
-	var_vend = sprintf( vartemp, thr_str, opname, 'vendor' );
-
-	% Use eval() to instantiate the variable names constructed above,
-	% copying each to a simplified name.
-	data_blis = eval( var_blis ); % e.g. data_st_sgemm_asm_blis( :, : );
-	data_open = eval( var_open ); % e.g. data_st_sgemm_openblas( :, : );
-	data_vend = eval( var_vend ); % e.g. data_st_sgemm_vendor( :, : );
-
-	% Only read Eigen data in select cases.
-	if with_eigen == 1
-		opname_u = opname; opname_u(1) = '_';
-		if nth == 1 || strcmp( opname_u, '_gemm' )
-			file_eige = sprintf( filetemp_eige, dirpath, thr_str, opname );
-			run( file_eige )
-			var_eige = sprintf( vartemp, thr_str, opname, 'eigen' );
-			data_eige = eval( var_eige ); % e.g. data_st_sgemm_eigen( :, : );
-		else
-			data_eige(1,1) = -1;
-		end
-	else
-		data_eige(1,1) = -1;
-	end
-
+	data_blis = read_data( filetemp_blis, dirpath, vartemp, thr_str, opname, blis_str );
+	data_open = read_data( filetemp_open, dirpath, vartemp, thr_str, opname, open_str );
+	data_vend = read_data( filetemp_vend, dirpath, vartemp, thr_str, opname, vend_str );
+	data_eige = read_data( filetemp_eige, dirpath, vartemp, thr_str, opname, eige_str );
+	
 	% Plot one result in an m x n grid of plots, via the subplot()
 	% function.
 	plot_l3_perf( opname, ...
@@ -127,7 +105,6 @@ for opi = 1:n_opnames
 	              data_vend, vend_str, ...
 	              nth, ...
 	              4, 5, ...
-	              with_eigen, ...
 	              cfreq, ...
 	              dflopspercycle, ...
 	              opi, ...
