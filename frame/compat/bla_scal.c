@@ -58,6 +58,11 @@ void PASTEF772(chx,cha,blasname) \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
+	if (*n == 0 || alpha == NULL) { \
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+		return ; \
+	} \
+\
 	/* Convert/typecast negative values of n to zero. */ \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
@@ -104,6 +109,11 @@ void sscal_
     inc_t  incx0;
     /* Initialize BLIS. */
     //bli_init_auto();
+
+	if (*n == 0 || alpha == NULL) {
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+		return;
+	}
 
     /* Convert/typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;
@@ -165,6 +175,11 @@ void dscal_
 
     /* Initialize BLIS  */
     //bli_init_auto();
+
+	if (*n == 0 || alpha == NULL) {
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+		return;
+	}
 
     /* Convert typecast negative values of n to zero. */
     if ( *n < 0 ) n0 = ( dim_t )0;

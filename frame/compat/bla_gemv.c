@@ -81,6 +81,11 @@ void PASTEF77(ch,blasname) \
       incy  \
     ); \
 \
+    if (*m == 0 || *n == 0) { \
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1); \
+	    return; \
+    } \
+\
     /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
     bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
 \
@@ -180,6 +185,11 @@ void dgemv_
      incy
      );
 
+  if (*m == 0 || *n == 0) {
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	  return;
+  }
+  
   /* Map BLAS chars to their corresponding BLIS enumerated type value. */
   if      ( *transa == 'n' || *transa == 'N' ) blis_transa = BLIS_NO_TRANSPOSE;
   else if ( *transa == 't' || *transa == 'T' ) blis_transa = BLIS_TRANSPOSE;
@@ -345,6 +355,11 @@ void sgemv_
      incy
      );
 
+  if (*m == 0 || *n == 0) {
+	  AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	  return;
+  }
+  
   /* Map BLAS chars to their corresponding BLIS enumerated type value. */
   if      ( *transa == 'n' || *transa == 'N' ) blis_transa = BLIS_NO_TRANSPOSE;
   else if ( *transa == 't' || *transa == 'T' ) blis_transa = BLIS_TRANSPOSE;
