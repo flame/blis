@@ -36,7 +36,8 @@
 
 #include "blis.h"
 
-static membrk_t global_membrk;
+// Statically initialize the mutex within the global membrk object.
+static membrk_t global_membrk = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
 // -----------------------------------------------------------------------------
 
@@ -62,7 +63,10 @@ void bli_membrk_init
 	bli_membrk_set_malloc_fp( malloc_fp, membrk );
 	bli_membrk_set_free_fp( free_fp, membrk );
 
-	bli_membrk_init_mutex( membrk );
+	// The mutex field of membrk is initialized statically above. This
+	// keeps bli_membrk_init() simpler and removes the possibility of
+	// something going wrong during mutex initialization.
+
 #ifdef BLIS_ENABLE_PBA_POOLS
 	bli_membrk_init_pools( cntx, membrk );
 #endif
@@ -75,13 +79,15 @@ void bli_membrk_finalize
 {
 	membrk_t* restrict membrk = bli_membrk_query();
 
-	bli_membrk_set_malloc_fp( NULL, membrk );
-	bli_membrk_set_free_fp( NULL, membrk );
-
 #ifdef BLIS_ENABLE_PBA_POOLS
 	bli_membrk_finalize_pools( membrk );
 #endif
-	bli_membrk_finalize_mutex( membrk );
+
+	// The mutex field of membrk is initialized statically above, and
+	// therefore never destroyed.
+
+	bli_membrk_set_malloc_fp( NULL, membrk );
+	bli_membrk_set_free_fp( NULL, membrk );
 }
 
 void bli_membrk_acquire_m

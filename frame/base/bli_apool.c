@@ -39,12 +39,17 @@ void bli_apool_init
        apool_t* restrict apool
      )
 {
+	// NOTE: The apool_t is only used in one place; it is the type used to
+	// define the sba. We've switched to static initialization of the mutex
+	// field to remove one more thing that could possibly go wrong during
+	// library initialization.
+
 	// Query the mutex from the apool_t.
-	bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
+	//bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
 
 	// Initialize the mutex.
 	//*mutex = BLIS_PTHREAD_MUTEX_INITIALIZER;
-	bli_pthread_mutex_init( mutex, NULL );
+	//bli_pthread_mutex_init( mutex, NULL );
 
 	// We choose to start with:
 	// - an empty pool
@@ -212,11 +217,14 @@ void bli_apool_finalize
        apool_t* restrict apool
      )
 {
+	// NOTE: Since the apool_t's mutex is now initialized statically, we no
+	// longer need to explicitly destroy it.
+
 	// Query the mutex from the apool_t.
-	bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
+	//bli_pthread_mutex_t* restrict mutex = bli_apool_mutex( apool );
 
 	// Destroy the mutex.
-	bli_pthread_mutex_destroy( mutex );
+	//bli_pthread_mutex_destroy( mutex );
 
 	// Query the underlying pool_t and mutex from the apool_t.
 	pool_t* restrict pool = bli_apool_pool( apool );

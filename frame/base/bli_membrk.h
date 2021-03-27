@@ -39,15 +39,15 @@
 
 // membrk init
 
-BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
-{
-	bli_pthread_mutex_init( &(membrk->mutex), NULL );
-}
+//BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
+//{
+//	bli_pthread_mutex_init( &(membrk->mutex), NULL );
+//}
 
-BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
-{
-	bli_pthread_mutex_destroy( &(membrk->mutex) );
-}
+//BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
+//{
+//	bli_pthread_mutex_destroy( &(membrk->mutex) );
+//}
 
 // membrk query
 
