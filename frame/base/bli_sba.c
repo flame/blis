@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-// The small block allocator: an apool_t of array_t of pool_t.
+// Statically initialize the mutex within the small block allocator.
+// Note that the sba is an apool_t of array_t of pool_t.
 static apool_t sba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
 apool_t* bli_sba_query( void )

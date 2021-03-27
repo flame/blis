@@ -101,7 +101,7 @@ void bli_pack_set_pack_b( bool pack_b )
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
-	bli_rntm_set_pack_a( pack_b, &global_rntm );
+	bli_rntm_set_pack_b( pack_b, &global_rntm );
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );

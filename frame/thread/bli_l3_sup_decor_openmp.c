@@ -76,7 +76,7 @@ err_t bli_l3_sup_thread_decorator
 	// Set the packing block allocator field of the rntm. This will be
 	// inherited by all of the child threads when they make local copies of
 	// the rntm below.
-	bli_membrk_rntm_set_membrk( rntm );
+	bli_pba_rntm_set_pba( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
 	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );

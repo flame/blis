@@ -1097,7 +1097,7 @@ typedef struct
 
 // -- packing block allocator: Locked set of pools type --
 
-typedef struct membrk_s
+typedef struct pba_s
 {
 	pool_t              pools[3];
 	bli_pthread_mutex_t mutex;
@@ -1107,7 +1107,7 @@ typedef struct membrk_s
 	malloc_ft           malloc_fp;
 	free_ft             free_fp;
 
-} membrk_t;
+} pba_t;
 
 
 // -- Memory object type --
@@ -1477,7 +1477,7 @@ typedef struct rntm_s
 	pool_t*   sba_pool;
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
-	membrk_t* membrk;
+	pba_t*    pba;
 
 } rntm_t;
 
