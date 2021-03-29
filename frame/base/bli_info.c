@@ -69,14 +69,6 @@ gint_t bli_info_get_pool_addr_offset_size_a( void )   { return BLIS_POOL_ADDR_OF
 gint_t bli_info_get_pool_addr_offset_size_b( void )   { return BLIS_POOL_ADDR_OFFSET_SIZE_B; }
 gint_t bli_info_get_pool_addr_offset_size_c( void )   { return BLIS_POOL_ADDR_OFFSET_SIZE_C; }
 gint_t bli_info_get_pool_addr_offset_size_gen( void ) { return BLIS_POOL_ADDR_OFFSET_SIZE_GEN; }
-gint_t bli_info_get_enable_stay_auto_init( void )
-{
-#ifdef BLIS_ENABLE_STAY_AUTO_INITIALIZED
-	return 1;
-#else
-	return 0;
-#endif
-}
 gint_t bli_info_get_enable_blas( void )
 {
 #ifdef BLIS_ENABLE_BLAS
