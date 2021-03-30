@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.8.1](ReleaseNotes.md#changes-in-081)
 * [Changes in 0.8.0](ReleaseNotes.md#changes-in-080)
 * [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
 * [Changes in 0.6.1](ReleaseNotes.md#changes-in-061)
@@ -37,6 +38,47 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.8.1
+March 22, 2021
+
+Improvements present in 0.8.1:
+
+Framework:
+- Implemented an automatic reduction in the number of threads when the user requests parallelism via a single number (ie: the automatic way) and (a) that number of threads is prime, and (b) that number exceeds a minimum threshold defined by the macro `BLIS_NT_MAX_PRIME`, which defaults to 11. If prime numbers are really desired, this feature may be suppressed by defining the macro `BLIS_ENABLE_AUTO_PRIME_NUM_THREADS` in the appropriate configuration family's `bli_family_*.h`. (Jeff Diamond)
+- Changed default value of `BLIS_THREAD_RATIO_M` from 2 to 1, which leads to slightly different automatic thread factorizations.
+- Enable the 1m method only if the real domain microkernel is not a reference kernel. BLIS now forgoes use of 1m if both the real and complex domain kernels are reference implementations.
+- Relocated the general stride handling for `gemmsup`. This fixed an issue whereby `gemm` would fail to trigger to conventional code path for cases that use general stride even after `gemmsup` rejected the problem. (RuQing Xu)
+- Disabled AMD's small matrix handling entry points for `syrk` and `trsm` due to lack of testing on our side.
+- Fixed an incorrect function signature (and prototype) of `bli_?gemmt()`. (RuQing Xu)
+- Redefined `BLIS_NUM_ARCHS` to be part of the `arch_t` enum, which means it will be updated automatically when defining future subconfigs.
+- Minor code consolidation in all level-3 `_front()` functions.
+- Reorganized Windows cpp branch of `bli_pthreads.c`.
+- Implemented `bli_pthread_self()` and `_equals()`, but left them commented out (via cpp guards) due to issues with getting the Windows versions working. Thankfully, these functions aren't yet needed by BLIS.
+
+Kernels:
+- Added low-precision POWER10 `gemm` kernels via a `power10` sandbox. This sandbox also provides an API for implementations that use these kernels. See the `sandbox/power10/POWER10.md` document for more info. (Nicholai Tukanov)
+- Added assembly `packm` kernels for the `haswell` kernel set and registered to `haswell`, `zen`, and `zen2` subconfigs accordingly. The `s`, `c`, and `z` kernels were modeled on the `d` kernel, which was contributed by AMD.
+- Reduced KC in the `skx` subconfig from 384 to 256. (Tze Meng Low)
+- Fixed bugs in two `haswell` dgemmsup kernels, which involved extraneous assembly instructions left over from when the kernels were first written. (Kiran Varaganti, Bhaskar Nallani)
+- Minor updates to all of the `gemmtrsm` kernels to allow division by diagonal elements rather that scaling by pre-inverted elements. This change was applied to `haswell` and `penryn` kernel sets as well as reference kernels, 1m kernels, and the pre-broadcast B (bb) format kernels used by the `power9` subconfig. (Bhaskar Nallani)
+- Fixed incorrect return type on `bli_diag_offset_with_trans()`. (Devin Matthews)
+
+Build system:
+- Output a pkgconfig file so that CMake users that use BLIS can find and incorporate BLIS build products. (Ajay Panyala)
+- Fixed an issue in the the configure script's kernel-to-config map that caused `skx` kernel flags to be used when compiling kernels from the `zen` kernel set. This issue wasn't really fixed, but rather tweaked in such a way that it happens to now work. A more proper fix would require a serious rethinking of the configuration system. (Devin Matthews)
+- Fixed the shared library build rule in top-level Makefile. The previous rule was incorrectly only linking prerequisites that were newer than the target (`$?`) rather than correctly linking all prerequisites (`$^`). (Devin Matthews) 
+- Fixed `cc_vendor` for crosstool-ng toolchains. (Isuru Fernando)
+- Allow disabling of `trsm` diagonal pre-inversion at compile time via `--disable-trsm-preinversion`.
+
+Testing:
+- Fixed obscure testsuite bug for the `gemmt` test module that relates to its dependency on `gemv`.
+- Allow the `amaxv` testsuite module to run with a dimension of 0. (Meghana Vankadari)
+
+Documentation:
+- Documented auto-reduction for prime numbers of threads in `docs/Multithreading.md`.
+- Fixed a missing `trans_t` argument in the API documentation for `her2k`/`syr2k` in `docs/BLISTypedAPI.md`. (RuQing Xu)
+- Removed an extra call to `free()` in the level-1v typed API example code. (Ilknur Mustafazade)
 
 ## Changes in 0.8.0
 November 19, 2020

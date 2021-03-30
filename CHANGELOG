@@ -1,10 +1,557 @@
-commit 9b387f6d5a010969727ec583c0cdd067a5274ed8 (HEAD -> master, tag: 0.8.0)
+commit 8535b3e11d2297854991c4272932ce4974dda629 (HEAD -> master, tag: 0.8.1)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 22 17:42:33 2021 -0500
+
+    Version file update (0.8.1)
+
+commit e56d9f2d94ed247696dda2cbf94d2ca05c7fc089 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 22 17:40:50 2021 -0500
+
+    ReleaseNotes.md update in advance of next version.
+
+commit ca83f955d45814b7d84f53933cdb73323c0dea2c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 22 17:21:21 2021 -0500
+
+    CREDITS file update.
+
+commit 57ef61f6cdb86957f67212aa59407f2f8e7f3d1a
+Merge: bf1b578e e7a4a8ed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 19 13:05:43 2021 -0500
+
+    Merge branch 'master' of github.com:flame/blis
+
+commit bf1b578ea32ea1c9dbf7cb3586969e8ae89aa5ef
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 19 13:03:17 2021 -0500
+
+    Reduced KC on skx from 384 to 256.
+    
+    Details:
+    - Reduced the KC cache blocksize for double real on the skx subconfig
+      from 384 to 256. The maximum (extended) KC was also reduced
+      accordingly from 480 to 320. Thanks to Tze Meng Low for suggesting
+      this change.
+
+commit e7a4a8edc940942357e8e4c4594383a29a962f93
+Author: Nicholai Tukanov <nicholaitukanov@gmail.com>
+Date:   Wed Mar 17 19:43:31 2021 -0500
+
+    Fix calculation of new pb size (#487)
+    
+    Details:
+    - Added missing parentheses to the i8 and i4 instantiations of the
+      GENERIC_GEMM macro in sandbox/power10/generic_gemm.c.
+
+commit 4493cf516e01aba82642a43abe350943ba458fe2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 15 13:12:49 2021 -0500
+
+    Redefined BLIS_NUM_ARCHS to update automatically.
+    
+    Details:
+    - Changed BLIS_NUM_ARCHS from a cpp macro definition to the last enum
+      value in the arch_t enum. This means that it no longer needs to get
+      updated manually whenever new subconfigurations are added to BLIS.
+      Also removed the explicit initial index assigment of 0 from the
+      first enum value, which was unnecessary due to how the C language
+      standard mandates indexing of enum values. Thanks to Devin Matthews
+      for originally submitting this as a PR in #446.
+    - Updated docs/ConfigurationHowTo.md to reflect the aforementioned
+      change.
+
+commit a4b73de84cdffcbe5cf71969a0f7f0f8202b3510
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 12 17:12:27 2021 -0600
+
+    Disabled _self() and _equal() in bli_pthread API.
+    
+    Details:
+    - Disabled the _self() and _equal() extensions to the bli_pthread API
+      introduced in d479654. These functions were disabled after I realized
+      that they aren't actually needed yet. Thanks to Devin Matthews for
+      helping me reason through the appropriate consumer code that will
+      appear in BLIS (eventually) in a future commit. (Also, I could never
+      get the Windows branch to link properly in clang builds in AppVeyor.
+      See the comment I left in the code, and #485, for more info.)
+
+commit f9d604679d8715bc3e79a8630268446889b51388
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 11 16:57:55 2021 -0600
+
+    Added _self() and _equal() to bli_pthread API.
+    
+    Details:
+    - Expanded the bli_pthread API to include equivalents to pthread_self()
+      and pthread_equal(). Implemented these two functions for all three cpp
+      branches present within bli_pthread.c: systemless, Windows, and
+      Linux/BSD.
+
+commit fa9b3c8f6b3d5717f19832362104413e1a86dfb0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 11 15:13:51 2021 -0600
+
+    Shuffled code in Windows branch of bli_pthreads.c.
+    
+    Details:
+    - Reordered the definitions in the cpp branch in bli_pthreads.c that
+      defines the bli_pthreads API in terms of Windows API calls. Also added
+      missing comments that mark sections of the API, which brings the code
+      into harmony with other cpp branches (as well as bli_pthread.h).
+
+commit 95d4f3934d806b3563f6648d57a4e381d747caf5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 11 13:50:40 2021 -0600
+
+    Moved cpp macro redef of strerror_r to bli_env.c.
+    
+    Details:
+    - Relocated the _MSC_VER-guarded cpp macro re-definition of strerror_r
+      (in terms of strerror_s) from bli_thread.h to bli_env.c. It was
+      likely left behind in bli_thread.h in a previous commit, when code
+      that now resides in bli_env.c was moved from bli_thread.c. (I couldn't
+      find any other instance of strerror_r being used in BLIS, so I moved
+      the #define directly to bli_env.c rather than place it in bli_env.h.)
+      The code that uses strerror_r is currently disabled, though, so this
+      commit should have no affect on BLIS.
+
+commit 8a3066c315358d45d4f5b710c54594455f9e8fc6
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 9 17:52:59 2021 -0600
+
+    Relocated gemmsup_ref general stride handling.
+    
+    Details:
+    - Moved the logic that checks for general stridedness in any of the
+      matrix operands in a gemmsup problem. The logic previously resided
+      near the top of bli_gemmsup_int(), which is the thread entry point
+      for the parallel region of the current gemmsup implementation. The
+      problem with this setup was that the code would attempt to reject
+      problems with any general-strided operands by returning BLIS_FAILURE,
+      and that return value was then being ignored by the l3_sup thread
+      decorator, which unconditionally returns BLIS_SUCCESS. To solve this
+      issue, rather than try to manage n return values, one from each of n
+      threads, I simply moved the logic into bli_gemmsup_ref(). I didn't
+      move it any higher (e.g. bli_gemmsup()) because I still want the
+      logic to be part of the current gemmsup handler implementation. That
+      is, perhaps someone else will create a different handler, and that
+      author wants to handle general stride differently. (We don't want to
+      force them into a particular way of handling general stride.)
+    - Removed the general stride handling from bli_gemmtsup_int(), even
+      though this function is inoperative for now.
+    - This commit addresses issue #484. Thanks to RuQing Xu for reporting
+      this issue.
+
+commit 670bc7b60f6065893e8ec1bebd2fc9e5ba710dff
+Author: Nicholai Tukanov <nicholaitukanov@gmail.com>
+Date:   Fri Mar 5 13:53:43 2021 -0600
+
+    Add low-precision POWER10 gemm kernels (#467)
+    
+    Details:
+    - This commit adds a new BLIS sandbox that (1) provides implementations
+      based on low-precision gemm kernels, and (2) extends the BLIS typed
+      API for those new implementations. Currently, these new kernels can
+      only be used for the POWER10 microarchitecture; however, they may
+      provide a template for developing similar kernels for other
+      microarchitectures (even those beyond POWER), as changes would likely
+      be limited to select places in the microkernel and possibly the
+      packing routines. The new low-precision operations that are now
+      supported include: shgemm, sbgemm, i16gemm, i8gemm, i4gemm. For more
+      information, refer to the POWER10.md document that is included in
+      'sandbox/power10'.
+
+commit b8dcc5bc75a746807d6f8fa22dc2123c98396bf5 (origin/dev, origin/amd, dev, amd)
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Tue Mar 2 06:58:24 2021 +0800
+
+    Fixed typed API definition for gemmt (#476)
+    
+    Details:
+    - Fixed incorrect definition and prototype of bli_?gemmt() in
+      frame/3/bli_l3_tapi.c and .h, respectively. gemmt was previously
+      defined identically to gemm, which was wrong because it did not
+      take into account the uplo property of C.
+    - Fixed incorrect API documentation for her2k/syr2k in BLISTypedAPI.md.
+      Specifically, the document erroneously listed only a single transab
+      parameter instead of transa and transb.
+
+commit a0e4fe2340a93521e1b1a835a96d0f26dec8406a
+Author: Ilknur <ilknuri607@gmail.com>
+Date:   Tue Mar 2 02:06:56 2021 +0400
+
+    Fixed double free() in level1v example (#482)
+    
+    Details:
+    - In exampls/tapi/00level1v.c, pointer 'z' was being freed twice and
+      pointer 'a' was not being freed at all. This commit correctly frees
+      each pointer exactly once.
+
+commit f5871c7e06a75799251d6b55a8a5fbfa1a92cf95
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Feb 28 17:03:57 2021 -0600
+
+    Added complex asm packm kernels for 'haswell' set.
+    
+    Details:
+    - Implemented assembly-based packm kernels for single- and double-
+      precision complex domain (c and z) and housed them in the 'haswell'
+      kernel set. This means c3xk, c8xk, z3xk, and z4xk are now all
+      optimized.
+    - Registered the aforementioned packm kernels in the haswell, zen,
+      and zen2 subconfigs.
+    - Minor modifications to the corresponding s and d packm kernels that
+      were introduced in 426ad67.
+    - Thanks to AMD, who originally contributed the double-precision real
+      packm kernels (d6xk and d8xk), upon which these complex kernels are
+      partially based.
+
+commit 426ad679f55264e381eb57a372632b774320fb85
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Feb 27 18:39:56 2021 -0600
+
+    Added assembly packm kernels for 'haswell' set.
+    
+    Details:
+    - Implemented assembly-based packm kernels for single- and double-
+      precision real domain (s and d) and housed them in the 'haswell'
+      kernel set. This means s6xk, s16xk, d6xk, and d8xk are now all
+      optimized.
+    - Registered the aforementioned packm kernels in the haswell, zen,
+      and zen2 subconfigs.
+    - Thanks to AMD, who originally contributed the double-precision real
+      packm kernels (d6xk and d8xk), which I have now tweaked and used to
+      create comparable single-precision real kernels (s6xk and s16xk).
+
+commit f50c1b7e5886d29efe134e1994d05af9949cd4b6
+Merge: 8f39aea1 b3953b93
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Feb 1 11:55:51 2021 -0600
+
+    Merge pull request #473 from ajaypanyala/pkgconfig
+    
+    build: generate pkgconfig file
+
+commit 8f39aea11f80a805b66cff4b4dc5e72727ea461d
+Merge: f8db9fb3 2a815d5b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Jan 30 17:59:56 2021 -0600
+
+    Merge branch 'dev'
+
+commit f8db9fb33b48844d6b47fdef699625bd9197745a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 28 08:04:52 2021 -0600
+
+    Fixed missing parentheses in README.md Citations.
+
+commit b3953b938eee59f79b4a4162ba583a5cb59fa34e
+Author: Ajay Panyala <ajay.panyala@gmail.com>
+Date:   Tue Jan 12 17:07:04 2021 -0800
+
+    drop CFLAGS in the generated pkgconfig file
+
+commit b02d9376bac31c1a1c7916f44c4946277a1425e2
+Author: Ajay Panyala <ajay.panyala@gmail.com>
+Date:   Mon Jan 11 20:50:01 2021 -0800
+
+    add datadir
+
+commit d8d8deeb6d8b84adb7ae5fdb88c6dd4f06624a76
+Author: Ajay Panyala <ajay.panyala@gmail.com>
+Date:   Mon Jan 11 17:47:50 2021 -0800
+
+    generate pkgconfig file
+
+commit 8c65411c7c8737248a6f054ffa0ce008c95cb515
+Merge: 328b4f88 874c3f04
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jan 11 16:01:45 2021 -0600
+
+    Merge pull request #471 from flame/fix-470
+    
+    Fix kernel-to-config mapping for intel64
+
+commit 874c3f04ece9af4d8fdf0e2713e21a259c117656
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jan 8 13:56:30 2021 -0600
+
+    Update configure
+    
+    Choose last sub-config in the kernel-to-config map if the config list doesn't contain the name of the kernel set. E.g. for "zen: skx knl haswell" pick "haswell" instead of "skx" which was chosen previously. Fixes #470.
+
+commit 2a815d5b365d934cb351b2f2a8cd1366e997b2e1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 4 18:03:39 2021 -0600
+
+    Support trsm pre-inversion in 1m, bb, ref kernels.
+    
+    Details:
+    - Expanded support for disabling trsm diagonal pre-inversion to other
+      microkernel types, including the reference microkernel as well as the
+      kernel implementations for 1m and the pre-broadcast B (bb) format used
+      by the power9 subconfig. This builds on the 'haswell' and 'penryn'
+      kernel support added in 7038bba. Thanks to Bhaskar Nallani for
+      reminding me, in #461 (post-closure), that 1m support was missing from
+      that commit.
+    - Removed cpp branch of ref_kernels/3/bli_trsm_ref.c that contained the
+      omp simd implementation after making a stripped-down copy in 'old'.
+      This code has been disabled for some time and it seemed better suited
+      to rot away out of sight rather than clutter up a file that is already
+      cluttered by the presence of lower and upper versions.
+    - Minor comment update to bli_ind_init().
+
+commit c3ed2cbb9f60100fc9beb2a9d75476de9f711dc5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 4 16:16:32 2021 -0600
+
+    Enable 1m only if real domain ukr is not reference.
+    
+    Details:
+    - Previously, BLIS would automatically enable use of the 1m method
+      for a given precision if the complex domain microkernel was a
+      reference kernel. This commit adds an additional constraint so that
+      1m is only enabled if the corresponding real domain microkernel is
+      NOT reference. That is, BLIS now forgos use of 1m if both the real and
+      complex domain kernels are reference implementations. Note that this
+      does not prevent 1m from being enabled manually under those
+      conditions; it only means that 1m will not be enabled automatically
+      at initialization-time.
+
+commit ed50c947385ba3b0b5d550015f38f7f0a31755c0
+Merge: 0cef09aa 328b4f88
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jan 4 14:31:44 2021 -0600
+
+    Merge branch 'master' into dev
+
+commit 328b4f8872b4bca9a53d2de8c6e285f3eb13d196
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Dec 30 17:54:18 2020 -0600
+
+    Shared object (dylib) was not built correctly for partial build.
+    
+    The SO build rule used $? instead of $^. Observed on macOS, not sure if it affected Linux or not.
+
+commit ae6ef66ef824da9bc6348bf9d1b588cd4f2ded9b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Dec 30 17:34:55 2020 -0600
+
+    bli_diag_offset_with_trans had wrong return type. Fixes #468.
+
+commit ebcf197fb86fdd0a864ea928140752bc2462e8c6
+Merge: 472f138c 21aa67e1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Dec 5 22:26:27 2020 -0600
+
+    Merge pull request #466 from isuruf/patch-3
+    
+    fix cc_vendor for crosstool-ng toolchains
+
+commit 21aa67e11cebbc5a6dd7c6353154256294df3c33
+Author: Isuru Fernando <isuruf@gmail.com>
+Date:   Sat Dec 5 21:59:13 2020 -0600
+
+    fix cc_vendor for crosstool-ng toolchains
+
+commit 472f138cb927b7259126ebb9c68919cfcc7a4ea3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Dec 5 14:13:52 2020 -0600
+
+    Fixed typo in README.md to CodingConventions.md.
+
+commit 0cef09aa92208441a656bf097f197ea8e22b533b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 4 16:40:59 2020 -0600
+
+    Consolidated code in level-3 _front() functions.
+    
+    Details:
+    - Reduced a code segment that appears in all of the bli_*_front()
+      functions except for bli_gemm_front(). Previously, the code looked
+      like this (taken from bli_herk_front()):
+    
+        if ( bli_cntx_method( cntx ) == BLIS_NAT )
+        {
+            bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
+            bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &ah_local );
+        }
+        else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
+        {
+            pack_t schema_a = bli_cntx_schema_a_block( cntx );
+            pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+    
+            bli_obj_set_pack_schema( schema_a, &a_local );
+            bli_obj_set_pack_schema( schema_b, &ah_local );
+        }
+    
+      This code segment is part of a sort-of-hack that allows us to
+      communicate the pack schemas into the level-3 thread decorator, which
+      needs them so that they can be passed into bli_l3_cntl_create_if(),
+      where the control tree is created. However, the first conditional case
+      above is unnecessary because the second case is fully generalized.
+      That is, even in the native case, the context contains correct,
+      queryable schemas. Thus, these code segments were reduced to something
+      like:
+    
+        pack_t schema_a = bli_cntx_schema_a_block( cntx );
+        pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+    
+        bli_obj_set_pack_schema( schema_a, &a_local );
+        bli_obj_set_pack_schema( schema_b, &ah_local );
+    
+      There's always a small chance that the seemingly unnecessary code
+      in the first branch case has some special use that is not apparent to
+      me, but the testsuite's default input parameters seem to think this
+      commit will be fine.
+
+commit 7038bbaa05484141195822291cf3ba88cbce4980
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Dec 4 16:08:15 2020 -0600
+
+    Optionally disable trsm diagonal pre-inversion.
+    
+    Details:
+    - Implemented a configure-time option, --disable-trsm-preinversion, that
+      optionally disables the pre-inversion of diagonal elements of the
+      triangular matrix in the trsm operation and instead uses division
+      instructions within the gemmtrsm microkernels. Pre-inversion is
+      enabled by default. When it is disabled, performance may suffer
+      slightly, but numerical robustness should improve for certain
+      pathological cases involving denormal (subnormal) numbers that would
+      otherwise result in overflow in the pre-inverted value. Thanks to
+      Bhaskar Nallani for reporting this issue via #461.
+    - Added preprocessor macro guards to bli_trsm_cntl.c as well as the
+      gemmtrsm microkernels for 'haswell' and 'penryn' kernel sets pursuant
+      to the aforementioned feature.
+    - Added macros to frame/include/bli_x86_asm_macros.h related to division
+      instructions.
+
+commit 78aee79452cce2691c40f05b3632bdfc122300af
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 2 13:02:36 2020 -0600
+
+    Allow amaxv testsuite module to run with dim = 0.
+    
+    Details:
+    - Exit early from libblis_test_amaxv_check() when the vector dimension
+      (length) of x is 0. This allows the module to run when the testsuite
+      driver passes in a problem size of 0. Thanks to Meghana Vankadari for
+      alerting us to this issue via #459.
+    - Note: All other testsuite modules appear to work with problem sizes
+      of 0, except for the microkernel modules. I chose not to "fix" those
+      modules because a failure (or segmentation fault, as happens in this
+      case) is actually meaningful in that it alerts the developer that some
+      microkernels cannot be used with k = 0. Specifically, the 'haswell'
+      kernel set contains microkernels that preload elements of B. Those
+      microkernels would need to be restructured to avoid preloading in
+      order to support usage when k = 0.
+
+commit 92d2b12a44ee0990c22735472aeaf1c17deb2d9b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 2 13:02:00 2020 -0600
+
+    Fixed obscure testsuite gemmt dependency bug.
+    
+    Details:
+    - Fixed a bug in the gemmt testsuite module that only manifested when
+      testing of gemmt is enabled but testing of gemv is disabled. The bug
+      was due to a copy-paste error dating back to the introduction of gemmt
+      in 88ad841.
+
+commit b43dae9a5d2f078c9bbe07079031d6c00a68b7de
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 1 16:44:38 2020 -0600
+
+    Fixed copy-paste bugs in edge-case sup kernels.
+    
+    Details:
+    - Fixed bugs in two sup kernels, bli_dgemmsup_rv_haswell_asm_1x6() and
+      bli_dgemmsup_rd_haswell_asm_1x4(), which involved extraneous assembly
+      instructions that were left over from when the kernels were first
+      written. These instructions would cause segmentation faults in some
+      situations where extra memory was not allocated beyond the end of
+      the matrix buffers. Thanks to Kiran Varaganti for reporting these
+      bugs and to Bhaskar Nallani for identifying the cause and solution.
+
+commit 11dfc176a3c422729f453f6c23204cf023e9954d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Dec 1 19:51:27 2020 +0000
+
+    Reorganized thread auto-factorization logic.
+    
+    Details:
+    - Reorganized logic of bli_thread_partition_2x2() so that the primary
+      guts were factored out into "fast" and "slow" variants. Then added
+      logic to the "fast" variant that allows for more optimal thread
+      factorizations in some situations where there is at least one factor
+      of 2.
+    - Changed BLIS_THREAD_RATIO_M from 2 to 1 in bli_kernel_macro_defs.h and
+      added comments to that file describing BLIS_THREAD_RATIO_? and
+      BLIS_THREAD_MAX_?R.
+    - In bli_family_zen.h and bli_family_zen2.h, preprocessed out several
+      macros not used in vanilla BLIS and removed the unused macro
+      BLIS_ENABLE_ZEN_BLOCK_SIZES from the former file.
+    - Disabled AMD's small matrix handling entry points in bli_syrk_front.c
+      and bli_trsm_front.c. (These branches of small matrix handling have
+      not been reviewed by vanilla BLIS developers.)
+    - Added commented-out calls printf() to bli_rntm.c.
+    - Whitespace changes to bli_thread.c.
+
+commit 6d3bafacd7aa7ad198762b39490876c172bfbbcb
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Nov 28 17:17:56 2020 -0600
+
+    Update BuildSystem.md
+    
+    Add git version >= 1.8.5 requirement (see #462).
+
+commit 64856ea5a61b01d585750815788b6a775f729647
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 23 16:54:51 2020 -0600
+
+    Auto-reduce (by default) prime numbers of threads.
+    
+    Details:
+    - When requesting multithreaded parallelism by specifying the total
+      number of threads (whether it be via environment variable, globally at
+      runtime, or locally at runtime), reduce the number of threads actually
+      used by one if the original value (a) is prime and (b) exceeds a
+      minimum threshold defined by the macro BLIS_NT_MAX_PRIME, which is set
+      to 11 by default. If, when specifying the total number of threads (and
+      not the individual ways of parallelism for each loop), prime numbers
+      of threads are desired, this feature may be overridden by defining the
+      BLIS_ENABLE_AUTO_PRIME_NUM_THREADS macro in the bli_family_*.h that
+      corresponds to the configuration family targeted at configure-time.
+      (For now, there is no configure option(s) to control this feature.)
+      Thanks to Jeff Diamond for suggesting this change.
+    - Defined a new function in bli_thread.c, bli_is_prime(), that returns a
+      bool that determines whether an integer is prime. This function is
+      implemented in terms of existing functions in bli_thread.c.
+    - Updated docs/Multithreading.md to document the above feature, along
+      with unrelated minor edits.
+
+commit 55933b6ff6b9b8a12041715f42bba06273d84b74
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 20 10:39:32 2020 -0600
+
+    Added missing attribution to docs/ReleaseNotes.md.
+
+commit e310f57b4b29fbfee479e0f9fe2040851efdec4f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Nov 19 13:33:37 2020 -0600
+
+    CHANGELOG update (0.8.0)
+
+commit 9b387f6d5a010969727ec583c0cdd067a5274ed8 (tag: 0.8.0)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Nov 19 13:33:37 2020 -0600
 
     Version file update (0.8.0)
 
-commit 2928ec750d3a3e1e5d55de5b57ddc04e9d0bd796 (origin/master, origin/HEAD)
+commit 2928ec750d3a3e1e5d55de5b57ddc04e9d0bd796
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Nov 18 18:31:35 2020 -0600
 
@@ -13,11 +560,43 @@ Date:   Wed Nov 18 18:31:35 2020 -0600
     Details:
     - Updated docs/ReleaseNotes.md in preparation for next version.
 
-commit b9899bedff6854639468daa7a973bb14ca131a74 (origin/amd, amd)
+commit b9899bedff6854639468daa7a973bb14ca131a74
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Wed Nov 18 16:52:41 2020 -0600
 
     CREDITS file update.
+
+commit 9bb23e6c2a44b77292a72093938ab1ee6e6cc26a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Nov 16 15:55:45 2020 -0600
+
+    Added support for systemless build (no pthreads).
+    
+    Details:
+    - Added a configure option, --[enable|disable]-system, which determines
+      whether the modest operating system dependencies in BLIS are included.
+      The most notable example of this on Linux and BSD/OSX is the use of
+      POSIX threads to ensure thread safety for when application-level
+      threads call BLIS. When --disable-system is given, the bli_pthreads
+      implementation is dummied out entirely, allowing the calling code
+      within BLIS to remain unchanged. Why would anyone want to build BLIS
+      like this? The motivating example was submitted via #454 in which a
+      user wanted to build BLIS for a simulator such as gem5 where thread
+      safety may not be a concern (and where the operating system is largely
+      absent anyway). Thanks to Stepan Nassyr for suggesting this feature.
+    - Another, more minor side effect of the --disable-system option is that
+      the implementation of bli_clock() unconditionally returns 0.0 instead
+      of the time elapsed since some fixed point in the past. The reasoning
+      for this is that if the operating system is truly minimal, the system
+      function call upon which bli_clock() would normally be implemented
+      (e.g. clock_gettime()) may not be available.
+    - Refactored preprocess-guarded code in bli_pthread.c and bli_pthread.h
+      to remove redundancies.
+    - Removed old comments and commented #include of "bli_pthread_wrap.h"
+      from bli_system.h.
+    - Documented bli_clock() and bli_clock_min_diff() in BLISObjectAPI.md
+      and BLISTypedAPI.md, with a note that both are non-functional when
+      BLIS is configured with --disable-system.
 
 commit 88ad84143414644df4c56733b1cf91a36bfacaf8
 Author: Field G. Van Zee <field@cs.utexas.edu>
