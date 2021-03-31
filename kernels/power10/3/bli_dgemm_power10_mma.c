@@ -168,25 +168,25 @@ void bli_dgemm_power10_mma_8x8
     // handle beta cases
     if (beta_ != 0.0)
     {
-        SAVE_ACC(dv4sf_t, &acc0, rs_c, 0      );
-        SAVE_ACC(dv4sf_t, &acc1, rs_c, 4      );
-        SAVE_ACC(dv4sf_t, &acc2, rs_c, 8      );
-        SAVE_ACC(dv4sf_t, &acc3, rs_c, 12     );
-        SAVE_ACC(dv4sf_t, &acc4, rs_c,    4*rs_c);
-        SAVE_ACC(dv4sf_t, &acc5, rs_c,  4+4*rs_c);
-        SAVE_ACC(dv4sf_t, &acc6, rs_c,  8+4*rs_c);
-        SAVE_ACC(dv4sf_t, &acc7, rs_c, 12+4*rs_c);
+        SAVE_ACC(dv4sf_t, &acc0, rs_c, 0       );
+        SAVE_ACC(dv4sf_t, &acc1, rs_c, 2       );
+        SAVE_ACC(dv4sf_t, &acc2, rs_c, 4       );
+        SAVE_ACC(dv4sf_t, &acc3, rs_c, 6       );
+        SAVE_ACC(dv4sf_t, &acc4, rs_c,   4*rs_c);
+        SAVE_ACC(dv4sf_t, &acc5, rs_c, 2+4*rs_c);
+        SAVE_ACC(dv4sf_t, &acc6, rs_c, 4+4*rs_c);
+        SAVE_ACC(dv4sf_t, &acc7, rs_c, 6+4*rs_c);
     }
     else
     {
-        SAVE_ACC_bz(dv4sf_t, &acc0, rs_c,  0     );
-        SAVE_ACC_bz(dv4sf_t, &acc1, rs_c,  4     );
-        SAVE_ACC_bz(dv4sf_t, &acc2, rs_c,  8     );
-        SAVE_ACC_bz(dv4sf_t, &acc3, rs_c, 12     );
-        SAVE_ACC_bz(dv4sf_t, &acc4, rs_c,    4*rs_c);
-        SAVE_ACC_bz(dv4sf_t, &acc5, rs_c,  4+4*rs_c);
-        SAVE_ACC_bz(dv4sf_t, &acc6, rs_c,  8+4*rs_c);
-        SAVE_ACC_bz(dv4sf_t, &acc7, rs_c, 12+4*rs_c);
+        SAVE_ACC_bz(dv4sf_t, &acc0, rs_c, 0       );
+        SAVE_ACC_bz(dv4sf_t, &acc1, rs_c, 2       );
+        SAVE_ACC_bz(dv4sf_t, &acc2, rs_c, 4       );
+        SAVE_ACC_bz(dv4sf_t, &acc3, rs_c, 6       );
+        SAVE_ACC_bz(dv4sf_t, &acc4, rs_c,   4*rs_c);
+        SAVE_ACC_bz(dv4sf_t, &acc5, rs_c, 2+4*rs_c);
+        SAVE_ACC_bz(dv4sf_t, &acc6, rs_c, 4+4*rs_c);
+        SAVE_ACC_bz(dv4sf_t, &acc7, rs_c, 6+4*rs_c);
     }
 
 }
