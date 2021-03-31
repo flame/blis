@@ -421,6 +421,21 @@ BLIS_INLINE bool bli_is_unit_diag( diag_t diag )
 }
 
 
+// err_t-related
+
+BLIS_INLINE bool bli_is_success( err_t err )
+{
+	return ( bool )
+	       ( err == BLIS_SUCCESS );
+}
+
+BLIS_INLINE bool bli_is_failure( err_t err )
+{
+	return ( bool )
+	       ( err != BLIS_SUCCESS );
+}
+
+
 // dimension-related
 
 BLIS_INLINE bool bli_zero_dim1( dim_t m )

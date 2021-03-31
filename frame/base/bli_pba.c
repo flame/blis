@@ -101,6 +101,7 @@ void bli_pba_acquire_m
 	pool_t* pool;
 	pblk_t* pblk;
 	dim_t   pi;
+	err_t   r_val;
 
 	// If the internal memory pools for packing block allocator are disabled,
 	// we spoof the buffer type as BLIS_BUFFER_FOR_GEN_USE to induce the
@@ -125,7 +126,7 @@ void bli_pba_acquire_m
 
 		// For general-use buffer requests, dynamically allocating memory
 		// is assumed to be sufficient.
-		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size );
+		void* buf = bli_fmalloc_align( malloc_fp, req_size, align_size, &r_val );
 
 		// Initialize the mem_t object with:
 		// - the address of the memory block,

@@ -73,7 +73,8 @@ void bli_l3_thread_decorator
 	const dim_t n_threads = bli_rntm_num_threads( rntm );
 
 	#ifdef PRINT_THRINFO
-	thrinfo_t** threads = bli_malloc_intl( n_threads * sizeof( thrinfo_t* ) );
+	err_t r_val;
+	thrinfo_t** threads = bli_malloc_intl( n_threads * sizeof( thrinfo_t* ), &r_val );
 	#endif
 
 	// NOTE: The sba was initialized in bli_init().

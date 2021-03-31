@@ -62,11 +62,12 @@ void* bli_sba_acquire
      )
 {
 	void* block;
+	err_t r_val;
 
 #ifdef BLIS_ENABLE_SBA_POOLS
 	if ( rntm == NULL )
 	{
-		block = bli_malloc_intl( req_size );
+		block = bli_malloc_intl( req_size, &r_val );
 	}
 	else
 	{
@@ -96,7 +97,7 @@ void* bli_sba_acquire
 	}
 #else
 
-	block = bli_malloc_intl( req_size );
+	block = bli_malloc_intl( req_size, &r_val );
 
 #endif
 

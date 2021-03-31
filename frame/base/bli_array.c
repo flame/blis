@@ -43,6 +43,8 @@ void bli_array_init
        array_t* restrict array
      )
 {
+	err_t r_val;
+
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_array_init(): allocating array [%d * %d]: ",
 	        ( int )num_elem, ( int )elem_size );
@@ -52,7 +54,7 @@ void bli_array_init
 	const size_t array_size = num_elem * elem_size;
 
 	// Allocate the array buffer.
-	void* restrict buf = bli_malloc_intl( array_size );
+	void* restrict buf = bli_malloc_intl( array_size, &r_val );
 
 	// Initialize the array elements to zero. THIS IS IMPORANT because
 	// consumer threads will use the NULL-ness of the array elements to
@@ -72,6 +74,8 @@ void bli_array_resize
        array_t* restrict array
      )
 {
+	err_t r_val;
+
 	// Query the number of elements in the array.
 	const siz_t num_elem_prev = bli_array_num_elem( array );
 
@@ -98,7 +102,7 @@ void bli_array_resize
 	#endif
 
 	// Allocate a new array buffer.
-	char* restrict buf_new = bli_malloc_intl( array_size_new );
+	char* restrict buf_new = bli_malloc_intl( array_size_new, &r_val );
 
 	// Copy the previous array contents to the new array.
 	memcpy( buf_new, buf_prev, array_size_prev );

@@ -39,6 +39,8 @@ void bli_apool_init
        apool_t* restrict apool
      )
 {
+	err_t r_val;
+
 	// NOTE: The apool_t is only used in one place; it is the type used to
 	// define the sba. We've switched to static initialization of the mutex
 	// field to remove one more thing that could possibly go wrong during
@@ -92,7 +94,7 @@ void bli_apool_init
 	// Allocate the block_ptrs array.
 	array_t** restrict block_ptrs
 	=
-	bli_malloc_intl( block_ptrs_len * sizeof( array_t* ) );
+	bli_malloc_intl( block_ptrs_len * sizeof( array_t* ), &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_apool_init(): allocating %d array_t.\n", ( int )num_blocks );
@@ -141,6 +143,8 @@ void bli_apool_alloc_block
        array_t** restrict array_p
      )
 {
+	err_t r_val;
+
 	// Since the apool_t is defined as a pool of array_t, we can hard-code
 	// the block_size parameter.
 	const siz_t block_size = sizeof( array_t );
@@ -154,7 +158,7 @@ void bli_apool_alloc_block
 	// be recovered when it's time to free the block.
 	array_t* restrict array
 	=
-	bli_malloc_intl( block_size );
+	bli_malloc_intl( block_size, &r_val );
 
 	// Initialize an array_t struct within the newly allocated memory region.
 	bli_array_init( num_elem, sizeof( pool_t* ), array );
@@ -376,6 +380,8 @@ pool_t* bli_apool_array_elem
        array_t* restrict array
      )
 {
+	err_t r_val;
+
 	// Query the array element corresponding to index.
 	// NOTE: If we knew that the array_t contained elements of size
 	// sizeof( void* ) or sizeof( whatever ), we could return the *value*
@@ -425,7 +431,7 @@ pool_t* bli_apool_array_elem
 		#endif
 
 		// Allocate the pool_t.
-		pool = bli_malloc_intl( sizeof( pool_t ) );
+		pool = bli_malloc_intl( sizeof( pool_t ), &r_val );
 
 		// Initialize the pool_t.
 		bli_pool_init
@@ -461,6 +467,8 @@ void bli_apool_grow
        apool_t* restrict apool
      )
 {
+	err_t r_val;
+
 	// If the requested increase is zero, return early.
 	if ( num_blocks_add == 0 ) return;
 
@@ -501,7 +509,7 @@ void bli_apool_grow
 		// Allocate a new block_ptrs array.
 		array_t** restrict block_ptrs_new
 		=
-		bli_malloc_intl( block_ptrs_len_new * sizeof( array_t* ) );
+		bli_malloc_intl( block_ptrs_len_new * sizeof( array_t* ), &r_val );
 
 		// Query the top_index of the pool.
 		const siz_t top_index = bli_pool_top_index( pool );
