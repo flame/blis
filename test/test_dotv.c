@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -193,9 +193,20 @@ int main( int argc, char** argv )
                                      xp, incx,
                                      yp, incy, resp );
 #else
+
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
                      *resp = cdotu_(&nn,
                                     xp, &incx,
                                     yp, &incy );
+
+#else
+                     cdotu_(resp, &nn,
+                                    xp, &incx,
+                                    yp, &incy );
+
+
+#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL ...
+
 #endif
             }
             else if ( bli_is_dcomplex( dt ) )
@@ -213,9 +224,20 @@ int main( int argc, char** argv )
                                       xp, incx,
                                       yp, incy, resp );
 #else
+
+#ifdef BLIS_DISABLE_COMPLEX_RETURN_INTEL
                      *resp = zdotu_( &nn,
                                      xp, &incx,
                                      yp, &incy );
+
+#else
+                     zdotu_( resp, &nn,
+                                     xp, &incx,
+                                     yp, &incy );
+
+
+#endif // BLIS_DISABLE_COMPLEX_RETURN_INTEL
+
 #endif
             }
 
