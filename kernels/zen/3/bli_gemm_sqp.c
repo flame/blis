@@ -213,10 +213,17 @@ inc_t bli_kernel_8mx6n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
     inc_t ldc6 = ldc * 6; inc_t ldb6 = ldb * 6;
 
     for (j = 0; j <= (n - 6); j += 6) {
+        double* pcldc = pc + ldc;
+        double* pcldc2 = pcldc + ldc;
+        double* pcldc3 = pcldc2 + ldc;
+        double* pcldc4 = pcldc3 + ldc;
+        double* pcldc5 = pcldc4 + ldc;
 
-        //printf("x");
-        double* pcldc = pc + ldc; double* pcldc2 = pcldc + ldc; double* pcldc3 = pcldc2 + ldc; double* pcldc4 = pcldc3 + ldc; double* pcldc5 = pcldc4 + ldc;
-        double* pbldb = pb + ldb; double* pbldb2 = pbldb + ldb; double* pbldb3 = pbldb2 + ldb; double* pbldb4 = pbldb3 + ldb; double* pbldb5 = pbldb4 + ldb;
+        double* pbldb = pb + ldb;
+        double* pbldb2 = pbldb + ldb;
+        double* pbldb3 = pbldb2 + ldb;
+        double* pbldb4 = pbldb3 + ldb;
+        double* pbldb5 = pbldb4 + ldb;
 
 #if BLIS_ENABLE_PREFETCH
         _mm_prefetch((char*)(pc), _MM_HINT_T0);
@@ -317,7 +324,7 @@ inc_t bli_kernel_8mx6n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 
         pc += ldc6;pb += ldb6;
     }
-
+    //printf(" 8x6:j:%d ", j);
     return j;
 }
 
@@ -326,7 +333,6 @@ inc_t bli_kernel_8mx6n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t lda, double* b, guint_t ldb, double* c, guint_t ldc)
 {
     gint_t p;
-
     __m256d av0;
     __m256d bv0, bv1, bv2, bv3;
     __m256d cv0, cv1, cv2, cv3;
@@ -338,10 +344,17 @@ inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
     pc = c;
     inc_t ldc5 = ldc * 5; inc_t ldb5 = ldb * 5;
 
-    for (j = 0; j <= (n - 5); j += 5) {
+    for (; j <= (n - 5); j += 5) {
 
-        double* pcldc = pc + ldc; double* pcldc2 = pcldc + ldc; double* pcldc3 = pcldc2 + ldc; double* pcldc4 = pcldc3 + ldc;
-        double* pbldb = pb + ldb; double* pbldb2 = pbldb + ldb; double* pbldb3 = pbldb2 + ldb; double* pbldb4 = pbldb3 + ldb;
+        double* pcldc = pc + ldc;
+        double* pcldc2 = pcldc + ldc;
+        double* pcldc3 = pcldc2 + ldc;
+        double* pcldc4 = pcldc3 + ldc;
+
+        double* pbldb = pb + ldb;
+        double* pbldb2 = pbldb + ldb;
+        double* pbldb3 = pbldb2 + ldb;
+        double* pbldb4 = pbldb3 + ldb;
 
 #if BLIS_ENABLE_PREFETCH
         _mm_prefetch((char*)(pc), _MM_HINT_T0);
@@ -430,7 +443,7 @@ inc_t bli_kernel_8mx5n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 
         pc += ldc5;pb += ldb5;
     }
-
+    //printf(" 8x5:j:%d ", j);
     return j;
 }
 
@@ -494,6 +507,7 @@ inc_t bli_kernel_8mx4n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 
         pc += ldc4;pb += ldb4;
     }// j loop 4 multiple
+    //printf(" 8x4:j:%d ", j);
     return j;
 }
 
@@ -552,6 +566,7 @@ inc_t bli_kernel_8mx3n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 
         pc += ldc3;pb += ldb3;
     }// j loop 3 multiple
+    //printf(" 8x3:j:%d ", j);
     return j;
 }
 
@@ -601,6 +616,7 @@ inc_t bli_kernel_8mx2n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
 
         pc += ldc2;pb += ldb2;
     }// j loop 2 multiple
+    //printf(" 8x2:j:%d ", j);
     return j;
 }
 
@@ -637,6 +653,7 @@ inc_t bli_kernel_8mx1n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
         _mm256_storeu_pd(pc + 4, cx0);
         pc += ldc;pb += ldb;
     }// j loop 1 multiple
+    //printf(" 8x1:j:%d ", j);
     return j;
 }
 
@@ -805,6 +822,7 @@ inc_t bli_kernel_1mx1n(gint_t n, gint_t k, gint_t j, double* aPacked, guint_t ld
         *pc = c0;
         pc += ldc;pb += ldb;
     }// j loop 1 multiple
+    //printf(" 1x1:j:%d ", j);
     return j;
 }
 
@@ -998,7 +1016,6 @@ static err_t bli_dgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
             return BLIS_MALLOC_RETURNED_NULL;
         }
     }
-
     for (i = (*p_istart); i <= (m-mx); i += mx) //this loop can be threaded. no of workitems = m/8
     {
         inc_t j = 0;
@@ -1016,10 +1033,12 @@ static err_t bli_dgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
             {
                 bli_prepackA_8(pa, aPacked, k, lda, isTransA, alpha);
             }
+#if 0//mx=4, kernels not yet implemented.
             else if(mx==4)
             {
                 bli_prepackA_4(pa, aPacked, k, lda, isTransA, alpha);
             }
+#endif//0
             else if(mx==1)
             {
                 bli_prepackA_1(pa, aPacked, k, lda, isTransA, alpha);
@@ -1031,26 +1050,25 @@ static err_t bli_dgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         }
         if(mx==8)
         {
-            //printf(" mx8i:%3ld ", i);
-            //8mx6n currently turned off to isolate a bug.
-            //j = bli_kernel_8mx6n(n, k, j, aPacked, lda, b, ldb, ci, ldc);
-            if (j <= n - 5)
+            //printf("\n mx8i:%3ld ", i);
+            j = bli_kernel_8mx6n(n, k, j, aPacked, lda, b, ldb, ci, ldc);
+            if (j <= (n - 5))
             {
-                j = bli_kernel_8mx5n(n, k, j, aPacked, lda, b, ldb, ci, ldc);
+                j = bli_kernel_8mx5n(n, k, j, aPacked, lda, b + (j * ldb), ldb, ci + (j * ldc), ldc);
             }
-            if (j <= n - 4)
+            if (j <= (n - 4))
             {
                 j = bli_kernel_8mx4n(n, k, j, aPacked, lda, b + (j * ldb), ldb, ci + (j * ldc), ldc);
             }
-            if (j <= n - 3)
+            if (j <= (n - 3))
             {
                 j = bli_kernel_8mx3n(n, k, j, aPacked, lda, b + (j * ldb), ldb, ci + (j * ldc), ldc);
             }
-            if (j <= n - 2)
+            if (j <= (n - 2))
             {
                 j = bli_kernel_8mx2n(n, k, j, aPacked, lda, b + (j * ldb), ldb, ci + (j * ldc), ldc);
             }
-            if (j <= n - 1)
+            if (j <= (n - 1))
             {
                 j = bli_kernel_8mx1n(n, k, j, aPacked, lda, b + (j * ldb), ldb, ci + (j * ldc), ldc);
             }
@@ -1058,7 +1076,7 @@ static err_t bli_dgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
         /* mx==4 to be implemented */
         else if(mx==1)
         {
-            //printf(" mx1i:%3ld ", i);
+            //printf("\n mx1i:%3ld ", i);
             j = bli_kernel_1mx1n(n, k, j, aPacked, lda, b, ldb, ci, ldc);
         }
         *p_istart = i + mx;
@@ -1184,309 +1202,201 @@ void bli_sub_m(gint_t m, gint_t n, double* w, double* c)
     }
 }
 
+/* Pack real and imaginary parts in separate buffers and also multipy with multiplication factor */
 void bli_packX_real_imag(double* pb, guint_t n, guint_t k, guint_t ldb, double* pbr, double* pbi, double mul, gint_t mx)
 {
     gint_t j, p;
     __m256d av0, av1, zerov;
     __m256d tv0, tv1;
-    if(mx==8)
+    gint_t max_k = (k*2)-8;
+
+    if((mul ==1.0)||(mul==-1.0))
     {
-        if((mul ==1.0)||(mul==-1.0))
-        {
-            if(mul ==1.0)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p <= ((k*2)-8); p += 8)
-                    {
-                        double* pbp = pb + p;
-                        av0 = _mm256_loadu_pd(pbp);
-                        av1 = _mm256_loadu_pd(pbp+4);
-
-                        tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
-                        tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
-                        av0 = _mm256_unpacklo_pd(tv0, tv1);
-                        av1 = _mm256_unpackhi_pd(tv0, tv1);
-
-                        _mm256_storeu_pd(pbr, av0); pbr += 4;
-                        _mm256_storeu_pd(pbi, av1); pbi += 4;
-                    }
-
-                    for (; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br = *(pb + p) ;
-                        double bi = *(pb + p + 1);
-                        *pbr = br;
-                        *pbi = bi;
-                        pbr++; pbi++;
-                    }
-                    pb = pb + ldb;
-                }
-            }
-            else
-            {
-                zerov = _mm256_setzero_pd();
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p <= ((k*2)-8); p += 8)
-                    {
-                        double* pbp = pb + p;
-                        av0 = _mm256_loadu_pd(pbp);
-                        av1 = _mm256_loadu_pd(pbp+4);
-
-                        tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
-                        tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
-                        av0 = _mm256_unpacklo_pd(tv0, tv1);
-                        av1 = _mm256_unpackhi_pd(tv0, tv1);
-
-                        //negate
-                        av0 = _mm256_sub_pd(zerov,av0);
-                        av1 = _mm256_sub_pd(zerov,av1);
-
-                        _mm256_storeu_pd(pbr, av0); pbr += 4;
-                        _mm256_storeu_pd(pbi, av1); pbi += 4;
-                    }
-
-                    for (; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br = -*(pb + p) ;
-                        double bi = -*(pb + p + 1);
-                        *pbr = br;
-                        *pbi = bi;
-                        pbr++; pbi++;
-                    }
-                    pb = pb + ldb;
-                }
-            }
-        }
-        else
+        if(mul ==1.0) /* handles alpha or beta = 1.0 */
         {
             for (j = 0; j < n; j++)
             {
-                for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+                for (p = 0; p <= max_k; p += 8)
                 {
-                    double br_ = mul * (*(pb + p));
-                    double bi_ = mul * (*(pb + p + 1));
-                    *pbr = br_;
-                    *pbi = bi_;
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);   //ai1, ar1, ai0, ar0
+                    av1 = _mm256_loadu_pd(pbp+4); //ai3, ar3, ai2, ar2
+                    //
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);//ai2, ar2, ai0, ar0
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);//ai3, ar3, ai1, ar1
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);//ar3, ar2, ar1, ar0
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);//ai3, ai2, ai1, ai0
+
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = *(pb + p) ;
+                    double bi = *(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
                     pbr++; pbi++;
                 }
                 pb = pb + ldb;
             }
         }
-    }//mx==8
-#if 0//already taken care in previous loop
-    else//mx==1
-    {
-        if((mul ==1.0)||(mul==-1.0))
+        else /* handles alpha or beta = - 1.0 */
         {
-            if(mul ==1.0)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (gint_t ii = 0; ii < (mx*2); ii += 2)
-                    {
-                        double cr_ = c[(j * ldc) + i + ii];
-                        double ci_ = c[(j * ldc) + i + ii + 1];
-                        *pcr = cr_;
-                        *pci = ci_;
-                        pcr++; pci++;
-                    }
-                }
-            }
-            else
-            {
-                //mul = -1.0
-                for (j = 0; j < n; j++)
-                {
-                    for (gint_t ii = 0; ii < (mx*2); ii += 2)
-                    {
-                        double cr_ = -c[(j * ldc) + i + ii];
-                        double ci_ = -c[(j * ldc) + i + ii + 1];
-                        *pcr = cr_;
-                        *pci = ci_;
-                        pcr++; pci++;
-                    }
-                }
-            }
-        }
-        else
-        {
+            zerov = _mm256_setzero_pd();
             for (j = 0; j < n; j++)
             {
-                for (gint_t ii = 0; ii < (mx*2); ii += 2)
+                for (p = 0; p <= max_k; p += 8)
                 {
-                    double cr_ = mul*c[(j * ldc) + i + ii];
-                    double ci_ = mul*c[(j * ldc) + i + ii + 1];
-                    *pcr = cr_;
-                    *pci = ci_;
-                    pcr++; pci++;
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp); //ai1, ar1, ai0, ar0
+                    av1 = _mm256_loadu_pd(pbp+4);//ai3, ar3, ai2, ar2
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);//ai2, ar2, ai0, ar0
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);//ai3, ar3, ai1, ar1
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);//ar3, ar2, ar1, ar0
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);//ai3, ai2, ai1, ai0
+
+                    //negate
+                    av0 = _mm256_sub_pd(zerov,av0);
+                    av1 = _mm256_sub_pd(zerov,av1);
+
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
                 }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = -*(pb + p) ;
+                    double bi = -*(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    pbr++; pbi++;
+                }
+                pb = pb + ldb;
             }
         }
-    }//mx==1
-#endif
+    }
+    else /* handles alpha or beta is not equal +/- 1.0 */
+    {
+        for (j = 0; j < n; j++)
+        {
+            for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+            {
+                double br_ = mul * (*(pb + p));
+                double bi_ = mul * (*(pb + p + 1));
+                *pbr = br_;
+                *pbi = bi_;
+                pbr++; pbi++;
+            }
+            pb = pb + ldb;
+        }
+    }
 }
 
+/* Pack real and imaginary parts in separate buffers and compute sum of real and imaginary part */
 void bli_packX_real_imag_sum(double* pb, guint_t n, guint_t k, guint_t ldb, double* pbr, double* pbi, double* pbs, double mul, gint_t mx)
 {
     gint_t j, p;
     __m256d av0, av1, zerov;
     __m256d tv0, tv1, sum;
-
-    if(mx==8)
+    gint_t max_k = (k*2) - 8;
+    if((mul ==1.0)||(mul==-1.0))
     {
-        if((mul ==1.0)||(mul==-1.0))
-        {
-            if(mul ==1.0)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p <= ((k*2)-8); p += 8)
-                    {
-                        double* pbp = pb + p;
-                        av0 = _mm256_loadu_pd(pbp);
-                        av1 = _mm256_loadu_pd(pbp+4);
-
-                        tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
-                        tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
-                        av0 = _mm256_unpacklo_pd(tv0, tv1);
-                        av1 = _mm256_unpackhi_pd(tv0, tv1);
-                        sum = _mm256_add_pd(av0, av1);
-                        _mm256_storeu_pd(pbr, av0); pbr += 4;
-                        _mm256_storeu_pd(pbi, av1); pbi += 4;
-                        _mm256_storeu_pd(pbs, sum); pbs += 4;
-                    }
-
-                    for (; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br = *(pb + p) ;
-                        double bi = *(pb + p + 1);
-                        *pbr = br;
-                        *pbi = bi;
-                        *pbs = br + bi;
-
-                        pbr++; pbi++; pbs++;
-                    }
-                    pb = pb + ldb;
-                }
-            }
-            else
-            {
-                zerov = _mm256_setzero_pd();
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p <= ((k*2)-8); p += 8)
-                    {
-                        double* pbp = pb + p;
-                        av0 = _mm256_loadu_pd(pbp);
-                        av1 = _mm256_loadu_pd(pbp+4);
-
-                        tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
-                        tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
-                        av0 = _mm256_unpacklo_pd(tv0, tv1);
-                        av1 = _mm256_unpackhi_pd(tv0, tv1);
-
-                        //negate
-                        av0 = _mm256_sub_pd(zerov,av0);
-                        av1 = _mm256_sub_pd(zerov,av1);
-
-                        sum = _mm256_add_pd(av0, av1);
-                        _mm256_storeu_pd(pbr, av0); pbr += 4;
-                        _mm256_storeu_pd(pbi, av1); pbi += 4;
-                        _mm256_storeu_pd(pbs, sum); pbs += 4;
-                    }
-
-                    for (; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br = -*(pb + p) ;
-                        double bi = -*(pb + p + 1);
-                        *pbr = br;
-                        *pbi = bi;
-                        *pbs = br + bi;
-
-                        pbr++; pbi++; pbs++;
-                    }
-                    pb = pb + ldb;
-                }
-            }
-        }
-        else
+        if(mul ==1.0)
         {
             for (j = 0; j < n; j++)
             {
-                for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+                for (p=0; p <= max_k; p += 8)
                 {
-                    double br_ = mul * (*(pb + p));
-                    double bi_ = mul * (*(pb + p + 1));
-                    *pbr = br_;
-                    *pbi = bi_;
-                    *pbs = br_ + bi_;
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);//ai1, ar1, ai0, ar0
+                    av1 = _mm256_loadu_pd(pbp+4);//ai3, ar3, ai2, ar2
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);//ai2, ar2, ai0, ar0
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);//ai3, ar3, ai1, ar1
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);//ar3, ar2, ar1, ar0
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);//ai3, ai2, ai1, ai0
+                    sum = _mm256_add_pd(av0, av1);
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                    _mm256_storeu_pd(pbs, sum); pbs += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = *(pb + p) ;
+                    double bi = *(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    *pbs = br + bi;
 
                     pbr++; pbi++; pbs++;
                 }
                 pb = pb + ldb;
             }
         }
-    }//mx==8
-#if 0
-    else
-    {
-        if((alpha ==1.0)||(alpha==-1.0))
-        {
-            if(alpha ==1.0)
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br_ = b[(j * ldb) + p];
-                        double bi_ = b[(j * ldb) + p + 1];
-                        *pbr = br_;
-                        *pbi = bi_;
-                        *pbs = br_ + bi_;
-
-                        pbr++; pbi++; pbs++;
-                    }
-                }
-            }
-            else
-            {
-                for (j = 0; j < n; j++)
-                {
-                    for (p = 0; p < (k*2); p += 2)// (real + imag)*k
-                    {
-                        double br_ = -b[(j * ldb) + p];
-                        double bi_ = -b[(j * ldb) + p + 1];
-                        *pbr = br_;
-                        *pbi = bi_;
-                        *pbs = br_ + bi_;
-
-                        pbr++; pbi++; pbs++;
-                    }
-                }
-            }
-        }
         else
         {
+            zerov = _mm256_setzero_pd();
             for (j = 0; j < n; j++)
             {
-                for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+                for (p = 0; p <= max_k; p += 8)
                 {
-                    double br_ = alpha * b[(j * ldb) + p];
-                    double bi_ = alpha * b[(j * ldb) + p + 1];
-                    *pbr = br_;
-                    *pbi = bi_;
-                    *pbs = br_ + bi_;
+                    double* pbp = pb + p;
+                    av0 = _mm256_loadu_pd(pbp);//ai1, ar1, ai0, ar0
+                    av1 = _mm256_loadu_pd(pbp+4);//ai3, ar3, ai2, ar2
+
+                    tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);//ai2, ar2, ai0, ar0
+                    tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);//ai3, ar3, ai1, ar1
+                    av0 = _mm256_unpacklo_pd(tv0, tv1);//ar3, ar2, ar1, ar0
+                    av1 = _mm256_unpackhi_pd(tv0, tv1);//ai3, ai2, ai1, ai0
+
+                    //negate
+                    av0 = _mm256_sub_pd(zerov,av0);
+                    av1 = _mm256_sub_pd(zerov,av1);
+
+                    sum = _mm256_add_pd(av0, av1);
+                    _mm256_storeu_pd(pbr, av0); pbr += 4;
+                    _mm256_storeu_pd(pbi, av1); pbi += 4;
+                    _mm256_storeu_pd(pbs, sum); pbs += 4;
+                }
+
+                for (; p < (k*2); p += 2)// (real + imag)*k
+                {
+                    double br = -*(pb + p) ;
+                    double bi = -*(pb + p + 1);
+                    *pbr = br;
+                    *pbi = bi;
+                    *pbs = br + bi;
 
                     pbr++; pbi++; pbs++;
                 }
+                pb = pb + ldb;
             }
         }
     }
-    #endif
+    else
+    {
+        for (j = 0; j < n; j++)
+        {
+            for (p = 0; p < (k*2); p += 2)// (real + imag)*k
+            {
+                double br_ = mul * (*(pb + p));
+                double bi_ = mul * (*(pb + p + 1));
+                *pbr = br_;
+                *pbi = bi_;
+                *pbs = br_ + bi_;
+
+                pbr++; pbi++; pbs++;
+            }
+            pb = pb + ldb;
+        }
+    }
 }
 
+/* Pack real and imaginary parts of A matrix in separate buffers and compute sum of real and imaginary part */
 void bli_packA_real_imag_sum(double *pa, gint_t i, guint_t k, guint_t lda, double *par, double *pai, double *pas, bool isTransA, gint_t mx)
 {
     __m256d av0, av1, av2, av3;
@@ -1578,7 +1488,8 @@ void bli_packA_real_imag_sum(double *pa, gint_t i, guint_t k, guint_t lda, doubl
             {
                 gint_t idx = ii * lda;
                 gint_t sidx;
-                for (p = 0; p <= ((k*2)-8); p += 8)
+                gint_t max_k = (k*2) - 8;
+                for (p = 0; p <= max_k; p += 8)
                 {
                     double ar0_ = *(pa + idx + p);
                     double ai0_ = *(pa + idx + p + 1);
@@ -1709,11 +1620,11 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
     double* pbi = bi;
     double* pbs = bs;
 
-    gint_t j, p;
+    gint_t j;
 
     /* b matrix real and imag packing and compute. */
-    //bli_packX_real_imag_sum(b, n, k, ldb, pbr, pbi, pbs, alpha, mx);
-#if 1//bug in above api to be fixed for mx = 1
+    bli_packX_real_imag_sum(b, n, k, ldb, pbr, pbi, pbs, alpha, mx);
+#if 0//bug in above api to be fixed for mx = 1
     if((alpha ==1.0)||(alpha==-1.0))
     {
         if(alpha ==1.0)
@@ -1814,7 +1725,8 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
     }
     ci = (double*)mci.alignedBuf;
     inc_t i;
-    for (i = (*p_istart); i <= (m2-mxmul2); i += mxmul2) //this loop can be threaded.
+    gint_t max_m = (m2-mxmul2);
+    for (i = (*p_istart); i <= max_m; i += mxmul2) //this loop can be threaded.
     {
         ////////////// operation 1 /////////////////
 
@@ -1832,8 +1744,8 @@ static err_t bli_zgemm_sqp_m8(gint_t m, gint_t n, gint_t k, double* a, guint_t l
 
         //Split Cr and Ci and beta multiplication done.
         double* pc = c + i;
-        //bli_packX_real_imag(pc, n, mx, ldc, pcr, pci, beta, mx);
-#if 1   //bug in above api to be fixed for mx = 1
+        bli_packX_real_imag(pc, n, mx, ldc, pcr, pci, beta, mx);
+#if 0   //bug in above api to be fixed for mx = 1
         if((beta ==1.0)||(beta==-1.0))
         {
             if(beta ==1.0)
