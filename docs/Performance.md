@@ -549,7 +549,7 @@ The `runthese.m` file will contain example invocations of the function.
 * Compiler: gcc 9.3.0
 * Results gathered: 2 April 2021
 * Implementations tested:
-  * BLIS 3a70941 (post-0.8.1)
+  * BLIS 757cb1c (post-0.8.1)
     * configured with `./configure -t openmp --sve-vector-size=vla CFLAGS="-D_A64FX -DPREFETCH256 -DSVE_NO_NAT_COMPLEX_KERNELS" arm64_sve` (single- and multithreaded)
     * sub-configuration exercised: `arm64_sve`
     * Single-threaded (1 core) execution requested via:
