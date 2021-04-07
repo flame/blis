@@ -549,20 +549,20 @@ The `runthese.m` file will contain example invocations of the function.
 * Compiler: gcc 9.3.0
 * Results gathered: 2 April 2021
 * Implementations tested:
-  * BLIS 39fbc3b (post-0.8.1)
-    * configured with `./configure -t openmp --sve-vector-size=vla CFLAGS="-D_A64FX -DPREFETCH256" arm64_sve` (single- and multithreaded)
+  * BLIS 757cb1c (post-0.8.1)
+    * configured with `./configure -t openmp --sve-vector-size=vla CFLAGS="-D_A64FX -DPREFETCH256 -DSVE_NO_NAT_COMPLEX_KERNELS" arm64_sve` (single- and multithreaded)
     * sub-configuration exercised: `arm64_sve`
     * Single-threaded (1 core) execution requested via:
-      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880` (double precision)
-      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040` (single precision)
+      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
+      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
     * Multithreaded (12 core) execution requested via:
       * `export BLIS_JC_NT=1 BLIS_IC_NT=2 BLIS_JR_NT=6`
-      * `export BLIS_SVE_KC_D=2400 BLIS_SVE_MC_D=64 BLIS_SVE_NC_D=26880` (double precision)
-      * `export BLIS_SVE_KC_S=2400 BLIS_SVE_MC_S=128 BLIS_SVE_NC_S=23040` (single precision)
+      * `export BLIS_SVE_KC_D=2400 BLIS_SVE_MC_D=64 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
+      * `export BLIS_SVE_KC_S=2400 BLIS_SVE_MC_S=128 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
     * Multithreaded (48 core) execution requested via:
       * `export BLIS_JC_NT=1 BLIS_IC_NT=4 BLIS_JR_NT=12`
-      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880` (double precision)
-      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040` (single precision)
+      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
+      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
   * Eigen 3.3.9
     * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen)
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
@@ -576,6 +576,7 @@ The `runthese.m` file will contain example invocations of the function.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
     * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
+    * **NOTE**: Some operations vendord by ARMPL were found as implemented but unoptimized. Their performance was not measured so as to collect all data in a timely manner.
   * Fujitsu SSL2 (Fujitsu toolchain 1.2.31)
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1 NPARALLEL=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12 NPARALLEL=12`
