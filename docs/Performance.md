@@ -21,6 +21,9 @@
   * **[Zen2](Performance.md#zen2)**
     * **[Experiment details](Performance.md#zen2-experiment-details)**
     * **[Results](Performance.md#zen2-results)**
+  * **[A64fx](Performance.md#a64fx)**
+    * **[Experiment details](Performance.md#a64fx-experiment-details)**
+    * **[Results](Performance.md#a64fx-results)**
 * **[Feedback](Performance.md#feedback)**
 
 # Introduction
@@ -523,6 +526,83 @@ The `runthese.m` file will contain example invocations of the function.
 ![multithreaded (64 cores)](graphs/large/l3_perf_zen2_jc4ic4jr4_nt64.png)
 * **Zen2 multithreaded (128 cores)**
 ![multithreaded (128 cores)](graphs/large/l3_perf_zen2_jc8ic4jr4_nt128.png)
+
+---
+
+## A64fx
+
+### A64fx experiment details
+
+* Location: RIKEN Center of Computational Science in Kobe, Japan
+  * These test results were gathered on the Fugaku supercomputer under project "量子物質の創発と機能のための基礎科学 ―「富岳」と最先端実験の密連携による革新的強相関電子科学" (hp200132)
+* Processor model: Fujitsu A64fx
+* Core topology: one socket, 4 NUMA groups per socket, 13 cores per group (one reserved for the OS), 48 cores total
+* SMT status: Unknown
+* Max clock rate: 2.2GHz (single- and multicore, observed)
+* Max vector register length: 512 bits (SVE)
+* Max FMA vector IPC: 2
+* Peak performance:
+  * single-core: 70.4 GFLOPS (double-precision), 140.8 GFLOPS (single-precision)
+  * multicore: 70.4 GFLOPS/core (double-precision), 140.8 GFLOPS/core (single-precision)
+* Operating system: RHEL 8.3
+* Page size: 256 bytes
+* Compiler: gcc 9.3.0
+* Results gathered: 2 April 2021
+* Implementations tested:
+  * BLIS 39fbc3b (post-0.8.1)
+    * configured with `./configure -t openmp --sve-vector-size=vla CFLAGS="-D_A64FX -DPREFETCH256" arm64_sve` (single- and multithreaded)
+    * sub-configuration exercised: `arm64_sve`
+    * Single-threaded (1 core) execution requested via:
+      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880` (double precision)
+      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040` (single precision)
+    * Multithreaded (12 core) execution requested via:
+      * `export BLIS_JC_NT=1 BLIS_IC_NT=2 BLIS_JR_NT=6`
+      * `export BLIS_SVE_KC_D=2400 BLIS_SVE_MC_D=64 BLIS_SVE_NC_D=26880` (double precision)
+      * `export BLIS_SVE_KC_S=2400 BLIS_SVE_MC_S=128 BLIS_SVE_NC_S=23040` (single precision)
+    * Multithreaded (48 core) execution requested via:
+      * `export BLIS_JC_NT=1 BLIS_IC_NT=4 BLIS_JR_NT=12`
+      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880` (double precision)
+      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040` (single precision)
+  * Eigen 3.3.9
+    * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen)
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
+  * ARMPL (20.1.0 for A64fx)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
+  * Fujitsu SSL2 (Fujitsu toolchain 1.2.31)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1 NPARALLEL=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12 NPARALLEL=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48 NPARALLEL=48`
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="12-23 24-35 36-47 48-59"`.
+  * All executables were run through `numactl --interleave=all` (multithreaded only).
+* Frequency throttling: No change made. No frequency lowering observed.
+* Comments:
+  * None.
+
+### A64fx results
+
+#### pdf
+
+* [A64fx single-threaded](graphs/large/l3_perf_a64fx_nt1.pdf)
+* [A64fx multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic2jr6_nt12.pdf)
+* [A64fx multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.pdf)
+
+#### png (inline)
+
+* **A64fx single-threaded**
+![single-threaded](graphs/large/l3_perf_a64fx_nt1.png)
+* **A64fx multithreaded (12 cores)**
+![multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic2jr6_nt12.png)
+* **A64fx multithreaded (48 cores)**
+![multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.png)
 
 ---
 
