@@ -576,7 +576,7 @@ The `runthese.m` file will contain example invocations of the function.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
     * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
-    * **NOTE**: Some operations vendord by ARMPL were found as implemented but unoptimized. Their performance was not measured so as to collect all data in a timely manner.
+    * **NOTE**: While this version of ARMPL does provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm` (with the exception `dtrsm`), but these implementations yield very low performance, and their long run times led us to skip collecting these data altogether.
   * Fujitsu SSL2 (Fujitsu toolchain 1.2.31)
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1 NPARALLEL=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12 NPARALLEL=12`
@@ -586,7 +586,7 @@ The `runthese.m` file will contain example invocations of the function.
   * All executables were run through `numactl --interleave=all` (multithreaded only).
 * Frequency throttling: No change made. No frequency lowering observed.
 * Comments:
-  * None.
+  * Special thanks to Stepan Nassyr and RuQing G. Xu for their work in developing and optimizing A64fx support. Also, thanks to RuQing G. Xu for collecting the data that appear in these graphs.
 
 ### A64fx results
 
