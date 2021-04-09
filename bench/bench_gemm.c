@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -147,10 +147,9 @@ int main( int argc, char** argv )
             continue;
           }
 
-        if      ( transA_c == 'n' || transA_c == 'N') transa = BLIS_NO_TRANSPOSE;
-        else if ( transA_c == 't' || transA_c == 'T') transa = BLIS_TRANSPOSE;
-        else if ( transA_c == 'c' || transA_c == 'C') transa = BLIS_CONJ_NO_TRANSPOSE;
-        else if ( transA_c == 'h' || transA_c == 'H') transa = BLIS_CONJ_TRANSPOSE;
+        if      (transA_c == 'n' || transA_c == 'N')  transa = BLIS_NO_TRANSPOSE;
+        else if (transA_c == 't' || transA_c == 'T')  transa = BLIS_TRANSPOSE;
+        else if ( transA_c == 'c' || transA_c == 'C') transa = BLIS_CONJ_TRANSPOSE;
         else
           {
             printf("Invalid option for transA \n");
@@ -159,8 +158,7 @@ int main( int argc, char** argv )
 
         if      ( transB_c == 'n' || transB_c == 'N') transb = BLIS_NO_TRANSPOSE;
         else if ( transB_c == 't' || transB_c == 'T') transb = BLIS_TRANSPOSE;
-        else if ( transB_c == 'c' || transB_c == 'C') transb = BLIS_CONJ_NO_TRANSPOSE;
-        else if ( transB_c == 'h' || transB_c == 'H') transb = BLIS_CONJ_TRANSPOSE;
+        else if ( transB_c == 'c' || transB_c == 'C') transb = BLIS_CONJ_TRANSPOSE;
         else
           {
             printf("Invalid option for transB \n");
