@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,7 +44,11 @@
 #ifdef FILE_IN_OUT
 //#define READ_ALL_PARAMS_FROM_FILE
 #endif
-//#define PRINT
+
+// uncomment to enable cblas interface
+//#define CBLAS
+
+#define CACHE_LINE_SIZE 64
 
 int main( int argc, char** argv )
 {
@@ -98,13 +102,10 @@ int main( int argc, char** argv )
 
 	n_repeats = 3;
 
-#if 1
 	//dt = BLIS_FLOAT;
 	dt = BLIS_DOUBLE;
-#else
 	//dt = BLIS_SCOMPLEX;
-	dt = BLIS_DCOMPLEX;
-#endif
+	//dt = BLIS_DCOMPLEX;
 
 #ifdef FILE_IN_OUT
 	if(argc < 3)
@@ -203,6 +204,23 @@ int main( int argc, char** argv )
 	bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
 	bli_param_map_blis_to_netlib_diag( diaga, &f77_diaga );
 
+
+            siz_t elem_size = bli_dt_size( dt );
+
+            cs_a = bli_align_dim_to_size( cs_a, elem_size, BLIS_HEAP_STRIDE_ALIGN_SIZE );
+            cs_b = bli_align_dim_to_size( cs_b, elem_size, BLIS_HEAP_STRIDE_ALIGN_SIZE );
+
+            //Will verify the leading dimension is powers of 2 and add 64bytes.
+            inc_t n_bytes = cs_a*sizeof(dt);
+
+            if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
+                   cs_a += CACHE_LINE_SIZE/sizeof(dt);
+
+            n_bytes = cs_b*sizeof(dt);
+            if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
+                   cs_b += CACHE_LINE_SIZE/sizeof(dt);
+
+
 		if(bli_is_left(side) && ((m > cs_a) || (m > cs_b))) continue; //leading dimension should be greater than number of rows
 
 		if(bli_is_right(side) && ((n > cs_a) || (m > cs_b))) continue; //leading dimension should be greater than number of rows
@@ -294,91 +312,184 @@ int main( int argc, char** argv )
 			          &c );
 #else
 
-		if ( bli_is_float( dt ) )
-		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  nn     = bli_obj_width( &c );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			float*   alphap = bli_obj_buffer( &alpha );
-			float*   ap     = bli_obj_buffer( &a );
-			float*   cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+            enum CBLAS_ORDER     cblas_order;
+            enum CBLAS_TRANSPOSE cblas_transa;
+            enum CBLAS_UPLO cblas_uplo;
+            enum CBLAS_SIDE cblas_side;
+            enum CBLAS_DIAG cblas_diag;
 
-			strsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &nn,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_double( dt ) )
-		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  nn     = bli_obj_width( &c );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			double*  alphap = bli_obj_buffer( &alpha );
-			double*  ap     = bli_obj_buffer( &a );
-			double*  cp     = bli_obj_buffer( &c );
+            if ( bli_obj_row_stride( &c ) == 1 )
+              cblas_order = CblasColMajor;
+            else
+              cblas_order = CblasRowMajor;
 
-			dtrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &nn,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_scomplex( dt ) )
-		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  nn     = bli_obj_width( &c );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			scomplex*  alphap = bli_obj_buffer( &alpha );
-			scomplex*  ap     = bli_obj_buffer( &a );
-			scomplex*  cp     = bli_obj_buffer( &c );
+            if( bli_is_trans( transa ) )
+              cblas_transa = CblasTrans;
+            else if( bli_is_conjtrans( transa ) )
+              cblas_transa = CblasConjTrans;
+            else
+              cblas_transa = CblasNoTrans;
 
-			ctrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &nn,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
-		else if ( bli_is_dcomplex( dt ) )
-		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  nn     = bli_obj_width( &c );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			dcomplex*  alphap = bli_obj_buffer( &alpha );
-			dcomplex*  ap     = bli_obj_buffer( &a );
-			dcomplex*  cp     = bli_obj_buffer( &c );
+            if(bli_is_upper(uploa))
+                cblas_uplo = CblasUpper;
+            else
+                cblas_uplo = CblasLower;
 
-			ztrsm_( &f77_side,
-			        &f77_uploa,
-			        &f77_transa,
-			        &f77_diaga,
-			        &mm,
-			        &nn,
-			        alphap,
-			        ap, &lda,
-			        cp, &ldc );
-		}
+            if(bli_is_left(side))
+                cblas_side = CblasLeft;
+            else
+                cblas_side = CblasRight;
+
+            if(bli_is_unit_diag(diaga))
+                cblas_diag = CblasUnit;
+            else
+                cblas_diag = CblasNonUnit;
+
+#else
+            f77_char f77_transa;
+            bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
+#endif
+            if ( bli_is_float( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &c );
+                f77_int  nn     = bli_obj_width( &c );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  ldc    = bli_obj_col_stride( &c );
+
+                float*   alphap = bli_obj_buffer( &alpha );
+                float*   ap     = bli_obj_buffer( &a );
+                float*   cp     = bli_obj_buffer( &c );
+
+#ifdef CBLAS
+                cblas_strsm( cblas_order,
+                             cblas_side,
+                             cblas_uplo,
+                             cblas_transa,
+                             cblas_diag,
+                             mm,
+                             nn,
+                             *alphap,
+                             ap, lda,
+                             cp, ldc
+                             );
+#else
+                strsm_( &f77_side,
+                        &f77_uploa,
+                        &f77_transa,
+                        &f77_diaga,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        cp, &ldc );
+#endif
+            }
+            else if ( bli_is_double( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &c );
+                f77_int  nn     = bli_obj_width( &c );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  ldc    = bli_obj_col_stride( &c );
+                double*  alphap = bli_obj_buffer( &alpha );
+                double*  ap     = bli_obj_buffer( &a );
+                double*  cp     = bli_obj_buffer( &c );
+
+#ifdef CBLAS
+                cblas_dtrsm( cblas_order,
+                             cblas_side,
+                             cblas_uplo,
+                             cblas_transa,
+                             cblas_diag,
+                             mm,
+                             nn,
+                             *alphap,
+                             ap, lda,
+                             cp, ldc
+                             );
+#else  
+                dtrsm_( &f77_side,
+                        &f77_uploa,
+                        &f77_transa,
+                        &f77_diaga,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        cp, &ldc );
 #endif
 
-#ifdef PRINT
-			bli_printm( "c after", &c, "%9.5f", "" );
-			exit(1);
+            }
+            else if ( bli_is_scomplex( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &c );
+                f77_int  nn     = bli_obj_width( &c );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  ldc    = bli_obj_col_stride( &c );
+                scomplex*  alphap = bli_obj_buffer( &alpha );
+                scomplex*  ap     = bli_obj_buffer( &a );
+                scomplex*  cp     = bli_obj_buffer( &c );
+
+#ifdef CBLAS
+                cblas_ctrsm( cblas_order,
+                             cblas_side,
+                             cblas_uplo,
+                             cblas_transa,
+                             cblas_diag,
+                             mm,
+                             nn,
+                             alphap,
+                             ap, lda,
+                             cp, ldc
+                             );
+#else
+                ctrsm_( &f77_side,
+                        &f77_uploa,
+                        &f77_transa,
+                        &f77_diaga,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        cp, &ldc );
+#endif
+            }
+            else if ( bli_is_dcomplex( dt ) )
+            {
+                f77_int  mm     = bli_obj_length( &c );
+                f77_int  nn     = bli_obj_width( &c );
+                f77_int  lda    = bli_obj_col_stride( &a );
+                f77_int  ldc    = bli_obj_col_stride( &c );
+                dcomplex*  alphap = bli_obj_buffer( &alpha );
+                dcomplex*  ap     = bli_obj_buffer( &a );
+                dcomplex*  cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+                cblas_ztrsm( cblas_order,
+                             cblas_side,
+                             cblas_uplo,
+                             cblas_transa,
+                             cblas_diag,
+                             mm,
+                             nn,
+                             alphap,
+                             ap, lda,
+                             cp, ldc
+                             );
+#else
+                ztrsm_( &f77_side,
+                        &f77_uploa,
+                        &f77_transa,
+                        &f77_diaga,
+                        &mm,
+                        &nn,
+                        alphap,
+                        ap, &lda,
+                        cp, &ldc );
+#endif
+            }else{
+                printf("Invalid data type! Exiting!\n");
+                exit(1);
+            }
 #endif
 
 			dtime_save = bli_clock_min_diff( dtime_save, dtime );
