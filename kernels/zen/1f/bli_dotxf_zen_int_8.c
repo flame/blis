@@ -203,53 +203,28 @@ void bli_sdotxf_zen_int_8
 			a6 += n_elem_per_reg * n_iter_unroll;
 			a7 += n_elem_per_reg * n_iter_unroll;
 		}
-
-#if 0
-		rho0 += rho0v.f[0] + rho0v.f[1] + rho0v.f[2] + rho0v.f[3] +
-		        rho0v.f[4] + rho0v.f[5] + rho0v.f[6] + rho0v.f[7];
-		rho1 += rho1v.f[0] + rho1v.f[1] + rho1v.f[2] + rho1v.f[3] +
-		        rho1v.f[4] + rho1v.f[5] + rho1v.f[6] + rho1v.f[7];
-		rho2 += rho2v.f[0] + rho2v.f[1] + rho2v.f[2] + rho2v.f[3] +
-		        rho2v.f[4] + rho2v.f[5] + rho2v.f[6] + rho2v.f[7];
-		rho3 += rho3v.f[0] + rho3v.f[1] + rho3v.f[2] + rho3v.f[3] +
-		        rho3v.f[4] + rho3v.f[5] + rho3v.f[6] + rho3v.f[7];
-		rho4 += rho4v.f[0] + rho4v.f[1] + rho4v.f[2] + rho4v.f[3] +
-		        rho4v.f[4] + rho4v.f[5] + rho4v.f[6] + rho4v.f[7];
-		rho5 += rho5v.f[0] + rho5v.f[1] + rho5v.f[2] + rho5v.f[3] +
-		        rho5v.f[4] + rho5v.f[5] + rho5v.f[6] + rho5v.f[7];
-		rho6 += rho6v.f[0] + rho6v.f[1] + rho6v.f[2] + rho6v.f[3] +
-		        rho6v.f[4] + rho6v.f[5] + rho6v.f[6] + rho6v.f[7];
-		rho7 += rho7v.f[0] + rho7v.f[1] + rho7v.f[2] + rho7v.f[3] +
-		        rho7v.f[4] + rho7v.f[5] + rho7v.f[6] + rho7v.f[7];
-#else
+		
 		// Now we need to sum the elements within each vector.
+		// Sum the elements of a given rho?v with hadd.
 
-		v8sf_t onev; onev.v = _mm256_set1_ps( 1.0f );
-
-		// Sum the elements of a given rho?v by dotting it with 1. The '1' in
-		// '0xf1' stores the sum of the upper four and lower four values to
-		// the low elements of each lane: elements 4 and 0, respectively. (The
-		// 'f' in '0xf1' means include all four elements of each lane in the
-		// summation.)
-		rho0v.v = _mm256_dp_ps( rho0v.v, onev.v, 0xf1 );
-		rho1v.v = _mm256_dp_ps( rho1v.v, onev.v, 0xf1 );
-		rho2v.v = _mm256_dp_ps( rho2v.v, onev.v, 0xf1 );
-		rho3v.v = _mm256_dp_ps( rho3v.v, onev.v, 0xf1 );
-		rho4v.v = _mm256_dp_ps( rho4v.v, onev.v, 0xf1 );
-		rho5v.v = _mm256_dp_ps( rho5v.v, onev.v, 0xf1 );
-		rho6v.v = _mm256_dp_ps( rho6v.v, onev.v, 0xf1 );
-		rho7v.v = _mm256_dp_ps( rho7v.v, onev.v, 0xf1 );
+		rho0v.v = _mm256_hadd_ps( rho0v.v, rho1v.v);
+		rho1v.v = _mm256_hadd_ps( rho2v.v, rho3v.v);
+		rho2v.v = _mm256_hadd_ps( rho4v.v, rho5v.v);
+		rho3v.v = _mm256_hadd_ps( rho6v.v, rho7v.v);
+		rho0v.v = _mm256_hadd_ps( rho0v.v, rho0v.v);
+		rho1v.v = _mm256_hadd_ps( rho1v.v, rho1v.v);
+		rho2v.v = _mm256_hadd_ps( rho2v.v, rho2v.v);
+		rho3v.v = _mm256_hadd_ps( rho3v.v, rho3v.v);
 
 		// Manually add the results from above to finish the sum.
 		rho0    = rho0v.f[0] + rho0v.f[4];
-		rho1    = rho1v.f[0] + rho1v.f[4];
-		rho2    = rho2v.f[0] + rho2v.f[4];
-		rho3    = rho3v.f[0] + rho3v.f[4];
-		rho4    = rho4v.f[0] + rho4v.f[4];
-		rho5    = rho5v.f[0] + rho5v.f[4];
-		rho6    = rho6v.f[0] + rho6v.f[4];
-		rho7    = rho7v.f[0] + rho7v.f[4];
-#endif
+		rho1    = rho0v.f[1] + rho0v.f[5];
+		rho2    = rho1v.f[0] + rho1v.f[4];
+		rho3    = rho1v.f[1] + rho1v.f[5];
+		rho4    = rho2v.f[0] + rho2v.f[4];
+		rho5    = rho2v.f[1] + rho2v.f[5];
+		rho6    = rho3v.f[0] + rho3v.f[4];
+		rho7    = rho3v.f[1] + rho3v.f[5];
 
 		// Adjust for scalar subproblem.
 		m -= n_elem_per_reg * n_iter_unroll * m_viter;
