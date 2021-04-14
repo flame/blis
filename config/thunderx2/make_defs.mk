@@ -65,7 +65,11 @@ CKOPTFLAGS     := $(COPTFLAGS) -O3 -ftree-vectorize
 ifeq ($(CC_VENDOR),gcc)
 CKVECFLAGS     := -mcpu=thunderx2t99
 else
-$(error gcc is required for this configuration.)
+ifeq ($(CC_VENDOR),clang)
+CKVECFLAGS     := -mcpu=thunderx2t99
+else
+$(error gcc or clang is required for this configuration.)
+endif
 endif
 
 # Flags specific to reference kernels.
