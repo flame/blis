@@ -767,7 +767,7 @@ void bli_zgemmsup_rv_zen_asm_2x4n
 				ymm2 = _mm256_loadu_pd((double const *)(tC));
 				ymm3 = _mm256_permute_pd(ymm2, 5);
 				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 =_mm256_mul_pd(ymm1, ymm3);
+				ymm3 = _mm256_mul_pd(ymm1, ymm3);
 				ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
 
 				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
