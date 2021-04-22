@@ -6,7 +6,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2017 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -181,18 +181,22 @@ all: blis openblas mkl
 
 blis: \
        bench_gemm_blis.x \
+       bench_gemmt_blis.x \
        bench_trsm_blis.x
 
 openblas: \
       bench_gemm_openblas.x \
+      bench_gemmt_openblas.x \
       bench_trsm_openblas.x
 
 atlas: \
       bench_gemm_atlas.x \
+      bench_gemmt_atlas.x \
       bench_trsm_atlas.x
 
 mkl:  \
       bench_gemm_mkl.x \
+      bench_gemmt_mkl.x \
       bench_trsm_mkl.x
 
 
