@@ -13,7 +13,7 @@ Contents
 * **[Key Features](#key-features)**
 * **[How to Download BLIS](#how-to-download-blis)**
 * **[Getting Started](#getting-started)**
-* **[Perforamnce](#performance)**
+* **[Performance](#performance)**
 * **[Documentation](#documentation)**
 * **[External Packages](#external-packages)**
 * **[Discussion](#discussion)**
