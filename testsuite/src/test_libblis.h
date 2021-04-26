@@ -168,8 +168,8 @@ typedef struct
 	unsigned int  n_datatypes;
 	char          datatype_char[ MAX_NUM_DATATYPES + 1 ];
 	num_t         datatype[ MAX_NUM_DATATYPES + 1 ];
-    unsigned int  mixed_domain;
-    unsigned int  mixed_precision;
+	unsigned int  mixed_domain;
+	unsigned int  mixed_precision;
 	unsigned int  p_first;
 	unsigned int  p_max;
 	unsigned int  p_inc;

@@ -36,6 +36,7 @@
 #include "f77_dot_sub.h"
 
 #ifdef BLIS_ENABLE_CBLAS
+
 //
 // Define CBLAS subrotine wrapper interfaces.
 //

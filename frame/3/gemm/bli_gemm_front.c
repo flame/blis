@@ -54,12 +54,27 @@ void bli_gemm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
-	
-		
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemm_check( alpha, a, b, beta, c, cntx );
-	
+
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) )
+	{
+		return;
+	}
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
 	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
@@ -67,6 +82,7 @@ void bli_gemm_front
 	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
 	{
 		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
+
 		if ( status == BLIS_SUCCESS )
 		{
 			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
@@ -171,13 +187,6 @@ void bli_gemm_front
 	  bli_obj_width( &a_local ),
 	  rntm
 	);
-
-#ifdef BLIS_CONFIG_ZEN3
-	// On AMD Zen3 platform we support changing
-	// the blocksize at runtime to get optimial
-	// performance
-	BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c_local);
-#endif
 
 	obj_t* cp    = &c_local;
 	obj_t* betap = beta;

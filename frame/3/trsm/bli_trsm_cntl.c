@@ -99,7 +99,7 @@ cntl_t* bli_trsm_l_cntl_create
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
-	  TRUE,    // do NOT invert diagonal
+	  FALSE,   // do NOT invert diagonal
 	  TRUE,    // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
 	  schema_a, // normally BLIS_PACKED_ROW_PANELS
@@ -137,7 +137,11 @@ cntl_t* bli_trsm_l_cntl_create
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
-	  TRUE,    // do NOT invert diagonal
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	  TRUE,    // invert diagonal
+#else
+	  FALSE,   // do NOT invert diagonal
+#endif
 	  TRUE,    // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
 	  schema_a, // normally BLIS_PACKED_ROW_PANELS

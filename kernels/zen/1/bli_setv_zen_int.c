@@ -37,32 +37,33 @@
 
 // -----------------------------------------------------------------------------
 
-void  bli_ssetv_zen_int
-(
-	conj_t           conjalpha,
-	dim_t            n,
-	float*  restrict alpha,
-	float*  restrict x, inc_t incx,
-	cntx_t* restrict cntx
-)
+void bli_ssetv_zen_int
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       float*  restrict alpha,
+       float*  restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
 {
-	__m256           alphav;
-	const dim_t   num_elem_per_reg = 8;
-	dim_t i = 0;
-	// If the vector dimension is zero return early.
-	if (bli_zero_dim1(n)) return;
+	const dim_t num_elem_per_reg = 8;
+	dim_t       i = 0;
+	__m256      alphav;
 
-	if (incx == 1)
+	// If the vector dimension is zero return early.
+	if ( bli_zero_dim1( n ) ) return;
+
+	if ( incx == 1 )
 	{
-		alphav = _mm256_broadcast_ss(alpha);
+		alphav = _mm256_broadcast_ss( alpha );
+
 		// For loop with n & ~0x7F => n & 0xFFFFFF80 masks the lower bits and results in multiples of 128
 		// for example if n = 255
 		// n & ~0x7F results in 128: copy from 0 to 128 happens in first loop
 		// n & ~0x3F results in 192: copy from 128 to 192 happens in second loop
 		// n & ~0x1F results in 224: copy from 128 to 192 happens in third loop and so on.
-		for (i = 0; i < (n & (~0x7F)); i += 128)
+		for ( i = 0; i < (n & (~0x7F)); i += 128 )
 		{
-
 			_mm256_storeu_ps(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_ps(x + num_elem_per_reg * 1, alphav);
 			_mm256_storeu_ps(x + num_elem_per_reg * 2, alphav);
@@ -82,7 +83,7 @@ void  bli_ssetv_zen_int
 
 			x += 128;
 		}
-		for (; i < (n & (~0x3F)); i += 64)
+		for ( ; i < (n & (~0x3F)); i += 64 )
 		{
 			_mm256_storeu_ps(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_ps(x + num_elem_per_reg * 1, alphav);
@@ -95,7 +96,7 @@ void  bli_ssetv_zen_int
 
 			x += 64;
 		}
-		for (; i < (n & (~0x1F)); i += 32)
+		for ( ; i < (n & (~0x1F)); i += 32 )
 		{
 			_mm256_storeu_ps(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_ps(x + num_elem_per_reg * 1, alphav);
@@ -104,26 +105,26 @@ void  bli_ssetv_zen_int
 
 			x += 32;
 		}
-		for (; i < (n & (~0x0F)); i += 16)
+		for ( ; i < (n & (~0x0F)); i += 16 )
 		{
 			_mm256_storeu_ps(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_ps(x + num_elem_per_reg * 1, alphav);
 
 			x += 16;
 		}
-		for (; i < (n & (~0x07)); i += 8)
+		for ( ; i < (n & (~0x07)); i += 8 )
 		{
 			_mm256_storeu_ps(x + num_elem_per_reg * 0, alphav);
 			x += 8;
 		}
-		for (; i < n; i++)
+		for ( ; i < n; ++i )
 		{
 			*x++ = *alpha;
 		}
 	}
 	else
 	{
-		for (dim_t i = 0; i < n; ++i)
+		for ( dim_t i = 0; i < n; ++i )
 		{
 			*x = *alpha;
 			x += incx;
@@ -132,28 +133,29 @@ void  bli_ssetv_zen_int
 }
 
 void  bli_dsetv_zen_int
-(
-	conj_t           conjalpha,
-	dim_t            n,
-	double*  restrict alpha,
-	double*  restrict x, inc_t incx,
-	cntx_t* restrict cntx
-)
+     (
+       conj_t           conjalpha,
+       dim_t            n,
+       double* restrict alpha,
+       double* restrict x, inc_t incx,
+       cntx_t* restrict cntx
+     )
 {
-	const dim_t   num_elem_per_reg = 4;
-	dim_t i = 0;
-	__m256d          alphav;
-	// If the vector dimension is zero return early.
-	if (bli_zero_dim1(n)) return;
+	const dim_t num_elem_per_reg = 4;
+	dim_t       i = 0;
+	__m256d     alphav;
 
-	if (incx == 1)
+	// If the vector dimension is zero return early.
+	if ( bli_zero_dim1( n ) ) return;
+
+	if ( incx == 1 )
 	{
 		// Broadcast the alpha scalar to all elements of a vector register.
-		alphav = _mm256_broadcast_sd(alpha);
+		alphav = _mm256_broadcast_sd( alpha );
 
 		// n & (~0x3F) = n & 0xFFFFFFC0 -> this masks the numbers less than 64,
 		// the copy operation will be done for the multiples of 64
-		for (i = 0; i < (n & (~0x3F)); i += 64)
+		for ( i = 0; i < (n & (~0x3F)); i += 64 )
 		{
 			_mm256_storeu_pd(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_pd(x + num_elem_per_reg * 1, alphav);
@@ -174,7 +176,7 @@ void  bli_dsetv_zen_int
 
 			x += num_elem_per_reg * 16;
 		}
-		for (; i < (n & (~0x1F)); i += 32)
+		for ( ; i < (n & (~0x1F)); i += 32 )
 		{
 			_mm256_storeu_pd(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_pd(x + num_elem_per_reg * 1, alphav);
@@ -187,7 +189,7 @@ void  bli_dsetv_zen_int
 
 			x += num_elem_per_reg * 8;
 		}
-		for (; i < (n & (~0xF)); i += 16)
+		for ( ; i < (n & (~0xF)); i += 16 )
 		{
 			_mm256_storeu_pd(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_pd(x + num_elem_per_reg * 1, alphav);
@@ -196,26 +198,26 @@ void  bli_dsetv_zen_int
 
 			x += num_elem_per_reg * 4;
 		}
-		for (; i < (n & (~0x07)); i += 8)
+		for ( ; i < (n & (~0x07)); i += 8 )
 		{
 			_mm256_storeu_pd(x + num_elem_per_reg * 0, alphav);
 			_mm256_storeu_pd(x + num_elem_per_reg * 1, alphav);
 
 			x += num_elem_per_reg * 2;
 		}
-		for (; i < (n & (~0x03)); i += 4)
+		for ( ; i < (n & (~0x03)); i += 4 )
 		{
 			_mm256_storeu_pd(x + num_elem_per_reg * 0, alphav);
 			x += num_elem_per_reg;
 		}
-		for (; i < n; i++)
+		for ( ; i < n; ++i )
 		{
 			*x++ = *alpha;
 		}
 	}
 	else
 	{
-		for (i = 0; i < n; ++i)
+		for ( i = 0; i < n; ++i )
 		{
 			*x = *alpha;
 
@@ -223,3 +225,4 @@ void  bli_dsetv_zen_int
 		}
 	}
 }
+

@@ -147,7 +147,14 @@ BLIS_INLINE void bli_mem_set_size( siz_t size, mem_t* mem )
 BLIS_INLINE void bli_mem_clear( mem_t* mem )
 {
 	bli_mem_set_buffer( NULL, mem );
+#ifdef __cplusplus
+	const packbuf_t pb = BLIS_BUFFER_FOR_GEN_USE;
+	// When using C++, which is strongly typed, we avoid use of -1 as a
+	// packbuf_t value since it will result in a compile-time error.
+	bli_mem_set_buf_type( pb, mem );
+#else
 	bli_mem_set_buf_type( ( packbuf_t )-1, mem );
+#endif
 	bli_mem_set_pool( NULL, mem );
 	bli_mem_set_size( 0, mem );
 }

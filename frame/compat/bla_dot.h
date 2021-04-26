@@ -87,4 +87,5 @@ BLIS_EXPORT_BLAS double PASTEF77(d,sdot)
          const float*   x, const f77_int* incx,
          const float*   y, const f77_int* incy
      );
+
 #endif

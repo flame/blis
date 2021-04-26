@@ -91,7 +91,7 @@ dim_t PASTEMAC0(opname) \
 }
 
 GENFRONT( gemm_determine_kc, gemm )
-GENFRONT( herk_determine_kc, trmm )
+GENFRONT( herk_determine_kc, herk )
 GENFRONT( trmm_determine_kc, trmm )
 GENFRONT( trsm_determine_kc, trsm )
 

@@ -235,7 +235,7 @@ endif
 
 # Enumerate possible datatypes and computation precisions.
 #dts := s d c z
-DTS := d
+DTS := s d
 
 TRANS := n_n \
          n_t \
@@ -266,17 +266,27 @@ SHAPES := l_l_s \
           l_s_s \
           l_l_l
 
-LDIMS := s l
+#LDIMS := s l
+LDIMS := s
 
 # Define the small/constant m, n, and k dimensions for single core and multicore
 # experiments.
-SMS_ST := 6
-SNS_ST := 8
-SKS_ST := 4
-
-SMS_MT := 6
-SNS_MT := 8
-SKS_MT := 10
+# st, single real
+SMS_ST_S := 6
+SNS_ST_S := 16
+SKS_ST_S := 4
+# mt, single real
+SMS_MT_S := 6
+SNS_MT_S := 16
+SKS_MT_S := 10
+# st, double real
+SMS_ST_D := 6
+SNS_ST_D := 8
+SKS_ST_D := 4
+# mt, double real
+SMS_MT_D := 6
+SNS_MT_D := 8
+SKS_MT_D := 10
 
 
 #
@@ -397,39 +407,63 @@ XSTORS0 = ccc
 # --- Object and binary file definitons ----------------------------------------
 #
 
+get-sms-st = $(strip $(if $(findstring s,$(1)),$(SMS_ST_S),\
+                     $(if $(findstring d,$(1)),$(SMS_ST_D),0)))
+get-sks-st = $(strip $(if $(findstring s,$(1)),$(SKS_ST_S),\
+                     $(if $(findstring d,$(1)),$(SKS_ST_D),0)))
+get-sns-st = $(strip $(if $(findstring s,$(1)),$(SNS_ST_S),\
+                     $(if $(findstring d,$(1)),$(SNS_ST_D),0)))
+get-sms-mt = $(strip $(if $(findstring s,$(1)),$(SMS_MT_S),\
+                     $(if $(findstring d,$(1)),$(SMS_MT_D),0)))
+get-sks-mt = $(strip $(if $(findstring s,$(1)),$(SKS_MT_S),\
+                     $(if $(findstring d,$(1)),$(SKS_MT_D),0)))
+get-sns-mt = $(strip $(if $(findstring s,$(1)),$(SNS_MT_S),\
+                     $(if $(findstring d,$(1)),$(SNS_MT_D),0)))
+
+get-sms    = $(strip $(if $(findstring st,$(1)),$(call get-sms-st,$(2)),\
+                     $(if $(findstring mt,$(1)),$(call get-sms-mt,$(2)),0)))
+get-sks    = $(strip $(if $(findstring st,$(1)),$(call get-sks-st,$(2)),\
+                     $(if $(findstring mt,$(1)),$(call get-sks-mt,$(2)),0)))
+get-sns    = $(strip $(if $(findstring st,$(1)),$(call get-sns-st,$(2)),\
+                     $(if $(findstring mt,$(1)),$(call get-sns-mt,$(2)),0)))
+
 # Define a function to generate an object file name using the various parameter
 # lists.
-get-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4),$(foreach sm,$(5),$(foreach sn,$(6),$(foreach sk,$(7),$(foreach ld,$(8),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(call get-ldim-str,$(ld))_$(9)_$(10).o))))))))
+get-objs = $(foreach dt,$(1),$(foreach tr,$(2),$(foreach st,$(3),$(foreach sh,$(4), \
+           $(foreach sm,$(call get-sms,$(7),$(dt)), \
+           $(foreach sn,$(call get-sns,$(7),$(dt)), \
+           $(foreach sk,$(call get-sks,$(7),$(dt)), \
+           $(foreach ld,$(5),test_$(dt)gemm_$(tr)_$(st)_$(call get-shape-dim-str,$(sh),$(sm),$(sn),$(sk))_$(call get-ldim-str,$(ld))_$(6)_$(7).o))))))))
 
 # -- Single-threaded --
 
 # Build a list of object files and binaries for each single-threaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blissup,st)
+BLISSUP_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(LDIMS),blissup,st)
 BLISSUP_ST_BINS  := $(patsubst %.o,%.x,$(BLISSUP_ST_OBJS))
 
-BLISLPAB_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blisconv,st)
-BLISLPAB_ST_BINS := $(patsubst %.o,%.x,$(BLISLPAB_ST_OBJS))
+BLISCONV_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(LDIMS),blisconv,st)
+BLISCONV_ST_BINS := $(patsubst %.o,%.x,$(BLISCONV_ST_OBJS))
 
-EIGEN_ST_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),eigen,st)
+EIGEN_ST_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(LDIMS),eigen,st)
 EIGEN_ST_BINS    := $(patsubst %.o,%.x,$(EIGEN_ST_OBJS))
 
-OPENBLAS_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),openblas,st)
+OPENBLAS_ST_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(LDIMS),openblas,st)
 OPENBLAS_ST_BINS := $(patsubst %.o,%.x,$(OPENBLAS_ST_OBJS))
 
-BLASFEO_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),blasfeo,st)
+BLASFEO_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(LDIMS),blasfeo,st)
 BLASFEO_ST_BINS  := $(patsubst %.o,%.x,$(BLASFEO_ST_OBJS))
 
-LIBXSMM_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),libxsmm,st)
+LIBXSMM_ST_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(XSTORS0),$(SHAPES),$(LDIMS),libxsmm,st)
 LIBXSMM_ST_BINS  := $(patsubst %.o,%.x,$(LIBXSMM_ST_OBJS))
 
-VENDOR_ST_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_ST),$(SNS_ST),$(SKS_ST),$(LDIMS),vendor,st)
+VENDOR_ST_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(LDIMS),vendor,st)
 VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
 # Mark the object files as intermediate so that make will remove them
 # automatically after building the binaries on which they depend.
 .INTERMEDIATE: $(BLISSUP_ST_OBJS) \
-               $(BLISLPAB_ST_OBJS) \
+               $(BLISCONV_ST_OBJS) \
                $(EIGEN_ST_OBJS) \
                $(OPENBLAS_ST_OBJS) \
                $(BLASFEO_ST_OBJS) \
@@ -440,19 +474,19 @@ VENDOR_ST_BINS   := $(patsubst %.o,%.x,$(VENDOR_ST_OBJS))
 
 # Build a list of object files and binaries for each multithreaded
 # implementation using the get-st-objs() function defined above.
-BLISSUP_MT_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),blissup,mt)
+BLISSUP_MT_OBJS  := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(LDIMS),blissup,mt)
 BLISSUP_MT_BINS  := $(patsubst %.o,%.x,$(BLISSUP_MT_OBJS))
 
-BLISLPAB_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),blisconv,mt)
-BLISLPAB_MT_BINS := $(patsubst %.o,%.x,$(BLISLPAB_MT_OBJS))
+BLISCONV_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(STORS0),$(SHAPES),$(LDIMS),blisconv,mt)
+BLISCONV_MT_BINS := $(patsubst %.o,%.x,$(BLISCONV_MT_OBJS))
 
-EIGEN_MT_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),eigen,mt)
+EIGEN_MT_OBJS    := $(call get-objs,$(DTS),$(TRANS0),$(ESTORS0),$(SHAPES),$(LDIMS),eigen,mt)
 EIGEN_MT_BINS    := $(patsubst %.o,%.x,$(EIGEN_MT_OBJS))
 
-OPENBLAS_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),openblas,mt)
+OPENBLAS_MT_OBJS := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(LDIMS),openblas,mt)
 OPENBLAS_MT_BINS := $(patsubst %.o,%.x,$(OPENBLAS_MT_OBJS))
 
-VENDOR_MT_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(SMS_MT),$(SNS_MT),$(SKS_MT),$(LDIMS),vendor,mt)
+VENDOR_MT_OBJS   := $(call get-objs,$(DTS),$(TRANS0),$(BSTORS0),$(SHAPES),$(LDIMS),vendor,mt)
 VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 #$(error "objs = $(EIGEN_ST_BINS)" )
@@ -460,7 +494,7 @@ VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 # Mark the object files as intermediate so that make will remove them
 # automatically after building the binaries on which they depend.
 .INTERMEDIATE: $(BLISSUP_MT_OBJS) \
-               $(BLISLPAB_MT_OBJS) \
+               $(BLISCONV_MT_OBJS) \
                $(EIGEN_MT_OBJS) \
                $(OPENBLAS_MT_OBJS) \
                $(VENDOR_MT_OBJS)
@@ -472,22 +506,13 @@ VENDOR_MT_BINS   := $(patsubst %.o,%.x,$(VENDOR_MT_OBJS))
 
 all:         st
 
-#blis:        blissup-st blisconv-st
-#blissup:     blissup-st
-#blisconv:    blisconv-st
-#eigen:       eigen-st
-#openblas:    openblas-st
-#blasfeo:     blasfeo-st
-#libxsmm:     libxsmm-st
-#vendor:      vendor-st
-
 # -- Single-threaded --
 
 st:          blissup-st blisconv-st \
              eigen-st openblas-st blasfeo-st libxsmm-st vendor-st
 
 blissup-st:  check-env $(BLISSUP_ST_BINS)
-blisconv-st: check-env $(BLISLPAB_ST_BINS)
+blisconv-st: check-env $(BLISCONV_ST_BINS)
 eigen-st:    check-env $(EIGEN_ST_BINS)
 openblas-st: check-env $(OPENBLAS_ST_BINS)
 blasfeo-st:  check-env $(BLASFEO_ST_BINS)
@@ -500,7 +525,7 @@ mt:          blissup-mt blisconv-mt \
              eigen-mt openblas-mt vendor-mt
 
 blissup-mt:  check-env $(BLISSUP_MT_BINS)
-blisconv-mt: check-env $(BLISLPAB_MT_BINS)
+blisconv-mt: check-env $(BLISCONV_MT_BINS)
 eigen-mt:    check-env $(EIGEN_MT_BINS)
 openblas-mt: check-env $(OPENBLAS_MT_BINS)
 vendor-mt:   check-env $(VENDOR_MT_BINS)
@@ -531,9 +556,9 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_ST), \
-$(foreach sn,$(SNS_ST), \
-$(foreach sk,$(SKS_ST), \
+$(foreach sm,$(call get-sms,st,$(dt)), \
+$(foreach sn,$(call get-sns,st,$(dt)), \
+$(foreach sk,$(call get-sks,st,$(dt)), \
 $(foreach ld,$(LDIMS), \
 $(foreach impl,$(BIMPLS_ST), \
 $(eval $(call make-st-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
@@ -553,9 +578,9 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_MT), \
-$(foreach sn,$(SNS_MT), \
-$(foreach sk,$(SKS_MT), \
+$(foreach sm,$(call get-sms,mt,$(dt)), \
+$(foreach sn,$(call get-sns,mt,$(dt)), \
+$(foreach sk,$(call get-sks,mt,$(dt)), \
 $(foreach ld,$(LDIMS), \
 $(foreach impl,$(BIMPLS_MT), \
 $(eval $(call make-mt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
@@ -574,9 +599,9 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_ST), \
-$(foreach sn,$(SNS_ST), \
-$(foreach sk,$(SKS_ST), \
+$(foreach sm,$(call get-sms,st,$(dt)), \
+$(foreach sn,$(call get-sns,st,$(dt)), \
+$(foreach sk,$(call get-sks,st,$(dt)), \
 $(foreach ld,$(LDIMS), \
 $(foreach impl,$(EIMPLS), \
 $(eval $(call make-eigst-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))
@@ -595,9 +620,9 @@ $(foreach dt,$(DTS), \
 $(foreach tr,$(TRANS), \
 $(foreach st,$(STORS), \
 $(foreach sh,$(SHAPES), \
-$(foreach sm,$(SMS_MT), \
-$(foreach sn,$(SNS_MT), \
-$(foreach sk,$(SKS_MT), \
+$(foreach sm,$(call get-sms,mt,$(dt)), \
+$(foreach sn,$(call get-sns,mt,$(dt)), \
+$(foreach sk,$(call get-sks,mt,$(dt)), \
 $(foreach ld,$(LDIMS), \
 $(foreach impl,$(EIMPLS), \
 $(eval $(call make-eigmt-rule,$(dt),$(tr),$(st),$(sh),$(sm),$(sn),$(sk),$(ld),$(impl))))))))))))

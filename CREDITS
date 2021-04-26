@@ -20,7 +20,9 @@ but many others have contributed code and feedback, including
   Jérémie du Boisberranger @jeremiedbb
   Jed Brown                @jedbrown           (Argonne National Laboratory)
   Robin Christ             @robinchrist
+  Dilyn Corner             @dilyn-corner
   Mat Cross                @matcross           (NAG)
+                           @decandia50
   Kay Dewhurst             @jkd2016            (Max Planck Institute, Halle, Germany)
   Jeff Diamond                                 (Oracle)
   Johannes Dieterich       @iotamudelta
@@ -58,7 +60,10 @@ but many others have contributed code and feedback, including
   Simon Lukas Märtens      @ACSimon33          (RWTH Aachen University)
   Devin Matthews           @devinamatthews     (The University of Texas at Austin)
   Stefanos Mavros          @smavros
+  Ilknur Mustafazade       @Runkli
+                           @nagsingh
   Bhaskar Nallani          @BhaskarNallani     (AMD)
+  Stepan Nassyr            @stepannassyr       (Jülich Supercomputing Centre)
   Nisanth Padinharepatt                        (AMD)
   Ajay Panyala             @ajaypanyala
   Devangi Parikh           @dnparikh           (The University of Texas at Austin)
@@ -68,6 +73,7 @@ but many others have contributed code and feedback, including
   Jack Poulson             @poulson            (Stanford)
   Mathieu Poumeyrol        @kali
   Christos Psarras         @ChrisPsa           (RWTH Aachen University)
+                           @pkubaj
                            @qnerd
   Michael Rader            @mrader1248
   Pradeep Rao              @pradeeptrgit       (AMD)
@@ -88,11 +94,13 @@ but many others have contributed code and feedback, including
   Nicholai Tukanov         @nicholaiTukanov    (The University of Texas at Austin)
   Rhys Ulerich             @RhysU              (The University of Texas at Austin)
   Robert van de Geijn      @rvdg               (The University of Texas at Austin)
+  Meghana Vankadari        @Meghana-vankadari  (AMD)
   Kiran Varaganti          @kvaragan           (AMD)
   Natalia Vassilieva                           (Hewlett Packard Enterprise)
   Zhang Xianyi             @xianyi             (Chinese Academy of Sciences)
-  RuQing Xu                @xrq-phys           (The University of Tokyo)
   Benda Xu                 @heroxbd
+  Guodong Xu               @docularxu          (Linaro.org)
+  RuQing Xu                @xrq-phys           (The University of Tokyo)
   Costas Yamin             @cosstas
   Chenhan Yu               @ChenhanYu          (The University of Texas at Austin)
   Roman Yurchak            @rth                (Symerio)

@@ -72,11 +72,6 @@ INSERT_GENTDEF( packm )
 
 // NOTE: the following macros generate packm kernel function type definitions
 // that are "ctyped" and void-typed, for each of the floating-point datatypes.
-// However, we will only make use of the void-typed definitions because the
-// functions such as bli_?packm_cxk() (currently) use arrays of function
-// pointers to store and access the function pointers for various unrolling
-// (register blocksize) values, and therefore they must all be of the same
-// type (hence the use of void* for kappa, a, and p).
 
 // packm_ker
 

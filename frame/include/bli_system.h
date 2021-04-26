@@ -64,7 +64,7 @@
 
 // Determine if we are on a 64-bit or 32-bit architecture.
 #if defined(_M_X64) || defined(__x86_64) || defined(__aarch64__) || \
-    defined(_ARCH_PPC64)
+    defined(_ARCH_PPC64) || defined(__s390x__) || defined(_LP64)
   #define BLIS_ARCH_64
 #else
   #define BLIS_ARCH_32
@@ -123,11 +123,6 @@
 
   #include <time.h>
 #endif
-
-// POSIX threads are unconditionally required, regardless of whether
-// multithreading is enabled via pthreads or OpenMP (or disabled).
-// If pthreads is not available (Windows), then fake it.
-//#include "bli_pthread_wrap.h"
 
 
 #endif

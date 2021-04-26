@@ -52,7 +52,7 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_5); \
-	/* Inspect whether we are going to be packing matrix A. */	\
+	/* Inspect whether we are going to be packing matrix A. */ \
 	if ( will_pack == FALSE ) \
 	{ \
 	} \

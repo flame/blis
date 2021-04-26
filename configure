@@ -168,6 +168,18 @@ print_usage()
 	echo "                 --disable-threading is specified, threading will be"
 	echo "                 disabled. The default is 'no'."
 	echo " "
+	echo "   --enable-system, --disable-system"
+	echo " "
+	echo "                 Enable conventional operating system support, such as"
+	echo "                 pthreads for thread-safety. The default state is enabled."
+	echo "                 However, in rare circumstances you may wish to configure"
+	echo "                 BLIS for use with a minimal or nonexistent operating"
+	echo "                 system (e.g. hardware simulators). In these situations,"
+	echo "                 --disable-system may be used to jettison all compile-time"
+	echo "                 and link-time dependencies outside of the standard C"
+	echo "                 library. When disabled, this option also forces the use"
+	echo "                 of --disable-threading."
+	echo " "
 	echo "   --disable-pba-pools, --enable-pba-pools"
 	echo "   --disable-sba-pools, --enable-sba-pools"
 	echo " "
@@ -286,6 +298,20 @@ print_usage()
 	echo "                 which may be ignored in select situations if the"
 	echo "                 implementation has a good reason to do so."
 	echo " "
+	echo "   --disable-trsm-preinversion, --enable-trsm-preinversion"
+	echo " "
+	echo "                 Disable (enabled by default) pre-inversion of triangular"
+	echo "                 matrix diagonals when performing trsm. When pre-inversion"
+	echo "                 is enabled, diagonal elements are inverted outside of the"
+	echo "                 microkernel (e.g. during packing) so that the microkernel"
+	echo "                 can use multiply instructions. When disabled, division"
+	echo "                 instructions are used within the microkernel. Executing"
+	echo "                 these division instructions within the microkernel will"
+	echo "                 incur a performance penalty, but numerical robustness will"
+	echo "                 improve for certain cases involving denormal numbers that"
+	echo "                 would otherwise result in overflow in the pre-inverted"
+	echo "                 values."
+	echo " "
 	echo "   --force-version=STRING"
 	echo " "
 	echo "                 Force configure to use an arbitrary version string"
@@ -300,9 +326,6 @@ print_usage()
 	echo "                 a sanity check to make sure these lists are constituted"
 	echo "                 as expected."
 	echo " "
-	echo "   -q, --quiet   Suppress informational output. By default, configure"
-	echo "                 is verbose. (NOTE: -q is not yet implemented)"
-	echo " "
 	echo "   --complex-return=gnu|intel"
 	echo " "
 	echo "                 Specify the way in which complex numbers are returned"
@@ -311,6 +334,9 @@ print_usage()
 	echo "                 If not specified and the environment variable FC is set,"
 	echo "                 attempt to determine the return type from the compiler."
 	echo "                 Otherwise, the default is \"gnu\"."
+	echo " "
+	echo "   -q, --quiet   Suppress informational output. By default, configure"
+	echo "                 is verbose. (NOTE: -q is not yet implemented)"
 	echo " "
 	echo "   -h, --help    Output this information and quit."
 	echo " "
@@ -1000,7 +1026,7 @@ select_tool()
 
 auto_detect()
 {
-	local cc cflags config_defines detected_config rval
+	local cc cflags config_defines detected_config rval cmd
 
 	# Use the same compiler that was found earlier.
 	cc="${found_cc}"
@@ -1017,68 +1043,100 @@ auto_detect()
 		cflags=
 	fi
 
-	# Locate our source files.
-	bli_arch_c="bli_arch.c"
-	bli_cpuid_c="bli_cpuid.c"
-	main_c="config_detect.c"
+	# Accumulate a list of source files we'll need to compile along with
+	# the top-level (root) directory in which they are located.
+	c_src_pairs=""
+	c_src_pairs="${c_src_pairs} frame:bli_arch.c"
+	c_src_pairs="${c_src_pairs} frame:bli_cpuid.c"
+	c_src_pairs="${c_src_pairs} frame:bli_env.c"
+	c_src_pairs="${c_src_pairs} build:config_detect.c"
 
-	bli_arch_c_filepath=$(find ${dist_path}/frame -name "${bli_arch_c}")
-	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_c}")
-	main_c_filepath=$(find ${dist_path}/build -name "${main_c}")
+	# Accumulate a list of full filepaths to the source files listed above.
+	c_src_filepaths=""
+	for pair in ${c_src_pairs}; do
 
-	# Locate headers needed directly by the above files.
-	bli_arch_h="bli_arch.h"
-	bli_cpuid_h="bli_cpuid.h"
-	bli_typed_h="bli_type_defs.h"
+		filename=${pair#*:}
+		rootdir=${pair%:*}
 
-	bli_arch_h_filepath=$(find ${dist_path}/frame -name "${bli_arch_h}")
-	bli_cpuid_h_filepath=$(find ${dist_path}/frame -name "${bli_cpuid_h}")
-	bli_typed_h_filepath=$(find ${dist_path}/frame -name "${bli_typed_h}")
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		c_src_filepaths="${c_src_filepaths} ${filepath}"
+	done
 
-	bli_arch_h_path=${bli_arch_h_filepath%/${bli_arch_h}}
-	bli_cpuid_h_path=${bli_cpuid_h_filepath%/${bli_cpuid_h}}
-	bli_typed_h_path=${bli_typed_h_filepath%/${bli_typed_h}}
+	# Accumulate a list of header files we'll need to locate along with
+	# the top-level (root) directory in which they are located.
+	c_hdr_pairs=""
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_system.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_type_defs.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_arch.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_cpuid.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_env.h"
+	# NOTE: These headers are needed by bli_type_defs.h.
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_malloc.h"
+	c_hdr_pairs="${c_hdr_pairs} frame:bli_pthread.h"
 
-	# Locate other headers needed by bli_type_defs.h.
-	bli_pthread_h="bli_pthread.h"
-	bli_pthread_h_filepath=$(find ${dist_path}/frame -name "${bli_pthread_h}")
-	bli_pthread_h_path=${bli_pthread_h_filepath%/${bli_pthread_h}}
-	bli_malloc_h="bli_malloc.h"
-	bli_malloc_h_filepath=$(find ${dist_path}/frame -name "${bli_malloc_h}")
-	bli_malloc_h_path=${bli_malloc_h_filepath%/${bli_malloc_h}}
+	# Accumulate a list of full paths to the header files listed above.
+	# While we are at it, we include the "-I" compiler option to indicate
+	# adding the path to the list of directories to search when encountering
+	# #include directives.
+	c_hdr_paths=""
+	for pair in ${c_hdr_pairs}; do
+
+		filename=${pair#*:}
+		rootdir=${pair%:*}
+
+		filepath=$(find ${dist_path}/${rootdir} -name "${filename}")
+		path=${filepath%/*}
+		c_hdr_paths="${c_hdr_paths} -I${path}"
+	done
 
 	# Define the executable name.
 	autodetect_x="auto-detect.x"
 
 	# Create #defines for all of the BLIS_CONFIG_ macros in bli_cpuid.c.
+	bli_cpuid_c_filepath=$(find ${dist_path}/frame -name "bli_cpuid.c")
 	config_defines=$(grep BLIS_CONFIG_ ${bli_cpuid_c_filepath} \
 	                 | sed -e 's/#ifdef /-D/g')
 
-	# Set the linker flags. We need pthreads because it is needed for
-	# parts of bli_arch.c unrelated to bli_arch_string(), which is called
-	# by the main() function in ${main_c}.
-	if [[ $is_win == no || "$cc_vendor" != "clang" ]]; then
+	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
+	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
+	# bli_arch_string(), which is called by the main() function in ${main_c}.
+	if [[ "$is_win" == "no" || "$cc_vendor" != "clang" ]]; then
 		ldflags="${LIBPTHREAD--lpthread}"
+	fi
+
+	# However, if --disable-system was given, we override the choice made above
+	# and do not use any pthread link flags.
+	if [[ "$enable_system" == "no" ]]; then
+		ldflags=
 	fi
 
 	# Compile the auto-detect program using source code inside the
 	# framework.
 	# NOTE: -D_GNU_SOURCE is needed to enable POSIX extensions to
 	# pthreads (i.e., barriers).
-	${cc} ${config_defines} \
+
+	cmd="${cc} ${config_defines} \
 	      -DBLIS_CONFIGURETIME_CPUID \
-	      -I${bli_cpuid_h_path} \
-	      -I${bli_arch_h_path} \
-	      -I${bli_typed_h_path} \
-	      -I${bli_pthread_h_path} \
-	      -I${bli_malloc_h_path} \
+	      ${c_hdr_paths} \
 	      -std=c99 -D_GNU_SOURCE \
 	      ${cflags} \
-	      ${bli_arch_c_filepath} \
-	      ${bli_cpuid_c_filepath} \
+	      ${c_src_filepaths} \
 	      ${ldflags} \
-	      ${main_c_filepath} \
-	   -o ${autodetect_x}
+	      -o ${autodetect_x}"
+
+	if [ "${debug_auto_detect}" == "no" ]; then
+
+		# Execute the compilation command.
+		eval ${cmd}
+
+	else
+
+		# Debugging stuff. Instead of executing ${cmd}, join the lines together
+		# with tr and trim excess whitespace via awk.
+		cmd=$(echo "${cmd}" | tr '\n' ' ' | awk '{$1=$1;print}')
+		echo "${cmd}"
+		return
+	fi
 
 	# Run the auto-detect program.
 	detected_config=$(./${autodetect_x})
@@ -1333,13 +1391,17 @@ get_compiler_version()
 	# isolate the version number.
 	# The last part ({ read first rest ; echo $first ; }) is a workaround
 	# to OS X's egrep only returning the first match.
-	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI' | { read first rest ; echo $first ; })
+	cc_vendor=$(echo "${vendor_string}" | egrep -o 'icc|gcc|clang|emcc|pnacl|IBM|oneAPI|crosstool-NG' | { read first rest ; echo $first ; })
+	if [ "${cc_vendor}" = "crosstool-NG" ]; then
+	     # Treat compilers built by crosstool-NG (for eg: conda) as gcc.
+	     cc_vendor="gcc"
+	fi
 	if [ "${cc_vendor}" = "icc" -o \
 	     "${cc_vendor}" = "gcc" ]; then
 		cc_version=$(${cc} -dumpversion)
-	#if compiler is AOCC, first grep for clang and then the version number.
+	# If compiler is AOCC, first grep for clang and then the version number.
 	elif [ "${cc_vendor}" = "clang" ]; then
-            cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
+		cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
@@ -1462,6 +1524,15 @@ check_compiler()
 			if [ ${cc_revision} -lt 1 ]; then
 				blacklistcc_add "skx"
 			fi
+		fi
+		if [ ${cc_major} -eq 18 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			blacklistcc_add "knl"
+			blacklistcc_add "skx"
+		fi
+		if [ ${cc_major} -ge 19 ]; then
+			echo "${script_name}: ${cc} ${cc_version} is known to cause erroneous results. See https://github.com/flame/blis/issues/371 for details."
+			echoerr_unsupportedcc
 		fi
 	fi
 
@@ -1934,6 +2005,9 @@ main()
 	debug_type=''
 	debug_flag=''
 
+	# The system flag.
+	enable_system='yes'
+
 	# The threading flag.
 	threading_model='off'
 
@@ -1961,6 +2035,7 @@ main()
 	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
+	enable_trsm_preinversion='yes'
 	force_version='no'
 	complex_return='default'
 
@@ -1992,6 +2067,13 @@ main()
 	# Dummy file. Used to check whether the cwd is the same as the top-level
 	# source distribution directory.
 	dummy_file='_blis_dir_detect.tmp'
+
+	# -- Debugging --
+
+	# A global flag to help debug the compilation command for the executable
+	# that configure builds on-the-fly to perform hardware auto-detection.
+	debug_auto_detect="no"
+
 
 
 	# -- Command line option/argument parsing ----------------------------------
@@ -2069,6 +2151,12 @@ main()
 						export-shared=*)
 							export_shared=${OPTARG#*=}
 							;;
+						enable-system)
+							enable_system='yes'
+							;;
+						disable-system)
+							enable_system='no'
+							;;
 						enable-threading=*)
 							threading_model=${OPTARG#*=}
 							;;
@@ -2144,6 +2232,12 @@ main()
 							;;
 						without-memkind)
 							enable_memkind='no'
+							;;
+						enable-trsm-preinversion)
+							enable_trsm_preinversion='yes'
+							;;
+						disable-trsm-preinversion)
+							enable_trsm_preinversion='no'
 							;;
 						force-version=*)
 							force_version=${OPTARG#*=}
@@ -2441,6 +2535,15 @@ main()
 		config_name=$(auto_detect)
 		#config_name="generic"
 
+		# Debugging stuff. When confirming the behavior of auto_detect(),
+		# it is useful to output ${config_name}, which in theory could be
+		# set temoprarily to something other than the config_name, such as
+		# the compilation command.
+		if [ "${debug_auto_detect}" = "yes" ]; then
+			echo "auto-detect program compilation command: ${config_name}"
+			exit 1
+		fi
+
 		echo "${script_name}: hardware detection driver returned '${config_name}'."
 
 		# If the auto-detect code returned the "generic" string, it means we
@@ -2543,11 +2646,11 @@ main()
 
 			reducedclist="${kernel}"
 
-		# Otherwise, use the first name.
+		# Otherwise, use the last name.
 		else
 
-			first_config=${configs%% *}
-			reducedclist="${first_config}"
+			last_config=${configs##* }
+			reducedclist="${last_config}"
 		fi
 
 		# Create a new "kernel:subconfig" pair and add it to the kconfig_map
@@ -2819,6 +2922,19 @@ main()
 		exit 1
 	fi
 
+	# Check if we are building with or without operating system support.
+	if [ "x${enable_system}" = "xyes" ]; then
+		echo "${script_name}: enabling operating system support."
+		enable_system_01=1
+	else
+		echo "${script_name}: disabling operating system support."
+		echo "${script_name}: WARNING: all threading will be disabled!"
+		enable_system_01=0
+
+		# Force threading to be disabled.
+		threading_model='off'
+	fi
+
 	# Check the threading model flag and standardize its value, if needed.
 	# NOTE: 'omp' is deprecated but still supported; 'openmp' is preferred.
 	enable_openmp='no'
@@ -2962,6 +3078,13 @@ main()
 		echo "${script_name}: small matrix handling is disabled."
 		enable_sup_handling_01=0
 	fi
+	if [ "x${enable_trsm_preinversion}" = "xyes" ]; then
+		echo "${script_name}: trsm diagonal element pre-inversion is enabled."
+		enable_trsm_preinversion_01=1
+	else
+		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
+		enable_trsm_preinversion_01=0
+	fi
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
@@ -3008,8 +3131,7 @@ main()
 
 		enable_sandbox_01=0
 	fi
-
-
+	
 	# Check the method used for returning complex numbers
 	if [ "x${complex_return}" = "xdefault" ]; then
 		if [ -n "${FC}" ]; then
@@ -3040,7 +3162,7 @@ main()
 			complex_return='gnu'
 		fi
 	fi
-
+	
 	if [ "x${complex_return}" = "xgnu"  ]; then
 		complex_return_intel01='0'
 	elif [ "x${complex_return}" = "xintel" ]; then
@@ -3080,7 +3202,13 @@ main()
 	# For Windows builds, clear the libpthread_esc variable so that
 	# no pthreads library is substituted into config.mk. (Windows builds
 	# employ an implementation of pthreads that is internal to BLIS.)
-	if [[ $is_win == yes && "$cc_vendor" == "clang" ]]; then
+	if [[ "$is_win" == "yes" && "$cc_vendor" == "clang" ]]; then
+		libpthread_esc=
+	fi
+
+	# We also clear the libpthread_esc variable for systemless builds
+	# (--disable-system).
+	if [[ "$enable_system" == "no" ]]; then
 		libpthread_esc=
 	fi
 
@@ -3103,7 +3231,7 @@ main()
 		enable_aocl_zen='yes'
 		enable_aocl_zen_01=1
 	else
-		enable_aocl_zen = 'no';
+		enable_aocl_zen='no'
 		enable_aocl_zen_01=0;
 	fi
 
@@ -3187,6 +3315,7 @@ main()
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
 		| sed -e "s/@ldflags_preset@/${ldflags_preset_esc}/g" \
 		| sed -e "s/@debug_type@/${debug_type}/g" \
+		| sed -e "s/@enable_system@/${enable_system}/g" \
 		| sed -e "s/@threading_model@/${threading_model}/g" \
 		| sed -e "s/@prefix@/${prefix_esc}/g" \
 		| sed -e "s/@exec_prefix@/${exec_prefix_esc}/g" \
@@ -3218,6 +3347,7 @@ main()
 		| perl -pe "s/\@config_list_defines\@/${config_list_defines}/g" \
 		| perl -pe "s/\@kernel_list_defines\@/${kernel_list_defines}/g" \
 		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen_01}/g" \
+		| sed   -e "s/@enable_system@/${enable_system_01}/g" \
 		| sed   -e "s/@enable_openmp@/${enable_openmp_01}/g" \
 		| sed   -e "s/@enable_pthreads@/${enable_pthreads_01}/g" \
 		| sed   -e "s/@enable_jrir_slab@/${enable_jrir_slab_01}/g" \
@@ -3233,6 +3363,7 @@ main()
 		| sed   -e "s/@enable_mixed_dt_extra_mem@/${enable_mixed_dt_extra_mem_01}/g" \
 		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
+		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \

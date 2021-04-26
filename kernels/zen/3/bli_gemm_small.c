@@ -60,16 +60,16 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      );
 
-/* static err_t bli_dgemm_small */
-/*      ( */
-/*        obj_t*  alpha, */
-/*        obj_t*  a, */
-/*        obj_t*  b, */
-/*        obj_t*  beta, */
-/*        obj_t*  c, */
-/*        cntx_t* cntx, */
-/*        cntl_t* cntl */
-/*      ); */
+err_t bli_dgemm_small
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
 
 static err_t bli_sgemm_small_atbn
      (
@@ -145,11 +145,15 @@ err_t bli_gemm_small
 #endif
         }
 
-  	if (bli_obj_has_notrans( b ))
+        if (bli_obj_has_notrans( b ))
         {
             if (dt == BLIS_FLOAT)
             {
                 return bli_sgemm_small_atbn(alpha, a, b, beta, c, cntx, cntl);
+            }
+            else if (dt == BLIS_DOUBLE)
+            {
+                return bli_dgemm_small_atbn(alpha, a, b, beta, c, cntx, cntl);
             }
         }
 
@@ -164,7 +168,7 @@ err_t bli_gemm_small
     // native implementation.
     return BLIS_NOT_YET_IMPLEMENTED;
 #else
-    return bli_dgemm_small(alpha, a, b, beta, c, cntx, cntl);
+        return bli_dgemm_small(alpha, a, b, beta, c, cntx, cntl);
 #endif
     }
 
@@ -1741,21 +1745,36 @@ static err_t bli_sgemm_small
      )
 {
 
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
 	
-  gint_t M = bli_obj_length( c ); // number of rows of Matrix C
-  gint_t N = bli_obj_width( c );  // number of columns of Matrix C
-  gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
-  gint_t L = M * N;
+    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+    gint_t N = bli_obj_width( c );  // number of columns of Matrix C
+    gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
+    gint_t L = M * N;
 
-  if( N < 3 )  // Implementation assumes that N is atleast 3
-  {
-    AOCL_DTL_TRACE_EXIT_ERR(
-                    AOCL_DTL_LEVEL_INFO,
+    // when N is equal to 1 call GEMV instead of GEMM
+    if (N == 1)
+    {
+        bli_gemv
+        (
+            alpha,
+            a,
+            b,
+            beta,
+            c
+        );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+        return BLIS_SUCCESS;
+    }
+
+    if (N<3) //Implemenation assumes that N is atleast 3.
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
                     "N < 3 cannot be processed by small_gemm"    
-                    );
-    return BLIS_NOT_YET_IMPLEMENTED;
-  }
+			);
+        return BLIS_NOT_YET_IMPLEMENTED;
+	}
 /* #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME */
 /*     if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME)))) */
 /* #else */

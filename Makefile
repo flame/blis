@@ -112,7 +112,6 @@ BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 # of source code.
 BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
-BASE_OBJ_AOCLDTL_PATH  := $(BASE_OBJ_PATH)/$(AOCLDTL_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
@@ -150,7 +149,7 @@ MK_LIBS                   += $(LIBBLIS_SO_PATH) \
                              $(LIBBLIS_SO_MAJ_PATH)
 MK_LIBS_INST              += $(LIBBLIS_SO_MMB_INST)
 MK_LIBS_SYML              += $(LIBBLIS_SO_INST) \
-			     $(LIBBLIS_SO_MAJ_INST)
+                             $(LIBBLIS_SO_MAJ_INST)
 endif
 
 # Strip leading, internal, and trailing whitespace.
@@ -167,6 +166,7 @@ MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 # Set the path to the subdirectory of the share installation directory.
 MK_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/blis
 
+PC_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/pkgconfig
 
 
 #
@@ -210,11 +210,6 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
-# Generate object file paths for all of the debgu and trace logger.
-MK_AOCLDTL_OBJS       := $(call gen-obj-paths-from-src,$(AOCLDTL_SRC_SUFS),$(MK_AOCLDTL_SRC),$(AOCLDTL_PATH),$(BASE_OBJ_AOCLDTL_PATH))
-
-
-
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
 MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
@@ -224,7 +219,6 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_KERNELS_OBJS) \
                        $(MK_REFKERN_OBJS) \
                        $(MK_FRAME_OBJS) \
-                       $(MK_AOCLDTL_OBJS) \
                        $(MK_SANDBOX_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
@@ -256,8 +250,13 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
-# Install BLIS CPP Template header files
-HEADERS_TO_INSTALL += $(CPP_HEADER_DIR)/*.hh
+# If requested, include AMD's C++ template header files in the list of headers
+# to install.
+ifeq ($(INSTALL_HH),yes)
+HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
+endif
+
+
 
 #
 # --- public makefile fragment definitions -------------------------------------
@@ -267,6 +266,8 @@ HEADERS_TO_INSTALL += $(CPP_HEADER_DIR)/*.hh
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE)
 
+PC_IN_FILE  := blis.pc.in
+PC_OUT_FILE := blis.pc
 
 
 #
@@ -423,7 +424,7 @@ all: libs
 
 libs: libblis
 
-test: checkblis checkblas 
+test: checkblis checkblas
 
 check: checkblis-fast checkblas
 
@@ -675,7 +676,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in $(LDFLAGS)
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
@@ -685,7 +686,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	@$(RM_F) $@.in
 else
 	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 endif
 
@@ -926,6 +927,19 @@ else
 	@- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
 endif
 
+
+# --- AMD's C++ template header test rules ---
+
+# NOTE: The targets below won't work as intended for an out-of-tree build,
+# and so it's disabled for now.
+
+#testcpp: testvendcpp
+
+# Recursively run the test for AMD's C++ template header.
+#testvendcpp:
+#	$(MAKE) -C $(VEND_TESTCPP_PATH)
+
+
 # --- Install header rules ---
 
 install-headers: check-env $(MK_INCL_DIR_INST)
@@ -943,7 +957,7 @@ endif
 
 # --- Install share rules ---
 
-install-share: check-env $(MK_SHARE_DIR_INST)
+install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
 $(MK_SHARE_DIR_INST): $(FRAGS_TO_INSTALL) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -962,6 +976,20 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
+$(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
+	$(MKDIR) $(@)
+ifeq ($(ENABLE_VERBOSE),no)
+	@echo "Installing $(PC_OUT_FILE) into $(@)/"
+endif
+	$(shell cat "$(PC_IN_FILE)" \
+	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@prefix@#$(prefix)#g" \
+	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
+	| sed -e "s#@libdir@#$(libdir)#g" \
+	| sed -e "s#@includedir@#$(includedir)#g" \
+	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
+	> "$(PC_OUT_FILE)" )
+	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
 
 # --- Install library rules ---
 
@@ -1219,6 +1247,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
+	- $(RM_F) $(PC_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
@@ -1227,6 +1256,8 @@ else
 	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)"
 	@- $(RM_F) $(CONFIG_MK_FILE)
+	@echo "Removing $(PC_OUT_FILE)"
+	@- $(RM_F) $(PC_OUT_FILE)
 	@echo "Removing $(OBJ_DIR)"
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)"

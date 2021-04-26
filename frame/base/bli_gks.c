@@ -161,6 +161,11 @@ void bli_gks_init( void )
 #endif
 
 		// IBM architectures
+#ifdef BLIS_CONFIG_POWER10
+		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,
+		                                              bli_cntx_init_power10_ref,
+		                                              bli_cntx_init_power10_ind );
+#endif													  
 #ifdef BLIS_CONFIG_POWER9
 		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
 		                                              bli_cntx_init_power9_ref,
@@ -296,6 +301,25 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 	// Return the context pointer at gks_id_ind.
 	return gks_id_ind;
+}
+
+// -----------------------------------------------------------------------------
+
+cntx_t** bli_gks_lookup_id
+     (
+       arch_t id
+     )
+{
+	// Return the address of the array of context pointers for a given
+	// architecture id. This function is only used for sanity check purposes
+	// to ensure that the underlying data structures for a particular id are
+	// initialized.
+
+	// Index into the array of context pointers for the given architecture id.
+	cntx_t** restrict gks_id = gks[ id ];
+
+	// Return the context pointer at gks_id_ind.
+	return gks_id;
 }
 
 // -----------------------------------------------------------------------------

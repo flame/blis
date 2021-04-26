@@ -80,46 +80,56 @@ void bli_sgemm_armv7a_int_4x4
 	// Vector for column 3
 	float32x4_t cv3;
 
-	if( rs_c == 1 )
+	if ( *beta != 0.0F )
 	{
-		// Load column 0
- 		cv0 = vld1q_f32( c + 0*rs_c + 0*cs_c ); 
-	
-		// Load column 1
- 		cv1 = vld1q_f32( c + 0*rs_c + 1*cs_c ); 
-	
-		// Load column 2
- 		cv2 = vld1q_f32( c + 0*rs_c + 2*cs_c ); 
-	
-		// Load column 3
- 		cv3 = vld1q_f32( c + 0*rs_c + 3*cs_c ); 
-	}	
+		if ( rs_c == 1 )
+		{
+			// Load column 0
+			cv0 = vld1q_f32( c + 0*rs_c + 0*cs_c );
+
+			// Load column 1
+			cv1 = vld1q_f32( c + 0*rs_c + 1*cs_c );
+
+			// Load column 2
+			cv2 = vld1q_f32( c + 0*rs_c + 2*cs_c );
+
+			// Load column 3
+			cv3 = vld1q_f32( c + 0*rs_c + 3*cs_c );
+		}
+		else
+		{
+			// Load column 0
+			cv0 = vld1q_lane_f32( c + 0*rs_c + 0*cs_c, cv0, 0);
+			cv0 = vld1q_lane_f32( c + 1*rs_c + 0*cs_c, cv0, 1);
+			cv0 = vld1q_lane_f32( c + 2*rs_c + 0*cs_c, cv0, 2);
+			cv0 = vld1q_lane_f32( c + 3*rs_c + 0*cs_c, cv0, 3);
+
+			// Load column 1
+			cv1 = vld1q_lane_f32( c + 0*rs_c + 1*cs_c, cv1, 0);
+			cv1 = vld1q_lane_f32( c + 1*rs_c + 1*cs_c, cv1, 1);
+			cv1 = vld1q_lane_f32( c + 2*rs_c + 1*cs_c, cv1, 2);
+			cv1 = vld1q_lane_f32( c + 3*rs_c + 1*cs_c, cv1, 3);
+
+			// Load column 2
+			cv2 = vld1q_lane_f32( c + 0*rs_c + 2*cs_c, cv2, 0);
+			cv2 = vld1q_lane_f32( c + 1*rs_c + 2*cs_c, cv2, 1);
+			cv2 = vld1q_lane_f32( c + 2*rs_c + 2*cs_c, cv2, 2);
+			cv2 = vld1q_lane_f32( c + 3*rs_c + 2*cs_c, cv2, 3);
+
+			// Load column 3
+			cv3 = vld1q_lane_f32( c + 0*rs_c + 3*cs_c, cv3, 0);
+			cv3 = vld1q_lane_f32( c + 1*rs_c + 3*cs_c, cv3, 1);
+			cv3 = vld1q_lane_f32( c + 2*rs_c + 3*cs_c, cv3, 2);
+			cv3 = vld1q_lane_f32( c + 3*rs_c + 3*cs_c, cv3, 3);
+
+		}
+	}
 	else
 	{
-		// Load column 0
-		cv0 = vld1q_lane_f32( c + 0*rs_c + 0*cs_c, cv0, 0);
-		cv0 = vld1q_lane_f32( c + 1*rs_c + 0*cs_c, cv0, 1);
-		cv0 = vld1q_lane_f32( c + 2*rs_c + 0*cs_c, cv0, 2);
-		cv0 = vld1q_lane_f32( c + 3*rs_c + 0*cs_c, cv0, 3);
-	
-		// Load column 1
-		cv1 = vld1q_lane_f32( c + 0*rs_c + 1*cs_c, cv1, 0);
-		cv1 = vld1q_lane_f32( c + 1*rs_c + 1*cs_c, cv1, 1);
-		cv1 = vld1q_lane_f32( c + 2*rs_c + 1*cs_c, cv1, 2);
-		cv1 = vld1q_lane_f32( c + 3*rs_c + 1*cs_c, cv1, 3);
-	
-		// Load column 2
-		cv2 = vld1q_lane_f32( c + 0*rs_c + 2*cs_c, cv2, 0);
-		cv2 = vld1q_lane_f32( c + 1*rs_c + 2*cs_c, cv2, 1);
-		cv2 = vld1q_lane_f32( c + 2*rs_c + 2*cs_c, cv2, 2);
-		cv2 = vld1q_lane_f32( c + 3*rs_c + 2*cs_c, cv2, 3);
-	
-		// Load column 3
-		cv3 = vld1q_lane_f32( c + 0*rs_c + 3*cs_c, cv3, 0);
-		cv3 = vld1q_lane_f32( c + 1*rs_c + 3*cs_c, cv3, 1);
-		cv3 = vld1q_lane_f32( c + 2*rs_c + 3*cs_c, cv3, 2);
-		cv3 = vld1q_lane_f32( c + 3*rs_c + 3*cs_c, cv3, 3);
-
+		cv0 = vmovq_n_f32( 0.0 );
+		cv1 = vmovq_n_f32( 0.0 );
+		cv2 = vmovq_n_f32( 0.0 );
+		cv3 = vmovq_n_f32( 0.0 );
 	}
 
 	// Vector for accummulating column 0
@@ -142,15 +152,15 @@ void bli_sgemm_armv7a_int_4x4
 	// Initialize vector to 0.0
 	abv3 = vmovq_n_f32( 0.0 );
 
-	for ( i = 0; i < k_iter; ++i ) 
-	{ 
+	for ( i = 0; i < k_iter; ++i )
+	{
 		// Begin iter 0
- 		av1 = vld1q_f32( a ); 
+			av1 = vld1q_f32( a );
 
 		__builtin_prefetch( a + 224 );
 		__builtin_prefetch( b + 224 );
-	
- 		bv1 = vld1q_f32( b ); 
+
+		bv1 = vld1q_f32( b );
 
 		abv0 = vmlaq_lane_f32( abv0, av1, vget_low_f32(bv1), 0 );
 		abv1 = vmlaq_lane_f32( abv1, av1, vget_low_f32(bv1), 1 );
@@ -158,24 +168,24 @@ void bli_sgemm_armv7a_int_4x4
 		abv3 = vmlaq_lane_f32( abv3, av1, vget_high_f32(bv1), 1 );
 
 
-		av2 = vld1q_f32( a+4 ); 
+		av2 = vld1q_f32( a+4 );
 
 		//__builtin_prefetch( a + 116 );
 		//__builtin_prefetch( b + 116 );
-	
- 		bv2 = vld1q_f32( b+4 ); 
+
+		bv2 = vld1q_f32( b+4 );
 
 		abv0 = vmlaq_lane_f32( abv0, av2, vget_low_f32(bv2), 0 );
 		abv1 = vmlaq_lane_f32( abv1, av2, vget_low_f32(bv2), 1 );
 		abv2 = vmlaq_lane_f32( abv2, av2, vget_high_f32(bv2), 0 );
 		abv3 = vmlaq_lane_f32( abv3, av2, vget_high_f32(bv2), 1 );
 
-		av3 = vld1q_f32( a+8 ); 
+		av3 = vld1q_f32( a+8 );
 
 		//__builtin_prefetch( a + 120 );
 		//__builtin_prefetch( b + 120 );
-	
- 		bv3 = vld1q_f32( b+8 ); 
+
+		bv3 = vld1q_f32( b+8 );
 
 		abv0 = vmlaq_lane_f32( abv0, av3, vget_low_f32(bv3), 0 );
 		abv1 = vmlaq_lane_f32( abv1, av3, vget_low_f32(bv3), 1 );
@@ -183,12 +193,12 @@ void bli_sgemm_armv7a_int_4x4
 		abv3 = vmlaq_lane_f32( abv3, av3, vget_high_f32(bv3), 1 );
 
 
-		av4 = vld1q_f32( a+12); 
+		av4 = vld1q_f32( a+12);
 
 		//__builtin_prefetch( a + 124 );
 		//__builtin_prefetch( b + 124 );
-	
- 		bv4 = vld1q_f32( b+12); 
+
+		bv4 = vld1q_f32( b+12);
 
 		abv0 = vmlaq_lane_f32( abv0, av4, vget_low_f32(bv4), 0 );
 		abv1 = vmlaq_lane_f32( abv1, av4, vget_low_f32(bv4), 1 );
@@ -197,71 +207,85 @@ void bli_sgemm_armv7a_int_4x4
 
 
 
-		a += 16; 
-		b += 16; 
-	} 
+		a += 16;
+		b += 16;
+	}
 
-	for ( i = 0; i < k_left; ++i ) 
-	{ 
- 		av1 = vld1q_f32( a ); 
+	for ( i = 0; i < k_left; ++i )
+	{
+		av1 = vld1q_f32( a );
 
 		__builtin_prefetch( a + 112 );
 		__builtin_prefetch( b + 112 );
-	
- 		bv1 = vld1q_f32( b ); 
+
+		bv1 = vld1q_f32( b );
 
 		abv0 = vmlaq_lane_f32( abv0, av1, vget_low_f32(bv1), 0 );
 		abv1 = vmlaq_lane_f32( abv1, av1, vget_low_f32(bv1), 1 );
 		abv2 = vmlaq_lane_f32( abv2, av1, vget_high_f32(bv1), 0 );
 		abv3 = vmlaq_lane_f32( abv3, av1, vget_high_f32(bv1), 1 );
 
-		a += 4; 
-		b += 4; 
+		a += 4;
+		b += 4;
 	}
 
 	__builtin_prefetch( a_next );
 	__builtin_prefetch( b_next );
 
-	cv0 = vmulq_n_f32( cv0, *beta );
-	cv1 = vmulq_n_f32( cv1, *beta );
-	cv2 = vmulq_n_f32( cv2, *beta );
-	cv3 = vmulq_n_f32( cv3, *beta );
+	if ( *beta != 0.0F )
+	{
+		// Multiply C by beta and then accumulate alpha * A * B.
+		cv0 = vmulq_n_f32( cv0, *beta );
+		cv1 = vmulq_n_f32( cv1, *beta );
+		cv2 = vmulq_n_f32( cv2, *beta );
+		cv3 = vmulq_n_f32( cv3, *beta );
 
-	cv0 = vmlaq_f32( cv0, abv0, alphav );
-	cv1 = vmlaq_f32( cv1, abv1, alphav );
-	cv2 = vmlaq_f32( cv2, abv2, alphav );
-	cv3 = vmlaq_f32( cv3, abv3, alphav );
+		cv0 = vmlaq_f32( cv0, abv0, alphav );
+		cv1 = vmlaq_f32( cv1, abv1, alphav );
+		cv2 = vmlaq_f32( cv2, abv2, alphav );
+		cv3 = vmlaq_f32( cv3, abv3, alphav );
+	}
+	else
+	{
+		// Since beta = 0, skip straight to accumulating alpha * A * B.
+		// Note: C (cv?) was initialized to zero above.
+		cv0 = vmlaq_f32( cv0, abv0, alphav );
+		cv1 = vmlaq_f32( cv1, abv1, alphav );
+		cv2 = vmlaq_f32( cv2, abv2, alphav );
+		cv3 = vmlaq_f32( cv3, abv3, alphav );
+	}
 
-	if( rs_c == 1 )
+	if ( rs_c == 1 )
 	{
 		// Store column 0
-  		vst1q_f32( c + 0*rs_c + 0*cs_c, cv0 ); 
+		vst1q_f32( c + 0*rs_c + 0*cs_c, cv0 );
 		// Store column 1
-  		vst1q_f32( c + 0*rs_c + 1*cs_c, cv1 ); 
+		vst1q_f32( c + 0*rs_c + 1*cs_c, cv1 );
 		// Store column 2
-  		vst1q_f32( c + 0*rs_c + 2*cs_c, cv2 ); 
+		vst1q_f32( c + 0*rs_c + 2*cs_c, cv2 );
 		// Store column 3
-  		vst1q_f32( c + 0*rs_c + 3*cs_c, cv3 ); 
+		vst1q_f32( c + 0*rs_c + 3*cs_c, cv3 );
 	}
-	else{
+	else
+	{
 		// Store column 0
 		vst1q_lane_f32( c + 0*rs_c + 0*cs_c, cv0, 0);
 		vst1q_lane_f32( c + 1*rs_c + 0*cs_c, cv0, 1);
 		vst1q_lane_f32( c + 2*rs_c + 0*cs_c, cv0, 2);
 		vst1q_lane_f32( c + 3*rs_c + 0*cs_c, cv0, 3);
-	
+
 		// Store column 1
 		vst1q_lane_f32( c + 0*rs_c + 1*cs_c, cv1, 0);
 		vst1q_lane_f32( c + 1*rs_c + 1*cs_c, cv1, 1);
 		vst1q_lane_f32( c + 2*rs_c + 1*cs_c, cv1, 2);
 		vst1q_lane_f32( c + 3*rs_c + 1*cs_c, cv1, 3);
-	
+
 		// Store column 2
 		vst1q_lane_f32( c + 0*rs_c + 2*cs_c, cv2, 0);
 		vst1q_lane_f32( c + 1*rs_c + 2*cs_c, cv2, 1);
 		vst1q_lane_f32( c + 2*rs_c + 2*cs_c, cv2, 2);
 		vst1q_lane_f32( c + 3*rs_c + 2*cs_c, cv2, 3);
-	
+
 		// Store column 3
 		vst1q_lane_f32( c + 0*rs_c + 3*cs_c, cv3, 0);
 		vst1q_lane_f32( c + 1*rs_c + 3*cs_c, cv3, 1);

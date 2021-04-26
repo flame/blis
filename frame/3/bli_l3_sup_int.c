@@ -92,12 +92,12 @@ err_t bli_gemmsup_int
 	                                     stor_id == BLIS_RRC ||
 	                                     stor_id == BLIS_RCR ||
 	                                     stor_id == BLIS_CRR );
-	const bool     is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
+	const bool    is_rcc_crc_ccr_ccc = !is_rrr_rrc_rcr_crr;
 
 	const num_t   dt         = bli_obj_dt( c );
-	const bool     row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
+	const bool    row_pref   = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, stor_id, cntx );
 
-	const bool     is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
+	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );
 
 	const dim_t  m           = bli_obj_length( c );
@@ -223,6 +223,7 @@ err_t bli_gemmsup_int
 			bli_l3_sup_thrinfo_update_root( rntm, thread );
 		}
 
+
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
@@ -252,6 +253,8 @@ err_t bli_gemmsup_int
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 	return BLIS_SUCCESS;
 }
+
+// -----------------------------------------------------------------------------
 
 err_t bli_gemmtsup_int
      (
@@ -319,7 +322,8 @@ err_t bli_gemmtsup_int
 	const bool    is_primary = ( row_pref ? is_rrr_rrc_rcr_crr
 	                                      : is_rcc_crc_ccr_ccc );
 
-	const dim_t  n           = bli_obj_width( c );
+	const dim_t  m           = bli_obj_length( c );
+	const dim_t  n           = m;
 	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	const bool   auto_factor = bli_rntm_auto_factor( rntm );
@@ -335,7 +339,7 @@ err_t bli_gemmtsup_int
 		//  - rrr rrc rcr crr for row-preferential kernels
 		//  - rcc crc ccr ccc for column-preferential kernels
 
-		const dim_t mu = n / MR;
+		const dim_t mu = m / MR;
 		const dim_t nu = n / NR;
 
 		// Decide which algorithm to use (block-panel var2m or panel-block
@@ -378,8 +382,8 @@ err_t bli_gemmtsup_int
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
 			bli_gemmtsup_ref_var2m( BLIS_NO_TRANSPOSE,
-			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                        alpha, a, b, beta, c,
+			                        stor_id, cntx, rntm, thread );
 		}
 		else // use_pb
 		{
@@ -389,8 +393,8 @@ err_t bli_gemmtsup_int
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
 			bli_gemmtsup_ref_var1n( BLIS_NO_TRANSPOSE,
-			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                        alpha, a, b, beta, c,
+			                        stor_id, cntx, rntm, thread );
 			// *requires nudging of nc up to be a multiple of mr.
 		}
 	}
@@ -401,7 +405,7 @@ err_t bli_gemmtsup_int
 		//  - rcc crc ccr ccc for row-preferential kernels
 
 		const dim_t mu = n / MR; // the n becomes m after a transposition
-		const dim_t nu = n / NR; // the m becomes n after a transposition
+		const dim_t nu = m / NR; // the m becomes n after a transposition
 
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
@@ -443,8 +447,8 @@ err_t bli_gemmtsup_int
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
 			bli_gemmtsup_ref_var2m( BLIS_TRANSPOSE,
-			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                        alpha, a, b, beta, c,
+			                        stor_id, cntx, rntm, thread );
 		}
 		else // use_pb
 		{
@@ -454,8 +458,8 @@ err_t bli_gemmtsup_int
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
 			bli_gemmtsup_ref_var1n( BLIS_TRANSPOSE,
-			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+			                        alpha, a, b, beta, c,
+			                        stor_id, cntx, rntm, thread );
 			// *requires nudging of mc up to be a multiple of nr.
 		}
 	}

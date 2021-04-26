@@ -99,6 +99,26 @@
   #define BLIS_ENABLE_MULTITHREADING
 #endif
 
+// Enable the use of prime numbers of threads when requesting automatic thread
+// factorization. When disabled, requesting a prime number of threads will
+// result in a reduction (by one) of the number of threads, provided that the
+// prime number exceeds a minimum threshold (see below).
+#ifdef BLIS_ENABLE_AUTO_PRIME_NUM_THREADS
+  #undef BLIS_DISABLE_AUTO_PRIME_NUM_THREADS
+#else
+  // Default behavior is disabled.
+  #undef  BLIS_DISABLE_AUTO_PRIME_NUM_THREADS // In case user explicitly disabled.
+  #define BLIS_DISABLE_AUTO_PRIME_NUM_THREADS
+#endif
+
+// Set the maximum requested number of threads that BLIS will accept from the
+// user that may be prime. If a larger prime number of threads is requested,
+// it will be reduced by one to allow for more efficient thread factorizations.
+// This value will only be used if BLIS_ENABLE_AUTO_PRIME_NUM_THREADS is defined.
+#ifndef BLIS_NT_MAX_PRIME
+  #define BLIS_NT_MAX_PRIME 11
+#endif
+
 
 // -- MIXED DATATYPE SUPPORT ---------------------------------------------------
 

@@ -312,6 +312,10 @@ TESTSUITE_DIR      := testsuite
 CPP_HEADER_DIR     := cpp
 CPP_TEST_DIR       := testcpp
 
+VEND_DIR           := vendor
+VEND_CPP_DIR       := $(VEND_DIR)/cpp
+VEND_TESTCPP_DIR   := $(VEND_DIR)/testcpp
+
 # The filename suffix for reference kernels.
 REFNM              := ref
 
@@ -377,6 +381,10 @@ AOCLDTL_PATH       := $(DIST_PATH)/$(AOCLDTL_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
+
+# Construct paths to some optional C++ template headers contributed by AMD.
+VEND_CPP_PATH      := $(DIST_PATH)/$(VEND_CPP_DIR)
+VEND_TESTCPP_PATH  := $(DIST_PATH)/$(VEND_TESTCPP_DIR)
 
 # Construct paths to the makefile fragments for the four primary directories
 # of source code: the config directory, general framework code, reference
@@ -517,7 +525,8 @@ LIBMEMKIND := -lmemkind
 
 # Default linker flags.
 # NOTE: -lpthread is needed unconditionally because BLIS uses pthread_once()
-# to initialize itself in a thread-safe manner.
+# to initialize itself in a thread-safe manner. The one exception to this
+# rule: if --disable-system is given at configure-time, LIBPTHREAD is empty.
 LDFLAGS    := $(LDFLAGS_PRESET) $(LIBM) $(LIBPTHREAD)
 
 # Add libmemkind to the link-time flags, if it was enabled at configure-time.
@@ -747,6 +756,10 @@ CPPROCFLAGS := -D_POSIX_C_SOURCE=200112L
 $(foreach c, $(CONFIG_LIST_FAM), $(eval $(call append-var-for,CPPROCFLAGS,$(c))))
 
 # --- Threading flags ---
+
+# NOTE: We don't have to explicitly omit -pthread when --disable-system is given
+# since that option forces --enable-threading=none, and thus -pthread never gets
+# added to begin with.
 
 ifeq ($(CC_VENDOR),gcc)
 ifeq ($(THREADING_MODEL),auto)

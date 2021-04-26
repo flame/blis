@@ -54,7 +54,7 @@ void bli_trsm_front
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
- 
+
 #ifdef PRINT_SMALL_TRSM_INFO
         printf("Side:: %c\n", side ? 'R' : 'L');
         if (bli_obj_datatype(*a) == BLIS_FLOAT)

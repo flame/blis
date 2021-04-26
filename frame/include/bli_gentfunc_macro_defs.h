@@ -105,7 +105,9 @@ GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
 GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname )
 
+
 // -- Basic one-operand macro with conjugation (complex funcs only, used only for dot, ger) --
+
 
 #define INSERT_GENTFUNCDOTC_BLAS( blasname, blisname ) \
 \
@@ -113,6 +115,7 @@ GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
 GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
 
 // -- Basic one-operand macro with conjugation (used only for dot, ger) --
 
@@ -227,7 +230,6 @@ GENTFUNC( float,    s, tfuncname, varname1, varname2 ) \
 GENTFUNC( double,   d, tfuncname, varname1, varname2 ) \
 GENTFUNC( scomplex, c, tfuncname, varname1, varname2 ) \
 GENTFUNC( dcomplex, z, tfuncname, varname1, varname2 )
-
 
 // -- (three auxiliary arguments) --
 

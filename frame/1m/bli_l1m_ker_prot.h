@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -49,9 +48,9 @@ void PASTEMAC(ch,varname) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       ctype*   restrict kappa, \
-       ctype*   restrict a, inc_t inca, inc_t lda, \
-       ctype*   restrict p,             inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
        cntx_t* restrict cntx  \
      );
 
@@ -64,9 +63,9 @@ void PASTEMAC(ch,varname) \
      ( \
        conj_t           conja, \
        dim_t            n, \
-       void*   restrict kappa, \
-       void*   restrict p,             inc_t ldp, \
-       void*   restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict kappa, \
+       ctype*  restrict p,             inc_t ldp, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
        cntx_t* restrict cntx  \
      );
 
@@ -81,9 +80,9 @@ void PASTEMAC(ch,varname) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p, inc_t is_p, inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p, inc_t is_p, inc_t ldp, \
        cntx_t* restrict cntx  \
      );
 
@@ -98,9 +97,9 @@ void PASTEMAC(ch,varname) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p, inc_t is_p, inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p, inc_t is_p, inc_t ldp, \
        cntx_t* restrict cntx  \
      );
 
@@ -116,9 +115,9 @@ void PASTEMAC(ch,varname) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p,             inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
        cntx_t* restrict cntx  \
      );
 
@@ -134,9 +133,9 @@ void PASTEMAC(ch,varname) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p,             inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
        cntx_t* restrict cntx  \
      );
 
