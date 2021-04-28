@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -3761,6 +3761,8 @@ void bli_sgemmsup_rv_zen_asm_1x16n
 	vmovss(xmm1, mem(rcx, rsi, 1))
 	vmovss(xmm2, mem(rcx, rsi, 2))
 	vmovss(xmm14, mem(rcx, rax, 1))
+	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
+
 	vextractf128(imm(0x0), ymm5, xmm0)//c0-c3
 	vshufps(imm(0x01), xmm0, xmm0,xmm1)
 	vshufps(imm(0x02), xmm0, xmm0,xmm2)
@@ -3769,7 +3771,8 @@ void bli_sgemmsup_rv_zen_asm_1x16n
 	vmovss(xmm1, mem(rcx, rsi, 1))
 	vmovss(xmm2, mem(rcx, rsi, 2))
 	vmovss(xmm14, mem(rcx, rax, 1))
-	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c		
+	lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
+
 	vextractf128(imm(0x1), ymm5, xmm0)//e4-e7
 	vshufps(imm(0x01), xmm0, xmm0,xmm1)
 	vshufps(imm(0x02), xmm0, xmm0,xmm2)
@@ -3777,12 +3780,12 @@ void bli_sgemmsup_rv_zen_asm_1x16n
 	vmovss(xmm0, mem(rcx))
 	vmovss(xmm1, mem(rcx, rsi, 1))
 	vmovss(xmm2, mem(rcx, rsi, 2))
-	vmovss(xmm14, mem(rcx, rax, 1))	
+	vmovss(xmm14, mem(rcx, rax, 1))
 
 	label(.SDONE)
 
 	lea(mem(r12, rsi, 8), r12)         // c_jj = r12 += 8*cs_c
-    lea(mem(r12, rsi, 8), r12)
+        lea(mem(r12, rsi, 8), r12)
 	//add(imm(4*16), r14)                 // b_jj = r14 += 8*cs_b
 	mov(var(ps_b4), rbx)               // load ps_b4
 	lea(mem(r14, rbx, 1), r14)         // a_ii = r14 += ps_b4
