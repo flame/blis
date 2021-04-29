@@ -667,7 +667,9 @@ void zgemm_
 			return;
 		}
 	}
-
+// native tuning resulted in better numbers compared to 3m1 in constrained multi-instance and non-constrained single thread run.
+// further testing is necessary to cover complete spectrum of matrix sizes.
+#if 0
 	if ((m0 <=128) && (n0 > 68) && (n0 <= 128) && (k0 <= 128))
 	{
 		// induced 3m1 performs better for above case.
@@ -676,14 +678,19 @@ void zgemm_
 		return;
 	}
 	else
+#endif
 #endif//ENABLE_INDUCED_METHOD
 	{
+// native tuning resulted in better numbers compared to sup in constrained multi-instance and non-constrained single thread run.
+// further testing is necessary to cover complete spectrum of matrix sizes.
+#if 0
 		err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 		if(status==BLIS_SUCCESS)
 		{
 			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
 			return;
 		}
+#endif//
 		// fall back on native path when zgemm is not handled in sup path.
 		bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)

@@ -143,13 +143,13 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
 #if AOCL_BLIS_MULTIINSTANCE
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  4080 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,   240,   144,    18 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   512,   256,   566 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  2040,  4080,  256 );
 #else
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    18 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   566 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  256 );
 #endif
 
 	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
