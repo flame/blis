@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -151,33 +152,32 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	//
 	// These are reference block sizes and may be overridden based on
 	// number of threads used at runtime.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,    72,    36 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  4080 );
+    //                                           s      d      c      z
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   72,    18 );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   566 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  256 );
 
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
+    bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
+    bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
-	// Update the context with the current architecture's register and cache
-	// blocksizes (and multiples) for native execution.
-	bli_cntx_set_blkszs
-	(
-	  BLIS_NAT, 7,
-	  // level-3
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  // level-1f
-	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
-	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
-	  cntx
-	);
-
+    // Update the context with the current architecture's register and cache
+    // blocksizes (and multiples) for native execution.
+    bli_cntx_set_blkszs
+    (
+      BLIS_NAT, 7,
+      // level-3
+      BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
+      BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
+      BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
+      BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
+      BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+      // level-1f
+      BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
+      BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
+      cntx
+    );
 // -------------------------------------------------------------------------
 
 	// Initialize sup thresholds with architecture-appropriate values.
@@ -269,9 +269,9 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16n, TRUE,
 	  cntx
 	);
-	
+
 #endif
-	
+
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
