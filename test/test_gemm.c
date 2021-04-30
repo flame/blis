@@ -47,19 +47,15 @@
 // uncomment to enable cblas interface
 //#define CBLAS
 
-#define CACHE_LINE_SIZE 64
-
 int main( int argc, char** argv )
 {
         obj_t a, b, c;
         obj_t c_save;
         obj_t alpha, beta;
         dim_t m, n, k;
-        dim_t p;
-        dim_t p_begin, p_end, p_inc;
-        int   m_input, n_input, k_input;
+        inc_t lda, ldb, ldc;
         num_t dt;
-        int   r, n_repeats;
+        inc_t r, n_repeats;
         trans_t  transa;
         trans_t  transb;
         f77_char f77_transa;
@@ -68,38 +64,18 @@ int main( int argc, char** argv )
         double dtime;
         double dtime_save;
         double gflops;
-#ifdef FILE_IN_OUT
-        FILE* fin  = NULL;
-        FILE* fout = NULL;
-#endif
-        //bli_init();
 
+        //bli_init();
         //bli_error_checking_level_set( BLIS_NO_ERROR_CHECKING );
 
-        n_repeats = 3;
-
-#ifndef PRINT
-        p_begin = 200;
-        p_end   = 2000;
-        p_inc   = 200;
-
-        m_input = -1;
-        n_input = -1;
-        k_input = -1;
-#else
-        p_begin = 16;
-        p_end   = 16;
-        p_inc   = 1;
-
-        m_input = 5;
-        k_input = 6;
-        n_input = 4;
-#endif
+        n_repeats = 300;
 
         //dt = BLIS_FLOAT;
         dt = BLIS_DOUBLE;
         //dt = BLIS_SCOMPLEX;
         //dt = BLIS_DCOMPLEX;
+
+        const char stor_scheme = 'C';
 
         transa = BLIS_NO_TRANSPOSE;
         transb = BLIS_NO_TRANSPOSE;
@@ -107,60 +83,65 @@ int main( int argc, char** argv )
         bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
         bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
-
-        printf("BLIS Library version is : %s\n", bli_info_get_version_str());
-
-
+        
+	printf("BLIS Library version is : %s\n", bli_info_get_version_str());
 
 #ifdef FILE_IN_OUT
-        if (argc < 3)
-          {
+        FILE* fin = NULL;
+	FILE* fout = NULL;
+        if (argc < 3){
             printf("Usage: ./test_gemm_XX.x input.csv output.csv\n");
             exit(1);
-          }
+        }
         fin = fopen(argv[1], "r");
-        if (fin == NULL)
-          {
+        if (fin == NULL){
             printf("Error opening the file %s\n", argv[1]);
             exit(1);
-          }
+        }
         fout = fopen(argv[2], "w");
-        if (fout == NULL)
-          {
+        if (fout == NULL){
             printf("Error opening output file %s\n", argv[2]);
             exit(1);
-          }
-
+        }
         fprintf(fout, "m\t k\t n\t cs_a\t cs_b\t cs_c\t gflops\n");
-
         printf("~~~~~~~~~~_BLAS\t m\t k\t n\t cs_a\t cs_b\t cs_c \t gflops\n");
 
-        inc_t lda;
-        inc_t ldb;
-        inc_t ldc;
-
-        char stor_scheme;
-        stor_scheme = 'C';
-
         while (fscanf(fin, "%lld %lld %lld %lld %lld %lld\n", &m, &k, &n, &lda, &ldb, &ldc) == 6)
-          {
-            // By default enabling column-storage
-            if( (stor_scheme == 'C') || (stor_scheme == 'c') )
-            {
-                // Col-major Order
-		// this conditions are valid only when Op(A) = n and op(B) = n
-                if ((m > lda) || (k > ldb) || (m > ldc)) continue; // leading dimension should be greater than number of rows
-            }
-            else if( (stor_scheme == 'R') || (stor_scheme == 'r') )
-            {
-                // Row-major Order
-                if ((k > lda) || (n > ldb) || (n > ldc)) continue; // leading dimension should be greater than number of cols
-            }
-            else
-            {
+        {
+	    // dimensions should not be greater than leading dimensions
+            // These are valid only when Op(A) = n and op(B) = n
+            if( (stor_scheme == 'C') || (stor_scheme == 'c') ) {
+                if ((m > lda) || (k > ldb) || (m > ldc)) continue; 
+            }else if( (stor_scheme == 'R') || (stor_scheme == 'r') ) {
+		// leading dimension should be greater than number of cols
+                if ((k > lda) || (n > ldb) || (n > ldc)) continue;
+	    }else {
                 printf("Invalid Storage type\n");
                 continue;
             }
+#else
+        dim_t p, p_begin, p_end, p_inc;
+        dim_t m_input, n_input, k_input;
+        p_begin = 200;
+        p_end   = 2000;
+        p_inc   = 200;
+
+        m_input = n_input = k_input = -1;
+        for ( p = p_begin; p <= p_end; p += p_inc )
+        {
+            if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
+            else               m =     ( dim_t )    m_input;
+            if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
+            else               n =     ( dim_t )    n_input;
+            if ( k_input < 0 ) k = p * ( dim_t )abs(k_input);
+            else               k =     ( dim_t )    k_input;
+            
+	    if( (stor_scheme == 'C') || (stor_scheme == 'c') ) {
+	        lda = m; ldb = k, ldc = m;
+            }else if( (stor_scheme == 'R') || (stor_scheme == 'r') ) {
+	        lda = k; ldb = n, ldc = n;
+            }
+#endif
 
             bli_obj_create( dt, 1, 1, 0, 0, &alpha);
             bli_obj_create( dt, 1, 1, 0, 0, &beta );
@@ -175,15 +156,15 @@ int main( int argc, char** argv )
             inc_t n_bytes = lda*sizeof(dt);
 
             if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
-               lda += CACHE_LINE_SIZE/sizeof(dt);
+               lda += BLIS_SIMD_ALIGN_SIZE/sizeof(dt);
 
             n_bytes = ldb*sizeof(dt);
             if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
-               ldb += CACHE_LINE_SIZE/sizeof(dt);
+               ldb += BLIS_SIMD_ALIGN_SIZE/sizeof(dt);
 
             n_bytes = ldc*sizeof(dt);
             if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
-               ldc += CACHE_LINE_SIZE/sizeof(dt);
+               ldc += BLIS_SIMD_ALIGN_SIZE/sizeof(dt);
 
             if( (stor_scheme == 'C') || (stor_scheme == 'c') )
             {
@@ -214,317 +195,247 @@ int main( int argc, char** argv )
 #endif
             bli_obj_set_conjtrans( transa, &a);
             bli_obj_set_conjtrans( transb, &b);
+            bli_setsc(  (0.9/1.0), 0.2, &alpha );
+            bli_setsc( -(1.1/1.0), 0.3, &beta );
 
-            //bli_setsc( 0.0, -1, &alpha );
-            //bli_setsc( 0.0, 1, &beta );
-
-            bli_setsc( -1, 0.0, &alpha );
-            bli_setsc( 1, 0.0, &beta );
-
-#else
-        for ( p = p_begin; p <= p_end; p += p_inc )
-        {
-                if ( m_input < 0 ) m = p * ( dim_t )abs(m_input);
-                else               m =     ( dim_t )    m_input;
-                if ( n_input < 0 ) n = p * ( dim_t )abs(n_input);
-                else               n =     ( dim_t )    n_input;
-                if ( k_input < 0 ) k = p * ( dim_t )abs(k_input);
-                else               k =     ( dim_t )    k_input;
-
-                bli_obj_create( dt, 1, 1, 0, 0, &alpha );
-                bli_obj_create( dt, 1, 1, 0, 0, &beta );
-
-                bli_obj_create( dt, m, k, 0, 0, &a );
-                bli_obj_create( dt, k, n, 0, 0, &b );
-                bli_obj_create( dt, m, n, 0, 0, &c );
-                bli_obj_create( dt, m, n, 0, 0, &c_save );
-
-                bli_randm( &a );
-                bli_randm( &b );
-                bli_randm( &c );
-
-                bli_obj_set_conjtrans( transa, &a );
-                bli_obj_set_conjtrans( transb, &b );
-
-                bli_setsc(  (0.9/1.0), 0.2, &alpha );
-                bli_setsc( -(1.1/1.0), 0.3, &beta );
-
-#endif
-                bli_copym( &c, &c_save );
-
-                dtime_save = DBL_MAX;
-
-                for ( r = 0; r < n_repeats; ++r )
-                  {
-                    bli_copym( &c_save, &c );
-
-                    dtime = bli_clock();
-
-
-#ifdef PRINT
-                    bli_printm( "a", &a, "%4.1f", "" );
-                    bli_printm( "b", &b, "%4.1f", "" );
-                    bli_printm( "c", &c, "%4.1f", "" );
-#endif
+            bli_copym( &c, &c_save );
+            dtime_save = DBL_MAX;
+            for ( r = 0; r < n_repeats; ++r )
+            {
+                bli_copym( &c_save, &c );
+                dtime = bli_clock();
 
 #ifdef BLIS
-
-                    bli_gemm( &alpha,
-                              &a,
-                              &b,
-                              &beta,
-                              &c );
-
+                bli_gemm( &alpha,
+                          &a,
+                          &b,
+                          &beta,
+                          &c );
 #else
-
-#ifdef CBLAS
-            enum CBLAS_ORDER     cblas_order;
-            enum CBLAS_TRANSPOSE cblas_transa;
-            enum CBLAS_TRANSPOSE cblas_transb;
-
-            if ( bli_obj_row_stride( &c ) == 1 )
-              cblas_order = CblasColMajor;
-            else
-              cblas_order = CblasRowMajor;
-
-            if( bli_is_trans( transa ) )
-              cblas_transa = CblasTrans;
-            else if( bli_is_conjtrans( transa ) )
-              cblas_transa = CblasConjTrans;
-            else
-              cblas_transa = CblasNoTrans;
-
-            if( bli_is_trans( transb ) )
-              cblas_transb = CblasTrans;
-            else if( bli_is_conjtrans( transb ) )
-              cblas_transb = CblasConjTrans;
-            else
-              cblas_transb = CblasNoTrans;
-#else
-            f77_char f77_transa;
-            f77_char f77_transb;
-
-            bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
-            bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
-
-#endif
-            if ( bli_is_float( dt ) )
-              {
+                f77_int lda, ldb, ldc;
                 f77_int  mm     = bli_obj_length( &c );
                 f77_int  kk     = bli_obj_width_after_trans( &a );
                 f77_int  nn     = bli_obj_width( &c );
-                f77_int  lda    = bli_obj_col_stride( &a );
-                f77_int  ldb    = bli_obj_col_stride( &b );
-                f77_int  ldc    = bli_obj_col_stride( &c );
-                float*   alphap = bli_obj_buffer( &alpha );
-                float*   ap     = bli_obj_buffer( &a );
-                float*   bp     = bli_obj_buffer( &b );
-                float*   betap  = bli_obj_buffer( &beta );
-                float*   cp     = bli_obj_buffer( &c );
 #ifdef CBLAS
-                cblas_sgemm( cblas_order,
-                             cblas_transa,
-                             cblas_transb,
-                             mm,
-                             nn,
-                             kk,
-                             *alphap,
-                             ap, lda,
-                             bp, ldb,
-                             *betap,
-                             cp, ldc
-                             );
+                enum CBLAS_ORDER     cblas_order;
+                enum CBLAS_TRANSPOSE cblas_transa;
+                enum CBLAS_TRANSPOSE cblas_transb;
 
-#else
-                sgemm_( &f77_transa,
-                        &f77_transb,
-                        &mm,
-                        &nn,
-                        &kk,
-                        alphap,
-                        ap, (f77_int*)&lda,
-                        bp, (f77_int*)&ldb,
-                        betap,
-                        cp, (f77_int*)&ldc );
-#endif
-              }
-            else if ( bli_is_double( dt ) )
-              {
-                f77_int  mm     = bli_obj_length( &c );
-                f77_int  kk     = bli_obj_width_after_trans( &a );
-                f77_int  nn     = bli_obj_width( &c );
-                f77_int  lda    = bli_obj_col_stride( &a );
-                f77_int  ldb    = bli_obj_col_stride( &b );
-                f77_int  ldc    = bli_obj_col_stride( &c );
-                double*  alphap = bli_obj_buffer( &alpha );
-                double*  ap     = bli_obj_buffer( &a );
-                double*  bp     = bli_obj_buffer( &b );
-                double*  betap  = bli_obj_buffer( &beta );
-                double*  cp     = bli_obj_buffer( &c );
-#ifdef CBLAS
-                cblas_dgemm( cblas_order,
-                             cblas_transa,
-                             cblas_transb,
-                             mm,
-                             nn,
-                             kk,
-                             *alphap,
-                             ap, lda,
-                             bp, ldb,
-                             *betap,
-                             cp, ldc
-                             );
-
-#else
-                dgemm_( &f77_transa,
-                        &f77_transb,
-                        &mm,
-                        &nn,
-                        &kk,
-                        alphap,
-                        ap, (f77_int*)&lda,
-                        bp, (f77_int*)&ldb,
-                        betap,
-                        cp, (f77_int*)&ldc );
-#endif
-              }
-            else if ( bli_is_scomplex( dt ) )
-              {
-                f77_int  mm     = bli_obj_length( &c );
-                f77_int  kk     = bli_obj_width_after_trans( &a );
-                f77_int  nn     = bli_obj_width( &c );
-                f77_int  lda    = bli_obj_col_stride( &a );
-                f77_int  ldb    = bli_obj_col_stride( &b );
-                f77_int  ldc    = bli_obj_col_stride( &c );
-                scomplex*  alphap = bli_obj_buffer( &alpha );
-                scomplex*  ap     = bli_obj_buffer( &a );
-                scomplex*  bp     = bli_obj_buffer( &b );
-                scomplex*  betap  = bli_obj_buffer( &beta );
-                scomplex*  cp     = bli_obj_buffer( &c );
-
-#ifdef CBLAS
-                cblas_cgemm( cblas_order,
-                             cblas_transa,
-                             cblas_transb,
-                             mm,
-                             nn,
-                             kk,
-                             alphap,
-                             ap, lda,
-                             bp, ldb,
-                             betap,
-                             cp, ldc
-                             );
-
-#else
-                cgemm_( &f77_transa,
-                        &f77_transb,
-                        &mm,
-                        &nn,
-                        &kk,
-                        alphap,
-                        ap, (f77_int*)&lda,
-                        bp, (f77_int*)&ldb,
-                        betap,
-                        cp, (f77_int*)&ldc );
-#endif
-              }
-            else if ( bli_is_dcomplex( dt ) )
-              {
-                f77_int  mm     = bli_obj_length( &c );
-                f77_int  kk     = bli_obj_width_after_trans( &a );
-                f77_int  nn     = bli_obj_width( &c );
-                f77_int  lda    = bli_obj_col_stride( &a );
-                f77_int  ldb    = bli_obj_col_stride( &b );
-                f77_int  ldc    = bli_obj_col_stride( &c );
-                dcomplex*  alphap = bli_obj_buffer( &alpha );
-                dcomplex*  ap     = bli_obj_buffer( &a );
-                dcomplex*  bp     = bli_obj_buffer( &b );
-                dcomplex*  betap  = bli_obj_buffer( &beta );
-                dcomplex*  cp     = bli_obj_buffer( &c );
-#ifdef CBLAS
-                cblas_zgemm( cblas_order,
-                             cblas_transa,
-                             cblas_transb,
-                             mm,
-                             nn,
-                             kk,
-                             alphap,
-                             ap, lda,
-                             bp, ldb,
-                             betap,
-                             cp, ldc
-                             );
-
-#else
-                zgemm_( &f77_transa,
-                        &f77_transb,
-                        &mm,
-                        &nn,
-                        &kk,
-                        alphap,
-                        ap, (f77_int*)&lda,
-                        bp, (f77_int*)&ldb,
-                        betap,
-                        cp, (f77_int*)&ldc );
-#endif
-              }
-#endif
-
-#ifdef PRINT
-                        bli_printm( "c after", &c, "%4.1f", "" );
-                        exit(1);
-#endif
-
-
-                        dtime_save = bli_clock_min_diff( dtime_save, dtime );
+                if ( bli_obj_row_stride( &c ) == 1 ){
+                    cblas_order = CblasColMajor;
+                }else{
+                    cblas_order = CblasRowMajor;
                 }
 
-                gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
+                if( bli_is_trans( transa ) )
+                  cblas_transa = CblasTrans;
+                else if( bli_is_conjtrans( transa ) )
+                  cblas_transa = CblasConjTrans;
+                else
+                  cblas_transa = CblasNoTrans;
 
-                if ( bli_is_complex( dt ) ) gflops *= 4.0;
+                if( bli_is_trans( transb ) )
+                  cblas_transb = CblasTrans;
+                else if( bli_is_conjtrans( transb ) )
+                  cblas_transb = CblasConjTrans;
+                else
+                  cblas_transb = CblasNoTrans;
+#else
+                f77_char f77_transa;
+                f77_char f77_transb;
+                bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
+                bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
+#endif
+                if( (stor_scheme == 'C') || (stor_scheme == 'c') ){
+                    lda    = bli_obj_col_stride( &a );
+                    ldb    = bli_obj_col_stride( &b );
+                    ldc    = bli_obj_col_stride( &c );
+                } else {
+                    lda    = bli_obj_row_stride( &a );
+                    ldb    = bli_obj_row_stride( &b );
+                    ldc    = bli_obj_row_stride( &c );
+		}
+
+                if ( bli_is_float( dt ) )
+                {
+                    float*   alphap = bli_obj_buffer( &alpha );
+                    float*   ap     = bli_obj_buffer( &a );
+                    float*   bp     = bli_obj_buffer( &b );
+                    float*   betap  = bli_obj_buffer( &beta );
+                    float*   cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+                    cblas_sgemm( cblas_order,
+                                 cblas_transa,
+                                 cblas_transb,
+                                 mm,
+                                 nn,
+                                 kk,
+                                 *alphap,
+                                 ap, lda,
+                                 bp, ldb,
+                                 *betap,
+                                 cp, ldc
+                                 );
+#else
+                    sgemm_( &f77_transa,
+                            &f77_transb,
+                            &mm,
+                            &nn,
+                            &kk,
+                            alphap,
+                            ap, (f77_int*)&lda,
+                            bp, (f77_int*)&ldb,
+                            betap,
+                            cp, (f77_int*)&ldc );
+#endif
+                }else if ( bli_is_double( dt ) )
+                {
+                    double*  alphap = bli_obj_buffer( &alpha );
+                    double*  ap     = bli_obj_buffer( &a );
+                    double*  bp     = bli_obj_buffer( &b );
+                    double*  betap  = bli_obj_buffer( &beta );
+                    double*  cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+                    cblas_dgemm( cblas_order,
+                                 cblas_transa,
+                                 cblas_transb,
+                                 mm,
+                                 nn,
+                                 kk,
+                                 *alphap,
+                                 ap, lda,
+                                 bp, ldb,
+                                 *betap,
+                                 cp, ldc
+                                 );
+#else
+                    dgemm_( &f77_transa,
+                            &f77_transb,
+                            &mm,
+                            &nn,
+                            &kk,
+                            alphap,
+                            ap, (f77_int*)&lda,
+                            bp, (f77_int*)&ldb,
+                            betap,
+                            cp, (f77_int*)&ldc );
+#endif
+                }else if ( bli_is_scomplex( dt ) )
+                {
+                    scomplex*  alphap = bli_obj_buffer( &alpha );
+                    scomplex*  ap     = bli_obj_buffer( &a );
+                    scomplex*  bp     = bli_obj_buffer( &b );
+                    scomplex*  betap  = bli_obj_buffer( &beta );
+                    scomplex*  cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+                    cblas_cgemm( cblas_order,
+                                 cblas_transa,
+                                 cblas_transb,
+                                 mm,
+                                 nn,
+                                 kk,
+                                 alphap,
+                                 ap, lda,
+                                 bp, ldb,
+                                 betap,
+                                 cp, ldc
+                                 );
+#else
+                    cgemm_( &f77_transa,
+                            &f77_transb,
+                            &mm,
+                            &nn,
+                            &kk,
+                            alphap,
+                            ap, (f77_int*)&lda,
+                            bp, (f77_int*)&ldb,
+                            betap,
+                            cp, (f77_int*)&ldc );
+#endif
+                }else if ( bli_is_dcomplex( dt ) )
+                {
+                    dcomplex*  alphap = bli_obj_buffer( &alpha );
+                    dcomplex*  ap     = bli_obj_buffer( &a );
+                    dcomplex*  bp     = bli_obj_buffer( &b );
+                    dcomplex*  betap  = bli_obj_buffer( &beta );
+                    dcomplex*  cp     = bli_obj_buffer( &c );
+#ifdef CBLAS
+                    cblas_zgemm( cblas_order,
+                                 cblas_transa,
+                                 cblas_transb,
+                                 mm,
+                                 nn,
+                                 kk,
+                                 alphap,
+                                 ap, lda,
+                                 bp, ldb,
+                                 betap,
+                                 cp, ldc
+                                 );
+#else
+                    zgemm_( &f77_transa,
+                            &f77_transb,
+                            &mm,
+                            &nn,
+                            &kk,
+                            alphap,
+                            ap, (f77_int*)&lda,
+                            bp, (f77_int*)&ldb,
+                            betap,
+                            cp, (f77_int*)&ldc );
+#endif
+                }
+#endif
+
+#ifdef PRINT
+                bli_printm( "a", &a, "%4.1f", "" );
+                bli_printm( "b", &b, "%4.1f", "" );
+                bli_printm( "c", &c, "%4.1f", "" );
+                bli_printm( "c after", &c, "%4.1f", "" );
+                exit(1);
+#endif
+                dtime_save = bli_clock_min_diff( dtime_save, dtime );
+            }//nrepeats
+
+            gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
+            if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
 #ifdef BLIS
-                printf( "data_gemm_blis" );
+            printf("data_gemm_blis" );
 #else
-                printf( "data_gemm_%s", BLAS );
+            printf("data_gemm_%s", BLAS );
 #endif
 
 
 #ifdef FILE_IN_OUT
 
-                printf("%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f\n", \
-                        ( unsigned long )m,
-                        ( unsigned long )k,
-                       ( unsigned long )n, (unsigned long)lda, (unsigned long)ldb, (unsigned long)ldc,  gflops);
+            printf("%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f\n", \
+                  ( unsigned long )m,( unsigned long )k,( unsigned long )n,
+                  (unsigned long)lda,(unsigned long)ldb,(unsigned long)ldc,gflops);
 
-
-                fprintf(fout, "%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f \n", \
-                        ( unsigned long )m,
-				( unsigned long )k,
-                        ( unsigned long )n, (unsigned long)lda, (unsigned long)ldb, (unsigned long)ldc,  gflops);
-                fflush(fout);
-
+            fprintf(fout, "%6lu \t %4lu \t %4lu \t %4lu \t %4lu \t %4lu \t %6.3f\n", \
+                   ( unsigned long )m,( unsigned long )k,( unsigned long )n,
+                   (unsigned long)lda,(unsigned long)ldb,(unsigned long)ldc,gflops);
+            fflush(fout);
 #else
-                printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
-                        ( unsigned long )(p - p_begin)/p_inc + 1,
-                        ( unsigned long )m,
-                        ( unsigned long )k,
-                        ( unsigned long )n, gflops );
+            printf( "( %2lu, 1:4 ) = [ %4lu %4lu %4lu %7.2f ];\n",
+                   ( unsigned long )(p - p_begin)/p_inc + 1,
+                   ( unsigned long )m,( unsigned long )k,
+                   ( unsigned long )n, gflops );
 #endif
-                bli_obj_free( &alpha );
-                bli_obj_free( &beta );
+            bli_obj_free( &alpha );
+            bli_obj_free( &beta );
 
-                bli_obj_free( &a );
-                bli_obj_free( &b );
-                bli_obj_free( &c );
-                bli_obj_free( &c_save );
-        }
+            bli_obj_free( &a );
+            bli_obj_free( &b );
+            bli_obj_free( &c );
+            bli_obj_free( &c_save );
+        }//while
 
         //bli_finalize();
 #ifdef FILE_IN_OUT
-    fclose(fin);
-    fclose(fout);
+        fclose(fin);
+        fclose(fout);
 #endif
         return 0;
 }
