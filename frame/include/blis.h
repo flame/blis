@@ -136,7 +136,8 @@ extern "C" {
 #include "bli_arch.h"
 #include "bli_cpuid.h"
 #include "bli_string.h"
-#include "bli_setgetij.h"
+#include "bli_setgetijm.h"
+#include "bli_setgetijv.h"
 #include "bli_setri.h"
 
 #include "bli_castm.h"

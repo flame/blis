@@ -53,7 +53,7 @@ This index provides a quick way to jump directly to the description for each ope
   * **[Level-3](BLISObjectAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
     * [gemm](BLISObjectAPI.md#gemm), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
   * **[Utility](BLISObjectAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getijm](BLISObjectAPI.md#getijm), [setijm](BLISObjectAPI.md#setijm)
+    * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getijv](BLISObjectAPI.md#getijv), [getijm](BLISObjectAPI.md#getijm), [setijv](BLISObjectAPI.md#setijv), [setijm](BLISObjectAPI.md#setijm)
 
 
 
@@ -2125,6 +2125,19 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 
 ---
 
+#### getijv
+```c
+err_t bli_getijv
+      (
+        dim_t   i,
+        obj_t*  b,
+        double* ar,
+        double* ai
+      )
+```
+Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
 #### getijm
 ```c
 err_t bli_getijm
@@ -2136,8 +2149,21 @@ err_t bli_getijm
         double* ai
       )
 ```
-Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
-If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
+Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
+#### setijv
+```c
+err_t bli_setijv
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       obj_t*  x
+     );
+```
+Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. If elements of `x` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+If the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
 
 #### setijm
 ```c
@@ -2151,7 +2177,7 @@ err_t bli_setijm
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
-If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
+If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
 
 
 

@@ -34,43 +34,38 @@
 
 #include "blis.h"
 
-typedef void (*setijm_fp)
+typedef void (*setijv_fp)
      (
        double         ar,
        double         ai,
        dim_t          i,
-       dim_t          j,
-       void* restrict b, inc_t rs, inc_t cs
+       void* restrict x, inc_t incx
      );
-static setijm_fp GENARRAY(ftypes_setijm,setijm);
+static setijv_fp GENARRAY(ftypes_setijv,setijv);
 
-err_t bli_setijm
+err_t bli_setijv
      (
        double  ar,
        double  ai,
        dim_t   i,
-       dim_t   j,
-       obj_t*  b
+       obj_t*  x
      )
 {
-	dim_t m  = bli_obj_length( b );
-	dim_t n  = bli_obj_width( b );
-	dim_t rs = bli_obj_row_stride( b );
-	dim_t cs = bli_obj_col_stride( b );
-	num_t dt = bli_obj_dt( b );
+	dim_t n    = bli_obj_vector_dim( x );
+	dim_t incx = bli_obj_vector_inc( x );
+	num_t dt   = bli_obj_dt( x );
 
-	// Return error if i or j is beyond bounds of matrix/vector.
-	if ( m <= i ) return BLIS_FAILURE;
-	if ( n <= j ) return BLIS_FAILURE;
+	// Return error if i is beyond bounds of the vector.
+	if ( i < 0 || n <= i ) return BLIS_FAILURE;
 
 	// Don't modify scalar constants.
 	if ( dt == BLIS_CONSTANT ) return BLIS_FAILURE;
 
 	// Query the pointer to the buffer at the adjusted offsets.
-	void* b_p = bli_obj_buffer_at_off( b );
+	void* x_p = bli_obj_buffer_at_off( x );
 
 	// Index into the function pointer array.
-	setijm_fp f = ftypes_setijm[ dt ];
+	setijv_fp f = ftypes_setijv[ dt ];
 
 	// Invoke the type-specific function.
 	f
@@ -78,8 +73,7 @@ err_t bli_setijm
 	  ar,
 	  ai,
 	  i,
-	  j,
-	  b_p, rs, cs
+	  x_p, incx
 	);
 
 	return BLIS_SUCCESS;
@@ -93,85 +87,58 @@ void PASTEMAC(ch,opname) \
        double         ar, \
        double         ai, \
        dim_t          i, \
-       dim_t          j, \
-       void* restrict b, inc_t rs, inc_t cs  \
+       void* restrict x, inc_t incx  \
      ) \
 { \
-	ctype* restrict b_cast = ( ctype* )b; \
+	ctype* restrict x_cast = ( ctype* )x; \
 \
-	ctype* restrict b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	ctype* restrict x_i = x_cast + (i  )*incx; \
 \
-	PASTEMAC2(z,ch,sets)( ar, ai, *b_ij ); \
+	PASTEMAC2(z,ch,sets)( ar, ai, *x_i ); \
 }
 
-INSERT_GENTFUNC_BASIC0( setijm )
+INSERT_GENTFUNC_BASIC0( setijv )
 
 // -----------------------------------------------------------------------------
 
-typedef void (*getijm_fp)
+typedef void (*getijv_fp)
      (
        dim_t          i,
-       dim_t          j,
-       void* restrict b, inc_t rs, inc_t cs,
+       void* restrict x, inc_t incx,
        double*        ar,
        double*        ai
      );
-static getijm_fp GENARRAY(ftypes_getijm,getijm);
+static getijv_fp GENARRAY(ftypes_getijv,getijv);
 
-err_t bli_getijm
+err_t bli_getijv
       (
         dim_t   i,
-        dim_t   j,
-        obj_t*  b,
+        obj_t*  x,
         double* ar,
         double* ai
       )
 {
-	dim_t m  = bli_obj_length( b );
-	dim_t n  = bli_obj_width( b );
-	dim_t rs = bli_obj_row_stride( b );
-	dim_t cs = bli_obj_col_stride( b );
-	num_t dt = bli_obj_dt( b );
+	dim_t n    = bli_obj_vector_dim( x );
+	dim_t incx = bli_obj_vector_inc( x );
+	num_t dt   = bli_obj_dt( x );
 
-	// Return error if i or j is beyond bounds of matrix/vector.
-	if ( m <= i ) return BLIS_FAILURE;
-	if ( n <= j ) return BLIS_FAILURE;
+	// Return error if i is beyond bounds of the vector.
+	if ( i < 0 || n <= i ) return BLIS_FAILURE;
 
-	void* b_p;
-
-#if 0
-	// Handle scalar constants separately.
-	if ( dt == BLIS_CONSTANT )
-	{
-		if ( i == 0 && j == 0 )
-		{
-			dt  = BLIS_DCOMPLEX;
-			b_p = bli_obj_buffer_for_const( dt, b )
-		}
-		else return BLIS_FAILURE;
-	}
-	else
-	{
-		// Query the pointer to the buffer at the adjusted offsets.
-		b_p = bli_obj_buffer_at_off( b );
-	}
-#else
 	// Disallow access into scalar constants.
 	if ( dt == BLIS_CONSTANT ) return BLIS_FAILURE;
 
 	// Query the pointer to the buffer at the adjusted offsets.
-	b_p = bli_obj_buffer_at_off( b );
-#endif
+	void* x_p = bli_obj_buffer_at_off( x );
 
 	// Index into the function pointer array.
-	getijm_fp f = ftypes_getijm[ dt ];
+	getijv_fp f = ftypes_getijv[ dt ];
 
 	// Invoke the type-specific function.
 	f
 	(
 	  i,
-	  j,
-	  b_p, rs, cs,
+	  x_p, incx,
 	  ar,
 	  ai
 	);
@@ -185,18 +152,17 @@ err_t bli_getijm
 void PASTEMAC(ch,opname) \
      ( \
        dim_t          i, \
-       dim_t          j, \
-       void* restrict b, inc_t rs, inc_t cs, \
+       void* restrict x, inc_t incx, \
        double*        ar, \
        double*        ai  \
      ) \
 { \
-	ctype* restrict b_cast = ( ctype* )b; \
+	ctype* restrict x_cast = ( ctype* )x; \
 \
-	ctype* restrict b_ij = b_cast + (i  )*rs + (j  )*cs; \
+	ctype* restrict x_i = x_cast + (i  )*incx; \
 \
-	PASTEMAC2(ch,z,gets)( *b_ij, *ar, *ai ); \
+	PASTEMAC2(ch,z,gets)( *x_i, *ar, *ai ); \
 }
 
-INSERT_GENTFUNC_BASIC0( getijm )
+INSERT_GENTFUNC_BASIC0( getijv )
 
