@@ -1,6 +1,8 @@
 #include "blis.h"
 
 #include <float.h>
+#include <fenv.h>
+#include <ctype.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,21 +34,21 @@ bla_double bli_dlamch(bla_character *cmach, ftnlen cmach_len)
 /*          emax  = largest exponent before overflow */
 /*          rmax  = overflow threshold  - (base**emax)*(1-eps) */
 	
-    switch ( toupper( *cmach ) )
-    {
-	case E: return DBL_EPSILON;
-	case S: return DBL_MIN;
-	case B: return FLT_RADIX;
-	case P: return FLT_RADIX*DBL_EPSILON;
-	case N: return DBL_MANT_DIG;
-	case R: return DBL_ROUNDS == FE_TONEAREST ? 1.0 : 0.0;
-	case M: return DBL_MIN_EXP;
-	case U: return DBL_MIN;
-	case L: return DBL_MAX_EXP;
-	case O: return DBL_MAX;
-    }
+	switch ( toupper( *cmach ) )
+	{
+		case 'E': return DBL_EPSILON;
+		case 'S': return DBL_MIN;
+		case 'B': return FLT_RADIX;
+		case 'P': return FLT_RADIX*DBL_EPSILON;
+		case 'N': return DBL_MANT_DIG;
+		case 'R': return FLT_ROUNDS == FE_TONEAREST ? 1.0 : 0.0;
+		case 'M': return DBL_MIN_EXP;
+		case 'U': return DBL_MIN;
+		case 'L': return DBL_MAX_EXP;
+		case 'O': return DBL_MAX;
+	}
 	
-    return 0.0;
+	return 0.0;
 }
 
 #ifdef __cplusplus
