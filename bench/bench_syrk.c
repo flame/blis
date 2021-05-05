@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    modification, are permitted provided that the following conditions are
    met:
@@ -56,17 +56,17 @@
 /* #define CBLAS */
 #endif
 
-// C = alpha * op(A) * op(B) + beta * C
+// C = alpha * op(A) * op(AT) + beta * C
 // where op(X) is one of op(X) = X, or op(X) = XT, or op(X) = XH,
 // alpha and beta are scalars,
-// A, B and C are matrices:
+// A and C are matrices:
 // op(A) is an n-by-k matrix,
-// op(B) is a k-by-n matrix,
-// C is an n-by-n upper or lower triangular matrix.
+// op(AT) is a k-by-n matrix,
+// C is an n-by-n symmetric matrix.
 
 int main( int argc, char** argv )
 {
-    obj_t a, b, c;
+    obj_t a, c;
     obj_t c_save;
     obj_t alpha, beta;
     dim_t n, k;
@@ -76,7 +76,6 @@ int main( int argc, char** argv )
     char dt_ch;
     int   r, n_repeats;
     trans_t  transa;
-    trans_t  transb;
     uplo_t uploc;
 
     double dtime;
@@ -92,7 +91,7 @@ int main( int argc, char** argv )
 
     if (argc < 3)
       {
-        printf("Usage: ./test_gemmt_XX.x input.csv output.csv\n");
+        printf("Usage: ./test_syrk_XX.x input.csv output.csv\n");
         exit(1);
       }
     fin = fopen(argv[1], "r");
@@ -107,25 +106,23 @@ int main( int argc, char** argv )
         printf("Error opening output file %s\n", argv[2]);
         exit(1);
       }
-    fprintf(fout, "Dt uplo  n\t  k\t lda\t ldb\t ldc\t transa transb alphaR\t alphaI\t betaR\t betaI\t gflops\n");
+    fprintf(fout, "Dt uploc transa n\t  k\t alphaR\t alphaI\t betaR\t betaI\t lda\t ldc\t  gflops\n");
 
 
     inc_t lda;
-    inc_t ldb;
     inc_t ldc;
 
-    char stor_scheme, transA_c, transB_c, uplo_c;
+    char stor_scheme, transA_c, uplo_c;
     double alpha_r, beta_r, alpha_i, beta_i;
     dim_t m_trans, n_trans;
     char tmp[256]; // to store function name, line no present in logs.
 
     stor_scheme = 'C'; // since logs are collected at BLAS APIs
 
-    // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary beta_real, beta_imaginary}
-    while (fscanf(fin,"%s %c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf\n",\
-			tmp, &dt_ch, &uplo_c, &n, &k,\
-			&lda, &ldb, &ldc, &transA_c, &transB_c, \
-			&alpha_r, &alpha_i, &beta_r, &beta_i) == 14)
+    // {S,D,C,Z}{ uploc, transa, n, k, alpha_real, alpha_imag, lda, beta_real, beta_imag, ldc}
+    while (fscanf(fin, "%s %c %c %c %ld %ld %lf %lf %lu %lf %lf %lu\n",\
+			tmp, &dt_ch, &uplo_c, &transA_c, &n, &k, &alpha_r,\
+			&alpha_i, &lda, &beta_r, &beta_i, &ldc) == 12)
     {
         if (dt_ch == 'D' || dt_ch == 'd') dt = BLIS_DOUBLE;
         else if (dt_ch == 'Z' || dt_ch == 'z') dt = BLIS_DCOMPLEX;
@@ -141,7 +138,7 @@ int main( int argc, char** argv )
         else if (uplo_c == 'L' || uplo_c == 'l') uploc = BLIS_LOWER;
         else
         {
-            printf("INvalid option for uplo\n");
+            printf("Invalid option for uplo\n");
             continue;
         }
 
@@ -154,14 +151,6 @@ int main( int argc, char** argv )
             continue;
         }
 
-        if( transB_c == 'n' || transB_c == 'N') transb = BLIS_NO_TRANSPOSE;
-        else if (transB_c == 't' || transB_c == 'T') transb = BLIS_TRANSPOSE;
-        else if ( transB_c == 'c' || transB_c == 'C') transb = BLIS_CONJ_TRANSPOSE;
-        else
-        {
-            printf("Invalid option for transB \n");
-            continue;
-        }
 
         bli_obj_create( dt, 1, 1, 0, 0, &alpha);
         bli_obj_create( dt, 1, 1, 0, 0, &beta );
@@ -170,33 +159,25 @@ int main( int argc, char** argv )
         {
           // Column storage
           // leading dimension should be greater than number of rows
-          if( n > ldc ) continue;
+	  if( n > ldc ) continue;
 
           bli_set_dims_with_trans( transa, n, k, &m_trans, &n_trans);
-          if( m_trans > lda ) continue;
-	  bli_obj_create( dt, m_trans, n_trans, 1, lda, &a );
-
-          bli_set_dims_with_trans( transb, k, n, &m_trans, &n_trans);
-	  if( m_trans > ldb ) continue;
-
-          bli_obj_create( dt, m_trans, n_trans, 1, ldb, &b );
+	  if( m_trans > lda ) continue;
+          bli_obj_create( dt, m_trans, n_trans, 1, lda, &a );
 
           bli_obj_create( dt, n, n, 1, ldc, &c );
           bli_obj_create( dt, n, n, 1, ldc, &c_save );
         }
         else if (stor_scheme == 'r' || stor_scheme == 'R')
         {
+          bli_set_dims_with_trans( transa, n, k, &m_trans, &n_trans);
+
           // row storage
           // leading dimension shold be greater than number of columns
-          if( n > ldc ) continue;
 
-          bli_set_dims_with_trans( transa, n, k, &m_trans, &n_trans);
-          if( n_trans > lda ) continue;
+          if((n_trans > lda) || (n > ldc)) continue;
+
           bli_obj_create( dt, m_trans, n_trans, lda, 1, &a );
-
-          bli_set_dims_with_trans( transb, k, n, &m_trans, &n_trans);
-          if( n_trans > ldb ) continue;
-          bli_obj_create( dt, m_trans, n_trans, ldb, 1, &b );
 
           bli_obj_create( dt, n, n, ldc, 1, &c );
           bli_obj_create( dt, n, n, ldc, 1, &c_save );
@@ -213,25 +194,23 @@ int main( int argc, char** argv )
             continue;
         }
 #endif
-        bli_obj_set_struc( BLIS_TRIANGULAR, &c );
+        bli_obj_set_struc( BLIS_SYMMETRIC, &c );
         bli_obj_set_uplo( uploc, &c );
 
 #ifdef AOCL_MATRIX_INITIALISATION
         bli_randm( &a );
-        bli_randm( &b );
         bli_randm( &c );
 #endif
+        bli_mksymm( &c );
         bli_mktrim( &c );
 
         bli_obj_set_conjtrans( transa, &a);
-        bli_obj_set_conjtrans( transb, &b);
 
         bli_setsc( alpha_r,alpha_i, &alpha );
         bli_setsc( beta_r, beta_i,  &beta  );
 
-        bli_obj_set_struc( BLIS_TRIANGULAR, &c_save );
+        bli_obj_set_struc( BLIS_SYMMETRIC, &c_save );
         bli_obj_set_uplo( uploc, &c_save);
-
         bli_copym( &c, &c_save );
 
         dtime_save = DBL_MAX;
@@ -242,16 +221,14 @@ int main( int argc, char** argv )
 
 #ifdef PRINT
             bli_printm( "a", &a, "%4.1f", "," );
-            bli_printm( "b", &b, "%4.1f", "," );
             bli_printm( "c", &c, "%4.1f", "," );
 #endif
 
             dtime = bli_clock();
 
 #ifdef BLIS
-            bli_gemmt( &alpha,
+            bli_syrk( &alpha,
                       &a,
-                      &b,
                       &beta,
                       &c );
 
@@ -261,7 +238,6 @@ int main( int argc, char** argv )
             enum CBLAS_ORDER cblas_order;
             enum CBLAS_UPLO  cblas_uplo;
             enum CBLAS_TRANSPOSE cblas_transa;
-            enum CBLAS_TRANSPOSE cblas_transb;
 
             if ( bli_obj_row_stride( &c ) == 1 )
                 cblas_order = CblasColMajor;
@@ -279,20 +255,12 @@ int main( int argc, char** argv )
             else
                 cblas_transa = CblasNoTrans;
 
-            if( bli_is_trans( transb ) )
-                cblas_transb = CblasTrans;
-            else if( bli_is_conjtrans( transb ) )
-                cblas_transb = CblasConjTrans;
-            else
-                cblas_transb = CblasNoTrans;
 #else
 
             f77_char f77_transa;
-            f77_char f77_transb;
             f77_char f77_uploc;
 
             bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
-            bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
             bli_param_map_blis_to_netlib_uplo( uploc, &f77_uploc );
 #endif
 
@@ -302,31 +270,26 @@ int main( int argc, char** argv )
                 f77_int  nn     = n;
                 float*   alphap = bli_obj_buffer( &alpha );
                 float*   ap     = bli_obj_buffer( &a );
-                float*   bp     = bli_obj_buffer( &b );
                 float*   betap  = bli_obj_buffer( &beta );
                 float*   cp     = bli_obj_buffer( &c );
 #ifdef CBLAS
-                cblas_sgemmt( cblas_order,
+                cblas_ssyrk( cblas_order,
                               cblas_uplo,
                               cblas_transa,
-                              cblas_transb,
                               nn,
                               kk,
                               *alphap,
                               ap, lda,
-                              bp, ldb,
                               *betap,
                               cp, ldc );
 
 #else
-                sgemmt_( &f77_uploc,
+                ssyrk_( &f77_uploc,
                          &f77_transa,
-                         &f77_transb,
                          &nn,
                          &kk,
                          alphap,
                          ap, (f77_int*)&lda,
-                         bp, (f77_int*)&ldb,
                          betap,
                          cp, (f77_int*)&ldc );
 
@@ -338,31 +301,26 @@ int main( int argc, char** argv )
                 f77_int  nn      = n;
                 double*  alphap = bli_obj_buffer( &alpha );
                 double*  ap     = bli_obj_buffer( &a );
-                double*  bp     = bli_obj_buffer( &b );
                 double*  betap  = bli_obj_buffer( &beta );
                 double*  cp     = bli_obj_buffer( &c );
 #ifdef CBLAS
-                cblas_dgemmt( cblas_order,
+                cblas_dsyrk( cblas_order,
                               cblas_uplo,
                               cblas_transa,
-                              cblas_transb,
                               nn,
                               kk,
                               *alphap,
                               ap,lda,
-                              bp, ldb,
                               *betap,
                               cp, ldc
                             );
 #else
-                dgemmt_( &f77_uploc,
+                dsyrk_( &f77_uploc,
                          &f77_transa,
-                         &f77_transb,
                          &nn,
                          &kk,
                          alphap,
                          ap, (f77_int*)&lda,
-                         bp, (f77_int*)&ldb,
                          betap,
                          cp, (f77_int*)&ldc
                        );
@@ -374,30 +332,25 @@ int main( int argc, char** argv )
                 f77_int  nn     = n;
                 scomplex*  alphap = bli_obj_buffer( &alpha );
                 scomplex*  ap     = bli_obj_buffer( &a );
-                scomplex*  bp     = bli_obj_buffer( &b );
                 scomplex*  betap  = bli_obj_buffer( &beta );
                 scomplex*  cp     = bli_obj_buffer( &c );
 #ifdef CBLAS
-                cblas_cgemmt( cblas_order,
+                cblas_csyrk( cblas_order,
                               cblas_uplo,
                               cblas_transa,
-                              cblas_transb,
                               nn,
                               kk,
                               alphap,
                               ap, lda,
-                              bp, ldb,
                               betap,
                               cp, ldc );
 #else
-                cgemmt_( &f77_uploc,
+                csyrk_( &f77_uploc,
                          &f77_transa,
-                         &f77_transb,
                          &nn,
                          &kk,
                          alphap,
                          ap, (f77_int*)&lda,
-                         bp, (f77_int*)&ldb,
                          betap,
                          cp, (f77_int*)&ldc
                        );
@@ -410,31 +363,26 @@ int main( int argc, char** argv )
                 f77_int  nn     = n;
                 dcomplex*  alphap = bli_obj_buffer( &alpha );
                 dcomplex*  ap     = bli_obj_buffer( &a );
-                dcomplex*  bp     = bli_obj_buffer( &b );
                 dcomplex*  betap  = bli_obj_buffer( &beta );
                 dcomplex*  cp     = bli_obj_buffer( &c );
 #ifdef CBLAS
-                cblas_zgemmt( cblas_order,
+                cblas_zsyrk( cblas_order,
                               cblas_uplo,
                               cblas_transa,
-                              cblas_transb,
                               nn,
                               kk,
                               alphap,
                               ap, lda,
-                              bp, ldb,
                               betap,
                               cp, ldc );
 
 #else
-                zgemmt_( &f77_uploc,
+                zsyrk_( &f77_uploc,
                          &f77_transa,
-                         &f77_transb,
                          &nn,
                          &kk,
                          alphap,
                          ap, (f77_int*)&lda,
-                         bp, (f77_int*)&ldb,
                          betap,
                          cp, (f77_int*)&ldc );
 
@@ -463,12 +411,11 @@ int main( int argc, char** argv )
                 ( unsigned long )n,
                 ( unsigned long )k, gflops );
 
-        fprintf(fout, "%c %c %ld\t %ld\t %ld\t %ld\t %ld\t %c %c %lf\t %lf\t %lf\t %lf\t %6.3f\n", \
-                dt_ch, uplo_c, n, k, lda, ldb, ldc, 
-                transA_c,
-                transB_c,
+        fprintf(fout, "%c %c %c %ld\t %ld\t %lf\t %lf\t %lf\t %lf\t %lu\t %lu\t %6.3f\n", \
+                dt_ch, uplo_c, transA_c, n, k,
                 alpha_r, alpha_i,
                 beta_r, beta_i,
+                lda, ldc,
                 gflops
                 );
 
@@ -478,7 +425,6 @@ int main( int argc, char** argv )
         bli_obj_free( &beta );
 
         bli_obj_free( &a );
-        bli_obj_free( &b );
         bli_obj_free( &c );
         bli_obj_free( &c_save );
     }
