@@ -33,11 +33,17 @@ bla_real bli_slamch(bla_character *cmach, ftnlen cmach_len)
 /*          rmin  = underflow threshold - base**(emin-1) */
 /*          emax  = largest exponent before overflow */
 /*          rmax  = overflow threshold  - (base**emax)*(1-eps) */
-	
+
+	float safe_min = FLT_MIN;
+	float small = 1.0f / FLT_MAX;
+
+	if ( small >= safe_min )
+		safe_min = small * ( 1.0f + FLT_EPSILON );
+
 	switch ( toupper( *cmach ) )
 	{
 		case 'E': return FLT_EPSILON;
-		case 'S': return FLT_MIN;
+		case 'S': return safe_min;
 		case 'B': return FLT_RADIX;
 		case 'P': return FLT_RADIX*FLT_EPSILON;
 		case 'N': return FLT_MANT_DIG;

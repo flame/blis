@@ -33,11 +33,17 @@ bla_double bli_dlamch(bla_character *cmach, ftnlen cmach_len)
 /*          rmin  = underflow threshold - base**(emin-1) */
 /*          emax  = largest exponent before overflow */
 /*          rmax  = overflow threshold  - (base**emax)*(1-eps) */
-	
+
+	double safe_min = DBL_MIN;
+	double small = 1.0f / DBL_MAX;
+
+	if ( small >= safe_min )
+		safe_min = small * ( 1.0 + DBL_EPSILON );
+
 	switch ( toupper( *cmach ) )
 	{
 		case 'E': return DBL_EPSILON;
-		case 'S': return DBL_MIN;
+		case 'S': return safe_min;
 		case 'B': return FLT_RADIX;
 		case 'P': return FLT_RADIX*DBL_EPSILON;
 		case 'N': return DBL_MANT_DIG;
