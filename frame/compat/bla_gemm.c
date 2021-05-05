@@ -523,7 +523,7 @@ void dgemm_
 	{
 	    return;
 	}
-	
+
 	// fall back on native path when dgemm is not handled in sup path.
 	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
@@ -654,19 +654,20 @@ void zgemm_
 	   * Usage of 3m_sqp is restricted to sizes, where it is found efficient compared to native, sup and other induced method.
 	   * Further investigation is necessary to make the usage choices more generic.  */
 	bool sqp_on = false;
-	if((m0==n0)&&(n0==k0)&&(m0==128))
+	if( (m0 == n0 ) && ( n0 == k0 ) && ( m0 == 128 ) )
 	{
 		sqp_on = true;
 	}
-#if 0
-    // though this range is giving 60 gflops/s in standalone, while integration in app cause performance degradation.
-	// to be enabled after fixing.
-	if((m0>=4200) && (m0<=4600) && (n0==326)&&(k0==1120)) //to be tuned further.
+#if 1
+	// current range of sizes used for 3m_sqp to be expaned after evaluation.
+	if( ( m0 >= 4200) && ( m0 <= 4600 ) && ( ( n0 >= 326 ) || (n0 <= 1600 ) )
+     && ( k0 == 1120 ) ) //to be tuned further.
 	{
 		sqp_on = true;
 	}
 #endif
-	if( ((blis_transa==BLIS_TRANSPOSE) || (blis_transa==BLIS_NO_TRANSPOSE)) && (blis_transb==BLIS_NO_TRANSPOSE) && (sqp_on==true))
+	if( ( ( blis_transa == BLIS_TRANSPOSE ) || ( blis_transa == BLIS_NO_TRANSPOSE ) )
+		&& ( blis_transb == BLIS_NO_TRANSPOSE) && (sqp_on == true))
 	{
 		//sqp algo is found better for n > 40
 		if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
