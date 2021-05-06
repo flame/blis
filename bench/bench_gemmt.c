@@ -121,7 +121,8 @@ int main( int argc, char** argv )
 
     stor_scheme = 'C'; // since logs are collected at BLAS APIs
 
-    while (fscanf(fin, "%s %c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf\n", tmp, &dt_ch, &uplo_c, &k, &n, &lda, &ldb, &ldc, &transA_c, &transB_c, &alpha_r, &alpha_i, &beta_r, &beta_i) == 14)
+    // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary beta_real, beta_imaginary}
+    while (fscanf(fin, "%s %c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf\n", tmp, &dt_ch, &uplo_c, &n, &k, &lda, &ldb, &ldc, &transA_c, &transB_c, &alpha_r, &alpha_i, &beta_r, &beta_i) == 14)
     {
         if (dt_ch == 'D' || dt_ch == 'd') dt = BLIS_DOUBLE;
         else if (dt_ch == 'Z' || dt_ch == 'z') dt = BLIS_DCOMPLEX;
