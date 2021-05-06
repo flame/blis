@@ -157,12 +157,20 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 # Define the operations we will test.
 TEST_OPS := dotv axpyv \
             gemv ger hemv her her2 trmv trsv \
-            gemm hemm herk her2k trmm trsm
+            gemm hemm herk her2k trmm trsm \
+
+# Include extension API's added by AMD in operations list
+# Keeping it seperate in case it needs to be guarded by a variable
+
+TEST_OPS := $(TEST_OPS) axpbyv cabs1 copyv gemm3m gemm_batch \
+            gemmt imatcopy omatadd omatcopy omatcopy2 \
+            scalv swapv trmv
 
 # Optionally test gemmt, which some libraries might not implement.
 ifeq ($(BUILD_GEMMT),yes)
 TEST_OPS := $(TEST_OPS) gemmt
 endif
+
 
 # Define a function to create the executable names.
 test-bins = $(foreach op, $(TEST_OPS), test_$(op)_$(1).x)

@@ -112,6 +112,7 @@ BASE_OBJ_PATH          := ./$(OBJ_DIR)/$(CONFIG_NAME)
 # of source code.
 BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
+BASE_OBJ_AOCLDTL_PATH  := $(BASE_OBJ_PATH)/$(AOCLDTL_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
 BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
@@ -210,6 +211,11 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
+# Generate object file paths for all of the debgu and trace logger.
+MK_AOCLDTL_OBJS       := $(call gen-obj-paths-from-src,$(AOCLDTL_SRC_SUFS),$(MK_AOCLDTL_SRC),$(AOCLDTL_PATH),$(BASE_OBJ_AOCLDTL_PATH))
+
+
+
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
 MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
@@ -219,6 +225,7 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_KERNELS_OBJS) \
                        $(MK_REFKERN_OBJS) \
                        $(MK_FRAME_OBJS) \
+                       $(MK_AOCLDTL_OBJS) \
                        $(MK_SANDBOX_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
@@ -249,6 +256,9 @@ HEADERS_TO_INSTALL := $(BLIS_H_FLAT)
 ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
+
+# Install BLIS CPP Template header files
+HEADERS_TO_INSTALL += $(CPP_HEADER_DIR)/*.hh
 
 # If requested, include AMD's C++ template header files in the list of headers
 # to install.
