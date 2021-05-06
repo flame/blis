@@ -52,6 +52,10 @@ void PASTEMAC(ch,varname) \
 { \
     const num_t dt = PASTEMAC(ch,type); \
 \
+    bli_init_once(); \
+\
+    if( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+\
     ctype*  minus_one  = PASTEMAC(ch,m1); \
     ctype*  A01; \
     ctype*  A11; \

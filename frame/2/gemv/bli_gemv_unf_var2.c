@@ -54,6 +54,11 @@ void PASTEMAC(ch,varname) \
 { \
 \
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3); \
+\
+    bli_init_once(); \
+\
+    if(cntx == NULL) cntx = bli_gks_query_cntx(); \
+\
     const num_t dt = PASTEMAC(ch,type); \
 \
     ctype*  zero       = PASTEMAC(ch,0); \

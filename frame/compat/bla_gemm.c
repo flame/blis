@@ -288,7 +288,10 @@ void PASTEF77(ch,blasname) \
 	/* Finalize BLIS. */				 \
 	bli_finalize_auto(); \
 }
+#endif
 
+#ifdef BLIS_ENABLE_BLAS
+#ifdef BLIS_CONFIG_EPYC
 void dgemm_
 (
 	const f77_char* transa,
@@ -701,10 +704,8 @@ void zgemm_
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 }// end of zgemm_
-
-
-#endif
-
-#ifdef BLIS_ENABLE_BLAS
 INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
+#else
+INSERT_GENTFUNC_BLAS( gemm,gemm )
+#endif
 #endif
