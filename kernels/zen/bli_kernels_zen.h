@@ -260,3 +260,13 @@ void bli_dgemm_ref_k1_nn
       double* c, const inc_t ldc
      );
 
+ err_t bli_trsm_small
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
+
