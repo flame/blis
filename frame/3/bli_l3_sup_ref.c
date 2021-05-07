@@ -89,6 +89,13 @@ err_t bli_gemmsup_ref
 	// return from the parallel/threaded region.
 	if ( stor_id == BLIS_XXX ) return BLIS_FAILURE;
 
+#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+	//  of threads.
+	//  rntm will be updated with optimum number of threads.
+	bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm );
+#endif
+
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
 	bli_rntm_set_ways_from_rntm_sup
@@ -165,12 +172,6 @@ err_t bli_gemmtsup_ref
 		bli_scalm( beta, c );
 		return BLIS_SUCCESS;
 	}
-#endif
-#ifdef AOCL_DYNAMIC
-	// If dynamic-threading is enabled, calculate optimum number
-	//  of threads.
-	//  rntm will be updated with optimum number of threads.
-	bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm );
 #endif
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop.
