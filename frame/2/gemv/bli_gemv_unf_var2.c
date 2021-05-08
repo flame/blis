@@ -182,6 +182,11 @@ void bli_dgemv_unf_var2
           NULL
         );
 
+    if( bli_deq0( *alpha ) )
+    {
+    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_TRACE_LEVEL_3)
+	return;
+    }
     /* Fusing factor. */
     b_fuse = 4;
 
@@ -253,6 +258,12 @@ void bli_sgemv_unf_var2
           y, incy,
           NULL
         );
+
+    if( bli_seq0( *alpha ) )
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+	return;
+    }
 
     /* Query the context for the kernel function pointer and fusing factor. */
     b_fuse = 5;
@@ -328,6 +339,11 @@ void bli_zgemv_unf_var2
       NULL
     );
 
+    if( bli_zeq0( *alpha ) )
+    {
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+	return;
+    }
     /* fusing factor */
     b_fuse = 5;
 
@@ -399,8 +415,13 @@ void bli_cgemv_unf_var2
       NULL
     );
 
+    if( bli_ceq0( *alpha ) )
+    {
+    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_TRACE_3)
+	return;
+    }
     /* fusing factor. */
-    b_fuse = 5;
+    b_fuse = 4;
 
     for ( i = 0; i < n_iter; i += f )
     {
@@ -410,7 +431,7 @@ void bli_cgemv_unf_var2
         y1 = y + (0  )*incy;
 
         /* y = y + alpha * A1 * x1; */
-        bli_caxpyf_zen_int_5
+        bli_caxpyf_zen_int_4
         (
           conja,
           conjx,
