@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -58,6 +59,10 @@ GENTFUNC( dcomplex, z, blasname, blisname )
 #define INSERT_GENTFUNC_BLAS_CZ( blasname, blisname ) \
 \
 GENTFUNC( scomplex, c, blasname, blisname ) \
+GENTFUNC( dcomplex, z, blasname, blisname )
+
+#define INSERT_GENTFUNC_BLAS_Z( blasname, blisname ) \
+\
 GENTFUNC( dcomplex, z, blasname, blisname )
 
 // -- Basic one-operand macro with real domain only --
@@ -158,9 +163,8 @@ GENTFUNC( double,   d, tfuncname ) \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
-#define INSERT_GENTFUNC_BASIC0_CZ( tfuncname ) \
+#define INSERT_GENTFUNC_BASIC0_Z( tfuncname ) \
 \
-GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
 // -- (one auxiliary argument) --
