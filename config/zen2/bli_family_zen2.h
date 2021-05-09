@@ -90,11 +90,5 @@
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0
 
-// This feature enables us to achieve better performance
-// by using lesser number of threads than what is specified
-// by application for smaller sizes.
-// Disabling this feature by default.
-
-//#define AOCL_DYNAMIC
 #endif
 

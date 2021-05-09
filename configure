@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020-2021, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -334,6 +334,15 @@ print_usage()
 	echo "                 If not specified and the environment variable FC is set,"
 	echo "                 attempt to determine the return type from the compiler."
 	echo "                 Otherwise, the default is \"gnu\"."
+	echo " "
+	echo "   --disable-aocl-dynamic, --enable-aocl-dynamic"
+	echo " "
+	echo "                 Enable (disabled by default) dynamic selection of number of" 
+	echo "                 threads used to solve the given problem."
+	echo "                 Range of optimum number of threads will be [1, num_threads],"
+	echo "                 where \"num_threads\" is number of threads set by the application."
+	echo "                 Num_threads is derived from either environment variable"
+	echo "                 OMP_NUM_THREADS or BLIS_NUM_THREADS' or bli_set_num_threads() API."
 	echo " "
 	echo "   -q, --quiet   Suppress informational output. By default, configure"
 	echo "                 is verbose. (NOTE: -q is not yet implemented)"
@@ -2036,6 +2045,7 @@ main()
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
+	enable_aocl_dynamic='no'
 	force_version='no'
 	complex_return='default'
 
@@ -2238,6 +2248,12 @@ main()
 							;;
 						disable-trsm-preinversion)
 							enable_trsm_preinversion='no'
+							;;
+						enable-aocl-dynamic)
+							enable_aocl_dynamic='yes'
+							;;
+						disable-aocl-dynamic)
+							enable_aocl_dynamic='no'
 							;;
 						force-version=*)
 							force_version=${OPTARG#*=}
@@ -3085,6 +3101,13 @@ main()
 		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
 		enable_trsm_preinversion_01=0
 	fi
+	if [ "x${enable_aocl_dynamic}" = "xyes" ]; then
+		echo "${script_name}: Dynamic selection of number of threads is enabled"
+		enable_aocl_dynamic_01=1
+	else
+		echo "${script_name}: Dynamic selection of number of threads is disabled"
+		enable_aocl_dynamic_01=0
+	fi
 
 	# Report integer sizes.
 	if [ "x${int_type_size}" = "x32" ]; then
@@ -3364,6 +3387,7 @@ main()
 		| sed   -e "s/@enable_sup_handling@/${enable_sup_handling_01}/g" \
 		| sed   -e "s/@enable_memkind@/${enable_memkind_01}/g" \
 		| sed   -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion_01}/g" \
+		| sed   -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic_01}/g" \
 		| sed   -e "s/@enable_pragma_omp_simd@/${enable_pragma_omp_simd_01}/g" \
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \

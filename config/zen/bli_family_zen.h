@@ -78,11 +78,5 @@
 #define BLIS_ENABLE_SUP_MR_EXT 1
 #define BLIS_ENABLE_SUP_NR_EXT 0
 
-// This feature enables us to achieve better performance
-// by using lesser number of threads than what is specified
-// by application for smaller sizes.
-// Disabling this feature by default.
-//#define AOCL_DYNAMIC
-
 //#endif
 

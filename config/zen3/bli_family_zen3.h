@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -136,10 +136,4 @@
 #define BLIS_GEMM_DYNAMIC_BLOCK_SIZE_UPDATE(cntx, rntm, c) {}
 #endif
 
-// This feature enables us to achieve better performance
-// by using lesser number of threads than what is specified
-// by application for smaller sizes.
-// Disabling this feature by default.
-
-//#define AOCL_DYNAMIC
 #endif

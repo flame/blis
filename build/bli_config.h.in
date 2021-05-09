@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -50,6 +50,10 @@
 //This enables us to use different cache-blocking sizes for TRSM instead of common level-3 cache-block sizes.
 #if @enable_aocl_zen@
 #define AOCL_BLIS_ZEN
+#endif
+
+#if @enable_aocl_dynamic@
+#define AOCL_DYNAMIC
 #endif
 
 #if @enable_system@
