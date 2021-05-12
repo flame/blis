@@ -108,37 +108,6 @@ INSERT_GENTPROTR_BASIC0( normim )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       char*  s1, \
-       dim_t  n, \
-       void*  x, inc_t incx, \
-       char*  format, \
-       char*  s2  \
-     );
-
-INSERT_GENTPROT_BASIC0_I( printv )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
-       char*  s1, \
-       dim_t  m, \
-       dim_t  n, \
-       void*  x, inc_t rs_x, inc_t cs_x, \
-       char*  format, \
-       char*  s2  \
-     );
-
-INSERT_GENTPROT_BASIC0_I( printm )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
-     ( \
        dim_t    n, \
        ctype*   x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
@@ -179,4 +148,89 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
 
 INSERT_GENTPROTR_BASIC0( sumsqv )
 
+// -----------------------------------------------------------------------------
+
+// Operations with basic interfaces only.
+
+#ifdef BLIS_TAPI_BASIC
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       conj_t  conjchi, \
+       ctype*  chi, \
+       ctype*  psi, \
+       bool*   is_eq  \
+     );
+
+INSERT_GENTPROT_BASIC0( eqsc )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+      ( \
+        conj_t  conjx, \
+        dim_t   n, \
+        ctype*  x, inc_t incx, \
+        ctype*  y, inc_t incy, \
+        bool*   is_eq  \
+      );
+
+INSERT_GENTPROT_BASIC0( eqv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y, \
+       bool*   is_eq  \
+     );
+
+INSERT_GENTPROT_BASIC0( eqm )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       char*  s1, \
+       dim_t  n, \
+       void*  x, inc_t incx, \
+       char*  format, \
+       char*  s2  \
+     );
+
+INSERT_GENTPROT_BASIC0_I( printv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       char*  s1, \
+       dim_t  m, \
+       dim_t  n, \
+       void*  x, inc_t rs_x, inc_t cs_x, \
+       char*  format, \
+       char*  s2  \
+     );
+
+INSERT_GENTPROT_BASIC0_I( printm )
+
+#endif // #ifdef BLIS_TAPI_BASIC
 

@@ -35,6 +35,12 @@
 // This file defines macros used to allow the _oapi.c files to produce
 // object APIs that contain context parameters.
 
+// Define a macro so that the source code can determine which interface
+// (basic or expert) we are compiling.
+#undef  BLIS_OAPI_BASIC
+#undef  BLIS_OAPI_EXPERT
+#define BLIS_OAPI_EXPERT
+
 // Define the macro to add a suffix to the object API function names
 // (in function definitions).
 #undef  EX_SUF

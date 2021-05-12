@@ -35,6 +35,12 @@
 // This file defines macros used to allow the _tapi.c files to produce
 // typed APIs that omit expert parameters.
 
+// Define a macro so that the source code can determine which interface
+// (basic or expert) we are compiling.
+#undef  BLIS_TAPI_EXPERT
+#undef  BLIS_TAPI_BASIC
+#define BLIS_TAPI_BASIC
+
 // Define the macro to remove the function name suffix (in function
 // definitions).
 #undef  EX_SUF

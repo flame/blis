@@ -261,6 +261,12 @@ BLIS_INLINE trans_t bli_trans_toggled_conj( trans_t trans )
 	       ( trans ^ BLIS_CONJ_BIT );
 }
 
+BLIS_INLINE trans_t bli_apply_trans( trans_t transapp, trans_t trans )
+{
+	return ( trans_t )
+	       ( trans ^ transapp );
+}
+
 BLIS_INLINE void bli_toggle_trans( trans_t* trans )
 {
 	*trans = bli_trans_toggled( *trans );
