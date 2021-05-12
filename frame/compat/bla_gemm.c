@@ -478,6 +478,7 @@ void dgemm_
 
     // The code below will be called when number of threads = 1.
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX
     if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
       {
 	err_t status;
@@ -514,12 +515,14 @@ void dgemm_
 	  }
       }
 
+#endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 	if (status == BLIS_SUCCESS)
 	{
 	    return;
 	}
+	
 	// fall back on native path when dgemm is not handled in sup path.
 	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
