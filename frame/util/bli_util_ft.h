@@ -195,7 +195,7 @@ INSERT_GENTDEFR( sumsqv )
 
 // Operations with only basic interfaces.
 
-#ifdef BLIS_OAPI_BASIC
+#ifdef BLIS_TAPI_BASIC
 
 // eqsc
 
