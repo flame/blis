@@ -37,7 +37,7 @@
 #include "bli_l3_check.h"
 
 // Define function types.
-#include "bli_l3_ft_ex.h"
+//#include "bli_l3_ft_ex.h"
 #include "bli_l3_ft_ukr.h"
 #include "bli_l3_oft.h"
 #include "bli_l3_oft_var.h"
@@ -60,6 +60,9 @@
 
 #include "bli_tapi_ba.h"
 #include "bli_l3_tapi.h"
+
+// Clean up temporary macro defs from bli_?api_[ba|ex].h.
+#include "bli_xapi_undef.h"
 
 // Define function types for small/unpacked handlers/kernels.
 #include "bli_l3_sup_oft.h"

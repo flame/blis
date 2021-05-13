@@ -53,6 +53,9 @@
 #include "bli_l1f_tapi.h"
 #include "bli_l1f_ft.h"
 
+// Clean up temporary macro defs from bli_?api_[ba|ex].h.
+#include "bli_xapi_undef.h"
+
 // Generate function pointer arrays for tapi functions (expert only).
 #include "bli_l1f_fpa.h"
 

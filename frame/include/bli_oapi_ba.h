@@ -35,13 +35,13 @@
 // This file defines macros used to allow the _oapi.c files to produce
 // object APIs that omit expert parameters.
 
-// Define a macro so that the source code can determine which interface
+// Define a macro that allows the source code to determine which interface
 // (basic or expert) we are compiling.
 #undef  BLIS_OAPI_EXPERT
 #undef  BLIS_OAPI_BASIC
 #define BLIS_OAPI_BASIC
 
-// Define the macro to remove the function name suffix (in function
+// Define the macro to omit a suffix from the function names (in function
 // definitions).
 #undef  EX_SUF
 #define EX_SUF
@@ -51,7 +51,7 @@
 #undef  BLIS_OAPI_EX_PARAMS
 #define BLIS_OAPI_EX_PARAMS
 
-// Define the macro to declare local expert variables that are initialized
+// Define the macro to add local expert variables that are initialized
 // to NULL. The "( void )" statements are to prevent unused variable
 // warnings by the compiler.
 #undef  BLIS_OAPI_EX_DECLS

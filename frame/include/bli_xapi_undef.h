@@ -32,40 +32,26 @@
 
 */
 
-#include "bli_l1m_check.h"
+// This file un-defines macros used to allow the _oapi.c and _tapi.c files to
+// produce object and typed APIs that omit or contain expert parameters.
 
-// Define kernel function types.
-#include "bli_l1m_ft_ker.h"
+// Un-define all macros that allow the source code to determine which interface
+// (basic or expert) we are compiling.
+#undef  BLIS_OAPI_BASIC
+#undef  BLIS_OAPI_EXPERT
+#undef  BLIS_TAPI_BASIC
+#undef  BLIS_TAPI_EXPERT
 
-// Define object function types for variants.
-#include "bli_l1m_oft_var.h"
+// Un-define the macro to omit or add the function name suffix (in function
+// definitions).
+#undef  EX_SUF
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_l1m_oapi.h"
+// Un-define the macro to omit or add expert arguments from function signatures
+// and prototypes.
+#undef  BLIS_OAPI_EX_PARAMS
+#undef  BLIS_TAPI_EX_PARAMS
 
-#include "bli_oapi_ba.h"
-#include "bli_l1m_oapi.h"
-
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_l1m_tapi.h"
-#include "bli_l1m_ft.h"
-
-#include "bli_tapi_ba.h"
-#include "bli_l1m_tapi.h"
-#include "bli_l1m_ft.h"
-
-// Clean up temporary macro defs from bli_?api_[ba|ex].h.
-#include "bli_xapi_undef.h"
-
-// Generate function pointer arrays for tapi functions (expert only).
-#include "bli_l1m_fpa.h"
-
-// Prototype level-1m implementations.
-#include "bli_l1m_unb_var1.h"
-
-// Pack-related
-#include "bli_packm.h"
-#include "bli_unpackm.h"
+// Un-define the macro to omit or add local expert variables.
+#undef  BLIS_OAPI_EX_DECLS
+#undef  BLIS_TAPI_EX_DECLS
 
