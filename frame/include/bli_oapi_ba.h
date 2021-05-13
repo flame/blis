@@ -37,7 +37,6 @@
 
 // Define a macro that allows the source code to determine which interface
 // (basic or expert) we are compiling.
-#undef  BLIS_OAPI_EXPERT
 #undef  BLIS_OAPI_BASIC
 #define BLIS_OAPI_BASIC
 
@@ -57,8 +56,4 @@
 #undef  BLIS_OAPI_EX_DECLS
 #define BLIS_OAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
                              rntm_t* rntm = NULL; ( void )rntm;
-
-// Define the macro to pass the local expert variables to another function.
-//#undef  BLIS_TAPI_EX_VARS
-//#define BLIS_TAPI_EX_VARS
 
