@@ -76,7 +76,7 @@ arch_t bli_cpuid_query_id( void )
 	printf( "vendor   = %s\n", vendor==1 ? "AMD": "INTEL" );
 	printf("family    = %x\n", family );
 	printf( "model    = %x\n", model );
- 
+
 	printf( "features = %x\n", features );
 #endif
 
