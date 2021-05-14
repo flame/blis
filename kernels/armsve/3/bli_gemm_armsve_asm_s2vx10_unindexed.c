@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Dept. Physics, The University of Tokyo
+   Copyright (C) 2020, The University of Tokyo
+   Copyright (C) 2019, Forschunszentrum Juelich
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
