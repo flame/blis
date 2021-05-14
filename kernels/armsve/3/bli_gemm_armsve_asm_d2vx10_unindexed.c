@@ -74,13 +74,13 @@ void bli_dgemm_armsve_asm_2vx10_unindexed
 " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
 #ifdef _A64FX
-" mov             x8, 0x1                         \n\t" // Tag C address.
+" mov             x8, 0x3                         \n\t" // Tag C address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x5, x5, x8                      \n\t"
 " mov             x8, 0x2                         \n\t" // Tag B address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x1, x1, x8                      \n\t"
-" mov             x8, 0x3                         \n\t" // Tag A address.
+" mov             x8, 0x1                         \n\t" // Tag A address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x0, x0, x8                      \n\t"
 #endif
@@ -113,25 +113,25 @@ GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p0,p0,x0)
 " cmp             x6, #1                          \n\t"
 " b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
 " mov             x16, x5                         \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
-" prfm            PLDL1STRM, [x16]                \n\t"
+" prfm            PLDL1KEEP, [x16]                \n\t"
 " END_CCOL_PRFM:                                  \n\t"
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
@@ -203,57 +203,68 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 " ldr             x8, [x8]                        \n\t"
 " dup             z30.d, x4                       \n\t" // Broadcast alpha & beta into vectors.
 " dup             z31.d, x8                       \n\t"
+" fmov            d28, #1.0                       \n\t" // Prepare FP 1.0.
+" fmov            x16, d28                        \n\t"
 "                                                 \n\t"
 " PREFETCH_ABNEXT:                                \n\t"
 " ldr             x0, %[a_next]                   \n\t"
 " ldr             x1, %[b_next]                   \n\t"
-" prfm            PLDL2KEEP, [x0]                 \n\t"
-" prfm            PLDL2KEEP, [x0, 256*1]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*2]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*3]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*4]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*5]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*6]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*7]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*8]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*9]          \n\t"
-" prfm            PLDL2KEEP, [x0, 256*10]         \n\t"
-" prfm            PLDL2KEEP, [x0, 256*11]         \n\t"
-" prfm            PLDL2KEEP, [x0, 256*12]         \n\t"
-" prfm            PLDL2KEEP, [x0, 256*13]         \n\t"
-" prfm            PLDL2KEEP, [x0, 256*14]         \n\t"
-" prfm            PLDL2KEEP, [x0, 256*15]         \n\t"
-" prfm            PLDL2KEEP, [x1]                 \n\t"
-" prfm            PLDL2KEEP, [x1, 256*1]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*3]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*4]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*5]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*6]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*7]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*8]          \n\t"
-" prfm            PLDL2KEEP, [x1, 256*9]          \n\t"
+#ifdef _A64FX
+" mov             x8, 0x2                         \n\t" // Tag B address.
+" lsl             x8, x8, #56                     \n\t"
+" orr             x1, x1, x8                      \n\t"
+" mov             x8, 0x1                         \n\t" // Tag A address.
+" lsl             x8, x8, #56                     \n\t"
+" orr             x0, x0, x8                      \n\t"
+#endif
+" prfm            PLDL1STRM, [x0]                 \n\t"
+" prfm            PLDL1STRM, [x0, 256*1]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*2]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*3]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*4]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*5]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*6]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*7]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*8]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*9]          \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*10]         \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*11]         \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*12]         \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*13]         \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*14]         \n\t"
+// " prfm            PLDL2KEEP, [x0, 256*15]         \n\t"
+" prfm            PLDL1STRM, [x1]                 \n\t"
+" prfm            PLDL1STRM, [x1, 256*1]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*2]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*3]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*4]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*5]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*6]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*7]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*8]          \n\t"
+// " prfm            PLDL2KEEP, [x1, 256*9]          \n\t"
+"                                                 \n\t"
+" mov             x9, x5                          \n\t" // C address for loading.
+"                                                 \n\t" // C address for storing is x5 itself.
+" cmp             x6, #1                          \n\t" // Preload first half of C for contiguous case.
+" b.ne            WRITE_MEM                       \n\t"
+GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,x9,x7)
 "                                                 \n\t"
 " WRITE_MEM:                                      \n\t"
 "                                                 \n\t"
-" fmov            d28, #1.0                       \n\t"
-" fmov            x16, d28                        \n\t"
 " cmp             x16, x4                         \n\t"
 " b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
 SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19,z30)
 "                                                 \n\t"
 " UNIT_ALPHA:                                     \n\t"
-" mov             x9, x5                          \n\t" // C address for loading.
-"                                                 \n\t" // C address for storing is x5 itself.
 " cmp             x6, #1                          \n\t"
 " b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
-GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,x9,x7)
-GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
-GEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,x9,x7)
+// First half of C is already loaded in this case.
+GEMM_C_FMAD_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31,x9,x7)
 "                                                 \n\t"
 GEMM_C_STORE_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,x5,x7)
 GEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)

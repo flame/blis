@@ -106,13 +106,13 @@ void bli_shgemm_armsve_asm_2vx10_unindexed
 " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
 #ifdef _A64FX
-" mov             x8, 0x1                         \n\t" // Tag C address.
+" mov             x8, 0x3                         \n\t" // Tag C address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x5, x5, x8                      \n\t"
 " mov             x8, 0x2                         \n\t" // Tag B address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x1, x1, x8                      \n\t"
-" mov             x8, 0x3                         \n\t" // Tag A address.
+" mov             x8, 0x1                         \n\t" // Tag A address.
 " lsl             x8, x8, #56                     \n\t"
 " orr             x0, x0, x8                      \n\t"
 #endif
