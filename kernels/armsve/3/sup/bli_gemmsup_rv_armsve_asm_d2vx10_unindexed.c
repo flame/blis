@@ -42,6 +42,9 @@
 // 2vx10 microkernels.
 #include "../armsve_asm_2vx10.h"
 
+// Prototype reference kernel.
+GEMMSUP_KER_PROT( double,   d, gemmsup_r_armsve_ref2 )
+
 void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
      (
        conj_t              conja,
@@ -78,7 +81,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
     double *ai = a;
     double *bi = b + n0_mker * 10 * cs_b0;
     double *ci = c + n0_mker * 10 * cs_c0;
-    bli_dgemmsup_r_armsve_ref // TODO: Fix function name.
+    bli_dgemmsup_r_armsve_ref2
     (
       conja, conjb,
       m0, n0_left, k0,
