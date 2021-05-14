@@ -33,6 +33,7 @@
 */
 
 #include "blis.h"
+#include "bli_a64fx_sector_cache.h"
 
 void bli_cntx_init_a64fx( cntx_t* cntx )
 {
@@ -64,29 +65,13 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  cntx
 	);
 
-	dim_t dmc = 256;
-	dim_t smc = 512;
-	// For ic > 1 threading strategy, set MC to a smaller value.
-	dim_t ic = bli_env_get_var( "BLIS_IC_NT", -1 );
-	if ( ic > 1 )
-	{
-		dmc = 128;
-		smc = 256;
-	}
-
-	// Check for user-defined block sizes.
-	dim_t dkc = bli_env_get_var( "BLIS_SVE_FP64_KC", -1 );
-	dim_t skc = bli_env_get_var( "BLIS_SVE_FP32_KC", -1 );
-	if ( dkc < 0 ) dkc = 2048;
-	if ( skc < 0 ) skc = 2048;
-
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    10,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   smc,   dmc,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   skc,   dkc,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 22050, 22050,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   256,   128,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  2048,  2048,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 23040, 26880,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
@@ -101,6 +86,7 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  cntx
 	);
 
+#if 0
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
 	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,   65,   -1,   -1 );
@@ -149,6 +135,17 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  BLIS_MR, &blkszs[ BLIS_MR ],
 	  cntx
 	);
+#endif
+
+	// Set A64FX cache sector sizes for each PE/CMG
+	// SC Fugaku might disable users' setting cache sizes.
+#if !defined(CACHE_SECTOR_SIZE_READONLY)
+#pragma omp parallel
+	{
+	  A64FX_SETUP_SECTOR_CACHE_SIZES(A64FX_SCC(0,1,3,0))
+	  A64FX_SETUP_SECTOR_CACHE_SIZES_L2(A64FX_SCC_L2(9,28))
+	}
+#endif
 
 }
 
