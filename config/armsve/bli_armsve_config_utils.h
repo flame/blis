@@ -35,9 +35,7 @@
 */
 #include "blis.h"
 
-dim_t bli_b_vl_armsve(void);
-dim_t bli_s_vl_armsve(void);
-dim_t bli_d_vl_armsve(void);
+dim_t bli_vl_bits_armsve(void);
 
 dim_t bli_s_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);
 dim_t bli_d_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);

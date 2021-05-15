@@ -35,24 +35,19 @@
 */
 #include "blis.h"
 
-#define EXPANDMAC_VL_ARMSVE(ch, inst) \
-dim_t PASTEMAC(ch, _vl_armsve) (void) \
+dim_t bli_vl_bits_armsve(void)
 { \
-    uint64_t vl = 0; \
-    __asm__ ( \
-      " mov  x0, xzr   \n\t" \
-      #inst" x0        \n\t" \
-      " mov  %[vl], x0 \n\t" \
-    : [vl] "=r" (vl), \
-    :  \
-    : "x0" \
-     ); \
-    return vl; \
+    uint64_t vl = 0;
+    __asm__ (
+      " mov  x0, xzr   \n\t"
+      " indb x0        \n\t"
+      " mov  %[vl], x0 \n\t"
+    : [vl] "=r" (vl),
+    : 
+    : "x0"
+     );
+    return vl;
 }
-
-EXPANDMAC_VL_ARMSVE( b, incb )
-EXPANDMAC_VL_ARMSVE( s, incw )
-EXPANDMAC_VL_ARMSVE( d, incd )
 
 
 #define EXPANDMAC_BLKSZ_ARMSVE(ch, S_Data) \
@@ -69,7 +64,7 @@ dim_t PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
     dim_t N_L3 = bli_env_get_var("BLIS_SVE_N_L3", N_L3_SVE_DEFAULT); \
     dim_t C_L3 = bli_env_get_var("BLIS_SVE_C_L3", C_L3_SVE_DEFAULT); \
 \
-    dim_t vl_b = bli_b_vl_armsve(); \
+    dim_t vl_b = bli_vl_bits_armsve(); \
     dim_t vl = vl_b / S_Data; \
     dim_t m_r = 2 * vl; \
     dim_t n_r = 10; \
