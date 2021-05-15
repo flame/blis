@@ -51,8 +51,8 @@ dim_t bli_vl_bits_armsve(void)
 
 
 #define EXPANDMAC_BLKSZ_ARMSVE(ch, S_Data) \
-dim_t PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
-                                   dim_t *k_c_, dim_t *m_c_, dim_t *n_c_) \
+void PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
+                                  dim_t *k_c_, dim_t *m_c_, dim_t *n_c_) \
 { \
     dim_t W_L1 = bli_env_get_var("BLIS_SVE_W_L1", W_L1_SVE_DEFAULT); \
     dim_t N_L1 = bli_env_get_var("BLIS_SVE_N_L1", N_L1_SVE_DEFAULT); \
