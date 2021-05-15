@@ -5,6 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2019, Forschunszentrum Juelich
+   Copyright (C) 2020, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,16 +33,12 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#include "blis.h"
 
-//#ifndef BLIS_FAMILY_H
-//#define BLIS_FAMILY_H
+dim_t bli_b_vl_armsve(void);
+dim_t bli_s_vl_armsve(void);
+dim_t bli_d_vl_armsve(void);
 
-
-// -- MEMORY ALLOCATION --------------------------------------------------------
-
-#define BLIS_SIMD_ALIGN_SIZE    256
-#define BLIS_SIMD_NUM_REGISTERS 32
-
-
-//#endif
+dim_t bli_s_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);
+dim_t bli_d_blksz_armsve(dim_t *m_r_, dim_t *n_r_, dim_t *k_c_, dim_t *m_c_, dim_t *n_c_);
 
