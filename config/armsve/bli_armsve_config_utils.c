@@ -40,9 +40,9 @@ dim_t bli_vl_bits_armsve(void)
     uint64_t vl = 0;
     __asm__ (
       " mov  x0, xzr   \n\t"
-      " indb x0        \n\t"
+      " incb x0        \n\t"
       " mov  %[vl], x0 \n\t"
-    : [vl] "=r" (vl),
+    : [vl] "=r" (vl)
     : 
     : "x0"
      );
