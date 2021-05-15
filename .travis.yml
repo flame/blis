@@ -1,80 +1,83 @@
 language: c
 sudo: required
-dist: trusty
+dist: focal
 matrix:
   include:
   # full testsuite (all tests except for mixed datatype)
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # mixed-datatype testsuite (gemm_nn only)
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=MD SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=MD SDE=0 THR="none" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # salt testsuite (fast set of operations+parameters)
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=SALT SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=SALT SDE=0 THR="none" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # test x86_64 ukrs with SDE
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=0 SDE=1 THR="none" CONF="x86_64"
+    env: OOT=0 TEST=0 SDE=1 THR="none" CONF="x86_64" \
+      PACKAGES="gcc-8 binutils"
   # openmp build
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=0 SDE=0 THR="openmp" CONF="auto"
+    env: OOT=0 TEST=0 SDE=0 THR="openmp" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # pthreads build
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto"
+    env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # out-of-tree build
   - os: linux
     compiler: gcc
-    env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto"
+    env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto" \
+      PACKAGES="gcc-8 binutils"
   # clang build
   - os: linux
     compiler: clang
-    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto" \
+      PACKAGES="clang-8 binutils"
   # macOS with system compiler (clang)
   - os: osx
     compiler: clang
-    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto" \
+      PACKAGES="clang-8 binutils"
   # cortexa15 build and fast testsuite (qemu)
   - os: linux
     compiler: arm-linux-gnueabihf-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa15" \
-      PACKAGES="gcc-arm-linux-gnueabihf qemu-system-arm qemu-user" \
+      PACKAGES="gcc-arm-linux-gnueabihf libc6-dev-armhf-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-arm -cpu cortex-a15 -L /usr/arm-linux-gnueabihf/"
   # cortexa57 build and fast testsuite (qemu)
   - os: linux
     compiler: aarch64-linux-gnu-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa57" \
-      PACKAGES="gcc-aarch64-linux-gnu qemu-system-arm qemu-user" \
+      PACKAGES="gcc-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
+  # armsve build and fast testsuite (qemu)
+  - os: linux
+    compiler: aarch64-linux-gnu-gcc-10
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="armsve" \
+      PACKAGES="gcc-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
+      TESTSUITE_WRAPPER="qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/"
 install:
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/as; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/as /usr/bin/as; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo rm -f /usr/bin/ld; fi
-- if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo ln -s /usr/lib/binutils-2.26/bin/ld /usr/bin/ld; fi
-- if [ "$CC" = "gcc" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-6"; fi
+- if [ "$CC" = "clang" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="clang-8"; fi
+- if [ "$CC" = "gcc"   ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-8"  ; fi
 - if [ -n "$PACKAGES" ]; then sudo apt-get install -y $PACKAGES; fi
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-6
-    - binutils-2.26
-    - clang
 script:
 - export DIST_PATH=.
-- pwd
 - if [ $OOT -eq 1 ]; then export DIST_PATH=`pwd`; mkdir ../oot; cd ../oot; chmod -R a-w $DIST_PATH; fi
-- pwd
-- $DIST_PATH/configure -t $THR CC=$CC $CONF
-- pwd
-- ls -l
+- $DIST_PATH/configure -t $THR CC=$CC CFLAGS=$CFLAGS $CONF
 - $CC --version
-- make -j 2
+- pwd
+- env
+- ls -l
+- make -j 2 V=1
 - if [ "$TEST" != "0" ]; then travis_wait 30 $DIST_PATH/travis/do_testsuite.sh; fi
 - if [ "$SDE" = "1" ]; then travis_wait 30 $DIST_PATH/travis/do_sde.sh; fi
