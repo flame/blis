@@ -455,6 +455,14 @@ arch_t bli_cpuid_query_id( void )
 		{
 			// Check for each ARMv8 configuration that is enabled, check for that
 			// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ARMSVE
+			if ( bli_cpuid_is_armsve( model, part, features ) )
+				return BLIS_ARCH_ARMSVE;
+#endif
+#ifdef BLIS_CONFIG_A64FX
+			if ( bli_cpuid_is_a64fx( model, part, features ) )
+				return BLIS_ARCH_A64FX;
+#endif
 #ifdef BLIS_CONFIG_THUNDERX2
 			if ( bli_cpuid_is_thunderx2( model, part, features ) )
 				return BLIS_ARCH_THUNDERX2;
@@ -462,14 +470,6 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_CORTEXA57
 			if ( bli_cpuid_is_cortexa57( model, part, features ) )
 				return BLIS_ARCH_CORTEXA57;
-#endif
-#ifdef BLIS_CONFIG_ARMSVE
-			if ( bli_cpuid_is_armsve( model, part, features ) )
-				return BLIS_ARCH_ARMSVE;
-#endif
-#ifdef BLIS_CONFIG_ARMSVE
-			if ( bli_cpuid_is_a64fx( model, part, features ) )
-				return BLIS_ARCH_A64FX;
 #endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
