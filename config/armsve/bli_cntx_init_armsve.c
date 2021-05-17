@@ -33,11 +33,14 @@
 */
 
 #include "blis.h"
+#include "bli_armsve_config_utils.h"
 
 void bli_cntx_init_armsve( cntx_t* cntx )
 {
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+#if 0
 	blksz_t thresh[ BLIS_NUM_THRESH ];
+#endif
 
 	// Set default kernel blocksizes and functions.
 	bli_cntx_init_armsve_ref( cntx );

@@ -111,7 +111,7 @@ void __attribute__ ((noinline,optimize(0))) bli_dgemmsup_cv_armsve_2vx10_unindex
 
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
-  uint64_t rs_a   = 1;
+  // uint64_t rs_a   = 1;
   uint64_t cs_a   = cs_a0;
   uint64_t rs_b   = rs_b0;
   uint64_t cs_b   = cs_b0;

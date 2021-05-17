@@ -114,7 +114,7 @@ void __attribute__ ((optimize(0))) bli_dgemmsup_rv_armsve_2vx10_unindexed
   uint64_t rs_a   = rs_a0;
   uint64_t cs_a   = cs_a0;
   uint64_t rs_b   = rs_b0;
-  uint64_t cs_b   = 1;
+  // uint64_t cs_b   = 1;
 
   uint64_t k_mker = k0 / 4;
   uint64_t k_left = k0 % 4;
