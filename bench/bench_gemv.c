@@ -156,7 +156,7 @@ int main( int argc, char** argv )
         //
         // Input    No Transpose  With Transpose
         //
-        //   A         mxn        nxm *
+        //   A         mxn        mxn *
         //   x         nx1        mx1
         //   y         mx1        nx1
         //
@@ -168,17 +168,39 @@ int main( int argc, char** argv )
         bli_obj_create(dt, m, n, 1, lda, &a);
         if (transa == BLIS_NO_TRANSPOSE)
           {
-            bli_obj_create(dt, n, 1, 0, 0, &x);
-            bli_obj_create(dt, m, 1, 0, 0, &y);
-            bli_obj_create(dt, m, 1, 0, 0, &y_save);
+			// For non transpose operation
+			// Vector x has n entries and vector y as m entries
+			//
+			// However, the actual buffer size needs to consider
+			// the strids as well
+			//
+			// buffer size for x = (1+(n-1)*abs(incx))
+			// buffer size for y = (1+(m-1)*abs(incy))
+			//
+			// We achieve this by passing incx and incy as row-strides
+			// to bli_obj_create function.
+            bli_obj_create(dt, n, 1, incx, 1, &x);
+            bli_obj_create(dt, m, 1, incy, 1, &y);
+            bli_obj_create(dt, m, 1, incy, 1, &y_save);
           }
         else
           {
-            bli_obj_create(dt, m, 1, 0, 0, &x);
-            bli_obj_create(dt, n, 1, 0, 0, &y);
-            bli_obj_create(dt, n, 1, 0, 0, &y_save);
+			// For transpose operation
+			// Vector x has m entries and vector y as n entries
+			//
+			// However, the actual buffer size needs to consider
+			// the strids as well
+			//
+			// buffer size for x = (1+(m-1)*abs(incx))
+			// buffer size for y = (1+(n-1)*abs(incy))
+			//
+			// We achieve this by passing incx and incy as row-strides
+			// to bli_obj_create function.
+            bli_obj_create(dt, m, 1, incx, 1, &x);
+            bli_obj_create(dt, n, 1, incy, 1, &y);
+            bli_obj_create(dt, n, 1, incy, 1, &y_save);
           }
-
+		
 #ifdef AOCL_MATRIX_INITIALISATION
         bli_randm( &a );
         bli_randm( &x );
