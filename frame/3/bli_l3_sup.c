@@ -48,15 +48,15 @@ err_t bli_gemmsup
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
 //  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c);
 
-	// Return early if small matrix handling is disabled at configure-time.
-	#ifdef BLIS_DISABLE_SUP_HANDLING
+    // Return early if small matrix handling is disabled at configure-time.
+    #ifdef BLIS_DISABLE_SUP_HANDLING
     AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP is Disabled.");
-	return BLIS_FAILURE;
-	#endif
+    return BLIS_FAILURE;
+    #endif
 
-	// Return early if this is a mixed-datatype computation.
-	if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
-	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
+    // Return early if this is a mixed-datatype computation.
+    if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
+         bli_obj_dt( c ) != bli_obj_dt( b ) ||
          bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) {
         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP doesn't support Mixed datatypes.");
         return BLIS_FAILURE;
@@ -99,42 +99,42 @@ err_t bli_gemmsup
     }
 
 
-	// Obtain a valid (native) context from the gks if necessary.
-	// NOTE: This must be done before calling the _check() function, since
-	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+    // Obtain a valid (native) context from the gks if necessary.
+    // NOTE: This must be done before calling the _check() function, since
+    // that function assumes the context pointer is valid.
+    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	// Return early if a microkernel preference-induced transposition would
-	// have been performed and shifted the dimensions outside of the space
-	// of sup-handled problems.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
-	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
+    // Return early if a microkernel preference-induced transposition would
+    // have been performed and shifted the dimensions outside of the space
+    // of sup-handled problems.
+    if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
+    {
+        const num_t dt = bli_obj_dt( c );
+        const dim_t k  = bli_obj_width_after_trans( a );
 
-		// Pass in m and n reversed, which simulates a transposition of the
-		// entire operation pursuant to the microkernel storage preference.
+        // Pass in m and n reversed, which simulates a transposition of the
+        // entire operation pursuant to the microkernel storage preference.
         if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, m, k, cntx ) ) {
             AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Trasposition results in sizes beyond SUP thresholds.");
-			return BLIS_FAILURE;
-	}
+            return BLIS_FAILURE;
     }
-	else // ukr_prefers_storage_of( c, ... )
-	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
+    }
+    else // ukr_prefers_storage_of( c, ... )
+    {
+        const num_t dt = bli_obj_dt( c );
+        const dim_t k  = bli_obj_width_after_trans( a );
 
         if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) ) {
             AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes are beyond SUP thresholds.");
-			return BLIS_FAILURE;
-	}
+            return BLIS_FAILURE;
+    }
     }
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+    // Initialize a local runtime with global settings if necessary. Note
+    // that in the case that a runtime is passed in, we make a local copy.
+    rntm_t rntm_l;
+    if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+    else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
 #if 0
 const num_t dt = bli_obj_dt( c );
@@ -149,30 +149,30 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
         (int)m, (int)n, (int)k, (int)tm, (int)tn, (int)tk );
 #endif
 
-	// We've now ruled out the following two possibilities:
-	// - the ukernel prefers the operation as-is, and the sup thresholds are
-	//   unsatisfied.
-	// - the ukernel prefers a transposed operation, and the sup thresholds are
-	//   unsatisfied after taking into account the transposition.
-	// This implies that the sup thresholds (at least one of them) are met.
-	// and the small/unpacked handler should be called.
-	// NOTE: The sup handler is free to enforce a stricter threshold regime
-	// if it so chooses, in which case it can/should return BLIS_FAILURE.
+    // We've now ruled out the following two possibilities:
+    // - the ukernel prefers the operation as-is, and the sup thresholds are
+    //   unsatisfied.
+    // - the ukernel prefers a transposed operation, and the sup thresholds are
+    //   unsatisfied after taking into account the transposition.
+    // This implies that the sup thresholds (at least one of them) are met.
+    // and the small/unpacked handler should be called.
+    // NOTE: The sup handler is free to enforce a stricter threshold regime
+    // if it so chooses, in which case it can/should return BLIS_FAILURE.
 
-	// Query the small/unpacked handler from the context and invoke it.
-	gemmsup_oft gemmsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMM, cntx );
+    // Query the small/unpacked handler from the context and invoke it.
+    gemmsup_oft gemmsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMM, cntx );
 
-	return
-	gemmsup_fp
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm
-	);
+    return
+    gemmsup_fp
+    (
+      alpha,
+      a,
+      b,
+      beta,
+      c,
+      cntx,
+      rntm
+    );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }
@@ -192,15 +192,15 @@ err_t bli_gemmtsup
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
 //  AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c);
 
-	// Return early if small matrix handling is disabled at configure-time.
-	#ifdef BLIS_DISABLE_SUP_HANDLING
+    // Return early if small matrix handling is disabled at configure-time.
+    #ifdef BLIS_DISABLE_SUP_HANDLING
     AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP is Disabled.");
-	return BLIS_FAILURE;
-	#endif
+    return BLIS_FAILURE;
+    #endif
 
-	// Return early if this is a mixed-datatype computation.
-	if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
-	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
+    // Return early if this is a mixed-datatype computation.
+    if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
+         bli_obj_dt( c ) != bli_obj_dt( b ) ||
          bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) {
         AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP doesn't support Mixed datatypes.");
         return BLIS_FAILURE;
@@ -242,42 +242,25 @@ err_t bli_gemmtsup
     }
 
 
-	// Obtain a valid (native) context from the gks if necessary.
-	// NOTE: This must be done before calling the _check() function, since
-	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+    // Obtain a valid (native) context from the gks if necessary.
+    // NOTE: This must be done before calling the _check() function, since
+    // that function assumes the context pointer is valid.
+    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    // Return early if a microkernel preference-induced transposition would
-    // have been performed and shifted the dimensions outside of the space
-    // of sup-handled problems.
-    if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
+    num_t dt = bli_obj_dt(c);
+    dim_t k = bli_obj_width_after_trans( a );
+
+    if ( !bli_cntx_gemmtsup_thresh_is_met( dt, n, k, cntx ) )
     {
-        const num_t dt = bli_obj_dt( c );
-        const dim_t k  = bli_obj_width_after_trans( a );
-
-        // Pass in m and n reversed, which simulates a transposition of the
-        // entire operation pursuant to the microkernel storage preference.
-        if ( !bli_cntx_gemmt_sup_thresh_is_met( dt, n, k, cntx ) ) {
-            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Trasposition results in sizes beyond SUP thresholds.");
-            return BLIS_FAILURE;
-        }
-    }
-    else // ukr_prefers_storage_of( c, ... )
-	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
-
-        if ( !bli_cntx_gemmt_sup_thresh_is_met( dt, n, k, cntx ) ) {
-            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes beyond SUP thresholds.");
-			return BLIS_FAILURE;
-	}
+        AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes beyond SUP thresholds.");
+        return BLIS_FAILURE;
     }
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+    // Initialize a local runtime with global settings if necessary. Note
+    // that in the case that a runtime is passed in, we make a local copy.
+    rntm_t rntm_l;
+    if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+    else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
 #if 0
 const num_t dt = bli_obj_dt( c );
@@ -294,28 +277,28 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 
     // We've now ruled out the following two possibilities:
     // - the ukernel prefers the operation as-is, and the sup thresholds are
-	// unsatisfied.
+    // unsatisfied.
     // - the ukernel prefers a transposed operation, and the sup thresholds are
     //   unsatisfied after taking into account the transposition.
-	// This implies that the sup thresholds (at least one of them) are met.
-	// and the small/unpacked handler should be called.
-	// NOTE: The sup handler is free to enforce a stricter threshold regime
-	// if it so chooses, in which case it can/should return BLIS_FAILURE.
+    // This implies that the sup thresholds (at least one of them) are met.
+    // and the small/unpacked handler should be called.
+    // NOTE: The sup handler is free to enforce a stricter threshold regime
+    // if it so chooses, in which case it can/should return BLIS_FAILURE.
 
-	// Query the small/unpacked handler from the context and invoke it.
-	gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
+    // Query the small/unpacked handler from the context and invoke it.
+    gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
 
-	return
-	gemmtsup_fp
-	(
-	  alpha,
-	  a,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm
-	);
+    return
+    gemmtsup_fp
+    (
+      alpha,
+      a,
+      b,
+      beta,
+      c,
+      cntx,
+      rntm
+    );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }
@@ -384,42 +367,25 @@ err_t bli_syrksup
     }
 
 
-	// Obtain a valid (native) context from the gks if necessary.
-	// NOTE: This must be done before calling the _check() function, since
-	// that function assumes the context pointer is valid.
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+    // Obtain a valid (native) context from the gks if necessary.
+    // NOTE: This must be done before calling the _check() function, since
+    // that function assumes the context pointer is valid.
+    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    // Return early if a microkernel preference-induced transposition would
-    // have been performed and shifted the dimensions outside of the space
-    // of sup-handled problems.
-    if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
+    num_t dt = bli_obj_dt( c );
+    dim_t k = bli_obj_width_after_trans( a );
+
+    if( !bli_cntx_syrksup_thresh_is_met( dt, n, k, stor_id, cntx))
     {
-        const num_t dt = bli_obj_dt( c );
-        const dim_t k  = bli_obj_width_after_trans( a );
-
-        // Pass in m and n reversed, which simulates a transposition of the
-        // entire operation pursuant to the microkernel storage preference.
-        if ( !bli_cntx_syrk_sup_thresh_is_met( dt, n, k, cntx ) ) {
-            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Trasposition results in sizes beyond SUP thresholds.");
-            return BLIS_FAILURE;
-        }
-    }
-    else // ukr_prefers_storage_of( c, ... )
-	{
-		const num_t dt = bli_obj_dt( c );
-		const dim_t k  = bli_obj_width_after_trans( a );
-
-        if ( !bli_cntx_syrk_sup_thresh_is_met( dt, n, k, cntx ) ) {
-            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes beyond SUP thresholds.");
-			return BLIS_FAILURE;
-	}
+        AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - sizes beyond SUP thresholds.");
+        return BLIS_FAILURE;
     }
 
-	// Initialize a local runtime with global settings if necessary. Note
-	// that in the case that a runtime is passed in, we make a local copy.
-	rntm_t rntm_l;
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+    // Initialize a local runtime with global settings if necessary. Note
+    // that in the case that a runtime is passed in, we make a local copy.
+    rntm_t rntm_l;
+    if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+    else                { rntm_l = *rntm;                       rntm = &rntm_l; }
 
 #if 0
 const num_t dt = bli_obj_dt( c );
@@ -436,28 +402,28 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 
     // We've now ruled out the following two possibilities:
     // - the ukernel prefers the operation as-is, and the sup thresholds are
-	// unsatisfied.
+    // unsatisfied.
     // - the ukernel prefers a transposed operation, and the sup thresholds are
     //   unsatisfied after taking into account the transposition.
-	// This implies that the sup thresholds (at least one of them) are met.
-	// and the small/unpacked handler should be called.
-	// NOTE: The sup handler is free to enforce a stricter threshold regime
-	// if it so chooses, in which case it can/should return BLIS_FAILURE.
+    // This implies that the sup thresholds (at least one of them) are met.
+    // and the small/unpacked handler should be called.
+    // NOTE: The sup handler is free to enforce a stricter threshold regime
+    // if it so chooses, in which case it can/should return BLIS_FAILURE.
 
-	// Query the small/unpacked handler from the context and invoke it.
-	gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
+    // Query the small/unpacked handler from the context and invoke it.
+    gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
 
-	return
-	gemmtsup_fp
-	(
-	  alpha,
-	  a,
-	  &at_local,
-	  beta,
-	  c,
-	  cntx,
-	  rntm
-	);
+    return
+    gemmtsup_fp
+    (
+      alpha,
+      a,
+      &at_local,
+      beta,
+      c,
+      cntx,
+      rntm
+    );
 
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }

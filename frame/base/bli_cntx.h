@@ -317,7 +317,7 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_
 }
 
 // -- gemmt specific function
-BLIS_INLINE bool bli_cntx_gemmt_sup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_gemmtsup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
 {
     if( bli_is_double( dt ))
     {
@@ -336,10 +336,30 @@ BLIS_INLINE bool bli_cntx_gemmt_sup_thresh_is_met( num_t dt, dim_t n, dim_t k, c
 }
 
 // -- syrk specific function
-BLIS_INLINE bool bli_cntx_syrk_sup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_syrksup_thresh_is_met( num_t dt, dim_t n, dim_t k, stor3_t stor_id, cntx_t* cntx )
 {
-    //copied gemm thresholds temporarily. These needs to be derived for syrk.
+#ifdef BLIS_CONFIG_EPYC
+    if( bli_is_double( dt ) )
+    {
+        if( ( stor_id == BLIS_RRC ) || ( stor_id == BLIS_CCR ) )
+        {
+            if( n < 140) return TRUE;
+            else if( ( n < 200 ) && ( k < 100 ) ) return TRUE;
+            else if( ( n <= 450 ) && ( k < 50 ) ) return TRUE;
+            else return FALSE;
+        }
+        else
+        {
+            if( n < 150 ) return TRUE;
+            else return FALSE;
+        }
+    }
+    else
         return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
+#else
+    //copied gemm thresholds temporarily. These needs to be derived for syrk.
+    return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
+#endif
 }
 
 // -----------------------------------------------------------------------------
