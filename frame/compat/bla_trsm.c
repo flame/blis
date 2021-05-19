@@ -596,10 +596,11 @@ void dtrsm_
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
     /* Irrespective of num threads single thread bli_dtrsm_small 
-     * is performing better than other implementations for [m,n]<=128 */
+     * is performing better than other implementations for [m,n]<=256 */
     /* ToDo: This condition will be tunned for single thread */
-    if(m0 <=128 && n0<=128)
+    if(m0 <=256 && n0<=256)
     {
         err_t status;
         status = bli_trsm_small
@@ -619,6 +620,7 @@ void dtrsm_
             return;
         }
     }
+#endif
 #endif
 
     bli_trsmnat
