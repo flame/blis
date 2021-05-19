@@ -39,16 +39,16 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
 
     if( dt_type == 'S' || dt_type == 's' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if( dt_type == 'D' || dt_type == 'd' )
     {
-        alpha_real = *(double*)alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*) beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if( dt_type == 'c' || dt_type == 'C' )
@@ -100,12 +100,12 @@ void AOCL_DTL_log_trsm_sizes(int8 loglevel,
 
     if( dt_type == 'S' || dt_type == 's' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if( dt_type == 'D' || dt_type == 'd' )
     {
-        alpha_real = *(double*)alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if( dt_type == 'C' || dt_type == 'c' )
@@ -154,16 +154,16 @@ void AOCL_DTL_log_gemmt_sizes(int8 loglevel,
 
     if( dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if( dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*) beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if( dt_type == 'c' || dt_type == 'C' )
@@ -345,16 +345,16 @@ void AOCL_DTL_log_symm_sizes( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*)beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -399,13 +399,13 @@ void AOCL_DTL_log_symv_sizes( int8 loglevel,
     double beta_d = 0.0;
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_d = *(float*)alpha;
-        beta_d = *(float*)beta;
+        alpha_d = *((float*)alpha);
+        beta_d = *((float*)beta);
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_d = *(double*) alpha;
-        beta_d = *(double*) beta;
+        alpha_d = *((double*)alpha);
+        beta_d = *((double*)beta);
     }
 
     // {S, D} { uploa, m, alpha_d, lda, incx, beta_d, incy}
@@ -438,16 +438,16 @@ void AOCL_DTL_log_gemv_sizes( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*) beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -494,12 +494,12 @@ void AOCL_DTL_log_ger_sizes( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -553,7 +553,6 @@ void AOCL_DTL_log_her_sizes( int8 loglevel,
 
 void AOCL_DTL_log_dotv_sizes( int8 loglevel,
                               char dt_type,
-                              char transa,
                               const f77_int  n,
                               const f77_int incx,
                               const f77_int incy,
@@ -564,7 +563,7 @@ void AOCL_DTL_log_dotv_sizes( int8 loglevel,
     char buffer[256];
 
     // { n, incx, incy}
-    sprintf(buffer, " %c %c %ld %ld %ld", dt_type, transa, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, " %c %ld %ld %ld", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
 
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -592,16 +591,16 @@ void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*)beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -645,12 +644,12 @@ void AOCL_DTL_log_her2_sizes ( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -724,16 +723,16 @@ void AOCL_DTL_log_axpby_sizes ( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(float*)beta;
+        beta_real = *((float*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real = *(double*)beta;
+        beta_real = *((double*)beta);
         beta_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -776,12 +775,12 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -823,17 +822,41 @@ void AOCL_DTL_log_copy_sizes( int8 loglevel,
 
 void AOCL_DTL_log_scal_sizes( int8 loglevel,
                               char dt_type,
-                              const double alpha,
+                              const void* alpha,
                               const f77_int  n,
                               const f77_int  incx,
                               const char* filename,
                               const char* function_name,
                               int line)
 {
-  char buffer[256];
+    char buffer[256];
+    double alpha_real = 0.0;
+    double alpha_imag = 0.0;
+
+    if(dt_type == 's' || dt_type == 'S' )
+    {
+        alpha_real = *((float*)alpha);
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'd' || dt_type == 'D' )
+    {
+        alpha_real = *((double*)alpha);
+        alpha_imag = 0.0;
+    }
+    else if(dt_type == 'c' || dt_type == 'C' )
+    {
+        alpha_real = (float)(((scomplex*)alpha)->real);
+        alpha_imag = (float)(((scomplex*)alpha)->imag);
+    }
+    else if(dt_type == 'z' || dt_type == 'Z' )
+    {
+        alpha_real = ((dcomplex*)alpha)->real;
+        alpha_imag = ((dcomplex*)alpha)->imag;
+    }
+
     // {S, D, C, Z} { alpha, n, incx}
-    sprintf(buffer, " %c %lf %ld %ld",
-            dt_type, alpha, (dim_t)n,  (dim_t)incx);
+    sprintf(buffer, " %c %lf %lf %ld %ld",
+            dt_type, alpha_real, alpha_imag, (dim_t)n,  (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 
@@ -893,12 +916,12 @@ void AOCL_DTL_log_syr2_sizes(int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -941,16 +964,16 @@ void AOCL_DTL_log_syr2k_sizes(int8  loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real  = *(float*)beta;
+        beta_real  = *((float*)beta);
         beta_imag  = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real  = *(double*) beta;
+        beta_real  = *((double*)beta);
         beta_imag  = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -991,12 +1014,12 @@ void AOCL_DTL_log_syr_sizes(int8  loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -1038,16 +1061,16 @@ void AOCL_DTL_log_syrk_sizes(int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
-        beta_real  = *(float*)beta;
+        beta_real  = *((float*)beta);
         beta_imag  = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
-        beta_real  = *(double*) beta;
+        beta_real  = *((double*)beta);
         beta_imag  = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )
@@ -1092,12 +1115,12 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 
     if(dt_type == 's' || dt_type == 'S' )
     {
-        alpha_real = *(float*)alpha;
+        alpha_real = *((float*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'd' || dt_type == 'D' )
     {
-        alpha_real = *(double*) alpha;
+        alpha_real = *((double*)alpha);
         alpha_imag = 0.0;
     }
     else if(dt_type == 'c' || dt_type == 'C' )

@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -212,7 +212,7 @@ void AOCL_DTL_log_copy_sizes( int8 loglevel,
 
 void AOCL_DTL_log_scal_sizes( int8 loglevel,
                               char dt_type,
-                              const double alpha,
+                              const void* alpha,
                               const f77_int  n,
                               const f77_int  incx,
                               const char* filename,
@@ -275,7 +275,6 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
 
 void AOCL_DTL_log_dotv_sizes( int8 loglevel,
                               char dt_type,
-                              char transa,
                               const f77_int  n,
                               const f77_int incx,
                               const f77_int incy,
@@ -454,8 +453,8 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
     AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
                             __FUNCTION__, __LINE__);
 
-#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy) \
-  AOCL_DTL_log_dotv_sizes(loglevel, dt_type, transa, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, n, incx, incy) \
+  AOCL_DTL_log_dotv_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
 
 #define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
     AOCL_DTL_log_syr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, __FILE__,\
@@ -528,9 +527,9 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 
 #define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy)
 
-#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, transa, n, incx, incy)
+#define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, n, incx, incy)
 
-#define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) 
+#define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda)
 
 #define AOCL_DTL_LOG_SYR2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)
 

@@ -185,7 +185,9 @@ blis: \
        bench_trsm_blis.x \
        bench_gemv_blis.x \
        bench_syrk_blis.x \
-       bench_ger_blis.x
+       bench_ger_blis.x \
+       bench_scalv_blis.x \
+       bench_dotv_blis.x
 
 openblas: \
       bench_gemm_openblas.x \
@@ -193,7 +195,9 @@ openblas: \
       bench_trsm_openblas.x \
       bench_gemv_openblas.x \
       bench_syrk_openblas.x \
-      bench_ger_openblas.x
+      bench_ger_openblas.x \
+      bench_scalv_openblas.x \
+      bench_dotv_openblas.x
 
 atlas: \
       bench_gemm_atlas.x \
@@ -201,7 +205,9 @@ atlas: \
       bench_trsm_atlas.x\
       bench_gemv_atlas.x \
       bench_syrk_atlas.x \
-      bench_ger_atlas.x
+      bench_ger_atlas.x \
+      bench_scalv_atlas.x \
+      bench_dotv_atlas.x
 
 mkl:  \
       bench_gemm_mkl.x \
@@ -209,7 +215,9 @@ mkl:  \
       bench_trsm_mkl.x \
       bench_gemv_mkl.x \
       bench_syrk_mkl.x \
-      bench_ger_mkl.x
+      bench_ger_mkl.x \
+      bench_scalv_mkl.x \
+      bench_dotv_mkl.x
 
 
 # --Object file rules --
