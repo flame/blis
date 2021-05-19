@@ -32,14 +32,15 @@
 
 */
 
-GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )
-GEMM_UKR_PROT( float,    s, gemm_armsve_asm_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_10x2v_unindexed )
+//#ifndef BLIS_FAMILY_H
+//#define BLIS_FAMILY_H
 
-PACKM_KER_PROT( double,   d, packm_armsve256_asm_8xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_12xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
+
+// -- MEMORY ALLOCATION --------------------------------------------------------
+
+#define BLIS_SIMD_ALIGN_SIZE    256
+#define BLIS_SIMD_NUM_REGISTERS 32
+
+
+//#endif
+

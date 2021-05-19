@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,14 +33,13 @@
 
 */
 
-GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )
-GEMM_UKR_PROT( float,    s, gemm_armsve_asm_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve_2vx10_unindexed )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_10x2v_unindexed )
+#define SVE512_IN_REG_TRANSPOSE_d8x2(DST0,DST1,DST2,DST3,DST4,DST5,DST6SRC0,DST7SRC1,PT,P2C,P4C,P6C) \
+  "trn1    " #DST0".d, " #DST6SRC0".d, " #DST7SRC1".d \n\t" \
+  "trn2    " #DST1".d, " #DST6SRC0".d, " #DST7SRC1".d \n\t" \
+  "compact " #DST2".d, " #P2C", " #DST0".d \n\t" \
+  "compact " #DST3".d, " #P2C", " #DST1".d \n\t" \
+  "compact " #DST4".d, " #P4C", " #DST0".d \n\t" \
+  "compact " #DST5".d, " #P4C", " #DST1".d \n\t" \
+  "compact " #DST6SRC0".d, " #P6C", " #DST0".d \n\t" \
+  "compact " #DST7SRC1".d, " #P6C", " #DST1".d \n\t"
 
-PACKM_KER_PROT( double,   d, packm_armsve256_asm_8xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_12xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
