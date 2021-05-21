@@ -263,38 +263,21 @@ void dgemv_
   /* Call variants based on transpose value. */
   if(bli_does_notrans(blis_transa))
     {
-      if((m0 <1200) && (n0 < 1200))
-        {
-          bli_dgemv_zen_ref_c
-            (
-             m0,
-             n0,
-             (double*) alpha,
-             (double*)a, cs_a,
-             x0, incx0,
-             (double*) beta,
-             y0, incy0,
-             NULL
-             );
-        }
-      else
-        {
-          //variant_2 is chosen for column-storage
-          // and uses axpyf-based implementation
-          bli_dgemv_unf_var2
-            (
-             blis_transa,
-             BLIS_NO_CONJUGATE,
-             m0,
-             n0,
-             (double*)alpha,
-             (double*)a,  rs_a, cs_a,
-             x0, incx0,
-             (double*)beta,
-             y0, incy0,
-             NULL
-             );
-        }
+      //variant_2 is chosen for column-storage
+      // and uses axpyf-based implementation
+      bli_dgemv_unf_var2
+        (
+         blis_transa,
+         BLIS_NO_CONJUGATE,
+         m0,
+         n0,
+         (double*)alpha,
+         (double*)a,  rs_a, cs_a,
+         x0, incx0,
+         (double*)beta,
+         y0, incy0,
+         NULL
+         );
     }
   else
     {
