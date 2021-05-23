@@ -344,8 +344,9 @@ void bli_zgemv_unf_var2
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 	return;
     }
+
     /* fusing factor */
-    b_fuse = 5;
+    b_fuse = 4;
 
     for ( i = 0; i < n_iter; i += f )
     {
@@ -355,7 +356,7 @@ void bli_zgemv_unf_var2
         y1 = y + (0  )*incy;
 
         /* y = y + alpha * A1 * x1; */
-        bli_zaxpyf_zen_int_5
+        bli_zaxpyf_zen_int_4
         (
           conja,
           conjx,
@@ -448,8 +449,6 @@ void bli_cgemv_unf_var2
 }
 
 
-
-//INSERT_GENTFUNC_BASIC0_CZ( gemv_unf_var2 )
 #else
 INSERT_GENTFUNC_BASIC0( gemv_unf_var2 )
 #endif
