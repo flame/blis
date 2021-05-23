@@ -2373,6 +2373,11 @@ main()
 	fi
 
 	echo "${script_name}: using '${found_cc}' C compiler."
+	
+	# Also check the compiler to see if we are (cross-)compiling for Windows
+	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
+		is_win=yes
+	fi
 
 
 	# -- Find a C++ compiler ---------------------------------------------------
