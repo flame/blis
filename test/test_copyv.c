@@ -67,8 +67,48 @@ bool_t dcompare_result(int n, double *x, int incx, double *y, int incy) {
 	}
 	return TRUE;
 }
-#endif
 
+bool_t ccompare_result(int n, scomplex *x, int incx, scomplex *y, int incy) {
+    for (int i = 0; i < n; i++)
+    {
+        if ( (*x) != (*y) )
+        {
+            printf("%4f != %4f at location %d.\n", *x, *y, 2*i);
+            return FALSE;
+        }
+
+        if( *(x + 1) != *(y + 1) )
+        {
+            printf("%4f != %4f at location %d.\n", *(x + 1), *(y + 1), (2*i + 1));
+            return FALSE;
+        }
+        x += 2*incx;
+        y += 2*incy;
+    }
+    return TRUE;
+}
+
+bool_t zcompare_result(int n, dcomplex *x, int incx, dcomplex *y, int incy) {
+    for (int i = 0; i < n; i++)
+    {
+        if ( (*x) != (*y) )
+        {
+            printf("%4f != %4f at location %d.\n", *x, *y, 2*i);
+            return FALSE;
+        }
+
+        if( *(x + 1) != *(y + 1) )
+        {
+            printf("%4f != %4f at location %d.\n", *(x + 1), *(y + 1), (2*i + 1));
+            return FALSE;
+        }
+        x += 2*incx;
+        y += 2*incy;
+    }
+    return TRUE;
+}
+
+#endif
 
 int main(int argc, char** argv)
 {
@@ -76,13 +116,13 @@ int main(int argc, char** argv)
 	dim_t n;
 	dim_t p;
 	dim_t p_begin, p_end, p_inc;
-	int   n_input, sizeof_dt;
+	int   n_input;
 	int   r, n_repeats;
 	num_t dt;
 
 	double dtime;
 	double dtime_save;
-	double Gbps;
+	double gflops;
 
 	//bli_init();
 
@@ -103,19 +143,14 @@ int main(int argc, char** argv)
 #endif
 
 #if 1
-	 // dt = BLIS_FLOAT;
-	dt = BLIS_DOUBLE;
+	dt = BLIS_FLOAT;
+	//dt = BLIS_DOUBLE;
 #else
 	//dt = BLIS_SCOMPLEX;
 	dt = BLIS_DCOMPLEX;
 #endif
 
-	if (dt == BLIS_DOUBLE)
-		sizeof_dt = sizeof(double);
-	else if (dt == BLIS_FLOAT)
-		sizeof_dt = sizeof(float);
-
-	printf("executable\t n\t GBs per sec\n");
+	printf("executable\t n\t Gflops per sec\n");
 	for (p = p_begin; p <= p_end; p += p_inc)
 	{
 
@@ -224,16 +259,15 @@ int main(int argc, char** argv)
 
 		if (p >= 10000)
 			p_inc = 10000;
-		Gbps = (n * sizeof_dt) / (dtime_save * 1.0e9);
-		if(bli_is_complex(dt)) Gbps *= 2;
+		gflops = (n * 1) / (dtime_save * 1.0e9);
+		if(bli_is_complex(dt)) gflops *= 2;
 #ifdef BLIS
 		printf("data_copyv_blis\t");
 #else
 		printf("data_copyv_%s\t", BLAS);
 #endif
-		printf("%4lu\t %7.2f\n", 
-			(unsigned long)n, Gbps);
-
+		printf("%4lu\t %7.2f\n",
+			(unsigned long)n, gflops);
 		bli_obj_free(&x);
 		bli_obj_free(&y);
 	}
