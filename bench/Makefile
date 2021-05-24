@@ -190,7 +190,8 @@ blis: \
        bench_dotv_blis.x \
        bench_trsv_blis.x \
        bench_amaxv_blis.x \
-       bench_copyv_blis.x
+       bench_copyv_blis.x \
+       bench_swapv_blis.x
 
 openblas: \
       bench_gemm_openblas.x \
@@ -203,7 +204,8 @@ openblas: \
       bench_dotv_openblas.x \
       bench_trsv_openblas.x \
       bench_amaxv_openblas.x \
-      bench_copyv_openblas.x
+      bench_copyv_openblas.x \
+      bench_swapv_openblas.x
 
 atlas: \
       bench_gemm_atlas.x \
@@ -216,7 +218,8 @@ atlas: \
       bench_dotv_atlas.x \
       bench_trsv_atlas.x \
       bench_amaxv_atlas.x \
-      bench_copyv_atlas.x
+      bench_copyv_atlas.x \
+      bench_swapv_atlas.x
 
 mkl:  \
       bench_gemm_mkl.x \
@@ -229,7 +232,8 @@ mkl:  \
       bench_dotv_mkl.x \
       bench_trsv_mkl.x \
       bench_amaxv_mkl.x \
-      bench_copyv_mkl.x
+      bench_copyv_mkl.x \
+      bench_swapv_mkl.x
 
 
 # --Object file rules --
