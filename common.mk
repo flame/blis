@@ -394,14 +394,14 @@ BASE_LIB_PATH      := $(LIB_PATH)
 LIBBLIS            := libblis
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
-ifeq ($(OS_NAME),Darwin)
-SHLIB_EXT          := dylib
-else ifeq ($(IS_WIN),yes)
+ifeq ($(IS_WIN),yes)
 ifeq ($(CC_VENDOR),gcc)
 SHLIB_EXT          := dll.a
 else
 SHLIB_EXT          := lib
 endif
+else ifeq ($(OS_NAME),Darwin)
+SHLIB_EXT          := dylib
 else
 SHLIB_EXT          := so
 endif
@@ -421,14 +421,14 @@ LIBBLIS_SO_PATH    := $(BASE_LIB_PATH)/$(LIBBLIS_SO)
 # number, a symlink in BASE_LIB_PATH is needed so that ld can find the local
 # shared library when the testsuite is run via 'make test' or 'make check'.
 
-ifeq ($(OS_NAME),Darwin)
-# OS X shared library extensions.
-LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).$(SHLIB_EXT)
-LIBBLIS_SO_MMB_EXT := $(SO_MMB).$(SHLIB_EXT)
-else ifeq ($(IS_WIN),yes)
+ifeq ($(IS_WIN),yes)
 # Windows shared library extension.
 LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).dll
 LIBBLIS_SO_MMB_EXT :=
+else ifeq ($(OS_NAME),Darwin)
+# OS X shared library extensions.
+LIBBLIS_SO_MAJ_EXT := $(SO_MAJOR).$(SHLIB_EXT)
+LIBBLIS_SO_MMB_EXT := $(SO_MMB).$(SHLIB_EXT)
 else
 # Linux shared library extensions.
 LIBBLIS_SO_MAJ_EXT := $(SHLIB_EXT).$(SO_MAJOR)
@@ -515,23 +515,21 @@ endif
 
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
-ifeq ($(OS_NAME),Darwin)
-# OS X shared library link flags.
-SOFLAGS    := -dynamiclib
-SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
-else
-SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
 # Windows shared library link flags.
+SOFLAGS    := -shared
 ifeq ($(CC_VENDOR),clang)
 SOFLAGS    += -Wl,-implib:$(BASE_LIB_PATH)/$(LIBBLIS).lib
 else
 SOFLAGS    += -Wl,--out-implib,$(BASE_LIB_PATH)/$(LIBBLIS).dll.a
 endif
+else ifeq ($(OS_NAME),Darwin)
+# OS X shared library link flags.
+SOFLAGS    := -dynamiclib
+SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
 else
 # Linux shared library link flags.
-SOFLAGS    += -Wl,-soname,$(LIBBLIS_SONAME)
-endif
+SOFLAGS    += -shared -Wl,-soname,$(LIBBLIS_SONAME)
 endif
 
 # Decide which library to link to for things like the testsuite and BLIS test
