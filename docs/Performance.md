@@ -534,7 +534,7 @@ The `runthese.m` file will contain example invocations of the function.
 ### A64fx experiment details
 
 * Location: RIKEN Center of Computational Science in Kobe, Japan
-  * These test results were gathered on the Fugaku supercomputer under project "量子物質の創発と機能のための基礎科学 ―「富岳」と最先端実験の密連携による革新的強相関電子科学" (hp200132)
+  * These test results were gathered on the Fugaku supercomputer under project "量子物質の創発と機能のための基礎科学 ―「富岳」と最先端実験の密連携による革新的強相関電子科学" (hp200132) (Basic Science for Emergence and Functionality in Quantum Matter: Innovative Strongly-Correlated Electron Science by Integration of "Fugaku" and Frontier Experiments)
 * Processor model: Fujitsu A64fx
 * Core topology: one socket, 4 NUMA groups per socket, 13 cores per group (one reserved for the OS), 48 cores total
 * SMT status: Unknown
@@ -546,23 +546,17 @@ The `runthese.m` file will contain example invocations of the function.
   * multicore: 70.4 GFLOPS/core (double-precision), 140.8 GFLOPS/core (single-precision)
 * Operating system: RHEL 8.3
 * Page size: 256 bytes
-* Compiler: gcc 9.3.0
-* Results gathered: 2 April 2021
+* Compiler: gcc 10.1.0
+* Results gathered: 2 April 2021; BLIS and SSL2 updated on 20 May 2021
 * Implementations tested:
-  * BLIS 757cb1c (post-0.8.1)
-    * configured with `./configure -t openmp --sve-vector-size=vla CFLAGS="-D_A64FX -DPREFETCH256 -DSVE_NO_NAT_COMPLEX_KERNELS" arm64_sve` (single- and multithreaded)
-    * sub-configuration exercised: `arm64_sve`
-    * Single-threaded (1 core) execution requested via:
-      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
-      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
-    * Multithreaded (12 core) execution requested via:
-      * `export BLIS_JC_NT=1 BLIS_IC_NT=2 BLIS_JR_NT=6`
-      * `export BLIS_SVE_KC_D=2400 BLIS_SVE_MC_D=64 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
-      * `export BLIS_SVE_KC_S=2400 BLIS_SVE_MC_S=128 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
-    * Multithreaded (48 core) execution requested via:
-      * `export BLIS_JC_NT=1 BLIS_IC_NT=4 BLIS_JR_NT=12`
-      * `export BLIS_SVE_KC_D=2048 BLIS_SVE_MC_D=128 BLIS_SVE_NC_D=26880 BLIS_SVE_KERNEL_IDX_D=14` (double precision)
-      * `export BLIS_SVE_KC_S=2048 BLIS_SVE_MC_S=256 BLIS_SVE_NC_S=23040 BLIS_SVE_KERNEL_IDX_S=2` (single precision)
+  * BLIS 61584de (post-0.8.1)
+    * configured with:
+      * `../configure -t none CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (single-threaded)
+      * `../configure -t openmp CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (multithreaded)
+    * sub-configuration exercised: `a64fx`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (12 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=1 BLIS_JR_NT=12`
+    * Multithreaded (48 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=4 BLIS_JR_NT=12`
   * Eigen 3.3.9
     * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen)
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
@@ -593,7 +587,7 @@ The `runthese.m` file will contain example invocations of the function.
 #### pdf
 
 * [A64fx single-threaded](graphs/large/l3_perf_a64fx_nt1.pdf)
-* [A64fx multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic2jr6_nt12.pdf)
+* [A64fx multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic1jr12_nt12.pdf)
 * [A64fx multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.pdf)
 
 #### png (inline)
@@ -601,7 +595,7 @@ The `runthese.m` file will contain example invocations of the function.
 * **A64fx single-threaded**
 ![single-threaded](graphs/large/l3_perf_a64fx_nt1.png)
 * **A64fx multithreaded (12 cores)**
-![multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic2jr6_nt12.png)
+![multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic1jr12_nt12.png)
 * **A64fx multithreaded (48 cores)**
 ![multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.png)
 

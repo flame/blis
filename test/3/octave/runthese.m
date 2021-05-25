@@ -24,6 +24,6 @@ plot_panel_4x5(2.60,16,64, '1s','../results/zen2/20200929/jc4ic4jr4','zen2','MKL
 plot_panel_4x5(2.60,16,128,'2s','../results/zen2/20200929/jc8ic4jr4','zen2','MKL'); close all; clear all;
 
 % a64fx
-plot_panel_4x5(2.20,32,1, 'st','../results/a64fx/20210405/st',        'a64fx','Fujitsu SSL2'); close all; clear all;
-plot_panel_4x5(2.20,32,12,'1s','../results/a64fx/20210405/jc1ic4jr3', 'a64fx','Fujitsu SSL2'); close all; clear all;
-plot_panel_4x5(2.20,32,48,'2s','../results/a64fx/20210405/jc1ic4jr12','a64fx','Fujitsu SSL2'); close all; clear all;
+plot_panel_4x5(2.20,32,1, 'st','../results/a64fx/20210520/st',        'a64fx','Fujitsu SSL2'); close all; clear all;
+plot_panel_4x5(2.20,32,12,'1s','../results/a64fx/20210520/jc1ic1jr12','a64fx','Fujitsu SSL2'); close all; clear all;
+plot_panel_4x5(2.20,32,48,'2s','../results/a64fx/20210520/jc1ic4jr12','a64fx','Fujitsu SSL2'); close all; clear all;
