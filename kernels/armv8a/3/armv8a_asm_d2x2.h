@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,9 +31,20 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
 
-GEMM_UKR_PROT( float,    s, gemm_armv8a_asm_8x12 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_8x4 )
+/* C     A   B
+ * || <- | * --
+ * ||    |
+ */
+#define DGEMM_2X2_NANOKERNEL(C0,C1,A,B) \
+" fmla  v"#C0".2d, v"#A".2d, v"#B".d[0] \n\t" \
+" fmla  v"#C1".2d, v"#A".2d, v"#B".d[1] \n\t"
+
+#define SGEMM_4X4_NANOKERNEL(C0,C1,C2,C3,A,B) \
+" fmla  v"#C0".4s, v"#A".4s, v"#B".s[0] \n\t" \
+" fmla  v"#C1".4s, v"#A".4s, v"#B".s[1] \n\t" \
+" fmla  v"#C2".4s, v"#A".4s, v"#B".s[2] \n\t" \
+" fmla  v"#C3".4s, v"#A".4s, v"#B".s[3] \n\t"
 
