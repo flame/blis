@@ -190,8 +190,11 @@ extern "C" {
 
 // NOTE: These definitions should not be included much earlier since an addon
 // may wish to utilize other types and definitions provided by BLIS.
-
+// TODO: Disable addon header file inclusion for windows since configure
+// script is not executed, and subsequently the header file ie not generated.
+#if !defined(_WIN32) && !defined(__CYGWIN__)
 #include "bli_addon.h"
+#endif
 
 
 // -- sandbox implementation --

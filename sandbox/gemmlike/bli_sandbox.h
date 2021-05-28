@@ -14,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name(s) of the copyright holder(s) nor the names of its
+    - Neither the name of copyright holder(s) nor the names
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -32,47 +32,25 @@
 
 */
 
-// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
-// entry point to any sandbox implementation.
+#ifndef BLIS_SANDBOX_H
+#define BLIS_SANDBOX_H
 
-// NOTE: This function is implemented identically to the function that it
-// overrides in frame/ind/oapi/bli_l3_nat_oapi.c. This means that we are
-// forgoing the option of customizing the implementations that underlie
-// bli_gemm() and bli_?gemm(). Any new code defined in this sandbox
-// directory, however, will be included in the BLIS.
+// NOTE: This header is the only header required to be present in the sandbox
+// implementation directory.
 
-#include "blis.h"
+// This header should contain (or #include) any definitions that must be
+// folded into blis.h. Typically, it will remain empty since any header
+// definitions specific to the sandbox implementation will not need to be
+// made available to applications (or the framework) during compilation.
 
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	/* Obtain a valid (native) context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Invoke the operation's front end. */ \
-	PASTEMAC(opname,_front) \
-	( \
-	  alpha, a, b, beta, c, cntx, rntm, NULL \
-	); \
-}
+#include "bls_gemm.h"
+#include "bls_gemm_var.h"
 
-GENFRONT( gemm, gemm, nat )
+#include "bls_l3_packm_a.h"
+#include "bls_l3_packm_b.h"
+#include "bls_l3_packm_var.h"
+
+#include "bls_l3_decor.h"
+
+
+#endif

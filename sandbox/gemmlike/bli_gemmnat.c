@@ -57,6 +57,16 @@ void PASTEMAC(opname,imeth) \
        rntm_t* rntm  \
      ) \
 { \
+\
+	/* A switch to easily toggle whether we use the sandbox implementation
+	   of bls_gemm() as the implementation for bli_gemm(). (This allows for
+	   easy testing of bls_gemm() via the testsuite.) */ \
+	if ( 1 ) \
+	{ \
+		bls_gemm_ex( alpha, a, b, beta, c, cntx, rntm ); \
+		return; \
+	} \
+\
 	bli_init_once(); \
 \
 	/* Obtain a valid (native) context from the gks if necessary. */ \
