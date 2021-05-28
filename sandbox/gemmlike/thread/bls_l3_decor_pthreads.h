@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,47 +32,16 @@
 
 */
 
-// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
-// entry point to any sandbox implementation.
+#ifndef BLIS_SBX_L3_DECOR_PTHREADS_H
+#define BLIS_SBX_L3_DECOR_PTHREADS_H
 
-// NOTE: This function is implemented identically to the function that it
-// overrides in frame/ind/oapi/bli_l3_nat_oapi.c. This means that we are
-// forgoing the option of customizing the implementations that underlie
-// bli_gemm() and bli_?gemm(). Any new code defined in this sandbox
-// directory, however, will be included in the BLIS.
+// Definitions specific to situations when POSIX multithreading is enabled.
+#ifdef BLIS_ENABLE_PTHREADS
 
-#include "blis.h"
+// Thread entry point prototype.
+void* bls_l3_thread_entry( void* data_void );
 
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	/* Obtain a valid (native) context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Invoke the operation's front end. */ \
-	PASTEMAC(opname,_front) \
-	( \
-	  alpha, a, b, beta, c, cntx, rntm, NULL \
-	); \
-}
+#endif
 
-GENFRONT( gemm, gemm, nat )
+#endif
+

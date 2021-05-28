@@ -57,7 +57,7 @@ void PASTEMAC(ch,opname) \
 	} \
 	else /* if ( will_pack == TRUE ) */ \
 	{ \
-		/* NOTE: This is "rounding up" of the last upanel is actually optional
+		/* NOTE: This "rounding up" of the last upanel is actually optional
 		   for the rrc/crc cases, but absolutely necessary for the other cases
 		   since we NEED that last micropanel to have the same ldim (cs_p) as
 		   the other micropanels. Why? So that millikernels can use the same
@@ -280,15 +280,15 @@ void PASTEMAC(ch,opname) \
 		} \
 		else \
 		{ \
-			/* All other stor3_t ids: pack A to column-stored row-panels. */ \
+			/* All other stor3_t ids: pack B to row-stored column-panels. */ \
 			*rs_p = nr; \
 			*cs_p = 1; \
 \
 			*pd_p = nr; \
 			*ps_p = k * nr; \
 \
-			/* Set the schema to "packed row panels" to indicate packing to
-			   conventional column-stored row panels. */ \
+			/* Set the schema to "packed column panels" to indicate packing to
+			   conventional row-stored column panels. */ \
 			*schema = BLIS_PACKED_COL_PANELS; \
 		} \
 \
