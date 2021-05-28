@@ -35,4 +35,5 @@
 GEMM_UKR_PROT( float,    s, gemm_armv8a_asm_8x12 )
 GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8 )
 GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_8x4 )
+GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_4x4 )
 
