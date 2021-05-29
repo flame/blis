@@ -1135,20 +1135,14 @@ __asm__ volatile
 " ldr x1,%[baddr]                            \n\t" // Load address of B
 " ldr x2,%[caddr]                            \n\t" // Load address of C
 "                                            \n\t"
-" ldr x3,%[a_next]                           \n\t" // Move pointer
-" ldr x4,%[b_next]                           \n\t" // Move pointer
-"                                            \n\t"
 " ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
 " ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
 "                                            \n\t" 
-" ldr x7,%[alpha]                            \n\t" // Alpha address      
-" ldr x8,%[beta]                             \n\t" // Beta address      
-"                                            \n\t" 
-" ldr x9,%[cs_c]                             \n\t" // Load cs_c
-" lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
+" ldr x10,%[cs_c]                            \n\t" // Load cs_c
+" lsl x10,x10,#3                             \n\t" // cs_c * sizeof(double)
 "                                            \n\t"
-" ldr x13,%[rs_c]                            \n\t" // Load rs_c.
-" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
+" ldr x14,%[rs_c]                            \n\t" // Load rs_c.
+" lsl x14,x14,#3                             \n\t" // rs_c * sizeof(double). 
 "                                            \n\t"
 " add x20,x2,x10                             \n\t" //Load address Column 1 of C
 " add x21,x20,x10                            \n\t" //Load address Column 2 of C
@@ -1610,10 +1604,16 @@ BNE(DLOOPKLEFT)                                    // if i!=0.
 "                                            \n\t"
 LABEL(DPOSTACCUM)
 "                                            \n\t"
-" ld1r {v6.2d},[x7]                          \n\t" // Load alpha.
-" ld1r {v7.2d},[x8]                          \n\t" // Load beta
+" ldr x0,%[alpha]                            \n\t" // Alpha address      
+" ldr x1,%[beta]                             \n\t" // Beta address      
+"                                            \n\t" 
+" ld1r {v6.2d},[x0]                          \n\t" // Load alpha.
+" ld1r {v7.2d},[x1]                          \n\t" // Load beta
 "                                            \n\t"
-" cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
+" ldr x0,%[a_next]                           \n\t" // Next A address for later use.
+" ldr x1,%[b_next]                           \n\t" // Next B address for later use.
+"                                            \n\t"
+" cmp x14,#8                                 \n\t" // If rs_c != 1 (column-major)
 BNE(DGENSTORED)
 "                                            \n\t"
 LABEL(DCOLSTORED)                                  // C is column-major.
@@ -1771,8 +1771,8 @@ BEQ(DBETAZEROCOLSTOREDS4)                          // Taking care of the beta==0
 "                                            \n\t"
 LABEL(DBETAZEROCOLSTOREDS4)
 "                                            \n\t"
-" prfm pldl2keep,[x3]                        \n\t"
-" prfm pldl2keep,[x4]                        \n\t"
+" prfm pldl2keep,[x0]                        \n\t"
+" prfm pldl2keep,[x1]                        \n\t"
 "                                            \n\t"
 " fmla v8.2d, v26.2d,v6.d[0]                 \n\t" // Scale by alpha
 " fmla v9.2d, v27.2d,v6.d[0]                 \n\t" // Scale by alpha
@@ -2016,8 +2016,8 @@ BEQ(DBETAZEROGENSTOREDS4)                          // Taking care of the beta==0
 "                                            \n\t"
 LABEL(DBETAZEROGENSTOREDS4)
 "                                            \n\t"
-" prfm pldl2keep,[x3]                        \n\t"
-" prfm pldl2keep,[x4]                        \n\t"
+" prfm pldl2keep,[x0]                        \n\t"
+" prfm pldl2keep,[x1]                        \n\t"
 "                                            \n\t"
 " fmla v8.2d, v26.2d,v6.d[0]                 \n\t" // Scale by alpha
 " fmla v9.2d, v27.2d,v6.d[0]                 \n\t" // Scale by alpha
@@ -2060,12 +2060,10 @@ LABEL(DEND)                                        // Done!
  [a_next] "m" (a_next), // 8
  [b_next] "m" (b_next)  // 9
 :// Register clobber list
- "x0","x1","x2","x3",
- "x4","x5","x6",
- "x7","x8","x9",
- "x10","x11","x12","x13","x14","x16","x17",
- "x20","x21","x22","x23","x24","x25","x26",
- "x27",       
+ "x0","x1","x2",
+ "x5","x6","x10",
+ "x14","x16","x17",
+ "x20","x21","x22","x23","x24","x25","x26","x27",
  "v0","v1","v2",
  "v3","v4","v5",
  "v6","v7","v8",
