@@ -93,20 +93,19 @@ __asm__ volatile
 "                                            \n\t"
 " add x16,x2,x10                             \n\t" //Load address Column 1 of C
 " add x17,x16,x10                            \n\t" //Load address Column 2 of C
-" add x18,x17,x10                            \n\t" //Load address Column 3 of C
-" add x19,x18,x10                            \n\t" //Load address Column 4 of C
-" add x20,x19,x10                            \n\t" //Load address Column 5 of C
-" add x21,x20,x10                            \n\t" //Load address Column 6 of C
-" add x22,x21,x10                            \n\t" //Load address Column 7 of C
-" add x23,x22,x10                            \n\t" //Load address Column 8 of C
-" add x24,x23,x10                            \n\t" //Load address Column 9 of C
-" add x25,x24,x10                            \n\t" //Load address Column 10 of C
-" add x26,x25,x10                            \n\t" //Load address Column 11 of C
+" add x19,x17,x10                            \n\t" //Load address Column 3 of C
+" add x20,x19,x10                            \n\t" //Load address Column 4 of C
+" add x21,x20,x10                            \n\t" //Load address Column 5 of C
+" add x22,x21,x10                            \n\t" //Load address Column 6 of C
+" add x23,x22,x10                            \n\t" //Load address Column 7 of C
+" add x24,x23,x10                            \n\t" //Load address Column 8 of C
+" add x25,x24,x10                            \n\t" //Load address Column 9 of C
+" add x26,x25,x10                            \n\t" //Load address Column 10 of C
+" add x27,x26,x10                            \n\t" //Load address Column 11 of C
 "                                            \n\t"
 " prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
 " prfm pldl1keep,[x16]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x17]                       \n\t" // Prefetch c.
-" prfm pldl1keep,[x18]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x19]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
@@ -115,6 +114,7 @@ __asm__ volatile
 " prfm pldl1keep,[x24]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
+" prfm pldl1keep,[x27]                       \n\t" // Prefetch c.
 "                                            \n\t"
 " dup  v8.4s, wzr                            \n\t" // Vector for accummulating column 0
 " prfm    PLDL1KEEP, [x1, #192]              \n\t" 
@@ -560,12 +560,12 @@ LABEL(SBETAZEROCOLSTOREDS1)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROCOLSTOREDS2)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" ldr q8, [x18]                              \n\t" //Load column 3 of C
-" ldr q9, [x18, #16]                         \n\t"
-" ldr q10, [x19]                             \n\t" //Load column 4 of C
-" ldr q11, [x19, #16]                        \n\t"
-" ldr q12, [x20]                             \n\t" //Load column 5 of C
-" ldr q13, [x20, #16]                        \n\t"
+" ldr q8, [x19]                              \n\t" //Load column 3 of C
+" ldr q9, [x19, #16]                         \n\t"
+" ldr q10, [x20]                             \n\t" //Load column 4 of C
+" ldr q11, [x20, #16]                        \n\t"
+" ldr q12, [x21]                             \n\t" //Load column 5 of C
+" ldr q13, [x21, #16]                        \n\t"
 "                                            \n\t"
 " fmul v8.4s, v8.4s, v7.s[0]                 \n\t" // Scale by beta
 " fmul v9.4s, v9.4s, v7.s[0]                 \n\t" // Scale by beta
@@ -583,12 +583,12 @@ LABEL(SBETAZEROCOLSTOREDS2)
 " fmla v12.4s,v18.4s,v6.s[0]                 \n\t" // Scale by alpha
 " fmla v13.4s,v19.4s,v6.s[0]                 \n\t" // Scale by alpha
 "                                            \n\t"
-" str q8, [x18]                              \n\t" //Store column 3 of C
-" str q9, [x18, #16]                         \n\t"
-" str q10, [x19]                             \n\t" //Store column 4 of C
-" str q11, [x19, #16]                        \n\t"
-" str q12, [x20]                             \n\t" //Store column 5 of C
-" str q13, [x20, #16]                        \n\t"
+" str q8, [x19]                              \n\t" //Store column 3 of C
+" str q9, [x19, #16]                         \n\t"
+" str q10, [x20]                             \n\t" //Store column 4 of C
+" str q11, [x20, #16]                        \n\t"
+" str q12, [x21]                             \n\t" //Store column 5 of C
+" str q13, [x21, #16]                        \n\t"
 "                                            \n\t"
 " dup  v0.4s, wzr                            \n\t"
 " dup  v1.4s, wzr                            \n\t"
@@ -600,12 +600,12 @@ LABEL(SBETAZEROCOLSTOREDS2)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROCOLSTOREDS3)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" ldr q0, [x21]                              \n\t" //Load column 6 of C
-" ldr q1, [x21, #16]                         \n\t"
-" ldr q2, [x22]                              \n\t" //Load column 7 of C
-" ldr q3, [x22, #16]                         \n\t"
-" ldr q4, [x23]                              \n\t" //Load column 8 of C
-" ldr q5, [x23, #16]                         \n\t"
+" ldr q0, [x22]                              \n\t" //Load column 6 of C
+" ldr q1, [x22, #16]                         \n\t"
+" ldr q2, [x23]                              \n\t" //Load column 7 of C
+" ldr q3, [x23, #16]                         \n\t"
+" ldr q4, [x24]                              \n\t" //Load column 8 of C
+" ldr q5, [x24, #16]                         \n\t"
 "                                            \n\t"
 " fmul v0.4s,v0.4s,v7.s[0]                   \n\t" // Scale by beta
 " fmul v1.4s,v1.4s,v7.s[0]                   \n\t" // Scale by beta
@@ -623,12 +623,12 @@ LABEL(SBETAZEROCOLSTOREDS3)
 " fmla v4.4s,v24.4s,v6.s[0]                  \n\t" // Scale by alpha
 " fmla v5.4s,v25.4s,v6.s[0]                  \n\t" // Scale by alpha
 "                                            \n\t"
-" str q0, [x21]                              \n\t" //Store column 6 of C
-" str q1, [x21, #16]                         \n\t"
-" str q2, [x22]                              \n\t" //Store column 7 of C
-" str q3, [x22, #16]                         \n\t"
-" str q4, [x23]                              \n\t" //Store column 8 of C
-" str q5, [x23, #16]                         \n\t"
+" str q0, [x22]                              \n\t" //Store column 6 of C
+" str q1, [x22, #16]                         \n\t"
+" str q2, [x23]                              \n\t" //Store column 7 of C
+" str q3, [x23, #16]                         \n\t"
+" str q4, [x24]                              \n\t" //Store column 8 of C
+" str q5, [x24, #16]                         \n\t"
 "                                            \n\t"
 " dup  v8.4s, wzr                            \n\t"
 " dup  v9.4s, wzr                            \n\t"
@@ -640,12 +640,12 @@ LABEL(SBETAZEROCOLSTOREDS3)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROCOLSTOREDS4)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" ldr q8, [x24]                              \n\t" //Load column 9 of C
-" ldr q9, [x24, #16]                         \n\t"
-" ldr q10, [x25]                             \n\t" //Load column 10 of C
-" ldr q11, [x25, #16]                        \n\t"
-" ldr q12, [x26]                             \n\t" //Load column 11 of C
-" ldr q13, [x26, #16]                        \n\t"
+" ldr q8, [x25]                              \n\t" //Load column 9 of C
+" ldr q9, [x25, #16]                         \n\t"
+" ldr q10, [x26]                             \n\t" //Load column 10 of C
+" ldr q11, [x26, #16]                        \n\t"
+" ldr q12, [x27]                             \n\t" //Load column 11 of C
+" ldr q13, [x27, #16]                        \n\t"
 "                                            \n\t"
 " fmul v8.4s, v8.4s, v7.s[0]                 \n\t" // Scale by beta
 " fmul v9.4s, v9.4s, v7.s[0]                 \n\t" // Scale by beta
@@ -666,12 +666,12 @@ LABEL(SBETAZEROCOLSTOREDS4)
 " fmla v12.4s,v30.4s,v6.s[0]                 \n\t" // Scale by alpha
 " fmla v13.4s,v31.4s,v6.s[0]                 \n\t" // Scale by alpha
 "                                            \n\t"
-" str q8, [x24]                              \n\t" //Store column 9 of C
-" str q9, [x24, #16]                         \n\t"
-" str q10, [x25]                             \n\t" //Store column 10 of C
-" str q11, [x25, #16]                        \n\t"
-" str q12, [x26]                             \n\t" //Store column 11 of C
-" str q13, [x26, #16]                        \n\t"
+" str q8, [x25]                              \n\t" //Store column 9 of C
+" str q9, [x25, #16]                         \n\t"
+" str q10, [x26]                             \n\t" //Store column 10 of C
+" str q11, [x26, #16]                        \n\t"
+" str q12, [x27]                             \n\t" //Store column 11 of C
+" str q13, [x27, #16]                        \n\t"
 "                                            \n\t"
 "                                            \n\t"
 BRANCH(SEND)                                       // Done.
@@ -690,38 +690,38 @@ LABEL(SGENSTORED)                                  // C is general-stride stored
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROGENSTOREDS1)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" mov x27, x2                                \n\t"
+" mov x5, x2                                 \n\t"
 "                                            \n\t"
-" ld1 {v0.s}[0],[x27],x14                    \n\t" // Load c00  into quad and increment by rs_c.
-" ld1 {v0.s}[1],[x27],x14                    \n\t" // Load c01  into quad and increment by rs_c.
-" ld1 {v0.s}[2],[x27],x14                    \n\t" // Load c02  into quad and increment by rs_c.
-" ld1 {v0.s}[3],[x27],x14                    \n\t" // Load c03  into quad and increment by rs_c.
-" ld1 {v1.s}[0],[x27],x14                    \n\t" // Load c04  into quad and increment by rs_c.
-" ld1 {v1.s}[1],[x27],x14                    \n\t" // Load c05  into quad and increment by rs_c.
-" ld1 {v1.s}[2],[x27],x14                    \n\t" // Load c06  into quad and increment by rs_c.
-" ld1 {v1.s}[3],[x27],x14                    \n\t" // Load c07  into quad and increment by rs_c.
+" ld1 {v0.s}[0],[x5],x14                     \n\t" // Load c00  into quad and increment by rs_c.
+" ld1 {v0.s}[1],[x5],x14                     \n\t" // Load c01  into quad and increment by rs_c.
+" ld1 {v0.s}[2],[x5],x14                     \n\t" // Load c02  into quad and increment by rs_c.
+" ld1 {v0.s}[3],[x5],x14                     \n\t" // Load c03  into quad and increment by rs_c.
+" ld1 {v1.s}[0],[x5],x14                     \n\t" // Load c04  into quad and increment by rs_c.
+" ld1 {v1.s}[1],[x5],x14                     \n\t" // Load c05  into quad and increment by rs_c.
+" ld1 {v1.s}[2],[x5],x14                     \n\t" // Load c06  into quad and increment by rs_c.
+" ld1 {v1.s}[3],[x5],x14                     \n\t" // Load c07  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x16                               \n\t"
+" mov x5, x16                                \n\t"
 "                                            \n\t"
-" ld1 {v2.s}[0],[x27],x14                    \n\t" // Load c10  into quad and increment by rs_c.
-" ld1 {v2.s}[1],[x27],x14                    \n\t" // Load c11  into quad and increment by rs_c.
-" ld1 {v2.s}[2],[x27],x14                    \n\t" // Load c12  into quad and increment by rs_c.
-" ld1 {v2.s}[3],[x27],x14                    \n\t" // Load c13  into quad and increment by rs_c.
-" ld1 {v3.s}[0],[x27],x14                    \n\t" // Load c14  into quad and increment by rs_c.
-" ld1 {v3.s}[1],[x27],x14                    \n\t" // Load c15  into quad and increment by rs_c.
-" ld1 {v3.s}[2],[x27],x14                    \n\t" // Load c16  into quad and increment by rs_c.
-" ld1 {v3.s}[3],[x27],x14                    \n\t" // Load c17  into quad and increment by rs_c.
+" ld1 {v2.s}[0],[x5],x14                     \n\t" // Load c10  into quad and increment by rs_c.
+" ld1 {v2.s}[1],[x5],x14                     \n\t" // Load c11  into quad and increment by rs_c.
+" ld1 {v2.s}[2],[x5],x14                     \n\t" // Load c12  into quad and increment by rs_c.
+" ld1 {v2.s}[3],[x5],x14                     \n\t" // Load c13  into quad and increment by rs_c.
+" ld1 {v3.s}[0],[x5],x14                     \n\t" // Load c14  into quad and increment by rs_c.
+" ld1 {v3.s}[1],[x5],x14                     \n\t" // Load c15  into quad and increment by rs_c.
+" ld1 {v3.s}[2],[x5],x14                     \n\t" // Load c16  into quad and increment by rs_c.
+" ld1 {v3.s}[3],[x5],x14                     \n\t" // Load c17  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x17                               \n\t"
+" mov x5, x17                                \n\t"
 "                                            \n\t"
-" ld1 {v4.s}[0],[x27],x14                    \n\t" // Load c20  into quad and increment by rs_c.
-" ld1 {v4.s}[1],[x27],x14                    \n\t" // Load c21  into quad and increment by rs_c.
-" ld1 {v4.s}[2],[x27],x14                    \n\t" // Load c22  into quad and increment by rs_c.
-" ld1 {v4.s}[3],[x27],x14                    \n\t" // Load c23  into quad and increment by rs_c.
-" ld1 {v5.s}[0],[x27],x14                    \n\t" // Load c24  into quad and increment by rs_c.
-" ld1 {v5.s}[1],[x27],x14                    \n\t" // Load c25  into quad and increment by rs_c.
-" ld1 {v5.s}[2],[x27],x14                    \n\t" // Load c26  into quad and increment by rs_c.
-" ld1 {v5.s}[3],[x27],x14                    \n\t" // Load c27  into quad and increment by rs_c.
+" ld1 {v4.s}[0],[x5],x14                     \n\t" // Load c20  into quad and increment by rs_c.
+" ld1 {v4.s}[1],[x5],x14                     \n\t" // Load c21  into quad and increment by rs_c.
+" ld1 {v4.s}[2],[x5],x14                     \n\t" // Load c22  into quad and increment by rs_c.
+" ld1 {v4.s}[3],[x5],x14                     \n\t" // Load c23  into quad and increment by rs_c.
+" ld1 {v5.s}[0],[x5],x14                     \n\t" // Load c24  into quad and increment by rs_c.
+" ld1 {v5.s}[1],[x5],x14                     \n\t" // Load c25  into quad and increment by rs_c.
+" ld1 {v5.s}[2],[x5],x14                     \n\t" // Load c26  into quad and increment by rs_c.
+" ld1 {v5.s}[3],[x5],x14                     \n\t" // Load c27  into quad and increment by rs_c.
 "                                            \n\t"
 " fmul v0.4s,v0.4s,v7.s[0]                   \n\t" // Scale by beta
 " fmul v1.4s,v1.4s,v7.s[0]                   \n\t" // Scale by beta
@@ -739,38 +739,38 @@ LABEL(SBETAZEROGENSTOREDS1)
 " fmla v4.4s,v12.4s,v6.s[0]                  \n\t" // Scale by alpha
 " fmla v5.4s,v13.4s,v6.s[0]                  \n\t" // Scale by alpha
 "                                            \n\t"
-" mov x27, x2                                \n\t"
+" mov x5, x2                                 \n\t"
 "                                            \n\t"
-" st1 {v0.s}[0],[x27],x14                    \n\t" // Store c00  into quad and increment by rs_c.
-" st1 {v0.s}[1],[x27],x14                    \n\t" // Store c01  into quad and increment by rs_c.
-" st1 {v0.s}[2],[x27],x14                    \n\t" // Store c02  into quad and increment by rs_c.
-" st1 {v0.s}[3],[x27],x14                    \n\t" // Store c03  into quad and increment by rs_c.
-" st1 {v1.s}[0],[x27],x14                    \n\t" // Store c04  into quad and increment by rs_c.
-" st1 {v1.s}[1],[x27],x14                    \n\t" // Store c05  into quad and increment by rs_c.
-" st1 {v1.s}[2],[x27],x14                    \n\t" // Store c06  into quad and increment by rs_c.
-" st1 {v1.s}[3],[x27],x14                    \n\t" // Store c07  into quad and increment by rs_c.
+" st1 {v0.s}[0],[x5],x14                     \n\t" // Store c00  into quad and increment by rs_c.
+" st1 {v0.s}[1],[x5],x14                     \n\t" // Store c01  into quad and increment by rs_c.
+" st1 {v0.s}[2],[x5],x14                     \n\t" // Store c02  into quad and increment by rs_c.
+" st1 {v0.s}[3],[x5],x14                     \n\t" // Store c03  into quad and increment by rs_c.
+" st1 {v1.s}[0],[x5],x14                     \n\t" // Store c04  into quad and increment by rs_c.
+" st1 {v1.s}[1],[x5],x14                     \n\t" // Store c05  into quad and increment by rs_c.
+" st1 {v1.s}[2],[x5],x14                     \n\t" // Store c06  into quad and increment by rs_c.
+" st1 {v1.s}[3],[x5],x14                     \n\t" // Store c07  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x16                               \n\t"
+" mov x5, x16                                \n\t"
 "                                            \n\t"
-" st1 {v2.s}[0],[x27],x14                    \n\t" // Store c10  into quad and increment by rs_c.
-" st1 {v2.s}[1],[x27],x14                    \n\t" // Store c11  into quad and increment by rs_c.
-" st1 {v2.s}[2],[x27],x14                    \n\t" // Store c12  into quad and increment by rs_c.
-" st1 {v2.s}[3],[x27],x14                    \n\t" // Store c13  into quad and increment by rs_c.
-" st1 {v3.s}[0],[x27],x14                    \n\t" // Store c14  into quad and increment by rs_c.
-" st1 {v3.s}[1],[x27],x14                    \n\t" // Store c15  into quad and increment by rs_c.
-" st1 {v3.s}[2],[x27],x14                    \n\t" // Store c16  into quad and increment by rs_c.
-" st1 {v3.s}[3],[x27],x14                    \n\t" // Store c17  into quad and increment by rs_c.
+" st1 {v2.s}[0],[x5],x14                     \n\t" // Store c10  into quad and increment by rs_c.
+" st1 {v2.s}[1],[x5],x14                     \n\t" // Store c11  into quad and increment by rs_c.
+" st1 {v2.s}[2],[x5],x14                     \n\t" // Store c12  into quad and increment by rs_c.
+" st1 {v2.s}[3],[x5],x14                     \n\t" // Store c13  into quad and increment by rs_c.
+" st1 {v3.s}[0],[x5],x14                     \n\t" // Store c14  into quad and increment by rs_c.
+" st1 {v3.s}[1],[x5],x14                     \n\t" // Store c15  into quad and increment by rs_c.
+" st1 {v3.s}[2],[x5],x14                     \n\t" // Store c16  into quad and increment by rs_c.
+" st1 {v3.s}[3],[x5],x14                     \n\t" // Store c17  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x17                               \n\t"
+" mov x5, x17                                \n\t"
 "                                            \n\t"
-" st1 {v4.s}[0],[x27],x14                    \n\t" // Store c20  into quad and increment by rs_c.
-" st1 {v4.s}[1],[x27],x14                    \n\t" // Store c21  into quad and increment by rs_c.
-" st1 {v4.s}[2],[x27],x14                    \n\t" // Store c22  into quad and increment by rs_c.
-" st1 {v4.s}[3],[x27],x14                    \n\t" // Store c23  into quad and increment by rs_c.
-" st1 {v5.s}[0],[x27],x14                    \n\t" // Store c24  into quad and increment by rs_c.
-" st1 {v5.s}[1],[x27],x14                    \n\t" // Store c25  into quad and increment by rs_c.
-" st1 {v5.s}[2],[x27],x14                    \n\t" // Store c26  into quad and increment by rs_c.
-" st1 {v5.s}[3],[x27],x14                    \n\t" // Store c27  into quad and increment by rs_c.
+" st1 {v4.s}[0],[x5],x14                     \n\t" // Store c20  into quad and increment by rs_c.
+" st1 {v4.s}[1],[x5],x14                     \n\t" // Store c21  into quad and increment by rs_c.
+" st1 {v4.s}[2],[x5],x14                     \n\t" // Store c22  into quad and increment by rs_c.
+" st1 {v4.s}[3],[x5],x14                     \n\t" // Store c23  into quad and increment by rs_c.
+" st1 {v5.s}[0],[x5],x14                     \n\t" // Store c24  into quad and increment by rs_c.
+" st1 {v5.s}[1],[x5],x14                     \n\t" // Store c25  into quad and increment by rs_c.
+" st1 {v5.s}[2],[x5],x14                     \n\t" // Store c26  into quad and increment by rs_c.
+" st1 {v5.s}[3],[x5],x14                     \n\t" // Store c27  into quad and increment by rs_c.
 "                                            \n\t"
 " dup  v8.4s, wzr                            \n\t"
 " dup  v9.4s, wzr                            \n\t"
@@ -782,38 +782,38 @@ LABEL(SBETAZEROGENSTOREDS1)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROGENSTOREDS2)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" mov x27, x18                               \n\t"
+" mov x5, x19                                \n\t"
 "                                            \n\t"
-" ld1 {v8.s}[0],[x27],x14                    \n\t" // Load c30  into quad and increment by rs_c.
-" ld1 {v8.s}[1],[x27],x14                    \n\t" // Load c31  into quad and increment by rs_c.
-" ld1 {v8.s}[2],[x27],x14                    \n\t" // Load c32  into quad and increment by rs_c.
-" ld1 {v8.s}[3],[x27],x14                    \n\t" // Load c33  into quad and increment by rs_c.
-" ld1 {v9.s}[0],[x27],x14                    \n\t" // Load c34  into quad and increment by rs_c.
-" ld1 {v9.s}[1],[x27],x14                    \n\t" // Load c35  into quad and increment by rs_c.
-" ld1 {v9.s}[2],[x27],x14                    \n\t" // Load c36  into quad and increment by rs_c.
-" ld1 {v9.s}[3],[x27],x14                    \n\t" // Load c37  into quad and increment by rs_c.
+" ld1 {v8.s}[0],[x5],x14                     \n\t" // Load c30  into quad and increment by rs_c.
+" ld1 {v8.s}[1],[x5],x14                     \n\t" // Load c31  into quad and increment by rs_c.
+" ld1 {v8.s}[2],[x5],x14                     \n\t" // Load c32  into quad and increment by rs_c.
+" ld1 {v8.s}[3],[x5],x14                     \n\t" // Load c33  into quad and increment by rs_c.
+" ld1 {v9.s}[0],[x5],x14                     \n\t" // Load c34  into quad and increment by rs_c.
+" ld1 {v9.s}[1],[x5],x14                     \n\t" // Load c35  into quad and increment by rs_c.
+" ld1 {v9.s}[2],[x5],x14                     \n\t" // Load c36  into quad and increment by rs_c.
+" ld1 {v9.s}[3],[x5],x14                     \n\t" // Load c37  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x19                               \n\t"
+" mov x5, x20                                \n\t"
 "                                            \n\t"
-" ld1 {v10.s}[0],[x27],x14                   \n\t" // Load c40  into quad and increment by rs_c.
-" ld1 {v10.s}[1],[x27],x14                   \n\t" // Load c41  into quad and increment by rs_c.
-" ld1 {v10.s}[2],[x27],x14                   \n\t" // Load c42  into quad and increment by rs_c.
-" ld1 {v10.s}[3],[x27],x14                   \n\t" // Load c43  into quad and increment by rs_c.
-" ld1 {v11.s}[0],[x27],x14                   \n\t" // Load c44  into quad and increment by rs_c.
-" ld1 {v11.s}[1],[x27],x14                   \n\t" // Load c45  into quad and increment by rs_c.
-" ld1 {v11.s}[2],[x27],x14                   \n\t" // Load c46  into quad and increment by rs_c.
-" ld1 {v11.s}[3],[x27],x14                   \n\t" // Load c47  into quad and increment by rs_c.
+" ld1 {v10.s}[0],[x5],x14                    \n\t" // Load c40  into quad and increment by rs_c.
+" ld1 {v10.s}[1],[x5],x14                    \n\t" // Load c41  into quad and increment by rs_c.
+" ld1 {v10.s}[2],[x5],x14                    \n\t" // Load c42  into quad and increment by rs_c.
+" ld1 {v10.s}[3],[x5],x14                    \n\t" // Load c43  into quad and increment by rs_c.
+" ld1 {v11.s}[0],[x5],x14                    \n\t" // Load c44  into quad and increment by rs_c.
+" ld1 {v11.s}[1],[x5],x14                    \n\t" // Load c45  into quad and increment by rs_c.
+" ld1 {v11.s}[2],[x5],x14                    \n\t" // Load c46  into quad and increment by rs_c.
+" ld1 {v11.s}[3],[x5],x14                    \n\t" // Load c47  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x20                               \n\t"
+" mov x5, x21                                \n\t"
 "                                            \n\t"
-" ld1 {v12.s}[0],[x27],x14                   \n\t" // Load c50  into quad and increment by rs_c.
-" ld1 {v12.s}[1],[x27],x14                   \n\t" // Load c51  into quad and increment by rs_c.
-" ld1 {v12.s}[2],[x27],x14                   \n\t" // Load c52  into quad and increment by rs_c.
-" ld1 {v12.s}[3],[x27],x14                   \n\t" // Load c53  into quad and increment by rs_c.
-" ld1 {v13.s}[0],[x27],x14                   \n\t" // Load c54  into quad and increment by rs_c.
-" ld1 {v13.s}[1],[x27],x14                   \n\t" // Load c55  into quad and increment by rs_c.
-" ld1 {v13.s}[2],[x27],x14                   \n\t" // Load c56  into quad and increment by rs_c.
-" ld1 {v13.s}[3],[x27],x14                   \n\t" // Load c57  into quad and increment by rs_c.
+" ld1 {v12.s}[0],[x5],x14                    \n\t" // Load c50  into quad and increment by rs_c.
+" ld1 {v12.s}[1],[x5],x14                    \n\t" // Load c51  into quad and increment by rs_c.
+" ld1 {v12.s}[2],[x5],x14                    \n\t" // Load c52  into quad and increment by rs_c.
+" ld1 {v12.s}[3],[x5],x14                    \n\t" // Load c53  into quad and increment by rs_c.
+" ld1 {v13.s}[0],[x5],x14                    \n\t" // Load c54  into quad and increment by rs_c.
+" ld1 {v13.s}[1],[x5],x14                    \n\t" // Load c55  into quad and increment by rs_c.
+" ld1 {v13.s}[2],[x5],x14                    \n\t" // Load c56  into quad and increment by rs_c.
+" ld1 {v13.s}[3],[x5],x14                    \n\t" // Load c57  into quad and increment by rs_c.
 "                                            \n\t"
 " fmul v8.4s, v8.4s, v7.s[0]                 \n\t" // Scale by beta
 " fmul v9.4s, v9.4s, v7.s[0]                 \n\t" // Scale by beta
@@ -831,38 +831,38 @@ LABEL(SBETAZEROGENSTOREDS2)
 " fmla v12.4s,v18.4s,v6.s[0]                 \n\t" // Scale by alpha
 " fmla v13.4s,v19.4s,v6.s[0]                 \n\t" // Scale by alpha
 "                                            \n\t"
-" mov x27, x18                               \n\t"
+" mov x5, x19                                \n\t"
 "                                            \n\t"
-" st1 {v8.s}[0],[x27],x14                    \n\t" // Store c30  into quad and increment by rs_c.
-" st1 {v8.s}[1],[x27],x14                    \n\t" // Store c31  into quad and increment by rs_c.
-" st1 {v8.s}[2],[x27],x14                    \n\t" // Store c32  into quad and increment by rs_c.
-" st1 {v8.s}[3],[x27],x14                    \n\t" // Store c33  into quad and increment by rs_c.
-" st1 {v9.s}[0],[x27],x14                    \n\t" // Store c34  into quad and increment by rs_c.
-" st1 {v9.s}[1],[x27],x14                    \n\t" // Store c35  into quad and increment by rs_c.
-" st1 {v9.s}[2],[x27],x14                    \n\t" // Store c36  into quad and increment by rs_c.
-" st1 {v9.s}[3],[x27],x14                    \n\t" // Store c37  into quad and increment by rs_c.
+" st1 {v8.s}[0],[x5],x14                     \n\t" // Store c30  into quad and increment by rs_c.
+" st1 {v8.s}[1],[x5],x14                     \n\t" // Store c31  into quad and increment by rs_c.
+" st1 {v8.s}[2],[x5],x14                     \n\t" // Store c32  into quad and increment by rs_c.
+" st1 {v8.s}[3],[x5],x14                     \n\t" // Store c33  into quad and increment by rs_c.
+" st1 {v9.s}[0],[x5],x14                     \n\t" // Store c34  into quad and increment by rs_c.
+" st1 {v9.s}[1],[x5],x14                     \n\t" // Store c35  into quad and increment by rs_c.
+" st1 {v9.s}[2],[x5],x14                     \n\t" // Store c36  into quad and increment by rs_c.
+" st1 {v9.s}[3],[x5],x14                     \n\t" // Store c37  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x19                               \n\t"
+" mov x5, x20                                \n\t"
 "                                            \n\t"
-" st1 {v10.s}[0],[x27],x14                   \n\t" // Store c40  into quad and increment by rs_c.
-" st1 {v10.s}[1],[x27],x14                   \n\t" // Store c41  into quad and increment by rs_c.
-" st1 {v10.s}[2],[x27],x14                   \n\t" // Store c42  into quad and increment by rs_c.
-" st1 {v10.s}[3],[x27],x14                   \n\t" // Store c43  into quad and increment by rs_c.
-" st1 {v11.s}[0],[x27],x14                   \n\t" // Store c44  into quad and increment by rs_c.
-" st1 {v11.s}[1],[x27],x14                   \n\t" // Store c45  into quad and increment by rs_c.
-" st1 {v11.s}[2],[x27],x14                   \n\t" // Store c46  into quad and increment by rs_c.
-" st1 {v11.s}[3],[x27],x14                   \n\t" // Store c47  into quad and increment by rs_c.
+" st1 {v10.s}[0],[x5],x14                    \n\t" // Store c40  into quad and increment by rs_c.
+" st1 {v10.s}[1],[x5],x14                    \n\t" // Store c41  into quad and increment by rs_c.
+" st1 {v10.s}[2],[x5],x14                    \n\t" // Store c42  into quad and increment by rs_c.
+" st1 {v10.s}[3],[x5],x14                    \n\t" // Store c43  into quad and increment by rs_c.
+" st1 {v11.s}[0],[x5],x14                    \n\t" // Store c44  into quad and increment by rs_c.
+" st1 {v11.s}[1],[x5],x14                    \n\t" // Store c45  into quad and increment by rs_c.
+" st1 {v11.s}[2],[x5],x14                    \n\t" // Store c46  into quad and increment by rs_c.
+" st1 {v11.s}[3],[x5],x14                    \n\t" // Store c47  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x20                               \n\t"
+" mov x5, x21                                \n\t"
 "                                            \n\t"
-" st1 {v12.s}[0],[x27],x14                   \n\t" // Store c50  into quad and increment by rs_c.
-" st1 {v12.s}[1],[x27],x14                   \n\t" // Store c51  into quad and increment by rs_c.
-" st1 {v12.s}[2],[x27],x14                   \n\t" // Store c52  into quad and increment by rs_c.
-" st1 {v12.s}[3],[x27],x14                   \n\t" // Store c53  into quad and increment by rs_c.
-" st1 {v13.s}[0],[x27],x14                   \n\t" // Store c54  into quad and increment by rs_c.
-" st1 {v13.s}[1],[x27],x14                   \n\t" // Store c55  into quad and increment by rs_c.
-" st1 {v13.s}[2],[x27],x14                   \n\t" // Store c56  into quad and increment by rs_c.
-" st1 {v13.s}[3],[x27],x14                   \n\t" // Store c57  into quad and increment by rs_c.
+" st1 {v12.s}[0],[x5],x14                    \n\t" // Store c50  into quad and increment by rs_c.
+" st1 {v12.s}[1],[x5],x14                    \n\t" // Store c51  into quad and increment by rs_c.
+" st1 {v12.s}[2],[x5],x14                    \n\t" // Store c52  into quad and increment by rs_c.
+" st1 {v12.s}[3],[x5],x14                    \n\t" // Store c53  into quad and increment by rs_c.
+" st1 {v13.s}[0],[x5],x14                    \n\t" // Store c54  into quad and increment by rs_c.
+" st1 {v13.s}[1],[x5],x14                    \n\t" // Store c55  into quad and increment by rs_c.
+" st1 {v13.s}[2],[x5],x14                    \n\t" // Store c56  into quad and increment by rs_c.
+" st1 {v13.s}[3],[x5],x14                    \n\t" // Store c57  into quad and increment by rs_c.
 "                                            \n\t"
 " dup  v0.4s, wzr                            \n\t"
 " dup  v1.4s, wzr                            \n\t"
@@ -874,38 +874,38 @@ LABEL(SBETAZEROGENSTOREDS2)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROGENSTOREDS3)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" mov x27, x21                               \n\t"
+" mov x5, x22                                \n\t"
 "                                            \n\t"
-" ld1 {v0.s}[0],[x27],x14                    \n\t" // Load c60  into quad and increment by rs_c.
-" ld1 {v0.s}[1],[x27],x14                    \n\t" // Load c61  into quad and increment by rs_c.
-" ld1 {v0.s}[2],[x27],x14                    \n\t" // Load c62  into quad and increment by rs_c.
-" ld1 {v0.s}[3],[x27],x14                    \n\t" // Load c63  into quad and increment by rs_c.
-" ld1 {v1.s}[0],[x27],x14                    \n\t" // Load c64  into quad and increment by rs_c.
-" ld1 {v1.s}[1],[x27],x14                    \n\t" // Load c65  into quad and increment by rs_c.
-" ld1 {v1.s}[2],[x27],x14                    \n\t" // Load c66  into quad and increment by rs_c.
-" ld1 {v1.s}[3],[x27],x14                    \n\t" // Load c67  into quad and increment by rs_c.
+" ld1 {v0.s}[0],[x5],x14                     \n\t" // Load c60  into quad and increment by rs_c.
+" ld1 {v0.s}[1],[x5],x14                     \n\t" // Load c61  into quad and increment by rs_c.
+" ld1 {v0.s}[2],[x5],x14                     \n\t" // Load c62  into quad and increment by rs_c.
+" ld1 {v0.s}[3],[x5],x14                     \n\t" // Load c63  into quad and increment by rs_c.
+" ld1 {v1.s}[0],[x5],x14                     \n\t" // Load c64  into quad and increment by rs_c.
+" ld1 {v1.s}[1],[x5],x14                     \n\t" // Load c65  into quad and increment by rs_c.
+" ld1 {v1.s}[2],[x5],x14                     \n\t" // Load c66  into quad and increment by rs_c.
+" ld1 {v1.s}[3],[x5],x14                     \n\t" // Load c67  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x22                               \n\t"
+" mov x5, x23                                \n\t"
 "                                            \n\t"
-" ld1 {v2.s}[0],[x27],x14                    \n\t" // Load c70  into quad and increment by rs_c.
-" ld1 {v2.s}[1],[x27],x14                    \n\t" // Load c71  into quad and increment by rs_c.
-" ld1 {v2.s}[2],[x27],x14                    \n\t" // Load c72  into quad and increment by rs_c.
-" ld1 {v2.s}[3],[x27],x14                    \n\t" // Load c73  into quad and increment by rs_c.
-" ld1 {v3.s}[0],[x27],x14                    \n\t" // Load c74  into quad and increment by rs_c.
-" ld1 {v3.s}[1],[x27],x14                    \n\t" // Load c75  into quad and increment by rs_c.
-" ld1 {v3.s}[2],[x27],x14                    \n\t" // Load c76  into quad and increment by rs_c.
-" ld1 {v3.s}[3],[x27],x14                    \n\t" // Load c77  into quad and increment by rs_c.
+" ld1 {v2.s}[0],[x5],x14                     \n\t" // Load c70  into quad and increment by rs_c.
+" ld1 {v2.s}[1],[x5],x14                     \n\t" // Load c71  into quad and increment by rs_c.
+" ld1 {v2.s}[2],[x5],x14                     \n\t" // Load c72  into quad and increment by rs_c.
+" ld1 {v2.s}[3],[x5],x14                     \n\t" // Load c73  into quad and increment by rs_c.
+" ld1 {v3.s}[0],[x5],x14                     \n\t" // Load c74  into quad and increment by rs_c.
+" ld1 {v3.s}[1],[x5],x14                     \n\t" // Load c75  into quad and increment by rs_c.
+" ld1 {v3.s}[2],[x5],x14                     \n\t" // Load c76  into quad and increment by rs_c.
+" ld1 {v3.s}[3],[x5],x14                     \n\t" // Load c77  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x23                               \n\t"
+" mov x5, x24                                \n\t"
 "                                            \n\t"
-" ld1 {v4.s}[0],[x27],x14                    \n\t" // Load c80  into quad and increment by rs_c.
-" ld1 {v4.s}[1],[x27],x14                    \n\t" // Load c81  into quad and increment by rs_c.
-" ld1 {v4.s}[2],[x27],x14                    \n\t" // Load c82  into quad and increment by rs_c.
-" ld1 {v4.s}[3],[x27],x14                    \n\t" // Load c83  into quad and increment by rs_c.
-" ld1 {v5.s}[0],[x27],x14                    \n\t" // Load c84  into quad and increment by rs_c.
-" ld1 {v5.s}[1],[x27],x14                    \n\t" // Load c85  into quad and increment by rs_c.
-" ld1 {v5.s}[2],[x27],x14                    \n\t" // Load c86  into quad and increment by rs_c.
-" ld1 {v5.s}[3],[x27],x14                    \n\t" // Load c87  into quad and increment by rs_c.
+" ld1 {v4.s}[0],[x5],x14                     \n\t" // Load c80  into quad and increment by rs_c.
+" ld1 {v4.s}[1],[x5],x14                     \n\t" // Load c81  into quad and increment by rs_c.
+" ld1 {v4.s}[2],[x5],x14                     \n\t" // Load c82  into quad and increment by rs_c.
+" ld1 {v4.s}[3],[x5],x14                     \n\t" // Load c83  into quad and increment by rs_c.
+" ld1 {v5.s}[0],[x5],x14                     \n\t" // Load c84  into quad and increment by rs_c.
+" ld1 {v5.s}[1],[x5],x14                     \n\t" // Load c85  into quad and increment by rs_c.
+" ld1 {v5.s}[2],[x5],x14                     \n\t" // Load c86  into quad and increment by rs_c.
+" ld1 {v5.s}[3],[x5],x14                     \n\t" // Load c87  into quad and increment by rs_c.
 "                                            \n\t"
 " fmul v0.4s,v0.4s,v7.s[0]                   \n\t" // Scale by beta
 " fmul v1.4s,v1.4s,v7.s[0]                   \n\t" // Scale by beta
@@ -923,38 +923,38 @@ LABEL(SBETAZEROGENSTOREDS3)
 " fmla v4.4s,v24.4s,v6.s[0]                  \n\t" // Scale by alpha
 " fmla v5.4s,v25.4s,v6.s[0]                  \n\t" // Scale by alpha
 "                                            \n\t"
-" mov x27, x21                               \n\t"
+" mov x5, x22                                \n\t"
 "                                            \n\t"
-" st1 {v0.s}[0],[x27],x14                    \n\t" // Store c60  into quad and increment by rs_c.
-" st1 {v0.s}[1],[x27],x14                    \n\t" // Store c61  into quad and increment by rs_c.
-" st1 {v0.s}[2],[x27],x14                    \n\t" // Store c62  into quad and increment by rs_c.
-" st1 {v0.s}[3],[x27],x14                    \n\t" // Store c63  into quad and increment by rs_c.
-" st1 {v1.s}[0],[x27],x14                    \n\t" // Store c64  into quad and increment by rs_c.
-" st1 {v1.s}[1],[x27],x14                    \n\t" // Store c65  into quad and increment by rs_c.
-" st1 {v1.s}[2],[x27],x14                    \n\t" // Store c66  into quad and increment by rs_c.
-" st1 {v1.s}[3],[x27],x14                    \n\t" // Store c67  into quad and increment by rs_c.
+" st1 {v0.s}[0],[x5],x14                     \n\t" // Store c60  into quad and increment by rs_c.
+" st1 {v0.s}[1],[x5],x14                     \n\t" // Store c61  into quad and increment by rs_c.
+" st1 {v0.s}[2],[x5],x14                     \n\t" // Store c62  into quad and increment by rs_c.
+" st1 {v0.s}[3],[x5],x14                     \n\t" // Store c63  into quad and increment by rs_c.
+" st1 {v1.s}[0],[x5],x14                     \n\t" // Store c64  into quad and increment by rs_c.
+" st1 {v1.s}[1],[x5],x14                     \n\t" // Store c65  into quad and increment by rs_c.
+" st1 {v1.s}[2],[x5],x14                     \n\t" // Store c66  into quad and increment by rs_c.
+" st1 {v1.s}[3],[x5],x14                     \n\t" // Store c67  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x22                               \n\t"
+" mov x5, x23                                \n\t"
 "                                            \n\t"
-" st1 {v2.s}[0],[x27],x14                    \n\t" // Store c70  into quad and increment by rs_c.
-" st1 {v2.s}[1],[x27],x14                    \n\t" // Store c71  into quad and increment by rs_c.
-" st1 {v2.s}[2],[x27],x14                    \n\t" // Store c72  into quad and increment by rs_c.
-" st1 {v2.s}[3],[x27],x14                    \n\t" // Store c73  into quad and increment by rs_c.
-" st1 {v3.s}[0],[x27],x14                    \n\t" // Store c74  into quad and increment by rs_c.
-" st1 {v3.s}[1],[x27],x14                    \n\t" // Store c75  into quad and increment by rs_c.
-" st1 {v3.s}[2],[x27],x14                    \n\t" // Store c76  into quad and increment by rs_c.
-" st1 {v3.s}[3],[x27],x14                    \n\t" // Store c77  into quad and increment by rs_c.
+" st1 {v2.s}[0],[x5],x14                     \n\t" // Store c70  into quad and increment by rs_c.
+" st1 {v2.s}[1],[x5],x14                     \n\t" // Store c71  into quad and increment by rs_c.
+" st1 {v2.s}[2],[x5],x14                     \n\t" // Store c72  into quad and increment by rs_c.
+" st1 {v2.s}[3],[x5],x14                     \n\t" // Store c73  into quad and increment by rs_c.
+" st1 {v3.s}[0],[x5],x14                     \n\t" // Store c74  into quad and increment by rs_c.
+" st1 {v3.s}[1],[x5],x14                     \n\t" // Store c75  into quad and increment by rs_c.
+" st1 {v3.s}[2],[x5],x14                     \n\t" // Store c76  into quad and increment by rs_c.
+" st1 {v3.s}[3],[x5],x14                     \n\t" // Store c77  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x23                               \n\t"
+" mov x5, x24                                \n\t"
 "                                            \n\t"
-" st1 {v4.s}[0],[x27],x14                    \n\t" // Store c80  into quad and increment by rs_c.
-" st1 {v4.s}[1],[x27],x14                    \n\t" // Store c81  into quad and increment by rs_c.
-" st1 {v4.s}[2],[x27],x14                    \n\t" // Store c82  into quad and increment by rs_c.
-" st1 {v4.s}[3],[x27],x14                    \n\t" // Store c83  into quad and increment by rs_c.
-" st1 {v5.s}[0],[x27],x14                    \n\t" // Store c84  into quad and increment by rs_c.
-" st1 {v5.s}[1],[x27],x14                    \n\t" // Store c85  into quad and increment by rs_c.
-" st1 {v5.s}[2],[x27],x14                    \n\t" // Store c86  into quad and increment by rs_c.
-" st1 {v5.s}[3],[x27],x14                    \n\t" // Store c87  into quad and increment by rs_c.
+" st1 {v4.s}[0],[x5],x14                     \n\t" // Store c80  into quad and increment by rs_c.
+" st1 {v4.s}[1],[x5],x14                     \n\t" // Store c81  into quad and increment by rs_c.
+" st1 {v4.s}[2],[x5],x14                     \n\t" // Store c82  into quad and increment by rs_c.
+" st1 {v4.s}[3],[x5],x14                     \n\t" // Store c83  into quad and increment by rs_c.
+" st1 {v5.s}[0],[x5],x14                     \n\t" // Store c84  into quad and increment by rs_c.
+" st1 {v5.s}[1],[x5],x14                     \n\t" // Store c85  into quad and increment by rs_c.
+" st1 {v5.s}[2],[x5],x14                     \n\t" // Store c86  into quad and increment by rs_c.
+" st1 {v5.s}[3],[x5],x14                     \n\t" // Store c87  into quad and increment by rs_c.
 "                                            \n\t"
 " dup  v8.4s, wzr                            \n\t"
 " dup  v9.4s, wzr                            \n\t"
@@ -966,38 +966,38 @@ LABEL(SBETAZEROGENSTOREDS3)
 " fcmp s7,#0.0                               \n\t"
 BEQ(SBETAZEROGENSTOREDS4)                          // Taking care of the beta==0 case.
 "                                            \n\t"
-" mov x27, x24                               \n\t"
+" mov x5, x25                                \n\t"
 "                                            \n\t"
-" ld1 {v8.s}[0],[x27],x14                    \n\t" // Load c90  into quad and increment by rs_c.
-" ld1 {v8.s}[1],[x27],x14                    \n\t" // Load c91  into quad and increment by rs_c.
-" ld1 {v8.s}[2],[x27],x14                    \n\t" // Load c92  into quad and increment by rs_c.
-" ld1 {v8.s}[3],[x27],x14                    \n\t" // Load c93  into quad and increment by rs_c.
-" ld1 {v9.s}[0],[x27],x14                    \n\t" // Load c94  into quad and increment by rs_c.
-" ld1 {v9.s}[1],[x27],x14                    \n\t" // Load c95  into quad and increment by rs_c.
-" ld1 {v9.s}[2],[x27],x14                    \n\t" // Load c96  into quad and increment by rs_c.
-" ld1 {v9.s}[3],[x27],x14                    \n\t" // Load c97  into quad and increment by rs_c.
+" ld1 {v8.s}[0],[x5],x14                     \n\t" // Load c90  into quad and increment by rs_c.
+" ld1 {v8.s}[1],[x5],x14                     \n\t" // Load c91  into quad and increment by rs_c.
+" ld1 {v8.s}[2],[x5],x14                     \n\t" // Load c92  into quad and increment by rs_c.
+" ld1 {v8.s}[3],[x5],x14                     \n\t" // Load c93  into quad and increment by rs_c.
+" ld1 {v9.s}[0],[x5],x14                     \n\t" // Load c94  into quad and increment by rs_c.
+" ld1 {v9.s}[1],[x5],x14                     \n\t" // Load c95  into quad and increment by rs_c.
+" ld1 {v9.s}[2],[x5],x14                     \n\t" // Load c96  into quad and increment by rs_c.
+" ld1 {v9.s}[3],[x5],x14                     \n\t" // Load c97  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x25                               \n\t"
+" mov x5, x26                                \n\t"
 "                                            \n\t"
-" ld1 {v10.s}[0],[x27],x14                   \n\t" // Load c100  into quad and increment by rs_c.
-" ld1 {v10.s}[1],[x27],x14                   \n\t" // Load c101  into quad and increment by rs_c.
-" ld1 {v10.s}[2],[x27],x14                   \n\t" // Load c102  into quad and increment by rs_c.
-" ld1 {v10.s}[3],[x27],x14                   \n\t" // Load c103  into quad and increment by rs_c.
-" ld1 {v11.s}[0],[x27],x14                   \n\t" // Load c104  into quad and increment by rs_c.
-" ld1 {v11.s}[1],[x27],x14                   \n\t" // Load c105  into quad and increment by rs_c.
-" ld1 {v11.s}[2],[x27],x14                   \n\t" // Load c106  into quad and increment by rs_c.
-" ld1 {v11.s}[3],[x27],x14                   \n\t" // Load c107  into quad and increment by rs_c.
+" ld1 {v10.s}[0],[x5],x14                    \n\t" // Load c100  into quad and increment by rs_c.
+" ld1 {v10.s}[1],[x5],x14                    \n\t" // Load c101  into quad and increment by rs_c.
+" ld1 {v10.s}[2],[x5],x14                    \n\t" // Load c102  into quad and increment by rs_c.
+" ld1 {v10.s}[3],[x5],x14                    \n\t" // Load c103  into quad and increment by rs_c.
+" ld1 {v11.s}[0],[x5],x14                    \n\t" // Load c104  into quad and increment by rs_c.
+" ld1 {v11.s}[1],[x5],x14                    \n\t" // Load c105  into quad and increment by rs_c.
+" ld1 {v11.s}[2],[x5],x14                    \n\t" // Load c106  into quad and increment by rs_c.
+" ld1 {v11.s}[3],[x5],x14                    \n\t" // Load c107  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x26                               \n\t"
+" mov x5, x27                                \n\t"
 "                                            \n\t"
-" ld1 {v12.s}[0],[x27],x14                   \n\t" // Load c110  into quad and increment by rs_c.
-" ld1 {v12.s}[1],[x27],x14                   \n\t" // Load c111  into quad and increment by rs_c.
-" ld1 {v12.s}[2],[x27],x14                   \n\t" // Load c112  into quad and increment by rs_c.
-" ld1 {v12.s}[3],[x27],x14                   \n\t" // Load c113  into quad and increment by rs_c.
-" ld1 {v13.s}[0],[x27],x14                   \n\t" // Load c114  into quad and increment by rs_c.
-" ld1 {v13.s}[1],[x27],x14                   \n\t" // Load c115  into quad and increment by rs_c.
-" ld1 {v13.s}[2],[x27],x14                   \n\t" // Load c116  into quad and increment by rs_c.
-" ld1 {v13.s}[3],[x27],x14                   \n\t" // Load c117  into quad and increment by rs_c.
+" ld1 {v12.s}[0],[x5],x14                    \n\t" // Load c110  into quad and increment by rs_c.
+" ld1 {v12.s}[1],[x5],x14                    \n\t" // Load c111  into quad and increment by rs_c.
+" ld1 {v12.s}[2],[x5],x14                    \n\t" // Load c112  into quad and increment by rs_c.
+" ld1 {v12.s}[3],[x5],x14                    \n\t" // Load c113  into quad and increment by rs_c.
+" ld1 {v13.s}[0],[x5],x14                    \n\t" // Load c114  into quad and increment by rs_c.
+" ld1 {v13.s}[1],[x5],x14                    \n\t" // Load c115  into quad and increment by rs_c.
+" ld1 {v13.s}[2],[x5],x14                    \n\t" // Load c116  into quad and increment by rs_c.
+" ld1 {v13.s}[3],[x5],x14                    \n\t" // Load c117  into quad and increment by rs_c.
 "                                            \n\t"
 " fmul v8.4s, v8.4s, v7.s[0]                 \n\t" // Scale by beta
 " fmul v9.4s, v9.4s, v7.s[0]                 \n\t" // Scale by beta
@@ -1018,38 +1018,38 @@ LABEL(SBETAZEROGENSTOREDS4)
 " fmla v12.4s,v30.4s,v6.s[0]                 \n\t" // Scale by alpha
 " fmla v13.4s,v31.4s,v6.s[0]                 \n\t" // Scale by alpha
 "                                            \n\t"
-" mov x27, x24                               \n\t"
+" mov x5, x25                                \n\t"
 "                                            \n\t"
-" st1 {v8.s}[0],[x27],x14                    \n\t" // Store c90  into quad and increment by rs_c.
-" st1 {v8.s}[1],[x27],x14                    \n\t" // Store c91  into quad and increment by rs_c.
-" st1 {v8.s}[2],[x27],x14                    \n\t" // Store c92  into quad and increment by rs_c.
-" st1 {v8.s}[3],[x27],x14                    \n\t" // Store c93  into quad and increment by rs_c.
-" st1 {v9.s}[0],[x27],x14                    \n\t" // Store c94  into quad and increment by rs_c.
-" st1 {v9.s}[1],[x27],x14                    \n\t" // Store c95  into quad and increment by rs_c.
-" st1 {v9.s}[2],[x27],x14                    \n\t" // Store c96  into quad and increment by rs_c.
-" st1 {v9.s}[3],[x27],x14                    \n\t" // Store c97  into quad and increment by rs_c.
+" st1 {v8.s}[0],[x5],x14                     \n\t" // Store c90  into quad and increment by rs_c.
+" st1 {v8.s}[1],[x5],x14                     \n\t" // Store c91  into quad and increment by rs_c.
+" st1 {v8.s}[2],[x5],x14                     \n\t" // Store c92  into quad and increment by rs_c.
+" st1 {v8.s}[3],[x5],x14                     \n\t" // Store c93  into quad and increment by rs_c.
+" st1 {v9.s}[0],[x5],x14                     \n\t" // Store c94  into quad and increment by rs_c.
+" st1 {v9.s}[1],[x5],x14                     \n\t" // Store c95  into quad and increment by rs_c.
+" st1 {v9.s}[2],[x5],x14                     \n\t" // Store c96  into quad and increment by rs_c.
+" st1 {v9.s}[3],[x5],x14                     \n\t" // Store c97  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x25                               \n\t"
+" mov x5, x26                                \n\t"
 "                                            \n\t"
-" st1 {v10.s}[0],[x27],x14                   \n\t" // Store c100  into quad and increment by rs_c.
-" st1 {v10.s}[1],[x27],x14                   \n\t" // Store c101  into quad and increment by rs_c.
-" st1 {v10.s}[2],[x27],x14                   \n\t" // Store c102  into quad and increment by rs_c.
-" st1 {v10.s}[3],[x27],x14                   \n\t" // Store c103  into quad and increment by rs_c.
-" st1 {v11.s}[0],[x27],x14                   \n\t" // Store c104  into quad and increment by rs_c.
-" st1 {v11.s}[1],[x27],x14                   \n\t" // Store c105  into quad and increment by rs_c.
-" st1 {v11.s}[2],[x27],x14                   \n\t" // Store c106  into quad and increment by rs_c.
-" st1 {v11.s}[3],[x27],x14                   \n\t" // Store c107  into quad and increment by rs_c.
+" st1 {v10.s}[0],[x5],x14                    \n\t" // Store c100  into quad and increment by rs_c.
+" st1 {v10.s}[1],[x5],x14                    \n\t" // Store c101  into quad and increment by rs_c.
+" st1 {v10.s}[2],[x5],x14                    \n\t" // Store c102  into quad and increment by rs_c.
+" st1 {v10.s}[3],[x5],x14                    \n\t" // Store c103  into quad and increment by rs_c.
+" st1 {v11.s}[0],[x5],x14                    \n\t" // Store c104  into quad and increment by rs_c.
+" st1 {v11.s}[1],[x5],x14                    \n\t" // Store c105  into quad and increment by rs_c.
+" st1 {v11.s}[2],[x5],x14                    \n\t" // Store c106  into quad and increment by rs_c.
+" st1 {v11.s}[3],[x5],x14                    \n\t" // Store c107  into quad and increment by rs_c.
 "                                            \n\t"
-" mov x27, x26                               \n\t"
+" mov x5, x27                                \n\t"
 "                                            \n\t"
-" st1 {v12.s}[0],[x27],x14                   \n\t" // Store c110  into quad and increment by rs_c.
-" st1 {v12.s}[1],[x27],x14                   \n\t" // Store c111  into quad and increment by rs_c.
-" st1 {v12.s}[2],[x27],x14                   \n\t" // Store c112  into quad and increment by rs_c.
-" st1 {v12.s}[3],[x27],x14                   \n\t" // Store c113  into quad and increment by rs_c.
-" st1 {v13.s}[0],[x27],x14                   \n\t" // Store c114  into quad and increment by rs_c.
-" st1 {v13.s}[1],[x27],x14                   \n\t" // Store c115  into quad and increment by rs_c.
-" st1 {v13.s}[2],[x27],x14                   \n\t" // Store c116  into quad and increment by rs_c.
-" st1 {v13.s}[3],[x27],x14                   \n\t" // Store c147  into quad and increment by rs_c.
+" st1 {v12.s}[0],[x5],x14                    \n\t" // Store c110  into quad and increment by rs_c.
+" st1 {v12.s}[1],[x5],x14                    \n\t" // Store c111  into quad and increment by rs_c.
+" st1 {v12.s}[2],[x5],x14                    \n\t" // Store c112  into quad and increment by rs_c.
+" st1 {v12.s}[3],[x5],x14                    \n\t" // Store c113  into quad and increment by rs_c.
+" st1 {v13.s}[0],[x5],x14                    \n\t" // Store c114  into quad and increment by rs_c.
+" st1 {v13.s}[1],[x5],x14                    \n\t" // Store c115  into quad and increment by rs_c.
+" st1 {v13.s}[2],[x5],x14                    \n\t" // Store c116  into quad and increment by rs_c.
+" st1 {v13.s}[3],[x5],x14                    \n\t" // Store c147  into quad and increment by rs_c.
 "                                            \n\t"
 LABEL(SEND)                                        // Done!
 "                                            \n\t"
@@ -1068,11 +1068,10 @@ LABEL(SEND)                                        // Done!
  [b_next] "m" (b_next) // 10
 :// Register clobber list
  "x0", "x1", "x2",
- "x5", "x6", "x10",
- "x14",
- "x16","x17","x18","x19",       
- "x20","x21","x22","x23",
- "x24","x25","x26","x27",
+ "x5", "x6", "x10","x14",
+ "x16","x17","x19","x20",
+ "x21","x22","x23","x24",
+ "x25","x26","x27",
  "v0", "v1", "v2", "v3",
  "v4", "v5", "v6", "v7",
  "v8", "v9", "v10","v11",
