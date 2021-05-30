@@ -56,7 +56,6 @@ typedef struct bls_gemm_bp_cntx_t
     rntm_t*   rntm;
     tci_comm* thread_jc;
     tci_comm* thread_ic;
-    tci_comm* thread_irjr;
 } bls_gemm_bp_cntx_t;
 
 void bls_gemm_bp_var2

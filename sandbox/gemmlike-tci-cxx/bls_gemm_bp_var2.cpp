@@ -112,14 +112,9 @@ void bls_gemm_bp_var2
     const auto cs_ct    = ( col_pref ? MR : 1 );
 
     /* Split the thread communicators repeatedly based on the requested
-       parallelism. The final communicator will never have a barrier called
-       on it and so can be constructed without a context (i.e. it can only
-       be used for work partitioning and not communication). */
-    auto thread_jc   = thread   .gang( TCI_EVENLY, bli_rntm_ways_for( BLIS_NC, rntm ) );
-    auto thread_ic   = thread_jc.gang( TCI_EVENLY, bli_rntm_ways_for( BLIS_MC, rntm ) );
-    auto thread_irjr = thread_ic.gang( TCI_EVENLY | TCI_NO_CONTEXT,
-                                       bli_rntm_ways_for( BLIS_MR, rntm ) *
-                                       bli_rntm_ways_for( BLIS_NR, rntm ) );
+       parallelism. */
+    auto thread_jc = thread   .gang( TCI_EVENLY, bli_rntm_ways_for( BLIS_NC, rntm ) );
+    auto thread_ic = thread_jc.gang( TCI_EVENLY, bli_rntm_ways_for( BLIS_MC, rntm ) );
 
     /* tci_comm_distribute* assigns work by partitioning the range [0,ntask),
        here n. The second paramaeter of tci_range is the granularity, i.e.
@@ -218,7 +213,7 @@ void bls_gemm_bp_var2
                         /* The below only partitions work along the jr loop. Partitioning along
                            both ir and jr is easily possible by distributing threads over tasks
                            and computing the work allocation from the task ID. */
-                        thread_irjr.distribute_over_threads({ nc_cur, NR },
+                        thread_ic.distribute_over_threads({ nc_cur, NR },
                         [&](dim_t jr_start, dim_t jr_end)
                         {
                             auxinfo_t aux;

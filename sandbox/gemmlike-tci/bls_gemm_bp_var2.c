@@ -276,7 +276,7 @@ void bls_gemm_bp_var2_ic
         /* The below only partitions work along the jr loop. Partitioning along
            both ir and jr is easily possible by distributing threads over tasks
            and computing the work allocation from the task ID. */
-        tci_comm_distribute_over_threads( cntx.thread_irjr, (tci_range){ n, NR }, bls_gemm_bp_var2_jr_ir, &cntx );
+        tci_comm_distribute_over_threads( cntx.thread_ic, (tci_range){ n, NR }, bls_gemm_bp_var2_jr_ir, &cntx );
     }
 
     /* Release any memory that was acquired for packing matrix A. */
@@ -400,23 +400,16 @@ void bls_gemm_bp_var2
 
     tci_comm thread_jc;
     tci_comm thread_ic;
-    tci_comm thread_irjr;
 
     /* Split the thread communicators repeatedly based on the requested
-       parallelism. The final communicator will never have a barrier called
-       on it and so can be constructed without a context (i.e. it can only
-       be used for work partitioning and not communication). */
+       parallelism. */
     tci_comm_gang( thread, &thread_jc, TCI_EVENLY,
                    bli_rntm_ways_for( BLIS_NC, cntx.rntm ), 0 );
     tci_comm_gang( &thread_jc, &thread_ic, TCI_EVENLY,
                    bli_rntm_ways_for( BLIS_MC, cntx.rntm ), 0 );
-    tci_comm_gang( &thread_ic, &thread_irjr, TCI_EVENLY | TCI_NO_CONTEXT ,
-                   bli_rntm_ways_for( BLIS_MR, cntx.rntm ) *
-                   bli_rntm_ways_for( BLIS_NR, cntx.rntm ), 0 );
 
     cntx.thread_jc = &thread_jc;
     cntx.thread_ic = &thread_ic;
-    cntx.thread_irjr = &thread_irjr;
 
     /* tci_comm_distribute* assigns work by partitioning the range [0,ntask),
        here cntx.n. The second paramaeter of tci_range is the granularity, i.e.
