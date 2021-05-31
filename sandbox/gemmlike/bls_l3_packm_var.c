@@ -177,16 +177,16 @@ void PASTECH2(bls_,ch,varname) \
 			); \
 		} \
 \
-		p_begin += ps_p; \
-\
 /*
-if ( row_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_sup_var1: b packed", panel_len_max, panel_dim_max, \
-                      p_use,         rs_p, cs_p, "%5.2f", "" ); \
 if ( !row_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_sup_var1: a packed", panel_dim_max, panel_len_max, \
-                      p_use,         rs_p, cs_p, "%5.2f", "" ); \
+PASTEMAC(ch,fprintm)( stdout, "packm_var1: a packed", panel_dim_max, panel_len_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
+else \
+PASTEMAC(ch,fprintm)( stdout, "packm_var1: b packed", panel_len_max, panel_dim_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
 */ \
+\
+		p_begin += ps_p; \
 	} \
 }
 
