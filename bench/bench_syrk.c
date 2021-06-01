@@ -188,7 +188,7 @@ int main( int argc, char** argv )
             continue;
         }
 #ifndef CBLAS
-        if(bli_obj_col_stride(&c) == 1)
+        if(bli_obj_row_stride(&c) != 1)
         {
             printf("BLAS APIs doesn't support row-storage\n");
             continue;

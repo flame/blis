@@ -221,7 +221,7 @@ int main( int argc, char** argv )
         }
 #ifndef BLIS // Incase if we are using blis interface we don't have to check for col-storage.
      #ifndef CBLAS
-        if(bli_obj_col_stride(&c) == 1)
+        if(bli_obj_row_stride(&c) != 1)
         {
             printf("BLAS APIs doesn't support row-storage: Enable CBLAS\n");
             continue;
