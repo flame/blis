@@ -266,7 +266,7 @@ void bli_sgemv_unf_var2
     }
 
     /* Query the context for the kernel function pointer and fusing factor. */
-    b_fuse = 5;
+    b_fuse = 6;
 
     for ( i = 0; i < n_iter; i += f )
     {
@@ -277,7 +277,7 @@ void bli_sgemv_unf_var2
         y1 = y + (0  )*incy;
 
         /* y = y + alpha * A1 * x1; */
-        bli_saxpyf_zen_int_5
+        bli_saxpyf_zen_int_6
         (
           conja,
           conjx,
