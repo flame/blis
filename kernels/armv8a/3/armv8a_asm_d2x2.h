@@ -37,6 +37,11 @@
 /* C     A   B
  * || <- | * --
  * ||    |
+ *
+ * or:
+ * C     B * A
+ * -- <- |   --
+ * --    |
  */
 #define DGEMM_2X2_NANOKERNEL(C0,C1,A,B) \
 " fmla  v"#C0".2d, v"#A".2d, v"#B".d[0] \n\t" \
