@@ -184,7 +184,7 @@ void bli_dgemv_unf_var2
 
     if( bli_deq0( *alpha ) )
     {
-    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_TRACE_LEVEL_3)
+    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 	return;
     }
     /* Fusing factor. */
@@ -418,7 +418,7 @@ void bli_cgemv_unf_var2
 
     if( bli_ceq0( *alpha ) )
     {
-    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_TRACE_3)
+    	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 	return;
     }
     /* fusing factor. */
