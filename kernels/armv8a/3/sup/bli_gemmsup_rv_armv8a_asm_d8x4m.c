@@ -93,6 +93,12 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
   DSTORE2V(C10,C11,CADDR,CSHIFT) \
 " add  "#CADDR", "#CADDR", "#RSC" \n\t"
 
+/*
+ * 8x4 kernel for dgemmsup.
+ *
+ * R-dimension too short.
+ * Not recommanded for use.
+ */
 void bli_dgemmsup_rv_armv8a_asm_8x4m
      (
        conj_t              conja,

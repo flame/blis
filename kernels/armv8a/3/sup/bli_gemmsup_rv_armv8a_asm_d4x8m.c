@@ -96,14 +96,14 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 
 
 /*
- * 4x8 dgemmsup kernel with extending 2nd dimension.
+ * 4x8 dgemmsup kernel with extending 1st dimension.
  *
  * Recommanded usage case: 
  * o 16 < (L1 cache latency) * (Num. FPU) < 25.
  * o L1 cache has a bandwidth not too low (true in most cases).
  * o (FMLA latency) * (Num. FPU) < 32 cycles (true in almost all cases).
  */
-void bli_dgemmsup_rv_armv8a_asm_4x8n
+void bli_dgemmsup_rv_armv8a_asm_4x8m
      (
        conj_t              conja,
        conj_t              conjb,
@@ -119,7 +119,7 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
        cntx_t*    restrict cntx
      )
 {
-  if ( m0 != 4 )
+  if ( n0 != 8 )
   {
     bli_dgemmsup_r_armv8a_ref2
     (
@@ -136,15 +136,15 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
   void*    a_next = bli_auxinfo_next_a( data );
   void*    b_next = bli_auxinfo_next_b( data );
 #endif
-  uint64_t ps_b   = bli_auxinfo_ps_b( data );
+  uint64_t ps_a   = bli_auxinfo_ps_a( data );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
   uint64_t k_mker = k0 / 4;
   uint64_t k_left = k0 % 4;
 
-  uint64_t n_iter = n0 / 8;
-  uint64_t n_left = n0 % 8;
+  uint64_t m_iter = m0 / 4;
+  uint64_t m_left = m0 % 4;
 
   uint64_t rs_a   = rs_a0;
   uint64_t cs_a   = cs_a0;
@@ -154,23 +154,23 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
   // uint64_t cs_b   = cs_b0;
   assert( cs_b0 == 1 );
 
-  if ( n_iter == 0 ) goto consider_edge_cases;
+  if ( m_iter == 0 ) goto consider_edge_cases;
 
   __asm__ volatile
   (
-" ldr             x10, %[b]                       \n\t"
+" ldr             x10, %[a]                       \n\t"
 " ldr             x13, %[c]                       \n\t"
-" ldr             x12, %[n_iter]                  \n\t"
-" ldr             x11, %[ps_b]                    \n\t" // Panel-skip of B.
-" ldr             x3, %[rs_b]                     \n\t" // Row-skip of B.
+" ldr             x12, %[m_iter]                  \n\t"
+" ldr             x11, %[ps_a]                    \n\t" // Panel-skip of A.
 " ldr             x9, %[rs_a]                     \n\t" // Row-skip of A.
 " ldr             x2, %[cs_a]                     \n\t" // Column-skip of A.
+" ldr             x3, %[rs_b]                     \n\t" // Row-skip of B.
 "                                                 \n\t"
 " ldr             x6, %[rs_c]                     \n\t" // Row-skip of C.
 " ldr             x7, %[cs_c]                     \n\t" // Column-skip of C.
 "                                                 \n\t"
 "                                                 \n\t" // Multiply some address skips by sizeof(double).
-" lsl             x11, x11, #3                    \n\t" // ps_b
+" lsl             x11, x11, #3                    \n\t" // ps_a
 " lsl             x9, x9, #3                      \n\t" // rs_a
 " lsl             x2, x2, #3                      \n\t" // cs_a
 " lsl             x3, x3, #3                      \n\t" // rs_b
@@ -180,30 +180,30 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
 " mov             x1, x5                          \n\t"
 " cmp             x7, #8                          \n\t" // Prefetch column-strided C.
 BEQ(C_PREFETCH_COLS)
-DPRFMC_FWD(x1,x6)
-DPRFMC_FWD(x1,x6)
-DPRFMC_FWD(x1,x6)
-DPRFMC_FWD(x1,x6)
-BRANCH(C_PREFETCH_END)
-LABEL(C_PREFETCH_COLS)
 // This prefetch will not cover further mker perts. Skip.
 //
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
-// DPRFMC_FWD(x1,x7)
+// DPRFMC_FWD(x1,x6)
+// DPRFMC_FWD(x1,x6)
+// DPRFMC_FWD(x1,x6)
+// DPRFMC_FWD(x1,x6)
+BRANCH(C_PREFETCH_END)
+LABEL(C_PREFETCH_COLS)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
 LABEL(C_PREFETCH_END)
 //
 // Millikernel.
 LABEL(MILLIKER_MLOOP)
 "                                                 \n\t"
-" mov             x1, x10                         \n\t" // Parameters to be reloaded
+" mov             x0, x10                         \n\t" // Parameters to be reloaded
 " mov             x5, x13                         \n\t" //  within each millikernel loop.
-" ldr             x0, %[a]                        \n\t"
+" ldr             x1, %[b]                        \n\t"
 " ldr             x4, %[k_mker]                   \n\t"
 " ldr             x8, %[k_left]                   \n\t"
 "                                                 \n\t"
@@ -219,19 +219,8 @@ LABEL(LOAD_ABC)
 " cmp             x4, #0                          \n\t" //  to avoid out-of-boundary read.
 BEQ(CLEAR_CCOLS)
 "                                                 \n\t"
-" ldr             q24, [x1, #16*0]                \n\t" // Load B first.
-" ldr             q25, [x1, #16*1]                \n\t"
-" ldr             q26, [x1, #16*2]                \n\t"
-" ldr             q27, [x1, #16*3]                \n\t"
-" add             x1, x1, x3                      \n\t"
-" ldr             q28, [x1, #16*0]                \n\t"
-" ldr             q29, [x1, #16*1]                \n\t"
-" ldr             q30, [x1, #16*2]                \n\t"
-" ldr             q31, [x1, #16*3]                \n\t"
-" add             x1, x1, x3                      \n\t"
-"                                                 \n\t"
 " mov             x14, x0                         \n\t" // Load A.
-" ld1             {v16.d}[0], [x14], x9           \n\t" // We want A to be kept in L1.
+" ld1             {v16.d}[0], [x14], x9           \n\t"
 " ld1             {v16.d}[1], [x14], x9           \n\t"
 " ld1             {v17.d}[0], [x14], x9           \n\t"
 " ld1             {v17.d}[1], [x14], x9           \n\t"
@@ -254,6 +243,17 @@ BEQ(CLEAR_CCOLS)
 " ld1             {v23.d}[0], [x14], x9           \n\t"
 " ld1             {v23.d}[1], [x14], x9           \n\t"
 " add             x0, x0, x2                      \n\t"
+"                                                 \n\t"
+" ldr             q24, [x1, #16*0]                \n\t" // Load B.
+" ldr             q25, [x1, #16*1]                \n\t"
+" ldr             q26, [x1, #16*2]                \n\t"
+" ldr             q27, [x1, #16*3]                \n\t"
+" add             x1, x1, x3                      \n\t"
+" ldr             q28, [x1, #16*0]                \n\t"
+" ldr             q29, [x1, #16*1]                \n\t"
+" ldr             q30, [x1, #16*2]                \n\t"
+" ldr             q31, [x1, #16*3]                \n\t"
+" add             x1, x1, x3                      \n\t"
 LABEL(CLEAR_CCOLS)
 CLEAR8V(0,1,2,3,4,5,6,7)
 CLEAR8V(8,9,10,11,12,13,14,15)
@@ -297,17 +297,17 @@ DGEMM_4X8_MKER_LOOP_PLAIN_LOC(22,23,28,29,30,31,xzr,-1,-1,-1,noload)
 LABEL(K_LEFT_LOOP)
 " cmp             x8, #0                          \n\t" // End of exec.
 BEQ(WRITE_MEM_PREP)
-" ldr             q24, [x1, #16*0]                \n\t" // Load B row.
-" ldr             q25, [x1, #16*1]                \n\t"
-" ldr             q26, [x1, #16*2]                \n\t"
-" ldr             q27, [x1, #16*3]                \n\t"
-" add             x1, x1, x3                      \n\t"
 " mov             x14, x0                         \n\t" // Load A col.
 " ld1             {v16.d}[0], [x14], x9           \n\t"
 " ld1             {v16.d}[1], [x14], x9           \n\t"
 " ld1             {v17.d}[0], [x14], x9           \n\t"
 " ld1             {v17.d}[1], [x14], x9           \n\t"
 " add             x0, x0, x2                      \n\t"
+" ldr             q24, [x1, #16*0]                \n\t" // Load B row.
+" ldr             q25, [x1, #16*1]                \n\t"
+" ldr             q26, [x1, #16*2]                \n\t"
+" ldr             q27, [x1, #16*3]                \n\t"
+" add             x1, x1, x3                      \n\t"
 " sub             x8, x8, #1                      \n\t"
 DGEMM_4X8_MKER_LOOP_PLAIN_LOC(16,17,24,25,26,27,xzr,-1,-1,-1,noload)
 BRANCH(K_LEFT_LOOP)
@@ -402,9 +402,9 @@ LABEL(END_WRITE_MEM)
 " subs            x12, x12, #1                    \n\t"
 BEQ(END_EXEC)
 "                                                 \n\t"
-" mov             x8, #8                          \n\t"
-" madd            x13, x7, x8, x13                \n\t" // Forward C's base address to the next logic panel.
-" add             x10, x10, x11                   \n\t" // Forward B's base address to the next logic panel.
+" mov             x8, #4                          \n\t"
+" madd            x13, x6, x8, x13                \n\t" // Forward C's base address to the next logic panel.
+" add             x10, x10, x11                   \n\t" // Forward A's base address to the next logic panel.
 BRANCH(MILLIKER_MLOOP)
 //
 // End of execution.
@@ -415,7 +415,7 @@ LABEL(END_EXEC)
   [c]      "m" (c),
   [rs_a]   "m" (rs_a),
   [cs_a]   "m" (cs_a),
-  [ps_b]   "m" (ps_b),
+  [ps_a]   "m" (ps_a),
   [rs_b]   "m" (rs_b),
   [rs_c]   "m" (rs_c),
   [cs_c]   "m" (cs_c),
@@ -425,7 +425,7 @@ LABEL(END_EXEC)
   [a_next] "r" (a_next),
   [b_next] "r" (b_next),
 #endif
-  [n_iter] "m" (n_iter),
+  [m_iter] "m" (m_iter),
   [k_mker] "m" (k_mker),
   [k_left] "m" (k_left),
   [alpha]  "m" (alpha),
@@ -442,13 +442,13 @@ consider_edge_cases:
   // TODO: Implement optimized kernel for this.
   //
   // Forward address.
-  b = b + n_iter * ps_b;
-  c = c + n_iter * 8 * cs_c;
-  if ( n_left )
+  a = a + m_iter * ps_a;
+  c = c + m_iter * 4 * rs_c;
+  if ( m_left )
   {
     bli_dgemmsup_r_armv8a_ref2
     (
-      conja, conjb, 4, n_left, k0,
+      conja, conjb, m_left, 8, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
