@@ -1,9 +1,11 @@
 /*
- * Copyright (C) 2020, Advanced Micro Devices, Inc. All Rights Reserved
+ * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All Rights Reserved
  */
 
 #ifndef BLIS_CONFIG_H
 #define BLIS_CONFIG_H
+
+#cmakedefine AOCL_DYNAMIC
 
 #cmakedefine AOCL_BLIS_ZEN
 
@@ -35,10 +37,14 @@
 
 #cmakedefine BLIS_ENABLE_MEMKIND
 
+#cmakedefine BLIS_ENABLE_TRSM_PREINVERSION
+
 #cmakedefine BLIS_ENABLE_PRAGMA_OMP_SIMD
 
 #cmakedefine BLIS_ENABLE_SANDBOX
 
 #cmakedefine BLIS_ENABLE_SHARED
+
+#cmakedefine BLIS_ENABLE_COMPLEX_RETURN_INTEL
 
 #endif

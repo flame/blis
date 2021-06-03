@@ -85,18 +85,31 @@ option(ENABLE_MEMKIND "libmemkind for manage memory pools" OFF)
 option(ENABLE_PRAGMA_OMP_SIMD "pragma openmp simd" ON)
 option(ENABLE_SANDBOX "Sandbox implementation for gemm" OFF)
 option(BLIS_ENABLE_ILP64 "ENABLE BLIS ILP64" OFF)
-option(ENABLE_INT_TYPE_SIZE "Integer size type" OFF)
+option(ENABLE_INT_TYPE_SIZE " Internal BLIS integers ,used in native BLIS interfaces based on architecture dependent " ON)
 option(ENABLE_BLASTEST "Enable the blastest" OFF)
 option(ENABLE_TESTCPP_TESTING "Enabling testcpp" OFF)
 option (ENABLE_NO_UNDERSCORE_API "export APIs without underscore" ON)
 option (ENABLE_UPPERCASE "export APIs with uppercase" OFF)
+option (ENABLE_COMPLEX_RETURN_INTEL "Enable complex_return_intel" OFF)
+option (ENABLE_TRSM_PREINVERSION "Enable TRSM preinversion" ON)
+option (ENABLE_AOCL_DYNAMIC "Enable Dynamic Multi-threading" OFF)
 
 if(ENABLE_NO_UNDERSCORE_API)
     add_definitions(-DBLIS_ENABLE_NO_UNDERSCORE_API)
 endif()
 
+if(ENABLE_COMPLEX_RETURN_INTEL)
+    set(BLIS_ENABLE_COMPLEX_RETURN_INTEL TRUE)
+else()
+    set(BLIS_DISABLE_COMPLEX_RETURN_INTEL TRUE)
+endif()
+
 if(ENABLE_UPPERCASE)
      add_definitions(-DBLIS_ENABLE_UPPERCASE)
+endif()
+
+if(ENABLE_AOCL_DYNAMIC)
+     set(AOCL_DYNAMIC TRUE)
 endif()
 
 if (BUILD_SHARED_LIBS)
@@ -117,9 +130,9 @@ else ()
 endif ()
 
 if (ENABLE_TRSM_PREINVERSION)
-  add_definitions(-DBLIS_ENABLE_TRSM_PREINVERSION)
+  set(BLIS_ENABLE_TRSM_PREINVERSION TRUE)
 else()
-  add_definitions(-DBLIS_DISABLE_TRSM_PREINVERSION)
+  set(BLIS_DISABLE_TRSM_PREINVERSION TRUE)
 endif()
 
 if (ENABLE_INT_TYPE_SIZE)
@@ -131,8 +144,7 @@ else ()
 endif ()
 
 if (BLIS_ENABLE_ILP64 AND NOT ENABLE_INT_TYPE_SIZE)
-    message(FATAL_ERROR "To avoid the possibility of truncation, we do not allow use of 64-bit integers"
-        "in the BLAS API with 32-bit integers in BLIS. Please use a different configuration of integers")
+    message(FATAL_ERROR "for ILP64 we must enable ENABLE_INT_TYPE_SIZE with BLIS_INT_TYPE_SIZE = 64 ")
 endif ()
 
 if (ENABLE_VERBOSE)
@@ -288,7 +300,7 @@ add_definitions(-D_MSC_VER)
 add_definitions(-DBLIS_CNAME=${TARGET_ARCH})
 
 # Generate the bli_config.h header file
-configure_file (build/bli_win_config.h.in ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/bli_config.h @ONLY)
+configure_file (build/bli_win_config.h.in ${CMAKE_SOURCE_DIR}/bli_config.h @ONLY)
 
 include_directories(${CMAKE_SOURCE_DIR}/aocl_dtl)
 include_directories(${CMAKE_SOURCE_DIR}/.)
@@ -373,6 +385,7 @@ include_directories(${CMAKE_SOURCE_DIR}/kernels/zen/1m)
 include_directories(${CMAKE_SOURCE_DIR}/kernels/zen/2)
 include_directories(${CMAKE_SOURCE_DIR}/kernels/zen/3)
 include_directories(${CMAKE_SOURCE_DIR}/kernels/zen/3/sup)
+include_directories(${CMAKE_SOURCE_DIR}/kernels/zen2)
 
 file(GLOB headers ${CMAKE_SOURCE_DIR}/*.h)
 
@@ -462,6 +475,7 @@ endif ()
     " ${CMAKE_CURRENT_SOURCE_DIR}/frame/thread/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/frame/util/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/aocl_dtl/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/"
 )
 
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH})
@@ -491,14 +505,14 @@ set(BLIS_VERSION_STRING ${BLIS_VERSION})
 add_definitions(-DBLIS_VERSION_STRING="${BLIS_VERSION_STRING}")
 
 if(BUILD_SHARED_LIBS)
-    add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/bli_config.h
+    add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     target_compile_definitions("${PROJECT_NAME}" PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
 endif()
 if(NOT BUILD_SHARED_LIBS)
-    add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/bli_config.h
+    add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")

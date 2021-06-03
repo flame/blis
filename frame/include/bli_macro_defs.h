@@ -5,8 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
    
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -207,7 +206,11 @@
 #define ccopy_  ccopy 
 #define zcopy_  zcopy 
 #define sdot_   sdot 
-#define ddot_   ddot 
+#define ddot_   ddot
+#define cdotc_  cdotc
+#define zdotc_  zdotc
+#define cdotu_  cdotu
+#define zdotu_  zdotu
 #define snrm2_  snrm2
 #define dnrm2_  dnrm2
 #define scnrm2_ scnrm2
@@ -264,7 +267,11 @@
 #define cgemm_  cgemm 
 #define zgemm_  zgemm 
 #define chemm_  chemm 
-#define zhemm_  zhemm 
+#define zhemm_  zhemm
+#define dgemmt_ dgemmt
+#define sgemmt_ sgemmt
+#define zgemmt_ zgemmt
+#define cgemmt_ cgemmt
 #define cher2k_ cher2k
 #define zher2k_ zher2k
 #define cherk_  cherk
