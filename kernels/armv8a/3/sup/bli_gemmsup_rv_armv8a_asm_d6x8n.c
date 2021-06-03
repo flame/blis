@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,6 +31,7 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
 
 #include "blis.h"
@@ -44,33 +45,57 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 // Nanokernel operations.
 #include "../armv8a_asm_d2x2.h"
 
-/*
+/* Order of row-major DGEMM_6x8's execution in 2x2 blocks:
+ *
  * +---+ +---+ +---+ +---+
- * | 0 | | 2 | | 4 | | 6 |
+ * | 0 | | 1 | | 6 | | 7 |
  * +---+ +---+ +---+ +---+
  * +---+ +---+ +---+ +---+
- * | 1 | | 3 | | 5 | | 7 |
+ * | 2 | | 3 | | 8 | | 9 |
  * +---+ +---+ +---+ +---+
+ * +---+ +---+ +---+ +---+
+ * | 4 | | 5 | | 10| | 11|
+ * +---+ +---+ +---+ +---+
+ *
  */
-#define DGEMM_4X8_MKER_LOOP_PLAIN(C00,C01,C02,C03,C10,C11,C12,C13,C20,C21,C22,C23,C30,C31,C32,C33,A0,A1,B0,B1,B2,B3,BADDR,BSHIFT0,BSHIFT1,BSHIFT2,LOADNEXT) \
+#define DGEMM_6X8_MKER_LOOP_PLAIN(C00,C01,C02,C03,C10,C11,C12,C13,C20,C21,C22,C23,C30,C31,C32,C33,C40,C41,C42,C43,C50,C51,C52,C53,A0,A1,A2,B0,B1,B2,B3,AELEMADDR,AELEMST,BADDR,BSHIFT,LOADNEXT) \
   DGEMM_2X2_NANOKERNEL(C00,C10,B0,A0) \
-  DGEMM_2X2_NANOKERNEL(C20,C30,B0,A1) \
-  DGEMM_LOAD1V_ ##LOADNEXT (B0,BADDR,BSHIFT0) \
   DGEMM_2X2_NANOKERNEL(C01,C11,B1,A0) \
+  DGEMM_2X2_NANOKERNEL(C20,C30,B0,A1) \
   DGEMM_2X2_NANOKERNEL(C21,C31,B1,A1) \
-  DGEMM_LOAD1V_ ##LOADNEXT (B1,BADDR,BSHIFT1) \
+  DGEMM_2X2_NANOKERNEL(C40,C50,B0,A2) \
+  DGEMM_2X2_NANOKERNEL(C41,C51,B1,A2) \
+  DGEMM_LOAD2V_ ##LOADNEXT (B0,B1,BADDR,BSHIFT) \
   DGEMM_2X2_NANOKERNEL(C02,C12,B2,A0) \
-  DGEMM_2X2_NANOKERNEL(C22,C32,B2,A1) \
-  DGEMM_LOAD1V_ ##LOADNEXT (B2,BADDR,BSHIFT2) \
   DGEMM_2X2_NANOKERNEL(C03,C13,B3,A0) \
-  DGEMM_2X2_NANOKERNEL(C23,C33,B3,A1)
-
+  DGEMM_LOAD1V_G_ ##LOADNEXT (A0,AELEMADDR,AELEMST) \
+  DGEMM_2X2_NANOKERNEL(C22,C32,B2,A1) \
+  DGEMM_2X2_NANOKERNEL(C23,C33,B3,A1) \
+  DGEMM_LOAD1V_G_ ##LOADNEXT (A1,AELEMADDR,AELEMST) \
+  DGEMM_2X2_NANOKERNEL(C42,C52,B2,A2) \
+  DGEMM_2X2_NANOKERNEL(C43,C53,B3,A2)
 
 // Interleaving load or not.
 #define DGEMM_LOAD1V_noload(V1,ADDR,IMM)
 #define DGEMM_LOAD1V_load(V1,ADDR,IMM) \
 " ldr  q"#V1", ["#ADDR", #"#IMM"] \n\t"
 
+#define DGEMM_LOAD2V_noload(V1,V2,ADDR,IMM)
+#define DGEMM_LOAD2V_load(V1,V2,ADDR,IMM) \
+  DGEMM_LOAD1V_load(V1,ADDR,IMM) \
+  DGEMM_LOAD1V_load(V2,ADDR,IMM+16)
+
+#define DGEMM_LOAD1V_G_noload(V1,ADDR,ST)
+#define DGEMM_LOAD1V_G_load(V1,ADDR,ST) \
+" ld1  {v"#V1".d}[0], ["#ADDR"], "#ST" \n\t" \
+" ld1  {v"#V1".d}[1], ["#ADDR"], "#ST" \n\t"
+
+// Prefetch C in the long direction.
+#define DPRFMC_FWD(CADDR,DLONGC) \
+" prfm PLDL1KEEP, ["#CADDR"]      \n\t" \
+" add  "#CADDR", "#CADDR", "#DLONGC" \n\t"
+
+// For row-storage of C.
 #define DLOADC_4V_R_FWD(C0,C1,C2,C3,CADDR,CSHIFT,RSC) \
   DLOAD4V(C0,C1,C2,C3,CADDR,CSHIFT) \
 " add  "#CADDR", "#CADDR", "#RSC" \n\t"
@@ -78,19 +103,24 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
   DSTORE4V(C0,C1,C2,C3,CADDR,CSHIFT) \
 " add  "#CADDR", "#CADDR", "#RSC" \n\t"
 
-#define DLOADC_4V_C_FWD(C00,C10,C01,C11,CADDR,CSHIFT,CSC) \
-  DLOAD2V(C00,C10,CADDR,CSHIFT) \
-" add  "#CADDR", "#CADDR", "#CSC" \n\t" \
-  DLOAD2V(C01,C11,CADDR,CSHIFT) \
+// For column-storage of C.
+#define DLOADC_3V_C_FWD(C0,C1,C2,CADDR,CSHIFT,CSC) \
+  DLOAD2V(C0,C1,CADDR,CSHIFT) \
+  DLOAD1V(C2,CADDR,CSHIFT+32) \
 " add  "#CADDR", "#CADDR", "#CSC" \n\t"
-#define DSTOREC_4V_C_FWD(C00,C10,C01,C11,CADDR,CSHIFT,CSC) \
-  DSTORE2V(C00,C10,CADDR,CSHIFT) \
-" add  "#CADDR", "#CADDR", "#CSC" \n\t" \
-  DSTORE2V(C01,C11,CADDR,CSHIFT) \
+#define DSTOREC_3V_C_FWD(C0,C1,C2,CADDR,CSHIFT,CSC) \
+  DSTORE2V(C0,C1,CADDR,CSHIFT) \
+  DSTORE1V(C2,CADDR,CSHIFT+32) \
 " add  "#CADDR", "#CADDR", "#CSC" \n\t"
 
+#define DSCALE6V(V0,V1,V2,V3,V4,V5,A,IDX) \
+  DSCALE4V(V0,V1,V2,V3,A,IDX) \
+  DSCALE2V(V4,V5,A,IDX)
+#define DSCALEA6V(D0,D1,D2,D3,D4,D5,S0,S1,S2,S3,S4,S5,A,IDX) \
+  DSCALEA4V(D0,D1,D2,D3,S0,S1,S2,S3,A,IDX) \
+  DSCALEA2V(D4,D5,S4,S5,A,IDX)
 
-void bli_dgemmsup_rv_armv8a_asm_4x8n
+void bli_dgemmsup_rv_armv8a_asm_6x8n
      (
        conj_t              conja,
        conj_t              conjb,
@@ -106,9 +136,27 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
        cntx_t*    restrict cntx
      )
 {
-  if ( m0 != 4 )
+  // TODO: Expand this support range to 8 and do:
+  //  8 = 4 + 4;
+  //  7 = 6 + 1;
+  //  6;
+  //  5 = 4 + 1;
+  //  4;
+  //
+  if ( m0 != 6 )
   {
-    // TODO: Implement smaller kernels?
+    if ( m0 > 4 )
+    {
+      bli_dgemmsup_rv_armv8a_asm_4x8n
+      (
+        conja, conjb, 4, n0, k0,
+	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	beta, c, rs_c0, cs_c0, data, cntx
+      );
+      m0 -= 4;
+      a += 4 * rs_a0;
+      c += 4 * rs_c0;
+    }
 
     bli_dgemmsup_r_armv8a_ref2
     (
@@ -166,6 +214,28 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
 " lsl             x6, x6, #3                      \n\t" // rs_c
 " lsl             x7, x7, #3                      \n\t" // cs_c
 "                                                 \n\t"
+" mov             x1, x5                          \n\t"
+" cmp             x7, #8                          \n\t" // Prefetch column-strided C.
+BEQ(C_PREFETCH_COLS)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+BRANCH(C_PREFETCH_END)
+LABEL(C_PREFETCH_COLS)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+LABEL(C_PREFETCH_END)
+//
+// Millikernel.
 LABEL(MILLIKER_MLOOP)
 "                                                 \n\t"
 " mov             x1, x10                         \n\t" // Parameters to be reloaded
@@ -175,108 +245,91 @@ LABEL(MILLIKER_MLOOP)
 " ldr             x8, %[k_left]                   \n\t"
 "                                                 \n\t"
 // Storage scheme:
-//  V[ 0:15] <- C
-//  V[16:23] <- A; Allowed latency: 48 cycles / # of FPUs.
-//  V[24:31] <- B; Allowed latency: 28 cycles / # of FPUs.
+//  V[ 0:23] <- C
+//  V[24:27] <- A
+//  V[28:31] <- B
 // Under this scheme, the following is defined:
-#define DGEMM_4X8_MKER_LOOP_PLAIN_LOC(A0,A1,B0,B1,B2,B3,BADDR,BSHIFT0,BSHIFT1,BSHIFT2,LOADNEXT) \
-  DGEMM_4X8_MKER_LOOP_PLAIN(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,A0,A1,B0,B1,B2,B3,BADDR,BSHIFT0,BSHIFT1,BSHIFT2,LOADNEXT)
+#define DGEMM_6X8_MKER_LOOP_PLAIN_LOC(A0,A1,A2,B0,B1,B2,B3,AELEMADDR,AELEMST,BADDR,BSHIFT,LOADNEXT) \
+  DGEMM_6X8_MKER_LOOP_PLAIN(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,A0,A1,A2,B0,B1,B2,B3,AELEMADDR,AELEMST,BADDR,BSHIFT,LOADNEXT)
+// Load from memory.
 LABEL(LOAD_ABC)
 "                                                 \n\t" // No-microkernel early return is a must
 " cmp             x4, #0                          \n\t" //  to avoid out-of-boundary read.
 BEQ(CLEAR_CCOLS)
 "                                                 \n\t"
-" ldr             q24, [x1, #16*0]                \n\t" // Load B first.
-" ldr             q25, [x1, #16*1]                \n\t"
-" ldr             q26, [x1, #16*2]                \n\t"
-" ldr             q27, [x1, #16*3]                \n\t"
-" add             x1, x1, x3                      \n\t"
-" ldr             q28, [x1, #16*0]                \n\t"
+" ldr             q28, [x1, #16*0]                \n\t" // Load B first.
 " ldr             q29, [x1, #16*1]                \n\t"
 " ldr             q30, [x1, #16*2]                \n\t"
 " ldr             q31, [x1, #16*3]                \n\t"
 " add             x1, x1, x3                      \n\t"
 "                                                 \n\t"
 " mov             x14, x0                         \n\t" // Load A.
-" ld1             {v16.d}[0], [x14], x9           \n\t" // We want A to be kept in L1.
-" ld1             {v16.d}[1], [x14], x9           \n\t"
-" ld1             {v17.d}[0], [x14], x9           \n\t"
-" ld1             {v17.d}[1], [x14], x9           \n\t"
+" ld1             {v24.d}[0], [x14], x9           \n\t" // We want A to be kept in L1.
+" ld1             {v24.d}[1], [x14], x9           \n\t"
+" ld1             {v25.d}[0], [x14], x9           \n\t"
+" ld1             {v25.d}[1], [x14], x9           \n\t"
+" ld1             {v26.d}[0], [x14], x9           \n\t"
+" ld1             {v26.d}[1], [x14], x9           \n\t"
 " add             x0, x0, x2                      \n\t"
 " mov             x14, x0                         \n\t"
-" ld1             {v18.d}[0], [x14], x9           \n\t"
-" ld1             {v18.d}[1], [x14], x9           \n\t"
-" ld1             {v19.d}[0], [x14], x9           \n\t"
-" ld1             {v19.d}[1], [x14], x9           \n\t"
-" add             x0, x0, x2                      \n\t"
-" mov             x14, x0                         \n\t"
-" ld1             {v20.d}[0], [x14], x9           \n\t"
-" ld1             {v20.d}[1], [x14], x9           \n\t"
-" ld1             {v21.d}[0], [x14], x9           \n\t"
-" ld1             {v21.d}[1], [x14], x9           \n\t"
-" add             x0, x0, x2                      \n\t"
-" mov             x14, x0                         \n\t"
-" ld1             {v22.d}[0], [x14], x9           \n\t"
-" ld1             {v22.d}[1], [x14], x9           \n\t"
-" ld1             {v23.d}[0], [x14], x9           \n\t"
-" ld1             {v23.d}[1], [x14], x9           \n\t"
-" add             x0, x0, x2                      \n\t"
+" ld1             {v27.d}[0], [x14], x9           \n\t"
+" ld1             {v27.d}[1], [x14], x9           \n\t"
 LABEL(CLEAR_CCOLS)
 CLEAR8V(0,1,2,3,4,5,6,7)
 CLEAR8V(8,9,10,11,12,13,14,15)
+CLEAR8V(16,17,18,19,20,21,22,23)
 // No-microkernel early return, once again.
 BEQ(K_LEFT_LOOP)
 //
 // Microkernel is defined here as:
-#define DGEMM_4X8_MKER_LOOP_PLAIN_LOC_FWD(A0,A1,B0,B1,B2,B3) \
-  DGEMM_4X8_MKER_LOOP_PLAIN_LOC(A0,A1,B0,B1,B2,B3,x1,0,16*1,16*2,load) \
- "ldr             q"#B3", [x1, #16*3]             \n\t" \
- "mov             x14, x0                         \n\t" \
- "ld1             {v"#A0".d}[0], [x14], x9        \n\t" \
- "ld1             {v"#A0".d}[1], [x14], x9        \n\t" \
- "ld1             {v"#A1".d}[0], [x14], x9        \n\t" \
- "ld1             {v"#A1".d}[1], [x14], x9        \n\t" \
+#define DGEMM_6X8_MKER_LOOP_PLAIN_LOC_FWD(A0,A1,A2,B0,B1,B2,B3) \
+  DGEMM_6X8_MKER_LOOP_PLAIN_LOC(A0,A1,A2,B0,B1,B2,B3,x14,x9,x1,0,load) \
  "add             x0, x0, x2                      \n\t" \
+ "mov             x14, x0                         \n\t" \
+ "ld1             {v"#A2".d}[0], [x14], x9        \n\t" \
+ "ld1             {v"#A2".d}[1], [x14], x9        \n\t" \
+ "ldr             q"#B2", [x1, #16*2]             \n\t" \
+ "ldr             q"#B3", [x1, #16*3]             \n\t" \
  "add             x1, x1, x3                      \n\t"
 // Start microkernel loop.
 LABEL(K_MKER_LOOP)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,28,29,30,31)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC_FWD(27,24,25,28,29,30,31)
 "                                                 \n\t" // Decrease counter before final replica.
 " subs            x4, x4, #1                      \n\t" // Branch early to avoid reading excess mem.
 BEQ(FIN_MKER_LOOP)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC_FWD(16,17,24,25,26,27)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC_FWD(18,19,28,29,30,31)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC_FWD(20,21,24,25,26,27)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC_FWD(22,23,28,29,30,31)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC_FWD(26,27,24,28,29,30,31)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC_FWD(25,26,27,28,29,30,31)
 BRANCH(K_MKER_LOOP)
 //
 // Final microkernel loop.
 LABEL(FIN_MKER_LOOP)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC(16,17,24,25,26,27,x1,0,16*1,16*2,load)
-" ldr             q27, [x1, #16*3]                \n\t"
-" add             x1, x1, x3                      \n\t"
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC(18,19,28,29,30,31,x1,0,16*1,16*2,load)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC(26,27,24,28,29,30,31,x14,x9,x1,0,load)
+" add             x0, x0, x2                      \n\t"
+" ldr             q30, [x1, #16*2]                \n\t"
 " ldr             q31, [x1, #16*3]                \n\t"
 " add             x1, x1, x3                      \n\t"
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC(20,21,24,25,26,27,xzr,-1,-1,-1,noload)
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC(22,23,28,29,30,31,xzr,-1,-1,-1,noload)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC(25,26,27,28,29,30,31,xzr,-1,xzr,-1,noload)
 //
 // Loops left behind microkernels.
 LABEL(K_LEFT_LOOP)
 " cmp             x8, #0                          \n\t" // End of exec.
 BEQ(WRITE_MEM_PREP)
-" ldr             q24, [x1, #16*0]                \n\t" // Load B row.
-" ldr             q25, [x1, #16*1]                \n\t"
-" ldr             q26, [x1, #16*2]                \n\t"
-" ldr             q27, [x1, #16*3]                \n\t"
+" ldr             q28, [x1, #16*0]                \n\t" // Load B row.
+" ldr             q29, [x1, #16*1]                \n\t"
+" ldr             q30, [x1, #16*2]                \n\t"
+" ldr             q31, [x1, #16*3]                \n\t"
 " add             x1, x1, x3                      \n\t"
-" mov             x14, x0                         \n\t" // Load A col.
-" ld1             {v16.d}[0], [x14], x9           \n\t"
-" ld1             {v16.d}[1], [x14], x9           \n\t"
-" ld1             {v17.d}[0], [x14], x9           \n\t"
-" ld1             {v17.d}[1], [x14], x9           \n\t"
+" mov             x14, x0                         \n\t"
+" ld1             {v24.d}[0], [x14], x9           \n\t" // Load A col.
+" ld1             {v24.d}[1], [x14], x9           \n\t"
+" ld1             {v25.d}[0], [x14], x9           \n\t"
+" ld1             {v25.d}[1], [x14], x9           \n\t"
+" ld1             {v26.d}[0], [x14], x9           \n\t"
+" ld1             {v26.d}[1], [x14], x9           \n\t"
 " add             x0, x0, x2                      \n\t"
 " sub             x8, x8, #1                      \n\t"
-DGEMM_4X8_MKER_LOOP_PLAIN_LOC(16,17,24,25,26,27,xzr,-1,-1,-1,noload)
+DGEMM_6X8_MKER_LOOP_PLAIN_LOC(24,25,26,28,29,30,31,xzr,-1,xzr,-1,noload)
 BRANCH(K_LEFT_LOOP)
 //
 // Scale and write to memory.
@@ -291,17 +344,21 @@ BNE(WRITE_MEM_C)
 //
 // C storage in rows.
 LABEL(WRITE_MEM_R)
-" ld1r            {v16.2d}, [x4]                  \n\t" // Load alpha & beta.
-" ld1r            {v17.2d}, [x8]                  \n\t"
-DLOADC_4V_R_FWD(20,21,22,23,x1,0,x6)
-DLOADC_4V_R_FWD(24,25,26,27,x1,0,x6)
-DSCALE8V(20,21,22,23,24,25,26,27,17,0)
-DSCALEA8V(20,21,22,23,24,25,26,27,0,1,2,3,4,5,6,7,16,0)
-//
+" ld1r            {v24.2d}, [x4]                  \n\t" // Load alpha & beta.
+" ld1r            {v25.2d}, [x8]                  \n\t"
+DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
+DSCALE4V(26,27,28,29,25,0)
+DSCALEA4V(26,27,28,29,0,1,2,3,24,0)
 DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
+DSCALE4V(0,1,2,3,25,0)
+DSCALEA4V(0,1,2,3,4,5,6,7,24,0)
+DSTOREC_4V_R_FWD(26,27,28,29,x5,0,x6)
 DLOADC_4V_R_FWD(4,5,6,7,x1,0,x6)
-DSCALE8V(0,1,2,3,4,5,6,7,17,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0)
+DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
+DSCALE8V(4,5,6,7,26,27,28,29,25,0)
+DSCALEA8V(4,5,6,7,26,27,28,29,8,9,10,11,12,13,14,15,24,0)
+DLOADC_4V_R_FWD(8,9,10,11,x1,0,x6)
+DLOADC_4V_R_FWD(12,13,14,15,x1,0,x6)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_R)
@@ -311,57 +368,81 @@ BRANCH(PRFM_END_R)
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_R)
 #endif
-//
-DSTOREC_4V_R_FWD(20,21,22,23,x5,0,x6)
-DSTOREC_4V_R_FWD(24,25,26,27,x5,0,x6)
+DSCALE8V(8,9,10,11,12,13,14,15,25,0)
+DSCALEA8V(8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,0)
 DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
 DSTOREC_4V_R_FWD(4,5,6,7,x5,0,x6)
+DSTOREC_4V_R_FWD(26,27,28,29,x5,0,x6)
+DSTOREC_4V_R_FWD(8,9,10,11,x5,0,x6)
+DSTOREC_4V_R_FWD(12,13,14,15,x5,0,x6)
 BRANCH(END_WRITE_MEM)
 //
 // C storage in columns.
 LABEL(WRITE_MEM_C)
-// In-register transpose.
-" trn1            v16.2d, v0.2d, v4.2d            \n\t" // Column 0.
-" trn1            v17.2d, v8.2d, v12.2d           \n\t"
-" trn2            v18.2d, v0.2d, v4.2d            \n\t" // Column 1.
-" trn2            v19.2d, v8.2d, v12.2d           \n\t"
-" trn1            v20.2d, v1.2d, v5.2d            \n\t" // Column 2.
-" trn1            v21.2d, v9.2d, v13.2d           \n\t"
-" trn2            v22.2d, v1.2d, v5.2d            \n\t" // Column 3.
-" trn2            v23.2d, v9.2d, v13.2d           \n\t"
-" trn1            v24.2d, v2.2d, v6.2d            \n\t" // Column 4.
-" trn1            v25.2d, v10.2d, v14.2d          \n\t"
-" trn2            v26.2d, v2.2d, v6.2d            \n\t" // Column 5.
-" trn2            v27.2d, v10.2d, v14.2d          \n\t"
-" trn1            v28.2d, v3.2d, v7.2d            \n\t" // Column 6.
-" trn1            v29.2d, v11.2d, v15.2d          \n\t"
-" trn2            v30.2d, v3.2d, v7.2d            \n\t" // Column 7.
-" trn2            v31.2d, v11.2d, v15.2d          \n\t"
-" ld1r            {v14.2d}, [x4]                  \n\t" // Load alpha & beta.
-" ld1r            {v15.2d}, [x8]                  \n\t"
-DLOADC_4V_C_FWD(0,1,2,3,x1,0,x7)
-DLOADC_4V_C_FWD(4,5,6,7,x1,0,x7)
-DSCALE8V(0,1,2,3,4,5,6,7,15,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23,14,0)
-//
-DLOADC_4V_C_FWD(16,17,18,19,x1,0,x7)
-DLOADC_4V_C_FWD(20,21,22,23,x1,0,x7)
-DSCALE8V(16,17,18,19,20,21,22,23,15,0)
-DSCALEA8V(16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,14,0)
+// In-register transpose,
+//  do transposition in row-order.
+" trn1            v24.2d, v0.2d, v4.2d            \n\t" // Row 0-1.
+" trn2            v25.2d, v0.2d, v4.2d            \n\t"
+" trn1            v26.2d, v1.2d, v5.2d            \n\t"
+" trn2            v27.2d, v1.2d, v5.2d            \n\t"
+" trn1            v28.2d, v2.2d, v6.2d            \n\t"
+" trn2            v29.2d, v2.2d, v6.2d            \n\t"
+" trn1            v30.2d, v3.2d, v7.2d            \n\t"
+" trn2            v31.2d, v3.2d, v7.2d            \n\t"
+"                                                 \n\t"
+" trn1            v0.2d, v8.2d, v12.2d            \n\t" // Row 2-3.
+" trn2            v1.2d, v8.2d, v12.2d            \n\t"
+" trn1            v2.2d, v9.2d, v13.2d            \n\t"
+" trn2            v3.2d, v9.2d, v13.2d            \n\t"
+" trn1            v4.2d, v10.2d, v14.2d           \n\t"
+" trn2            v5.2d, v10.2d, v14.2d           \n\t"
+" trn1            v6.2d, v11.2d, v15.2d           \n\t"
+" trn2            v7.2d, v11.2d, v15.2d           \n\t"
+"                                                 \n\t"
+" trn1            v8.2d, v16.2d, v20.2d           \n\t" // Row 4-5.
+" trn2            v9.2d, v16.2d, v20.2d           \n\t"
+" trn1            v10.2d, v17.2d, v21.2d          \n\t" // AMARI
+" trn2            v11.2d, v17.2d, v21.2d          \n\t" // AMARI
+" trn1            v12.2d, v18.2d, v22.2d          \n\t" // AMARI
+" trn2            v13.2d, v18.2d, v22.2d          \n\t" // AMARI
+" trn1            v14.2d, v19.2d, v23.2d          \n\t" // AMARI
+" trn2            v15.2d, v19.2d, v23.2d          \n\t" // AMARI
+"                                                 \n\t"
+" ld1r            {v16.2d}, [x4]                  \n\t" // Load alpha & beta.
+" ld1r            {v17.2d}, [x8]                  \n\t"
+DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
+DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
+DSCALE6V(18,19,20,21,22,23,17,0)
+DSCALEA6V(18,19,20,21,22,23,24,0,8,25,1,9,16,0)
+DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
+DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
+DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
+DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
+DLOADC_3V_C_FWD(24,0,8,x1,0,x7)
+DLOADC_3V_C_FWD(25,1,9,x1,0,x7)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
-BRANCH(PRFM_END_C)
+BRANCH(PRFM_END_R)
 " prfm  PLDL1KEEP, [%[a_next], #16*0] \n\t"
 " prfm  PLDL1KEEP, [%[a_next], #16*1] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*0] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
-LABEL(PRFM_END_C)
+LABEL(PRFM_END_R)
 #endif
-//
-DSTOREC_4V_C_FWD(0,1,2,3,x5,0,x7)
-DSTOREC_4V_C_FWD(4,5,6,7,x5,0,x7)
-DSTOREC_4V_C_FWD(16,17,18,19,x5,0,x7)
-DSTOREC_4V_C_FWD(20,21,22,23,x5,0,x7)
+DSCALE6V(18,19,20,21,22,23,17,0)
+DSCALEA6V(18,19,20,21,22,23,26,2,10,27,3,11,16,0)
+DSCALE6V(24,0,8,25,1,9,17,0)
+DSCALEA6V(24,0,8,25,1,9,28,4,12,29,5,13,16,0)
+DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
+DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
+DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
+DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
+DSTOREC_3V_C_FWD(24,0,8,x5,0,x7)
+DSTOREC_3V_C_FWD(25,1,9,x5,0,x7)
+DSCALE6V(18,19,20,21,22,23,17,0)
+DSCALEA6V(18,19,20,21,22,23,30,6,14,31,7,15,16,0)
+DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
+DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)
@@ -415,7 +496,7 @@ consider_edge_cases:
   {
     bli_dgemmsup_r_armv8a_ref2
     (
-      conja, conjb, 4, n_left, k0,
+      conja, conjb, 6, n_left, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
