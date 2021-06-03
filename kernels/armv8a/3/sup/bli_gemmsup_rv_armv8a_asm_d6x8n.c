@@ -145,7 +145,7 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
   //
   if ( m0 != 6 )
   {
-    if ( m0 > 4 )
+    if ( m0 >= 4 )
     {
       bli_dgemmsup_rv_armv8a_asm_4x8n
       (
@@ -158,12 +158,15 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
       c += 4 * rs_c0;
     }
 
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m0, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
+    if ( m0 > 0 )
+    {
+      bli_dgemmsup_r_armv8a_ref2
+      (
+	conja, conjb, m0, n0, k0,
+	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	beta, c, rs_c0, cs_c0, data, cntx
+      );
+    }
     return;
   }
 
@@ -422,12 +425,12 @@ DLOADC_3V_C_FWD(24,0,8,x1,0,x7)
 DLOADC_3V_C_FWD(25,1,9,x1,0,x7)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
-BRANCH(PRFM_END_R)
+BRANCH(PRFM_END_C)
 " prfm  PLDL1KEEP, [%[a_next], #16*0] \n\t"
 " prfm  PLDL1KEEP, [%[a_next], #16*1] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*0] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
-LABEL(PRFM_END_R)
+LABEL(PRFM_END_C)
 #endif
 DSCALE6V(18,19,20,21,22,23,17,0)
 DSCALEA6V(18,19,20,21,22,23,26,2,10,27,3,11,16,0)

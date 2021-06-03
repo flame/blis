@@ -71,6 +71,11 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 #define DGEMM_LOAD1V_load(V1,ADDR,IMM) \
 " ldr  q"#V1", ["#ADDR", #"#IMM"] \n\t"
 
+// Prefetch C in the long direction.
+#define DPRFMC_FWD(CADDR,DLONGC) \
+" prfm PLDL1KEEP, ["#CADDR"]      \n\t" \
+" add  "#CADDR", "#CADDR", "#DLONGC" \n\t"
+
 #define DLOADC_4V_R_FWD(C0,C1,C2,C3,CADDR,CSHIFT,RSC) \
   DLOAD4V(C0,C1,C2,C3,CADDR,CSHIFT) \
 " add  "#CADDR", "#CADDR", "#RSC" \n\t"
@@ -108,8 +113,6 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
 {
   if ( m0 != 4 )
   {
-    // TODO: Implement smaller kernels?
-
     bli_dgemmsup_r_armv8a_ref2
     (
       conja, conjb, m0, n0, k0,
@@ -166,6 +169,26 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
 " lsl             x6, x6, #3                      \n\t" // rs_c
 " lsl             x7, x7, #3                      \n\t" // cs_c
 "                                                 \n\t"
+" mov             x1, x5                          \n\t"
+" cmp             x7, #8                          \n\t" // Prefetch column-strided C.
+BEQ(C_PREFETCH_COLS)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+DPRFMC_FWD(x1,x6)
+BRANCH(C_PREFETCH_END)
+LABEL(C_PREFETCH_COLS)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+DPRFMC_FWD(x1,x7)
+LABEL(C_PREFETCH_END)
+//
+// Millikernel.
 LABEL(MILLIKER_MLOOP)
 "                                                 \n\t"
 " mov             x1, x10                         \n\t" // Parameters to be reloaded
