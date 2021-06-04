@@ -39,7 +39,7 @@
 #if defined(__clang__)
 #define PRAGMA_NOUNROLL _Pragma("nounroll")
 #define PRAGMA_UNROLL_4 _Pragma("unroll 4")
-#elif define(__GNUC__)
+#elif defined(__GNUC__)
 #define PRAGMA_NOUNROLL _Pragma("GCC nounroll")
 #define PRAGMA_UNROLL_4 _Pragma("GCC unroll 4")
 #else
