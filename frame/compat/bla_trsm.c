@@ -395,7 +395,7 @@ void dtrsm_
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d),
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'd',
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -458,7 +458,7 @@ void dtrsm_
                     (double*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);  
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
             else if(bli_is_trans(blis_transa))
@@ -474,7 +474,7 @@ void dtrsm_
                     (double*)b, rs_b,
                     NULL
                 );
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); 
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
         }
@@ -493,12 +493,12 @@ void dtrsm_
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 double inva = 1.0/ *a;
-                for(int indx = 0; indx < m0; indx ++) 
+                for(int indx = 0; indx < m0; indx ++)
                 {
                     b[indx] = ( inva * b[indx] );
                 }
             }
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); 
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
     }
@@ -545,7 +545,7 @@ void dtrsm_
                     (double*)b, cs_b,
                     NULL
                 );
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO); 
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 return;
             }
         }
@@ -556,10 +556,10 @@ void dtrsm_
             (
                 conja,
                 n0,
-                (double*)alpha, 
+                (double*)alpha,
                 b, cs_b,
                 NULL,
-                NULL 
+                NULL
             );
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
@@ -569,7 +569,7 @@ void dtrsm_
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
                 }
             }
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);  
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
             return;
         }
     }
@@ -597,7 +597,7 @@ void dtrsm_
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-    /* Irrespective of num threads single thread bli_dtrsm_small 
+    /* Irrespective of num threads single thread bli_dtrsm_small
      * is performing better than other implementations for [m,n]<=256 */
     /* ToDo: This condition will be tunned for single thread */
     if(m0 <=256 && n0<=256)
@@ -633,12 +633,12 @@ void dtrsm_
         NULL
     );
 
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) 
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
 
-GENTFUNC( float, s, trsm, trsm ) 
+GENTFUNC( float, s, trsm, trsm )
 INSERT_GENTFUNC_BLAS_CZ( trsm, trsm )
 #else
 INSERT_GENTFUNC_BLAS( trsm, trsm )
