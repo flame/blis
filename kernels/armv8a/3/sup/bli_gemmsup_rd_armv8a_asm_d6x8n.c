@@ -281,18 +281,18 @@ DGEMM_6X4X2_K_MKER_LOOP_PLAIN_LOC(26,27,24,25,28,29,30,31,x0,x14,x2,noload)
 //
 // If major kernel is executed,
 //  an additional depth-summation is required.
-" faddp.2d        v0, v0, v1                      \n\t" // Line 0.
-" faddp.2d        v1, v2, v3                      \n\t"
-" faddp.2d        v2, v4, v5                      \n\t" // Line 1.
-" faddp.2d        v3, v6, v7                      \n\t"
-" faddp.2d        v4, v8, v9                      \n\t" // Line 2.
-" faddp.2d        v5, v10, v11                    \n\t"
-" faddp.2d        v6, v12, v13                    \n\t" // Line 3.
-" faddp.2d        v7, v14, v15                    \n\t"
-" faddp.2d        v8, v16, v17                    \n\t" // Line 4.
-" faddp.2d        v9, v18, v19                    \n\t"
-" faddp.2d        v10, v20, v21                   \n\t" // Line 5.
-" faddp.2d        v11, v22, v23                   \n\t"
+" faddp           v0.2d, v0.2d, v1.2d             \n\t" // Line 0.
+" faddp           v1.2d, v2.2d, v3.2d             \n\t"
+" faddp           v2.2d, v4.2d, v5.2d             \n\t" // Line 1.
+" faddp           v3.2d, v6.2d, v7.2d             \n\t"
+" faddp           v4.2d, v8.2d, v9.2d             \n\t" // Line 2.
+" faddp           v5.2d, v10.2d, v11.2d           \n\t"
+" faddp           v6.2d, v12.2d, v13.2d           \n\t" // Line 3.
+" faddp           v7.2d, v14.2d, v15.2d           \n\t"
+" faddp           v8.2d, v16.2d, v17.2d           \n\t" // Line 4.
+" faddp           v9.2d, v18.2d, v19.2d           \n\t"
+" faddp           v10.2d, v20.2d, v21.2d          \n\t" // Line 5.
+" faddp           v11.2d, v22.2d, v23.2d          \n\t"
 "                                                 \n\t"
 // Loops left behind microkernels.
 LABEL(K_LEFT_LOOP)
