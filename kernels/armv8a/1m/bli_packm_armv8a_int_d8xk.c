@@ -40,7 +40,7 @@
 #define PRAGMA_NOUNROLL _Pragma("nounroll")
 #define PRAGMA_UNROLL_2 _Pragma("unroll 2")
 #elif defined(__GNUC__)
-#define PRAGMA_NOUNROLL _Pragma("GCC nounroll")
+#define PRAGMA_NOUNROLL _Pragma("GCC unroll 1")
 #define PRAGMA_UNROLL_2 _Pragma("GCC unroll 2")
 #else
 #define PRAGMA_NOUNROLL
@@ -102,15 +102,15 @@ void bli_dpackm_armv8a_int_8xk
         PRAGMA_UNROLL_2
         for ( dim_t ik = k_iter * 2 + k_left; ik > 0; --ik )
         {
-          poly128_t v0 = vldrq_p128( a_loc + 0 );
-          poly128_t v1 = vldrq_p128( a_loc + 2 );
-          poly128_t v2 = vldrq_p128( a_loc + 4 );
-          poly128_t v3 = vldrq_p128( a_loc + 6 );
+          float64x2_t v0 = vld1q_f64( a_loc + 0 );
+          float64x2_t v1 = vld1q_f64( a_loc + 2 );
+          float64x2_t v2 = vld1q_f64( a_loc + 4 );
+          float64x2_t v3 = vld1q_f64( a_loc + 6 );
 
-          vstrq_p128( p_loc + 0, v0 );
-          vstrq_p128( p_loc + 2, v1 );
-          vstrq_p128( p_loc + 4, v2 );
-          vstrq_p128( p_loc + 6, v3 );
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          vst1q_f64( p_loc + 6, v3 );
 
           a_loc += lda;
           p_loc += ldp;
@@ -130,14 +130,14 @@ void bli_dpackm_armv8a_int_8xk
         PRAGMA_NOUNROLL
         for ( ; k_iter > 0; --k_iter )
         {
-          v0 = (float64x2_t)vldrq_p128( a_loc + inca * 0 );
-          v1 = (float64x2_t)vldrq_p128( a_loc + inca * 1 );
-          v2 = (float64x2_t)vldrq_p128( a_loc + inca * 2 );
-          v3 = (float64x2_t)vldrq_p128( a_loc + inca * 3 );
-          v4 = (float64x2_t)vldrq_p128( a_loc + inca * 4 );
-          v5 = (float64x2_t)vldrq_p128( a_loc + inca * 5 );
-          v6 = (float64x2_t)vldrq_p128( a_loc + inca * 6 );
-          v7 = (float64x2_t)vldrq_p128( a_loc + inca * 7 );
+          v0 = vld1q_f64( a_loc + inca * 0 );
+          v1 = vld1q_f64( a_loc + inca * 1 );
+          v2 = vld1q_f64( a_loc + inca * 2 );
+          v3 = vld1q_f64( a_loc + inca * 3 );
+          v4 = vld1q_f64( a_loc + inca * 4 );
+          v5 = vld1q_f64( a_loc + inca * 5 );
+          v6 = vld1q_f64( a_loc + inca * 6 );
+          v7 = vld1q_f64( a_loc + inca * 7 );
 
           // In-register transpose.
           float64x2_t vd0_1 = vtrn1q_f64( v0, v1 );
@@ -149,16 +149,16 @@ void bli_dpackm_armv8a_int_8xk
           float64x2_t vd2_2 = vtrn2q_f64( v4, v5 );
           float64x2_t vd3_2 = vtrn2q_f64( v6, v7 );
 
-          vstrq_p128( p_loc + 0, (poly128_t)vd0_1 );
-          vstrq_p128( p_loc + 2, (poly128_t)vd1_1 );
-          vstrq_p128( p_loc + 4, (poly128_t)vd2_1 );
-          vstrq_p128( p_loc + 6, (poly128_t)vd3_1 );
+          vst1q_f64( p_loc + 0, vd0_1 );
+          vst1q_f64( p_loc + 2, vd1_1 );
+          vst1q_f64( p_loc + 4, vd2_1 );
+          vst1q_f64( p_loc + 6, vd3_1 );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0, (poly128_t)vd0_2 );
-          vstrq_p128( p_loc + 2, (poly128_t)vd1_2 );
-          vstrq_p128( p_loc + 4, (poly128_t)vd2_2 );
-          vstrq_p128( p_loc + 6, (poly128_t)vd3_2 );
+          vst1q_f64( p_loc + 0, vd0_2 );
+          vst1q_f64( p_loc + 2, vd1_2 );
+          vst1q_f64( p_loc + 4, vd2_2 );
+          vst1q_f64( p_loc + 6, vd3_2 );
           p_loc += ldp;
           a_loc += 2 * lda; // 2;
         }
@@ -173,10 +173,10 @@ void bli_dpackm_armv8a_int_8xk
           v3 = vld1q_lane_f64( a_loc + inca * 6, v3, 0 );
           v3 = vld1q_lane_f64( a_loc + inca * 7, v3, 1 );
 
-          vstrq_p128( p_loc + 0, (poly128_t)v0 );
-          vstrq_p128( p_loc + 2, (poly128_t)v1 );
-          vstrq_p128( p_loc + 4, (poly128_t)v2 );
-          vstrq_p128( p_loc + 6, (poly128_t)v3 );
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          vst1q_f64( p_loc + 6, v3 );
           p_loc += ldp;
           a_loc += lda; // 1;
         }
@@ -193,10 +193,10 @@ void bli_dpackm_armv8a_int_8xk
         PRAGMA_UNROLL_2
         for ( dim_t ik = k_iter * 2 + k_left; ik > 0; --ik )
         {
-          float64x2_t v0 = (float64x2_t)vldrq_p128( a_loc + 0 );
-          float64x2_t v1 = (float64x2_t)vldrq_p128( a_loc + 2 );
-          float64x2_t v2 = (float64x2_t)vldrq_p128( a_loc + 4 );
-          float64x2_t v3 = (float64x2_t)vldrq_p128( a_loc + 6 );
+          float64x2_t v0 = vld1q_f64( a_loc + 0 );
+          float64x2_t v1 = vld1q_f64( a_loc + 2 );
+          float64x2_t v2 = vld1q_f64( a_loc + 4 );
+          float64x2_t v3 = vld1q_f64( a_loc + 6 );
 
           // Scale by kappa.
           v0 = vmulq_f64( v0, vkappa );
@@ -204,10 +204,10 @@ void bli_dpackm_armv8a_int_8xk
           v2 = vmulq_f64( v2, vkappa );
           v3 = vmulq_f64( v3, vkappa );
 
-          vstrq_p128( p_loc + 0, (poly128_t)v0 );
-          vstrq_p128( p_loc + 2, (poly128_t)v1 );
-          vstrq_p128( p_loc + 4, (poly128_t)v2 );
-          vstrq_p128( p_loc + 6, (poly128_t)v3 );
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          vst1q_f64( p_loc + 6, v3 );
 
           a_loc += lda;
           p_loc += ldp;
@@ -227,14 +227,14 @@ void bli_dpackm_armv8a_int_8xk
         PRAGMA_NOUNROLL
         for ( ; k_iter > 0; --k_iter )
         {
-          v0 = (float64x2_t)vldrq_p128( a_loc + inca * 0 );
-          v1 = (float64x2_t)vldrq_p128( a_loc + inca * 1 );
-          v2 = (float64x2_t)vldrq_p128( a_loc + inca * 2 );
-          v3 = (float64x2_t)vldrq_p128( a_loc + inca * 3 );
-          v4 = (float64x2_t)vldrq_p128( a_loc + inca * 4 );
-          v5 = (float64x2_t)vldrq_p128( a_loc + inca * 5 );
-          v6 = (float64x2_t)vldrq_p128( a_loc + inca * 6 );
-          v7 = (float64x2_t)vldrq_p128( a_loc + inca * 7 );
+          v0 = vld1q_f64( a_loc + inca * 0 );
+          v1 = vld1q_f64( a_loc + inca * 1 );
+          v2 = vld1q_f64( a_loc + inca * 2 );
+          v3 = vld1q_f64( a_loc + inca * 3 );
+          v4 = vld1q_f64( a_loc + inca * 4 );
+          v5 = vld1q_f64( a_loc + inca * 5 );
+          v6 = vld1q_f64( a_loc + inca * 6 );
+          v7 = vld1q_f64( a_loc + inca * 7 );
 
           // Scale by kappa.
           v0 = vmulq_f64( v0, vkappa );
@@ -256,16 +256,16 @@ void bli_dpackm_armv8a_int_8xk
           float64x2_t vd2_2 = vtrn2q_f64( v4, v5 );
           float64x2_t vd3_2 = vtrn2q_f64( v6, v7 );
 
-          vstrq_p128( p_loc + 0, (poly128_t)vd0_1 );
-          vstrq_p128( p_loc + 2, (poly128_t)vd1_1 );
-          vstrq_p128( p_loc + 4, (poly128_t)vd2_1 );
-          vstrq_p128( p_loc + 6, (poly128_t)vd3_1 );
+          vst1q_f64( p_loc + 0, vd0_1 );
+          vst1q_f64( p_loc + 2, vd1_1 );
+          vst1q_f64( p_loc + 4, vd2_1 );
+          vst1q_f64( p_loc + 6, vd3_1 );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0, (poly128_t)vd0_2 );
-          vstrq_p128( p_loc + 2, (poly128_t)vd1_2 );
-          vstrq_p128( p_loc + 4, (poly128_t)vd2_2 );
-          vstrq_p128( p_loc + 6, (poly128_t)vd3_2 );
+          vst1q_f64( p_loc + 0, vd0_2 );
+          vst1q_f64( p_loc + 2, vd1_2 );
+          vst1q_f64( p_loc + 4, vd2_2 );
+          vst1q_f64( p_loc + 6, vd3_2 );
           p_loc += ldp;
           a_loc += 2 * lda; // 2;
         }
@@ -286,10 +286,10 @@ void bli_dpackm_armv8a_int_8xk
           v2 = vmulq_f64( v2, vkappa );
           v3 = vmulq_f64( v3, vkappa );
 
-          vstrq_p128( p_loc + 0, (poly128_t)v0 );
-          vstrq_p128( p_loc + 2, (poly128_t)v1 );
-          vstrq_p128( p_loc + 4, (poly128_t)v2 );
-          vstrq_p128( p_loc + 6, (poly128_t)v3 );
+          vst1q_f64( p_loc + 0, v0 );
+          vst1q_f64( p_loc + 2, v1 );
+          vst1q_f64( p_loc + 4, v2 );
+          vst1q_f64( p_loc + 6, v3 );
           p_loc += ldp;
           a_loc += lda; // 1;
         }

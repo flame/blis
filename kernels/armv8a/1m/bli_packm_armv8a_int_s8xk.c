@@ -40,7 +40,7 @@
 #define PRAGMA_NOUNROLL _Pragma("nounroll")
 #define PRAGMA_UNROLL_4 _Pragma("unroll 4")
 #elif defined(__GNUC__)
-#define PRAGMA_NOUNROLL _Pragma("GCC nounroll")
+#define PRAGMA_NOUNROLL _Pragma("GCC unroll 1")
 #define PRAGMA_UNROLL_4 _Pragma("GCC unroll 4")
 #else
 #define PRAGMA_NOUNROLL
@@ -102,11 +102,11 @@ void bli_spackm_armv8a_int_8xk
         PRAGMA_UNROLL_4
         for ( dim_t ik = k_iter * 4 + k_left; ik > 0; --ik )
         {
-          poly128_t v0 = vldrq_p128( a_loc +  0 );
-          poly128_t v1 = vldrq_p128( a_loc +  4 );
+          float32x4_t v0 = vld1q_f32( a_loc +  0 );
+          float32x4_t v1 = vld1q_f32( a_loc +  4 );
 
-          vstrq_p128( p_loc +  0, v0 );
-          vstrq_p128( p_loc +  4, v1 );
+          vst1q_f32( p_loc +  0, v0 );
+          vst1q_f32( p_loc +  4, v1 );
 
           a_loc += lda;
           p_loc += ldp;
@@ -130,14 +130,14 @@ void bli_spackm_armv8a_int_8xk
         PRAGMA_NOUNROLL
         for ( ; k_iter > 0; --k_iter )
         {
-          v0 = (float32x4_t)vldrq_p128( a_loc + inca * 0 );
-          v1 = (float32x4_t)vldrq_p128( a_loc + inca * 1 );
-          v2 = (float32x4_t)vldrq_p128( a_loc + inca * 2 );
-          v3 = (float32x4_t)vldrq_p128( a_loc + inca * 3 );
-          v4 = (float32x4_t)vldrq_p128( a_loc + inca * 4 );
-          v5 = (float32x4_t)vldrq_p128( a_loc + inca * 5 );
-          v6 = (float32x4_t)vldrq_p128( a_loc + inca * 6 );
-          v7 = (float32x4_t)vldrq_p128( a_loc + inca * 7 );
+          v0 = vld1q_f32( a_loc + inca * 0 );
+          v1 = vld1q_f32( a_loc + inca * 1 );
+          v2 = vld1q_f32( a_loc + inca * 2 );
+          v3 = vld1q_f32( a_loc + inca * 3 );
+          v4 = vld1q_f32( a_loc + inca * 4 );
+          v5 = vld1q_f32( a_loc + inca * 5 );
+          v6 = vld1q_f32( a_loc + inca * 6 );
+          v7 = vld1q_f32( a_loc + inca * 7 );
 
           // In-register transpose.
           //
@@ -160,20 +160,20 @@ void bli_spackm_armv8a_int_8xk
           v6 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
           v7 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v0  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v4  );
+          vst1q_f32( p_loc + 0,  v0  );
+          vst1q_f32( p_loc + 4,  v4  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v1  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v5  );
+          vst1q_f32( p_loc + 0,  v1  );
+          vst1q_f32( p_loc + 4,  v5  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v2  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v6  );
+          vst1q_f32( p_loc + 0,  v2  );
+          vst1q_f32( p_loc + 4,  v6  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v3  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v7  );
+          vst1q_f32( p_loc + 0,  v3  );
+          vst1q_f32( p_loc + 4,  v7  );
           p_loc += ldp;
           a_loc += 4 * lda; // 4;
         }
@@ -188,8 +188,8 @@ void bli_spackm_armv8a_int_8xk
           v1 = vld1q_lane_f32( a_loc + inca * 6 , v1, 2 );
           v1 = vld1q_lane_f32( a_loc + inca * 7 , v1, 3 );
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v0 );
-          vstrq_p128( p_loc + 4,  (poly128_t)v1 );
+          vst1q_f32( p_loc + 0,  v0 );
+          vst1q_f32( p_loc + 4,  v1 );
           p_loc += ldp;
           a_loc += lda; // 1;
         }
@@ -206,15 +206,15 @@ void bli_spackm_armv8a_int_8xk
         PRAGMA_UNROLL_4
         for ( dim_t ik = k_iter * 4 + k_left; ik > 0; --ik )
         {
-          float32x4_t v0 = (float32x4_t)vldrq_p128( a_loc + 0 );
-          float32x4_t v1 = (float32x4_t)vldrq_p128( a_loc + 4 );
+          float32x4_t v0 = vld1q_f32( a_loc + 0 );
+          float32x4_t v1 = vld1q_f32( a_loc + 4 );
 
           // Scale by kappa.
           v0 = vmulq_f32( v0, vkappa );
           v1 = vmulq_f32( v1, vkappa );
 
-          vstrq_p128( p_loc + 0, (poly128_t)v0 );
-          vstrq_p128( p_loc + 4, (poly128_t)v1 );
+          vst1q_f32( p_loc + 0, v0 );
+          vst1q_f32( p_loc + 4, v1 );
 
           a_loc += lda;
           p_loc += ldp;
@@ -238,14 +238,14 @@ void bli_spackm_armv8a_int_8xk
         PRAGMA_NOUNROLL
         for ( ; k_iter > 0; --k_iter )
         {
-          v0  = (float32x4_t)vldrq_p128( a_loc + inca * 0  );
-          v1  = (float32x4_t)vldrq_p128( a_loc + inca * 1  );
-          v2  = (float32x4_t)vldrq_p128( a_loc + inca * 2  );
-          v3  = (float32x4_t)vldrq_p128( a_loc + inca * 3  );
-          v4  = (float32x4_t)vldrq_p128( a_loc + inca * 4  );
-          v5  = (float32x4_t)vldrq_p128( a_loc + inca * 5  );
-          v6  = (float32x4_t)vldrq_p128( a_loc + inca * 6  );
-          v7  = (float32x4_t)vldrq_p128( a_loc + inca * 7  );
+          v0  = vld1q_f32( a_loc + inca * 0  );
+          v1  = vld1q_f32( a_loc + inca * 1  );
+          v2  = vld1q_f32( a_loc + inca * 2  );
+          v3  = vld1q_f32( a_loc + inca * 3  );
+          v4  = vld1q_f32( a_loc + inca * 4  );
+          v5  = vld1q_f32( a_loc + inca * 5  );
+          v6  = vld1q_f32( a_loc + inca * 6  );
+          v7  = vld1q_f32( a_loc + inca * 7  );
 
           // Scale by kappa.
           v0  = vmulq_f32( v0,  vkappa );
@@ -278,20 +278,20 @@ void bli_spackm_armv8a_int_8xk
           v6 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt0, (float64x2_t)vt2 );
           v7 = (float32x4_t)vtrn2q_f64( (float64x2_t)vt1, (float64x2_t)vt3 );
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v0  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v4  );
+          vst1q_f32( p_loc + 0,  v0  );
+          vst1q_f32( p_loc + 4,  v4  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v1  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v5  );
+          vst1q_f32( p_loc + 0,  v1  );
+          vst1q_f32( p_loc + 4,  v5  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v2  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v6  );
+          vst1q_f32( p_loc + 0,  v2  );
+          vst1q_f32( p_loc + 4,  v6  );
           p_loc += ldp;
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v3  );
-          vstrq_p128( p_loc + 4,  (poly128_t)v7  );
+          vst1q_f32( p_loc + 0,  v3  );
+          vst1q_f32( p_loc + 4,  v7  );
           p_loc += ldp;
           a_loc += 4 * lda; // 4;
         }
@@ -310,8 +310,8 @@ void bli_spackm_armv8a_int_8xk
           v0 = vmulq_f32( v0, vkappa );
           v1 = vmulq_f32( v1, vkappa );
 
-          vstrq_p128( p_loc + 0,  (poly128_t)v0 );
-          vstrq_p128( p_loc + 4,  (poly128_t)v1 );
+          vst1q_f32( p_loc + 0,  v0 );
+          vst1q_f32( p_loc + 4,  v1 );
           p_loc += ldp;
           a_loc += lda; // 1;
         }
