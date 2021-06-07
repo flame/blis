@@ -1050,6 +1050,7 @@ static uint32_t get_coretype(void) {
 	// ARM_CPU_IMP_NVIDIA 0x4E
 	// ARM_CPU_IMP_FUJITSU 0x46
 	// ARM_CPU_IMP_HISI 0x48
+	// ARM_CPU_IMP_APPLE 0x61
 	//
 	// ARM_CPU_PART_AEM_V8 0xD0F
 	// ARM_CPU_PART_FOUNDATION 0xD00
@@ -1062,6 +1063,13 @@ static uint32_t get_coretype(void) {
 	// ARM_CPU_PART_CORTEX_A55 0xD05
 	// ARM_CPU_PART_CORTEX_A76 0xD0B
 	// ARM_CPU_PART_NEOVERSE_N1 0xD0C
+	// ARM_CPU_PART_CORTEX_A77 0xD0D
+	//   from GCC:
+	// ARM_CPU_PART_CORTEX_A78 0xd41
+	// ARM_CPU_PART_CORTEX_X1 0xd44
+	// ARM_CPU_PART_CORTEX_V1 0xd40
+	// ARM_CPU_PART_CORTEX_N2 0xd49
+	// ARM_CPU_PART_CORTEX_R82 0xd15
 	//
 	// APM_CPU_PART_POTENZA 0x000
 	//
@@ -1077,9 +1085,9 @@ static uint32_t get_coretype(void) {
 	// QCOM_CPU_PART_FALKOR_V1 0x800
 	// QCOM_CPU_PART_FALKOR 0xC00
 	// QCOM_CPU_PART_KRYO 0x200
-        // QCOM_CPU_PART_KRYO_3XX_SILVER 0x803
-        // QCOM_CPU_PART_KRYO_4XX_GOLD 0x804
-        // QCOM_CPU_PART_KRYO_4XX_SILVER 0x805
+	// QCOM_CPU_PART_KRYO_3XX_SILVER 0x803
+	// QCOM_CPU_PART_KRYO_4XX_GOLD 0x804
+	// QCOM_CPU_PART_KRYO_4XX_SILVER 0x805
 	//
 	// NVIDIA_CPU_PART_DENVER 0x003
 	// NVIDIA_CPU_PART_CARMEL 0x004
@@ -1087,6 +1095,9 @@ static uint32_t get_coretype(void) {
 	// FUJITSU_CPU_PART_A64FX 0x001
 	//
 	// HISI_CPU_PART_TSV110 0xD01
+
+	// APPLE_CPU_PART_M1_ICESTORM 0x022
+	// APPLE_CPU_PART_M1_FIRESTORM 0x023
 
 	// Fixme:  After merging the vpu_count branch we could report the
 	// part here with bli_dolog.
@@ -1131,6 +1142,8 @@ static uint32_t get_coretype(void) {
 	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; assume that's
 	// as graviton2, which has: l1d 64k, l2 1024, l3 32M,
 	// Features : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
+	// No idea about M1 -- not currently in OpenBLAS -- but it does use
+	// neon (and has some sort of hidden "matrix coprocessor").
 	return BLIS_ARCH_CORTEXA57;
 }
 #endif
