@@ -67,7 +67,7 @@ void AOCL_DTL_log_gemm_sizes(int8 loglevel,
     }
 
     //{S, D, C, Z} m, n, k, lda, ldb, ldc, transa, transb, alpha_real, alpha_imag, beta_real, beta_imag
-    sprintf(buffer, "%c %ld %ld %ld %ld %ld %ld %c %c %lf %lf %lf %lf",
+    sprintf(buffer, " %c %ld %ld %ld %ld %ld %ld %c %c %lf %lf %lf %lf",
                     dt_type,
                     (dim_t)m, (dim_t)n, (dim_t)k,
                     (dim_t)lda, (dim_t)ldb, (dim_t)ldc,
@@ -120,7 +120,7 @@ void AOCL_DTL_log_trsm_sizes(int8 loglevel,
     }
 
     //{S, D, C, Z} side, uplo, transa, diaga, m, n, lda, ldb, alpha_real, alpha_imag
-    sprintf(buffer, "%c %c %c %c %c %ld %ld %ld %ld %lf %lf",dt_type,
+    sprintf(buffer, " %c %c %c %c %c %ld %ld %ld %ld %lf %lf",dt_type,
                     side, uploa, transa, diaga,
                     (dim_t)m, (dim_t)n, (dim_t)lda, (dim_t)ldb,
                     alpha_real, alpha_imag
@@ -231,7 +231,7 @@ void AOCL_DTL_log_hemm_sizes(int8 loglevel,
 
     // {C, Z} { side, uploa, m, n, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
 
-    sprintf(buffer, "%c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
+    sprintf(buffer, " %c %c %c %ld %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, side, uploa, (dim_t)m, (dim_t)n, alpha_real, alpha_imag,
             (dim_t)lda, (dim_t)ldb, beta_real, beta_imag, (dim_t)ldc);
 
@@ -618,7 +618,7 @@ void AOCL_DTL_log_hemv_sizes ( int8 loglevel,
         beta_imag = ((dcomplex*)beta)->imag;
     }
     // {S, D,C, Z} { uploa, m, alpha_real, alpha_imag, lda, incx, beta_real, beta_imag, incy}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld %lf %lf %ld",
+    sprintf(buffer, " %c %c %ld %lf %lf %ld %ld %lf %lf %ld",
             dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)lda, (dim_t)incx, beta_real, beta_imag, (dim_t)incy);
 
 
@@ -664,7 +664,7 @@ void AOCL_DTL_log_her2_sizes ( int8 loglevel,
     }
 
     // {S, D, C, Z} {uploa, m, alpha_real, alpha_imag, incx, incy}
-    sprintf(buffer, "%c %c %ld %lf %lf %ld %ld",
+    sprintf(buffer, " %c %c %ld %lf %lf %ld %ld",
                     dt_type, uploa, (dim_t)m, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -682,7 +682,7 @@ void AOCL_DTL_log_amax_sizes ( int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, " %c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 
@@ -698,7 +698,7 @@ void AOCL_DTL_log_asum_sizes ( int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx}
-    sprintf(buffer, "%c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
+    sprintf(buffer, " %c %ld %ld", dt_type, (dim_t)n, (dim_t)incx);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 
@@ -751,7 +751,7 @@ void AOCL_DTL_log_axpby_sizes ( int8 loglevel,
     }
 
     // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, beta_real, beta_imag, incy}
-    sprintf(buffer, "%c %ld %lf %lf %ld %lf %lf %ld",
+    sprintf(buffer, " %c %ld %lf %lf %ld %lf %lf %ld",
                     dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx,
                     beta_real, beta_imag, (dim_t)incy);
 
@@ -795,7 +795,7 @@ void AOCL_DTL_log_axpy_sizes ( int8 loglevel,
     }
 
     // {S, D, C, Z} {n, alpha_real, alpha_imag, incx, incy}
-    sprintf(buffer, "%c %ld %lf %lf %ld %ld",
+    sprintf(buffer, " %c %ld %lf %lf %ld %ld",
                     dt_type, (dim_t)n, alpha_real, alpha_imag, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
@@ -813,7 +813,7 @@ void AOCL_DTL_log_copy_sizes( int8 loglevel,
 {
     char buffer[256];
     // {S, D, C, Z} {n, incx, incy}
-    sprintf(buffer, "%c %ld %ld %ld", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
+    sprintf(buffer, " %c %ld %ld %ld", dt_type, (dim_t)n, (dim_t)incx, (dim_t)incy);
 
     DTL_Trace(loglevel, TRACE_TYPE_LOG, function_name, function_name, line, buffer);
 

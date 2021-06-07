@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin.
-   Copyright (C) 2019-2020, Advanced Micro Devices, Inc.All Rights Reserved.
+   Copyright (C) 2019 - 2021, Advanced Micro Devices, Inc.All Rights Reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -150,8 +150,8 @@ void PASTEF77(ch,blasname) \
      ) \
 { \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-	AOCL_DTL_LOG_SYR2K_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc),\
-			 *MKSTR(transa), *m, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc ) \
+	AOCL_DTL_LOG_SYR2K_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploc,\
+			 *transa, *m, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc ) \
 	uplo_t  blis_uploc; \
 	trans_t blis_transa; \
 	dim_t   m0, k0; \

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019-2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ void PASTEF77(ch,blasname) \
 	inc_t   rs_c, cs_c; \
 \
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1) \
-	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *MKSTR(uploc), *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
+	AOCL_DTL_LOG_HERK_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *uploc, *transa, *m, *k, (void*)alpha, *lda, (void*)beta, *ldc);\
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
 \
