@@ -67,10 +67,12 @@ int main( int argc, char** argv )
     dim_t  p_inc = 0; // to keep track of number of inputs
     char  dt_ch;
 
-    char  uploa, uploa_c;
+    char uploa_c;
+    uplo_t  uploa;
     f77_char f77_uploa;
 
-    char  transa, transA;
+    char transA;
+    trans_t  transa;
     f77_char f77_transa;
 
     char  diaga_c;

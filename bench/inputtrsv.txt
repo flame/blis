@@ -22,3 +22,10 @@ ctrsv_:122: c u t u 2000 2000 10
 ztrsv_:122: z u t n 2000 2000 10
 ztrsv_:122: z u t n 2000 2000 10
 ztrsv_:122: z u t u 2000 2000 10
+dtrsv_:122: d L C N 13 105 1
+dtrsv_:122: d L C N 13 113 1
+dtrsv_:122: d L C N 13 115 1
+dtrsv_:122: d L C N 13 137 1
+dtrsv_:122: d L C N 13 169 1
+dtrsv_:122: d L C N 13 284 1
+dtrsv_:122: d L C N 13 297 1
