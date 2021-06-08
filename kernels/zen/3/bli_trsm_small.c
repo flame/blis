@@ -482,7 +482,7 @@ err_t bli_trsm_small
     /* ToDo: Temporary threshold condition for trsm single thread.
     *  It will be updated with arch based threshold function which reads
     *  tunned thresholds for all 64 (datatype,side,uplo,transa,unit,) trsm
-       combinations. We arrived to this condition based on performance 
+       combinations. We arrived to this condition based on performance
        comparsion with only available native path
     */
     if(m > 256 && n > 256) {
@@ -13809,7 +13809,7 @@ static  err_t bli_dtrsm_small_XAuB
     double* restrict B = b->buffer;      //pointer to matrix B
 
     double *a01, *a11, *b10, *b11;   //pointers for GEMM and TRSM blocks
-    
+
     gint_t required_packing_A = 1;
     mem_t local_mem_buf_A_s;
     double *D_A_pack = NULL;
@@ -14014,6 +14014,9 @@ static  err_t bli_dtrsm_small_XAuB
                 ymm2 = _mm256_broadcast_sd((double const *)(a01 + p_lda * 2)); //A01[0][2]
                 ymm7 = _mm256_fmadd_pd(ymm2, ymm0, ymm7); //ymm2 += (B10[0][0]*A01[0][2] B10[1][0]*A01[0][2] B10[2][0]*A01[0][2] B10[3][0]*A01[0][2])
                 ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8); //ymm6 += (B10[4][0]*A01[0][2] B10[5][0]*A01[0][2] B10[6][0]*A01[0][2] B10[7][0]*A01[0][2])
+
+                //Prefetch the next micro panel
+                _mm_prefetch((char*)( b10 + 8*cs_b), _MM_HINT_T0);
 
                 ymm2 = _mm256_broadcast_sd((double const *)(a01 + p_lda * 3)); //A01[0][3]
                 ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); //ymm3 += (B10[0][0]*A01[0][3] B10[1][0]*A01[0][3] B10[2][0]*A01[0][3] B10[3][0]*A01[0][3])
@@ -14226,17 +14229,11 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -14388,17 +14385,11 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -14562,17 +14553,11 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -14736,17 +14721,11 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -14992,17 +14971,11 @@ static  err_t bli_dtrsm_small_XAuB
             ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
             ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
             // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15138,17 +15111,9 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15247,17 +15212,9 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15363,17 +15320,9 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15480,17 +15429,9 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15667,19 +15608,10 @@ static  err_t bli_dtrsm_small_XAuB
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
             ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15781,17 +15713,8 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15868,17 +15791,8 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -15961,17 +15875,8 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16054,17 +15959,8 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16210,21 +16106,9 @@ static  err_t bli_dtrsm_small_XAuB
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
             ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16297,17 +16181,7 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16365,17 +16239,7 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16437,17 +16301,7 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16509,17 +16363,7 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16638,23 +16482,8 @@ static  err_t bli_dtrsm_small_XAuB
 
             ymm3 = _mm256_setzero_pd();
             ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
-            // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16703,17 +16532,6 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16755,17 +16573,6 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16809,17 +16616,6 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -16863,17 +16659,6 @@ static  err_t bli_dtrsm_small_XAuB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -17219,6 +17004,9 @@ static  err_t bli_dtrsm_small_XAltB
                 ymm7 = _mm256_fmadd_pd(ymm2, ymm0, ymm7); //ymm2 += (B10[0][0]*A01[0][2] B10[1][0]*A01[0][2] B10[2][0]*A01[0][2] B10[3][0]*A01[0][2])
                 ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8); //ymm6 += (B10[4][0]*A01[0][2] B10[5][0]*A01[0][2] B10[6][0]*A01[0][2] B10[7][0]*A01[0][2])
 
+                //Prefetch the next micro panel
+                _mm_prefetch((char*)( b10 + 8*cs_b), _MM_HINT_T0);
+
                 ymm2 = _mm256_broadcast_sd((double const *)(a01 + p_lda * 3)); //A01[0][3]
                 ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); //ymm3 += (B10[0][0]*A01[0][3] B10[1][0]*A01[0][3] B10[2][0]*A01[0][3] B10[3][0]*A01[0][3])
                 ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10); //ymm7 += (B10[4][0]*A01[0][3] B10[5][0]*A01[0][3] B10[6][0]*A01[0][3] B10[7][0]*A01[0][3])
@@ -17438,17 +17226,11 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -17609,17 +17391,11 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -17792,17 +17568,11 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -17975,17 +17745,11 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18259,17 +18023,11 @@ static  err_t bli_dtrsm_small_XAltB
             ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
             ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
             // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18409,17 +18167,9 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18523,17 +18273,9 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18645,17 +18387,9 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18767,17 +18501,9 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -18982,19 +18708,10 @@ static  err_t bli_dtrsm_small_XAltB
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
             ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19098,17 +18815,8 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19188,17 +18896,8 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19284,17 +18983,8 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19380,17 +19070,8 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19566,21 +19247,9 @@ static  err_t bli_dtrsm_small_XAltB
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
             ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19722,17 +19391,7 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19795,17 +19454,7 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -19868,17 +19517,7 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20029,23 +19668,8 @@ static  err_t bli_dtrsm_small_XAltB
 
             ymm3 = _mm256_setzero_pd();
             ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
-            // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20094,17 +19718,6 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20147,17 +19760,6 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20202,17 +19804,6 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20257,17 +19848,6 @@ static  err_t bli_dtrsm_small_XAltB
             k_iter = j;                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20568,6 +20148,9 @@ static  err_t bli_dtrsm_small_XAlB
                 ymm7 = _mm256_fmadd_pd(ymm2, ymm0, ymm7); //ymm2 += (B10[0][0]*A01[0][2] B10[1][0]*A01[0][2] B10[2][0]*A01[0][2] B10[3][0]*A01[0][2])
                 ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8); //ymm6 += (B10[4][0]*A01[0][2] B10[5][0]*A01[0][2] B10[6][0]*A01[0][2] B10[7][0]*A01[0][2])
 
+                //Prefetch the next micro panel
+                _mm_prefetch((char*)( b10 + 8*cs_b), _MM_HINT_T0);
+
                 ymm2 = _mm256_broadcast_sd((double const *)(a01 + p_lda * 3)); //A01[0][3]
                 ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); //ymm3 += (B10[0][0]*A01[0][3] B10[1][0]*A01[0][3] B10[2][0]*A01[0][3] B10[3][0]*A01[0][3])
                 ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10); //ymm7 += (B10[4][0]*A01[0][3] B10[5][0]*A01[0][3] B10[6][0]*A01[0][3] B10[7][0]*A01[0][3])
@@ -20779,17 +20362,11 @@ static  err_t bli_dtrsm_small_XAlB
             k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -20944,17 +20521,11 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21118,17 +20689,11 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21292,17 +20857,11 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21549,17 +21108,11 @@ static  err_t bli_dtrsm_small_XAlB
             ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
             ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
             // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21695,18 +21248,9 @@ static  err_t bli_dtrsm_small_XAlB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21808,18 +21352,9 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -21927,18 +21462,9 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22046,18 +21572,9 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22234,19 +21751,10 @@ static  err_t bli_dtrsm_small_XAlB
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
             ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22348,18 +21856,8 @@ static  err_t bli_dtrsm_small_XAlB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22439,18 +21937,8 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22534,18 +22022,8 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22629,18 +22107,8 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22787,21 +22255,9 @@ static  err_t bli_dtrsm_small_XAlB
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
             ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22872,18 +22328,7 @@ static  err_t bli_dtrsm_small_XAlB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -22942,18 +22387,7 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23014,18 +22448,7 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23086,18 +22509,7 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23215,23 +22627,8 @@ static  err_t bli_dtrsm_small_XAlB
 
             ymm3 = _mm256_setzero_pd();
             ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
-            // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23278,18 +22675,6 @@ static  err_t bli_dtrsm_small_XAlB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23332,18 +22717,6 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23386,18 +22759,6 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23440,18 +22801,6 @@ static  err_t bli_dtrsm_small_XAlB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -23798,6 +23147,9 @@ static  err_t bli_dtrsm_small_XAutB
                 ymm7 = _mm256_fmadd_pd(ymm2, ymm0, ymm7); //ymm2 += (B10[0][0]*A01[0][2] B10[1][0]*A01[0][2] B10[2][0]*A01[0][2] B10[3][0]*A01[0][2])
                 ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8); //ymm6 += (B10[4][0]*A01[0][2] B10[5][0]*A01[0][2] B10[6][0]*A01[0][2] B10[7][0]*A01[0][2])
 
+                //Prefetch the next micro panel
+                _mm_prefetch((char*)( b10 + 8*cs_b), _MM_HINT_T0);
+
                 ymm2 = _mm256_broadcast_sd((double const *)(a01 + p_lda * 3)); //A01[0][3]
                 ymm9 = _mm256_fmadd_pd(ymm2, ymm0, ymm9); //ymm3 += (B10[0][0]*A01[0][3] B10[1][0]*A01[0][3] B10[2][0]*A01[0][3] B10[3][0]*A01[0][3])
                 ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10); //ymm7 += (B10[4][0]*A01[0][3] B10[5][0]*A01[0][3] B10[6][0]*A01[0][3] B10[7][0]*A01[0][3])
@@ -24009,18 +23361,11 @@ static  err_t bli_dtrsm_small_XAutB
             k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
             ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
             ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -24174,18 +23519,11 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -24349,18 +23687,11 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -24524,18 +23855,11 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-j-D_NR);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
                 ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
                 ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -24801,17 +24125,11 @@ static  err_t bli_dtrsm_small_XAutB
             ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
             ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
             // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -24947,18 +24265,9 @@ static  err_t bli_dtrsm_small_XAutB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
             ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25059,17 +24368,9 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
 
 
                 ///GEMM implementation starts///
@@ -25177,18 +24478,9 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25295,18 +24587,9 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
                 ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25506,19 +24789,10 @@ static  err_t bli_dtrsm_small_XAutB
             ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
             ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
             // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25620,18 +24894,8 @@ static  err_t bli_dtrsm_small_XAutB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
             ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25710,18 +24974,8 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25804,18 +25058,8 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -25898,18 +25142,8 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
                 ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26083,21 +25317,9 @@ static  err_t bli_dtrsm_small_XAutB
             ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
             ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
             // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26170,18 +25392,7 @@ static  err_t bli_dtrsm_small_XAutB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
             ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26241,18 +25452,7 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26314,18 +25514,7 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26387,18 +25576,7 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
                 ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26548,23 +25726,8 @@ static  err_t bli_dtrsm_small_XAutB
 
             ymm3 = _mm256_setzero_pd();
             ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
 
             // ymm3   | ymm4
-            // ymm5   | ymm6
-            // ymm7   | ymm8
-            // ymm9   | ymm10
-            // ymm11  | ymm12
-            // ymm13  | ymm14
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26611,18 +25774,6 @@ static  err_t bli_dtrsm_small_XAutB
             k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
             ymm3 = _mm256_setzero_pd();
-            ymm4 = _mm256_setzero_pd();
-            ymm5 = _mm256_setzero_pd();
-            ymm6 = _mm256_setzero_pd();
-            ymm7 = _mm256_setzero_pd();
-            ymm8 = _mm256_setzero_pd();
-            ymm9 = _mm256_setzero_pd();
-            ymm10 = _mm256_setzero_pd();
-            ymm11 = _mm256_setzero_pd();
-            ymm12 = _mm256_setzero_pd();
-            ymm13 = _mm256_setzero_pd();
-            ymm14 = _mm256_setzero_pd();
-
 
             ///GEMM implementation starts///
             for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26665,18 +25816,6 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26719,18 +25858,6 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
@@ -26773,18 +25900,6 @@ static  err_t bli_dtrsm_small_XAutB
                 k_iter = (n-n_remainder);                    //number of GEMM operations to be done(in blocks of 4x4)
 
                 ymm3 = _mm256_setzero_pd();
-                ymm4 = _mm256_setzero_pd();
-                ymm5 = _mm256_setzero_pd();
-                ymm6 = _mm256_setzero_pd();
-                ymm7 = _mm256_setzero_pd();
-                ymm8 = _mm256_setzero_pd();
-                ymm9 = _mm256_setzero_pd();
-                ymm10 = _mm256_setzero_pd();
-                ymm11 = _mm256_setzero_pd();
-                ymm12 = _mm256_setzero_pd();
-                ymm13 = _mm256_setzero_pd();
-                ymm14 = _mm256_setzero_pd();
-
 
                 ///GEMM implementation starts///
                 for(k = 0; k < k_iter; k++)      //loop for number of GEMM operations
