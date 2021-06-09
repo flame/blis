@@ -58,17 +58,12 @@
 #define BLIS_SMALL_K_RECT_MATRIX_THRES 128
 
 #define BLIS_SMALL_MATRIX_THRES_TRSM   32768 //128(128+128) => m*(m+n)
-#define BLIS_SMALL_MATRIX_A_THRES_TRSM	128
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
 
 //This macro will enable  BLIS DGEMM to choose block sizes for a  single instance mode
 #define BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES 	0
 
-#define D_BLIS_SMALL_MATRIX_THRES_TRSM_NAPLES 250
-#define D_BLIS_SMALL_MATRIX_THRES_TRSM_ALXB_NAPLES 90
-
-#define D_BLIS_SMALL_MATRIX_THRES_TRSM_DIM_RATIO 22
 // Allow the sup implementation to combine some small edge case iterations in
 // the 2nd loop of the panel-block algorithm (MR) and/or the 2nd loop of the
 // block-panel algorithm (NR) with the last full iteration that precedes it.
