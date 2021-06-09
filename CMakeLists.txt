@@ -10,6 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 
 SET(AOCL_BLIS_FAMILY "zen" CACHE STRING "AOCL BLIS family name")
+SET(OPENMP_PATH "C:\\Program Files\\LLVM\\lib" CACHE STRING "openmp library
+path")
 set(TARGET_ARCH ${AOCL_BLIS_FAMILY})
 set(AOCL_BLIS_ZEN TRUE)
 set (PYTHON_EXE "python")
@@ -132,7 +134,7 @@ endif ()
 if (ENABLE_TRSM_PREINVERSION)
   set(BLIS_ENABLE_TRSM_PREINVERSION TRUE)
 else()
-  set(BLIS_DISABLE_TRSM_PREINVERSION TRUE)
+  add_definitions(-DBLIS_DISABLE_TRSM_PREINVERSION)
 endif()
 
 if (ENABLE_INT_TYPE_SIZE)
@@ -504,10 +506,16 @@ file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
 add_definitions(-DBLIS_VERSION_STRING="${BLIS_VERSION_STRING}")
 
+message( STATUS "OPENMP PATH:" ${OPENMP_PATH})
+link_directories("${OPENMP_PATH}")
+
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
+    if(ENABLE_OPENMP)
+        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OPENMP_PATH}/libomp.lib")
+    endif()
     target_compile_definitions("${PROJECT_NAME}" PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
 endif()
@@ -515,6 +523,9 @@ if(NOT BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" STATIC ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
+    if(ENABLE_OPENMP)
+        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OPENMP_PATH}/libomp.lib")
+    endif()
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
 endif()
 
