@@ -386,7 +386,12 @@ err_t bli_syrksup
     rntm_t rntm_l;
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
-
+#ifdef AOCL_DYNAMIC
+  // If dynamic-threading is enabled, calculate optimum
+  // number of threads.
+  // rntm will be updated with optimum number of threads.
+  bli_nthreads_optimum( a, &at_local, c, BLIS_SYRK, rntm );
+#endif
 #if 0
 const num_t dt = bli_obj_dt( c );
 const dim_t m  = bli_obj_length( c );

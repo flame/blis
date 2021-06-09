@@ -487,16 +487,22 @@ void bli_nthreads_optimum(
 		rntm_t* rntm
 		)
 {
+#ifndef BLIS_ENABLE_MULTITHREADING
+	return;
+#endif
+	dim_t n_threads = bli_rntm_num_threads(rntm);
+
+	if(( n_threads == -1) || (n_threads == 1)) return;
+
+	dim_t n_threads_ideal = n_threads;
 
 	if( family == BLIS_GEMM && bli_obj_is_double(c))
 	{
-		dim_t n_threads = bli_rntm_num_threads(rntm);
 
 		dim_t m = bli_obj_length(c);
 		dim_t n = bli_obj_width(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		dim_t n_threads_ideal;
 
 		if( k >= 128)
 		{
@@ -532,14 +538,32 @@ void bli_nthreads_optimum(
 			}
 		}
 
-		dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
-
-		bli_pthread_mutex_lock( &global_rntm_mutex );
-
-		bli_rntm_set_num_threads_only( n_threads_opt, rntm );
-
-		bli_pthread_mutex_unlock( &global_rntm_mutex );
 	}
+	else if( family == BLIS_SYRK && bli_obj_is_double(c))
+	{
+
+		dim_t n = bli_obj_length(c);
+		dim_t k = bli_obj_width_after_trans(a);
+
+
+		if( (( n <= 10) && ( k < 700))  ||
+		    (( n <= 20) && ( k <= 190)) ||
+		    (( n <= 40) && ( k <= 80))  ||
+		    (( n <= 50) && ( k <= 40))  ||
+		    (( n <= 60) && ( k <= 20))
+		  )
+			n_threads_ideal = 1;	
+		else
+			n_threads_ideal = n_threads;
+	}
+	dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
+
+	bli_pthread_mutex_lock( &global_rntm_mutex );
+
+	bli_rntm_set_num_threads_only( n_threads_opt, rntm );
+
+	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
 	return;
 }
 #endif
