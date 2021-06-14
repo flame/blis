@@ -455,8 +455,9 @@ void dgemm_
     bli_obj_set_conjtrans(blis_transb, &bo);
 
     //cntx_t* cntx = bli_gks_query_cntx();
-    dim_t nt = bli_thread_get_num_threads(); // get number of threads
-    if (nt > 1)
+    //dim_t nt = bli_thread_get_num_threads(); // get number of threads
+    bool nt = bli_thread_get_is_parallel(); // Check if parallel dgemm is invoked.
+    if (nt)
       {
 	// Will call parallelized dgemm code - sup & native
 	PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
@@ -557,17 +558,17 @@ void zgemm_
              dcomplex*    c, const f77_int* ldc
      )
 {
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
-	trans_t blis_transa;
-	trans_t blis_transb;
-	dim_t   m0, n0, k0;
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
+  trans_t blis_transa;
+  trans_t blis_transb;
+  dim_t   m0, n0, k0;
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
 
-	/* Initialize BLIS. */
-	bli_init_auto();
+    /* Initialize BLIS. */
+    bli_init_auto();
 
-	/* Perform BLAS parameter checking. */
+  /* Perform BLAS parameter checking. */
 	PASTEBLACHK(gemm)
 	(
 	  MKSTR(z),
@@ -623,8 +624,9 @@ void zgemm_
 	bli_obj_set_conjtrans( blis_transa, &ao );
 	bli_obj_set_conjtrans( blis_transb, &bo );
 
-	dim_t nt = bli_thread_get_num_threads(); // get number of threads
-	if (nt > 1)
+	//dim_t nt = bli_thread_get_num_threads(); // get number of threads
+	bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+	if ( nt )
 	  {
 	    // Will call parallelized zgemm code - sup & native
 	    PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
