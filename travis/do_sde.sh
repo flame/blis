@@ -3,15 +3,21 @@
 set -e
 set -x
 
-SDE_VERSION=sde-external-8.16.0-2018-01-30-lin
+SDE_VERSION=sde-external-8.63.0-2021-01-18-lin
 SDE_TARBALL=$SDE_VERSION.tar.bz2
 SDE=$SDE_VERSION/sde64
 
-curl --verbose --form accept_license=1 --form form_id=intel_licensed_dls_step_1 \
-     --output /dev/null --cookie-jar jar.txt \
-     --location https://software.intel.com/protected-download/267266/144917
-curl --verbose --cookie jar.txt --output $SDE_TARBALL \
-     https://software.intel.com/system/files/managed/2a/1a/$SDE_TARBALL
+#
+# This doesn't seem to be necessary anymore
+#
+#curl --verbose --form accept_license=1 --form form_id=intel_licensed_dls_step_1 \
+#     --output /dev/null --cookie-jar jar.txt \
+#     --location https://software.intel.com/protected-download/267266/144917
+#curl --verbose --cookie jar.txt --output $SDE_TARBALL \
+#     https://software.intel.com/system/files/managed/2a/1a/$SDE_TARBALL
+
+curl --verbose --output $SDE_TARBALL \
+     https://software.intel.com/content/dam/develop/external/us/en/documents/downloads/$SDE_TARBALL
 
 tar xvf $SDE_TARBALL
 

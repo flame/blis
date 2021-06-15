@@ -32,7 +32,14 @@
 
 */
 
-// This file is needed for the BLIS build system.
+// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
+// entry point to any sandbox implementation.
+
+// NOTE: This function is implemented identically to the function that it
+// overrides in frame/ind/oapi/bli_l3_nat_oapi.c. This means that we are
+// forgoing the option of customizing the implementations that underlie
+// bli_gemm() and bli_?gemm(). Any new code defined in this sandbox
+// directory, however, will be included in the BLIS.
 
 #include "blis.h"
 

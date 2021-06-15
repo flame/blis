@@ -13,6 +13,7 @@ Contents
 * **[Key Features](#key-features)**
 * **[How to Download BLIS](#how-to-download-blis)**
 * **[Getting Started](#getting-started)**
+* **[Performance](#performance)**
 * **[Documentation](#documentation)**
 * **[External Packages](#external-packages)**
 * **[Discussion](#discussion)**
@@ -392,6 +393,24 @@ options.
 If/when you have time, we *strongly* encourage you to read the detailed
 walkthrough of the build system found in our [Build System](docs/BuildSystem.md)
 guide.
+
+Performance
+-----------
+
+We provide graphs that report performance of several implementations across a
+range of hardware types, multithreading configurations, problem sizes,
+operations, and datatypes. These pages also document most of the details needed
+to reproduce these experiments.
+
+ * **[Performance](docs/Performance.md).** This document reports empirically
+measured performance of a representative set of level-3 operations on a variety
+of hardware architectures, as implemented within BLIS and other BLAS libraries
+for all four of the standard floating-point datatypes.
+
+ * **[PerformanceSmall](docs/PerformanceSmall.md).** This document reports
+empirically measured performance of `gemm` on select hardware architectures
+within BLIS and other BLAS libraries when performing matrix problems where one
+or two dimensions is exceedingly small.
 
 Documentation
 -------------

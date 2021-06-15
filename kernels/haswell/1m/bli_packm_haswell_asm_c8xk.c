@@ -125,7 +125,7 @@ void bli_cpackm_haswell_asm_8xk
 		
 		mov(var(kappa), rcx)               // load address of kappa
 		vbroadcastss(mem(rcx, 0), ymm10)   // load kappa_r and duplicate
-		vbroadcastss(mem(rcx, 8), ymm11)   // load kappa_i and duplicate
+		vbroadcastss(mem(rcx, 4), ymm11)   // load kappa_i and duplicate
 		
 
 										   // now branch on kappa == 1.0
