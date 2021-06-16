@@ -83,10 +83,9 @@ void bli_saxpyf_zen_int_6
     v8sf_t           chi0v, chi1v, chi2v, chi3v;
     v8sf_t           chi4v,chi5v;
 
-    v8sf_t           a00v, a01v, a02v, a03v;
-    v8sf_t           a04v,a05v;
+    v8sf_t           a00v, a01v;
 
-    v8sf_t           y0v, y1v;
+    v8sf_t           y0v;
 
     float           chi0, chi1, chi2, chi3;
     float           chi4,chi5;

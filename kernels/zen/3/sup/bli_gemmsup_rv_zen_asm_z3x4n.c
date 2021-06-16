@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -37,16 +37,16 @@
 
 /*
    rrr:
-	 --------        ------        --------
-	 --------   +=   ------ ...    --------
-	 --------        ------        --------
-	 --------        ------            :
+     --------        ------        --------
+     --------   +=   ------ ...    --------
+     --------        ------        --------
+     --------        ------            :
 
    rcr:
-	 --------        | | | |       --------
-	 --------   +=   | | | | ...   --------
-	 --------        | | | |       --------
-	 --------        | | | |           :
+     --------        | | | |       --------
+     --------   +=   | | | | ...   --------
+     --------        | | | |       --------
+     --------        | | | |           :
 
    Assumptions:
    - B is row-stored;
@@ -62,10 +62,10 @@
    cost of the in-register transpose).
 
    crr:
-	 | | | | | | | |       ------        --------
-	 | | | | | | | |  +=   ------ ...    --------
-	 | | | | | | | |       ------        --------
-	 | | | | | | | |       ------            :
+     | | | | | | | |       ------        --------
+     | | | | | | | |  +=   ------ ...    --------
+     | | | | | | | |       ------        --------
+     | | | | | | | |       ------            :
 */
 void bli_zgemmsup_rv_zen_asm_3x4n
      (
@@ -83,452 +83,436 @@ void bli_zgemmsup_rv_zen_asm_3x4n
        cntx_t*      restrict cntx
      )
 {
-	uint64_t m_left = m0 % 3;
-	if ( m_left )
-	{
-		zgemmsup_ker_ft ker_fps[3] = 
-		{
-			NULL,
-			bli_zgemmsup_rv_zen_asm_1x4n,
-			bli_zgemmsup_rv_zen_asm_2x4n,
-		};
-		zgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
-		ker_fp
-		(
-			conja, conjb, m_left, n0, k0,
-			alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-			beta, c, rs_c0, cs_c0, data, cntx
-		);
-		return;
-	}
-	//void*    a_next = bli_auxinfo_next_a( data );
-	//void*    b_next = bli_auxinfo_next_b( data );
+    uint64_t m_left = m0 % 3;
+    if ( m_left )
+    {
+        zgemmsup_ker_ft ker_fps[3] =
+        {
+            NULL,
+            bli_zgemmsup_rv_zen_asm_1x4n,
+            bli_zgemmsup_rv_zen_asm_2x4n,
+        };
+        zgemmsup_ker_ft ker_fp = ker_fps[ m_left ];
+        ker_fp
+        (
+            conja, conjb, m_left, n0, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+        );
+        return;
+    }
+    //void*    a_next = bli_auxinfo_next_a( data );
+    //void*    b_next = bli_auxinfo_next_b( data );
 
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
+    // Typecast local copies of integers in case dim_t and inc_t are a
+    // different size than is expected by load instructions.
 
-	uint64_t k_iter = 0;
-
-
-	uint64_t n_iter = n0 / 4;
-	uint64_t n_left = n0 % 4;
-
-	uint64_t rs_a   = rs_a0;
-	uint64_t cs_a   = cs_a0;
-	uint64_t rs_b   = rs_b0;
-	uint64_t cs_b   = cs_b0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
+    uint64_t k_iter = 0;
 
 
-	if ( n_iter == 0 ) goto consider_edge_cases;
+    uint64_t n_iter = n0 / 4;
+    uint64_t n_left = n0 % 4;
 
-	//handling case when alpha and beta are real and +/-1.
-	uint64_t alpha_real_one = *((uint64_t*)(&alpha->real));
-	uint64_t beta_real_one = *((uint64_t*)(&beta->real));
+    uint64_t rs_a   = rs_a0;
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
-	uint64_t alpha_real_one_abs = ((alpha_real_one << 1) >> 1);
-	uint64_t beta_real_one_abs  = ((beta_real_one << 1) >> 1);
 
-	char alpha_mul_type = BLIS_MUL_DEFAULT;
-	char beta_mul_type  = BLIS_MUL_DEFAULT;
+    if ( n_iter == 0 ) goto consider_edge_cases;
 
-	if((alpha_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS) && (alpha->imag==0))// (alpha is real and +/-1)
-	{
-		alpha_mul_type = BLIS_MUL_ONE; //alpha real and 1
-		if(alpha_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
-		{
-			alpha_mul_type = BLIS_MUL_MINUS_ONE; //alpha real and -1
-		}
-	}
+    char alpha_mul_type = BLIS_MUL_DEFAULT;
+    char beta_mul_type  = BLIS_MUL_DEFAULT;
 
-	if(beta->imag == 0)// beta is real
-	{
-		if(beta_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS)// (beta +/-1)
-		{
-			beta_mul_type = BLIS_MUL_ONE;
-			if(beta_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
-			{
-				beta_mul_type = BLIS_MUL_MINUS_ONE;
-			}
-		}
-		else if(beta_real_one == 0)
-		{
-			beta_mul_type = BLIS_MUL_ZERO;
-		}
-	}
+    //handling case when alpha and beta are real and +/-1.
 
-	// -------------------------------------------------------------------------
-	//scratch registers
-	__m256d ymm0, ymm1, ymm2, ymm3;
-	__m256d ymm4, ymm5, ymm6, ymm7;
-	__m256d ymm8, ymm9, ymm10, ymm11;
-	__m256d ymm12, ymm13, ymm14, ymm15;
-	__m128d xmm0, xmm3;
+    if(alpha->imag == 0.0)// (alpha is real)
+    {
+        if(alpha->real == 1.0)          alpha_mul_type = BLIS_MUL_ONE;
+        else if(alpha->real == -1.0)    alpha_mul_type = BLIS_MUL_MINUS_ONE;
+        else if(alpha->real == 0.0)     alpha_mul_type = BLIS_MUL_ZERO;
+    }
 
-	dcomplex *tA = a;
-	double *tAimag = &a->imag;
-	dcomplex *tB = b;
-	dcomplex *tC = c;
-	for (n_iter = 0; n_iter < n0 / 4; n_iter++)
-	{
-		// clear scratch registers.
-		ymm4 = _mm256_setzero_pd();
-		ymm5 = _mm256_setzero_pd();
-		ymm6 = _mm256_setzero_pd();
-		ymm7 = _mm256_setzero_pd();
-		ymm8 = _mm256_setzero_pd();
-		ymm9 = _mm256_setzero_pd();
-		ymm10 = _mm256_setzero_pd();
-		ymm11 = _mm256_setzero_pd();
-		ymm12 = _mm256_setzero_pd();
-		ymm13 = _mm256_setzero_pd();
-		ymm14 = _mm256_setzero_pd();
-		ymm15 = _mm256_setzero_pd();
-		
-		dim_t ta_inc_row = rs_a;
-		dim_t tb_inc_row = rs_b;
-		dim_t tc_inc_row = rs_c;
+    if(beta->imag == 0.0)// (beta is real)
+    {
+        if(beta->real == 1.0)       beta_mul_type = BLIS_MUL_ONE;
+        else if(beta->real == -1.0) beta_mul_type = BLIS_MUL_MINUS_ONE;
+        else if(beta->real == 0.0)  beta_mul_type = BLIS_MUL_ZERO;
+    }
 
-		dim_t ta_inc_col = cs_a;
-		dim_t tb_inc_col = cs_b;
-		dim_t tc_inc_col = cs_c;
+    // -------------------------------------------------------------------------
+    //scratch registers
+    __m256d ymm0, ymm1, ymm2, ymm3;
+    __m256d ymm4, ymm5, ymm6, ymm7;
+    __m256d ymm8, ymm9, ymm10, ymm11;
+    __m256d ymm12, ymm13, ymm14, ymm15;
+    __m128d xmm0, xmm3;
 
-		tA = a;
-		tAimag = &a->imag;
-		tB = b + n_iter*tb_inc_col*4;
-		tC = c + n_iter*tc_inc_col*4;
-		for (k_iter = 0; k_iter <k0; k_iter++)
-		{
-			// The inner loop broadcasts the B matrix data and
-			// multiplies it with the A matrix.
-			// This loop is processing MR x K
-			ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
-			ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
-			
-			//broadcasted matrix B elements are multiplied
-			//with matrix A columns.
-			ymm2 = _mm256_broadcast_sd((double const *)(tA));
-			ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
-			ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
+    dcomplex *tA = a;
+    double *tAimag = &a->imag;
+    dcomplex *tB = b;
+    dcomplex *tC = c;
+    for (n_iter = 0; n_iter < n0 / 4; n_iter++)
+    {
+        // clear scratch registers.
+        ymm4 = _mm256_setzero_pd();
+        ymm5 = _mm256_setzero_pd();
+        ymm6 = _mm256_setzero_pd();
+        ymm7 = _mm256_setzero_pd();
+        ymm8 = _mm256_setzero_pd();
+        ymm9 = _mm256_setzero_pd();
+        ymm10 = _mm256_setzero_pd();
+        ymm11 = _mm256_setzero_pd();
+        ymm12 = _mm256_setzero_pd();
+        ymm13 = _mm256_setzero_pd();
+        ymm14 = _mm256_setzero_pd();
+        ymm15 = _mm256_setzero_pd();
 
-			ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
-			ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
-			ymm9 = _mm256_fmadd_pd(ymm1, ymm2, ymm9);
+        dim_t ta_inc_row = rs_a;
+        dim_t tb_inc_row = rs_b;
+        dim_t tc_inc_row = rs_c;
 
-			ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row*2));
-			ymm12 = _mm256_fmadd_pd(ymm0, ymm2, ymm12);
-			ymm13 = _mm256_fmadd_pd(ymm1, ymm2, ymm13);
+        dim_t ta_inc_col = cs_a;
+        dim_t tb_inc_col = cs_b;
+        dim_t tc_inc_col = cs_c;
 
-			//Compute imag values
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
-			ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
-			ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
+        tA = a;
+        tAimag = &a->imag;
+        tB = b + n_iter*tb_inc_col*4;
+        tC = c + n_iter*tc_inc_col*4;
+        for (k_iter = 0; k_iter <k0; k_iter++)
+        {
+            // The inner loop broadcasts the B matrix data and
+            // multiplies it with the A matrix.
+            // This loop is processing MR x K
+            ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
+            ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
 
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
-			ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
-			ymm11 = _mm256_fmadd_pd(ymm1, ymm2, ymm11);
+            //broadcasted matrix B elements are multiplied
+            //with matrix A columns.
+            ymm2 = _mm256_broadcast_sd((double const *)(tA));
+            ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
+            ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
 
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *4));
-			ymm14 = _mm256_fmadd_pd(ymm0, ymm2, ymm14);
-			ymm15 = _mm256_fmadd_pd(ymm1, ymm2, ymm15);
-			tA += ta_inc_col;
-			tAimag += ta_inc_col*2;
-		}
-		ymm6 =_mm256_permute_pd(ymm6,  5);
-		ymm7 =_mm256_permute_pd(ymm7,  5);
-		ymm10 = _mm256_permute_pd(ymm10, 5);
-		ymm11 = _mm256_permute_pd(ymm11, 5);
-		ymm14 = _mm256_permute_pd(ymm14, 5);
-		ymm15 = _mm256_permute_pd(ymm15, 5);
+            ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
+            ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
+            ymm9 = _mm256_fmadd_pd(ymm1, ymm2, ymm9);
 
-		// subtract/add even/odd elements
-		ymm4 = _mm256_addsub_pd(ymm4, ymm6);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm7);
+            ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row*2));
+            ymm12 = _mm256_fmadd_pd(ymm0, ymm2, ymm12);
+            ymm13 = _mm256_fmadd_pd(ymm1, ymm2, ymm13);
 
-		ymm8 = _mm256_addsub_pd(ymm8, ymm10);
-		ymm9 = _mm256_addsub_pd(ymm9, ymm11);
+            //Compute imag values
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
+            ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
+            ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
 
-		ymm12 = _mm256_addsub_pd( ymm12, ymm14);
-		ymm13 = _mm256_addsub_pd( ymm13, ymm15);
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
+            ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
+            ymm11 = _mm256_fmadd_pd(ymm1, ymm2, ymm11);
 
-		//When alpha_real = -1.0, instead of multiplying with -1, sign is changed.
-		if(alpha_mul_type == BLIS_MUL_MINUS_ONE)// equivalent to  if(alpha->real == -1.0)
-		{
-			ymm0 = _mm256_setzero_pd();
-			ymm4 = _mm256_sub_pd(ymm0,ymm4);
-			ymm5 = _mm256_sub_pd(ymm0, ymm5);
-			ymm8 = _mm256_sub_pd(ymm0, ymm8);
-			ymm9 = _mm256_sub_pd(ymm0, ymm9);
-			ymm12 = _mm256_sub_pd(ymm0, ymm12);
-			ymm13 = _mm256_sub_pd(ymm0, ymm13);
-		}
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *4));
+            ymm14 = _mm256_fmadd_pd(ymm0, ymm2, ymm14);
+            ymm15 = _mm256_fmadd_pd(ymm1, ymm2, ymm15);
+            tA += ta_inc_col;
+            tAimag += ta_inc_col*2;
+        }
+        ymm6 =_mm256_permute_pd(ymm6,  5);
+        ymm7 =_mm256_permute_pd(ymm7,  5);
+        ymm10 = _mm256_permute_pd(ymm10, 5);
+        ymm11 = _mm256_permute_pd(ymm11, 5);
+        ymm14 = _mm256_permute_pd(ymm14, 5);
+        ymm15 = _mm256_permute_pd(ymm15, 5);
 
-		//when alpha is real and +/-1, multiplication is skipped.
-		if(alpha_mul_type == BLIS_MUL_DEFAULT)
-		{
-			// alpha, beta multiplication.
-			/* (ar + ai) x AB */
-			ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
-			ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
+        // subtract/add even/odd elements
+        ymm4 = _mm256_addsub_pd(ymm4, ymm6);
+        ymm5 = _mm256_addsub_pd(ymm5, ymm7);
 
-			ymm3 = _mm256_permute_pd(ymm4, 5);
-			ymm4 = _mm256_mul_pd(ymm0, ymm4);
-			ymm3 =_mm256_mul_pd(ymm1, ymm3);
-			ymm4 = _mm256_addsub_pd(ymm4, ymm3);
+        ymm8 = _mm256_addsub_pd(ymm8, ymm10);
+        ymm9 = _mm256_addsub_pd(ymm9, ymm11);
 
-			ymm3 = _mm256_permute_pd(ymm5, 5);
-			ymm5 = _mm256_mul_pd(ymm0, ymm5);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm5 = _mm256_addsub_pd(ymm5, ymm3);
+        ymm12 = _mm256_addsub_pd( ymm12, ymm14);
+        ymm13 = _mm256_addsub_pd( ymm13, ymm15);
 
-			ymm3 = _mm256_permute_pd(ymm8, 5);
-			ymm8 = _mm256_mul_pd(ymm0, ymm8);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm8 = _mm256_addsub_pd(ymm8, ymm3);
+        //When alpha_real = -1.0, instead of multiplying with -1, sign is changed.
+        if(alpha_mul_type == BLIS_MUL_MINUS_ONE)// equivalent to  if(alpha->real == -1.0)
+        {
+            ymm0 = _mm256_setzero_pd();
+            ymm4 = _mm256_sub_pd(ymm0,ymm4);
+            ymm5 = _mm256_sub_pd(ymm0, ymm5);
+            ymm8 = _mm256_sub_pd(ymm0, ymm8);
+            ymm9 = _mm256_sub_pd(ymm0, ymm9);
+            ymm12 = _mm256_sub_pd(ymm0, ymm12);
+            ymm13 = _mm256_sub_pd(ymm0, ymm13);
+        }
 
-			ymm3 = _mm256_permute_pd(ymm9, 5);
-			ymm9 = _mm256_mul_pd(ymm0, ymm9);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm9 = _mm256_addsub_pd(ymm9, ymm3);
+        //when alpha is real and +/-1, multiplication is skipped.
+        if(alpha_mul_type == BLIS_MUL_DEFAULT)
+        {
+            // alpha, beta multiplication.
+            /* (ar + ai) x AB */
+            ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
+            ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
 
-			ymm3 = _mm256_permute_pd(ymm12, 5);
-			ymm12 = _mm256_mul_pd(ymm0, ymm12);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm12 = _mm256_addsub_pd(ymm12, ymm3);
+            ymm3 = _mm256_permute_pd(ymm4, 5);
+            ymm4 = _mm256_mul_pd(ymm0, ymm4);
+            ymm3 =_mm256_mul_pd(ymm1, ymm3);
+            ymm4 = _mm256_addsub_pd(ymm4, ymm3);
 
-			ymm3 = _mm256_permute_pd(ymm13, 5);
-			ymm13 = _mm256_mul_pd(ymm0, ymm13);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm13 = _mm256_addsub_pd(ymm13, ymm3);
-		}
+            ymm3 = _mm256_permute_pd(ymm5, 5);
+            ymm5 = _mm256_mul_pd(ymm0, ymm5);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm5 = _mm256_addsub_pd(ymm5, ymm3);
 
-		if(tc_inc_row == 1) //col stored
-		{
-			if(beta_mul_type == BLIS_MUL_ZERO)
-			{
-				//transpose left 3x2
-				_mm_storeu_pd((double *)(tC ), _mm256_castpd256_pd128(ymm4));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-				_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
-				tC += tc_inc_col;
+            ymm3 = _mm256_permute_pd(ymm8, 5);
+            ymm8 = _mm256_mul_pd(ymm0, ymm8);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm8 = _mm256_addsub_pd(ymm8, ymm3);
 
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-				_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
-				tC += tc_inc_col;
+            ymm3 = _mm256_permute_pd(ymm9, 5);
+            ymm9 = _mm256_mul_pd(ymm0, ymm9);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm9 = _mm256_addsub_pd(ymm9, ymm3);
 
-				//transpose right 3x2
-				_mm_storeu_pd((double *)(tC ), _mm256_castpd256_pd128(ymm5));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
-				_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm13));
-				tC += tc_inc_col;
+            ymm3 = _mm256_permute_pd(ymm12, 5);
+            ymm12 = _mm256_mul_pd(ymm0, ymm12);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm12 = _mm256_addsub_pd(ymm12, ymm3);
 
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
-				_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm13, 1));
-			}
-			else{
-				ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
-				ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
-				//Multiply ymm4 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, ymm0);
-				//Multiply ymm8 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm8 = _mm256_add_pd(ymm8, ymm0);
+            ymm3 = _mm256_permute_pd(ymm13, 5);
+            ymm13 = _mm256_mul_pd(ymm0, ymm13);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm13 = _mm256_addsub_pd(ymm13, ymm3);
+        }
 
-				//Multiply ymm12 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm12 = _mm256_add_pd(ymm12, ymm0);
+        if(tc_inc_row == 1) //col stored
+        {
+            if(beta_mul_type == BLIS_MUL_ZERO)
+            {
+                //transpose left 3x2
+                _mm_storeu_pd((double *)(tC ), _mm256_castpd256_pd128(ymm4));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+                _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
+                tC += tc_inc_col;
 
-				//transpose left 3x2
-				_mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm4));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-				_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
-				tC += tc_inc_col;
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+                _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
+                tC += tc_inc_col;
 
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-				_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
-				tC += tc_inc_col;
+                //transpose right 3x2
+                _mm_storeu_pd((double *)(tC ), _mm256_castpd256_pd128(ymm5));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
+                _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm13));
+                tC += tc_inc_col;
 
-				//Multiply ymm5 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, ymm0);
-				//Multiply ymm9 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm9 = _mm256_add_pd(ymm9, ymm0);
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
+                _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm13, 1));
+            }
+            else{
+                ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
+                ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
+                //Multiply ymm4 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, ymm0);
+                //Multiply ymm8 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm8 = _mm256_add_pd(ymm8, ymm0);
 
-				//Multiply ymm13 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm13 = _mm256_add_pd(ymm13, ymm0);
+                //Multiply ymm12 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm12 = _mm256_add_pd(ymm12, ymm0);
 
-				//transpose right 3x2
-				_mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm5));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
-				_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm13));
-				tC += tc_inc_col;
+                //transpose left 3x2
+                _mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm4));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+                _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
+                tC += tc_inc_col;
 
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
-				_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm13, 1));
-			}
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+                _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
+                tC += tc_inc_col;
 
-		}
-		else
-		{
-			if(beta_mul_type == BLIS_MUL_ZERO)
-			{
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
-			}
-			else if(beta_mul_type == BLIS_MUL_ONE)// equivalent to  if(beta->real == 1.0)
-			{
-				ymm2 = _mm256_loadu_pd((double const *)(tC));
-				ymm4 = _mm256_add_pd(ymm4,ymm2);
-				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
-				ymm5 = _mm256_add_pd(ymm5,ymm2);
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
-				ymm8 = _mm256_add_pd(ymm8,ymm2);
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
-				ymm9 = _mm256_add_pd(ymm9,ymm2);
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
-				ymm12 = _mm256_add_pd(ymm12,ymm2);
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2 +2));
-				ymm13 = _mm256_add_pd(ymm13,ymm2);
+                //Multiply ymm5 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, ymm0);
+                //Multiply ymm9 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm9 = _mm256_add_pd(ymm9, ymm0);
 
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
-			}
-			else{
-				/* (br + bi) C + (ar + ai) AB */
-				ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
-				ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
+                //Multiply ymm13 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm13 = _mm256_add_pd(ymm13, ymm0);
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 =_mm256_mul_pd(ymm1, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
+                //transpose right 3x2
+                _mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm5));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
+                _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm13));
+                tC += tc_inc_col;
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
+                _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm13, 1));
+            }
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
+        }
+        else
+        {
+            if(beta_mul_type == BLIS_MUL_ZERO)
+            {
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
+            }
+            else if(beta_mul_type == BLIS_MUL_ONE)// equivalent to  if(beta->real == 1.0)
+            {
+                ymm2 = _mm256_loadu_pd((double const *)(tC));
+                ymm4 = _mm256_add_pd(ymm4,ymm2);
+                ymm2 = _mm256_loadu_pd((double const *)(tC+2));
+                ymm5 = _mm256_add_pd(ymm5,ymm2);
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
+                ymm8 = _mm256_add_pd(ymm8,ymm2);
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
+                ymm9 = _mm256_add_pd(ymm9,ymm2);
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
+                ymm12 = _mm256_add_pd(ymm12,ymm2);
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2 +2));
+                ymm13 = _mm256_add_pd(ymm13,ymm2);
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm9 = _mm256_add_pd(ymm9, _mm256_addsub_pd(ymm2, ymm3));
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
+            }
+            else{
+                /* (br + bi) C + (ar + ai) AB */
+                ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
+                ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm12 = _mm256_add_pd(ymm12, _mm256_addsub_pd(ymm2, ymm3));
+                ymm2 = _mm256_loadu_pd((double const *)(tC));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 =_mm256_mul_pd(ymm1, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2 +2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm13 = _mm256_add_pd(ymm13, _mm256_addsub_pd(ymm2, ymm3));
+                ymm2 = _mm256_loadu_pd((double const *)(tC+2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
 
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
-			}
-		}
-	}
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
 
-	consider_edge_cases:
-	// Handle edge cases in the m dimension, if they exist.
-	if ( n_left )
-	{
-		const dim_t      mr_cur = 3;
-		const dim_t      j_edge = n0 - ( dim_t )n_left;
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm9 = _mm256_add_pd(ymm9, _mm256_addsub_pd(ymm2, ymm3));
 
-		dcomplex* restrict cij = c + j_edge*cs_c;
-		dcomplex* restrict ai  = a;
-		dcomplex* restrict bj  = b + n_iter * 4;
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm12 = _mm256_add_pd(ymm12, _mm256_addsub_pd(ymm2, ymm3));
 
-		if ( 2 <= n_left )
-		{
-			const dim_t nr_cur = 2;
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2 +2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm13 = _mm256_add_pd(ymm13, _mm256_addsub_pd(ymm2, ymm3));
 
-			bli_zgemmsup_rv_zen_asm_3x2
-			(
-			  conja, conjb, mr_cur, nr_cur, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
-		}
-		if ( 1 == n_left )
-		{
-			bli_zgemv_ex
-			(
-			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
-			  beta, cij, rs_c0, cntx, NULL
-			);
-		}
-	}
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row *2+ 2), ymm13);
+            }
+        }
+    }
+
+    consider_edge_cases:
+    // Handle edge cases in the m dimension, if they exist.
+    if ( n_left )
+    {
+        const dim_t      mr_cur = 3;
+        const dim_t      j_edge = n0 - ( dim_t )n_left;
+
+        dcomplex* restrict cij = c + j_edge*cs_c;
+        dcomplex* restrict ai  = a;
+        dcomplex* restrict bj  = b + n_iter * 4;
+
+        if ( 2 <= n_left )
+        {
+            const dim_t nr_cur = 2;
+
+            bli_zgemmsup_rv_zen_asm_3x2
+            (
+              conja, conjb, mr_cur, nr_cur, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+              beta, cij, rs_c0, cs_c0, data, cntx
+            );
+            cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+        }
+        if ( 1 == n_left )
+        {
+            bli_zgemv_ex
+            (
+              BLIS_NO_TRANSPOSE, conjb, m0, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0,
+              beta, cij, rs_c0, cntx, NULL
+            );
+        }
+    }
 
 }
 
@@ -549,286 +533,286 @@ void bli_zgemmsup_rv_zen_asm_2x4n
      )
 {
 
-	uint64_t k_iter = 0;
+    uint64_t k_iter = 0;
 
 
-	uint64_t n_iter = n0 / 4;
-	uint64_t n_left = n0 % 4;
+    uint64_t n_iter = n0 / 4;
+    uint64_t n_left = n0 % 4;
 
-	uint64_t rs_a   = rs_a0;
-	uint64_t cs_a   = cs_a0;
-	uint64_t rs_b   = rs_b0;
-	uint64_t cs_b   = cs_b0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
-
-	if ( n_iter == 0 ) goto consider_edge_cases;
-
-	// -------------------------------------------------------------------------
-	//scratch registers
-	__m256d ymm0, ymm1, ymm2, ymm3;
-	__m256d ymm4, ymm5, ymm6, ymm7;
-	__m256d ymm8, ymm9, ymm10, ymm11;
-	__m128d xmm0, xmm3;
-
-	dcomplex *tA = a;
-	double *tAimag = &a->imag;
-	dcomplex *tB = b;
-	dcomplex *tC = c;
-	for (n_iter = 0; n_iter < n0 / 4; n_iter++)
-	{
-		// clear scratch registers.
-		ymm4 = _mm256_setzero_pd();
-		ymm5 = _mm256_setzero_pd();
-		ymm6 = _mm256_setzero_pd();
-		ymm7 = _mm256_setzero_pd();
-		ymm8 = _mm256_setzero_pd();
-		ymm9 = _mm256_setzero_pd();
-		ymm10 = _mm256_setzero_pd();
-		ymm11 = _mm256_setzero_pd();
-		
-		dim_t ta_inc_row = rs_a;
-		dim_t tb_inc_row = rs_b;
-		dim_t tc_inc_row = rs_c;
-
-		dim_t ta_inc_col = cs_a;
-		dim_t tb_inc_col = cs_b;
-		dim_t tc_inc_col = cs_c;
-
-		tA = a;
-		tAimag = &a->imag;
-		tB = b + n_iter*tb_inc_col*4;
-		tC = c + n_iter*tc_inc_col*4;
-		for (k_iter = 0; k_iter <k0; k_iter++)
-		{
-			// The inner loop broadcasts the B matrix data and
-			// multiplies it with the A matrix.
-			// This loop is processing MR x K
-			ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
-			ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
-			
-			//broadcasted matrix B elements are multiplied
-			//with matrix A columns.
-			ymm2 = _mm256_broadcast_sd((double const *)(tA));
-			ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
-			ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
-
-			ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
-			ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
-			ymm9 = _mm256_fmadd_pd(ymm1, ymm2, ymm9);
-
-			//Compute imag values
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
-			ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
-			ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
-
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
-			ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
-			ymm11 = _mm256_fmadd_pd(ymm1, ymm2, ymm11);
-
-			tA += ta_inc_col;
-			tAimag += ta_inc_col*2;
-		}
-		ymm6 =_mm256_permute_pd(ymm6,  5);
-		ymm7 =_mm256_permute_pd(ymm7,  5);
-		ymm10 = _mm256_permute_pd(ymm10, 5);
-		ymm11 = _mm256_permute_pd(ymm11, 5);
-
-		// subtract/add even/odd elements
-		ymm4 = _mm256_addsub_pd(ymm4, ymm6);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm7);
-
-		ymm8 = _mm256_addsub_pd(ymm8, ymm10);
-		ymm9 = _mm256_addsub_pd(ymm9, ymm11);
-
-		// alpha, beta multiplication.
-
-		/* (ar + ai) x AB */
-		ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
-		ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
-
-		ymm3 = _mm256_permute_pd(ymm4, 5);
-		ymm4 = _mm256_mul_pd(ymm0, ymm4);
-		ymm3 =_mm256_mul_pd(ymm1, ymm3);
-		ymm4 = _mm256_addsub_pd(ymm4, ymm3);
-
-		ymm3 = _mm256_permute_pd(ymm5, 5);
-		ymm5 = _mm256_mul_pd(ymm0, ymm5);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm3);
-
-		ymm3 = _mm256_permute_pd(ymm8, 5);
-		ymm8 = _mm256_mul_pd(ymm0, ymm8);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm8 = _mm256_addsub_pd(ymm8, ymm3);
-
-		ymm3 = _mm256_permute_pd(ymm9, 5);
-		ymm9 = _mm256_mul_pd(ymm0, ymm9);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm9 = _mm256_addsub_pd(ymm9, ymm3);
-
-		if(tc_inc_row == 1) //col stored
-		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
-			{
-				//transpose left 2x2
-				_mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm4));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-				tC += tc_inc_col;
-
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-				tC += tc_inc_col;
-
-				//transpose right 2x2
-				_mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm5));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
-				tC += tc_inc_col;
-
-				_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
-			}
-			else{
-				ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
-				ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
-				//Multiply ymm4 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, ymm0);
-				//Multiply ymm8 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm8 = _mm256_add_pd(ymm8, ymm0);
-
-				//transpose left 2x2
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-				tC += tc_inc_col;
-
-				_mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm4,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-				tC += tc_inc_col;
+    uint64_t rs_a   = rs_a0;
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
 
-				//Multiply ymm5 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, ymm0);
-				//Multiply ymm9 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm9 = _mm256_add_pd(ymm9, ymm0);
+    if ( n_iter == 0 ) goto consider_edge_cases;
 
-				//transpose right 2x2
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
-				_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
-				tC += tc_inc_col;
+    // -------------------------------------------------------------------------
+    //scratch registers
+    __m256d ymm0, ymm1, ymm2, ymm3;
+    __m256d ymm4, ymm5, ymm6, ymm7;
+    __m256d ymm8, ymm9, ymm10, ymm11;
+    __m128d xmm0, xmm3;
 
-				_mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm5,1));
-				_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
-			}
+    dcomplex *tA = a;
+    double *tAimag = &a->imag;
+    dcomplex *tB = b;
+    dcomplex *tC = c;
+    for (n_iter = 0; n_iter < n0 / 4; n_iter++)
+    {
+        // clear scratch registers.
+        ymm4 = _mm256_setzero_pd();
+        ymm5 = _mm256_setzero_pd();
+        ymm6 = _mm256_setzero_pd();
+        ymm7 = _mm256_setzero_pd();
+        ymm8 = _mm256_setzero_pd();
+        ymm9 = _mm256_setzero_pd();
+        ymm10 = _mm256_setzero_pd();
+        ymm11 = _mm256_setzero_pd();
 
-		}
-		else
-		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
-			{
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
-			}
-			else{
-				/* (br + bi) C + (ar + ai) AB */
-				ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
-				ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
+        dim_t ta_inc_row = rs_a;
+        dim_t tb_inc_row = rs_b;
+        dim_t tc_inc_row = rs_c;
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
+        dim_t ta_inc_col = cs_a;
+        dim_t tb_inc_col = cs_b;
+        dim_t tc_inc_col = cs_c;
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
+        tA = a;
+        tAimag = &a->imag;
+        tB = b + n_iter*tb_inc_col*4;
+        tC = c + n_iter*tc_inc_col*4;
+        for (k_iter = 0; k_iter <k0; k_iter++)
+        {
+            // The inner loop broadcasts the B matrix data and
+            // multiplies it with the A matrix.
+            // This loop is processing MR x K
+            ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
+            ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
+            //broadcasted matrix B elements are multiplied
+            //with matrix A columns.
+            ymm2 = _mm256_broadcast_sd((double const *)(tA));
+            ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
+            ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm9 = _mm256_add_pd(ymm9, _mm256_addsub_pd(ymm2, ymm3));
+            ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
+            ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
+            ymm9 = _mm256_fmadd_pd(ymm1, ymm2, ymm9);
 
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-				_mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
-			}
-		}
-	}
+            //Compute imag values
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
+            ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
+            ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
 
-	consider_edge_cases:
-	// Handle edge cases in the m dimension, if they exist.
-	if ( n_left )
-	{
-		const dim_t      mr_cur = 3;
-		const dim_t      j_edge = n0 - ( dim_t )n_left;
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
+            ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
+            ymm11 = _mm256_fmadd_pd(ymm1, ymm2, ymm11);
 
-		dcomplex* restrict cij = c + j_edge*cs_c;
-		dcomplex* restrict ai  = a;
-		dcomplex* restrict bj  = b + n_iter * 4;
+            tA += ta_inc_col;
+            tAimag += ta_inc_col*2;
+        }
+        ymm6 =_mm256_permute_pd(ymm6,  5);
+        ymm7 =_mm256_permute_pd(ymm7,  5);
+        ymm10 = _mm256_permute_pd(ymm10, 5);
+        ymm11 = _mm256_permute_pd(ymm11, 5);
 
-		if ( 2 <= n_left )
-		{
-			const dim_t nr_cur = 2;
+        // subtract/add even/odd elements
+        ymm4 = _mm256_addsub_pd(ymm4, ymm6);
+        ymm5 = _mm256_addsub_pd(ymm5, ymm7);
 
-			bli_zgemmsup_rv_zen_asm_2x2
-			(
-			  conja, conjb, mr_cur, nr_cur, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
-		}
-		if ( 1 == n_left )
-		{
-			bli_zgemv_ex
-			(
-			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
-			  beta, cij, rs_c0, cntx, NULL
-			);
-		}
-	}
+        ymm8 = _mm256_addsub_pd(ymm8, ymm10);
+        ymm9 = _mm256_addsub_pd(ymm9, ymm11);
+
+        // alpha, beta multiplication.
+
+        /* (ar + ai) x AB */
+        ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
+        ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
+
+        ymm3 = _mm256_permute_pd(ymm4, 5);
+        ymm4 = _mm256_mul_pd(ymm0, ymm4);
+        ymm3 =_mm256_mul_pd(ymm1, ymm3);
+        ymm4 = _mm256_addsub_pd(ymm4, ymm3);
+
+        ymm3 = _mm256_permute_pd(ymm5, 5);
+        ymm5 = _mm256_mul_pd(ymm0, ymm5);
+        ymm3 = _mm256_mul_pd(ymm1, ymm3);
+        ymm5 = _mm256_addsub_pd(ymm5, ymm3);
+
+        ymm3 = _mm256_permute_pd(ymm8, 5);
+        ymm8 = _mm256_mul_pd(ymm0, ymm8);
+        ymm3 = _mm256_mul_pd(ymm1, ymm3);
+        ymm8 = _mm256_addsub_pd(ymm8, ymm3);
+
+        ymm3 = _mm256_permute_pd(ymm9, 5);
+        ymm9 = _mm256_mul_pd(ymm0, ymm9);
+        ymm3 = _mm256_mul_pd(ymm1, ymm3);
+        ymm9 = _mm256_addsub_pd(ymm9, ymm3);
+
+        if(tc_inc_row == 1) //col stored
+        {
+            if(beta->real == 0.0 && beta->imag == 0.0)
+            {
+                //transpose left 2x2
+                _mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm4));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+                tC += tc_inc_col;
+
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+                tC += tc_inc_col;
+
+                //transpose right 2x2
+                _mm_storeu_pd((double *)(tC  ), _mm256_castpd256_pd128(ymm5));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
+                tC += tc_inc_col;
+
+                _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm5,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
+            }
+            else{
+                ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
+                ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
+                //Multiply ymm4 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, ymm0);
+                //Multiply ymm8 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm8 = _mm256_add_pd(ymm8, ymm0);
+
+                //transpose left 2x2
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+                tC += tc_inc_col;
+
+                _mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm4,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+                tC += tc_inc_col;
+
+
+                //Multiply ymm5 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, ymm0);
+                //Multiply ymm9 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm9 = _mm256_add_pd(ymm9, ymm0);
+
+                //transpose right 2x2
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
+                _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm9));
+                tC += tc_inc_col;
+
+                _mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm5,1));
+                _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm9,1));
+            }
+
+        }
+        else
+        {
+            if(beta->real == 0.0 && beta->imag == 0.0)
+            {
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+            }
+            else{
+                /* (br + bi) C + (ar + ai) AB */
+                ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
+                ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
+
+                ymm2 = _mm256_loadu_pd((double const *)(tC));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
+
+                ymm2 = _mm256_loadu_pd((double const *)(tC+2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
+
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
+
+                ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row + 2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm9 = _mm256_add_pd(ymm9, _mm256_addsub_pd(ymm2, ymm3));
+
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+                _mm256_storeu_pd((double *)(tC + tc_inc_row + 2), ymm9);
+            }
+        }
+    }
+
+    consider_edge_cases:
+    // Handle edge cases in the m dimension, if they exist.
+    if ( n_left )
+    {
+        const dim_t      mr_cur = 3;
+        const dim_t      j_edge = n0 - ( dim_t )n_left;
+
+        dcomplex* restrict cij = c + j_edge*cs_c;
+        dcomplex* restrict ai  = a;
+        dcomplex* restrict bj  = b + n_iter * 4;
+
+        if ( 2 <= n_left )
+        {
+            const dim_t nr_cur = 2;
+
+            bli_zgemmsup_rv_zen_asm_2x2
+            (
+              conja, conjb, mr_cur, nr_cur, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+              beta, cij, rs_c0, cs_c0, data, cntx
+            );
+            cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+        }
+        if ( 1 == n_left )
+        {
+            bli_zgemv_ex
+            (
+              BLIS_NO_TRANSPOSE, conjb, m0, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0,
+              beta, cij, rs_c0, cntx, NULL
+            );
+        }
+    }
 
 }
 
@@ -848,215 +832,215 @@ void bli_zgemmsup_rv_zen_asm_1x4n
        cntx_t*      restrict cntx
      )
 {
-	//void*    a_next = bli_auxinfo_next_a( data );
-	//void*    b_next = bli_auxinfo_next_b( data );
+    //void*    a_next = bli_auxinfo_next_a( data );
+    //void*    b_next = bli_auxinfo_next_b( data );
 
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
+    // Typecast local copies of integers in case dim_t and inc_t are a
+    // different size than is expected by load instructions.
 
-	uint64_t k_iter = 0;
+    uint64_t k_iter = 0;
 
-	uint64_t n_iter = n0 / 4;
-	uint64_t n_left = n0 % 4;
+    uint64_t n_iter = n0 / 4;
+    uint64_t n_left = n0 % 4;
 
-	uint64_t cs_a   = cs_a0;
-	uint64_t rs_b   = rs_b0;
-	uint64_t cs_b   = cs_b0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t cs_b   = cs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
 
-	if ( n_iter == 0 ) goto consider_edge_cases;
+    if ( n_iter == 0 ) goto consider_edge_cases;
 
-	// -------------------------------------------------------------------------
-	//scratch registers
-	__m256d ymm0, ymm1, ymm2, ymm3;
-	__m256d ymm4, ymm5, ymm6, ymm7;
-	__m128d xmm0, xmm3;
+    // -------------------------------------------------------------------------
+    //scratch registers
+    __m256d ymm0, ymm1, ymm2, ymm3;
+    __m256d ymm4, ymm5, ymm6, ymm7;
+    __m128d xmm0, xmm3;
 
-	dcomplex *tA = a;
-	double *tAimag = &a->imag;
-	dcomplex *tB = b;
-	dcomplex *tC = c;
-	for (n_iter = 0; n_iter < n0 / 4; n_iter++)
-	{
-		// clear scratch registers.
-		ymm4 = _mm256_setzero_pd();
-		ymm5 = _mm256_setzero_pd();
-		ymm6 = _mm256_setzero_pd();
-		ymm7 = _mm256_setzero_pd();
+    dcomplex *tA = a;
+    double *tAimag = &a->imag;
+    dcomplex *tB = b;
+    dcomplex *tC = c;
+    for (n_iter = 0; n_iter < n0 / 4; n_iter++)
+    {
+        // clear scratch registers.
+        ymm4 = _mm256_setzero_pd();
+        ymm5 = _mm256_setzero_pd();
+        ymm6 = _mm256_setzero_pd();
+        ymm7 = _mm256_setzero_pd();
 
-		dim_t tb_inc_row = rs_b;
-		dim_t tc_inc_row = rs_c;
+        dim_t tb_inc_row = rs_b;
+        dim_t tc_inc_row = rs_c;
 
-		dim_t ta_inc_col = cs_a;
-		dim_t tb_inc_col = cs_b;
-		dim_t tc_inc_col = cs_c;
+        dim_t ta_inc_col = cs_a;
+        dim_t tb_inc_col = cs_b;
+        dim_t tc_inc_col = cs_c;
 
-		tA = a;
-		tAimag = &a->imag;
-		tB = b + n_iter*tb_inc_col*4;
-		tC = c + n_iter*tc_inc_col*4;
-		for (k_iter = 0; k_iter <k0; k_iter++)
-		{
-			// The inner loop broadcasts the B matrix data and
-			// multiplies it with the A matrix.
-			// This loop is processing MR x K
-			ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
-			ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
-			
-			//broadcasted matrix B elements are multiplied
-			//with matrix A columns.
-			ymm2 = _mm256_broadcast_sd((double const *)(tA));
-			ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
-			ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
+        tA = a;
+        tAimag = &a->imag;
+        tB = b + n_iter*tb_inc_col*4;
+        tC = c + n_iter*tc_inc_col*4;
+        for (k_iter = 0; k_iter <k0; k_iter++)
+        {
+            // The inner loop broadcasts the B matrix data and
+            // multiplies it with the A matrix.
+            // This loop is processing MR x K
+            ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
+            ymm1 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter +  2));
 
-			//Compute imag values
-			ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
-			ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
-			ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
+            //broadcasted matrix B elements are multiplied
+            //with matrix A columns.
+            ymm2 = _mm256_broadcast_sd((double const *)(tA));
+            ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
+            ymm5 = _mm256_fmadd_pd(ymm1, ymm2, ymm5);
 
-			tA += ta_inc_col;
-			tAimag += ta_inc_col*2;
-		}
-		ymm6 =_mm256_permute_pd(ymm6,  5);
-		ymm7 =_mm256_permute_pd(ymm7,  5);
+            //Compute imag values
+            ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
+            ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
+            ymm7 = _mm256_fmadd_pd(ymm1, ymm2, ymm7);
 
-		// subtract/add even/odd elements
-		ymm4 = _mm256_addsub_pd(ymm4, ymm6);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm7);
+            tA += ta_inc_col;
+            tAimag += ta_inc_col*2;
+        }
+        ymm6 =_mm256_permute_pd(ymm6,  5);
+        ymm7 =_mm256_permute_pd(ymm7,  5);
 
-		// alpha, beta multiplication.
+        // subtract/add even/odd elements
+        ymm4 = _mm256_addsub_pd(ymm4, ymm6);
+        ymm5 = _mm256_addsub_pd(ymm5, ymm7);
 
-		/* (ar + ai) x AB */
-		ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
-		ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
+        // alpha, beta multiplication.
 
-		ymm3 = _mm256_permute_pd(ymm4, 5);
-		ymm4 = _mm256_mul_pd(ymm0, ymm4);
-		ymm3 =_mm256_mul_pd(ymm1, ymm3);
-		ymm4 = _mm256_addsub_pd(ymm4, ymm3);
+        /* (ar + ai) x AB */
+        ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
+        ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
 
-		ymm3 = _mm256_permute_pd(ymm5, 5);
-		ymm5 = _mm256_mul_pd(ymm0, ymm5);
-		ymm3 = _mm256_mul_pd(ymm1, ymm3);
-		ymm5 = _mm256_addsub_pd(ymm5, ymm3);
+        ymm3 = _mm256_permute_pd(ymm4, 5);
+        ymm4 = _mm256_mul_pd(ymm0, ymm4);
+        ymm3 =_mm256_mul_pd(ymm1, ymm3);
+        ymm4 = _mm256_addsub_pd(ymm4, ymm3);
 
-		if(tc_inc_row == 1) //col stored
-		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
-			{
-				//transpose left 1x2
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
-				tC += tc_inc_col;
+        ymm3 = _mm256_permute_pd(ymm5, 5);
+        ymm5 = _mm256_mul_pd(ymm0, ymm5);
+        ymm3 = _mm256_mul_pd(ymm1, ymm3);
+        ymm5 = _mm256_addsub_pd(ymm5, ymm3);
 
-				_mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm4,1));
-				tC += tc_inc_col;
+        if(tc_inc_row == 1) //col stored
+        {
+            if(beta->real == 0.0 && beta->imag == 0.0)
+            {
+                //transpose left 1x2
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
+                tC += tc_inc_col;
 
-				//transpose right 1x2
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
-				tC += tc_inc_col;
+                _mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm4,1));
+                tC += tc_inc_col;
 
-				_mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm5,1));
-			}
-			else{
-				ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
-				ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
-				//Multiply ymm4 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, ymm0);
+                //transpose right 1x2
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
+                tC += tc_inc_col;
 
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
-				tC += tc_inc_col;
+                _mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm5,1));
+            }
+            else{
+                ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
+                ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
+                //Multiply ymm4 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, ymm0);
 
-				_mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm4,1));
-				tC += tc_inc_col;
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
+                tC += tc_inc_col;
 
-				//Multiply ymm5 with beta
-				xmm0 = _mm_loadu_pd((double *)(tC)) ;
-				xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-				ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-				ymm3 = _mm256_permute_pd(ymm0, 5);
-				ymm0 = _mm256_mul_pd(ymm1, ymm0);
-				ymm3 = _mm256_mul_pd(ymm2, ymm3);
-				ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, ymm0);
+                _mm_storeu_pd((double *)(tC ) ,_mm256_extractf128_pd (ymm4,1));
+                tC += tc_inc_col;
 
-				_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
-				tC += tc_inc_col;
+                //Multiply ymm5 with beta
+                xmm0 = _mm_loadu_pd((double *)(tC)) ;
+                xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+                ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+                ymm3 = _mm256_permute_pd(ymm0, 5);
+                ymm0 = _mm256_mul_pd(ymm1, ymm0);
+                ymm3 = _mm256_mul_pd(ymm2, ymm3);
+                ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, ymm0);
 
-				_mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm5,1));
-			}
+                _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm5));
+                tC += tc_inc_col;
 
-		}
-		else
-		{
-			if(beta->real == 0.0 && beta->imag == 0.0)
-			{
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-			}
-			else{
-				/* (br + bi) C + (ar + ai) AB */
-				ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
-				ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
+                _mm_storeu_pd((double *)(tC)  ,_mm256_extractf128_pd (ymm5,1));
+            }
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 =_mm256_mul_pd(ymm1, ymm3);
-				ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
+        }
+        else
+        {
+            if(beta->real == 0.0 && beta->imag == 0.0)
+            {
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+            }
+            else{
+                /* (br + bi) C + (ar + ai) AB */
+                ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
+                ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
 
-				ymm2 = _mm256_loadu_pd((double const *)(tC+2));
-				ymm3 = _mm256_permute_pd(ymm2, 5);
-				ymm2 = _mm256_mul_pd(ymm0, ymm2);
-				ymm3 = _mm256_mul_pd(ymm1, ymm3);
-				ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
+                ymm2 = _mm256_loadu_pd((double const *)(tC));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 =_mm256_mul_pd(ymm1, ymm3);
+                ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
 
-				_mm256_storeu_pd((double *)(tC), ymm4);
-				_mm256_storeu_pd((double *)(tC + 2), ymm5);
-			}
-		}
-	}
+                ymm2 = _mm256_loadu_pd((double const *)(tC+2));
+                ymm3 = _mm256_permute_pd(ymm2, 5);
+                ymm2 = _mm256_mul_pd(ymm0, ymm2);
+                ymm3 = _mm256_mul_pd(ymm1, ymm3);
+                ymm5 = _mm256_add_pd(ymm5, _mm256_addsub_pd(ymm2, ymm3));
 
-	consider_edge_cases:
-	// Handle edge cases in the m dimension, if they exist.
-	if ( n_left )
-	{
-		const dim_t      mr_cur = 3;
-		const dim_t      j_edge = n0 - ( dim_t )n_left;
+                _mm256_storeu_pd((double *)(tC), ymm4);
+                _mm256_storeu_pd((double *)(tC + 2), ymm5);
+            }
+        }
+    }
 
-		dcomplex* restrict cij = c + j_edge*cs_c;
-		dcomplex* restrict ai  = a;
-		dcomplex* restrict bj  = b + n_iter * 4;
+    consider_edge_cases:
+    // Handle edge cases in the m dimension, if they exist.
+    if ( n_left )
+    {
+        const dim_t      mr_cur = 3;
+        const dim_t      j_edge = n0 - ( dim_t )n_left;
 
-		if ( 2 <= n_left )
-		{
-			const dim_t nr_cur = 2;
-			bli_zgemmsup_rv_zen_asm_1x2
-			(
-			  conja, conjb, mr_cur, nr_cur, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
-			  beta, cij, rs_c0, cs_c0, data, cntx
-			);
-			cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
-		}
-		if ( 1 == n_left )
-		{
-			bli_zgemv_ex
-			(
-			  BLIS_NO_TRANSPOSE, conjb, m0, k0,
-			  alpha, ai, rs_a0, cs_a0, bj, rs_b0,
-			  beta, cij, rs_c0, cntx, NULL
-			);
-		}
-	}
+        dcomplex* restrict cij = c + j_edge*cs_c;
+        dcomplex* restrict ai  = a;
+        dcomplex* restrict bj  = b + n_iter * 4;
+
+        if ( 2 <= n_left )
+        {
+            const dim_t nr_cur = 2;
+            bli_zgemmsup_rv_zen_asm_1x2
+            (
+              conja, conjb, mr_cur, nr_cur, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0, cs_b0,
+              beta, cij, rs_c0, cs_c0, data, cntx
+            );
+            cij += nr_cur*cs_c0; bj += nr_cur*cs_b0; n_left -= nr_cur;
+        }
+        if ( 1 == n_left )
+        {
+            bli_zgemv_ex
+            (
+              BLIS_NO_TRANSPOSE, conjb, m0, k0,
+              alpha, ai, rs_a0, cs_a0, bj, rs_b0,
+              beta, cij, rs_c0, cntx, NULL
+            );
+        }
+    }
 }
 
 void bli_zgemmsup_rv_zen_asm_3x2
@@ -1075,194 +1059,194 @@ void bli_zgemmsup_rv_zen_asm_3x2
        cntx_t*      restrict cntx
      )
 {
-	uint64_t k_iter = 0;
+    uint64_t k_iter = 0;
 
-	uint64_t rs_a   = rs_a0;
-	uint64_t cs_a   = cs_a0;
-	uint64_t rs_b   = rs_b0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
+    uint64_t rs_a   = rs_a0;
+    uint64_t cs_a   = cs_a0;
+    uint64_t rs_b   = rs_b0;
+    uint64_t rs_c   = rs_c0;
+    uint64_t cs_c   = cs_c0;
 
 
 
-	// -------------------------------------------------------------------------
-	//scratch registers
-	__m256d ymm0, ymm1, ymm2, ymm3;
-	__m256d ymm4, ymm6;
-	__m256d ymm8, ymm10;
-	__m256d ymm12, ymm14;
-	__m128d xmm0, xmm3;
+    // -------------------------------------------------------------------------
+    //scratch registers
+    __m256d ymm0, ymm1, ymm2, ymm3;
+    __m256d ymm4, ymm6;
+    __m256d ymm8, ymm10;
+    __m256d ymm12, ymm14;
+    __m128d xmm0, xmm3;
 
-	dcomplex *tA = a;
-	double *tAimag = &a->imag;
-	dcomplex *tB = b;
-	dcomplex *tC = c;
-	// clear scratch registers.
-	ymm4 = _mm256_setzero_pd();
-	ymm6 = _mm256_setzero_pd();
-	ymm8 = _mm256_setzero_pd();
-	ymm10 = _mm256_setzero_pd();
-	ymm12 = _mm256_setzero_pd();
-	ymm14 = _mm256_setzero_pd();
+    dcomplex *tA = a;
+    double *tAimag = &a->imag;
+    dcomplex *tB = b;
+    dcomplex *tC = c;
+    // clear scratch registers.
+    ymm4 = _mm256_setzero_pd();
+    ymm6 = _mm256_setzero_pd();
+    ymm8 = _mm256_setzero_pd();
+    ymm10 = _mm256_setzero_pd();
+    ymm12 = _mm256_setzero_pd();
+    ymm14 = _mm256_setzero_pd();
 
-	dim_t ta_inc_row = rs_a;
-	dim_t tb_inc_row = rs_b;
-	dim_t tc_inc_row = rs_c;
+    dim_t ta_inc_row = rs_a;
+    dim_t tb_inc_row = rs_b;
+    dim_t tc_inc_row = rs_c;
 
-	dim_t ta_inc_col = cs_a;
-	dim_t tc_inc_col = cs_c;
+    dim_t ta_inc_col = cs_a;
+    dim_t tc_inc_col = cs_c;
 
-	for (k_iter = 0; k_iter <k0; k_iter++)
-	{
-		// The inner loop broadcasts the B matrix data and
-		// multiplies it with the A matrix.
-		// This loop is processing MR x K
-		ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
-		
-		//broadcasted matrix B elements are multiplied
-		//with matrix A columns.
-		ymm2 = _mm256_broadcast_sd((double const *)(tA));
-		ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
+    for (k_iter = 0; k_iter <k0; k_iter++)
+    {
+        // The inner loop broadcasts the B matrix data and
+        // multiplies it with the A matrix.
+        // This loop is processing MR x K
+        ymm0 = _mm256_loadu_pd((double const *)(tB + tb_inc_row * k_iter));
 
-		ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
-		ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
+        //broadcasted matrix B elements are multiplied
+        //with matrix A columns.
+        ymm2 = _mm256_broadcast_sd((double const *)(tA));
+        ymm4 = _mm256_fmadd_pd(ymm0, ymm2, ymm4);
 
-		ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row*2));
-		ymm12 = _mm256_fmadd_pd(ymm0, ymm2, ymm12);
+        ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row));
+        ymm8 = _mm256_fmadd_pd(ymm0, ymm2, ymm8);
 
-		//Compute imag values
-		ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
-		ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
+        ymm2 = _mm256_broadcast_sd((double const *)(tA + ta_inc_row*2));
+        ymm12 = _mm256_fmadd_pd(ymm0, ymm2, ymm12);
 
-		ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
-		ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
+        //Compute imag values
+        ymm2 = _mm256_broadcast_sd((double const *)(tAimag ));
+        ymm6 = _mm256_fmadd_pd(ymm0, ymm2, ymm6);
 
-		ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *4));
-		ymm14 = _mm256_fmadd_pd(ymm0, ymm2, ymm14);
-		tA += ta_inc_col;
-		tAimag += ta_inc_col*2;
-	}
-	ymm6 =_mm256_permute_pd(ymm6,  5);
-	ymm10 = _mm256_permute_pd(ymm10, 5);
-	ymm14 = _mm256_permute_pd(ymm14, 5);
+        ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *2));
+        ymm10 = _mm256_fmadd_pd(ymm0, ymm2, ymm10);
 
-	// subtract/add even/odd elements
-	ymm4 = _mm256_addsub_pd(ymm4, ymm6);
+        ymm2 = _mm256_broadcast_sd((double const *)(tAimag + ta_inc_row *4));
+        ymm14 = _mm256_fmadd_pd(ymm0, ymm2, ymm14);
+        tA += ta_inc_col;
+        tAimag += ta_inc_col*2;
+    }
+    ymm6 =_mm256_permute_pd(ymm6,  5);
+    ymm10 = _mm256_permute_pd(ymm10, 5);
+    ymm14 = _mm256_permute_pd(ymm14, 5);
 
-	ymm8 = _mm256_addsub_pd(ymm8, ymm10);
+    // subtract/add even/odd elements
+    ymm4 = _mm256_addsub_pd(ymm4, ymm6);
 
-	ymm12 = _mm256_addsub_pd( ymm12, ymm14);
+    ymm8 = _mm256_addsub_pd(ymm8, ymm10);
 
-	// alpha, beta multiplication.
+    ymm12 = _mm256_addsub_pd( ymm12, ymm14);
 
-	/* (ar + ai) x AB */
-	ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
-	ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
+    // alpha, beta multiplication.
 
-	ymm3 = _mm256_permute_pd(ymm4, 5);
-	ymm4 = _mm256_mul_pd(ymm0, ymm4);
-	ymm3 =_mm256_mul_pd(ymm1, ymm3);
-	ymm4 = _mm256_addsub_pd(ymm4, ymm3);
+    /* (ar + ai) x AB */
+    ymm0 = _mm256_broadcast_sd((double const *)(alpha));       // load alpha_r and duplicate
+    ymm1 = _mm256_broadcast_sd((double const *)(&alpha->imag));    // load alpha_i and duplicate
 
-	ymm3 = _mm256_permute_pd(ymm8, 5);
-	ymm8 = _mm256_mul_pd(ymm0, ymm8);
-	ymm3 = _mm256_mul_pd(ymm1, ymm3);
-	ymm8 = _mm256_addsub_pd(ymm8, ymm3);
+    ymm3 = _mm256_permute_pd(ymm4, 5);
+    ymm4 = _mm256_mul_pd(ymm0, ymm4);
+    ymm3 =_mm256_mul_pd(ymm1, ymm3);
+    ymm4 = _mm256_addsub_pd(ymm4, ymm3);
 
-	ymm3 = _mm256_permute_pd(ymm12, 5);
-	ymm12 = _mm256_mul_pd(ymm0, ymm12);
-	ymm3 = _mm256_mul_pd(ymm1, ymm3);
-	ymm12 = _mm256_addsub_pd(ymm12, ymm3);
+    ymm3 = _mm256_permute_pd(ymm8, 5);
+    ymm8 = _mm256_mul_pd(ymm0, ymm8);
+    ymm3 = _mm256_mul_pd(ymm1, ymm3);
+    ymm8 = _mm256_addsub_pd(ymm8, ymm3);
 
-	if(tc_inc_row == 1) //col stored
-	{
-		if(beta->real == 0.0 && beta->imag == 0.0)
-		{
-			//transpose left 3x2
-			_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
-			_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-			_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
-			tC += tc_inc_col;
+    ymm3 = _mm256_permute_pd(ymm12, 5);
+    ymm12 = _mm256_mul_pd(ymm0, ymm12);
+    ymm3 = _mm256_mul_pd(ymm1, ymm3);
+    ymm12 = _mm256_addsub_pd(ymm12, ymm3);
 
-			_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
-			_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-			_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
-		}
-		else{
-			ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
-			ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
-			//Multiply ymm4 with beta
-			xmm0 = _mm_loadu_pd((double *)(tC)) ;
-			xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
-			ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-			ymm3 = _mm256_permute_pd(ymm0, 5);
-			ymm0 = _mm256_mul_pd(ymm1, ymm0);
-			ymm3 = _mm256_mul_pd(ymm2, ymm3);
-			ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-			ymm4 = _mm256_add_pd(ymm4, ymm0);
-			//Multiply ymm8 with beta
-			xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
-			xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
-			ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-			ymm3 = _mm256_permute_pd(ymm0, 5);
-			ymm0 = _mm256_mul_pd(ymm1, ymm0);
-			ymm3 = _mm256_mul_pd(ymm2, ymm3);
-			ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-			ymm8 = _mm256_add_pd(ymm8, ymm0);
+    if(tc_inc_row == 1) //col stored
+    {
+        if(beta->real == 0.0 && beta->imag == 0.0)
+        {
+            //transpose left 3x2
+            _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
+            _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+            _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
+            tC += tc_inc_col;
 
-			//Multiply ymm12 with beta
-			xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
-			xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
-			ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
-			ymm3 = _mm256_permute_pd(ymm0, 5);
-			ymm0 = _mm256_mul_pd(ymm1, ymm0);
-			ymm3 = _mm256_mul_pd(ymm2, ymm3);
-			ymm0 = _mm256_addsub_pd(ymm0, ymm3);
-			ymm12 = _mm256_add_pd(ymm12, ymm0);
+            _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
+            _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+            _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
+        }
+        else{
+            ymm1 = _mm256_broadcast_sd((double const *)(beta));       // load alpha_r and duplicate
+            ymm2 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load alpha_i and duplicate
+            //Multiply ymm4 with beta
+            xmm0 = _mm_loadu_pd((double *)(tC)) ;
+            xmm3 = _mm_loadu_pd((double *)(tC + tc_inc_col)) ;
+            ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+            ymm3 = _mm256_permute_pd(ymm0, 5);
+            ymm0 = _mm256_mul_pd(ymm1, ymm0);
+            ymm3 = _mm256_mul_pd(ymm2, ymm3);
+            ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+            ymm4 = _mm256_add_pd(ymm4, ymm0);
+            //Multiply ymm8 with beta
+            xmm0 = _mm_loadu_pd((double *)(tC + 1)) ;
+            xmm3 = _mm_loadu_pd((double *)(tC + 1 + tc_inc_col)) ;
+            ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+            ymm3 = _mm256_permute_pd(ymm0, 5);
+            ymm0 = _mm256_mul_pd(ymm1, ymm0);
+            ymm3 = _mm256_mul_pd(ymm2, ymm3);
+            ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+            ymm8 = _mm256_add_pd(ymm8, ymm0);
 
-			_mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
-			_mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
-			_mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
-			tC += tc_inc_col;
-			_mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
-			_mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
-			_mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
-		}
-	}
-	else
-	{
-		if(beta->real == 0.0 && beta->imag == 0.0)
-		{
-			_mm256_storeu_pd((double *)(tC), ymm4);
-			_mm256_storeu_pd((double *)(tC + tc_inc_row  ),  ymm8);
-			_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
-		}
-		else{
-			/* (br + bi) C + (ar + ai) AB */
-			ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
-			ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
+            //Multiply ymm12 with beta
+            xmm0 = _mm_loadu_pd((double *)(tC + 2)) ;
+            xmm3 = _mm_loadu_pd((double *)(tC + 2 + tc_inc_col)) ;
+            ymm0 = _mm256_insertf128_pd(_mm256_castpd128_pd256(xmm0), xmm3, 1) ;
+            ymm3 = _mm256_permute_pd(ymm0, 5);
+            ymm0 = _mm256_mul_pd(ymm1, ymm0);
+            ymm3 = _mm256_mul_pd(ymm2, ymm3);
+            ymm0 = _mm256_addsub_pd(ymm0, ymm3);
+            ymm12 = _mm256_add_pd(ymm12, ymm0);
 
-			ymm2 = _mm256_loadu_pd((double const *)(tC));
-			ymm3 = _mm256_permute_pd(ymm2, 5);
-			ymm2 = _mm256_mul_pd(ymm0, ymm2);
-			ymm3 =_mm256_mul_pd(ymm1, ymm3);
-			ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
+            _mm_storeu_pd((double *)(tC), _mm256_castpd256_pd128(ymm4));
+            _mm_storeu_pd((double *)(tC+1), _mm256_castpd256_pd128(ymm8));
+            _mm_storeu_pd((double *)(tC+2), _mm256_castpd256_pd128(ymm12));
+            tC += tc_inc_col;
+            _mm_storeu_pd((double *)(tC  ),_mm256_extractf128_pd (ymm4,1));
+            _mm_storeu_pd((double *)(tC+1)  ,_mm256_extractf128_pd (ymm8,1));
+            _mm_storeu_pd((double *)(tC+2), _mm256_extractf128_pd(ymm12, 1));
+        }
+    }
+    else
+    {
+        if(beta->real == 0.0 && beta->imag == 0.0)
+        {
+            _mm256_storeu_pd((double *)(tC), ymm4);
+            _mm256_storeu_pd((double *)(tC + tc_inc_row  ),  ymm8);
+            _mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+        }
+        else{
+            /* (br + bi) C + (ar + ai) AB */
+            ymm0 = _mm256_broadcast_sd((double const *)(beta));       // load beta_r and duplicate
+            ymm1 = _mm256_broadcast_sd((double const *)(&beta->imag));    // load beta_i and duplicate
 
-			ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
-			ymm3 = _mm256_permute_pd(ymm2, 5);
-			ymm2 = _mm256_mul_pd(ymm0, ymm2);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
+            ymm2 = _mm256_loadu_pd((double const *)(tC));
+            ymm3 = _mm256_permute_pd(ymm2, 5);
+            ymm2 = _mm256_mul_pd(ymm0, ymm2);
+            ymm3 =_mm256_mul_pd(ymm1, ymm3);
+            ymm4 = _mm256_add_pd(ymm4, _mm256_addsub_pd(ymm2, ymm3));
 
-			ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
-			ymm3 = _mm256_permute_pd(ymm2, 5);
-			ymm2 = _mm256_mul_pd(ymm0, ymm2);
-			ymm3 = _mm256_mul_pd(ymm1, ymm3);
-			ymm12 = _mm256_add_pd(ymm12, _mm256_addsub_pd(ymm2, ymm3));
+            ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row));
+            ymm3 = _mm256_permute_pd(ymm2, 5);
+            ymm2 = _mm256_mul_pd(ymm0, ymm2);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm8 = _mm256_add_pd(ymm8, _mm256_addsub_pd(ymm2, ymm3));
 
-			_mm256_storeu_pd((double *)(tC), ymm4);
-			_mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
-			_mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
-		}
-	}
+            ymm2 = _mm256_loadu_pd((double const *)(tC+tc_inc_row*2));
+            ymm3 = _mm256_permute_pd(ymm2, 5);
+            ymm2 = _mm256_mul_pd(ymm0, ymm2);
+            ymm3 = _mm256_mul_pd(ymm1, ymm3);
+            ymm12 = _mm256_add_pd(ymm12, _mm256_addsub_pd(ymm2, ymm3));
+
+            _mm256_storeu_pd((double *)(tC), ymm4);
+            _mm256_storeu_pd((double *)(tC + tc_inc_row) ,  ymm8);
+            _mm256_storeu_pd((double *)(tC + tc_inc_row *2), ymm12);
+        }
+    }
 }

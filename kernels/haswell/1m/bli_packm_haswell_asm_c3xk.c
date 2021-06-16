@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019 - 2021, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -104,7 +104,7 @@ void bli_cpackm_haswell_asm_3xk
 
 	// -------------------------------------------------------------------------
 
-	if ( cdim0 == mnr && !gs && !bli_does_conj( conja ) && unitk )
+	if ( cdim0 == mnr && !gs && !conja && unitk )
 	{
 		begin_asm()
 		

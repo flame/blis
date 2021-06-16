@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2224,40 +2224,24 @@ void bli_zgemm_haswell_asm_3x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	//handling case when alpha and beta are real and +/-1.
-	uint64_t alpha_real_one = *((uint64_t*)(&alpha->real));
-	uint64_t beta_real_one = *((uint64_t*)(&beta->real));
-
-	uint64_t alpha_real_one_abs = ((alpha_real_one << 1) >> 1);
-	uint64_t beta_real_one_abs  = ((beta_real_one << 1) >> 1);
-
 	char alpha_mul_type = BLIS_MUL_DEFAULT;
 	char beta_mul_type  = BLIS_MUL_DEFAULT;
 
-	if((alpha_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS) && (alpha->imag==0))// (alpha is real and +/-1)
-	{
-		alpha_mul_type = BLIS_MUL_ONE; //alpha real and 1
-		if(alpha_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
-		{
-			alpha_mul_type = BLIS_MUL_MINUS_ONE; //alpha real and -1
-		}
-	}
+    //handling case when alpha and beta are real and +/-1.
 
-	if(beta->imag == 0)// beta is real
-	{
-		if(beta_real_one_abs == BLIS_DOUBLE_TO_UINT64_ONE_ABS)// (beta +/-1)
-		{
-			beta_mul_type = BLIS_MUL_ONE;
-			if(beta_real_one == BLIS_DOUBLE_TO_UINT64_MINUS_ONE)
-			{
-				beta_mul_type = BLIS_MUL_MINUS_ONE;
-			}
-		}
-		else if(beta_real_one == 0)
-		{
-			beta_mul_type = BLIS_MUL_ZERO;
-		}
-	}
+    if(alpha->imag == 0.0)// (alpha is real)
+    {
+        if(alpha->real == 1.0)          alpha_mul_type = BLIS_MUL_ONE;
+        else if(alpha->real == -1.0)    alpha_mul_type = BLIS_MUL_MINUS_ONE;
+        else if(alpha->real == 0.0)     alpha_mul_type = BLIS_MUL_ZERO;
+    }
+
+    if(beta->imag == 0.0)// (beta is real)
+    {
+        if(beta->real == 1.0)       beta_mul_type = BLIS_MUL_ONE;
+        else if(beta->real == -1.0) beta_mul_type = BLIS_MUL_MINUS_ONE;
+        else if(beta->real == 0.0)  beta_mul_type = BLIS_MUL_ZERO;
+    }
 
 	begin_asm()
 

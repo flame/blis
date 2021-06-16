@@ -1631,7 +1631,7 @@ void bli_cntx_set_l3_thresh_funcs( dim_t n_funcs, ... )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_thresh_funcs(): " );
 	#endif
-	l1vkr_t* func_ids   = bli_malloc_intl( n_funcs * sizeof( opid_t ) );
+	opid_t* func_ids   = bli_malloc_intl( n_funcs * sizeof( opid_t ) );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_cntx_set_l3_thresh_funcs(): " );
