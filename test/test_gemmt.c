@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved..
 
    modification, are permitted provided that the following conditions are
    met:
@@ -31,7 +31,11 @@
 
 */
 
+#ifdef WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #include "blis.h"
 
 //#define FILE_IN_OUT

@@ -272,6 +272,14 @@
 #define sgemmt_ sgemmt
 #define zgemmt_ zgemmt
 #define cgemmt_ cgemmt
+#define sgemm_batch_ sgemm_batch
+#define dgemm_batch_ dgemm_batch
+#define cgemm_batch_ cgemm_batch
+#define zgemm_batch_ zgemm_batch
+#define saxpby_ saxpby
+#define daxpby_ daxpby
+#define caxpby_ caxpby
+#define zaxpby_ zaxpby
 #define cher2k_ cher2k
 #define zher2k_ zher2k
 #define cherk_  cherk

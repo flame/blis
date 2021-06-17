@@ -334,7 +334,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Attempt to open input file corresponding to input_filename as
 	// read-only/binary.
-	input_stream = fopen( input_filename, "rb" );
+	input_stream = fopen( input_filename, "r" );
 	libblis_test_fopen_check_stream( input_filename, input_stream );
 
 	// Initialize the individual override field to FALSE.
@@ -439,7 +439,7 @@ void libblis_test_read_params_file( char* input_filename, test_params_t* params 
 
 	// Attempt to open input file corresponding to input_filename as
 	// read-only/binary.
-	input_stream = fopen( input_filename, "rb" );
+	input_stream = fopen( input_filename, "r" );
 	libblis_test_fopen_check_stream( input_filename, input_stream );
 
 	// Read the number of repeats.
