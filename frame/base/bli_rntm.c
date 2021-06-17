@@ -556,6 +556,16 @@ void bli_nthreads_optimum(
 		else
 			n_threads_ideal = n_threads;
 	}
+        else if( family == BLIS_TRSM && bli_obj_is_double(c))
+        {
+                dim_t m = bli_obj_length(c);
+                dim_t n = bli_obj_width(c);
+
+                if(m<=512 && n<=512)
+                    n_threads_ideal = 4;
+
+        }
+
 	dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
 
 	bli_pthread_mutex_lock( &global_rntm_mutex );

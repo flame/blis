@@ -602,7 +602,7 @@ void dtrsm_
      * is doing better than native multithread */
     bool nt = bli_thread_get_is_parallel();
     if((nt==0 && m0<=1000 && n0<=1000) ||
-       (nt && m0<=128  && n0<=128 ) )
+       (nt && (m0+n0)<320) )
     {
         err_t status;
         status = bli_trsm_small

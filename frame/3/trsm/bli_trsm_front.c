@@ -126,6 +126,11 @@ void bli_trsm_front
 	bli_obj_set_as_root( &b_local );
 	bli_obj_set_as_root( &c_local );
 
+#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+	//  of threads and update in rntm
+	bli_nthreads_optimum(a, b, b, BLIS_TRSM, rntm );
+#endif
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
