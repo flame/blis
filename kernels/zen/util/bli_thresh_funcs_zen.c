@@ -79,7 +79,7 @@ bool bli_cntx_syrksup_thresh_is_met_zen( obj_t* a, obj_t* b, obj_t* c, cntx_t* c
         }
         else
         {
-            if( n < 150 ) return TRUE;
+            if( n <= 432 ) return TRUE;
             else return FALSE;
         }
     }

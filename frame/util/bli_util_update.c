@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,25 +61,35 @@ void PASTEMAC(ch, varname) \
 	start = ((n_off < m_off) && (m_off < n_off + n_cur)) ? m_off: n_off; \
 	end   = ((n_off < m_off + m_cur) && (m_off + m_cur < n_off + n_cur))? (m_off + m_cur):(n_off + n_cur); \
 \
-	if( beta_val != 0.0 ) \
+	if ( beta_val == 1.0 ) \
 	{ \
 		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
 			for(n = 0; n <= diag-n_off; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
+				c[m*rs_c + n] += ct[m*rs_ct + n]; \
 \
 		for(; m < m_cur; m++) \
 			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
+				c[m*rs_c + n] += ct[m*rs_ct + n]; \
+	} \
+	else if( beta_val == 0.0 )\
+	{ \
+		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
+			for(n = 0; n <= diag-n_off; n++) \
+				c[m*rs_c + n] = ct[m*rs_ct + n]; \
+\
+		for(; m < m_cur; m++) \
+			for(n = 0; n < n_cur; n++) \
+				c[m*rs_c + n] = ct[m*rs_ct + n]; \
 	} \
 	else \
 	{ \
 		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
 			for(n = 0; n <= diag-n_off; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
+				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
 \
 		for(; m < m_cur; m++) \
 			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = ct[m*rs_ct + n]; \
+				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
 	} \
 \
 	return; \
@@ -109,17 +119,17 @@ void PASTEMAC(ch, varname) \
 	start = ((n_off < m_off) && (m_off < n_off + n_cur)) ? m_off: n_off; \
 	end   = ((n_off < m_off + m_cur) && (m_off + m_cur < n_off + n_cur))? (m_off + m_cur):(n_off + n_cur); \
 \
-	if( beta_val != 0.0 ) \
+	if( beta_val == 1.0 ) \
 	{ \
 		for(m = 0; m < start-m_off; m++) \
 			for(n = 0; n < n_cur; n++) \
-				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
+				c[m*rs_c + n] += ct[m*rs_ct + n]; \
 \
-	for(diag = start, m= start-m_off; diag < end; diag++, m++) \
-		for(n = diag-n_off; n < n_cur; n++) \
-			c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
+		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
+			for(n = diag-n_off; n < n_cur; n++) \
+				c[m*rs_c + n] += ct[m*rs_ct + n]; \
 	} \
-	else \
+	else if ( beta_val == 0.0 )\
 	{ \
 		for(m = 0; m < start-m_off; m++) \
 			for(n = 0; n < n_cur; n++) \
@@ -128,6 +138,16 @@ void PASTEMAC(ch, varname) \
 		for(diag = start, m= start-m_off; diag < end; diag++, m++) \
 			for(n = diag-n_off; n < n_cur; n++) \
 				c[m*rs_c + n] = ct[m*rs_ct + n]; \
+	} \
+	else \
+	{ \
+		for(m = 0; m < start-m_off; m++) \
+			for(n = 0; n < n_cur; n++) \
+				c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
+\
+	for(diag = start, m= start-m_off; diag < end; diag++, m++) \
+		for(n = diag-n_off; n < n_cur; n++) \
+			c[m*rs_c + n] = c[m * rs_c + n] * beta_val + ct[m*rs_ct + n]; \
 	} \
 \
 	return; \
