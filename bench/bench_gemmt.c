@@ -207,7 +207,7 @@ int main( int argc, char** argv )
             continue;
         }
 #ifndef CBLAS
-        if(bli_obj_row_stride(&c) != 1)
+        if( ( stor_scheme == 'R' ) || ( stor_scheme == 'r' ) )
         {
             printf("BLAS APIs doesn't support row-storage\n");
             continue;
@@ -263,7 +263,7 @@ int main( int argc, char** argv )
             enum CBLAS_TRANSPOSE cblas_transa;
             enum CBLAS_TRANSPOSE cblas_transb;
 
-            if ( bli_obj_row_stride( &c ) == 1 )
+            if ( ( stor_scheme == 'C' ) || ( stor_scheme == 'c' ) )
                 cblas_order = CblasColMajor;
             else
                 cblas_order = CblasRowMajor;

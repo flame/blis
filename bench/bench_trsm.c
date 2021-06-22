@@ -232,7 +232,7 @@ int main( int argc, char** argv )
             enum CBLAS_SIDE cblas_side;
             enum CBLAS_DIAG cblas_diag;
 
-            if ( bli_obj_row_stride( &c ) == 1 )
+            if ( ( stor_scheme == 'C' ) || ( stor_scheme == 'c' ) )
               cblas_order = CblasColMajor;
             else
               cblas_order = CblasRowMajor;
