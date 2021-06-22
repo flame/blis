@@ -335,9 +335,9 @@ print_usage()
 	echo "                 attempt to determine the return type from the compiler."
 	echo "                 Otherwise, the default is \"gnu\"."
 	echo " "
-	echo "   --disable-aocl-dynamic, --enable-aocl-dynamic"
+	echo "   --enable-aocl-dynamic, --disable-aocl-dynamic"
 	echo " "
-	echo "                 Enable (disabled by default) dynamic selection of number of" 
+	echo "                 Disable (Enabled by default) dynamic selection of number of" 
 	echo "                 threads used to solve the given problem."
 	echo "                 Range of optimum number of threads will be [1, num_threads],"
 	echo "                 where \"num_threads\" is number of threads set by the application."
@@ -2045,7 +2045,7 @@ main()
 	enable_sup_handling='yes'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
-	enable_aocl_dynamic='no'
+	enable_aocl_dynamic='yes'
 	force_version='no'
 	complex_return='default'
 
