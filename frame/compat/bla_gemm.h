@@ -54,6 +54,21 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
+BLIS_EXPORT_BLAS void dzgemm_
+     (
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const dcomplex*    alpha, \
+       const double*    a, const f77_int* lda, \
+       const dcomplex*    b, const f77_int* ldb, \
+       const dcomplex*    beta, \
+             dcomplex*    c, const f77_int* ldc  \
+     );
+
 INSERT_GENTPROT_BLAS( gemm )
+
 #endif
 

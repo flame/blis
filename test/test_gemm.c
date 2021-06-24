@@ -42,7 +42,7 @@
 
 //#define FILE_IN_OUT
 //#define PRINT
-//#define MATRIX_INITIALISATION
+#define MATRIX_INITIALISATION
 
 // uncomment to enable cblas interface
 //#define CBLAS
@@ -54,7 +54,7 @@ int main( int argc, char** argv )
         obj_t alpha, beta;
         dim_t m, n, k;
         inc_t lda, ldb, ldc;
-        num_t dt;
+        num_t dt, dt_a;
         inc_t r, n_repeats;
         trans_t  transa;
         trans_t  transb;
@@ -75,7 +75,16 @@ int main( int argc, char** argv )
         //dt = BLIS_SCOMPLEX;
         //dt = BLIS_DCOMPLEX;
 
-        const char stor_scheme = 'C';
+	if( bli_is_real( dt ) || bli_is_scomplex( dt ) )
+		dt_a = dt;
+	else
+	{
+		dt_a = dt;
+		// Enable the following to call
+		// dzgemm 
+		//dt_a = BLIS_DOUBLE;
+	}
+	const char stor_scheme = 'C';
 
         transa = BLIS_NO_TRANSPOSE;
         transb = BLIS_NO_TRANSPOSE;
@@ -83,7 +92,7 @@ int main( int argc, char** argv )
         bli_param_map_blis_to_netlib_trans( transa, &f77_transa );
         bli_param_map_blis_to_netlib_trans( transb, &f77_transb );
 
-        
+
 	printf("BLIS Library version is : %s\n", bli_info_get_version_str());
 
 #ifdef FILE_IN_OUT
@@ -153,10 +162,10 @@ int main( int argc, char** argv )
             ldc = bli_align_dim_to_size( ldc, elem_size, BLIS_HEAP_STRIDE_ALIGN_SIZE );
 
             // Will verify the leading dimension is powers of 2 and add 64bytes.
-            inc_t n_bytes = lda*sizeof(dt);
+            inc_t n_bytes = lda*sizeof(dt_a);
 
             if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
-               lda += BLIS_SIMD_ALIGN_SIZE/sizeof(dt);
+               lda += BLIS_SIMD_ALIGN_SIZE/sizeof(dt_a);
 
             n_bytes = ldb*sizeof(dt);
             if((n_bytes!=0) && !(n_bytes&(n_bytes-1)))// check whether n_bytes is power of 2.
@@ -169,7 +178,7 @@ int main( int argc, char** argv )
             if( (stor_scheme == 'C') || (stor_scheme == 'c') )
             {
                 // Col-major Order
-                bli_obj_create( dt, m, k, 1, lda, &a );
+                bli_obj_create( dt_a, m, k, 1, lda, &a );
                 bli_obj_create( dt, k, n, 1, ldb, &b );
                 bli_obj_create( dt, m, n, 1, ldc, &c );
                 bli_obj_create( dt, m, n, 1, ldc, &c_save );
@@ -177,7 +186,7 @@ int main( int argc, char** argv )
             else if( (stor_scheme == 'R') || (stor_scheme == 'r') )
             {
                 // Row-major Order
-                bli_obj_create( dt, m, k, lda, 1, &a );
+                bli_obj_create( dt_a, m, k, lda, 1, &a );
                 bli_obj_create( dt, k, n, ldb, 1, &b );
                 bli_obj_create( dt, m, n, ldc, 1, &c );
                 bli_obj_create( dt, m, n, ldc, 1, &c_save );
@@ -373,7 +382,24 @@ int main( int argc, char** argv )
                                  cp, ldc
                                  );
 #else
-                    zgemm_( &f77_transa,
+		    if( bli_is_double( dt_a ) )
+		    {
+		    	dzgemm_(
+				 &f77_transa,
+				 &f77_transb,
+				 &mm,
+				 &nn,
+				 &kk,
+				 alphap,
+				 (double*)ap, (f77_int*)&lda,
+				 bp, (f77_int*)&ldb,
+				 betap,
+				 cp, (f77_int*)&ldc
+				);
+		    }
+		    else
+		    {
+                    	zgemm_( &f77_transa,
                             &f77_transb,
                             &mm,
                             &nn,
@@ -383,6 +409,7 @@ int main( int argc, char** argv )
                             bp, (f77_int*)&ldb,
                             betap,
                             cp, (f77_int*)&ldc );
+		   }
 #endif
                 }
 #endif
@@ -398,7 +425,9 @@ int main( int argc, char** argv )
             }//nrepeats
 
             gflops = ( 2.0 * m * k * n ) / ( dtime_save * 1.0e9 );
-            if ( bli_is_complex( dt ) ) gflops *= 4.0;
+	    if (bli_is_dcomplex(dt) && (bli_is_double(dt_a)))
+		    gflops *= 2.0;
+	    else if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
 #ifdef BLIS
             printf("data_gemm_blis" );
