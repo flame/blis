@@ -52,6 +52,7 @@ err_t bli_gemmsup_int
 	const num_t  dt          = bli_obj_dt( c );
 	const dim_t  m           = bli_obj_length( c );
 	const dim_t  n           = bli_obj_width( c );
+	const dim_t  k           = bli_obj_width( a );
 	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	const bool   auto_factor = bli_rntm_auto_factor( rntm );
@@ -84,14 +85,13 @@ err_t bli_gemmsup_int
 		return BLIS_FAILURE;
 	}
 
-	
 	if ( is_rrr_rrc_rcr_crr )
 	{
 	  // This branch handles:
-		//  - rrr rrc rcr crr for row-preferential kernels
-		//  - rcc crc ccr ccc for column-preferential kernels
-	        //  - Currently only row-preferential kernels are only supported.
-	  
+	  //  - rrr rrc rcr crr for row-preferential kernels
+	  //  - rcc crc ccr ccc for column-preferential kernels
+	  //  - Currently only row-preferential kernels are only supported.
+
 	  // calculate number of micropanels in m and n dimensions and
 	  // recalculate the automatic thread factorization based on these number of  micropanels 
 	  const dim_t mu = m / MR;
@@ -101,18 +101,24 @@ err_t bli_gemmsup_int
 	  // with a new factorization based on the matrix dimensions in units
 	  // of micropanels.
 	  if ( auto_factor )
-	    {
+	  {
 	      // In the block-panel algorithm, the m dimension is parallelized
 	      // with ic_nt and the n dimension is parallelized with jc_nt.
 	      bli_thread_partition_2x2( n_threads, mu, nu, &ic_new, &jc_new );
-	      
+
 	      // Update the ways of parallelism for the jc and ic loops, and then
 	      // update the current thread's root thrinfo_t node according to the
 	      // new ways of parallelism value for the jc loop.
 	      bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
 	      bli_l3_sup_thrinfo_update_root( rntm, thread );
-	    }
-	
+	  }
+
+	  /*Enable packing for B matrix for higher sizes*/
+	  if(bli_is_float(dt) && (n_threads==1)) {
+              if((m > 240) &&  (k > 240) && (n > 240))
+	          bli_rntm_set_pack_b( 1, rntm );
+	  }
+
 	  bli_gemmsup_ref_var2m( BLIS_NO_TRANSPOSE,
 				 alpha, a, b, beta, c,
 				 stor_id, cntx, rntm, thread );
@@ -120,28 +126,35 @@ err_t bli_gemmsup_int
 	else
 	{
 	  // This branch handles:
-		//  - rrr rrc rcr crr for column-preferential kernels
-		//  - rcc crc ccr ccc for row-preferential kernels
-	        //  - Currently only row-preferential kernels are only supported.
+	  //  - rrr rrc rcr crr for column-preferential kernels
+	  //  - rcc crc ccr ccc for row-preferential kernels
+          //  - Currently only row-preferential kernels are only supported.
 	  const dim_t mu = n / MR; // the n becomes m after a transposition
 	  const dim_t nu = m / NR; // the m becomes n after a transposition
-	  
+
 	  if ( auto_factor )
-	    {
+	  {
 	      // In the block-panel algorithm, the m dimension is parallelized
 	      // with ic_nt and the n dimension is parallelized with jc_nt.
 	      bli_thread_partition_2x2( n_threads, mu, nu, &ic_new, &jc_new );
-	      
+
 	      // Update the ways of parallelism for the jc and ic loops, and then
 	      // update the current thread's root thrinfo_t node according to the
 	      // new ways of parallelism value for the jc loop.
 	      bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
 	      bli_l3_sup_thrinfo_update_root( rntm, thread );
-	    }
+	  }
+
+	  /* Enable packing for B matrix for higher sizes. Note that pack A 
+	   * becomes pack B inside var2m because this is transpose case*/
+	  if(bli_is_float(dt) && (n_threads==1)) {
+              if((m > 240) &&  (k > 240) && (n > 240))
+	          bli_rntm_set_pack_a( 1, rntm );
+	  }
 
 	  bli_gemmsup_ref_var2m( BLIS_TRANSPOSE,
-			                       alpha, a, b, beta, c,
-			                       stor_id, cntx, rntm, thread );
+	                         alpha, a, b, beta, c,
+			         stor_id, cntx, rntm, thread );
 	}
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
