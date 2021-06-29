@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -36,7 +36,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Top-level makefile for libflame linear algebra library.
 #
 #
@@ -720,7 +720,7 @@ endif
 
 # --- BLAS test suite rules ---
 
-testblas: blastest-run 
+testblas: blastest-run
 
 blastest-f2c: check-env $(BLASTEST_F2C_LIB)
 
@@ -903,7 +903,7 @@ endif
 
 # Check results of BLIS CPP Template tests
 checkbliscpp:
-	$(MAKE) -C $(CPP_TEST_DIR) 
+	$(MAKE) -C $(CPP_TEST_DIR)
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
@@ -1091,24 +1091,28 @@ endif # ifeq ($(IS_WIN),no)
 # --- Query current configuration ---
 
 showconfig: check-env
-	@echo "configuration family:    $(CONFIG_NAME)"
-	@echo "sub-configurations:      $(CONFIG_LIST)"
-	@echo "requisite kernels sets:  $(KERNEL_LIST)"
-	@echo "kernel-to-config map:    $(KCONFIG_MAP)"
+	@echo "configuration family:        $(CONFIG_NAME)"
+	@echo "sub-configurations:          $(CONFIG_LIST)"
+	@echo "requisite kernels sets:      $(KERNEL_LIST)"
+	@echo "kernel-to-config map:        $(KCONFIG_MAP)"
 	@echo "-------------------------"
-	@echo "BLIS version string:     $(VERSION)"
-	@echo ".so major version:       $(SO_MAJOR)"
-	@echo ".so minor.build vers:    $(SO_MINORB)"
-	@echo "install libdir:          $(INSTALL_LIBDIR)"
-	@echo "install includedir:      $(INSTALL_INCDIR)"
-	@echo "install sharedir:        $(INSTALL_SHAREDIR)"
-	@echo "debugging status:        $(DEBUG_TYPE)"
-	@echo "multithreading status:   $(THREADING_MODEL)"
-	@echo "enable BLAS API?         $(MK_ENABLE_BLAS)"
-	@echo "enable CBLAS API?        $(MK_ENABLE_CBLAS)"
-	@echo "build static library?    $(MK_ENABLE_STATIC)"
-	@echo "build shared library?    $(MK_ENABLE_SHARED)"
-	@echo "ARG_MAX hack enabled?    $(ARG_MAX_HACK)"
+	@echo "BLIS version string:         $(VERSION)"
+	@echo ".so major version:           $(SO_MAJOR)"
+	@echo ".so minor.build vers:        $(SO_MINORB)"
+	@echo "install libdir:              $(INSTALL_LIBDIR)"
+	@echo "install includedir:          $(INSTALL_INCDIR)"
+	@echo "install sharedir:            $(INSTALL_SHAREDIR)"
+	@echo "debugging status:            $(DEBUG_TYPE)"
+	@echo "multithreading status:       $(THREADING_MODEL)"
+	@echo "enable BLAS API?             $(MK_ENABLE_BLAS)"
+	@echo "enable CBLAS API?            $(MK_ENABLE_CBLAS)"
+	@echo "build static library?        $(MK_ENABLE_STATIC)"
+	@echo "build shared library?        $(MK_ENABLE_SHARED)"
+	@echo "ARG_MAX hack enabled?        $(ARG_MAX_HACK)"
+	@echo "complex return scheme:       $(MK_COMPLEX_RETURN_SCHEME)"
+	@echo "enable trsm preinversion:    $(MK_ENABLE_TRSM_PREINVERSION)"
+	@echo "enable AOCL dynamic threads: $(MK_ENABLE_AOCL_DYNAMIC)"
+
 
 
 # --- Clean rules ---
@@ -1282,7 +1286,7 @@ endif
 
 changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'"
-	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
+	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG)
 
 
 # --- Uninstall rules ---

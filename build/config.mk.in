@@ -191,5 +191,14 @@ SANDBOX           := @sandbox@
 # variable is set to the empty value.
 LIBPTHREAD        := @libpthread@
 
+# Complex return scheme configuration
+MK_ENABLE_TRSM_PREINVERSION := @enable_trsm_preinversion@
+
+# Complex return scheme configuration
+MK_COMPLEX_RETURN_SCHEME := @complex_return@
+
+# Status of aocl dynamic configuration
+MK_ENABLE_AOCL_DYNAMIC := @enable_aocl_dynamic@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

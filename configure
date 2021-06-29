@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -337,7 +337,7 @@ print_usage()
 	echo " "
 	echo "   --enable-aocl-dynamic, --disable-aocl-dynamic"
 	echo " "
-	echo "                 Disable (Enabled by default) dynamic selection of number of" 
+	echo "                 Disable (Enabled by default) dynamic selection of number of"
 	echo "                 threads used to solve the given problem."
 	echo "                 Range of optimum number of threads will be [1, num_threads],"
 	echo "                 where \"num_threads\" is number of threads set by the application."
@@ -840,7 +840,7 @@ build_kconfig_registry()
 			assign_key_value "kconfig_registry" "${kernel}" "${newvalue}"
 
 		done
-		
+
 	done
 }
 
@@ -1941,7 +1941,7 @@ main()
 	# The root directory of the BLIS framework.
 	aocldtl_dir='aocl_dtl'
 	aocldtl_dirpath="${dist_path}/${aocldtl_dir}"
-	
+
 	# The name of the sandbox directory.
 	sandbox_dir='sandbox'
 	sandbox_dirpath="${dist_path}/${sandbox_dir}"
@@ -3101,11 +3101,20 @@ main()
 		echo "${script_name}: trsm diagonal element pre-inversion is disabled."
 		enable_trsm_preinversion_01=0
 	fi
+
+	# Check aocl dynamic threading configuration and enable it only if
+	# multi-threading is enabled
 	if [ "x${enable_aocl_dynamic}" = "xyes" ]; then
-		echo "${script_name}: Dynamic selection of number of threads is enabled"
-		enable_aocl_dynamic_01=1
+		if [ "x${threading_model}" != "xoff" ]; then
+			echo "${script_name}: dynamic selection of number of threads is enabled"
+			enable_aocl_dynamic_01=1
+		else
+			enable_aocl_dynamic_01=0
+			enable_aocl_dynamic="no"
+			echo "${script_name}: dynamic threading is disabled as multithreading is disabled"
+		fi
 	else
-		echo "${script_name}: Dynamic selection of number of threads is disabled"
+		echo "${script_name}: dynamic selection of number of threads is disabled"
 		enable_aocl_dynamic_01=0
 	fi
 
@@ -3154,7 +3163,7 @@ main()
 
 		enable_sandbox_01=0
 	fi
-	
+
 	# Check the method used for returning complex numbers
 	if [ "x${complex_return}" = "xdefault" ]; then
 		if [ -n "${FC}" ]; then
@@ -3185,7 +3194,7 @@ main()
 			complex_return='gnu'
 		fi
 	fi
-	
+
 	if [ "x${complex_return}" = "xgnu"  ]; then
 		complex_return_intel01='0'
 	elif [ "x${complex_return}" = "xintel" ]; then
@@ -3195,6 +3204,7 @@ main()
 		echo "${script_name}: *** Acceptable values are \"gnu\" and \"intel\"."
 		exit 1
 	fi
+
 
 	echo "${script_name}: configuring complex return type as \"${complex_return}\"."
 
@@ -3356,8 +3366,11 @@ main()
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
+		| sed -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion}/g" \
+		| sed -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic}/g" \
+		| sed -e "s/@complex_return@/${complex_return}/g" \
 		> "${config_mk_out_path}"
-		
+
 
 	# Begin substituting information into the bli_config_h_in file, outputting
 	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
