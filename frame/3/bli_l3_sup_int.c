@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-20, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -159,7 +159,7 @@ err_t bli_gemmsup_int
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4);
 	return BLIS_SUCCESS;
-	
+
 #else  // #ifdef BLIS_CONFIG_EPYC
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
@@ -356,35 +356,6 @@ err_t bli_gemmtsup_int
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_4);
 //	AOCL_DTL_LOG_GEMMT_INPUTS(AOCL_DTL_LEVEL_TRACE_4, alpha, a, b, beta, c);
 
-#if 0
-	//bli_gemmsup_ref_var2
-	//bli_gemmsup_ref_var1
-	#if 0
-	bli_gemmsup_ref_var1n
-	#else
-	#endif
-	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
-	const bool    is_rrr_rrc_rcr_crr = ( stor_id == BLIS_RRR ||
-	                                     stor_id == BLIS_RRC ||
-	                                     stor_id == BLIS_RCR ||
-	                                     stor_id == BLIS_CRR );
-	if ( is_rrr_rrc_rcr_crr )
-	{
-		bli_gemmsup_ref_var2m
-		(
-		  BLIS_NO_TRANSPOSE, alpha, a, b, beta, c, stor_id, cntx, rntm
-		);
-	}
-	else
-	{
-		bli_gemmsup_ref_var2m
-		(
-		  BLIS_TRANSPOSE, alpha, a, b, beta, c, stor_id, cntx, rntm
-		);
-	}
-
-	return BLIS_SUCCESS;
-#endif
 
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
 
@@ -430,9 +401,15 @@ err_t bli_gemmtsup_int
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
 		// Also, recalculate the automatic thread factorization.
+#ifdef BLIS_CONFIG_EPYC
+		if         ( mu >= nu )    use_bp = TRUE;
+		else /* if ( mu <  nu ) */ use_bp = TRUE;// var1n is not implemented for GEMMT
+
+#else
 		if         ( mu >= nu )    use_bp = TRUE;
 		else /* if ( mu <  nu ) */ use_bp = FALSE;
 
+#endif
 		// If the parallel thread factorization was automatic, we update it
 		// with a new factorization based on the matrix dimensions in units
 		// of micropanels.
@@ -495,9 +472,14 @@ err_t bli_gemmtsup_int
 		// Decide which algorithm to use (block-panel var2m or panel-block
 		// var1n) based on the number of micropanels in the m and n dimensions.
 		// Also, recalculate the automatic thread factorization.
+#ifdef BLIS_CONFIG_EPYC
+		if         ( mu >= nu )    use_bp = TRUE;
+		else /* if ( mu <  nu ) */ use_bp = TRUE; //var1n is not implemented for gemmt
+#else
 		if         ( mu >= nu )    use_bp = TRUE;
 		else /* if ( mu <  nu ) */ use_bp = FALSE;
 
+#endif
 		// If the parallel thread factorization was automatic, we update it
 		// with a new factorization based on the matrix dimensions in units
 		// of micropanels.

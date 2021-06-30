@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -478,11 +478,24 @@ void PASTEMACT(ch,opname,uplo,varname) \
 					); \
 \
 					/* Scale the bottom edge of C and add the result from above. */ \
-					PASTEMAC(ch,update_lower_triang)( m_off_cblock, n_off_cblock, \
+					if(col_pref) \
+					{ \
+					  PASTEMAC(ch,update_upper_triang)( \
+						   n_off_cblock, m_off_cblock, \
+						   n_cur, m_cur, \
+						   ct, cs_ct, rs_ct, \
+						   beta_cast, \
+						   c11, cs_c, rs_c \
+						 ); \
+					} \
+					else \
+					{ \
+					  PASTEMAC(ch,update_lower_triang)( m_off_cblock, n_off_cblock, \
 								m_cur, n_cur, \
 					                        ct,  rs_ct, cs_ct, \
 					                        beta_cast, \
 						                c11, rs_c,  cs_c ); \
+					} \
 				} \
 			} \
 		} \
@@ -762,11 +775,24 @@ void PASTEMACT(ch,opname,uplo,varname) \
 					); \
 \
 					/* Scale the bottom edge of C and add the result from above. */ \
-					PASTEMAC(ch,update_upper_triang)( m_off_cblock, n_off_cblock, \
+					if(col_pref) \
+					{ \
+					  PASTEMAC(ch, update_lower_triang)( \
+							n_off_cblock, m_off_cblock, \
+							n_cur, m_cur, \
+							ct, cs_ct, rs_ct, \
+							beta_cast, \
+							c11, cs_c, rs_c \
+						  ); \
+					} \
+					else \
+					{ \
+					  PASTEMAC(ch,update_upper_triang)( m_off_cblock, n_off_cblock, \
 								m_cur, n_cur, \
 					                        ct,  rs_ct, cs_ct, \
 					                        beta_cast, \
 						                c11, rs_c,  cs_c ); \
+					} \
 				} \
 		} \
 	} \

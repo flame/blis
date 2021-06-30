@@ -319,6 +319,7 @@ BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_
 // -- gemmt specific function
 BLIS_INLINE bool bli_cntx_gemmtsup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
 {
+#ifdef BLIS_CONFIG_EPYC
     if( bli_is_double( dt ))
     {
         if ( n < 300 )       return TRUE;
@@ -333,6 +334,9 @@ BLIS_INLINE bool bli_cntx_gemmtsup_thresh_is_met( num_t dt, dim_t n, dim_t k, cn
     }
     else
         return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
+#else
+    return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
+#endif
 }
 
 // -- syrk specific function
