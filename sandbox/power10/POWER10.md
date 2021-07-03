@@ -1,6 +1,6 @@
 ### Low Precision POWER10 Kernels
 
-This is a special BLIS Sandbox that allows users to call reduced preicison or reduced integer POWER10 `GEMM` kernels. 
+This is a special BLIS Sandbox that allows users to call POWER10 reduced precision/integer `GEMM` kernels. 
 
 Supported kernels: `IEEE float16 (bli_shgemm), bfloat16 (bli_sbgemm), int16 (bli_i16gemm), int8 (bli_i8gemm), int4 (bli_i4gemm)`.
 
@@ -8,7 +8,7 @@ Supported kernels: `IEEE float16 (bli_shgemm), bfloat16 (bli_sbgemm), int16 (bli
 
 This document describes how the low precision POWER10 `gemm` kernels are implemented and explains how to call the POWER10 `GEMM` kernels. 
 
-**Important: These kernels does not have the full functionality of BLIS. This sandbox can only perform single threaded, no transpose, GEMM.**
+**Important: These kernels does not have the full functionality of BLIS. The kernels can only perform single threaded, no transpose, GEMM.**
 
 #### Implementation
 
@@ -59,7 +59,7 @@ Ensure that you have GCC 10.2 or greater.
 
 #### P10 Testsuite
 
-In `p10_testsuite`, their are performance gathering and correctness checking programs for the POWER10 `GEMM` kernels. By default, the performance gathering and correctness checking is done over square matrices ranging from 80 to 4000 in increments of 80. Performance is measured in GFLOPS, and correctness is measured using the BLIS method.
+In `p10_testsuite`, there are performance gathering and correctness checking programs for the POWER10 reduced precision/integer `GEMM` kernels. By default, the performance gathering and correctness checking is done over square matrices ranging from 80 to 4000 in increments of 80. Performance is measured in GFLOPs, and correctness is measured using the BLIS method (detailed in `blis/testsuite/test_gemm.c`).
 
 #### References
 
