@@ -40,16 +40,31 @@
 #define BLIS_LOADFIRST 0
 #define MEM_ALLOC 1//malloc performs better than bli_malloc.
 
+#define SET_TRANS(X,Y)\
+    Y = BLIS_NO_TRANSPOSE;\
+    if(bli_obj_has_trans( a ))\
+    {\
+        Y = BLIS_TRANSPOSE;\
+        if(bli_obj_has_conj(a))\
+        {\
+            Y = BLIS_CONJ_TRANSPOSE;\
+        }\
+    }\
+    else if(bli_obj_has_conj(a))\
+    {\
+        Y = BLIS_CONJ_NO_TRANSPOSE;\
+    }
+
 //Macro for 3m_sqp n loop
 #define BLI_SQP_ZGEMM_N(MX)\
     int j=0;\
     for(; j<=(n-nx); j+= nx)\
     {\
-        status = bli_sqp_zgemm_m8( m, nx, k, a, lda, b+(j*ldb), ldb, c+(j*ldc), ldc, alpha_real, beta_real, isTransA, MX,  p_istart, kx, &mem_3m_sqp);\
+        status = bli_sqp_zgemm_m8( m, nx, k, a, lda, b+(j*ldb), ldb, c+(j*ldc), ldc, alpha_real, beta_real, transa, MX,  p_istart, kx, &mem_3m_sqp);\
     }\
     if(j<n)\
     {\
-        status = bli_sqp_zgemm_m8( m, n-j, k, a, lda, b+(j*ldb), ldb, c+(j*ldc), ldc, alpha_real, beta_real, isTransA, MX,  p_istart, kx, &mem_3m_sqp);\
+        status = bli_sqp_zgemm_m8( m, n-j, k, a, lda, b+(j*ldb), ldb, c+(j*ldc), ldc, alpha_real, beta_real, transa, MX,  p_istart, kx, &mem_3m_sqp);\
     }
 
 //Macro for sqp_dgemm n loop
@@ -135,7 +150,7 @@ BLIS_INLINE err_t bli_sqp_zgemm( gint_t m,
                             guint_t ldc,
                             double alpha,
                             double beta,
-                            bool isTransA,
+                            trans_t transa,
                             dim_t nt);
 
 BLIS_INLINE err_t bli_sqp_dgemm( gint_t m,
@@ -181,7 +196,7 @@ err_t bli_gemm_sqp
         return BLIS_INVALID_ROW_STRIDE;
     }
 
-    if(bli_obj_has_conj(a) || bli_obj_has_conj(b))
+    if(bli_obj_has_conj(b))
     {
         return BLIS_NOT_YET_IMPLEMENTED;
     }
@@ -216,6 +231,9 @@ err_t bli_gemm_sqp
         isTransA = true;
     }
 
+    trans_t transa = BLIS_NO_TRANSPOSE;
+    SET_TRANS(a,transa)
+
     dim_t nt = bli_thread_get_num_threads(); // get number of threads
 
     double* ap     = ( double* )bli_obj_buffer( a );
@@ -237,7 +255,7 @@ err_t bli_gemm_sqp
             return BLIS_NOT_YET_IMPLEMENTED;
         }
         //printf("zsqp ");
-        return bli_sqp_zgemm( m, n, k, ap, lda, bp, ldb, cp, ldc, alpha_real, beta_real, isTransA, nt);
+        return bli_sqp_zgemm( m, n, k, ap, lda, bp, ldb, cp, ldc, alpha_real, beta_real, transa, nt);
     }
     else if(dt == BLIS_DOUBLE)
     {
@@ -254,6 +272,8 @@ err_t bli_gemm_sqp
             return BLIS_NOT_YET_IMPLEMENTED;
         }
         //printf("dsqp ");
+        // dgemm case only transpose or no-transpose is handled.
+        // conjugate_transpose and conjugate no transpose are not applicable.
         return bli_sqp_dgemm( m, n, k, ap, lda, bp, ldb, cp, ldc, *alpha_cast, *beta_cast, isTransA, nt);
     }
 
@@ -627,7 +647,7 @@ BLIS_INLINE void bli_sqp_zgemm_kx(  gint_t m,
                                     guint_t ldb,
                                     double* c,
                                     guint_t ldc,
-                                    bool isTransA,
+                                    trans_t transa,
                                     double alpha,
                                     double beta,
                                     gint_t mx,
@@ -653,7 +673,7 @@ BLIS_INLINE void bli_sqp_zgemm_kx(  gint_t m,
     double* pas = as;
 
     /* a matrix real and imag packing and compute. */
-    bli_3m_sqp_packA_real_imag_sum(a, i, kx+p, lda, par, pai, pas, isTransA, mx, p);
+    bli_3m_sqp_packA_real_imag_sum(a, i, kx+p, lda, par, pai, pas, transa, mx, p);
 
     double* pcr = cr;
     double* pci = ci;
@@ -874,7 +894,7 @@ BLIS_INLINE err_t bli_sqp_zgemm_m8( gint_t m,
                                     guint_t ldc,
                                     double alpha,
                                     double beta,
-                                    bool isTransA,
+                                    trans_t transa,
                                     gint_t mx,
                                     gint_t* p_istart,
                                     gint_t kx,
@@ -926,14 +946,14 @@ BLIS_INLINE err_t bli_sqp_zgemm_m8( gint_t m,
         for(; p <= (k-kx); p += kx)
         {
             bli_sqp_zgemm_kx(m, n, kx, p, a, lda, k, c, ldc,
-                            isTransA, alpha, beta, mx, i, ar, ai, as,
+                            transa, alpha, beta, mx, i, ar, ai, as,
                             br + p, bi + p, bs + p, cr, ci, w, a_aligned);
         }// k loop end
 
         if(p<k)
         {
             bli_sqp_zgemm_kx(m, n, (k - p), p, a, lda, k, c, ldc,
-                             isTransA, alpha, beta, mx, i, ar, ai, as,
+                             transa, alpha, beta, mx, i, ar, ai, as,
                             br + p, bi + p, bs + p, cr, ci, w, a_aligned);
         }
 #else//kloop
@@ -946,7 +966,7 @@ BLIS_INLINE err_t bli_sqp_zgemm_m8( gint_t m,
         double* pas = as;
 
         /* a matrix real and imag packing and compute. */
-        bli_3m_sqp_packA_real_imag_sum(a, i, k, lda, par, pai, pas, isTransA, mx, 0);
+        bli_3m_sqp_packA_real_imag_sum(a, i, k, lda, par, pai, pas, transa, mx, 0);
 
         double* pcr = cr;
         double* pci = ci;
@@ -1035,7 +1055,7 @@ BLIS_INLINE err_t bli_sqp_zgemm(gint_t m,
                                 guint_t ldc,
                                 double alpha_real,
                                 double beta_real,
-                                bool isTransA,
+                                trans_t transa,
                                 dim_t nt)
 {
     gint_t istart = 0;
@@ -1078,7 +1098,7 @@ BLIS_INLINE err_t bli_sqp_zgemm(gint_t m,
         kx = k;
     }
     // for tn case there is a bug in handling k parts. To be fixed.
-    if(isTransA==true)
+    if(transa!=BLIS_NO_TRANSPOSE)
     {
         kx = k;
     }

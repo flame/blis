@@ -666,8 +666,7 @@ void zgemm_
 		sqp_on = true;
 	}
 #endif
-	if( ( ( blis_transa == BLIS_TRANSPOSE ) || ( blis_transa == BLIS_NO_TRANSPOSE ) )
-		&& ( blis_transb == BLIS_NO_TRANSPOSE) && (sqp_on == true))
+	if( ( blis_transb == BLIS_NO_TRANSPOSE) && ( sqp_on == true ) )
 	{
 		//sqp algo is found better for n > 40
 		if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
