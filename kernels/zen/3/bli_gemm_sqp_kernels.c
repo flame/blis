@@ -1412,19 +1412,18 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
                                     double *par,
                                     double *pai,
                                     double *pas,
-                                    bool isTransA,
+                                    trans_t transa,
                                     gint_t mx,
                                     gint_t p)
 {
     __m256d av0, av1, av2, av3;
-    __m256d tv0, tv1, sum;
+    __m256d tv0, tv1, sum, zerov;
     gint_t poffset = p;
 #if KLP
-    //k = p + k;
 #endif
     if(mx==8)
     {
-        if(isTransA==false)
+        if(transa == BLIS_NO_TRANSPOSE)
         {
             pa = pa +i;
 #if KLP
@@ -1432,7 +1431,6 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
 #else
             p = 0;
 #endif
-            //printf("packA from p_%d to p_%d \n", p, k);
             for (; p < k; p += 1)
             {
                 //for (int ii = 0; ii < MX8 * 2; ii += 2) //real + imag : Rkernel needs 8 elements each.
@@ -1462,12 +1460,51 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
                 pa = pa + lda;
             }
         }
-        else
+        else if(transa == BLIS_CONJ_NO_TRANSPOSE)
+        {
+            zerov = _mm256_setzero_pd();
+            pa = pa +i;
+#if KLP
+            pa = pa + (p*lda);
+#else
+            p = 0;
+#endif
+            for (; p < k; p += 1)
+            {
+                //for (int ii = 0; ii < MX8 * 2; ii += 2) //real + imag : Rkernel needs 8 elements each.
+                av0 = _mm256_loadu_pd(pa);
+                av1 = _mm256_loadu_pd(pa+4);
+                av2 = _mm256_loadu_pd(pa+8);
+                av3 = _mm256_loadu_pd(pa+12);
+
+                tv0 = _mm256_permute2f128_pd(av0, av1, 0x20);
+                tv1 = _mm256_permute2f128_pd(av0, av1, 0x31);
+                av0 = _mm256_unpacklo_pd(tv0, tv1);
+                av1 = _mm256_unpackhi_pd(tv0, tv1);
+                av1 = _mm256_sub_pd(zerov,av1);//negate imaginary component
+                sum = _mm256_add_pd(av0, av1);
+                _mm256_storeu_pd(par, av0); par += 4;
+                _mm256_storeu_pd(pai, av1); pai += 4;
+                _mm256_storeu_pd(pas, sum); pas += 4;
+
+                tv0 = _mm256_permute2f128_pd(av2, av3, 0x20);
+                tv1 = _mm256_permute2f128_pd(av2, av3, 0x31);
+                av2 = _mm256_unpacklo_pd(tv0, tv1);
+                av3 = _mm256_unpackhi_pd(tv0, tv1);
+                av3 = _mm256_sub_pd(zerov,av3);//negate imaginary component
+                sum = _mm256_add_pd(av2, av3);
+                _mm256_storeu_pd(par, av2); par += 4;
+                _mm256_storeu_pd(pai, av3); pai += 4;
+                _mm256_storeu_pd(pas, sum); pas += 4;
+
+                pa = pa + lda;
+            }
+        }
+        else if(transa == BLIS_TRANSPOSE)
         {
             gint_t idx = (i/2) * lda;
             pa = pa + idx;
 #if KLP
-            //pa = pa + p;
 #else
             p = 0;
 #endif
@@ -1527,18 +1564,79 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
                 }
             }
         }
-    }   //mx==8
-    else//mx==1
-    {
-        if(isTransA==false)
+        else if(transa == BLIS_CONJ_TRANSPOSE)
         {
-            pa = pa + i;
+            gint_t idx = (i/2) * lda;
+            pa = pa + idx;
 #if KLP
-            //pa = pa + (p*lda); done below.. not needed
 #else
             p = 0;
 #endif
-            //printf(" packAx1 from p_%d to p_%d ",p,k-1);
+            //A conjugate Transpose case:
+            for (gint_t ii = 0; ii < BLIS_MX8 ; ii++)
+            {
+                gint_t idx = ii * lda;
+                gint_t sidx;
+                gint_t pidx = 0;
+                gint_t max_k = (k*2) - 8;
+                for (p = poffset; p <= max_k; p += 8)
+                {
+                    double ar0_ = *(pa + idx + p);
+                    double ai0_ = -(*(pa + idx + p + 1));
+
+                    double ar1_ = *(pa + idx + p + 2);
+                    double ai1_ = -(*(pa + idx + p + 3));
+
+                    double ar2_ = *(pa + idx + p + 4);
+                    double ai2_ = -(*(pa + idx + p + 5));
+
+                    double ar3_ = *(pa + idx + p + 6);
+                    double ai3_ = -(*(pa + idx + p + 7));
+
+                    sidx = (pidx/2) * BLIS_MX8;
+                    *(par + sidx + ii) = ar0_;
+                    *(pai + sidx + ii) = ai0_;
+                    *(pas + sidx + ii) = ar0_ + ai0_;
+
+                    sidx = ((pidx+2)/2) * BLIS_MX8;
+                    *(par + sidx + ii) = ar1_;
+                    *(pai + sidx + ii) = ai1_;
+                    *(pas + sidx + ii) = ar1_ + ai1_;
+
+                    sidx = ((pidx+4)/2) * BLIS_MX8;
+                    *(par + sidx + ii) = ar2_;
+                    *(pai + sidx + ii) = ai2_;
+                    *(pas + sidx + ii) = ar2_ + ai2_;
+
+                    sidx = ((pidx+6)/2) * BLIS_MX8;
+                    *(par + sidx + ii) = ar3_;
+                    *(pai + sidx + ii) = ai3_;
+                    *(pas + sidx + ii) = ar3_ + ai3_;
+                    pidx += 8;
+                }
+
+                for (; p < (k*2); p += 2)
+                {
+                    double ar_ = *(pa + idx + p);
+                    double ai_ = -(*(pa + idx + p + 1));
+                    gint_t sidx = (pidx/2) * BLIS_MX8;
+                    *(par + sidx + ii) = ar_;
+                    *(pai + sidx + ii) = ai_;
+                    *(pas + sidx + ii) = ar_ + ai_;
+                    pidx += 2;
+                }
+            }
+        }
+    }   //mx==8
+    else//mx==1
+    {
+        if(transa == BLIS_NO_TRANSPOSE)
+        {
+            pa = pa + i;
+#if KLP
+#else
+            p = 0;
+#endif
             //A No transpose case:
             for (; p < k; p += 1)
             {
@@ -1554,12 +1652,33 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
                 }
             }
         }
-        else
+        else if(transa == BLIS_CONJ_NO_TRANSPOSE)
+        {
+            pa = pa + i;
+#if KLP
+#else
+            p = 0;
+#endif
+            //A conjuate No transpose case:
+            for (; p < k; p += 1)
+            {
+                gint_t idx = p * lda;
+                for (gint_t ii = 0; ii < (mx*2) ; ii += 2)
+                { //real + imag : Rkernel needs 8 elements each.
+                    double ar_ = *(pa + idx + ii);
+                    double ai_ = -(*(pa + idx + ii + 1));// conjugate: negate imaginary component
+                    *par = ar_;
+                    *pai = ai_;
+                    *pas = ar_ + ai_;
+                    par++; pai++; pas++;
+                }
+            }
+        }
+        else if(transa == BLIS_TRANSPOSE)
         {
             gint_t idx = (i/2) * lda;
             pa = pa + idx;
 #if KLP
-            //pa = pa + p; done below.. not needed
 #else
             p = 0;
 #endif
@@ -1573,6 +1692,34 @@ void bli_3m_sqp_packA_real_imag_sum(double *pa,
                 {
                     double ar0_ = *(pa + idx + p);
                     double ai0_ = *(pa + idx + p + 1);
+
+                    sidx = (pidx/2) * mx;
+                    *(par + sidx + ii) = ar0_;
+                    *(pai + sidx + ii) = ai0_;
+                    *(pas + sidx + ii) = ar0_ + ai0_;
+                    pidx += 2;
+
+                }
+            }
+        }
+        else if(transa == BLIS_CONJ_TRANSPOSE)
+        {
+            gint_t idx = (i/2) * lda;
+            pa = pa + idx;
+#if KLP
+#else
+            p = 0;
+#endif
+            //A Transpose case:
+            for (gint_t ii = 0; ii < mx ; ii++)
+            {
+                gint_t idx = ii * lda;
+                gint_t sidx;
+                gint_t pidx = 0;
+                for (p = poffset;p < (k*2); p += 2)
+                {
+                    double ar0_ = *(pa + idx + p);
+                    double ai0_ = -(*(pa + idx + p + 1));
 
                     sidx = (pidx/2) * mx;
                     *(par + sidx + ii) = ar0_;
