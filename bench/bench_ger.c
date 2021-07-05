@@ -66,6 +66,7 @@ int main( int argc, char** argv )
     dim_t p_inc = 0; // to keep track of number of inputs
     num_t dt;
     char  dt_ch;
+    char stor_scheme;
     int   r, n_repeats;
 
     double   dtime;
@@ -107,6 +108,7 @@ int main( int argc, char** argv )
     inc_t incy;
     char tmp[256]; // to store function name, line no present in logs.
 
+    stor_scheme = 'C';
 
     // {S,D,C,Z} {transa m n alpha incx incy lda}
 
@@ -185,7 +187,7 @@ int main( int argc, char** argv )
 #ifdef CBLAS
             enum CBLAS_ORDER     cblas_order;
 
-            if ( bli_obj_row_stride( &a ) == 1 )
+            if ( ( stor_scheme == 'C' ) || ( stor_scheme == 'c' ) )
               cblas_order = CblasColMajor;
             else
               cblas_order = CblasRowMajor;
