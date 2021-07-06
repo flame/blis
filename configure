@@ -3629,6 +3629,23 @@ main()
 			exit 1
 		fi
 
+		# If 'blis.pc.in' symlink does not already exist in the current
+		# directory, create a symbolic link to it. If one does exist, we
+		# use -f to force creation of a new link.
+		if [ ! -e "./blis.pc.in" ]; then
+
+			echo "${script_name}: creating symbolic link to blis.pc.in."
+			ln -s "${dist_path}/blis.pc.in"
+
+		elif [ -h "./blis.pc.in" ]; then
+			echo "${script_name}: symbolic link to blis.pc.in already exists; forcing creation of new link."
+			ln -sf "${dist_path}/blis.pc.in"
+		else
+			echo "${script_name}: Non-symbolic link file or directory 'blis.pc.in' blocks creation of symlink."
+			echo "${script_name}: *** Please remove this entity and re-run configure."
+			exit 1
+		fi
+
 		# If 'common.mk' symlink does not already exist in the current
 		# directory, create a symbolic link to it. If one does exist, we
 		# use -f to force creation of a new link.
