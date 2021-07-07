@@ -43,6 +43,7 @@ build_script:
 - ps: Push-AppveyorArtifact C:\blis.zip
 
 test_script:
+# "make checkblas" does not work with shared linking Windows due to inability to override xerbla_
 - if [%LIB_TYPE%]==[shared] set "TEST_TARGET=checkblis-fast"
 - if [%LIB_TYPE%]==[static] set "TEST_TARGET=check"
 - bash -lc "cd /c/projects/blis && mingw32-make %TEST_TARGET% -j4 V=1"
