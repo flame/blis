@@ -776,7 +776,7 @@ read_registry_file()
 					# set names, if they exist. Finally, update the kernel registry
 					# with the new kernel list.
 					#newklist=$(echo -e "${klisttmp}" | sed -e "s/${ker}/${kers_ker}/g")
-                    newklist=$(substitute_words "${ker}" "${kers_ker}" "${klisttmp}")
+					newklist=$(substitute_words "${ker}" "${kers_ker}" "${klisttmp}")
 					newklist=$(canonicalize_ws "${newklist}")
 					newklist=$(rm_duplicate_words "${newklist}")
 
@@ -800,22 +800,22 @@ read_registry_file()
 
 substitute_words()
 {
-    local word new_words list newlist
+	local word new_words list newlist
 
-    word="$1"
-    new_words="$2"
-    list="$3"
+	word="$1"
+	new_words="$2"
+	list="$3"
 
-    for str in ${list}; do
+	for str in ${list}; do
 
-        if [ "${str}" == "${word}" ]; then
-            newlist="${newlist} ${new_words}"
-        else
-            newlist="${newlist} ${str}"
-        fi
-    done
+		if [ "${str}" == "${word}" ]; then
+			newlist="${newlist} ${new_words}"
+		else
+			newlist="${newlist} ${str}"
+		fi
+	done
 
-    echo "${newlist}"
+	echo "${newlist}"
 }
 
 build_kconfig_registry()
