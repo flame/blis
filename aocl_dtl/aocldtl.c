@@ -5,7 +5,7 @@
  *               These functions are invoked though macros by
  *               end user.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc. All rights Reserved.
+ * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
  *
  *=======================================================================*/
 #include "blis.h"
@@ -23,9 +23,22 @@
 #endif
 #endif
 
+/*
+ * Client should provide this function, it should return
+ * number of threads used by the API
+ */
+extern dim_t AOCL_get_requested_threads_count(void);
+
 /* By default the trace level will be set to ALL User can configure this
       parameter at run time using command line argument */
 uint32 gui32TraceLogLevel = AOCL_DTL_TRACE_LEVEL;
+
+/*
+ * Time elapsed in the function will be logged from main thread only,
+ * we will save the main thread id. This will be compared with the id
+ * of the logging thread.
+ */
+AOCL_TID gtidMainThreadID = -1;
 
 /* The user can configure the file name in which he wants to dump the data */
 #if AOCL_DTL_TRACE_ENABLE
@@ -117,6 +130,9 @@ void DTL_Initialize(
     }
 #endif
 
+    /* Save Id for main thread */
+    gtidMainThreadID = AOCL_gettid();
+
 } /* DTL_Initialize */
 #endif
 
@@ -162,6 +178,7 @@ void DTL_Uninitialize(void)
 *                             pi8FunctionName - Function Name
 *                             ui32LineNumber - Line number
 *                             pi8Message - Message to be printed
+*
 *  Output Parameter(s)     :  None
 *  Return parameter(s)     :  None
 *==================================================================*/
@@ -176,6 +193,8 @@ void DTL_Trace(
 {
     uint8 i = 0;
     AOCL_FAL_FILE *pOutFile = NULL;
+    uint64 u64EventTime = AOCL_getTimestamp();
+    dim_t u64RequestedThreadsCount = AOCL_get_requested_threads_count();
 
     bli_init_auto();
 
@@ -226,7 +245,6 @@ void DTL_Trace(
       level set while initialization */
     if (ui8LogLevel <= gui32TraceLogLevel)
     {
-
         /* Indent as per level if is function call trace */
         if ((ui8LogLevel >= AOCL_DTL_LEVEL_TRACE_1) &&
             (ui8LogLevel <= AOCL_DTL_LEVEL_TRACE_8))
@@ -242,26 +260,39 @@ void DTL_Trace(
         switch (ui8LogType)
         {
         case TRACE_TYPE_FENTRY:
-            fprintf(pOutFile, "In %s()...\n", pi8FunctionName);
+            fprintf(pOutFile, "nt=%ld,ts=%ld: In %s()...\n",
+                    u64RequestedThreadsCount,
+                    u64EventTime,
+                    pi8FunctionName);
             break;
 
         case TRACE_TYPE_FEXIT:
             if (pi8Message == NULL)
             { /* Function returned successfully */
-                fprintf(pOutFile, "Out of %s()\n", pi8FunctionName);
+                fprintf(pOutFile, "ts=%ld: Out of %s()\n",
+                        u64EventTime,
+                        pi8FunctionName);
             }
             else
             { /* Function failed to complete, use message to get error */
-                fprintf(pOutFile, "Out of %s() with error %s\n", pi8FunctionName, pi8Message);
+                fprintf(pOutFile, "ts=%ld: Out of %s() with error %s\n",
+                        u64EventTime,
+                        pi8FunctionName,
+                        pi8Message);
             }
             break;
 
         case TRACE_TYPE_LOG:
-            fprintf(pOutFile, "%s:%d:%s\n", pi8FileName, ui32LineNumber, pi8Message);
+                fprintf(pOutFile, "%s %s",
+                        pi8FileName,
+                        pi8Message
+                        );
+
             break;
 
         case TRACE_TYPE_RAW:
-            fprintf(pOutFile, "%s\n", pi8Message);
+            fprintf(pOutFile, "%s\n",
+                    pi8Message);
             break;
         }
 	fflush(pOutFile);
@@ -405,6 +436,72 @@ void DTL_DumpData(
     fflush(pDumpFile);
 
 } /* DTL_DumpData */
+#endif
+
+#if (AOCL_DTL_TRACE_ENABLE || AOCL_DTL_LOG_ENABLE)
+void AOCL_DTL_start_perf_timer(void)
+{
+    AOCL_TID current_thread = AOCL_gettid();
+
+    // Automatic duration calulation is currently
+    // supported from main thread only, in other words
+    // at BLAS interface.
+    if (current_thread != gtidMainThreadID) {
+        return;
+    }
+
+    AOCL_FLIST_Node *pFileNode = AOCL_FLIST_GetNode(gpLogFileList, current_thread);
+
+    if (NULL == pFileNode) {
+        /* It might be the first call from the current thread, try to create
+        new trace for this thread. */
+        AOCL_FAL_FILE *pOutFile = AOCL_FLIST_AddFile(pchDTL_LOG_FILE, &gpLogFileList, current_thread);
+
+        if (NULL == pOutFile)
+        {
+            AOCL_DEBUGPRINT("File does not exists to dump the trace data \n");
+            return;
+        } else {
+            pFileNode = AOCL_FLIST_GetNode(gpLogFileList, current_thread);
+        }
+    }
+
+    pFileNode->u64SavedTimeStamp = AOCL_getTimestamp();
+    fflush(stdout);
+}
+
+
+uint64 AOCL_DTL_get_time_spent(void)
+{
+    AOCL_TID current_thread = AOCL_gettid();
+
+    // Automatic duration calulation is currently
+    // supported from main thread only, in other words
+    // at BLAS interface.
+    if (current_thread != gtidMainThreadID) {
+        return 0;
+    }
+
+    uint64 u64CurrentTimeStamp = AOCL_getTimestamp();
+    AOCL_FLIST_Node *pFileNode = AOCL_FLIST_GetNode(gpLogFileList, AOCL_gettid());
+
+    if (NULL == pFileNode) {
+        /* It might be the first call from the current thread, try to create
+        new trace for this thread. */
+        AOCL_FAL_FILE *pOutFile = AOCL_FLIST_AddFile(pchDTL_LOG_FILE, &gpLogFileList, AOCL_gettid());
+
+        if (NULL == pOutFile)
+        {
+            AOCL_DEBUGPRINT("File does not exists to dump the trace data \n");
+            return 0;
+        } else {
+            pFileNode = AOCL_FLIST_GetNode(gpLogFileList, AOCL_gettid());
+        }
+    }
+
+    return (u64CurrentTimeStamp - pFileNode->u64SavedTimeStamp);
+}
+
 #endif
 
 /* This is enabled by passing ETRACE_ENABLE=1 to make */

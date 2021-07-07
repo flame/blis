@@ -19,7 +19,7 @@
 #include <omp.h>
 #endif
 
-// BLIS TODO: This is workaround to check if BLIS is built with 
+// BLIS TODO: This is workaround to check if BLIS is built with
 //            openmp support. Ideally we dont' want any library
 //            specific code in dtl.
 #include <blis.h>
@@ -36,19 +36,23 @@
 
 */
 
-uint32 AOCL_gettid(void) __attribute__((no_instrument_function));
+AOCL_TID AOCL_gettid(void) __attribute__((no_instrument_function));
 pid_t  AOCL_getpid(void) __attribute__((no_instrument_function));
 uint64 AOCL_getTimestamp(void) __attribute__((no_instrument_function));
 
-uint32 AOCL_gettid(void)
+AOCL_TID AOCL_gettid(void)
 {
 
 #ifdef BLIS_ENABLE_OPENMP
   return omp_get_thread_num();
 #else
-  return 0; // will not work for pthread-based parallelization
-
+#ifdef BLIS_ENABLE_PTHREADS
+  return pthread_self();
+#else
+  return 0;
 #endif
+#endif
+
 }
 
 pid_t  AOCL_getpid(void)
@@ -63,7 +67,7 @@ uint64 AOCL_getTimestamp(void)
     /* The C11 way */
     if (clock_gettime(CLOCK_REALTIME, &tms))
     {
-	return -1;
+        return -1;
     }
 
     /* seconds, multiplied with 1 million */
@@ -73,13 +77,13 @@ uint64 AOCL_getTimestamp(void)
     /* round up if necessary */
     if (tms.tv_nsec % 1000 >= 500)
     {
-	++micros;
+        ++micros;
     }
     return micros;
 }
 
 #else  /* Non linux support */
-uint32 AOCL_gettid(void)
+AOCL_TID AOCL_gettid(void)
 {
     /* stub for other os's */
     return 0;

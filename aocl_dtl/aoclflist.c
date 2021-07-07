@@ -1,12 +1,12 @@
 /*===================================================================
  * File Name :  aoclflist.c
- * 
- * Description : Linked list of open files assocaited with 
+ *
+ * Description : Linked list of open files assocaited with
  *               each thread. This is used to log the data
  *               to correct file as per the current thread id.
  *
  * Copyright (C) 2020, Advanced Micro Devices, Inc
- * 
+ *
  *==================================================================*/
 
 #include "aocltpdef.h"
@@ -16,7 +16,7 @@
 #include "aoclos.h"
 
 
-/* Disable instrumentation for following function, since they are called from 
+/* Disable instrumentation for following function, since they are called from
  * Auto Generated execution trace handlers. */
 Bool AOCL_FLIST_IsEmpty(
     AOCL_FLIST_Node *plist) __attribute__((no_instrument_function));
@@ -44,6 +44,35 @@ Bool AOCL_FLIST_IsEmpty(AOCL_FLIST_Node *plist)
     return (plist == NULL);
 
 } /* AOCL_FLIST_IsEmpty */
+
+AOCL_FLIST_Node * AOCL_FLIST_GetNode(AOCL_FLIST_Node *plist, AOCL_TID tid)
+{
+    AOCL_FLIST_Node *temp;
+
+    if (AOCL_FLIST_IsEmpty(plist) == 1)
+    {
+        return NULL;
+    }
+
+    temp = plist;
+
+    /* if list is not empty search for the file handle in all nodes */
+    while (temp != NULL)
+    {
+        if (temp->tid == tid)
+        {
+            if (temp->fp == NULL)
+            {
+                AOCL_DEBUGPRINT("Could not get saved time stamp for thread = %d", tid);
+            }
+            return temp;
+        }
+        temp = temp->pNext;
+    }
+
+    return NULL;
+
+} /* AOCL_FLIST_GetNode */
 
 AOCL_FAL_FILE *AOCL_FLIST_GetFile(AOCL_FLIST_Node *plist, AOCL_TID tid)
 {
@@ -89,7 +118,7 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
     }
 
     /* We don't have exiting file, lets try to open new one */
-    sprintf(pchFileName, "P%d_T%d_%s", AOCL_getpid(), tid, pchFilePrefix);
+    sprintf(pchFileName, "P%d_T%u_%s", AOCL_getpid(), tid, pchFilePrefix);
 
     file = AOCL_FAL_Open(pchFileName, "wb");
     if (file == NULL)
@@ -108,6 +137,7 @@ AOCL_FAL_FILE *AOCL_FLIST_AddFile(const int8 *pchFilePrefix, AOCL_FLIST_Node **p
 
     newNode->pNext = NULL;
     newNode->tid = tid;
+    newNode->u64SavedTimeStamp = AOCL_getTimestamp();
     newNode->fp = file;
 
     if (AOCL_FLIST_IsEmpty(*plist) == 1)

@@ -46,7 +46,6 @@ err_t bli_gemmsup
      )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_2);
-//  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_2, alpha, a, b, beta, c);
 
     // Return early if small matrix handling is disabled at configure-time.
     #ifdef BLIS_DISABLE_SUP_HANDLING

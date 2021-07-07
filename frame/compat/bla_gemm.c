@@ -65,9 +65,12 @@ void PASTEF77(ch,blasname) \
 	inc_t   rs_b, cs_b; \
 	inc_t   rs_c, cs_c; \
 \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -118,6 +121,7 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */				 \
 	bli_finalize_auto(); \
@@ -142,18 +146,20 @@ void PASTEF77(ch,blasname) \
 	     ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)	\
 \
 	dim_t       m0_a, n0_a; \
 	dim_t       m0_b, n0_b; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
+\
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
 	/* Perform BLAS parameter checking. */ \
 	PASTEBLACHK(blasname) \
@@ -217,6 +223,7 @@ void PASTEF77(ch,blasname) \
 					NULL \
 					); \
 		} \
+		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
 		return; \
 	} \
 	else if( m0 == 1 ) \
@@ -249,6 +256,7 @@ void PASTEF77(ch,blasname) \
 					NULL \
 					); \
 		} \
+		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
 		return; \
 	} \
 \
@@ -284,7 +292,8 @@ void PASTEF77(ch,blasname) \
 	  NULL  \
 	); \
 \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO) \
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
 	/* Finalize BLIS. */				 \
 	bli_finalize_auto(); \
 }
@@ -306,15 +315,19 @@ void dgemm_
 	double* c, const f77_int* ldc
 )
 {
-  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'D', *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+
+
 
   trans_t blis_transa;
   trans_t blis_transb;
   dim_t   m0, n0, k0;
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
 
-    /* Initialize BLIS. */
-    bli_init_auto();
+  /* Initialize BLIS. */
+  bli_init_auto();
+
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(d), *transa, *transb, *m, *n, *k, \
+                           (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
   /* Perform BLAS parameter checking. */
   PASTEBLACHK(gemm)
@@ -358,7 +371,8 @@ void dgemm_
 			  (double*)beta,
 			  c, *ldc
 			);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	/* Finalize BLIS */
 	bli_finalize_auto();
 
@@ -395,6 +409,9 @@ void dgemm_
 		((void*)0)
 	    );
 	}
+
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+
 	return;
     }
     else if (m0 == 1)
@@ -427,6 +444,7 @@ void dgemm_
 		((void*)0)
 	    );
 	}
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 	return;
     }
 
@@ -478,8 +496,9 @@ void dgemm_
 			NULL,
 			NULL
 		 );
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 	return;
@@ -519,7 +538,8 @@ void dgemm_
 
 	if (status == BLIS_SUCCESS)
 	  {
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	    /* Finalize BLIS. */
 	    bli_finalize_auto();
 
@@ -532,7 +552,8 @@ void dgemm_
     err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 	if (status == BLIS_SUCCESS)
 	{
-	    return;
+		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+		return;
 	}
 
 	// fall back on native path when dgemm is not handled in sup path.
@@ -550,7 +571,8 @@ void dgemm_
 	/*		NULL */
 	/*	 ); */
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 } // end of dgemm_
@@ -569,15 +591,16 @@ void zgemm_
              dcomplex*    c, const f77_int* ldc
      )
 {
-  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
-
   trans_t blis_transa;
   trans_t blis_transb;
   dim_t   m0, n0, k0;
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
 
-    /* Initialize BLIS. */
-    bli_init_auto();
+  /* Initialize BLIS. */
+  bli_init_auto();
+
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *transa, *transb, *m, *n, *k,
+		(void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
   /* Perform BLAS parameter checking. */
 	PASTEBLACHK(gemm)
@@ -655,11 +678,12 @@ void zgemm_
 			NULL
 			);
 
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
+	    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+	    /* Finalize BLIS. */
+	    bli_finalize_auto();
+	    return;
+	  }
 
     // The code below will be called when number of threads = 1.
 #if ENABLE_INDUCED_METHOD
@@ -686,7 +710,8 @@ void zgemm_
 		//sqp algo is found better for n > 40
 		if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
 		{
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+			AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 			return;
 		}
 	}
@@ -699,17 +724,20 @@ void zgemm_
 		err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 		if(status==BLIS_SUCCESS)
 		{
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+			AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 			return;
 		}
+
 	}
 	// fall back on native path when zgemm is not handled in sup path.
 	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	return;
 
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 }// end of zgemm_
@@ -738,15 +766,16 @@ void dzgemm_
      )
 {
 
-  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'Z', *transa, *transb, *m, *n, *k, (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
-
   trans_t blis_transa;
   trans_t blis_transb;
   dim_t   m0, n0, k0;
-  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
 
-    /* Initialize BLIS. */
-    bli_init_auto();
+  /* Initialize BLIS. */
+  bli_init_auto();
+
+  AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
+  AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *transa, *transb, *m, *n, *k,
+				(void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
   /* Perform BLAS parameter checking. */
 	PASTEBLACHK(gemm)
@@ -808,7 +837,8 @@ void dzgemm_
 		// fall back on native path when zgemm is not handled in sup path.
 	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 }// end of dzgemm_

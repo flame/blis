@@ -1,11 +1,11 @@
 
 /*===================================================================
  * File Name :  aocltpdef.h
- * 
+ *
  * Description : Abstraction for various datatypes used by DTL.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
- * 
+ * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+ *
  *==================================================================*/
 #ifndef AOCL_TYPEDEF_H_
 #define AOCL_TYPEDEF_H_

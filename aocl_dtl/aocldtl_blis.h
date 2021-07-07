@@ -14,21 +14,28 @@
 #include "blis.h"
 
 #if AOCL_DTL_LOG_ENABLE
+dim_t AOCL_get_requested_threads_count(void);
+
 void AOCL_DTL_log_gemm_sizes(int8 loglevel,
-                             char dt,
+                             char dt_type,
                              const f77_char transa,
                              const f77_char transb,
                              const f77_int m,
                              const f77_int n,
                              const f77_int k,
-                             const void* alpha,
+                             const void *alpha,
                              const f77_int lda,
                              const f77_int ldb,
-                             const void* beta,
+                             const void *beta,
                              const f77_int ldc,
-                             const char* filename,
-                             const char* functionn_name,
+                             const char *filename,
+                             const char *function_name,
                              int line);
+
+void AOCL_DTL_log_gemm_stats(int8 loglevel,
+                             const f77_int m,
+                             const f77_int n,
+                             const f77_int k);
 
 void AOCL_DTL_log_trsm_sizes(int8 loglevel,
                              char dt,
@@ -376,8 +383,12 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
                              const char*    function_name,
                              int  line);
 
+
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
     AOCL_DTL_log_gemm_sizes(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, __FILE__, __FUNCTION__, __LINE__);
+
+#define AOCL_DTL_LOG_GEMM_STATS(loglevel, m, n, k)    \
+    AOCL_DTL_log_gemm_stats(loglevel, m, n, k);
 
 #define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb)     \
     AOCL_DTL_log_trsm_sizes(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__, __FUNCTION__, __LINE__);
@@ -486,6 +497,8 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 #else
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)
+
+#define AOCL_DTL_LOG_GEMM_STATS(loglevel, m, n, k)
 
 #define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb)
 

@@ -46,7 +46,6 @@ err_t bli_gemmsup_ref
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
-//	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_3, alpha, a, b, beta, c);
 	// This function implements the default gemmsup handler. If you are a
 	// BLIS developer and wish to use a different gemmsup handler, please
 	// register a different function pointer in the context in your
