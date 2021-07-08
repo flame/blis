@@ -34,6 +34,7 @@
 */
 
 #include "blis.h"
+#define BLIS_DGEMV_VAR1_FUSE 8
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, varname ) \
@@ -53,55 +54,55 @@ void PASTEMAC(ch,varname) \
      ) \
 { \
 \
-	if(cntx == NULL) cntx = bli_gks_query_cntx(); \
+    if(cntx == NULL) cntx = bli_gks_query_cntx(); \
 \
-	const num_t dt = PASTEMAC(ch,type); \
+    const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*  A1; \
-	ctype*  x1; \
-	ctype*  y1; \
-	dim_t   i; \
-	dim_t   b_fuse, f; \
-	dim_t   n_elem, n_iter; \
-	inc_t   rs_at, cs_at; \
-	conj_t  conja; \
+    ctype*  A1; \
+    ctype*  x1; \
+    ctype*  y1; \
+    dim_t   i; \
+    dim_t   b_fuse, f; \
+    dim_t   n_elem, n_iter; \
+    inc_t   rs_at, cs_at; \
+    conj_t  conja; \
 \
-	bli_set_dims_incs_with_trans( transa, \
-	                              m, n, rs_a, cs_a, \
-	                              &n_iter, &n_elem, &rs_at, &cs_at ); \
+    bli_set_dims_incs_with_trans( transa, \
+                                  m, n, rs_a, cs_a, \
+                                  &n_iter, &n_elem, &rs_at, &cs_at ); \
 \
-	conja = bli_extract_conj( transa ); \
+    conja = bli_extract_conj( transa ); \
 \
-	PASTECH(ch,dotxf_ker_ft) kfp_df; \
+    PASTECH(ch,dotxf_ker_ft) kfp_df; \
 \
-	/* Query the context for the kernel function pointer and fusing factor. */ \
-	kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
-	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
+    /* Query the context for the kernel function pointer and fusing factor. */ \
+    kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
-	for ( i = 0; i < n_iter; i += f ) \
-	{ \
-		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
+    for ( i = 0; i < n_iter; i += f ) \
+    { \
+        f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse ); \
 \
-		A1 = a + (i  )*rs_at + (0  )*cs_at; \
-		x1 = x + (0  )*incy; \
-		y1 = y + (i  )*incy; \
+        A1 = a + (i  )*rs_at + (0  )*cs_at; \
+        x1 = x + (0  )*incy; \
+        y1 = y + (i  )*incy; \
 \
-		/* y1 = beta * y1 + alpha * A1 * x; */ \
-		kfp_df \
-		( \
-		  conja, \
-		  conjx, \
-		  n_elem, \
-		  f, \
-		  alpha, \
-		  A1,   cs_at, rs_at, \
-		  x1,   incx, \
-		  beta, \
-		  y1,   incy, \
-		  cntx  \
-		); \
+        /* y1 = beta * y1 + alpha * A1 * x; */ \
+        kfp_df \
+        ( \
+          conja, \
+          conjx, \
+          n_elem, \
+          f, \
+          alpha, \
+          A1,   cs_at, rs_at, \
+          x1,   incx, \
+          beta, \
+          y1,   incy, \
+          cntx  \
+        ); \
 \
-	} \
+    } \
 }
 
 #ifdef BLIS_CONFIG_EPYC
@@ -116,57 +117,114 @@ void bli_dgemv_unf_var1
        double*  x, inc_t incx,
        double*  beta,
        double*  y, inc_t incy,
-       cntx_t* cntx 
+       cntx_t* cntx
      )
 {
 
-	double*  A1;
-	double*  x1;
-	double*  y1;
-	dim_t   i;
-	dim_t   b_fuse, f;
-	dim_t   n_elem, n_iter;
-	inc_t   rs_at, cs_at;
-	conj_t  conja;
+    double*  A1;
+    double*  y1;
+    dim_t   i;
+    dim_t   f;
+    dim_t   n_elem, n_iter;
+    inc_t   rs_at, cs_at;
+    conj_t  conja;
+    //memory pool declarations for packing vector X.
+    mem_t   mem_bufX;
+    rntm_t  rntm;
+    double  *x_buf = x;
+    inc_t   buf_incx = incx;
 
-	bli_init_once();
+    bli_init_once();
 
-	if( cntx == NULL ) cntx = bli_gks_query_cntx();
+    if( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	bli_set_dims_incs_with_trans( transa,
-	                              m, n, rs_a, cs_a,
-	                              &n_iter, &n_elem, &rs_at, &cs_at );
+    bli_set_dims_incs_with_trans( transa,
+                                  m, n, rs_a, cs_a,
+                                  &n_iter, &n_elem, &rs_at, &cs_at );
 
-	conja = bli_extract_conj( transa );
+    conja = bli_extract_conj( transa );
 
+    if (incx > 1)
+    {
+        /*
+          Initialize mem pool buffer to NULL and size to 0
+          "buf" and "size" fields are assigned once memory
+          is allocated from the pool in bli_membrk_acquire_m().
+          This will ensure bli_mem_is_alloc() will be passed on
+          an allocated memory if created or a NULL .
+        */
+        mem_bufX.pblk.buf = NULL;   mem_bufX.pblk.block_size = 0;
+        mem_bufX.buf_type = 0;      mem_bufX.size = 0;
+        mem_bufX.pool = NULL;
 
-	/* Query the context for the kernel function pointer and fusing factor. */
-	b_fuse = 8;
- 
-	for ( i = 0; i < n_iter; i += f )
-	{
-		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+        /* In order to get the buffer from pool via rntm access to memory broker
+        is needed.Following are initializations for rntm */
 
-		A1 = a + (i  )*rs_at + (0  )*cs_at;
-		x1 = x + (0  )*incy;
-		y1 = y + (i  )*incy;
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_membrk_rntm_set_membrk( &rntm );
 
-		/* y1 = beta * y1 + alpha * A1 * x; */
-		bli_ddotxf_zen_int_8
-		(
-		  conja,
-		  conjx,
-		  n_elem,
-		  f,
-		  alpha,
-		  A1,   cs_at, rs_at,
-		  x1,   incx,
-		  beta,
-		  y1,   incy,
-		  cntx 
-		);
+        //calculate the size required for n_elem double elements in vector X.
+        size_t buffer_size = n_elem * sizeof(double);
 
-	}
+        #ifdef BLIS_ENABLE_MEM_TRACING
+            printf( "bli_dgemv_unf_var1(): get mem pool block\n" );
+        #endif
+
+        /*acquire a Buffer(n_elem*size(double)) from the memory broker
+        and save the associated mem_t entry to mem_bufX.*/
+        bli_membrk_acquire_m(&rntm,
+                                buffer_size,
+                                BLIS_BUFFER_FOR_B_PANEL,
+                                &mem_bufX);
+
+        /*Continue packing X if buffer memory is allocated*/
+        if ((bli_mem_is_alloc( &mem_bufX )))
+        {
+            x_buf = bli_mem_buffer(&mem_bufX);
+
+            //pack X vector with non-unit stride to a temp buffer x_buf with unit stride
+            for(dim_t x_index = 0 ; x_index < n_elem ; x_index++)
+            {
+                *(x_buf + x_index) =  *(x + (x_index * incx)) ;
+            }
+            // stride of vector x_buf =1
+            buf_incx = 1;
+        }
+    }
+
+    for ( i = 0; i < n_iter; i += f )
+    {
+        f  = bli_determine_blocksize_dim_f( i, n_iter, BLIS_DGEMV_VAR1_FUSE );
+
+        A1 = a + (i  )*rs_at + (0  )*cs_at;
+        y1 = y + (i  )*incy;
+
+        /* y1 = beta * y1 + alpha * A1 * x; */
+        bli_ddotxf_zen_int_8
+        (
+          conja,
+          conjx,
+          n_elem,
+          f,
+          alpha,
+          A1,   cs_at, rs_at,
+          x_buf,   buf_incx,
+          beta,
+          y1,   incy,
+          cntx
+        );
+
+    }
+    if ((incx > 1) && bli_mem_is_alloc( &mem_bufX ))
+    {
+        #ifdef BLIS_ENABLE_MEM_TRACING
+            printf( "bli_dgemv_unf_var1(): releasing mem pool block\n" );
+        #endif
+        // Return the buffer to pool
+        bli_membrk_release(&rntm , &mem_bufX);
+    }
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 
 void bli_sgemv_unf_var1
@@ -180,57 +238,57 @@ void bli_sgemv_unf_var1
        float*  x, inc_t incx,
        float*  beta,
        float*  y, inc_t incy,
-       cntx_t* cntx 
+       cntx_t* cntx
      )
 {
 
-	float*  A1;
-	float*  x1;
-	float*  y1;
-	dim_t   i;
-	dim_t   b_fuse, f;
-	dim_t   n_elem, n_iter;
-	inc_t   rs_at, cs_at;
-	conj_t  conja;
+    float*  A1;
+    float*  x1;
+    float*  y1;
+    dim_t   i;
+    dim_t   b_fuse, f;
+    dim_t   n_elem, n_iter;
+    inc_t   rs_at, cs_at;
+    conj_t  conja;
 
-	bli_init_once();
+    bli_init_once();
 
-	if( cntx == NULL ) cntx = bli_gks_query_cntx();
+    if( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-	bli_set_dims_incs_with_trans( transa,
-	                              m, n, rs_a, cs_a,
-	                              &n_iter, &n_elem, &rs_at, &cs_at );
+    bli_set_dims_incs_with_trans( transa,
+                                  m, n, rs_a, cs_a,
+                                  &n_iter, &n_elem, &rs_at, &cs_at );
 
-	conja = bli_extract_conj( transa );
+    conja = bli_extract_conj( transa );
 
 
-	/* Query the context for the kernel function pointer and fusing factor. */
-	b_fuse = 8;
- 
-	for ( i = 0; i < n_iter; i += f )
-	{
-		f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+    /* Query the context for the kernel function pointer and fusing factor. */
+    b_fuse = 8;
 
-		A1 = a + (i  )*rs_at + (0  )*cs_at;
-		x1 = x + (0  )*incy;
-		y1 = y + (i  )*incy;
+    for ( i = 0; i < n_iter; i += f )
+    {
+        f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
 
-		/* y1 = beta * y1 + alpha * A1 * x; */
-		bli_sdotxf_zen_int_8
-		(
-		  conja,
-		  conjx,
-		  n_elem,
-		  f,
-		  alpha,
-		  A1,   cs_at, rs_at,
-		  x1,   incx,
-		  beta,
-		  y1,   incy,
-		  cntx 
-		);
+        A1 = a + (i  )*rs_at + (0  )*cs_at;
+        x1 = x + (0  )*incy;
+        y1 = y + (i  )*incy;
 
-	}
+        /* y1 = beta * y1 + alpha * A1 * x; */
+        bli_sdotxf_zen_int_8
+        (
+          conja,
+          conjx,
+          n_elem,
+          f,
+          alpha,
+          A1,   cs_at, rs_at,
+          x1,   incx,
+          beta,
+          y1,   incy,
+          cntx
+        );
+
+    }
 }
 
 INSERT_GENTFUNC_BASIC0_CZ( gemv_unf_var1 )
