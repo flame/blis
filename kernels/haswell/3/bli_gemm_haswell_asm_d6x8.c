@@ -866,27 +866,27 @@ void bli_sgemm_haswell_asm_6x16
 
 
 
-
 	label(.SDONE)
 
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1014,7 +1014,7 @@ void bli_dgemm_haswell_asm_6x8
 	vmovapd(mem(rbx, -1*32), ymm1)
 
 	 // iteration 1
-    prefetch(0, mem(rax, 72*8))
+	prefetch(0, mem(rax, 72*8))
 
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
@@ -1610,26 +1610,28 @@ void bli_dgemm_haswell_asm_6x8
 
 
 
+
 	label(.DDONE)
 
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -2142,28 +2144,27 @@ void bli_cgemm_haswell_asm_3x8
 
 
 
-
-
 	label(.CDONE)
 
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -2293,7 +2294,7 @@ void bli_zgemm_haswell_asm_3x4
 	vmovapd(mem(rbx, -1*32), ymm1)
 
 	 // iteration 1
-    prefetch(0, mem(rax, 36*16))
+	prefetch(0, mem(rax, 36*16))
 
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
@@ -2674,28 +2675,27 @@ void bli_zgemm_haswell_asm_3x4
 
 
 
-
-
 	label(.ZDONE)
 
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",

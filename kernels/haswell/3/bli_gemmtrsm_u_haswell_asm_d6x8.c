@@ -805,20 +805,22 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 
 	vzeroupper()
 
+
+
 	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a10]    "m" (a10),    // 2
-      [b01]    "m" (b01),    // 3
-      [beta]   "m" (beta),   // 4
-      [alpha]  "m" (alpha),  // 5
-      [a11]    "m" (a11),    // 6
-      [b11]    "m" (b11),    // 7
-      [c11]    "m" (c11),    // 8
-      [rs_c]   "m" (rs_c),   // 9
-      [cs_c]   "m" (cs_c)    // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a10]    "m" (a10),    // 2
+	  [b01]    "m" (b01),    // 3
+	  [beta]   "m" (beta),   // 4
+	  [alpha]  "m" (alpha),  // 5
+	  [a11]    "m" (a11),    // 6
+	  [b11]    "m" (b11),    // 7
+	  [c11]    "m" (c11),    // 8
+	  [rs_c]   "m" (rs_c),   // 9
+	  [cs_c]   "m" (cs_c)    // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -845,17 +847,17 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	vmovhpd(xmm1, mem(rcx, r10, 1))*/
 
 void bli_dgemmtrsm_u_haswell_asm_6x8
-(
-    dim_t               k0,
-    double*    restrict alpha,
-    double*    restrict a10,
-    double*    restrict a11,
-    double*    restrict b01,
-    double*    restrict b11,
-    double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-    auxinfo_t* restrict data,
-    cntx_t*    restrict cntx
-)
+     (
+       dim_t               k0,
+       double*    restrict alpha,
+       double*    restrict a10,
+       double*    restrict a11,
+       double*    restrict b01,
+       double*    restrict b11,
+       double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
+       auxinfo_t* restrict data,
+       cntx_t*    restrict cntx
+     )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
 	//void*   b_next = bli_auxinfo_next_b( data );
@@ -869,7 +871,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 
 	double*  beta   = bli_dm1;
 
-    begin_asm()
+	begin_asm()
 
 	vzeroall() // zero all xmm/ymm registers.
 
@@ -934,7 +936,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	vmovapd(mem(rbx, -1*32), ymm1)
 
 	 // iteration 1
-    prefetch(0, mem(rax, 72*8))
+	prefetch(0, mem(rax, 72*8))
 
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
@@ -1555,6 +1557,7 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	label(.DDONE)
 
 	vzeroupper()
+
 
 
 	end_asm(
