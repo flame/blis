@@ -870,7 +870,7 @@ void bli_sgemm_haswell_asm_6x16
 	
 	label(.SDONE)
 	
-	
+	vzeroupper()
 
     end_asm(
 	: // output operands (none)
@@ -1624,6 +1624,7 @@ void bli_dgemm_haswell_asm_6x8
 	
 	
 	label(.DDONE)
+
 	vzeroupper()
 	
 
@@ -2158,7 +2159,7 @@ void bli_cgemm_haswell_asm_3x8
 	
 	label(.CDONE)
 	
-	
+	vzeroupper()
 
     end_asm(
 	: // output operands (none)
@@ -2758,7 +2759,7 @@ void bli_zgemm_haswell_asm_3x4
 
 	label(.ZDONE)
 
-
+	vzeroupper()
 
     end_asm(
 	: // output operands (none)
