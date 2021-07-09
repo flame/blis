@@ -1014,6 +1014,8 @@ void bli_dgemm_haswell_asm_6x8
 	vmovapd(mem(rbx, -1*32), ymm1)
 
 	 // iteration 1
+    prefetch(0, mem(rax, 72*8))
+
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
 	vfmadd231pd(ymm0, ymm2, ymm4)
@@ -1039,7 +1041,7 @@ void bli_dgemm_haswell_asm_6x8
 	vmovapd(mem(rbx, 1*32), ymm1)
 
 	 // iteration 2
-	prefetch(0, mem(rax, 76*8))
+	prefetch(0, mem(rax, 80*8))
 
 	vbroadcastsd(mem(rax, 12*8), ymm2)
 	vbroadcastsd(mem(rax, 13*8), ymm3)
@@ -2291,6 +2293,8 @@ void bli_zgemm_haswell_asm_3x4
 	vmovapd(mem(rbx, -1*32), ymm1)
 
 	 // iteration 1
+    prefetch(0, mem(rax, 36*16))
+
 	vbroadcastsd(mem(rax, 6*8), ymm2)
 	vbroadcastsd(mem(rax, 7*8), ymm3)
 	vfmadd231pd(ymm0, ymm2, ymm4)
@@ -2316,7 +2320,7 @@ void bli_zgemm_haswell_asm_3x4
 	vmovapd(mem(rbx, 1*32), ymm1)
 
 	 // iteration 2
-	prefetch(0, mem(rax, 38*16))
+	prefetch(0, mem(rax, 40*16))
 
 	vbroadcastsd(mem(rax, 12*8), ymm2)
 	vbroadcastsd(mem(rax, 13*8), ymm3)
