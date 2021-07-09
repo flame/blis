@@ -10773,10 +10773,11 @@ static  err_t bli_dtrsm_small_XAltB_unitDiag(
             k_iter = j / D_NR;      //number of GEMM operations to be performed(in block of 4x4)
 
             dim_t iter;
+			err_t r_val;
 
             if((j+n_remainder) == n)
             {
-                f_temp = bli_malloc_user(4 * sizeof(double));
+                f_temp = bli_malloc_user(4 * sizeof(double), &r_val);
                 for(iter = 0; iter < m_remainder; iter++)
                     f_temp[iter] = (b11 + cs_b * (n_remainder-1))[iter];
             }

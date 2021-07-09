@@ -48,7 +48,7 @@ This index provides a quick way to jump directly to the description for each ope
   * **[Level-3](BLISTypedAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
     * [gemm](BLISTypedAPI.md#gemm), [hemm](BLISTypedAPI.md#hemm), [herk](BLISTypedAPI.md#herk), [her2k](BLISTypedAPI.md#her2k), [symm](BLISTypedAPI.md#symm), [syrk](BLISTypedAPI.md#syrk), [syr2k](BLISTypedAPI.md#syr2k), [trmm](BLISTypedAPI.md#trmm), [trmm3](BLISTypedAPI.md#trmm3), [trsm](BLISTypedAPI.md#trsm)
   * **[Utility](BLISTypedAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv)
+    * [asumv](BLISTypedAPI.md#asumv), [norm1v](BLISTypedAPI.md#norm1v), [normfv](BLISTypedAPI.md#normfv), [normiv](BLISTypedAPI.md#normiv), [norm1m](BLISTypedAPI.md#norm1m), [normfm](BLISTypedAPI.md#normfm), [normim](BLISTypedAPI.md#normim), [mkherm](BLISTypedAPI.md#mkherm), [mksymm](BLISTypedAPI.md#mksymm), [mktrim](BLISTypedAPI.md#mktrim), [fprintv](BLISTypedAPI.md#fprintv), [fprintm](BLISTypedAPI.md#fprintm),[printv](BLISTypedAPI.md#printv), [printm](BLISTypedAPI.md#printm), [randv](BLISTypedAPI.md#randv), [randm](BLISTypedAPI.md#randm), [sumsqv](BLISTypedAPI.md#sumsqv), [getsc](BLISTypedAPI.md#getsc), [getijv](BLISTypedAPI.md#getijv), [getijm](BLISTypedAPI.md#getijm), [setsc](BLISTypedAPI.md#setsc), [setijv](BLISTypedAPI.md#setijv), [setijm](BLISTypedAPI.md#setijm), [eqsc](BLISTypedAPI.md#eqsc), [eqv](BLISTypedAPI.md#eqv), [eqm](BLISTypedAPI.md#eqm)
 
 
 
@@ -1694,6 +1694,149 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 **Note:** This function attempts to mimic the algorithm for computing the Frobenius norm in the netlib LAPACK routine `?lassq()`.
 
 ---
+
+#### getsc
+```c
+void bli_getsc
+     (
+       ctype*  chi,
+       double* zeta_r,
+       double* zeta_i
+     )
+```
+Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+
+---
+
+#### getijv
+```c
+err_t bli_?getijv
+     (
+       dim_t   i,
+       ctype*  x, incx,
+       double* ar,
+       double* ai
+     )
+```
+Copy the real and imaginary values at the `i`th element of vector `x` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+Note that the object-based analogue of [getijv](BLISObjectAPI.md#getijv) does bounds checking of the vector element offset `i` against the vector length while the typed functions specified above do not (since the vector length is not given).
+
+---
+
+#### getijm
+```c
+err_t bli_?getijm
+     (
+       dim_t   i,
+       dim_t   j,
+       ctype*  b, inc_t rs_b, inc_t cs_b,
+       double* ar,
+       double* ai
+     )
+```
+Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. For real domain invocations, only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+Note that the object-based analogue of [getijm](BLISObjectAPI.md#getijm) does bounds checking of the matrix element offsets (`i`,`j`) against the matrix dimensions while the typed functions specified above do not (since the matrix dimensions are not given).
+
+---
+
+#### setsc
+```c
+void bli_setsc
+     (
+       double* zeta_r,
+       double* zeta_i,
+       ctype*  chi
+     );
+```
+Copy real and imaginary values `zeta_r` and `zeta_i` to the scalar object `chi`. If `chi` is stored as a real type, then `zeta_i` is ignored. (If `chi` is stored in single precision, the contents are typecast/demoted during the copy.)
+
+---
+
+#### setijv
+```c
+err_t bli_?setijv
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       ctype*  x, incx
+     );
+```
+Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. For real domain invocations, only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+Note that the object-based analogue of [setijv](BLISObjectAPI.md#setijv) does bounds checking of the vector element offset `i` against the vector length while the typed functions specified above do not (since the vector length is not given).
+
+---
+
+#### setijm
+```c
+err_t bli_?setijm
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       dim_t   j,
+       ctype*  b, inc_t rs_b, inc_t cs_b
+     );
+```
+Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. For real domain invocations, only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+Note that the object-based analogue of [setijm](BLISObjectAPI.md#setijm) does bounds checking of the matrix element offsets (`i`,`j`) against the matrix dimensions while the typed functions specified above do not (since the matrix dimensions are not given).
+
+---
+
+#### eqsc
+```c
+void bli_?eqsc
+     (
+       conj_t conjchi,
+       ctype* chi,
+       ctype* psi,
+       bool*  is_eq
+     );
+```
+Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
+If `conjchi` indicates a conjugation, `chi` will be implicitly conjugated for purposes of the comparision.
+
+---
+
+#### eqv
+```c
+void bli_?eqv
+     (
+       conj_t  conjx,
+       dim_t   n,
+       ctype*  x, inc_t incx,
+       ctype*  y, inc_t incy,
+       bool*   is_eq
+     );
+```
+Perform an element-wise comparison between length _n_ vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
+If `conjx` indicates a conjugation, `x` will be implicitly conjugated for purposes of the comparision.
+
+---
+
+#### eqm
+```c
+void bli_?eqm
+     (
+       doff_t  diagoffa,
+       diag_t  diaga,
+       uplo_t  uploa,
+       trans_t transa,
+       dim_t   m,
+       dim_t   n,
+       ctype*  a, inc_t rs_a, inc_t cs_a,
+       ctype*  b, inc_t rs_b, inc_t cs_b,
+       bool*   is_eq
+     )
+```
+Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
+Here, `B` is an _m x n_ matrix, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `diaga` indicates a unit diagonal, the diagonals of both matrices will be ignored for purposes of the comparision.
+If `uploa` indicates lower or upper storage, only that part of matrix `A` will be referenced in the comparison.
+If `transa` indicates a conjugation and/or transposition, then `A` will be conjugated and/or transposed for purposes of the comparison.
+
+
+
 
 
 ## Level-3 microkernels

@@ -37,7 +37,7 @@
 #include "bli_l3_check.h"
 
 // Define function types.
-#include "bli_l3_ft_ex.h"
+//#include "bli_l3_ft_ex.h"
 #include "bli_l3_ft_ukr.h"
 #include "bli_l3_oft.h"
 #include "bli_l3_oft_var.h"
@@ -50,16 +50,20 @@
 // Prototype object APIs (expert and non-expert).
 #include "bli_oapi_ex.h"
 #include "bli_l3_oapi.h"
+#include "bli_xapi_undef.h"
 
 #include "bli_oapi_ba.h"
 #include "bli_l3_oapi.h"
+#include "bli_xapi_undef.h"
 
 // Prototype typed APIs (expert and non-expert).
 #include "bli_tapi_ex.h"
 #include "bli_l3_tapi.h"
+#include "bli_xapi_undef.h"
 
 #include "bli_tapi_ba.h"
 #include "bli_l3_tapi.h"
+#include "bli_xapi_undef.h"
 
 // Define function types for small/unpacked handlers/kernels.
 #include "bli_l3_sup_oft.h"

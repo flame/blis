@@ -198,15 +198,18 @@ typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
 
-// -- Void function pointer types --
+// -- Misc. function pointer types --
 
 // Note: This type should be used in any situation where the address of a
 // *function* will be conveyed or stored prior to it being typecast back
 // to the correct function type. It does not need to be used when conveying
 // or storing the address of *data* (such as an array of float or double).
-
 //typedef void (*void_fp)( void );
 typedef void* void_fp;
+
+// Typedef function pointer types for malloc() and free() substitutes.
+typedef void* (*malloc_ft)( size_t size );
+typedef void  (*free_ft)  ( void*  p    );
 
 
 //
@@ -1038,10 +1041,9 @@ typedef enum
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
-// These headers must be included here (or earlier) because definitions they
-// provide are needed in the pool_t and related structs.
+// This header must be included here (or earlier) because definitions it
+// provides are needed in the pool_t and related structs.
 #include "bli_pthread.h"
-#include "bli_malloc.h"
 
 // -- Pool block type --
 
@@ -1099,7 +1101,7 @@ typedef struct
 
 // -- packing block allocator: Locked set of pools type --
 
-typedef struct membrk_s
+typedef struct pba_s
 {
 	pool_t              pools[3];
 	bli_pthread_mutex_t mutex;
@@ -1109,7 +1111,7 @@ typedef struct membrk_s
 	malloc_ft           malloc_fp;
 	free_ft             free_fp;
 
-} membrk_t;
+} pba_t;
 
 
 // -- Memory object type --
@@ -1479,7 +1481,7 @@ typedef struct rntm_s
 	pool_t*   sba_pool;
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
-	membrk_t* membrk;
+	pba_t*    pba;
 
 } rntm_t;
 

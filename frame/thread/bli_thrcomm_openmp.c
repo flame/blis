@@ -111,17 +111,21 @@ void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 
 void bli_thrcomm_init( dim_t n_threads, thrcomm_t* comm )
 {
+	err_t r_val;
+
 	if ( comm == NULL ) return;
 	comm->sent_object = NULL;
 	comm->n_threads = n_threads;
-	comm->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads );
+	comm->barriers = bli_malloc_intl( sizeof( barrier_t* ) * n_threads, &r_val );
 	bli_thrcomm_tree_barrier_create( n_threads, BLIS_TREE_BARRIER_ARITY, comm->barriers, 0 );
 }
 
 //Tree barrier used for Intel Xeon Phi
 barrier_t* bli_thrcomm_tree_barrier_create( int num_threads, int arity, barrier_t** leaves, int leaf_index )
 {
-	barrier_t* me = bli_malloc_intl( sizeof(barrier_t) );
+	err_t r_val;
+
+	barrier_t* me = bli_malloc_intl( sizeof( barrier_t ), &r_val );
 
 	me->dad = NULL;
 	me->signal = 0;

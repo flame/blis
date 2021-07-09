@@ -44,8 +44,9 @@ mbool_t* bli_mbool_create
      )
 {
 	mbool_t* b;
+	err_t r_val;
 
-	b = ( mbool_t* ) bli_malloc_intl( sizeof(mbool_t) );
+	b = ( mbool_t* ) bli_malloc_intl( sizeof( mbool_t ), &r_val );
 
 	bli_mbool_init
 	(

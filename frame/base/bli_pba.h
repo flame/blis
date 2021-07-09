@@ -37,83 +37,100 @@
 #ifndef BLIS_MEMBRK_H
 #define BLIS_MEMBRK_H
 
-// membrk init
+// Packing block allocator (formerly memory broker)
 
-BLIS_INLINE void bli_membrk_init_mutex( membrk_t* membrk )
+/*
+typedef struct pba_s
 {
-	bli_pthread_mutex_init( &(membrk->mutex), NULL );
+	pool_t              pools[3];
+	bli_pthread_mutex_t mutex;
+
+	// These fields are used for general-purpose allocation.
+	siz_t               align_size;
+	malloc_ft           malloc_fp;
+	free_ft             free_fp;
+
+} pba_t;
+*/
+
+
+// pba init
+
+//BLIS_INLINE void bli_pba_init_mutex( pba_t* pba )
+//{
+//	bli_pthread_mutex_init( &(pba->mutex), NULL );
+//}
+
+//BLIS_INLINE void bli_pba_finalize_mutex( pba_t* pba )
+//{
+//	bli_pthread_mutex_destroy( &(pba->mutex) );
+//}
+
+// pba query
+
+BLIS_INLINE pool_t* bli_pba_pool( dim_t pool_index, pba_t* pba )
+{
+	return &(pba->pools[ pool_index ]);
 }
 
-BLIS_INLINE void bli_membrk_finalize_mutex( membrk_t* membrk )
+BLIS_INLINE siz_t bli_pba_align_size( pba_t* pba )
 {
-	bli_pthread_mutex_destroy( &(membrk->mutex) );
+	return pba->align_size;
 }
 
-// membrk query
-
-BLIS_INLINE pool_t* bli_membrk_pool( dim_t pool_index, membrk_t* membrk )
+BLIS_INLINE malloc_ft bli_pba_malloc_fp( pba_t* pba )
 {
-	return &(membrk->pools[ pool_index ]);
+	return pba->malloc_fp;
 }
 
-BLIS_INLINE siz_t bli_membrk_align_size( membrk_t* membrk )
+BLIS_INLINE free_ft bli_pba_free_fp( pba_t* pba )
 {
-	return membrk->align_size;
+	return pba->free_fp;
 }
 
-BLIS_INLINE malloc_ft bli_membrk_malloc_fp( membrk_t* membrk )
+// pba modification
+
+BLIS_INLINE void bli_pba_set_align_size( siz_t align_size, pba_t* pba )
 {
-	return membrk->malloc_fp;
+	pba->align_size = align_size;
 }
 
-BLIS_INLINE free_ft bli_membrk_free_fp( membrk_t* membrk )
+BLIS_INLINE void bli_pba_set_malloc_fp( malloc_ft malloc_fp, pba_t* pba )
 {
-	return membrk->free_fp;
+	pba->malloc_fp = malloc_fp;
 }
 
-// membrk modification
-
-BLIS_INLINE void bli_membrk_set_align_size( siz_t align_size, membrk_t* membrk )
+BLIS_INLINE void bli_pba_set_free_fp( free_ft free_fp, pba_t* pba )
 {
-	membrk->align_size = align_size;
+	pba->free_fp = free_fp;
 }
 
-BLIS_INLINE void bli_membrk_set_malloc_fp( malloc_ft malloc_fp, membrk_t* membrk )
+// pba action
+
+BLIS_INLINE void bli_pba_lock( pba_t* pba )
 {
-	membrk->malloc_fp = malloc_fp;
+	bli_pthread_mutex_lock( &(pba->mutex) );
 }
 
-BLIS_INLINE void bli_membrk_set_free_fp( free_ft free_fp, membrk_t* membrk )
+BLIS_INLINE void bli_pba_unlock( pba_t* pba )
 {
-	membrk->free_fp = free_fp;
-}
-
-// membrk action
-
-BLIS_INLINE void bli_membrk_lock( membrk_t* membrk )
-{
-	bli_pthread_mutex_lock( &(membrk->mutex) );
-}
-
-BLIS_INLINE void bli_membrk_unlock( membrk_t* membrk )
-{
-	bli_pthread_mutex_unlock( &(membrk->mutex) );
+	bli_pthread_mutex_unlock( &(pba->mutex) );
 }
 
 // -----------------------------------------------------------------------------
 
-membrk_t* bli_membrk_query( void );
+pba_t* bli_pba_query( void );
 
-void bli_membrk_init
+void bli_pba_init
      (
        cntx_t*   cntx
      );
-void bli_membrk_finalize
+void bli_pba_finalize
      (
        void
      );
 
-void bli_membrk_acquire_m
+void bli_pba_acquire_m
      (
        rntm_t*   rntm,
        siz_t     req_size,
@@ -121,43 +138,43 @@ void bli_membrk_acquire_m
        mem_t*    mem
      );
 
-void bli_membrk_release
+void bli_pba_release
      (
        rntm_t* rntm,
        mem_t*  mem
      );
 
-void bli_membrk_rntm_set_membrk
+void bli_pba_rntm_set_pba
      (
        rntm_t* rntm
      );
 
-siz_t bli_membrk_pool_size
+siz_t bli_pba_pool_size
      (
-       membrk_t* membrk,
+       pba_t*    pba,
        packbuf_t buf_type
      );
 
 // ----------------------------------------------------------------------------
 
-void bli_membrk_init_pools
+void bli_pba_init_pools
      (
-       cntx_t*   cntx,
-       membrk_t* membrk
+       cntx_t* cntx,
+       pba_t*  pba
      );
-void bli_membrk_finalize_pools
+void bli_pba_finalize_pools
      (
-       membrk_t* membrk
+       pba_t* pba
      );
 
-void bli_membrk_compute_pool_block_sizes
+void bli_pba_compute_pool_block_sizes
      (
        siz_t*  bs_a,
        siz_t*  bs_b,
        siz_t*  bs_c,
        cntx_t* cntx
      );
-void bli_membrk_compute_pool_block_sizes_dt
+void bli_pba_compute_pool_block_sizes_dt
      (
        num_t   dt,
        siz_t*  bs_a,
