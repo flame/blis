@@ -457,7 +457,15 @@ void dgemm_
     //cntx_t* cntx = bli_gks_query_cntx();
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
     bool nt = bli_thread_get_is_parallel(); // Check if parallel dgemm is invoked.
-    if (nt)
+  
+    // if m0 is large and (n0 & k0) < 10 - SMALL GEMM - ST is better
+    //
+
+#ifdef AOCL_DYNAMIC
+    if (nt && ((n0 > 10 ) || (k0 > 10)) )
+#else
+      if (nt)
+#endif
       {
 	// Will call parallelized dgemm code - sup & native
 	PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
@@ -480,7 +488,10 @@ void dgemm_
     // The code below will be called when number of threads = 1.
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
-    if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
+    
+    //if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
+    if( ( ( (m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) ) ||
+	  ((n0 <= 10) && (k0 <=10)) )
       {
 	err_t status;
 	if (bli_is_notrans(blis_transa))

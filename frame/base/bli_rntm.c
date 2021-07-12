@@ -238,7 +238,7 @@ void bli_rntm_set_ways_from_rntm
 		pc = 1;
 
 		bli_thread_partition_2x2( nt, m*BLIS_THREAD_RATIO_M,
-		                              n*BLIS_THREAD_RATIO_N, &ic, &jc );
+					      n*BLIS_THREAD_RATIO_N, &ic, &jc );
 
 		for ( ir = BLIS_THREAD_MAX_IR ; ir > 1 ; ir-- )
 		{
@@ -361,7 +361,7 @@ void bli_rntm_set_ways_from_rntm_sup
 		//bli_thread_partition_2x2( nt, m*BLIS_THREAD_SUP_RATIO_M,
 		//                              n*BLIS_THREAD_SUP_RATIO_N, &ic, &jc );
 		bli_thread_partition_2x2( nt, m,
-		                              n, &ic, &jc );
+					      n, &ic, &jc );
 
 //printf( "bli_rntm_set_ways_from_rntm_sup(): jc = %d  ic = %d\n", (int)jc, (int)ic );
 #if 0
@@ -422,8 +422,8 @@ void bli_rntm_print
 
 	printf( "rntm contents    nt  jc  pc  ic  jr  ir\n" );
 	printf( "autofac? %1d | %4d%4d%4d%4d%4d%4d\n", (int)af,
-	                                               (int)nt, (int)jc, (int)pc,
-	                                               (int)ic, (int)jr, (int)ir );
+						       (int)nt, (int)jc, (int)pc,
+						       (int)ic, (int)jr, (int)ir );
 }
 
 // -----------------------------------------------------------------------------
@@ -436,19 +436,19 @@ dim_t bli_rntm_calc_num_threads_in
 {
 	/*                                     // bp algorithm:
 	   bszid_t bszids[7] = { BLIS_NC,      // level 0: 5th loop
-	                         BLIS_KC,      // level 1: 4th loop
-	                         BLIS_NO_PART, // level 2: pack B
-	                         BLIS_MC,      // level 3: 3rd loop
-	                         BLIS_NO_PART, // level 4: pack A
-	                         BLIS_NR,      // level 5: 2nd loop
-	                         BLIS_MR,      // level 6: 1st loop
-	                         BLIS_KR       // level 7: ukr loop
+				 BLIS_KC,      // level 1: 4th loop
+				 BLIS_NO_PART, // level 2: pack B
+				 BLIS_MC,      // level 3: 3rd loop
+				 BLIS_NO_PART, // level 4: pack A
+				 BLIS_NR,      // level 5: 2nd loop
+				 BLIS_MR,      // level 6: 1st loop
+				 BLIS_KR       // level 7: ukr loop
 
-	                         ...           // pb algorithm:
-	                         BLIS_NR,      // level 5: 2nd loop
-	                         BLIS_MR,      // level 6: 1st loop
-	                         BLIS_KR       // level 7: ukr loop
-	                       }; */
+				 ...           // pb algorithm:
+				 BLIS_NR,      // level 5: 2nd loop
+				 BLIS_MR,      // level 6: 1st loop
+				 BLIS_KR       // level 7: ukr loop
+			       }; */
 	dim_t n_threads_in = 1;
 
 	// Starting with the current element of the bszids array (pointed
@@ -473,6 +473,24 @@ dim_t bli_rntm_calc_num_threads_in
 	return n_threads_in;
 }
 
+#if 0
+	for ( ; *bszid_cur != BLIS_KR; bszid_cur++ )
+	{
+		const bszid_t bszid = *bszid_cur;
+		dim_t         cur_way = 1;
+
+		// We assume bszid is in {NC,KC,MC,NR,MR,KR} if it is not
+		// BLIS_NO_PART.
+		if ( bszid != BLIS_NO_PART )
+			cur_way = bli_rntm_ways_for( bszid, rntm );
+		else
+			cur_way = 1;
+
+		n_threads_in *= cur_way;
+	}
+#endif
+
+
 #ifdef AOCL_DYNAMIC
 //calculates the optimum number of threads using m, n, k dimensions.
 //This function modifies only the local copy of rntm with optimum threads.
@@ -480,16 +498,17 @@ dim_t bli_rntm_calc_num_threads_in
 //application is available in global_rntm data structure.
 
 void bli_nthreads_optimum(
-		obj_t*  a,
-		obj_t*  b,
-		obj_t*  c,
-		opid_t  family,
-		rntm_t* rntm
-		)
+		           obj_t*  a,
+		           obj_t*  b,
+		           obj_t*  c,
+		           opid_t  family,
+		           rntm_t* rntm
+		         )
 {
 #ifndef BLIS_ENABLE_MULTITHREADING
 	return;
 #endif
+
 	dim_t n_threads = bli_rntm_num_threads(rntm);
 
 	if(( n_threads == -1) || (n_threads == 1)) return;
@@ -510,87 +529,89 @@ void bli_nthreads_optimum(
 			else	    n_threads_ideal = 16;
 		}
 		else
-		{
-			if(m > 10000)
-			{
-				if(n >= 96) n_threads_ideal = 16;
-				else       n_threads_ideal = 8;
-			}
-			else if( m > 1000)
-			{
-				if(n < 15) n_threads_ideal = 4;
-				else       n_threads_ideal = 8;
-			}
-			else if(m > 210)
-			{
-				if(n < 10) n_threads_ideal = 1;
-				else	   n_threads_ideal = 4;
-			}
-			else if(m > 150)
-			{
-				if(n < 15) n_threads_ideal = 1;
-				else	   n_threads_ideal = 4;
-			}
-			else
-			{
-				if(n < 20) n_threads_ideal = 1;
-				else       n_threads_ideal = 4;
-			}
-		}
+                  {
+                        if(m > 10000)
+                        {
+
+			  /* if(n >= 96) n_threads_ideal = 16; */
+                          /* else       n_threads_ideal = 8; */
+
+                          // current logic is only limiting threads to
+			  //  less or equal to 64 - limits performance.
+
+			  // To deal with larger matrix sizes we need to use
+			  // large number of threads to improve performance
+
+			  // Need to derive this upperTH - and
+			  // if matrix -sizes are larger and user wants
+			  // to use higher number of threads - that should be allowed.
+
+                          // if (n > UpperTH) n_threads_ideal = n_threads;
+                              if (n > 200 )       n_threads_ideal = 64;
+                              else if ( n > 120 ) n_threads_ideal = 32;
+                              else if ( n > 40  ) n_threads_ideal = 16;
+                              else if ( n > 10  ) n_threads_ideal = 8;
+                              else /* if ( n <= 10) */ n_threads_ideal = 4;
+                        }
+                        else if( m > 1000)
+                          {
+                            if (n <= 10) n_threads_ideal = 4;
+                            else if ( n <= 40  ) n_threads_ideal = 8;
+                            else if ( n <= 120 ) n_threads_ideal = 16;
+                            else if ( n <= 200 ) n_threads_ideal = 32;
+                            else                 n_threads_ideal = 64;
+
+                            /* if(n < 15) n_threads_ideal = 4; */
+                            /* else       n_threads_ideal = 8; */
+                          }
+                    else if(m > 210)
+		      {
+			if(n < 10) n_threads_ideal = 1;
+			else	   n_threads_ideal = 4;
+		      }
+		    else if(m > 150)
+		      {
+			if(n < 15) n_threads_ideal = 1;
+			else	   n_threads_ideal = 4;
+		      }
+		    else
+		      {
+			if(n < 20) n_threads_ideal = 1;
+			else       n_threads_ideal = 4;
+		      }
+		  }
 
 	}
 	else if( family == BLIS_SYRK && bli_obj_is_double(c))
 	{
+	  dim_t n = bli_obj_length(c);
+	  dim_t k = bli_obj_width_after_trans(a);
 
-		dim_t n = bli_obj_length(c);
-		dim_t k = bli_obj_width_after_trans(a);
-
-
-		if( (( n <= 10) && ( k < 700))  ||
-		    (( n <= 20) && ( k <= 190)) ||
-		    (( n <= 40) && ( k <= 80))  ||
-		    (( n <= 50) && ( k <= 40))  ||
-		    (( n <= 60) && ( k <= 20))
-		  )
-			n_threads_ideal = 1;	
-		else
-			n_threads_ideal = n_threads;
+	  if( (( n <= 10) && ( k < 700))  ||
+	      (( n <= 20) && ( k <= 190)) ||
+	      (( n <= 40) && ( k <= 80))  ||
+	      (( n <= 50) && ( k <= 40))  ||
+	      (( n <= 60) && ( k <= 20))
+	      )
+	    n_threads_ideal = 1;
+	  else
+	    n_threads_ideal = n_threads;
 	}
-        else if( family == BLIS_TRSM && bli_obj_is_double(c))
-        {
-                dim_t m = bli_obj_length(c);
-                dim_t n = bli_obj_width(c);
+	else if( family == BLIS_TRSM && bli_obj_is_double(c))
+	{
+	  dim_t m = bli_obj_length(c);
+	  dim_t n = bli_obj_width(c);
 
-                if(m<=512 && n<=512)
-                    n_threads_ideal = 4;
-
-        }
+	  if(m<=512 && n<=512)
+	    n_threads_ideal = 4;
+	}
 
 	dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
 
-	bli_pthread_mutex_lock( &global_rntm_mutex );
-
+	// This modifies only local rntm - therefore doesn't require mutex locks
+	// for updating rntm
 	bli_rntm_set_num_threads_only( n_threads_opt, rntm );
-
-	bli_pthread_mutex_unlock( &global_rntm_mutex );
 
 	return;
 }
-#endif
-#if 0
-	for ( ; *bszid_cur != BLIS_KR; bszid_cur++ )
-	{
-		const bszid_t bszid = *bszid_cur;
-		dim_t         cur_way = 1;
-
-		// We assume bszid is in {NC,KC,MC,NR,MR,KR} if it is not
-		// BLIS_NO_PART.
-		if ( bszid != BLIS_NO_PART )
-			cur_way = bli_rntm_ways_for( bszid, rntm );
-		else
-			cur_way = 1;
-
-		n_threads_in *= cur_way;
-	}
-#endif
-
+#endif // AOCL_DYNAMIC
