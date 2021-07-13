@@ -36,14 +36,12 @@
 #define BLIS_SANDBOX_H
 
 #include "blis.h"
-#include "gemm_api.h"
+#include "gemm_prototypes.h"
 
 // NOTE: This header is the only header required to be present in the sandbox
 // implementation directory.
 
-// This header is used to create the typedefs needed for low precision
-
-// int4 type 
+// int4
 typedef union
 {
     uint8_t v;
@@ -54,7 +52,7 @@ typedef union
     } bits;
 } nibbles;
 
-// bfloat16 
+// brain float16 
 typedef union
 {
     uint16_t v;
@@ -80,36 +78,25 @@ typedef union
 
 #define P10_PG_SIZE 4096
 
+// microkernel prototypes
 GEMM_UKR_PROT2( bfloat16,   float,  sb, gemm_power10_mma_8x16 )
 GEMM_UKR_PROT2(  float16,   float,  sh, gemm_power10_mma_8x16 )
 GEMM_UKR_PROT2(  int16_t, int32_t, i16, gemm_power10_mma_8x16 )
 GEMM_UKR_PROT2(   int8_t, int32_t,  i8, gemm_power10_mma_8x16 )
 GEMM_UKR_PROT2(  nibbles, int32_t,  i4, gemm_power10_mma_8x16 )
 
-/* Creates a function that initializes a matrix of type ctype with random vals */
-#define RandomMatrixMacro(ch, ctype, rand_func) \
-    RM_PROT(ch, ctype) \
-    { \
-    for ( int i=0; i<m; i++ ) \
-        for ( int j=0; j<n; j++ ) \
-            *(ap + j*cs_a + i*rs_a) = \
-                (ctype) rand_func(); \
-    }
-
-/* Creates a function that initializes a matrix of type ctype with random vals */
-#define RandomMatrixBounded(ch, ctype, rand_func) \
-    RM_B_PROT(ch, ctype) \
-    { \
-    for ( int i=0; i<m; i++ ) \
-        for ( int j=0; j<n; j++ ) \
-            *(ap + j*cs_a + i*rs_a) = \
-                (ctype) rand_func() % (upper - lower + 1) + lower; \
-    }
-
+// gemm kernel prototypes
 GEMM_FUNC_PROT(  float16,   float,  sh);
 GEMM_FUNC_PROT( bfloat16,   float,  sb);
 GEMM_FUNC_PROT(  int16_t, int32_t, i16);
 GEMM_FUNC_PROT(   int8_t, int32_t,  i8);
 GEMM_FUNC_PROT(  nibbles, int32_t,  i4);
+
+// pack kernel prototypes
+PACK_MACRO_PROTO(sb, bfloat16)
+PACK_MACRO_PROTO(sh, float16)
+PACK_MACRO_PROTO(i16, int16_t)
+PACK_MACRO_PROTO(i8, int8_t)
+PACK_MACRO_PROTO(i4, nibbles)
 
 #endif

@@ -32,16 +32,34 @@
 
 */
 
-// Templates for packing routines prototypes
+// BLIS GEMM function naming scheme
+#define GEMM_FUNC_NAME_(ch)    bli_ ## ch ## gemm
+#define GEMM_FUNC_NAME(ch)     GEMM_FUNC_NAME_(ch)
 
-#include "bli_sandbox.h"
+// BLIS GEMM function prototype macro
+#define GEMM_FUNC_PROT(DTYPE_IN, DTYPE_OUT, ch) \
+    void GEMM_FUNC_NAME(ch) \
+        ( \
+            trans_t transa, \
+            trans_t transb, \
+            dim_t   m, \
+            dim_t   n, \
+            dim_t   k, \
+            DTYPE_OUT*  alpha, \
+            DTYPE_IN*  a, inc_t rsa, inc_t csa, \
+            DTYPE_IN*  b, inc_t rsb, inc_t csb, \
+            DTYPE_OUT*  beta, \
+            DTYPE_OUT*  c, inc_t rsc, inc_t csc \
+        ) 
 
-#define PACK_FUNC_NAME_(ch, mat) ch ## _pack ## mat
+// Pack routine naming scheme
+#define PACK_FUNC_NAME_(ch, mat) ch ## _pack_ ## mat
 #define PACK_FUNC_NAME(ch, mat)  PACK_FUNC_NAME_(ch, mat)
 
+// Pack routine prototype
 #define PACK_MACRO_PROTO(ch, DTYPE_IN) \
 \
-void PACK_FUNC_NAME(ch, A) \
+void PACK_FUNC_NAME(ch, a) \
     (  \
         dim_t MR, \
         int m, int k, \
@@ -49,16 +67,10 @@ void PACK_FUNC_NAME(ch, A) \
         DTYPE_IN* apack \
     ); \
 \
-void PACK_FUNC_NAME(ch, B) \
+void PACK_FUNC_NAME(ch, b) \
     ( \
         dim_t NR, \
         int k, int n, \
         DTYPE_IN* bp, int rs_b, int cs_b, \
         DTYPE_IN* bpack \
     ); 
-
-PACK_MACRO_PROTO(sb, bfloat16)
-PACK_MACRO_PROTO(sh, float16)
-PACK_MACRO_PROTO(i16, int16_t)
-PACK_MACRO_PROTO(i8, int8_t)
-PACK_MACRO_PROTO(i4, nibbles)

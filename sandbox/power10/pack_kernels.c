@@ -32,22 +32,57 @@
 
 */
 
-// Prototypes and template for the low precision POWER10 GEMM API
+/*
 
-#define GEMM_FUNC_NAME_(ch)    bli_ ## ch ## gemm
-#define GEMM_FUNC_NAME(ch)     GEMM_FUNC_NAME_(ch)
+    Details on bit16_dt vector data structure
 
-#define GEMM_FUNC_PROT(DTYPE_IN, DTYPE_OUT, ch) \
-    void GEMM_FUNC_NAME(ch) \
-        ( \
-            trans_t transa, \
-            trans_t transb, \
-            dim_t   m, \
-            dim_t   n, \
-            dim_t   k, \
-            DTYPE_OUT*  alpha, \
-            DTYPE_IN*  a, inc_t rsa, inc_t csa, \
-            DTYPE_IN*  b, inc_t rsb, inc_t csb, \
-            DTYPE_OUT*  beta, \
-            DTYPE_OUT*  c, inc_t rsc, inc_t csc \
-        ) 
+    Vector X = [ X[0,0] X[0,1] X[1,0] X[1,1] X[2,0] X[2,1] X[3,0] X[3,1] ]
+    Vector Y = [ Y[0,0] Y[0,1] Y[1,0] Y[1,1] Y[2,0] Y[2,1] Y[3,0] Y[3,1] ]
+
+    These bit16_dt vectors represent a 4x2 matrix. Hence, in matrix form it 
+    looks like the following:
+
+    X = [ X[0,0] X[0,1] 
+          X[1,0] X[1,1]
+          X[2,0] X[2,1]
+          X[3,0] X[3,1] ]
+
+    The outer product instruction: xvbf16ger2 (bfloat16 outer product)
+
+    Syntax: 
+
+        xvbf16ger2 ACCUMULATOR A, VECTOR X, VECTOR Y
+
+    Semantics:
+
+        A = X * Y^T
+
+    The generic packing routine would load 8 elements from the same column.
+    This causes an issue since the instruction expects the vector to be a
+    4x2 matrix where the data is packed in contiguous order. Thus, we must make 
+    a packing routine that will interleave the matrix data. Making it so 
+    that when we load the 8 contiguous elements from A, it will represent
+    a 4x2 section of the matrix.
+
+*/
+
+#include "pack_a_templates.h"
+#include "pack_b_templates.h"
+#include "bli_sandbox.h"
+
+// 16 bit routines
+BIT16_PACK_A(sb, bfloat16);
+BIT16_PACK_B(sb, bfloat16);
+BIT16_PACK_A(sh, float16);
+BIT16_PACK_B(sh, float16);
+BIT16_PACK_A(i16, int16_t);
+BIT16_PACK_B(i16, int16_t);
+
+// 8 bit
+BIT8_PACK_A(i8, int8_t);
+BIT8_PACK_B(i8, int8_t);
+
+// 4 bit
+BIT4_PACK_A(i4, nibbles);
+BIT4_PACK_B(i4, nibbles);
+
