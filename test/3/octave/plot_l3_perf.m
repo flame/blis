@@ -55,8 +55,7 @@ titlename = sprintf( titlename, title_opname );
 
 % Set the legend strings.
 blis_legend = sprintf( 'BLIS' );
-%open_legend = sprintf( 'OpenBLAS' );
-open_legend = sprintf( 'ARMPL' );
+open_legend = sprintf( 'OpenBLAS' );
 eige_legend = sprintf( 'Eigen' );
 %vend_legend  = sprintf( 'MKL' );
 %vend_legend  = sprintf( 'ARMPL' );

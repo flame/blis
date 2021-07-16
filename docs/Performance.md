@@ -24,6 +24,9 @@
   * **[A64fx](Performance.md#a64fx)**
     * **[Experiment details](Performance.md#a64fx-experiment-details)**
     * **[Results](Performance.md#a64fx-results)**
+  * **[Neoverse N1](Performance.md#neoverse-n1)**
+    * **[Experiment details](Performance.md#neoverse-n1-experiment-details)**
+    * **[Results](Performance.md#neoverse-n1-results)**
 * **[Feedback](Performance.md#feedback)**
 
 # Introduction
@@ -598,6 +601,58 @@ The `runthese.m` file will contain example invocations of the function.
 ![multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic1jr12_nt12.png)
 * **A64fx multithreaded (48 cores)**
 ![multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.png)
+
+---
+
+## Neoverse N1
+
+### Neoverse N1 experiment details
+
+* Location: AWS cloud
+* Processor model: Graviton2 Neoverse N1
+* Core topology: one socket, 64 cores per socket, 64 cores total
+* SMT status: none
+* Max clock rate: 2.5GHz (single-core and multicore)
+* Max vector register length: 128 bits (NEON)
+* Max FMA vector IPC: 2
+* Peak performance:
+  * single-core: 20.0 GFLOPS (double-precision), 40.0 GFLOPS (single-precision)
+  * multicore: 20.0 GFLOPS/core (double-precision), 40.0 GFLOPS/core (single-precision)
+* Operating system: unknown
+* Page size: unknown
+* Compiler: gcc 10.3.0
+* Results gathered: 15 July 2021
+* Implementations tested:
+  * BLIS fab5c86d (0.8.1-67)
+    * configured with `./configure -t openmp thunderx2` (single- and multithreaded)
+    * sub-configuration exercised: `thunderx2`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (64 core) execution requested via `export BLIS_NUM_THREADS=64`
+  * OpenBLAS 0.3.17
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-63"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
+* Frequency throttling (via `cpupower`):
+  * No changes made.
+* Comments:
+  * N/A
+
+### Neoverse N1 results
+
+#### pdf
+
+* [Neoverse N1 single-threaded](graphs/large/l3_perf_nn1_nt1.pdf)
+* [Neoverse N1 multithreaded (64 cores)](graphs/large/l3_perf_nn1_jc2ic8jr4_nt64.pdf)
+
+#### png (inline)
+
+* **Neoverse N1 single-threaded**
+![single-threaded](graphs/large/l3_perf_nn1_nt1.png)
+* **Neoverse N1 multithreaded (64 cores)**
+![multithreaded (64 cores)](graphs/large/l3_perf_nn1_jc2ic8jr4_nt64.png)
 
 ---
 
