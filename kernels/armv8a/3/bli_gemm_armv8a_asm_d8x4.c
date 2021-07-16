@@ -111,8 +111,8 @@ void bli_dgemm_armv8a_asm_8x4
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 15;
-  uint64_t k_left = k0 % 15;
+  uint64_t k_mker = k0 / 6;
+  uint64_t k_left = k0 % 6;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
 
@@ -138,7 +138,7 @@ void bli_dgemm_armv8a_asm_8x4
 // Storage scheme:
 //  V[ 0:15] <- C
 //  V[16:21] <- B
-//  V[22:31] <- A
+//  V[22:29] <- A
 // Under this scheme, the following is defined:
 #define DGEMM_8X4_MKER_LOOP_PLAIN_LOC(A0,A1,A2,A3,B0,B1,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT) \
   DGEMM_8X4_MKER_LOOP_PLAIN(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,A0,A1,A2,A3,B0,B1,AADDR,ASHIFT,BADDR,BSHIFT,LOADNEXT)
@@ -159,8 +159,6 @@ BEQ(CLEAR_CCOLS)
 " ldr             q28, [x0, #16*2]                \n\t"
 " ldr             q29, [x0, #16*3]                \n\t"
 " add             x0, x0, x2                      \n\t"
-" ldr             q30, [x0, #16*0]                \n\t"
-" ldr             q31, [x0, #16*1]                \n\t"
 "                                                 \n\t"
 " ldr             q16, [x1, #16*0]                \n\t"
 " ldr             q17, [x1, #16*1]                \n\t"
@@ -180,42 +178,35 @@ BEQ(K_LEFT_LOOP)
 //
 // Microkernel is defined here as:
 #define DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(A0,A1,A2,A3,B0,B1) \
-  DGEMM_8X4_MKER_LOOP_PLAIN_LOC(A0,A1,A2,A3,B0,B1,x0,16*2,x1,0,load) \
+  DGEMM_8X4_MKER_LOOP_PLAIN_LOC(A0,A1,A2,A3,B0,B1,x0,0,x1,0,load) \
  "ldr             q"#B1", [x1, #16*1]             \n\t" \
+ "ldr             q"#A2", [x0, #16*2]             \n\t" \
+ "ldr             q"#A3", [x0, #16*3]             \n\t" \
  "add             x1, x1, x3                      \n\t" \
- "add             x0, x0, x2                      \n\t" \
- "ldr             q"#A2", [x0, #16*0]             \n\t" \
- "ldr             q"#A3", [x0, #16*1]             \n\t"
+ "add             x0, x0, x2                      \n\t"
 // Start microkernel loop.
 LABEL(K_MKER_LOOP)
 DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(22,23,24,25,16,17)
 DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(26,27,28,29,18,19)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(30,31,22,23,20,21)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,16,17)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(28,29,30,31,18,19)
 DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(22,23,24,25,20,21)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(26,27,28,29,16,17)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(30,31,22,23,18,19)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,20,21)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(28,29,30,31,16,17)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(22,23,24,25,18,19)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(26,27,28,29,20,21)
 "                                                 \n\t" // Decrease counter before final replica.
 " subs            x4, x4, #1                      \n\t" // Branch early to avoid reading excess mem.
 BEQ(FIN_MKER_LOOP)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(30,31,22,23,16,17)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(24,25,26,27,18,19)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(28,29,30,31,20,21)
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(26,27,28,29,16,17)
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(22,23,24,25,18,19)
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC_FWD(26,27,28,29,20,21)
 BRANCH(K_MKER_LOOP)
 //
 // Final microkernel loop.
 LABEL(FIN_MKER_LOOP)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC(30,31,22,23,16,17,x0,16*2,x1,0,noload)
-" ldr             q30, [x0, #16*2]                \n\t"
-" ldr             q31, [x0, #16*3]                \n\t"
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC(26,27,28,29,16,17,x0,0,x1,0,noload)
+" ldr             q26, [x0, #16*0]                \n\t"
+" ldr             q27, [x0, #16*1]                \n\t"
+" ldr             q28, [x0, #16*2]                \n\t"
+" ldr             q29, [x0, #16*3]                \n\t"
 " add             x0, x0, x2                      \n\t"
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC(24,25,26,27,18,19,xzr,-1,xzr,-1,noload)
-DGEMM_8X4_MKER_LOOP_PLAIN_LOC(28,29,30,31,20,21,xzr,-1,xzr,-1,noload)
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC(22,23,24,25,18,19,xzr,-1,xzr,-1,noload)
+DGEMM_8X4_MKER_LOOP_PLAIN_LOC(26,27,28,29,20,21,xzr,-1,xzr,-1,noload)
 //
 // Loops left behind microkernels.
 LABEL(K_LEFT_LOOP)
