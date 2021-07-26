@@ -624,27 +624,31 @@ void zgemm_
 	bli_obj_set_conjtrans( blis_transa, &ao );
 	bli_obj_set_conjtrans( blis_transb, &bo );
 
+	// default instance peformance tuning is done in zgemm.
+	// Single instance tuning is done based on env set.
+	dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
+
 	//dim_t nt = bli_thread_get_num_threads(); // get number of threads
 	bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 	if ( nt )
-	  {
-	    // Will call parallelized zgemm code - sup & native
-	    PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
-	      (
-	       &alphao,
-	       &ao,
-	       &bo,
-	       &betao,
-	       &co,
-	       NULL,
-	       NULL
-	       );
+	{
+		// Will call parallelized zgemm code - sup & native
+		PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+			(
+			&alphao,
+			&ao,
+			&bo,
+			&betao,
+			&co,
+			NULL,
+			NULL
+			);
 
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-	    /* Finalize BLIS. */
-	    bli_finalize_auto();
-	    return;
-	  }
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
 
     // The code below will be called when number of threads = 1.
 #if ENABLE_INDUCED_METHOD
@@ -658,14 +662,14 @@ void zgemm_
 	{
 		sqp_on = true;
 	}
-#if 1
+
 	// current range of sizes used for 3m_sqp to be expaned after evaluation.
 	if( ( m0 >= 4200) && ( m0 <= 4600 ) && ( ( n0 >= 326 ) || (n0 <= 1600 ) )
      && ( k0 == 1120 ) ) //to be tuned further.
 	{
 		sqp_on = true;
 	}
-#endif
+
 	if( ( blis_transb == BLIS_NO_TRANSPOSE) && ( sqp_on == true ) )
 	{
 		//sqp algo is found better for n > 40
@@ -675,35 +679,24 @@ void zgemm_
 			return;
 		}
 	}
-// native tuning resulted in better numbers compared to 3m1 in constrained multi-instance and non-constrained single thread run.
-// further testing is necessary to cover complete spectrum of matrix sizes.
-#if 0
-	if ((m0 <=128) && (n0 > 68) && (n0 <= 128) && (k0 <= 128))
-	{
-		// induced 3m1 performs better for above case.
-		bli_gemmind(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
-		return;
-	}
-	else
-#endif
 #endif//ENABLE_INDUCED_METHOD
+
+// native tuning resulted in better numbers compared to sup in constrained multi-instance
+// sup has been enabled for single instance cases.
+	if(single_instance==1)
 	{
-// native tuning resulted in better numbers compared to sup in constrained multi-instance and non-constrained single thread run.
-// further testing is necessary to cover complete spectrum of matrix sizes.
-#if 0
 		err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 		if(status==BLIS_SUCCESS)
 		{
 			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
 			return;
 		}
-#endif//
-		// fall back on native path when zgemm is not handled in sup path.
-		bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
-		return;
 	}
+	// fall back on native path when zgemm is not handled in sup path.
+	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+	return;
+
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
 	/* Finalize BLIS. */
