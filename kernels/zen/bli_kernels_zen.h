@@ -273,3 +273,19 @@ void bli_dgemm_ref_k1_nn
        cntl_t* cntl
      );
 
+// threshold functions
+bool bli_cntx_gemmtsup_thresh_is_met_zen
+     (
+       obj_t* a,
+       obj_t* b,
+       obj_t* c,
+       cntx_t* cntx
+     );
+
+bool bli_cntx_syrksup_thresh_is_met_zen
+     (
+       obj_t* a,
+       obj_t* b,
+       obj_t* c,
+       cntx_t* cntx
+     );

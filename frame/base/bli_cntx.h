@@ -128,6 +128,10 @@ BLIS_INLINE func_t* bli_cntx_l1v_kers_buf( cntx_t* cntx )
 {
 	return cntx->l1v_kers;
 }
+BLIS_INLINE void** bli_cntx_l3_thresh_funcs_buf(cntx_t* cntx )
+{
+	return cntx->l3_thresh_funcs;
+}
 BLIS_INLINE func_t* bli_cntx_packm_kers_buf( cntx_t* cntx )
 {
 	return cntx->packm_kers;
@@ -307,65 +311,6 @@ BLIS_INLINE dim_t bli_cntx_get_l3_sup_thresh_dt( num_t dt, threshid_t thresh_id,
 	return thresh_dt;
 }
 
-BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( num_t dt, dim_t m, dim_t n, dim_t k, cntx_t* cntx )
-{
-	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
-	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
-	if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
-
-	return FALSE;
-}
-
-// -- gemmt specific function
-BLIS_INLINE bool bli_cntx_gemmtsup_thresh_is_met( num_t dt, dim_t n, dim_t k, cntx_t* cntx )
-{
-#ifdef BLIS_CONFIG_EPYC
-    if( bli_is_double( dt ))
-    {
-        if ( n < 300 )       return TRUE;
-        if ( (k / n ) > 50 ) return TRUE;
-
-        return FALSE;
-    }
-    else if ( bli_is_dcomplex( dt ) )
-    {
-        if ( n < 100 )   return TRUE;
-        else             return FALSE;
-    }
-    else
-        return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
-#else
-    return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
-#endif
-}
-
-// -- syrk specific function
-BLIS_INLINE bool bli_cntx_syrksup_thresh_is_met( num_t dt, dim_t n, dim_t k, stor3_t stor_id, cntx_t* cntx )
-{
-#ifdef BLIS_CONFIG_EPYC
-    if( bli_is_double( dt ) )
-    {
-        if( ( stor_id == BLIS_RRC ) || ( stor_id == BLIS_CCR ) )
-        {
-            if( n < 140) return TRUE;
-            else if( ( n < 200 ) && ( k < 100 ) ) return TRUE;
-            else if( ( n <= 450 ) && ( k < 50 ) ) return TRUE;
-            else return FALSE;
-        }
-        else
-        {
-            if( n < 150 ) return TRUE;
-            else return FALSE;
-        }
-    }
-    else
-        return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
-#else
-    //copied gemm thresholds temporarily. These needs to be derived for syrk.
-    return bli_cntx_l3_sup_thresh_is_met( dt, n, n, k, cntx );
-#endif
-}
-
 // -----------------------------------------------------------------------------
 
 BLIS_INLINE void* bli_cntx_get_l3_sup_handler( opid_t op, cntx_t* cntx )
@@ -520,6 +465,14 @@ BLIS_INLINE void_fp bli_cntx_get_packm_ker_dt( num_t dt, l1mkr_t ker_id, cntx_t*
 	return fp;
 }
 
+BLIS_INLINE void* bli_cntx_get_l3_thresh_func( opid_t func_id, cntx_t* cntx )
+{
+	void** funcs = bli_cntx_l3_thresh_funcs_buf( cntx );
+	void*    func  = funcs[ func_id ];
+
+	return func;
+}
+
 BLIS_INLINE func_t* bli_cntx_get_unpackm_kers( l1mkr_t ker_id, cntx_t* cntx )
 {
 	func_t* func = NULL;
@@ -599,7 +552,6 @@ BLIS_INLINE bool bli_cntx_l3_nat_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t uk
 }
 
 // -----------------------------------------------------------------------------
-
 BLIS_INLINE bool bli_cntx_l3_vir_ukr_prefers_rows_dt( num_t dt, l3ukr_t ukr_id, cntx_t* cntx )
 {
 	// For induced methods, return the ukernel storage preferences of the
@@ -650,6 +602,34 @@ BLIS_INLINE bool bli_cntx_l3_vir_ukr_dislikes_storage_of( obj_t* obj, l3ukr_t uk
 }
 
 // -----------------------------------------------------------------------------
+BLIS_INLINE bool bli_cntx_l3_sup_thresh_is_met( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
+{
+	num_t dt = bli_obj_dt( c );
+	dim_t k = bli_obj_width_after_trans( a );
+
+	dim_t m, n;
+
+	if(bli_cntx_l3_vir_ukr_dislikes_storage_of(c, BLIS_GEMM_UKR, cntx ) )
+	{
+		m = bli_obj_width(c);
+		n = bli_obj_length(c);
+	}
+	else
+	{
+		m = bli_obj_length( c );
+		n = bli_obj_width( c );
+
+	}
+
+	if ( m < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx ) ) return TRUE;
+	if ( n < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx ) ) return TRUE;
+	if ( k < bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx ) ) return TRUE;
+
+	return FALSE;
+}
+
+// -----------------------------------------------------------------------------
+
 
 BLIS_INLINE bool bli_cntx_l3_sup_ker_prefers_rows_dt( num_t dt, stor3_t stor_id, cntx_t* cntx )
 {
@@ -814,6 +794,7 @@ BLIS_EXPORT_BLIS void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... );
 BLIS_EXPORT_BLIS void bli_cntx_set_l1f_kers( dim_t n_kers, ... );
 BLIS_EXPORT_BLIS void bli_cntx_set_l1v_kers( dim_t n_kers, ... );
 BLIS_EXPORT_BLIS void bli_cntx_set_packm_kers( dim_t n_kers, ... );
+BLIS_EXPORT_BLIS void bli_cntx_set_l3_thresh_funcs( dim_t n_funcs, ... );
 
 BLIS_EXPORT_BLIS void bli_cntx_print( cntx_t* cntx );
 

@@ -1432,6 +1432,7 @@ typedef struct cntx_s
 	func_t    l3_vir_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	func_t    l3_nat_ukrs[ BLIS_NUM_LEVEL3_UKRS ];
 	mbool_t   l3_nat_ukrs_prefs[ BLIS_NUM_LEVEL3_UKRS ];
+	void*     l3_thresh_funcs[ BLIS_NUM_LEVEL3_OPS ];
 
 	blksz_t   l3_sup_thresh[ BLIS_NUM_THRESH ];
 	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];

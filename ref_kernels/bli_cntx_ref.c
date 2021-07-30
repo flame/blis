@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -456,6 +456,13 @@ void GENBARNAME(cntx_init)
 	  BLIS_KT, &thresh[ BLIS_KT ],
 	  cntx
 	);
+
+	// -- Set level-3 threshold functions -------------------------------------
+	vfuncs = bli_cntx_l3_thresh_funcs_buf( cntx );
+
+	// Initialize all of the function pointers to default function
+	for ( i = 0; i < BLIS_NUM_LEVEL3_OPS; ++i )
+		vfuncs[ i ] = bli_cntx_l3_sup_thresh_is_met;
 
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------

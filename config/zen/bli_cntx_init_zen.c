@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -65,6 +65,17 @@ void bli_cntx_init_zen( cntx_t* cntx )
       BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
       cntx
     );
+
+    // Update the context with architecture specific threshold functions
+    bli_cntx_set_l3_thresh_funcs
+    (
+     2,
+     // GEMMT
+     BLIS_GEMMT, bli_cntx_gemmtsup_thresh_is_met_zen,
+     // SYRK
+     BLIS_SYRK, bli_cntx_syrksup_thresh_is_met_zen,
+     cntx
+     );
 
     // Update the context with optimized level-1f kernels.
     bli_cntx_set_l1f_kers

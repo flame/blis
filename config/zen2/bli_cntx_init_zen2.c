@@ -63,6 +63,17 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  cntx
 	);
 
+	// Update the context with architecture specific threshold functions
+	bli_cntx_set_l3_thresh_funcs
+	(
+	  2,
+	  //gemmt
+	  BLIS_GEMMT, bli_cntx_gemmtsup_thresh_is_met_zen,
+	  //SYRK
+	  BLIS_SYRK, bli_cntx_syrksup_thresh_is_met_zen,
+	  cntx
+	 );
+
 	// Update the context with optimized packm kernels.
 	bli_cntx_set_packm_kers
 	(

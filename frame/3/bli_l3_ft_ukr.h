@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -100,3 +101,14 @@ INSERT_GENTDEF( trsm )
 
 #endif
 
+// These function pointers are used to hold addresses of functions
+// that decide which algorithm to choose between SUP and native
+// implementations based on input dimensions. These are stored
+// in cntx of respective configurations.
+typedef bool (*thresh_func_ft)
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx
+     );

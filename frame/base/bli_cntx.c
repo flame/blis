@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1601,6 +1601,105 @@ void bli_cntx_set_l1v_kers( dim_t n_kers, ... )
 	printf( "bli_cntx_set_l1v_kers(): " );
 	#endif
 	bli_free_intl( ker_fps );
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_cntx_set_l3_thresh_funcs( dim_t n_funcs, ... )
+{
+	// This function can be called from the bli_cntx_init_*() function for
+	// a particular architecture if the kernel developer wishes to use
+	// non-default level-3 threshold functions. It should be called after
+	// bli_cntx_init_defaults() so that the context begins with default
+	// functionss across all operations.
+
+	/* Example prototypes:
+
+	   void bli_cntx_set_l3_thresh_funcs
+	   (
+	     dim_t   n_funcs,
+	     opid_t op1_id, void_fp ker0_fp,
+	     opid_t op2_id, void_fp ker1_fp,
+	     opid_t op2_id, void_fp ker2_fp,
+	     ...
+	     cntx_t* cntx
+	   );
+	*/
+
+	va_list   args;
+	dim_t     i;
+
+	// Allocate some temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_thresh_funcs(): " );
+	#endif
+	l1vkr_t* func_ids   = bli_malloc_intl( n_funcs * sizeof( opid_t ) );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_thresh_funcs(): " );
+	#endif
+	void_fp* func_fps   = bli_malloc_intl( n_funcs * sizeof( void_fp ) );
+
+	// -- Begin variable argument section --
+
+	// Initialize variable argument environment.
+	va_start( args, n_funcs );
+
+	// Process n_funcs tuples.
+	for ( i = 0; i < n_funcs; ++i )
+	{
+		// Here, we query the variable argument list for:
+		// - the opid_t of the function we're about to process,
+		// - the function pointer
+		// that we need to store to the context.
+		const opid_t  op_id   = ( opid_t )va_arg( args, opid_t );
+		      void_fp  func_fp   = ( void_fp )va_arg( args, void_fp );
+
+		// Store the values in our temporary arrays.
+		func_ids[ i ]   = op_id;
+		func_fps[ i ]   = func_fp;
+	}
+
+	// The last argument should be the context pointer.
+	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
+
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
+
+	// -- End variable argument section --
+
+	// Query the context for the address of:
+	// - the level-3 threshold func array
+	void_fp* cntx_l3_thresh_funcs = bli_cntx_l3_thresh_funcs_buf( cntx );
+
+	// Now that we have the context address, we want to copy the values
+	// from the temporary buffers into the corresponding buffers in the
+	// context.
+
+	// Process each blocksize id tuple provided.
+	for ( i = 0; i < n_funcs; ++i )
+	{
+		// Read the current func id, and function pointer.
+		const opid_t  func_id   = func_ids[ i ];
+		      void_fp func_fp   = func_fps[ i ];
+
+		// Store function pointer in cntx
+		cntx_l3_thresh_funcs[ func_id ] = func_fp;
+
+	}
+
+	// Free the temporary local arrays.
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_thresh_funcs(): " );
+	#endif
+	bli_free_intl( func_ids );
+
+	#ifdef BLIS_ENABLE_MEM_TRACING
+	printf( "bli_cntx_set_l3_thresh_funcs(): " );
+	#endif
+	bli_free_intl( func_fps );
 }
 
 // -----------------------------------------------------------------------------

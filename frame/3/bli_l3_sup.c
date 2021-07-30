@@ -71,8 +71,6 @@ err_t bli_gemmsup
 	return BLIS_FAILURE;
     }
 
-    const dim_t m  = bli_obj_length( c );
-    const dim_t n  = bli_obj_width( c );
     trans_t transa = bli_obj_conjtrans_status( a );
     trans_t transb = bli_obj_conjtrans_status( b );
 
@@ -104,30 +102,14 @@ err_t bli_gemmsup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    // Return early if a microkernel preference-induced transposition would
-    // have been performed and shifted the dimensions outside of the space
-    // of sup-handled problems.
-    if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( c, BLIS_GEMM_UKR, cntx ) )
-    {
-	const num_t dt = bli_obj_dt( c );
-	const dim_t k  = bli_obj_width_after_trans( a );
+    thresh_func_ft func_fp;
 
-	// Pass in m and n reversed, which simulates a transposition of the
-	// entire operation pursuant to the microkernel storage preference.
-	if ( !bli_cntx_l3_sup_thresh_is_met( dt, n, m, k, cntx ) ) {
-	    AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Trasposition results in sizes beyond SUP thresholds.");
-	    return BLIS_FAILURE;
-    }
-    }
-    else // ukr_prefers_storage_of( c, ... )
-    {
-	const num_t dt = bli_obj_dt( c );
-	const dim_t k  = bli_obj_width_after_trans( a );
+    func_fp = bli_cntx_get_l3_thresh_func(BLIS_GEMM, cntx);
 
-	if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, n, k, cntx ) ) {
-	    AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes are beyond SUP thresholds.");
-	    return BLIS_FAILURE;
-    }
+    // Return early if the sizes are beyond SUP thresholds
+        if ( !func_fp( a, b, c, cntx ) ) {
+            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes are beyond SUP thresholds.");
+            return BLIS_FAILURE;
     }
 
     // Initialize a local runtime with global settings if necessary. Note
@@ -215,7 +197,6 @@ err_t bli_gemmtsup
 	return BLIS_FAILURE;
     }
 
-    const dim_t n  = bli_obj_width( c );
     trans_t transa = bli_obj_conjtrans_status( a );
     trans_t transb = bli_obj_conjtrans_status( b );
 
@@ -247,10 +228,11 @@ err_t bli_gemmtsup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    num_t dt = bli_obj_dt(c);
-    dim_t k = bli_obj_width_after_trans( a );
+    thresh_func_ft func_fp;
 
-    if ( !bli_cntx_gemmtsup_thresh_is_met( dt, n, k, cntx ) )
+    func_fp = bli_cntx_get_l3_thresh_func(BLIS_GEMMT, cntx);
+
+    if ( !func_fp( a, b, c, cntx ) )
     {
 	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes beyond SUP thresholds.");
 	return BLIS_FAILURE;
@@ -343,7 +325,6 @@ err_t bli_syrksup
 	return BLIS_FAILURE;
     }
 
-    const dim_t n  = bli_obj_width( c );
     trans_t transa = bli_obj_conjtrans_status( a );
 
     //Don't use sup for currently unsupported storage types in cgemmsup
@@ -372,10 +353,8 @@ err_t bli_syrksup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-    num_t dt = bli_obj_dt( c );
-    dim_t k = bli_obj_width_after_trans( a );
-
-    if( !bli_cntx_syrksup_thresh_is_met( dt, n, k, stor_id, cntx))
+    thresh_func_ft func_fp = bli_cntx_get_l3_thresh_func(BLIS_SYRK, cntx);
+    if( !func_fp( a, &at_local, c, cntx))
     {
 	AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - sizes beyond SUP thresholds.");
 	return BLIS_FAILURE;
