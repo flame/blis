@@ -92,7 +92,13 @@ void bli_init_apis( void )
 	bli_memsys_init();
 
 	// Reset the control variable that will allow finalization.
-	once_finalize = BLIS_PTHREAD_ONCE_INIT;
+	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
+	// contents to the static control variable because some implementations of
+	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
+	// a struct initializer expression (i.e. { ... }), which cannot be used in
+	// post-declaration struct assignment in strict C99.
+	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
+	once_finalize = once_new;
 }
 
 void bli_finalize_apis( void )
@@ -105,6 +111,12 @@ void bli_finalize_apis( void )
 	bli_gks_finalize();
 
 	// Reset the control variable that will allow (re-)initialization.
-	once_init = BLIS_PTHREAD_ONCE_INIT;
+	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
+	// contents to the static control variable because some implementations of
+	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
+	// a struct initializer expression (i.e. { ... }), which cannot be used in
+	// post-declaration struct assignment in strict C99.
+	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
+	once_init = once_new;
 }
 
