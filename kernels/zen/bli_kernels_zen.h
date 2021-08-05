@@ -81,8 +81,8 @@ SCALV_KER_PROT( float,    s, scalv_zen_int10 )
 SCALV_KER_PROT( double,   d, scalv_zen_int10 )
 
 // swapv (intrinsics)
-SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
-SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
+SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
+SWAPV_KER_PROT(double,  d, swapv_zen_int8 )
 
 // copyv (intrinsics)
 COPYV_KER_PROT( float,    s, copyv_zen_int )
@@ -291,3 +291,13 @@ bool bli_cntx_syrksup_thresh_is_met_zen
        obj_t* c,
        cntx_t* cntx
      );
+
+#ifdef BLIS_ENABLE_FAST_MATH
+void bli_dnorm2fv_unb_var1
+     (
+       dim_t    n,
+       double*   x, inc_t incx,
+       double* norm,
+       cntx_t*  cntx
+     );
+#endif

@@ -13,4 +13,5 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_scalv_zen_int10.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_setv_zen_int.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_swapv_zen_int8.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_norm2_zen_int.c
     )
