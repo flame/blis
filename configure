@@ -1422,7 +1422,7 @@ get_compiler_version()
 		cc_version=$(${cc} -dumpversion)
 	# If compiler is AOCC, first grep for clang and then the version number.
 	elif [ "${cc_vendor}" = "clang" ]; then
-		cc_version=$(echo "${vendor_string}" | egrep -o 'clang version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
+		cc_version=$(echo "${vendor_string}" | egrep -o '(clang|LLVM) version [0-9]+\.[0-9]+\.?[0-9]*' | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*')
 	elif [ "${cc_vendor}" = "oneAPI" ]; then
 		# Treat Intel oneAPI's clang as clang, not icc.
 		cc_vendor="clang"
