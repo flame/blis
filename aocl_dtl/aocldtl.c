@@ -264,6 +264,7 @@ void DTL_Trace(
             fprintf(pOutFile, "%s\n", pi8Message);
             break;
         }
+	fflush(pOutFile);
     }
 } /* DTL_Data_Trace_Entry */
 #endif
@@ -401,6 +402,7 @@ void DTL_DumpData(
         }
         fprintf(pDumpFile, "\n");
     } /* End of if */
+    fflush(pDumpFile);
 
 } /* DTL_DumpData */
 #endif
@@ -460,6 +462,7 @@ void __cyg_profile_func_enter(void *pvThisFunc, void *pvCaller)
     fprintf(pOutFile, "\n%lu:+:%p",
             AOCL_getTimestamp(),
             (void *)(pvThisFunc - info.dli_fbase));
+    fflush(pOutFile);
 }
 
 /*===================================================================
@@ -498,6 +501,7 @@ void __cyg_profile_func_exit(void *pvThisFunc, void *pvCaller)
     fprintf(pOutFile, "\n%lu:-:%p",
             AOCL_getTimestamp(),
             (void *)(pvThisFunc - info.dli_fbase));
+    fflush(pOutFile);
 }
 
 #endif /* AOCL_AUTO_TRACE_ENABLE */
