@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -67,8 +67,8 @@ void bli_gemm_blk_var2
 	// Partition along the n dimension.
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, b,
+		// Determine the current algorithmic blocksize for GEMM.
+		b_alg = bli_determine_blocksize( BLIS_GEMM, direct, i, my_end, b,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for B1 and C1.

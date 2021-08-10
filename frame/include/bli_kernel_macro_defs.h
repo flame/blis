@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -246,12 +246,6 @@
 #define BLIS_POOL_ADDR_OFFSET_SIZE_GEN   0
 #endif
 
-
-#ifdef AOCL_BLIS_ZEN
-#define TRSM_BLKSZ_FUNC bli_cntx_get_trsm_blksz
-#else
-#define TRSM_BLKSZ_FUNC bli_cntx_get_blksz
-#endif
 
 #endif
 

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -81,15 +81,9 @@ void bli_trsm_blk_var1
 	{
 		obj_t a11_1, c1_1;
 
-        //For zen architectures, TRSM uses different MC, KC and NC blocking sizes than other Level-3 routines.
-        //Hence calling a different function to query TRSM-specific block sizes for zen family.
-#ifdef AOCL_BLIS_ZEN
-		b_alg = bli_determine_blocksize_trsm( direct, i, my_end, &a11,
+		// Determine the current algorithmic blocksize for TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, &a11,
 		                                 bli_cntl_bszid( cntl ), cntx );
-#else
-		b_alg = bli_determine_blocksize( direct, i, my_end, &a11,
-		                                 bli_cntl_bszid( cntl ), cntx );
-#endif
 		// Acquire partitions for A1 and C1.
 		bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 		                        i, b_alg, &a11, &a11_1 );
@@ -158,8 +152,8 @@ void bli_trsm_blk_var1
 	{
 		obj_t a11, c1;
 
-		// Determine the current algorithmic blocksize.
-		b_alg = bli_determine_blocksize( direct, i, my_end, &ax1,
+		// Determine the current algorithmic blocksize for GEMM.
+		b_alg = bli_determine_blocksize( BLIS_GEMM, direct, i, my_end, &ax1,
 		                                 bli_cntl_bszid( cntl ), cntx );
 
 		// Acquire partitions for A1 and C1.

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -67,16 +67,9 @@ void bli_trsm_blk_var2
 	// Partition along the n dimension.
 	for ( dim_t i = my_start; i < my_end; i += b_alg )
 	{
-		// Determine the current algorithmic blocksize.
-        //For zen family, TRSM uses different MC, KC and NC blocksizes than Level-3 routines.
-        //Hence calling a different function to query TRSM-specific block sizes for zen family.
-#ifdef AOCL_BLIS_ZEN
-		b_alg = bli_determine_blocksize_trsm( direct, i, my_end, b,
+		// Determine the current algorithmic blocksize for TRSM.
+		b_alg = bli_determine_blocksize( BLIS_TRSM, direct, i, my_end, b,
 		                                 bli_cntl_bszid( cntl ), cntx );
-#else
-		b_alg = bli_determine_blocksize( direct, i, my_end, b,
-		                                 bli_cntl_bszid( cntl ), cntx );
-#endif
 
 		// Acquire partitions for B1 and C1.
 		bli_acquire_mpart_ndim( direct, BLIS_SUBPART1,
