@@ -185,7 +185,7 @@ void libblis_test_normfv_experiment
 	// Set all elements of x to beta.
 	bli_setv( &beta, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -240,7 +240,7 @@ void libblis_test_normfv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( x ) );
 	dim_t  m       = bli_obj_vector_dim( x );
 
 	obj_t  m_r, temp_r;

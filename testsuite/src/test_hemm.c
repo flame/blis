@@ -241,7 +241,7 @@ void libblis_test_hemm_experiment
 	bli_obj_set_conj( conja, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -312,7 +312,7 @@ void libblis_test_hemm_check
      )
 {
 	num_t  dt      = bli_obj_dt( c );
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( c ) );
 
 	dim_t  m       = bli_obj_length( c );
 	dim_t  n       = bli_obj_width( c );
@@ -387,7 +387,7 @@ void libblis_test_hemm_check
 	}
 
 	bli_gemv( beta, c_orig, &t, &BLIS_ONE, &z );
-	
+
 	bli_subv( &z, &v );
 	bli_normfv( &v, &norm );
 	bli_getsc( &norm, resid, &junk );

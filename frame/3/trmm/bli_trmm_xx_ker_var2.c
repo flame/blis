@@ -59,16 +59,16 @@ void bli_trmm_xx_ker_var2
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
 	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( a ) )
+	if ( bli_obj_is_triangular( bli_obj_root( a ) ) )
 	{
 		side = 0;
-		if ( bli_obj_root_is_lower( a ) ) uplo = 0;
+		if ( bli_obj_is_lower( bli_obj_root( a ) ) ) uplo = 0;
 		else                              uplo = 1;
 	}
-	else // if ( bli_obj_root_is_triangular( b ) )
+	else // if ( bli_obj_is_triangular( bli_obj_root( b ) ) )
 	{
 		side = 1;
-		if ( bli_obj_root_is_lower( b ) ) uplo = 0;
+		if ( bli_obj_is_lower( bli_obj_root( b ) ) ) uplo = 0;
 		else                              uplo = 1;
 	}
 

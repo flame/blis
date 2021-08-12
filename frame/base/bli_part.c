@@ -131,7 +131,7 @@ void bli_acquire_mpart_mdim
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.) Note that the function called below
 	// assumes forward partitioning.
-	if ( bli_obj_is_panel_packed( obj ) )
+	if ( bli_is_panel_packed( bli_obj_pack_schema( obj ) ) )
 	{
 		bli_packm_acquire_mpart_t2b( req_part, i, b, obj, sub_obj );
 		return;
@@ -266,7 +266,7 @@ void bli_acquire_mpart_mdim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_is_general( bli_obj_root( sub_obj ) ) &&
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -287,16 +287,16 @@ void bli_acquire_mpart_mdim
 		// matrix is triangular, the subpartition should be marked as zero.
 		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( sub_obj ) )
+			if ( bli_obj_is_hermitian( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( sub_obj ) )
+			else if ( bli_obj_is_symmetric( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( sub_obj ) )
+			else if ( bli_obj_is_triangular( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}
@@ -355,7 +355,7 @@ void bli_acquire_mpart_ndim
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.) Note that the function called below
 	// assumes forward partitioning.
-	if ( bli_obj_is_panel_packed( obj ) )
+	if ( bli_is_panel_packed( bli_obj_pack_schema( obj ) ) )
 	{
 		bli_packm_acquire_mpart_l2r( req_part, j, b, obj, sub_obj );
 		return;
@@ -489,7 +489,7 @@ void bli_acquire_mpart_ndim
 	// diagonal), and the subpartition does not intersect the root matrix's
 	// diagonal, then we might need to modify some of the subpartition's
 	// properties, depending on its structure type.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_is_general( bli_obj_root( sub_obj ) ) &&
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -510,16 +510,16 @@ void bli_acquire_mpart_ndim
 		// matrix is triangular, the subpartition should be marked as zero.
 		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( sub_obj ) )
+			if ( bli_obj_is_hermitian( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( sub_obj ) )
+			else if ( bli_obj_is_symmetric( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( sub_obj ) )
+			else if ( bli_obj_is_triangular( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}
@@ -579,7 +579,7 @@ void bli_acquire_mpart_mndim
 	// object is packed to row or column storage, as such objects can be
 	// partitioned through normally.) Note that the function called below
 	// assumes forward partitioning.
-	if ( bli_obj_is_panel_packed( obj ) )
+	if ( bli_is_panel_packed( bli_obj_pack_schema( obj ) ) )
 	{
 		bli_packm_acquire_mpart_tl2br( req_part, ij, b, obj, sub_obj );
 		return;
@@ -742,7 +742,7 @@ void bli_acquire_mpart_mndim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_is_general( bli_obj_root( sub_obj ) ) &&
 	     req_part != BLIS_SUBPART00 &&
 	     req_part != BLIS_SUBPART11 &&
 	     req_part != BLIS_SUBPART22 )
@@ -775,16 +775,16 @@ void bli_acquire_mpart_mndim
 		// matrix is triangular, the subpartition should be marked as zero.
 		if ( bli_obj_is_unstored_subpart( sub_obj ) )
 		{
-			if ( bli_obj_root_is_hermitian( sub_obj ) )
+			if ( bli_obj_is_hermitian( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 				bli_obj_toggle_conj( sub_obj );
 			}
-			else if ( bli_obj_root_is_symmetric( sub_obj ) )
+			else if ( bli_obj_is_symmetric( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_reflect_about_diag( sub_obj );
 			}
-			else if ( bli_obj_root_is_triangular( sub_obj ) )
+			else if ( bli_obj_is_triangular( bli_obj_root( sub_obj ) ) )
 			{
 				bli_obj_set_uplo( BLIS_ZEROS, sub_obj );
 			}

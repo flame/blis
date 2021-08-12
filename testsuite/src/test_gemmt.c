@@ -243,7 +243,7 @@ void libblis_test_gemmt_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -325,7 +325,7 @@ void libblis_test_gemmt_check
      )
 {
 	num_t  dt      = bli_obj_dt( c );
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( c ) );
 	uplo_t uploc   = bli_obj_uplo( c );
 
 	dim_t  m       = bli_obj_length( c );

@@ -356,21 +356,21 @@ void bli_obj_free
 
 	buf_a = bli_obj_buffer_at_off( a );
 
-	bli_zzsets( 0.0, 0.0, value ); 
+	bli_zzsets( 0.0, 0.0, value );
 
-	if ( bli_obj_is_float( a ) )
+	if ( bli_obj_dt( a ) == BLIS_FLOAT )
 	{
 		bli_szcopys( *(( float*    )buf_a), value );
 	}
-	else if ( bli_obj_is_double( a ) )
+	else if ( bli_obj_dt( a ) == BLIS_DOUBLE )
 	{
 		bli_dzcopys( *(( double*   )buf_a), value );
 	}
-	else if ( bli_obj_is_scomplex( a ) )
+	else if ( bli_obj_dt( a ) == BLIS_SCOMPLEX )
 	{
 		bli_czcopys( *(( scomplex* )buf_a), value );
 	}
-	else if ( bli_obj_is_dcomplex( a ) )
+	else if ( bli_obj_dt( a ) == BLIS_DCOMPLEX )
 	{
 		bli_zzcopys( *(( dcomplex* )buf_a), value );
 	}
@@ -500,7 +500,7 @@ void bli_adjust_strides
 			// Set the column stride to indicate that this is a column vector
 			// stored in column-major order. This is done for legacy reasons,
 			// because we at one time we had to satisify the error checking
-			// in the underlying BLAS library, which expects the leading 
+			// in the underlying BLAS library, which expects the leading
 			// dimension to be set to at least m, even if it will never be
 			// used for indexing since it is a vector and thus only has one
 			// column of data.
@@ -664,9 +664,9 @@ void bli_obj_print
 	fprintf( file, " ps              %lu\n", ( unsigned long )bli_obj_panel_stride( obj ) );
 	fprintf( file, "\n" );
 
-	fprintf( file, " info            %lX\n", ( unsigned long )(*obj).info );
+	fprintf( file, " info               \n" );
 	fprintf( file, " - is complex    %lu\n", ( unsigned long )bli_obj_is_complex( obj ) );
-	fprintf( file, " - is d. prec    %lu\n", ( unsigned long )bli_obj_is_double_prec( obj ) );
+	fprintf( file, " - is d. prec    %lu\n", ( unsigned long )bli_is_double_prec( bli_obj_dt( obj ) ) );
 	fprintf( file, " - datatype      %lu\n", ( unsigned long )bli_obj_dt( obj ) );
 	fprintf( file, " - target dt     %lu\n", ( unsigned long )bli_obj_target_dt( obj ) );
 	fprintf( file, " - exec dt       %lu\n", ( unsigned long )bli_obj_exec_dt( obj ) );
@@ -675,16 +675,16 @@ void bli_obj_print
 	fprintf( file, " - has trans     %lu\n", ( unsigned long )bli_obj_has_trans( obj ) );
 	fprintf( file, " - has conj      %lu\n", ( unsigned long )bli_obj_has_conj( obj ) );
 	fprintf( file, " - unit diag?    %lu\n", ( unsigned long )bli_obj_has_unit_diag( obj ) );
-	fprintf( file, " - struc type    %lu\n", ( unsigned long )bli_obj_struc( obj ) >> BLIS_STRUC_SHIFT );
-	fprintf( file, " - uplo type     %lu\n", ( unsigned long )bli_obj_uplo( obj ) >> BLIS_UPLO_SHIFT );
+	fprintf( file, " - struc type    %lu\n", ( unsigned long )bli_obj_struc( obj ) );
+	fprintf( file, " - uplo type     %lu\n", ( unsigned long )bli_obj_uplo( obj ) );
 	fprintf( file, "   - is upper    %lu\n", ( unsigned long )bli_obj_is_upper( obj ) );
 	fprintf( file, "   - is lower    %lu\n", ( unsigned long )bli_obj_is_lower( obj ) );
 	fprintf( file, "   - is dense    %lu\n", ( unsigned long )bli_obj_is_dense( obj ) );
-	fprintf( file, " - pack schema   %lu\n", ( unsigned long )bli_obj_pack_schema( obj ) >> BLIS_PACK_SCHEMA_SHIFT );
+	fprintf( file, " - pack schema   %lu\n", ( unsigned long )bli_obj_pack_schema( obj ) );
 	fprintf( file, " - packinv diag? %lu\n", ( unsigned long )bli_obj_has_inverted_diag( obj ) );
 	fprintf( file, " - pack ordifup  %lu\n", ( unsigned long )bli_obj_is_pack_rev_if_upper( obj ) );
 	fprintf( file, " - pack ordiflo  %lu\n", ( unsigned long )bli_obj_is_pack_rev_if_lower( obj ) );
-	fprintf( file, " - packbuf type  %lu\n", ( unsigned long )bli_obj_pack_buffer_type( obj ) >> BLIS_PACK_BUFFER_SHIFT );
+	fprintf( file, " - packbuf type  %lu\n", ( unsigned long )bli_obj_pack_buffer_type( obj ) );
 	fprintf( file, "\n" );
 }
 

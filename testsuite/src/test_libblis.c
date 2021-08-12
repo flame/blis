@@ -667,7 +667,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 	int   i, p;
 
 	// Initialize the operation type field.
-	op->opid = opid; 
+	op->opid = opid;
 
 	// Read the line for the overall operation switch.
 	libblis_test_read_next_line( buffer, input_stream );
@@ -702,7 +702,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 			//printf( "buffer[p]:       %s\n", &buffer[p] );
 
 			// Advance until we hit non-whitespace (ie: the next number).
-			for ( ; isspace( buffer[p] ); ++p ) ; 
+			for ( ; isspace( buffer[p] ); ++p ) ;
 
 			//printf( "buffer[p] after: %s\n", &buffer[p] );
 
@@ -711,7 +711,7 @@ void libblis_test_read_op_info( test_ops_t*  ops,
 			//printf( "dim[%d] = %d\n", i, op->dim_spec[i] );
 
 			// Advance until we hit whitespace (ie: the space before the next number).
-			for ( ; !isspace( buffer[p] ); ++p ) ; 
+			for ( ; !isspace( buffer[p] ); ++p ) ;
 		}
 	}
 
@@ -809,11 +809,11 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	// convert these values into strings, with "unset" being used if the
 	// value returned was -1 (indicating the environment variable was unset).
 	dim_t nt    = bli_thread_get_num_threads();
-	dim_t jc_nt = bli_thread_get_jc_nt(); 
-	dim_t pc_nt = bli_thread_get_pc_nt(); 
-	dim_t ic_nt = bli_thread_get_ic_nt(); 
-	dim_t jr_nt = bli_thread_get_jr_nt(); 
-	dim_t ir_nt = bli_thread_get_ir_nt(); 
+	dim_t jc_nt = bli_thread_get_jc_nt();
+	dim_t pc_nt = bli_thread_get_pc_nt();
+	dim_t ic_nt = bli_thread_get_ic_nt();
+	dim_t jr_nt = bli_thread_get_jr_nt();
+	dim_t ir_nt = bli_thread_get_ir_nt();
 
 	if (    nt == -1 ) sprintf(    nt_str, "unset" );
 	else               sprintf(    nt_str, "%d", ( int )   nt );
@@ -1775,7 +1775,7 @@ void libblis_test_op_driver
 				= ( char* ) malloc( ( n_operands + 1 ) * sizeof( char ) );
 
 				for ( o = 0; o < n_operands; ++o )
-				{ 
+				{
 					unsigned int ij;
 					operand_t    operand_type
 					= libblis_test_get_operand_type_for_char( o_types[o] );
@@ -2217,7 +2217,7 @@ void libblis_test_op_driver
 				ind_str = bli_ind_oper_get_avail_impl_string( op->opid, datatype );
 
 				// Loop over the requested parameter combinations.
-				for ( pci = 0; pci < n_param_combos; ++pci )	
+				for ( pci = 0; pci < n_param_combos; ++pci )
 				{
 					// Loop over the requested problem sizes.
 					for ( p_cur = p_first, pi = 1; p_cur <= p_max; p_cur += p_inc, ++pi )
@@ -2435,7 +2435,7 @@ void libblis_test_build_function_string
 	if ( strlen( funcname_str ) > MAX_FUNC_STRING_LENGTH )
 		libblis_test_printf_error( "Function name string length (%d) exceeds maximum (%d).\n",
 		                           strlen( funcname_str ), MAX_FUNC_STRING_LENGTH );
-		
+
 }
 
 
@@ -2577,7 +2577,7 @@ void libblis_test_mobj_create( test_params_t* params, num_t dt, trans_t trans, c
 	dim_t  n_trans   = n;
 	dim_t  rs        = 1; // Initialization avoids a compiler warning.
 	dim_t  cs        = 1; // Initialization avoids a compiler warning.
-	
+
 	// Apply the trans parameter to the dimensions (if needed).
 	bli_set_dims_with_trans( trans, m, n, &m_trans, &n_trans );
 
@@ -2695,7 +2695,7 @@ void libblis_test_vobj_randomize( test_params_t* params, bool normalize, obj_t* 
 	if ( normalize )
 	{
 		num_t dt   = bli_obj_dt( x );
-		num_t dt_r = bli_obj_dt_proj_to_real( x );
+		num_t dt_r = bli_dt_proj_to_real( bli_obj_dt( x ) );
 		obj_t kappa;
 		obj_t kappa_r;
 
@@ -2735,7 +2735,7 @@ void libblis_test_mobj_randomize( test_params_t* params, bool normalize, obj_t* 
 		bli_scalm( &kappa, a );
 #endif
 		num_t dt   = bli_obj_dt( a );
-		num_t dt_r = bli_obj_dt_proj_to_real( a );
+		num_t dt_r = bli_dt_proj_to_real( bli_obj_dt( a ) );
 		obj_t kappa;
 		obj_t kappa_r;
 
@@ -3007,7 +3007,7 @@ void libblis_test_parse_message( FILE* output_stream, char* message, va_list arg
 	char*         the_string;
 	char          the_char;
 
-	// Begin looping over message to insert variables wherever there are 
+	// Begin looping over message to insert variables wherever there are
 	// format specifiers.
 	for ( c = 0; message[c] != '\0'; )
 	{

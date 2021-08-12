@@ -95,14 +95,14 @@ dir_t bli_trmm_direct
 	// - right,lower: forwards
 	// - right,upper: backwards
 
-	if ( bli_obj_root_is_triangular( a ) )
+	if ( bli_obj_is_triangular( bli_obj_root( a ) ) )
 	{
-		if ( bli_obj_root_is_lower( a ) ) direct = BLIS_BWD;
+		if ( bli_obj_is_lower( bli_obj_root( a ) ) ) direct = BLIS_BWD;
 		else                              direct = BLIS_FWD;
 	}
-	else // if ( bli_obj_root_is_triangular( b ) )
+	else // if ( bli_obj_is_triangular( bli_obj_root( b ) ) )
 	{
-		if ( bli_obj_root_is_lower( b ) ) direct = BLIS_FWD;
+		if ( bli_obj_is_lower( bli_obj_root( b ) ) ) direct = BLIS_FWD;
 		else                              direct = BLIS_BWD;
 	}
 
@@ -124,14 +124,14 @@ dir_t bli_trsm_direct
 	// - right,lower: backwards
 	// - right,upper: forwards
 
-	if ( bli_obj_root_is_triangular( a ) )
+	if ( bli_obj_is_triangular( bli_obj_root( a ) ) )
 	{
-		if ( bli_obj_root_is_lower( a ) ) direct = BLIS_FWD;
+		if ( bli_obj_is_lower( bli_obj_root( a ) ) ) direct = BLIS_FWD;
 		else                              direct = BLIS_BWD;
 	}
-	else // if ( bli_obj_root_is_triangular( b ) )
+	else // if ( bli_obj_is_triangular( bli_obj_root( b ) ) )
 	{
-		if ( bli_obj_root_is_lower( b ) ) direct = BLIS_BWD;
+		if ( bli_obj_is_lower( bli_obj_root( b ) ) ) direct = BLIS_BWD;
 		else                              direct = BLIS_FWD;
 	}
 

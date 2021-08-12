@@ -228,7 +228,7 @@ void libblis_test_dotxf_experiment
 	bli_obj_set_conj( conjat, &a );
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &y_save, &y );
@@ -298,7 +298,7 @@ void libblis_test_dotxf_check
      )
 {
 	num_t  dt      = bli_obj_dt( y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( y ) );
 
 	dim_t  b_n     = bli_obj_vector_dim( y );
 

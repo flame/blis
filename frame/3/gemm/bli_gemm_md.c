@@ -740,7 +740,7 @@ void bli_gemm_md_zgemm
 		//num_t dt_c2 = bli_obj_dt( c );
 		//num_t dt_c1 = bli_dt_proj_to_complex( dt_c2 );
 		//num_t dt_c  = bli_dt_proj_to_double_prec( dt_c1 );
-		//num_t dt_c = bli_obj_dt_proj_to_complex( c );
+		//num_t dt_c = bli_dt_proj_to_complex( bli_obj_dt( c ) );
 		num_t dt_c = BLIS_DCOMPLEX;
 
 		if ( bli_obj_is_single_prec( c ) ) dt_c = BLIS_SCOMPLEX;

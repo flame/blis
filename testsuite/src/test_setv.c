@@ -179,7 +179,7 @@ void libblis_test_setv_experiment
 	// Randomize x.
 	libblis_test_vobj_randomize( params, FALSE, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -247,7 +247,7 @@ void libblis_test_setv_check
 	// that each element of x is equal to beta.
 	//
 
-	if      ( bli_obj_is_float( x ) )
+	if      ( bli_obj_dt( x ) == BLIS_FLOAT )
 	{
 		float*    chi1      = buf_x;
 		float*    beta_cast = buf_beta;
@@ -255,11 +255,11 @@ void libblis_test_setv_check
 		for ( i = 0; i < m_x; ++i )
 		{
 			if ( !bli_seq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
-			
+
 			chi1 += inc_x;
 		}
 	}
-	else if ( bli_obj_is_double( x ) )
+	else if ( bli_obj_dt( x ) == BLIS_DOUBLE )
 	{
 		double*   chi1      = buf_x;
 		double*   beta_cast = buf_beta;
@@ -267,11 +267,11 @@ void libblis_test_setv_check
 		for ( i = 0; i < m_x; ++i )
 		{
 			if ( !bli_deq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
-			
+
 			chi1 += inc_x;
 		}
 	}
-	else if ( bli_obj_is_scomplex( x ) )
+	else if ( bli_obj_dt( x ) == BLIS_SCOMPLEX )
 	{
 		scomplex* chi1      = buf_x;
 		scomplex* beta_cast = buf_beta;
@@ -279,11 +279,11 @@ void libblis_test_setv_check
 		for ( i = 0; i < m_x; ++i )
 		{
 			if ( !bli_ceq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
-			
+
 			chi1 += inc_x;
 		}
 	}
-	else // if ( bli_obj_is_dcomplex( x ) )
+	else // if ( bli_obj_dt( x ) == BLIS_DCOMPLEX )
 	{
 		dcomplex* chi1      = buf_x;
 		dcomplex* beta_cast = buf_beta;
@@ -291,7 +291,7 @@ void libblis_test_setv_check
 		for ( i = 0; i < m_x; ++i )
 		{
 			if ( !bli_zeq( *chi1, *beta_cast ) ) { *resid = 1.0; return; }
-			
+
 			chi1 += inc_x;
 		}
 	}

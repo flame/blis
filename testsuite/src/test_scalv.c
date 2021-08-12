@@ -193,7 +193,7 @@ void libblis_test_scalv_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjbeta, &beta );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &y_save, &y );
@@ -252,7 +252,7 @@ void libblis_test_scalv_check
      )
 {
 	num_t  dt      = bli_obj_dt( y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( y ) );
 
 	dim_t  m       = bli_obj_vector_dim( y );
 

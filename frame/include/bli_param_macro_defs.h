@@ -129,37 +129,33 @@ BLIS_INLINE bool bli_is_double_prec( num_t dt )
 BLIS_INLINE dom_t bli_dt_domain( num_t dt )
 {
 	return ( dom_t )
-	       ( dt & BLIS_DOMAIN_BIT );
+	       ( dt & BLIS_BITVAL_COMPLEX );
 }
 
 BLIS_INLINE bool bli_dt_dom_is_real( num_t dt )
 {
-	return ( bool )
-	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_REAL );
+	return bli_dt_domain( dt ) == BLIS_REAL;
 }
 
 BLIS_INLINE bool bli_dt_dom_is_complex( num_t dt )
 {
-	return ( bool )
-	       ( ( dt & BLIS_DOMAIN_BIT ) == BLIS_COMPLEX );
+	return bli_dt_domain( dt ) == BLIS_COMPLEX;
 }
 
 BLIS_INLINE prec_t bli_dt_prec( num_t dt )
 {
 	return ( prec_t )
-	       ( dt & BLIS_PRECISION_BIT );
+	       ( dt & BLIS_BITVAL_DOUBLE_PREC );
 }
 
 BLIS_INLINE bool bli_dt_prec_is_single( num_t dt )
 {
-	return ( bool )
-	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_SINGLE_PREC );
+	return bli_dt_prec( dt ) == BLIS_SINGLE_PREC;
 }
 
 BLIS_INLINE bool bli_dt_prec_is_double( num_t dt )
 {
-	return ( bool )
-	       ( ( dt & BLIS_PRECISION_BIT ) == BLIS_DOUBLE_PREC );
+	return bli_dt_prec( dt ) == BLIS_DOUBLE_PREC;
 }
 
 BLIS_INLINE num_t bli_dt_proj_to_real( num_t dt )
@@ -213,58 +209,54 @@ BLIS_INLINE bool bli_is_conjtrans( trans_t trans )
 	       ( trans == BLIS_CONJ_TRANSPOSE );
 }
 
-BLIS_INLINE bool bli_does_notrans( trans_t trans )
-{
-	return ( bool )
-	       ( (~trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
-}
-
 BLIS_INLINE bool bli_does_trans( trans_t trans )
 {
 	return ( bool )
-	       ( ( trans & BLIS_TRANS_BIT ) == BLIS_BITVAL_TRANS );
+           ( trans & BLIS_BITVAL_TRANS );
 }
 
-BLIS_INLINE bool bli_does_noconj( trans_t trans )
+BLIS_INLINE bool bli_does_notrans( trans_t trans )
 {
-	return ( bool )
-	       ( (~trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
+	return !bli_does_trans( trans );
 }
 
 BLIS_INLINE bool bli_does_conj( trans_t trans )
 {
 	return ( bool )
-	       ( ( trans & BLIS_CONJ_BIT ) == BLIS_BITVAL_CONJ );
+	       ( trans & BLIS_BITVAL_CONJ );
+}
+
+BLIS_INLINE bool bli_does_noconj( trans_t trans )
+{
+	return !bli_does_conj( trans );
 }
 
 BLIS_INLINE trans_t bli_extract_trans( trans_t trans )
 {
 	return ( trans_t )
-	       ( trans & BLIS_TRANS_BIT );
+	       ( trans & BLIS_BITVAL_TRANS );
 }
 
 BLIS_INLINE conj_t bli_extract_conj( trans_t trans )
 {
 	return ( conj_t )
-	       ( trans & BLIS_CONJ_BIT );
-}
-
-BLIS_INLINE trans_t bli_trans_toggled( trans_t trans )
-{
-	return ( trans_t )
-	       ( trans ^ BLIS_TRANS_BIT );
-}
-
-BLIS_INLINE trans_t bli_trans_toggled_conj( trans_t trans )
-{
-	return ( trans_t )
-	       ( trans ^ BLIS_CONJ_BIT );
+	       ( trans & BLIS_BITVAL_CONJ );
 }
 
 BLIS_INLINE trans_t bli_apply_trans( trans_t transapp, trans_t trans )
 {
 	return ( trans_t )
 	       ( trans ^ transapp );
+}
+
+BLIS_INLINE trans_t bli_trans_toggled( trans_t trans )
+{
+	return bli_apply_trans( BLIS_TRANSPOSE, trans );
+}
+
+BLIS_INLINE trans_t bli_trans_toggled_conj( trans_t trans )
+{
+	return bli_apply_trans( (trans_t)BLIS_CONJUGATE, trans );
 }
 
 BLIS_INLINE void bli_toggle_trans( trans_t* trans )
@@ -335,8 +327,8 @@ BLIS_INLINE uplo_t bli_uplo_toggled( uplo_t uplo )
 {
 	return ( uplo_t )
 	       ( bli_is_upper_or_lower( uplo )
-	         ? ( ( uplo ^ BLIS_LOWER_BIT ) ^ BLIS_UPPER_BIT )
-	         :     uplo
+	         ? uplo ^ ( BLIS_BITVAL_STRICT_LOWER | BLIS_BITVAL_STRICT_UPPER )
+	         : uplo
 	       );
 }
 
@@ -382,28 +374,26 @@ BLIS_INLINE bool bli_is_herm_or_symm( struc_t struc )
 
 // conj
 
-BLIS_INLINE bool bli_is_noconj( conj_t conj )
-{
-	return ( bool )
-	       ( conj == BLIS_NO_CONJUGATE );
-}
-
 BLIS_INLINE bool bli_is_conj( conj_t conj )
 {
 	return ( bool )
 	       ( conj == BLIS_CONJUGATE );
 }
 
-BLIS_INLINE conj_t bli_conj_toggled( conj_t conj )
+BLIS_INLINE bool bli_is_noconj( conj_t conj )
 {
-	return ( conj_t )
-	       ( conj ^ BLIS_CONJ_BIT );
+	return !bli_is_conj( conj );
 }
 
 BLIS_INLINE conj_t bli_apply_conj( conj_t conjapp, conj_t conj )
 {
 	return ( conj_t )
-	       ( conj ^ conjapp );
+	       bli_apply_trans( (trans_t)conjapp, (trans_t)conj );
+}
+
+BLIS_INLINE conj_t bli_conj_toggled( conj_t conj )
+{
+	return bli_apply_conj( BLIS_CONJUGATE, conj );
 }
 
 BLIS_INLINE void bli_toggle_conj( conj_t* conj )
@@ -754,7 +744,7 @@ BLIS_INLINE void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, 
 	*offm_inc = 0;
 
 	// If the diagonal intersects the right side of the matrix,
-	// ignore the area below that intersection. 
+	// ignore the area below that intersection.
 	if ( *m > -(*diagoff) + *n )
 	{
 		*m = -(*diagoff) + *n;
@@ -956,8 +946,7 @@ BLIS_INLINE bool bli_is_last_iter( dim_t i, dim_t end_iter, dim_t tid, dim_t nth
 
 BLIS_INLINE guint_t bli_packbuf_index( packbuf_t buf_type )
 {
-	return ( guint_t )
-	       ( ( buf_type & BLIS_PACK_BUFFER_BITS ) >> BLIS_PACK_BUFFER_SHIFT );
+	return ( guint_t )buf_type;
 }
 
 // pack_t-related
@@ -965,27 +954,24 @@ BLIS_INLINE guint_t bli_packbuf_index( packbuf_t buf_type )
 BLIS_INLINE bool bli_is_packed( pack_t schema )
 {
 	return ( bool )
-	       ( schema & BLIS_PACK_BIT );
-}
-
-BLIS_INLINE bool bli_is_row_packed( pack_t schema )
-{
-	return ( bool )
-	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                            BLIS_BITVAL_PACKED_ROWS ) );
+	       ( schema & BLIS_BITVAL_PACKED );
 }
 
 BLIS_INLINE bool bli_is_col_packed( pack_t schema )
 {
 	return ( bool )
-	       ( ( schema & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-	                                            BLIS_BITVAL_PACKED_COLUMNS ) );
+	       ( schema & BLIS_BITVAL_COLUMNS );
+}
+
+BLIS_INLINE bool bli_is_row_packed( pack_t schema )
+{
+	return !bli_is_col_packed( schema );
 }
 
 BLIS_INLINE bool bli_is_panel_packed( pack_t schema )
 {
 	return ( bool )
-	       ( schema & BLIS_PACK_PANEL_BIT );
+	       ( schema & BLIS_BITVAL_PANEL );
 }
 
 BLIS_INLINE bool bli_is_4mi_packed( pack_t schema )
@@ -1065,8 +1051,7 @@ BLIS_INLINE bool bli_is_ind_packed( pack_t schema )
 
 BLIS_INLINE guint_t bli_pack_schema_index( pack_t schema )
 {
-	return ( guint_t )
-	       ( ( schema & BLIS_PACK_FORMAT_BITS ) >> BLIS_PACK_FORMAT_SHIFT );
+	return ( guint_t )( schema & BLIS_PACK_FORMAT_BITS );
 }
 
 

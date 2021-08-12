@@ -213,7 +213,7 @@ void libblis_test_ger_experiment
 	bli_obj_set_conj( conjx, &x );
 	bli_obj_set_conj( conjy, &y );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &a_save, &a );
@@ -278,7 +278,7 @@ void libblis_test_ger_check
      )
 {
 	num_t  dt      = bli_obj_dt( a );
-	num_t  dt_real = bli_obj_dt_proj_to_real( a );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( a ) );
 
 	dim_t  m_a     = bli_obj_length( a );
 	dim_t  n_a     = bli_obj_width( a );

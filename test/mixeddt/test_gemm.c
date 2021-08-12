@@ -275,7 +275,7 @@ void blas_gemm_md( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c )
 	bool    force_proj_a = FALSE;
 	bool    force_proj_b = FALSE;
 
-	
+
 
 	if      (    bli_is_real( dtc ) &&    bli_is_real( dta ) &&    bli_is_real( dtb ) )
 	{
@@ -410,7 +410,7 @@ void blas_gemm_md( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c )
 		inc_t ma  = bli_obj_length( ao );
 		inc_t na  = bli_obj_width( ao );
 		siz_t ela = bli_obj_elem_size( ao );
-		num_t dtap = bli_obj_dt_proj_to_real( ao );
+		num_t dtap = bli_dt_proj_to_real( bli_obj_dt( ao ) );
 
 		bli_obj_alias_to( ao, &ar ); ao = &ar;
 		bli_obj_set_strides( rsa, 2*csa, ao );
@@ -423,7 +423,7 @@ void blas_gemm_md( obj_t* alpha, obj_t* a, obj_t* b, obj_t* beta, obj_t* c )
 		inc_t mc  = bli_obj_length( co );
 		inc_t nc  = bli_obj_width( co );
 		siz_t elc = bli_obj_elem_size( co );
-		num_t dtcp = bli_obj_dt_proj_to_real( co );
+		num_t dtcp = bli_dt_proj_to_real( bli_obj_dt( co ) );
 
 		bli_obj_alias_to( co, &cr ); co = &cr;
 		bli_obj_set_strides( rsc, 2*csc, co );

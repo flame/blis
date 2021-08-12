@@ -229,7 +229,7 @@ void libblis_test_trmm_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_diag( diaga, &a );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &b_save, &b );
@@ -295,7 +295,7 @@ void libblis_test_trmm_check
      )
 {
 	num_t  dt      = bli_obj_dt( b );
-	num_t  dt_real = bli_obj_dt_proj_to_real( b );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( b ) );
 
 	dim_t  m       = bli_obj_length( b );
 	dim_t  n       = bli_obj_width( b );

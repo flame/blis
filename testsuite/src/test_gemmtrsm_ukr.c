@@ -375,7 +375,7 @@ bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c11_save, &c11 );
@@ -487,7 +487,7 @@ void libblis_test_gemmtrsm_ukr_check
      )
 {
 	num_t  dt      = bli_obj_dt( b11 );
-	num_t  dt_real = bli_obj_dt_proj_to_real( b11 );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( b11 ) );
 
 	dim_t  m       = bli_obj_length( b11 );
 	dim_t  n       = bli_obj_width( b11 );

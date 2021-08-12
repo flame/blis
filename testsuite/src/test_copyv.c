@@ -178,7 +178,7 @@ void libblis_test_copyv_experiment
 	// Apply the parameters.
 	bli_obj_set_conj( conjx, &x );
 
-	// Disable repeats since bli_copyv() is not yet tested. 
+	// Disable repeats since bli_copyv() is not yet tested.
 	//for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -233,7 +233,7 @@ void libblis_test_copyv_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( x ) );
 
 	obj_t  norm_y_r;
 

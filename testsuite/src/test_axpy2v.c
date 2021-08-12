@@ -220,7 +220,7 @@ void libblis_test_axpy2v_experiment
 	bli_obj_set_conj( conjx, &x );
 	bli_obj_set_conj( conjy, &y );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &z_save, &z );
@@ -290,7 +290,7 @@ void libblis_test_axpy2v_check
      )
 {
 	num_t  dt      = bli_obj_dt( z );
-	num_t  dt_real = bli_obj_dt_proj_to_real( z );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( z ) );
 
 	dim_t  m       = bli_obj_vector_dim( z );
 

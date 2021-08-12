@@ -216,7 +216,7 @@ void libblis_test_syr_experiment
 	// Apply the remaining parameters.
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &a_save, &a );
@@ -278,7 +278,7 @@ void libblis_test_syr_check
      )
 {
 	num_t  dt      = bli_obj_dt( a );
-	num_t  dt_real = bli_obj_dt_proj_to_real( a );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( a ) );
 
 	dim_t  m_a     = bli_obj_length( a );
 

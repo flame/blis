@@ -202,7 +202,7 @@ void libblis_test_xpbym_experiment
 	// Apply the parameters.
 	bli_obj_set_conjtrans( transx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &y_save, &y );
@@ -264,7 +264,7 @@ void libblis_test_xpbym_check
      )
 {
 	num_t  dt      = bli_obj_dt( y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( y ) );
 
 	dim_t  m       = bli_obj_length( y );
 	dim_t  n       = bli_obj_width( y );

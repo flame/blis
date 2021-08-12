@@ -249,7 +249,7 @@ void libblis_test_subm_check
      )
 {
 	num_t  dt      = bli_obj_dt( y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( y ) );
 	dim_t  m       = bli_obj_length( y );
 	dim_t  n       = bli_obj_width( y );
 

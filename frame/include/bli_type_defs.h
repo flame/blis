@@ -42,25 +42,6 @@
 // -- BLIS basic types ---------------------------------------------------------
 //
 
-#ifdef __cplusplus
-  // For C++, include stdint.h.
-  #include <stdint.h>
-#elif __STDC_VERSION__ >= 199901L
-  // For C99 (or later), include stdint.h.
-  #include <stdint.h>
-  #include <stdbool.h>
-#else
-  // When stdint.h is not available, manually typedef the types we will use.
-  #ifdef _WIN32
-    typedef          __int32  int32_t;
-    typedef unsigned __int32 uint32_t;
-    typedef          __int64  int64_t;
-    typedef unsigned __int64 uint64_t;
-  #else
-    #error "Attempting to compile on pre-C99 system without stdint.h."
-  #endif
-#endif
-
 // -- General-purpose integers --
 
 // If BLAS integers are 64 bits, mandate that BLIS integers also be 64 bits.
@@ -213,247 +194,16 @@ typedef void  (*free_ft)  ( void*  p    );
 
 
 //
-// -- BLIS info bit field offsets ----------------------------------------------
-//
-
-/*
-  info field description
-
-  bit(s)   purpose
-  -------  -------
-   2 ~ 0   Stored numerical datatype
-           - 0: domain    (0 == real, 1 == complex)
-           - 1: precision (0 == single, 1 == double)
-           - 2: special   (100 = int; 101 = const)
-       3   Transposition required [during pack]?
-       4   Conjugation required [during pack]?
-   7 ~ 5   Part of matrix stored:
-           - 5: strictly upper triangular
-           - 6: diagonal
-           - 7: strictly lower triangular
-       8   Implicit unit diagonal?
-       9   Invert diagonal required [during pack]?
-  12 ~ 10  Target numerical datatype
-           - 10: domain    (0 == real, 1 == complex)
-           - 11: precision (0 == single, 1 == double)
-           - 12: used to encode integer, constant types
-  15 ~ 13  Execution numerical datatype
-           - 13: domain    (0 == real, 1 == complex)
-           - 14: precision (0 == single, 1 == double)
-           - 15: used to encode integer, constant types
-  22 ~ 16  Packed type/status
-           - 0 0000 00: not packed
-           - 1 0000 00: packed (unspecified; by rows, columns, or vector)
-           - 1 0000 00: packed by rows
-           - 1 0000 01: packed by columns
-           - 1 0000 10: packed by row panels
-           - 1 0000 11: packed by column panels
-           - 1 0001 10: packed by 4m interleaved row panels
-           - 1 0001 11: packed by 4m interleaved column panels
-           - 1 0010 10: packed by 3m interleaved row panels
-           - 1 0010 11: packed by 3m interleaved column panels
-           - 1 0011 10: packed by 4m separated row panels (not used)
-           - 1 0011 11: packed by 4m separated column panels (not used)
-           - 1 0100 10: packed by 3m separated row panels
-           - 1 0100 11: packed by 3m separated column panels
-           - 1 0101 10: packed real-only row panels
-           - 1 0101 11: packed real-only column panels
-           - 1 0110 10: packed imag-only row panels
-           - 1 0110 11: packed imag-only column panels
-           - 1 0111 10: packed real+imag row panels
-           - 1 0111 11: packed real+imag column panels
-           - 1 1000 10: packed by 1m expanded row panels
-           - 1 1000 11: packed by 1m expanded column panels
-           - 1 1001 10: packed by 1m reordered row panels
-           - 1 1001 11: packed by 1m reordered column panels
-       23  Packed panel order if upper-stored
-           - 0 == forward order if upper
-           - 1 == reverse order if upper
-       24  Packed panel order if lower-stored
-           - 0 == forward order if lower
-           - 1 == reverse order if lower
-  26 ~ 25  Packed buffer type
-           - 0 == block of A
-           - 1 == panel of B
-           - 2 == panel of C
-           - 3 == general use
-  28 ~ 27  Structure type
-           - 0 == general
-           - 1 == Hermitian
-           - 2 == symmetric
-           - 3 == triangular
-  31 ~ 29  Computation numerical datatype
-           - 29: domain    (0 == real, 1 == complex)
-           - 30: precision (0 == single, 1 == double)
-           - 31: used to encode integer, constant types
-
-  info2 field description
-
-  bit(s)   purpose
-  -------  -------
-    2 ~ 0  Scalar storage numerical datatype
-           -  0: domain    (0 == real, 1 == complex)
-           -  1: precision (0 == single, 1 == double)
-           -  2: used to encode integer, constant types
-*/
-
-// info
-#define BLIS_DATATYPE_SHIFT                0
-#define   BLIS_DOMAIN_SHIFT                0
-#define   BLIS_PRECISION_SHIFT             1
-#define BLIS_CONJTRANS_SHIFT               3
-#define   BLIS_TRANS_SHIFT                 3
-#define   BLIS_CONJ_SHIFT                  4
-#define BLIS_UPLO_SHIFT                    5
-#define   BLIS_UPPER_SHIFT                 5
-#define   BLIS_DIAG_SHIFT                  6
-#define   BLIS_LOWER_SHIFT                 7
-#define BLIS_UNIT_DIAG_SHIFT               8
-#define BLIS_INVERT_DIAG_SHIFT             9
-#define BLIS_TARGET_DT_SHIFT               10
-#define   BLIS_TARGET_DOMAIN_SHIFT         10
-#define   BLIS_TARGET_PREC_SHIFT           11
-#define BLIS_EXEC_DT_SHIFT                 13
-#define   BLIS_EXEC_DOMAIN_SHIFT           13
-#define   BLIS_EXEC_PREC_SHIFT             14
-#define BLIS_PACK_SCHEMA_SHIFT             16
-#define   BLIS_PACK_RC_SHIFT               16
-#define   BLIS_PACK_PANEL_SHIFT            17
-#define   BLIS_PACK_FORMAT_SHIFT           18
-#define   BLIS_PACK_SHIFT                  22
-#define BLIS_PACK_REV_IF_UPPER_SHIFT       23
-#define BLIS_PACK_REV_IF_LOWER_SHIFT       24
-#define BLIS_PACK_BUFFER_SHIFT             25
-#define BLIS_STRUC_SHIFT                   27
-#define BLIS_COMP_DT_SHIFT                 29
-#define   BLIS_COMP_DOMAIN_SHIFT           29
-#define   BLIS_COMP_PREC_SHIFT             30
-
-// info2
-#define BLIS_SCALAR_DT_SHIFT                0
-#define   BLIS_SCALAR_DOMAIN_SHIFT          0
-#define   BLIS_SCALAR_PREC_SHIFT            1
-
-//
-// -- BLIS info bit field masks ------------------------------------------------
-//
-
-// info
-#define BLIS_DATATYPE_BITS                 ( 0x7  << BLIS_DATATYPE_SHIFT )
-#define   BLIS_DOMAIN_BIT                  ( 0x1  << BLIS_DOMAIN_SHIFT )
-#define   BLIS_PRECISION_BIT               ( 0x1  << BLIS_PRECISION_SHIFT )
-#define BLIS_CONJTRANS_BITS                ( 0x3  << BLIS_CONJTRANS_SHIFT )
-#define   BLIS_TRANS_BIT                   ( 0x1  << BLIS_TRANS_SHIFT )
-#define   BLIS_CONJ_BIT                    ( 0x1  << BLIS_CONJ_SHIFT )
-#define BLIS_UPLO_BITS                     ( 0x7  << BLIS_UPLO_SHIFT )
-#define   BLIS_UPPER_BIT                   ( 0x1  << BLIS_UPPER_SHIFT )
-#define   BLIS_DIAG_BIT                    ( 0x1  << BLIS_DIAG_SHIFT )
-#define   BLIS_LOWER_BIT                   ( 0x1  << BLIS_LOWER_SHIFT )
-#define BLIS_UNIT_DIAG_BIT                 ( 0x1  << BLIS_UNIT_DIAG_SHIFT )
-#define BLIS_INVERT_DIAG_BIT               ( 0x1  << BLIS_INVERT_DIAG_SHIFT )
-#define BLIS_TARGET_DT_BITS                ( 0x7  << BLIS_TARGET_DT_SHIFT )
-#define   BLIS_TARGET_DOMAIN_BIT           ( 0x1  << BLIS_TARGET_DOMAIN_SHIFT )
-#define   BLIS_TARGET_PREC_BIT             ( 0x1  << BLIS_TARGET_PREC_SHIFT )
-#define BLIS_EXEC_DT_BITS                  ( 0x7  << BLIS_EXEC_DT_SHIFT )
-#define   BLIS_EXEC_DOMAIN_BIT             ( 0x1  << BLIS_EXEC_DOMAIN_SHIFT )
-#define   BLIS_EXEC_PREC_BIT               ( 0x1  << BLIS_EXEC_PREC_SHIFT )
-#define BLIS_PACK_SCHEMA_BITS              ( 0x7F << BLIS_PACK_SCHEMA_SHIFT )
-#define   BLIS_PACK_RC_BIT                 ( 0x1  << BLIS_PACK_RC_SHIFT )
-#define   BLIS_PACK_PANEL_BIT              ( 0x1  << BLIS_PACK_PANEL_SHIFT )
-#define   BLIS_PACK_FORMAT_BITS            ( 0xF  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_PACK_BIT                    ( 0x1  << BLIS_PACK_SHIFT )
-#define BLIS_PACK_REV_IF_UPPER_BIT         ( 0x1  << BLIS_PACK_REV_IF_UPPER_SHIFT )
-#define BLIS_PACK_REV_IF_LOWER_BIT         ( 0x1  << BLIS_PACK_REV_IF_LOWER_SHIFT )
-#define BLIS_PACK_BUFFER_BITS              ( 0x3  << BLIS_PACK_BUFFER_SHIFT )
-#define BLIS_STRUC_BITS                    ( 0x3  << BLIS_STRUC_SHIFT )
-#define BLIS_COMP_DT_BITS                  ( 0x7  << BLIS_COMP_DT_SHIFT )
-#define   BLIS_COMP_DOMAIN_BIT             ( 0x1  << BLIS_COMP_DOMAIN_SHIFT )
-#define   BLIS_COMP_PREC_BIT               ( 0x1  << BLIS_COMP_PREC_SHIFT )
-
-// info2
-#define BLIS_SCALAR_DT_BITS                ( 0x7  << BLIS_SCALAR_DT_SHIFT )
-#define   BLIS_SCALAR_DOMAIN_BIT           ( 0x1  << BLIS_SCALAR_DOMAIN_SHIFT )
-#define   BLIS_SCALAR_PREC_BIT             ( 0x1  << BLIS_SCALAR_PREC_SHIFT )
-
-
-//
-// -- BLIS enumerated type value definitions -----------------------------------
-//
-
-#define BLIS_BITVAL_REAL                      0x0
-#define BLIS_BITVAL_COMPLEX                   BLIS_DOMAIN_BIT
-#define BLIS_BITVAL_SINGLE_PREC               0x0
-#define BLIS_BITVAL_DOUBLE_PREC               BLIS_PRECISION_BIT
-#define   BLIS_BITVAL_FLOAT_TYPE              0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT  
-#define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_PRECISION_BIT
-#define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_DOMAIN_BIT | BLIS_PRECISION_BIT )
-#define   BLIS_BITVAL_INT_TYPE                0x04
-#define   BLIS_BITVAL_CONST_TYPE              0x05
-#define BLIS_BITVAL_NO_TRANS                  0x0
-#define BLIS_BITVAL_TRANS                     BLIS_TRANS_BIT
-#define BLIS_BITVAL_NO_CONJ                   0x0
-#define BLIS_BITVAL_CONJ                      BLIS_CONJ_BIT
-#define BLIS_BITVAL_CONJ_TRANS              ( BLIS_CONJ_BIT | BLIS_TRANS_BIT )
-#define BLIS_BITVAL_ZEROS                     0x0 
-#define BLIS_BITVAL_UPPER                   ( BLIS_UPPER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_LOWER                   ( BLIS_LOWER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS  
-#define BLIS_BITVAL_NONUNIT_DIAG              0x0
-#define BLIS_BITVAL_UNIT_DIAG                 BLIS_UNIT_DIAG_BIT
-#define BLIS_BITVAL_INVERT_DIAG               BLIS_INVERT_DIAG_BIT
-#define BLIS_BITVAL_NOT_PACKED                0x0
-#define   BLIS_BITVAL_4MI                   ( 0x1  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_3MI                   ( 0x2  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_4MS                   ( 0x3  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_3MS                   ( 0x4  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_RO                    ( 0x5  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_IO                    ( 0x6  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_RPI                   ( 0x7  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_1E                    ( 0x8  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_1R                    ( 0x9  << BLIS_PACK_FORMAT_SHIFT )
-#define   BLIS_BITVAL_PACKED_UNSPEC         ( BLIS_PACK_BIT                                                            )
-#define   BLIS_BITVAL_PACKED_ROWS           ( BLIS_PACK_BIT                                                            )
-#define   BLIS_BITVAL_PACKED_COLUMNS        ( BLIS_PACK_BIT                                         | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS     ( BLIS_PACK_BIT                   | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS     ( BLIS_PACK_BIT                   | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_4MI ( BLIS_PACK_BIT | BLIS_BITVAL_4MI | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_4MI ( BLIS_PACK_BIT | BLIS_BITVAL_4MI | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_3MI ( BLIS_PACK_BIT | BLIS_BITVAL_3MI | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_3MI ( BLIS_PACK_BIT | BLIS_BITVAL_3MI | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_4MS ( BLIS_PACK_BIT | BLIS_BITVAL_4MS | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_4MS ( BLIS_PACK_BIT | BLIS_BITVAL_4MS | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_3MS ( BLIS_PACK_BIT | BLIS_BITVAL_3MS | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_3MS ( BLIS_PACK_BIT | BLIS_BITVAL_3MS | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_RO  ( BLIS_PACK_BIT | BLIS_BITVAL_RO  | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_RO  ( BLIS_PACK_BIT | BLIS_BITVAL_RO  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_IO  ( BLIS_PACK_BIT | BLIS_BITVAL_IO  | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_IO  ( BLIS_PACK_BIT | BLIS_BITVAL_IO  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_RPI ( BLIS_PACK_BIT | BLIS_BITVAL_RPI | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_1E  ( BLIS_PACK_BIT | BLIS_BITVAL_1E  | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_1E  ( BLIS_PACK_BIT | BLIS_BITVAL_1E  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define   BLIS_BITVAL_PACKED_ROW_PANELS_1R  ( BLIS_PACK_BIT | BLIS_BITVAL_1R  | BLIS_PACK_PANEL_BIT                    )
-#define   BLIS_BITVAL_PACKED_COL_PANELS_1R  ( BLIS_PACK_BIT | BLIS_BITVAL_1R  | BLIS_PACK_PANEL_BIT | BLIS_PACK_RC_BIT )
-#define BLIS_BITVAL_PACK_FWD_IF_UPPER         0x0
-#define BLIS_BITVAL_PACK_REV_IF_UPPER         BLIS_PACK_REV_IF_UPPER_BIT
-#define BLIS_BITVAL_PACK_FWD_IF_LOWER         0x0
-#define BLIS_BITVAL_PACK_REV_IF_LOWER         BLIS_PACK_REV_IF_LOWER_BIT
-#define BLIS_BITVAL_BUFFER_FOR_A_BLOCK        0x0
-#define BLIS_BITVAL_BUFFER_FOR_B_PANEL      ( 0x1 << BLIS_PACK_BUFFER_SHIFT )
-#define BLIS_BITVAL_BUFFER_FOR_C_PANEL      ( 0x2 << BLIS_PACK_BUFFER_SHIFT )
-#define BLIS_BITVAL_BUFFER_FOR_GEN_USE      ( 0x3 << BLIS_PACK_BUFFER_SHIFT )
-#define BLIS_BITVAL_GENERAL                   0x0
-#define BLIS_BITVAL_HERMITIAN               ( 0x1 << BLIS_STRUC_SHIFT )
-#define BLIS_BITVAL_SYMMETRIC               ( 0x2 << BLIS_STRUC_SHIFT )
-#define BLIS_BITVAL_TRIANGULAR              ( 0x3 << BLIS_STRUC_SHIFT )
-
-
-//
 // -- BLIS enumerated type definitions -----------------------------------------
 //
 
 // -- Operational parameter types --
+
+#define BLIS_BITVAL_NO_TRANS                  0x0
+#define BLIS_BITVAL_TRANS                     0x1
+#define BLIS_BITVAL_NO_CONJ                   0x0
+#define BLIS_BITVAL_CONJ                      0x2
+#define BLIS_BITVAL_CONJ_TRANS              ( BLIS_BITVAL_CONJ | BLIS_BITVAL_TRANS )
 
 typedef enum
 {
@@ -469,6 +219,14 @@ typedef enum
 	BLIS_CONJUGATE         = BLIS_BITVAL_CONJ
 } conj_t;
 
+#define BLIS_BITVAL_ZEROS                     0x0
+#define BLIS_BITVAL_DIAG                      0x1
+#define BLIS_BITVAL_STRICT_UPPER              0x2
+#define BLIS_BITVAL_STRICT_LOWER              0x4
+#define BLIS_BITVAL_UPPER                   ( BLIS_BITVAL_STRICT_UPPER | BLIS_BITVAL_DIAG )
+#define BLIS_BITVAL_LOWER                   ( BLIS_BITVAL_STRICT_LOWER | BLIS_BITVAL_DIAG )
+#define BLIS_BITVAL_DENSE                   ( BLIS_BITVAL_STRICT_UPPER | BLIS_BITVAL_STRICT_LOWER | BLIS_BITVAL_DIAG )
+
 typedef enum
 {
 	BLIS_ZEROS             = BLIS_BITVAL_ZEROS,
@@ -483,17 +241,28 @@ typedef enum
 	BLIS_RIGHT
 } side_t;
 
+#define BLIS_BITVAL_NONUNIT_DIAG              0x0
+#define BLIS_BITVAL_UNIT_DIAG                 0x1
+
 typedef enum
 {
 	BLIS_NONUNIT_DIAG      = 0x0,
 	BLIS_UNIT_DIAG         = BLIS_BITVAL_UNIT_DIAG
 } diag_t;
 
+#define BLIS_BITVAL_NO_INVERT_DIAG            0x0
+#define BLIS_BITVAL_INVERT_DIAG               0x1
+
 typedef enum
 {
 	BLIS_NO_INVERT_DIAG    = 0x0,
 	BLIS_INVERT_DIAG       = BLIS_BITVAL_INVERT_DIAG
 } invdiag_t;
+
+#define BLIS_BITVAL_GENERAL                   0x0
+#define BLIS_BITVAL_HERMITIAN                 0x1
+#define BLIS_BITVAL_SYMMETRIC                 0x2
+#define BLIS_BITVAL_TRIANGULAR                0x3
 
 typedef enum
 {
@@ -505,6 +274,17 @@ typedef enum
 
 
 // -- Data type --
+
+#define BLIS_BITVAL_REAL                      0x0
+#define BLIS_BITVAL_COMPLEX                   0x1
+#define BLIS_BITVAL_SINGLE_PREC               0x0
+#define BLIS_BITVAL_DOUBLE_PREC               0x2
+#define   BLIS_BITVAL_FLOAT_TYPE              0x0
+#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_BITVAL_COMPLEX
+#define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_BITVAL_DOUBLE_PREC
+#define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_BITVAL_COMPLEX | BLIS_BITVAL_DOUBLE_PREC )
+#define   BLIS_BITVAL_INT_TYPE                0x04
+#define   BLIS_BITVAL_CONST_TYPE              0x05
 
 typedef enum
 {
@@ -532,6 +312,44 @@ typedef enum
 
 
 // -- Pack schema type --
+
+#define BLIS_BITVAL_NOT_PACKED                0x0
+#define   BLIS_PACK_FORMAT_BITS               0xF
+#define   BLIS_BITVAL_4MI                     0x1
+#define   BLIS_BITVAL_3MI                     0x2
+#define   BLIS_BITVAL_4MS                     0x3
+#define   BLIS_BITVAL_3MS                     0x4
+#define   BLIS_BITVAL_RO                      0x5
+#define   BLIS_BITVAL_IO                      0x6
+#define   BLIS_BITVAL_RPI                     0x7
+#define   BLIS_BITVAL_1E                      0x8
+#define   BLIS_BITVAL_1R                      0x9
+#define   BLIS_BITVAL_PACKED                ( 0x1  << 4 )
+#define   BLIS_BITVAL_COLUMNS               ( 0x1  << 5 )
+#define   BLIS_BITVAL_PANEL                 ( 0x1  << 6 )
+#define   BLIS_BITVAL_PACKED_UNSPEC         ( BLIS_BITVAL_PACKED                                                             )
+#define   BLIS_BITVAL_PACKED_ROWS           ( BLIS_BITVAL_PACKED                                                             )
+#define   BLIS_BITVAL_PACKED_COLUMNS        ( BLIS_BITVAL_PACKED                                       | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS     ( BLIS_BITVAL_PACKED                   | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS     ( BLIS_BITVAL_PACKED                   | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_4MI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_4MI | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_4MI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_4MI | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_3MI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_3MI | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_3MI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_3MI | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_4MS ( BLIS_BITVAL_PACKED | BLIS_BITVAL_4MS | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_4MS ( BLIS_BITVAL_PACKED | BLIS_BITVAL_4MS | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_3MS ( BLIS_BITVAL_PACKED | BLIS_BITVAL_3MS | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_3MS ( BLIS_BITVAL_PACKED | BLIS_BITVAL_3MS | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_RO  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_RO  | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_RO  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_RO  | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_IO  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_IO  | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_IO  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_IO  | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_RPI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_RPI | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_RPI ( BLIS_BITVAL_PACKED | BLIS_BITVAL_RPI | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_1E  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_1E  | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_1E  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_1E  | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
+#define   BLIS_BITVAL_PACKED_ROW_PANELS_1R  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_1R  | BLIS_BITVAL_PANEL                       )
+#define   BLIS_BITVAL_PACKED_COL_PANELS_1R  ( BLIS_BITVAL_PACKED | BLIS_BITVAL_1R  | BLIS_BITVAL_PANEL | BLIS_BITVAL_COLUMNS )
 
 typedef enum
 {
@@ -571,6 +389,11 @@ typedef enum
 
 // -- Pack order type --
 
+#define BLIS_BITVAL_PACK_FWD_IF_UPPER         0x0
+#define BLIS_BITVAL_PACK_REV_IF_UPPER         0x1
+#define BLIS_BITVAL_PACK_FWD_IF_LOWER         0x0
+#define BLIS_BITVAL_PACK_REV_IF_LOWER         0x1
+
 typedef enum
 {
 	BLIS_PACK_FWD_IF_UPPER = BLIS_BITVAL_PACK_FWD_IF_UPPER,
@@ -582,6 +405,11 @@ typedef enum
 
 
 // -- Pack buffer type --
+
+#define BLIS_BITVAL_BUFFER_FOR_A_BLOCK        0x0
+#define BLIS_BITVAL_BUFFER_FOR_B_PANEL        0x1
+#define BLIS_BITVAL_BUFFER_FOR_C_PANEL        0x2
+#define BLIS_BITVAL_BUFFER_FOR_GEN_USE        0x3
 
 typedef enum
 {
@@ -1241,8 +1069,21 @@ typedef struct obj_s
 	dim_t         dim[2];
 	doff_t        diag_off;
 
-	objbits_t     info;
-	objbits_t     info2;
+    objbits_t     dt                : 3;
+    objbits_t     conjtrans         : 2;
+    objbits_t     uplo              : 3;
+    objbits_t     diag              : 1;
+    objbits_t     invert_diag       : 1;
+    objbits_t     target_dt         : 3;
+    objbits_t     exec_dt           : 3;
+    objbits_t     pack_schema       : 7;
+    objbits_t     pack_rev_if_upper : 1;
+    objbits_t     pack_rev_if_lower : 1;
+    objbits_t     pack_buffer       : 2;
+    objbits_t     struc             : 2;
+    objbits_t     comp_dt           : 3;
+    objbits_t     scalar_dt         : 3;
+
 	siz_t         elem_size;
 
 	void*         buffer;
@@ -1274,58 +1115,80 @@ typedef struct obj_s
 
 #define BLIS_OBJECT_INITIALIZER \
 { \
-	.root      = NULL, \
+	.root              = NULL, \
 \
-	.off       = { 0, 0 }, \
-	.dim       = { 0, 0 }, \
-	.diag_off  = 0, \
+	.off               = { 0, 0 }, \
+	.dim               = { 0, 0 }, \
+	.diag_off          = 0, \
 \
-	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.info2     = 0x0, \
-	.elem_size = sizeof( float ), /* this is changed later. */ \
+    .dt                = BLIS_FLOAT, \
+    .conjtrans         = BLIS_NO_TRANSPOSE, \
+    .uplo              = BLIS_DENSE, \
+    .diag              = BLIS_NONUNIT_DIAG, \
+    .invert_diag       = BLIS_NO_INVERT_DIAG, \
+    .target_dt         = BLIS_FLOAT, \
+    .exec_dt           = BLIS_FLOAT, \
+    .pack_schema       = BLIS_NOT_PACKED, \
+    .pack_rev_if_upper = BLIS_PACK_FWD_IF_UPPER, \
+    .pack_rev_if_lower = BLIS_PACK_FWD_IF_LOWER, \
+    .pack_buffer       = BLIS_BUFFER_FOR_A_BLOCK, \
+    .struc             = BLIS_GENERAL, \
+    .comp_dt           = BLIS_FLOAT, \
+    .scalar_dt         = BLIS_FLOAT, \
+	.elem_size         = sizeof( float ), /* this is changed later. */ \
 \
-	.buffer    = NULL, \
-	.rs        = 0, \
-	.cs        = 0, \
-	.is        = 1,  \
+	.buffer            = NULL, \
+	.rs                = 0, \
+	.cs                = 0, \
+	.is                = 1,  \
 \
-	.scalar    = { 0.0, 0.0 }, \
+	.scalar            = { 0.0, 0.0 }, \
 \
-	.m_padded  = 0, \
-	.n_padded  = 0, \
-	.ps        = 0, \
-	.pd        = 0, \
-	.m_panel   = 0, \
-	.n_panel   = 0  \
+	.m_padded          = 0, \
+	.n_padded          = 0, \
+	.ps                = 0, \
+	.pd                = 0, \
+	.m_panel           = 0, \
+	.n_panel           = 0  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
 { \
-	.root      = NULL, \
+	.root              = NULL, \
 \
-	.off       = { 0, 0 }, \
-	.dim       = { 1, 1 }, \
-	.diag_off  = 0, \
+	.off               = { 0, 0 }, \
+	.dim               = { 1, 1 }, \
+	.diag_off          = 0, \
 \
-	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.info2     = 0x0, \
-	.elem_size = sizeof( float ), /* this is changed later. */ \
+    .dt                = BLIS_FLOAT, \
+    .conjtrans         = BLIS_NO_TRANSPOSE, \
+    .uplo              = BLIS_DENSE, \
+    .diag              = BLIS_NONUNIT_DIAG, \
+    .invert_diag       = BLIS_NO_INVERT_DIAG, \
+    .target_dt         = BLIS_FLOAT, \
+    .exec_dt           = BLIS_FLOAT, \
+    .pack_schema       = BLIS_NOT_PACKED, \
+    .pack_rev_if_upper = BLIS_PACK_FWD_IF_UPPER, \
+    .pack_rev_if_lower = BLIS_PACK_FWD_IF_LOWER, \
+    .pack_buffer       = BLIS_BUFFER_FOR_A_BLOCK, \
+    .struc             = BLIS_GENERAL, \
+    .comp_dt           = BLIS_FLOAT, \
+    .scalar_dt         = BLIS_FLOAT, \
+	.elem_size         = sizeof( float ), /* this is changed later. */ \
 \
-	.buffer    = NULL, \
-	.rs        = 0, \
-	.cs        = 0, \
-	.is        = 1,  \
+	.buffer            = NULL, \
+	.rs                = 0, \
+	.cs                = 0, \
+	.is                = 1,  \
 \
-	.scalar    = { 0.0, 0.0 }, \
+	.scalar            = { 0.0, 0.0 }, \
 \
-	.m_padded  = 0, \
-	.n_padded  = 0, \
-	.ps        = 0, \
-	.pd        = 0, \
-	.m_panel   = 0, \
-	.n_panel   = 0  \
+	.m_padded          = 0, \
+	.n_padded          = 0, \
+	.ps                = 0, \
+	.pd                = 0, \
+	.m_panel           = 0, \
+	.n_panel           = 0  \
 }
 
 // Define these macros here since they must be updated if contents of
@@ -1333,65 +1196,89 @@ typedef struct obj_s
 
 BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
-	b->root      = a->root;
+	b->root              = a->root;
 
-	b->off[0]    = a->off[0];
-	b->off[1]    = a->off[1];
-	b->dim[0]    = a->dim[0];
-	b->dim[1]    = a->dim[1];
-	b->diag_off  = a->diag_off;
+	b->off[0]            = a->off[0];
+	b->off[1]            = a->off[1];
+	b->dim[0]            = a->dim[0];
+	b->dim[1]            = a->dim[1];
+	b->diag_off          = a->diag_off;
 
-	b->info      = a->info;
-	b->info2     = a->info2;
-	b->elem_size = a->elem_size;
+    b->dt                = a->dt;
+    b->conjtrans         = a->conjtrans;
+    b->uplo              = a->uplo;
+    b->diag              = a->diag;
+    b->invert_diag       = a->invert_diag;
+    b->target_dt         = a->target_dt;
+    b->exec_dt           = a->exec_dt;
+    b->pack_schema       = a->pack_schema;
+    b->pack_rev_if_upper = a->pack_rev_if_upper;
+    b->pack_rev_if_lower = a->pack_rev_if_lower;
+    b->pack_buffer       = a->pack_buffer;
+    b->struc             = a->struc;
+    b->comp_dt           = a->comp_dt;
+    b->scalar_dt         = a->scalar_dt;
+	b->elem_size         = a->elem_size;
 
-	b->buffer    = a->buffer;
-	b->rs        = a->rs;
-	b->cs        = a->cs;
-	b->is        = a->is;
+	b->buffer            = a->buffer;
+	b->rs                = a->rs;
+	b->cs                = a->cs;
+	b->is                = a->is;
 
-	b->scalar    = a->scalar;
+	b->scalar            = a->scalar;
 
-	//b->pack_mem  = a->pack_mem;
-	b->m_padded  = a->m_padded;
-	b->n_padded  = a->n_padded;
-	b->ps        = a->ps;
-	b->pd        = a->pd;
-	b->m_panel   = a->m_panel;
-	b->n_panel   = a->n_panel;
+	//b->pack_mem          = a->pack_mem;
+	b->m_padded          = a->m_padded;
+	b->n_padded          = a->n_padded;
+	b->ps                = a->ps;
+	b->pd                = a->pd;
+	b->m_panel           = a->m_panel;
+	b->n_panel           = a->n_panel;
 }
 
 BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
-	b->root      = a->root;
+	b->root              = a->root;
 
-	b->off[0]    = a->off[0];
-	b->off[1]    = a->off[1];
+	b->off[0]            = a->off[0];
+	b->off[1]            = a->off[1];
 	// Avoid copying m and n since they will be overwritten.
-	//b->dim[0]    = a->dim[0];
-	//b->dim[1]    = a->dim[1];
-	b->diag_off  = a->diag_off;
+	//b->dim[0]            = a->dim[0];
+	//b->dim[1]            = a->dim[1];
+	b->diag_off          = a->diag_off;
 
-	b->info      = a->info;
-	b->info2     = a->info2;
-	b->elem_size = a->elem_size;
+    b->dt                = a->dt;
+    b->conjtrans         = a->conjtrans;
+    b->uplo              = a->uplo;
+    b->diag              = a->diag;
+    b->invert_diag       = a->invert_diag;
+    b->target_dt         = a->target_dt;
+    b->exec_dt           = a->exec_dt;
+    b->pack_schema       = a->pack_schema;
+    b->pack_rev_if_upper = a->pack_rev_if_upper;
+    b->pack_rev_if_lower = a->pack_rev_if_lower;
+    b->pack_buffer       = a->pack_buffer;
+    b->struc             = a->struc;
+    b->comp_dt           = a->comp_dt;
+    b->scalar_dt         = a->scalar_dt;
+	b->elem_size         = a->elem_size;
 
-	b->buffer    = a->buffer;
-	b->rs        = a->rs;
-	b->cs        = a->cs;
-	b->is        = a->is;
+	b->buffer            = a->buffer;
+	b->rs                = a->rs;
+	b->cs                = a->cs;
+	b->is                = a->is;
 
-	b->scalar    = a->scalar;
+	b->scalar            = a->scalar;
 
 	// Avoid copying pack_mem entry.
 	// FGVZ: You should probably make sure this is right.
-	//b->pack_mem  = a->pack_mem;
-	b->m_padded  = a->m_padded;
-	b->n_padded  = a->n_padded;
-	b->ps        = a->ps;
-	b->pd        = a->pd;
-	b->m_panel   = a->m_panel;
-	b->n_panel   = a->n_panel;
+	//b->pack_mem          = a->pack_mem;
+	b->m_padded          = a->m_padded;
+	b->n_padded          = a->n_padded;
+	b->ps                = a->ps;
+	b->pd                = a->pd;
+	b->m_panel           = a->m_panel;
+	b->n_panel           = a->n_panel;
 }
 
 // Initializors for global scalar constants.
@@ -1400,22 +1287,32 @@ BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 
 #define bli_obj_init_const( buffer0 ) \
 { \
-	.root      = NULL, \
+	.root              = NULL, \
 \
-	.off       = { 0, 0 }, \
-	.dim       = { 1, 1 }, \
-	.diag_off  = 0, \
+	.off               = { 0, 0 }, \
+	.dim               = { 1, 1 }, \
+	.diag_off          = 0, \
 \
-	.info      = 0x0 | BLIS_BITVAL_CONST_TYPE | \
-	                   BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.info2     = 0x0, \
-	.elem_size = sizeof( constdata_t ), \
+    .dt                = BLIS_CONSTANT, \
+    .conjtrans         = BLIS_NO_TRANSPOSE, \
+    .uplo              = BLIS_DENSE, \
+    .diag              = BLIS_NONUNIT_DIAG, \
+    .invert_diag       = BLIS_NO_INVERT_DIAG, \
+    .target_dt         = BLIS_FLOAT, \
+    .exec_dt           = BLIS_FLOAT, \
+    .pack_schema       = BLIS_NOT_PACKED, \
+    .pack_rev_if_upper = BLIS_PACK_FWD_IF_UPPER, \
+    .pack_rev_if_lower = BLIS_PACK_FWD_IF_LOWER, \
+    .pack_buffer       = BLIS_BUFFER_FOR_A_BLOCK, \
+    .struc             = BLIS_GENERAL, \
+    .comp_dt           = BLIS_FLOAT, \
+    .scalar_dt         = BLIS_FLOAT, \
+	.elem_size         = sizeof( constdata_t ), \
 \
-	.buffer    = buffer0, \
-	.rs        = 1, \
-	.cs        = 1, \
-	.is        = 1  \
+	.buffer            = buffer0, \
+	.rs                = 1, \
+	.cs                = 1, \
+	.is                = 1  \
 }
 
 #define bli_obj_init_constdata( val ) \
@@ -1546,13 +1443,13 @@ typedef enum
 	BLIS_INVALID_COL_STRIDE                    = ( -51),
 	BLIS_INVALID_DIM_STRIDE_COMBINATION        = ( -52),
 
-	// Structure-specific errors    
+	// Structure-specific errors
 	BLIS_EXPECTED_GENERAL_OBJECT               = ( -60),
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
-	// Storage-specific errors    
+	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
 	// Partitioning-specific errors
@@ -1566,7 +1463,7 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
-	// Buffer-specific errors 
+	// Buffer-specific errors
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
 	// Memory errors

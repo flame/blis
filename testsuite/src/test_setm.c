@@ -181,7 +181,7 @@ void libblis_test_setm_experiment
 	// Randomize x.
 	libblis_test_mobj_randomize( params, FALSE, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -251,7 +251,7 @@ void libblis_test_setm_check
 	// that each element of x is equal to beta.
 	//
 
-	if      ( bli_obj_is_float( x ) )
+	if      ( bli_obj_dt( x ) == BLIS_FLOAT )
 	{
 		float*    beta_cast  = buf_beta;
 		float*    buf_x_cast = buf_x;
@@ -267,7 +267,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else if ( bli_obj_is_double( x ) )
+	else if ( bli_obj_dt( x ) == BLIS_DOUBLE )
 	{
 		double*   beta_cast  = buf_beta;
 		double*   buf_x_cast = buf_x;
@@ -283,7 +283,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else if ( bli_obj_is_scomplex( x ) )
+	else if ( bli_obj_dt( x ) == BLIS_SCOMPLEX )
 	{
 		scomplex* beta_cast  = buf_beta;
 		scomplex* buf_x_cast = buf_x;
@@ -299,7 +299,7 @@ void libblis_test_setm_check
 			}
 		}
 	}
-	else // if ( bli_obj_is_dcomplex( x ) )
+	else // if ( bli_obj_dt( x ) == BLIS_DCOMPLEX )
 	{
 		dcomplex* beta_cast  = buf_beta;
 		dcomplex* buf_x_cast = buf_x;

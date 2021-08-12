@@ -139,13 +139,13 @@ dim_t PASTEMAC0(opname) \
 	   multiple of MR if A is Hermitian or symmetric, or NR if B is
 	   Hermitian or symmetric. If neither case applies, then we leave
 	   the blocksizes unchanged. */ \
-	if      ( bli_obj_root_is_herm_or_symm( a ) ) \
+	if      ( bli_is_herm_or_symm( bli_obj_struc( bli_obj_root( a ) ) ) ) \
 	{ \
 		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 		b_max = bli_align_dim_to_mult( b_max, mnr ); \
 	} \
-	else if ( bli_obj_root_is_herm_or_symm( b ) ) \
+	else if ( bli_is_herm_or_symm( bli_obj_struc( bli_obj_root( b ) ) ) ) \
 	{ \
 		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
@@ -257,7 +257,7 @@ dim_t PASTEMAC0(opname) \
 	/* Nudge the default and maximum kc blocksizes up to the nearest
 	   multiple of MR if the triangular matrix is on the left, or NR
 	   if the triangular matrix is one the right. */ \
-	if ( bli_obj_root_is_triangular( a ) ) \
+	if ( bli_obj_is_triangular( bli_obj_root( a ) ) ) \
 		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	else \
 		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
