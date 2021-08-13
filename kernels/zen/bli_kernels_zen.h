@@ -79,6 +79,8 @@ SCALV_KER_PROT( double,   d, scalv_zen_int )
 // scalv (intrinsics unrolled x10)
 SCALV_KER_PROT( float,    s, scalv_zen_int10 )
 SCALV_KER_PROT( double,   d, scalv_zen_int10 )
+SCALV_KER_PROT( scomplex, c, scalv_zen_int10 )
+SCALV_KER_PROT( dcomplex, z, scalv_zen_int10 )
 
 // swapv (intrinsics)
 SWAPV_KER_PROT(float,   s, swapv_zen_int8 )
