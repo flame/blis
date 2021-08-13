@@ -1240,22 +1240,22 @@ struct thrinfo_s;
 
 typedef void (*obj_pack_fn_t)
     (
-      mdim_t mat,
-      mem_t* mem,
-      struct obj_s* a,
-      struct obj_s* ap,
-      struct cntx_s* cntx,
-      struct rntm_s* rntm,
+      mdim_t            mat,
+      mem_t*            mem,
+      struct obj_s*     a,
+      struct obj_s*     ap,
+      struct cntx_s*    cntx,
+      struct rntm_s*    rntm,
       struct thrinfo_s* thread
     );
 
 typedef void (*obj_ker_fn_t)
     (
-      struct obj_s* a,
-      struct obj_s* b,
-      struct obj_s* c,
-      struct cntx_s* cntx,
-      struct rntm_s* rntm,
+      struct obj_s*     a,
+      struct obj_s*     b,
+      struct obj_s*     c,
+      struct cntx_s*    cntx,
+      struct rntm_s*    rntm,
       struct thrinfo_s* thread
     );
 
@@ -1303,13 +1303,14 @@ typedef struct obj_s
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
 
-    // User data pointer
-    void*         user_data;
+	// User data pointer
+	void*         user_data;
 
-    // Function pointers
-    obj_pack_fn_t pack;
-    obj_ker_fn_t  ker;
-    obj_ukr_fn_t  ukr;
+	// Function pointers
+	obj_pack_fn_t pack;
+	obj_ker_fn_t  ker;
+	obj_ukr_fn_t  ukr;
+
 } obj_t;
 
 // Pre-initializors. Things that must be set afterwards:
@@ -1348,11 +1349,11 @@ typedef struct obj_s
 	.m_panel   = 0, \
 	.n_panel   = 0, \
 \
-    .user_data = NULL, \
+	.user_data = NULL, \
 \
-    .pack      = NULL, \
-    .ker       = NULL, \
-    .ukr       = NULL  \
+	.pack      = NULL, \
+	.ker       = NULL, \
+	.ukr       = NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
@@ -1382,11 +1383,11 @@ typedef struct obj_s
 	.m_panel   = 0, \
 	.n_panel   = 0, \
 \
-    .user_data = NULL, \
+	.user_data = NULL, \
 \
-    .pack      = NULL, \
-    .ker       = NULL, \
-    .ukr       = NULL  \
+	.pack      = NULL, \
+	.ker       = NULL, \
+	.ukr       = NULL  \
 }
 
 // Define these macros here since they must be updated if contents of
