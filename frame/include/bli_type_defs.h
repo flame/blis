@@ -385,7 +385,7 @@ typedef void  (*free_ft)  ( void*  p    );
 #define BLIS_BITVAL_SINGLE_PREC               0x0
 #define BLIS_BITVAL_DOUBLE_PREC               BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_FLOAT_TYPE              0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT  
+#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT
 #define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_DOMAIN_BIT | BLIS_PRECISION_BIT )
 #define   BLIS_BITVAL_INT_TYPE                0x04
@@ -395,10 +395,10 @@ typedef void  (*free_ft)  ( void*  p    );
 #define BLIS_BITVAL_NO_CONJ                   0x0
 #define BLIS_BITVAL_CONJ                      BLIS_CONJ_BIT
 #define BLIS_BITVAL_CONJ_TRANS              ( BLIS_CONJ_BIT | BLIS_TRANS_BIT )
-#define BLIS_BITVAL_ZEROS                     0x0 
+#define BLIS_BITVAL_ZEROS                     0x0
 #define BLIS_BITVAL_UPPER                   ( BLIS_UPPER_BIT | BLIS_DIAG_BIT )
 #define BLIS_BITVAL_LOWER                   ( BLIS_LOWER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS  
+#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS
 #define BLIS_BITVAL_NONUNIT_DIAG              0x0
 #define BLIS_BITVAL_UNIT_DIAG                 BLIS_UNIT_DIAG_BIT
 #define BLIS_BITVAL_INVERT_DIAG               BLIS_INVERT_DIAG_BIT
@@ -1242,7 +1242,7 @@ typedef void (*obj_pack_fn_t)
     (
       mdim_t mat,
       mem_t* mem,
-      struct obj_s* a, 
+      struct obj_s* a,
       struct obj_s* ap,
       struct cntx_s* cntx,
       struct rntm_s* rntm,
@@ -1251,8 +1251,8 @@ typedef void (*obj_pack_fn_t)
 
 typedef void (*obj_ker_fn_t)
     (
-      struct obj_s* a, 
-      struct obj_s* b, 
+      struct obj_s* a,
+      struct obj_s* b,
       struct obj_s* c,
       struct cntx_s* cntx,
       struct rntm_s* rntm,
@@ -1302,7 +1302,6 @@ typedef struct obj_s
 	                        // usually MR or NR)
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
-	pack_t        schema;   // pack schema, which may be unpacked
 
     // User data pointer
     void*         user_data;
@@ -1348,7 +1347,6 @@ typedef struct obj_s
 	.pd        = 0, \
 	.m_panel   = 0, \
 	.n_panel   = 0, \
-    .schema    = BLIS_NOT_PACKED, \
 \
     .user_data = NULL, \
 \
@@ -1383,7 +1381,6 @@ typedef struct obj_s
 	.pd        = 0, \
 	.m_panel   = 0, \
 	.n_panel   = 0, \
-    .schema    = BLIS_NOT_PACKED, \
 \
     .user_data = NULL, \
 \
@@ -1423,7 +1420,6 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->pd        = a->pd;
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
-	b->schema    = a->schema;
 
 	b->user_data = a->user_data;
 
@@ -1463,7 +1459,6 @@ BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->pd        = a->pd;
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
-	b->schema    = a->schema;
 
 	b->user_data = a->user_data;
 
@@ -1624,13 +1619,13 @@ typedef enum
 	BLIS_INVALID_COL_STRIDE                    = ( -51),
 	BLIS_INVALID_DIM_STRIDE_COMBINATION        = ( -52),
 
-	// Structure-specific errors    
+	// Structure-specific errors
 	BLIS_EXPECTED_GENERAL_OBJECT               = ( -60),
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
-	// Storage-specific errors    
+	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
 	// Partitioning-specific errors
@@ -1644,7 +1639,7 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
-	// Buffer-specific errors 
+	// Buffer-specific errors
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
 	// Memory errors
