@@ -1215,7 +1215,7 @@ BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
     return obj->ker;
 }
 
-BLIS_INLINE obj_ukr_fn_t bli_obj_ukf_fn( obj_t* obj )
+BLIS_INLINE obj_ukr_fn_t bli_obj_ukr_fn( obj_t* obj )
 {
     return obj->ukr;
 }
@@ -1232,7 +1232,7 @@ BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker, obj_t* obj )
     obj->ker = ker;
 }
 
-BLIS_INLINE void bli_obj_set_ukf_fn( obj_ukr_fn_t ukr, obj_t* obj )
+BLIS_INLINE void bli_obj_set_ukr_fn( obj_ukr_fn_t ukr, obj_t* obj )
 {
     obj->ukr = ukr;
 }
