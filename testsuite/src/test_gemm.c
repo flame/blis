@@ -270,7 +270,7 @@ void libblis_test_gemm_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -399,7 +399,7 @@ void libblis_test_gemm_md
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conjtrans( transb, &b );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );
@@ -483,8 +483,8 @@ void libblis_test_gemm_md_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
-	num_t  dt_comp = bli_obj_dt_proj_to_complex( c );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( c ) );
+	num_t  dt_comp = bli_dt_proj_to_complex( bli_obj_dt( c ) );
 	num_t  dt;
 
 	dim_t  m       = bli_obj_length( c );
@@ -542,9 +542,9 @@ void libblis_test_gemm_md_check
 	bli_gemv( &BLIS_ONE, &c0, &t, &BLIS_ZERO, &v );
 
 #if 0
-if ( bli_obj_is_scomplex( c ) &&
-     bli_obj_is_float( a ) &&
-     bli_obj_is_float( b ) )
+if ( bli_obj_dt( c ) == BLIS_SCOMPLEX &&
+     bli_obj_dt( a ) == BLIS_FLOAT &&
+     bli_obj_dt( b ) == BLIS_FLOAT )
 {
 bli_printm( "test_gemm.c: a", a, "%7.3f", "" );
 bli_printm( "test_gemm.c: b", b, "%7.3f", "" );
@@ -594,7 +594,7 @@ void libblis_test_gemm_check
      )
 {
 	num_t  dt      = bli_obj_dt( c );
-	num_t  dt_real = bli_obj_dt_proj_to_real( c );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( c ) );
 
 	dim_t  m       = bli_obj_length( c );
 	dim_t  n       = bli_obj_width( c );

@@ -50,7 +50,7 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
+	num_t     dt_absq_c  = bli_dt_proj_to_complex( bli_obj_dt( absq ) ); \
 \
 	void*     buf_chi; \
 	void*     buf_absq   = bli_obj_buffer_at_off( absq ); \
@@ -274,7 +274,7 @@ void PASTEMAC0(opname) \
 	bli_init_once(); \
 \
 	num_t     dt_chi; \
-	num_t     dt_zeta_c   = bli_obj_dt_proj_to_complex( zeta_r ); \
+	num_t     dt_zeta_c   = bli_dt_proj_to_complex( bli_obj_dt( zeta_r ) ); \
 \
 	void*     buf_chi; \
 \

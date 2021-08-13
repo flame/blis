@@ -101,7 +101,7 @@ BLIS_INLINE bool bli_gemm_md_is_crr( obj_t* a, obj_t* b, obj_t* c )
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_real( a )    &&
 	     bli_obj_is_real( b )    &&
-	     bli_obj_exec_domain( c ) == BLIS_REAL )
+	     bli_is_real( bli_obj_exec_dt( c ) ) )
 		r_val = TRUE;
 
 	return r_val;
@@ -121,7 +121,7 @@ BLIS_INLINE bool bli_gemm_md_is_ccr( obj_t* a, obj_t* b, obj_t* c )
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_complex( a ) &&
 	     bli_obj_is_real( b )    &&
-	     bli_obj_exec_domain( c ) == BLIS_COMPLEX )
+	     bli_is_complex( bli_obj_exec_dt( c ) ) )
 		r_val = TRUE;
 
 	return r_val;
@@ -141,7 +141,7 @@ BLIS_INLINE bool bli_gemm_md_is_crc( obj_t* a, obj_t* b, obj_t* c )
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_real( a )    &&
 	     bli_obj_is_complex( b ) &&
-	     bli_obj_exec_domain( c ) == BLIS_COMPLEX )
+	     bli_is_complex( bli_obj_exec_dt( c ) ) )
 		r_val = TRUE;
 
 	return r_val;

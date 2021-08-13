@@ -216,7 +216,7 @@ void libblis_test_trsv_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_diag( diaga, &a );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &x_save, &x );
@@ -278,7 +278,7 @@ void libblis_test_trsv_check
      )
 {
 	num_t   dt      = bli_obj_dt( x );
-	num_t   dt_real = bli_obj_dt_proj_to_real( x );
+	num_t   dt_real = bli_dt_proj_to_real( bli_obj_dt( x ) );
 
 	dim_t   m       = bli_obj_vector_dim( x );
 

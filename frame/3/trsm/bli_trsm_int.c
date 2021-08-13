@@ -99,7 +99,7 @@ void bli_trsm_int
 	// Set two bools: one based on the implied side parameter (the structure
 	// of the root object) and one based on the uplo field of the triangular
 	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( a ) )
+	if ( bli_obj_is_triangular( bli_obj_root( a ) ) )
 	{
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to B (the non-triangular matrix).
@@ -108,7 +108,7 @@ void bli_trsm_int
 			bli_obj_scalar_apply_scalar( alpha, &b_local );
 		}
 	}
-	else // if ( bli_obj_root_is_triangular( b ) )
+	else // if ( bli_obj_is_triangular( bli_obj_root( b ) ) )
 	{
 		// If alpha is non-unit, typecast and apply it to the scalar
 		// attached to A (the non-triangular matrix).

@@ -43,6 +43,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
@@ -121,6 +122,26 @@
   //#include <sys/time.h>
 
   #include <time.h>
+#endif
+
+// Standard integer types
+#ifdef __cplusplus
+  // For C++, include stdint.h.
+  #include <stdint.h>
+#elif __STDC_VERSION__ >= 199901L
+  // For C99 (or later), include stdint.h.
+  #include <stdint.h>
+  #include <stdbool.h>
+#else
+  // When stdint.h is not available, manually typedef the types we will use.
+  #ifdef _WIN32
+    typedef          __int32  int32_t;
+    typedef unsigned __int32 uint32_t;
+    typedef          __int64  int64_t;
+    typedef unsigned __int64 uint64_t;
+  #else
+    #error "Attempting to compile on pre-C99 system without stdint.h."
+  #endif
 #endif
 
 

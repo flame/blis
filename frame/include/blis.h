@@ -38,21 +38,21 @@
 #define BLIS_H
 
 
+// NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
+// YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
+
+// -- System headers --
+// NOTE: This header must be included before bli_config_macro_defs.h,
+//       and also before extern "C".
+
+#include "bli_system.h"
+
 // Allow C++ users to include this header file in their source code. However,
 // we make the extern "C" conditional on whether we're using a C++ compiler,
 // since regular C compilers don't understand the extern "C" construct.
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
-// YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
-
-// -- System headers --
-// NOTE: This header must be included before bli_config_macro_defs.h.
-
-#include "bli_system.h"
-
 
 // -- configure definitions --
 

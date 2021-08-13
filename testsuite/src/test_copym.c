@@ -236,7 +236,7 @@ void libblis_test_copym_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( x ) );
 
 	obj_t  norm_y_r;
 

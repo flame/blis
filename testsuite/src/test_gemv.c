@@ -226,7 +226,7 @@ void libblis_test_gemv_experiment
 	bli_obj_set_conjtrans( transa, &a );
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &y_save, &y );
@@ -294,7 +294,7 @@ void libblis_test_gemv_check
      )
 {
 	num_t  dt      = bli_obj_dt( y );
-	num_t  dt_real = bli_obj_dt_proj_to_real( y );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( y ) );
 
 	conj_t conja   = bli_obj_conj_status( a );
 
@@ -340,11 +340,11 @@ void libblis_test_gemv_check
 	bli_copyv( x,      &x_temp );
 	bli_copyv( y_orig, &y_temp );
 
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       &x_temp, &xT_temp );
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       &y_temp, &yT_temp );
-	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n, 
+	bli_acquire_vpart_f2b( BLIS_SUBPART1, 0, min_m_n,
 	                       y, &yT );
 
 	bli_scalv( &kappac, &xT_temp );

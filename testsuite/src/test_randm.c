@@ -172,7 +172,7 @@ void libblis_test_randm_experiment
 	// Create the test objects.
 	libblis_test_mobj_create( params, datatype, BLIS_NO_TRANSPOSE, x_store, m, n, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		time = bli_clock();
@@ -228,7 +228,7 @@ void libblis_test_randm_check
        double*        resid
      )
 {
-	num_t  dt_real = bli_obj_dt_proj_to_real( x );
+	num_t  dt_real = bli_dt_proj_to_real( bli_obj_dt( x ) );
 	dim_t  m_x     = bli_obj_length( x );
 	dim_t  n_x     = bli_obj_width( x );
 	obj_t  sum;
@@ -245,7 +245,7 @@ void libblis_test_randm_check
 	bli_obj_scalar_init_detached( dt_real, &sum );
 
 	bli_absumm( x, &sum );
-	
+
 	if ( bli_is_float( dt_real ) )
 	{
 		float*  sum_x = bli_obj_buffer_at_off( &sum );

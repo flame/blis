@@ -661,7 +661,7 @@ siz_t bli_thread_range_mdim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
+		if ( bli_obj_is_triangular( bli_obj_root( a ) ) ) bszid = BLIS_MR;
 		else                                   bszid = BLIS_NR;
 	}
 
@@ -720,7 +720,7 @@ siz_t bli_thread_range_ndim
 	// packing A and B.
 	if ( family == BLIS_TRSM )
 	{
-		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
+		if ( bli_obj_is_triangular( bli_obj_root( b ) ) ) bszid = BLIS_MR;
 		else                                   bszid = BLIS_NR;
 	}
 

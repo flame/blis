@@ -129,8 +129,8 @@ void bli_prune_unref_mparts( obj_t* p, mdim_t mdim_p,
 		// Only update the affected offset fields if the object in question
 		// is NOT a packed object. Otherwise, bli_obj_buffer_at_off() will
 		// compute the wrong address within the macro-kernel object wrapper.
-		if ( !bli_obj_is_packed( p ) ) { bli_obj_inc_off( mdim_p, off_inc, p ); }
-		if ( !bli_obj_is_packed( s ) ) { bli_obj_inc_off( mdim_s, off_inc, s ); }
+		if ( !bli_is_packed( bli_obj_pack_schema( p ) ) ) { bli_obj_inc_off( mdim_p, off_inc, p ); }
+		if ( !bli_is_packed( bli_obj_pack_schema( s ) ) ) { bli_obj_inc_off( mdim_s, off_inc, s ); }
 	}
 }
 

@@ -51,7 +51,7 @@ void bli_setrm
 
 	// Initialize a local scalar, alpha_real, using the real projection
 	// of the datatype of b.
-	bli_obj_scalar_init_detached( bli_obj_dt_proj_to_real( b ),
+	bli_obj_scalar_init_detached( bli_dt_proj_to_real( bli_obj_dt( b ) ),
 	                              &alpha_real );
 
 	// Copy/typecast alpha to alpha_real. This discards the imaginary
@@ -80,7 +80,7 @@ void bli_setrv
 
 	// Initialize a local scalar, alpha_real, using the real projection
 	// of the datatype of x.
-	bli_obj_scalar_init_detached( bli_obj_dt_proj_to_real( x ),
+	bli_obj_scalar_init_detached( bli_dt_proj_to_real( bli_obj_dt( x ) ),
 	                              &alpha_real );
 
 	// Copy/typecast alpha to alpha_real. This discards the imaginary
@@ -114,7 +114,7 @@ void bli_setim
 
 	// Initialize a local scalar, alpha_real, using the real projection
 	// of the datatype of b.
-	bli_obj_scalar_init_detached( bli_obj_dt_proj_to_real( b ),
+	bli_obj_scalar_init_detached( bli_dt_proj_to_real( bli_obj_dt( b ) ),
 	                              &alpha_real );
 
 	// Copy/typecast alpha to alpha_real. This discards the imaginary
@@ -146,7 +146,7 @@ void bli_setiv
 
 	// Initialize a local scalar, alpha_real, using the real projection
 	// of the datatype of x.
-	bli_obj_scalar_init_detached( bli_obj_dt_proj_to_real( x ),
+	bli_obj_scalar_init_detached( bli_dt_proj_to_real( bli_obj_dt( x ) ),
 	                              &alpha_real );
 
 	// Copy/typecast alpha to alpha_real. This discards the imaginary
