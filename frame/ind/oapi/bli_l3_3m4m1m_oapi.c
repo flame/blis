@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-// -- gemm/her2k/syr2k ---------------------------------------------------------
+// -- gemm ---------------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, cname, imeth, nstage ) \
@@ -124,22 +124,6 @@ GENFRONT( gemm, gemm, 4mh, 4 )
 GENFRONT( gemm, gemm, 4mb, 1 )
 GENFRONT( gemm, gemm, 4m1, 1 )
 GENFRONT( gemm, gemm, 1m,  1 )
-
-// her2k
-GENFRONT( her2k, gemm, 3mh, 3 )
-GENFRONT( her2k, gemm, 3m1, 1 )
-GENFRONT( her2k, gemm, 4mh, 4 )
-//GENFRONT( her2k, gemm, 4mb, 1 ) // Not implemented.
-GENFRONT( her2k, gemm, 4m1, 1 )
-GENFRONT( her2k, gemm, 1m,  1 )
-
-// syr2k
-GENFRONT( syr2k, gemm, 3mh, 3 )
-GENFRONT( syr2k, gemm, 3m1, 1 )
-GENFRONT( syr2k, gemm, 4mh, 4 )
-//GENFRONT( syr2k, gemm, 4mb, 1 ) // Not implemented.
-GENFRONT( syr2k, gemm, 4m1, 1 )
-GENFRONT( syr2k, gemm, 1m,  1 )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
@@ -233,89 +217,6 @@ GENFRONT( trmm3, gemm, 4mh, 4 )
 //GENFRONT( trmm3, gemm, 4mb, 1 ) // Not implemented.
 GENFRONT( trmm3, gemm, 4m1, 1 )
 GENFRONT( trmm3, gemm, 1m,  1 )
-
-
-// -- herk/syrk ----------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth, nstage ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	ind_t   ind      = PASTEMAC0(imeth); \
-	num_t   dt       = bli_obj_dt( c ); \
-	obj_t*  beta_use = beta; \
-\
-	dim_t   i; \
-\
-	/* If the objects are in the real domain, execute the native
-	   implementation. */ \
-	if ( bli_obj_is_real( c ) ) \
-	{ \
-		PASTEMAC(opname,nat)( alpha, a, beta, c, cntx, rntm ); \
-		return; \
-	} \
-\
-	/* Query a context for the current induced method. This context is
-	   managed and cached by the gks and should not be freed by the caller.
-	   Note that the datatype argument is needed because it will be passed
-	   in when bli_gks_query_ind_cntx() eventually calls the induced method's
-	   _cntx_init() function. */ \
-	cntx = bli_gks_query_ind_cntx( ind, dt ); \
-\
-	/* 3mh and 4mh change the context for each stage, and so in order to
-	   remain thread-safe, we must make a local copy of the context for
-	   those induced methods. */ \
-	cntx_t cntx_l; \
-	if ( ind == BLIS_3MH || ind == BLIS_4MH ) { cntx_l = *cntx; cntx = &cntx_l; } \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Some induced methods execute in multiple "stages". */ \
-	for ( i = 0; i < nstage; ++i ) \
-	{ \
-		/* Prepare the context for the ith stage of computation. */ \
-		bli_cntx_ind_stage( ind, i, cntx ); \
-\
-		/* For multi-stage methods, use BLIS_ONE as beta after the first
-		   stage. */ \
-		if ( i > 0 ) beta_use = &BLIS_ONE; \
-\
-		/* Invoke the operation's front end and request the default control
-		   tree. */ \
-		PASTEMAC(opname,_front)( alpha, a, beta_use, c, cntx, rntm, NULL ); \
-	} \
-}
-
-// herk
-GENFRONT( herk, gemm, 3mh, 3 )
-GENFRONT( herk, gemm, 3m1, 1 )
-GENFRONT( herk, gemm, 4mh, 4 )
-//GENFRONT( herk, gemm, 4mb, 1 ) // Not implemented.
-GENFRONT( herk, gemm, 4m1, 1 )
-GENFRONT( herk, gemm, 1m,  1 )
-
-// syrk
-GENFRONT( syrk, gemm, 3mh, 3 )
-GENFRONT( syrk, gemm, 3m1, 1 )
-GENFRONT( syrk, gemm, 4mh, 4 )
-//GENFRONT( syrk, gemm, 4mb, 1 ) // Not implemented.
-GENFRONT( syrk, gemm, 4m1, 1 )
-GENFRONT( syrk, gemm, 1m,  1 )
 
 
 // -- trmm ---------------------------------------------------------------------

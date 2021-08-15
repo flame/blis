@@ -36,7 +36,7 @@
 #include "blis.h"
 
 
-// -- gemm/her2k/syr2k ---------------------------------------------------------
+// -- gemm ---------------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, imeth ) \
@@ -68,8 +68,6 @@ void PASTEMAC(opname,imeth) \
 
 GENFRONT( gemm, ind )
 GENFRONT( gemmt, ind )
-GENFRONT( her2k, ind )
-GENFRONT( syr2k, ind )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
@@ -106,39 +104,6 @@ void PASTEMAC(opname,imeth) \
 GENFRONT( hemm, ind )
 GENFRONT( symm, ind )
 GENFRONT( trmm3, ind )
-
-
-// -- herk/syrk ----------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	num_t                dt   = bli_obj_dt( c ); \
-	PASTECH(opname,_oft) func = PASTEMAC(opname,ind_get_avail)( dt ); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	func( alpha, a, beta, c, cntx, rntm ); \
-}
-
-GENFRONT( herk, ind )
-GENFRONT( syrk, ind )
 
 
 // -- trmm/trsm ----------------------------------------------------------------

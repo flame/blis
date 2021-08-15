@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-#define FUNCPTR_T herk_fp
+#define FUNCPTR_T gemmt_fp
 
 typedef void (*FUNCPTR_T)
      (
@@ -57,13 +57,10 @@ typedef void (*FUNCPTR_T)
        thrinfo_t* thread
      );
 
-static FUNCPTR_T GENARRAY(ftypes,herk_l_ker_var2sl);
+static FUNCPTR_T GENARRAY(ftypes,gemmt_u_ker_var2);
 
-//
-// -- Macrokernel functions for slab partitioning ------------------------------
-//
 
-void bli_herk_l_ker_var2sl
+void bli_gemmt_u_ker_var2
      (
        obj_t*  a,
        obj_t*  b,
@@ -121,7 +118,7 @@ void bli_herk_l_ker_var2sl
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_exec];
+    f = ftypes[dt_exec];
 
 	// Invoke the function.
 	f( diagoffc,
@@ -204,7 +201,7 @@ void PASTEMAC(ch,varname) \
 	dim_t           n_iter, n_left; \
 	dim_t           m_cur; \
 	dim_t           n_cur; \
-	dim_t           i, j, ip; \
+	dim_t           i, j, jp; \
 	inc_t           rstep_a; \
 	inc_t           cstep_b; \
 	inc_t           rstep_c, cstep_c; \
@@ -227,29 +224,31 @@ void PASTEMAC(ch,varname) \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
 \
-	/* Safeguard: If the current panel of C is entirely above the diagonal,
+	/* Safeguard: If the current panel of C is entirely below the diagonal,
 	   it is not stored. So we do nothing. */ \
-	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) return; \
+	if ( bli_is_strictly_below_diag_n( diagoffc, m, n ) ) return; \
 \
-	/* If there is a zero region above where the diagonal of C intersects
-	   the left edge of the panel, adjust the pointer to C and A and treat
-	   this case as if the diagonal offset were zero. */ \
-	if ( diagoffc < 0 ) \
+	/* If there is a zero region to the left of where the diagonal of C
+	   intersects the top edge of the panel, adjust the pointer to C and B
+	   and treat this case as if the diagonal offset were zero.
+	   NOTE: It's possible that after this pruning that the diagonal offset
+	   is still positive (though it is guaranteed to be less than NR). */ \
+	if ( diagoffc > 0 ) \
 	{ \
-		ip       = -diagoffc / MR; \
-		i        = ip * MR; \
-		m        = m - i; \
-		diagoffc = -diagoffc % MR; \
-		c_cast   = c_cast + (i  )*rs_c; \
-		a_cast   = a_cast + (ip )*ps_a; \
+		jp       = diagoffc / NR; \
+		j        = jp * NR; \
+		n        = n - j; \
+		diagoffc = diagoffc % NR; \
+		c_cast   = c_cast + (j  )*cs_c; \
+		b_cast   = b_cast + (jp )*ps_b; \
 	} \
 \
-	/* If there is a zero region to the right of where the diagonal
-	   of C intersects the bottom of the panel, shrink it to prevent
-	   "no-op" iterations from executing. */ \
-	if ( diagoffc + m < n ) \
+	/* If there is a zero region below where the diagonal of C intersects
+	   the right edge of the panel, shrink it to prevent "no-op" iterations
+	   from executing. */ \
+	if ( -diagoffc + n < m ) \
 	{ \
-		n = diagoffc + m; \
+		m = -diagoffc + n; \
 	} \
 \
 	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
@@ -283,6 +282,9 @@ void PASTEMAC(ch,varname) \
 	bli_auxinfo_set_is_a( is_a, &aux ); \
 	bli_auxinfo_set_is_b( is_b, &aux ); \
 \
+	/* Save the desired output datatype (indicating no typecasting). */ \
+	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
+\
 	/* The 'thread' argument points to the thrinfo_t node for the 2nd (jr)
 	   loop around the microkernel. Here we query the thrinfo_t node for the
 	   1st (ir) loop around the microkernel. */ \
@@ -298,37 +300,38 @@ void PASTEMAC(ch,varname) \
 	dim_t ir_start, ir_end; \
 	dim_t jr_inc,   ir_inc; \
 \
-	/* Note that we partition the 2nd loop into two regions: the rectangular
-	   part of C, and the triangular portion. */ \
-	dim_t n_iter_rct; \
+	/* Note that we partition the 2nd loop into two regions: the triangular
+	   part of C, and the rectangular portion. */ \
 	dim_t n_iter_tri; \
+	dim_t n_iter_rct; \
 \
-	if ( bli_is_strictly_below_diag_n( diagoffc, m, n ) ) \
+	if ( bli_is_strictly_above_diag_n( diagoffc, m, n ) ) \
 	{ \
 		/* If the entire panel of C does not intersect the diagonal, there is
-		   no triangular region, and therefore we can skip the second set of
+		   no triangular region, and therefore we can skip the first set of
 		   loops. */ \
-		n_iter_rct = n_iter; \
 		n_iter_tri = 0; \
+		n_iter_rct = n_iter; \
 	} \
 	else \
 	{ \
 		/* If the panel of C does intersect the diagonal, compute the number of
-		   iterations in the rectangular region by dividing NR into the diagonal
-		   offset. Any remainder from this integer division is discarded, which
-		   is what we want. That is, we want the rectangular region to contain
-		   as many columns of whole microtiles as possible without including any
-		   microtiles that intersect the diagonal. The number of iterations in
-		   the triangular (or trapezoidal) region is computed as the remaining
+		   iterations in the triangular (or trapezoidal) region by dividing NR
+		   into the number of rows in C. A non-zero remainder means we need to
+		   add one additional iteration. That is, we want the triangular region
+		   to contain as few columns of whole microtiles as possible while still
+		   including all microtiles that intersect the diagonal. The number of
+		   iterations in the rectangular region is computed as the remaining
 		   number of iterations in the n dimension. */ \
-		n_iter_rct = diagoffc / NR; \
-		n_iter_tri = n_iter - n_iter_rct; \
+		n_iter_tri = ( m + diagoffc ) / NR + ( ( m + diagoffc ) % NR ? 1 : 0 ); \
+		n_iter_rct = n_iter - n_iter_tri; \
 	} \
 \
-	/* Use slab assignment of micropanels to threads in the 2nd and 1st
-	   loops for the initial rectangular region of C (if it exists). */ \
-	bli_thread_range_jrir_sl( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
-	bli_thread_range_jrir_sl( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
+	/* Use round-robin assignment of micropanels to threads in the 2nd loop
+	   and the default (slab or rr) partitioning in the 1st loop for the
+	   initial triangular region of C (if it exists). */ \
+	bli_thread_range_jrir_rr( thread, n_iter_tri, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	bli_thread_range_jrir   ( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_start; j < jr_end; j += jr_inc ) \
@@ -353,19 +356,18 @@ void PASTEMAC(ch,varname) \
 			a1  = a_cast + i * rstep_a; \
 			c11 = c1     + i * rstep_c; \
 \
-			/* No need to compute the diagonal offset for the rectangular
-			   region. */ \
-			/*diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR;*/ \
+			/* Compute the diagonal offset for the submatrix at (i,j). */ \
+			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_herk_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter_sl( i, m_iter, ir_tid, ir_nt ) ) \
+			a2 = bli_gemmt_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_herk_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter_sl( j, n_iter, jr_tid, jr_nt ) ) \
+				b2 = bli_gemmt_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter_rr( j, n_iter, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -377,10 +379,33 @@ void PASTEMAC(ch,varname) \
 			/* If the diagonal intersects the current MR x NR submatrix, we
 			   compute it the temporary buffer and then add in the elements
 			   on or below the diagonal.
-			   Otherwise, if the submatrix is strictly below the diagonal,
+			   Otherwise, if the submatrix is strictly above the diagonal,
 			   we compute and store as we normally would.
-			   And if we're strictly above the diagonal, we do nothing and
+			   And if we're strictly below the diagonal, we do nothing and
 			   continue. */ \
+			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
+			{ \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+				  k, \
+				  alpha_cast, \
+				  a1, \
+				  b1, \
+				  zero, \
+				  ct, rs_ct, cs_ct, \
+				  &aux, \
+				  cntx  \
+				); \
+\
+				/* Scale C and add the result to only the stored part. */ \
+				PASTEMAC(ch,xpbys_mxn_u)( diagoffc_ij, \
+				                          m_cur, n_cur, \
+				                          ct,  rs_ct, cs_ct, \
+				                          beta_cast, \
+				                          c11, rs_c,  cs_c ); \
+			} \
+			else if ( bli_is_strictly_above_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -423,18 +448,20 @@ void PASTEMAC(ch,varname) \
 		} \
 	} \
 \
-	/* If there is no triangular region, then we're done. */ \
-	if ( n_iter_tri == 0 ) return; \
+	/* If there is no rectangular region, then we're done. */ \
+	if ( n_iter_rct == 0 ) return; \
 \
-	/* Use round-robin assignment of micropanels to threads in the 2nd
-	   loop and slab partitioning in the 1st loop for the remaining
-	   triangular region of C. */ \
-	bli_thread_range_jrir_rr( thread, n_iter_tri, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+	/* Determine the thread range and increment for the 2nd loop of the
+	   remaining rectangular region of C (and also use default partitioning
+	   for the 1st loop).
+	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	   slab or round-robin partitioning was requested at configure-time. */ \
+	bli_thread_range_jrir( thread, n_iter_rct, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
 \
-	/* Advance the start and end iteration offsets for the triangular region
-	   by the number of iterations used for the rectangular region. */ \
-	jr_start += n_iter_rct; \
-	jr_end   += n_iter_rct; \
+	/* Advance the start and end iteration offsets for the rectangular region
+	   by the number of iterations used for the triangular region. */ \
+	jr_start += n_iter_tri; \
+	jr_end   += n_iter_tri; \
 \
 	/* Loop over the n dimension (NR columns at a time). */ \
 	for ( j = jr_start; j < jr_end; j += jr_inc ) \
@@ -459,18 +486,19 @@ void PASTEMAC(ch,varname) \
 			a1  = a_cast + i * rstep_a; \
 			c11 = c1     + i * rstep_c; \
 \
-			/* Compute the diagonal offset for the submatrix at (i,j). */ \
-			diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR; \
+			/* No need to compute the diagonal offset for the rectangular
+			   region. */ \
+			/*diagoffc_ij = diagoffc - (doff_t)j*NR + (doff_t)i*MR;*/ \
 \
 			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_herk_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter_rr( i, m_iter, ir_tid, ir_nt ) ) \
+			a2 = bli_gemmt_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+			if ( bli_is_last_iter( i, m_iter, ir_tid, ir_nt ) ) \
 			{ \
 				a2 = a_cast; \
-				b2 = bli_herk_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter_rr( j, n_iter, jr_tid, jr_nt ) ) \
+				b2 = bli_gemmt_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+				if ( bli_is_last_iter( j, n_iter, jr_tid, jr_nt ) ) \
 					b2 = b_cast; \
 			} \
 \
@@ -482,33 +510,10 @@ void PASTEMAC(ch,varname) \
 			/* If the diagonal intersects the current MR x NR submatrix, we
 			   compute it the temporary buffer and then add in the elements
 			   on or below the diagonal.
-			   Otherwise, if the submatrix is strictly below the diagonal,
+			   Otherwise, if the submatrix is strictly above the diagonal,
 			   we compute and store as we normally would.
-			   And if we're strictly above the diagonal, we do nothing and
+			   And if we're strictly below the diagonal, we do nothing and
 			   continue. */ \
-			if ( bli_intersects_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
-			{ \
-				/* Invoke the gemm micro-kernel. */ \
-				gemm_ukr \
-				( \
-				  k, \
-				  alpha_cast, \
-				  a1, \
-				  b1, \
-				  zero, \
-				  ct, rs_ct, cs_ct, \
-				  &aux, \
-				  cntx  \
-				); \
-\
-				/* Scale C and add the result to only the stored part. */ \
-				PASTEMAC(ch,xpbys_mxn_l)( diagoffc_ij, \
-				                          m_cur, n_cur, \
-				                          ct,  rs_ct, cs_ct, \
-				                          beta_cast, \
-				                          c11, rs_c,  cs_c ); \
-			} \
-			else if ( bli_is_strictly_below_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
 				/* Handle interior and edge cases separately. */ \
 				if ( m_cur == MR && n_cur == NR ) \
@@ -552,5 +557,5 @@ void PASTEMAC(ch,varname) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC0( herk_l_ker_var2sl )
+INSERT_GENTFUNC_BASIC0( gemmt_u_ker_var2 )
 

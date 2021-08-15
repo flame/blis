@@ -48,13 +48,7 @@
 #include "bli_l3_packm.h"
 
 // Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
 #include "bli_l3_oapi.h"
-#include "bli_xapi_undef.h"
-
-#include "bli_oapi_ba.h"
-#include "bli_l3_oapi.h"
-#include "bli_xapi_undef.h"
 
 // Prototype typed APIs (expert and non-expert).
 #include "bli_tapi_ex.h"
@@ -93,11 +87,7 @@
 // Operation-specific headers.
 #include "bli_gemm.h"
 #include "bli_hemm.h"
-#include "bli_herk.h"
-#include "bli_her2k.h"
 #include "bli_symm.h"
-#include "bli_syrk.h"
-#include "bli_syr2k.h"
 #include "bli_trmm.h"
 #include "bli_trmm3.h"
 #include "bli_trsm.h"

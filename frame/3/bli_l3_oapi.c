@@ -192,30 +192,36 @@ void bli_her2k_ex
        rntm_t* rntm
      )
 {
-	bli_init_once();
+    bli_init_once();
 
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */
-	if ( bli_obj_is_complex( c ) &&
-	     bli_obj_is_complex( a ) &&
-	     bli_obj_is_complex( b ) )
-	{
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */
-		bli_her2kind( alpha, a, b, beta, c, cntx, rntm );
-	}
-	else
-	{
-		bli_her2knat( alpha, a, b, beta, c, cntx, rntm );
-	}
+    obj_t ah;
+    obj_t bh;
+    obj_t alphah;
+
+	bli_obj_alias_to( alpha, &alphah );
+	bli_obj_toggle_conj( &alphah );
+
+	bli_obj_alias_to( a, &ah );
+	bli_obj_induce_trans( &ah );
+	bli_obj_toggle_conj( &ah );
+
+	bli_obj_alias_to( b, &bh );
+	bli_obj_induce_trans( &bh );
+	bli_obj_toggle_conj( &bh );
+
+	// Invoke gemmt twice, using beta only the first time.
+
+    bli_gemmt_ex(   alpha, a, &bh,      beta, c, cntx, rntm );
+    bli_gemmt_ex( &alphah, b, &ah, &BLIS_ONE, c, cntx, rntm );
+
+	// The Hermitian rank-2k product was computed as A*B'+B*A', even for
+	// the diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-2k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+
+    bli_setid( &BLIS_ZERO, c );
 }
 
 void bli_her2k
@@ -241,30 +247,20 @@ void bli_syr2k_ex
        rntm_t* rntm
      )
 {
-	bli_init_once();
+    bli_init_once();
 
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */
-	if ( bli_obj_is_complex( c ) &&
-	     bli_obj_is_complex( a ) &&
-	     bli_obj_is_complex( b ) )
-	{
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */
-		bli_syr2kind( alpha, a, b, beta, c, cntx, rntm );
-	}
-	else
-	{
-		bli_syr2knat( alpha, a, b, beta, c, cntx, rntm );
-	}
+    obj_t at;
+    obj_t bt;
+
+	bli_obj_alias_to( b, &bt );
+	bli_obj_induce_trans( &bt );
+	bli_obj_alias_to( a, &at );
+	bli_obj_induce_trans( &at );
+
+	// Invoke gemmt twice, using beta only the first time.
+
+    bli_gemmt_ex( alpha, a, &bt,      beta, c, cntx, rntm );
+    bli_gemmt_ex( alpha, b, &at, &BLIS_ONE, c, cntx, rntm );
 }
 
 void bli_syr2k
@@ -433,26 +429,24 @@ void bli_herk_ex
        rntm_t* rntm
      )
 {
-	bli_init_once();
+    bli_init_once();
 
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */
-		bli_herkind( alpha, a, beta, c, cntx, rntm );
-	}
-	else
-	{
-		bli_herknat( alpha, a, beta, c, cntx, rntm );
-	}
+    obj_t ah;
+
+	bli_obj_alias_to( a, &ah );
+	bli_obj_induce_trans( &ah );
+    bli_obj_toggle_conj( &ah );
+
+    bli_gemmt_ex( alpha, a, &ah, beta, c, cntx, rntm );
+
+	// The Hermitian rank-k product was computed as A*A', even for the
+	// diagonal elements. Mathematically, the imaginary components of
+	// diagonal elements of a Hermitian rank-k product should always be
+	// zero. However, in practice, they sometimes accumulate meaningless
+	// non-zero values. To prevent this, we explicitly set those values
+	// to zero before returning.
+
+	bli_setid( &BLIS_ZERO, c );
 }
 
 void bli_herk
@@ -476,26 +470,14 @@ void bli_syrk_ex
        rntm_t* rntm
      )
 {
-	bli_init_once();
+    bli_init_once();
 
-	/* Only proceed with an induced method if all operands have the same
-	   (complex) datatype. If any datatypes differ, skip the induced method
-	   chooser function and proceed directly with native execution, which is
-	   where mixed datatype support will be implemented (if at all). */
-	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_is_complex( c ) )
-	{
-		/* Invoke the operation's "ind" function--its induced method front-end.
-		   For complex problems, it calls the highest priority induced method
-		   that is available (ie: implemented and enabled), and if none are
-		   enabled, it calls native execution. (For real problems, it calls
-		   the operation's native execution interface.) */
-		bli_syrkind( alpha, a, beta, c, cntx, rntm );
-	}
-	else
-	{
-		bli_syrknat( alpha, a, beta, c, cntx, rntm );
-	}
+    obj_t at;
+
+	bli_obj_alias_to( a, &at );
+	bli_obj_induce_trans( &at );
+
+    bli_gemmt_ex( alpha, a, &at, beta, c, cntx, rntm );
 }
 
 void bli_syrk

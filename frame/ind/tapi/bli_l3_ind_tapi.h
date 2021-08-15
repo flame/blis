@@ -87,56 +87,6 @@ INSERT_GENTPROT_BASIC0( hemm4m1 )
 INSERT_GENTPROT_BASIC0( hemm1m )
 
 
-#undef  GENTPROTR
-#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       uplo_t   uploc, \
-       trans_t  transa, \
-       trans_t  transb, \
-       dim_t    m, \
-       dim_t    k, \
-       ctype*   alpha, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       ctype*   b, inc_t rs_b, inc_t cs_b, \
-       ctype_r* beta, \
-       ctype*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t*  cntx, \
-       rntm_t*  rntmx  \
-     );
-
-INSERT_GENTPROTR_BASIC0( her2k3mh )
-INSERT_GENTPROTR_BASIC0( her2k3m1 )
-INSERT_GENTPROTR_BASIC0( her2k4mh )
-INSERT_GENTPROTR_BASIC0( her2k4m1 )
-INSERT_GENTPROTR_BASIC0( her2k1m )
-
-
-#undef  GENTPROTR
-#define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       uplo_t   uploc, \
-       trans_t  transa, \
-       dim_t    m, \
-       dim_t    k, \
-       ctype_r* alpha, \
-       ctype*   a, inc_t rs_a, inc_t cs_a, \
-       ctype_r* beta, \
-       ctype*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntmx  \
-     );
-
-INSERT_GENTPROTR_BASIC0( herk3mh )
-INSERT_GENTPROTR_BASIC0( herk3m1 )
-INSERT_GENTPROTR_BASIC0( herk4mh )
-INSERT_GENTPROTR_BASIC0( herk4m1 )
-INSERT_GENTPROTR_BASIC0( herk1m )
-
-
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
@@ -162,56 +112,6 @@ INSERT_GENTPROT_BASIC0( symm3m1 )
 INSERT_GENTPROT_BASIC0( symm4mh )
 INSERT_GENTPROT_BASIC0( symm4m1 )
 INSERT_GENTPROT_BASIC0( symm1m )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       uplo_t  uploc, \
-       trans_t transa, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     );
-
-INSERT_GENTPROT_BASIC0( syr2k3mh )
-INSERT_GENTPROT_BASIC0( syr2k3m1 )
-INSERT_GENTPROT_BASIC0( syr2k4mh )
-INSERT_GENTPROT_BASIC0( syr2k4m1 )
-INSERT_GENTPROT_BASIC0( syr2k1m )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       uplo_t  uploc, \
-       trans_t transa, \
-       dim_t   m, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     );
-
-INSERT_GENTPROT_BASIC0( syrk3mh )
-INSERT_GENTPROT_BASIC0( syrk3m1 )
-INSERT_GENTPROT_BASIC0( syrk4mh )
-INSERT_GENTPROT_BASIC0( syrk4m1 )
-INSERT_GENTPROT_BASIC0( syrk1m )
 
 
 #undef  GENTPROT

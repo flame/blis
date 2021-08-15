@@ -52,9 +52,9 @@ static float C_pack[F_SCRATCH_DIM]  __attribute__((aligned(64)));
 #define D_SCRATCH_DIM (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES)
 static double D_A_pack[D_SCRATCH_DIM]  __attribute__((aligned(64)));
 static double D_C_pack[D_SCRATCH_DIM]  __attribute__((aligned(64)));
-#define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called. 
-#define AT_MR 4 // The kernel dimension of the A transpose SYRK kernel.(AT_MR * NR).
-static err_t bli_ssyrk_small
+#define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called.
+#define AT_MR 4 // The kernel dimension of the A transpose GEMMT kernel.(AT_MR * NR).
+static err_t bli_sgemmt_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -65,7 +65,7 @@ static err_t bli_ssyrk_small
        cntl_t* cntl
      );
 
-static err_t bli_dsyrk_small
+static err_t bli_dgemmt_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -76,7 +76,7 @@ static err_t bli_dsyrk_small
        cntl_t* cntl
      );
 
-static err_t bli_ssyrk_small_atbn
+static err_t bli_sgemmt_small_atbn
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -87,7 +87,7 @@ static err_t bli_ssyrk_small_atbn
        cntl_t* cntl
      );
 
-static err_t bli_dsyrk_small_atbn
+static err_t bli_dgemmt_small_atbn
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -98,11 +98,11 @@ static err_t bli_dsyrk_small_atbn
        cntl_t* cntl
      );
 /*
-* The bli_syrk_small function will use the
+* The bli_gemmt_small function will use the
 * custom MRxNR kernels, to perform the computation.
 * The custom kernels are used if the [M * N] < 240 * 240
 */
-err_t bli_syrk_small
+err_t bli_gemmt_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -113,20 +113,20 @@ err_t bli_syrk_small
        cntl_t* cntl
      )
 {
-	// FGVZ: This code was originally in bli_syrk_front(). However, it really
-	// fits more naturally here within the bli_syrk_small() function. This
+	// FGVZ: This code was originally in bli_gemmt_front(). However, it really
+	// fits more naturally here within the bli_gemmt_small() function. This
 	// becomes a bit more obvious now that the code is here, as it contains
-	// cpp macros such as BLIS_SMALL_MATRIX_A_THRES_M_SYRK, which are specific
+	// cpp macros such as BLIS_SMALL_MATRIX_A_THRES_M_GEMMT, which are specific
 	// to this implementation.
 	if ( bli_obj_has_trans( a ) )
 	{
 		// Continue with small implementation.
 		;
 	}
-	else if ( ( bli_obj_length( a ) <= BLIS_SMALL_MATRIX_A_THRES_M_SYRK &&
-	            bli_obj_width( a )  <  BLIS_SMALL_MATRIX_A_THRES_N_SYRK ) ||
-	          ( bli_obj_length( a ) <  BLIS_SMALL_MATRIX_A_THRES_M_SYRK &&
-	            bli_obj_width( a )  <= BLIS_SMALL_MATRIX_A_THRES_N_SYRK ) )
+	else if ( ( bli_obj_length( a ) <= BLIS_SMALL_MATRIX_A_THRES_M_GEMMT &&
+	            bli_obj_width( a )  <  BLIS_SMALL_MATRIX_A_THRES_N_GEMMT ) ||
+	          ( bli_obj_length( a ) <  BLIS_SMALL_MATRIX_A_THRES_M_GEMMT &&
+	            bli_obj_width( a )  <= BLIS_SMALL_MATRIX_A_THRES_N_GEMMT ) )
 	{
 		// Continue with small implementation.
 		;
@@ -162,11 +162,11 @@ err_t bli_syrk_small
         {
             if (dt == BLIS_FLOAT)
             {
-                return bli_ssyrk_small_atbn(alpha, a, b, beta, c, cntx, cntl);
+                return bli_sgemmt_small_atbn(alpha, a, b, beta, c, cntx, cntl);
             }
             else if (dt == BLIS_DOUBLE)
             {
-                return bli_dsyrk_small_atbn(alpha, a, b, beta, c, cntx, cntl);
+                return bli_dgemmt_small_atbn(alpha, a, b, beta, c, cntx, cntl);
             }
         }
 
@@ -175,19 +175,19 @@ err_t bli_syrk_small
 
     if (dt == BLIS_DOUBLE)
     {
-        return bli_dsyrk_small(alpha, a, b, beta, c, cntx, cntl);
+        return bli_dgemmt_small(alpha, a, b, beta, c, cntx, cntl);
     }
 
     if (dt == BLIS_FLOAT)
     {
-        return bli_ssyrk_small(alpha, a, b, beta, c, cntx, cntl);
+        return bli_sgemmt_small(alpha, a, b, beta, c, cntx, cntl);
     }
 
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
 
-static err_t bli_ssyrk_small
+static err_t bli_sgemmt_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -240,7 +240,7 @@ static err_t bli_ssyrk_small
         beta_cast = (beta->buffer);
         int required_packing_A = 1;
 
-        // when N is equal to 1 call GEMV instead of SYRK
+        // when N is equal to 1 call GEMV instead of GEMMT
         if (N == 1)
         {
             bli_gemv
@@ -1584,7 +1584,7 @@ static err_t bli_ssyrk_small
                 }
             }
         }
-        
+
         //copy/compute sryk values back to C using SIMD
         if ( bli_seq0( *beta_cast ) )
         {//just copy in case of beta = 0
@@ -1673,7 +1673,7 @@ static err_t bli_ssyrk_small
                 _i = 0;
                 for ( _l = 0; _l < k; _l++ )
                 {
-                    ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC));     
+                    ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC));
                     ymm0 = _mm256_loadu_ps((C + _i*rsc));
                     ymm0 = _mm256_fmadd_ps(ymm2, ymm1, ymm0);
                     _mm256_storeu_ps((matCbuf + _i*rs_matC), ymm0);
@@ -1703,11 +1703,11 @@ static err_t bli_ssyrk_small
                     _l = 0;
                     while ( _l < k )
                     {
-                        ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC + _j*ldc_matC));       
+                        ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC + _j*ldc_matC));
                         ymm0 = _mm256_loadu_ps((C + _i*rsc + _j*ldc));
                         ymm0 = _mm256_fmadd_ps(ymm2, ymm1, ymm0);
                         _mm256_storeu_ps((matCbuf + _i*rs_matC + _j*ldc_matC), ymm0);
-                        
+
                         _i += 8;
                         _l++;
                     }
@@ -1729,8 +1729,8 @@ static err_t bli_ssyrk_small
                     _i = 0;
                     _l = 0;
                     while ( _l < k )
-                    {                                   
-                        ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC + _j*ldc_matC));       
+                    {
+                        ymm2 = _mm256_loadu_ps((matCbuf + _i*rs_matC + _j*ldc_matC));
                         ymm0 = _mm256_loadu_ps((C + _i*rsc + _j*ldc));
                         ymm0 = _mm256_fmadd_ps(ymm2, ymm1, ymm0);
                         _mm256_storeu_ps((matCbuf + _i*rs_matC + _j*ldc_matC), ymm0);
@@ -1747,7 +1747,7 @@ static err_t bli_ssyrk_small
                 }
             }
         }
-        
+
         return BLIS_SUCCESS;
     }
     else
@@ -1756,7 +1756,7 @@ static err_t bli_ssyrk_small
 
 };
 
-static err_t bli_dsyrk_small
+static err_t bli_dgemmt_small
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -1810,7 +1810,7 @@ static err_t bli_dsyrk_small
         beta_cast = (beta->buffer);
         int required_packing_A = 1;
 
-        // when N is equal to 1 call GEMV instead of SYRK
+        // when N is equal to 1 call GEMV instead of GEMMT
         if (N == 1)
         {
             bli_gemv
@@ -3154,7 +3154,7 @@ static err_t bli_dsyrk_small
                 }
             }
         }
-        
+
         //copy/compute sryk values back to C using SIMD
         if ( bli_seq0( *beta_cast ) )
         {//just copy for beta = 0
@@ -3195,7 +3195,7 @@ static err_t bli_dsyrk_small
                     {
                         ymm0 = _mm256_loadu_pd((C + _i*rsc + _j*ldc));
                         _mm256_storeu_pd((matCbuf + _i*rs_matC + _j*ldc_matC), ymm0);
-                        
+
                         _i += 4;
                         _l++;
                     }
@@ -3243,7 +3243,7 @@ static err_t bli_dsyrk_small
                 _i = 0;
                 for ( _l = 0; _l < k; _l++ )
                 {
-                    ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC));     
+                    ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC));
                     ymm0 = _mm256_loadu_pd((C + _i*rsc));
                     ymm0 = _mm256_fmadd_pd(ymm2, ymm1, ymm0);
                     _mm256_storeu_pd((matCbuf + _i*rs_matC), ymm0);
@@ -3273,7 +3273,7 @@ static err_t bli_dsyrk_small
                     _l = 0;
                     while ( _l < k )
                     {
-                        ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC + _j*ldc_matC));       
+                        ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC + _j*ldc_matC));
                         ymm0 = _mm256_loadu_pd((C + _i*rsc + _j*ldc));
                         ymm0 = _mm256_fmadd_pd(ymm2, ymm1, ymm0);
                         _mm256_storeu_pd((matCbuf + _i*rs_matC + _j*ldc_matC), ymm0);
@@ -3299,8 +3299,8 @@ static err_t bli_dsyrk_small
                     _i = 0;
                     _l = 0;
                     while ( _l < k )
-                    {                                   
-                        ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC + _j*ldc_matC));       
+                    {
+                        ymm2 = _mm256_loadu_pd((matCbuf + _i*rs_matC + _j*ldc_matC));
                         ymm0 = _mm256_loadu_pd((C + _i*rsc + _j*ldc));
                         ymm0 = _mm256_fmadd_pd(ymm2, ymm1, ymm0);
                         _mm256_storeu_pd((matCbuf + _i*rs_matC + _j*ldc_matC), ymm0);
@@ -3317,7 +3317,7 @@ static err_t bli_dsyrk_small
                 }
             }
         }
-        
+
         return BLIS_SUCCESS;
     }
     else
@@ -3326,7 +3326,7 @@ static err_t bli_dsyrk_small
 
 };
 
-static err_t bli_ssyrk_small_atbn
+static err_t bli_sgemmt_small_atbn
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -3364,7 +3364,7 @@ static err_t bli_ssyrk_small_atbn
     alpha_cast = (alpha->buffer);
     beta_cast = (beta->buffer);
 
-    // The non-copy version of the A^T SYRK gives better performance for the small M cases.
+    // The non-copy version of the A^T GEMMT gives better performance for the small M cases.
     // The threshold is controlled by BLIS_ATBN_M_THRES
     if (M <= BLIS_ATBN_M_THRES)
     {
@@ -3715,7 +3715,7 @@ static err_t bli_ssyrk_small_atbn
                 }
             }
         }
-        
+
         //copy/compute sryk values back to C
         if ( bli_seq0( *beta_cast ) ) //when beta is 0, just copy result to C
         {
@@ -3774,7 +3774,7 @@ static err_t bli_ssyrk_small_atbn
         return BLIS_NONCONFORMAL_DIMENSIONS;
 }
 
-static err_t bli_dsyrk_small_atbn
+static err_t bli_dgemmt_small_atbn
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -3812,7 +3812,7 @@ static err_t bli_dsyrk_small_atbn
     alpha_cast = (alpha->buffer);
     beta_cast = (beta->buffer);
 
-    // The non-copy version of the A^T SYRK gives better performance for the small M cases.
+    // The non-copy version of the A^T GEMMT gives better performance for the small M cases.
     // The threshold is controlled by BLIS_ATBN_M_THRES
     if (M <= BLIS_ATBN_M_THRES)
     {
@@ -3968,7 +3968,7 @@ static err_t bli_dsyrk_small_atbn
                 result *= (*alpha_cast);
                 tC[3] = result/* + tC[3] * (*beta_cast)*/;
 
-      
+
                 tC += ldc;
                 ymm6 = _mm256_hadd_pd(ymm6, ymm6);
                 _mm256_storeu_pd(scratch, ymm6);
@@ -4199,7 +4199,7 @@ static err_t bli_dsyrk_small_atbn
                 }
             }
         }
-        
+
         return BLIS_SUCCESS;
     }
     else
