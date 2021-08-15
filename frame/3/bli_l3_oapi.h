@@ -38,72 +38,217 @@
 // Prototype object-based interfaces.
 //
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c  \
-       BLIS_OAPI_EX_PARAMS  \
+BLIS_EXPORT_BLIS void bli_gemm_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 
-GENPROT( gemm )
-GENPROT( gemmt )
-GENPROT( her2k )
-GENPROT( syr2k )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c  \
-       BLIS_OAPI_EX_PARAMS  \
+BLIS_EXPORT_BLIS void bli_gemm
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
      );
 
-GENPROT( hemm )
-GENPROT( symm )
-GENPROT( trmm3 )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c  \
-       BLIS_OAPI_EX_PARAMS  \
+BLIS_EXPORT_BLIS void bli_gemmt_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
      );
 
-GENPROT( herk )
-GENPROT( syrk )
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
-     ( \
-       side_t  side, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b  \
-       BLIS_OAPI_EX_PARAMS  \
+BLIS_EXPORT_BLIS void bli_gemmt
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
      );
 
-GENPROT( trmm )
-GENPROT( trsm )
+BLIS_EXPORT_BLIS void bli_her2k_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
 
+BLIS_EXPORT_BLIS void bli_her2k
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_syr2k_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_syr2k
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_hemm_ex
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+BLIS_EXPORT_BLIS void bli_hemm
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_symm_ex
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+BLIS_EXPORT_BLIS void bli_symm
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_trmm3_ex
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+BLIS_EXPORT_BLIS void bli_trmm3
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_herk_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_herk
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_syrk_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_syrk
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+BLIS_EXPORT_BLIS void bli_trmm_ex
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_trmm
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
+
+BLIS_EXPORT_BLIS void bli_trsm_ex
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+BLIS_EXPORT_BLIS void bli_trsm
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b
+     );
