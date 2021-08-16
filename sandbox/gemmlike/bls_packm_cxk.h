@@ -14,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of copyright holder(s) nor the names
+    - Neither the name(s) of the copyright holder(s) nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -32,27 +32,27 @@
 
 */
 
-#ifndef BLIS_SANDBOX_H
-#define BLIS_SANDBOX_H
 
-// NOTE: This header is the only header required to be present in the sandbox
-// implementation directory.
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTECH2(bls_,ch,varname) \
+     ( \
+       conj_t  conja, \
+       pack_t  schema, \
+       dim_t   panel_dim, \
+       dim_t   panel_dim_max, \
+       dim_t   panel_len, \
+       dim_t   panel_len_max, \
+       ctype*  kappa, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  p,             inc_t ldp, \
+       cntx_t* cntx  \
+     );
 
-// This header should contain (or #include) any definitions that must be
-// folded into blis.h. Typically, it will remain empty since any header
-// definitions specific to the sandbox implementation will not need to be
-// made available to applications (or the framework) during compilation.
+//INSERT_GENTPROT_BASIC0( packm_cxk )
+GENTPROT( float,    s, packm_cxk )
+GENTPROT( double,   d, packm_cxk )
+GENTPROT( scomplex, c, packm_cxk )
+GENTPROT( dcomplex, z, packm_cxk )
 
-#include "bls_gemm.h"
-#include "bls_gemm_var.h"
-
-#include "bls_l3_packm_a.h"
-#include "bls_l3_packm_b.h"
-#include "bls_l3_packm_var.h"
-
-#include "bls_packm_cxk.h"
-
-#include "bls_l3_decor.h"
-
-
-#endif

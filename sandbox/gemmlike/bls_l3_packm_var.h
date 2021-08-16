@@ -61,3 +61,8 @@ GENTPROT( double,   d, packm_var1 )
 GENTPROT( scomplex, c, packm_var1 )
 GENTPROT( dcomplex, z, packm_var1 )
 
+//INSERT_GENTPROT_BASIC0( packm_var2 )
+GENTPROT( float,    s, packm_var2 )
+GENTPROT( double,   d, packm_var2 )
+GENTPROT( scomplex, c, packm_var2 )
+GENTPROT( dcomplex, z, packm_var2 )
