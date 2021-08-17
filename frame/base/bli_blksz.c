@@ -272,12 +272,11 @@ dim_t bli_determine_blocksize_f
 		b_alg = bli_blksz_get_def( dt, bsize );
 		b_max = bli_blksz_get_max( dt, bsize );
 
-		b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
-
 		// If b_use != 0, this means that trsm blocksizes are set
 		// and we continue with trsm-specific blocksizes.
 		// Else, we query L3 blocksizes and use them for TRSM execution.
-		if( b_use > 0 ) return b_use;
+		if( b_alg > 0 ) return bli_determine_blocksize_f_sub( i, dim, b_alg, b_max);
+
 	}
 
 	bsize = bli_cntx_get_blksz( bszid, cntx );
@@ -314,12 +313,11 @@ dim_t bli_determine_blocksize_b
 		b_alg = bli_blksz_get_def( dt, bsize );
 		b_max = bli_blksz_get_max( dt, bsize );
 
-		b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
-
 		// If b_use != 0, this means that trsm blocksizes are set
 		// and we continue with trsm-specific blocksizes.
 		// Else, we query L3 blocksizes and use them for TRSM execution.
-		if( b_use > 0 ) return b_use;
+		if( b_alg > 0 ) bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
+
 	}
 
 	bsize = bli_cntx_get_blksz( bszid, cntx );
