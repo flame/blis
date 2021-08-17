@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,15 +36,29 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := amd64
-#CONFIGS_INCL   += $(THIS_CONFIG)
+THIS_CONFIG    := amdepyc
 
-#
-# --- Determine the C compiler and related flags ---
-#
+# For architecture independent files we still need to define
+# the required flags
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
 
-# These setting should come from makefiles for individial configuration
-# included in this bundle.
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O3
+endif
+
+# This will add BLIS_CONFIG_EPYC for all framework files
+# FIXME: framework files should not have architecture specific
+#        checks at least at compile time. Once the macro
+#        is defined it is applicable to every build in the
+#        Family including any non AMD configuration.
+#        However, it is still better to define it in makefiles
+#        instead of headers so we can have slighly more
+#        control on this.
+COPTFLAGS +=  -DBLIS_CONFIG_EPYC
 
 # Store all of the variables here to new variables containing the
 # configuration name.

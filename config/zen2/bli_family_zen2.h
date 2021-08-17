@@ -36,12 +36,6 @@
 #ifndef BLI_FAMILY_ZEN2_
 #define BLI_FAMILY_ZEN2_
 
-//To enable framework optimizations for EPYC family processors.
-//With this macro defined, we can call kernels directly from BLAS interfaces
-//for levels 1 & 2.
-//This macro needs to be defined for a;; EPYC configurations.
-#define BLIS_CONFIG_EPYC
-
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
@@ -58,9 +52,6 @@
 
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
-
-#define BLIS_ENABLE_SMALL_MATRIX_ROME
-#define BLIS_SMALL_MATRIX_THRES_ROME       400
 
 // When running HPL with pure MPI without DGEMM threading (Single-threaded
 // BLIS), defining this macro as 1 yields better performance.

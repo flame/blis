@@ -52,7 +52,7 @@ elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen3")
   add_definitions(-DBLIS_KERNELS_HASWELL)
 elseif (${AOCL_BLIS_FAMILY} STREQUAL "amd64")
   set(AOCL_BLIS_ZEN FALSE)
-  add_definitions(-DBLIS_FAMILY_AMD64)
+  add_definitions(-DBLIS_FAMILY_AMDEPYC)
   add_definitions(-DBLIS_CONFIG_ZEN3)
   add_definitions(-DBLIS_CONFIG_ZEN2)
   add_definitions(-DBLIS_CONFIG_ZEN)
@@ -294,7 +294,7 @@ endif()
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0 ")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Oi")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
-set(INTR_GENERAL_LINK_FLAGS "${INTR_GENERAL_LINK_FLAGS} /RELEGE") 
+set(INTR_GENERAL_LINK_FLAGS "${INTR_GENERAL_LINK_FLAGS} /RELEGE")
 
 add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 
@@ -397,13 +397,13 @@ find_package(PythonLibs 3 REQUIRED)
 
 string(APPEND HEADER_PATH
 if(${AOCL_BLIS_FAMILY} STREQUAL "zen")
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen/"  
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/" 
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/" 
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/"
 elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen2")
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen2/" 
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/" 
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/" 
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen2/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/"
 elseif (${AOCL_BLIS_FAMILY} STREQUAL "amd64")
     " ${CMAKE_CURRENT_SOURCE_DIR}/config/amd64/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/config/bulldozer/"

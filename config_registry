@@ -11,7 +11,7 @@
 x86_64:         intel64 amd64 amd64_legacy
 intel64:        skx knl haswell sandybridge penryn generic
 amd64_legacy:   excavator steamroller piledriver bulldozer generic
-amd64:          zen3 zen2 zen generic
+amdepyc:        zen3 zen2 zen generic
 
 # NOTE: ARM families will remain disabled until runtime hardware detection
 # logic is added to BLIS.

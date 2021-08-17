@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2019 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019 - 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -136,8 +136,11 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_INTEL64
 #include "bli_family_intel64.h"
 #endif
-#ifdef BLIS_FAMILY_AMD64
-#include "bli_family_amd64.h"
+#ifdef BLIS_FAMILY_AMDEPYC
+#include "bli_family_amdepyc.h"
+#endif
+#ifdef BLIS_FAMILY_AMD64_LEGACY
+#include "bli_family_amd64_legacy.h"
 #endif
 #ifdef BLIS_FAMILY_X86_64
 #include "bli_family_x86_64.h"

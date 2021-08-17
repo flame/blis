@@ -1263,9 +1263,6 @@ void bli_cntx_set_l3_sup_kers( dim_t n_ukrs, ... )
 }
 
 // -----------------------------------------------------------------------------
-
-#ifdef AOCL_BLIS_ZEN
-
 void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... )
 {
 	// This function should be called from the bli_cntx_init_*() function for
@@ -1366,7 +1363,7 @@ void bli_cntx_set_trsm_blkszs( dim_t n_bs, ... )
 	#endif
 	bli_free_intl( bszids );
 }
-#endif
+
 // -----------------------------------------------------------------------------
 
 void bli_cntx_set_l1f_kers( dim_t n_kers, ... )

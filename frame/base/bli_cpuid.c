@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ arch_t bli_cpuid_query_id( void )
 	printf( "vendor   = %s\n", vendor==1 ? "AMD": "INTEL" );
 	printf("family    = %x\n", family );
 	printf( "model    = %x\n", model );
-	
+
 	printf( "features = %x\n", features );
 #endif
 
@@ -117,7 +117,7 @@ arch_t bli_cpuid_query_id( void )
 #ifdef BLIS_CONFIG_ZEN3
 		if ( bli_cpuid_is_zen3( family, model, features ) )
 			return BLIS_ARCH_ZEN3;
-#endif	  
+#endif
 #ifdef BLIS_CONFIG_ZEN2
 		if ( bli_cpuid_is_zen2( family, model, features ) )
 			return BLIS_ARCH_ZEN2;
@@ -282,10 +282,12 @@ bool bli_cpuid_is_zen3
 	if ( family != 0x19 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x00-0xff (THIS NEEDS UPDATING)
+	// Zen 3 maps to couple of different model number ranges
+	// we check for all of them.
 	const bool is_arch
 	=
-	( 0x00 <= model && model <= 0xff );
+	(( model <= 0x0f ) ||
+	(0x30 <= model && model <= 0x3f ));
 
 	if ( !is_arch ) return FALSE;
 
@@ -310,7 +312,6 @@ bool bli_cpuid_is_zen2
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x30-0xff (THIS NEEDS UPDATING)
 	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0xff );
@@ -338,10 +339,7 @@ bool bli_cpuid_is_zen
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x00-0xff (THIS NEEDS UPDATING)
-	const bool is_arch
-	=
-	( 0x00 <= model && model <= 0xff );
+	const bool is_arch = (model <= 0x30 );
 
 	if ( !is_arch ) return FALSE;
 
@@ -811,7 +809,7 @@ uint32_t bli_cpuid_query
 		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX   ) ) *features |= FEATURE_AVX;
 		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_FMA3  ) ) *features |= FEATURE_FMA3;
 
-		// Check whether the hardware supports xsave/xrestor/xsetbv/xgetbv AND 
+		// Check whether the hardware supports xsave/xrestor/xsetbv/xgetbv AND
 		// support for these is enabled by the OS. If so, then we proceed with
 		// checking that various register-state saving features are available.
 		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_XGETBV ) )
@@ -843,7 +841,7 @@ uint32_t bli_cpuid_query
 
 			// The OS can manage the state of 512-bit zmm (AVX-512) registers
 			// only if the xcr[7:5] bits are set. If they are not set, then
-			// clear all feature bits related to AVX-512. 
+			// clear all feature bits related to AVX-512.
 			if ( !bli_cpuid_has_features( eax, XGETBV_MASK_XMM |
 				                               XGETBV_MASK_YMM |
 				                               XGETBV_MASK_ZMM ) )
@@ -859,7 +857,7 @@ uint32_t bli_cpuid_query
 
 			// The OS can manage the state of 256-bit ymm (AVX) registers
 			// only if the xcr[2] bit is set. If it is not set, then
-			// clear all feature bits related to AVX. 
+			// clear all feature bits related to AVX.
 			if ( !bli_cpuid_has_features( eax, XGETBV_MASK_XMM |
 				                               XGETBV_MASK_YMM ) )
 			{
@@ -872,7 +870,7 @@ uint32_t bli_cpuid_query
 			// The OS can manage the state of 128-bit xmm (SSE) registers
 			// only if the xcr[1] bit is set. If it is not set, then
 			// clear all feature bits related to SSE (which means the
-			// entire bitfield is clear). 
+			// entire bitfield is clear).
 			if ( !bli_cpuid_has_features( eax, XGETBV_MASK_XMM ) )
 			{
 				*features = 0;

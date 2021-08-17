@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,19 +33,20 @@
 
 */
 
-#ifndef BLI_FAMILY_ZEN3_
-#define BLI_FAMILY_ZEN3_
+#ifndef BLIS_FAMILY_AMD64_H
+#define BLIS_FAMILY_AMD64_H
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
 //
-
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
+
 #define BLIS_ENABLE_SMALL_MATRIX
 #define BLIS_ENABLE_SMALL_MATRIX_TRSM
+
 
 // This will select the threshold below which small matrix code will be called.
 #define BLIS_SMALL_MATRIX_THRES        700
@@ -55,4 +56,9 @@
 #define BLIS_SMALL_MATRIX_A_THRES_M_SYRK    96
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK    128
 
+// When running HPL with pure MPI without DGEMM threading (Single-threaded
+// BLIS), defining this macro as 1 yields better performance.
+#define AOCL_BLIS_MULTIINSTANCE   0
+
 #endif
+
