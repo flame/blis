@@ -580,7 +580,7 @@ Citations
 
 For those of you looking for the appropriate article to cite regarding BLIS, we
 recommend citing our
-[first ACM TOMS journal paper]( https://dl.acm.org/doi/10.1145/2764454?cid=81314495332)
+[first ACM TOMS journal paper](https://dl.acm.org/doi/10.1145/2764454?cid=81314495332)
 ([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis1_toms_rev3.pdf)):
 
 ```
@@ -594,12 +594,12 @@ recommend citing our
    month       = {June},
    year        = {2015},
    issue_date  = {June 2015},
-   url         = {http://doi.acm.org/10.1145/2764454},
+   url         = {https://doi.acm.org/10.1145/2764454},
 }
 ```
 
 You may also cite the
-[second ACM TOMS journal paper]( https://dl.acm.org/doi/10.1145/2755561?cid=81314495332)
+[second ACM TOMS journal paper](https://dl.acm.org/doi/10.1145/2755561?cid=81314495332)
 ([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis2_toms_rev3.pdf)):
 
 ```
@@ -616,7 +616,7 @@ You may also cite the
    month       = {June},
    year        = {2016},
    issue_date  = {June 2016},
-   url         = {http://doi.acm.org/10.1145/2755561},
+   url         = {https://doi.acm.org/10.1145/2755561},
 }
 ```
 
@@ -653,12 +653,12 @@ for determining blocksize parameters in BLIS
    month       = {August},
    year        = {2016},
    issue_date  = {August 2016},
-   url         = {http://doi.acm.org/10.1145/2925987},
+   url         = {https://doi.acm.org/10.1145/2925987},
 }
 ```
 
 A fifth paper, submitted to ACM TOMS, begins the study of so-called
-[induced methods for complex matrix multiplication]( https://dl.acm.org/doi/10.1145/3086466?cid=81314495332)
+[induced methods for complex matrix multiplication](https://dl.acm.org/doi/10.1145/3086466?cid=81314495332)
 ([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis5_toms_rev2.pdf)):
 
 ```
@@ -672,7 +672,7 @@ A fifth paper, submitted to ACM TOMS, begins the study of so-called
    month       = {July},
    year        = {2017},
    issue_date  = {July 2017},
-   url         = {http://doi.acm.org/10.1145/3086466},
+   url         = {https://doi.acm.org/10.1145/3086466},
 }
 ```
 
@@ -697,7 +697,7 @@ article and derives a
 ```
 
 A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` for
-[mixed-domain and/or mixed-precision](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf) operands
+[mixed-domain and/or mixed-precision](https://dl.acm.org/doi/10.1145/3402225?cid=81314495332) operands
 ([unofficial backup link](https://www.cs.utexas.edu/users/flame/pubs/blis7_toms_rev0.pdf)):
 
 ```
@@ -706,7 +706,13 @@ A seventh paper, submitted to ACM TOMS, explores the implementation of `gemm` fo
    title       = {Supporting Mixed-domain Mixed-precision Matrix Multiplication
 within the BLIS Framework},
    journal     = {ACM Transactions on Mathematical Software},
-   note        = {submitted}
+   volume      = {47},
+   number      = {2},
+   pages       = {12:1--12:26},
+   month       = {April},
+   year        = {2021},
+   issue_date  = {April 2021},
+   url         = {https://doi.org/10.1145/3402225},
 }
 ```
 
