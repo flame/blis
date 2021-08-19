@@ -300,7 +300,7 @@ void PASTECH2(bls_,ch,opname) \
 \
 	/* Pack matrix B to the destination buffer chosen above. Here, the packed
 	   matrix is stored to row-stored k x NR micropanels. */ \
-	PASTECH2(bls_,ch,packm_var2) \
+	PASTECH2(bls_,ch,packm_var1) \
 	( \
 	  conj, \
 	  schema, \
