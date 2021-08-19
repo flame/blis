@@ -14,7 +14,7 @@
     - Redistributions in binary form must reproduce the above copyright
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
-    - Neither the name of copyright holder(s) nor the names
+    - Neither the name(s) of the copyright holder(s) nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
 
@@ -32,28 +32,18 @@
 
 */
 
-#ifndef BLIS_SANDBOX_H
-#define BLIS_SANDBOX_H
 
-// NOTE: This header is the only header required to be present in the sandbox
-// implementation directory.
+//
+// Prototype object-based check functions.
+//
 
-// This header should contain (or #include) any definitions that must be
-// folded into blis.h. Typically, it will remain empty since any header
-// definitions specific to the sandbox implementation will not need to be
-// made available to applications (or the framework) during compilation.
+void bls_gemm_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+    );
 
-#include "bls_gemm.h"
-#include "bls_gemm_check.h"
-#include "bls_gemm_var.h"
-
-#include "bls_l3_packm_a.h"
-#include "bls_l3_packm_b.h"
-#include "bls_l3_packm_var.h"
-
-#include "bls_packm_cxk.h"
-
-#include "bls_l3_decor.h"
-
-
-#endif
