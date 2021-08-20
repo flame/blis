@@ -128,6 +128,20 @@ arrayname[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES] = \
 
 
 
+// -- One-operand macro (with custom prefix) --
+
+#define GENARRAY_PREF(arrayname,prefix,op) \
+\
+arrayname[BLIS_NUM_FP_TYPES] = \
+{ \
+	PASTECH2(prefix,s,op), \
+	PASTECH2(prefix,c,op), \
+	PASTECH2(prefix,d,op), \
+	PASTECH2(prefix,z,op)  \
+}
+
+
+
 // -- Two-operand macros --
 
 

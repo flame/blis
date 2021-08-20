@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -121,6 +121,8 @@ void* libblis_test_thread_entry( void* tdata_void )
 
 void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 {
+	err_t r_val;
+
 	// Query the total number of threads to simulate.
 	size_t nt = ( size_t )params->n_app_threads;
 
@@ -130,12 +132,12 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	bli_pthread_t* pthread = bli_malloc_user( sizeof( bli_pthread_t ) * nt );
+	bli_pthread_t* pthread = bli_malloc_user( sizeof( bli_pthread_t ) * nt, &r_val );
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt );
+	thread_data_t* tdata   = bli_malloc_user( sizeof( thread_data_t ) * nt, &r_val );
 
 	// Allocate a mutex for the threads to share.
 	//bli_pthread_mutex_t* mutex   = bli_malloc_user( sizeof( bli_pthread_mutex_t ) );
@@ -145,7 +147,7 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "libblis_test_thread_decorator(): " );
 	#endif
-	bli_pthread_barrier_t* barrier = bli_malloc_user( sizeof( bli_pthread_barrier_t ) );
+	bli_pthread_barrier_t* barrier = bli_malloc_user( sizeof( bli_pthread_barrier_t ), &r_val );
 
 	// Initialize the mutex.
 	//bli_pthread_mutex_init( mutex, NULL );
@@ -314,6 +316,7 @@ void libblis_test_level3_ukrs( thread_data_t* tdata, test_params_t* params, test
 void libblis_test_level3_ops( thread_data_t* tdata, test_params_t* params, test_ops_t* ops )
 {
 	libblis_test_gemm( tdata, params, &(ops->gemm) );
+	libblis_test_gemmt( tdata, params, &(ops->gemmt) );
 	libblis_test_hemm( tdata, params, &(ops->hemm) );
 	libblis_test_herk( tdata, params, &(ops->herk) );
 	libblis_test_her2k( tdata, params, &(ops->her2k) );
@@ -408,6 +411,7 @@ void libblis_test_read_ops_file( char* input_filename, test_ops_t* ops )
 
 	// Level-3
 	libblis_test_read_op_info( ops, input_stream, BLIS_GEMM,  BLIS_TEST_DIMS_MNK, 2, &(ops->gemm) );
+	libblis_test_read_op_info( ops, input_stream, BLIS_GEMMT, BLIS_TEST_DIMS_MK,  3, &(ops->gemmt) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HEMM,  BLIS_TEST_DIMS_MN,  4, &(ops->hemm) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HERK,  BLIS_TEST_DIMS_MK,  2, &(ops->herk) );
 	libblis_test_read_op_info( ops, input_stream, BLIS_HER2K, BLIS_TEST_DIMS_MK,  3, &(ops->her2k) );

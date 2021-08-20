@@ -78,17 +78,17 @@ void PASTEMAC(opname,EX_SUF) \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
-    ( \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   transx, \
-	   m, \
-	   n, \
-	   buf_x, rs_x, cs_x, \
-	   buf_y, rs_y, cs_y, \
-	   cntx, \
-	   rntm  \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  buf_x, rs_x, cs_x, \
+	  buf_y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -146,18 +146,18 @@ void PASTEMAC(opname,EX_SUF) \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
-    ( \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   transx, \
-	   m, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, rs_x, cs_x, \
-	   buf_y, rs_y, cs_y, \
-	   cntx, \
-	   rntm  \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, rs_x, cs_x, \
+	  buf_y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -223,17 +223,17 @@ void PASTEMAC(opname,EX_SUF) \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
-    ( \
-	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   m, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, rs_x, cs_x, \
-	   cntx, \
-	   rntm  \
+	( \
+	  BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  m, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, rs_x, cs_x, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -285,17 +285,17 @@ void PASTEMAC(opname,EX_SUF) \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
-    ( \
-	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   m, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, rs_x, cs_x, \
-	   cntx, \
-	   rntm  \
+	( \
+	  BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  m, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, rs_x, cs_x, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -354,18 +354,18 @@ void PASTEMAC(opname,EX_SUF) \
 	PASTEMAC2(opname,BLIS_TAPI_EX_SUF,_qfp)( dt ); \
 \
 	f \
-    ( \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   transx, \
-	   m, \
-	   n, \
-	   buf_x, rs_x, cs_x, \
-	   buf_beta, \
-	   buf_y, rs_y, cs_y, \
-	   cntx, \
-	   rntm  \
+	( \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  buf_x, rs_x, cs_x, \
+	  buf_beta, \
+	  buf_y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -420,17 +420,17 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   diagoffx, \
-	   diagx, \
-	   uplox, \
-	   transx, \
-	   m, \
-	   n, \
-	   buf_x, rs_x, cs_x, \
-	   buf_beta, \
-	   buf_y, rs_y, cs_y, \
-	   cntx, \
-	   rntm  \
+	  diagoffx, \
+	  diagx, \
+	  uplox, \
+	  transx, \
+	  m, \
+	  n, \
+	  buf_x, rs_x, cs_x, \
+	  buf_beta, \
+	  buf_y, rs_y, cs_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 

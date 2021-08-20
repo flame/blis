@@ -52,15 +52,12 @@ void bli_dpackm_armsve256_asm_8xk
        dim_t            cdim_,
        dim_t            n_,
        dim_t            n_max_,
-       void*   restrict kappa_,
-       void*   restrict a_, inc_t inca_, inc_t lda_,
-       void*   restrict p_,              inc_t ldp_,
+       double* restrict kappa,
+       double* restrict a, inc_t inca_, inc_t lda_,
+       double* restrict p,              inc_t ldp_,
        cntx_t* restrict cntx
      )
 {
-    double*       a     = ( double* )a_;
-    double*       p     = ( double* )p_;
-    double*       kappa = ( double* )kappa_;
     const int64_t cdim  = cdim_;
     const int64_t mnr   = 8;
     const int64_t n     = n_;

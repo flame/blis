@@ -32,11 +32,12 @@
 
 */
 
-GEMM_UKR_PROT( double,   s, gemm_knl_asm_24x16 )
+GEMM_UKR_PROT( float,    s, gemm_knl_asm_24x16 )
+
 GEMM_UKR_PROT( double,   d, gemm_knl_asm_24x8 )
 
-PACKM_KER_PROT( double,   s, packm_knl_asm_24xk )
-PACKM_KER_PROT( double,   s, packm_knl_asm_16xk )
+PACKM_KER_PROT( float,    s, packm_knl_asm_24xk )
+PACKM_KER_PROT( float,    s, packm_knl_asm_16xk )
 
 PACKM_KER_PROT( double,   d, packm_knl_asm_24xk )
 PACKM_KER_PROT( double,   d, packm_knl_asm_8xk )

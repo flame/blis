@@ -149,6 +149,16 @@ void bli_gks_init( void )
 		                                              bli_cntx_init_cortexa53_ref,
 		                                              bli_cntx_init_cortexa53_ind );
 #endif
+#ifdef BLIS_CONFIG_ARMSVE
+		bli_gks_register_cntx( BLIS_ARCH_ARMSVE,      bli_cntx_init_armsve,
+		                                              bli_cntx_init_armsve_ref,
+		                                              bli_cntx_init_armsve_ind );
+#endif
+#ifdef BLIS_CONFIG_A64FX
+		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
+		                                              bli_cntx_init_a64fx_ref,
+		                                              bli_cntx_init_a64fx_ind );
+#endif
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
 		                                              bli_cntx_init_cortexa15_ref,
@@ -161,6 +171,11 @@ void bli_gks_init( void )
 #endif
 
 		// IBM architectures
+#ifdef BLIS_CONFIG_POWER10
+		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,
+		                                              bli_cntx_init_power10_ref,
+		                                              bli_cntx_init_power10_ind );
+#endif													  
 #ifdef BLIS_CONFIG_POWER9
 		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
 		                                              bli_cntx_init_power9_ref,
@@ -300,6 +315,25 @@ cntx_t* bli_gks_lookup_ind_cntx
 
 // -----------------------------------------------------------------------------
 
+cntx_t** bli_gks_lookup_id
+     (
+       arch_t id
+     )
+{
+	// Return the address of the array of context pointers for a given
+	// architecture id. This function is only used for sanity check purposes
+	// to ensure that the underlying data structures for a particular id are
+	// initialized.
+
+	// Index into the array of context pointers for the given architecture id.
+	cntx_t** restrict gks_id = gks[ id ];
+
+	// Return the context pointer at gks_id_ind.
+	return gks_id;
+}
+
+// -----------------------------------------------------------------------------
+
 void bli_gks_register_cntx
      (
        arch_t  id,
@@ -308,6 +342,8 @@ void bli_gks_register_cntx
        void_fp ind_fp
      )
 {
+	err_t r_val;
+
 	// This function is called by bli_gks_init() for each architecture that
 	// will be supported by BLIS. It takes an architecture id and three
 	// function pointers, one to a function that initializes a native context
@@ -356,7 +392,7 @@ void bli_gks_register_cntx
 	// needs to be allocated. Allocate the memory and initialize it to
 	// zeros/NULL, storing the address of the alloacted memory at the element
 	// for the current architecture id.
-	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS );
+	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS, &r_val );
 
 	// Alias the allocated array for readability.
 	cntx_t** restrict gks_id = gks[ id ];
@@ -368,7 +404,7 @@ void bli_gks_register_cntx
 	// Allocate memory for a single context and store the address at
 	// the element in the gks[ id ] array that is reserved for native
 	// execution.
-	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ) );
+	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 
 	// Alias the allocated context address for readability.
 	cntx_t* restrict gks_id_nat = gks_id[ BLIS_NAT ];
@@ -465,6 +501,7 @@ cntx_t* bli_gks_query_ind_cntx
 	bli_init_once();
 
 	cntx_t* gks_id_ind;
+	err_t r_val;
 
 	// Return the address of a context that will be suited for executing a
 	// level-3 operation via the requested induced method (and datatype) for
@@ -523,7 +560,7 @@ cntx_t* bli_gks_query_ind_cntx
 			// If gks_id_ind is NULL, then we know we must allocate and then
 			// initialize the context, storing its address back to
 			// gks_id[ ind ].
-			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ) );
+			gks_id_ind    = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 			gks_id[ ind ] = gks_id_ind;
 
 			// Before we can call the induced method context initialization

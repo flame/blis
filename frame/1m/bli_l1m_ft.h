@@ -57,25 +57,6 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEF( addm )
 INSERT_GENTDEF( subm )
-
-// copym
-
-#undef  GENTDEF
-#define GENTDEF( ctype, ch, opname, tsuf ) \
-\
-typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
-     ( \
-       doff_t  diagoffx, \
-       diag_t  diagx, \
-       uplo_t  uplox, \
-       trans_t transx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y  \
-       BLIS_TAPI_EX_PARAMS  \
-     );
-
 INSERT_GENTDEF( copym )
 
 // axpym

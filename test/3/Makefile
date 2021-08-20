@@ -136,14 +136,14 @@ PS_MAX   := 2400
 PS_INC   := 48
 
 # Single-socket (multithreaded)
-P1_BEGIN := 96
-P1_MAX   := 4800
-P1_INC   := 96
+P1_BEGIN := 120
+P1_MAX   := 6000
+P1_INC   := 120
 
 # Dual-socket (multithreaded)
-P2_BEGIN := 144
-P2_MAX   := 7200
-P2_INC   := 144
+P2_BEGIN := 160
+P2_MAX   := 8000
+P2_INC   := 160
 
 
 #
@@ -231,9 +231,9 @@ vendor:     vendor-st vendor-1s vendor-2s
 mkl:        vendor
 armpl:      vendor
 
-all-st:     blis-st openblas-st mkl-st
-all-1s:     blis-1s openblas-1s mkl-1s
-all-2s:     blis-2s openblas-2s mkl-2s
+all-st:     blis-st openblas-st mkl-st eigen-st
+all-1s:     blis-1s openblas-1s mkl-1s eigen-1s
+all-2s:     blis-2s openblas-2s mkl-2s eigen-2s
 
 blis-st:    blis-nat-st
 blis-1s:    blis-nat-1s

@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -51,6 +52,7 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      );
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( her2k )
 GENPROT( syr2k )
 

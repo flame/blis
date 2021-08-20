@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -44,6 +45,7 @@ void_fp PASTEMAC(opname,ind_get_avail)( num_t dt );
 /*bool PASTEMAC(opname,ind_has_avail)( num_t dt ); */
 
 GENPROT( gemm )
+GENPROT( gemmt )
 GENPROT( hemm )
 GENPROT( herk )
 GENPROT( her2k )

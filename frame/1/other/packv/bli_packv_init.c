@@ -117,7 +117,7 @@ siz_t bli_packv_init_pack
 	dim_t     dim_a  = bli_obj_vector_dim( a );
 	dim_t     bmult  = bli_cntx_get_blksz_def_dt( dt, bmult_id, cntx );
 
-	membrk_t* membrk = bli_cntx_membrk( cntx );
+	pba_t*    pba    = bli_cntx_pba( cntx );
 
 #if 0
 	mem_t*    mem_p;
@@ -156,9 +156,7 @@ siz_t bli_packv_init_pack
 	{
 		// If the mem_t object of p has not yet been allocated, then acquire
 		// a memory block suitable for a vector.
-		bli_membrk_acquire_v( membrk,
-		                      size_p,
-		                      mem_p );
+		bli_pba_acquire_v( pba, size_p, mem_p );
 	}
 	else
 	{
@@ -166,11 +164,9 @@ siz_t bli_packv_init_pack
 		// re-acquire the memory so there is sufficient space.
 		if ( bli_mem_size( mem_p ) < size_p )
 		{
-			bli_membrk_release( mem_p );
+			bli_pba_release( mem_p );
 
-			bli_membrk_acquire_v( membrk,
-			                      size_p,
-			                      mem_p );
+			bli_pba_acquire_v( pba, size_p, mem_p );
 		}
 	}
 

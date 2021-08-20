@@ -52,7 +52,7 @@ typedef struct rntm_s
 	bool      l3_sup;
 
 	pool_t*   sba_pool;
-	membrk_t* membrk;
+	pba_t*    pba;
 
 } rntm_t;
 */
@@ -124,9 +124,9 @@ BLIS_INLINE pool_t* bli_rntm_sba_pool( rntm_t* rntm )
 	return rntm->sba_pool;
 }
 
-BLIS_INLINE membrk_t* bli_rntm_membrk( rntm_t* rntm )
+BLIS_INLINE pba_t* bli_rntm_pba( rntm_t* rntm )
 {
-	return rntm->membrk;
+	return rntm->pba;
 }
 
 #if 0
@@ -205,9 +205,9 @@ BLIS_INLINE void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
 	rntm->sba_pool = sba_pool;
 }
 
-BLIS_INLINE void bli_rntm_set_membrk( membrk_t* membrk, rntm_t* rntm )
+BLIS_INLINE void bli_rntm_set_pba( pba_t* pba, rntm_t* rntm )
 {
-	rntm->membrk = membrk;
+	rntm->pba = pba;
 }
 
 BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
@@ -222,9 +222,9 @@ BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
 {
 	bli_rntm_set_sba_pool( NULL, rntm );
 }
-BLIS_INLINE void bli_rntm_clear_membrk( rntm_t* rntm )
+BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
 {
-	bli_rntm_set_membrk( NULL, rntm );
+	bli_rntm_set_pba( NULL, rntm );
 }
 
 //
@@ -313,7 +313,7 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
           .sba_pool    = NULL, \
-          .membrk      = NULL, \
+          .pba         = NULL, \
         }  \
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
@@ -327,7 +327,7 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_l3_sup( rntm );
 
 	bli_rntm_clear_sba_pool( rntm );
-	bli_rntm_clear_membrk( rntm );
+	bli_rntm_clear_pba( rntm );
 }
 
 // -- rntm_t total thread calculation ------------------------------------------

@@ -69,15 +69,16 @@ bool bli_cpuid_is_piledriver( uint32_t family, uint32_t model, uint32_t features
 bool bli_cpuid_is_bulldozer( uint32_t family, uint32_t model, uint32_t features );
 
 // ARM
-bool   bli_cpuid_is_a64fx( uint32_t model, uint32_t part, uint32_t features );
-bool   bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
-bool   bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
-bool   bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
-bool   bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
-bool   bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_thunderx2( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa57( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa53( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_armsve( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_a64fx( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa15( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_cortexa9( uint32_t model, uint32_t part, uint32_t features );
 
 // s390
-bool   bli_cpuid_is_z13( uint32_t model, uint32_t part, uint32_t features );
+bool bli_cpuid_is_z13( uint32_t model, uint32_t part, uint32_t features );
 
 uint32_t bli_cpuid_query( uint32_t* family, uint32_t* model, uint32_t* features );
 
@@ -179,7 +180,8 @@ enum
 };
 enum
 {
-	FEATURE_NEON = 0x1
+	FEATURE_NEON = 0x01,
+	FEATURE_SVE  = 0x02
 };
 
 #endif

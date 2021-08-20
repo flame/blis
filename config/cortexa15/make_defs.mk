@@ -61,9 +61,9 @@ COPTFLAGS      := -O2
 endif
 
 # Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+CKOPTFLAGS     := $(COPTFLAGS) -O3
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -march=armv7-a
+CKVECFLAGS     := -mcpu=cortex-a15
 else
 $(error gcc is required for this configuration.)
 endif

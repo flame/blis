@@ -45,6 +45,12 @@
 // Enabled kernel sets (kernel_list)
 @kernel_list_defines@
 
+#if @enable_system@
+#define BLIS_ENABLE_SYSTEM
+#else
+#define BLIS_DISABLE_SYSTEM
+#endif
+
 #if @enable_openmp@
 #define BLIS_ENABLE_OPENMP
 #endif
@@ -147,6 +153,12 @@
 #define BLIS_DISABLE_MEMKIND
 #endif
 
+#if @enable_trsm_preinversion@
+#define BLIS_ENABLE_TRSM_PREINVERSION
+#else
+#define BLIS_DISABLE_TRSM_PREINVERSION
+#endif
+
 #if @enable_pragma_omp_simd@
 #define BLIS_ENABLE_PRAGMA_OMP_SIMD
 #else
@@ -163,6 +175,12 @@
 #define BLIS_ENABLE_SHARED
 #else
 #define BLIS_DISABLE_SHARED
+#endif
+
+#if @complex_return_intel@
+#define BLIS_ENABLE_COMPLEX_RETURN_INTEL
+#else
+#define BLIS_DISABLE_COMPLEX_RETURN_INTEL
 #endif
 
 

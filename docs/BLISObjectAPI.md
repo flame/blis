@@ -1,6 +1,7 @@
 # Contents
 
 * **[Contents](BLISObjectAPI.md#contents)**
+* **[Operation index](BLISObjectAPI.md#operation-index)**
 * **[Introduction](BLISObjectAPI.md#introduction)**
   * [BLIS types](BLISObjectAPI.md#blis-types)
     * [Integer-based types](BLISObjectAPI.md#integer-based-types)
@@ -18,7 +19,6 @@
   * [Object mutator function reference](BLISObjectAPI.md#object-mutator-function-reference)
   * [Other object function reference](BLISObjectAPI.md#other-object-function-reference)
 * **[Computational function reference](BLISObjectAPI.md#computational-function-reference)**
-  * [Operation index](BLISObjectAPI.md#operation-index)
   * [Level-1v operations](BLISObjectAPI.md#level-1v-operations)
   * [Level-1d operations](BLISObjectAPI.md#level-1d-operations)
   * [Level-1m operations](BLISObjectAPI.md#level-1m-operations)
@@ -26,13 +26,36 @@
   * [Level-2 operations](BLISObjectAPI.md#level-2-operations)
   * [Level-3 operations](BLISObjectAPI.md#level-3-operations)
   * [Utility operations](BLISObjectAPI.md#utility-operations)
-  * [Level-3 microkernels](BLISObjectAPI.md#level-3-microkernels)
 * **[Query function reference](BLISObjectAPI.md#query-function-reference)**
   * [General library information](BLISObjectAPI.md#general-library-information)
   * [Specific configuration](BLISObjectAPI.md#specific-configuration)
   * [General configuration](BLISObjectAPI.md#general-configuration)
   * [Kernel information](BLISObjectAPI.md#kernel-information)
+  * [Clock functions](BLISObjectAPI.md#clock-functions)
 * **[Example code](BLISObjectAPI.md#example-code)**
+
+
+
+# Operation index
+
+This index provides a quick way to jump directly to the description for each operation discussed later in the [Computational function reference](BLISObjectAPI.md#computational-function-reference) section:
+
+  * **[Level-1v](BLISObjectAPI.md#level-1v-operations)**: Operations on vectors:
+    * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [scal2v](BLISObjectAPI.md#scal2v), [scalv](BLISObjectAPI.md#scalv), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
+  * **[Level-1d](BLISObjectAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
+    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISObjectAPI.md#subd), [xpbyd](BLISObjectAPI.md#xpbyd)
+  * **[Level-1m](BLISObjectAPI.md#level-1m-operations)**: Element-wise operations on matrices:
+    * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
+  * **[Level-1f](BLISObjectAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
+    * [axpy2v](BLISObjectAPI.md#axpy2v), [dotaxpyv](BLISObjectAPI.md#dotaxpyv), [axpyf](BLISObjectAPI.md#axpyf), [dotxf](BLISObjectAPI.md#dotxf), [dotxaxpyf](BLISObjectAPI.md#dotxaxpyf)
+  * **[Level-2](BLISObjectAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
+    * [gemv](BLISObjectAPI.md#gemv), [ger](BLISObjectAPI.md#ger), [hemv](BLISObjectAPI.md#hemv), [her](BLISObjectAPI.md#her), [her2](BLISObjectAPI.md#her2), [symv](BLISObjectAPI.md#symv), [syr](BLISObjectAPI.md#syr), [syr2](BLISObjectAPI.md#syr2), [trmv](BLISObjectAPI.md#trmv), [trsv](BLISObjectAPI.md#trsv)
+  * **[Level-3](BLISObjectAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
+    * [gemm](BLISObjectAPI.md#gemm), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
+  * **[Utility](BLISObjectAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
+    * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getsc](BLISObjectAPI.md#getsc), [getijv](BLISObjectAPI.md#getijv), [getijm](BLISObjectAPI.md#getijm), [setsc](BLISObjectAPI.md#setsc), [setijv](BLISObjectAPI.md#setijv), [setijm](BLISObjectAPI.md#setijm), [eqsc](BLISObjectAPI.md#eqsc), [eqv](BLISObjectAPI.md#eqv), [eqm](BLISObjectAPI.md#eqm)
+
+
 
 # Introduction
 
@@ -671,26 +694,6 @@ Notes for interpreting function descriptions:
 ---
 
 
-## Operation index
-
-  * **[Level-1v](BLISObjectAPI.md#level-1v-operations)**: Operations on vectors:
-    * [addv](BLISObjectAPI.md#addv), [amaxv](BLISObjectAPI.md#amaxv), [axpyv](BLISObjectAPI.md#axpyv), [axpbyv](BLISObjectAPI.md#axpbyv), [copyv](BLISObjectAPI.md#copyv), [dotv](BLISObjectAPI.md#dotv), [dotxv](BLISObjectAPI.md#dotxv), [invertv](BLISObjectAPI.md#invertv), [scal2v](BLISObjectAPI.md#scal2v), [scalv](BLISObjectAPI.md#scalv), [setv](BLISObjectAPI.md#setv), [setrv](BLISObjectAPI.md#setrv), [setiv](BLISObjectAPI.md#setiv), [subv](BLISObjectAPI.md#subv), [swapv](BLISObjectAPI.md#swapv), [xpbyv](BLISObjectAPI.md#xpbyv)
-  * **[Level-1d](BLISObjectAPI.md#level-1d-operations)**: Element-wise operations on matrix diagonals:
-    * [addd](BLISObjectAPI.md#addd), [axpyd](BLISObjectAPI.md#axpyd), [copyd](BLISObjectAPI.md#copyd), [invertd](BLISObjectAPI.md#invertd), [scald](BLISObjectAPI.md#scald), [scal2d](BLISObjectAPI.md#scal2d), [setd](BLISObjectAPI.md#setd), [setid](BLISObjectAPI.md#setid), [shiftd](BLISObjectAPI.md#shiftd), [subd](BLISObjectAPI.md#subd), [xpbyd](BLISObjectAPI.md#xpbyd)
-  * **[Level-1m](BLISObjectAPI.md#level-1m-operations)**: Element-wise operations on matrices:
-    * [addm](BLISObjectAPI.md#addm), [axpym](BLISObjectAPI.md#axpym), [copym](BLISObjectAPI.md#copym), [scalm](BLISObjectAPI.md#scalm), [scal2m](BLISObjectAPI.md#scal2m), [setm](BLISObjectAPI.md#setm), [setrm](BLISObjectAPI.md#setrm), [setim](BLISObjectAPI.md#setim), [subm](BLISObjectAPI.md#subm)
-  * **[Level-1f](BLISObjectAPI.md#level-1f-operations)**: Fused operations on multiple vectors:
-    * [axpy2v](BLISObjectAPI.md#axpy2v), [dotaxpyv](BLISObjectAPI.md#dotaxpyv), [axpyf](BLISObjectAPI.md#axpyf), [dotxf](BLISObjectAPI.md#dotxf), [dotxaxpyf](BLISObjectAPI.md#dotxaxpyf)
-  * **[Level-2](BLISObjectAPI.md#level-2-operations)**: Operations with one matrix and (at least) one vector operand:
-    * [gemv](BLISObjectAPI.md#gemv), [ger](BLISObjectAPI.md#ger), [hemv](BLISObjectAPI.md#hemv), [her](BLISObjectAPI.md#her), [her2](BLISObjectAPI.md#her2), [symv](BLISObjectAPI.md#symv), [syr](BLISObjectAPI.md#syr), [syr2](BLISObjectAPI.md#syr2), [trmv](BLISObjectAPI.md#trmv), [trsv](BLISObjectAPI.md#trsv)
-  * **[Level-3](BLISObjectAPI.md#level-3-operations)**: Operations with matrices that are multiplication-like:
-    * [gemm](BLISObjectAPI.md#gemm), [hemm](BLISObjectAPI.md#hemm), [herk](BLISObjectAPI.md#herk), [her2k](BLISObjectAPI.md#her2k), [symm](BLISObjectAPI.md#symm), [syrk](BLISObjectAPI.md#syrk), [syr2k](BLISObjectAPI.md#syr2k), [trmm](BLISObjectAPI.md#trmm), [trmm3](BLISObjectAPI.md#trmm3), [trsm](BLISObjectAPI.md#trsm)
-  * **[Utility](BLISObjectAPI.md#Utility-operations)**: Miscellaneous operations on matrices and vectors:
-    * [asumv](BLISObjectAPI.md#asumv), [norm1v](BLISObjectAPI.md#norm1v), [normfv](BLISObjectAPI.md#normfv), [normiv](BLISObjectAPI.md#normiv), [norm1m](BLISObjectAPI.md#norm1m), [normfm](BLISObjectAPI.md#normfm), [normim](BLISObjectAPI.md#normim), [mkherm](BLISObjectAPI.md#mkherm), [mksymm](BLISObjectAPI.md#mksymm), [mktrim](BLISObjectAPI.md#mktrim), [fprintv](BLISObjectAPI.md#fprintv), [fprintm](BLISObjectAPI.md#fprintm),[printv](BLISObjectAPI.md#printv), [printm](BLISObjectAPI.md#printm), [randv](BLISObjectAPI.md#randv), [randm](BLISObjectAPI.md#randm), [sumsqv](BLISObjectAPI.md#sumsqv), [getijm](BLISObjectAPI.md#getijm), [setijm](BLISObjectAPI.md#setijm)
-
----
-
-
 ## Level-1v operations
 
 Level-1v operations perform various level-1 BLAS-like operations on vectors (hence the _v_).
@@ -787,6 +790,8 @@ Perform
 ```
 where `x` and `y` are vectors of length _n_.
 
+Observed object properties: `conj?(x)`.
+
 ---
 
 #### dotv
@@ -803,6 +808,8 @@ Perform
   rho := conj?(x)^T * conj?(y)
 ```
 where `x` and `y` are vectors of length _n_, and `rho` is a scalar.
+
+Observed object properties: `conj?(x)`, `conj?(y)`.
 
 ---
 
@@ -822,6 +829,8 @@ Perform
   rho := conj?(beta) * rho + conj?(alpha) * conj?(x)^T * conj?(y)
 ```
 where `x` and `y` are vectors of length _n_, and `alpha`, `beta`, and `rho` are scalars.
+
+Observed object properties: `conj?(alpha)`, `conj?(beta)`, `conj?(x)`, `conj?(y)`.
 
 ---
 
@@ -1076,7 +1085,7 @@ void bli_setd
      );
 ```
 
-Observed object properties: `conj?(alpha)`, `diagoff(A)`, `diag(A)`.
+Observed object properties: `conj?(alpha)`, `diagoff(A)`.
 
 ---
 
@@ -1679,6 +1688,27 @@ Observed object properties: `trans?(A)`, `trans?(B)`.
 
 ---
 
+#### gemmt
+```c
+void bli_gemmt
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+```
+Perform
+```
+  C := beta * C + alpha * trans?(A) * trans?(B)
+```
+where `C` is an _m x m_ matrix, `trans?(A)` is an _m x k_ matrix, and `trans?(B)` is a _k x m_ matrix. This operation is similar to `bli_gemm()` except that it only updates the lower or upper triangle of `C` as specified by `uplo(C)`.
+
+Observed object properties: `trans?(A)`, `trans?(B)`, `uplo(C)`.
+
+---
+
 #### hemm
 ```c
 void bli_hemm
@@ -2101,6 +2131,34 @@ where, on entry, `scale` and `sumsq` contain `scale_old` and `sumsq_old`, respec
 
 ---
 
+#### getsc
+```c
+void bli_getsc
+     (
+       obj_t*  chi,
+       double* zeta_r,
+       double* zeta_i
+     )
+```
+Copy the real and imaginary values from the scalar object `chi` to `zeta_r` and `zeta_i`. If `chi` is stored as a real type, then `zeta_i` is set to zero. (If `chi` is stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+
+---
+
+#### getijv
+```c
+err_t bli_getijv
+      (
+        dim_t   i,
+        obj_t*  b,
+        double* ar,
+        double* ai
+      )
+```
+Copy the real and imaginary values at the `i`th element of vector object `x` to `ar` and `ai`. If elements of `x` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `x` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
+---
+
 #### getijm
 ```c
 err_t bli_getijm
@@ -2112,8 +2170,38 @@ err_t bli_getijm
         double* ai
       )
 ```
-Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. f elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
-If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
+Copy the real and imaginary values at the (`i`,`j`) element of object `b` to `ar` and `ai`. If elements of `b` are stored as real types, then only `ar` is overwritten and `ai` is left unchanged. (If `b` contains elements stored in single precision, the corresponding elements are typecast/promoted during the copy.)
+If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
+---
+
+#### setsc
+```c
+void bli_setsc
+     (
+       double* zeta_r,
+       double* zeta_i,
+       obj_t*  chi
+     );
+```
+Copy real and imaginary values `zeta_r` and `zeta_i` to the scalar object `chi`. If `chi` is stored as a real type, then `zeta_i` is ignored. (If `chi` is stored in single precision, the contents are typecast/demoted during the copy.)
+
+---
+
+#### setijv
+```c
+err_t bli_setijv
+     (
+       double  ar,
+       double  ai,
+       dim_t   i,
+       obj_t*  x
+     );
+```
+Copy real and imaginary values `ar` and `ai` to the `i`th element of vector object `x`. If elements of `x` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `x` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
+If the element offset `i` is beyond the vector dimension of `x` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `x` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
+---
 
 #### setijm
 ```c
@@ -2127,7 +2215,59 @@ err_t bli_setijm
      );
 ```
 Copy real and imaginary values `ar` and `ai` to the (`i`,`j`) element of object `b`. If elements of `b` are stored as real types, then only `ar` is copied and `ai` is ignored. (If `b` contains elements stored in single precision, the corresponding elements are typecast/demoted during the copy.)
-If either the row offset `i` is beyond the _m_ dimension of `b`, or column offset `j` is beyond the _n_ dimension of `b`, the function does not perform any copy and returns `BLIS_FAILURE`. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, `BLIS_FAILURE` is returned.
+If either the row offset `i` is beyond the _m_ dimension of `b` or less than zero, or column offset `j` is beyond the _n_ dimension of `b` or less than zero, the function returns `BLIS_FAILURE` without taking any action. Similarly, if `b` is a global scalar constant such as `BLIS_ONE`, the function returns `BLIS_FAILURE`.
+
+---
+
+#### eqsc
+```c
+void bli_eqsc
+     (
+       obj_t  chi,
+       obj_t  psi,
+       bool*  is_eq
+     );
+```
+Perform an element-wise comparison between scalars `chi` and `psi` and store the boolean result in the `bool` pointed to by `is_eq`.
+If exactly one of `conj(chi)` or `conj(psi)` (but not both) indicate a conjugation, then one of the scalars will be implicitly conjugated for purposes of the comparision.
+
+Observed object properties: `conj?(chi)`, `conj?(psi)`.
+
+---
+
+#### eqv
+```c
+void bli_eqv
+     (
+       obj_t  x,
+       obj_t  y,
+       bool*  is_eq
+     );
+```
+Perform an element-wise comparison between vectors `x` and `y` and store the boolean result in the `bool` pointed to by `is_eq`.
+If exactly one of `conj(x)` or `conj(y)` (but not both) indicate a conjugation, then one of the vectors will be implicitly conjugated for purposes of the comparision.
+
+Observed object properties: `conj?(x)`, `conj?(y)`.
+
+---
+
+#### eqm
+```c
+void bli_eqm
+     (
+       obj_t  a,
+       obj_t  b,
+       bool*  is_eq
+     );
+```
+Perform an element-wise comparison between matrices `A` and `B` and store the boolean result in the `bool` pointed to by `is_eq`.
+Here, `A` is stored as a dense matrix, or lower- or upper-triangular/trapezoidal matrix with arbitrary diagonal offset and unit or non-unit diagonal.
+If `diag(A)` indicates a unit diagonal, the diagonals of both matrices will be ignored for purposes of the comparision.
+If `uplo(A)` indicates lower or upper storage, only that part of both matrices `A` and `B` will be referenced.
+If exactly one of `trans(A)` or `trans(B)` (but not both) indicate a transposition, then one of the matrices will be transposed for purposes of the comparison.
+Similarly, if exactly one of `trans(A)` or `trans(B)` (but not both) indicate a conjugation, then one of the matrices will be implicitly conjugated for purposes of the comparision.
+
+Observed object properties: `diagoff(A)`, `diag(A)`, `uplo(A)`, `trans?(A)`, `trans?(B)`.
 
 
 
@@ -2211,6 +2351,54 @@ Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_s
  * `BLIS_VIRTUAL_UKERNEL` (`"virtual"`): This value is returned when the queried microkernel is driven by a the "virtual" microkernel provided by an induced method. This happens for any `method` value that is not `BLIS_NAT` (ie: native), but only applies to the complex domain.
  * `BLIS_OPTIMIZED_UKERNEL` (`"optimzd"`): This value is returned when the queried microkernel is provided by an implementation that is neither reference nor virtual, and thus we assume the kernel author would deem it to be "optimized". Such a microkernel may not be optimal in the literal sense of the word, but nonetheless is _intended_ to be optimized, at least relative to the reference microkernels.
  * `BLIS_NOTAPPLIC_UKERNEL` (`"notappl"`): This value is returned usually when performing a `gemmtrsm` or `trsm` microkernel type query for any `method` value that is not `BLIS_NAT` (ie: native). That is, induced methods cannot be (purely) used on `trsm`-based microkernels because these microkernels perform more a triangular inversion, which is not matrix multiplication.
+
+
+## Clock functions
+
+---
+
+#### clock
+```c
+double bli_clock
+     (
+       void
+     );
+```
+Return the amount of time that has elapsed since some fixed time in the past. The return values of `bli_clock()` typically feature nanosecond precision, though this is not guaranteed.
+
+**Note:** On Linux, `bli_clock()` is implemented in terms of `clock_gettime()` using the `clockid_t` value of `CLOCK_MONOTONIC`. On OS X, `bli_clock` is implemented in terms of `mach_absolute_time()`. And on Windows, `bli_clock` is implemented in terms of `QueryPerformanceFrequency()`. Please see [frame/base/bli_clock.c](https://github.com/flame/blis/blob/master/frame/base/bli_clock.c) for more details.
+**Note:** This function is returns meaningless values when BLIS is configured with `--disable-system`.
+
+---
+
+#### clock_min_diff
+```c
+double bli_clock_min_diff
+     (
+       double time_prev_min,
+       double time_start
+     );
+```
+This function computes an intermediate value, `time_diff`, equal to `bli_clock() - time_start`, and then tentatively prepares to return the minimum value of `time_diff` and `time_min`. If that minimum value is extremely small (close to zero), the function returns `time_min` instead.
+
+This function is meant to be used in conjuction with `bli_clock()` for
+performance timing within applications--specifically in loops where only
+the fastest timing is of interest. For example:
+```c
+double t_save = DBL_MAX;
+for( i = 0; i < 3; ++i )
+{
+   double t = bli_clock();
+   bli_gemm( ... );
+   t_save = bli_clock_min_diff( t_save, t );
+}
+double gflops = ( 2.0 * m * k * n ) / ( t_save * 1.0e9 );
+```
+This code calls `bli_gemm()` three times and computes the performance, in GFLOPS, of the fastest of the three executions.
+
+---
+
+
 
 # Example code
 

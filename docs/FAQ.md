@@ -8,6 +8,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Why did you create BLIS?](FAQ.md#why-did-you-create-blis)
   * [Why should I use BLIS instead of GotoBLAS / OpenBLAS / ATLAS / MKL / ESSL / ACML / Accelerate?](FAQ.md#why-should-i-use-blis-instead-of-gotoblas--openblas--atlas--mkl--essl--acml--accelerate)
   * [How is BLIS related to FLAME / libflame?](FAQ.md#how-is-blis-related-to-flame--libflame)
+  * [What is the difference between BLIS and the AMD fork of BLIS found in AOCL?](FAQ.md#what-is-the-difference-between-blis-and-the-amd-fork-of-blis-found-in-aocl)
   * [Does BLIS automatically detect my hardware?](FAQ.md#does-blis-automatically-detect-my-hardware)
   * [I understand that BLIS is mostly a tool for developers?](FAQ.md#i-understand-that-blis-is-mostly-a-tool-for-developers)
   * [How do I link against BLIS?](FAQ.md#how-do-i-link-against-blis)
@@ -16,6 +17,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [What is a macrokernel?](FAQ.md#what-is-a-macrokernel)
   * [What is a context?](FAQ.md#what-is-a-context)
   * [I am used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?](FAQ.md#im-used-to-thinking-in-terms-of-column-majorrow-major-storage-and-leading-dimensions-what-is-a-row-stride--column-stride)
+  * [Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?](FAQ.md#why-does-blis-have-vector-level-1v-and-matrix-level-1m-variations-of-most-level-1-operations)
   * [What does it mean when a matrix with general stride is column-tilted or row-tilted?](FAQ.md#what-does-it-mean-when-a-matrix-with-general-stride-is-column-tilted-or-row-tilted)
   * [I am not really interested in all of these newfangled features in BLIS. Can I just use BLIS as a BLAS library?](FAQ.md#im-not-really-interested-in-all-of-these-newfangled-features-in-blis-can-i-just-use-blis-as-a-blas-library)
   * [What about CBLAS?](FAQ.md#what-about-cblas)
@@ -59,6 +61,12 @@ homepage](https://github.com/flame/blis#key-features). But here are a few reason
 ### How is BLIS related to FLAME / `libflame`?
 
 As explained [above](FAQ.md#why-did-you-create-blis?), BLIS was initially a layer within `libflame` that allowed more convenient interfacing to the BLAS. So in some ways, BLIS is a spin-off project. Prior to developing BLIS, [its author](http://www.cs.utexas.edu/users/field/) worked as the primary maintainer of `libflame`. If you look closely, you can also see that the design of BLIS was influenced by some of the more useful and innovative aspects of `libflame`, such as internal object abstractions and control trees. Also, various members of the [SHPC research group](http://shpc.ices.utexas.edu/people.html) and its [collaborators](http://shpc.ices.utexas.edu/collaborators.html) routinely provide insight, feedback, and also contribute code (especially kernels) to the BLIS project.
+
+### What is the difference between BLIS and the AMD fork of BLIS found in AOCL?
+
+BLIS, also known as "vanilla BLIS" or "upstream BLIS," is maintained by its [original developer](https://github.com/fgvanzee) (with the [support of others](http://shpc.ices.utexas.edu/collaborators.html)) in the [Science of High-Performance Computing](http://shpc.ices.utexas.edu/) (SHPC) group within the [The Oden Institute for Computational Engineering and Sciences](http://www.oden.utexas.edu/) at [The University of Texas at Austin](http://www.utexas.edu/). In 2015, [AMD](https://www.amd.com/) reorganized many of their software library efforts around existing open source projects. BLIS was chosen as the basis for their [CPU BLAS library](https://developer.amd.com/amd-aocl/blas-library/), and an AMD-maintained [fork of BLIS](https://github.com/amd/blis) was established.
+
+AMD BLIS sometimes contains certain optimizations specific to AMD hardware. Many of these optimizations are (eventually) merged back into upstream BLIS. However, for various reasons, some changes may remain unique to AMD BLIS for quite some time. Thus, if you want the latest optimizations for AMD hardware, feel free to try AMD BLIS. However, please note that neither The University of Texas at Austin nor BLIS's developers can endorse or offer direct support for any outside fork of BLIS, including AMD BLIS.
 
 ### Does BLIS automatically detect my hardware?
 
@@ -110,6 +118,16 @@ In generalized storage, we have a row stride and a column stride. The row stride
 
 BLIS also supports situations where both the row stride and column stride are non-unit. We call this situation "general stride".
 
+### Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?
+
+At first glance, it might appear that an element-wise operation such as `copym` or `axpym` would be sufficiently general purpose to cover the cases where the operands are vectors. After all, an *m x 1* matrix can be viewed as a vector of length m and vice versa. But in BLIS, operations on vectors are treated slightly differently than operations on matrices.
+
+If an application wishes to perform an element-wise operation on two objects, and the application calls a level-1m operation, the dimensions of those objects must be conformal, or "match up" (after any transposition implied by the object properties). This includes situations where one of the dimensions is unit.
+
+However, if an application instead decides to perform an element-wise operation on two objects, and the application calls a level-1v operation, the dimension constraints are slightly relaxed. In this scenario, BLIS only checks that the vector *lengths* are equal. This allows for the vectors to have different orientations (row vs column) while still being considered conformal. So, you could perform a `copyv` operation to copy from an *m x 1* vector to a *1 x m* vector. A `copym` operation on such objects would not be allowed (unless it was executed with the source object containing an implicit transposition).
+
+Another way to think about level-1v operations is that they will work with any two matrix objects in situations where (a) the corresponding level-1m operation *would have* worked if the input had been transposed, and (b) all operands happen to be vectors (i.e., have one unit dimension).
+
 ### What does it mean when a matrix with general stride is column-tilted or row-tilted?
 
 When a matrix is stored with general stride, both the row stride and column stride (let's call them `rs` and `cs`) are non-unit. When `rs` < `cs`, we call the general stride matrix "column-tilted" because it is "closer" to being column-stored (than row-stored). Similarly, when `rs` > `cs`, the matrix is "row-tilted" because it is closer to being row-stored.
@@ -136,7 +154,7 @@ Originally, BLIS did indeed require the application to explicitly setup (initial
 
 Yes! BLIS supports multithreading (via OpenMP or POSIX threads) for all of its level-3 operations. For more information on enabling and controlling multithreading, please see the [Multithreading](Multithreading.md) guide.
 
-BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives is thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
+BLIS is also thread-safe so that you can call BLIS from threads within a multithreaded library or application. BLIS derives its thread-safety via unconditional use of features present in POSIX threads (pthreads). These pthreads features are employed for thread-safety regardless of whether BLIS is configured for OpenMP multithreading, pthreads multithreading, or single-threaded execution.
 
 ### Does BLIS support NUMA environments?
 

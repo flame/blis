@@ -67,11 +67,29 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  // gemmtrsm_l
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
+
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
 	  cntx
 	);
+
+#if 1
+	// Update the context with optimized packm kernels.
+	bli_cntx_set_packm_kers
+	(
+	  8,
+	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
+	  BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
+	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
+	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
+	  BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
+	  BLIS_PACKM_8XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
+	  BLIS_PACKM_3XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
+	  BLIS_PACKM_4XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_4xk,
+	  cntx
+	);
+#endif
 
 	// Update the context with optimized level-1f kernels.
 	bli_cntx_set_l1f_kers
@@ -90,11 +108,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	bli_cntx_set_l1v_kers
 	(
 	  10,
-#if 1
+
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
-#endif
+
 	  // axpyv
 #if 0
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
@@ -106,9 +124,11 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
 	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int,
+
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+
 	  // scalv
 #if 0
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
@@ -162,9 +182,9 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 
 	// Initialize sup thresholds with architecture-appropriate values.
 	//                                          s     d     c     z
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],   -1,  201,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],   -1,  201,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],   -1,  201,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],  201,  201,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],  201,  201,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],  201,  201,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh
@@ -189,7 +209,7 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	// Update the context with optimized small/unpacked gemm kernels.
 	bli_cntx_set_l3_sup_kers
 	(
-	  8,
+	  16,
 	  //BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_r_haswell_ref,
 	  BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m, TRUE,
 	  BLIS_RRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m, TRUE,
@@ -199,18 +219,27 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 	  BLIS_CRC, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8n, TRUE,
 	  BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
 	  BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8n, TRUE,
+
+	  BLIS_RRR, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16m, TRUE,
+	  BLIS_RRC, BLIS_FLOAT, bli_sgemmsup_rd_haswell_asm_6x16m, TRUE,
+	  BLIS_RCR, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16m, TRUE,
+	  BLIS_RCC, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16n, TRUE,
+	  BLIS_CRR, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16m, TRUE,
+	  BLIS_CRC, BLIS_FLOAT, bli_sgemmsup_rd_haswell_asm_6x16n, TRUE,
+	  BLIS_CCR, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16n, TRUE,
+	  BLIS_CCC, BLIS_FLOAT, bli_sgemmsup_rv_haswell_asm_6x16n, TRUE,
 	  cntx
 	);
 
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],    -1,     6,    -1,    -1,
-	                                            -1,     9,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,    72,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,   256,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],    -1,  4080,    -1,    -1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR ],     6,     6,    -1,    -1,
+	                                             9,     9,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   168,    72,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes for small/unpacked level-3 problems.

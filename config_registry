@@ -30,6 +30,8 @@ piledriver:  piledriver
 bulldozer:   bulldozer
 
 # ARM architectures.
+armsve:      armsve/armsve
+a64fx:       a64fx/armsve
 thunderx2:   thunderx2/armv8a
 cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a
@@ -37,6 +39,7 @@ cortexa15:   cortexa15/armv7a
 cortexa9:    cortexa9/armv7a
 
 # IBM architectures.
+power10:     power10
 power9:      power9
 bgq:         bgq
 

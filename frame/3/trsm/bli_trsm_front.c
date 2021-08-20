@@ -52,9 +52,11 @@ void bli_trsm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+#if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	gint_t status = bli_trsm_small( side, alpha, a, b, cntx, cntl );
 	if ( status == BLIS_SUCCESS ) return;
+#endif
 #endif
 
 	// Check parameters.
@@ -145,19 +147,11 @@ void bli_trsm_front
 	// bli_l3_cntl_create_if()). This allows us to access the schemas from
 	// the control tree, which hopefully reduces some confusion, particularly
 	// in bli_packm_init().
-	if ( bli_cntx_method( cntx ) == BLIS_NAT )
-	{
-		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
-		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
-	}
-	else // if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	{
-		pack_t schema_a = bli_cntx_schema_a_block( cntx );
-		pack_t schema_b = bli_cntx_schema_b_panel( cntx );
+	pack_t schema_a = bli_cntx_schema_a_block( cntx );
+	pack_t schema_b = bli_cntx_schema_b_panel( cntx );
 
-		bli_obj_set_pack_schema( schema_a, &a_local );
-		bli_obj_set_pack_schema( schema_b, &b_local );
-	}
+	bli_obj_set_pack_schema( schema_a, &a_local );
+	bli_obj_set_pack_schema( schema_b, &b_local );
 
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator

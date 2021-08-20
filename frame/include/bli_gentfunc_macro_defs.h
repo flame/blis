@@ -74,17 +74,33 @@ GENTFUNCCO( scomplex, float,  c, s, blasname, blisname ) \
 GENTFUNCCO( dcomplex, double, z, d, blasname, blisname )
 
 
+// -- Basic one-operand macro with conjugation (real funcs only, used only for dot, ger) --
+
+
+#define INSERT_GENTFUNCDOTR_BLAS( blasname, blisname ) \
+\
+GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname )
+
+
+// -- Basic one-operand macro with conjugation (complex funcs only, used only for dot, ger) --
+
+
+#define INSERT_GENTFUNCDOTC_BLAS( blasname, blisname ) \
+\
+GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
+GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+
+
 // -- Basic one-operand macro with conjugation (used only for dot, ger) --
 
 
 #define INSERT_GENTFUNCDOT_BLAS( blasname, blisname ) \
 \
-GENTFUNCDOT( float,    s,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
-GENTFUNCDOT( double,   d,  , BLIS_NO_CONJUGATE, blasname, blisname ) \
-GENTFUNCDOT( scomplex, c, c, BLIS_CONJUGATE,    blasname, blisname ) \
-GENTFUNCDOT( scomplex, c, u, BLIS_NO_CONJUGATE, blasname, blisname ) \
-GENTFUNCDOT( dcomplex, z, c, BLIS_CONJUGATE,    blasname, blisname ) \
-GENTFUNCDOT( dcomplex, z, u, BLIS_NO_CONJUGATE, blasname, blisname )
+INSERT_GENTFUNCDOTR_BLAS( blasname, blisname ) \
+INSERT_GENTFUNCDOTC_BLAS( blasname, blisname )
 
 
 // -- Basic one-operand macro with real projection --

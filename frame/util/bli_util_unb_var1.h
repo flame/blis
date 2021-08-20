@@ -108,39 +108,6 @@ INSERT_GENTPROTR_BASIC0( normim_unb_var1 )
 
 
 #undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
-     ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  n, \
-       ctype* x, inc_t incx, \
-       char*  format, \
-       char*  s2  \
-     );
-
-INSERT_GENTPROT_BASIC0_I( fprintv )
-
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
-     ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  m, \
-       dim_t  n, \
-       ctype* x, inc_t rs_x, inc_t cs_x, \
-       char*  format, \
-       char*  s2  \
-     );
-
-INSERT_GENTPROT_BASIC0_I( fprintm )
-
-
-#undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTEMAC(ch,varname) \
@@ -187,4 +154,71 @@ void PASTEMAC(ch,varname) \
      );
 
 INSERT_GENTPROTR_BASIC0( sumsqv_unb_var1 )
+
+// -----------------------------------------------------------------------------
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+bool PASTEMAC(ch,varname) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy  \
+     );
+
+INSERT_GENTPROT_BASIC0( eqv_unb_var1 )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+bool PASTEMAC(ch,varname) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y  \
+     );
+
+INSERT_GENTPROT_BASIC0( eqm_unb_var1 )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       FILE*  file, \
+       char*  s1, \
+       dim_t  n, \
+       ctype* x, inc_t incx, \
+       char*  format, \
+       char*  s2  \
+     );
+
+INSERT_GENTPROT_BASIC0_I( fprintv )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+     ( \
+       FILE*  file, \
+       char*  s1, \
+       dim_t  m, \
+       dim_t  n, \
+       ctype* x, inc_t rs_x, inc_t cs_x, \
+       char*  format, \
+       char*  s2  \
+     );
+
+INSERT_GENTPROT_BASIC0_I( fprintm )
+
 

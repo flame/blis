@@ -103,6 +103,9 @@ RANLIB            := @RANLIB@
 # Archiver.
 AR                := @AR@
 
+# Python Interpreter
+PYTHON            := @PYTHON@
+
 # Preset (required) CFLAGS and LDFLAGS. These variables capture the value
 # of the CFLAGS and LDFLAGS environment variables at configure-time (and/or
 # the value of CFLAGS/LDFLAGS if either was specified on the command line).
@@ -113,6 +116,9 @@ LDFLAGS_PRESET    := @ldflags_preset@
 
 # The level of debugging info to generate.
 DEBUG_TYPE        := @debug_type@
+
+# Whether operating system support was requested via --enable-system.
+ENABLE_SYSTEM     := @enable_system@
 
 # The requested threading model.
 THREADING_MODEL   := @threading_model@
@@ -181,7 +187,8 @@ MK_ENABLE_MEMKIND := @enable_memkind@
 # enabled.
 SANDBOX           := @sandbox@
 
-# The name of the pthreads library.
+# The name of the pthreads library. If --disable-system was given, then this
+# variable is set to the empty value.
 LIBPTHREAD        := @libpthread@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block

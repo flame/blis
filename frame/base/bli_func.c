@@ -44,8 +44,9 @@ func_t* bli_func_create
      )
 {
 	func_t* f;
+	err_t r_val;
 
-	f = ( func_t* ) bli_malloc_intl( sizeof(func_t) );
+	f = ( func_t* )bli_malloc_intl( sizeof( func_t ), &r_val );
 
 	bli_func_init
 	(

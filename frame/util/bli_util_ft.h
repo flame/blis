@@ -191,3 +191,62 @@ typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
 
 INSERT_GENTDEFR( sumsqv )
 
+// -----------------------------------------------------------------------------
+
+// Operations with only basic interfaces.
+
+#ifdef BLIS_TAPI_BASIC
+
+// eqsc
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t  conjchi, \
+       ctype*  chi, \
+       ctype*  psi, \
+       bool*   is_eq  \
+     );
+
+INSERT_GENTDEF( eqsc )
+
+// eqv
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       conj_t  conjx, \
+       dim_t   n, \
+       ctype*  x, inc_t incx, \
+       ctype*  y, inc_t incy, \
+       bool*   is_eq  \
+     );
+
+INSERT_GENTDEF( eqv )
+
+// eqm
+
+#undef  GENTDEF
+#define GENTDEF( ctype, ch, opname, tsuf ) \
+\
+typedef void (*PASTECH2(ch,opname,tsuf)) \
+     ( \
+       doff_t  diagoffx, \
+       diag_t  diagx, \
+       uplo_t  uplox, \
+       trans_t transx, \
+       dim_t   m, \
+       dim_t   n, \
+       ctype*  x, inc_t rs_x, inc_t cs_x, \
+       ctype*  y, inc_t rs_y, inc_t cs_y, \
+       bool*   is_eq  \
+     );
+
+INSERT_GENTDEF( eqm )
+
+#endif // #ifdef BLIS_OAPI_BASIC
+

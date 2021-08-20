@@ -4,31 +4,48 @@
 exec_root="test"
 out_root="output"
 
-sys="blis"
+#sys="blis"
 #sys="lonestar5"
 #sys="ul252"
 #sys="ul264"
+sys="ul2128"
 
 if [ ${sys} = "blis" ]; then
 
 	export GOMP_CPU_AFFINITY="0-3"
+
+	numactl=""
 	nt=4
 
 elif [ ${sys} = "lonestar5" ]; then
 
 	export GOMP_CPU_AFFINITY="0-23"
+
+	numactl=""
 	nt=12
 
 elif [ ${sys} = "ul252" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-51"
+
+	numactl="numactl --interleave=all"
 	nt=26
 
 elif [ ${sys} = "ul264" ]; then
 
 	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
 	export GOMP_CPU_AFFINITY="0-63"
+
+	numactl="numactl --interleave=all"
+	nt=32
+
+elif [ ${sys} = "ul2128" ]; then
+
+	export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/field/intel/mkl/lib/intel64"
+	export GOMP_CPU_AFFINITY="0-127"
+
+	numactl="numactl --interleave=all"
 	nt=32
 
 fi
@@ -41,8 +58,7 @@ delay=0.02
 threads="st"
 
 # Datatypes to test.
-#dts="d s"
-dts="d"
+dts="s d"
 
 # Operations to test.
 ops="gemm"
@@ -61,10 +77,22 @@ shapes="sll lsl lls lss sls ssl lll"
 # Small problem dimensions to use.
 # FGVZ: figure out how to probe what's in the directory and
 # execute everything that's there?
-sms="6"
-sns="8"
-sks="4"
-#sks="10"
+# st, single real
+sms_st_s="6"
+sns_st_s="16"
+sks_st_s="4"
+# st, double real
+sms_st_d="6"
+sns_st_d="8"
+sks_st_d="4"
+# mt, single real
+sms_mt_s="6"
+sns_mt_s="16"
+sks_mt_s="10"
+# mt, double real
+sms_mt_d="6"
+sns_mt_d="8"
+sks_mt_d="10"
 
 # Leading dimensions to use (small or large).
 # When a leading dimension is large, it is constant and set to the largest
@@ -81,12 +109,13 @@ pcombos="uu"
 
 # Implementations to test.
 impls="vendor blissup blisconv openblas eigen blasfeo libxsmm"
-#impls="vendor blisconv openblas eigen blasfeo libxsmm"
+#impls="vendor blissup blisconv openblas eigen"
 #impls="vendor"
 #impls="blissup"
 #impls="blisconv"
 #impls="openblas"
 #impls="eigen"
+#impls="blasfeo"
 
 # Save a copy of GOMP_CPU_AFFINITY so that if we have to unset it, we can
 # restore the value.
@@ -97,6 +126,34 @@ GOMP_CPU_AFFINITYsave=${GOMP_CPU_AFFINITY}
 for th in ${threads}; do
 
 	for dt in ${dts}; do
+
+		# Choose the small m, n, and k values based on the threadedness and
+		# datatype currently being executed.
+		if   [ ${th} = "st" ]; then
+			if   [ ${dt} = "s" ]; then
+				sms=${sms_st_s}
+				sns=${sns_st_s}
+				sks=${sks_st_s}
+			elif [ ${dt} = "d" ]; then
+				sms=${sms_st_d}
+				sns=${sns_st_d}
+				sks=${sks_st_d}
+			else
+				exit 1
+			fi
+		elif [ ${th} = "mt" ]; then
+			if   [ ${dt} = "s" ]; then
+				sms=${sms_mt_s}
+				sns=${sns_mt_s}
+				sks=${sks_mt_s}
+			elif [ ${dt} = "d" ]; then
+				sms=${sms_mt_d}
+				sns=${sns_mt_d}
+				sks=${sks_mt_d}
+			else
+				exit 1
+			fi
+		fi
 
 		for op in ${ops}; do
 
@@ -270,10 +327,10 @@ for th in ${threads}; do
 												# Construct the name of the output file.
 												out_file="${out_root}_${th}_${dt}${op}_${tr}_${st}_${shstr}_${ldstr}_${packstr}_${im}.m"
 
-												echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
+												echo "Running (nt = ${nt_use}) ${numactl} ./${exec_name} > ${out_file}"
 
 												# Run executable.
-												./${exec_name} > ${out_file}
+												${numactl} ./${exec_name} > ${out_file}
 
 												sleep ${delay}
 

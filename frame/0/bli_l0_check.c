@@ -87,6 +87,7 @@ void PASTEMAC(opname,_check) \
 GENFRONT( absqsc )
 GENFRONT( normfsc )
 
+// -----------------------------------------------------------------------------
 
 void bli_getsc_check
      (
@@ -349,6 +350,40 @@ void bli_l0_xx2sc_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( absq );
+	bli_check_error_code( e_val );
+}
+
+void bli_l0_xxbsc_check
+     (
+       obj_t*  chi,
+       obj_t*  psi,
+       bool*   is_eq
+     )
+{
+	err_t e_val;
+
+	// Check object datatypes.
+
+	e_val = bli_check_noninteger_object( chi );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_noninteger_object( psi );
+	bli_check_error_code( e_val );
+
+	// Check object dimensions.
+
+	e_val = bli_check_scalar_object( chi );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_scalar_object( psi );
+	bli_check_error_code( e_val );
+
+	// Check object buffers (for non-NULLness).
+
+	e_val = bli_check_object_buffer( chi );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( psi );
 	bli_check_error_code( e_val );
 }
 

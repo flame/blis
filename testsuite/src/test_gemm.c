@@ -254,15 +254,17 @@ void libblis_test_gemm_experiment
 		bli_setsc(  0.9,  1.0, &beta );
 	}
 
+	#if 0
+	//bli_setm( &BLIS_ONE, &a );
+	bli_setsc(  1.0,  0.0, &alpha );
+	bli_setsc(  1.0,  0.0, &beta );
+	#endif
+
 	// Randomize A, B, and C, and save C.
 	libblis_test_mobj_randomize( params, TRUE, &a );
 	libblis_test_mobj_randomize( params, TRUE, &b );
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
-
-//bli_setm( &BLIS_ONE, &a );
-//bli_setsc(  1.0,  0.0, &alpha );
-//bli_setsc(  0.0,  0.0, &beta );
 
 	// Apply the parameters.
 	bli_obj_set_conjtrans( transa, &a );
@@ -453,11 +455,13 @@ bli_printm( "c", c, "%5.2f", "" );
 //     bli_obj_stor3_from_strides( c, a, b ) == BLIS_CRR )
 //bli_printm( "c before", c, "%6.3f", "" );
 		bli_gemm( alpha, a, b, beta, c );
+		//bls_gemm( alpha, a, b, beta, c );
 #if 0
 if ( bli_obj_length( c ) == 12 &&
      bli_obj_stor3_from_strides( c, a, b ) == BLIS_RRR )
 bli_printm( "c after", c, "%6.3f", "" );
 #endif
+//bli_printm( "c after", c, "%5.2f", "" );
 		break;
 
 		default:

@@ -64,6 +64,18 @@ double bli_clock_min_diff( double time_min, double time_start )
 	return time_min;
 }
 
+#ifdef BLIS_DISABLE_SYSTEM
+// --- Begin systemless definitions --------------------------------------------
+
+double bli_clock_helper()
+{
+    return 0.0;
+}
+
+// --- End systemless definitions ----------------------------------------------
+#else
+// --- Begin system definitions ------------------------------------------------
+
 #if BLIS_OS_WINDOWS
 // --- Begin Windows build definitions -----------------------------------------
 
@@ -133,5 +145,8 @@ double bli_clock_helper()
 }
 
 // --- End Linux build definitions ---------------------------------------------
+#endif
+
+// --- End system definitions --------------------------------------------------
 #endif
 

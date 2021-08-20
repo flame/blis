@@ -183,12 +183,12 @@ static int32_t offsets[32] __attribute__((aligned(64))) =
 void bli_sgemm_knl_asm_24x16
      (
        dim_t               k_,
-       double*    restrict alpha,
-       double*    restrict a,
-       double*    restrict b,
-       double*    restrict beta,
-       double*    restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t*          data,
+       float*     restrict alpha,
+       float*     restrict a,
+       float*     restrict b,
+       float*     restrict beta,
+       float*     restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {

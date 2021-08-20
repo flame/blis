@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,6 +53,26 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_gemm_check( alpha, a, b, beta, c, cntx );
+
+	// If C has a zero dimension, return early.
+	if ( bli_obj_has_zero_dim( c ) )
+	{
+		return;
+	}
+
+	// If alpha is zero, or if A or B has a zero dimension, scale C by beta
+	// and return early.
+	if ( bli_obj_equals( alpha, &BLIS_ZERO ) ||
+	     bli_obj_has_zero_dim( a ) ||
+	     bli_obj_has_zero_dim( b ) )
+	{
+		bli_scalm( beta, c );
+		return;
+	}
+
 #if 0
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 	// Only handle small problems separately for homogeneous datatypes.
@@ -60,22 +80,11 @@ void bli_gemm_front
 	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
 	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
 	{
-		gint_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
+		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
 		if ( status == BLIS_SUCCESS ) return;
 	}
 #endif
 #endif
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
-	// If alpha is zero, scale by beta and return.
-	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
-	{
-		bli_scalm( beta, c );
-		return;
-	}
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );

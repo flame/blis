@@ -155,6 +155,10 @@ int main( int argc, char** argv )
 	        ( unsigned long )0,
 	        ( unsigned long )0, 0.0 );
 
+	// Flush the initialization-inducing statement above so there is
+	// at least one line of output even if the implementation crashes.
+	fflush( stdout );
+
 
 	//for ( p = p_begin; p <= p_max; p += p_inc )
 	for ( p = p_max; p_begin <= p; p -= p_inc )
@@ -280,6 +284,35 @@ int main( int argc, char** argv )
 		Stride<Dynamic,1> stride_c( os_c, 1 );
 
 		#if defined(IS_FLOAT)
+			#ifdef A_STOR_R
+			typedef Matrix<float, Dynamic, Dynamic, RowMajor> MatrixXs_A;
+			#else
+			typedef Matrix<float, Dynamic, Dynamic, ColMajor> MatrixXs_A;
+			#endif
+			#ifdef B_STOR_R
+			typedef Matrix<float, Dynamic, Dynamic, RowMajor> MatrixXs_B;
+			#else
+			typedef Matrix<float, Dynamic, Dynamic, ColMajor> MatrixXs_B;
+			#endif
+			#ifdef C_STOR_R
+			typedef Matrix<float, Dynamic, Dynamic, RowMajor> MatrixXs_C;
+			#else
+			typedef Matrix<float, Dynamic, Dynamic, ColMajor> MatrixXs_C;
+			#endif
+
+			#ifdef A_NOTRANS  // A is not transposed
+			Map<MatrixXs_A,  0, Stride<Dynamic,1> > A( ( float* )ap, m, k, stride_a );
+			#else // A is transposed
+			Map<MatrixXs_A,  0, Stride<Dynamic,1> > A( ( float* )ap, k, m, stride_a );
+			#endif
+
+			#ifdef B_NOTRANS // B is not transposed
+			Map<MatrixXs_B,  0, Stride<Dynamic,1> > B( ( float* )bp, k, n, stride_b );
+			#else // B is transposed
+			Map<MatrixXs_B,  0, Stride<Dynamic,1> > B( ( float* )bp, n, k, stride_b );
+			#endif
+
+			Map<MatrixXs_C,  0, Stride<Dynamic,1> > C( ( float* )cp, m, n, stride_c );
 		#elif defined (IS_DOUBLE)
 			#ifdef A_STOR_R
 			typedef Matrix<double, Dynamic, Dynamic, RowMajor> MatrixXd_A;

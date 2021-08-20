@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2017 - 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -36,20 +36,21 @@
 #include "xmmintrin.h"
 #include "blis.h"
 
+#define AOCL_DTL_TRACE_ENTRY(x)      ;
+#define AOCL_DTL_TRACE_EXIT(x)       ;
+#define AOCL_DTL_TRACE_EXIT_ERR(x,y) ;
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
 #define MR 32
 #define D_MR (MR >> 1)
 #define NR 3
+#define D_BLIS_SMALL_MATRIX_K_THRES_ROME    256
 
 #define BLIS_ENABLE_PREFETCH
-#define F_SCRATCH_DIM (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES)
-static float A_pack[F_SCRATCH_DIM]  __attribute__((aligned(64)));
 #define D_BLIS_SMALL_MATRIX_THRES (BLIS_SMALL_MATRIX_THRES / 2 )
 #define D_BLIS_SMALL_M_RECT_MATRIX_THRES (BLIS_SMALL_M_RECT_MATRIX_THRES / 2)
 #define D_BLIS_SMALL_K_RECT_MATRIX_THRES (BLIS_SMALL_K_RECT_MATRIX_THRES / 2)
-#define D_SCRATCH_DIM (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES)
-static double D_A_pack[D_SCRATCH_DIM]  __attribute__((aligned(64)));
 #define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called. 
 #define AT_MR 4 // The kernel dimension of the A transpose GEMM kernel.(AT_MR * NR).
 static err_t bli_sgemm_small
@@ -111,7 +112,10 @@ err_t bli_gemm_small
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
+	
 #ifdef BLIS_ENABLE_MULTITHREADING
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 #endif
     // If alpha is zero, scale by beta and return.
@@ -128,7 +132,7 @@ err_t bli_gemm_small
         return BLIS_INVALID_ROW_STRIDE;
     }
 
-    num_t dt = ((*c).info & (0x7 << 0));
+    num_t dt = bli_obj_dt(c);
 
     if (bli_obj_has_trans( a ))
     {
@@ -157,6 +161,7 @@ err_t bli_gemm_small
         return bli_sgemm_small(alpha, a, b, beta, c, cntx, cntl);
     }
 
+	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -172,70 +177,136 @@ static err_t bli_sgemm_small
        cntl_t* cntl
      )
 {
-
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
     gint_t L = M * N;
 
-                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
+	// when N is equal to 1 call GEMV instead of GEMM
+    if (N == 1)
+    {
+        bli_gemv
+        (
+            alpha,
+            a,
+            b,
+            beta,
+            c
+        );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
+        return BLIS_SUCCESS;
+    }
+
+
     if ((((L) < (BLIS_SMALL_MATRIX_THRES * BLIS_SMALL_MATRIX_THRES))
         || ((M  < BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
     {
-
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
         guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
         guint_t row_idx, col_idx, k;
-        float *A = a->buffer; // pointer to elements of Matrix A
-        float *B = b->buffer; // pointer to elements of Matrix B
-        float *C = c->buffer; // pointer to elements of Matrix C
+
+        float *A = bli_obj_buffer_at_off(a); // pointer to elements of Matrix A
+        float *B = bli_obj_buffer_at_off(b); // pointer to elements of Matrix B
+        float *C = bli_obj_buffer_at_off(c); // pointer to elements of Matrix C
 
         float *tA = A, *tB = B, *tC = C;//, *tA_pack;
-        float *tA_packed; // temprorary pointer to hold packed A memory pointer
+        float *tA_packed; // temporary pointer to hold packed A memory pointer
+
         guint_t row_idx_packed; //packed A memory row index
         guint_t lda_packed; //lda of packed A
         guint_t col_idx_start; //starting index after A matrix is packed.
         dim_t tb_inc_row = 1; // row stride of matrix B
         dim_t tb_inc_col = ldb; // column stride of matrix B
-        __m256 ymm4, ymm5, ymm6, ymm7;
+
+	    __m256 ymm4, ymm5, ymm6, ymm7;
         __m256 ymm8, ymm9, ymm10, ymm11;
         __m256 ymm12, ymm13, ymm14, ymm15;
         __m256 ymm0, ymm1, ymm2, ymm3;
 
         gint_t n_remainder; // If the N is non multiple of 3.(N%3)
         gint_t m_remainder; // If the M is non multiple of 32.(M%32)
-
-        float *alpha_cast, *beta_cast; // alpha, beta multiples
-        alpha_cast = (alpha->buffer);
-        beta_cast = (beta->buffer);
         gint_t required_packing_A = 1;
+        mem_t local_mem_buf_A_s;
+        float *A_pack = NULL;
+        rntm_t rntm;
 
-        // when N is equal to 1 call GEMV instead of GEMM
-        if (N == 1)
-        {
-            bli_gemv
-            (
-                alpha,
-                a,
-                b,
-                beta,
-                c
-            );
-            return BLIS_SUCCESS;
+        const num_t    dt_exec   = bli_obj_dt( c );
+        float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
+        float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
+
+        /*Beta Zero Check*/
+        bool is_beta_non_zero=0;
+        if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
+            is_beta_non_zero = 1;
         }
 
-        //update the pointer math if matrix B needs to be transposed.
-        if (bli_obj_has_trans( b ))
-        {
+	//update the pointer math if matrix B needs to be transposed.
+        if (bli_obj_has_trans( b )) {
             tb_inc_col = 1; //switch row and column strides
             tb_inc_row = ldb;
         }
 
-        if ((N <= 3) || ((MR * K) > F_SCRATCH_DIM))
+        /*
+         * This function was using global array to pack part of A input when needed.
+         * However, using this global array make the function non-reentrant.
+         * Instead of using a global array we should allocate buffer for each invocation.
+         * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
+         * better approach is to get the buffer from the pre-allocated pool and return
+         * it the pool once we are doing.
+         *
+         * In order to get the buffer from pool, we need access to memory broker,
+         * currently this function is not invoked in such a way that it can receive
+         * the memory broker (via rntm). Following hack will get the global memory
+         * broker that can be use it to access the pool.
+         *
+         * Note there will be memory allocation at least on first innovation
+         * as there will not be any pool created for this size.
+         * Subsequent invocations will just reuse the buffer from the pool.
+         */
+
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_pba_rntm_set_pba( &rntm );
+
+        // Get the current size of the buffer pool for A block packing.
+        // We will use the same size to avoid pool re-initialization 
+        siz_t buffer_size = bli_pool_block_size(bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                                                bli_rntm_pba(&rntm)));
+
+        // Based on the available memory in the buffer we will decide if 
+        // we want to do packing or not.
+        //
+        // This kernel assumes that "A" will be un-packged if N <= 3.
+        // Usually this range (N <= 3) is handled by SUP, however,
+        // if SUP is disabled or for any other condition if we do
+        // enter this kernel with N <= 3, we want to make sure that
+        // "A" remains unpacked.
+        //
+        // If this check is removed it will result in the crash as
+        // reported in CPUPL-587.
+        //
+        
+        if ((N <= 3) || (((MR * K) << 2) > buffer_size))
         {
             required_packing_A = 0;
         }
+        else 
+        {
+#ifdef BLIS_ENABLE_MEM_TRACING
+            printf( "bli_sgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
+#endif
+            // Get the buffer from the pool, if there is no pool with
+            // required size, it will be created. 
+            bli_pba_acquire_m(&rntm,
+                                 buffer_size,
+                                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                 &local_mem_buf_A_s);
+
+            A_pack = bli_mem_buffer(&local_mem_buf_A_s);
+        }
+
         /*
         * The computation loop runs for MRxN columns of C matrix, thus
         * accessing the MRxK A matrix data and KxNR B matrix data.
@@ -244,7 +315,6 @@ static err_t bli_sgemm_small
         // Process MR rows of C matrix at a time.
         for (row_idx = 0; (row_idx + (MR - 1)) < M; row_idx += MR)
         {
-
             col_idx_start = 0;
             tA_packed = A;
             row_idx_packed = row_idx;
@@ -339,7 +409,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
@@ -355,15 +424,39 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                // multiply C by beta and accumulate col 1.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate col 1.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_ps(tC + 24);
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+
+                    float* ttC = tC +ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_ps(ttC + 24);
+                    ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
+
+                    ttC += ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_ps(ttC + 24);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
                 _mm256_storeu_ps(tC + 16, ymm6);
@@ -371,14 +464,6 @@ static err_t bli_sgemm_small
 
                 // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
                 _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
                 _mm256_storeu_ps(tC + 16, ymm10);
@@ -386,14 +471,6 @@ static err_t bli_sgemm_small
 
                 // multiply C by beta and accumulate, col 3.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
                 _mm256_storeu_ps(tC, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -483,7 +560,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
@@ -499,15 +575,37 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                // multiply C by beta and accumulate col 1.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate col 1.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_ps(tC + 24);
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                    float* ttC = tC +ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_ps(ttC + 24);
+                    ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
+                    ttC = ttC +ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_ps(ttC + 24);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
                 _mm256_storeu_ps(tC + 16, ymm6);
@@ -515,14 +613,6 @@ static err_t bli_sgemm_small
 
                 // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
                 _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
                 _mm256_storeu_ps(tC + 16, ymm10);
@@ -530,14 +620,6 @@ static err_t bli_sgemm_small
 
                 // multiply C by beta and accumulate, col 3.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
                 _mm256_storeu_ps(tC, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -596,7 +678,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm8 = _mm256_mul_ps(ymm8, ymm0);
@@ -609,29 +690,34 @@ static err_t bli_sgemm_small
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
                 // multiply C by beta and accumulate, col 1.
-                ymm2 = _mm256_loadu_ps(tC + 0);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
-                _mm256_storeu_ps(tC + 0, ymm8);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_ps(tC + 24);
+                    ymm11 = _mm256_fmadd_ps(ymm2, ymm1, ymm11);
+
+                    float* ttC = tC +ldc;
+                    // multiply C by beta and accumulate, col 2.
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_ps(ttC + 24);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
+                }
+                _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
                 _mm256_storeu_ps(tC + 16, ymm10);
                 _mm256_storeu_ps(tC + 24, ymm11);
-
-                // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
                 _mm256_storeu_ps(tC, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -680,7 +766,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm12 = _mm256_mul_ps(ymm12, ymm0);
@@ -688,15 +773,19 @@ static err_t bli_sgemm_small
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
                 ymm15 = _mm256_mul_ps(ymm15, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC + 0);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_ps(tC + 24);
-                ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC + 0);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_ps(tC + 24);
+                    ymm15 = _mm256_fmadd_ps(ymm2, ymm1, ymm15);
+                }
 
                 _mm256_storeu_ps(tC + 0, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
@@ -768,7 +857,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
@@ -781,37 +869,43 @@ static err_t bli_sgemm_small
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                    float* ttC = tC +ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
+                    ttC += ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
                 _mm256_storeu_ps(tC + 16, ymm6);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
                 _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
                 _mm256_storeu_ps(tC + 16, ymm10);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
                 _mm256_storeu_ps(tC, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -862,7 +956,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm8 = _mm256_mul_ps(ymm8, ymm0);
@@ -872,25 +965,33 @@ static err_t bli_sgemm_small
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC + 0);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
-                _mm256_storeu_ps(tC + 0, ymm8);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm10 = _mm256_fmadd_ps(ymm2, ymm1, ymm10);
+
+                    float* ttC = tC +ldc;
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(ttC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                }
+
+                _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
                 _mm256_storeu_ps(tC + 16, ymm10);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+
                 _mm256_storeu_ps(tC, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -934,21 +1035,23 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm12 = _mm256_mul_ps(ymm12, ymm0);
                 ymm13 = _mm256_mul_ps(ymm13, ymm0);
                 ymm14 = _mm256_mul_ps(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC + 0);
-                ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_ps(tC + 16);
-                ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
-
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC + 0);
+                    ymm12 = _mm256_fmadd_ps(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm13 = _mm256_fmadd_ps(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_ps(tC + 16);
+                    ymm14 = _mm256_fmadd_ps(ymm2, ymm1, ymm14);
+                }
                 _mm256_storeu_ps(tC + 0, ymm12);
                 _mm256_storeu_ps(tC + 8, ymm13);
                 _mm256_storeu_ps(tC + 16, ymm14);
@@ -1001,7 +1104,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
@@ -1011,29 +1113,35 @@ static err_t bli_sgemm_small
                 ymm8 = _mm256_mul_ps(ymm8, ymm0);
                 ymm9 = _mm256_mul_ps(ymm9, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    float* ttC = tC + ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                    ttC += ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
                 _mm256_storeu_ps(tC, ymm6);
                 _mm256_storeu_ps(tC + 8, ymm7);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm8 = _mm256_fmadd_ps(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
                 _mm256_storeu_ps(tC, ymm8);
                 _mm256_storeu_ps(tC + 8, ymm9);
 
@@ -1076,7 +1184,6 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
@@ -1084,20 +1191,25 @@ static err_t bli_sgemm_small
                 ymm6 = _mm256_mul_ps(ymm6, ymm0);
                 ymm7 = _mm256_mul_ps(ymm7, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    float* ttC = tC + ldc;
+                    ymm2 = _mm256_loadu_ps(ttC);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_ps(ttC + 8);
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
                 _mm256_storeu_ps(tC, ymm6);
                 _mm256_storeu_ps(tC + 8, ymm7);
 
@@ -1135,16 +1247,19 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
 
                 // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_ps(tC + 8);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + 8);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(tC, ymm4);
                 _mm256_storeu_ps(tC + 8, ymm5);
 
@@ -1189,28 +1304,30 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
                 ymm6 = _mm256_mul_ps(ymm6, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + ldc);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_ps(tC + 2*ldc);
+                    ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
+                }
                 _mm256_storeu_ps(tC, ymm4);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
                 _mm256_storeu_ps(tC, ymm5);
 
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm6 = _mm256_fmadd_ps(ymm2, ymm1, ymm6);
                 _mm256_storeu_ps(tC, ymm6);
             }
             n_remainder = N - col_idx;
@@ -1244,21 +1361,23 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 //multiply A*B by alpha.
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_ps(tC + ldc);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(tC, ymm4);
-
                 // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
                 _mm256_storeu_ps(tC, ymm5);
 
                 col_idx += 2;
@@ -1291,13 +1410,15 @@ static err_t bli_sgemm_small
                 }
                 // alpha, beta multiplication.
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
-
                 ymm4 = _mm256_mul_ps(ymm4, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_ps(tC);
-                ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_ps(tC);
+                    ymm4 = _mm256_fmadd_ps(ymm2, ymm1, ymm4);
+                }
                 _mm256_storeu_ps(tC, ymm4);
 
             }
@@ -1310,7 +1431,7 @@ static err_t bli_sgemm_small
         // to handle this case.
         if ((m_remainder) && (lda > 7))
         {
-            float f_temp[8];
+            float f_temp[8] = {0.0};
 
             for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
             {
@@ -1371,7 +1492,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero){
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1384,7 +1507,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                if(is_beta_non_zero){
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                }
                 _mm256_storeu_ps(f_temp, ymm7);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1397,7 +1522,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                if(is_beta_non_zero){
+                    ymm9 = _mm256_fmadd_ps(ymm2, ymm1, ymm9);
+                }
                 _mm256_storeu_ps(f_temp, ymm9);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1455,7 +1582,9 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero){
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1468,8 +1597,10 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
-                _mm256_storeu_ps(f_temp, ymm7);
+                if(is_beta_non_zero){
+                    ymm7 = _mm256_fmadd_ps(ymm2, ymm1, ymm7);
+                }
+	    	_mm256_storeu_ps(f_temp, ymm7);
                 for (int i = 0; i < m_remainder; i++)
                 {
                     tC[i] = f_temp[i];
@@ -1510,7 +1641,6 @@ static err_t bli_sgemm_small
                 ymm5 = _mm256_fmadd_ps(ymm0, ymm3, ymm5);
 
                 ymm0 = _mm256_broadcast_ss(alpha_cast);
-                ymm1 = _mm256_broadcast_ss(beta_cast);
 
                 // multiply C by beta and accumulate.
                 ymm5 = _mm256_mul_ps(ymm5, ymm0);
@@ -1520,7 +1650,10 @@ static err_t bli_sgemm_small
                     f_temp[i] = tC[i];
                 }
                 ymm2 = _mm256_loadu_ps(f_temp);
-                ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero){
+                    ymm1 = _mm256_broadcast_ss(beta_cast);
+                    ymm5 = _mm256_fmadd_ps(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_ps(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -1551,15 +1684,36 @@ static err_t bli_sgemm_small
                     }
 
                     result *= (*alpha_cast);
-                    (*tC) = (*tC) * (*beta_cast) + result;
+                    if(is_beta_non_zero){
+                        (*tC) = (*tC) * (*beta_cast) + result;
+                    }else{
+                        (*tC) = result;
+                    }
                 }
             }
         }
+
+        // Return the buffer to pool
+        if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s) ) {
+
+#ifdef BLIS_ENABLE_MEM_TRACING
+        printf( "bli_sgemm_small(): releasing mem pool block\n" );
+#endif
+            bli_pba_release(&rntm,
+                               &local_mem_buf_A_s);
+        }
+		
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
         return BLIS_SUCCESS;
     }
     else
-        return BLIS_NONCONFORMAL_DIMENSIONS;
-
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
+		return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 
 };
 
@@ -1575,28 +1729,51 @@ static err_t bli_dgemm_small
      )
 {
 
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
     gint_t L = M * N;
 
-                                // If alpha is zero, scale by beta and return.
-                                //   printf("alpha_cast = %f beta_cast = %f [ Trans = %d %d], [stride = %d %d %d] [m,n,k = %d %d %d]\n",*alpha_cast,*beta_cast, bli_obj_has_trans( a ), bli_obj_has_trans( b ), lda, ldb,ldc, M,N,K);
+    // when N is equal to 1 call GEMV instead of GEMM
+    if (N == 1)
+    {
+        bli_gemv
+        (
+            alpha,
+            a,
+            b,
+            beta,
+            c
+        );
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+        return BLIS_SUCCESS;
+    }
+
+    if (N<3) //Implemenation assumes that N is atleast 3.
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"N < 3, cannot be processed by small gemm"
+			);
+        return BLIS_NOT_YET_IMPLEMENTED;
+	}
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX_ROME
-    if( (L != 0) && (K != 0) && (N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))
+    if( (L && K) && ((K < D_BLIS_SMALL_MATRIX_K_THRES_ROME) || ((N < BLIS_SMALL_MATRIX_THRES_ROME) && (K < BLIS_SMALL_MATRIX_THRES_ROME))))
 #else
     if ((((L) < (D_BLIS_SMALL_MATRIX_THRES * D_BLIS_SMALL_MATRIX_THRES))
         || ((M  < D_BLIS_SMALL_M_RECT_MATRIX_THRES) && (K < D_BLIS_SMALL_K_RECT_MATRIX_THRES))) && ((L!=0) && (K!=0)))
 #endif   
     {
-
         guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
         guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
         guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
         guint_t row_idx, col_idx, k;
-        double *A = a->buffer; // pointer to elements of Matrix A
-        double *B = b->buffer; // pointer to elements of Matrix B
-        double *C = c->buffer; // pointer to elements of Matrix C
+        double *A = bli_obj_buffer_at_off(a); // pointer to elements of Matrix A
+        double *B = bli_obj_buffer_at_off(b); // pointer to elements of Matrix B
+        double *C = bli_obj_buffer_at_off(c); // pointer to elements of Matrix C
 
         double *tA = A, *tB = B, *tC = C;//, *tA_pack;
         double *tA_packed; // temprorary pointer to hold packed A memory pointer
@@ -1614,23 +1791,13 @@ static err_t bli_dgemm_small
         gint_t m_remainder; // If the M is non multiple of 16.(M%16)
 
         double *alpha_cast, *beta_cast; // alpha, beta multiples
-        alpha_cast = (alpha->buffer);
-        beta_cast = (beta->buffer);
-        gint_t required_packing_A = 1;
+        alpha_cast = bli_obj_buffer_for_1x1(BLIS_DOUBLE, alpha);
+        beta_cast = bli_obj_buffer_for_1x1(BLIS_DOUBLE, beta);
 
-        // when N is equal to 1 call GEMV instead of GEMM
-        if (N == 1)
-        {
-            bli_gemv
-            (
-                alpha,
-                a,
-                b,
-                beta,
-                c
-            );
-            return BLIS_SUCCESS;
-        }
+        gint_t required_packing_A = 1;
+        mem_t local_mem_buf_A_s;
+        double *D_A_pack = NULL;
+        rntm_t rntm;
 
         //update the pointer math if matrix B needs to be transposed.
         if (bli_obj_has_trans( b ))
@@ -1639,10 +1806,71 @@ static err_t bli_dgemm_small
             tb_inc_row = ldb;
         }
 
-        if ((N <= 3) || ((D_MR * K) > D_SCRATCH_DIM))
+        //checking whether beta value is zero.
+        //if true, we should perform C=alpha * A*B operation
+        //instead of C = beta * C + alpha * (A * B)
+        bool is_beta_non_zero = 0;
+        if(!bli_obj_equals(beta, &BLIS_ZERO))
+                is_beta_non_zero = 1;
+
+        /*
+         * This function was using global array to pack part of A input when needed.
+         * However, using this global array make the function non-reentrant.
+         * Instead of using a global array we should allocate buffer for each invocation.
+         * Since the buffer size is too big or stack and doing malloc every time will be too expensive,
+         * better approach is to get the buffer from the pre-allocated pool and return
+         * it the pool once we are doing.
+         *
+         * In order to get the buffer from pool, we need access to memory broker,
+         * currently this function is not invoked in such a way that it can receive
+         * the memory broker (via rntm). Following hack will get the global memory
+         * broker that can be use it to access the pool.
+         *
+         * Note there will be memory allocation at least on first innovation
+         * as there will not be any pool created for this size.
+         * Subsequent invocations will just reuse the buffer from the pool.
+         */
+
+        bli_rntm_init_from_global( &rntm );
+        bli_rntm_set_num_threads_only( 1, &rntm );
+        bli_pba_rntm_set_pba( &rntm );
+
+        // Get the current size of the buffer pool for A block packing.
+        // We will use the same size to avoid pool re-initliazaton 
+        siz_t buffer_size = bli_pool_block_size(
+            bli_pba_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
+                            bli_rntm_pba(&rntm)));
+
+        //
+        // This kernel assumes that "A" will be unpackged if N <= 3.
+        // Usually this range (N <= 3) is handled by SUP, however,
+        // if SUP is disabled or for any other condition if we do
+        // enter this kernel with N <= 3, we want to make sure that
+        // "A" remains unpacked.
+        //
+        // If this check is removed it will result in the crash as
+        // reported in CPUPL-587.
+        //
+
+        if ((N <= 3) || ((D_MR * K) << 3) > buffer_size)
         {
             required_packing_A = 0;
         }
+        
+        if (required_packing_A == 1)
+        {
+#ifdef BLIS_ENABLE_MEM_TRACING
+            printf( "bli_dgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
+#endif
+            // Get the buffer from the pool.
+            bli_pba_acquire_m(&rntm,
+                                 buffer_size,
+                                 BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
+                                 &local_mem_buf_A_s);
+
+            D_A_pack = bli_mem_buffer(&local_mem_buf_A_s);
+        }
+
         /*
         * The computation loop runs for D_MRxN columns of C matrix, thus
         * accessing the D_MRxK A matrix data and KxNR B matrix data.
@@ -1762,45 +1990,56 @@ static err_t bli_dgemm_small
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
                 ymm15 = _mm256_mul_pd(ymm15, ymm0);
 
-                // multiply C by beta and accumulate col 1.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate col 1.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_pd(tC + 12);
+                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
+                    double* ttC = tC + ldc;
+
+                    // multiply C by beta and accumulate, col 2.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_pd(ttC + 12);
+                    ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
+                    ttC += ldc;
+
+                    // multiply C by beta and accumulate, col 3.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_pd(ttC + 12);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                }
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
                 _mm256_storeu_pd(tC + 8, ymm6);
                 _mm256_storeu_pd(tC + 12, ymm7);
 
-                // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
                 _mm256_storeu_pd(tC, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
                 _mm256_storeu_pd(tC + 8, ymm10);
                 _mm256_storeu_pd(tC + 12, ymm11);
 
-                // multiply C by beta and accumulate, col 3.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+
                 _mm256_storeu_pd(tC, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
@@ -1906,45 +2145,54 @@ static err_t bli_dgemm_small
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
                 ymm15 = _mm256_mul_pd(ymm15, ymm0);
 
-                // multiply C by beta and accumulate col 1.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate col 1.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_pd(tC + 12);
+                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
+                    // multiply C by beta and accumulate, col 2.
+                    double* ttC  = tC + ldc;
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_pd(ttC + 12);
+                    ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
+                    // multiply C by beta and accumulate, col 3.
+                    ttC += ldc;
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_pd(ttC + 12);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                }
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
                 _mm256_storeu_pd(tC + 8, ymm6);
                 _mm256_storeu_pd(tC + 12, ymm7);
 
-                // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
                 _mm256_storeu_pd(tC, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
                 _mm256_storeu_pd(tC + 8, ymm10);
                 _mm256_storeu_pd(tC + 12, ymm11);
 
-                // multiply C by beta and accumulate, col 3.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+
                 _mm256_storeu_pd(tC, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
@@ -2015,35 +2263,42 @@ static err_t bli_dgemm_small
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
                 ymm15 = _mm256_mul_pd(ymm15, ymm0);
 
-                // multiply C by beta and accumulate, col 1.
-                ymm2 = _mm256_loadu_pd(tC + 0);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate, col 1.
+                    ymm2 = _mm256_loadu_pd(tC + 0);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+                    ymm2 = _mm256_loadu_pd(tC + 12);
+                    ymm11 = _mm256_fmadd_pd(ymm2, ymm1, ymm11);
+
+                    // multiply C by beta and accumulate, col 2.
+                    double *ttC = tC + ldc;
+
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_pd(ttC + 12);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                }
+
                 _mm256_storeu_pd(tC + 0, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
                 _mm256_storeu_pd(tC + 8, ymm10);
                 _mm256_storeu_pd(tC + 12, ymm11);
 
-                // multiply C by beta and accumulate, col 2.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+
                 _mm256_storeu_pd(tC, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
                 _mm256_storeu_pd(tC + 12, ymm15);
-
                 col_idx += 2;
             }
             // if the N is not multiple of 3.
@@ -2095,15 +2350,18 @@ static err_t bli_dgemm_small
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
                 ymm15 = _mm256_mul_pd(ymm15, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC + 0);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
-                ymm2 = _mm256_loadu_pd(tC + 12);
-                ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC + 0);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+                    ymm2 = _mm256_loadu_pd(tC + 12);
+                    ymm15 = _mm256_fmadd_pd(ymm2, ymm1, ymm15);
+                }
 
                 _mm256_storeu_pd(tC + 0, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
@@ -2188,41 +2446,50 @@ static err_t bli_dgemm_small
                 ymm13 = _mm256_mul_pd(ymm13, ymm0);
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+
+                    // multiply C by beta and accumulate.
+                    double *ttC = tC +ldc;
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
+                    // multiply C by beta and accumulate.
+                    ttC += ldc;
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                }
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
                 _mm256_storeu_pd(tC + 8, ymm6);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
                 _mm256_storeu_pd(tC, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
                 _mm256_storeu_pd(tC + 8, ymm10);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
                 _mm256_storeu_pd(tC, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
-
             }
             n_remainder = N - col_idx;
             // if the N is not multiple of 3.
@@ -2279,25 +2546,34 @@ static err_t bli_dgemm_small
                 ymm13 = _mm256_mul_pd(ymm13, ymm0);
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC + 0);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC + 0);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm10 = _mm256_fmadd_pd(ymm2, ymm1, ymm10);
+
+                    double *ttC = tC + ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(ttC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                }
                 _mm256_storeu_pd(tC + 0, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
                 _mm256_storeu_pd(tC + 8, ymm10);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
                 _mm256_storeu_pd(tC, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
@@ -2348,14 +2624,18 @@ static err_t bli_dgemm_small
                 ymm13 = _mm256_mul_pd(ymm13, ymm0);
                 ymm14 = _mm256_mul_pd(ymm14, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC + 0);
-                ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
-                ymm2 = _mm256_loadu_pd(tC + 8);
-                ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
 
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC + 0);
+                    ymm12 = _mm256_fmadd_pd(ymm2, ymm1, ymm12);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm13 = _mm256_fmadd_pd(ymm2, ymm1, ymm13);
+                    ymm2 = _mm256_loadu_pd(tC + 8);
+                    ymm14 = _mm256_fmadd_pd(ymm2, ymm1, ymm14);
+
+                }
                 _mm256_storeu_pd(tC + 0, ymm12);
                 _mm256_storeu_pd(tC + 4, ymm13);
                 _mm256_storeu_pd(tC + 8, ymm14);
@@ -2418,29 +2698,39 @@ static err_t bli_dgemm_small
                 ymm8 = _mm256_mul_pd(ymm8, ymm0);
                 ymm9 = _mm256_mul_pd(ymm9, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                    double* ttC = tC + ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
+                    ttC += ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
+                    ymm2 = _mm256_loadu_pd(ttC + 4);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
+                }
+
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
                 _mm256_storeu_pd(tC, ymm6);
                 _mm256_storeu_pd(tC + 4, ymm7);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm8 = _mm256_fmadd_pd(ymm2, ymm1, ymm8);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
                 _mm256_storeu_pd(tC, ymm8);
                 _mm256_storeu_pd(tC + 4, ymm9);
 
@@ -2491,20 +2781,26 @@ static err_t bli_dgemm_small
                 ymm6 = _mm256_mul_pd(ymm6, ymm0);
                 ymm7 = _mm256_mul_pd(ymm7, ymm0);
 
+                if(is_beta_non_zero)
+                {
                 // multiply C by beta and accumulate.
                 ymm2 = _mm256_loadu_pd(tC);
                 ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
                 ymm2 = _mm256_loadu_pd(tC + 4);
                 ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                double* ttC = tC + ldc;
+
+                // multiply C by beta and accumulate.
+                ymm2 = _mm256_loadu_pd(ttC);
+                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                ymm2 = _mm256_loadu_pd(ttC + 4);
+                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+                }
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
                 _mm256_storeu_pd(tC, ymm6);
                 _mm256_storeu_pd(tC + 4, ymm7);
 
@@ -2547,11 +2843,14 @@ static err_t bli_dgemm_small
                 ymm4 = _mm256_mul_pd(ymm4, ymm0);
                 ymm5 = _mm256_mul_pd(ymm5, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
-                ymm2 = _mm256_loadu_pd(tC + 4);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                    ymm2 = _mm256_loadu_pd(tC + 4);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_pd(tC, ymm4);
                 _mm256_storeu_pd(tC + 4, ymm5);
 
@@ -2604,21 +2903,30 @@ static err_t bli_dgemm_small
                 ymm5 = _mm256_mul_pd(ymm5, ymm0);
                 ymm6 = _mm256_mul_pd(ymm6, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                    double* ttC = tC + ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                    ttC += ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
+                }
                 _mm256_storeu_pd(tC, ymm4);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                 _mm256_storeu_pd(tC, ymm5);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm6 = _mm256_fmadd_pd(ymm2, ymm1, ymm6);
                 _mm256_storeu_pd(tC, ymm6);
             }
             n_remainder = N - col_idx;
@@ -2658,15 +2966,21 @@ static err_t bli_dgemm_small
                 ymm4 = _mm256_mul_pd(ymm4, ymm0);
                 ymm5 = _mm256_mul_pd(ymm5, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                    double* ttC = tC + ldc;
+
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(ttC);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+                }
                 _mm256_storeu_pd(tC, ymm4);
 
-                // multiply C by beta and accumulate.
                 tC += ldc;
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                 _mm256_storeu_pd(tC, ymm5);
 
                 col_idx += 2;
@@ -2703,9 +3017,13 @@ static err_t bli_dgemm_small
 
                 ymm4 = _mm256_mul_pd(ymm4, ymm0);
 
-                // multiply C by beta and accumulate.
-                ymm2 = _mm256_loadu_pd(tC);
-                ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+                if(is_beta_non_zero)
+                {
+                    // multiply C by beta and accumulate.
+                    ymm2 = _mm256_loadu_pd(tC);
+                    ymm4 = _mm256_fmadd_pd(ymm2, ymm1, ymm4);
+
+                }
                 _mm256_storeu_pd(tC, ymm4);
 
             }
@@ -2718,7 +3036,7 @@ static err_t bli_dgemm_small
         // to handle this case.
         if ((m_remainder) && (lda > 3))
         {
-            double f_temp[8];
+            double f_temp[8] = {0.0};
 
             for (col_idx = 0; (col_idx + 2) < N; col_idx += 3)
             {
@@ -2773,44 +3091,52 @@ static err_t bli_dgemm_small
                 ymm7 = _mm256_mul_pd(ymm7, ymm0);
                 ymm9 = _mm256_mul_pd(ymm9, ymm0);
 
+                if(is_beta_non_zero)
+                {
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = tC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
 
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tC[i];
-                }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
-                _mm256_storeu_pd(f_temp, ymm5);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
 
-                tC += ldc;
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tC[i];
-                }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
-                _mm256_storeu_pd(f_temp, ymm7);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
+                    double* ttC = tC + ldc;
 
-                tC += ldc;
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tC[i];
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = ttC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
+                    ttC += ldc;
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = ttC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
                 }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm9 = _mm256_fmadd_pd(ymm2, ymm1, ymm9);
-                _mm256_storeu_pd(f_temp, ymm9);
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    tC[i] = f_temp[i];
-                }
+                    _mm256_storeu_pd(f_temp, ymm5);
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        tC[i] = f_temp[i];
+                    }
+
+                    tC += ldc;
+                    _mm256_storeu_pd(f_temp, ymm7);
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        tC[i] = f_temp[i];
+                    }
+
+                    tC += ldc;
+                    _mm256_storeu_pd(f_temp, ymm9);
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        tC[i] = f_temp[i];
+                    }
             }
             n_remainder = N - col_idx;
             // if the N is not multiple of 3.
@@ -2858,12 +3184,25 @@ static err_t bli_dgemm_small
                 ymm5 = _mm256_mul_pd(ymm5, ymm0);
                 ymm7 = _mm256_mul_pd(ymm7, ymm0);
 
-                for (int i = 0; i < m_remainder; i++)
+                if(is_beta_non_zero)
                 {
-                    f_temp[i] = tC[i];
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = tC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
+
+                    double* ttC = tC + ldc;
+
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = ttC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
+
                 }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                 _mm256_storeu_pd(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -2871,12 +3210,6 @@ static err_t bli_dgemm_small
                 }
 
                 tC += ldc;
-                for (int i = 0; i < m_remainder; i++)
-                {
-                    f_temp[i] = tC[i];
-                }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm7 = _mm256_fmadd_pd(ymm2, ymm1, ymm7);
                 _mm256_storeu_pd(f_temp, ymm7);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -2923,12 +3256,16 @@ static err_t bli_dgemm_small
                 // multiply C by beta and accumulate.
                 ymm5 = _mm256_mul_pd(ymm5, ymm0);
 
-                for (int i = 0; i < m_remainder; i++)
+                if(is_beta_non_zero)
                 {
-                    f_temp[i] = tC[i];
+
+                    for (int i = 0; i < m_remainder; i++)
+                    {
+                        f_temp[i] = tC[i];
+                    }
+                    ymm2 = _mm256_loadu_pd(f_temp);
+                    ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                 }
-                ymm2 = _mm256_loadu_pd(f_temp);
-                ymm5 = _mm256_fmadd_pd(ymm2, ymm1, ymm5);
                 _mm256_storeu_pd(f_temp, ymm5);
                 for (int i = 0; i < m_remainder; i++)
                 {
@@ -2959,16 +3296,33 @@ static err_t bli_dgemm_small
                     }
 
                     result *= (*alpha_cast);
-                    (*tC) = (*tC) * (*beta_cast) + result;
+                    if(is_beta_non_zero)
+                        (*tC) = (*tC) * (*beta_cast) + result;
+                    else
+                    (*tC) = result;
                 }
             }
         }
+
+    // Return the buffer to pool
+        if ((required_packing_A == 1) && bli_mem_is_alloc( &local_mem_buf_A_s )) {
+#ifdef BLIS_ENABLE_MEM_TRACING
+        printf( "bli_dgemm_small(): releasing mem pool block\n" );
+#endif
+        bli_pba_release(&rntm,
+                           &local_mem_buf_A_s);
+        }
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
         return BLIS_NONCONFORMAL_DIMENSIONS;
-
-
+	}
 };
 
 static err_t bli_sgemm_small_atbn
@@ -2982,16 +3336,21 @@ static err_t bli_sgemm_small_atbn
        cntl_t* cntl
      )
 {
-    gint_t M = bli_obj_length( c ); // number of rows of Matrix C
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
+	gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
+
     guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
     guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
     guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
+
     int row_idx = 0, col_idx = 0, k;
-    float *A = a->buffer; // pointer to matrix A elements, stored in row major format
-    float *B = b->buffer; // pointer to matrix B elements, stored in column major format
-    float *C = c->buffer; // pointer to matrix C elements, stored in column major format
+
+    float *A = bli_obj_buffer_at_off(a); // pointer to matrix A elements, stored in row major format
+    float *B = bli_obj_buffer_at_off(b); // pointer to matrix B elements, stored in column major format
+    float *C = bli_obj_buffer_at_off(c); // pointer to matrix C elements, stored in column major format
 
     float *tA = A, *tB = B, *tC = C;
 
@@ -3000,10 +3359,17 @@ static err_t bli_sgemm_small_atbn
     __m256 ymm12, ymm13, ymm14, ymm15;
     __m256 ymm0, ymm1, ymm2, ymm3;
 
-    float result, scratch[8];
-    float *alpha_cast, *beta_cast; // alpha, beta multiples
-    alpha_cast = (alpha->buffer);
-    beta_cast = (beta->buffer);
+    float result;
+    float scratch[8] = {0.0};
+    const num_t    dt_exec   = bli_obj_dt( c );
+    float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
+    float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
+
+    /*Beta Zero Check*/
+    bool is_beta_non_zero=0;
+    if ( !bli_obj_equals( beta, &BLIS_ZERO ) ){
+        is_beta_non_zero = 1;
+    }
 
     // The non-copy version of the A^T GEMM gives better performance for the small M cases.
     // The threshold is controlled by BLIS_ATBN_M_THRES
@@ -3116,28 +3482,44 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm4);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
+                }else{
+                    tC[0] = result;
+                }
 
                 ymm7 = _mm256_hadd_ps(ymm7, ymm7);
                 ymm7 = _mm256_hadd_ps(ymm7, ymm7);
                 _mm256_storeu_ps(scratch, ymm7);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
+                }else{
+                    tC[1] = result;
+                }
 
                 ymm10 = _mm256_hadd_ps(ymm10, ymm10);
                 ymm10 = _mm256_hadd_ps(ymm10, ymm10);
                 _mm256_storeu_ps(scratch, ymm10);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
+                }else{
+                    tC[2] = result;
+                }
 
                 ymm13 = _mm256_hadd_ps(ymm13, ymm13);
                 ymm13 = _mm256_hadd_ps(ymm13, ymm13);
                 _mm256_storeu_ps(scratch, ymm13);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
+                }else{
+                    tC[3] = result;
+                }
 
                 tC += ldc;
                 ymm5 = _mm256_hadd_ps(ymm5, ymm5);
@@ -3145,28 +3527,44 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm5);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
+                }else{
+                    tC[0] = result;
+                }
 
                 ymm8 = _mm256_hadd_ps(ymm8, ymm8);
                 ymm8 = _mm256_hadd_ps(ymm8, ymm8);
                 _mm256_storeu_ps(scratch, ymm8);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
+                }else{
+                    tC[1] = result;
+                }
 
                 ymm11 = _mm256_hadd_ps(ymm11, ymm11);
                 ymm11 = _mm256_hadd_ps(ymm11, ymm11);
                 _mm256_storeu_ps(scratch, ymm11);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
+                }else{
+                    tC[2] = result;
+                }
 
                 ymm14 = _mm256_hadd_ps(ymm14, ymm14);
                 ymm14 = _mm256_hadd_ps(ymm14, ymm14);
                 _mm256_storeu_ps(scratch, ymm14);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
+                }else{
+                    tC[3] = result;
+                }
 
                 tC += ldc;
                 ymm6 = _mm256_hadd_ps(ymm6, ymm6);
@@ -3174,28 +3572,44 @@ static err_t bli_sgemm_small_atbn
                 _mm256_storeu_ps(scratch, ymm6);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[0] = result + tC[0] * (*beta_cast);
+                }else{
+                    tC[0] = result;
+                }
 
                 ymm9 = _mm256_hadd_ps(ymm9, ymm9);
                 ymm9 = _mm256_hadd_ps(ymm9, ymm9);
                 _mm256_storeu_ps(scratch, ymm9);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[1] = result + tC[1] * (*beta_cast);
+                }else{
+                    tC[1] = result;
+                }
 
                 ymm12 = _mm256_hadd_ps(ymm12, ymm12);
                 ymm12 = _mm256_hadd_ps(ymm12, ymm12);
                 _mm256_storeu_ps(scratch, ymm12);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[2] = result + tC[2] * (*beta_cast);
+                }else{
+                    tC[2] = result;
+                }
 
                 ymm15 = _mm256_hadd_ps(ymm15, ymm15);
                 ymm15 = _mm256_hadd_ps(ymm15, ymm15);
                 _mm256_storeu_ps(scratch, ymm15);
                 result = scratch[0] + scratch[4];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero){
+                    tC[3] = result + tC[3] * (*beta_cast);
+                }else{
+                    tC[3] = result;
+                }
             }
         }
 
@@ -3279,29 +3693,44 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm4);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    tC[0] = result + tC[0] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[0] = result + tC[0] * (*beta_cast);
+                    }else{
+                        tC[0] = result;
+                    }
 
                     ymm7 = _mm256_hadd_ps(ymm7, ymm7);
                     ymm7 = _mm256_hadd_ps(ymm7, ymm7);
                     _mm256_storeu_ps(scratch, ymm7);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    tC[1] = result + tC[1] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[1] = result + tC[1] * (*beta_cast);
+                    }else{
+                        tC[1] = result;
+                    }
 
                     ymm10 = _mm256_hadd_ps(ymm10, ymm10);
                     ymm10 = _mm256_hadd_ps(ymm10, ymm10);
                     _mm256_storeu_ps(scratch, ymm10);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    tC[2] = result + tC[2] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[2] = result + tC[2] * (*beta_cast);
+                    }else{
+                        tC[2] = result;
+                    }
 
                     ymm13 = _mm256_hadd_ps(ymm13, ymm13);
                     ymm13 = _mm256_hadd_ps(ymm13, ymm13);
                     _mm256_storeu_ps(scratch, ymm13);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    tC[3] = result + tC[3] * (*beta_cast);
-
+                    if(is_beta_non_zero){
+                        tC[3] = result + tC[3] * (*beta_cast);
+                    }else{
+                        tC[3] = result;
+                    }
                 }
             }
             processed_row = row_idx;
@@ -3351,16 +3780,26 @@ static err_t bli_sgemm_small_atbn
                     _mm256_storeu_ps(scratch, ymm4);
                     result = scratch[0] + scratch[4];
                     result *= (*alpha_cast);
-                    tC[0] = result + tC[0] * (*beta_cast);
+                    if(is_beta_non_zero){
+                        tC[0] = result + tC[0] * (*beta_cast);
+                    }else{
+                        tC[0] = result;
+                    }
 
                 }
             }
         }
-
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
         return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 }
 
 static err_t bli_dgemm_small_atbn
@@ -3374,16 +3813,23 @@ static err_t bli_dgemm_small_atbn
        cntl_t* cntl
      )
 {
+	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
+	
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
+
+    // The non-copy version of the A^T GEMM gives better performance for the small M cases.
+    // The threshold is controlled by BLIS_ATBN_M_THRES
+    if (M <= BLIS_ATBN_M_THRES)
+    {
     guint_t lda = bli_obj_col_stride( a ); // column stride of matrix OP(A), where OP(A) is Transpose(A) if transA enabled.
     guint_t ldb = bli_obj_col_stride( b ); // column stride of matrix OP(B), where OP(B) is Transpose(B) if transB enabled.
     guint_t ldc = bli_obj_col_stride( c ); // column stride of matrix C
     guint_t row_idx = 0, col_idx = 0, k;
-    double *A = a->buffer; // pointer to matrix A elements, stored in row major format
-    double *B = b->buffer; // pointer to matrix B elements, stored in column major format
-    double *C = c->buffer; // pointer to matrix C elements, stored in column major format
+    double *A = bli_obj_buffer_at_off(a); // pointer to matrix A elements, stored in row major format
+    double *B = bli_obj_buffer_at_off(b); // pointer to matrix B elements, stored in column major format
+    double *C = bli_obj_buffer_at_off(c); // pointer to matrix C elements, stored in column major format
 
     double *tA = A, *tB = B, *tC = C;
 
@@ -3392,19 +3838,23 @@ static err_t bli_dgemm_small_atbn
     __m256d ymm12, ymm13, ymm14, ymm15;
     __m256d ymm0, ymm1, ymm2, ymm3;
 
-    double result, scratch[8];
+    double result;
+    double scratch[8] = {0.0};
     double *alpha_cast, *beta_cast; // alpha, beta multiples
-    alpha_cast = (alpha->buffer);
-    beta_cast = (beta->buffer);
+    alpha_cast = bli_obj_buffer_for_1x1(BLIS_DOUBLE, alpha);
+    beta_cast = bli_obj_buffer_for_1x1(BLIS_DOUBLE, beta);
 
-    // The non-copy version of the A^T GEMM gives better performance for the small M cases.
-    // The threshold is controlled by BLIS_ATBN_M_THRES
-    if (M <= BLIS_ATBN_M_THRES)
+    //check if beta is zero
+    //if true, we need to perform C = alpha * (A * B)
+    //instead of C = beta * C  + alpha * (A * B)
+    bool is_beta_non_zero = 0;
+    if(!bli_obj_equals(beta,&BLIS_ZERO))
+        is_beta_non_zero = 1;
+
+    for (col_idx = 0; (col_idx + (NR - 1)) < N; col_idx += NR)
     {
-        for (col_idx = 0; (col_idx + (NR - 1)) < N; col_idx += NR)
+        for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
         {
-            for (row_idx = 0; (row_idx + (AT_MR - 1)) < M; row_idx += AT_MR)
-            {
                 tA = A + row_idx * lda;
                 tB = B + col_idx * ldb;
                 tC = C + col_idx * ldc + row_idx;
@@ -3507,77 +3957,111 @@ static err_t bli_dgemm_small_atbn
                 _mm256_storeu_pd(scratch, ymm4);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[0] = result + tC[0] * (*beta_cast);
+                else
+                    tC[0] = result;
 
                 ymm7 = _mm256_hadd_pd(ymm7, ymm7);
                 _mm256_storeu_pd(scratch, ymm7);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[1] = result + tC[1] * (*beta_cast);
+                else
+                    tC[1] = result;
 
                 ymm10 = _mm256_hadd_pd(ymm10, ymm10);
                 _mm256_storeu_pd(scratch, ymm10);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[2] = result + tC[2] * (*beta_cast);
+                else
+                    tC[2] = result;
 
                 ymm13 = _mm256_hadd_pd(ymm13, ymm13);
                 _mm256_storeu_pd(scratch, ymm13);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
-
+                if(is_beta_non_zero)
+                    tC[3] = result + tC[3] * (*beta_cast);
+                else
+                    tC[3] = result;
 
                 tC += ldc;
                 ymm5 = _mm256_hadd_pd(ymm5, ymm5);
                 _mm256_storeu_pd(scratch, ymm5);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[0] = result + tC[0] * (*beta_cast);
+                else
+                    tC[0] = result;
 
                 ymm8 = _mm256_hadd_pd(ymm8, ymm8);
                 _mm256_storeu_pd(scratch, ymm8);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[1] = result + tC[1] * (*beta_cast);
+                else
+                    tC[1] = result;
 
                 ymm11 = _mm256_hadd_pd(ymm11, ymm11);
                 _mm256_storeu_pd(scratch, ymm11);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[2] = result + tC[2] * (*beta_cast);
+                else
+                    tC[2] = result;
 
                 ymm14 = _mm256_hadd_pd(ymm14, ymm14);
                 _mm256_storeu_pd(scratch, ymm14);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[3] = result + tC[3] * (*beta_cast);
+                else
+                    tC[3] = result;
 
-      
                 tC += ldc;
                 ymm6 = _mm256_hadd_pd(ymm6, ymm6);
                 _mm256_storeu_pd(scratch, ymm6);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[0] = result + tC[0] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[0] = result + tC[0] * (*beta_cast);
+                else
+                    tC[0] = result;
 
                 ymm9 = _mm256_hadd_pd(ymm9, ymm9);
                 _mm256_storeu_pd(scratch, ymm9);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[1] = result + tC[1] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[1] = result + tC[1] * (*beta_cast);
+                else
+                    tC[1] = result;
 
                 ymm12 = _mm256_hadd_pd(ymm12, ymm12);
                 _mm256_storeu_pd(scratch, ymm12);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[2] = result + tC[2] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[2] = result + tC[2] * (*beta_cast);
+                else
+                    tC[2] = result;
 
                 ymm15 = _mm256_hadd_pd(ymm15, ymm15);
                 _mm256_storeu_pd(scratch, ymm15);
                 result = scratch[0] + scratch[2];
                 result *= (*alpha_cast);
-                tC[3] = result + tC[3] * (*beta_cast);
+                if(is_beta_non_zero)
+                    tC[3] = result + tC[3] * (*beta_cast);
+                else
+                    tC[3] = result;
             }
         }
 
@@ -3659,26 +4143,37 @@ static err_t bli_dgemm_small_atbn
                     _mm256_storeu_pd(scratch, ymm4);
                     result = scratch[0] + scratch[2];
                     result *= (*alpha_cast);
-                    tC[0] = result + tC[0] * (*beta_cast);
+                    if(is_beta_non_zero)
+                        tC[0] = result + tC[0] * (*beta_cast);
+                    else
+                        tC[0] = result;
 
                     ymm7 = _mm256_hadd_pd(ymm7, ymm7);
                     _mm256_storeu_pd(scratch, ymm7);
                     result = scratch[0] + scratch[2];
                     result *= (*alpha_cast);
-                    tC[1] = result + tC[1] * (*beta_cast);
+                    if(is_beta_non_zero)
+                        tC[1] = result + tC[1] * (*beta_cast);
+                    else
+                        tC[1] = result;
 
                     ymm10 = _mm256_hadd_pd(ymm10, ymm10);
                     _mm256_storeu_pd(scratch, ymm10);
                     result = scratch[0] + scratch[2];
                     result *= (*alpha_cast);
-                    tC[2] = result + tC[2] * (*beta_cast);
+                    if(is_beta_non_zero)
+                        tC[2] = result + tC[2] * (*beta_cast);
+                    else
+                        tC[2] = result;
 
                     ymm13 = _mm256_hadd_pd(ymm13, ymm13);
                     _mm256_storeu_pd(scratch, ymm13);
                     result = scratch[0] + scratch[2];
                     result *= (*alpha_cast);
-                    tC[3] = result + tC[3] * (*beta_cast);
-
+                    if(is_beta_non_zero)
+                        tC[3] = result + tC[3] * (*beta_cast);
+                    else
+                        tC[3] = result;
                 }
             }
             processed_row = row_idx;
@@ -3727,17 +4222,24 @@ static err_t bli_dgemm_small_atbn
                     _mm256_storeu_pd(scratch, ymm4);
                     result = scratch[0] + scratch[2];
                     result *= (*alpha_cast);
-                    tC[0] = result + tC[0] * (*beta_cast);
-
+                    if(is_beta_non_zero)
+                        tC[0] = result + tC[0] * (*beta_cast);
+                    else
+                        tC[0] = result;
                 }
             }
         }
-
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
         return BLIS_SUCCESS;
     }
     else
-        return BLIS_NONCONFORMAL_DIMENSIONS;
+	{
+		AOCL_DTL_TRACE_EXIT_ERR(
+			AOCL_DTL_LEVEL_INFO,
+			"Invalid dimesions for small gemm."
+			);
+		return BLIS_NONCONFORMAL_DIMENSIONS;
+	}
 }
-
 #endif
 

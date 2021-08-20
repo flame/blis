@@ -132,3 +132,72 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
 }
 
 
+err_t bli_gemmtsup
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm
+     )
+{
+	// Return early if small matrix handling is disabled at configure-time.
+	#ifdef BLIS_DISABLE_SUP_HANDLING
+	return BLIS_FAILURE;
+	#endif
+
+	// Return early if this is a mixed-datatype computation.
+	if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
+	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
+	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) ) return BLIS_FAILURE;
+
+	// Obtain a valid (native) context from the gks if necessary.
+	// NOTE: This must be done before calling the _check() function, since
+	// that function assumes the context pointer is valid.
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+
+	// Return early if the problem dimensions exceed their sup thresholds.
+	// Notice that we do not bother to check whether the microkernel
+	// prefers or dislikes the storage of C, since the same check is called
+	// for either way.
+	{
+		const num_t dt = bli_obj_dt( c );
+		const dim_t m  = bli_obj_length( c );
+		const dim_t k  = bli_obj_width_after_trans( a );
+
+		if ( !bli_cntx_l3_sup_thresh_is_met( dt, m, m, k, cntx ) )
+			return BLIS_FAILURE;
+	}
+
+	// Initialize a local runtime with global settings if necessary. Note
+	// that in the case that a runtime is passed in, we make a local copy.
+	rntm_t rntm_l;
+	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+	else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+	// We've now ruled out the possibility that the sup thresholds are
+	// unsatisfied.
+	// This implies that the sup thresholds (at least one of them) are met.
+	// and the small/unpacked handler should be called.
+	// NOTE: The sup handler is free to enforce a stricter threshold regime
+	// if it so chooses, in which case it can/should return BLIS_FAILURE.
+
+	// Query the small/unpacked handler from the context and invoke it.
+	gemmtsup_oft gemmtsup_fp = bli_cntx_get_l3_sup_handler( BLIS_GEMMT, cntx );
+
+	return
+	gemmtsup_fp
+	(
+	  alpha,
+	  a,
+	  b,
+	  beta,
+	  c,
+	  cntx,
+	  rntm
+	);
+}
+
+

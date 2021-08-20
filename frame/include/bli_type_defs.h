@@ -6,7 +6,7 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2016, Hewlett Packard Enterprise Development LP
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -150,7 +150,7 @@ typedef uint32_t objbits_t;  // object information bit field
 	// interoperability with BLIS.
 	#ifndef _DEFINED_SCOMPLEX
 	#define _DEFINED_SCOMPLEX
-	typedef struct
+	typedef struct scomplex
 	{
 		float  real;
 		float  imag;
@@ -161,7 +161,7 @@ typedef uint32_t objbits_t;  // object information bit field
 	// interoperability with BLIS.
 	#ifndef _DEFINED_DCOMPLEX
 	#define _DEFINED_DCOMPLEX
-	typedef struct
+	typedef struct dcomplex
 	{
 		double real;
 		double imag;
@@ -198,15 +198,18 @@ typedef double    f77_double;
 typedef scomplex  f77_scomplex;
 typedef dcomplex  f77_dcomplex;
 
-// -- Void function pointer types --
+// -- Misc. function pointer types --
 
 // Note: This type should be used in any situation where the address of a
 // *function* will be conveyed or stored prior to it being typecast back
 // to the correct function type. It does not need to be used when conveying
 // or storing the address of *data* (such as an array of float or double).
-
 //typedef void (*void_fp)( void );
 typedef void* void_fp;
+
+// Typedef function pointer types for malloc() and free() substitutes.
+typedef void* (*malloc_ft)( size_t size );
+typedef void  (*free_ft)  ( void*  p    );
 
 
 //
@@ -382,7 +385,7 @@ typedef void* void_fp;
 #define BLIS_BITVAL_SINGLE_PREC               0x0
 #define BLIS_BITVAL_DOUBLE_PREC               BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_FLOAT_TYPE              0x0
-#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT  
+#define   BLIS_BITVAL_SCOMPLEX_TYPE           BLIS_DOMAIN_BIT
 #define   BLIS_BITVAL_DOUBLE_TYPE             BLIS_PRECISION_BIT
 #define   BLIS_BITVAL_DCOMPLEX_TYPE         ( BLIS_DOMAIN_BIT | BLIS_PRECISION_BIT )
 #define   BLIS_BITVAL_INT_TYPE                0x04
@@ -392,10 +395,10 @@ typedef void* void_fp;
 #define BLIS_BITVAL_NO_CONJ                   0x0
 #define BLIS_BITVAL_CONJ                      BLIS_CONJ_BIT
 #define BLIS_BITVAL_CONJ_TRANS              ( BLIS_CONJ_BIT | BLIS_TRANS_BIT )
-#define BLIS_BITVAL_ZEROS                     0x0 
+#define BLIS_BITVAL_ZEROS                     0x0
 #define BLIS_BITVAL_UPPER                   ( BLIS_UPPER_BIT | BLIS_DIAG_BIT )
 #define BLIS_BITVAL_LOWER                   ( BLIS_LOWER_BIT | BLIS_DIAG_BIT )
-#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS  
+#define BLIS_BITVAL_DENSE                     BLIS_UPLO_BITS
 #define BLIS_BITVAL_NONUNIT_DIAG              0x0
 #define BLIS_BITVAL_UNIT_DIAG                 BLIS_UNIT_DIAG_BIT
 #define BLIS_BITVAL_INVERT_DIAG               BLIS_INVERT_DIAG_BIT
@@ -918,6 +921,7 @@ typedef enum
 // bli_l3_ind.c to index into arrays.
 //
 	BLIS_GEMM = 0,
+	BLIS_GEMMT,
 	BLIS_HEMM,
 	BLIS_HERK,
 	BLIS_HER2K,
@@ -931,7 +935,7 @@ typedef enum
 	BLIS_NOID
 } opid_t;
 
-#define BLIS_NUM_LEVEL3_OPS 10
+#define BLIS_NUM_LEVEL3_OPS 11
 
 
 // -- Blocksize ID type --
@@ -984,8 +988,11 @@ typedef enum
 
 typedef enum
 {
+	// NOTE: The C language standard guarantees that the first enum value
+	// starts at 0.
+
 	// Intel
-	BLIS_ARCH_SKX = 0,
+	BLIS_ARCH_SKX,
 	BLIS_ARCH_KNL,
 	BLIS_ARCH_KNC,
 	BLIS_ARCH_HASWELL,
@@ -1001,6 +1008,8 @@ typedef enum
 	BLIS_ARCH_BULLDOZER,
 
 	// ARM
+	BLIS_ARCH_ARMSVE,
+	BLIS_ARCH_A64FX,
 	BLIS_ARCH_THUNDERX2,
 	BLIS_ARCH_CORTEXA57,
 	BLIS_ARCH_CORTEXA53,
@@ -1009,28 +1018,29 @@ typedef enum
 	BLIS_ARCH_A64FX,
 
 	// IBM/Power
+	BLIS_ARCH_POWER10,
 	BLIS_ARCH_POWER9,
 	BLIS_ARCH_POWER7,
 	BLIS_ARCH_BGQ,
 
 	// Generic architecture/configuration
-	BLIS_ARCH_GENERIC
+	BLIS_ARCH_GENERIC,
+
+	// The total number of defined architectures. This must be last in the
+	// list of enums since its definition assumes that the previous enum
+	// value (BLIS_ARCH_GENERIC) is given index num_archs-1.
+	BLIS_NUM_ARCHS
 
 } arch_t;
-
-// NOTE: This value must be updated to reflect the number of enum values
-// listed above for arch_t!
-#define BLIS_NUM_ARCHS 22
 
 
 //
 // -- BLIS misc. structure types -----------------------------------------------
 //
 
-// These headers must be included here (or earlier) because definitions they
-// provide are needed in the pool_t and related structs.
+// This header must be included here (or earlier) because definitions it
+// provides are needed in the pool_t and related structs.
 #include "bli_pthread.h"
-#include "bli_malloc.h"
 
 // -- Pool block type --
 
@@ -1088,7 +1098,7 @@ typedef struct
 
 // -- packing block allocator: Locked set of pools type --
 
-typedef struct membrk_s
+typedef struct pba_s
 {
 	pool_t              pools[3];
 	bli_pthread_mutex_t mutex;
@@ -1098,7 +1108,7 @@ typedef struct membrk_s
 	malloc_ft           malloc_fp;
 	free_ft             free_fp;
 
-} membrk_t;
+} pba_t;
 
 
 // -- Memory object type --
@@ -1219,6 +1229,47 @@ typedef struct constdata_s
 // -- BLIS object type definitions ---------------------------------------------
 //
 
+// Forward declarations for function pointer types
+struct obj_s;
+struct cntx_s;
+struct rntm_s;
+struct thrinfo_s;
+
+typedef void (*obj_pack_fn_t)
+    (
+      mdim_t            mat,
+      mem_t*            mem,
+      struct obj_s*     a,
+      struct obj_s*     ap,
+      struct cntx_s*    cntx,
+      struct rntm_s*    rntm,
+      struct thrinfo_s* thread
+    );
+
+typedef void (*obj_ker_fn_t)
+    (
+      struct obj_s*     a,
+      struct obj_s*     b,
+      struct obj_s*     c,
+      struct cntx_s*    cntx,
+      struct rntm_s*    rntm,
+      struct thrinfo_s* thread
+    );
+
+typedef void (*obj_ukr_fn_t)
+    (
+      dim_t                   m,
+      dim_t                   n,
+      dim_t                   k,
+      void*          restrict alpha,
+      void*          restrict a, inc_t rs_a, inc_t cs_a,
+      void*          restrict b, inc_t rs_b, inc_t cs_b,
+      void*          restrict beta,
+      void*          restrict c, inc_t rs_c, inc_t cs_c,
+      auxinfo_t*     restrict data,
+      struct cntx_s* restrict cntx
+    );
+
 typedef struct obj_s
 {
 	// Basic fields
@@ -1248,6 +1299,15 @@ typedef struct obj_s
 	                        // usually MR or NR)
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
+
+	// User data pointer
+	void*         user_data;
+
+	// Function pointers
+	obj_pack_fn_t pack;
+	obj_ker_fn_t  ker;
+	obj_ukr_fn_t  ukr;
+
 } obj_t;
 
 // Pre-initializors. Things that must be set afterwards:
@@ -1284,7 +1344,13 @@ typedef struct obj_s
 	.ps        = 0, \
 	.pd        = 0, \
 	.m_panel   = 0, \
-	.n_panel   = 0  \
+	.n_panel   = 0, \
+\
+	.user_data = NULL, \
+\
+	.pack      = NULL, \
+	.ker       = NULL, \
+	.ukr       = NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
@@ -1312,7 +1378,13 @@ typedef struct obj_s
 	.ps        = 0, \
 	.pd        = 0, \
 	.m_panel   = 0, \
-	.n_panel   = 0  \
+	.n_panel   = 0, \
+\
+	.user_data = NULL, \
+\
+	.pack      = NULL, \
+	.ker       = NULL, \
+	.ukr       = NULL  \
 }
 
 // Define these macros here since they must be updated if contents of
@@ -1346,6 +1418,12 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->pd        = a->pd;
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
+
+	b->user_data = a->user_data;
+
+	b->pack      = a->pack;
+	b->ker       = a->ker;
+	b->ukr       = a->ukr;
 }
 
 BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
@@ -1379,6 +1457,12 @@ BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->pd        = a->pd;
 	b->m_panel   = a->m_panel;
 	b->n_panel   = a->n_panel;
+
+	b->user_data = a->user_data;
+
+	b->pack      = a->pack;
+	b->ker       = a->ker;
+	b->ukr       = a->ukr;
 }
 
 // Initializors for global scalar constants.
@@ -1468,7 +1552,7 @@ typedef struct rntm_s
 	pool_t*   sba_pool;
 
 	// The packing block allocator, which is attached in the l3 thread decorator.
-	membrk_t* membrk;
+	pba_t*    pba;
 
 } rntm_t;
 
@@ -1533,13 +1617,13 @@ typedef enum
 	BLIS_INVALID_COL_STRIDE                    = ( -51),
 	BLIS_INVALID_DIM_STRIDE_COMBINATION        = ( -52),
 
-	// Structure-specific errors    
+	// Structure-specific errors
 	BLIS_EXPECTED_GENERAL_OBJECT               = ( -60),
 	BLIS_EXPECTED_HERMITIAN_OBJECT             = ( -61),
 	BLIS_EXPECTED_SYMMETRIC_OBJECT             = ( -62),
 	BLIS_EXPECTED_TRIANGULAR_OBJECT            = ( -63),
 
-	// Storage-specific errors    
+	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
 	// Partitioning-specific errors
@@ -1553,7 +1637,7 @@ typedef enum
 	// Packing-specific errors
 	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
 
-	// Buffer-specific errors 
+	// Buffer-specific errors
 	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
 
 	// Memory errors
@@ -1571,6 +1655,7 @@ typedef enum
 
 	// Architecture-related errors
 	BLIS_INVALID_ARCH_ID                       = (-150),
+	BLIS_UNINITIALIZED_GKS_CNTX                = (-151),
 
 	// Blocksize-related errors
 	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),

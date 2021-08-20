@@ -129,7 +129,6 @@ void PASTEMAC(opname,_check) \
 
 GENTPROT( zipsc )
 
-
 // -----------------------------------------------------------------------------
 
 void bli_l0_xsc_check
@@ -147,4 +146,11 @@ void bli_l0_xx2sc_check
      (
        obj_t*  chi,
        obj_t*  norm 
+     );
+
+void bli_l0_xxbsc_check
+     (
+       obj_t*  chi,
+       obj_t*  psi,
+       bool*   is_eq
      );

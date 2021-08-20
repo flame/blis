@@ -46,9 +46,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p,             inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
        cntx_t* restrict cntx \
      ) \
 { \
@@ -332,9 +332,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
        dim_t            cdim, \
        dim_t            n, \
        dim_t            n_max, \
-       void*   restrict kappa, \
-       void*   restrict a, inc_t inca, inc_t lda, \
-       void*   restrict p,             inc_t ldp, \
+       ctype*  restrict kappa, \
+       ctype*  restrict a, inc_t inca, inc_t lda, \
+       ctype*  restrict p,             inc_t ldp, \
        cntx_t* restrict cntx \
      ) \
 { \

@@ -1187,10 +1187,61 @@ BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 }
 
 
+// -- User-provided information macros --
+
+// User data query
+
+BLIS_INLINE void* bli_obj_user_data( obj_t* obj )
+{
+	return obj->user_data;
+}
+
+// User data modification
+
+BLIS_INLINE void bli_obj_set_user_data( void* data, obj_t* obj )
+{
+	obj->user_data = data;
+}
+
+// Function pointer query
+
+BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( obj_t* obj )
+{
+	return obj->pack;
+}
+
+BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
+{
+	return obj->ker;
+}
+
+BLIS_INLINE obj_ukr_fn_t bli_obj_ukr_fn( obj_t* obj )
+{
+	return obj->ukr;
+}
+
+// Function pointer modification
+
+BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack, obj_t* obj )
+{
+	obj->pack = pack;
+}
+
+BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker, obj_t* obj )
+{
+	obj->ker = ker;
+}
+
+BLIS_INLINE void bli_obj_set_ukr_fn( obj_ukr_fn_t ukr, obj_t* obj )
+{
+	obj->ukr = ukr;
+}
+
+
 // -- Initialization-related macros --
 
 // Finish the initialization started by the matrix-specific static initializer
-// (e.g. BLIS_OBJECT_PREINITIALIZER)
+// (e.g. BLIS_OBJECT_INITIALIZER)
 // NOTE: This is intended only for use in the BLAS compatibility API and typed
 // BLIS API.
 
@@ -1223,7 +1274,7 @@ BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t
 }
 
 // Finish the initialization started by the 1x1-specific static initializer
-// (e.g. BLIS_OBJECT_PREINITIALIZER_1X1)
+// (e.g. BLIS_OBJECT_INITIALIZER_1X1)
 // NOTE: This is intended only for use in the BLAS compatibility API and typed
 // BLIS API.
 

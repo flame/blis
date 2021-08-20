@@ -39,126 +39,7 @@
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf, mr, nr ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     ) \
-{ \
-	const inc_t     rs_a   = 1; \
-	const inc_t     cs_a   = mr; \
-\
-	const inc_t     rs_b   = nr; \
-	const inc_t     cs_b   = 1; \
-\
-	PRAGMA_SIMD \
-	for ( dim_t i = 0; i < mr; ++i ) \
-	{ \
-		/* b1 = b1 - a10t * B0; */ \
-		/* b1 = b1 / alpha11; */ \
-		for ( dim_t j = 0; j < nr; ++j ) \
-		{ \
-			ctype beta11c = b[i*rs_b + j*cs_b]; \
-			ctype rho11; \
-\
-			/* beta11 = beta11 - a10t * b01; */ \
-			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( dim_t l = 0; l < i; ++l ) \
-			{ \
-				PASTEMAC(ch,axpys)( a[i*rs_a + l*cs_a], \
-				                    b[l*rs_b + j*cs_b], rho11 ); \
-			} \
-			PASTEMAC(ch,subs)( rho11, beta11c ); \
-\
-			/* beta11 = beta11 / alpha11; */ \
-			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
-			   of alpha11, so we can multiply rather than divide. We store
-			   the inverse of alpha11 intentionally to avoid expensive
-			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( a[i*rs_a + i*cs_a], beta11c ); \
-\
-			/* Output final result to matrix c. */ \
-			PASTEMAC(ch,copys)( beta11c, c[i*rs_c + j*cs_c] ); \
-\
-			/* Store the local value back to b11. */ \
-			PASTEMAC(ch,copys)( beta11c, b[i*rs_b + j*cs_b] ); \
-		} \
-	} \
-}
-
-//INSERT_GENTFUNC_BASIC2( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( float,    s, trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 16 )
-GENTFUNC( double,   d, trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( scomplex, c, trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( dcomplex, z, trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
-
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf, mr, nr ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     ) \
-{ \
-	const inc_t     rs_a   = 1; \
-	const inc_t     cs_a   = mr; \
-\
-	const inc_t     rs_b   = nr; \
-	const inc_t     cs_b   = 1; \
-\
-	PRAGMA_SIMD \
-	for ( dim_t iter = 0; iter < mr; ++iter ) \
-	{ \
-		dim_t i = mr - iter - 1; \
-\
-		/* b1 = b1 - a12t * B2; */ \
-		/* b1 = b1 / alpha11; */ \
-		for ( dim_t j = 0; j < nr; ++j ) \
-		{ \
-			ctype beta11c = b[i*rs_b + j*cs_b]; \
-			ctype rho11; \
-\
-			/* beta11 = beta11 - a12t * b21; */ \
-			PASTEMAC(ch,set0s)( rho11 ); \
-			for ( dim_t l = 0; l < iter; ++l ) \
-			{ \
-				PASTEMAC(ch,axpys)( a[i*rs_a + (i+1+l)*cs_a], \
-				                    b[(i+1+l)*rs_b + j*cs_b], rho11 ); \
-			} \
-			PASTEMAC(ch,subs)( rho11, beta11c ); \
-\
-			/* beta11 = beta11 / alpha11; */ \
-			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
-			   of alpha11, so we can multiply rather than divide. We store
-			   the inverse of alpha11 intentionally to avoid expensive
-			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( a[i*rs_a + i*cs_a], beta11c ); \
-\
-			/* Output final result to matrix c. */ \
-			PASTEMAC(ch,copys)( beta11c, c[i*rs_c + j*cs_c] ); \
-\
-			/* Store the local value back to b11. */ \
-			PASTEMAC(ch,copys)( beta11c, b[i*rs_b + j*cs_b] ); \
-		} \
-	} \
-}
-
-//INSERT_GENTFUNC_BASIC2( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( float,    s, trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 16 )
-GENTFUNC( double,   d, trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( scomplex, c, trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( dcomplex, z, trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
+// (Deleted. See 'old' directory.)
 
 #else
 
@@ -166,7 +47,7 @@ GENTFUNC( dcomplex, z, trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
 // and makes no use of #pragma omp simd.
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -229,11 +110,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,subs)( rho11, beta11c ); \
 \
 			/* beta11 = beta11 / alpha11; */ \
-			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
-			   of alpha11, so we can multiply rather than divide. We store
-			   the inverse of alpha11 intentionally to avoid expensive
-			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( *alpha11, beta11c ); \
+			/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+			   (1.0/alpha11) is stored during packing instead alpha11 so we
+			   can multiply rather than divide. When preinversion is disabled,
+			   alpha11 is stored and division happens below explicitly. */ \
+			PASTEMAC(ch,diagop)( *alpha11, beta11c ); \
 \
 			/* Output final result to matrix c. */ \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
@@ -244,11 +125,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+INSERT_GENTFUNC_BASIC3( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+#else
+INSERT_GENTFUNC_BASIC3( trsm_l, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+#endif
 
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -311,11 +196,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,subs)( rho11, beta11c ); \
 \
 			/* beta11 = beta11 / alpha11; */ \
-			/* NOTE: The INVERSE of alpha11 (1.0/alpha11) is stored instead
-			   of alpha11, so we can multiply rather than divide. We store
-			   the inverse of alpha11 intentionally to avoid expensive
-			   division instructions within the micro-kernel. */ \
-			PASTEMAC(ch,scals)( *alpha11, beta11c ); \
+			/* NOTE: When preinversion is enabled, the INVERSE of alpha11
+			   (1.0/alpha11) is stored during packing instead alpha11 so we
+			   can multiply rather than divide. When preinversion is disabled,
+			   alpha11 is stored and division happens below explicitly. */ \
+			PASTEMAC(ch,diagop)( *alpha11, beta11c ); \
 \
 			/* Output final result to matrix c. */ \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
@@ -326,6 +211,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
+#else
+INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
+#endif
 
 #endif

@@ -71,7 +71,7 @@ void bli_free_pool( void* p )
 
 // -----------------------------------------------------------------------------
 
-void* bli_malloc_user( size_t size )
+void* bli_malloc_user( size_t size, err_t* r_val )
 {
 	const malloc_ft malloc_fp  = BLIS_MALLOC_USER;
 	const size_t    align_size = BLIS_HEAP_ADDR_ALIGN_SIZE;
@@ -82,7 +82,9 @@ void* bli_malloc_user( size_t size )
 	fflush( stdout );
 	#endif
 
-	return bli_fmalloc_align( malloc_fp, size, align_size );
+	void* p = bli_fmalloc_align( malloc_fp, size, align_size, r_val );
+
+	return p;
 }
 
 void bli_free_user( void* p )
@@ -97,7 +99,7 @@ void bli_free_user( void* p )
 
 // -----------------------------------------------------------------------------
 
-void* bli_malloc_intl( size_t size )
+void* bli_malloc_intl( size_t size, err_t* r_val )
 {
 	const malloc_ft malloc_fp = BLIS_MALLOC_INTL;
 
@@ -106,18 +108,21 @@ void* bli_malloc_intl( size_t size )
 	fflush( stdout );
 	#endif
 
-	return bli_fmalloc_noalign( malloc_fp, size );
+	void* p = bli_fmalloc_noalign( malloc_fp, size, r_val );
+
+	return p;
 }
 
-void* bli_calloc_intl( size_t size )
+void* bli_calloc_intl( size_t size, err_t* r_val )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_calloc_intl(): " );
 	#endif
 
-	void* p = bli_malloc_intl( size );
+	void* p = bli_malloc_intl( size, r_val );
 
-	memset( p, 0, size );
+	if ( bli_is_success( *r_val ) )
+		memset( p, 0, size );
 
 	return p;
 }
@@ -138,7 +143,8 @@ void* bli_fmalloc_align
      (
        malloc_ft f,
        size_t    size,
-       size_t    align_size
+       size_t    align_size,
+       err_t*    r_val
      )
 {
 	const size_t ptr_size     = sizeof( void* );
@@ -164,6 +170,9 @@ void* bli_fmalloc_align
 	// Check the pointer returned by malloc().
 	if ( bli_error_checking_is_enabled() )
 		bli_fmalloc_post_check( p_orig );
+
+	// The pseudo-return value isn't used yet.
+	*r_val = BLIS_SUCCESS;
 
 	// Advance the pointer by one pointer element.
 	p_byte = p_orig;
@@ -226,7 +235,8 @@ void bli_ffree_align
 void* bli_fmalloc_noalign
      (
        malloc_ft f,
-       size_t    size
+       size_t    size,
+       err_t*    r_val
      )
 {
 	void* p = f( size );
@@ -234,6 +244,9 @@ void* bli_fmalloc_noalign
 	// Check the pointer returned by malloc().
 	if ( bli_error_checking_is_enabled() )
 		bli_fmalloc_post_check( p );
+
+	// The pseudo-return value isn't used yet.
+	*r_val = BLIS_SUCCESS;
 
 	return p;
 }

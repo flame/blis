@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -36,7 +36,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Top-level makefile for libflame linear algebra library.
 #
 #
@@ -166,6 +166,7 @@ MK_INCL_DIR_INST          := $(INSTALL_INCDIR)/blis
 # Set the path to the subdirectory of the share installation directory.
 MK_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/blis
 
+PC_SHARE_DIR_INST         := $(INSTALL_SHAREDIR)/pkgconfig
 
 
 #
@@ -249,6 +250,12 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
+# If requested, include AMD's C++ template header files in the list of headers
+# to install.
+ifeq ($(INSTALL_HH),yes)
+HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
+endif
+
 
 
 #
@@ -259,6 +266,8 @@ endif
 FRAGS_TO_INSTALL := $(CONFIG_MK_FILE) \
                     $(COMMON_MK_FILE)
 
+PC_IN_FILE  := blis.pc.in
+PC_OUT_FILE := blis.pc
 
 
 #
@@ -452,7 +461,7 @@ endif
 
 flat-header: check-env $(BLIS_H_FLAT)
 
-$(BLIS_H_FLAT): $(FRAME_H99_FILES)
+$(BLIS_H_FLAT): $(ALL_H99_FILES)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(FLATTEN_H) -c -v1 $(BLIS_H_SRC_PATH) $@ "./$(INCLUDE_DIR)" "$(ALL_H99_DIRPATHS)"
 else
@@ -645,7 +654,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) @$@.in $(LDFLAGS)
 	$(RM_F) $@.in
 else
-	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 else # ifeq ($(ENABLE_VERBOSE),no)
 ifeq ($(ARG_MAX_HACK),yes)
@@ -655,7 +664,7 @@ ifeq ($(ARG_MAX_HACK),yes)
 	@$(RM_F) $@.in
 else
 	@echo "Dynamically linking $@"
-	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $? $(LDFLAGS)
+	@$(LINKER) $(SOFLAGS) -o $(LIBBLIS_SO_OUTPUT_NAME) $^ $(LDFLAGS)
 endif
 endif
 
@@ -679,7 +688,7 @@ endif
 
 # --- BLAS test suite rules ---
 
-testblas: blastest-run 
+testblas: blastest-run
 
 blastest-f2c: check-env $(BLASTEST_F2C_LIB)
 
@@ -688,7 +697,7 @@ blastest-bin: check-env blastest-f2c $(BLASTEST_DRV_BIN_PATHS)
 blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -697,7 +706,7 @@ else
 endif
 
 # driver object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -784,7 +793,7 @@ testsuite: testsuite-run
 testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
-$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
+$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
@@ -892,6 +901,19 @@ else
 	@- $(TESTSUITE_CHECK_PATH) $(TESTSUITE_OUT_FILE)
 endif
 
+
+# --- AMD's C++ template header test rules ---
+
+# NOTE: The targets below won't work as intended for an out-of-tree build,
+# and so it's disabled for now.
+
+#testcpp: testvendcpp
+
+# Recursively run the test for AMD's C++ template header.
+#testvendcpp:
+#	$(MAKE) -C $(VEND_TESTCPP_PATH)
+
+
 # --- Install header rules ---
 
 install-headers: check-env $(MK_INCL_DIR_INST)
@@ -909,7 +931,7 @@ endif
 
 # --- Install share rules ---
 
-install-share: check-env $(MK_SHARE_DIR_INST)
+install-share: check-env $(MK_SHARE_DIR_INST) $(PC_SHARE_DIR_INST)
 
 $(MK_SHARE_DIR_INST): $(FRAGS_TO_INSTALL) $(CONFIG_MK_FILE)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -928,6 +950,20 @@ else
 	               $(@)/$(CONFIG_DIR)/$(CONFIG_NAME)/
 endif
 
+$(PC_SHARE_DIR_INST):  $(PC_IN_FILE)
+	$(MKDIR) $(@)
+ifeq ($(ENABLE_VERBOSE),no)
+	@echo "Installing $(PC_OUT_FILE) into $(@)/"
+endif
+	$(shell cat "$(PC_IN_FILE)" \
+	| sed -e "s#@PACKAGE_VERSION@#$(VERSION)#g" \
+	| sed -e "s#@prefix@#$(prefix)#g" \
+	| sed -e "s#@exec_prefix@#$(exec_prefix)#g" \
+	| sed -e "s#@libdir@#$(libdir)#g" \
+	| sed -e "s#@includedir@#$(includedir)#g" \
+	| sed -e "s#@LDFLAGS@#$(LDFLAGS)#g" \
+	> "$(PC_OUT_FILE)" )
+	$(INSTALL) -m 0644 $(PC_OUT_FILE) $(@)
 
 # --- Install library rules ---
 
@@ -1167,11 +1203,13 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+#	- $(MAKE) -C $(VEND_TESTCPP_DIR) clean
 else
 	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)"
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
+#	@$(MAKE) -C $(VEND_TESTCPP_DIR) clean
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 
@@ -1180,6 +1218,7 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
+	- $(RM_F) $(PC_OUT_FILE)
 	- $(RM_RF) $(OBJ_DIR)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
@@ -1188,6 +1227,8 @@ else
 	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)"
 	@- $(RM_F) $(CONFIG_MK_FILE)
+	@echo "Removing $(PC_OUT_FILE)"
+	@- $(RM_F) $(PC_OUT_FILE)
 	@echo "Removing $(OBJ_DIR)"
 	@- $(RM_RF) $(OBJ_DIR)
 	@echo "Removing $(LIB_DIR)"
@@ -1202,7 +1243,7 @@ endif
 
 changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'"
-	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
+	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG)
 
 
 # --- Uninstall rules ---

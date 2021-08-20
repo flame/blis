@@ -15,9 +15,18 @@
   * **[Haswell](Performance.md#haswell)**
     * **[Experiment details](Performance.md#haswell-experiment-details)**
     * **[Results](Performance.md#haswell-results)**
-  * **[Epyc](Performance.md#epyc)**
-    * **[Experiment details](Performance.md#epyc-experiment-details)**
-    * **[Results](Performance.md#epyc-results)**
+  * **[Zen](Performance.md#zen)**
+    * **[Experiment details](Performance.md#zen-experiment-details)**
+    * **[Results](Performance.md#zen-results)**
+  * **[Zen2](Performance.md#zen2)**
+    * **[Experiment details](Performance.md#zen2-experiment-details)**
+    * **[Results](Performance.md#zen2-results)**
+  * **[A64fx](Performance.md#a64fx)**
+    * **[Experiment details](Performance.md#a64fx-experiment-details)**
+    * **[Results](Performance.md#a64fx-results)**
+  * **[Neoverse N1](Performance.md#neoverse-n1)**
+    * **[Experiment details](Performance.md#neoverse-n1-experiment-details)**
+    * **[Results](Performance.md#neoverse-n1-results)**
 * **[Feedback](Performance.md#feedback)**
 
 # Introduction
@@ -240,6 +249,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (26 core) execution requested via `export OMP_NUM_THREADS=26`
@@ -320,6 +330,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
@@ -355,12 +366,12 @@ The `runthese.m` file will contain example invocations of the function.
 
 ---
 
-## Epyc
+## Zen
 
-### Epyc experiment details
+### Zen experiment details
 
 * Location: Oracle cloud
-* Processor model: AMD Epyc 7551 (Zen1)
+* Processor model: AMD Epyc 7551 (Zen1 "Naples")
 * Core topology: two sockets, 4 dies per socket, 2 core complexes (CCX) per die, 4 cores per CCX, 64 cores total
 * SMT status: enabled, but not utilized
 * Max clock rate: 3.0GHz (single-core), 2.55GHz (multicore)
@@ -398,6 +409,7 @@ The `runthese.m` file will contain example invocations of the function.
          endif()
          ```
     * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
     * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
     * Multithreaded (32 core) execution requested via `export OMP_NUM_THREADS=32`
@@ -417,22 +429,230 @@ The `runthese.m` file will contain example invocations of the function.
 * Comments:
   * MKL performance is dismal, despite being linked in the same manner as on the Xeon Platinum. It's not clear what is causing the slowdown. It could be that MKL's runtime kernel/blocksize selection logic is falling back to some older, more basic implementation because CPUID is not returning Intel as the hardware vendor. Alternatively, it's possible that MKL is trying to use kernels for the closest Intel architectures--say, Haswell/Broadwell--but its implementations use Haswell-specific optimizations that, due to microarchitectural differences, degrade performance on Zen.
 
-### Epyc results
+### Zen results
 
 #### pdf
 
-* [Epyc single-threaded](graphs/large/l3_perf_epyc_nt1.pdf)
-* [Epyc multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.pdf)
-* [Epyc multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.pdf)
+* [Zen single-threaded](graphs/large/l3_perf_zen_nt1.pdf)
+* [Zen multithreaded (32 cores)](graphs/large/l3_perf_zen_jc1ic8jr4_nt32.pdf)
+* [Zen multithreaded (64 cores)](graphs/large/l3_perf_zen_jc2ic8jr4_nt64.pdf)
 
 #### png (inline)
 
-* **Epyc single-threaded**
-![single-threaded](graphs/large/l3_perf_epyc_nt1.png)
-* **Epyc multithreaded (32 cores)**
-![multithreaded (32 cores)](graphs/large/l3_perf_epyc_jc1ic8jr4_nt32.png)
-* **Epyc multithreaded (64 cores)**
-![multithreaded (64 cores)](graphs/large/l3_perf_epyc_jc2ic8jr4_nt64.png)
+* **Zen single-threaded**
+![single-threaded](graphs/large/l3_perf_zen_nt1.png)
+* **Zen multithreaded (32 cores)**
+![multithreaded (32 cores)](graphs/large/l3_perf_zen_jc1ic8jr4_nt32.png)
+* **Zen multithreaded (64 cores)**
+![multithreaded (64 cores)](graphs/large/l3_perf_zen_jc2ic8jr4_nt64.png)
+
+---
+
+## Zen2
+
+### Zen2 experiment details
+
+* Location: Oracle cloud
+* Processor model: AMD Epyc 7742 (Zen2 "Rome")
+* Core topology: two sockets, 8 Core Complex Dies (CCDs) per socket, 2 Core Complexes (CCX) per CCD, 4 cores per CCX, 128 cores total
+* SMT status: enabled, but not utilized
+* Max clock rate: 2.25GHz (base, documented); 3.4GHz boost (single-core, documented); 2.6GHz boost (multicore, estimated)
+* Max vector register length: 256 bits (AVX2)
+* Max FMA vector IPC: 2
+  * Alternatively, FMA vector IPC is 4 when vectors are limited to 128 bits each.
+* Peak performance:
+  * single-core: 54.4 GFLOPS (double-precision), 108.8 GFLOPS (single-precision)
+  * multicore (estimated): 41.6 GFLOPS/core (double-precision), 83.2 GFLOPS/core (single-precision)
+* Operating system: Ubuntu 18.04 (Linux kernel 4.15.0)
+* Page size: 4096 bytes
+* Compiler: gcc 9.3.0
+* Results gathered: 24 September 2020, 29 September 2020
+* Implementations tested:
+  * BLIS 4fd8d9f (0.7.0-55)
+    * configured with `./configure -t openmp auto` (single- and multithreaded)
+    * sub-configuration exercised: `zen2`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (64 core) execution requested via `export BLIS_JC_NT=4 BLIS_IC_NT=4 BLIS_JR_NT=4`
+    * Multithreaded (128 core) execution requested via `export BLIS_JC_NT=8 BLIS_IC_NT=4 BLIS_JR_NT=4`
+  * OpenBLAS 0.3.10
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=128` (multithreaded, 128 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
+    * Multithreaded (128 core) execution requested via `export OPENBLAS_NUM_THREADS=128`
+  * Eigen 3.3.90
+    * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen) (24 September 2020)
+    * Prior to compilation, modified top-level `CMakeLists.txt` to ensure that `-march=native` was added to `CXX_FLAGS` variable (h/t Sameer Agarwal):
+         ```
+         # These lines added after line 60.
+         check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+         if(COMPILER_SUPPORTS_MARCH_NATIVE)
+           set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+         endif()
+         ```
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (64 core) execution requested via `export OMP_NUM_THREADS=64`
+    * Multithreaded (128 core) execution requested via `export OMP_NUM_THREADS=128`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
+  * MKL 2020 update 3
+    * Single-threaded (1 core) execution requested via `export MKL_NUM_THREADS=1`
+    * Multithreaded (64 core) execution requested via `export MKL_NUM_THREADS=64`
+    * Multithreaded (128 core) execution requested via `export MKL_NUM_THREADS=128`
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-127"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset. 
+  * All executables were run through `numactl --interleave=all`.
+* Frequency throttling (via `cpupower`):
+  * Driver: acpi-cpufreq
+  * Governor: performance
+  * Hardware limits (steps): 1.5GHz, 2.0GHz, 2.25GHz
+  * Adjusted minimum: 2.25GHz
+* Comments:
+  * MKL performance is once again underwhelming. This is likely because Intel has decided that it does not want to give users of MKL a reason to purchase AMD hardware.
+
+### Zen2 results
+
+#### pdf
+
+* [Zen2 single-threaded](graphs/large/l3_perf_zen2_nt1.pdf)
+* [Zen2 multithreaded (64 cores)](graphs/large/l3_perf_zen2_jc4ic4jr4_nt64.pdf)
+* [Zen2 multithreaded (128 cores)](graphs/large/l3_perf_zen2_jc8ic4jr4_nt128.pdf)
+
+#### png (inline)
+
+* **Zen2 single-threaded**
+![single-threaded](graphs/large/l3_perf_zen2_nt1.png)
+* **Zen2 multithreaded (64 cores)**
+![multithreaded (64 cores)](graphs/large/l3_perf_zen2_jc4ic4jr4_nt64.png)
+* **Zen2 multithreaded (128 cores)**
+![multithreaded (128 cores)](graphs/large/l3_perf_zen2_jc8ic4jr4_nt128.png)
+
+---
+
+## A64fx
+
+### A64fx experiment details
+
+* Location: RIKEN Center of Computational Science in Kobe, Japan
+  * These test results were gathered on the Fugaku supercomputer under project "量子物質の創発と機能のための基礎科学 ―「富岳」と最先端実験の密連携による革新的強相関電子科学" (hp200132) (Basic Science for Emergence and Functionality in Quantum Matter: Innovative Strongly-Correlated Electron Science by Integration of "Fugaku" and Frontier Experiments)
+* Processor model: Fujitsu A64fx
+* Core topology: one socket, 4 NUMA groups per socket, 13 cores per group (one reserved for the OS), 48 cores total
+* SMT status: Unknown
+* Max clock rate: 2.2GHz (single- and multicore, observed)
+* Max vector register length: 512 bits (SVE)
+* Max FMA vector IPC: 2
+* Peak performance:
+  * single-core: 70.4 GFLOPS (double-precision), 140.8 GFLOPS (single-precision)
+  * multicore: 70.4 GFLOPS/core (double-precision), 140.8 GFLOPS/core (single-precision)
+* Operating system: RHEL 8.3
+* Page size: 256 bytes
+* Compiler: gcc 10.1.0
+* Results gathered: 2 April 2021; BLIS and SSL2 updated on 20 May 2021
+* Implementations tested:
+  * BLIS 61584de (post-0.8.1)
+    * configured with:
+      * `../configure -t none CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (single-threaded)
+      * `../configure -t openmp CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (multithreaded)
+    * sub-configuration exercised: `a64fx`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (12 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=1 BLIS_JR_NT=12`
+    * Multithreaded (48 core) execution requested via `export BLIS_JC_NT=1 BLIS_IC_NT=4 BLIS_JR_NT=12`
+  * Eigen 3.3.9
+    * Obtained via the [Eigen GitLab homepage](https://gitlab.com/libeigen/eigen)
+    * configured and built BLAS library via `mkdir build; cd build; cmake ..; make blas`
+    * installed headers via `cmake . -DCMAKE_INSTALL_PREFIX=$HOME/flame/eigen; make install`
+    * The `gemm` implementation was pulled in at compile-time via Eigen headers; other operations were linked to Eigen's BLAS library.
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
+    * **NOTE**: This version of Eigen does not provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm`, and therefore those curves are omitted from the multithreaded graphs.
+  * ARMPL (20.1.0 for A64fx)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
+    * **NOTE**: While this version of ARMPL does provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm` (with the exception `dtrsm`), but these implementations yield very low performance, and their long run times led us to skip collecting these data altogether.
+  * Fujitsu SSL2 (Fujitsu toolchain 1.2.31)
+    * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1 NPARALLEL=1`
+    * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12 NPARALLEL=12`
+    * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48 NPARALLEL=48`
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="12-23 24-35 36-47 48-59"`.
+  * All executables were run through `numactl --interleave=all` (multithreaded only).
+* Frequency throttling: No change made. No frequency lowering observed.
+* Comments:
+  * Special thanks to Stepan Nassyr and RuQing G. Xu for their work in developing and optimizing A64fx support. Also, thanks to RuQing G. Xu for collecting the data that appear in these graphs.
+
+### A64fx results
+
+#### pdf
+
+* [A64fx single-threaded](graphs/large/l3_perf_a64fx_nt1.pdf)
+* [A64fx multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic1jr12_nt12.pdf)
+* [A64fx multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.pdf)
+
+#### png (inline)
+
+* **A64fx single-threaded**
+![single-threaded](graphs/large/l3_perf_a64fx_nt1.png)
+* **A64fx multithreaded (12 cores)**
+![multithreaded (12 cores)](graphs/large/l3_perf_a64fx_jc1ic1jr12_nt12.png)
+* **A64fx multithreaded (48 cores)**
+![multithreaded (48 cores)](graphs/large/l3_perf_a64fx_jc1ic4jr12_nt48.png)
+
+---
+
+## Neoverse N1
+
+### Neoverse N1 experiment details
+
+* Location: AWS cloud
+* Processor model: Graviton2 Neoverse N1
+* Core topology: one socket, 64 cores per socket, 64 cores total
+* SMT status: none
+* Max clock rate: 2.5GHz (single-core and multicore)
+* Max vector register length: 128 bits (NEON)
+* Max FMA vector IPC: 2
+* Peak performance:
+  * single-core: 20.0 GFLOPS (double-precision), 40.0 GFLOPS (single-precision)
+  * multicore: 20.0 GFLOPS/core (double-precision), 40.0 GFLOPS/core (single-precision)
+* Operating system: unknown
+* Page size: unknown
+* Compiler: gcc 10.3.0
+* Results gathered: 15 July 2021
+* Implementations tested:
+  * BLIS fab5c86d (0.8.1-67)
+    * configured with `./configure -t openmp thunderx2` (single- and multithreaded)
+    * sub-configuration exercised: `thunderx2`
+    * Single-threaded (1 core) execution requested via no change in environment variables
+    * Multithreaded (64 core) execution requested via `export BLIS_NUM_THREADS=64`
+  * OpenBLAS 0.3.17
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=0` (single-threaded)
+    * configured `Makefile.rule` with `BINARY=64 NO_CBLAS=1 NO_LAPACK=1 NO_LAPACKE=1 USE_THREAD=1 NUM_THREADS=64` (multithreaded, 64 cores)
+    * Single-threaded (1 core) execution requested via `export OPENBLAS_NUM_THREADS=1`
+    * Multithreaded (64 core) execution requested via `export OPENBLAS_NUM_THREADS=64`
+* Affinity:
+  * Thread affinity for BLIS was specified manually via `GOMP_CPU_AFFINITY="0-63"`. However, multithreaded OpenBLAS appears to revert to single-threaded execution if `GOMP_CPU_AFFINITY` is set. Therefore, when measuring OpenBLAS performance, the `GOMP_CPU_AFFINITY` environment variable was unset.
+* Frequency throttling (via `cpupower`):
+  * No changes made.
+* Comments:
+  * N/A
+
+### Neoverse N1 results
+
+#### pdf
+
+* [Neoverse N1 single-threaded](graphs/large/l3_perf_nn1_nt1.pdf)
+* [Neoverse N1 multithreaded (64 cores)](graphs/large/l3_perf_nn1_jc2ic8jr4_nt64.pdf)
+
+#### png (inline)
+
+* **Neoverse N1 single-threaded**
+![single-threaded](graphs/large/l3_perf_nn1_nt1.png)
+* **Neoverse N1 multithreaded (64 cores)**
+![multithreaded (64 cores)](graphs/large/l3_perf_nn1_jc2ic8jr4_nt64.png)
 
 ---
 

@@ -33,7 +33,15 @@
 
 */
 
-#include "blis.h"
+#ifdef BLIS_CONFIGURETIME_CPUID
+  #define BLIS_INLINE static
+  #define BLIS_EXPORT_BLIS
+  #include "bli_system.h"
+  #include "bli_type_defs.h"
+  #include "bli_env.h"
+#else
+  #include "blis.h"
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -62,6 +70,10 @@ gint_t bli_env_get_var( const char* env, gint_t fallback )
 }
 
 #if 0
+#ifdef _MSC_VER
+#define strerror_r(errno,buf,len) strerror_s(buf,len,errno)
+#endif
+
 void bli_env_set_var( const char* env, dim_t value )
 {
 	dim_t       r_val;
