@@ -209,6 +209,29 @@ void bli_dgemmsup_rd_armv8a_int_2x8
     b_loc += 1;
   }
 
+  // Load alpha and beta.
+  // Note that here vb is used for alpha, in contrast to other kernels.
+  vb_0 = vld1q_dup_f64( alpha );
+  va_0 = vld1q_dup_f64( beta );
+
+  // Scale.
+  vc_00 = vmulq_f64( vc_00, vb_0 );
+  vc_01 = vmulq_f64( vc_01, vb_0 );
+  vc_02 = vmulq_f64( vc_02, vb_0 );
+  vc_03 = vmulq_f64( vc_03, vb_0 );
+  vc_04 = vmulq_f64( vc_04, vb_0 );
+  vc_05 = vmulq_f64( vc_05, vb_0 );
+  vc_06 = vmulq_f64( vc_06, vb_0 );
+  vc_07 = vmulq_f64( vc_07, vb_0 );
+  vc_10 = vmulq_f64( vc_10, vb_0 );
+  vc_11 = vmulq_f64( vc_11, vb_0 );
+  vc_12 = vmulq_f64( vc_12, vb_0 );
+  vc_13 = vmulq_f64( vc_13, vb_0 );
+  vc_14 = vmulq_f64( vc_14, vb_0 );
+  vc_15 = vmulq_f64( vc_15, vb_0 );
+  vc_16 = vmulq_f64( vc_16, vb_0 );
+  vc_17 = vmulq_f64( vc_17, vb_0 );
+
   if ( cs_c == 1 )
   {
     // Row-storage.
@@ -221,6 +244,18 @@ void bli_dgemmsup_rd_armv8a_int_2x8
     vc_14 = vpaddq_f64( vc_14, vc_15 );
     vc_16 = vpaddq_f64( vc_16, vc_17 );
 
+    if      ( n0 > 1 ) vb_0 = vld1q_f64     ( c_loc + 0 * rs_c + 0 );
+    else if ( n0 > 0 ) vb_0 = vld1q_lane_f64( c_loc + 0 * rs_c + 0, vb_0, 0 );
+    if      ( n0 > 3 ) vb_1 = vld1q_f64     ( c_loc + 0 * rs_c + 2 );
+    else if ( n0 > 2 ) vb_1 = vld1q_lane_f64( c_loc + 0 * rs_c + 2, vb_1, 0 );
+    if      ( n0 > 5 ) vb_2 = vld1q_f64     ( c_loc + 0 * rs_c + 4 );
+    else if ( n0 > 4 ) vb_2 = vld1q_lane_f64( c_loc + 0 * rs_c + 4, vb_2, 0 );
+    if      ( n0 > 7 ) vb_3 = vld1q_f64     ( c_loc + 0 * rs_c + 6 );
+    else if ( n0 > 6 ) vb_3 = vld1q_lane_f64( c_loc + 0 * rs_c + 6, vb_3, 0 );
+    vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+    vc_02 = vfmaq_f64( vc_02, va_0, vb_1 );
+    vc_04 = vfmaq_f64( vc_04, va_0, vb_2 );
+    vc_06 = vfmaq_f64( vc_06, va_0, vb_3 );
     if      ( n0 > 1 ) vst1q_f64     ( c_loc + 0 * rs_c + 0, vc_00 );
     else if ( n0 > 0 ) vst1q_lane_f64( c_loc + 0 * rs_c + 0, vc_00, 0 );
     if      ( n0 > 3 ) vst1q_f64     ( c_loc + 0 * rs_c + 2, vc_02 );
@@ -229,8 +264,21 @@ void bli_dgemmsup_rd_armv8a_int_2x8
     else if ( n0 > 4 ) vst1q_lane_f64( c_loc + 0 * rs_c + 4, vc_04, 0 );
     if      ( n0 > 7 ) vst1q_f64     ( c_loc + 0 * rs_c + 6, vc_06 );
     else if ( n0 > 6 ) vst1q_lane_f64( c_loc + 0 * rs_c + 6, vc_06, 0 );
+
     if ( m0 > 1 )
     {
+      if      ( n0 > 1 ) vb_0 = vld1q_f64     ( c_loc + 1 * rs_c + 0 );
+      else if ( n0 > 0 ) vb_0 = vld1q_lane_f64( c_loc + 1 * rs_c + 0, vb_0, 0 );
+      if      ( n0 > 3 ) vb_1 = vld1q_f64     ( c_loc + 1 * rs_c + 2 );
+      else if ( n0 > 2 ) vb_1 = vld1q_lane_f64( c_loc + 1 * rs_c + 2, vb_1, 0 );
+      if      ( n0 > 5 ) vb_2 = vld1q_f64     ( c_loc + 1 * rs_c + 4 );
+      else if ( n0 > 4 ) vb_2 = vld1q_lane_f64( c_loc + 1 * rs_c + 4, vb_2, 0 );
+      if      ( n0 > 7 ) vb_3 = vld1q_f64     ( c_loc + 1 * rs_c + 6 );
+      else if ( n0 > 6 ) vb_3 = vld1q_lane_f64( c_loc + 1 * rs_c + 6, vb_3, 0 );
+      vc_10 = vfmaq_f64( vc_10, va_0, vb_0 );
+      vc_12 = vfmaq_f64( vc_12, va_0, vb_1 );
+      vc_14 = vfmaq_f64( vc_14, va_0, vb_2 );
+      vc_16 = vfmaq_f64( vc_16, va_0, vb_3 );
       if      ( n0 > 1 ) vst1q_f64     ( c_loc + 1 * rs_c + 0, vc_10 );
       else if ( n0 > 0 ) vst1q_lane_f64( c_loc + 1 * rs_c + 0, vc_10, 0 );
       if      ( n0 > 3 ) vst1q_f64     ( c_loc + 1 * rs_c + 2, vc_12 );
@@ -256,10 +304,27 @@ void bli_dgemmsup_rd_armv8a_int_2x8
     if ( m0 > 1 )
     {
       // if ( n0 > 0 )
+                    vb_0 = vld1q_f64( c_loc + 0 + 0 * cs_c );
+      if ( n0 > 1 ) vb_1 = vld1q_f64( c_loc + 0 + 1 * cs_c );
+      if ( n0 > 2 ) vb_2 = vld1q_f64( c_loc + 0 + 2 * cs_c );
+      if ( n0 > 3 ) vb_3 = vld1q_f64( c_loc + 0 + 3 * cs_c );
+      vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+      vc_01 = vfmaq_f64( vc_01, va_0, vb_1 );
+      vc_02 = vfmaq_f64( vc_02, va_0, vb_2 );
+      vc_03 = vfmaq_f64( vc_03, va_0, vb_3 );
                     vst1q_f64( c_loc + 0 + 0 * cs_c, vc_00 );
       if ( n0 > 1 ) vst1q_f64( c_loc + 0 + 1 * cs_c, vc_01 );
       if ( n0 > 2 ) vst1q_f64( c_loc + 0 + 2 * cs_c, vc_02 );
       if ( n0 > 3 ) vst1q_f64( c_loc + 0 + 3 * cs_c, vc_03 );
+
+      if ( n0 > 4 ) vb_0 = vld1q_f64( c_loc + 0 + 4 * cs_c );
+      if ( n0 > 5 ) vb_1 = vld1q_f64( c_loc + 0 + 5 * cs_c );
+      if ( n0 > 6 ) vb_2 = vld1q_f64( c_loc + 0 + 6 * cs_c );
+      if ( n0 > 7 ) vb_3 = vld1q_f64( c_loc + 0 + 7 * cs_c );
+      vc_04 = vfmaq_f64( vc_04, va_0, vb_0 );
+      vc_05 = vfmaq_f64( vc_05, va_0, vb_1 );
+      vc_06 = vfmaq_f64( vc_06, va_0, vb_2 );
+      vc_07 = vfmaq_f64( vc_07, va_0, vb_3 );
       if ( n0 > 4 ) vst1q_f64( c_loc + 0 + 4 * cs_c, vc_04 );
       if ( n0 > 5 ) vst1q_f64( c_loc + 0 + 5 * cs_c, vc_05 );
       if ( n0 > 6 ) vst1q_f64( c_loc + 0 + 6 * cs_c, vc_06 );
@@ -268,10 +333,27 @@ void bli_dgemmsup_rd_armv8a_int_2x8
     else
     {
       // if ( n0 > 0 )
+                    vb_0 = vld1q_lane_f64( c_loc + 0 + 0 * cs_c, vb_0, 0 );
+      if ( n0 > 1 ) vb_1 = vld1q_lane_f64( c_loc + 0 + 1 * cs_c, vb_1, 0 );
+      if ( n0 > 2 ) vb_2 = vld1q_lane_f64( c_loc + 0 + 2 * cs_c, vb_2, 0 );
+      if ( n0 > 3 ) vb_3 = vld1q_lane_f64( c_loc + 0 + 3 * cs_c, vb_3, 0 );
+      vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+      vc_01 = vfmaq_f64( vc_01, va_0, vb_1 );
+      vc_02 = vfmaq_f64( vc_02, va_0, vb_2 );
+      vc_03 = vfmaq_f64( vc_03, va_0, vb_3 );
                     vst1q_lane_f64( c_loc + 0 + 0 * cs_c, vc_00, 0 );
       if ( n0 > 1 ) vst1q_lane_f64( c_loc + 0 + 1 * cs_c, vc_01, 0 );
       if ( n0 > 2 ) vst1q_lane_f64( c_loc + 0 + 2 * cs_c, vc_02, 0 );
       if ( n0 > 3 ) vst1q_lane_f64( c_loc + 0 + 3 * cs_c, vc_03, 0 );
+
+      if ( n0 > 4 ) vb_0 = vld1q_lane_f64( c_loc + 0 + 4 * cs_c, vb_0, 0 );
+      if ( n0 > 5 ) vb_1 = vld1q_lane_f64( c_loc + 0 + 5 * cs_c, vb_1, 0 );
+      if ( n0 > 6 ) vb_2 = vld1q_lane_f64( c_loc + 0 + 6 * cs_c, vb_2, 0 );
+      if ( n0 > 7 ) vb_3 = vld1q_lane_f64( c_loc + 0 + 7 * cs_c, vb_3, 0 );
+      vc_04 = vfmaq_f64( vc_04, va_0, vb_0 );
+      vc_05 = vfmaq_f64( vc_05, va_0, vb_1 );
+      vc_06 = vfmaq_f64( vc_06, va_0, vb_2 );
+      vc_07 = vfmaq_f64( vc_07, va_0, vb_3 );
       if ( n0 > 4 ) vst1q_lane_f64( c_loc + 0 + 4 * cs_c, vc_04, 0 );
       if ( n0 > 5 ) vst1q_lane_f64( c_loc + 0 + 5 * cs_c, vc_05, 0 );
       if ( n0 > 6 ) vst1q_lane_f64( c_loc + 0 + 6 * cs_c, vc_06, 0 );
