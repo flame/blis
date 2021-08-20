@@ -48,10 +48,11 @@ extern "C" {
 // NOTE: PLEASE DON'T CHANGE THE ORDER IN WHICH HEADERS ARE INCLUDED UNLESS
 // YOU ARE SURE THAT IT DOESN'T BREAK INTER-HEADER MACRO DEPENDENCIES.
 
-// -- System headers --
-// NOTE: This header must be included before bli_config_macro_defs.h.
+// -- System and language-related headers --
 
+// NOTE: bli_system.h header must be included before bli_config_macro_defs.h.
 #include "bli_system.h"
+#include "bli_lang_defs.h"
 
 
 // -- configure definitions --
