@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, The University of Texas at Austin
+   Copyright (C) 2014, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,37 +32,27 @@
 
 */
 
-//
-// Prototype BLAS-like interfaces to the variants.
-//
 
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, varname ) \
 \
 void PASTECH2(bls_,ch,varname) \
      ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
-       ctype*  restrict kappa, \
-       ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
-       cntx_t* restrict cntx, \
-       thrinfo_t* restrict thread  \
+       conj_t  conja, \
+       pack_t  schema, \
+       dim_t   panel_dim, \
+       dim_t   panel_dim_max, \
+       dim_t   panel_len, \
+       dim_t   panel_len_max, \
+       ctype*  kappa, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  p,             inc_t ldp, \
+       cntx_t* cntx  \
      );
 
-//INSERT_GENTPROT_BASIC0( packm_var1 )
-GENTPROT( float,    s, packm_var1 )
-GENTPROT( double,   d, packm_var1 )
-GENTPROT( scomplex, c, packm_var1 )
-GENTPROT( dcomplex, z, packm_var1 )
+//INSERT_GENTPROT_BASIC0( packm_cxk )
+GENTPROT( float,    s, packm_cxk )
+GENTPROT( double,   d, packm_cxk )
+GENTPROT( scomplex, c, packm_cxk )
+GENTPROT( dcomplex, z, packm_cxk )
 
-//INSERT_GENTPROT_BASIC0( packm_var2 )
-GENTPROT( float,    s, packm_var2 )
-GENTPROT( double,   d, packm_var2 )
-GENTPROT( scomplex, c, packm_var2 )
-GENTPROT( dcomplex, z, packm_var2 )
