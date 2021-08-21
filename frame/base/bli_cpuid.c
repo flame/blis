@@ -6,7 +6,6 @@
 
    Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
-   Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -450,28 +449,9 @@ arch_t bli_cpuid_query_id( void )
 	{
 		if ( model == MODEL_ARMV8 )
 		{
+			return part;
 			// Check for each ARMv8 configuration that is enabled, check for that
 			// microarchitecture. We check from most recent to most dated.
-#ifdef BLIS_CONFIG_ARMSVE
-			if ( bli_cpuid_is_armsve( model, part, features ) )
-				return BLIS_ARCH_ARMSVE;
-#endif
-#ifdef BLIS_CONFIG_A64FX
-			if ( bli_cpuid_is_a64fx( model, part, features ) )
-				return BLIS_ARCH_A64FX;
-#endif
-#ifdef BLIS_CONFIG_THUNDERX2
-			if ( bli_cpuid_is_thunderx2( model, part, features ) )
-				return BLIS_ARCH_THUNDERX2;
-#endif
-#ifdef BLIS_CONFIG_CORTEXA57
-			if ( bli_cpuid_is_cortexa57( model, part, features ) )
-				return BLIS_ARCH_CORTEXA57;
-#endif
-#ifdef BLIS_CONFIG_CORTEXA53
-		if ( bli_cpuid_is_cortexa53( model, part, features ) )
-			return BLIS_ARCH_CORTEXA53;
-#endif
 			// If none of the other sub-configurations were detected, return
 			// the 'generic' arch_t id value.
 			return BLIS_ARCH_GENERIC;
@@ -499,76 +479,6 @@ arch_t bli_cpuid_query_id( void )
 	}
 
 	return BLIS_ARCH_GENERIC;
-}
-
-bool bli_cpuid_is_a64fx
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	return model == BLIS_ARCH_A64FX;
-}
-
-bool bli_cpuid_is_thunderx2
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	return model == BLIS_ARCH_THUNDERX2;
-}
-
-bool bli_cpuid_is_cortexa57
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	return model == BLIS_ARCH_CORTEXA57;
-}
-
-bool bli_cpuid_is_cortexa53
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	return model == BLIS_ARCH_CORTEXA53;
-}
-
-bool bli_cpuid_is_armsve
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_SVE;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
-}
-
-bool bli_cpuid_is_a64fx
-     (
-       uint32_t family,
-       uint32_t model,
-       uint32_t features
-     )
-{
-	// Check for expected CPU features.
-	const uint32_t expected = FEATURE_SVE;
-
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
-
-	return TRUE;
 }
 
 bool bli_cpuid_is_cortexa15
@@ -1017,7 +927,7 @@ int vpu_count( void )
 
 #elif defined(__aarch64__)
 
-#if __linux__
+#ifdef __linux__
 // This is adapted from OpenBLAS.  See
 // https://www.kernel.org/doc/html/latest/arm64/cpu-feature-registers.html
 // for the mechanism, but not the magic numbers.
@@ -1039,42 +949,52 @@ int vpu_count( void )
 et al
 ) */
 
-static uint32_t get_coretype(void) {
-	int implementer, part, midr_el1;
+#endif //__linux__
 
-// Fixme:  Presumably we should be checking the vector length as the
-// imlementation isn't length-agnostic.
-// #ifdef BLI_ARCH_ARMSVE          /* invented -- fixme */
-// 	if (!(getauxval(AT_HWCAP) & HWCAP_SVE)) {
-// 		/* Assuming no support for specific models */
-// 		return BLI_ARCH_ARMSVE;
-// 	}
-// #endif
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 
-	if (!(getauxval(AT_HWCAP) & HWCAP_CPUID)) {
-		// Fixme:  We could try reading /sys and /proc here, as below.
-		// Find out if that could work when the HWCAP test fails.
-		// https://github.com/xianyi/OpenBLAS/issues/2715 says HWCAP_CPUID
-		// is a Linux 4.11 feature and that sys/.../midr_el1 is a 4.7
-		// feature.  Should caution somewhere about binding to big cores
-		// in big-little CPUs.
-		return 0;
+static uint32_t get_coretype()
+{
+	int implementer = 0x00, part = 0x000;
+
+#ifdef __linux__
+	if ( getauxval( AT_HWCAP ) & HWCAP_CPUID )
+	{
+		// Also available from
+		// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
+		// and split out in /proc/cpuinfo (with a tab before the colon):
+		// CPU part	: 0x0a1
+		
+		uint64_t midr_el1;
+		__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
+		/*
+		 * MIDR_EL1
+		 *
+		 * 31          24 23     20 19          16 15          4 3         0
+		 * -----------------------------------------------------------------
+		 * | Implementer | Variant | Architecture | Part Number | Revision |
+		 * -----------------------------------------------------------------
+		 */
+		implementer = (midr_el1 >> 24) & 0xFF;
+		part        = (midr_el1 >> 4)  & 0xFFF;
 	}
-	// Also available from
-	// /sys/devices/system/cpu/cpu0/regs/identification/midr_el1
-	// and split out in /proc/cpuinfo (with a tab before the colon):
-	// CPU part	: 0x0a1
-	__asm("mrs %0, MIDR_EL1" : "=r" (midr_el1));
-	/*
-	 * MIDR_EL1
-	 *
-	 * 31		   24 23	 20 19			16 15		   4 3		  0
-	 * -----------------------------------------------------------------
-	 * | Implementer | Variant | Architecture | Part Number | Revision |
-	 * -----------------------------------------------------------------
-	 */
-	implementer = (midr_el1 >> 24) & 0xFF;
-	part		= (midr_el1 >> 4)  & 0xFFF;
+#ifdef BLIS_CONFIG_ARMSVE
+	else if ( getauxval( AT_HWCAP ) & HWCAP_SVE )
+	{
+		return BLIS_ARCH_ARMSVE;
+	}
+#endif
+#endif //__linux__
+
+#ifdef __APPLE__
+	// Better values could be obtained from sysctlbyname()
+	implementer = 0x61; //Apple
+	part        = 0x023; //Firestorm
+#endif //__APPLE__
+
 	// From Linux arch/arm64/include/asm/cputype.h
 	// ARM_CPU_IMP_ARM 0x41
 	// ARM_CPU_IMP_APM 0x50
@@ -1140,47 +1060,71 @@ static uint32_t get_coretype(void) {
 		case 0x41:		// ARM
 			switch (part)
 			{
+#ifdef BLIS_CONFIG_CORTEXA57
 				case 0xd07: // Cortex A57
 					return BLIS_ARCH_CORTEXA57;
+#endif
+#ifdef BLIS_CONFIG_CORTEXA53
 				case 0xd03: // Cortex A53
 					return BLIS_ARCH_CORTEXA53;
+#endif
+#ifdef BLIS_CONFIG_THUNDERX2
+				case 0xd0c: // Neoverse N1 (and Graviton G2?)
+					return BLIS_ARCH_THUNDERX2; //placeholder for N1
+#endif
 			}
 			break;
 		case 0x42:		// Broadcom
 			switch (part)
 			{
+#ifdef BLIS_CONFIG_THUNDERX2
 				case 0x516: // Vulcan
 					return BLIS_ARCH_THUNDERX2;
+#endif
 			}
 			break;
 		case 0x43:		// Cavium
 			switch (part)
 			{
+#ifdef BLIS_CONFIG_THUNDERX2
 				case 0x0af: // ThunderX2
 				case 0x0b8: // ThunderX3
 					return BLIS_ARCH_THUNDERX2;
+#endif
 			}
 			break;
-		case 0x46:      // Fujitsu
+		case 0x46:      	// Fujitsu
 			switch (part)
 			{
+#ifdef BLIS_CONFIG_A64FX
 				case 0x001: // A64FX
 					return BLIS_ARCH_A64FX;
+#endif
+			}
+			break;
+		case 0x61:		// Apple
+			switch (part)
+			{
+#ifdef BLIS_CONFIG_THUNDERX2
+				case 0x022: // Icestorm (M1.LITTLE)
+				case 0x023: // Firestorm (M1.big)
+					return BLIS_ARCH_THUNDERX2; //placeholder for M1
+#endif
 			}
 			break;
 	}
-	// Fixme: OpenBLAS uses a57 basic config for others, but says
-	// -mtune will speed them up
-	// <https://github.com/xianyi/OpenBLAS/commit/310ea55f29f16771438386fb2f1f140e2fd7e397>
-	// It has Neoverse-N1 as -march=armv8.2-a -mtune=neoverse-n1 (gcc
-	// 9+, else v8-a a72) plus some TX2 level 1 and 2 bits; assume that's
-	// as graviton2, which has: l1d 64k, l2 1024, l3 32M,
-	// Features : fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp ssbs
-	// No idea about M1 -- not currently in OpenBLAS -- but it does use
-	// neon (and has some sort of hidden "matrix coprocessor").
+
+// Can't use #if defined(...) here because of parsing done for autoconfiguration
+#ifdef BLIS_CONFIG_CORTEXA57
 	return BLIS_ARCH_CORTEXA57;
-}
+#else
+#ifdef BLIS_CONFIG_CORTEXA53
+	return BLIS_ARCH_CORTEXA53;
+#else
+	return BLIS_ARCH_GENERIC;
 #endif
+#endif
+}
 
 uint32_t bli_cpuid_query
      (
@@ -1190,11 +1134,8 @@ uint32_t bli_cpuid_query
      )
 {
 	*model	  = MODEL_ARMV8;
-	*part     = 0;
 	*features = 0;
-#if __linux__
 	*part	  = get_coretype();
-#endif
 
 	return VENDOR_ARM;
 }
