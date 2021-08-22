@@ -446,11 +446,14 @@ consider_edge_cases:
   c = c + n_iter * 8 * cs_c;
   if ( n_left )
   {
-    bli_dgemmsup_r_armv8a_ref2
+    auxinfo_t data_d6x4mn = *data;
+    bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
+
+    bli_dgemmsup_rv_armv8a_int_6x4mn
     (
       conja, conjb, 4, n_left, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
+      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
     );
   }
 

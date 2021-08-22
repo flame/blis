@@ -144,21 +144,6 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
        cntx_t*    restrict cntx
      )
 {
-  // 7 = 6 + 1;
-  //
-  if ( m0 == 7 )
-  {
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, 1, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-    m0 -= 1;
-    a += 1 * rs_a0;
-    c += 1 * rs_c0;
-  }
-  // 8 = 4 + 4;
   // 5 = 4 + 1;
   // 4;
   //

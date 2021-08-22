@@ -394,8 +394,21 @@ LABEL(END_EXEC)
   );
 
 consider_edge_cases:
-  // TODO: Implement.
-  //
+  a = a + m_iter * ps_a;
+  c = c + m_iter * 8 * rs_c;
+  // Edge case is within 1 millikernel loop of THIS kernel.
+  // Regarding the 6x?m kernel, the panel stride should be always local.
+  auxinfo_t data_6xkm = *data;
+  bli_auxinfo_set_ps_a( 6 * rs_a, &data_6xkm );
+  if ( m_left )
+  {
+    bli_dgemmsup_rv_armv8a_int_6x4mn
+    (
+      conja, conjb, m_left, 4, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, &data_6xkm, cntx
+    );
+  }
 
   // Issue prefetch instructions only after
   //  execution is done.

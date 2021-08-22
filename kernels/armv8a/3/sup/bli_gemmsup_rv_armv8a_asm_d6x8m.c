@@ -146,9 +146,44 @@ void bli_dgemmsup_rv_armv8a_asm_6x8m
 {
   if ( n0 != 8 )
   {
-    // TODO: Add a 6x6 kernel here.
-    //
-    if ( n0 > 0 )
+    if ( n0 < 8 )
+    {
+      for ( ; n0 >= 4; n0 -= 4 )
+      {
+	dgemmsup_ker_ft ukr_fp;
+	auxinfo_t data_d8xkm = *data;
+	if ( bli_auxinfo_ps_a( data ) == 6 * rs_a0 )
+	{
+	  // Use 8x4 Asm kernel for the unpacked case.
+	  bli_auxinfo_set_ps_a( 8 * rs_a0, &data_d8xkm );
+	  ukr_fp = bli_dgemmsup_rv_armv8a_asm_8x4m;
+	}
+	else
+	{
+	  // Cannot change dimension for m when A is packed.
+	  ukr_fp = bli_dgemmsup_rv_armv8a_int_6x4mn;
+	}
+
+	ukr_fp
+	(
+	  conja, conjb, m0, 4, k0,
+	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	  beta, c, rs_c0, cs_c0, &data_d8xkm, cntx
+	);
+	b += 4 * cs_b0;
+	c += 4 * cs_c0;
+      }
+      if ( n0 > 0 )
+      {
+	bli_dgemmsup_rv_armv8a_int_6x4mn
+	(
+	  conja, conjb, m0, n0, k0,
+	  alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+	  beta, c, rs_c0, cs_c0, data, cntx
+	);
+      }
+    }
+    else
     {
       bli_dgemmsup_r_armv8a_ref2
       (
@@ -485,6 +520,16 @@ consider_edge_cases:
   // Forward address.
   a = a + m_iter * ps_a;
   c = c + m_iter * 6 * rs_c;
+#if 1
+  auxinfo_t data_d6x4mn = *data;
+  bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
+  bli_dgemmsup_rv_armv8a_int_6x4mn
+  (
+    conja, conjb, m_left, 8, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
+  );
+#else
   if ( m_left >= 4 )
   {
     // Calls 4x8m with only 1 outermost loop.
@@ -498,7 +543,7 @@ consider_edge_cases:
       beta, c, rs_c0, cs_c0, data, cntx
     );
     m_left -= 4;
-    a = a + 4 * rs_c;
+    a = a + 4 * rs_a;
     c = c + 4 * rs_c;
   }
   if ( m_left )
@@ -510,6 +555,7 @@ consider_edge_cases:
       beta, c, rs_c0, cs_c0, data, cntx
     );
   }
+#endif
 
 }
 
