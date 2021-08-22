@@ -981,12 +981,8 @@ static uint32_t get_coretype()
 		implementer = (midr_el1 >> 24) & 0xFF;
 		part        = (midr_el1 >> 4)  & 0xFFF;
 	}
-#ifdef BLIS_CONFIG_ARMSVE
-	else if ( getauxval( AT_HWCAP ) & HWCAP_SVE )
-	{
-		return BLIS_ARCH_ARMSVE;
-	}
-#endif
+	
+	bool has_sve = getauxval( AT_HWCAP ) & HWCAP_SVE;
 #endif //__linux__
 
 #ifdef __APPLE__
@@ -1113,6 +1109,11 @@ static uint32_t get_coretype()
 			}
 			break;
 	}
+
+#ifdef BLIS_CONFIG_ARMSVE
+	if (has_sve)
+		return BLIS_ARCH_ARMSVE;
+#endif
 
 // Can't use #if defined(...) here because of parsing done for autoconfiguration
 #ifdef BLIS_CONFIG_CORTEXA57
