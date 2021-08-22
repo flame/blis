@@ -120,24 +120,122 @@ void bli_dgemmsup_rd_armv8a_asm_6x8n
 {
   if ( m0 != 6 )
   {
-    // Dispatch to counterpart.
-    if ( n0 == 8 && m0 >= 3 )
+    if ( m0 < 6 )
     {
-      bli_dgemmsup_rd_armv8a_asm_6x8m
-      (
-	conja, conjb, m0, n0, k0,
-	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	beta, c, rs_c0, cs_c0, data, cntx
-      );
-      return;
-    }
+      if ( m0 == 5 )
+      {
+        // 3xk calls.
+        dim_t n = n0;
+        double *b_loc = b;
+        double *c_loc = c;
+        for ( ; n >= 4; n -= 4 )
+        {
+          bli_dgemmsup_rd_armv8a_asm_3x4
+          (
+            conja, conjb, 3, 4, k0,
+            alpha, a, rs_a0, cs_a0, b_loc, rs_b0, cs_b0,
+            beta, c_loc, rs_c0, cs_c0, data, cntx
+          );
+          b_loc += 4 * cs_b0;
+          c_loc += 4 * cs_c0;
+        }
+        if ( n > 0 )
+        {
+          bli_dgemmsup_rd_armv8a_int_3x4
+          (
+            conja, conjb, 3, n, k0,
+            alpha, a, rs_a0, cs_a0, b_loc, rs_b0, cs_b0,
+            beta, c_loc, rs_c0, cs_c0, data, cntx
+          );
+        }
+        a += 3 * rs_a0;
+        c += 3 * rs_c0;
 
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m0, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
+        // 2xk calls.
+        for ( ; n0 > 0; n0 -= 8 )
+        {
+          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
+          bli_dgemmsup_rd_armv8a_int_2x8
+          (
+            conja, conjb, 2, n_loc, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+          );
+          b += 8 * cs_b0;
+          c += 8 * cs_c0;
+        }
+        return;
+      }
+      else if ( m0 == 4 )
+      {
+        for ( ; n0 > 0; n0 -= 8 )
+        {
+          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
+          bli_dgemmsup_rd_armv8a_int_2x8
+          (
+            conja, conjb, 2, n_loc, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+          );
+          bli_dgemmsup_rd_armv8a_int_2x8
+          (
+            conja, conjb, 2, n_loc, k0,
+            alpha, a + 2 * rs_a0, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c + 2 * rs_c0, rs_c0, cs_c0, data, cntx
+          );
+          b += 8 * cs_b0;
+          c += 8 * cs_c0;
+        }
+      }
+      else if ( m0 == 3 )
+      {
+        for ( ; n0 >= 4; n0 -= 4 )
+        {
+          bli_dgemmsup_rd_armv8a_asm_3x4
+          (
+            conja, conjb, 3, 4, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+          );
+          b += 4 * cs_b0;
+          c += 4 * cs_c0;
+        }
+        if ( n0 > 0 )
+        {
+          bli_dgemmsup_rd_armv8a_int_3x4
+          (
+            conja, conjb, 3, n0, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+          );
+        }
+      }
+      else // m0 == 2 or 1.
+      {
+        for ( ; n0 > 0; n0 -= 8 )
+        {
+          dim_t n_loc = ( n0 < 8 ) ? n0 : 8;
+          bli_dgemmsup_rd_armv8a_int_2x8
+          (
+            conja, conjb, m0, n_loc, k0,
+            alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c, rs_c0, cs_c0, data, cntx
+          );
+          b += 8 * cs_b0;
+          c += 8 * cs_c0;
+        }
+      }
+    }
+    else
+    {
+      // Should not be called.
+      bli_dgemmsup_r_armv8a_ref2
+      (
+        conja, conjb, m0, n0, k0,
+        alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+        beta, c, rs_c0, cs_c0, data, cntx
+      );
+    }
     return;
   }
 

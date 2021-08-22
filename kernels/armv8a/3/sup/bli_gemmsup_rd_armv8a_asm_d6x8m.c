@@ -127,24 +127,64 @@ void bli_dgemmsup_rd_armv8a_asm_6x8m
 {
   if ( n0 != 8 )
   {
-    // Dispatch to counterpart.
-    if ( m0 == 6 && n0 >= 4 )
+    if ( n0 < 8 )
     {
-      bli_dgemmsup_rd_armv8a_asm_6x8n
-      (
-	conja, conjb, m0, n0, k0,
-	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-	beta, c, rs_c0, cs_c0, data, cntx
-      );
-      return;
-    }
+      for ( ; n0 >= 4; n0 -= 4 )
+      {
+        dim_t m = m0;
+        double *a_loc = a;
+        double *c_loc = c;
 
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m0, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
+        for ( ; m >= 3; m -= 3 )
+        {
+          bli_dgemmsup_rd_armv8a_asm_3x4
+          (
+            conja, conjb, 3, 4, k0,
+            alpha, a_loc, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c_loc, rs_c0, cs_c0, data, cntx
+          );
+          a_loc += 3 * rs_a0;
+          c_loc += 3 * rs_c0;
+        }
+
+        if ( m > 0 )
+        {
+          bli_dgemmsup_rd_armv8a_int_3x4
+          (
+            conja, conjb, m, 4, k0,
+            alpha, a_loc, rs_a0, cs_a0, b, rs_b0, cs_b0,
+            beta, c_loc, rs_c0, cs_c0, data, cntx
+          );
+        }
+        b += 4 * cs_b0;
+        c += 4 * cs_c0;
+      }
+
+      for ( ; m0 > 0; m0 -= 3 )
+      {
+        dim_t m_loc = ( m0 < 3 ) ? m0 : 3;
+
+        bli_dgemmsup_rd_armv8a_int_3x4
+        (
+          conja, conjb, m_loc, n0, k0,
+          alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+          beta, c, rs_c0, cs_c0, data, cntx
+        );
+
+        a += 3 * rs_a0;
+        c += 3 * rs_c0;
+      }
+    }
+    else
+    {
+      // Should not be called.
+      bli_dgemmsup_r_armv8a_ref2
+      (
+        conja, conjb, m0, n0, k0,
+        alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+        beta, c, rs_c0, cs_c0, data, cntx
+      );
+    }
     return;
   }
 
@@ -448,13 +488,18 @@ consider_edge_cases:
   // Forward address.
   a = a + m_iter * 3 * rs_a;
   c = c + m_iter * 3 * rs_c;
-  if ( m_left )
+  for ( ; m_left > 0; m_left -= 2 )
   {
-    bli_dgemmsup_r_armv8a_ref2
+    dim_t m_loc = ( m_left < 2 ) ? m_left : 2;
+
+    bli_dgemmsup_rd_armv8a_int_2x8
     (
-      conja, conjb, m_left, 8, k0,
+      conja, conjb, m_loc, 8, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
+    a += 2 * rs_a0;
+    c += 2 * rs_c0;
   }
 }
+
