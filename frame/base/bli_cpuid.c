@@ -956,9 +956,13 @@ et al
 #include <sys/sysctl.h>
 #endif
 
-static uint32_t get_coretype()
+static uint32_t get_coretype
+	(
+	  uint32_t* features
+	)
 {
 	int implementer = 0x00, part = 0x000;
+	*features = FEATURE_NEON;
 
 #ifdef __linux__
 	if ( getauxval( AT_HWCAP ) & HWCAP_CPUID )
@@ -983,6 +987,8 @@ static uint32_t get_coretype()
 	}
 	
 	bool has_sve = getauxval( AT_HWCAP ) & HWCAP_SVE;
+	if (has_sve)
+		*features |= FEATURE_SVE;
 #endif //__linux__
 
 #ifdef __APPLE__
@@ -1134,9 +1140,8 @@ uint32_t bli_cpuid_query
        uint32_t* features
      )
 {
-	*model	  = MODEL_ARMV8;
-	*features = 0;
-	*part	  = get_coretype();
+	*model = MODEL_ARMV8;
+	*part  = get_coretype(features);
 
 	return VENDOR_ARM;
 }
@@ -1156,77 +1161,6 @@ uint32_t bli_cpuid_query
 
    The complication for family selection is that Neon is optional for
    CortexA9, for instance.  That's tested in bli_cpuid_is_cortexa9.
-
-   When reading /proc/cpuinfo, we should check the entry corresponding
-   to the core we're actually running on, in case the system is
-   heterogeneous (big.little), though users obviously should bind to
-   big cores.
-
-   arch/arm/include/asm/cputype.h has:
-
-   ARM_CPU_IMP_ARM			0x41
-   ARM_CPU_IMP_BRCM		0x42
-   ARM_CPU_IMP_DEC			0x44
-   ARM_CPU_IMP_INTEL		0x69
-
-   ARM implemented processors 
-   ARM_CPU_PART_ARM1136		0x4100b360
-   ARM_CPU_PART_ARM1156		0x4100b560
-   ARM_CPU_PART_ARM1176		0x4100b760
-   ARM_CPU_PART_ARM11MPCORE	0x4100b020
-   ARM_CPU_PART_CORTEX_A8		0x4100c080
-   ARM_CPU_PART_CORTEX_A9		0x4100c090
-   ARM_CPU_PART_CORTEX_A5		0x4100c050
-   ARM_CPU_PART_CORTEX_A7		0x4100c070
-   ARM_CPU_PART_CORTEX_A12		0x4100c0d0
-   ARM_CPU_PART_CORTEX_A17		0x4100c0e0
-   ARM_CPU_PART_CORTEX_A15		0x4100c0f0
-   ARM_CPU_PART_CORTEX_A53		0x4100d030
-   ARM_CPU_PART_CORTEX_A57		0x4100d070
-   ARM_CPU_PART_CORTEX_A72		0x4100d080
-   ARM_CPU_PART_CORTEX_A73		0x4100d090
-   ARM_CPU_PART_CORTEX_A75		0x4100d0a0
-   ARM_CPU_PART_MASK		0xff00fff0
-
-   Broadcom implemented processors 
-   ARM_CPU_PART_BRAHMA_B15		0x420000f0
-   ARM_CPU_PART_BRAHMA_B53		0x42001000
-
-   DEC implemented cores 
-   ARM_CPU_PART_SA1100		0x4400a110
-
-   Intel implemented cores 
-   ARM_CPU_PART_SA1110		0x6900b110
-   ARM_CPU_REV_SA1110_A0		0
-   ARM_CPU_REV_SA1110_B0		4
-   ARM_CPU_REV_SA1110_B1		5
-   ARM_CPU_REV_SA1110_B2		6
-   ARM_CPU_REV_SA1110_B4		8
-
-   ARM_CPU_XSCALE_ARCH_MASK	0xe000
-   ARM_CPU_XSCALE_ARCH_V1		0x2000
-   ARM_CPU_XSCALE_ARCH_V2		0x4000
-   ARM_CPU_XSCALE_ARCH_V3		0x6000
-
-   Qualcomm implemented cores
-   ARM_CPU_PART_SCORPION		0x510002d0
-
-   The list must be pretty incomplete.  A phone example in Android:
-   "Qualcomm MSM 8974 HAMMERHEAD" (AKA Snapdragon 800):
-   implementor: 0x51; variant: 0x2;  part: 0x06f
-
-   ----
-
-   Although it looks as if you should be able to do something similar
-   to POWER, instead of reading /proc, like:
-
-   #include <sys/auxv.h>
-   #include <linux/auxvec.h>  // for AT_PLATFORM
-   char * platform = NULL;
-   platform = (char*) getauxval (AT_PLATFORM);
-
-   that just yields "v7l" on cortexa9.
-
  */
 
 #define TEMP_BUFFER_SIZE 200
