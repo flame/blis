@@ -119,16 +119,10 @@ void bli_dgemmsup_rv_armv8a_asm_4x8n
        cntx_t*    restrict cntx
      )
 {
-  if ( m0 != 4 )
-  {
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m0, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-    return;
-  }
+  // Fixme: This uker has no dispatching for unalighed sizes.
+  // Currently it only serves as a dispatch target for other kernels
+  //  and cannot be registered in configurations.
+  assert( m0 == 4 );
 
   // LLVM has very bad routing ability for inline asm.
   // Limit number of registers in case of Clang compilation.

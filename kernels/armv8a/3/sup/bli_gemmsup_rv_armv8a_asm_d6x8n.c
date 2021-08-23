@@ -144,11 +144,11 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
        cntx_t*    restrict cntx
      )
 {
-  // 5 = 4 + 1;
-  // 4;
-  //
   if ( m0 != 6 )
   {
+    // 5 = 4 + 1;
+    // 4;
+    //
     while ( m0 >= 4 )
     {
       bli_dgemmsup_rv_armv8a_asm_4x8n
@@ -162,9 +162,11 @@ void bli_dgemmsup_rv_armv8a_asm_6x8n
       c += 4 * rs_c0;
     }
 
+    // 3, 2, 1;
+    //
     if ( m0 > 0 )
     {
-      bli_dgemmsup_r_armv8a_ref2
+      bli_dgemmsup_rv_armv8a_int_3x8mn
       (
 	conja, conjb, m0, n0, k0,
 	alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,

@@ -115,18 +115,10 @@ void bli_dgemmsup_rv_armv8a_asm_8x4m
        cntx_t*    restrict cntx
      )
 {
-  if ( n0 != 4 )
-  {
-    // TODO: Implement smaller kernels?
-
-    bli_dgemmsup_r_armv8a_ref2
-    (
-      conja, conjb, m0, n0, k0,
-      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
-    );
-    return;
-  }
+  // Fixme: This uker has no dispatching for unalighed sizes.
+  // Currently it only serves as a dispatch target for other kernels
+  //  and cannot be registered in configurations.
+  assert( n0 == 4 );
 
   void*    a_next = bli_auxinfo_next_a( data );
   void*    b_next = bli_auxinfo_next_b( data );

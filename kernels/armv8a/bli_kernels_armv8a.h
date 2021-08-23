@@ -55,5 +55,7 @@ GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_2x8 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_3x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_3x4 )
 GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x3 )
+
 GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_6x4mn )
+GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_3x8mn )
 
