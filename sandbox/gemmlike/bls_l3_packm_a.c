@@ -263,6 +263,7 @@ void PASTECH2(bls_,ch,opname) \
        dim_t            k, \
        dim_t            mr, \
        ctype*  restrict kappa, \
+       ctype*  restrict d, inc_t           incd, \
        ctype*  restrict a, inc_t           rs_a, inc_t           cs_a, \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
@@ -309,8 +310,9 @@ void PASTECH2(bls_,ch,opname) \
 	  m_max, \
 	  k_max, \
 	  kappa, \
-	  a,  rs_a,  cs_a, \
-	  *p, *rs_p, *cs_p, \
+	  NULL, incd, \
+	  a,    rs_a,  cs_a, \
+	  *p,   *rs_p, *cs_p, \
 		  pd_p,  *ps_p, \
 	  cntx, \
 	  thread  \

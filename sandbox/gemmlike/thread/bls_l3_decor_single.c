@@ -46,6 +46,7 @@ void bls_l3_thread_decorator
        //pack_t     schema_b,
        obj_t*     alpha,
        obj_t*     a,
+       obj_t*     d,
        obj_t*     b,
        obj_t*     beta,
        obj_t*     c,
@@ -113,6 +114,7 @@ void bls_l3_thread_decorator
 		(
 		  alpha,
 		  a,
+		  d,
 		  b,
 		  beta,
 		  c,

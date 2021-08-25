@@ -48,6 +48,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            m_max, \
        dim_t            n_max, \
        ctype*  restrict kappa, \
+       ctype*  restrict d, inc_t incd, \
        ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
        ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
                            dim_t pd_p, inc_t ps_p, \

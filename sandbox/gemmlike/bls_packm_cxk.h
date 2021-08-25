@@ -45,6 +45,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t   panel_len, \
        dim_t   panel_len_max, \
        ctype*  kappa, \
+       ctype*  d, inc_t incd, \
        ctype*  a, inc_t inca, inc_t lda, \
        ctype*  p,             inc_t ldp, \
        cntx_t* cntx  \

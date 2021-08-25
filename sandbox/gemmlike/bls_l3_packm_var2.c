@@ -50,6 +50,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            m_max, \
        dim_t            n_max, \
        ctype*  restrict kappa, \
+       ctype*  restrict d, inc_t incd, \
        ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
        ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
                            dim_t pd_p, inc_t ps_p, \
@@ -167,12 +168,12 @@ void PASTECH2(bls_,ch,varname) \
 			{ \
 				for ( dim_t l = 0; l < panel_len; ++l ) \
 				{ \
-					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					for ( dim_t d = 0; d < panel_dim; ++d ) \
 					{ \
-						ctype* cli = c_use + (l  )*ldc + (i  )*incc; \
-						ctype* pli = p_use + (l  )*ldp + (i  )*1; \
+						ctype* cld = c_use + (l  )*ldc + (d  )*incc; \
+						ctype* pld = p_use + (l  )*ldp + (d  )*1; \
 \
-						PASTEMAC(ch,copyjs)( *cli, *pli ); \
+						PASTEMAC(ch,copyjs)( *cld, *pld ); \
 					} \
 				} \
 			} \
@@ -180,12 +181,12 @@ void PASTECH2(bls_,ch,varname) \
 			{ \
 				for ( dim_t l = 0; l < panel_len; ++l ) \
 				{ \
-					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					for ( dim_t d = 0; d < panel_dim; ++d ) \
 					{ \
-						ctype* cli = c_use + (l  )*ldc + (i  )*incc; \
-						ctype* pli = p_use + (l  )*ldp + (i  )*1; \
+						ctype* cld = c_use + (l  )*ldc + (d  )*incc; \
+						ctype* pld = p_use + (l  )*ldp + (d  )*1; \
 \
-						PASTEMAC(ch,copys)( *cli, *pli ); \
+						PASTEMAC(ch,copys)( *cld, *pld ); \
 					} \
 				} \
 			} \

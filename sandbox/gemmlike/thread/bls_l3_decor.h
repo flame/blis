@@ -42,6 +42,7 @@ typedef void (*l3sbxint_t)
      (
        obj_t*     alpha,
        obj_t*     a,
+       obj_t*     d,
        obj_t*     b,
        obj_t*     beta,
        obj_t*     c,
@@ -57,6 +58,7 @@ void bls_l3_thread_decorator
        opid_t     family,
        obj_t*     alpha,
        obj_t*     a,
+       obj_t*     d,
        obj_t*     b,
        obj_t*     beta,
        obj_t*     c,

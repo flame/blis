@@ -40,6 +40,7 @@ void bls_gemm
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c
@@ -49,6 +50,7 @@ void bls_gemm_ex
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -64,6 +66,7 @@ void bls_gemm_int
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -88,6 +91,7 @@ void PASTECH2(bls_,ch,opname) \
        dim_t   k, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  d, inc_t incd, \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \

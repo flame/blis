@@ -41,6 +41,7 @@ void bls_gemm_check
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,

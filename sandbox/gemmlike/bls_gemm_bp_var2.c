@@ -45,6 +45,7 @@ typedef void (*FUNCPTR_T)
        dim_t            k,
        void*   restrict alpha,
        void*   restrict a, inc_t rs_a, inc_t cs_a,
+       void*   restrict d, inc_t incd,
        void*   restrict b, inc_t rs_b, inc_t cs_b,
        void*   restrict beta,
        void*   restrict c, inc_t rs_c, inc_t cs_c,
@@ -65,6 +66,7 @@ void bls_gemm_bp_var2
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -85,6 +87,9 @@ void bls_gemm_bp_var2
 	void* restrict buf_a     = bli_obj_buffer_at_off( a );
 	const inc_t    rs_a      = bli_obj_row_stride( a );
 	const inc_t    cs_a      = bli_obj_col_stride( a );
+
+	void* restrict buf_d     = bli_obj_buffer_at_off( d );
+	const inc_t    incd      = bli_obj_vector_inc( d );
 
 	void* restrict buf_b     = bli_obj_buffer_at_off( b );
 	const inc_t    rs_b      = bli_obj_row_stride( b );
@@ -111,6 +116,7 @@ void bls_gemm_bp_var2
 	  k,
 	  buf_alpha,
 	  buf_a, rs_a, cs_a,
+	  buf_d, incd,
 	  buf_b, rs_b, cs_b,
 	  buf_beta,
 	  buf_c, rs_c, cs_c,
@@ -136,6 +142,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            k, \
        void*   restrict alpha, \
        void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict d, inc_t incd, \
        void*   restrict b, inc_t rs_b, inc_t cs_b, \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
@@ -178,6 +185,7 @@ void PASTECH2(bls_,ch,varname) \
 	const inc_t jcstep_b = cs_b; \
 \
 	const inc_t pcstep_a = cs_a; \
+	const inc_t pcstep_d = incd; \
 	const inc_t pcstep_b = rs_b; \
 \
 	const inc_t icstep_c = rs_c; \
@@ -188,6 +196,7 @@ void PASTECH2(bls_,ch,varname) \
 	const inc_t irstep_c = rs_c * MR; \
 \
 	ctype* restrict a_00       = a; \
+	ctype* restrict d_00       = d; \
 	ctype* restrict b_00       = b; \
 	ctype* restrict c_00       = c; \
 	ctype* restrict alpha_cast = alpha; \
@@ -276,6 +285,7 @@ void PASTECH2(bls_,ch,varname) \
 			const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
 \
 			ctype* restrict a_pc = a_00 + pp * pcstep_a; \
+			ctype* restrict d_pc = d_00 + pp * pcstep_d; \
 			ctype* restrict b_pc = b_jc + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
@@ -300,6 +310,7 @@ void PASTECH2(bls_,ch,varname) \
 			  KC,     NC, \
 			  kc_cur, nc_cur, NR, \
 			  &one_local, \
+			  d_pc,   incd, \
 			  b_pc,   rs_b,      cs_b, \
 			  &b_use, &rs_b_use, &cs_b_use, \
 			                     &ps_b_use, \
@@ -354,6 +365,7 @@ void PASTECH2(bls_,ch,varname) \
 				  MC,     KC, \
 				  mc_cur, kc_cur, MR, \
 				  &one_local, \
+				  d_pc,   incd, \
 				  a_ic,   rs_a,      cs_a, \
 				  &a_use, &rs_a_use, &cs_a_use, \
 				                     &ps_a_use, \
