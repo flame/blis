@@ -78,9 +78,12 @@ endif
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
-GCC_VERSION := $(strip $(shell gcc -dumpversion | cut -d. -f1))
-#gcc or clang version must be atleast 4.0
+GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
+# gcc or clang version must be atleast 4.0
 # gcc 9.0 or later:
+ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
+CKVECFLAGS     += -march=znver3
+else
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     += -march=znver2
 else
@@ -88,7 +91,8 @@ else
 # as the fallback option.
 CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
-endif
+endif # GCC 9
+endif # GCC 11
 else
 ifeq ($(CC_VENDOR),clang)
 
@@ -103,11 +107,11 @@ ifeq ($(CC_VENDOR),clang)
 # For our prupose we just want to know if it version 2x or 3x
 
 # for version 3x we will enable znver3
-ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC_3')),1)
+ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
 CKVECFLAGS += -march=znver3
 else
 # for version 2x we will enable znver2
-ifeq ($(strip $(shell clang -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
+ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
 CKVECFLAGS += -march=znver2
 else
 #if compiling with clang
