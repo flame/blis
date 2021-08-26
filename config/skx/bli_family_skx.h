@@ -50,6 +50,8 @@
 #define BLIS_SIMD_SIZE                   64
 #define BLIS_SIMD_NUM_REGISTERS          32
 
+#define AVX512
+
 //#include <stdlib.h>
 
 //#define BLIS_MALLOC_POOL malloc

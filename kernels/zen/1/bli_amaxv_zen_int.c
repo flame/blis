@@ -36,7 +36,9 @@
 #include "immintrin.h"
 #include "blis.h"
 
-
+// Disable for all context without AVX512 support
+// Please define it in bli_family_xxx.h in config directory if there is AVX512 support
+#ifdef AVX512
 /* Union data structure to access AVX registers
    One 512-bit AVX register holds 8 DP elements. */
 typedef union
@@ -45,6 +47,14 @@ typedef union
 	double d[8] __attribute__((aligned(64)));
 } v8df_t;
 
+/* Union data structure to access AVX registers
+   One 512-bit AVX register holds 16 SP elements. */
+typedef union
+{
+	__m512  v;
+	float   f[16] __attribute__((aligned(64)));
+} v16sf_t;
+#endif
 
 /* Union data structure to access AVX registers
    One 256-bit AVX register holds 8 SP elements. */
@@ -73,6 +83,42 @@ typedef union
 	__m128d v;
 	double  d[2];
 }v2dd_t;
+
+// Disable for all context without AVX512 support
+// Please define it in bli_family_xxx.h in config directory if there is AVX512 support
+#ifdef AVX512
+/* Convert the nan to -ve numbers decrementing with
+   the times the function is called to ensure that
+   bigger numbers are assigned for nan which showed
+   up first.*/
+__m512 remove_NAN_512_s(__m512 vec)
+{
+    // Sign extraction mask
+    __m512 sign_mask;
+    // Temporary place to store vector's sign extracted 16xdouble word
+    __m512 vec_mask;
+    // k register to store the mask to do blend operation to remove NAN
+    __mmask16 vec_mask16;
+    // Static to preserve accross the function calls
+    static int iter = -1;
+    iter -= 1;
+
+    // Extracting sign from the vec into int_mask_vec
+    // Sign is -0.f in IEEE754 is just signbit set, all others 0
+    sign_mask = _mm512_set1_ps(-0.f);
+    // And with -0.f will keep just signbits, all others will be 0
+    vec_mask = _mm512_mul_ps(vec, sign_mask);
+    // Typecast mask into int type no clock cycle is taken just to
+    // convince compiler.
+    __m512i int_mask_vec = _mm512_castps_si512(vec_mask);
+    // Extract the signbits and put it in a 16bit mask register
+    vec_mask16 = _mm512_movepi32_mask(int_mask_vec);
+
+    // Swap NAN with -ve number
+    vec = _mm512_mask_blend_ps(vec_mask16, _mm512_set1_ps(iter), vec);
+    return vec;
+}
+#endif
 
 // return a mask which indicates either:
 // - v1 > v2
@@ -274,6 +320,509 @@ void bli_samaxv_zen_int
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
 
+// Disable for all context without AVX512 support
+// Please define it in bli_family_xxx.h in config directory if there is AVX512 support
+#ifdef AVX512
+void bli_samaxv_zen_int_avx512(
+    dim_t n,
+    float *restrict x, inc_t incx,
+    dim_t *restrict i_max,
+    cntx_t *restrict cntx)
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3)
+    // *minus_one = -1
+    float *minus_one = PASTEMAC(s, m1); // bli_sm1()
+                                        // *zero_i = 0
+    dim_t *zero_i = PASTEMAC(i, 0);		// bli_i0()
+
+    float fndMaxVal; // Max value will be stored in this
+    dim_t fndInd;	   // Max value's index will be stored in this
+    // Iterator for loops to keep continuity throughout the loops
+    dim_t i;
+
+    /* If the vector length is zero, return early. This directly emulates
+    the behavior of netlib BLAS's i?amax() routines. */
+    if (bli_zero_dim1(n))
+    {
+        /* Set i_max to zero if dimension is 0, no need to compute */
+        // Copy zero_i, that is 0 to i_max (i_max = 0)
+        PASTEMAC(i, copys) // bli_icopys
+        (*zero_i, *i_max);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+        return;
+    }
+
+    /* Initialize the index of the maximum absolute value to zero. */
+    // Copy zero_i, that is 0 to fndInd (fndInd = 0)
+    PASTEMAC(i, copys) // bli_icopys
+    (*zero_i, fndInd);
+
+    /* Initialize the maximum absolute value search candidate with
+    -1, which is guaranteed to be less than all values we will
+    compute. */
+    // Copy minus_one to fndMaxVal real and imaginary.
+    PASTEMAC(s, copys) // bli_scopys
+    (*minus_one, fndMaxVal);
+
+    // For non-unit strides, or very small vector lengths, compute with
+    // scalar code.
+    // n is less than the single vector length or non unit stride.
+    if (incx != 1 || n < 16)
+    {
+        for (i = 0; i < n; ++i)
+        {
+            // Call math.h fabsf to take absolute value of *(x +(i)*incx)
+            float absval = fabsf(*(x + (i)*incx));
+            if (fndMaxVal < absval || (isnan(absval) && !isnan(fndMaxVal)))
+            {
+                // If max value is found, set the value and index
+                fndMaxVal = absval;
+                fndInd = i;
+            }
+        }
+    }
+    else
+    {
+        dim_t num_iter, num_remain;
+        dim_t num_vector_elements = 16;
+        /* Total Registers used is
+        * xmm0-xmm4
+        * ymm5-ymm9
+        * zmm10-zmm26
+        * There are 6 free registers to use
+        */
+        // zmm register 15x
+        v16sf_t x_vec_1, x_vec_2, x_vec_3, max_vec_1, max_vec_2,
+                max_vec_3, maxInd_vec_1, maxInd_vec_2,
+                maxInd_vec_3, index_vec_1, ind_vec_2,
+                ind_vec_3, inc_vec, mask,
+                abs_mask;
+        // ymm register 5x
+        v8sf_t max_vec_lo, max_vec_hi,
+               maxInd_vec_lo, maxInd_vec_hi,
+               mask_vec_lo;
+        // xmm register 5x
+        v4sf_t max_vec_lo_lo, max_vec_lo_hi,
+               maxInd_vec_lo_lo, maxInd_vec_lo_hi,
+               mask_vec_lo_lo;
+        // zmm register 1x
+        __m512i intMask;
+        // k register 3x
+        __mmask16 mask_vec_1, mask_vec_2,
+                  mask_vec_3;
+
+        // Number of iterations for main loop.
+        num_iter = n / num_vector_elements;
+        // Number of iterations remaining for residual non vector loop
+        num_remain = n % num_vector_elements;
+        // A number with signbit one and others 0 IEEE-754
+        abs_mask.v = _mm512_set1_ps(-0.f);
+        // index_vector after loading max_vector with initial values.
+        index_vec_1.v = _mm512_setr_ps(16, 17, 18, 19, 20, 21,
+                                        22, 23, 24, 25, 26, 27,
+                                        28, 29, 30, 31);
+        // Broadcast 16. This is to increment the vector easily
+        inc_vec.v = _mm512_set1_ps(16);
+        // Load 16 float values from memory
+        max_vec_1.v = _mm512_loadu_ps(x);
+        // max_vector = abs(max_vector)
+        max_vec_1.v = _mm512_andnot_ps(abs_mask.v, max_vec_1.v);
+        // Remove nan and replace with -ve values
+        max_vec_1.v = remove_NAN_512_s(max_vec_1.v);
+
+        // Increment x vector as we have loaded 16 values
+        x += num_vector_elements;
+        // indexes for values present in max vector.
+        maxInd_vec_1.v = _mm512_setr_ps(0, 1, 2, 3, 4, 5, 6, 7, 8,
+                                            9, 10, 11, 12, 13, 14, 15);
+
+        int i = 1;
+        for (; (i + 4) < num_iter; i += 5)
+        {
+            /*
+                Unrolled to process 5 at a time. It basically works
+                by taking a master max_vec_1 and a maxInd_vec_1
+                holding indexes. Elements are taken from the RAM on a batch
+                of 5 (1 master max_vec_1 already exists to compare so
+                6 elements). Now each 2 of them is compared with each other
+                and an intermediate result is obtained. This intermediate
+                result is again with each other and combined until we reach
+                one vector in max_vector and maxIndex_vector.
+            */
+
+            // Load the vector and subs NAN
+            // Load Value x values
+            x_vec_1.v = _mm512_loadu_ps(x);
+            // x_vec_1 = abs(x_vec_1)
+            x_vec_1.v = _mm512_andnot_ps(abs_mask.v, x_vec_1.v);
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+            // Remove nan and replace with -ve values
+            x_vec_1.v = remove_NAN_512_s(x_vec_1.v);
+
+            // Mask Generation of 1st(can be previous max) and 2nd element
+            // mask = max_vector - x_vec_1
+            mask.v = _mm512_sub_ps(max_vec_1.v, x_vec_1.v);
+            // Type cast mask from IEEE754 (float) to integer type
+            // This operation will not need a new register, its just to convince
+            // the compiler. But its accounted as seperate register in the
+            // above calculations
+            intMask = _mm512_castps_si512(mask.v);
+            // Extract the signbit and build the mask.
+            mask_vec_1 = _mm512_movepi32_mask(intMask);
+
+            // Load 2 elements to 2nd max and x vector, set indexes
+            // Load Value x values
+            max_vec_2.v = _mm512_loadu_ps(x);
+            // max_vec_2 = abs(max_vec_2)
+            max_vec_2.v = _mm512_andnot_ps(abs_mask.v, max_vec_2.v);
+            // Remove nan and replace with -ve values
+            max_vec_2.v = remove_NAN_512_s(max_vec_2.v);
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+            // Increment the index vector to point to next indexes.
+            maxInd_vec_2.v = _mm512_add_ps(index_vec_1.v, inc_vec.v);
+
+            // Load Value x values
+            x_vec_2.v = _mm512_loadu_ps(x);
+            // x_vec_2 = abs(x_vec_2)
+            x_vec_2.v = _mm512_andnot_ps(abs_mask.v, x_vec_2.v);
+            // Remove nan and replace with -ve values
+            x_vec_2.v = remove_NAN_512_s(x_vec_2.v);
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+            // Increment the index vector to point to next indexes.
+            ind_vec_2.v = _mm512_add_ps(maxInd_vec_2.v, inc_vec.v);
+
+            // Mask generation for last loaded 2 elements into x and max vectors.
+            // mask = max_vec_2 - x_vec_2
+            mask.v = _mm512_sub_ps(max_vec_2.v, x_vec_2.v);
+            // Type cast mask from IEEE754 (float) to integer type
+            // This operation will not need a new register, its just to convince
+            // the compiler. But its accounted as seperate register in the
+            // above calculations
+            intMask = _mm512_castps_si512(mask.v);
+            // Extract the signbit and build the mask.
+            mask_vec_2 = _mm512_movepi32_mask(intMask);
+
+            // Load 2 more elements to 3rd max and x vector, set indexes
+            // Load Value x values
+            max_vec_3.v = _mm512_loadu_ps(x);
+            // max_vec_3 = abs(max_vec_3)
+            max_vec_3.v = _mm512_andnot_ps(abs_mask.v, max_vec_3.v);
+            // Remove nan and replace with -ve values
+            max_vec_3.v = remove_NAN_512_s(max_vec_3.v);
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+            // Increment the index vector to point to next indexes.
+            maxInd_vec_3.v = _mm512_add_ps(ind_vec_2.v, inc_vec.v);
+            // Load Value x values
+            x_vec_3.v = _mm512_loadu_ps(x);
+            // x_vec_3 = abs(x_vec_3)
+            x_vec_3.v = _mm512_andnot_ps(abs_mask.v, x_vec_3.v);
+            // Remove nan and replace with -ve values
+            x_vec_3.v = remove_NAN_512_s(x_vec_3.v);
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+            // Increment the index vector to point to next indexes.
+            ind_vec_3.v = _mm512_add_ps(maxInd_vec_3.v, inc_vec.v);
+
+            // Mask generation for last 2 elements loaded into x and max vectors.
+            // mask = max_vec_3 - x_vec_3
+            mask.v = _mm512_sub_ps(max_vec_3.v, x_vec_3.v);
+            // Type cast mask from IEEE754 (float) to integer type
+            // This operation will not need a new register, its just to convince
+            // the compiler. But its accounted as seperate register in the
+            // above calculations
+            intMask = _mm512_castps_si512(mask.v);
+            // Extract the signbit and build the mask.
+            mask_vec_3 = _mm512_movepi32_mask(intMask);
+
+            // Blend max vector and index vector (3 pairs of elements needs to be blended).
+            /* Take values from max_vector if corresponding bit in mask_vector is 0
+            * otherwise take value from x_vector, this is accumulated maximum value
+            * from max_vector and x_vector to mask_vector */
+            max_vec_1.v = _mm512_mask_blend_ps(mask_vec_1,
+                                               max_vec_1.v,
+                                               x_vec_1.v);
+            /* Take values from max_vector if corresponding bit in mask_vector is 0
+            * otherwise take value from x_vector, this is accumulated maximum value
+            * from max_vector and x_vector to mask_vector */
+            max_vec_2.v = _mm512_mask_blend_ps(mask_vec_2,
+                                               max_vec_2.v,
+                                               x_vec_2.v);
+            /* Take values from max_vector if corresponding bit in mask_vector is 0
+            * otherwise take value from x_vector, this is accumulated maximum value
+            * from max_vector and x_vector to mask_vector */
+            max_vec_3.v = _mm512_mask_blend_ps(mask_vec_3,
+                                               max_vec_3.v,
+                                               x_vec_3.v);
+            /* Take values from maxIndex_vector if corresponding bit in mask_vector
+            * is 0 otherwise take value from index_vec_1, this is accumulated
+            * maximum value index from maxIndex_vector and index_vec_1
+            * to maxIndex_vector */
+            maxInd_vec_1.v = _mm512_mask_blend_ps(mask_vec_1,
+                                                  maxInd_vec_1.v,
+                                                  index_vec_1.v);
+            /* Take values from maxIndex_vector if corresponding bit in mask_vector
+            * is 0 otherwise take value from index_vec_1, this is accumulated
+            * maximum value index from maxIndex_vector and index_vec_1
+            * to maxIndex_vector */
+            maxInd_vec_2.v = _mm512_mask_blend_ps(mask_vec_2,
+                                                  maxInd_vec_2.v,
+                                                  ind_vec_2.v);
+            /* Take values from maxIndex_vector if corresponding bit in mask_vector
+            * is 0 otherwise take value from index_vec_1, this is accumulated
+            * maximum value index from maxIndex_vector and index_vec_1
+            * to maxIndex_vector */
+            maxInd_vec_3.v = _mm512_mask_blend_ps(mask_vec_3,
+                                                  maxInd_vec_3.v,
+                                                  ind_vec_3.v);
+
+            // Mask generation for blending max_vec_2 and max_vec_3 to max_vec_2.
+            // mask = max_vec_2 - max_vec_3
+            mask.v = _mm512_sub_ps(max_vec_2.v, max_vec_3.v);
+            // Type cast mask from IEEE754 (float) to integer type
+            // This operation will not need a new register, its just to convince
+            // the compiler. But its accounted as seperate register in the
+            // above calculations
+            intMask = _mm512_castps_si512(mask.v);
+            // Extract the signbit and build the mask.
+            mask_vec_2 = _mm512_movepi32_mask(intMask);
+
+            // Blend to obtain 1 vector each of max values and index.
+            /* Take values from max_vec_2 if corresponding bit in mask_vec_2
+            * is 0 otherwise take value from max_vec_3, this is accumulated
+            * maximum value from max_vec_2 and max_vec_3 to mask_vec_2 */
+            max_vec_2.v = _mm512_mask_blend_ps(mask_vec_2,
+                                               max_vec_2.v,
+                                               max_vec_3.v);
+            /* Take values from maxInd_vec_2 if corresponding bit in mask_vector
+            * is 0 otherwise take value from maxInd_vec_3, this is accumulated
+            * maximum value index from maxInd_vec_2 and maxInd_vec_3
+            * to maxInd_vec_2 */
+            maxInd_vec_2.v = _mm512_mask_blend_ps(mask_vec_2,
+                                                  maxInd_vec_2.v,
+                                                  maxInd_vec_3.v);
+
+            // Mask generation for blending max_vec_1 and max_vec_2 into max_vec_1.
+            // mask = max_vec_1 - max_vec_2
+            mask.v = _mm512_sub_ps(max_vec_1.v, max_vec_2.v);
+            // Type cast mask from IEEE754 (float) to integer type
+            // This operation will not need a new register, its just to convince
+            // the compiler. But its accounted as seperate register in the
+            // above calculations
+            intMask = _mm512_castps_si512(mask.v);
+            // Extract the signbit and build the mask.
+            mask_vec_1 = _mm512_movepi32_mask(intMask);
+
+            // Final blend to the master max_vec_1 and maxInd_vec_1
+            /* Take values from max_vec_1 if corresponding bit in mask_vec_1
+            * is 0 otherwise take value from max_vec_2, this is accumulated
+            * maximum value from max_vec_1 and max_vec_2 to mask_vec_1 */
+            max_vec_1.v = _mm512_mask_blend_ps(mask_vec_1, max_vec_1.v, max_vec_2.v);
+            /* Take values from maxInd_vec_1 if corresponding bit in mask_vector
+            * is 0 otherwise take value from maxInd_vec_2, this is accumulated
+            * maximum value index from maxInd_vec_1 and maxInd_vec_2
+            * to maxInd_vec_1 */
+            maxInd_vec_1.v = _mm512_mask_blend_ps(mask_vec_1,
+                                                  maxInd_vec_1.v,
+                                                  maxInd_vec_2.v);
+
+            // Increment the index vector to point to next indexes.
+            index_vec_1.v = _mm512_add_ps(ind_vec_3.v, inc_vec.v);
+        }
+
+        for (; i < num_iter; i++)
+        {
+            /*
+                Take vector one by one, above code makes max_vec_1
+                contain the first 16 elements, now with the max vector
+                as first 16 elements (abs), we need to load next 16 elements
+                into x_vec_1 (abs). Now with those we can safely removeNan
+                which will put -ve values as NAN.
+
+                These -ve values of NAN decreases by 1 in each iteration,
+                this helps us find the first NAN value.
+            */
+            // Load Value x values
+            x_vec_1.v = _mm512_loadu_ps(x);
+            // x_vec_1 = abs(x_vec_1)
+            x_vec_1.v = _mm512_andnot_ps(abs_mask.v, x_vec_1.v);
+            // Remove nan and replace with -ve values
+            x_vec_1.v = remove_NAN_512_s(x_vec_1.v);
+
+            // Mask Generation
+            // mask = max_vec_1 - x_vec_1
+            mask.v = _mm512_sub_ps(max_vec_1.v, x_vec_1.v);
+            // Extract the signbit and build the mask.
+            mask_vec_1 = _mm512_movepi32_mask(_mm512_castps_si512(mask.v));
+            /* Take values from max_vec_1 if corresponding bit in
+            * mask_vec_1 is 0 otherwise take value from x_vec_1,
+            * this is accumulated maximum value from max_vec_1 and
+            * x_vec_1 to mask_vec_1 */
+            max_vec_1.v = _mm512_mask_blend_ps(mask_vec_1,
+                                               max_vec_1.v,
+                                               x_vec_1.v);
+            /* Take values from maxInd_vec_1 if corresponding bit in
+            * mask_vector is 0 otherwise take value from index_vec_1,
+            * this is accumulated maximum value index from maxInd_vec_1
+            * and index_vec_1 to maxInd_vec_1 */
+            maxInd_vec_1.v = _mm512_mask_blend_ps(mask_vec_1,
+                                                  maxInd_vec_1.v,
+                                                  index_vec_1.v);
+
+            // Increment the index vector to point to next indexes.
+            index_vec_1.v = _mm512_add_ps(index_vec_1.v, inc_vec.v);
+
+            // Increment x vector as we have loaded 16 values
+            x += num_vector_elements;
+        }
+
+        num_remain = (n - ((i)*16));
+
+        /*
+            Now take the max vector and produce the max value from
+            the max vector by slicing and comparing with itself,
+            until we are left with just one index position and max value.
+        */
+        // Split max to hi and lo
+        max_vec_hi.v = _mm512_extractf32x8_ps(max_vec_1.v, 1);
+        max_vec_lo.v = _mm512_extractf32x8_ps(max_vec_1.v, 0);
+
+        // Split maxIndex to hi and lo
+        maxInd_vec_hi.v = _mm512_extractf32x8_ps(maxInd_vec_1.v, 1);
+        maxInd_vec_lo.v = _mm512_extractf32x8_ps(maxInd_vec_1.v, 0);
+
+        // Compare max_vec_hi > max_vec_1
+        // mask_vec_lo = max_vec_lo - max_vec_hi
+        mask_vec_lo.v = _mm256_sub_ps(max_vec_lo.v, max_vec_hi.v);
+
+        /* Take values from max_vec_lo if corresponding bit in mask_vec_lo
+        * is 0 otherwise take value from max_vec_hi, this is accumulated
+        * maximum value from max_vec_lo and max_vec_hi to max_vec_lo */
+        max_vec_lo.v = _mm256_blendv_ps(max_vec_lo.v,
+                                        max_vec_hi.v,
+                                        mask_vec_lo.v);
+        /* Take values from maxInd_vec_lo if corresponding bit
+        * in mask_vec_lo is 0 otherwise take value from maxInd_vec_hi,
+        * this is accumulated maximum value from maxInd_vec_lo and
+        * maxInd_vec_hi to maxInd_vec_lo */
+        maxInd_vec_lo.v = _mm256_blendv_ps(maxInd_vec_lo.v,
+                                           maxInd_vec_hi.v,
+                                           mask_vec_lo.v);
+
+        // Split max_lo to hi and lo
+        max_vec_lo_hi.v = _mm256_extractf128_ps(max_vec_lo.v, 1);
+        max_vec_lo_lo.v = _mm256_extractf128_ps(max_vec_lo.v, 0);
+
+        // Split maxIndex_lo to hi and lo
+        maxInd_vec_lo_hi.v = _mm256_extractf128_ps(maxInd_vec_lo.v, 1);
+        maxInd_vec_lo_lo.v = _mm256_extractf128_ps(maxInd_vec_lo.v, 0);
+
+        // mask_vec_lo_lo = max_vec_lo_lo - max_vec_lo_hi
+        mask_vec_lo_lo.v = _mm_sub_ps(max_vec_lo_lo.v, max_vec_lo_hi.v);
+        /* Take values from max_vec_lo_lo if corresponding bit in
+        * mask_vec_lo_lo is 0 otherwise take value from max_vec_lo_hi,
+        * this is accumulated maximum value from max_vec_lo_lo and
+        * max_vec_lo_hi to max_vec_lo_lo */
+        max_vec_lo_lo.v = _mm_blendv_ps(max_vec_lo_lo.v,
+                                        max_vec_lo_hi.v,
+                                        mask_vec_lo_lo.v);
+        /* Take values from maxInd_vec_lo if corresponding bit
+        * in mask_vec_lo_lo is 0 otherwise take value from maxInd_vec_hi,
+        * this is accumulated maximum value from maxInd_vec_lo and
+        * maxInd_vec_hi to maxInd_vec_lo */
+        maxInd_vec_lo_lo.v = _mm_blendv_ps(maxInd_vec_lo_lo.v,
+                                           maxInd_vec_lo_hi.v,
+                                           mask_vec_lo_lo.v);
+
+        // Take 64 high bits of max_lo_lo and put it to 64 low bits, rest 1st value
+        /* Example max_vec_lo_lo is {a, b, x, y}
+        * After max_vec_lo_hi.v = _mm_permute_ps(max_vec_lo_lo.v, 14);
+        * max_vec_lo_hi is {x, y, a, a} (essentially folding the vector)
+        */
+        max_vec_lo_hi.v = _mm_permute_ps(max_vec_lo_lo.v, 14);
+        // Fold the vector same as max_vector
+        maxInd_vec_lo_hi.v = _mm_permute_ps(maxInd_vec_lo_lo.v, 14);
+
+        // mask_vec_lo_lo = max_vec_lo_lo - max_vec_lo_hi
+        mask_vec_lo_lo.v = _mm_sub_ps(max_vec_lo_lo.v, max_vec_lo_hi.v);
+        /* Take values from max_vec_lo_lo if corresponding bit in
+        * mask_vec_lo_lo is 0 otherwise take value from max_vec_lo_hi,
+        * this is accumulated maximum value from max_vec_lo_lo and
+        * max_vec_lo_hi to max_vec_lo_lo */
+        max_vec_lo_lo.v = _mm_blendv_ps(max_vec_lo_lo.v,
+                                        max_vec_lo_hi.v,
+                                        mask_vec_lo_lo.v);
+        /* Take values from maxInd_vec_lo if corresponding bit
+        * in mask_vec_lo_lo is 0 otherwise take value from maxInd_vec_hi,
+        * this is accumulated maximum value from maxInd_vec_lo and
+        * maxInd_vec_hi to maxInd_vec_lo */
+        maxInd_vec_lo_lo.v = _mm_blendv_ps(maxInd_vec_lo_lo.v,
+                                           maxInd_vec_lo_hi.v,
+                                           mask_vec_lo_lo.v);
+
+        // Take max_vec_lo_lo.f[1] and put it to max_vec_lo_hi.f[0]
+        /* Example max_vec_lo_lo is {a, b, x, y}
+        * After max_vec_lo_hi.v = _mm_permute_ps(max_vec_lo_lo.v, 1);
+        * max_vec_lo_hi is {b, a, a, a} (essentially folding the vector)
+        */
+        max_vec_lo_hi.v = _mm_permute_ps(max_vec_lo_lo.v, 1);
+        // Do the same operation.
+        maxInd_vec_lo_hi.v = _mm_permute_ps(maxInd_vec_lo_lo.v, 1);
+
+        // mask_vec_lo_lo = max_vec_lo_lo - max_vec_lo_hi
+        mask_vec_lo_lo.v = _mm_sub_ps(max_vec_lo_lo.v, max_vec_lo_hi.v);
+        /* Take values from max_vec_lo_lo if corresponding bit in
+        * mask_vec_lo_lo is 0 otherwise take value from max_vec_lo_hi,
+        * this is accumulated maximum value from max_vec_lo_lo and
+        * max_vec_lo_hi to max_vec_lo_lo */
+        max_vec_lo_lo.v = _mm_blendv_ps(max_vec_lo_lo.v,
+                                        max_vec_lo_hi.v,
+                                        mask_vec_lo_lo.v);
+        /* Take values from maxInd_vec_lo if corresponding bit
+        * in mask_vec_lo_lo is 0 otherwise take value from maxInd_vec_hi,
+        * this is accumulated maximum value from maxInd_vec_lo and
+        * maxInd_vec_hi to maxInd_vec_lo */
+        maxInd_vec_lo_lo.v = _mm_blendv_ps(maxInd_vec_lo_lo.v,
+                                           maxInd_vec_lo_hi.v,
+                                           mask_vec_lo_lo.v);
+        /* We have kept on folding and comparing until we got one single index
+        * and max value so that is the final answer so set it as the final
+        * answer.*/
+        fndInd = maxInd_vec_lo_lo.f[0];
+        fndMaxVal = max_vec_lo_lo.f[0];
+        // Found value is < 0 means it was the max NAN which was accumulated.
+        if (fndMaxVal < 0)
+        {
+            // So just set it as NAN
+            fndMaxVal = NAN;
+        }
+        // Finish off the remaining values using normal instructions
+        for (int i = n - num_remain; i < n; i++)
+        {
+            float absval = fabsf(*(x));
+            if (fndMaxVal < absval || (isnan(absval) && !isnan(fndMaxVal)))
+            {
+                fndMaxVal = absval;
+                fndInd = i;
+            }
+            x += 1;
+        }
+    }
+
+    // Issue vzeroupper instruction to clear upper lanes of ymm registers.
+    // This avoids a performance penalty caused by false dependencies when
+    // transitioning from from AVX to SSE instructions (which may occur
+    // later, especially if BLIS is compiled with -mfpmath=sse).
+    _mm256_zeroupper();
+
+    /* Store final index to output variable. */
+    *i_max = fndInd;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
+}
+#endif
 // -----------------------------------------------------------------------------
 
 void bli_damaxv_zen_int
@@ -531,7 +1080,9 @@ GENTFUNCR( scomplex, float,  c, s, amaxv_zen_int )
 GENTFUNCR( dcomplex, double, z, d, amaxv_zen_int )
 #endif
 
-
+// Disable for all context without AVX512 support
+// Please define it in bli_family_xxx.h in config directory if there is AVX512 support
+#ifdef AVX512
 /* Converts all the NAN to a negative number less than previously encountered NANs*/
 __m512d remove_NAN_512d(__m512d vec)
 {
@@ -560,8 +1111,12 @@ __m512d remove_NAN_512d(__m512d vec)
 	return vec;
 }
 
+#endif
 //----------------------------------------------------------------------------------------------------
 
+// Disable for all context without AVX512 support
+// Please define it in bli_family_xxx.h in config directory if there is AVX512 support
+#ifdef AVX512
 void bli_damaxv_zen_int_avx512(
 	dim_t n,
 	double *restrict x, inc_t incx,
@@ -864,5 +1419,6 @@ void bli_damaxv_zen_int_avx512(
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3)
 }
+#endif
 
 // ---------------------------------------------------------------------------------
