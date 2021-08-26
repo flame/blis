@@ -45,6 +45,7 @@ PACKM_KER_PROT(double, d, packm_6xk_nn_zen)
 // amaxv (intrinsics)
 AMAXV_KER_PROT( float,    s, amaxv_zen_int )
 AMAXV_KER_PROT( double,   d, amaxv_zen_int )
+AMAXV_KER_PROT( double,   d, amaxv_zen_int_avx512 )
 
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int )
