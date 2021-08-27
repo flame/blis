@@ -498,18 +498,21 @@ LABEL(END_EXEC)
   );
 
 consider_edge_cases:
-  // TODO: Implement optimized kernel for this.
-  //
   // Forward address.
   b = b + n_iter * ps_b;
   c = c + n_iter * 8 * cs_c;
   if ( n_left )
   {
-    bli_dgemmsup_r_armv8a_ref2
+    // Set panel stride to unpacked mode.
+    // Only 1 millikernel w.r.t. 6x8 is executed.
+    auxinfo_t data_d6x4mn = *data;
+    bli_auxinfo_set_ps_b( 4 * cs_b0, &data_d6x4mn );
+    //
+    bli_dgemmsup_rv_armv8a_int_6x4mn
     (
       conja, conjb, 6, n_left, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
-      beta, c, rs_c0, cs_c0, data, cntx
+      beta, c, rs_c0, cs_c0, &data_d6x4mn, cntx
     );
   }
 

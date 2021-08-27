@@ -538,11 +538,36 @@ consider_edge_cases:
   // Forward address.
   b = b + n_iter * 4 * cs_b;
   c = c + n_iter * 4 * cs_c;
+  if ( n_left >= 3 )
+  {
+    bli_dgemmsup_rd_armv8a_asm_6x3
+    (
+      conja, conjb, 6, 3, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    b = b + 3 * cs_b;
+    c = c + 3 * cs_c;
+    n_left -= 3;
+  }
+
   if ( n_left )
   {
-    bli_dgemmsup_r_armv8a_ref2
+    // n_left < 3;
+    //
+    // Slice in rows.
+    bli_dgemmsup_rd_armv8a_int_3x4
     (
-      conja, conjb, 6, n_left, k0,
+      conja, conjb, 3, n_left, k0,
+      alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
+      beta, c, rs_c0, cs_c0, data, cntx
+    );
+    a = a + 3 * rs_a;
+    c = c + 3 * rs_c;
+
+    bli_dgemmsup_rd_armv8a_int_3x4
+    (
+      conja, conjb, 3, n_left, k0,
       alpha, a, rs_a0, cs_a0, b, rs_b0, cs_b0,
       beta, c, rs_c0, cs_c0, data, cntx
     );
