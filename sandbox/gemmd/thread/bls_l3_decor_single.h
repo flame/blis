@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,18 +32,13 @@
 
 */
 
+#ifndef BLIS_SBX_L3_DECOR_SINGLE_H
+#define BLIS_SBX_L3_DECOR_SINGLE_H
 
-//
-// Prototype object-based check functions.
-//
+// Definitions specific to situations when multithreading is disabled.
+#ifndef BLIS_ENABLE_MULTITHREADING
 
-void bls_gemm_check
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
-    );
+#endif
+
+#endif
 

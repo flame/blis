@@ -44,6 +44,7 @@ void PASTECH(bls_,opname) \
      ( \
        obj_t*  alpha, \
        obj_t*  a, \
+       obj_t*  d, \
        obj_t*  b, \
        obj_t*  beta, \
        obj_t*  c, \
@@ -72,6 +73,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            k, \
        void*   restrict alpha, \
        void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict d, inc_t incd, \
        void*   restrict b, inc_t rs_b, inc_t cs_b, \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \

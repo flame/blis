@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,18 +32,74 @@
 
 */
 
-
 //
-// Prototype object-based check functions.
+// -- Prototype the gemm-like operation's object API ---------------------------
 //
 
-void bls_gemm_check
+void bls_gemm
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c
+     );
+
+void bls_gemm_ex
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
-       cntx_t* cntx
-    );
+       cntx_t* cntx,
+       rntm_t* rntm
+     );
+
+//
+// -- Prototype the gemm-like operation's thread entry point -------------------
+//
+
+void bls_gemm_int
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  d,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
+     );
+
+//
+// -- Prototype the gemm-like operation's typed API ----------------------------
+//
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTECH2(bls_,ch,opname) \
+     ( \
+       trans_t transa, \
+       trans_t transb, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   k, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  d, inc_t incd, \
+       ctype*  b, inc_t rs_b, inc_t cs_b, \
+       ctype*  beta, \
+       ctype*  c, inc_t rs_c, inc_t cs_c  \
+     );
+
+//INSERT_GENTPROT_BASIC0( gemm )
+GENTPROT( float,    s, gemm )
+GENTPROT( double,   d, gemm )
+GENTPROT( scomplex, c, gemm )
+GENTPROT( dcomplex, z, gemm )
 

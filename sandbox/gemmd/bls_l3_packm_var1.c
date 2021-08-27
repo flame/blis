@@ -35,7 +35,7 @@
 #include "blis.h"
 
 //
-// Variant 2 is similar to variant 1, but inlines the contents of packm_cxk().
+// Variant 1 provides basic support for packing by calling packm_cxk().
 //
 
 #undef  GENTFUNC
@@ -50,6 +50,7 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            m_max, \
        dim_t            n_max, \
        ctype*  restrict kappa, \
+       ctype*  restrict d, inc_t incd, \
        ctype*  restrict c, inc_t rs_c, inc_t cs_c, \
        ctype*  restrict p, inc_t rs_p, inc_t cs_p, \
                            dim_t pd_p, inc_t ps_p, \
@@ -157,70 +158,20 @@ void PASTECH2(bls_,ch,varname) \
 		   default is slab.) */ \
 		if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 		{ \
-			/* NOTE: We assume here that kappa = 1 and therefore ignore it. If
-			   we're wrong, this will get someone's attention. */ \
-			if ( !PASTEMAC(ch,eq1)( *kappa_cast ) ) \
-				bli_abort(); \
-\
-			/* Perform the packing, taking conjc into account. */ \
-			if ( bli_is_conj( conjc ) ) \
-			{ \
-				for ( dim_t l = 0; l < panel_len; ++l ) \
-				{ \
-					for ( dim_t i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype* cli = c_use + (l  )*ldc + (i  )*incc; \
-						ctype* pli = p_use + (l  )*ldp + (i  )*1; \
-\
-						PASTEMAC(ch,copyjs)( *cli, *pli ); \
-					} \
-				} \
-			} \
-			else \
-			{ \
-				for ( dim_t l = 0; l < panel_len; ++l ) \
-				{ \
-					for ( dim_t i = 0; i < panel_dim; ++i ) \
-					{ \
-						ctype* cli = c_use + (l  )*ldc + (i  )*incc; \
-						ctype* pli = p_use + (l  )*ldp + (i  )*1; \
-\
-						PASTEMAC(ch,copys)( *cli, *pli ); \
-					} \
-				} \
-			} \
-\
-			/* If panel_dim < panel_dim_max, then we zero those unused rows. */ \
-			if ( panel_dim < panel_dim_max ) \
-			{ \
-				const dim_t     i      = panel_dim; \
-				const dim_t     m_edge = panel_dim_max - panel_dim; \
-				const dim_t     n_edge = panel_len_max; \
-				ctype* restrict p_edge = p_use + (i  )*1; \
-\
-				PASTEMAC(ch,set0s_mxn) \
-				( \
-				  m_edge, \
-				  n_edge, \
-				  p_edge, 1, ldp  \
-				); \
-			} \
-\
-			/* If panel_len < panel_len_max, then we zero those unused columns. */ \
-			if ( panel_len < panel_len_max ) \
-			{ \
-				const dim_t     j      = panel_len; \
-				const dim_t     m_edge = panel_dim_max; \
-				const dim_t     n_edge = panel_len_max - panel_len; \
-				ctype* restrict p_edge = p_use + (j  )*ldp; \
-\
-				PASTEMAC(ch,set0s_mxn) \
-				( \
-				  m_edge, \
-				  n_edge, \
-				  p_edge, 1, ldp  \
-				); \
-			} \
+			PASTECH2(bls_,ch,packm_cxk) \
+			( \
+			  conjc, \
+			  schema, \
+			  panel_dim, \
+			  panel_dim_max, \
+			  panel_len, \
+			  panel_len_max, \
+			  kappa_cast, \
+			  d,     incd, \
+			  c_use, incc, ldc, \
+			  p_use,       ldp, \
+			  cntx  \
+			); \
 		} \
 \
 /*
@@ -237,8 +188,8 @@ PASTEMAC(ch,fprintm)( stdout, "packm_var1: b packed", panel_len_max, panel_dim_m
 }
 
 //INSERT_GENTFUNC_BASIC0( packm_var1 )
-GENTFUNC( float,    s, packm_var2 )
-GENTFUNC( double,   d, packm_var2 )
-GENTFUNC( scomplex, c, packm_var2 )
-GENTFUNC( dcomplex, z, packm_var2 )
+GENTFUNC( float,    s, packm_var1 )
+GENTFUNC( double,   d, packm_var1 )
+GENTFUNC( scomplex, c, packm_var1 )
+GENTFUNC( dcomplex, z, packm_var1 )
 

@@ -42,6 +42,7 @@ void bls_gemm
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c
@@ -51,6 +52,7 @@ void bls_gemm
 	(
 	  alpha,
 	  a,
+	  d,
 	  b,
 	  beta,
 	  c,
@@ -63,6 +65,7 @@ void bls_gemm_ex
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -94,7 +97,7 @@ void bls_gemm_ex
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 	{
-		bls_gemm_check( alpha, a, b, beta, c, cntx );
+		bls_gemm_check( alpha, a, d, b, beta, c, cntx );
 	}
 
 	// If C has a zero dimension, return early.
@@ -174,6 +177,7 @@ void bls_gemm_ex
 	  BLIS_GEMM, // operation family id
 	  alpha,
 	  &a_local,
+	  d,
 	  &b_local,
 	  beta,
 	  &c_local,
@@ -190,6 +194,7 @@ void bls_gemm_int
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -208,6 +213,7 @@ void bls_gemm_int
 	(
 	  alpha,
 	  a,
+	  d,
 	  b,
 	  beta,
 	  c,
@@ -222,6 +228,7 @@ void bls_gemm_int
 	(
 	  alpha,
 	  a,
+	  d,
 	  b,
 	  beta,
 	  c,
@@ -248,6 +255,7 @@ void PASTECH2(bls_,ch,opname) \
        dim_t   k, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  d, inc_t incd, \
        ctype*  b, inc_t rs_b, inc_t cs_b, \
        ctype*  beta, \
        ctype*  c, inc_t rs_c, inc_t cs_c  \
@@ -259,7 +267,7 @@ void PASTECH2(bls_,ch,opname) \
 	   the macro parameter 'ch' (e.g. s, d, etc). */ \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	obj_t       alphao, ao, bo, betao, co; \
+	obj_t       alphao, ao, dd, bo, betao, co; \
 \
 	dim_t       m_a, n_a; \
 	dim_t       m_b, n_b; \
@@ -277,6 +285,7 @@ void PASTECH2(bls_,ch,opname) \
 	/* Create bufferless matrix objects and attach the provided matrix pointers
 	   to those matrix objects. */ \
 	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_create_with_attached_buffer( dt, k,   1,   d, incd, k,    &dd ); \
 	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
 	bli_obj_create_with_attached_buffer( dt, m,   n,   c, rs_c, cs_c, &co ); \
 \
@@ -290,6 +299,7 @@ void PASTECH2(bls_,ch,opname) \
 	( \
 	  &alphao, \
 	  &ao, \
+	  &dd, \
 	  &bo, \
 	  &betao, \
 	  &co  \

@@ -32,57 +32,19 @@
 
 */
 
-// Given the current architecture of BLIS sandboxes, bli_gemmnat() is the
-// entry point to any sandbox implementation.
 
-// NOTE: This function is implemented identically to the function that it
-// overrides in frame/ind/oapi/bli_l3_nat_oapi.c. This means that we are
-// forgoing the option of customizing the implementations that underlie
-// bli_gemm() and bli_?gemm(). Any new code defined in this sandbox
-// directory, however, will be included in the BLIS.
+//
+// Prototype object-based check functions.
+//
 
-#include "blis.h"
+void bls_gemm_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  d,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+    );
 
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-\
-	/* A switch to easily toggle whether we use the sandbox implementation
-	   of bls_gemm() as the implementation for bli_gemm(). (This allows for
-	   easy testing of bls_gemm() via the testsuite.) */ \
-	if ( 1 ) \
-	{ \
-		bls_gemm_ex( alpha, a, b, beta, c, cntx, rntm ); \
-		return; \
-	} \
-\
-	bli_init_once(); \
-\
-	/* Obtain a valid (native) context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Invoke the operation's front end. */ \
-	PASTEMAC(opname,_front) \
-	( \
-	  alpha, a, b, beta, c, cntx, rntm, NULL \
-	); \
-}
-
-GENFRONT( gemm, gemm, nat )

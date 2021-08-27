@@ -39,9 +39,9 @@
 \
 void PASTECH2(bls_,ch,opname) \
      ( \
-       dim_t            m, \
        dim_t            k, \
-       dim_t            mr, \
+       dim_t            n, \
+       dim_t            nr, \
        cntx_t* restrict cntx, \
        rntm_t* restrict rntm, \
        mem_t*  restrict mem, \
@@ -49,22 +49,22 @@ void PASTECH2(bls_,ch,opname) \
      ) \
 { \
 	/* Set the pack buffer type so that we are obtaining memory blocks from
-	   the pool dedicated to blocks of A. */ \
-	const packbuf_t pack_buf_type = BLIS_BUFFER_FOR_A_BLOCK; \
+	   the pool dedicated to panels of B. */ \
+	const packbuf_t pack_buf_type = BLIS_BUFFER_FOR_B_PANEL; \
 \
 	/* NOTE: This "rounding up" of the last upanel is absolutely necessary since
 	   we NEED that last micropanel to have the same ldim (cs_p) as the other
 	   micropanels. Why? Because the microkernel assumes that the register (MR,
 	   NR) AND storage (PACKMR, PACKNR) blocksizes do not change. */ \
-	const dim_t m_pack = ( m / mr + ( m % mr ? 1 : 0 ) ) * mr; \
 	const dim_t k_pack = k; \
+	const dim_t n_pack = ( n / nr + ( n % nr ? 1 : 0 ) ) * nr; \
 \
 	/* Barrier to make sure all threads are caught up and ready to begin the
 	   packm stage. */ \
 	bli_thread_barrier( thread ); \
 \
 	/* Compute the size of the memory block eneded. */ \
-	siz_t size_needed = sizeof( ctype ) * m_pack * k_pack; \
+	siz_t size_needed = sizeof( ctype ) * k_pack * n_pack; \
 \
 	/* Check the mem_t entry provided by the caller. If it is unallocated,
 	   then we need to acquire a block from the packed block allocator. */ \
@@ -158,11 +158,11 @@ void PASTECH2(bls_,ch,opname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_init_mem_a )
-GENTFUNC( float,    s, packm_init_mem_a )
-GENTFUNC( double,   d, packm_init_mem_a )
-GENTFUNC( scomplex, c, packm_init_mem_a )
-GENTFUNC( dcomplex, z, packm_init_mem_a )
+//INSERT_GENTFUNC_BASIC0( packm_init_mem_b )
+GENTFUNC( float,    s, packm_init_mem_b )
+GENTFUNC( double,   d, packm_init_mem_b )
+GENTFUNC( scomplex, c, packm_init_mem_b )
+GENTFUNC( dcomplex, z, packm_init_mem_b )
 
 
 #undef  GENTFUNC
@@ -191,11 +191,11 @@ void PASTECH2(bls_,ch,opname) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_finalize_mem_a )
-GENTFUNC( float,    s, packm_finalize_mem_a )
-GENTFUNC( double,   d, packm_finalize_mem_a )
-GENTFUNC( scomplex, c, packm_finalize_mem_a )
-GENTFUNC( dcomplex, z, packm_finalize_mem_a )
+//INSERT_GENTFUNC_BASIC0( packm_finalize_mem_b )
+GENTFUNC( float,    s, packm_finalize_mem_b )
+GENTFUNC( double,   d, packm_finalize_mem_b )
+GENTFUNC( scomplex, c, packm_finalize_mem_b )
+GENTFUNC( dcomplex, z, packm_finalize_mem_b )
 
 
 #undef  GENTFUNC
@@ -204,11 +204,11 @@ GENTFUNC( dcomplex, z, packm_finalize_mem_a )
 void PASTECH2(bls_,ch,opname) \
      ( \
        pack_t* restrict schema, \
-       dim_t            m, \
        dim_t            k, \
-       dim_t            mr, \
-       dim_t*  restrict m_max, \
+       dim_t            n, \
+       dim_t            nr, \
        dim_t*  restrict k_max, \
+       dim_t*  restrict n_max, \
        ctype**          p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                            dim_t* restrict pd_p, inc_t* restrict ps_p, \
        mem_t*  restrict mem  \
@@ -218,21 +218,21 @@ void PASTECH2(bls_,ch,opname) \
 	   we NEED that last micropanel to have the same ldim (cs_p) as the other
 	   micropanels. Why? Because the microkernel assumes that the register (MR,
 	   NR) AND storage (PACKMR, PACKNR) blocksizes do not change. */ \
-	*m_max = ( m / mr + ( m % mr ? 1 : 0 ) ) * mr; \
 	*k_max = k; \
+	*n_max = ( n / nr + ( n % nr ? 1 : 0 ) ) * nr; \
 \
-	/* Determine the dimensions and strides for the packed matrix A. */ \
+	/* Determine the dimensions and strides for the packed matrix B. */ \
 	{ \
-		/* Pack A to column-stored row-panels. */ \
-		*rs_p = 1; \
-		*cs_p = mr; \
+		/* Pack B to row-stored column-panels. */ \
+		*rs_p = nr; \
+		*cs_p = 1; \
 \
-		*pd_p = mr; \
-		*ps_p = mr * k; \
+		*pd_p = nr; \
+		*ps_p = k * nr; \
 \
-		/* Set the schema to "packed row panels" to indicate packing to
-		   conventional column-stored row panels. */ \
-		*schema = BLIS_PACKED_ROW_PANELS; \
+		/* Set the schema to "packed column panels" to indicate packing to
+		   conventional row-stored column panels. */ \
+		*schema = BLIS_PACKED_COL_PANELS; \
 	} \
 \
 	/* Set the buffer address provided by the caller to point to the memory
@@ -240,11 +240,11 @@ void PASTECH2(bls_,ch,opname) \
 	*p = bli_mem_buffer( mem ); \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_init_a )
-GENTFUNC( float,    s, packm_init_a )
-GENTFUNC( double,   d, packm_init_a )
-GENTFUNC( scomplex, c, packm_init_a )
-GENTFUNC( dcomplex, z, packm_init_a )
+//INSERT_GENTFUNC_BASIC0( packm_init_b )
+GENTFUNC( float,    s, packm_init_b )
+GENTFUNC( double,   d, packm_init_b )
+GENTFUNC( scomplex, c, packm_init_b )
+GENTFUNC( dcomplex, z, packm_init_b )
 
 
 //
@@ -257,13 +257,14 @@ GENTFUNC( dcomplex, z, packm_init_a )
 void PASTECH2(bls_,ch,opname) \
      ( \
        conj_t           conj, \
-       dim_t            m_alloc, \
        dim_t            k_alloc, \
-       dim_t            m, \
+       dim_t            n_alloc, \
        dim_t            k, \
-       dim_t            mr, \
+       dim_t            n, \
+       dim_t            nr, \
        ctype*  restrict kappa, \
-       ctype*  restrict a, inc_t           rs_a, inc_t           cs_a, \
+       ctype*  restrict d, inc_t           incd, \
+       ctype*  restrict b, inc_t           rs_b, inc_t           cs_b, \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \
        cntx_t* restrict cntx, \
@@ -273,43 +274,44 @@ void PASTECH2(bls_,ch,opname) \
      ) \
 { \
 	pack_t schema; \
-	dim_t  m_max; \
 	dim_t  k_max; \
+	dim_t  n_max; \
 	dim_t  pd_p; \
 \
 	/* Prepare the packing destination buffer. */ \
-	PASTECH2(bls_,ch,packm_init_mem_a) \
+	PASTECH2(bls_,ch,packm_init_mem_b) \
 	( \
-	  m_alloc, k_alloc, mr, \
+	  k_alloc, n_alloc, nr, \
 	  cntx, \
 	  rntm, \
 	  mem, \
 	  thread  \
 	); \
 \
-	/* Determine the packing buffer and related parameters for matrix A. */ \
-	PASTECH2(bls_,ch,packm_init_a) \
+	/* Determine the packing buffer and related parameters for matrix B. */ \
+	PASTECH2(bls_,ch,packm_init_b) \
 	( \
 	  &schema, \
-	  m, k, mr, \
-	  &m_max, &k_max, \
+	  k, n, nr, \
+	  &k_max, &n_max, \
 	  p, rs_p,  cs_p, \
 	     &pd_p, ps_p, \
 	  mem  \
 	); \
 \
-	/* Pack matrix A to the destination buffer chosen above. Here, the packed
-	   matrix is stored to column-stored MR x k micropanels. */ \
+	/* Pack matrix B to the destination buffer chosen above. Here, the packed
+	   matrix is stored to row-stored k x NR micropanels. */ \
 	PASTECH2(bls_,ch,packm_var1) \
 	( \
 	  conj, \
 	  schema, \
-	  m, \
 	  k, \
-	  m_max, \
+	  n, \
 	  k_max, \
+	  n_max, \
 	  kappa, \
-	  a,  rs_a,  cs_a, \
+	  d,  incd, \
+	  b,  rs_b,  cs_b, \
 	  *p, *rs_p, *cs_p, \
 		  pd_p,  *ps_p, \
 	  cntx, \
@@ -320,9 +322,9 @@ void PASTECH2(bls_,ch,opname) \
 	bli_thread_barrier( thread ); \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_a )
-GENTFUNC( float,    s, packm_a )
-GENTFUNC( double,   d, packm_a )
-GENTFUNC( scomplex, c, packm_a )
-GENTFUNC( dcomplex, z, packm_a )
+//INSERT_GENTFUNC_BASIC0( packm_b )
+GENTFUNC( float,    s, packm_b )
+GENTFUNC( double,   d, packm_b )
+GENTFUNC( scomplex, c, packm_b )
+GENTFUNC( dcomplex, z, packm_b )
 

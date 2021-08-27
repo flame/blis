@@ -45,7 +45,6 @@ typedef void (*FUNCPTR_T)
        dim_t            k,
        void*   restrict alpha,
        void*   restrict a, inc_t rs_a, inc_t cs_a,
-       void*   restrict d, inc_t incd,
        void*   restrict b, inc_t rs_b, inc_t cs_b,
        void*   restrict beta,
        void*   restrict c, inc_t rs_c, inc_t cs_c,
@@ -66,7 +65,6 @@ void bls_gemm_bp_var1
      (
        obj_t*  alpha,
        obj_t*  a,
-       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
@@ -87,9 +85,6 @@ void bls_gemm_bp_var1
 	void* restrict buf_a     = bli_obj_buffer_at_off( a );
 	const inc_t    rs_a      = bli_obj_row_stride( a );
 	const inc_t    cs_a      = bli_obj_col_stride( a );
-
-	void* restrict buf_d     = bli_obj_buffer_at_off( d );
-	const inc_t    incd      = bli_obj_vector_inc( d );
 
 	void* restrict buf_b     = bli_obj_buffer_at_off( b );
 	const inc_t    rs_b      = bli_obj_row_stride( b );
@@ -116,7 +111,6 @@ void bls_gemm_bp_var1
 	  k,
 	  buf_alpha,
 	  buf_a, rs_a, cs_a,
-	  buf_d, incd,
 	  buf_b, rs_b, cs_b,
 	  buf_beta,
 	  buf_c, rs_c, cs_c,
@@ -142,7 +136,6 @@ void PASTECH2(bls_,ch,varname) \
        dim_t            k, \
        void*   restrict alpha, \
        void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict d, inc_t incd, \
        void*   restrict b, inc_t rs_b, inc_t cs_b, \
        void*   restrict beta, \
        void*   restrict c, inc_t rs_c, inc_t cs_c, \
@@ -176,32 +169,21 @@ void PASTECH2(bls_,ch,varname) \
 	const inc_t rs_ct   = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct   = ( col_pref ? MR : 1 ); \
 \
-	/* Temporary C buffer into which the thread will accumulate the answer.
-	   Results are accumulated back into C at the end of the operation in a
-	   thread-safe way, in case there is PC-loop parallelization. */ \
-	err_t e_val; \
-	ctype* restrict cpriv = bli_calloc_intl( n * m * sizeof( ctype ), &e_val ); \
-	const inc_t rs_cpriv  = ( bli_is_col_stored( rs_c, cs_c ) ? 1 : n ); \
-	const inc_t cs_cpriv  = ( bli_is_col_stored( rs_c, cs_c ) ? m : 1 ); \
-	bli_check_error_code( e_val ); \
-\
 	/* Compute partitioning step values for each matrix of each loop. */ \
-	const inc_t jcstep_c = cs_cpriv; \
+	const inc_t jcstep_c = cs_c; \
 	const inc_t jcstep_b = cs_b; \
 \
 	const inc_t pcstep_a = cs_a; \
-	const inc_t pcstep_d = incd; \
 	const inc_t pcstep_b = rs_b; \
 \
-	const inc_t icstep_c = rs_cpriv; \
+	const inc_t icstep_c = rs_c; \
 	const inc_t icstep_a = rs_a; \
 \
-	const inc_t jrstep_c = cs_cpriv * NR; \
+	const inc_t jrstep_c = cs_c * NR; \
 \
-	const inc_t irstep_c = rs_cpriv * MR; \
+	const inc_t irstep_c = rs_c * MR; \
 \
 	ctype* restrict a_00       = a; \
-	ctype* restrict d_00       = d; \
 	ctype* restrict b_00       = b; \
 	ctype* restrict c_00       = c; \
 	ctype* restrict alpha_cast = alpha; \
@@ -269,16 +251,15 @@ void PASTECH2(bls_,ch,varname) \
 		const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
 \
 		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
-		ctype* restrict c_jc = cpriv + jj * jcstep_c; \
+		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
 \
 		/* Identify the current thrinfo_t node and then grow the tree. */ \
 		thread_pc = bli_thrinfo_sub_node( thread_jc ); \
 		bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc ); \
 \
 		/* Compute the PC loop thread range for the current thread. */ \
-		dim_t pc_start, pc_end; \
-		bli_thread_range_sub( thread_pc, k, 1, FALSE, &pc_start, &pc_end ); \
-		const dim_t k_local = pc_end - pc_start; \
+		const dim_t pc_start = 0, pc_end = k; \
+		const dim_t k_local = k; \
 \
 		/* Compute number of primary and leftover components of the PC loop. */ \
 		/*const dim_t pc_iter = ( k_local + KC - 1 ) / KC;*/ \
@@ -291,11 +272,10 @@ void PASTECH2(bls_,ch,varname) \
 			const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
 \
 			ctype* restrict a_pc = a_00 + pp * pcstep_a; \
-			ctype* restrict d_pc = d_00 + pp * pcstep_d; \
 			ctype* restrict b_pc = b_jc + pp * pcstep_b; \
 \
-			/* Use beta = 1 everywhere for now. */ \
-			ctype* restrict beta_use = &one_local; \
+			/* Only apply beta to the first iteration of the pc loop. */ \
+			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
 \
 			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
@@ -316,7 +296,6 @@ void PASTECH2(bls_,ch,varname) \
 			  KC,     NC, \
 			  kc_cur, nc_cur, NR, \
 			  &one_local, \
-			  d_pc,   incd, \
 			  b_pc,   rs_b,      cs_b, \
 			  &b_use, &rs_b_use, &cs_b_use, \
 			                     &ps_b_use, \
@@ -371,7 +350,6 @@ void PASTECH2(bls_,ch,varname) \
 				  MC,     KC, \
 				  mc_cur, kc_cur, MR, \
 				  &one_local, \
-				  d_pc,   incd, \
 				  a_ic,   rs_a,      cs_a, \
 				  &a_use, &rs_a_use, &cs_a_use, \
 				                     &ps_a_use, \
@@ -470,7 +448,7 @@ void PASTECH2(bls_,ch,varname) \
 							  a_ir, \
 							  b_jr, \
 							  beta_use, \
-							  c_ir, rs_cpriv, cs_cpriv, \
+							  c_ir, rs_c, cs_c, \
 							  &aux, \
 							  cntx  \
 							); \
@@ -495,9 +473,9 @@ void PASTECH2(bls_,ch,varname) \
 							( \
 							  mr_cur, \
 							  nr_cur, \
-							  ct,   rs_ct,    cs_ct, \
+							  ct,   rs_ct, cs_ct, \
 							  beta_use, \
-							  c_ir, rs_cpriv, cs_cpriv \
+							  c_ir, rs_c,  cs_c \
 							); \
 						} \
 					} \
@@ -510,41 +488,6 @@ void PASTECH2(bls_,ch,varname) \
 			bli_thread_barrier( thread_pb ); \
 		} \
 	} \
-	/* Now apply beta, as it was deferred earlier. */ \
-	_Pragma("omp single") \
-	{ \
-		for ( dim_t j = 0; j < n; j += 1 ) \
-		{ \
-			ctype* restrict cj = c_00 + j * cs_c; \
-			for ( dim_t i = 0; i < m; i += 1 ) \
-			{ \
-				ctype* restrict ci = cj + i * rs_c; \
-				PASTEMAC(ch,scals) \
-				( \
-					beta_local, *ci \
-				) \
-			} \
-		} \
-	} \
-	/* Accumulate results from each thread in a thread-safe way. */ \
-	_Pragma("omp critical") \
-	{ \
-		for ( dim_t j = 0; j < n; j += 1 ) \
-		{ \
-			ctype* restrict cj     = c_00  + j * cs_c; \
-			ctype* restrict cprivj = cpriv + j * cs_cpriv; \
-			for ( dim_t i = 0; i < m; i += 1 ) \
-			{ \
-				ctype* restrict ci     = cj     + i * rs_c; \
-				ctype* restrict cprivi = cprivj + i * rs_cpriv; \
-				PASTEMAC(ch,adds) \
-				( \
-					*cprivi, *ci \
-				) \
-			} \
-		} \
-	} \
-	bli_free_intl( cpriv ); \
 \
 	/* Release any memory that was acquired for packing matrices A and B. */ \
 	PASTECH2(bls_,ch,packm_finalize_mem_a) \

@@ -43,6 +43,7 @@ typedef struct thread_data
 	opid_t     family;
 	obj_t*     alpha;
 	obj_t*     a;
+	obj_t*     d;
 	obj_t*     b;
 	obj_t*     beta;
 	obj_t*     c;
@@ -62,6 +63,7 @@ void* bls_l3_thread_entry( void* data_void )
 	opid_t         family   = data->family;
 	obj_t*         alpha    = data->alpha;
 	obj_t*         a        = data->a;
+	obj_t*         d        = data->d;
 	obj_t*         b        = data->b;
 	obj_t*         beta     = data->beta;
 	obj_t*         c        = data->c;
@@ -94,6 +96,7 @@ void* bls_l3_thread_entry( void* data_void )
 	(
 	  alpha,
 	  a,
+	  d,
 	  b,
 	  beta,
 	  c,
@@ -114,6 +117,7 @@ void bls_l3_thread_decorator
        opid_t     family,
        obj_t*     alpha,
        obj_t*     a,
+       obj_t*     d,
        obj_t*     b,
        obj_t*     beta,
        obj_t*     c,
@@ -167,6 +171,7 @@ void bls_l3_thread_decorator
 		datas[tid].family   = family;
 		datas[tid].alpha    = alpha;
 		datas[tid].a        = a;
+		datas[tid].d        = d;
 		datas[tid].b        = b;
 		datas[tid].beta     = beta;
 		datas[tid].c        = c;

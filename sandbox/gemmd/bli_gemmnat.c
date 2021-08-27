@@ -63,7 +63,17 @@ void PASTEMAC(opname,imeth) \
 	   easy testing of bls_gemm() via the testsuite.) */ \
 	if ( 1 ) \
 	{ \
-		bls_gemm_ex( alpha, a, b, beta, c, cntx, rntm ); \
+		const dim_t k  = bli_obj_width_after_trans( a ); \
+		const num_t dt = bli_obj_dt( c ); \
+		obj_t       d; \
+\
+		bli_obj_create( dt, k, 1, 1, k, &d ); \
+		/*bli_randv( &d );*/ \
+		bli_setv( &BLIS_ONE, &d ); \
+\
+		bls_gemm_ex( alpha, a, &d, b, beta, c, cntx, rntm ); \
+\
+		bli_obj_free( &d ); \
 		return; \
 	} \
 \

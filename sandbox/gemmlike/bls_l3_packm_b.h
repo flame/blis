@@ -105,7 +105,6 @@ void PASTECH2(bls_,ch,opname) \
        dim_t            n, \
        dim_t            nr, \
        ctype*  restrict kappa, \
-       ctype*  restrict d, inc_t           incd, \
        ctype*  restrict b, inc_t           rs_b, inc_t           cs_b, \
        ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
                                                  inc_t* restrict ps_p, \

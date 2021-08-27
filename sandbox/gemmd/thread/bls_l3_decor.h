@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,18 +32,44 @@
 
 */
 
+#ifndef BLIS_SBX_L3_DECOR_H
+#define BLIS_SBX_L3_DECOR_H
 
-//
-// Prototype object-based check functions.
-//
+// -- sup definitions ----------------------------------------------------------
 
-void bls_gemm_check
+// Level-3 sup internal function type.
+typedef void (*l3sbxint_t)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx
-    );
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     d,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm,
+       thrinfo_t* thread
+     );
+
+// Level-3 sup thread decorator prototype.
+void bls_l3_thread_decorator
+     (
+       l3sbxint_t func,
+       opid_t     family,
+       obj_t*     alpha,
+       obj_t*     a,
+       obj_t*     d,
+       obj_t*     b,
+       obj_t*     beta,
+       obj_t*     c,
+       cntx_t*    cntx,
+       rntm_t*    rntm
+     );
+
+// Include definitions specific to the method of multithreading.
+#include "bls_l3_decor_single.h"
+#include "bls_l3_decor_openmp.h"
+#include "bls_l3_decor_pthreads.h"
+
+#endif
 

@@ -46,6 +46,7 @@ void PASTECH2(bls_,ch,opname) \
        dim_t   panel_len, \
        dim_t   panel_len_max, \
        ctype*  kappa, \
+       ctype*  d, inc_t incd, \
        ctype*  a, inc_t inca, inc_t lda, \
        ctype*  p,             inc_t ldp, \
        cntx_t* cntx  \
@@ -91,30 +92,67 @@ void PASTECH2(bls_,ch,opname) \
 		if ( !PASTEMAC(ch,eq1)( *kappa ) ) \
 			bli_abort(); \
 \
-		/* Perform the packing, taking conja into account. */ \
-		if ( bli_is_conj( conja ) ) \
+		if ( d == NULL ) \
 		{ \
-			for ( dim_t l = 0; l < panel_len; ++l ) \
+			/* Perform the packing, taking conja into account. */ \
+			if ( bli_is_conj( conja ) ) \
 			{ \
-				for ( dim_t i = 0; i < panel_dim; ++i ) \
+				for ( dim_t l = 0; l < panel_len; ++l ) \
 				{ \
-					ctype* ali = a + (l  )*lda + (i  )*inca; \
-					ctype* pli = p + (l  )*ldp + (i  )*1; \
+					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					{ \
+						ctype* ali = a + (l  )*lda + (i  )*inca; \
+						ctype* pli = p + (l  )*ldp + (i  )*1; \
 \
-					PASTEMAC(ch,copyjs)( *ali, *pli ); \
+						PASTEMAC(ch,copyjs)( *ali, *pli ); \
+					} \
+				} \
+			} \
+			else \
+			{ \
+				for ( dim_t l = 0; l < panel_len; ++l ) \
+				{ \
+					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					{ \
+						ctype* ali = a + (l  )*lda + (i  )*inca; \
+						ctype* pli = p + (l  )*ldp + (i  )*1; \
+\
+						PASTEMAC(ch,copys)( *ali, *pli ); \
+					} \
 				} \
 			} \
 		} \
-		else \
+		else /* if ( d != NULL ) */ \
 		{ \
-			for ( dim_t l = 0; l < panel_len; ++l ) \
+			/* Perform the packing, taking conja into account. */ \
+			if ( bli_is_conj( conja ) ) \
 			{ \
-				for ( dim_t i = 0; i < panel_dim; ++i ) \
+				for ( dim_t l = 0; l < panel_len; ++l ) \
 				{ \
-					ctype* ali = a + (l  )*lda + (i  )*inca; \
-					ctype* pli = p + (l  )*ldp + (i  )*1; \
+					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					{ \
+						ctype* ali = a + (l  )*lda + (i  )*inca; \
+						ctype* dl  = d + (l  )*incd; \
+						ctype* pli = p + (l  )*ldp + (i  )*1; \
 \
-					PASTEMAC(ch,copys)( *ali, *pli ); \
+						/* Note that ali must be the second operand here since
+						   that is what is conjugated by scal2js. */ \
+						PASTEMAC(ch,scal2js)( *dl, *ali, *pli ); \
+					} \
+				} \
+			} \
+			else \
+			{ \
+				for ( dim_t l = 0; l < panel_len; ++l ) \
+				{ \
+					for ( dim_t i = 0; i < panel_dim; ++i ) \
+					{ \
+						ctype* ali = a + (l  )*lda + (i  )*inca; \
+						ctype* dl  = d + (l  )*incd; \
+						ctype* pli = p + (l  )*ldp + (i  )*1; \
+\
+						PASTEMAC(ch,scal2s)( *ali, *dl, *pli ); \
+					} \
 				} \
 			} \
 		} \

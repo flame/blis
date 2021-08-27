@@ -38,14 +38,13 @@ void bls_gemm_check
      (
        obj_t*  alpha,
        obj_t*  a,
+       obj_t*  d,
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx
      )
 {
-	//bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
-
 	err_t e_val;
 
 	// Check object datatypes.
@@ -57,6 +56,9 @@ void bls_gemm_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_floating_object( d );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_floating_object( b );
@@ -76,6 +78,9 @@ void bls_gemm_check
 	e_val = bli_check_matrix_object( a );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_vector_object( d );
+	bli_check_error_code( e_val );
+
 	e_val = bli_check_matrix_object( b );
 	bli_check_error_code( e_val );
 
@@ -88,6 +93,9 @@ void bls_gemm_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_object_buffer( d );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( b );
@@ -109,11 +117,17 @@ void bls_gemm_check
 	e_val = bli_check_level3_dims( a, b, c );
 	bli_check_error_code( e_val );
 
+	e_val = bli_check_vector_dim_equals( d, bli_obj_width_after_trans( a ) );
+	bli_check_error_code( e_val );
+
 	// Check for consistent datatypes.
 	// NOTE: We only perform these tests when mixed datatype support is
 	// disabled.
 
 	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, d );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_consistent_object_datatypes( c, b );
