@@ -1,6 +1,6 @@
 ![The BLIS cat is sleeping.](http://www.cs.utexas.edu/users/field/blis_cat.png)
 
-[![Build Status](https://travis-ci.org/flame/blis.svg?branch=master)](https://travis-ci.org/flame/blis)
+[![Build Status](https://travis-ci.com/flame/blis.svg?branch=master)](https://travis-ci.com/flame/blis)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/flame/blis?branch=master&svg=true)](https://ci.appveyor.com/project/shpc/blis/branch/master)
 
 Contents
