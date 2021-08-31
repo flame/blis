@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,17 +35,19 @@
 
 
 //
-// Define template prototypes for level-1f kernels.
+// Define template prototypes for level-2 kernels.
 //
 
 #define GEMV_KER_PROT( ctype, ch, opname ) \
 \
 void PASTEMAC(ch,opname) \
      ( \
+       conj_t           conja,\
+       conj_t           conjx,\
        dim_t            m, \
        dim_t            n, \
        ctype*  restrict alpha, \
-       ctype*  restrict a, inc_t lda, \
+       ctype*  restrict a, inc_t rs, inc_t cs, \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict beta, \
        ctype*  restrict y, inc_t incy, \

@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -40,10 +40,12 @@
  */
 void bli_dgemv_zen_ref_c
      (
+      conj_t           conja,
+      conj_t           conjx,
       dim_t            m,
       dim_t            n,
       double* restrict alpha,
-      double* restrict a, inc_t lda,
+      double* restrict a, inc_t inca, inc_t lda,
       double* restrict x, inc_t incx,
       double* restrict beta,
       double* restrict y, inc_t incy,
@@ -75,7 +77,7 @@ void bli_dgemv_zen_ref_c
         {
             PRAGMA_SIMD
             for(i = 0; i < m; i++)
-                (y0[i]) = (a0[i]) * (x0_val) * (*alpha) + y0[i] * (*beta);  
+                (y0[i]) = (a0[i]) * (x0_val) * (*alpha) + y0[i] * (*beta);
         }
         a0 += lda;
 
@@ -86,7 +88,7 @@ void bli_dgemv_zen_ref_c
             PRAGMA_SIMD
             for(i = 0; i < m; i++)
             {
-                (y0[i]) += (a0[i]) * xp * (*alpha); 
+                (y0[i]) += (a0[i]) * xp * (*alpha);
             }
             a0 += lda;
         }
@@ -112,7 +114,7 @@ void bli_dgemv_zen_ref_c
             const double xp = *(x0+j*incx);
             for(i = 0; i < m; i++)
             {
-                *(y0 + i*incy) += (a0[j*lda+i]) * xp * (*alpha);    
+                *(y0 + i*incy) += (a0[j*lda+i]) * xp * (*alpha);
             }
         }
     }

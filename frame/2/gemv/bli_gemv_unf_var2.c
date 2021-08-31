@@ -394,15 +394,14 @@ void bli_zgemv_unf_var2
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is hadled by scalv internally */
-
-    bli_zscalv_ex
+    bli_zscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
       n_elem,
       beta,
-      y, incy,
-      cntx,
-      NULL
+      y,
+      incy,
+      cntx
     );
 
     if( bli_zeq0( *alpha ) )
@@ -411,30 +410,57 @@ void bli_zgemv_unf_var2
         return;
     }
 
-    /* fusing factor */
-    b_fuse = 4;
-
-    for ( i = 0; i < n_iter; i += f )
+    // for non-unit incx, incy and rs_at and conjugate will be added in the next patch
+    if( (incx == 1 && incy == 1 && rs_at == 1 ) &&
+         !bli_is_conj(conja) && !bli_is_conj(conjx) && !bli_is_trans(transa))
     {
-        f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
-        A1 = a + (0  )*rs_at + (i  )*cs_at;
-        x1 = x + (i  )*incx;
-        y1 = y + (0  )*incy;
-
-        /* y = y + alpha * A1 * x1; */
-        bli_zaxpyf_zen_int_4
+        // This gemv code deals with the followint conditions only
+        // 1. incx, incy, and row stride equal to one
+        // 2. Non conjugate A matrix and X vector
+        // 3. No Transpose for A Martix
+        // Rest is taken care by the else part (axpyf implementation)
+        bli_zgemv_zen_int_4x4
         (
-          conja,
-          conjx,
-          n_elem,
-          f,
-          alpha,
-          A1, rs_at, cs_at,
-          x1, incx,
-          y1, incy,
-          NULL
+            conja,
+            conjx,
+            m,
+            n,
+            alpha,
+            a, rs_at, cs_at,
+            x, incx,
+            beta,
+            y, incy,
+            NULL
         );
     }
+    else
+    {
+        /* fusing factor */
+        b_fuse = 4;
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+            A1 = a + (0  )*rs_at + (i  )*cs_at;
+            x1 = x + (i  )*incx;
+            y1 = y + (0  )*incy;
+
+            /* y = y + alpha * A1 * x1; */
+            bli_zaxpyf_zen_int_4
+            (
+                conja,
+                conjx,
+                n_elem,
+                f,
+                alpha,
+                A1, rs_at, cs_at,
+                x1, incx,
+                y1, incy,
+                NULL
+            );
+        }
+    }
+
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 

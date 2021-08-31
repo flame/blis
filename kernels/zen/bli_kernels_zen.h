@@ -117,6 +117,7 @@ DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
 
 //gemv(scalar code)
 GEMV_KER_PROT( double,   d,  gemv_zen_ref_c )
+GEMV_KER_PROT( dcomplex, z,  gemv_zen_int_4x4 )
 
 // -- level-3 sup --------------------------------------------------------------
 // semmsup_rv
