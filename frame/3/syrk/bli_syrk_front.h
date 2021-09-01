@@ -43,16 +43,4 @@ void bli_syrk_front
        cntl_t* cntl
      );
 
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-err_t bli_syrk_small
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-     );
-#endif
 

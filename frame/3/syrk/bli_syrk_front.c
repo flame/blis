@@ -61,12 +61,6 @@ void bli_syrk_front
 	bli_obj_alias_to( a, &at_local );
 	bli_obj_induce_trans( &at_local );
 
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-	gint_t status = bli_syrk_small( alpha, &a_local, &at_local, beta, &c_local,
-	                                cntx, cntl );
-	if ( status == BLIS_SUCCESS ) return;
-#endif
-
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_syrk_check( alpha, a, beta, c, cntx );
