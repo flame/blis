@@ -257,16 +257,9 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 HEADERS_TO_INSTALL += $(CBLAS_H_FLAT)
 endif
 
-# Install BLIS CPP Template header files
-HEADERS_TO_INSTALL += $(CPP_HEADER_DIR)/*.hh
-
-# If requested, include AMD's C++ template header files in the list of headers
+# Include AMD's C++ template header files in the list of headers
 # to install.
-ifeq ($(INSTALL_HH),yes)
 HEADERS_TO_INSTALL += $(wildcard $(VEND_CPP_PATH)/*.hh)
-endif
-
-
 
 #
 # --- public makefile fragment definitions -------------------------------------
@@ -903,7 +896,7 @@ endif
 
 # Check results of BLIS CPP Template tests
 checkbliscpp:
-	$(MAKE) -C $(CPP_TEST_DIR)
+	$(MAKE) -C $(VEND_TESTCPP_DIR)
 
 # Check the results of the BLIS testsuite.
 checkblis: testsuite-run
@@ -1246,13 +1239,13 @@ ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
-	- $(MAKE) -C $(CPP_TEST_DIR) clean
+	- $(MAKE) -C $(VEND_TESTCPP_DIR) clean
 else
 	@echo "Removing object files from $(TESTSUITE_DIR)/$(OBJ_DIR)"
 	@- $(FIND) $(TESTSUITE_DIR)/$(OBJ_DIR) -name "*.o" | $(XARGS) $(RM_F)
 	@echo "Removing binary $(TESTSUITE_DIR)/$(TESTSUITE_BIN)"
 	@- $(RM_F) $(TESTSUITE_DIR)/$(TESTSUITE_BIN)
-	@$(MAKE) -C $(CPP_TEST_DIR) clean
+	@$(MAKE) -C $(VEND_TESTCPP_DIR) clean
 endif # ENABLE_VERBOSE
 endif # IS_CONFIGURED
 

@@ -303,8 +303,6 @@ LIB_DIR            := lib
 INCLUDE_DIR        := include
 BLASTEST_DIR       := blastest
 TESTSUITE_DIR      := testsuite
-CPP_HEADER_DIR     := cpp
-CPP_TEST_DIR       := testcpp
 
 VEND_DIR           := vendor
 VEND_CPP_DIR       := $(VEND_DIR)/cpp
