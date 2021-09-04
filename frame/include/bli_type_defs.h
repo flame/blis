@@ -1249,6 +1249,21 @@ typedef void (*obj_pack_fn_t)
       struct thrinfo_s* thread
     );
 
+typedef void (*obj_pack_ukr_fn_t)
+    (
+       dim_t          m, \
+       dim_t          m_max, \
+       dim_t          m_off, \
+       dim_t          n, \
+       dim_t          n_max, \
+       dim_t          n_off, \
+       void* restrict kappa, \
+       void* restrict a, inc_t inca, inc_t lda, \
+       void* restrict p,             inc_t ldp, \
+       void*          params, \
+       struct cntx_s* cntx  \
+    );
+
 typedef void (*obj_ker_fn_t)
     (
       struct obj_s*     a,
@@ -1307,9 +1322,10 @@ typedef struct obj_s
 	void*         user_data;
 
 	// Function pointers
-	obj_pack_fn_t pack;
-	obj_ker_fn_t  ker;
-	obj_ukr_fn_t  ukr;
+	obj_pack_fn_t     pack;
+	obj_pack_ukr_fn_t pack_ukr;
+	obj_ker_fn_t      ker;
+	obj_ukr_fn_t      ukr;
 
 } obj_t;
 
@@ -1352,6 +1368,7 @@ typedef struct obj_s
 	.user_data = NULL, \
 \
 	.pack      = NULL, \
+	.pack_ukr  = NULL, \
 	.ker       = NULL, \
 	.ukr       = NULL  \
 }
@@ -1386,6 +1403,7 @@ typedef struct obj_s
 	.user_data = NULL, \
 \
 	.pack      = NULL, \
+	.pack_ukr  = NULL, \
 	.ker       = NULL, \
 	.ukr       = NULL  \
 }
@@ -1425,6 +1443,7 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->user_data = a->user_data;
 
 	b->pack      = a->pack;
+	b->pack_ukr  = a->pack_ukr;
 	b->ker       = a->ker;
 	b->ukr       = a->ukr;
 }
@@ -1464,6 +1483,7 @@ BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 	b->user_data = a->user_data;
 
 	b->pack      = a->pack;
+	b->pack_ukr  = a->pack_ukr;
 	b->ker       = a->ker;
 	b->ukr       = a->ukr;
 }

@@ -1210,6 +1210,11 @@ BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( obj_t* obj )
 	return obj->pack;
 }
 
+BLIS_INLINE obj_pack_ukr_fn_t bli_obj_pack_ukr_fn( obj_t* obj )
+{
+	return obj->pack_ukr;
+}
+
 BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
 {
 	return obj->ker;
@@ -1225,6 +1230,11 @@ BLIS_INLINE obj_ukr_fn_t bli_obj_ukr_fn( obj_t* obj )
 BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack, obj_t* obj )
 {
 	obj->pack = pack;
+}
+
+BLIS_INLINE void bli_obj_set_pack_ukr_fn( obj_pack_ukr_fn_t pack_ukr, obj_t* obj )
+{
+	obj->pack_ukr = pack_ukr;
 }
 
 BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker, obj_t* obj )
