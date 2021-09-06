@@ -32,11 +32,14 @@
 
 */
 
+// file define different formats of BLAS APIs- uppercase with
+// and without underscore, lowercase without underscore.
+
 #include "blis.h"
 #include "bli_util_api_wrap.h"
 
 // wrapper functions to support additional symbols
-
+#ifdef BLIS_ENABLE_API_WRAPPER
 void CAXPY(const f77_int *n,const scomplex  *ca,const scomplex  *cx,const f77_int *incx,scomplex  *cy,const f77_int *incy)
 {
     caxpy_( n, ca, cx, incx, cy, incy);
@@ -3216,3 +3219,5 @@ void CAXPBY_( const f77_int* n,  const scomplex* alpha,  const scomplex *x,  con
 {
     caxpby_(n, alpha, x, incx, beta, y, incy);
 }
+
+#endif
