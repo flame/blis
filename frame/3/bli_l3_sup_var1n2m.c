@@ -971,7 +971,8 @@ void PASTEMAC(ch,varname) \
 		else if ( m <= 2*MR && n <= 2*NR ) KC = KC0 / 2; \
 		else if ( m <= 3*MR && n <= 3*NR ) KC = (( KC0 / 3 ) / 4 ) * 4; \
 		else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4; \
-		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
+		/* Will revisit setting this KC value - larger m and n demands larger KC */	\
+		else                               KC = KC0; /* (( KC0 / 5 ) / 4 ) * 4; VK */ \
 	} \
 \
 	/* Query the maximum blocksize for NR, which implies a maximum blocksize
