@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1569,7 +1569,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
 	dim_t jc_start, jc_end; \
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
+	bli_thread_range_weighted_sub( thread_jc, 0, BLIS_LOWER, m, n, NR, FALSE, &jc_start, &jc_end ); \
 	const dim_t n_local = jc_end - jc_start; \
 \
 	/* Compute number of primary and leftover components of the JC loop. */ \
@@ -1579,6 +1579,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 	dim_t m_off_cblock, n_off_cblock; \
 	dim_t m_off = 0; \
 	dim_t n_off = 0; \
+	doff_t diagoffc; \
 \
 	/* Loop over the n dimension (NC rows/columns at a time). */ \
 	/*for ( dim_t jj = 0; jj < jc_iter; jj += 1 )*/ \
@@ -1589,8 +1590,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
 		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
-\
-		n_off = jj; \
 \
 		/* Grow the thrinfo_t tree. */ \
 		bszid_t*   restrict bszids_pc = &bszids_jc[1]; \
@@ -1617,6 +1616,10 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
 			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
+\
+			m_off = 0; \
+			n_off = jj; \
+			diagoffc = m_off - n_off; \
 \
 			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
@@ -1675,7 +1678,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
 			dim_t ic_start, ic_end; \
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end ); \
+			bli_thread_range_weighted_sub( thread_ic, -diagoffc, BLIS_UPPER, nc_cur, m, MR, FALSE, &ic_start, &ic_end ); \
 			const dim_t m_local = ic_end - ic_start; \
 \
 			/* Compute number of primary and leftover components of the IC loop. */ \
@@ -2087,11 +2090,12 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
 	dim_t jc_start, jc_end; \
-	bli_thread_range_sub( thread_jc, n, NR, FALSE, &jc_start, &jc_end ); \
+	bli_thread_range_weighted_sub( thread_jc, 0, BLIS_UPPER, m, n, NR, FALSE, &jc_start, &jc_end ); \
 	const dim_t n_local = jc_end - jc_start; \
 \
 	dim_t m_off = 0; \
 	dim_t n_off = 0; \
+	doff_t diagoffc; \
 	dim_t m_off_cblock, n_off_cblock; \
 \
 	/* Compute number of primary and leftover components of the JC loop. */ \
@@ -2107,8 +2111,6 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
 		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
-\
-		n_off = jj; \
 \
 		/* Grow the thrinfo_t tree. */ \
 		bszid_t*   restrict bszids_pc = &bszids_jc[1]; \
@@ -2135,6 +2137,10 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
 			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
+\
+			m_off = 0; \
+			n_off = jj; \
+			diagoffc = m_off - n_off; \
 \
 			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
@@ -2193,7 +2199,7 @@ void PASTEMACT(ch,opname,uplo,varname) \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
 			dim_t ic_start, ic_end; \
-			bli_thread_range_sub( thread_ic, m, MR, FALSE, &ic_start, &ic_end ); \
+			bli_thread_range_weighted_sub( thread_ic, -diagoffc, BLIS_LOWER, nc_cur, m, MR, FALSE, &ic_start, &ic_end ); \
 			const dim_t m_local = ic_end - ic_start; \
 \
 			/* Compute number of primary and leftover components of the IC loop. */ \
