@@ -54,6 +54,8 @@ BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      );
 
 #ifdef BLIS_ENABLE_BLAS
+// Disabling temporarily
+#if 0
 BLIS_EXPORT_BLAS void dzgemm_
      (
        const f77_char* transa, \
@@ -67,7 +69,7 @@ BLIS_EXPORT_BLAS void dzgemm_
        const dcomplex*    beta, \
              dcomplex*    c, const f77_int* ldc  \
      );
-
+#endif
 INSERT_GENTPROT_BLAS( gemm )
 
 #endif

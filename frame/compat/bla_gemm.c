@@ -719,6 +719,10 @@ INSERT_GENTFUNC_BLAS_SC( gemm, gemm )
 #else
 INSERT_GENTFUNC_BLAS( gemm,gemm )
 #endif
+
+// Observed a regression in dgemm with this function addition.
+// Disabling temporarily.
+#if 0
 void dzgemm_
      (
        const f77_char* transa,
@@ -808,5 +812,5 @@ void dzgemm_
 	/* Finalize BLIS. */
 	bli_finalize_auto();
 }// end of dzgemm_
-
+#endif
 #endif
