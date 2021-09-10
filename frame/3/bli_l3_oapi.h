@@ -78,16 +78,34 @@ BLIS_EXPORT_BLIS void bli_gemmt
        obj_t*  c
      );
 
-BLIS_EXPORT_BLIS void bli_her2k_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+#undef GENTDEF
+#define GENTDEF(opname,ind) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
      );
+
+GENTDEF(her2k,_ex);
+GENTDEF(her2k,3mh);
+GENTDEF(her2k,3m1);
+GENTDEF(her2k,4mh);
+GENTDEF(her2k,4m1);
+GENTDEF(her2k,1m);
+GENTDEF(her2k,nat);
+
+GENTDEF(syr2k,_ex);
+GENTDEF(syr2k,3mh);
+GENTDEF(syr2k,3m1);
+GENTDEF(syr2k,4mh);
+GENTDEF(syr2k,4m1);
+GENTDEF(syr2k,1m);
+GENTDEF(syr2k,nat);
 
 BLIS_EXPORT_BLIS void bli_her2k
      (
@@ -96,17 +114,6 @@ BLIS_EXPORT_BLIS void bli_her2k
        obj_t*  b,
        obj_t*  beta,
        obj_t*  c
-     );
-
-BLIS_EXPORT_BLIS void bli_syr2k_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
      );
 
 BLIS_EXPORT_BLIS void bli_syr2k
@@ -181,15 +188,33 @@ BLIS_EXPORT_BLIS void bli_trmm3
        obj_t*  c
      );
 
-BLIS_EXPORT_BLIS void bli_herk_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+#undef GENTDEF
+#define GENTDEF(opname,ind) \
+BLIS_EXPORT_BLIS void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
      );
+
+GENTDEF(herk,_ex);
+GENTDEF(herk,3mh);
+GENTDEF(herk,3m1);
+GENTDEF(herk,4mh);
+GENTDEF(herk,4m1);
+GENTDEF(herk,1m);
+GENTDEF(herk,nat);
+
+GENTDEF(syrk,_ex);
+GENTDEF(syrk,3mh);
+GENTDEF(syrk,3m1);
+GENTDEF(syrk,4mh);
+GENTDEF(syrk,4m1);
+GENTDEF(syrk,1m);
+GENTDEF(syrk,nat);
 
 BLIS_EXPORT_BLIS void bli_herk
      (
@@ -197,16 +222,6 @@ BLIS_EXPORT_BLIS void bli_herk
        obj_t*  a,
        obj_t*  beta,
        obj_t*  c
-     );
-
-BLIS_EXPORT_BLIS void bli_syrk_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
      );
 
 BLIS_EXPORT_BLIS void bli_syrk

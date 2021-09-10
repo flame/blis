@@ -41,7 +41,7 @@
 // of executing one iteration of a for loop, plus the overhead of calling a
 // function that does nothing (ie: the _cntx_init_stage() function).
 
-// -- gemm ---------------------------------------------------------------------
+// -- gemm/gemmt ---------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, cname, imeth ) \

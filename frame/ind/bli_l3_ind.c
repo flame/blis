@@ -39,20 +39,20 @@ static void_fp bli_l3_ind_oper_fp[BLIS_NUM_IND_METHODS][BLIS_NUM_LEVEL3_OPS] =
 {
         /*   gemm          gemmt         hemm          herk          her2k         symm
              syrk          syr2k         trmm3         trmm          trsm  */
-/* 3mh  */ { bli_gemm3mh,  NULL,         bli_hemm3mh,  NULL,         NULL,         bli_symm3mh,
-             NULL,         NULL,         bli_trmm33mh, NULL,         NULL         },
-/* 3m1  */ { bli_gemm3m1,  NULL,         bli_hemm3m1,  NULL,         NULL,         bli_symm3m1,
-             NULL,         NULL,         bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
-/* 4mh  */ { bli_gemm4mh,  NULL,         bli_hemm4mh,  NULL,         NULL,         bli_symm4mh,
-             NULL,         NULL,         bli_trmm34mh, NULL,         NULL         },
+/* 3mh  */ { bli_gemm3mh,  bli_gemmt3mh, bli_hemm3mh,  bli_herk3mh,  bli_her2k3mh, bli_symm3mh,
+             bli_syrk3mh,  bli_syr2k3mh, bli_trmm33mh, NULL,         NULL         },
+/* 3m1  */ { bli_gemm3m1,  bli_gemmt3m1, bli_hemm3m1,  bli_herk3m1,  bli_her2k3m1, bli_symm3m1,
+             bli_syrk3m1,  bli_syr2k3m1, bli_trmm33m1, bli_trmm3m1,  bli_trsm3m1  },
+/* 4mh  */ { bli_gemm4mh,  bli_gemmt4mh, bli_hemm4mh,  bli_herk4mh,  bli_her2k4mh, bli_symm4mh,
+             bli_syrk4mh,  bli_syr2k4mh, bli_trmm34mh, NULL,         NULL         },
 /* 4mb  */ { bli_gemm4mb,  NULL,         NULL,         NULL,         NULL,         NULL,
              NULL,         NULL,         NULL,         NULL,         NULL         },
-/* 4m1  */ { bli_gemm4m1,  NULL,         bli_hemm4m1,  NULL,         NULL,         bli_symm4m1,
-             NULL,         NULL,         bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  },
-/* 1m   */ { bli_gemm1m,   NULL,         bli_hemm1m,   NULL,         NULL,         bli_symm1m,
-             NULL,         NULL,         bli_trmm31m,  bli_trmm1m,   bli_trsm1m   },
-/* nat  */ { bli_gemmnat,  bli_gemmtnat, bli_hemmnat,  NULL,         NULL,         bli_symmnat,
-             NULL,         NULL,         bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
+/* 4m1  */ { bli_gemm4m1,  bli_gemmt4m1, bli_hemm4m1,  bli_herk4m1,  bli_her2k4m1, bli_symm4m1,
+             bli_syrk4m1,  bli_syr2k4m1, bli_trmm34m1, bli_trmm4m1,  bli_trsm4m1  },
+/* 1m   */ { bli_gemm1m,   bli_gemmt1m,  bli_hemm1m,   bli_herk1m,   bli_her2k1m,  bli_symm1m,
+             bli_syrk1m,   bli_syr2k1m,  bli_trmm31m,  bli_trmm1m,   bli_trsm1m   },
+/* nat  */ { bli_gemmnat,  bli_gemmtnat, bli_hemmnat,  bli_herknat,  bli_her2knat, bli_symmnat,
+             bli_syrknat,  bli_syr2knat, bli_trmm3nat, bli_trmmnat,  bli_trsmnat  },
 };
 
 //

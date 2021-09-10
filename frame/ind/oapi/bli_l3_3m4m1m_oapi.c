@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-// -- gemm ---------------------------------------------------------------------
+// -- gemm/gemmt ---------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, cname, imeth, nstage ) \
@@ -124,6 +124,14 @@ GENFRONT( gemm, gemm, 4mh, 4 )
 GENFRONT( gemm, gemm, 4mb, 1 )
 GENFRONT( gemm, gemm, 4m1, 1 )
 GENFRONT( gemm, gemm, 1m,  1 )
+
+// gemmt
+GENFRONT( gemmt, gemmt, 3mh, 3 )
+GENFRONT( gemmt, gemmt, 3m1, 1 )
+GENFRONT( gemmt, gemmt, 4mh, 4 )
+//GENFRONT( gemmt, gemmt, 4mb, 1 ) // Not implemented.
+GENFRONT( gemmt, gemmt, 4m1, 1 )
+GENFRONT( gemmt, gemmt, 1m,  1 )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------

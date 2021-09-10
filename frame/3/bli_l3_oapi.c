@@ -147,21 +147,15 @@ void bli_gemmt_ex
 	}
 	*/
 
-	/* Only proceed with an induced method if each of the operands have a
-	   complex storage datatype. NOTE: Allowing precisions to vary while
-	   using 1m, which is what we do here, is unique to gemm; other level-3
-	   operations use 1m only if all storage datatypes are equal (and they
-	   ignore the computation precision). If any operands are real, skip the
-	   induced method chooser function and proceed directly with native
-	   execution. */
-	if ( bli_obj_is_complex( c ) &&
-	     bli_obj_is_complex( a ) &&
-	     bli_obj_is_complex( b ) )
+	/* Only proceed with an induced method if all operands have the same
+	   (complex) datatype. If any datatypes differ, skip the induced method
+	   chooser function and proceed directly with native execution, which is
+	   where mixed datatype support will be implemented (if at all). */
+	if ( bli_obj_dt( a ) == bli_obj_dt( c ) &&
+	     bli_obj_dt( b ) == bli_obj_dt( c ) &&
+	     bli_obj_is_complex( c ) )
 	{
-		/* FIXME: BLIS does not yet support induced methods for gemmt. Thus,
-		   we call the native implementation code path for now. */
-		/*PASTEMAC(opname,ind)( alpha, a, b, beta, c, cntx, rntm );*/
-		bli_gemmtnat( alpha, a, b, beta, c, cntx, rntm );
+		bli_gemmtind( alpha, a, b, beta, c, cntx, rntm );
 	}
 	else
 	{
@@ -181,48 +175,58 @@ void bli_gemmt
     bli_gemmt_ex( alpha, a, b, beta, c, NULL, NULL );
 }
 
-void bli_her2k_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
-     )
-{
-    bli_init_once();
-
-    obj_t ah;
-    obj_t bh;
-    obj_t alphah;
-
-	bli_obj_alias_to( alpha, &alphah );
-	bli_obj_toggle_conj( &alphah );
-
-	bli_obj_alias_to( a, &ah );
-	bli_obj_induce_trans( &ah );
-	bli_obj_toggle_conj( &ah );
-
-	bli_obj_alias_to( b, &bh );
-	bli_obj_induce_trans( &bh );
-	bli_obj_toggle_conj( &bh );
-
-	// Invoke gemmt twice, using beta only the first time.
-
-    bli_gemmt_ex(   alpha, a, &bh,      beta, c, cntx, rntm );
-    bli_gemmt_ex( &alphah, b, &ah, &BLIS_ONE, c, cntx, rntm );
-
-	// The Hermitian rank-2k product was computed as A*B'+B*A', even for
-	// the diagonal elements. Mathematically, the imaginary components of
-	// diagonal elements of a Hermitian rank-2k product should always be
-	// zero. However, in practice, they sometimes accumulate meaningless
-	// non-zero values. To prevent this, we explicitly set those values
-	// to zero before returning.
-
-    bli_setid( &BLIS_ZERO, c );
+#undef GENTFUNC
+#define GENTFUNC(opname,ind) \
+void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
+     ) \
+{ \
+    bli_init_once(); \
+\
+    obj_t ah; \
+    obj_t bh; \
+    obj_t alphah; \
+\
+	bli_obj_alias_to( alpha, &alphah ); \
+	bli_obj_toggle_conj( &alphah ); \
+\
+	bli_obj_alias_to( a, &ah ); \
+	bli_obj_induce_trans( &ah ); \
+	bli_obj_toggle_conj( &ah ); \
+\
+	bli_obj_alias_to( b, &bh ); \
+	bli_obj_induce_trans( &bh ); \
+	bli_obj_toggle_conj( &bh ); \
+\
+	/* Invoke gemmt twice, using beta only the first time. */ \
+\
+    PASTEMAC(gemmt,ind)(   alpha, a, &bh,      beta, c, cntx, rntm ); \
+    PASTEMAC(gemmt,ind)( &alphah, b, &ah, &BLIS_ONE, c, cntx, rntm ); \
+\
+	/* The Hermitian rank-2k product was computed as A*B'+B*A', even for \
+	 * the diagonal elements. Mathematically, the imaginary components of \
+	 * diagonal elements of a Hermitian rank-2k product should always be \
+	 * zero. However, in practice, they sometimes accumulate meaningless \
+	 * non-zero values. To prevent this, we explicitly set those values \
+	 * to zero before returning. */ \
+ \
+    bli_setid( &BLIS_ZERO, c ); \
 }
+
+GENTFUNC(her2k,_ex);
+GENTFUNC(her2k,3mh);
+GENTFUNC(her2k,3m1);
+GENTFUNC(her2k,4mh);
+GENTFUNC(her2k,4m1);
+GENTFUNC(her2k,1m);
+GENTFUNC(her2k,nat);
 
 void bli_her2k
      (
@@ -236,32 +240,42 @@ void bli_her2k
 	bli_her2k_ex( alpha, a, b, beta, c, NULL, NULL );
 }
 
-void bli_syr2k_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
-     )
-{
-    bli_init_once();
-
-    obj_t at;
-    obj_t bt;
-
-	bli_obj_alias_to( b, &bt );
-	bli_obj_induce_trans( &bt );
-	bli_obj_alias_to( a, &at );
-	bli_obj_induce_trans( &at );
-
-	// Invoke gemmt twice, using beta only the first time.
-
-    bli_gemmt_ex( alpha, a, &bt,      beta, c, cntx, rntm );
-    bli_gemmt_ex( alpha, b, &at, &BLIS_ONE, c, cntx, rntm );
+#undef GENTFUNC
+#define GENTFUNC(opname,ind) \
+void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
+     ) \
+{ \
+    bli_init_once(); \
+\
+    obj_t at; \
+    obj_t bt; \
+\
+	bli_obj_alias_to( b, &bt ); \
+	bli_obj_induce_trans( &bt ); \
+	bli_obj_alias_to( a, &at ); \
+	bli_obj_induce_trans( &at ); \
+\
+	/* Invoke gemmt twice, using beta only the first time. */ \
+\
+    PASTEMAC(gemmt,ind)( alpha, a, &bt,      beta, c, cntx, rntm ); \
+    PASTEMAC(gemmt,ind)( alpha, b, &at, &BLIS_ONE, c, cntx, rntm ); \
 }
+
+GENTFUNC(syr2k,_ex);
+GENTFUNC(syr2k,3mh);
+GENTFUNC(syr2k,3m1);
+GENTFUNC(syr2k,4mh);
+GENTFUNC(syr2k,4m1);
+GENTFUNC(syr2k,1m);
+GENTFUNC(syr2k,nat);
 
 void bli_syr2k
      (
@@ -419,35 +433,45 @@ void bli_trmm3
 	bli_trmm3_ex( side, alpha, a, b, beta, c, NULL, NULL );
 }
 
-void bli_herk_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
-     )
-{
-    bli_init_once();
-
-    obj_t ah;
-
-	bli_obj_alias_to( a, &ah );
-	bli_obj_induce_trans( &ah );
-    bli_obj_toggle_conj( &ah );
-
-    bli_gemmt_ex( alpha, a, &ah, beta, c, cntx, rntm );
-
-	// The Hermitian rank-k product was computed as A*A', even for the
-	// diagonal elements. Mathematically, the imaginary components of
-	// diagonal elements of a Hermitian rank-k product should always be
-	// zero. However, in practice, they sometimes accumulate meaningless
-	// non-zero values. To prevent this, we explicitly set those values
-	// to zero before returning.
-
-	bli_setid( &BLIS_ZERO, c );
+#undef GENTFUNC
+#define GENTFUNC(opname,ind) \
+void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
+     ) \
+{ \
+    bli_init_once(); \
+\
+    obj_t ah; \
+\
+	bli_obj_alias_to( a, &ah ); \
+	bli_obj_induce_trans( &ah ); \
+    bli_obj_toggle_conj( &ah ); \
+\
+    PASTEMAC(gemmt,ind)( alpha, a, &ah, beta, c, cntx, rntm ); \
+\
+	/* The Hermitian rank-k product was computed as A*A', even for the \
+	 * diagonal elements. Mathematically, the imaginary components of \
+	 * diagonal elements of a Hermitian rank-k product should always be \
+	 * zero. However, in practice, they sometimes accumulate meaningless \
+	 * non-zero values. To prevent this, we explicitly set those values \
+	 * to zero before returning. */ \
+\
+	bli_setid( &BLIS_ZERO, c ); \
 }
+
+GENTFUNC(herk,_ex);
+GENTFUNC(herk,3mh);
+GENTFUNC(herk,3m1);
+GENTFUNC(herk,4mh);
+GENTFUNC(herk,4m1);
+GENTFUNC(herk,1m);
+GENTFUNC(herk,nat);
 
 void bli_herk
      (
@@ -460,25 +484,35 @@ void bli_herk
 	bli_herk_ex( alpha, a, beta, c, NULL, NULL );
 }
 
-void bli_syrk_ex
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
-     )
-{
-    bli_init_once();
-
-    obj_t at;
-
-	bli_obj_alias_to( a, &at );
-	bli_obj_induce_trans( &at );
-
-    bli_gemmt_ex( alpha, a, &at, beta, c, cntx, rntm );
+#undef GENTFUNC
+#define GENTFUNC(opname,ind) \
+void PASTEMAC(opname,ind) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm \
+     ) \
+{ \
+    bli_init_once(); \
+\
+    obj_t at; \
+\
+	bli_obj_alias_to( a, &at ); \
+	bli_obj_induce_trans( &at ); \
+\
+    PASTEMAC(gemmt,ind)( alpha, a, &at, beta, c, cntx, rntm ); \
 }
+
+GENTFUNC(syrk,_ex);
+GENTFUNC(syrk,3mh);
+GENTFUNC(syrk,3m1);
+GENTFUNC(syrk,4mh);
+GENTFUNC(syrk,4m1);
+GENTFUNC(syrk,1m);
+GENTFUNC(syrk,nat);
 
 void bli_syrk
      (

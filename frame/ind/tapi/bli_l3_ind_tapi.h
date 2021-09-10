@@ -65,6 +65,32 @@ INSERT_GENTPROT_BASIC0( gemm1m )
 \
 void PASTEMAC(ch,opname) \
      ( \
+       uplo_t  uploc, \
+       trans_t transa, \
+       trans_t transb, \
+       dim_t   m, \
+       dim_t   k, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  b, inc_t rs_b, inc_t cs_b, \
+       ctype*  beta, \
+       ctype*  c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     );
+
+INSERT_GENTPROT_BASIC0( gemmt3mh )
+INSERT_GENTPROT_BASIC0( gemmt3m1 )
+INSERT_GENTPROT_BASIC0( gemmt4mh )
+INSERT_GENTPROT_BASIC0( gemmt4m1 )
+INSERT_GENTPROT_BASIC0( gemmt1m )
+
+
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
        side_t  side, \
        uplo_t  uploa, \
        conj_t  conja, \

@@ -98,6 +98,71 @@ INSERT_GENTFUNC_BASIC0( gemm4m1 )
 INSERT_GENTFUNC_BASIC0( gemm1m )
 
 
+// -- gemmt --------------------------------------------------------------------
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname ) \
+\
+void PASTEMAC(ch,opname) \
+     ( \
+       uplo_t  uploc, \
+       trans_t transa, \
+       trans_t transb, \
+       dim_t   m, \
+       dim_t   k, \
+       ctype*  alpha, \
+       ctype*  a, inc_t rs_a, inc_t cs_a, \
+       ctype*  b, inc_t rs_b, inc_t cs_b, \
+       ctype*  beta, \
+       ctype*  c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* cntx, \
+       rntm_t* rntm  \
+     ) \
+{ \
+	bli_init_once(); \
+\
+	const num_t dt = PASTEMAC(ch,type); \
+\
+	obj_t       alphao, ao, bo, betao, co; \
+\
+	dim_t       m_a, n_a; \
+	dim_t       m_b, n_b; \
+\
+	bli_set_dims_with_trans( transa, m, k, &m_a, &n_a ); \
+	bli_set_dims_with_trans( transb, k, m, &m_b, &n_b ); \
+\
+	bli_obj_create_1x1_with_attached_buffer( dt, alpha, &alphao ); \
+	bli_obj_create_1x1_with_attached_buffer( dt, beta,  &betao  ); \
+\
+	bli_obj_create_with_attached_buffer( dt, m_a, n_a, a, rs_a, cs_a, &ao ); \
+	bli_obj_create_with_attached_buffer( dt, m_b, n_b, b, rs_b, cs_b, &bo ); \
+	bli_obj_create_with_attached_buffer( dt, m,   m,   c, rs_c, cs_c, &co ); \
+\
+	bli_obj_set_uplo( uploc, &co ); \
+	bli_obj_set_conjtrans( transa, &ao ); \
+	bli_obj_set_conjtrans( transb, &bo ); \
+\
+	bli_obj_set_struc( BLIS_SYMMETRIC, &co ); \
+\
+	PASTEMAC0(opname) \
+	( \
+	  &alphao, \
+	  &ao, \
+	  &bo, \
+	  &betao, \
+	  &co, \
+	  cntx, \
+	  rntm  \
+	); \
+}
+
+INSERT_GENTFUNC_BASIC0( gemmt3mh )
+INSERT_GENTFUNC_BASIC0( gemmt3m1 )
+INSERT_GENTFUNC_BASIC0( gemmt4mh )
+INSERT_GENTFUNC_BASIC0( gemmt4m1 )
+INSERT_GENTFUNC_BASIC0( gemmt1m )
+
+
 // -- hemm ---------------------------------------------------------------------
 
 #undef  GENTFUNC
