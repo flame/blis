@@ -248,11 +248,12 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "piledriver",
     "bulldozer",
 
+    "armsve",
+    "a64fx",
+    "firestorm",
     "thunderx2",
     "cortexa57",
     "cortexa53",
-    "armsve",
-    "a64fx",
     "cortexa15",
     "cortexa9",
 
