@@ -3,45 +3,25 @@ sudo: required
 dist: focal
 matrix:
   include:
-  # full testsuite (all tests except for mixed datatype)
+  # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + SDE + OOT)
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
-  # mixed-datatype testsuite (gemm_nn only)
-  - os: linux
-    compiler: gcc
-    env: OOT=0 TEST=MD SDE=0 THR="none" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
-  # salt testsuite (fast set of operations+parameters)
-  - os: linux
-    compiler: gcc
-    env: OOT=0 TEST=SALT SDE=0 THR="none" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
-  # test x86_64 ukrs with SDE
-  - os: linux
-    compiler: gcc
-    env: OOT=0 TEST=0 SDE=1 THR="none" CONF="x86_64" \
+    env: OOT=1 TEST=ALL SDE=1 THR="none" CONF="x86_64" \
       PACKAGES="gcc-8 binutils"
   # openmp build
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=0 SDE=0 THR="openmp" CONF="auto" \
+    env: OOT=0 TEST=FAST SDE=0 THR="openmp" CONF="auto" \
       PACKAGES="gcc-8 binutils"
   # pthreads build
   - os: linux
     compiler: gcc
-    env: OOT=0 TEST=0 SDE=0 THR="pthreads" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
-  # out-of-tree build
-  - os: linux
-    compiler: gcc
-    env: OOT=1 TEST=0 SDE=0 THR="none" CONF="auto" \
+    env: OOT=0 TEST=FAST SDE=0 THR="pthreads" CONF="auto" \
       PACKAGES="gcc-8 binutils"
   # clang build
   - os: linux
     compiler: clang
-    env: OOT=0 TEST=0 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="auto"
       # There seems to be some difficulty installing 2 Clang toolchains of different versions.
       # Use the TravisCI default.
       # PACKAGES="clang-8 binutils"
@@ -60,14 +40,14 @@ matrix:
   - os: linux
     compiler: aarch64-linux-gnu-gcc
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="cortexa57" \
-      CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ \
+      CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
       PACKAGES="gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
   # armsve build and fast testsuite (qemu)
   - os: linux
     compiler: aarch64-linux-gnu-gcc-10
     env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="armsve" \
-      CC=arm-linux-gnueabihf-gcc-10 CXX=arm-linux-gnueabihf-g++-10 \
+      CC=aarch64-linux-gnu-gcc-10 CXX=aarch64-linux-gnu-g++-10 \
       PACKAGES="gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/"
 install:
