@@ -28,7 +28,7 @@ matrix:
   # macOS with system compiler (clang)
   - os: osx
     compiler: clang
-    env: OOT=0 TEST=1 SDE=0 THR="none" CONF="auto"
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="auto"
   # cortexa15 build and fast testsuite (qemu)
   - os: linux
     compiler: arm-linux-gnueabihf-gcc
