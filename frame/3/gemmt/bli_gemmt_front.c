@@ -53,6 +53,14 @@ void bli_gemmt_front
 	obj_t   b_local;
 	obj_t   c_local;
 
+#if 0
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	gint_t status = bli_gemmt_small( alpha, &a_local, &at_local, beta, &c_local,
+	                                 cntx, cntl );
+	if ( status == BLIS_SUCCESS ) return;
+#endif
+#endif
+
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_gemmt_check( alpha, a, b, beta, c, cntx );
@@ -120,7 +128,7 @@ void bli_gemmt_front
 	bli_l3_thread_decorator
 	(
 	  bli_gemm_int,
-	  BLIS_HERK, // operation family id (gemmt uses 'herk' family)
+	  BLIS_GEMMT, // operation family id
 	  alpha,
 	  &a_local,
 	  &b_local,

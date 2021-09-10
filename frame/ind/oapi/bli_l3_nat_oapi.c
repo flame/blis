@@ -41,7 +41,7 @@
 // of executing one iteration of a for loop, plus the overhead of calling a
 // function that does nothing (ie: the _cntx_init_stage() function).
 
-// -- gemm/her2k/syr2k/gemmt ---------------------------------------------------
+// -- gemm/gemmt ---------------------------------------------------------------
 
 #undef  GENFRONT
 #define GENFRONT( opname, cname, imeth ) \
@@ -81,8 +81,6 @@ void PASTEMAC(opname,imeth) \
 GENFRONT( gemm, gemm, nat )
 #endif
 GENFRONT( gemmt, gemm, nat )
-GENFRONT( her2k, gemm, nat )
-GENFRONT( syr2k, gemm, nat )
 
 
 // -- hemm/symm/trmm3 ----------------------------------------------------------
@@ -123,43 +121,6 @@ void PASTEMAC(opname,imeth) \
 GENFRONT( hemm, gemm, nat )
 GENFRONT( symm, gemm, nat )
 GENFRONT( trmm3, gemm, nat )
-
-
-// -- herk/syrk ----------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname, cname, imeth ) \
-\
-void PASTEMAC(opname,imeth) \
-     ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
-     ) \
-{ \
-	bli_init_once(); \
-\
-	/* Obtain a valid (native) context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
-\
-	/* Initialize a local runtime with global settings if necessary. Note
-	   that in the case that a runtime is passed in, we make a local copy. */ \
-	rntm_t rntm_l; \
-	if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; } \
-	else                { rntm_l = *rntm;                       rntm = &rntm_l; } \
-\
-	/* Invoke the operation's front end. */ \
-	PASTEMAC(opname,_front) \
-	( \
-	  alpha, a, beta, c, cntx, rntm, NULL \
-	); \
-}
-
-GENFRONT( herk, gemm, nat )
-GENFRONT( syrk, gemm, nat )
 
 
 // -- trmm ---------------------------------------------------------------------
