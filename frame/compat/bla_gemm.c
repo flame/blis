@@ -38,7 +38,7 @@
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#define ENABLE_INDUCED_METHOD 1
+#define ENABLE_INDUCED_METHOD 0
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNC
