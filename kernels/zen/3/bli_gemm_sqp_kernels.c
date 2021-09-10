@@ -1278,7 +1278,22 @@ void bli_3m_sqp_packC_real_imag(double* pc,
             }
         }
     }
-    else /* handles alpha or beta is not equal +/- 1.0 */
+    else if(mul==0) /* handles alpha or beta is equal to zero */
+    {
+        double br_ = 0;
+        double bi_ = 0;
+        for (j = 0; j < n; j++)
+        {
+            for (p = 0; p < (m*2); p += 2)// (real + imag)*m
+            {
+                *pcr = br_;
+                *pci = bi_;
+                pcr++; pci++;
+            }
+            pc = pc + ldc;
+        }
+    }
+    else /* handles alpha or beta is not equal +/- 1.0 and zero */
     {
         for (j = 0; j < n; j++)
         {
