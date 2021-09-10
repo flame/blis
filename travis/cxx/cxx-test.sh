@@ -55,4 +55,4 @@ if [ ! -e $SOURCE_DIR/travis/cxx/Makefile ]; then
     exit 1
 fi
 
-make -C $SOURCE_DIR/travis/cxx INCLUDE_DIR=$INCLUDE_DIR LIB_DIR=$LIB_DIR
+make -C $SOURCE_DIR/travis/cxx INCLUDE_DIR=$INCLUDE_DIR LIB_DIR=$LIB_DIR BUILD_DIR=$BUILD_DIR

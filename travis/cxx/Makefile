@@ -35,4 +35,4 @@
 .PHONY: all cxx-test
 
 all: cxx-test
-	$(CXX) -std=c++0x -o cxx-test.x -I$(INCLUDE_DIR) cxx-test.cxx -L$(LIB_DIR) -lblis
+	$(CXX) -std=c++0x -o $(BUILD_DIR)/cxx-test.x -I$(INCLUDE_DIR) cxx-test.cxx -L$(LIB_DIR) -lblis
