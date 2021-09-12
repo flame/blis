@@ -60,6 +60,10 @@ void bli_dgemm_armsve256_asm_8x8
 {
 	void* a_next = bli_auxinfo_next_a( data );
 	void* b_next = bli_auxinfo_next_b( data );
+	static int called = 0;
+	if (!called)
+		fprintf(stderr, "8x8 called\n");
+	called = 1;
 
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
@@ -70,27 +74,27 @@ void bli_dgemm_armsve256_asm_8x8
 
 __asm__ volatile
 (
-"                                            \n\t" 
-" ldr x0,%[aaddr]                            \n\t" // Load address of A 
-" ldr x1,%[baddr]                            \n\t" // Load address of B
-" ldr x2,%[caddr]                            \n\t" // Load address of C
+// "                                            \n\t" 
+// " ldr x0,%[aaddr]                            \n\t" // Load address of A 
+// " ldr x1,%[baddr]                            \n\t" // Load address of B
+// " ldr x2,%[caddr]                            \n\t" // Load address of C
+// "                                            \n\t"
+// " ldr x3,%[a_next]                           \n\t" // Move pointer
+// " ldr x4,%[b_next]                           \n\t" // Move pointer
+// "                                            \n\t"
+// " ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
+// " ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
+// "                                            \n\t" 
+// " ldr x7,%[alpha]                            \n\t" // Alpha address      
+// " ldr x8,%[beta]                             \n\t" // Beta address      
+// "                                            \n\t" 
+// " ldr x9,%[cs_c]                             \n\t" // Load cs_c
+// " ldr x13,%[rs_c]                            \n\t" // Load rs_c.
 "                                            \n\t"
-" ldr x3,%[a_next]                           \n\t" // Move pointer
-" ldr x4,%[b_next]                           \n\t" // Move pointer
+" lsl x10,%9,#3                              \n\t" // cs_c * sizeof(double)
+" lsl x14,%10,#3                             \n\t" // rs_c * sizeof(double). 
 "                                            \n\t"
-" ldr x5,%[k_iter]                           \n\t" // Init guard (k_iter)
-" ldr x6,%[k_left]                           \n\t" // Init guard (k_iter)
-"                                            \n\t" 
-" ldr x7,%[alpha]                            \n\t" // Alpha address      
-" ldr x8,%[beta]                             \n\t" // Beta address      
-"                                            \n\t" 
-" ldr x9,%[cs_c]                             \n\t" // Load cs_c
-" lsl x10,x9,#3                              \n\t" // cs_c * sizeof(double)
-"                                            \n\t"
-" ldr x13,%[rs_c]                            \n\t" // Load rs_c.
-" lsl x14,x13,#3                             \n\t" // rs_c * sizeof(double). 
-"                                            \n\t"
-" add x20,x2,x10                             \n\t" //Load address Column 1 of C
+" add x20,%2,x10                             \n\t" //Load address Column 1 of C
 " add x21,x20,x10                            \n\t" //Load address Column 2 of C
 " add x22,x21,x10                            \n\t" //Load address Column 3 of C
 " add x23,x22,x10                            \n\t" //Load address Column 4 of C
@@ -98,7 +102,7 @@ __asm__ volatile
 " add x25,x24,x10                            \n\t" //Load address Column 6 of C
 " add x26,x25,x10                            \n\t" //Load address Column 7 of C
 "                                            \n\t"
-" prfm pldl1keep,[x2]                        \n\t" // Prefetch c.
+" prfm pldl1keep,[%2]                        \n\t" // Prefetch c.
 " prfm pldl1keep,[x20]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x21]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x22]                       \n\t" // Prefetch c.
@@ -107,39 +111,39 @@ __asm__ volatile
 " prfm pldl1keep,[x25]                       \n\t" // Prefetch c.
 " prfm pldl1keep,[x26]                       \n\t" // Prefetch c.
 "                                            \n\t"
-" ldr  z0, [x0]                              \n\t" // Load a
-" ldr  z1, [x0, #1, MUL VL]                  \n\t"
+" ldr  z0, [%0]                              \n\t" // Load a
+" ldr  z1, [%0, #1, MUL VL]                  \n\t"
 "                                            \n\t"
 " ptrue   p0.d, all                          \n\t"
-" ld1rqd  {z2.d}, p0/z, [x1]                 \n\t" // load b( l,0:1 )
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
+" ld1rqd  {z2.d}, p0/z, [%1]                 \n\t" // load b( l,0:1 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
 "                                            \n\t"
-"                                            \n\t" // PRFM, the following prefetch on [x1] and [x0]
+"                                            \n\t" // PRFM, the following prefetch on [%1] and [%0]
 "                                            \n\t" //   is for b rows 4..7 and a columns 4..7.
 "                                            \n\t" //   both of them will be used in next iteration
 "                                            \n\t" //   of k_iter (unrolled per 4 loops)
 "                                            \n\t"
 " dup  z16.d, #0                             \n\t" // Vector for accummulating column 0
-" prfm    PLDL1KEEP, [x1, #256]              \n\t" // prefetch b row no.4
+" prfm    PLDL1KEEP, [%1, #256]              \n\t" // prefetch b row no.4
 " dup  z17.d, #0                             \n\t" // Vector for accummulating column 0
-" prfm    PLDL1KEEP, [x1, #320]              \n\t" // prefetch b row no.5
+" prfm    PLDL1KEEP, [%1, #320]              \n\t" // prefetch b row no.5
 " dup  z18.d, #0                             \n\t" // Vector for accummulating column 1
-" prfm    PLDL1KEEP, [x1, #384]              \n\t" // prefetch b row no.6
+" prfm    PLDL1KEEP, [%1, #384]              \n\t" // prefetch b row no.6
 " dup  z19.d, #0                             \n\t" // Vector for accummulating column 1
-" prfm    PLDL1KEEP, [x1, #448]              \n\t" // preftech b row no.7
+" prfm    PLDL1KEEP, [%1, #448]              \n\t" // preftech b row no.7
 " dup  z20.d, #0                             \n\t" // Vector for accummulating column 2 
 " dup  z21.d, #0                             \n\t" // Vector for accummulating column 2
 "                                            \n\t"
 " dup  z22.d, #0                             \n\t" // Vector for accummulating column 3
-" prfm    PLDL1KEEP, [x0, #256]              \n\t" // prefetch a col. no.4
+" prfm    PLDL1KEEP, [%0, #256]              \n\t" // prefetch a col. no.4
 " dup  z23.d, #0                             \n\t" // Vector for accummulating column 3
-" prfm    PLDL1KEEP, [x0, #320]              \n\t" // prefetch a col. no.5
+" prfm    PLDL1KEEP, [%0, #320]              \n\t" // prefetch a col. no.5
 " dup  z24.d, #0                             \n\t" // Vector for accummulating column 4
-" prfm    PLDL1KEEP, [x0, #384]              \n\t" // prefetch a col. no.6
+" prfm    PLDL1KEEP, [%0, #384]              \n\t" // prefetch a col. no.6
 " dup  z25.d, #0                             \n\t" // Vector for accummulating column 4
-" prfm    PLDL1KEEP, [x0, #448]              \n\t" // prefetch a col. no.7
+" prfm    PLDL1KEEP, [%0, #448]              \n\t" // prefetch a col. no.7
 " dup  z26.d, #0                             \n\t" // Vector for accummulating column 5 
 " dup  z27.d, #0                             \n\t" // Vector for accummulating column 5
 "                                            \n\t"
@@ -149,157 +153,157 @@ __asm__ volatile
 " dup  z31.d, #0                             \n\t" // Vector for accummulating column 7
 "                                            \n\t"
 "                                            \n\t"
-" cmp x5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
+" cmp %5,#0                                  \n\t" // If k_iter == 0, jump to k_left.
 " beq .DCONSIDERKLEFT                        \n\t"
 "                                            \n\t"
-" add x0, x0, #64                            \n\t" //update address of A
-" add x1, x1, #64                            \n\t" //update address of B
+" add %0, %0, #64                            \n\t" //update address of A
+" add %1, %1, #64                            \n\t" //update address of B
 "                                            \n\t"
-" cmp x5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
+" cmp %5,1                                   \n\t" // If there is just one k_iter, jump to that one. 
 " beq .DLASTITER                             \n\t" // (as loop is do-while-like).
 "                                            \n\t"
 " DLOOP:                                     \n\t" // Body
 "                                            \n\t"
 " fmla z16.d, z0.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
-" prfm    PLDL1KEEP, [x1, #448]              \n\t" // prefetch b row no.8, 512-64=448
+" prfm    PLDL1KEEP, [%1, #448]              \n\t" // prefetch b row no.8, 512-64=448
 " fmla z17.d, z1.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
-" prfm    PLDL1KEEP, [x1, #512]              \n\t" // prefetch b row no.9
+" prfm    PLDL1KEEP, [%1, #512]              \n\t" // prefetch b row no.9
 " fmla z18.d, z0.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" prfm    PLDL1KEEP, [x1, #576]              \n\t" // prefetch b row no.10
+" prfm    PLDL1KEEP, [%1, #576]              \n\t" // prefetch b row no.10
 "                                            \n\t"
 " fmla z19.d, z1.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z0.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
-" ldr  z6, [x0]                              \n\t" // Load a( 0:3,l )
+" ldr  z6, [%0]                              \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z21.d, z1.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
 " fmla z22.d, z0.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
-" ldr  z7, [x0, #1, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z7, [%0, #1, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z23.d, z1.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z0.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1]                 \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1]                 \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z1.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z0.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z1.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z0.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z1.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z0.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z1.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"                  // End it 1
 "                                            \n\t"
 " fmla z16.d, z6.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
-" prfm    PLDL1KEEP, [x1, #640]              \n\t" // prefetch b row no.11
+" prfm    PLDL1KEEP, [%1, #640]              \n\t" // prefetch b row no.11
 " fmla z17.d, z7.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
-" prfm    PLDL1KEEP, [x0, #448]              \n\t" // prefetch a col. no.8
+" prfm    PLDL1KEEP, [%0, #448]              \n\t" // prefetch a col. no.8
 " fmla z18.d, z6.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" prfm    PLDL1KEEP, [x0, #512]              \n\t" // prefetch a col. no.9
+" prfm    PLDL1KEEP, [%0, #512]              \n\t" // prefetch a col. no.9
 "                                            \n\t"
 " fmla z19.d, z7.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z6.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
-" ldr  z0, [x0, #2, MUL VL]                  \n\t" // Load a( 0:3,l )
+" ldr  z0, [%0, #2, MUL VL]                  \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z21.d, z7.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
 " fmla z22.d, z6.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
-" ldr  z1, [x0, #3, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z1, [%0, #3, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z23.d, z7.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z6.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1, #64]            \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1, #64]            \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z7.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z6.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z7.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #80]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #80]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z6.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z7.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #96]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #96]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z6.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z7.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #112]           \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #112]           \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"
 "                                            \n\t"                  //End it 2
 "                                            \n\t"
 " fmla z16.d, z0.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
-" prfm    PLDL1KEEP, [x0, #576]              \n\t" // prefetch a col. no.10
+" prfm    PLDL1KEEP, [%0, #576]              \n\t" // prefetch a col. no.10
 " fmla z17.d, z1.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
-" prfm    PLDL1KEEP, [x0, #640]              \n\t" // prefetch a col. no.11
+" prfm    PLDL1KEEP, [%0, #640]              \n\t" // prefetch a col. no.11
 "                                            \n\t"
 " fmla z18.d, z0.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
 "                                            \n\t"
-" add x1, x1, #128                           \n\t" // because immediate in 'ldr1rqd' must be
+" add %1, %1, #128                           \n\t" // because immediate in 'ldr1rqd' must be
 "                                            \n\t" //   in range -128 to 112
 "                                            \n\t"
 " fmla z19.d, z1.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z0.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
-" ldr  z6, [x0, #4, MUL VL]                  \n\t" // Load a( 0:3,l )
+" ldr  z6, [%0, #4, MUL VL]                  \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z21.d, z1.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
 " fmla z22.d, z0.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
-" ldr  z7, [x0, #5, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z7, [%0, #5, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z23.d, z1.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z0.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1, #0]             \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1, #0]             \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z1.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z0.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z1.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z0.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z1.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z0.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z1.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"                  // End it 3
 "                                            \n\t"
 " fmla z16.d, z6.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
 " fmla z17.d, z7.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
 " fmla z18.d, z6.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" ldr  z0, [x0, #6, MUL VL]                  \n\t" // Load a( 0:3,l )
+" ldr  z0, [%0, #6, MUL VL]                  \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z19.d, z7.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z6.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
 " fmla z21.d, z7.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
-" ldr  z1, [x0, #7, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z1, [%0, #7, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z22.d, z6.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
 " fmla z23.d, z7.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z6.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1, #64]            \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1, #64]            \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z7.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z6.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z7.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #80]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #80]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z6.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z7.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #96]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #96]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z6.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z7.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #112]           \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #112]           \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"                  //End it 4
-" add x0, x0, #256                           \n\t"
-" add x1, x1, #128                           \n\t"
+" add %0, %0, #256                           \n\t"
+" add %1, %1, #128                           \n\t"
 "                                            \n\t"
-" sub x5,x5,1                                \n\t" // i-=1
-" cmp x5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
+" sub %5,%5,1                                \n\t" // i-=1
+" cmp %5,1                                   \n\t" // Iterate again if we are not in k_iter == 1.
 " bne DLOOP                                  \n\t"
 "                                            \n\t"
 ".DLASTITER:                                 \n\t"
@@ -307,60 +311,60 @@ __asm__ volatile
 " fmla z16.d, z0.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
 " fmla z17.d, z1.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
 " fmla z18.d, z0.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" ldr  z6, [x0]                              \n\t" // Load a( 0:3,l )
+" ldr  z6, [%0]                              \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z19.d, z1.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z0.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
 " fmla z21.d, z1.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
-" ldr  z7, [x0, #1, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z7, [%0, #1, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z22.d, z0.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
 " fmla z23.d, z1.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z0.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1]                 \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1]                 \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z1.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z0.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z1.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z0.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z1.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z0.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z1.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"                  // End it 1
 "                                            \n\t"
 " fmla z16.d, z6.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
 " fmla z17.d, z7.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
 " fmla z18.d, z6.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" ldr  z0, [x0, #2, MUL VL]                  \n\t" // Load a( 0:3,l )
+" ldr  z0, [%0, #2, MUL VL]                  \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z19.d, z7.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z6.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
 " fmla z21.d, z7.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
-" ldr  z1, [x0, #3, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z1, [%0, #3, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z22.d, z6.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
 " fmla z23.d, z7.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z6.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1, #64]            \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1, #64]            \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z7.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z6.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z7.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #80]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #80]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z6.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z7.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #96]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #96]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z6.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z7.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #112]           \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #112]           \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"
 "                                            \n\t"                  //End it 2
@@ -368,32 +372,32 @@ __asm__ volatile
 " fmla z16.d, z0.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
 " fmla z17.d, z1.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
 " fmla z18.d, z0.d, z2.d[1]                  \n\t" // Accummulate  c(0:3,1)+=a(0:3,l)*b(l,1)
-" ldr  z6, [x0, #4, MUL VL]                  \n\t" // Load a( 0:3,l )
+" ldr  z6, [%0, #4, MUL VL]                  \n\t" // Load a( 0:3,l )
 "                                            \n\t"
 " fmla z19.d, z1.d, z2.d[1]                  \n\t" // Accummulate  c(4:7,1)+=a(4:7,l)*b(l,1)
 " fmla z20.d, z0.d, z3.d[0]                  \n\t" // Accummulate  c(0:3,2)+=a(0:3,l)*b(l,2)
 " fmla z21.d, z1.d, z3.d[0]                  \n\t" // Accummulate  c(4:7,2)+=a(4:7,l)*b(l,2)
-" ldr  z7, [x0, #5, MUL VL]                  \n\t" // load a( 4:7,l )
+" ldr  z7, [%0, #5, MUL VL]                  \n\t" // load a( 4:7,l )
 "                                            \n\t"
 " fmla z22.d, z0.d, z3.d[1]                  \n\t" // Accummulate  c(0:3,3)+=a(0:3,l)*b(l,3)
-" add x1, x1, #128                           \n\t" // because immediate in 'ldr1rqd' must be
+" add %1, %1, #128                           \n\t" // because immediate in 'ldr1rqd' must be
 "                                            \n\t" //   in range -128 to 112
 " fmla z23.d, z1.d, z3.d[1]                  \n\t" // Accummulate  c(4:7,3)+=a(4:7,l)*b(l,3)
 " fmla z24.d, z0.d, z4.d[0]                  \n\t" // Accummulate  c(0:3,4)+=a(0:3,l)*b(l,4)
-" ld1rqd  {z2.d}, p0/z, [x1, #0]             \n\t" // load b( l,0:1 )
+" ld1rqd  {z2.d}, p0/z, [%1, #0]             \n\t" // load b( l,0:1 )
 "                                            \n\t"
 " fmla z25.d, z1.d, z4.d[0]                  \n\t" // Accummulate  c(4:7,4)+=a(4:7,l)*b(l,4)
 " fmla z26.d, z0.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z1.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
 "                                            \n\t"
 " fmla z28.d, z0.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z1.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
 "                                            \n\t"
 " fmla z30.d, z0.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z1.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
 "                                            \n\t"
 "                                            \n\t"                  // End it 3
 "                                            \n\t"
@@ -414,7 +418,7 @@ __asm__ volatile
 "                                            \n\t"
 " fmla z26.d, z6.d, z4.d[1]                  \n\t" // Accummulate  c(0:3,5)+=a(0:3,l)*b(l,5)
 " fmla z27.d, z7.d, z4.d[1]                  \n\t" // Accummulate  c(4:7,5)+=a(0:3,l)*b(l,5)
-" add x1, x1, #64                            \n\t"
+" add %1, %1, #64                            \n\t"
 "                                            \n\t"
 " fmla z28.d, z6.d, z5.d[0]                  \n\t" // Accummulate  c(0:3,6)+=a(0:3,l)*b(l,6)
 " fmla z29.d, z7.d, z5.d[0]                  \n\t" // Accummulate  c(4:7,6)+=a(0:3,l)*b(l,6)
@@ -423,25 +427,25 @@ __asm__ volatile
 " fmla z31.d, z7.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
 "                                            \n\t"
 "                                            \n\t"                  //End it 4
-" add x0, x0, #192                           \n\t"
+" add %0, %0, #192                           \n\t"
 "                                            \n\t"
 " .DCONSIDERKLEFT:                           \n\t" 
-" cmp x6,0                                   \n\t" // If k_left == 0, we are done.
+" cmp %6,0                                   \n\t" // If k_left == 0, we are done.
 " beq .DPOSTACCUM                            \n\t" // else, we enter the k_left loop.
 "                                            \n\t"
 ".DLOOPKLEFT:                                \n\t"
 "                                            \n\t"
-" ldr  z0, [x0]                              \n\t" // Load a
-" ldr  z1, [x0, #1, MUL VL]                  \n\t"
-" add x0, x0, #64                            \n\t"
+" ldr  z0, [%0]                              \n\t" // Load a
+" ldr  z1, [%0, #1, MUL VL]                  \n\t"
+" add %0, %0, #64                            \n\t"
 "                                            \n\t"
-" ld1rqd  {z2.d}, p0/z, [x1]                 \n\t" // load b( l,0:1 )
-" ld1rqd  {z3.d}, p0/z, [x1, #16]            \n\t" // load b( l,2:3 )
-" ld1rqd  {z4.d}, p0/z, [x1, #32]            \n\t" // load b( l,4:5 )
-" ld1rqd  {z5.d}, p0/z, [x1, #48]            \n\t" // load b( l,6:7 )
-" add x1, x1, #64                            \n\t"
+" ld1rqd  {z2.d}, p0/z, [%1]                 \n\t" // load b( l,0:1 )
+" ld1rqd  {z3.d}, p0/z, [%1, #16]            \n\t" // load b( l,2:3 )
+" ld1rqd  {z4.d}, p0/z, [%1, #32]            \n\t" // load b( l,4:5 )
+" ld1rqd  {z5.d}, p0/z, [%1, #48]            \n\t" // load b( l,6:7 )
+" add %1, %1, #64                            \n\t"
 "                                            \n\t"
-" sub x6,x6,1                                \n\t"
+" sub %6,%6,1                                \n\t"
 "                                            \n\t"
 " fmla z16.d, z0.d, z2.d[0]                  \n\t" // Accummulate  c(0:3,0)+=a(0:3,l)*b(l,0)
 " fmla z17.d, z1.d, z2.d[0]                  \n\t" // Accummulate  c(4:7,0)+=a(4:7,l)*b(l,0)
@@ -467,15 +471,15 @@ __asm__ volatile
 " fmla z30.d, z0.d, z5.d[1]                  \n\t" // Accummulate  c(0:3,7)+=a(0:3,l)*b(l,7)
 " fmla z31.d, z1.d, z5.d[1]                  \n\t" // Accummulate  c(4:7,7)+=a(0:3,l)*b(l,7)
 "                                            \n\t"
-" cmp x6,0                                   \n\t" // Iterate again.
+" cmp %6,0                                   \n\t" // Iterate again.
 " bne .DLOOPKLEFT                            \n\t" // if i!=0.
 "                                            \n\t"
 " .DPOSTACCUM:                               \n\t"
 "                                            \n\t"
-" ld1rd {z6.d}, p0/z, [x7]                   \n\t" // Load alpha.
-" ld1rd {z7.d}, p0/z, [x8]                   \n\t" // Load beta
+" ld1rd {z6.d}, p0/z, [%7]                   \n\t" // Load alpha.
+" ld1rd {z7.d}, p0/z, [%8]                   \n\t" // Load beta
 "                                            \n\t"
-" cmp x13,#1                                 \n\t" // If rs_c != 1 (column-major)
+" cmp %10,#1                                 \n\t" // If rs_c != 1 (column-major)
 " bne .DGENSTORED                            \n\t"
 "                                            \n\t"
 " .DCOLSTORED:                               \n\t" // C is column-major.
@@ -488,8 +492,8 @@ __asm__ volatile
 " fcmp d7,#0.0                               \n\t"
 " beq .DBETAZEROCOLSTOREDS1                  \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
-" ldr z0, [x2]                               \n\t" //Load column 0 of C
-" ldr z1, [x2, #1, MUL VL]                   \n\t"
+" ldr z0, [%2]                               \n\t" //Load column 0 of C
+" ldr z1, [%2, #1, MUL VL]                   \n\t"
 "                                            \n\t"
 " ldr z2, [x20]                              \n\t" //Load column 1 of C
 " ldr z3, [x20, #1, MUL VL]                  \n\t"
@@ -506,8 +510,8 @@ __asm__ volatile
 " fmla z2.d, z18.d, z6.d[0]                  \n\t" // Scale by alpha
 " fmla z3.d, z19.d, z6.d[0]                  \n\t" // Scale by alpha
 "                                            \n\t"
-" str z0, [x2]                               \n\t" //Store column 0 of C
-" str z1, [x2, #1, MUL VL]                   \n\t"
+" str z0, [%2]                               \n\t" //Store column 0 of C
+" str z1, [%2, #1, MUL VL]                   \n\t"
 "                                            \n\t"
 " str z2, [x20]                              \n\t" //Store column 1 of C
 " str z3, [x20, #1, MUL VL]                  \n\t"
@@ -597,8 +601,8 @@ __asm__ volatile
 "                                            \n\t"
 " .DBETAZEROCOLSTOREDS4:                     \n\t"
 "                                            \n\t"
-" prfm pldl2keep,[x3]                        \n\t"
-" prfm pldl2keep,[x4]                        \n\t"
+" prfm pldl2keep,[%3]                        \n\t"
+" prfm pldl2keep,[%4]                        \n\t"
 "                                            \n\t"
 " fmla z8.d,  z28.d, z6.d[0]                 \n\t" // Scale by alpha
 " fmla z9.d,  z29.d, z6.d[0]                 \n\t" // Scale by alpha
@@ -624,12 +628,12 @@ __asm__ volatile
 "                                            \n\t" //     loading/storing from column of *c
 "                                            \n\t"
 "                                            \n\t" // C's each column's address:
-"                                            \n\t" //     x2, x20, x21, x22, x23, x24, x25, x26: are addresses of c(0,0:7)
-"                                            \n\t" //     x5, x6,  x7,  x8,  x16, x17, x18, x19: are addresses of c(4,0:7)
-" add  x5,  x15, x2                          \n\t" // x5  is address of c(4,0)
-" add  x6,  x15, x20                         \n\t" // x6  is address of c(4,1)
-" add  x7,  x15, x21                         \n\t" // x7  is address of c(4,2)
-" add  x8,  x15, x22                         \n\t" // x8  is address of c(4,3)
+"                                            \n\t" //     %2, x20, x21, x22, x23, x24, x25, x26: are addresses of c(0,0:7)
+"                                            \n\t" //     %5, %6,  %7,  %8,  x16, x17, x18, x19: are addresses of c(4,0:7)
+" add  %5,  x15, %2                          \n\t" // %5  is address of c(4,0)
+" add  %6,  x15, x20                         \n\t" // %6  is address of c(4,1)
+" add  %7,  x15, x21                         \n\t" // %7  is address of c(4,2)
+" add  %8,  x15, x22                         \n\t" // %8  is address of c(4,3)
 " add  x16, x15, x23                         \n\t" // x16 is address of c(4,4)
 " add  x17, x15, x24                         \n\t" // x17 is address of c(4,5)
 " add  x18, x15, x25                         \n\t" // x18 is address of c(4,6)
@@ -643,14 +647,14 @@ __asm__ volatile
 " fcmp d7,#0.0                               \n\t"
 " beq .DBETAZEROGENSTOREDS1                  \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
-"                                            \n\t" // x2  is address of c(0,0)
-"                                            \n\t" // x5  is address of c(4,0)
+"                                            \n\t" // %2  is address of c(0,0)
+"                                            \n\t" // %5  is address of c(4,0)
 "                                            \n\t" // x20 is address of c(0,1)
-"                                            \n\t" // x6  is address of c(4,1)
-" ld1d {z0.d}, p0/z, [x2, z4.d]              \n\t" // Load c( 0:3,0 ) into z0
-" ld1d {z1.d}, p0/z, [x5, z4.d]              \n\t" // Load c( 4:7,0 ) into z1
+"                                            \n\t" // %6  is address of c(4,1)
+" ld1d {z0.d}, p0/z, [%2, z4.d]              \n\t" // Load c( 0:3,0 ) into z0
+" ld1d {z1.d}, p0/z, [%5, z4.d]              \n\t" // Load c( 4:7,0 ) into z1
 " ld1d {z2.d}, p0/z, [x20, z4.d]             \n\t" // Load c( 0:3,1 ) into z2
-" ld1d {z3.d}, p0/z, [x6 , z4.d]             \n\t" // Load c( 4:7,1 ) into z3
+" ld1d {z3.d}, p0/z, [%6 , z4.d]             \n\t" // Load c( 4:7,1 ) into z3
 "                                            \n\t"
 " fmul z0.d, z0.d, z7.d                      \n\t" // Scale by beta
 " fmul z1.d, z1.d, z7.d                      \n\t" // Scale by beta
@@ -664,10 +668,10 @@ __asm__ volatile
 " fmla z2.d, z18.d, z6.d[0]                  \n\t" // Scale by alpha
 " fmla z3.d, z19.d, z6.d[0]                  \n\t" // Scale by alpha
 "                                            \n\t"
-" st1d {z0.d}, p0, [x2 , z4.d]               \n\t" // Store c( 0:3,0 ) <- z0
-" st1d {z1.d}, p0, [x5 , z4.d]               \n\t" // Store c( 4:7,0 ) <- z1
+" st1d {z0.d}, p0, [%2 , z4.d]               \n\t" // Store c( 0:3,0 ) <- z0
+" st1d {z1.d}, p0, [%5 , z4.d]               \n\t" // Store c( 4:7,0 ) <- z1
 " st1d {z2.d}, p0, [x20, z4.d]               \n\t" // Store c( 0:3,1 ) <- z2
-" st1d {z3.d}, p0, [x6 , z4.d]               \n\t" // Store c( 4:7,1 ) <- z3
+" st1d {z3.d}, p0, [%6 , z4.d]               \n\t" // Store c( 4:7,1 ) <- z3
 "                                            \n\t"
 "                                            \n\t"
 "                                            \n\t"
@@ -680,13 +684,13 @@ __asm__ volatile
 " beq .DBETAZEROGENSTOREDS2                  \n\t" // Taking care of the beta==0 case.
 "                                            \n\t"
 "                                            \n\t" // x21 is address of c(0,2)
-"                                            \n\t" // x7  is address of c(4,2)
+"                                            \n\t" // %7  is address of c(4,2)
 "                                            \n\t" // x22 is address of c(0,3)
-"                                            \n\t" // x8  is address of c(4,3)
+"                                            \n\t" // %8  is address of c(4,3)
 " ld1d {z8.d},  p0/z, [x21, z4.d]            \n\t" // Load c( 0:3,2 ) into z8
-" ld1d {z9.d},  p0/z, [x7 , z4.d]            \n\t" // Load c( 4:7,2 ) into z9
+" ld1d {z9.d},  p0/z, [%7 , z4.d]            \n\t" // Load c( 4:7,2 ) into z9
 " ld1d {z10.d}, p0/z, [x22, z4.d]            \n\t" // Load c( 0:3,3 ) into z10
-" ld1d {z11.d}, p0/z, [x8 , z4.d]            \n\t" // Load c( 4:7,3 ) into z11
+" ld1d {z11.d}, p0/z, [%8 , z4.d]            \n\t" // Load c( 4:7,3 ) into z11
 "                                            \n\t"
 " fmul z8.d,  z8.d,  z7.d                    \n\t" // Scale by beta
 " fmul z9.d,  z9.d,  z7.d                    \n\t" // Scale by beta
@@ -701,9 +705,9 @@ __asm__ volatile
 " fmla z11.d, z23.d, z6.d[0]                 \n\t" // Scale by alpha
 "                                            \n\t"
 " st1d {z8.d},  p0, [x21, z4.d]              \n\t" // Store c( 0:3,2 ) <- z8
-" st1d {z9.d},  p0, [x7 , z4.d]              \n\t" // Store c( 4:7,2 ) <- z9
+" st1d {z9.d},  p0, [%7 , z4.d]              \n\t" // Store c( 4:7,2 ) <- z9
 " st1d {z10.d}, p0, [x22, z4.d]              \n\t" // Store c( 0:3,3 ) <- z10
-" st1d {z11.d}, p0, [x8 , z4.d]              \n\t" // Store c( 4:7,3 ) <- z11
+" st1d {z11.d}, p0, [%8 , z4.d]              \n\t" // Store c( 4:7,3 ) <- z11
 "                                            \n\t"
 " dup  z0.d, #0                              \n\t" // C column 4, 5
 " dup  z1.d, #0                              \n\t"
@@ -775,24 +779,21 @@ __asm__ volatile
 "                                            \n\t"
 " .DEND:                                     \n\t" // Done!
 "                                            \n\t"
-:// output operands (none)
-:// input operands
- [aaddr]  "m" (a),      // 0
- [baddr]  "m" (b),      // 1
- [caddr]  "m" (c),      // 2
- [k_iter] "m" (k_iter), // 3
- [k_left] "m" (k_left), // 4
- [alpha]  "m" (alpha),  // 5
- [beta]   "m" (beta),   // 6
- [rs_c]   "m" (rs_c),   // 6
- [cs_c]   "m" (cs_c),   // 7
- [a_next] "m" (a_next), // 8
- [b_next] "m" (b_next)  // 9
+:// input/output operands
+ "+r" (a),      // %0
+ "+r" (b),      // %1
+ "+r" (c),      // %2
+ "+r" (a_next), // %3
+ "+r" (b_next), // %4
+ "+r" (k_iter), // %5
+ "+r" (k_left), // %6
+ "+r" (alpha),  // %7
+ "+r" (beta),   // %8
+ "+r" (cs_c),   // %9
+ "+r" (rs_c)    // %10 
+:// input-only operands (none)
 :// Register clobber list
- "x0","x1","x2","x3",
- "x4","x5","x6",
- "x7","x8","x9",
- "x10","x11","x12","x13","x14","x15","x16","x17","x18","x19",
+ "x10","x11","x12","x14","x15","x16","x17","x18","x19",
  "x20","x21","x22","x23","x24","x25","x26",
  "x27",       
  "v0","v1","v2",
