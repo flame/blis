@@ -4125,33 +4125,16 @@ void bli_sgemmsup_rv_zen_asm_3x8
     
     vshufpd(imm(0x01), xmm0, xmm0, xmm1)//a1b1
     vshufpd(imm(0x01), xmm2, xmm2, xmm10)//a3b3    
-    vmovsd(mem(rcx),xmm4)
-    vmovsd(mem(rcx, rsi, 1),xmm6)    
-    vfmadd231ps(xmm4, xmm3, xmm0)
-    vfmadd231ps(xmm6, xmm3, xmm1)
     vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
     vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )    
-    vmovsd(mem(rcx, rsi, 2),xmm4)
-    vmovsd(mem(rcx, rax, 1),xmm6)
-    vfmadd231ps(xmm4, xmm3, xmm2)
-    vfmadd231ps(xmm6, xmm3, xmm10)    
     vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
     vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
     lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
     
     vshufpd(imm(0x01), xmm11, xmm11, xmm1)//a1b1
     vshufpd(imm(0x01), xmm12, xmm12, xmm10)//a3b3        
-    vmovsd(mem(rcx),xmm4)
-    vmovsd(mem(rcx, rsi, 1),xmm6)    
-    vfmadd231ps(xmm4, xmm3, xmm11)
-    vfmadd231ps(xmm6, xmm3, xmm1)
     vmovsd(xmm11, mem(rcx)) // store ( gamma00..gamma10 )
     vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )    
-    
-    vmovsd(mem(rcx, rsi, 2),xmm4)
-    vmovsd(mem(rcx, rax, 1),xmm6)
-    vfmadd231ps(xmm4, xmm3, xmm12)
-    vfmadd231ps(xmm6, xmm3, xmm10)
     vmovsd(xmm12, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
     vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )    
     
@@ -4474,33 +4457,16 @@ void bli_sgemmsup_rv_zen_asm_2x8
     
     vshufpd(imm(0x01), xmm0, xmm0, xmm1)//a1b1
     vshufpd(imm(0x01), xmm2, xmm2, xmm10)//a3b3    
-    vmovsd(mem(rcx),xmm4)
-    vmovsd(mem(rcx, rsi, 1),xmm6)    
-    vfmadd231ps(xmm4, xmm3, xmm0)
-    vfmadd231ps(xmm6, xmm3, xmm1)
     vmovsd(xmm0, mem(rcx)) // store ( gamma00..gamma10 )
     vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )    
-    vmovsd(mem(rcx, rsi, 2),xmm4)
-    vmovsd(mem(rcx, rax, 1),xmm6)
-    vfmadd231ps(xmm4, xmm3, xmm2)
-    vfmadd231ps(xmm6, xmm3, xmm10)    
     vmovsd(xmm2, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
     vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
     lea(mem(rcx, rsi, 4), rcx) // rcx += cs_c
     
     vshufpd(imm(0x01), xmm11, xmm11, xmm1)//a1b1
     vshufpd(imm(0x01), xmm12, xmm12, xmm10)//a3b3        
-    vmovsd(mem(rcx),xmm4)
-    vmovsd(mem(rcx, rsi, 1),xmm6)    
-    vfmadd231ps(xmm4, xmm3, xmm11)
-    vfmadd231ps(xmm6, xmm3, xmm1)
     vmovsd(xmm11, mem(rcx)) // store ( gamma00..gamma10 )
     vmovsd(xmm1, mem(rcx, rsi, 1)) // store ( gamma01..gamma11 )    
-    
-    vmovsd(mem(rcx, rsi, 2),xmm4)
-    vmovsd(mem(rcx, rax, 1),xmm6)
-    vfmadd231ps(xmm4, xmm3, xmm12)
-    vfmadd231ps(xmm6, xmm3, xmm10)
     vmovsd(xmm12, mem(rcx, rsi, 2)) // store ( gamma02..gamma12 )
     vmovsd(xmm10, mem(rcx, rax, 1)) // store ( gamma03..gamma13 )
 
