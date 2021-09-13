@@ -823,6 +823,9 @@ err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx )
 {
 	err_t e_val = BLIS_SUCCESS;
 
+    if ( !cntx )
+        return e_val;
+
 	dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	siz_t dt_size = bli_dt_size( dt );

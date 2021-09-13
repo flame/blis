@@ -194,6 +194,10 @@ void PASTEMAC(opname,ind) \
     obj_t bh; \
     obj_t alphah; \
 \
+	/* Check parameters. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		bli_her2k_check( alpha, a, b, beta, c, cntx ); \
+\
 	bli_obj_alias_to( alpha, &alphah ); \
 	bli_obj_toggle_conj( &alphah ); \
 \
@@ -257,6 +261,10 @@ void PASTEMAC(opname,ind) \
 \
     obj_t at; \
     obj_t bt; \
+\
+	/* Check parameters. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		bli_syr2k_check( alpha, a, b, beta, c, cntx ); \
 \
 	bli_obj_alias_to( b, &bt ); \
 	bli_obj_induce_trans( &bt ); \
@@ -449,6 +457,10 @@ void PASTEMAC(opname,ind) \
 \
     obj_t ah; \
 \
+	/* Check parameters. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		bli_herk_check( alpha, a, beta, c, cntx ); \
+\
 	bli_obj_alias_to( a, &ah ); \
 	bli_obj_induce_trans( &ah ); \
     bli_obj_toggle_conj( &ah ); \
@@ -499,6 +511,10 @@ void PASTEMAC(opname,ind) \
     bli_init_once(); \
 \
     obj_t at; \
+\
+	/* Check parameters. */ \
+	if ( bli_error_checking_is_enabled() ) \
+		bli_syrk_check( alpha, a, beta, c, cntx ); \
 \
 	bli_obj_alias_to( a, &at ); \
 	bli_obj_induce_trans( &at ); \
