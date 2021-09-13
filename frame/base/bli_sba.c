@@ -76,24 +76,31 @@ void* bli_sba_acquire
 		// Query the small block pool from the rntm.
 		pool_t* restrict pool = bli_rntm_sba_pool( rntm );
 
-		// Query the block_size of the pool_t so that we can request the exact
-		// size present.
-		const siz_t block_size = bli_pool_block_size( pool );
+        if ( pool == NULL )
+        {
+		    block = bli_malloc_intl( req_size, &r_val );
+        }
+        else
+        {
+    		// Query the block_size of the pool_t so that we can request the exact
+    		// size present.
+    		const siz_t block_size = bli_pool_block_size( pool );
 
-		// Sanity check: Make sure the requested size is no larger than the
-		// block_size field of the pool.
-		if ( block_size < req_size )
-		{
-			printf( "bli_sba_acquire(): ** pool block_size is %d but req_size is %d.\n",
-			        ( int )block_size, ( int )req_size );
-			bli_abort();
-		}
+    		// Sanity check: Make sure the requested size is no larger than the
+    		// block_size field of the pool.
+    		if ( block_size < req_size )
+    		{
+    			printf( "bli_sba_acquire(): ** pool block_size is %d but req_size is %d.\n",
+    			        ( int )block_size, ( int )req_size );
+    			bli_abort();
+    		}
 
-		// Check out a block using the block_size queried above.
-		bli_pool_checkout_block( block_size, &pblk, pool );
+    		// Check out a block using the block_size queried above.
+    		bli_pool_checkout_block( block_size, &pblk, pool );
 
-		// The block address is stored within the pblk_t.
-		block = bli_pblk_buf( &pblk );
+    		// The block address is stored within the pblk_t.
+    		block = bli_pblk_buf( &pblk );
+        }
 	}
 #else
 
@@ -123,21 +130,28 @@ void bli_sba_release
 		// Query the small block pool from the rntm.
 		pool_t* restrict pool = bli_rntm_sba_pool( rntm );
 
-		// Query the block_size field from the pool. This is not super-important
-		// for this particular application of the pool_t (that is, the "leaf"
-		// component of the sba), but it seems like good housekeeping to maintain
-		// the block_size field of the pblk_t in case its ever needed/read.
-		const siz_t block_size = bli_pool_block_size( pool );
+        if ( pool == NULL )
+        {
+		    bli_free_intl( block );
+        }
+        else
+        {
+    		// Query the block_size field from the pool. This is not super-important
+    		// for this particular application of the pool_t (that is, the "leaf"
+    		// component of the sba), but it seems like good housekeeping to maintain
+    		// the block_size field of the pblk_t in case its ever needed/read.
+    		const siz_t block_size = bli_pool_block_size( pool );
 
-		// Embed the block's memory address into a pblk_t, along with the
-		// block_size queried from the pool.
-		bli_pblk_set_buf( block, &pblk );
-		bli_pblk_set_block_size( block_size, &pblk );
+    		// Embed the block's memory address into a pblk_t, along with the
+    		// block_size queried from the pool.
+    		bli_pblk_set_buf( block, &pblk );
+    		bli_pblk_set_block_size( block_size, &pblk );
 
-		// Check the pblk_t back into the pool_t. (It's okay that the pblk_t is
-		// a local variable since its contents are copied into the pool's internal
-		// data structure--an array of pblk_t.)
-		bli_pool_checkin_block( &pblk, pool );
+    		// Check the pblk_t back into the pool_t. (It's okay that the pblk_t is
+    		// a local variable since its contents are copied into the pool's internal
+    		// data structure--an array of pblk_t.)
+    		bli_pool_checkin_block( &pblk, pool );
+        }
 	}
 #else
 

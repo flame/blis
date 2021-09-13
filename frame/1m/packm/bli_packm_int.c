@@ -39,6 +39,7 @@ void bli_packm_int
        obj_t*  a,
        obj_t*  p,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      )
@@ -46,10 +47,6 @@ void bli_packm_int
 	bli_init_once();
 
 	packm_var_oft f;
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_packm_int_check( a, p, cntx );
 
 	// Sanity check; A should never have a zero dimension. If we must support
 	// it, then we should fold it into the next alias-and-early-exit block.
@@ -93,14 +90,21 @@ void bli_packm_int
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_packm_params_var_func( cntl );
 
+	// FGVZ: Not sure why we need this barrier, but we do.
+	bli_thread_barrier( thread );
+
 	// Invoke the variant with kappa_use.
 	f
 	(
 	  a,
 	  p,
 	  cntx,
+      rntm,
 	  cntl,
 	  thread
 	);
+
+	// Barrier so that packing is done before computation.
+	bli_thread_barrier( thread );
 }
 

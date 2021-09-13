@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2016, Hewlett Packard Enterprise Development LP
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,45 +35,19 @@
 
 #include "blis.h"
 
-void bli_l3_packm
-     (
-       obj_t*  x,
-       obj_t*  x_pack,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
-     )
+void* bli_packm_alloc
+      (
+        siz_t      size_needed,
+        rntm_t*    rntm,
+        cntl_t*    cntl,
+        thrinfo_t* thread
+      )
 {
-	packbuf_t pack_buf_type;
-	mem_t*    cntl_mem_p;
-	siz_t     size_needed;
-
-	// FGVZ: Not sure why we need this barrier, but we do.
-	bli_thread_barrier( thread );
-
-	// Every thread initializes x_pack and determines the size of memory
-	// block needed (which gets embedded into the otherwise "blank" mem_t
-	// entry in the control tree node).
-	size_needed
-	=
-	bli_packm_init
-	(
-	  x,
-	  x_pack,
-	  cntx,
-	  cntl
-	);
-
-	// If zero was returned, no memory needs to be allocated and so we can
-	// return early.
-	if ( size_needed == 0 ) return;
-
 	// Query the pack buffer type from the control tree node.
-	pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
+	packbuf_t pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
 
 	// Query the address of the mem_t entry within the control tree node.
-	cntl_mem_p = bli_cntl_pack_mem( cntl );
+	mem_t* cntl_mem_p = bli_cntl_pack_mem( cntl );
 
 	// Check the mem_t field in the control tree. If it is unallocated, then
 	// we need to acquire a block from the memory broker and broadcast it to
@@ -163,25 +137,6 @@ void bli_l3_packm
 		}
 	}
 
-
-	// Update the buffer address in x_pack to point to the buffer associated
-	// with the mem_t entry acquired from the memory broker (now cached in
-	// the control tree node).
-	void* buf = bli_mem_buffer( cntl_mem_p );
-    bli_obj_set_buffer( buf, x_pack );
-
-
-	// Pack the contents of object x to object x_pack.
-	bli_packm_int
-	(
-	  x,
-	  x_pack,
-	  cntx,
-	  cntl,
-	  thread
-	);
-
-	// Barrier so that packing is done before computation.
-	bli_thread_barrier( thread );
+    return bli_mem_buffer( cntl_mem_p );
 }
 

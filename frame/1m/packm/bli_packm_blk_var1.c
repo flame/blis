@@ -78,10 +78,25 @@ void bli_packm_blk_var1
        obj_t*   c,
        obj_t*   p,
        cntx_t*  cntx,
+       rntm_t*  rntm,
        cntl_t*  cntl,
        thrinfo_t* thread
      )
 {
+	// Every thread initializes p and determines the size of memory
+	// block needed (which gets embedded into the otherwise "blank" mem_t
+	// entry in the control tree node).
+	// Update the buffer address in p to point to the buffer associated
+	// with the mem_t entry acquired from the memory broker (now cached in
+	// the control tree node).
+    // Return early if no packing is required.
+	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
+        return;
+
+	// Check parameters.
+	if ( bli_error_checking_is_enabled() )
+		bli_packm_int_check( c, p, cntx );
+
 	num_t   dt_c           = bli_obj_dt( c );
     dim_t   dt_c_size      = bli_dt_size( dt_c );
 
@@ -108,7 +123,7 @@ void bli_packm_blk_var1
 	dim_t   panel_dim_off  = bli_obj_row_off( c );
 	dim_t   panel_len_off  = bli_obj_col_off( c );
 
-	char*   p_cast         = bli_obj_buffer_at_off( p );
+	char*   p_cast         = bli_obj_buffer( p );
 	inc_t   ldp            = bli_obj_col_stride( p );
 	inc_t   is_p           = bli_obj_imag_stride( p );
 	dim_t   panel_dim_max  = bli_obj_panel_dim( p );
@@ -116,46 +131,13 @@ void bli_packm_blk_var1
 
 	doff_t  diagoffc_inc   = ( doff_t )panel_dim_max;
 
+    obj_t   kappa_local;
+    char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
+
 	/* If C is zeros and part of a triangular matrix, then we don't need
 	   to pack it. */
 	if ( bli_is_zeros( uploc ) &&
 	     bli_is_triangular( strucc ) ) return;
-
-    char* kappa_cast;
-
-	// The value for kappa we use will depends on whether the scalar
-	// attached to A has a nonzero imaginary component. If it does,
-	// then we will apply the scalar during packing to facilitate
-	// implementing induced complex domain algorithms in terms of
-	// real domain micro-kernels. (In the aforementioned situation,
-	// applying a real scalar is easy, but applying a complex one is
-	// harder, so we avoid the need altogether with the code below.)
-	if ( bli_obj_scalar_has_nonzero_imag( p ) &&
-         !bli_is_nat_packed( schema ) )
-	{
-		//printf( "applying non-zero imag kappa\n_p" );
-	    obj_t kappa;
-
-		// Detach the scalar.
-		bli_obj_scalar_detach( p, &kappa );
-
-		// Reset the attached scalar (to 1.0).
-		bli_obj_scalar_reset( p );
-
-	    kappa_cast = bli_obj_buffer_for_1x1( dt_p, &kappa );
-	}
-	// This branch is also for native execution, where we assume that
-	// the micro-kernel will always apply the alpha scalar of the
-	// higher-level operation. Thus, we use BLIS_ONE for kappa so
-	// that the underlying packm implementation does not perform
-	// any scaling during packing.
-	else
-	{
-		// If the internal scalar of A has only a real component, then
-		// we will apply it later (in the micro-kernel), and so we will
-		// use BLIS_ONE to indicate no scaling during packing.
-	    kappa_cast = bli_obj_buffer_for_1x1( dt_p, &BLIS_ONE );
-	}
 
 	// If the packm structure-aware kernel func_t in the context is
 	// NULL (which is the default value after the context is created),
@@ -411,124 +393,3 @@ void bli_packm_blk_var1
 	}
 }
 
-
-
-/*
-if ( row_stored )
-PASTEMAC(ch,fprintm)( stdout, "packm_var2: b", m_p, n_p,
-                      c_cast,        rs_c, cs_c, "%4.1f", "" );
-if ( col_stored )
-PASTEMAC(ch,fprintm)( stdout, "packm_var2: a", m_p, n_p,
-                      c_cast,        rs_c, cs_c, "%4.1f", "" );
-*/
-/*
-if ( row_stored )
-PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b packed", *m_panel_max, *n_panel_max,
-                               p_use, rs_p, cs_p, "%5.2f", "" );
-else
-PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a packed", *m_panel_max, *n_panel_max,
-                               p_use, rs_p, cs_p, "%5.2f", "" );
-*/
-
-/*
-if ( col_stored ) {
-	if ( bli_thread_work_id( thread ) == 0 )
-	{
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n_p", bli_thread_work_id( thread ), c_use, p_use );
-	fflush( stdout );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use,
-	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: ap", *m_panel_max, *n_panel_max,
-	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" );
-	fflush( stdout );
-	}
-bli_thread_barrier( thread );
-	if ( bli_thread_work_id( thread ) == 1 )
-	{
-	printf( "packm_blk_var1: thread %lu  (a = %p, ap = %p)\n_p", bli_thread_work_id( thread ), c_use, p_use );
-	fflush( stdout );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: a", *m_panel_use, *n_panel_use,
-	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: ap", *m_panel_max, *n_panel_max,
-	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" );
-	fflush( stdout );
-	}
-bli_thread_barrier( thread );
-}
-else {
-	if ( bli_thread_work_id( thread ) == 0 )
-	{
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n_p", bli_thread_work_id( thread ), c_use, p_use );
-	fflush( stdout );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use,
-	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: bp", *m_panel_max, *n_panel_max,
-	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" );
-	fflush( stdout );
-	}
-bli_thread_barrier( thread );
-	if ( bli_thread_work_id( thread ) == 1 )
-	{
-	printf( "packm_blk_var1: thread %lu  (b = %p, bp = %p)\n_p", bli_thread_work_id( thread ), c_use, p_use );
-	fflush( stdout );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: b", *m_panel_use, *n_panel_use,
-	                      ( ctype* )c_use,         rs_c, cs_c, "%4.1f", "" );
-	PASTEMAC(ch,fprintm)( stdout, "packm_blk_var1: bp", *m_panel_max, *n_panel_max,
-	                      ( ctype* )p_use,         rs_p, cs_p, "%4.1f", "" );
-	fflush( stdout );
-	}
-bli_thread_barrier( thread );
-}
-*/
-/*
-		if ( bli_is_4mi_packed( schema ) ) {
-		printf( "packm_var2: is_p_use = %lu\n_p", is_p_use );
-		if ( col_stored ) {
-		if ( 0 )
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_use, *n_panel_use,
-		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" );
-		}
-		if ( row_stored ) {
-		if ( 0 )
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_use, *n_panel_use,
-		                       ( ctype_r* )c_use,         2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use,            rs_p, cs_p, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use + is_p_use, rs_p, cs_p, "%4.1f", "" );
-		}
-		}
-*/
-/*
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_rpi", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" );
-*/
-/*
-		if ( row_stored ) {
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: b_i", *m_panel_max, *n_panel_max,
-		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" );
-		inc_t is_b = rs_p * *m_panel_max;
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: bp_i", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use + is_b, rs_p, cs_p, "%4.1f", "" );
-		}
-*/
-/*
-		if ( col_stored ) {
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )c_use,        2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: a_i", *m_panel_max, *n_panel_max,
-		                       (( ctype_r* )c_use)+rs_c, 2*rs_c, 2*cs_c, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_r", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use,         rs_p, cs_p, "%4.1f", "" );
-		PASTEMAC(chr,fprintm)( stdout, "packm_var2: ap_i", *m_panel_max, *n_panel_max,
-		                       ( ctype_r* )p_use + p_inc, rs_p, cs_p, "%4.1f", "" );
-		}
-*/

@@ -55,7 +55,7 @@ void bli_trsm_packa
     }
 
 	// Pack matrix A according to the control tree node.
-	bli_l3_packm
+	bli_packm_int
 	(
 	  &a_local,
 	  &a_pack,
@@ -107,7 +107,7 @@ void bli_trsm_packb
     }
 
 	// Pack matrix B according to the control tree node.
-	bli_l3_packm
+	bli_packm_int
 	(
 	  &bt_local,
 	  &bt_pack,
