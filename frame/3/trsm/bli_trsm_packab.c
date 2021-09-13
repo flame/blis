@@ -45,12 +45,19 @@ void bli_trsm_packa
        thrinfo_t* thread
      )
 {
-	obj_t a_pack;
+	obj_t a_local, a_pack;
+
+    bli_obj_alias_to( a, &a_local );
+    if ( bli_obj_has_trans( a ) )
+    {
+        bli_obj_induce_trans( &a_local );
+        bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
+    }
 
 	// Pack matrix A according to the control tree node.
 	bli_l3_packm
 	(
-	  a,
+	  &a_local,
 	  &a_pack,
 	  cntx,
 	  rntm,
@@ -86,25 +93,39 @@ void bli_trsm_packb
        thrinfo_t* thread
      )
 {
-	obj_t b_pack;
+	obj_t bt_local, bt_pack;
+
+    // We always pass B^T to bli_l3_packm.
+    bli_obj_alias_to( b, &bt_local );
+    if ( bli_obj_has_trans( b ) )
+    {
+        bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
+    }
+    else
+    {
+        bli_obj_induce_trans( &bt_local );
+    }
 
 	// Pack matrix B according to the control tree node.
 	bli_l3_packm
 	(
-	  b,
-	  &b_pack,
+	  &bt_local,
+	  &bt_pack,
 	  cntx,
 	  rntm,
 	  cntl,
 	  thread
 	);
 
+    // Transpose packed object back to B.
+    bli_obj_induce_trans( &bt_pack );
+
 	// Proceed with execution using packed matrix B.
 	bli_trsm_int
 	(
 	  &BLIS_ONE,
 	  a,
-	  &b_pack,
+	  &bt_pack,
 	  &BLIS_ONE,
 	  c,
 	  cntx,

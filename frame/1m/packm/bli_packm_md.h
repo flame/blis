@@ -32,6 +32,5 @@
 
 */
 
-#include "bli_packm_blk_var1_md.h"
 #include "bli_packm_struc_cxk_md.h"
 

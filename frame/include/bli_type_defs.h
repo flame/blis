@@ -1240,7 +1240,6 @@ struct thrinfo_s;
 
 typedef void (*obj_pack_fn_t)
     (
-      mdim_t            mat,
       mem_t*            mem,
       struct obj_s*     a,
       struct obj_s*     ap,

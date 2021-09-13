@@ -75,6 +75,10 @@ void bli_trsm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( b, &c_local );
 
+    bli_obj_remove_offs( &a_local );
+    bli_obj_remove_offs( &b_local );
+    bli_obj_remove_offs( &c_local );
+
 	// We do not explicitly implement the cases where A is transposed.
 	// However, we can still handle them. Specifically, if A is marked as
 	// needing a transposition, we simply induce a transposition. This

@@ -46,51 +46,17 @@ void PASTEMAC(ch,varname) \
        conj_t          conjc, \
        pack_t          schema, \
        bool            invdiag, \
-       dim_t           m_panel, \
-       dim_t           n_panel, \
-       dim_t           m_panel_max, \
-       dim_t           n_panel_max, \
+       dim_t           panel_dim, \
+       dim_t           panel_len, \
+       dim_t           panel_dim_max, \
+       dim_t           panel_len_max, \
        ctype* restrict kappa, \
-       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
+       ctype* restrict c, inc_t incc, inc_t ldc, \
+       ctype* restrict p,             inc_t ldp, \
                           inc_t is_p, \
        cntx_t*         cntx  \
      ) \
 { \
-	dim_t  panel_dim; \
-	dim_t  panel_dim_max; \
-	dim_t  panel_len; \
-	dim_t  panel_len_max; \
-	inc_t  incc, ldc; \
-	inc_t  ldp; \
-\
-\
-	/* Determine the dimensions and relative strides of the micro-panel
-	   based on its pack schema. */ \
-	if ( bli_is_col_packed( schema ) ) \
-	{ \
-		/* Prepare to pack to row-stored column panel. */ \
-		panel_dim     = n_panel; \
-		panel_dim_max = n_panel_max; \
-		panel_len     = m_panel; \
-		panel_len_max = m_panel_max; \
-		incc          = cs_c; \
-		ldc           = rs_c; \
-		ldp           = rs_p; \
-	} \
-	else /* if ( bli_is_row_packed( schema ) ) */ \
-	{ \
-		/* Prepare to pack to column-stored row panel. */ \
-		panel_dim     = m_panel; \
-		panel_dim_max = m_panel_max; \
-		panel_len     = n_panel; \
-		panel_len_max = n_panel_max; \
-		incc          = rs_c; \
-		ldc           = cs_c; \
-		ldp           = cs_p; \
-	} \
-\
-\
 	/* Handle micro-panel packing based on the structure of the matrix
 	   being packed. */ \
 	if      ( bli_is_general( strucc ) ) \
@@ -116,25 +82,22 @@ void PASTEMAC(ch,varname) \
 		   matrices. */ \
 		PASTEMAC(ch,packm_herm_cxk_3mis) \
 		( \
-		  strucc, \
-		  diagoffc, \
-		  uploc, \
-		  conjc, \
-		  schema, \
-		  m_panel, \
-		  n_panel, \
-		  m_panel_max, \
-		  n_panel_max, \
-		  panel_dim, \
-		  panel_dim_max, \
-		  panel_len, \
-		  panel_len_max, \
-		  kappa, \
-		  c, rs_c, cs_c, \
-		     incc, ldc, \
-		  p, rs_p, cs_p, \
-		     is_p, ldp, \
-		  cntx  \
+          strucc, \
+          diagoffc, \
+          diagc, \
+          uploc, \
+          conjc, \
+          schema, \
+          invdiag, \
+          panel_dim, \
+          panel_len, \
+          panel_dim_max, \
+          panel_len_max, \
+          kappa, \
+          c, incc, ldc, \
+          p,       ldp, \
+             is_p, \
+          cntx  \
 		); \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
@@ -143,190 +106,23 @@ void PASTEMAC(ch,varname) \
 		   matrices. */ \
 		PASTEMAC(ch,packm_tri_cxk_3mis) \
 		( \
-		  strucc, \
-		  diagoffc, \
-		  diagc, \
-		  uploc, \
-		  conjc, \
-		  schema, \
-		  invdiag, \
-		  m_panel, \
-		  n_panel, \
-		  m_panel_max, \
-		  n_panel_max, \
-		  panel_dim, \
-		  panel_dim_max, \
-		  panel_len, \
-		  panel_len_max, \
-		  kappa, \
-		  c, rs_c, cs_c, \
-		     incc, ldc, \
-		  p, rs_p, cs_p, \
-		     is_p, ldp, \
-		  cntx  \
+          strucc, \
+          diagoffc, \
+          diagc, \
+          uploc, \
+          conjc, \
+          schema, \
+          invdiag, \
+          panel_dim, \
+          panel_len, \
+          panel_dim_max, \
+          panel_len_max, \
+          kappa, \
+          c, incc, ldc, \
+          p,       ldp, \
+             is_p, \
+          cntx  \
 		); \
-	} \
-\
-\
-	/* If m_panel < m_panel_max, or n_panel < n_panel_max, we would normally
-	   fill the edge region (the bottom m_panel_max - m_panel rows or right-
-	   side n_panel_max - n_panel columns) of the micropanel with zeros.
-	   However, this responsibility has been moved to the packm microkernel.
-	   This change allows experts to use custom kernels that pack to custom
-	   packing formats when the problem size is not a nice multiple of the
-	   register blocksize. */ \
-/*
-	if ( m_panel != m_panel_max ) \
-	{ \
-		ctype_r* restrict zero_r     = PASTEMAC(chr,0); \
-		dim_t             i          = m_panel; \
-		dim_t             m_edge     = m_panel_max - i; \
-		dim_t             n_edge     = n_panel_max; \
-		ctype_r*          p_edge_r   = ( ctype_r* )p +          (i  )*rs_p; \
-		ctype_r*          p_edge_i   = ( ctype_r* )p +   is_p + (i  )*rs_p; \
-		ctype_r*          p_edge_rpi = ( ctype_r* )p + 2*is_p + (i  )*rs_p; \
-\
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_r, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_i, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_rpi, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-*/ \
-\
-/*
-	if ( n_panel != n_panel_max ) \
-	{ \
-		ctype_r* restrict zero_r     = PASTEMAC(chr,0); \
-		dim_t             j          = n_panel; \
-		dim_t             m_edge     = m_panel_max; \
-		dim_t             n_edge     = n_panel_max - j; \
-		ctype_r*          p_edge_r   = ( ctype_r* )p +          (j  )*cs_p; \
-		ctype_r*          p_edge_i   = ( ctype_r* )p +   is_p + (j  )*cs_p; \
-		ctype_r*          p_edge_rpi = ( ctype_r* )p + 2*is_p + (j  )*cs_p; \
-\
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_r, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_i, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
-		( \
-		  BLIS_NO_CONJUGATE, \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  m_edge, \
-		  n_edge, \
-		  zero_r, \
-		  p_edge_rpi, rs_p, cs_p, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-*/ \
-\
-\
-	if ( bli_is_triangular( strucc ) ) \
-	{ \
-		/* If this panel is an edge case in both panel dimension and length,
-		   then it must be a bottom-right corner case. Set the part of the
-		   diagonal that extends into the zero-padded region to identity.
-		   NOTE: This is actually only necessary when packing for trsm, as
-		   it helps prevent NaNs and Infs from creeping into the computation.
-		   However, we set the region to identity for trmm as well. Those
-		   1.0's end up getting muliplied by the 0.0's in the zero-padded
-		   region of the other matrix, so there is no harm in this. */ \
-		if ( m_panel != m_panel_max && \
-		     n_panel != n_panel_max ) \
-		{ \
-			ctype_r* restrict one_r  = PASTEMAC(chr,1); \
-			ctype_r* restrict zero_r = PASTEMAC(chr,0); \
-			dim_t             i      = m_panel; \
-			dim_t             j      = n_panel; \
-			dim_t             m_br   = m_panel_max - i; \
-			dim_t             n_br   = n_panel_max - j; \
-			ctype_r*          p_br_r = ( ctype_r* )p +        (i  )*rs_p + (j  )*cs_p; \
-			ctype_r*          p_br_i = ( ctype_r* )p + is_p + (i  )*rs_p + (j  )*cs_p; \
-\
-			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
-			( \
-			  BLIS_NO_CONJUGATE, \
-			  0, \
-			  m_br, \
-			  n_br, \
-			  one_r, \
-			  p_br_r, rs_p, cs_p, \
-			  cntx, \
-			  NULL  \
-			); \
-			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
-			( \
-			  BLIS_NO_CONJUGATE, \
-			  0, \
-			  m_br, \
-			  n_br, \
-			  zero_r, \
-			  p_br_i, rs_p, cs_p, \
-			  cntx, \
-			  NULL  \
-			); \
-		} \
 	} \
 }
 
@@ -342,42 +138,29 @@ void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
        doff_t          diagoffc, \
+       diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
-       dim_t           m_panel, \
-       dim_t           n_panel, \
-       dim_t           m_panel_max, \
-       dim_t           n_panel_max, \
+       bool            invdiag, \
        dim_t           panel_dim, \
-       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
        ctype* restrict kappa, \
-       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                          inc_t incc, inc_t ldc, \
-       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                          inc_t is_p, inc_t ldp, \
+       ctype* restrict c, inc_t incc, inc_t ldc, \
+       ctype* restrict p,             inc_t ldp, \
+                          inc_t is_p, \
        cntx_t*         cntx  \
      ) \
 { \
 	doff_t  diagoffc_abs; \
 	dim_t   i, j; \
-	bool    row_stored; \
-	bool    col_stored; \
-\
-\
-	/* Create flags to incidate row or column storage. Note that the
-	   schema bit that encodes row or column is describing the form of
-	   micro-panel, not the storage in the micro-panel. Hence the
-	   mismatch in "row" and "column" semantics. */ \
-	row_stored = bli_is_col_packed( schema ); \
-	col_stored = bli_is_row_packed( schema ); \
 \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
 	   diagonal separately from the case where it does intersect. */ \
-	if ( !bli_intersects_diag_n( diagoffc, m_panel, n_panel ) ) \
+	if ( !bli_intersects_diag_n( diagoffc, panel_dim, panel_len ) ) \
 	{ \
 		/* If the current panel is unstored, we need to make a few
 		   adjustments so we refer to the data where it is actually
@@ -385,10 +168,10 @@ void PASTEMAC(ch,varname) \
 		   implicitly assumes we are operating on a dense panel
 		   within a larger symmetric or Hermitian matrix, since a
 		   general matrix would not contain any unstored region.) */ \
-		if ( bli_is_unstored_subpart_n( diagoffc, uploc, m_panel, n_panel ) ) \
+		if ( bli_is_unstored_subpart_n( diagoffc, uploc, panel_dim, panel_len ) ) \
 		{ \
-			c = c + diagoffc * ( doff_t )cs_c + \
-			       -diagoffc * ( doff_t )rs_c;  \
+			c = c + diagoffc * ( doff_t )ldc + \
+			       -diagoffc * ( doff_t )incc;  \
 			bli_swap_incs( &incc, &ldc ); \
 \
 			if ( bli_is_hermitian( strucc ) ) \
@@ -409,7 +192,7 @@ void PASTEMAC(ch,varname) \
 		  cntx  \
 		); \
 	} \
-	else /* if ( bli_intersects_diag_n( diagoffc, m_panel, n_panel ) ) */ \
+	else /* if ( bli_intersects_diag_n( diagoffc, panel_dim, panel_len ) ) */ \
 	{ \
 		ctype_r* restrict p_r         = ( ctype_r* )p; \
 \
@@ -434,14 +217,12 @@ void PASTEMAC(ch,varname) \
 		   a micro-panel. If they do, then somehow the constraints on
 		   cache blocksizes being a whole multiple of the register
 		   blocksizes was somehow violated. */ \
-		if ( ( col_stored && diagoffc < 0 ) || \
-		     ( row_stored && diagoffc > 0 ) ) \
+		if ( diagoffc < 0 ) \
 			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED ); \
 \
 		diagoffc_abs = bli_abs( diagoffc ); \
 \
-		if      ( ( row_stored && bli_is_upper( uploc ) ) || \
-		          ( col_stored && bli_is_lower( uploc ) ) ) \
+		if      ( bli_is_lower( uploc ) ) \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs; \
@@ -457,8 +238,8 @@ void PASTEMAC(ch,varname) \
 			diagoffc12 = diagoffc_abs - j; \
 			p12        = p_r + (j  )*ldp; \
 			c12        = c   + (j  )*ldc; \
-			c12        = c12 + diagoffc12 * ( doff_t )cs_c + \
-			                  -diagoffc12 * ( doff_t )rs_c;  \
+			c12        = c12 + diagoffc12 * ( doff_t )ldc + \
+			                  -diagoffc12 * ( doff_t )incc;  \
 			incc12     = ldc; \
 			ldc12      = incc; \
 			conjc12    = conjc; \
@@ -466,16 +247,15 @@ void PASTEMAC(ch,varname) \
 			if ( bli_is_hermitian( strucc ) ) \
 				bli_toggle_conj( &conjc12 ); \
 		} \
-		else /* if ( ( row_stored && bli_is_lower( uploc ) ) || \
-		             ( col_stored && bli_is_upper( uploc ) ) ) */ \
+		else /* if ( bli_is_upper( uploc ) ) */ \
 		{ \
 			p10_dim    = panel_dim; \
 			p10_len    = diagoffc_abs + panel_dim; \
 			diagoffc10 = diagoffc; \
 			p10        = p_r; \
 			c10        = c; \
-			c10        = c10 + diagoffc10 * ( doff_t )cs_c + \
-			                  -diagoffc10 * ( doff_t )rs_c;  \
+			c10        = c10 + diagoffc10 * ( doff_t )ldc + \
+			                  -diagoffc10 * ( doff_t )incc;  \
 			incc10     = ldc; \
 			ldc10      = incc; \
 			conjc10    = conjc; \
@@ -535,8 +315,8 @@ void PASTEMAC(ch,varname) \
 		{ \
 			dim_t    p11_m   = panel_dim; \
 			dim_t    p11_n   = panel_dim; \
-			inc_t    rs_c11  = 2*rs_c; \
-			inc_t    cs_c11  = 2*cs_c; \
+			inc_t    incc11  = 2*incc; \
+			inc_t    ldc11  = 2*ldc; \
 			dim_t    j2      = diagoffc_abs; \
 			ctype*   c11     = ( ctype*   )c   + (j2 )*ldc; \
 			ctype_r* p11     = ( ctype_r* )p_r + (j2 )*ldp; \
@@ -559,8 +339,8 @@ void PASTEMAC(ch,varname) \
 			  p11_m, \
 			  p11_n, \
 			  alpha_r, \
-			  c11_r, rs_c11, cs_c11, \
-			  p11_r, rs_p,   cs_p, \
+			  c11_r, incc11, ldc11, \
+			  p11_r, 1,      ldp, \
 			  cntx, \
 			  NULL  \
 			); \
@@ -576,8 +356,8 @@ void PASTEMAC(ch,varname) \
 			  p11_m, \
 			  p11_n, \
 			  alpha_i, \
-			  c11_i, rs_c11, cs_c11, \
-			  p11_i, rs_p,   cs_p, \
+			  c11_i, incc11, ldc11, \
+			  p11_i, 1,      ldp, \
 			  cntx, \
 			  NULL  \
 			); \
@@ -589,7 +369,7 @@ void PASTEMAC(ch,varname) \
 			{ \
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \
-					ctype_r* pi11_i = p11_i + (i  )*rs_p + (i  )*cs_p; \
+					ctype_r* pi11_i = p11_i + (i  ) + (i  )*ldp; \
 \
 					PASTEMAC(chr,set0s)( *pi11_i ); \
 				} \
@@ -607,7 +387,7 @@ void PASTEMAC(ch,varname) \
 				  &kappa_r, \
 				  &kappa_i, \
 				  p11_r, \
-				  p11_i, rs_p, cs_p  \
+				  p11_i, 1, ldp  \
 				); \
 			} \
 			else \
@@ -620,7 +400,7 @@ void PASTEMAC(ch,varname) \
 				  &kappa_r, \
 				  &kappa_i, \
 				  p11_r, \
-				  p11_i, rs_p, cs_p  \
+				  p11_i, 1, ldp  \
 				); \
 			} \
 \
@@ -632,9 +412,9 @@ void PASTEMAC(ch,varname) \
 				for ( j = 0; j < p11_n; ++j ) \
 				for ( i = 0; i < p11_m; ++i ) \
 				{ \
-					ctype_r* pi11_r   = p11_r   + (i  )*rs_p + (j  )*cs_p; \
-					ctype_r* pi11_i   = p11_i   + (i  )*rs_p + (j  )*cs_p; \
-					ctype_r* pi11_rpi = p11_rpi + (i  )*rs_p + (j  )*cs_p; \
+					ctype_r* pi11_r   = p11_r   + (i  ) + (j  )*ldp; \
+					ctype_r* pi11_i   = p11_i   + (i  ) + (j  )*ldp; \
+					ctype_r* pi11_rpi = p11_rpi + (i  ) + (j  )*ldp; \
 \
 					PASTEMAC(chr,add3s) \
 					( \
@@ -660,25 +440,20 @@ INSERT_GENTFUNCCO_BASIC( packm_herm_cxk_3mis, packm_cxk_3mis )
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffp, \
+       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
        pack_t          schema, \
        bool            invdiag, \
-       dim_t           m_panel, \
-       dim_t           n_panel, \
-       dim_t           m_panel_max, \
-       dim_t           n_panel_max, \
        dim_t           panel_dim, \
-       dim_t           panel_dim_max, \
        dim_t           panel_len, \
+       dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
        ctype* restrict kappa, \
-       ctype* restrict c, inc_t rs_c, inc_t cs_c, \
-                          inc_t incc, inc_t ldc, \
-       ctype* restrict p, inc_t rs_p, inc_t cs_p, \
-                          inc_t is_p, inc_t ldp, \
+       ctype* restrict c, inc_t incc, inc_t ldc, \
+       ctype* restrict p,             inc_t ldp, \
+                          inc_t is_p, \
        cntx_t*         cntx  \
      ) \
 { \
@@ -703,18 +478,18 @@ void PASTEMAC(ch,varname) \
 		ctype_r* p_i     = ( ctype_r* )p +   is_p; \
 		ctype_r* p_rpi   = ( ctype_r* )p + 2*is_p; \
 \
-		dim_t    j       = bli_abs( diagoffp ); \
+		dim_t    j       = bli_abs( diagoffc ); \
 		ctype_r* p11_r   = p_r   + (j  )*ldp; \
 		ctype_r* p11_i   = p_i   + (j  )*ldp; \
 		ctype_r* p11_rpi = p_rpi + (j  )*ldp; \
 \
-		dim_t    p11_m   = m_panel; \
-		dim_t    p11_n   = n_panel; \
+		dim_t    p11_m   = panel_dim; \
+		dim_t    p11_n   = panel_len; \
 \
 		dim_t    min_p11_m_n; \
 \
-		if      ( diagoffp < 0 ) p11_m -= j; \
-		else if ( diagoffp > 0 ) p11_n -= j; \
+		if      ( diagoffc < 0 ) p11_m -= j; \
+		else if ( diagoffc > 0 ) p11_n -= j; \
 \
 		min_p11_m_n = bli_min( p11_m, p11_n ); \
 \
@@ -730,22 +505,22 @@ void PASTEMAC(ch,varname) \
 			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
-			  diagoffp, \
-			  m_panel, \
-			  n_panel, \
+			  diagoffc, \
+			  panel_dim, \
+			  panel_len, \
 			  &kappa_r, \
-			  p_r, rs_p, cs_p, \
+			  p_r, 1, ldp, \
 			  cntx, \
 			  NULL  \
 			); \
 			PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
-			  diagoffp, \
-			  m_panel, \
-			  n_panel, \
+			  diagoffc, \
+			  panel_dim, \
+			  panel_len, \
 			  &kappa_i, \
-			  p_i, rs_p, cs_p, \
+			  p_i, 1, ldp, \
 			  cntx, \
 			  NULL  \
 			); \
@@ -755,9 +530,9 @@ void PASTEMAC(ch,varname) \
 			   and p11_i. */ \
 			for ( i = 0; i < min_p11_m_n; ++i ) \
 			{ \
-				ctype_r* pi11_r   = p11_r   + (i  )*rs_p + (i  )*cs_p; \
-				ctype_r* pi11_i   = p11_i   + (i  )*rs_p + (i  )*cs_p; \
-				ctype_r* pi11_rpi = p11_rpi + (i  )*rs_p + (i  )*cs_p; \
+				ctype_r* pi11_r   = p11_r   + (i  ) + (i  )*ldp; \
+				ctype_r* pi11_i   = p11_i   + (i  ) + (i  )*ldp; \
+				ctype_r* pi11_rpi = p11_rpi + (i  ) + (i  )*ldp; \
 \
 				PASTEMAC(chr,add3s)( *pi11_r, *pi11_i, *pi11_rpi ); \
 			} \
@@ -773,8 +548,8 @@ void PASTEMAC(ch,varname) \
 \
 			for ( i = 0; i < min_p11_m_n; ++i ) \
 			{ \
-				ctype_r* pi11_r = p11_r + (i  )*rs_p + (i  )*cs_p; \
-				ctype_r* pi11_i = p11_i + (i  )*rs_p + (i  )*cs_p; \
+				ctype_r* pi11_r = p11_r + (i  ) + (i  )*ldp; \
+				ctype_r* pi11_i = p11_i + (i  ) + (i  )*ldp; \
 \
 				PASTEMAC(ch,invertris)( *pi11_r, *pi11_i ); \
 			} \
@@ -793,48 +568,92 @@ void PASTEMAC(ch,varname) \
 			uplo_t            uplop  = uploc; \
 \
 			bli_toggle_uplo( &uplop ); \
-			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffp ); \
+			bli_shift_diag_offset_to_shrink_uplo( uplop, &diagoffc ); \
 \
 			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
-			  diagoffp, \
+			  diagoffc, \
 			  BLIS_NONUNIT_DIAG, \
 			  uplop, \
-			  m_panel, \
-			  n_panel, \
+			  panel_dim, \
+			  panel_len, \
 			  zero_r, \
-			  p_r, rs_p, cs_p, \
+			  p_r, 1, ldp, \
 			  cntx, \
 			  NULL  \
 			); \
 			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
-			  diagoffp, \
+			  diagoffc, \
 			  BLIS_NONUNIT_DIAG, \
 			  uplop, \
-			  m_panel, \
-			  n_panel, \
+			  panel_dim, \
+			  panel_len, \
 			  zero_r, \
-			  p_i, rs_p, cs_p, \
+			  p_i, 1, ldp, \
 			  cntx, \
 			  NULL  \
 			); \
 			PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
 			( \
 			  BLIS_NO_CONJUGATE, \
-			  diagoffp, \
+			  diagoffc, \
 			  BLIS_NONUNIT_DIAG, \
 			  uplop, \
-			  m_panel, \
-			  n_panel, \
+			  panel_dim, \
+			  panel_len, \
 			  zero_r, \
-			  p_rpi, rs_p, cs_p, \
+			  p_rpi, 1, ldp, \
 			  cntx, \
 			  NULL  \
 			); \
 		} \
+	} \
+\
+	/* If this panel is an edge case in both panel dimension and length,
+	   then it must be a bottom-right corner case. Set the part of the
+	   diagonal that extends into the zero-padded region to identity.
+	   NOTE: This is actually only necessary when packing for trsm, as
+	   it helps prevent NaNs and Infs from creeping into the computation.
+	   However, we set the region to identity for trmm as well. Those
+	   1.0's end up getting muliplied by the 0.0's in the zero-padded
+	   region of the other matrix, so there is no harm in this. */ \
+	if ( panel_dim != panel_dim_max && \
+	     panel_len != panel_len_max ) \
+	{ \
+		ctype_r* restrict one_r  = PASTEMAC(chr,1); \
+		ctype_r* restrict zero_r = PASTEMAC(chr,0); \
+		dim_t             i      = panel_dim; \
+		dim_t             j      = panel_len; \
+		dim_t             m_br   = panel_dim_max - i; \
+		dim_t             n_br   = panel_len_max - j; \
+		ctype_r*          p_br_r = ( ctype_r* )p +        (i  ) + (j  )*ldp; \
+		ctype_r*          p_br_i = ( ctype_r* )p + is_p + (i  ) + (j  )*ldp; \
+\
+		PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  m_br, \
+		  n_br, \
+		  one_r, \
+		  p_br_r, 1, ldp, \
+		  cntx, \
+		  NULL  \
+		); \
+		PASTEMAC2(chr,setd,BLIS_TAPI_EX_SUF) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  0, \
+		  m_br, \
+		  n_br, \
+		  zero_r, \
+		  p_br_i, 1, ldp, \
+		  cntx, \
+		  NULL  \
+		); \
 	} \
 }
 

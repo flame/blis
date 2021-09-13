@@ -273,7 +273,10 @@ void libblis_test_gemm_ukr_experiment
 	// about coaxing bli_obj_create() in allocating enough space for our
 	// purposes.
 	bli_obj_create( datatype, ldap, k, 1, ldap, &ap );
-	bli_obj_create( datatype, k, ldbp, ldbp, 1, &bp );
+	bli_obj_create( datatype, ldbp, k, 1, ldbp, &bp );
+
+    // Transpose B to B^T for packing
+    bli_obj_induce_trans( &b );
 
 	// Set up the objects for packing. Calling packm_init_pack() does everything
 	// except checkout a memory pool block and save its address to the obj_t's.
@@ -289,7 +292,7 @@ void libblis_test_gemm_ukr_experiment
 	                     BLIS_MR, BLIS_KR, &a, &ap, cntx );
 	bli_packm_init_pack( BLIS_NO_INVERT_DIAG, BLIS_PACKED_COL_PANELS,
 	                     BLIS_PACK_FWD_IF_UPPER, BLIS_PACK_FWD_IF_LOWER,
-	                     BLIS_KR, BLIS_NR, &b, &bp, cntx );
+	                     BLIS_NR, BLIS_KR, &b, &bp, cntx );
 	bli_obj_set_buffer( buf_ap, &ap );
 	bli_obj_set_buffer( buf_bp, &bp );
 
@@ -297,7 +300,11 @@ void libblis_test_gemm_ukr_experiment
 	bli_packm_blk_var1( &a, &ap, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
 	bli_packm_blk_var1( &b, &bp, cntx, NULL, &BLIS_PACKM_SINGLE_THREADED );
 
-	// Repeat the experiment n_repeats times and record results. 
+    // Transpose B^T back to B and Bp^T back to Bp
+    bli_obj_induce_trans( &b );
+    bli_obj_induce_trans( &bp );
+
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c_save, &c );

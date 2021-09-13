@@ -37,15 +37,20 @@
 \
 void PASTEMAC2(chc,chp,varname) \
      ( \
+       struc_t           strucc, \
+       doff_t            diagoffc, \
+       diag_t            diagc, \
+       uplo_t            uploc, \
        conj_t            conjc, \
        pack_t            schema, \
-       dim_t             m_panel, \
-       dim_t             n_panel, \
-       dim_t             m_panel_max, \
-       dim_t             n_panel_max, \
+       bool              invdiag, \
+       dim_t             panel_dim, \
+       dim_t             panel_len, \
+       dim_t             panel_dim_max, \
+       dim_t             panel_len_max, \
        ctype_p* restrict kappa, \
-       ctype_c* restrict c, inc_t rs_c, inc_t cs_c, \
-       ctype_p* restrict p, inc_t rs_p, inc_t cs_p, \
+       ctype_c* restrict c, inc_t incc, inc_t ldc, \
+       ctype_p* restrict p,             inc_t ldp, \
                             inc_t is_p, \
        cntx_t*           cntx  \
      );

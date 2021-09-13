@@ -69,6 +69,10 @@ void bli_hemm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
+    bli_obj_remove_offs( &a_local );
+    bli_obj_remove_offs( &b_local );
+    bli_obj_remove_offs( &c_local );
+
 #ifdef BLIS_DISABLE_HEMM_RIGHT
 	// NOTE: This case casts right-side hemm in terms of left side. This is
 	// necessary when the current subconfiguration uses a gemm microkernel

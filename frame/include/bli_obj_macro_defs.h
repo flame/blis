@@ -1367,6 +1367,14 @@ BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 	       );
 }
 
+// Adjust pointer based on offsets and then zero them
+
+BLIS_INLINE void bli_obj_remove_offs( obj_t* obj )
+{
+    bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
+    bli_obj_set_offs( 0, 0, obj );
+}
+
 // Make a full alias (shallow copy).
 
 BLIS_INLINE void bli_obj_alias_to( obj_t* a, obj_t* b )

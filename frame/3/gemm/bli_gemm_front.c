@@ -91,6 +91,10 @@ void bli_gemm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
+    bli_obj_remove_offs( &a_local );
+    bli_obj_remove_offs( &b_local );
+    bli_obj_remove_offs( &c_local );
+
 #ifdef BLIS_ENABLE_GEMM_MD
 	cntx_t cntx_local;
 

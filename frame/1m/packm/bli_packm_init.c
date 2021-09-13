@@ -212,7 +212,6 @@ siz_t bli_packm_init_pack
 
 	num_t     dt_tar       = bli_obj_target_dt( a );
 	num_t     dt_scalar    = bli_obj_scalar_dt( a );
-	trans_t   transa       = bli_obj_onlytrans_status( a );
 	dim_t     m_a          = bli_obj_length( a );
 	dim_t     n_a          = bli_obj_width( a );
 	dim_t     bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
@@ -242,24 +241,9 @@ siz_t bli_packm_init_pack
 	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_tar, p );
 
-	// Update the dimension fields to explicitly reflect a transposition,
-	// if needed.
-	// Then, clear the conjugation and transposition fields from the object
-	// since matrix packing in BLIS is deemed to take care of all conjugation
-	// and transposition necessary.
-	// Then, we adjust the properties of P when A needs a transposition.
-	// We negate the diagonal offset, and if A is upper- or lower-stored,
-	// we either toggle the uplo of P.
-	// Finally, if we mark P as dense since we assume that all matrices,
-	// regardless of structure, will be densified.
-	bli_obj_set_dims_with_trans( transa, m_a, n_a, p );
-	bli_obj_set_conjtrans( BLIS_NO_TRANSPOSE, p );
-	if ( bli_does_trans( transa ) )
-	{
-		bli_obj_negate_diag_offset( p );
-		if ( bli_obj_is_upper_or_lower( a ) )
-			bli_obj_toggle_uplo( p );
-	}
+	// Clear the conjugation field from the object since matrix packing
+    // in BLIS is deemed to take care of all conjugation necessary.
+	bli_obj_set_conj( BLIS_NO_CONJUGATE, p );
 
 	// If we are packing micropanels, mark P as dense. Otherwise, we are
 	// probably being called in the context of a level-2 operation, in
@@ -358,8 +342,7 @@ siz_t bli_packm_init_pack
 		// Compute the size of the packed buffer.
 		size_p = cs_p * n_p_pad * elem_size_p;
 	}
-	else if ( bli_is_row_packed( schema ) &&
-	          bli_is_panel_packed( schema ) )
+	else if ( bli_is_panel_packed( schema ) )
 	{
 		dim_t m_panel;
 		dim_t ps_p, ps_p_orig;
@@ -413,11 +396,6 @@ siz_t bli_packm_init_pack
 		          bli_is_io_packed( schema )  ||
 		          bli_is_rpi_packed( schema ) )
 		{
-			// The division by 2 below assumes that ps_p is an even number.
-			// However, it is possible that, at this point, ps_p is an odd.
-			// If it is indeed odd, we nudge it higher.
-			if ( bli_is_odd( ps_p ) ) ps_p += 1;
-
 			// Despite the fact that the packed micropanels will contain
 			// real elements, the panel stride that we store in the obj_t
 			// (which is passed into the macro-kernel) needs to be in units
@@ -450,100 +428,6 @@ siz_t bli_packm_init_pack
 
 		// Compute the size of the packed buffer.
 		size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
-	}
-	else if ( bli_is_col_packed( schema ) &&
-	          bli_is_panel_packed( schema ) )
-	{
-		dim_t n_panel;
-		dim_t ps_p, ps_p_orig;
-
-		// The panel dimension (for each datatype) should be equal to the
-		// default (logical) blocksize multiple in the n dimension.
-		n_panel = bmult_n_def;
-
-		// The "row stride" of a column-micropanel packed object is interpreted
-		// as the row stride WITHIN a micropanel. Thus, this is equal to the
-		// packing (storage) blocksize multiple (which may be equal to the
-		// default (logical) blocksize multiple.
-		rs_p = bmult_n_pack;
-
-		// The "column stride" of a column-micropanel packed object is
-		// interpreted as the column stride WITHIN a micropanel. Thus, it is
-		// unit.
-		cs_p = 1;
-
-		// The "panel stride" of a micropanel packed object is interpreted as
-		// the distance between the (0,0) element of panel k and the (0,0)
-		// element of panel k+1. We use the padded length computed above to
-		// allow for zero-padding (if necessary/desired) along the far end
-		// of each micropanel (ie: the bottom edge of the matrix). Zero-padding
-		// can also occur along the long edge of the last micropanel if the n
-		// dimension of the matrix is not a whole multiple of NR.
-		ps_p = m_p_pad * rs_p;
-
-		// As a general rule, we don't want micropanel strides to be odd. This
-		// is primarily motivated by our desire to support interleaved 3m
-		// micropanels, in which case we have to scale the panel stride
-		// by 3/2. That division by 2 means the numerator (prior to being
-		// scaled by 3) must be even.
-		if ( bli_is_odd( ps_p ) ) ps_p += 1;
-
-		// Preserve this early panel stride value for use later, if needed.
-		ps_p_orig = ps_p;
-
-		// Here, we adjust the panel stride, if necessary. Remember: ps_p is
-		// always interpreted as being in units of the datatype of the object
-		// which is not necessarily how the micropanels will be stored. For
-		// interleaved 3m, we will increase ps_p by 50%, and for ro/io/rpi,
-		// we halve ps_p. Why? Because the macro-kernel indexes in units of
-		// the complex datatype. So these changes "trick" it into indexing
-		// the correct amount.
-		if ( bli_is_3mi_packed( schema ) )
-		{
-			ps_p = ( ps_p * 3 ) / 2;
-		}
-		else if ( bli_is_3ms_packed( schema ) ||
-		          bli_is_ro_packed( schema ) ||
-		          bli_is_io_packed( schema ) ||
-		          bli_is_rpi_packed( schema ) )
-		{
-			// The division by 2 below assumes that ps_p is an even number.
-			// However, it is possible that, at this point, ps_p is an odd.
-			// If it is indeed odd, we nudge it higher.
-			if ( bli_is_odd( ps_p ) ) ps_p += 1;
-
-			// Despite the fact that the packed micropanels will contain
-			// real elements, the panel stride that we store in the obj_t
-			// (which is passed into the macro-kernel) needs to be in units
-			// of complex elements, since the macro-kernel will index through
-			// micropanels via complex pointer arithmetic for trmm/trsm.
-			// Since the indexing "increment" will be twice as large as each
-			// actual stored element, we divide the panel_stride by 2.
-			ps_p = ps_p / 2;
-		}
-
-		// Set the imaginary stride (in units of fundamental elements) for
-		// 3m and 4m (separated or interleaved). We use ps_p_orig since
-		// that variable tracks the number of real part elements contained
-		// within each micropanel of the source matrix. Therefore, this
-		// is the number of real elements that must be traversed before
-		// reaching the imaginary part (3mi/4mi) of the packed micropanel,
-		// or the real part of the next micropanel (3ms).
-		if      ( bli_is_3mi_packed( schema ) ) is_p = ps_p_orig;
-		else if ( bli_is_4mi_packed( schema ) ) is_p = ps_p_orig;
-		else if ( bli_is_3ms_packed( schema ) ) is_p = ps_p_orig * ( n_p_pad / n_panel );
-		else                                    is_p = 1;
-
-		// Store the strides and panel dimension in P.
-		bli_obj_set_strides( rs_p, cs_p, p );
-		bli_obj_set_imag_stride( is_p, p );
-		bli_obj_set_panel_dim( n_panel, p );
-		bli_obj_set_panel_stride( ps_p, p );
-		bli_obj_set_panel_length( m_p, p );
-		bli_obj_set_panel_width( n_panel, p );
-
-		// Compute the size of the packed buffer.
-		size_p = ps_p * ( n_p_pad / n_panel ) * elem_size_p;
 	}
 	else
 	{
