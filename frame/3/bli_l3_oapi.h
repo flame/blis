@@ -98,6 +98,7 @@ GENTDEF(her2k,4mh);
 GENTDEF(her2k,4m1);
 GENTDEF(her2k,1m);
 GENTDEF(her2k,nat);
+GENTDEF(her2k,ind);
 
 GENTDEF(syr2k,_ex);
 GENTDEF(syr2k,3mh);
@@ -106,6 +107,7 @@ GENTDEF(syr2k,4mh);
 GENTDEF(syr2k,4m1);
 GENTDEF(syr2k,1m);
 GENTDEF(syr2k,nat);
+GENTDEF(syr2k,ind);
 
 BLIS_EXPORT_BLIS void bli_her2k
      (
@@ -207,6 +209,7 @@ GENTDEF(herk,4mh);
 GENTDEF(herk,4m1);
 GENTDEF(herk,1m);
 GENTDEF(herk,nat);
+GENTDEF(herk,ind);
 
 GENTDEF(syrk,_ex);
 GENTDEF(syrk,3mh);
@@ -215,6 +218,7 @@ GENTDEF(syrk,4mh);
 GENTDEF(syrk,4m1);
 GENTDEF(syrk,1m);
 GENTDEF(syrk,nat);
+GENTDEF(syrk,ind);
 
 BLIS_EXPORT_BLIS void bli_herk
      (

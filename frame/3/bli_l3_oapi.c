@@ -231,6 +231,7 @@ GENTFUNC(her2k,4mh);
 GENTFUNC(her2k,4m1);
 GENTFUNC(her2k,1m);
 GENTFUNC(her2k,nat);
+GENTFUNC(her2k,ind);
 
 void bli_her2k
      (
@@ -284,6 +285,7 @@ GENTFUNC(syr2k,4mh);
 GENTFUNC(syr2k,4m1);
 GENTFUNC(syr2k,1m);
 GENTFUNC(syr2k,nat);
+GENTFUNC(syr2k,ind);
 
 void bli_syr2k
      (
@@ -484,6 +486,7 @@ GENTFUNC(herk,4mh);
 GENTFUNC(herk,4m1);
 GENTFUNC(herk,1m);
 GENTFUNC(herk,nat);
+GENTFUNC(herk,ind);
 
 void bli_herk
      (
@@ -529,6 +532,7 @@ GENTFUNC(syrk,4mh);
 GENTFUNC(syrk,4m1);
 GENTFUNC(syrk,1m);
 GENTFUNC(syrk,nat);
+GENTFUNC(syrk,ind);
 
 void bli_syrk
      (
