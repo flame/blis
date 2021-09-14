@@ -160,7 +160,7 @@ void bli_trsm_front
 	// Invoke the internal back-end.
 	bli_l3_thread_decorator
 	(
-	  bli_trsm_int,
+	  bli_l3_int,
 	  BLIS_TRSM, // operation family id
 	  alpha,
 	  &a_local,

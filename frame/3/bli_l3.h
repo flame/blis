@@ -35,6 +35,8 @@
 
 #include "bli_l3_cntl.h"
 #include "bli_l3_check.h"
+#include "bli_l3_int.h"
+#include "bli_l3_packab.h"
 
 // Define function types.
 //#include "bli_l3_ft_ex.h"

@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_gemm_packa
+void bli_l3_packa
      (
        obj_t*  a,
        obj_t*  b,
@@ -66,7 +66,7 @@ void bli_gemm_packa
 	);
 
 	// Proceed with execution using packed matrix A.
-	bli_gemm_int
+	bli_l3_int
 	(
 	  &BLIS_ONE,
 	  &a_pack,
@@ -82,7 +82,7 @@ void bli_gemm_packa
 
 // -----------------------------------------------------------------------------
 
-void bli_gemm_packb
+void bli_l3_packb
      (
        obj_t*  a,
        obj_t*  b,
@@ -121,7 +121,7 @@ void bli_gemm_packb
     bli_obj_induce_trans( &bt_pack );
 
 	// Proceed with execution using packed matrix B.
-	bli_gemm_int
+	bli_l3_int
 	(
 	  &BLIS_ONE,
 	  a,

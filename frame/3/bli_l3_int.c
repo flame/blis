@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,7 +35,7 @@
 
 #include "blis.h"
 
-void bli_trsm_int
+void bli_l3_int
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -47,10 +48,9 @@ void bli_trsm_int
        thrinfo_t* thread
      )
 {
-	obj_t        a_local;
-	obj_t        b_local;
-	obj_t        c_local;
-	trsm_var_oft f;
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
 
 	// Return early if the current control tree node is NULL.
 	if ( bli_cntl_is_null( cntl ) ) return;
@@ -60,23 +60,38 @@ void bli_trsm_int
 		bli_gemm_basic_check( alpha, a, b, beta, c, cntx );
 
 	// If C has a zero dimension, return early.
-	if ( bli_obj_has_zero_dim( c ) ) return;
+	if ( bli_obj_has_zero_dim( c ) )
+	{
+		return;
+	}
 
 	// If A or B has a zero dimension, scale C by beta and return early.
 	if ( bli_obj_has_zero_dim( a ) ||
 	     bli_obj_has_zero_dim( b ) )
 	{
 		if ( bli_thread_am_ochief( thread ) )
-		    bli_scalm( beta, c );
+			bli_scalm( beta, c );
 		bli_thread_barrier( thread );
 		return;
 	}
 
-	// Alias A and B in case we need to update attached scalars.
+	// If A or B is marked as being filled with zeros, scale C by beta and
+	// return early.
+	if ( bli_obj_is_zeros( a ) ||
+	     bli_obj_is_zeros( b ) )
+	{
+		// This should never execute.
+		bli_abort();
+
+		if ( bli_thread_am_ochief( thread ) )
+			bli_scalm( beta, c );
+		bli_thread_barrier( thread );
+		return;
+	}
+
+	// Alias A, B, and C in case we need to update attached scalars.
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );
-
-	// Alias C in case we need to induce a transposition.
 	bli_obj_alias_to( c, &c_local );
 
 	// If we are about to call a leaf-level implementation, and matrix C
@@ -90,42 +105,40 @@ void bli_trsm_int
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &c_local );
 	}
 
-	// If beta is non-unit, apply it to the scalar attached to C.
-	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
 	{
-		bli_obj_scalar_apply_scalar( beta, &c_local );
-	}
-
-	// Set two bools: one based on the implied side parameter (the structure
-	// of the root object) and one based on the uplo field of the triangular
-	// matrix's root object (whether that is matrix A or matrix B).
-	if ( bli_obj_root_is_triangular( a ) )
-	{
-		// If alpha is non-unit, typecast and apply it to the scalar
-		// attached to B (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
-		{
-			bli_obj_scalar_apply_scalar( alpha, &b_local );
-		}
+			bli_obj_scalar_apply_scalar( alpha, &a_local );
 	}
 	else // if ( bli_obj_root_is_triangular( b ) )
 	{
-		// If alpha is non-unit, typecast and apply it to the scalar
-		// attached to A (the non-triangular matrix).
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
-		{
-            bli_obj_scalar_apply_scalar( alpha, &a_local );
-		}
+            bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
-	// FGVZ->TMS: Is this barrier still needed?
-	bli_thread_barrier( thread );
+	// If beta is non-unit, typecast and apply it to the scalar attached
+	// to C.
+	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
+		bli_obj_scalar_apply_scalar( beta, &c_local );
 
 	// Create the next node in the thrinfo_t structure.
 	bli_thrinfo_grow( rntm, cntl, thread );
 
 	// Extract the function pointer from the current control tree node.
-	f = bli_cntl_var_func( cntl );
+	l3_var_oft f = bli_cntl_var_func( cntl );
+
+	// Somewhat hackish support for 4m1b method implementation.
+	{
+		ind_t im = bli_cntx_method( cntx );
+
+		if ( im != BLIS_NAT )
+		{
+			if ( im == BLIS_4M1B )
+			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
+		}
+	}
 
 	// Invoke the variant.
 	f

@@ -93,7 +93,7 @@ cntl_t* bli_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_gemm_packa,  // pack the left-hand operand
+	  bli_l3_packa,  // pack the left-hand operand
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_KR,
@@ -119,7 +119,7 @@ cntl_t* bli_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_gemm_packb,  // pack the right-hand operand
+	  bli_l3_packb,  // pack the right-hand operand
 	  packb_fp,
 	  BLIS_NR,
 	  BLIS_KR,

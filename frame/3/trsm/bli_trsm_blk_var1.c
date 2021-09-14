@@ -96,7 +96,7 @@ void bli_trsm_blk_var1
 #endif
 
 		// Perform trsm subproblem.
-		bli_trsm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a11_1,
@@ -169,7 +169,7 @@ void bli_trsm_blk_var1
 
 		// Perform gemm subproblem. (Note that we use the same backend
 		// function as before, since we're calling the same macrokernel.)
-		bli_trsm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a11,

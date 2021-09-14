@@ -95,7 +95,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa, // trsm operation's packm function for A.
+	  bli_l3_packa, // trsm operation's packm function for A.
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
@@ -133,7 +133,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa, // trsm operation's packm function for A.
+	  bli_l3_packa, // trsm operation's packm function for A.
 	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
@@ -171,7 +171,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packb,
+	  bli_l3_packb,
 	  packb_fp,
 	  BLIS_NR,
 	  BLIS_MR,
@@ -244,7 +244,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa,
+	  bli_l3_packa,
 	  packa_fp,
 	  BLIS_NR,
 	  BLIS_MR,
@@ -270,7 +270,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packb,
+	  bli_l3_packb,
 	  packb_fp,
 	  BLIS_MR,
 	  BLIS_MR,

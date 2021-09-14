@@ -77,7 +77,7 @@ void bli_trsm_blk_var2
 		                        i, b_alg, c, &c1 );
 
 		// Perform trsm subproblem.
-		bli_trsm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  a,

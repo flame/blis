@@ -276,7 +276,7 @@ void bli_gemm_front
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_gemm_int,
+	  bli_l3_int,
 	  BLIS_GEMM, // operation family id
 	  alpha,
 	  &a_local,
