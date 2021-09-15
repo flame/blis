@@ -75,3 +75,15 @@
 #define GEMM_CCOLCMPLX_CONTIGUOUS_STORE_FWD(ZRe,ZIm,PT,CAddr,CCS) \
   GEMM_ACOLCMPLX_CONTIGUOUS_STORE_FWD(ZRe,ZIm,PT,CAddr,CCS)
 
+#define GEMM_CCOLCMPLX_GATHER_LOAD_FWD(ZRe,ZIm,ZIndex,PRe,PIm,CAddr,CCS,CTemp) \
+" add  "#CTemp", "#CAddr", #"SZ"  \n\t" /* Imaginary skip */ \
+" "LD1" "#ZRe"."DT", "#PRe"/z, ["#CAddr", "#ZIndex"."DT", "OFFS"]\n\t" \
+" "LD1" "#ZIm"."DT", "#PRe"/z, ["#CTemp", "#ZIndex"."DT", "OFFS"]\n\t" \
+" add  "#CAddr", "#CAddr", "#CCS" \n\t"
+
+#define GEMM_CCOLCMPLX_SCATTER_STORE_FWD(ZRe,ZIm,ZIndex,PRe,PIm,CAddr,CCS,CTemp) \
+" add  "#CTemp", "#CAddr", #"SZ"  \n\t" /* Imaginary skip */ \
+" "ST1" "#ZRe"."DT", "#PRe", ["#CAddr", "#ZIndex"."DT", "OFFS"]\n\t" \
+" "ST1" "#ZIm"."DT", "#PRe", ["#CTemp", "#ZIndex"."DT", "OFFS"]\n\t" \
+" add  "#CAddr", "#CAddr", "#CCS" \n\t"
+

@@ -42,8 +42,6 @@
 // 2vx7 microkernels.
 #include "armsve_asm_2vx7cmplx.h"
 
-#include <assert.h>
-
 void bli_zgemm_armsve_asm_2vx7_unindexed
      (
        dim_t               k0,
@@ -58,9 +56,6 @@ void bli_zgemm_armsve_asm_2vx7_unindexed
 {
   void* a_next = bli_auxinfo_next_a( data );
   void* b_next = bli_auxinfo_next_b( data );
-
-  // TODO: Write.
-  assert( rs_c0 == 1 );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -233,8 +228,12 @@ GEMM_FMLACMPLX_COL7(z14,z15,z16,z17,z18,z19,z20,z21,z22,z23,z24,z25,z26,z27,p0,z
 GEMM_CCMPLX_STORE_COL7_C(z14,z15,z16,z17,z18,z19,z20,z21,z22,z23,z24,z25,z26,z27,p0,%2,%4)
 " b               END_WRITE_MEM                   \n\t"
 "                                                 \n\t"
-" WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
-// TODO: Implement.
+" WRITE_MEM_G:                                    \n\t"
+" add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
+" index           z28.d, xzr, %3                  \n\t" //  s.t. 2*sizeof(double) = 2*8 = 16.
+GEMM_CCMPLX_LOAD_COL7_G(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,p0,z28,x9,%4,x16)
+GEMM_FMLACMPLX_COL7(z14,z15,z16,z17,z18,z19,z20,z21,z22,z23,z24,z25,z26,z27,p0,z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z30,z31)
+GEMM_CCMPLX_STORE_COL7_G(z14,z15,z16,z17,z18,z19,z20,z21,z22,z23,z24,z25,z26,z27,p0,z28,%2,%4,x16)
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t"
 " b               END_EXEC                        \n\t"

@@ -42,8 +42,6 @@
 // 2vx8 microkernels.
 #include "armsve_asm_2vx8cmplx.h"
 
-#include <assert.h>
-
 void bli_zgemm_armsve_asm_2vx8_unindexed
      (
        dim_t               k0,
@@ -58,9 +56,6 @@ void bli_zgemm_armsve_asm_2vx8_unindexed
 {
   void* a_next = bli_auxinfo_next_a( data );
   void* b_next = bli_auxinfo_next_b( data );
-
-  // TODO: Write.
-  assert( rs_c0 == 1 );
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
@@ -143,7 +138,7 @@ GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z16,z17,p0,%0,x2)
 "                                                 \n\t"
 CLEAR_COL16(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15)
 "                                                 \n\t"
-" cmp             %5, #0                          \n\t" // If no 4-microkernel can be applied
+" cmp             %5, #0                          \n\t" // If no 6-microkernel can be applied
 " b.eq            K_LEFT_LOOP                     \n\t"
 "                                                 \n\t"
 " K_MKER_LOOP:                                    \n\t"
@@ -248,8 +243,22 @@ GEMM_CCMPLX_STORE_COL2_C(z4 ,z5 ,z6 ,z7 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
 " b               END_WRITE_MEM                   \n\t"
 "                                                 \n\t"
-" WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
-// TODO: Implement.
+" WRITE_MEM_G:                                    \n\t"
+" add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
+" index           z16.d, xzr, %3                  \n\t" //  s.t. 2*sizeof(double) = 2*8 = 16.
+GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z16,x9,%4,x16)
+GEMM_CCMPLX_LOAD_COL2_G(z24,z25,z26,z27,p0,z16,x9,%4,x16)
+GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z18,z19)
+GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z24,z25,z26,z27,z18,z19)
+GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z16,%2,%4,x16)
+GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z16,%2,%4,x16)
+"                                                 \n\t"
+GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z16,x9,%4,x16)
+GEMM_CCMPLX_LOAD_COL2_G(z24,z25,z26,z27,p0,z16,x9,%4,x16)
+GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z12,z13,z14,z15,z18,z19)
+GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z24,z25,z26,z27,z18,z19)
+GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z16,%2,%4,x16)
+GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z16,%2,%4,x16)
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t"
 " b               END_EXEC                        \n\t"
