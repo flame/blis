@@ -70,7 +70,7 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  (
 		3,
 		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_12xk,
+		BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_int_12xk,
 		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
 		cntx
 	  );
@@ -78,7 +78,7 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  bli_cntx_set_packm_kers
 	  (
 		1,
-		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_asm_8xk,
+		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
 		cntx
 	  );
 

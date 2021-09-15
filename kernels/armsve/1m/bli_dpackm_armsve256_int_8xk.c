@@ -45,7 +45,7 @@
 //   SVE vector length = 256 bits.
 //
 
-void bli_dpackm_armsve256_asm_8xk
+void bli_dpackm_armsve256_int_8xk
      (
        conj_t           conja,
        pack_t           schema,

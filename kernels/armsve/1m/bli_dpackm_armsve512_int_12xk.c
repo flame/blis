@@ -48,7 +48,7 @@
 //   2-rows -> 3 vectors packing and use predicator only in odd num of rows to be packed.
 //   prefetching is needed.
 
-void bli_dpackm_armsve512_asm_12xk
+void bli_dpackm_armsve512_int_12xk
      (
        conj_t           conja,
        pack_t           schema,
