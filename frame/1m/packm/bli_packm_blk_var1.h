@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,5 +33,41 @@
 
 */
 
-#include "bli_packm_struc_cxk_md.h"
+//
+// Prototype object-based interfaces.
+//
+
+typedef struct
+{
+    //                   Type of C          Type of P
+    packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+} packm_blk_var1_params_t;
+
+BLIS_INLINE void bli_packm_blk_var1_init_params
+                 (
+                   packm_blk_var1_params_t* params
+                 )
+{
+    #undef GENTFUNC2
+    #define GENTFUNC2(ctypec,ctypep,chc,chp,name) \
+    params->ukr_fn[ PASTEMAC(chc,type) ][ PASTEMAC(chp,type) ] = \
+        ( packm_ker_vft )PASTEMAC2(chc,chp,name);
+    INSERT_GENTFUNC2_MIXDP0(packm_struc_cxk_md)
+
+    #undef GENTFUNC
+    #define GENTFUNC(ctype,ch,name) \
+    params->ukr_fn[ PASTEMAC(ch,type) ][ PASTEMAC(ch,type) ] = \
+        ( packm_ker_vft )PASTEMAC(ch,name);
+    INSERT_GENTFUNC_BASIC0(packm_struc_cxk)
+}
+
+BLIS_EXPORT_BLIS void bli_packm_blk_var1
+     (
+       obj_t*   c,
+       obj_t*   p,
+       cntx_t*  cntx,
+       rntm_t*  rntm,
+       cntl_t*  cntl,
+       thrinfo_t* t
+     );
 

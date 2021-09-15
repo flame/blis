@@ -40,38 +40,38 @@ static func_t packm_struc_cxk_kers[BLIS_NUM_PACK_SCHEMA_TYPES] =
 {
     /* float (0)  scomplex (1)  double (2)  dcomplex (3) */
 // 0000 row/col panels
-    { { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
-        bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
+	{ { bli_spackm_struc_cxk,      bli_cpackm_struc_cxk,
+	    bli_dpackm_struc_cxk,      bli_zpackm_struc_cxk,      } },
 // 0001 row/col panels: 4m interleaved
-    { { NULL,                      bli_cpackm_struc_cxk_4mi,
-        NULL,                      bli_zpackm_struc_cxk_4mi,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_4mi,
+	    NULL,                      bli_zpackm_struc_cxk_4mi,  } },
 // 0010 row/col panels: 3m interleaved
-    { { NULL,                      bli_cpackm_struc_cxk_3mis,
-        NULL,                      bli_zpackm_struc_cxk_3mis, } },
+	{ { NULL,                      bli_cpackm_struc_cxk_3mis,
+	    NULL,                      bli_zpackm_struc_cxk_3mis, } },
 // 0011 row/col panels: 4m separated (NOT IMPLEMENTED)
-    { { NULL,                      NULL,
-        NULL,                      NULL,                      } },
+	{ { NULL,                      NULL,
+	    NULL,                      NULL,                      } },
 // 0100 row/col panels: 3m separated
-    { { NULL,                      bli_cpackm_struc_cxk_3mis,
-        NULL,                      bli_zpackm_struc_cxk_3mis, } },
+	{ { NULL,                      bli_cpackm_struc_cxk_3mis,
+	    NULL,                      bli_zpackm_struc_cxk_3mis, } },
 // 0101 row/col panels: real only
-    { { NULL,                      bli_cpackm_struc_cxk_rih,
-        NULL,                      bli_zpackm_struc_cxk_rih,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_rih,
+	    NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 0110 row/col panels: imaginary only
-    { { NULL,                      bli_cpackm_struc_cxk_rih,
-        NULL,                      bli_zpackm_struc_cxk_rih,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_rih,
+	    NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 0111 row/col panels: real+imaginary only
-    { { NULL,                      bli_cpackm_struc_cxk_rih,
-        NULL,                      bli_zpackm_struc_cxk_rih,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_rih,
+	    NULL,                      bli_zpackm_struc_cxk_rih,  } },
 // 1000 row/col panels: 1m-expanded (1e)
-    { { NULL,                      bli_cpackm_struc_cxk_1er,
-        NULL,                      bli_zpackm_struc_cxk_1er,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_1er,
+	    NULL,                      bli_zpackm_struc_cxk_1er,  } },
 // 1001 row/col panels: 1m-reordered (1r)
-    { { NULL,                      bli_cpackm_struc_cxk_1er,
-        NULL,                      bli_zpackm_struc_cxk_1er,  } },
+	{ { NULL,                      bli_cpackm_struc_cxk_1er,
+	    NULL,                      bli_zpackm_struc_cxk_1er,  } },
 };
 
-static packm_ker_vft GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
+static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_packm_blk_var1
      (
@@ -83,35 +83,33 @@ void bli_packm_blk_var1
        thrinfo_t* thread
      )
 {
+	// Extract various fields from the control tree.
+	pack_t schema  = bli_cntl_packm_params_pack_schema( cntl );
+	bool   invdiag = bli_cntl_packm_params_does_invert_diag( cntl );
+	bool   revifup = bli_cntl_packm_params_rev_iter_if_upper( cntl );
+	bool   reviflo = bli_cntl_packm_params_rev_iter_if_lower( cntl );
+
 	// Every thread initializes p and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
-	// entry in the control tree node).
-	// Update the buffer address in p to point to the buffer associated
-	// with the mem_t entry acquired from the memory broker (now cached in
-	// the control tree node).
-    // Return early if no packing is required.
+	// entry in the control tree node). Return early if no packing is required.
 	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
-        return;
+		return;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 		bli_packm_int_check( c, p, cntx );
 
 	num_t   dt_c           = bli_obj_dt( c );
-    dim_t   dt_c_size      = bli_dt_size( dt_c );
+	dim_t   dt_c_size      = bli_dt_size( dt_c );
 
 	num_t   dt_p           = bli_obj_dt( p );
-    dim_t   dt_p_size      = bli_dt_size( dt_p );
+	dim_t   dt_p_size      = bli_dt_size( dt_p );
 
 	struc_t strucc         = bli_obj_struc( c );
 	doff_t  diagoffc       = bli_obj_diag_offset( c );
 	diag_t  diagc          = bli_obj_diag( c );
 	uplo_t  uploc          = bli_obj_uplo( c );
-	trans_t transc         = bli_obj_conjtrans_status( c );
-	pack_t  schema         = bli_obj_pack_schema( p );
-	bool    invdiag        = bli_obj_has_inverted_diag( p );
-	bool    revifup        = bli_obj_is_pack_rev_if_upper( p );
-	bool    reviflo        = bli_obj_is_pack_rev_if_lower( p );
+	conj_t  conjc          = bli_obj_conj_status( c );
 
 	dim_t   iter_dim       = bli_obj_length( p );
 	dim_t   panel_len_full = bli_obj_width( p );
@@ -131,13 +129,8 @@ void bli_packm_blk_var1
 
 	doff_t  diagoffc_inc   = ( doff_t )panel_dim_max;
 
-    obj_t   kappa_local;
-    char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
-
-	/* If C is zeros and part of a triangular matrix, then we don't need
-	   to pack it. */
-	if ( bli_is_zeros( uploc ) &&
-	     bli_is_triangular( strucc ) ) return;
+	obj_t   kappa_local;
+	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
 
 	// If the packm structure-aware kernel func_t in the context is
 	// NULL (which is the default value after the context is created),
@@ -148,17 +141,20 @@ void bli_packm_blk_var1
 	// Query the datatype-specific function pointer from the func_t object.
 	packm_ker_vft packm_ker_cast = bli_func_get_dt( dt_p, packm_kers );
 
-    // For mixed-precision gemm, select the proper kernel (only dense panels).
-    if ( dt_c != dt_p )
+	// For mixed-precision gemm, select the proper kernel (only dense panels).
+	if ( dt_c != dt_p )
+	{
+		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
+	}
+
+	// Query the user-provided packing kernel from the obj_t. If provided,
+    // this overrides the kernel determined above.
+	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
+
+	if ( params )
     {
-        packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
+        packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
     }
-
-    // Query the user-provided packing kernel from the obj_t.
-    obj_pack_ukr_fn_t pack_ker_user  = bli_obj_pack_ukr_fn( c );
-
-	/* Extract the conjugation bit from the transposition argument. */
-	conj_t conjc = bli_extract_conj( transc );
 
 	/* Compute the storage stride scaling. Usually this is just 1. However,
 	   in the case of interleaved 3m, we need to scale by 3/2, and in the
@@ -216,38 +212,16 @@ void bli_packm_blk_var1
 	for ( dim_t ic  = ic0,    ip  = ip0,    it  = 0; it < n_iter;
 	            ic += ic_inc, ip += ip_inc, it += 1 )
 	{
-		dim_t  panel_dim_i = bli_min( panel_dim_max, iter_dim - ic );
+		dim_t  panel_dim_i     = bli_min( panel_dim_max, iter_dim - ic );
+		dim_t  panel_dim_off_i = panel_dim_off + ic;
 
-		doff_t diagoffc_i  = diagoffc + (ip  )*diagoffc_inc;
-		char*  c_begin     = c_cast   + (ic  )*incc*dt_c_size;
+		doff_t diagoffc_i      = diagoffc + (ip  )*diagoffc_inc;
+		char*  c_begin         = c_cast   + (ic  )*incc*dt_c_size;
 
-		inc_t  p_inc       = ps_p;
+		inc_t  p_inc           = ps_p;
 
-		if ( pack_ker_user )
-		{
-			/* This case executes if the user has specified a custom packing microkernel */
-
-			dim_t panel_dim_off_i = panel_dim_off + ic;
-
-			/* The definition of bli_packm_my_iter() will depend on whether slab
-			   or round-robin partitioning was requested at configure-time. */
-			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
-			{
-				pack_ker_user( panel_dim_i,
-				               panel_dim_max,
-				               panel_dim_off_i,
-				               panel_len_full,
-				               panel_len_max,
-				               panel_len_off,
-				               kappa_cast,
-				               c_begin, incc, ldc,
-				               p_begin,       ldp,
-			                   bli_obj_user_data( c ),
-				               cntx );
-			}
-		}
-		else if ( bli_is_triangular( strucc ) &&
-		          bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len_full ) )
+		if ( bli_is_triangular( strucc ) &&
+		     bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len_full ) )
 		{
 			/* This case executes if the panel belongs to a triangular
 			   matrix AND is completely unstored (ie: zero). If the panel
@@ -272,10 +246,9 @@ void bli_packm_blk_var1
 			if ( diagoffc_i < 0 )
 				bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 
-        	dim_t  panel_off_i;
-        	dim_t  panel_len_i;
-        	dim_t  panel_len_max_i;
-        	doff_t diagoffp_i;
+			dim_t  panel_off_i;
+			dim_t  panel_len_i;
+			dim_t  panel_len_max_i;
 
 			if ( bli_is_lower( uploc ) )
 			{
@@ -283,18 +256,18 @@ void bli_packm_blk_var1
 				panel_len_i     = bli_abs( diagoffc_i ) + panel_dim_i;
 				panel_len_max_i = bli_min( bli_abs( diagoffc_i ) + panel_dim_max,
 				                           panel_len_max );
-				diagoffp_i      = diagoffc_i;
 			}
 			else /* if ( bli_is_upper( uploc ) )  */
 			{
 				panel_off_i     = bli_abs( diagoffc_i );
 				panel_len_i     = panel_len_full - panel_off_i;
 				panel_len_max_i = panel_len_max  - panel_off_i;
-				diagoffp_i      = 0;
 			}
 
-			char* c_use = c_begin + (panel_off_i  )*ldc*dt_c_size;
-			char* p_use = p_begin;
+			dim_t panel_len_off_i = panel_off_i + panel_len_off;
+
+			char* c_use           = c_begin + (panel_off_i  )*ldc*dt_c_size;
+			char* p_use           = p_begin;
 
 			/* We need to re-compute the imaginary stride as a function of
 			   panel_len_max_i since triangular packed matrices have panels
@@ -312,7 +285,6 @@ void bli_packm_blk_var1
 			if ( bli_packm_my_iter_rr( it, it_start, it_end, tid, nt ) )
 			{
 				packm_ker_cast( strucc,
-				                diagoffp_i,
 				                diagc,
 				                uploc,
 				                conjc,
@@ -322,11 +294,14 @@ void bli_packm_blk_var1
 				                panel_len_i,
 				                panel_dim_max,
 				                panel_len_max,
+				                panel_dim_off_i,
+				                panel_len_off_i,
 				                kappa_cast,
 				                c_use, incc, ldc,
 				                p_use,       ldp,
-			                           is_p_use,
-				                cntx );
+				                       is_p_use,
+				                cntx,
+				                params );
 			}
 
 			/* NOTE: This value is usually LESS than ps_p because triangular
@@ -334,18 +309,17 @@ void bli_packm_blk_var1
 			   than a "full" micro-panel. */
 			p_inc = ( is_p_use * ss_num ) / ss_den;
 		}
-		else if ( bli_is_herm_or_symm( strucc ) )
+		else
 		{
-			/* This case executes if the panel belongs to a Hermitian or
-			   symmetric matrix, which includes stored, unstored, and
-			   diagonal-intersecting panels. */
+			/* This case executes if the panel is either dense, or belongs
+               to a Hermitian or symmetric matrix, which includes stored,
+               unstored, and diagonal-intersecting panels. */
 
 			/* The definition of bli_packm_my_iter() will depend on whether slab
 			   or round-robin partitioning was requested at configure-time. */
 			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
 			{
 				packm_ker_cast( strucc,
-				                diagoffc_i,
 				                diagc,
 				                uploc,
 				                conjc,
@@ -355,37 +329,13 @@ void bli_packm_blk_var1
 				                panel_len_full,
 				                panel_dim_max,
 				                panel_len_max,
+				                panel_dim_off_i,
+				                panel_len_off,
 				                kappa_cast,
 				                c_begin, incc, ldc,
 				                p_begin,       ldp, is_p,
-				                cntx );
-			}
-		}
-		else
-		{
-			/* This case executes if the panel is general, or, if the
-			   panel is part of a triangular matrix and is neither unstored
-			   (ie: zero) nor diagonal-intersecting. */
-
-			/* The definition of bli_packm_my_iter() will depend on whether slab
-			   or round-robin partitioning was requested at configure-time. */
-			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
-			{
-				packm_ker_cast( BLIS_GENERAL,
-				                0,
-				                diagc,
-				                BLIS_DENSE,
-				                conjc,
-				                schema,
-				                invdiag,
-				                panel_dim_i,
-				                panel_len_full,
-				                panel_dim_max,
-				                panel_len_max,
-				                kappa_cast,
-				                c_begin, incc, ldc,
-				                p_begin,       ldp, is_p,
-				                cntx );
+				                cntx,
+				                params );
 			}
 		}
 

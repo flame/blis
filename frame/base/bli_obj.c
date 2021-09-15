@@ -119,9 +119,9 @@ void bli_obj_create_without_buffer
 	bli_obj_set_diag_offset( 0, obj );
 
     bli_obj_set_pack_fn( NULL, obj );
-    bli_obj_set_pack_ukr_fn( NULL, obj );
+    bli_obj_set_pack_params( NULL, obj );
     bli_obj_set_ker_fn( NULL, obj );
-    bli_obj_set_ukr_fn( NULL, obj );
+    bli_obj_set_ker_params( NULL, obj );
 
 	// Set the internal scalar to 1.0.
 	bli_obj_set_scalar_dt( dt, obj );

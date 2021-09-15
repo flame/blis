@@ -1189,62 +1189,48 @@ BLIS_INLINE stor3_t bli_obj_stor3_from_strides( obj_t* c, obj_t* a, obj_t* b )
 
 // -- User-provided information macros --
 
-// User data query
-
-BLIS_INLINE void* bli_obj_user_data( obj_t* obj )
-{
-	return obj->user_data;
-}
-
-// User data modification
-
-BLIS_INLINE void bli_obj_set_user_data( void* data, obj_t* obj )
-{
-	obj->user_data = data;
-}
-
 // Function pointer query
 
 BLIS_INLINE obj_pack_fn_t bli_obj_pack_fn( obj_t* obj )
 {
-	return obj->pack;
+	return obj->pack_fn;
 }
 
-BLIS_INLINE obj_pack_ukr_fn_t bli_obj_pack_ukr_fn( obj_t* obj )
+BLIS_INLINE void* bli_obj_pack_params( obj_t* obj )
 {
-	return obj->pack_ukr;
+	return obj->pack_params;
 }
 
 BLIS_INLINE obj_ker_fn_t bli_obj_ker_fn( obj_t* obj )
 {
-	return obj->ker;
+	return obj->ker_fn;
 }
 
-BLIS_INLINE obj_ukr_fn_t bli_obj_ukr_fn( obj_t* obj )
+BLIS_INLINE void* bli_obj_ker_params( obj_t* obj )
 {
-	return obj->ukr;
+	return obj->ker_params;
 }
 
 // Function pointer modification
 
-BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_fn( obj_pack_fn_t pack_fn, obj_t* obj )
 {
-	obj->pack = pack;
+	obj->pack_fn = pack_fn;
 }
 
-BLIS_INLINE void bli_obj_set_pack_ukr_fn( obj_pack_ukr_fn_t pack_ukr, obj_t* obj )
+BLIS_INLINE void bli_obj_set_pack_params( void* params, obj_t* obj )
 {
-	obj->pack_ukr = pack_ukr;
+	obj->pack_params = params;
 }
 
-BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker, obj_t* obj )
+BLIS_INLINE void bli_obj_set_ker_fn( obj_ker_fn_t ker_fn, obj_t* obj )
 {
-	obj->ker = ker;
+	obj->ker_fn = ker_fn;
 }
 
-BLIS_INLINE void bli_obj_set_ukr_fn( obj_ukr_fn_t ukr, obj_t* obj )
+BLIS_INLINE void bli_obj_set_ker_params( void* params, obj_t* obj )
 {
-	obj->ukr = ukr;
+	obj->ker_params = params;
 }
 
 

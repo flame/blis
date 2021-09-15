@@ -40,7 +40,6 @@
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -50,11 +49,14 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
                           inc_t is_p, \
-       cntx_t*         cntx  \
+       cntx_t*         cntx, \
+       void*           params \
      ) \
 { \
 	/* Handle micro-panel packing based on the structure of the matrix
@@ -83,7 +85,6 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,packm_herm_cxk_3mis) \
 		( \
           strucc, \
-          diagoffc, \
           diagc, \
           uploc, \
           conjc, \
@@ -93,11 +94,14 @@ void PASTEMAC(ch,varname) \
           panel_len, \
           panel_dim_max, \
           panel_len_max, \
+          panel_dim_off, \
+          panel_len_off, \
           kappa, \
           c, incc, ldc, \
           p,       ldp, \
              is_p, \
-          cntx  \
+		  cntx, \
+          params \
 		); \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
@@ -107,7 +111,6 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,packm_tri_cxk_3mis) \
 		( \
           strucc, \
-          diagoffc, \
           diagc, \
           uploc, \
           conjc, \
@@ -117,11 +120,14 @@ void PASTEMAC(ch,varname) \
           panel_len, \
           panel_dim_max, \
           panel_len_max, \
+          panel_dim_off, \
+          panel_len_off, \
           kappa, \
           c, incc, ldc, \
           p,       ldp, \
              is_p, \
-          cntx  \
+		  cntx, \
+          params \
 		); \
 	} \
 }
@@ -137,7 +143,6 @@ INSERT_GENTFUNCCO_BASIC( packm_struc_cxk_3mis, packm_cxk_3mis )
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -147,15 +152,19 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
                           inc_t is_p, \
-       cntx_t*         cntx  \
+       cntx_t*         cntx, \
+       void*           params \
      ) \
 { \
-	doff_t  diagoffc_abs; \
-	dim_t   i, j; \
+	doff_t diagoffc = panel_dim_off - panel_len_off; \
+	doff_t diagoffc_abs; \
+	dim_t  i, j; \
 \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
@@ -440,7 +449,6 @@ INSERT_GENTFUNCCO_BASIC( packm_herm_cxk_3mis, packm_cxk_3mis )
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -450,13 +458,18 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
                           inc_t is_p, \
-       cntx_t*         cntx  \
+       cntx_t*         cntx, \
+       void*           params \
      ) \
 { \
+	doff_t diagoffc = panel_dim_off - panel_len_off; \
+\
 	/* Pack the panel. */ \
 	PASTEMAC(ch,kername) \
 	( \

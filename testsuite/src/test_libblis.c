@@ -2635,7 +2635,6 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	(
 	  NULL, // we don't need the small block allocator from the runtime.
 	  NULL, // func ptr is not referenced b/c we don't call via l3 _int().
-	  bli_packm_blk_var1,
 	  bmult_id_m,
 	  bmult_id_n,
 	  does_inv_diag,
@@ -2647,7 +2646,7 @@ cntl_t* libblis_test_pobj_create( bszid_t bmult_id_m, bszid_t bmult_id_n, invdia
 	);
 
 	// Pack the contents of A to P.
-	bli_packm_int( a, p, cntx, rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
+	bli_packm_blk_var1( a, p, cntx, rntm, cntl, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Return the control tree pointer so the caller can free the cntl_t and its
 	// mem_t entry later on.

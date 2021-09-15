@@ -57,15 +57,10 @@ cntl_t* bli_trsm_l_cntl_create
      )
 {
 	void_fp macro_kernel_p;
-	void_fp packa_fp;
-	void_fp packb_fp;
 
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
 	macro_kernel_p = bli_trsm_xx_ker_var2;
-
-	packa_fp = bli_packm_blk_var1;
-	packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -96,7 +91,6 @@ cntl_t* bli_trsm_l_cntl_create
 	(
 	  rntm,
 	  bli_l3_packa, // trsm operation's packm function for A.
-	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -134,7 +128,6 @@ cntl_t* bli_trsm_l_cntl_create
 	(
 	  rntm,
 	  bli_l3_packa, // trsm operation's packm function for A.
-	  packa_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
@@ -172,7 +165,6 @@ cntl_t* bli_trsm_l_cntl_create
 	(
 	  rntm,
 	  bli_l3_packb,
-	  packb_fp,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -216,9 +208,6 @@ cntl_t* bli_trsm_r_cntl_create
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
 
-	void_fp packa_fp = bli_packm_blk_var1;
-	void_fp packb_fp = bli_packm_blk_var1;
-
 	const opid_t family = BLIS_TRSM;
 
 	// Create two nodes for the macro-kernel.
@@ -245,7 +234,6 @@ cntl_t* bli_trsm_r_cntl_create
 	(
 	  rntm,
 	  bli_l3_packa,
-	  packa_fp,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -271,7 +259,6 @@ cntl_t* bli_trsm_r_cntl_create
 	(
 	  rntm,
 	  bli_l3_packb,
-	  packb_fp,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal

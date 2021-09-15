@@ -1240,27 +1240,12 @@ struct thrinfo_s;
 
 typedef void (*obj_pack_fn_t)
     (
-      mem_t*            mem,
       struct obj_s*     a,
       struct obj_s*     ap,
       struct cntx_s*    cntx,
       struct rntm_s*    rntm,
+      struct cntl_s*    cntl,
       struct thrinfo_s* thread
-    );
-
-typedef void (*obj_pack_ukr_fn_t)
-    (
-       dim_t          m, \
-       dim_t          m_max, \
-       dim_t          m_off, \
-       dim_t          n, \
-       dim_t          n_max, \
-       dim_t          n_off, \
-       void* restrict kappa, \
-       void* restrict a, inc_t inca, inc_t lda, \
-       void* restrict p,             inc_t ldp, \
-       void*          params, \
-       struct cntx_s* cntx  \
     );
 
 typedef void (*obj_ker_fn_t)
@@ -1270,21 +1255,8 @@ typedef void (*obj_ker_fn_t)
       struct obj_s*     c,
       struct cntx_s*    cntx,
       struct rntm_s*    rntm,
+      struct cntl_s*    cntl,
       struct thrinfo_s* thread
-    );
-
-typedef void (*obj_ukr_fn_t)
-    (
-      dim_t                   m,
-      dim_t                   n,
-      dim_t                   k,
-      void*          restrict alpha,
-      void*          restrict a, inc_t rs_a, inc_t cs_a,
-      void*          restrict b, inc_t rs_b, inc_t cs_b,
-      void*          restrict beta,
-      void*          restrict c, inc_t rs_c, inc_t cs_c,
-      auxinfo_t*     restrict data,
-      struct cntx_s* restrict cntx
     );
 
 typedef struct obj_s
@@ -1317,14 +1289,11 @@ typedef struct obj_s
 	dim_t         m_panel;  // m dimension of a "full" panel
 	dim_t         n_panel;  // n dimension of a "full" panel
 
-	// User data pointer
-	void*         user_data;
-
-	// Function pointers
-	obj_pack_fn_t     pack;
-	obj_pack_ukr_fn_t pack_ukr;
-	obj_ker_fn_t      ker;
-	obj_ukr_fn_t      ukr;
+	// User-customizable fields
+	obj_pack_fn_t pack_fn;
+	void*         pack_params;
+	obj_ker_fn_t  ker_fn;
+	void*         ker_params;
 
 } obj_t;
 
@@ -1339,72 +1308,68 @@ typedef struct obj_s
 
 #define BLIS_OBJECT_INITIALIZER \
 { \
-	.root      = NULL, \
+	.root        = NULL, \
 \
-	.off       = { 0, 0 }, \
-	.dim       = { 0, 0 }, \
-	.diag_off  = 0, \
+	.off         = { 0, 0 }, \
+	.dim         = { 0, 0 }, \
+	.diag_off    = 0, \
 \
-	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.info2     = 0x0, \
-	.elem_size = sizeof( float ), /* this is changed later. */ \
+	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
+	                     BLIS_BITVAL_GENERAL, \
+	.info2       = 0x0, \
+	.elem_size   = sizeof( float ), /* this is changed later. */ \
 \
-	.buffer    = NULL, \
-	.rs        = 0, \
-	.cs        = 0, \
-	.is        = 1,  \
+	.buffer      = NULL, \
+	.rs          = 0, \
+	.cs          = 0, \
+	.is          = 1,  \
 \
-	.scalar    = { 0.0, 0.0 }, \
+	.scalar      = { 0.0, 0.0 }, \
 \
-	.m_padded  = 0, \
-	.n_padded  = 0, \
-	.ps        = 0, \
-	.pd        = 0, \
-	.m_panel   = 0, \
-	.n_panel   = 0, \
+	.m_padded    = 0, \
+	.n_padded    = 0, \
+	.ps          = 0, \
+	.pd          = 0, \
+	.m_panel     = 0, \
+	.n_panel     = 0, \
 \
-	.user_data = NULL, \
-\
-	.pack      = NULL, \
-	.pack_ukr  = NULL, \
-	.ker       = NULL, \
-	.ukr       = NULL  \
+	.pack_fn     = NULL, \
+	.pack_params = NULL, \
+	.ker_fn      = NULL, \
+	.ker_params  = NULL  \
 }
 
 #define BLIS_OBJECT_INITIALIZER_1X1 \
 { \
-	.root      = NULL, \
+	.root        = NULL, \
 \
-	.off       = { 0, 0 }, \
-	.dim       = { 1, 1 }, \
-	.diag_off  = 0, \
+	.off         = { 0, 0 }, \
+	.dim         = { 1, 1 }, \
+	.diag_off    = 0, \
 \
-	.info      = 0x0 | BLIS_BITVAL_DENSE      | \
-	                   BLIS_BITVAL_GENERAL, \
-	.info2     = 0x0, \
-	.elem_size = sizeof( float ), /* this is changed later. */ \
+	.info        = 0x0 | BLIS_BITVAL_DENSE      | \
+	                     BLIS_BITVAL_GENERAL, \
+	.info2       = 0x0, \
+	.elem_size   = sizeof( float ), /* this is changed later. */ \
 \
-	.buffer    = NULL, \
-	.rs        = 0, \
-	.cs        = 0, \
-	.is        = 1,  \
+	.buffer      = NULL, \
+	.rs          = 0, \
+	.cs          = 0, \
+	.is          = 1,  \
 \
-	.scalar    = { 0.0, 0.0 }, \
+	.scalar      = { 0.0, 0.0 }, \
 \
-	.m_padded  = 0, \
-	.n_padded  = 0, \
-	.ps        = 0, \
-	.pd        = 0, \
-	.m_panel   = 0, \
-	.n_panel   = 0, \
+	.m_padded    = 0, \
+	.n_padded    = 0, \
+	.ps          = 0, \
+	.pd          = 0, \
+	.m_panel     = 0, \
+	.n_panel     = 0, \
 \
-	.user_data = NULL, \
-\
-	.pack      = NULL, \
-	.pack_ukr  = NULL, \
-	.ker       = NULL, \
-	.ukr       = NULL  \
+	.pack_fn     = NULL, \
+	.pack_params = NULL, \
+	.ker_fn      = NULL, \
+	.ker_params  = NULL  \
 }
 
 // Define these macros here since they must be updated if contents of
@@ -1412,79 +1377,75 @@ typedef struct obj_s
 
 BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 {
-	b->root      = a->root;
+	b->root        = a->root;
 
-	b->off[0]    = a->off[0];
-	b->off[1]    = a->off[1];
-	b->dim[0]    = a->dim[0];
-	b->dim[1]    = a->dim[1];
-	b->diag_off  = a->diag_off;
+	b->off[0]      = a->off[0];
+	b->off[1]      = a->off[1];
+	b->dim[0]      = a->dim[0];
+	b->dim[1]      = a->dim[1];
+	b->diag_off    = a->diag_off;
 
-	b->info      = a->info;
-	b->info2     = a->info2;
-	b->elem_size = a->elem_size;
+	b->info        = a->info;
+	b->info2       = a->info2;
+	b->elem_size   = a->elem_size;
 
-	b->buffer    = a->buffer;
-	b->rs        = a->rs;
-	b->cs        = a->cs;
-	b->is        = a->is;
+	b->buffer      = a->buffer;
+	b->rs          = a->rs;
+	b->cs          = a->cs;
+	b->is          = a->is;
 
-	b->scalar    = a->scalar;
+	b->scalar      = a->scalar;
 
-	//b->pack_mem  = a->pack_mem;
-	b->m_padded  = a->m_padded;
-	b->n_padded  = a->n_padded;
-	b->ps        = a->ps;
-	b->pd        = a->pd;
-	b->m_panel   = a->m_panel;
-	b->n_panel   = a->n_panel;
+	//b->pack_mem    = a->pack_mem;
+	b->m_padded    = a->m_padded;
+	b->n_padded    = a->n_padded;
+	b->ps          = a->ps;
+	b->pd          = a->pd;
+	b->m_panel     = a->m_panel;
+	b->n_panel     = a->n_panel;
 
-	b->user_data = a->user_data;
-
-	b->pack      = a->pack;
-	b->pack_ukr  = a->pack_ukr;
-	b->ker       = a->ker;
-	b->ukr       = a->ukr;
+	b->pack_fn     = a->pack_fn;
+	b->pack_params = a->pack_params;
+	b->ker_fn      = a->ker_fn;
+	b->ker_params  = a->ker_params;
 }
 
 BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
 {
-	b->root      = a->root;
+	b->root        = a->root;
 
-	b->off[0]    = a->off[0];
-	b->off[1]    = a->off[1];
+	b->off[0]      = a->off[0];
+	b->off[1]      = a->off[1];
 	// Avoid copying m and n since they will be overwritten.
-	//b->dim[0]    = a->dim[0];
-	//b->dim[1]    = a->dim[1];
-	b->diag_off  = a->diag_off;
+	//b->dim[0]      = a->dim[0];
+	//b->dim[1]      = a->dim[1];
+	b->diag_off    = a->diag_off;
 
-	b->info      = a->info;
-	b->info2     = a->info2;
-	b->elem_size = a->elem_size;
+	b->info        = a->info;
+	b->info2       = a->info2;
+	b->elem_size   = a->elem_size;
 
-	b->buffer    = a->buffer;
-	b->rs        = a->rs;
-	b->cs        = a->cs;
-	b->is        = a->is;
+	b->buffer      = a->buffer;
+	b->rs          = a->rs;
+	b->cs          = a->cs;
+	b->is          = a->is;
 
-	b->scalar    = a->scalar;
+	b->scalar      = a->scalar;
 
 	// Avoid copying pack_mem entry.
 	// FGVZ: You should probably make sure this is right.
-	//b->pack_mem  = a->pack_mem;
-	b->m_padded  = a->m_padded;
-	b->n_padded  = a->n_padded;
-	b->ps        = a->ps;
-	b->pd        = a->pd;
-	b->m_panel   = a->m_panel;
-	b->n_panel   = a->n_panel;
+	//b->pack_mem    = a->pack_mem;
+	b->m_padded    = a->m_padded;
+	b->n_padded    = a->n_padded;
+	b->ps          = a->ps;
+	b->pd          = a->pd;
+	b->m_panel     = a->m_panel;
+	b->n_panel     = a->n_panel;
 
-	b->user_data = a->user_data;
-
-	b->pack      = a->pack;
-	b->pack_ukr  = a->pack_ukr;
-	b->ker       = a->ker;
-	b->ukr       = a->ukr;
+	b->pack_fn     = a->pack_fn;
+	b->pack_params = a->pack_params;
+	b->ker_fn      = a->ker_fn;
+	b->ker_params  = a->ker_params;
 }
 
 // Initializors for global scalar constants.

@@ -46,49 +46,8 @@ void bli_packm_int
 {
 	bli_init_once();
 
-	packm_var_oft f;
-
-	// Sanity check; A should never have a zero dimension. If we must support
-	// it, then we should fold it into the next alias-and-early-exit block.
-	//if ( bli_obj_has_zero_dim( a ) ) bli_abort();
-
-	// Let us now check to see if the object has already been packed. First
-	// we check if it has been packed to an unspecified (row or column)
-	// format, in which case we can return, since by now aliasing has already
-	// taken place in packm_init().
-	// NOTE: The reason we don't need to even look at the control tree in
-	// this case is as follows: an object's pack status is only set to
-	// BLIS_PACKED_UNSPEC for situations when the actual format used is
-	// not important, as long as its packed into contiguous rows or
-	// contiguous columns. A good example of this is packing for matrix
-	// operands in the level-2 operations.
-	if ( bli_obj_pack_schema( a ) == BLIS_PACKED_UNSPEC )
-	{
-		return;
-	}
-
-	// At this point, we can be assured that cntl is not NULL. Now we check
-	// if the object has already been packed to the desired schema (as en-
-	// coded in the control tree). If so, we can return, as above.
-	// NOTE: In most cases, an object's pack status will be BLIS_NOT_PACKED
-	// and thus packing will be called for (but in some cases packing has
-	// already taken place, or does not need to take place, and so that will
-	// be indicated by the pack status). Also, not all combinations of
-	// current pack status and desired pack schema are valid.
-	if ( bli_obj_pack_schema( a ) == bli_cntl_packm_params_pack_schema( cntl ) )
-	{
-		return;
-	}
-
-	// If the object is marked as being filled with zeros, then we can skip
-	// the packm operation entirely.
-	if ( bli_obj_is_zeros( a ) )
-	{
-		return;
-	}
-
-	// Extract the function pointer from the current control tree node.
-	f = bli_cntl_packm_params_var_func( cntl );
+	// Extract the function pointer from the object.
+    packm_var_oft f = bli_obj_pack_fn( a );
 
 	// FGVZ: Not sure why we need this barrier, but we do.
 	bli_thread_barrier( thread );

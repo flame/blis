@@ -40,7 +40,6 @@
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -50,6 +49,8 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
@@ -84,7 +85,6 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,packm_herm_cxk) \
 		( \
           strucc, \
-          diagoffc, \
           diagc, \
           uploc, \
           conjc, \
@@ -94,6 +94,8 @@ void PASTEMAC(ch,varname) \
           panel_len, \
           panel_dim_max, \
           panel_len_max, \
+          panel_dim_off, \
+          panel_len_off, \
           kappa, \
           c, incc, ldc, \
           p,       ldp, \
@@ -108,7 +110,6 @@ void PASTEMAC(ch,varname) \
 		PASTEMAC(ch,packm_tri_cxk) \
 		( \
           strucc, \
-          diagoffc, \
           diagc, \
           uploc, \
           conjc, \
@@ -118,6 +119,8 @@ void PASTEMAC(ch,varname) \
           panel_len, \
           panel_dim_max, \
           panel_len_max, \
+          panel_dim_off, \
+          panel_len_off, \
           kappa, \
           c, incc, ldc, \
           p,       ldp, \
@@ -138,7 +141,6 @@ INSERT_GENTFUNC_BASIC( packm_struc_cxk, packm_cxk )
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -148,6 +150,8 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
@@ -155,8 +159,9 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      ) \
 { \
-	doff_t  diagoffc_abs; \
-	dim_t   i, j; \
+	doff_t diagoffc = panel_dim_off - panel_len_off; \
+	doff_t diagoffc_abs; \
+	dim_t  i, j; \
 \
 	/* Handle the case where the micro-panel does NOT intersect the
 	   diagonal separately from the case where it does intersect. */ \
@@ -379,7 +384,6 @@ INSERT_GENTFUNC_BASIC( packm_herm_cxk, packm_cxk )
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -389,6 +393,8 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
@@ -396,6 +402,8 @@ void PASTEMAC(ch,varname) \
        cntx_t*         cntx  \
      ) \
 { \
+	doff_t diagoffc = panel_dim_off - panel_len_off; \
+\
 	/* Pack the panel. */ \
 	PASTEMAC(ch,kername) \
 	( \

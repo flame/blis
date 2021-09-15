@@ -38,7 +38,6 @@
 void PASTEMAC(ch,varname) \
      ( \
        struc_t         strucc, \
-       doff_t          diagoffc, \
        diag_t          diagc, \
        uplo_t          uploc, \
        conj_t          conjc, \
@@ -48,11 +47,14 @@ void PASTEMAC(ch,varname) \
        dim_t           panel_len, \
        dim_t           panel_dim_max, \
        dim_t           panel_len_max, \
+       dim_t           panel_dim_off, \
+       dim_t           panel_len_off, \
        ctype* restrict kappa, \
        ctype* restrict c, inc_t incc, inc_t ldc, \
        ctype* restrict p,             inc_t ldp, \
                           inc_t is_p, \
-       cntx_t*         cntx  \
+       cntx_t*         cntx, \
+       void*           params \
      );
 
 INSERT_GENTPROTCO_BASIC0( packm_struc_cxk_1er )

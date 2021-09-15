@@ -94,6 +94,34 @@ void bli_l3_int
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
+	// Ensure that a valid packing function is set on A and B
+	if ( !bli_obj_pack_fn( &a_local ) )
+		bli_obj_set_pack_fn( bli_packm_blk_var1, &a_local );
+
+	if ( !bli_obj_pack_fn( &b_local ) )
+		bli_obj_set_pack_fn( bli_packm_blk_var1, &b_local );
+
+	// If we are using the default packing functon, ensure that the
+	// packing parameters are set. If using a custom packing function,
+	// it's up to the user to make sure there are valid parameters.
+	/*
+	packm_blk_var1_params_t params_a, params_b;
+
+	if ( bli_obj_pack_fn( &a_local ) == bli_packm_blk_var1 &&
+	     !bli_obj_pack_params( &a_local ) )
+	{
+		bli_packm_blk_var1_init_params( &params_a );
+		bli_obj_set_pack_params( &params_a, &a_local );
+	}
+
+	if ( bli_obj_pack_fn( &b_local ) == bli_packm_blk_var1 &&
+	     !bli_obj_pack_params( &b_local ) )
+	{
+		bli_packm_blk_var1_init_params( &params_b );
+		bli_obj_set_pack_params( &params_b, &b_local );
+	}
+	*/
+
 	// If we are about to call a leaf-level implementation, and matrix C
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions. Note that this transposition would normally
@@ -115,7 +143,7 @@ void bli_l3_int
 	else // if ( bli_obj_root_is_triangular( b ) )
 	{
 		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
-            bli_obj_scalar_apply_scalar( alpha, &b_local );
+			bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
