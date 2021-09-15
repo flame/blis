@@ -65,6 +65,8 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	);
 
 	// Set VL-specific packing routines if applicable.
+	// NOTE: SVE-Intrinsic kernels are used without checking __has_include(<arm_sve.h>).
+	//  Such is ensured at configuration stage for config: armsve.
 	if (m_r_d==16)
 	  bli_cntx_set_packm_kers
 	  (

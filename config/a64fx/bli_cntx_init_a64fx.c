@@ -58,9 +58,10 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	// Set SVE-512 packing routine.
 	bli_cntx_set_packm_kers
 	(
-	  3,
+	  2,
 	  BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-	  BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_int_12xk,
+	  // 12xk is not used and disabled for GCC 8-9 compatibility.
+	  // BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_int_12xk,
 	  BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
 	  cntx
 	);
