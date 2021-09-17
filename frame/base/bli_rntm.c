@@ -605,6 +605,22 @@ void bli_nthreads_optimum(
 	  if(m<=512 && n<=512)
 	    n_threads_ideal = 4;
 	}
+	else if( family == BLIS_GEMMT && bli_obj_is_double(c)  )
+	{
+		dim_t n = bli_obj_length(c);
+		dim_t k = bli_obj_width_after_trans(a);
+		dim_t product = (n*k)>>4; /* product is derived based on n and k */
+		//    Limit the number thread for smaller sizes:
+		if(product <= 346)
+		{
+			n_threads_ideal = 1;
+		}
+		/* finer threshold needs to set for max_thread cap of 2,3,4,5,6..32 */
+		else
+		{
+			n_threads_ideal = n_threads;
+		}
+	}
 
 	dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
 

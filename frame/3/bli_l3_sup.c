@@ -158,7 +158,6 @@ printf( "dims: %d %d %d (threshs: %d %d %d)\n",
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_2);
 }
 
-
 err_t bli_gemmtsup
      (
        obj_t*  alpha,
@@ -242,6 +241,14 @@ err_t bli_gemmtsup
     rntm_t rntm_l;
     if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
     else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+	// of threads and update in rntm
+
+    // Limit the number of thread for smaller sizes.
+    bli_nthreads_optimum( a, b, c, BLIS_GEMMT, rntm );
+#endif
 
 #if 0
 const num_t dt = bli_obj_dt( c );
