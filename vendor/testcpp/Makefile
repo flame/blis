@@ -3,7 +3,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2017 - 2021, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -112,7 +112,9 @@ TEST_OBJS      := $(patsubst $(TEST_SRC_PATH)/%.c, \
 # while building BLIS.
 CINCFLAGS      := -I$(INC_PATH)
 
-CXX	= g++
+# Use CXX from the blis configuration, this will insure that
+# correct compiler and compiler version is used to build testcpp folder
+#CXX	= g++
 
 # Use the CFLAGS for the configuration family.
 override CFLAGS         += $(call get-sandbox-cxxflags-for,$(CONFIG_NAME))
