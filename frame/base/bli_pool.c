@@ -122,6 +122,7 @@ void bli_pool_finalize
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
+#if 0 // Removing dead code
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
@@ -141,6 +142,8 @@ void bli_pool_finalize
 		
 		//bli_abort();
 	}
+
+#endif
 
 	// Query the free() function pointer for the pool.
 	free_ft free_fp = bli_pool_free_fp( pool );
