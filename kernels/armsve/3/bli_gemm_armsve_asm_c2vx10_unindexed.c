@@ -205,14 +205,26 @@ GEMM_2VX10CMPLX_MKER_LOOP_PLAIN_C_1_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,
 " prfm            PLDL1STRM, [%10, 256*1]         \n\t"
 "                                                 \n\t"
 " WRITE_MEM:                                      \n\t"
+" fmov            s27, #1.0                       \n\t"
+" fcmp            s29, #0.0                       \n\t" // Whether Imag(alpha) == 0.
+" fccmp           s28, s27, 0, eq                 \n\t" // Whether Real(alpha) == 1.
+" b.eq            UNIT_ALPHA                      \n\t"
 "                                                 \n\t"
 GEMM_FMULCMPLX_COL2(z20,z21,z22,z23,p0,z0 ,z1 ,z2 ,z3 ,z28,z29)
 GEMM_FMULCMPLX_COL2(z24,z25,z26,z27,p0,z4 ,z5 ,z6 ,z7 ,z28,z29)
 GEMM_FMULCMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z8, z9, z10,z11,z28,z29)
 GEMM_FMULCMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z12,z13,z14,z15,z28,z29)
 GEMM_FMULCMPLX_COL2(z8 ,z9 ,z10,z11,p0,z16,z17,z18,z19,z28,z29)
+" b               WRITE_MEM_EXEC                  \n\t"
 "                                                 \n\t"
 " UNIT_ALPHA:                                     \n\t"
+MOV_COL2(z20,z21,z22,z23,z0 ,z1 ,z2 ,z3 )
+MOV_COL2(z24,z25,z26,z27,z4 ,z5 ,z6 ,z7 )
+MOV_COL2(z0 ,z1 ,z2 ,z3 ,z8, z9, z10,z11)
+MOV_COL2(z4 ,z5 ,z6 ,z7 ,z12,z13,z14,z15)
+MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
+"                                                 \n\t"
+" WRITE_MEM_EXEC:                                 \n\t"
 " mov             x9, %2                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is %2 itself.
 " cmp             %3, #1                          \n\t"

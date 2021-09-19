@@ -94,6 +94,14 @@
   CLEAR_COL4(Z12,Z13,Z14,Z15) \
   CLEAR_COL4(Z16,Z17,Z18,Z19)
 
+// Moving is always .d.
+// Never use .DT here!
+#define MOV_COL2(ZD0Re,ZD0Im,ZD1Re,ZD1Im,Z0Re,Z0Im,Z1Re,Z1Im) \
+" mov "#ZD0Re".d, "#Z0Re".d \n\t" \
+" mov "#ZD0Im".d, "#Z0Im".d \n\t" \
+" mov "#ZD1Re".d, "#Z1Re".d \n\t" \
+" mov "#ZD1Im".d, "#Z1Im".d \n\t"
+
 #define GEMM_FMULCMPLX_COL2(ZD0Re,ZD0Im,ZD1Re,ZD1Im,PT,Z0Re,Z0Im,Z1Re,Z1Im,ZFactorRe,ZFactorIm) \
   FMUL_COL2(ZD0Re,ZD0Im,Z0Re,Z0Im,ZFactorRe) \
   FMUL_COL2(ZD1Re,ZD1Im,Z1Re,Z1Im,ZFactorRe) \

@@ -42,12 +42,6 @@
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10cmplx.h"
 
-#define MOV_COL2(ZD0Re,ZD0Im,ZD1Re,ZD1Im,Z0Re,Z0Im,Z1Re,Z1Im) \
-" mov "#ZD0Re".d, "#Z0Re".d \n\t" \
-" mov "#ZD0Im".d, "#Z0Im".d \n\t" \
-" mov "#ZD1Re".d, "#Z1Re".d \n\t" \
-" mov "#ZD1Im".d, "#Z1Im".d \n\t"
-
 void bli_zgemm_armsve_asm_2vx10_unindexed
      (
        dim_t               k0,
