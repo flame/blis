@@ -70,7 +70,7 @@
 #endif
 
 // Determine the target operating system.
-#if defined(BLIS_ENABLE_SYSTEM)
+//#if defined(BLIS_ENABLE_SYSTEM)
   #if defined(_WIN32) || defined(__CYGWIN__)
     #define BLIS_OS_WINDOWS 1
   #elif defined(__gnu_hurd__)
@@ -94,9 +94,9 @@
   #else
     #error "Cannot determine operating system"
   #endif
-#else // #if defined(BLIS_DISABLE_SYSTEM)
-  #define BLIS_OS_NONE
-#endif
+//#else // #if defined(BLIS_DISABLE_SYSTEM)
+//  #define BLIS_OS_NONE
+//#endif
 
 // A few changes that may be necessary in Windows environments.
 #if BLIS_OS_WINDOWS

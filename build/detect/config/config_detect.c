@@ -33,20 +33,8 @@
 
 */
 
-// The BLIS_ENABLE_SYSTEM macro must be defined so that the proper branches in
-// bli_system.h are processed. (This macro is normally defined in bli_config.h.)
-#define BLIS_ENABLE_SYSTEM
-
-// Use C-style static inline functions for the static inline functions that are
-// defined by the headers below. (This macro is normally defined in
-// bli_config_macro_defs.h.)
 #define BLIS_INLINE static
-
-// Since we're not building a shared library, we can forego the use of the
-// BLIS_EXPORT_BLIS annotations by #defining them to be nothing. (This macro is
-// normally defined in bli_config_macro_defs.h.)
 #define BLIS_EXPORT_BLIS
-
 #include "bli_system.h"
 #include "bli_type_defs.h"
 #include "bli_arch.h"
