@@ -382,6 +382,8 @@ int main( int argc, char** argv )
                                  cp, ldc
                                  );
 #else
+//Disabled dzgemm function temporarily.
+#if 0
 		    if( bli_is_double( dt_a ) )
 		    {
 		    	dzgemm_(
@@ -399,6 +401,7 @@ int main( int argc, char** argv )
 		    }
 		    else
 		    {
+#else
                     	zgemm_( &f77_transa,
                             &f77_transb,
                             &mm,
@@ -409,7 +412,8 @@ int main( int argc, char** argv )
                             bp, (f77_int*)&ldb,
                             betap,
                             cp, (f77_int*)&ldc );
-		   }
+//		   }
+#endif
 #endif
                 }
 #endif
