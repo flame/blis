@@ -34,7 +34,8 @@
 
 #include "blis.h"
 
-#if 1
+// Sanity: #pragma omp simd is only available on BLIS_ENABLE_PRAGMA_OMP_SIMD
+#if defined(BLIS_ENABLE_PRAGMA_OMP_SIMD)
 
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
@@ -156,10 +157,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 }
 
 //INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( float,    s, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 16 )
-GENTFUNC( double,   d, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( scomplex, c, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( dcomplex, z, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
+GENTFUNC( float,    s, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_MR_REF_S, BLIS_NR_REF_S )
+GENTFUNC( double,   d, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_MR_REF_D, BLIS_NR_REF_D )
+GENTFUNC( scomplex, c, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_MR_REF_C, BLIS_NR_REF_C )
+GENTFUNC( dcomplex, z, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, BLIS_MR_REF_Z, BLIS_NR_REF_Z )
 
 #else
 

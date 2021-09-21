@@ -239,6 +239,29 @@ The value `BLIS_HEAP_STRIDE_ALIGN_SIZE` defines the alignment used for so-called
 
 The value `BLIS_POOL_ADDR_ALIGN_SIZE` defines the alignment used when allocating blocks to the memory pools used to manage internal packing buffers. Any block of memory returned by the memory allocator is guaranteed to be aligned to this value. Aligning these blocks to the virtual memory page size (usually 4096 bytes) is standard practice.
 
+_**Reference micro-kernel sizes.**_ Using pre-implemented reference micro-kernels could be useful to port and get BLIS running quickly on a new architecture, without spending time implementing a set of optimized kernels, yet.
+
+For performance reason, reference micro-kernels (typically _gemm_ ones) are statically generated with some default hardcoded values of _MR_ and _NR_ for each precision. The developer who wants to tune these micro-sizes can override the default ones by adding in the `bli_family_<arch>.h` file:
+```c
+#define BLIS_MR_REF_S   ...
+#define BLIS_NR_REF_S   ...
+
+#define BLIS_MR_REF_D   ...
+#define BLIS_NR_REF_D   ...
+
+#define BLIS_MR_REF_C   ...
+#define BLIS_NR_REF_C   ...
+
+#define BLIS_MR_REF_Z   ...
+#define BLIS_NR_REF_Z   ...
+```
+and in `bli_cntx_init_<arch>.c`:
+```c
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ], BLIS_MR_REF_S, BLIS_MR_REF_D, BLIS_MR_REF_C, BLIS_MR_REF_Z );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ], BLIS_NR_REF_S, BLIS_NR_REF_D, BLIS_NR_REF_C, BLIS_NR_REF_Z );
+```
+
+**Note:** It is important to keep consistency between the micro-size macros (`BLIS_[MR|NR]_REF_[S|D|C|Z]`) and `blkszs` settings in `cntx`, hence the additional `bli_blksz_init_easy()` in `bli_cntx_init_<arch>.c`.
 
 
 ### make_defs.mk

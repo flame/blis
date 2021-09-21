@@ -36,6 +36,58 @@
 #define BLIS_KERNEL_MACRO_DEFS_H
 
 
+// -- Define default reference micro-kernel sizes --------------------------------------
+
+// NOTE: In case a developer wants to port BLIS on a new architecture and
+// does not afford yet implementing associated optimized micro-kernels,
+// (s)he can use the pre-implemented reference ones.
+//
+// A possible circumstance is when the user wants to tune these micro-sizes
+// (MR/NR), while still using the reference implementation.
+// That would be possible at one condition: these macros below must be
+// pre-defined (e.g. in bli_family_<arch>.h) and used to set the blocksizes
+// (bli_blksz_init_easy()) in bli_cntx_init_<arch>.c, in order to produce a
+// consistent context (match between micro-sizes and micro-kernels).
+//
+// PS: We currently only ensure consistency of micro-sizes MR/NR, since
+// they are directly correlated to generated micro-kernels.
+// Macro-sizes (MC/NC/KC) are not taken in account for the moment, since they
+// are more related to data-path and Goto's algorithm and can be safely changed
+// by user without impacting computation results (but bear in mind that they
+// always need to be multiple of MR/NR).
+#ifndef BLIS_MR_REF_S
+#define BLIS_MR_REF_S         4
+#endif
+
+#ifndef BLIS_NR_REF_S
+#define BLIS_NR_REF_S        16
+#endif
+
+#ifndef BLIS_MR_REF_D
+#define BLIS_MR_REF_D         4
+#endif
+
+#ifndef BLIS_NR_REF_D
+#define BLIS_NR_REF_D         8
+#endif
+
+#ifndef BLIS_MR_REF_C
+#define BLIS_MR_REF_C         4
+#endif
+
+#ifndef BLIS_NR_REF_C
+#define BLIS_NR_REF_C         8
+#endif
+
+#ifndef BLIS_MR_REF_Z
+#define BLIS_MR_REF_Z         4
+#endif
+
+#ifndef BLIS_NR_REF_Z
+#define BLIS_NR_REF_Z         4
+#endif
+
+
 // -- Define default threading parameters --------------------------------------
 
 // -- Conventional (large code path) values --
