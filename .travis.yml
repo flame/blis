@@ -1,6 +1,11 @@
 language: c
 sudo: required
 dist: focal
+branches:
+  only:
+  - master
+  - dev
+  - amd
 matrix:
   include:
   # full testsuite (all tests + mixed datatype (gemm_nn only) + salt + SDE + OOT)
