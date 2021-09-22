@@ -1,11 +1,11 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -411,9 +411,17 @@ BASE_LIB_PATH      := $(LIB_PATH)
 
 # The base name of the BLIS library that we will build.
 ifeq ($(THREADING_MODEL),off)
-LIBBLIS            := libblis
+ifeq ($(MK_BLAS_INT_TYPE_SIZE), 64)
+LIBBLIS            := libblis-ilp64
 else
-LIBBLIS            := libblis-mt
+LIBBLIS            := libblis-lp64
+endif
+else
+ifeq ($(MK_BLAS_INT_TYPE_SIZE), 64)
+LIBBLIS            := libblis-mt-ilp64
+else
+LIBBLIS            := libblis-mt-lp64
+endif
 endif
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
