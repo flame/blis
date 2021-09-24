@@ -32,16 +32,10 @@
 
 */
 
-#ifndef _BLI_GEMM_OPT_8X4_H_
-#define _BLI_GEMM_OPT_8X4_H_
-
-#ifdef UTEST
-#include "blis_utest.h"
-#else
 #include "blis.h"
-#endif
+#include "../bli_kernels_armv7a.h"
 
-void bli_sgemm_opt_8x4
+void bli_sgemm_armv7a_asm_wrap_4x4
      (
        dim_t               m,
        dim_t               n,
@@ -53,9 +47,14 @@ void bli_sgemm_opt_8x4
        float*     restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
-     );
+     )
+{
+    GEMM_UKR_SETUP_CT( s, 4, 4, false );
+    bli_sgemm_armv7a_asm_4x4(k, alpha, a, b, beta, c, rs_c, cs_c, data, cntx);
+    GEMM_UKR_FLUSH_CT( s );
+}
 
-void bli_dgemm_opt_8x4
+void bli_dgemm_armv7a_asm_wrap_4x4
      (
        dim_t               m,
        dim_t               n,
@@ -67,9 +66,14 @@ void bli_dgemm_opt_8x4
        double*    restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
-     );
+     )
+{
+    GEMM_UKR_SETUP_CT( d, 4, 4, false );
+    bli_dgemm_armv7a_asm_4x4(k, alpha, a, b, beta, c, rs_c, cs_c, data, cntx);
+    GEMM_UKR_FLUSH_CT( d );
+}
 
-void bli_cgemm_opt_8x4
+void bli_cgemm_armv7a_asm_wrap_2x2
      (
        dim_t               m,
        dim_t               n,
@@ -81,9 +85,14 @@ void bli_cgemm_opt_8x4
        scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
-     );
+     )
+{
+    GEMM_UKR_SETUP_CT( c, 2, 2, false );
+    bli_cgemm_armv7a_asm_2x2(k, alpha, a, b, beta, c, rs_c, cs_c, data, cntx);
+    GEMM_UKR_FLUSH_CT( c );
+}
 
-void bli_zgemm_opt_8x4
+void bli_zgemm_armv7a_asm_wrap_2x2
      (
        dim_t               m,
        dim_t               n,
@@ -95,6 +104,10 @@ void bli_zgemm_opt_8x4
        dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
-     );
+     )
+{
+    GEMM_UKR_SETUP_CT( z, 2, 2, false );
+    bli_zgemm_armv7a_asm_2x2(k, alpha, a, b, beta, c, rs_c, cs_c, data, cntx);
+    GEMM_UKR_FLUSH_CT( z );
+}
 
-#endif

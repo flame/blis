@@ -55,7 +55,9 @@
 
 void bli_i16sgemm_power10_mma_8x16
     (
-        dim_t               k0,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
         int32_t*       restrict alpha,
         short*     restrict a,
         short*     restrict b,
@@ -66,8 +68,8 @@ void bli_i16sgemm_power10_mma_8x16
     )
 {
 
-    uint64_t k_iter = (k0-1) / 4;
-    uint64_t k_left = (k0-1) % 4;
+    uint64_t k_iter = (k-1) / 4;
+    uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -82,7 +84,7 @@ void bli_i16sgemm_power10_mma_8x16
     iv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
-    __vector_quad acc0, acc1, acc2, acc3, 
+    __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
     vec_t *ca = (vec_t *) A0;

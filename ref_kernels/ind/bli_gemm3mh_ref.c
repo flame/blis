@@ -39,6 +39,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -56,9 +58,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
-\
-	const dim_t       m         = mr; \
-	const dim_t       n         = nr; \
 \
 	ctype_r           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype_r ) ] \
@@ -104,16 +103,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   we would as if it were column-stored. */ \
 	if ( bli_is_row_stored( rs_c, cs_c ) ) \
 	{ \
-		rs_ct = n; n_iter = m; incc = cs_c; \
-		cs_ct = 1; n_elem = n; ldc  = rs_c; \
+		rs_ct = nr; incct =  1; n_iter = m; incc = cs_c; \
+		cs_ct =  1;  ldct = nr; n_elem = n; ldc  = rs_c; \
 	} \
 	else /* column-stored or general stride */ \
 	{ \
-		rs_ct = 1; n_iter = n; incc = rs_c; \
-		cs_ct = m; n_elem = m; ldc  = cs_c; \
+		rs_ct =  1; incct =  1; n_iter = n; incc = rs_c; \
+		cs_ct = mr;  ldct = mr; n_elem = m; ldc  = cs_c; \
 	} \
-	incct = 1; \
-	ldct  = n_elem; \
 \
 \
 	/* The following gemm micro-kernel call implements one "phase" of the
@@ -130,6 +127,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* ct = alpha_r * a * b; */ \
 	rgemm_ukr \
 	( \
+      m, \
+      n, \
 	  k, \
 	  alpha_r, \
 	  a_cast, \
@@ -150,7 +149,7 @@ PASTEMAC(chr,fprintm)( stdout, "gemm3mh_ukr: ct", 4, 4, ct, rs_ct, cs_ct, "%4.1f
 	{ \
 		if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
 		{ \
-			/* c   = beta * c; 
+			/* c   = beta * c;
 			   c_r = c_r + ct;
 			   c_i = c_i - ct; */ \
 			for ( j = 0; j < n_iter; ++j ) \

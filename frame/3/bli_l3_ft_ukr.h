@@ -47,6 +47,8 @@
 \
 typedef void (*PASTECH3(ch,opname,_ukr,tsuf)) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \

@@ -44,7 +44,9 @@
 
 void bli_sgemm_armsve_asm_2vx10_unindexed
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
@@ -59,10 +61,13 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 4;
-  uint64_t k_left = k0 % 4;
+  uint64_t k_mker = k / 4;
+  uint64_t k_left = k % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
+
+  uint64_t mr = 2*svcntw();
+  GEMM_UKR_SETUP_CT( s, mr, 10, false );
 
   __asm__ volatile (
 " ldr             x0, %[a]                        \n\t"
@@ -247,8 +252,6 @@ SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z1
 " UNIT_ALPHA:                                     \n\t"
 " mov             x9, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
-" cmp             x6, #1                          \n\t"
-" b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
@@ -259,21 +262,6 @@ GEMM_C_LOAD_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,x9,x7)
 GEMM_C_STORE_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,x5,x7)
 GEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
 GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,x5,x7)
-" b               END_WRITE_MEM                   \n\t"
-"                                                 \n\t"
-" WRITE_MEM_G:                                    \n\t" // Available scratch: Z[20-30].
-"                                                 \n\t" // Here used scratch: Z[20-30] - Z30 as index.
-" mov             x8, xzr                         \n\t"
-" incb            x8                              \n\t"
-" madd            x8, x8, x6, xzr                 \n\t" // C-column's logical 1-vector skip.
-" index           z30.s, wzr, w6                  \n\t" // Skips passed to index is not multiplied by 8.
-GEMM_C_LOAD_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p0,p0,x9,x7,x8,x16)
-GEMM_C_FMAD_UKER(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p0,z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z31)
-GEMM_C_LOAD_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p0,p0,x9,x7,x8,x16)
-"                                                 \n\t"
-GEMM_C_STORE_UKER_G(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z30,p0,p0,x5,x7,x8,x16)
-GEMM_C_FMAD_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p0,z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,z31)
-GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p0,p0,x5,x7,x8,x16)
 "                                                 \n\t"
 " END_WRITE_MEM:                                  \n\t"
 " b               END_EXEC                        \n\t"
@@ -303,5 +291,7 @@ GEMM_C_STORE_UKER_G(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,z30,p0,p0,x5,x7,x8,x16)
   "z24","z25","z26","z27",
   "z28","z29","z30","z31"
    );
+
+   GEMM_UKR_FLUSH_CT( s );
 }
 

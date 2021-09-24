@@ -143,6 +143,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: bx111p_i", k+m, n, \
 	   upper: b11.r = alpha.r * b11.r - a12.r * b21.r; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  minus_one_r, \
 	  a1x_r, \
@@ -159,6 +161,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: bx111p_i", k+m, n, \
 	   upper: b11.i = alpha.r * b11.i - a12.r * b21.i; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  minus_one_r, \
 	  a1x_r, \
@@ -175,6 +179,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: bx111p_i", k+m, n, \
 	   upper: b11.i =     1.0 * b11.i - a12.i * b21.r; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  minus_one_r, \
 	  a1x_i, \
@@ -191,6 +197,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemmtrsm4m1_l_ukr: bx111p_i", k+m, n, \
 	   upper: b11.r =     1.0 * b11.r + a12.i * b21.i; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  one_r, \
 	  a1x_i, \

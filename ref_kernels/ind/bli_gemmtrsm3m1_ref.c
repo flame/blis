@@ -139,6 +139,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   upper: ab.r = a12.r * b21.r; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  one_r, \
 	  a1x_r, \
@@ -155,6 +157,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   upper: ab.i = a12.i * b21.i; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  one_r, \
 	  a1x_i, \
@@ -171,6 +175,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   upper: b11.i = alpha.r * b11.i - a12.ri * b21.ri; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  minus_one_r, \
 	  a1x_ri, \

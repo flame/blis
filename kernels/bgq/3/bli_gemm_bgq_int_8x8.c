@@ -56,6 +56,8 @@
 
 void bli_dgemm_bgq_int_8x8
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
@@ -66,6 +68,8 @@ void bli_dgemm_bgq_int_8x8
        cntx_t*    restrict cntx
      )
 {
+    GEMM_UKR_SETUP_CT_ANY( d, 8, 8, false );
+
     //Registers for storing C.
     //4 4x4 subblocks of C, c00, c01, c10, c11
     //4 registers per subblock: a, b, c, d
@@ -201,6 +205,8 @@ void bli_dgemm_bgq_int_8x8
     UPDATE( AB, c, 0 );
     AB = vec_perm( c11d, c11d, pattern );
     UPDATE( AB, c, 4 );
+
+    GEMM_UKR_FLUSH_CT( d );
 }
 
 void printvec(vector4double v)
@@ -214,6 +220,8 @@ void printvec(vector4double v)
 
 void bli_zgemm_bgq_int_4x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
@@ -224,6 +232,8 @@ void bli_zgemm_bgq_int_4x4
        cntx_t*    restrict cntx
      )
 {
+    GEMM_UKR_SETUP_CT_ANY( z, 4, 4, false );
+
     double* a_d = ( double* )a;
     double* b_d = ( double* )b;
     double* c_d = ( double* )c;
@@ -368,4 +378,6 @@ void bli_zgemm_bgq_int_4x4
     c_d += 2*cs_c;
     ZUPDATE( c03a, c03b, c_d, 0 );
     ZUPDATE( c13a, c13b, c_d, 4 );
+
+    GEMM_UKR_FLUSH_CT( z );
 }

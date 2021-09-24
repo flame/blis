@@ -41,6 +41,8 @@
 \
 void PASTEMAC2(ch,opname,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -157,6 +159,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
+          mr, \
+          nr, \
 		  k, \
 		  alpha_r, \
 		  a_r, \
@@ -172,8 +176,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		/* Accumulate the final result in ct back to c. */ \
 		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
 				                   *(c  + i*rs_c  + j*cs_c ) ); \
@@ -181,8 +185,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		} \
 		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *(c  + i*rs_c  + j*cs_c ) ); \
@@ -190,8 +194,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		} \
 		else \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *beta, \
@@ -218,6 +222,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
+          m, \
+          n, \
 		  k, \
 		  alpha_r, \
 		  a_r, \

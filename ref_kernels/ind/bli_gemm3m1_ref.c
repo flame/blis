@@ -39,6 +39,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -56,9 +58,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
-\
-	const dim_t       m         = mr; \
-	const dim_t       n         = nr; \
 \
 	ctype_r           ab_r[ BLIS_STACK_BUF_MAX_SIZE \
 	                        / sizeof( ctype_r ) ] \
@@ -118,16 +117,14 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   we would as if it were column-stored. */ \
 	if ( bli_is_row_stored( rs_c, cs_c ) ) \
 	{ \
-		rs_ab = n; n_iter = m; incc = cs_c; \
-		cs_ab = 1; n_elem = n; ldc  = rs_c; \
+		rs_ab = nr; incab =  1; n_iter = m; incc = cs_c; \
+		cs_ab =  1;  ldab = nr; n_elem = n; ldc  = rs_c; \
 	} \
 	else /* column-stored or general stride */ \
 	{ \
-		rs_ab = 1; n_iter = n; incc = rs_c; \
-		cs_ab = m; n_elem = m; ldc  = cs_c; \
+		rs_ab =  1; incab =  1; n_iter = n; incc = rs_c; \
+		cs_ab = mr;  ldab = mr; n_elem = m; ldc  = cs_c; \
 	} \
-	incab = 1; \
-	ldab  = n_elem; \
 \
 \
 	/* The following gemm micro-kernel calls implement all "phases" of the
@@ -146,6 +143,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* ab_r = alpha_r * a_r * b_r; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  alpha_r, \
 	  a_r, \
@@ -161,6 +160,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* ab_i = alpha_r * a_i * b_i; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  alpha_r, \
 	  a_i, \
@@ -176,6 +177,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* ct_i = alpha_r * a_ri * b_ri; */ \
 	rgemm_ukr \
 	( \
+      mr, \
+      nr, \
 	  k, \
 	  alpha_r, \
 	  a_rpi, \
@@ -191,7 +194,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   ab_i, and ab_rpi depends on the value of beta. */ \
 	if ( !PASTEMAC(chr,eq0)( beta_i ) ) \
 	{ \
-		/* c   = beta * c; 
+		/* c   = beta * c;
 		   c_r = c_r          + ab_r - ab_i;
 		   c_i = c_i + ab_rpi - ab_r - ab_i; */ \
 		for ( j = 0; j < n_iter; ++j ) \

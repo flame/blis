@@ -32,7 +32,7 @@
 
 */
 
-// MACROS for power9_asm_d12x6 
+// MACROS for power9_asm_d12x6
 
 
 // zero out registers used to store result
@@ -72,7 +72,7 @@
 "xxlxor           %%vs32, %%vs32, %%vs32        \n\t" \
 "xxlxor           %%vs33, %%vs33, %%vs33        \n\t" \
 "xxlxor           %%vs34, %%vs34, %%vs34        \n\t" \
-"xxlxor           %%vs35, %%vs35, %%vs35        \n\t" 
+"xxlxor           %%vs35, %%vs35, %%vs35        \n\t"
 
 #define DPREFETCH \
 "dcbt             0, %%r16                      \n\t" \
@@ -80,7 +80,7 @@
 "dcbt             0, %%r18                      \n\t" \
 "dcbt             0, %%r19                      \n\t" \
 "dcbt             0, %%r20                      \n\t" \
-"dcbt             0, %%r21                      \n\t" 
+"dcbt             0, %%r21                      \n\t"
 
 // preload col/row of A/B
 #define DPRELOAD \
@@ -1140,7 +1140,7 @@
 "                                               \n\t" \
 "                                               \n\t" \
 "addi             %%r8, %%r8, 1536              \n\t" \
-"addi             %%r7, %%r7, 1536              \n\t" 
+"addi             %%r7, %%r7, 1536              \n\t"
 
 // compute AB product
 // no unrolling
@@ -1248,7 +1248,7 @@
 "xvmuldp          %%vs32, %%vs32, %%vs62   	    \n\t" \
 "xvmuldp          %%vs33, %%vs33, %%vs62   	    \n\t" \
 "xvmuldp          %%vs34, %%vs34, %%vs62   	    \n\t" \
-"xvmuldp          %%vs35, %%vs35, %%vs62   	    \n\t" 
+"xvmuldp          %%vs35, %%vs35, %%vs62   	    \n\t"
 
 // initialize offset registers used for gen stored cases
 #define DGEN_LOAD_OFS_C \
@@ -1258,7 +1258,7 @@
 "add             %%r24, %%r23, %%r12           	\n\t" \
 "add             %%r25, %%r24, %%r12           	\n\t" \
 "add             %%r26, %%r25, %%r12           	\n\t" \
-"add             %%r27, %%r26, %%r12           	\n\t" 
+"add             %%r27, %%r26, %%r12           	\n\t"
 
 // load C into registers
 // assume C is gen stored
@@ -1282,84 +1282,8 @@
 "lxsdx            %%vs42,    0, %%r27           \n\t" \
 "xxpermdi         %%vs41, %%vs41, %%vs42, 0     \n\t"
 
-// increment offset registers to the next col
-#define DGEN_NEXT_COL_CMATRIX \
-"add             %%r22, %%r22, %%r10            \n\t" \
-"add             %%r23, %%r23, %%r10            \n\t" \
-"add             %%r24, %%r24, %%r10            \n\t" \
-"add             %%r25, %%r25, %%r10            \n\t" \
-"add             %%r26, %%r26, %%r10            \n\t" \
-"add             %%r27, %%r27, %%r10            \n\t"
-
-// load C into registers and move offset registers to next col
-#define DGENLOAD_UPDATE \
-DGEN_LOAD_C  \
-DGEN_NEXT_COL_CMATRIX 
-
 // scale C by beta and add it to the AB product
-// assume C is gen stored 
-#define DGEN_SCALE_BETA \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs0,  %%vs36, %%vs63   	    \n\t" \
-"xvmaddadp        %%vs1,  %%vs37, %%vs63   	  	\n\t" \
-"xvmaddadp        %%vs2,  %%vs38, %%vs63   	  	\n\t" \
-"xvmaddadp        %%vs3,  %%vs39, %%vs63	    \n\t" \
-"xvmaddadp        %%vs4,  %%vs40, %%vs63   	  	\n\t" \
-"xvmaddadp        %%vs5,  %%vs41, %%vs63   	  	\n\t" \
-"                                               \n\t" \
-"                                               \n\t" \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs6,  %%vs36, %%vs63        \n\t" \
-"xvmaddadp        %%vs7,  %%vs37, %%vs63        \n\t" \
-"xvmaddadp        %%vs8,  %%vs38, %%vs63        \n\t" \
-"xvmaddadp        %%vs9,  %%vs39, %%vs63        \n\t" \
-"xvmaddadp        %%vs10, %%vs40, %%vs63        \n\t" \
-"xvmaddadp        %%vs11, %%vs41, %%vs63        \n\t" \
-"                                               \n\t" \
-"                                               \n\t" \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs12, %%vs36, %%vs63        \n\t" \
-"xvmaddadp        %%vs13, %%vs37, %%vs63        \n\t" \
-"xvmaddadp        %%vs14, %%vs38, %%vs63        \n\t" \
-"xvmaddadp        %%vs15, %%vs39, %%vs63        \n\t" \
-"xvmaddadp        %%vs16, %%vs40, %%vs63        \n\t" \
-"xvmaddadp        %%vs17, %%vs41, %%vs63        \n\t" \
-"                                               \n\t" \
-"                                          	    \n\t" \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs18, %%vs36, %%vs63        \n\t" \
-"xvmaddadp        %%vs19, %%vs37, %%vs63        \n\t" \
-"xvmaddadp        %%vs20, %%vs38, %%vs63        \n\t" \
-"xvmaddadp        %%vs21, %%vs39, %%vs63        \n\t" \
-"xvmaddadp        %%vs22, %%vs40, %%vs63        \n\t" \
-"xvmaddadp        %%vs23, %%vs41, %%vs63        \n\t" \
-"                                               \n\t" \
-"                                               \n\t" \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs24, %%vs36, %%vs63        \n\t" \
-"xvmaddadp        %%vs25, %%vs37, %%vs63        \n\t" \
-"xvmaddadp        %%vs26, %%vs38, %%vs63        \n\t" \
-"xvmaddadp        %%vs27, %%vs39, %%vs63        \n\t" \
-"xvmaddadp        %%vs28, %%vs40, %%vs63        \n\t" \
-"xvmaddadp        %%vs29, %%vs41, %%vs63        \n\t" \
-"                                               \n\t" \
-"                                               \n\t" \
-DGENLOAD_UPDATE                                       \
-"                                               \n\t" \
-"xvmaddadp        %%vs30, %%vs36, %%vs63        \n\t" \
-"xvmaddadp        %%vs31, %%vs37, %%vs63        \n\t" \
-"xvmaddadp        %%vs32, %%vs38, %%vs63        \n\t" \
-"xvmaddadp        %%vs33, %%vs39, %%vs63        \n\t" \
-"xvmaddadp        %%vs34, %%vs40, %%vs63        \n\t" \
-"xvmaddadp        %%vs35, %%vs41, %%vs63        \n\t"
- 
-// scale C by beta and add it to the AB product
-// assume C is col stored 
+// assume C is col stored
 #define DCOL_SCALE_BETA \
 "lxv              %%vs36,  0(%%r16)             \n\t" \
 "lxv              %%vs42,  0(%%r17)             \n\t" \
@@ -1435,135 +1359,7 @@ DGENLOAD_UPDATE                                       \
 "xvmaddadp          %%vs31,  %%vs49,  %%vs63    \n\t" \
 "xvmaddadp          %%vs32,  %%vs50,  %%vs63    \n\t" \
 "xvmaddadp          %%vs33,  %%vs51,  %%vs63    \n\t" \
-"xvmaddadp          %%vs34,  %%vs52,  %%vs63    \n\t" 
-
-// store result into C's memory location
-// assume C is gen stored
-#define DGEN_STORE \
-"                                               \n\t" \
-"stxsdx          %%vs0, %%r9, %%r22             \n\t" \
-"xxswapd         %%vs0, %%vs0		            \n\t" \
-"stxsdx          %%vs0, 0, %%r22                \n\t" \
-"stxsdx          %%vs1, %%r9, %%r23             \n\t" \
-"xxswapd         %%vs1, %%vs1		            \n\t" \
-"stxsdx          %%vs1, 0, %%r23                \n\t" \
-"stxsdx          %%vs2, %%r9, %%r24             \n\t" \
-"xxswapd         %%vs2, %%vs2		            \n\t" \
-"stxsdx          %%vs2, 0, %%r24                \n\t" \
-"stxsdx          %%vs3, %%r9, %%r25             \n\t" \
-"xxswapd         %%vs3, %%vs3		            \n\t" \
-"stxsdx          %%vs3, 0, %%r25                \n\t" \
-"stxsdx          %%vs4, %%r9, %%r26             \n\t" \
-"xxswapd         %%vs4, %%vs4		            \n\t" \
-"stxsdx          %%vs4, 0, %%r26                \n\t" \
-"stxsdx          %%vs5, %%r9, %%r27             \n\t" \
-"xxswapd         %%vs5, %%vs5		            \n\t" \
-"stxsdx          %%vs5, 0, %%r27                \n\t" \
-"                                               \n\t" \
-DGEN_NEXT_COL_CMATRIX                                 \
-"                                               \n\t" \
-"stxsdx          %%vs6, %%r9, %%r22             \n\t" \
-"xxswapd         %%vs6, %%vs6		            \n\t" \
-"stxsdx          %%vs6, 0, %%r22                \n\t" \
-"stxsdx          %%vs7, %%r9, %%r23             \n\t" \
-"xxswapd         %%vs7, %%vs7		            \n\t" \
-"stxsdx          %%vs7, 0, %%r23                \n\t" \
-"stxsdx          %%vs8, %%r9, %%r24             \n\t" \
-"xxswapd         %%vs8, %%vs8		            \n\t" \
-"stxsdx          %%vs8, 0, %%r24                \n\t" \
-"stxsdx          %%vs9, %%r9, %%r25             \n\t" \
-"xxswapd         %%vs9, %%vs9		            \n\t" \
-"stxsdx          %%vs9, 0, %%r25                \n\t" \
-"stxsdx          %%vs10, %%r9, %%r26            \n\t" \
-"xxswapd         %%vs10, %%vs10		            \n\t" \
-"stxsdx          %%vs10, 0, %%r26               \n\t" \
-"stxsdx          %%vs11, %%r9, %%r27            \n\t" \
-"xxswapd         %%vs11, %%vs11		            \n\t" \
-"stxsdx          %%vs11, 0, %%r27               \n\t" \
-"                                               \n\t" \
-DGEN_NEXT_COL_CMATRIX                                 \
-"                                               \n\t" \
-"stxsdx          %%vs12, %%r9, %%r22            \n\t" \
-"xxswapd         %%vs12, %%vs12		            \n\t" \
-"stxsdx          %%vs12, 0, %%r22               \n\t" \
-"stxsdx          %%vs13, %%r9, %%r23            \n\t" \
-"xxswapd         %%vs13, %%vs13		            \n\t" \
-"stxsdx          %%vs13, 0, %%r23               \n\t" \
-"stxsdx          %%vs14, %%r9, %%r24            \n\t" \
-"xxswapd         %%vs14, %%vs14		            \n\t" \
-"stxsdx          %%vs14, 0, %%r24               \n\t" \
-"stxsdx          %%vs15, %%r9, %%r25            \n\t" \
-"xxswapd         %%vs15, %%vs15		            \n\t" \
-"stxsdx          %%vs15, 0, %%r25               \n\t" \
-"stxsdx          %%vs16, %%r9, %%r26            \n\t" \
-"xxswapd         %%vs16, %%vs16		            \n\t" \
-"stxsdx          %%vs16, 0, %%r26               \n\t" \
-"stxsdx          %%vs17, %%r9, %%r27            \n\t" \
-"xxswapd         %%vs17, %%vs17		            \n\t" \
-"stxsdx          %%vs17, 0, %%r27               \n\t" \
-"                                               \n\t" \
-DGEN_NEXT_COL_CMATRIX                                 \
-"                                               \n\t" \
-"stxsdx          %%vs18, %%r9, %%r22            \n\t" \
-"xxswapd         %%vs18, %%vs18		            \n\t" \
-"stxsdx          %%vs18, 0, %%r22               \n\t" \
-"stxsdx          %%vs19, %%r9, %%r23            \n\t" \
-"xxswapd         %%vs19, %%vs19		            \n\t" \
-"stxsdx          %%vs19, 0, %%r23               \n\t" \
-"stxsdx          %%vs20, %%r9, %%r24            \n\t" \
-"xxswapd         %%vs20, %%vs20		            \n\t" \
-"stxsdx          %%vs20, 0, %%r24               \n\t" \
-"stxsdx          %%vs21, %%r9, %%r25            \n\t" \
-"xxswapd         %%vs21, %%vs21		            \n\t" \
-"stxsdx          %%vs21, 0, %%r25               \n\t" \
-"stxsdx          %%vs22, %%r9, %%r26            \n\t" \
-"xxswapd         %%vs22, %%vs22		            \n\t" \
-"stxsdx          %%vs22, 0, %%r26               \n\t" \
-"stxsdx          %%vs23, %%r9, %%r27            \n\t" \
-"xxswapd         %%vs23, %%vs23		            \n\t" \
-"stxsdx          %%vs23, 0, %%r27               \n\t" \
-"                                               \n\t" \
-DGEN_NEXT_COL_CMATRIX                                 \
-"                                               \n\t" \
-"stxsdx          %%vs24, %%r9, %%r22            \n\t" \
-"xxswapd         %%vs24, %%vs24		            \n\t" \
-"stxsdx          %%vs24, 0, %%r22               \n\t" \
-"stxsdx          %%vs25, %%r9, %%r23            \n\t" \
-"xxswapd         %%vs25, %%vs25		            \n\t" \
-"stxsdx          %%vs25, 0, %%r23               \n\t" \
-"stxsdx          %%vs26, %%r9, %%r24            \n\t" \
-"xxswapd         %%vs26, %%vs26		            \n\t" \
-"stxsdx          %%vs26, 0, %%r24               \n\t" \
-"stxsdx          %%vs27, %%r9, %%r25            \n\t" \
-"xxswapd         %%vs27, %%vs27		            \n\t" \
-"stxsdx          %%vs27, 0, %%r25               \n\t" \
-"stxsdx          %%vs28, %%r9, %%r26            \n\t" \
-"xxswapd         %%vs28, %%vs28	                \n\t" \
-"stxsdx          %%vs28, 0, %%r26               \n\t" \
-"stxsdx          %%vs29, %%r9, %%r27            \n\t" \
-"xxswapd         %%vs29, %%vs29		            \n\t" \
-"stxsdx          %%vs29, 0, %%r27               \n\t" \
-"                                               \n\t" \
-DGEN_NEXT_COL_CMATRIX                                 \
-"                                               \n\t" \
-"stxsdx          %%vs30, %%r9, %%r22            \n\t" \
-"xxswapd         %%vs30, %%vs30		            \n\t" \
-"stxsdx          %%vs30, 0, %%r22               \n\t" \
-"stxsdx          %%vs31, %%r9, %%r23            \n\t" \
-"xxswapd         %%vs31, %%vs31		            \n\t" \
-"stxsdx          %%vs31, 0, %%r23               \n\t" \
-"stxsdx          %%vs32, %%r9, %%r24            \n\t" \
-"xxswapd         %%vs32, %%vs32		            \n\t" \
-"stxsdx          %%vs32, 0, %%r24               \n\t" \
-"stxsdx          %%vs33, %%r9, %%r25            \n\t" \
-"xxswapd         %%vs33, %%vs33		            \n\t" \
-"stxsdx          %%vs33, 0, %%r25               \n\t" \
-"stxsdx          %%vs34, %%r9, %%r26            \n\t" \
-"xxswapd         %%vs34, %%vs34	                \n\t" \
-"stxsdx          %%vs34, 0, %%r26               \n\t" \
-"stxsdx          %%vs35, %%r9, %%r27            \n\t" \
-"xxswapd         %%vs35, %%vs35		            \n\t" \
-"stxsdx          %%vs35, 0, %%r27               \n\t"
+"xvmaddadp          %%vs34,  %%vs52,  %%vs63    \n\t"
 
 // store result into C's memory location
 // assume C is col stored

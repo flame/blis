@@ -76,7 +76,9 @@
 
 void bli_shgemm_armsve_asm_2vx10_unindexed
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        void*      restrict alpha,
        void*      restrict a,
        void*      restrict b,
@@ -91,8 +93,8 @@ void bli_shgemm_armsve_asm_2vx10_unindexed
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 4;
-  uint64_t k_left = k0 % 4;
+  uint64_t k_mker = k / 4;
+  uint64_t k_left = k % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
 

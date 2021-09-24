@@ -35,6 +35,16 @@
 
 
 //
+// GEMM kernel parameter struct.
+//
+
+typedef struct
+{
+    gemm_ukr_vft ukr;
+} gemm_ker_params_t;
+
+
+//
 // Prototype object-based interfaces.
 //
 

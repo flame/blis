@@ -388,6 +388,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
+                  MR, \
+                  NR, \
 				  k, \
 				  alpha_cast, \
 				  a1, \
@@ -407,43 +409,20 @@ void PASTEMAC(ch,varname) \
 			} \
 			else if ( bli_is_strictly_above_diag_n( diagoffc_ij, m_cur, n_cur ) ) \
 			{ \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  beta_cast, \
-					  c11, rs_c, cs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  zero, \
-					  ct, rs_ct, cs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Scale the edge of C and add the result. */ \
-					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        beta_cast, \
-					                        c11, rs_c,  cs_c ); \
-				} \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+                  m_cur, \
+                  n_cur, \
+				  k, \
+				  alpha_cast, \
+				  a1, \
+				  b1, \
+				  beta_cast, \
+				  c11, rs_c, cs_c, \
+				  &aux, \
+				  cntx  \
+				); \
 			} \
 		} \
 	} \
@@ -515,43 +494,20 @@ void PASTEMAC(ch,varname) \
 			   And if we're strictly below the diagonal, we do nothing and
 			   continue. */ \
 			{ \
-				/* Handle interior and edge cases separately. */ \
-				if ( m_cur == MR && n_cur == NR ) \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  beta_cast, \
-					  c11, rs_c, cs_c, \
-					  &aux, \
-					  cntx  \
-					); \
-				} \
-				else \
-				{ \
-					/* Invoke the gemm micro-kernel. */ \
-					gemm_ukr \
-					( \
-					  k, \
-					  alpha_cast, \
-					  a1, \
-					  b1, \
-					  zero, \
-					  ct, rs_ct, cs_ct, \
-					  &aux, \
-					  cntx  \
-					); \
-\
-					/* Scale the edge of C and add the result. */ \
-					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-					                        ct,  rs_ct, cs_ct, \
-					                        beta_cast, \
-					                        c11, rs_c,  cs_c ); \
-				} \
+				/* Invoke the gemm micro-kernel. */ \
+				gemm_ukr \
+				( \
+                  m_cur, \
+                  n_cur, \
+				  k, \
+				  alpha_cast, \
+				  a1, \
+				  b1, \
+				  beta_cast, \
+				  c11, rs_c, cs_c, \
+				  &aux, \
+				  cntx  \
+				); \
 			} \
 		} \
 	} \

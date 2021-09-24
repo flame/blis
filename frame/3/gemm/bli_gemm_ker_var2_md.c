@@ -373,6 +373,8 @@ void PASTEMAC2(chc,che,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
+                  MR, \
+                  NR, \
 				  k, \
 				  alpha_cast, \
 				  a1, \

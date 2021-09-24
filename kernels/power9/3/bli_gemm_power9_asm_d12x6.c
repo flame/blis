@@ -37,7 +37,9 @@
 
 void bli_dgemm_power9_asm_12x6
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
@@ -50,11 +52,13 @@ void bli_dgemm_power9_asm_12x6
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
 
-	uint64_t k_iter = k0 / 16;
-	uint64_t k_left = k0 % 16;
+	uint64_t k_iter = k / 16;
+	uint64_t k_left = k % 16;
 
-  uint64_t rs_c   = rs_c0;
+    uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+    GEMM_UKR_SETUP_CT( d, 12, 6, false );
 
 	__asm__ volatile
   	(
@@ -86,9 +90,9 @@ void bli_dgemm_power9_asm_12x6
   "add              %%r20, %%r19, %%r10           \n\t" //         col 4 of C
   "add              %%r21, %%r20, %%r10           \n\t" //         col 5 of C
   "                                               \n\t"
-  DZERO_OUT_VREG                                         
+  DZERO_OUT_VREG
   "                                               \n\t"
-  DPRELOAD											                          
+  DPRELOAD
   "                                               \n\t"
   "addi             %%r8, %%r8, 96                \n\t" // move to next col/row of A/B
   "addi             %%r7, %%r7, 96                \n\t"
@@ -98,10 +102,10 @@ void bli_dgemm_power9_asm_12x6
   "cmpwi                  %%r11, 0                \n\t" // if k_iter == 0,
   "beq                    DCONSIDERKLEFT          \n\t" // then jmp to k_left
   "mtctr            %%r11                         \n\t" // else, do k_iter loop
-  "                                               \n\t"  
+  "                                               \n\t"
   "DLOOPKITER:                                    \n\t" // k_iter loop
   "                                               \n\t"
-  A_B_PRODUCT_16									                      // compute A*B 
+  A_B_PRODUCT_16									                      // compute A*B
   "                                               \n\t"
   "bdnz             DLOOPKITER                    \n\t"
   "                                               \n\t"
@@ -111,54 +115,26 @@ void bli_dgemm_power9_asm_12x6
   "beq                    DPOSTACCUM              \n\t" // then jmp to post accum
   "mtctr            %%r12                         \n\t" // else, do k_left loop
   "                                               \n\t"
-  "DLOOPKLEFT:                                    \n\t" // k_left loop 
+  "DLOOPKLEFT:                                    \n\t" // k_left loop
   "                                               \n\t"
   A_B_PRODUCT_1
   "                                               \n\t"
-  "bdnz             DLOOPKLEFT                    \n\t" 
+  "bdnz             DLOOPKLEFT                    \n\t"
   "                                               \n\t"
-  "DPOSTACCUM:                                    \n\t" 
+  "DPOSTACCUM:                                    \n\t"
   "                                               \n\t"
-  DSCALE_ALPHA											                    
+  DSCALE_ALPHA
   "                                               \n\t"
   "cmpdi                  %%r26, 0                \n\t" // if beta == 0,
   "beq                    DBETAZERO               \n\t" // then jmp to BZ
   "                                               \n\t"
-  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8
-  "beq              DCOLSTOREDBNZ                 \n\t" // then jmp to col store 
-  "                                               \n\t"
-  "DGENSTOREDBNZ:                                 \n\t" // BNZ gen stored case 
-  "                                               \n\t"
-  DGEN_LOAD_OFS_C                                       
-  "                                              	\n\t"
-  DGEN_SCALE_BETA
-  "                                               \n\t"
-  "b                DGENSTORED                    \n\t"
-  "                                               \n\t"
-  "DCOLSTOREDBNZ:                                 \n\t" // BNZ col stored case
-  "                                               \n\t"
-  DCOL_SCALE_BETA                                       
-  "                                               \n\t"
-  "b                DCOLSTORED                    \n\t"
+  DCOL_SCALE_BETA
   "                                               \n\t"
   "DBETAZERO:                                     \n\t" // BZ case
-  "                                               \n\t" 
-  "cmpwi                  %%r9, 8                 \n\t" // if rs_c == 8,
-  "beq              DCOLSTORED                    \n\t" // C is col stored
-  "                                               \n\t"
-  "DGENSTORED:                                    \n\t" // BZ gen stored case
-  "                                               \n\t"
-  DGEN_LOAD_OFS_C                                       
-  "                                               \n\t"
-  DGEN_STORE                                            
-  "                                               \n\t"
-  "b               DDONE                          \n\t"
-  "                                               \n\t"
-  "DCOLSTORED:                                    \n\t" // BZ col stored case
   "                                               \n\t"
   DCOL_STORE
   "                                               \n\t"
-  "DDONE:                                         \n\t"  
+  "DDONE:                                         \n\t"
   "                                               \n\t"
   : // output operands (none)
 	: // input operands
@@ -176,8 +152,8 @@ void bli_dgemm_power9_asm_12x6
 	: // register clobber list
   /* unclobberable regs: r2, r3, r4, r5, r6, r13, r14, r15, r30, r31 */
   "r0", "r7",  "r8",  "r9",
-  "r10", "r11", "r12", "r16", "r17", "r18", "r19", 
-  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29" 
+  "r10", "r11", "r12", "r16", "r17", "r18", "r19",
+  "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29"
 
   #if XLC
   ,"f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"
@@ -198,4 +174,6 @@ void bli_dgemm_power9_asm_12x6
   #endif
 
   );
+
+  GEMM_UKR_FLUSH_CT( d );
 }

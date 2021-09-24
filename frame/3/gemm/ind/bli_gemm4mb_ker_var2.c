@@ -170,15 +170,6 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,gemm_ukr_ft) \
 	                gemm_ukr   = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
-	/* Temporary C buffer for edge cases. */ \
-	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
-	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
-	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
-\
-	ctype* restrict zero       = PASTEMAC(ch,0); \
 	ctype* restrict one        = PASTEMAC(ch,1); \
 	ctype* restrict a_cast     = a; \
 	ctype* restrict b_cast     = b; \
@@ -215,10 +206,6 @@ void PASTEMAC(ch,varname) \
 \
 	/* If any dimension is zero, return immediately. */ \
 	if ( bli_zero_dim3( m, n, k ) ) return; \
-\
-	/* Clear the temporary C buffer in case it has any infs or NaNs. */ \
-	PASTEMAC(ch,set0s_mxn)( MR, NR, \
-	                        ct, rs_ct, cs_ct ); \
 \
 	/* Compute number of primary and leftover components of the m and n
 	   dimensions. */ \
@@ -313,45 +300,20 @@ void PASTEMAC(ch,varname) \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
 \
-			/* Handle interior and edge cases separately. */ \
-			if ( m_cur == MR && n_cur == NR ) \
-			{ \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c before", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
-				/* Invoke the gemm micro-kernel. */ \
-				gemm_ukr \
-				( \
-				  k, \
-				  alpha_cast, \
-				  a1, \
-				  b1, \
-				  beta_use, \
-				  c11, rs_c, cs_c, \
-				  &aux, \
-				  cntx  \
-				); \
-/*PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var3 (4m1b): c  after", 8, 6, c11, rs_c, cs_c, "%4.1f", "" );*/ \
-			} \
-			else \
-			{ \
-				/* Invoke the gemm micro-kernel. */ \
-				gemm_ukr \
-				( \
-				  k, \
-				  alpha_cast, \
-				  a1, \
-				  b1, \
-				  zero, \
-				  ct, rs_ct, cs_ct, \
-				  &aux, \
-				  cntx  \
-				); \
-\
-				/* Scale the bottom edge of C and add the result from above. */ \
-				PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
-				                        ct,  rs_ct, cs_ct, \
-				                        beta_use, \
-				                        c11, rs_c,  cs_c ); \
-			} \
+			/* Invoke the gemm micro-kernel. */ \
+			gemm_ukr \
+			( \
+              m_cur, \
+              n_cur, \
+			  k, \
+			  alpha_cast, \
+			  a1, \
+			  b1, \
+			  beta_use, \
+			  c11, rs_c, cs_c, \
+			  &aux, \
+			  cntx  \
+			); \
 		} \
 		} \
 	} \
