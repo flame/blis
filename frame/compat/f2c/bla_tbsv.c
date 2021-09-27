@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -267,7 +268,13 @@
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
-		    if (bli_creal(x[i__1]) != 0.f || bli_cimag(x[i__1]) != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_creal(x[i__1]) != 0.f || bli_cimag(x[i__1]) != 0.f) 
+			{
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = j;
@@ -297,7 +304,11 @@
 		for (j = *n; j >= 1; --j) {
 		    kx -= *incx;
 		    i__1 = jx;
-		    if (bli_creal(x[i__1]) != 0.f || bli_cimag(x[i__1]) != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_creal(x[i__1]) != 0.f || bli_cimag(x[i__1]) != 0.f) 
+			{
 			ix = kx;
 			l = kplus1 - j;
 			if (nounit) {
@@ -330,7 +341,11 @@
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
 		    i__2 = j;
-		    if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f) 
+			{
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = j;
@@ -360,7 +375,11 @@
 		for (j = 1; j <= i__1; ++j) {
 		    kx += *incx;
 		    i__2 = jx;
-		    if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_creal(x[i__2]) != 0.f || bli_cimag(x[i__2]) != 0.f) 
+			{
 			ix = kx;
 			l = 1 - j;
 			if (nounit) {
@@ -823,7 +842,11 @@
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
-		    if (x[j] != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[j] != 0.) 
+			{
 			l = kplus1 - j;
 			if (nounit) {
 			    x[j] /= a[kplus1 + j * a_dim1];
@@ -844,7 +867,11 @@
 		jx = kx;
 		for (j = *n; j >= 1; --j) {
 		    kx -= *incx;
-		    if (x[jx] != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[jx] != 0.) 
+			{
 			ix = kx;
 			l = kplus1 - j;
 			if (nounit) {
@@ -868,7 +895,11 @@
 	    if (*incx == 1) {
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
-		    if (x[j] != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[j] != 0.) 
+			{
 			l = 1 - j;
 			if (nounit) {
 			    x[j] /= a[j * a_dim1 + 1];
@@ -889,7 +920,11 @@
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
 		    kx += *incx;
-		    if (x[jx] != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[jx] != 0.) 
+			{
 			ix = kx;
 			l = 1 - j;
 			if (nounit) {
@@ -1238,7 +1273,11 @@
 	    kplus1 = *k + 1;
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
-		    if (x[j] != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[j] != 0.f) 
+			{
 			l = kplus1 - j;
 			if (nounit) {
 			    x[j] /= a[kplus1 + j * a_dim1];
@@ -1259,7 +1298,11 @@
 		jx = kx;
 		for (j = *n; j >= 1; --j) {
 		    kx -= *incx;
-		    if (x[jx] != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[jx] != 0.f) 
+			{
 			ix = kx;
 			l = kplus1 - j;
 			if (nounit) {
@@ -1283,7 +1326,11 @@
 	    if (*incx == 1) {
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
-		    if (x[j] != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[j] != 0.f) 
+			{
 			l = 1 - j;
 			if (nounit) {
 			    x[j] /= a[j * a_dim1 + 1];
@@ -1304,7 +1351,11 @@
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
 		    kx += *incx;
-		    if (x[jx] != 0.f) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (x[jx] != 0.f) 
+			{
 			ix = kx;
 			l = 1 - j;
 			if (nounit) {
@@ -1660,7 +1711,11 @@
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    i__1 = j;
-		    if (bli_zreal(x[i__1]) != 0. || bli_zimag(x[i__1]) != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_zreal(x[i__1]) != 0. || bli_zimag(x[i__1]) != 0.) 
+			{
 			l = kplus1 - j;
 			if (nounit) {
 			    i__1 = j;
@@ -1690,7 +1745,11 @@
 		for (j = *n; j >= 1; --j) {
 		    kx -= *incx;
 		    i__1 = jx;
-		    if (bli_zreal(x[i__1]) != 0. || bli_zimag(x[i__1]) != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_zreal(x[i__1]) != 0. || bli_zimag(x[i__1]) != 0.) 
+			{
 			ix = kx;
 			l = kplus1 - j;
 			if (nounit) {
@@ -1723,7 +1782,11 @@
 		i__1 = *n;
 		for (j = 1; j <= i__1; ++j) {
 		    i__2 = j;
-		    if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) 
+			{
 			l = 1 - j;
 			if (nounit) {
 			    i__2 = j;
@@ -1753,7 +1816,11 @@
 		for (j = 1; j <= i__1; ++j) {
 		    kx += *incx;
 		    i__2 = jx;
-		    if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) {
+			//When matrix A is singular or near singular, the solution to Ax = b is non-trivial
+			//Therefore inverse of A doesn't exist. Here by commenting out the below lines, 
+			//we end up generating NAN or inf
+			//if (bli_zreal(x[i__2]) != 0. || bli_zimag(x[i__2]) != 0.) 
+			{
 			ix = kx;
 			l = 1 - j;
 			if (nounit) {
