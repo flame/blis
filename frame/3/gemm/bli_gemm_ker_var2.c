@@ -64,7 +64,6 @@ void bli_gemm_ker_var2
 #endif
 
 	num_t     dt_exec   = bli_obj_exec_dt( c );
-    siz_t     dt_size   = bli_dt_size( dt_exec );
 
 	pack_t    schema_a  = bli_obj_pack_schema( a );
 	pack_t    schema_b  = bli_obj_pack_schema( b );
@@ -138,7 +137,7 @@ void bli_gemm_ker_var2
 	);
 #endif
 
-	const num_t  dt       = bli_obj_dt( c );
+    siz_t        dt_size  = bli_dt_size( dt_exec );
 
 	/* Alias some constants to simpler names. */
 	const dim_t  MR       = pd_a;
@@ -148,7 +147,7 @@ void bli_gemm_ker_var2
 
 	/* Query the context for the micro-kernel address and cast it to its
 	   function pointer type. */
-	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx );
+	gemm_ukr_vft gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt_exec, BLIS_GEMM_UKR, cntx );
 
     gemm_ker_params_t* params = bli_obj_ker_params( c );
     gemm_ukr_vft user_ukr = params ? params->ukr : NULL;
