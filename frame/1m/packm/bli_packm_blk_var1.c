@@ -151,7 +151,7 @@ void bli_packm_blk_var1
     // this overrides the kernel determined above.
 	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
 
-	if ( params )
+	if ( params && params->ukr_fn[ dt_c ][ dt_p ] )
     {
         packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
     }
@@ -220,6 +220,16 @@ void bli_packm_blk_var1
 
 		inc_t  p_inc           = ps_p;
 
+		/* NOTE: We MUST use round-robin partitioning when packing
+		   micropanels of a triangular matrix. Hermitian/symmetric
+		   and general packing may use slab or round-robin, depending
+		   on which was selected at configure-time. */
+		/* The definition of bli_packm_my_iter() will depend on whether slab
+		   or round-robin partitioning was requested at configure-time. */
+        bool   my_iter         = bli_is_triangular( strucc )
+            ? bli_packm_my_iter_rr( it, it_start, it_end, tid, nt )
+            : bli_packm_my_iter   ( it, it_start, it_end, tid, nt );
+
 		if ( bli_is_triangular( strucc ) &&
 		     bli_is_unstored_subpart_n( diagoffc_i, uploc, panel_dim_i, panel_len_full ) )
 		{
@@ -278,11 +288,7 @@ void bli_packm_blk_var1
 			/* We nudge the imaginary stride up by one if it is odd. */
 			is_p_use += ( bli_is_odd( is_p_use ) ? 1 : 0 );
 
-			/* NOTE: We MUST use round-robin partitioning when packing
-			   micropanels of a triangular matrix. Hermitian/symmetric
-			   and general packing may use slab or round-robin, depending
-			   on which was selected at configure-time. */
-			if ( bli_packm_my_iter_rr( it, it_start, it_end, tid, nt ) )
+			if ( my_iter )
 			{
 				packm_ker_cast( strucc,
 				                diagc,
@@ -293,7 +299,7 @@ void bli_packm_blk_var1
 				                panel_dim_i,
 				                panel_len_i,
 				                panel_dim_max,
-				                panel_len_max,
+				                panel_len_max_i,
 				                panel_dim_off_i,
 				                panel_len_off_i,
 				                kappa_cast,
@@ -315,9 +321,7 @@ void bli_packm_blk_var1
                to a Hermitian or symmetric matrix, which includes stored,
                unstored, and diagonal-intersecting panels. */
 
-			/* The definition of bli_packm_my_iter() will depend on whether slab
-			   or round-robin partitioning was requested at configure-time. */
-			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
+			if ( my_iter )
 			{
 				packm_ker_cast( strucc,
 				                diagc,

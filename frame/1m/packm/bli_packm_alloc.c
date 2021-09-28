@@ -49,22 +49,29 @@ void* bli_packm_alloc
 	// Query the address of the mem_t entry within the control tree node.
 	mem_t* cntl_mem_p = bli_cntl_pack_mem( cntl );
 
-	// Check the mem_t field in the control tree. If it is unallocated, then
-	// we need to acquire a block from the memory broker and broadcast it to
-	// all threads in the chief's thread group.
-	if ( bli_mem_is_unalloc( cntl_mem_p ) )
-	{
-		mem_t* local_mem_p;
-		mem_t  local_mem_s;
+	mem_t* local_mem_p;
+	mem_t  local_mem_s;
 
+	siz_t cntl_mem_size = 0;
+
+	if ( bli_mem_is_alloc( cntl_mem_p ) )
+        cntl_mem_size = bli_mem_size( cntl_mem_p );
+
+	if ( cntl_mem_size < size_needed )
+	{
 		if ( bli_thread_am_ochief( thread ) )
 		{
-			#ifdef BLIS_ENABLE_MEM_TRACING
-			printf( "bli_l3_packm(): acquiring mem pool block\n" );
-			#endif
-
-			// The chief thread acquires a block from the memory broker
-			// and saves the associated mem_t entry to local_mem_s.
+			// The chief thread releases the existing block associated with
+			// the mem_t entry in the control tree, and then re-acquires a
+			// new block, saving the associated mem_t entry to local_mem_s.
+	        if ( bli_mem_is_alloc( cntl_mem_p ) )
+            {
+    			bli_pba_release
+    			(
+    			  rntm,
+    			  cntl_mem_p
+    			);
+            }
 			bli_pba_acquire_m
 			(
 			  rntm,
@@ -78,63 +85,13 @@ void* bli_packm_alloc
 		// all threads.
 		local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
 
-		// Save the contents of the chief thread's local mem_t entry to the
-		// mem_t field in this thread's control tree node.
+		// Save the chief thread's local mem_t entry to the mem_t field in
+		// this thread's control tree node.
 		*cntl_mem_p = *local_mem_p;
-	}
-	else // ( bli_mem_is_alloc( cntl_mem_p ) )
-	{
-		mem_t* local_mem_p;
-		mem_t  local_mem_s;
 
-		// If the mem_t entry in the control tree does NOT contain a NULL
-		// buffer, then a block has already been acquired from the memory
-		// broker and cached in the control tree.
-
-		// As a sanity check, we should make sure that the mem_t object isn't
-		// associated with a block that is too small compared to the size of
-		// the packed matrix buffer that is needed, according to the return
-		// value from packm_init().
-		siz_t cntl_mem_size = bli_mem_size( cntl_mem_p );
-
-		if ( cntl_mem_size < size_needed )
-		{
-			if ( bli_thread_am_ochief( thread ) )
-			{
-				// The chief thread releases the existing block associated with
-				// the mem_t entry in the control tree, and then re-acquires a
-				// new block, saving the associated mem_t entry to local_mem_s.
-				bli_pba_release
-				(
-				  rntm,
-				  cntl_mem_p
-				);
-				bli_pba_acquire_m
-				(
-				  rntm,
-				  size_needed,
-				  pack_buf_type,
-				  &local_mem_s
-				);
-			}
-
-			// Broadcast the address of the chief thread's local mem_t entry to
-			// all threads.
-			local_mem_p = bli_thread_broadcast( thread, &local_mem_s );
-
-			// Save the chief thread's local mem_t entry to the mem_t field in
-			// this thread's control tree node.
-			*cntl_mem_p = *local_mem_p;
-		}
-		else
-		{
-			// If the mem_t entry is already allocated and sufficiently large,
-			// then we use it as-is. No action is needed, because all threads
-			// will already have the cached values in their local control
-			// trees' mem_t entries, currently pointed to by cntl_mem_p.
-
-			bli_thread_barrier( thread );
-		}
+        // Barrier so that the master thread doesn't return from the function
+        // before we are done reading.
+	    bli_thread_barrier( thread );
 	}
 
     return bli_mem_buffer( cntl_mem_p );
