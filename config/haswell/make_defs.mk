@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -65,10 +65,10 @@ endif
 # they make explicit use of the rbp register.
 CKOPTFLAGS     := $(COPTFLAGS) -O3 -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=haswell -mincoming-stack-boundary=3
 ifeq ($(GCC_OT_4_9_0),yes)
 # If gcc is older than 4.9.0, we must use a different label for -march.
-CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2
+CKVECFLAGS     := -mavx2 -mfma -mfpmath=sse -march=core-avx2 -mincoming-stack-boundary=3
 endif
 else
 ifeq ($(CC_VENDOR),icc)
