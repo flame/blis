@@ -229,7 +229,7 @@ If this feature is important or useful to your work, we would love to hear from 
 ### Who is involved in the project?
 
 Lots of people! For a full list of those involved, see the
-[CREDITS](CREDITS) file within the BLIS framework source distribution.
+[CREDITS](https://github.com/flame/blis/blob/master/CREDITS) file within the BLIS framework source distribution.
 
 ### Who funded the development of BLIS?
 
