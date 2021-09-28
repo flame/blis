@@ -727,8 +727,9 @@ This project and its associated research were partially sponsored by grants from
 [HPE](https://www.hpe.com/),
 [Oracle](https://www.oracle.com/),
 [Huawei](https://www.huawei.com/),
-and
 [Facebook](https://www.facebook.com/),
+and
+[ARM](https://www.arm.com/),
 as well as grants from the
 [National Science Foundation](https://www.nsf.gov/) (Awards
 CCF-0917167, ACI-1148125/1340293, CCF-1320112, and ACI-1550493).

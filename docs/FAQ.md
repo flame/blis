@@ -9,6 +9,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Why should I use BLIS instead of GotoBLAS / OpenBLAS / ATLAS / MKL / ESSL / ACML / Accelerate?](FAQ.md#why-should-i-use-blis-instead-of-gotoblas--openblas--atlas--mkl--essl--acml--accelerate)
   * [How is BLIS related to FLAME / libflame?](FAQ.md#how-is-blis-related-to-flame--libflame)
   * [What is the difference between BLIS and the AMD fork of BLIS found in AOCL?](FAQ.md#what-is-the-difference-between-blis-and-the-amd-fork-of-blis-found-in-aocl)
+  * [Who do I contact if I have a question about the AMD version of BLIS?](FAQ.md#who-do-i-contact-if-i-have-a-question-about-the-amd-version-of-blis)
   * [Does BLIS automatically detect my hardware?](FAQ.md#does-blis-automatically-detect-my-hardware)
   * [I understand that BLIS is mostly a tool for developers?](FAQ.md#i-understand-that-blis-is-mostly-a-tool-for-developers)
   * [How do I link against BLIS?](FAQ.md#how-do-i-link-against-blis)
@@ -17,6 +18,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [What is a macrokernel?](FAQ.md#what-is-a-macrokernel)
   * [What is a context?](FAQ.md#what-is-a-context)
   * [I am used to thinking in terms of column-major/row-major storage and leading dimensions. What is a "row stride" / "column stride"?](FAQ.md#im-used-to-thinking-in-terms-of-column-majorrow-major-storage-and-leading-dimensions-what-is-a-row-stride--column-stride)
+  * [I'm somewhat new to this matrix stuff. Can you remind me, what is the difference between a matrix row and a matrix column?](FAQ.md#im-somewhat-new-to-this-matrix-stuff-can-you-remind-me-what-is-the-difference-between-a-matrix-row-and-a-matrix-column)
   * [Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?](FAQ.md#why-does-blis-have-vector-level-1v-and-matrix-level-1m-variations-of-most-level-1-operations)
   * [What does it mean when a matrix with general stride is column-tilted or row-tilted?](FAQ.md#what-does-it-mean-when-a-matrix-with-general-stride-is-column-tilted-or-row-tilted)
   * [I am not really interested in all of these newfangled features in BLIS. Can I just use BLIS as a BLAS library?](FAQ.md#im-not-really-interested-in-all-of-these-newfangled-features-in-blis-can-i-just-use-blis-as-a-blas-library)
@@ -36,8 +38,7 @@ project, as well as those we think a new user or developer might ask. If you do 
   * [Who funded the development of BLIS?](FAQ.md#who-funded-the-development-of-blis)
   * [I found a bug. How do I report it?](FAQ.md#i-found-a-bug-how-do-i-report-it)
   * [How do I request a new feature?](FAQ.md#how-do-i-request-a-new-feature)
-  * [What is the difference between this version of BLIS and the one that AMD maintains?](FAQ.md#what-is-the-difference-between-this-version-of-blis-and-the-one-that-amd-maintains)
-  * [Who do I contact if I have a question about the AMD version of BLIS?](FAQ.md#who-do-i-contact-if-i-have-a-question-about-the-amd-version-of-blis)
+  * [I'm a developer and I'd like to study the way matrix multiplication is implemented in BLIS. Where should I start?](FAQ.md#im-a-developer-and-id-like-to-study-the-way-matrix-multiplication-is-implemented-in-blis-where-should-i-start)
   * [Where did you get the photo for the BLIS logo / mascot?](FAQ.md#where-did-you-get-the-photo-for-the-blis-logo--mascot)
 
 ### Why did you create BLIS?
@@ -60,13 +61,19 @@ homepage](https://github.com/flame/blis#key-features). But here are a few reason
 
 ### How is BLIS related to FLAME / `libflame`?
 
-As explained [above](FAQ.md#why-did-you-create-blis?), BLIS was initially a layer within `libflame` that allowed more convenient interfacing to the BLAS. So in some ways, BLIS is a spin-off project. Prior to developing BLIS, [its author](http://www.cs.utexas.edu/users/field/) worked as the primary maintainer of `libflame`. If you look closely, you can also see that the design of BLIS was influenced by some of the more useful and innovative aspects of `libflame`, such as internal object abstractions and control trees. Also, various members of the [SHPC research group](http://shpc.ices.utexas.edu/people.html) and its [collaborators](http://shpc.ices.utexas.edu/collaborators.html) routinely provide insight, feedback, and also contribute code (especially kernels) to the BLIS project.
+As explained [above](FAQ.md#why-did-you-create-blis?), BLIS was initially a layer within `libflame` that allowed more convenient interfacing to the BLAS. So in some ways, BLIS is a spin-off project. Prior to developing BLIS, [its primary author](http://www.cs.utexas.edu/users/field/) worked as the primary maintainer of `libflame`. If you look closely, you can also see that the design of BLIS was influenced by some of the more useful and innovative aspects of `libflame`, such as internal object abstractions and control trees.
+
+Note that various members of the [SHPC research group](http://shpc.ices.utexas.edu/people.html) and its [collaborators](http://shpc.ices.utexas.edu/collaborators.html) routinely provide insight, feedback, and also contribute code (especially kernels) to the BLIS project.
 
 ### What is the difference between BLIS and the AMD fork of BLIS found in AOCL?
 
 BLIS, also known as "vanilla BLIS" or "upstream BLIS," is maintained by its [original developer](https://github.com/fgvanzee) (with the [support of others](http://shpc.ices.utexas.edu/collaborators.html)) in the [Science of High-Performance Computing](http://shpc.ices.utexas.edu/) (SHPC) group within the [The Oden Institute for Computational Engineering and Sciences](http://www.oden.utexas.edu/) at [The University of Texas at Austin](http://www.utexas.edu/). In 2015, [AMD](https://www.amd.com/) reorganized many of their software library efforts around existing open source projects. BLIS was chosen as the basis for their [CPU BLAS library](https://developer.amd.com/amd-aocl/blas-library/), and an AMD-maintained [fork of BLIS](https://github.com/amd/blis) was established.
 
 AMD BLIS sometimes contains certain optimizations specific to AMD hardware. Many of these optimizations are (eventually) merged back into upstream BLIS. However, for various reasons, some changes may remain unique to AMD BLIS for quite some time. Thus, if you want the latest optimizations for AMD hardware, feel free to try AMD BLIS. However, please note that neither The University of Texas at Austin nor BLIS's developers can endorse or offer direct support for any outside fork of BLIS, including AMD BLIS.
+
+### Who do I contact if I have a question about the AMD version of BLIS?
+
+For questions or support regarding [AMD's fork of BLIS](https://github.com/amd/blis), please contact the [AMD Optimizing CPU Libraries](https://developer.amd.com/amd-aocl/) group at aoclsupport@amd.com.
 
 ### Does BLIS automatically detect my hardware?
 
@@ -76,9 +83,9 @@ If automatic hardware detection is requested at configure-time and the build pro
 
 ### I understand that BLIS is mostly a tool for developers?
 
-Yes. In order to achieve high performance, BLIS requires that hand-coded kernels and microkernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
+It is certainly the case that BLIS began as a tool targeted at developers. In order to achieve high performance, BLIS requires that hand-coded kernels and microkernels be written and referenced in a valid [BLIS configuration](ConfigurationHowTo.md). These components are usually written by developers and then included within BLIS for use by others.
 
-The good news, however, is that end-users can use BLIS too. Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge, and many kernels have already been added! Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
+The good news, however, is that BLIS has matured to the point where end-users can use it too! Once the aforementioned kernels are integrated into BLIS, they can be used without any developer-level knowledge, and many kernels have already been added! Usually, `./configure auto; make; make install` is sufficient for the typical users with typical hardware.
 
 ### How do I link against BLIS?
 
@@ -98,9 +105,9 @@ For a more thorough explanation of the microkernel and its role in the overall l
 
 ### What is a macrokernel?
 
-The macrokernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macrokernel is called. The macrokernel is implemented as two loops around the microkernel.
+The macrokernels are portable codes within the BLIS framework that implement relatively small subproblems within an overall level-3 operation. The overall problem (say, general matrix-matrix multiplication, or `gemm`) is partitioned down, according to cache blocksizes, such that its `A` and `B` operands are (1) a suitable size and (2) stored in a special packed format. At that time, the macrokernel is called. The macrokernel is implemented as two loops around the microkernel.
 
-The macrokernels in BLIS correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
+The macrokernels, along with the microkernel that they call, correspond to the so-called "inner kernels" (or simply "kernels") that formed the fundamental unit of computation in Kazushige Goto's GotoBLAS (and now in the successor library, OpenBLAS).
 
 For more information on macrokernels, please read our [ACM TOMS papers](https://github.com/flame/blis#citations).
 
@@ -117,6 +124,18 @@ Traditional BLAS assumes that matrices are stored in column-major order (or, as 
 In generalized storage, we have a row stride and a column stride. The row stride measures the distance in memory between rows (within a single column) while the column stride measures the distance between columns (within a single row). Column-major storage corresponds to the situation where the row stride equals 1. Since the row stride is unit, you only have to track the column stride (i.e., the leading dimension). Similarly, in row-major order, the column stride is equal to 1 and only the row stride must be tracked.
 
 BLIS also supports situations where both the row stride and column stride are non-unit. We call this situation "general stride".
+
+### I'm somewhat new to this matrix stuff. Can you remind me, what is the difference between a matrix row and a matrix column?
+
+Of course! (BLIS's primary author remembers what it was like to get columns and rows confused.)
+
+Matrix columns consist of elements that are vertically aligned. Matrix rows consist of element that are horizontally aligned. (One way to remember is that real-life columns are vertical structures that hold up buildings.)
+
+Furthermore, it is helpful to know that the number of rows in a matrix constitutes its so-called *m* dimension, and the number of columns consistutes its *n* dimension.
+
+Matrix dimension are always stated as *m x n*: the number of rows *by* the number of columns.
+
+So, a *3 x 4* matrix contains three rows (each of length four) and four columns (each of length three).
 
 ### Why does BLIS have vector (level-1v) and matrix (level-1m) variations of most level-1 operations?
 
@@ -214,31 +233,25 @@ Lots of people! For a full list of those involved, see the
 
 ### Who funded the development of BLIS?
 
-BLIS was primarily funded by grants from [Microsoft](https://www.microsoft.com/),
-[Intel](https://www.intel.com/), [Texas
-Instruments](https://www.ti.com/), [AMD](https://www.amd.com/), [Huawei](https://www.hauwei.com/us/), [Oracle](https://www.oracle.com/), and [Facebook](https://www.facebook.com/) as well as grants from the [National Science Foundation](http://www.nsf.gov/) (Awards CCF-0917167 ACI-1148125/1340293, and CCF-1320112).
+BLIS was primarily funded by a variety of gifts/grants from industry and the National Science Foundation. Please see the "Funding" section of the [BLIS homepage](https://github.com/flame/blis#funding) for more details.
 
 Reminder: _Any opinions, findings and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation (NSF)._
 
 ### I found a bug. How do I report it?
 
-If you think you've found a bug, we request that you [open an issue](http://github.com/flame/blis/issues). Don't be shy! Really, it's the best and most convenient way for us to track your issues/bugs/concerns. Other discussions that are not primarily bug-reports should take place via the [blis-devel](http://groups.google.com/group/blis-devel) mailing list.
+If you think you've found a bug, we request that you [open an issue](http://github.com/flame/blis/issues). Don't be shy! Really, it's the best and most convenient way for us to track your issues/bugs/concerns.
 
 ### How do I request a new feature?
 
 Feature requests should also be submitted by [opening a new issue](http://github.com/flame/blis/issues).
 
-### What is the difference between this version of BLIS and the one that AMD maintains?
+### I'm a developer and I'd like to study the way matrix multiplication is implemented in BLIS. Where should I start?
 
-AMD has chosen BLIS as the open-source foundation for the BLAS component of their [AMD Optimizing CPU Libraries (AOCL)](https://developer.amd.com/amd-aocl/) toolkit. Our group enjoys a great collaboration and partnership with AMD, and we are pleased to have their enthusiastic support for our project.
+Great question! The first thing you should know is that the core framework of [level-3 operations](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md#operation-index) was *not* designed to be used to teach or explain a high-performance implementation of matrix multiplication. Rather, it was designed to encode the family of level-3 operations with as little code duplication as possible. Because of this, and also for historical/evolutionary reasons, it can be a little difficult to trace the execution of, say, `gemm` from within the core framework.
 
-At a technical level, AMD's fork of BLIS is considered to be a downstream variant. AMD uses their fork to develop optimizations specific to AMD hardware. Occasionally, AMD will submit pull requests to merge their features, enhancements, and fixes back into our "plain vanilla" upstream repository. So our upstream BLIS will eventually contain most of the modifications originally developed by AMD in their fork, but with a lag. Similarly, features introduced into the upstream BLIS may not be immediately available in AMD's fork, but eventually their team will perform a merge and synchronize with our latest code. 
+Thankfully, we have an alternative environment in which experts, application developers, and other curious individuals can study BLIS's matrix multiplication implementation. This so-called "sandbox" is a simplified collection of code that strips away much of the framework complexity while also maintaining local definitions for many of the interesting bits. You may find this `gemmlike` sandbox in `sandbox/gemmlike`.
 
-AMD also uses a different versioning system for AOCL which is independent of the versions used by the [upstream BLIS](http://github.com/flame/blis) project.
-
-### Who do I contact if I have a question about the AMD version of BLIS?
-
-For questions or support regarding [AMD's fork of BLIS](https://github.com/amd/blis), please contact the [AMD Optimizing CPU Libraries](https://developer.amd.com/amd-aocl/) group at aoclsupport@amd.com.
+Sandboxes go beyond the scope of this FAQ. For an introduction, please refer to the [Sandboxes](https://github.com/flame/blis/blob/master/docs/Sandboxes.md) document, and/or contact the BLIS developers for more information.
 
 ### Where did you get the photo for the BLIS logo / mascot?
 
