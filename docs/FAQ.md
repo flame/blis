@@ -229,7 +229,7 @@ If this feature is important or useful to your work, we would love to hear from 
 ### Who is involved in the project?
 
 Lots of people! For a full list of those involved, see the
-[CREDITS](https://github.com/flame/blis/blob/master/CREDITS) file within the BLIS framework source distribution.
+[CREDITS](CREDITS) file within the BLIS framework source distribution.
 
 ### Who funded the development of BLIS?
 
@@ -247,13 +247,13 @@ Feature requests should also be submitted by [opening a new issue](http://github
 
 ### I'm a developer and I'd like to study the way matrix multiplication is implemented in BLIS. Where should I start?
 
-Great question! The first thing you should know is that the core framework of [level-3 operations](https://github.com/flame/blis/blob/master/docs/BLISTypedAPI.md#operation-index) was *not* designed to be used to teach or explain a high-performance implementation of matrix multiplication. Rather, it was designed to encode the family of level-3 operations with as little code duplication as possible. Because of this, and also for historical/evolutionary reasons, it can be a little difficult to trace the execution of, say, `gemm` from within the core framework.
+Great question! The first thing you should know is that the core framework of [level-3 operations](docs/BLISTypedAPI.md#operation-index) was *not* designed to be used to teach or explain a high-performance implementation of matrix multiplication. Rather, it was designed to encode the family of level-3 operations with as little code duplication as possible. Because of this, and also for historical/evolutionary reasons, it can be a little difficult to trace the execution of, say, `gemm` from within the core framework.
 
 Thankfully, we have an alternative environment in which experts, application developers, and other curious individuals can study BLIS's matrix multiplication implementation. This so-called "sandbox" is a simplified collection of code that strips away much of the framework complexity while also maintaining local definitions for many of the interesting bits. You may find this `gemmlike` sandbox in `sandbox/gemmlike`.
 
-Sandboxes go beyond the scope of this FAQ. For an introduction, please refer to the [Sandboxes](https://github.com/flame/blis/blob/master/docs/Sandboxes.md) document, and/or contact the BLIS developers for more information.
+Sandboxes go beyond the scope of this FAQ. For an introduction, please refer to the [Sandboxes](docs/Sandboxes.md) document, and/or contact the BLIS developers for more information.
 
 ### Where did you get the photo for the BLIS logo / mascot?
 
-The sleeping ["BLIS cat"](https://github.com/flame/blis/blob/master/README.md) photo was taken by Petar Mitchev and is used with his permission.
+The sleeping ["BLIS cat"](README.md) photo was taken by Petar Mitchev and is used with his permission.
 

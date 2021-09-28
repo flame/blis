@@ -121,7 +121,7 @@ Usually, neither of these situations will require any of your local definitions
 since those local definitions are only needed to define your sandbox
 implementation of `bli_gemmnat()`, and this function is already prototyped by
 BLIS. *But if you are adding additional APIs and/or operations to the sandbox
-that are unrelated to `bli_gemmnat()`, then you'll want to #include those
+that are unrelated to `bli_gemmnat()`, then you'll want to `#include` those
 function prototypes from within `bli_sandbox.h`*
 
 5. Your definition of `bli_gemmnat()` should be the **only function you define**
