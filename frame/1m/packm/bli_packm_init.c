@@ -85,6 +85,7 @@ bool bli_packm_init
 
 	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_tar, p );
+    bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
 
 	// Store the pack schema to the object.
 	bli_obj_set_pack_schema( schema, p );

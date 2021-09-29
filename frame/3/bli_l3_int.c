@@ -127,7 +127,8 @@ void bli_l3_int
 	// strides and dimensions. Note that this transposition would normally
 	// be handled explicitly in the packing of C, but if C is not being
 	// packed, this is our last chance to handle the transposition.
-	if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( c ) )
+	//if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( c ) )
+	if ( bli_obj_has_trans( c ) )
 	{
 		bli_obj_induce_trans( &c_local );
 		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &c_local );

@@ -183,9 +183,9 @@ mddm_t bli_gemm_md_ccr
 	{
 		bli_obj_swap( a, b );
 
-		bli_obj_toggle_trans( a );
-		bli_obj_toggle_trans( b );
-		bli_obj_toggle_trans( c );
+		bli_obj_induce_trans( a );
+		bli_obj_induce_trans( b );
+		bli_obj_induce_trans( c );
 
 		return bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
 	}
