@@ -323,7 +323,7 @@ void bli_packm_blk_var1
 
 			if ( my_iter )
 			{
-				packm_ker_cast( strucc,
+				packm_ker_cast( bli_is_triangular( strucc ) ? BLIS_GENERAL : strucc,
 				                diagc,
 				                uploc,
 				                conjc,
