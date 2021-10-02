@@ -315,6 +315,8 @@ bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
+    cntl_t* cntl_b;
+
 	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
@@ -323,7 +325,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
         // Transpose B to B^T for packing
         bli_obj_induce_trans( &b );
 
-    	cntl_t* cntl_b = libblis_test_pobj_create
+    	cntl_b = libblis_test_pobj_create
     	(
     	  BLIS_NR,
     	  BLIS_MR,
@@ -356,9 +358,14 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 		time_min = bli_clock_min_diff( time_min, time );
 
-    	// Free the control tree nodes and release their cached mem_t entries
-    	// back to the memory broker.
-    	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+        // On the last pass, we must keep the packed B buffer checked out in order
+        // to perform the correctness check later.
+        if (i < n_repeats-1)
+        {
+        	// Free the control tree nodes and release their cached mem_t entries
+        	// back to the memory broker.
+        	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+        }
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -397,6 +404,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the memory broker.
 	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
+	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.
 	bli_obj_free( &a_big );
