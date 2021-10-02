@@ -33,7 +33,6 @@
 
 */
 
-#include "bli_lang_defs.h"
 #include "blis.h"
 
 // Internal array to hold error strings.
