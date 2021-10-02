@@ -297,7 +297,7 @@ typedef struct
 typedef struct thread_data
 {
 	test_params_t*         params;
-	test_ops_t*            ops;
+	test_ops_t             ops;
 	unsigned int           nt;
 	unsigned int           id;
 	unsigned int           xc;

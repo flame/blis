@@ -109,7 +109,7 @@ void* libblis_test_thread_entry( void* tdata_void )
 	thread_data_t* tdata  = tdata_void;
 
 	test_params_t* params = tdata->params;
-	test_ops_t*    ops    = tdata->ops;
+	test_ops_t*    ops    = &tdata->ops;
 
 	// Walk through all test modules.
 	libblis_test_all_ops( tdata, params, ops );
@@ -162,12 +162,66 @@ void libblis_test_thread_decorator( test_params_t* params, test_ops_t* ops )
 	for ( signed int id = nt - 1; 0 <= id; id-- )
 	{
 		tdata[id].params  = params;
-		tdata[id].ops     = ops;
+		tdata[id].ops     = *ops;
 		tdata[id].nt      = nt;
 		tdata[id].id      = id;
 		tdata[id].xc      = 0;
 		//tdata[id].mutex   = mutex;
 		tdata[id].barrier = barrier;
+
+    	tdata[id].ops.randv.ops = &tdata[id].ops;
+    	tdata[id].ops.randm.ops = &tdata[id].ops;
+    	tdata[id].ops.addv.ops = &tdata[id].ops;
+    	tdata[id].ops.amaxv.ops = &tdata[id].ops;
+    	tdata[id].ops.axpbyv.ops = &tdata[id].ops;
+    	tdata[id].ops.axpyv.ops = &tdata[id].ops;
+    	tdata[id].ops.copyv.ops = &tdata[id].ops;
+    	tdata[id].ops.dotv.ops = &tdata[id].ops;
+    	tdata[id].ops.dotxv.ops = &tdata[id].ops;
+    	tdata[id].ops.normfv.ops = &tdata[id].ops;
+    	tdata[id].ops.scalv.ops = &tdata[id].ops;
+    	tdata[id].ops.scal2v.ops = &tdata[id].ops;
+    	tdata[id].ops.setv.ops = &tdata[id].ops;
+    	tdata[id].ops.subv.ops = &tdata[id].ops;
+    	tdata[id].ops.xpbyv.ops = &tdata[id].ops;
+    	tdata[id].ops.addm.ops = &tdata[id].ops;
+    	tdata[id].ops.axpym.ops = &tdata[id].ops;
+    	tdata[id].ops.copym.ops = &tdata[id].ops;
+    	tdata[id].ops.normfm.ops = &tdata[id].ops;
+    	tdata[id].ops.scalm.ops = &tdata[id].ops;
+    	tdata[id].ops.scal2m.ops = &tdata[id].ops;
+    	tdata[id].ops.setm.ops = &tdata[id].ops;
+    	tdata[id].ops.subm.ops = &tdata[id].ops;
+    	tdata[id].ops.xpbym.ops = &tdata[id].ops;
+    	tdata[id].ops.axpy2v.ops = &tdata[id].ops;
+    	tdata[id].ops.dotaxpyv.ops = &tdata[id].ops;
+    	tdata[id].ops.axpyf.ops = &tdata[id].ops;
+    	tdata[id].ops.dotxf.ops = &tdata[id].ops;
+    	tdata[id].ops.dotxaxpyf.ops = &tdata[id].ops;
+    	tdata[id].ops.gemv.ops = &tdata[id].ops;
+    	tdata[id].ops.ger.ops = &tdata[id].ops;
+    	tdata[id].ops.hemv.ops = &tdata[id].ops;
+    	tdata[id].ops.her.ops = &tdata[id].ops;
+    	tdata[id].ops.her2.ops = &tdata[id].ops;
+    	tdata[id].ops.symv.ops = &tdata[id].ops;
+    	tdata[id].ops.syr.ops = &tdata[id].ops;
+    	tdata[id].ops.syr2.ops = &tdata[id].ops;
+    	tdata[id].ops.trmv.ops = &tdata[id].ops;
+    	tdata[id].ops.trsv.ops = &tdata[id].ops;
+    	tdata[id].ops.gemm_ukr.ops = &tdata[id].ops;
+    	tdata[id].ops.trsm_ukr.ops = &tdata[id].ops;
+    	tdata[id].ops.gemmtrsm_ukr.ops = &tdata[id].ops;
+    	tdata[id].ops.gemm.ops = &tdata[id].ops;
+    	tdata[id].ops.gemmt.ops = &tdata[id].ops;
+    	tdata[id].ops.hemm.ops = &tdata[id].ops;
+    	tdata[id].ops.herk.ops = &tdata[id].ops;
+    	tdata[id].ops.her2k.ops = &tdata[id].ops;
+    	tdata[id].ops.symm.ops = &tdata[id].ops;
+    	tdata[id].ops.syrk.ops = &tdata[id].ops;
+    	tdata[id].ops.syr2k.ops = &tdata[id].ops;
+    	tdata[id].ops.trmm.ops = &tdata[id].ops;
+    	tdata[id].ops.trmm3.ops = &tdata[id].ops;
+    	tdata[id].ops.trsm.ops = &tdata[id].ops;
 
 		// Spawn additional threads for ids greater than 1.
 		if ( id != 0 )
