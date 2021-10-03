@@ -920,7 +920,7 @@ void ztrsm_
     trans_t blis_transa;
     diag_t  blis_diaga;
     dim_t   m0, n0;
-    //conj_t  conja = BLIS_NO_CONJUGATE ;
+    conj_t  conja = BLIS_NO_CONJUGATE ;
 
     /* Initialize BLIS. */
     bli_init_auto();
@@ -997,47 +997,8 @@ void ztrsm_
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-	/** NOTE: Since for RUCN kernel, function seem to
-	 * be having issue with the computation, which is
-	 * causing make check to fail, For time being, letting
-	 * this particular case through small ztrsm for sake
-	 * of make check.
-	 * TODO: code snippet needs to be enabled, once
-	 * fix is done.
-	 */
-
-            /* b = alpha * b; */
-/*            bli_zscalv_ex
-            (
-                conja,
-                m0,
-                (dcomplex*)alpha,
-                (dcomplex*)b, rs_b,
-                NULL,
-                NULL
-            );
-            if(blis_diaga == BLIS_NONUNIT_DIAG)
-            {
-		dcomplex inva = {0, 0};
-		inva.real = a->real;
-		inva.imag = (a->imag * -1.0);
-		double dnm = (a->real * a->real);
-		dnm += ( (-1.0 * (a->imag * a->imag )) * -1.0 );
-		inva.real /= dnm;
-		inva.imag /= dnm;
-		for(int indx = 0; indx < m0; indx ++)
-		{
-			double real = (inva.real * b[indx].real);
-			real += ((inva.imag * b[indx].imag) * -1.0);
-			double imag = (inva.real * b[indx].imag);
-			imag += (inva.imag * b[indx].real);
-			b[indx].real = real;
-			b[indx].imag = imag;
-		}
-            }
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            return;*/
-        }
+		;
+	}
     }
     else if( m0 == 1 )
     {
@@ -1088,45 +1049,7 @@ void ztrsm_
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-	/** NOTE: Since for LUCN kernel, function seem to
-	 * be having issue with the computation, which is
-	 * causing make check to fail, For time being, letting
-	 * this particular case through small ztrsm for sake
-	 * of make check.
-	 * TODO: code snippet needs to be enabled, once
-	 * fix is done.
-	 */
-	    /* b = alpha * b; */
-/*            bli_zscalv_ex
-            (
-                conja,
-                n0,
-                (dcomplex*)alpha,
-                (dcomplex*)b, cs_b,
-                NULL,
-                NULL
-            );
-	    if(blis_diaga == BLIS_NONUNIT_DIAG)
-            {
-		dcomplex inva = {0, 0};
-		inva.real = a->real;
-		inva.imag = (a->imag * -1.0);
-		double dnm = (a->real * a->real);
-		dnm += ( (-1.0 * (a->imag * a->imag )) * -1.0 );
-		inva.real /= dnm;
-		inva.imag /= dnm;
-		for(int indx = 0; indx < n0; indx ++)
-		{
-			double real = (inva.real * b[indx*cs_b].real);
-			real += ((inva.imag * b[indx*cs_b].imag) * -1.0);
-			double imag = (inva.real * b[indx*cs_b].imag);
-			imag += (inva.imag * b[indx*cs_b].real);
-			b[indx*cs_b].real = real;
-			b[indx*cs_b].imag = imag;
-		}
-            }
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            return;*/
+		;
         }
     }
 
@@ -1157,7 +1080,7 @@ void ztrsm_
      * In case of multithread when [m,n]<=128 sinlge thread implemenation
      * is doing better than native multithread */
     bool nt = bli_thread_get_is_parallel();
-    if((nt==0 && m0<500 && n0<500) ||
+    if((nt==0 && m0<=500 && n0<=500) ||
        (nt && (m0+n0)<128) )
     {
         err_t status;
@@ -1195,7 +1118,225 @@ void ztrsm_
     bli_finalize_auto();
 }
 
-GENTFUNC( scomplex, c, trsm, trsm )
+void ctrsm_
+(
+    const f77_char* side,
+    const f77_char* uploa,
+    const f77_char* transa,
+    const f77_char* diaga,
+    const f77_int*  m,
+    const f77_int*  n,
+    const scomplex*    alpha,
+    const scomplex*    a, const f77_int* lda,
+    scomplex*    b, const f77_int* ldb
+)
+{
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 's',
+                             *side, *uploa,*transa, *diaga, *m, *n,
+                            (void*)alpha,*lda, *ldb);
+
+    side_t  blis_side;
+    uplo_t  blis_uploa;
+    trans_t blis_transa;
+    diag_t  blis_diaga;
+    dim_t   m0, n0;
+    conj_t  conja = BLIS_NO_CONJUGATE ;
+
+    /* Initialize BLIS. */
+    bli_init_auto();
+
+    /* Perform BLAS parameter checking. */
+    PASTEBLACHK(trsm)
+    (
+      MKSTR(c),
+      MKSTR(trsm),
+      side,
+      uploa,
+      transa,
+      diaga,
+      m,
+      n,
+      lda,
+      ldb
+    );
+
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */
+    bli_param_map_netlib_to_blis_side( *side,  &blis_side );
+    bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa );
+    bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );
+    bli_param_map_netlib_to_blis_diag( *diaga, &blis_diaga );
+
+    /* Typecast BLAS integers to BLIS integers. */
+    bli_convert_blas_dim1( *m, m0 );
+    bli_convert_blas_dim1( *n, n0 );
+
+    /* Set the row and column strides of the matrix operands. */
+    const inc_t rs_a = 1;
+    const inc_t cs_a = *lda;
+    const inc_t rs_b = 1;
+    const inc_t cs_b = *ldb;
+    const num_t dt = BLIS_SCOMPLEX;
+
+
+    if( n0 == 1 )
+    {
+        if( blis_side == BLIS_LEFT )
+        {
+            if(bli_is_notrans(blis_transa))
+            {
+                bli_ctrsv_unf_var2
+                (
+                    blis_uploa,
+                    blis_transa,
+                    blis_diaga,
+                    m0,
+                    (scomplex*)alpha,
+                    (scomplex*)a, rs_a, cs_a,
+                    (scomplex*)b, rs_b,
+                    NULL
+                );
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                return;
+            }
+            else if(bli_is_trans(blis_transa))
+            {
+                bli_ctrsv_unf_var1
+                (
+                    blis_uploa,
+                    blis_transa,
+                    blis_diaga,
+                    m0,
+                    (scomplex*)alpha,
+                    (scomplex*)a, rs_a, cs_a,
+                    (scomplex*)b, rs_b,
+                    NULL
+                );
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                return;
+            }
+        }
+        else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
+        {
+			;
+        }
+    }
+    else if( m0 == 1 )
+    {
+        if(blis_side == BLIS_RIGHT)
+        {
+            if(bli_is_notrans(blis_transa))
+            {
+                if(blis_uploa == BLIS_UPPER)
+                    blis_uploa = BLIS_LOWER;
+                else
+                    blis_uploa = BLIS_UPPER;
+
+                bli_ctrsv_unf_var1
+                (
+                    blis_uploa,
+                    blis_transa,
+                    blis_diaga,
+                    n0,
+                    (scomplex*)alpha,
+                    (scomplex*)a, cs_a, rs_a,
+                    (scomplex*)b, cs_b,
+                    NULL
+                );
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                return;
+            }
+            else if(bli_is_trans(blis_transa))
+            {
+                if(blis_uploa == BLIS_UPPER)
+                    blis_uploa = BLIS_LOWER;
+                else
+                    blis_uploa = BLIS_UPPER;
+
+                bli_ctrsv_unf_var2
+                (
+                    blis_uploa,
+                    blis_transa,
+                    blis_diaga,
+                    n0,
+                    (scomplex*)alpha,
+                    (scomplex*)a, cs_a, rs_a,
+                    (scomplex*)b, cs_b,
+                    NULL
+                );
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                return;
+            }
+        }
+        else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
+        {
+			;
+        }
+    }
+
+    const struc_t struca = BLIS_TRIANGULAR;
+
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+
+    dim_t       mn0_a;
+
+    bli_set_dim_with_side( blis_side, m0, n0, &mn0_a );
+
+    bli_obj_init_finish_1x1( dt, (scomplex*)alpha, &alphao );
+
+    bli_obj_init_finish( dt, mn0_a, mn0_a, (scomplex*)a, rs_a, cs_a, &ao );
+    bli_obj_init_finish( dt, m0,    n0,    (scomplex*)b, rs_b, cs_b, &bo );
+
+    bli_obj_set_uplo( blis_uploa, &ao );
+    bli_obj_set_diag( blis_diaga, &ao );
+    bli_obj_set_conjtrans( blis_transa, &ao );
+
+    bli_obj_set_struc( struca, &ao );
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+    /* bli_ztrsm_small is performing better existing native
+     * implementations for [m,n]<=1000 for single thread.
+     * In case of multithread when [m,n]<=128 sinlge thread implemenation
+     * is doing better than native multithread */
+    bool nt = bli_thread_get_is_parallel();
+    if((nt==0 && m0<=1000 && n0<=1000) ||
+       (nt && (m0+n0)<320) )
+    {
+        err_t status;
+        status = bli_trsm_small
+                 (
+                     blis_side,
+                     &alphao,
+                     &ao,
+                     &bo,
+                     NULL,
+                     NULL
+                 );
+        if (status == BLIS_SUCCESS)
+        {
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            /* Finalize BLIS. */
+            bli_finalize_auto();
+            return;
+        }
+    }
+#endif
+    bli_trsmnat
+    (
+        blis_side,
+        &alphao,
+        &ao,
+        &bo,
+        NULL,
+        NULL
+    );
+
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO)
+    /* Finalize BLIS. */
+    bli_finalize_auto();
+}
+
 #else
 INSERT_GENTFUNC_BLAS( trsm, trsm )
 #endif
