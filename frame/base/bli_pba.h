@@ -119,7 +119,7 @@ BLIS_INLINE void bli_pba_unlock( pba_t* pba )
 
 // -----------------------------------------------------------------------------
 
-pba_t* bli_pba_query( void );
+BLIS_EXPORT_BLIS pba_t* bli_pba_query( void );
 
 void bli_pba_init
      (
