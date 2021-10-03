@@ -94,6 +94,7 @@ void bli_dgemmsup_rd_armv8a_int_3x4
 
   uint64_t k_mker = k0 / 2;
   uint64_t k_left = k0 % 2;
+  uint64_t b_iszr = ( *beta == 0.0 );
 
   assert( cs_a == 1 );
   assert( rs_b == 1 );
@@ -228,8 +229,11 @@ void bli_dgemmsup_rd_armv8a_int_3x4
       if      ( n0 > 3 ) va_1 = vld1q_f64     ( c_loc + 0 * rs_c + 2 );
       else if ( n0 > 2 ) va_1 = vld1q_lane_f64( c_loc + 0 * rs_c + 2, va_1, 0 );
 
-      vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
-      vc_02 = vfmaq_f64( vc_02, va_1, vb_0 );
+      if ( !b_iszr )
+      {
+        vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+        vc_02 = vfmaq_f64( vc_02, va_1, vb_0 );
+      }
 
       if      ( n0 > 1 ) vst1q_f64     ( c_loc + 0 * rs_c + 0, vc_00 );
       else if ( n0 > 0 ) vst1q_lane_f64( c_loc + 0 * rs_c + 0, vc_00, 0 );
@@ -243,8 +247,11 @@ void bli_dgemmsup_rd_armv8a_int_3x4
       if      ( n0 > 3 ) va_1 = vld1q_f64     ( c_loc + 1 * rs_c + 2 );
       else if ( n0 > 2 ) va_1 = vld1q_lane_f64( c_loc + 1 * rs_c + 2, va_1, 0 );
 
-      vc_10 = vfmaq_f64( vc_10, va_0, vb_0 );
-      vc_12 = vfmaq_f64( vc_12, va_1, vb_0 );
+      if ( !b_iszr )
+      {
+        vc_10 = vfmaq_f64( vc_10, va_0, vb_0 );
+        vc_12 = vfmaq_f64( vc_12, va_1, vb_0 );
+      }
 
       if      ( n0 > 1 ) vst1q_f64     ( c_loc + 1 * rs_c + 0, vc_10 );
       else if ( n0 > 0 ) vst1q_lane_f64( c_loc + 1 * rs_c + 0, vc_10, 0 );
@@ -258,8 +265,11 @@ void bli_dgemmsup_rd_armv8a_int_3x4
       if      ( n0 > 3 ) va_1 = vld1q_f64     ( c_loc + 2 * rs_c + 2 );
       else if ( n0 > 2 ) va_1 = vld1q_lane_f64( c_loc + 2 * rs_c + 2, va_1, 0 );
 
-      vc_20 = vfmaq_f64( vc_20, va_0, vb_0 );
-      vc_22 = vfmaq_f64( vc_22, va_1, vb_0 );
+      if ( !b_iszr )
+      {
+        vc_20 = vfmaq_f64( vc_20, va_0, vb_0 );
+        vc_22 = vfmaq_f64( vc_22, va_1, vb_0 );
+      }
 
       if      ( n0 > 1 ) vst1q_f64     ( c_loc + 2 * rs_c + 0, vc_20 );
       else if ( n0 > 0 ) vst1q_lane_f64( c_loc + 2 * rs_c + 0, vc_20, 0 );
@@ -279,9 +289,12 @@ void bli_dgemmsup_rd_armv8a_int_3x4
       if ( m0 > 1 ) va_1 = vld1q_lane_f64( c_loc + 1 + 1 * cs_c, va_1, 1 );
       if ( m0 > 2 ) va_2 = vld1q_lane_f64( c_loc + 2 + 1 * cs_c, va_2, 1 );
     }
-    vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
-    vc_10 = vfmaq_f64( vc_10, va_1, vb_0 );
-    vc_20 = vfmaq_f64( vc_20, va_2, vb_0 );
+    if ( !b_iszr )
+    {
+      vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+      vc_10 = vfmaq_f64( vc_10, va_1, vb_0 );
+      vc_20 = vfmaq_f64( vc_20, va_2, vb_0 );
+    }
     if ( m0 > 0 ) vst1q_lane_f64( c_loc + 0 + 0 * cs_c, vc_00, 0 );
     if ( m0 > 1 ) vst1q_lane_f64( c_loc + 1 + 0 * cs_c, vc_10, 0 );
     if ( m0 > 2 ) vst1q_lane_f64( c_loc + 2 + 0 * cs_c, vc_20, 0 );
@@ -304,9 +317,12 @@ void bli_dgemmsup_rd_armv8a_int_3x4
       if ( m0 > 1 ) va_1 = vld1q_lane_f64( c_loc + 1 + 3 * cs_c, va_1, 1 );
       if ( m0 > 2 ) va_2 = vld1q_lane_f64( c_loc + 2 + 3 * cs_c, va_2, 1 );
     }
-    vc_02 = vfmaq_f64( vc_02, va_0, vb_0 );
-    vc_12 = vfmaq_f64( vc_12, va_1, vb_0 );
-    vc_22 = vfmaq_f64( vc_22, va_2, vb_0 );
+    if ( !b_iszr )
+    {
+      vc_02 = vfmaq_f64( vc_02, va_0, vb_0 );
+      vc_12 = vfmaq_f64( vc_12, va_1, vb_0 );
+      vc_22 = vfmaq_f64( vc_22, va_2, vb_0 );
+    }
     if ( n0 > 2 )
     {
       if ( m0 > 0 ) vst1q_lane_f64( c_loc + 0 + 2 * cs_c, vc_02, 0 );

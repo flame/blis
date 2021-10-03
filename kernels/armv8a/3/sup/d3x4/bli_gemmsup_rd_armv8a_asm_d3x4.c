@@ -240,6 +240,7 @@ LABEL(WRITE_MEM_PREP)
 " ldr             x8, %[beta]                     \n\t"
 " ld1r            {v30.2d}, [x4]                  \n\t" // Load alpha & beta (value).
 " ld1r            {v31.2d}, [x8]                  \n\t"
+DSCALE6V(0,1,2,3,4,5,30,0)
 "                                                 \n\t"
 " mov             x9, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
@@ -248,14 +249,16 @@ BNE(WRITE_MEM_C)
 //
 // C storage in rows.
 LABEL(WRITE_MEM_R)
+" fcmp            d31, #0.0                       \n\t"
+BEQ(ZERO_BETA_R)
 DLOADC_2V_R_FWD(12,13,x9,0,x6)
 DLOADC_2V_R_FWD(14,15,x9,0,x6)
 DLOADC_2V_R_FWD(16,17,x9,0,x6)
-DSCALE6V(12,13,14,15,16,17,31,0)
-DSCALEA6V(12,13,14,15,16,17,0,1,2,3,4,5,30,0)
-DSTOREC_2V_R_FWD(12,13,x5,0,x6)
-DSTOREC_2V_R_FWD(14,15,x5,0,x6)
-DSTOREC_2V_R_FWD(16,17,x5,0,x6)
+DSCALEA6V(0,1,2,3,4,5,12,13,14,15,16,17,31,0)
+LABEL(ZERO_BETA_R)
+DSTOREC_2V_R_FWD(0,1,x5,0,x6)
+DSTOREC_2V_R_FWD(2,3,x5,0,x6)
+DSTOREC_2V_R_FWD(4,5,x5,0,x6)
 BRANCH(END_WRITE_MEM)
 //
 // C storage in columns.
@@ -264,16 +267,18 @@ LABEL(WRITE_MEM_C)
 " trn2            v7.2d, v0.2d, v2.2d            \n\t"
 " trn1            v8.2d, v1.2d, v3.2d            \n\t"
 " trn2            v9.2d, v1.2d, v3.2d            \n\t"
+" fcmp            d31, #0.0                       \n\t"
+BEQ(ZERO_BETA_C)
 DLOADC_1V_1ELM_C_FWD(12,20,0,x9,0,x7)
 DLOADC_1V_1ELM_C_FWD(13,20,1,x9,0,x7)
 DLOADC_1V_1ELM_C_FWD(14,21,0,x9,0,x7)
 DLOADC_1V_1ELM_C_FWD(15,21,1,x9,0,x7)
-DSCALE6V(12,13,14,15,20,21,31,0)
-DSCALEA6V(12,13,14,15,20,21,6,7,8,9,4,5,30,0)
-DSTOREC_1V_1ELM_C_FWD(12,20,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(13,20,1,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(14,21,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(15,21,1,x5,0,x7)
+DSCALEA6V(6,7,8,9,4,5,12,13,14,15,20,21,31,0)
+LABEL(ZERO_BETA_C)
+DSTOREC_1V_1ELM_C_FWD(6,4,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(7,4,1,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(8,5,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(9,5,1,x5,0,x7)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)

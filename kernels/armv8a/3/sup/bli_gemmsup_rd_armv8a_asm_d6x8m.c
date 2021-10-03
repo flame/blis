@@ -372,6 +372,12 @@ LABEL(WRITE_MEM_PREP)
 " ld1r            {v30.2d}, [x4]                  \n\t" // Load alpha & beta (value).
 " ld1r            {v31.2d}, [x8]                  \n\t"
 "                                                 \n\t"
+" fmov            d28, #1.0                       \n\t" // Don't scale for unit alpha.
+" fcmp            d30, d28                        \n\t"
+BEQ(UNIT_ALPHA)
+DSCALE12V(0,1,2,3,4,5,6,7,8,9,10,11,30,0)
+LABEL(UNIT_ALPHA)
+"                                                 \n\t"
 " mov             x1, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
 " cmp             x7, #8                          \n\t" // Check for column-storage.
@@ -379,11 +385,13 @@ BNE(WRITE_MEM_C)
 //
 // C storage in rows.
 LABEL(WRITE_MEM_R)
+" fcmp            d31, #0.0                       \n\t" // Don't load for zero beta.
+BEQ(ZERO_BETA_R)
 DLOADC_4V_R_FWD(12,13,14,15,x1,0,x6)
 DLOADC_4V_R_FWD(16,17,18,19,x1,0,x6)
 DLOADC_4V_R_FWD(20,21,22,23,x1,0,x6)
-DSCALE12V(12,13,14,15,16,17,18,19,20,21,22,23,31,0)
-DSCALEA12V(12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3,4,5,6,7,8,9,10,11,30,0)
+DSCALEA12V(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,31,0)
+LABEL(ZERO_BETA_R)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_R)
@@ -393,9 +401,9 @@ BRANCH(PRFM_END_R)
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_R)
 #endif
-DSTOREC_4V_R_FWD(12,13,14,15,x5,0,x6)
-DSTOREC_4V_R_FWD(16,17,18,19,x5,0,x6)
-DSTOREC_4V_R_FWD(20,21,22,23,x5,0,x6)
+DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
+DSTOREC_4V_R_FWD(4,5,6,7,x5,0,x6)
+DSTOREC_4V_R_FWD(8,9,10,11,x5,0,x6)
 BRANCH(END_WRITE_MEM)
 //
 // C storage in columns.
@@ -408,6 +416,8 @@ LABEL(WRITE_MEM_C)
 " trn2            v17.2d, v2.2d, v6.2d            \n\t"
 " trn1            v18.2d, v3.2d, v7.2d            \n\t"
 " trn2            v19.2d, v3.2d, v7.2d            \n\t"
+" fcmp            d31, #0.0                       \n\t" // Don't load for zero beta.
+BEQ(ZERO_BETA_C)
 DLOADC_1V_1ELM_C_FWD(0,20,0,x1,0,x7)
 DLOADC_1V_1ELM_C_FWD(1,20,1,x1,0,x7)
 DLOADC_1V_1ELM_C_FWD(2,21,0,x1,0,x7)
@@ -416,8 +426,8 @@ DLOADC_1V_1ELM_C_FWD(4,22,0,x1,0,x7)
 DLOADC_1V_1ELM_C_FWD(5,22,1,x1,0,x7)
 DLOADC_1V_1ELM_C_FWD(6,23,0,x1,0,x7)
 DLOADC_1V_1ELM_C_FWD(7,23,1,x1,0,x7)
-DSCALE12V(0,1,2,3,4,5,6,7,20,21,22,23,31,0)
-DSCALEA12V(0,1,2,3,4,5,6,7,20,21,22,23,12,13,14,15,16,17,18,19,8,9,10,11,30,0)
+DSCALEA12V(12,13,14,15,16,17,18,19,8,9,10,11,0,1,2,3,4,5,6,7,20,21,22,23,31,0)
+LABEL(ZERO_BETA_C)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_C)
@@ -427,14 +437,14 @@ BRANCH(PRFM_END_C)
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_C)
 #endif
-DSTOREC_1V_1ELM_C_FWD(0,20,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(1,20,1,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(2,21,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(3,21,1,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(4,22,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(5,22,1,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(6,23,0,x5,0,x7)
-DSTOREC_1V_1ELM_C_FWD(7,23,1,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(12,8,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(13,8,1,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(14,9,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(15,9,1,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(16,10,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(17,10,1,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(18,11,0,x5,0,x7)
+DSTOREC_1V_1ELM_C_FWD(19,11,1,x5,0,x7)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)
