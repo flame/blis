@@ -96,6 +96,11 @@
   DLOAD2V(V0,V1,ADDR,SHIFT) \
   DLOAD2V(V2,V3,ADDR,SHIFT+32)
 
+// Generic: load one line.
+#define DLOAD1V_GATHER_ELMFWD(V,ADDR,INC) \
+" ld1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
+" ld1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"
+
 // Store one line.
 #define DSTORE1V(V,ADDR,SHIFT) \
 " str   q"#V", ["#ADDR", #"#SHIFT"] \n\t"
@@ -105,5 +110,10 @@
 #define DSTORE4V(V0,V1,V2,V3,ADDR,SHIFT) \
   DSTORE2V(V0,V1,ADDR,SHIFT) \
   DSTORE2V(V2,V3,ADDR,SHIFT+32)
+
+// Generic: store one line.
+#define DSTORE1V_SCATTER_ELMFWD(V,ADDR,INC) \
+" st1   {v"#V".d}[0], ["#ADDR"], "#INC" \n\t" \
+" st1   {v"#V".d}[1], ["#ADDR"], "#INC" \n\t"
 
 
