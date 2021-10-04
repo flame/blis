@@ -551,7 +551,10 @@ LDFLAGS        += -Wl,-rpath,@executable_path/$(BASE_LIB_PATH)
 # rpath for BLAS tests
 LDFLAGS        += -Wl,-rpath,@executable_path/../../../$(BASE_LIB_PATH)
 else
-LDFLAGS        += "\'-Wl,-rpath,$$ORIGIN/$(BASE_LIB_PATH)\'"
+# rpath for test_libblis.x
+LDFLAGS        += -Wl,-rpath,'$$ORIGIN/$(BASE_LIB_PATH)'
+# rpath for BLAS tests
+LDFLAGS        += -Wl,-rpath,'$$ORIGIN/../../../$(BASE_LIB_PATH)'
 endif
 endif
 endif
