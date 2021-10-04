@@ -187,6 +187,14 @@ CNTX_INIT_PROTS( generic )
 #include "bli_family_bulldozer.h"
 #endif
 
+// -- ARM families --
+#ifdef BLIS_FAMILY_ARM64
+#include "bli_family_arm64.h"
+#endif
+#ifdef BLIS_FAMILY_ARM32
+#include "bli_family_arm32.h"
+#endif
+
 // -- ARM architectures --
 
 #ifdef BLIS_FAMILY_ARMSVE
