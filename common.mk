@@ -518,7 +518,11 @@ endif
 ifeq ($(OS_NAME),Darwin)
 # OS X shared library link flags.
 SOFLAGS    := -dynamiclib
+ifeq ($(MK_ENABLE_RPATH),yes)
 SOFLAGS    += -Wl,-install_name,@rpath/$(LIBBLIS_SONAME)
+else
+SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
+endif
 else
 SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
