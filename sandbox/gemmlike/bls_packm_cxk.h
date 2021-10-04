@@ -32,13 +32,27 @@
 
 */
 
-#ifndef BLIS_ERROR_MACRO_DEFS_H
-#define BLIS_ERROR_MACRO_DEFS_H
 
-// Used to insert filenames and line numbers into error-checking code.
-#define bli_check_error_code( code ) \
-        bli_check_error_code_helper( code, __FILE__, __LINE__ )
+#undef  GENTPROT
+#define GENTPROT( ctype, ch, varname ) \
+\
+void PASTECH2(bls_,ch,varname) \
+     ( \
+       conj_t  conja, \
+       pack_t  schema, \
+       dim_t   panel_dim, \
+       dim_t   panel_dim_max, \
+       dim_t   panel_len, \
+       dim_t   panel_len_max, \
+       ctype*  kappa, \
+       ctype*  a, inc_t inca, inc_t lda, \
+       ctype*  p,             inc_t ldp, \
+       cntx_t* cntx  \
+     );
 
-
-#endif
+//INSERT_GENTPROT_BASIC0( packm_cxk )
+GENTPROT( float,    s, packm_cxk )
+GENTPROT( double,   d, packm_cxk )
+GENTPROT( scomplex, c, packm_cxk )
+GENTPROT( dcomplex, z, packm_cxk )
 

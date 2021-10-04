@@ -124,6 +124,12 @@ void bli_pool_finalize
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
 
+	// NOTE: This sanity check has been disabled because bli_pool_reinit()
+	// is currently implemented in terms of bli_pool_finalize() followed by
+	// bli_pool_init(). If that _reinit() takes place when some blocks are
+	// checked out, then we would expect top_index != 0, and therefore this
+	// check is not universally appropriate.
+#if 0
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
 
@@ -135,6 +141,7 @@ void bli_pool_finalize
 		printf( "bli_pool_finalize(): Implication: not all blocks were checked back in!\n" );
 		bli_abort();
 	}
+#endif
 
 	// Query the free() function pointer for the pool.
 	free_ft free_fp = bli_pool_free_fp( pool );

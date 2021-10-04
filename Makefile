@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -36,7 +36,7 @@
 # Makefile
 #
 # Field G. Van Zee
-# 
+#
 # Top-level makefile for libflame linear algebra library.
 #
 #
@@ -688,7 +688,7 @@ endif
 
 # --- BLAS test suite rules ---
 
-testblas: blastest-run 
+testblas: blastest-run
 
 blastest-f2c: check-env $(BLASTEST_F2C_LIB)
 
@@ -697,7 +697,7 @@ blastest-bin: check-env blastest-f2c $(BLASTEST_DRV_BIN_PATHS)
 blastest-run: $(BLASTEST_DRV_BINS_R)
 
 # f2c object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_F2C_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -706,7 +706,7 @@ else
 endif
 
 # driver object file rule.
-$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c
+$(BASE_OBJ_BLASTEST_PATH)/%.o: $(BLASTEST_DRV_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) $(BLAT_CFLAGS) -c $< -o $@
 else
@@ -725,19 +725,13 @@ else
 	@$(RANLIB) $@
 endif
 
-# first argument: the base name of the BLAS test driver.
-define make-blat-rule
-$(BASE_OBJ_BLASTEST_PATH)/$(1).x: $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
+$(BASE_OBJ_BLASTEST_PATH)/%.x: $(BASE_OBJ_BLASTEST_PATH)/%.o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
+	$(LINKER) $< $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $$(@F) against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) $(LDFLAGS)'"
-	@$(LINKER) $(BASE_OBJ_BLASTEST_PATH)/$(1).o $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $$@
+	@echo "Linking $@ against '$(notdir $(BLASTEST_F2C_LIB)) $(LIBBLIS_LINK) "$(LDFLAGS)"'"
+	@$(LINKER) $< $(BLASTEST_F2C_LIB) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
-endef
-
-# Instantiate the rule above for each driver file.
-$(foreach name, $(BLASTEST_DRV_BASES), $(eval $(call make-blat-rule,$(name))))
 
 # A rule to run ?blat1.x driver files.
 define make-run-blat1-rule
@@ -793,7 +787,7 @@ testsuite: testsuite-run
 testsuite-bin: check-env $(TESTSUITE_BIN)
 
 # Object file rule.
-$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c
+$(BASE_OBJ_TESTSUITE_PATH)/%.o: $(TESTSUITE_SRC_PATH)/%.c $(BLIS_H_FLAT)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(CC) $(call get-user-cflags-for,$(CONFIG_NAME)) -c $< -o $@
 else
@@ -806,7 +800,7 @@ $(TESTSUITE_BIN): $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK)
 ifeq ($(ENABLE_VERBOSE),yes)
 	$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 else
-	@echo "Linking $@ against '$(LIBBLIS_LINK) $(LDFLAGS)'"
+	@echo "Linking $@ against '$(LIBBLIS_LINK) "$(LDFLAGS)"'"
 	@$(LINKER) $(MK_TESTSUITE_OBJS) $(LIBBLIS_LINK) $(LDFLAGS) -o $@
 endif
 
@@ -1243,7 +1237,7 @@ endif
 
 changelog:
 	@echo "Updating '$(DIST_PATH)/$(CHANGELOG)' via '$(GIT_LOG)'"
-	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG) 
+	@$(GIT_LOG) > $(DIST_PATH)/$(CHANGELOG)
 
 
 # --- Uninstall rules ---
