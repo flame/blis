@@ -518,7 +518,11 @@ endif
 ifeq ($(OS_NAME),Darwin)
 # OS X shared library link flags.
 SOFLAGS    := -dynamiclib
+ifeq ($(MK_ENABLE_RPATH),yes)
+SOFLAGS    += -Wl,-install_name,@rpath/$(LIBBLIS_SONAME)
+else
 SOFLAGS    += -Wl,-install_name,$(libdir)/$(LIBBLIS_SONAME)
+endif
 else
 SOFLAGS    := -shared
 ifeq ($(IS_WIN),yes)
@@ -545,7 +549,17 @@ LIBBLIS_L      := $(LIBBLIS_SO)
 LIBBLIS_LINK   := $(LIBBLIS_SO_PATH)
 ifeq ($(IS_WIN),no)
 # For Linux and OS X: set rpath property of shared object.
-LDFLAGS        += -Wl,-rpath,$(BASE_LIB_PATH)
+ifeq ($(OS_NAME),Darwin)
+# rpath for test_libblis.x
+LDFLAGS        += -Wl,-rpath,@executable_path/$(BASE_LIB_PATH)
+# rpath for BLAS tests
+LDFLAGS        += -Wl,-rpath,@executable_path/../../../$(BASE_LIB_PATH)
+else
+# rpath for test_libblis.x
+LDFLAGS        += -Wl,-rpath,'$$ORIGIN/$(BASE_LIB_PATH)'
+# rpath for BLAS tests
+LDFLAGS        += -Wl,-rpath,'$$ORIGIN/../../../$(BASE_LIB_PATH)'
+endif
 endif
 endif
 # On windows, use the shared library even if static is created.
