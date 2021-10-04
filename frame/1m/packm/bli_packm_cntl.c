@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-cntl_t* bli_packm_cntl_create_node
+BLIS_EXPORT_BLIS cntl_t* bli_packm_cntl_create_node
      (
        rntm_t*   rntm,
        void_fp   var_func,

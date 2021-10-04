@@ -43,24 +43,6 @@ typedef struct
     packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
 } packm_blk_var1_params_t;
 
-BLIS_INLINE void bli_packm_blk_var1_init_params
-                 (
-                   packm_blk_var1_params_t* params
-                 )
-{
-    #undef GENTFUNC2
-    #define GENTFUNC2(ctypec,ctypep,chc,chp,name) \
-    params->ukr_fn[ PASTEMAC(chc,type) ][ PASTEMAC(chp,type) ] = \
-        ( packm_ker_vft )PASTEMAC2(chc,chp,name);
-    INSERT_GENTFUNC2_MIXDP0(packm_struc_cxk_md)
-
-    #undef GENTFUNC
-    #define GENTFUNC(ctype,ch,name) \
-    params->ukr_fn[ PASTEMAC(ch,type) ][ PASTEMAC(ch,type) ] = \
-        ( packm_ker_vft )PASTEMAC(ch,name);
-    INSERT_GENTFUNC_BASIC0(packm_struc_cxk)
-}
-
 BLIS_EXPORT_BLIS void bli_packm_blk_var1
      (
        obj_t*   c,
