@@ -35,12 +35,6 @@
 #ifndef BLIS_ERROR_MACRO_DEFS_H
 #define BLIS_ERROR_MACRO_DEFS_H
 
-// -- Error-related macros --
-
-// Used to determine the size of the array of error strings.
-#define BLIS_MAX_NUM_ERR_MSGS    200
-#define BLIS_MAX_ERR_MSG_LENGTH  200
-
 // Used to insert filenames and line numbers into error-checking code.
 #define bli_check_error_code( code ) \
         bli_check_error_code_helper( code, __FILE__, __LINE__ )

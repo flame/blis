@@ -36,7 +36,7 @@
 #include "blis.h"
 
 // Internal array to hold error strings.
-static char bli_error_string[BLIS_MAX_NUM_ERR_MSGS][BLIS_MAX_ERR_MSG_LENGTH] =
+static char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 {
 	[-BLIS_INVALID_ERROR_CHECKING_LEVEL]         = "Invalid error checking level.",
 	[-BLIS_UNDEFINED_ERROR_CODE]                 = "Undefined error code.",
