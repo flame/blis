@@ -920,7 +920,7 @@ void ztrsm_
     trans_t blis_transa;
     diag_t  blis_diaga;
     dim_t   m0, n0;
-    conj_t  conja = BLIS_NO_CONJUGATE ;
+    conj_t  conja = BLIS_NO_CONJUGATE;
 
     /* Initialize BLIS. */
     bli_init_auto();
@@ -997,7 +997,50 @@ void ztrsm_
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-		;
+            bli_zscalv_ex
+            (
+                conja,
+                m0,
+                (dcomplex*)alpha,
+                (dcomplex*)b, rs_b,
+                NULL,
+                NULL
+            );
+	    if(blis_diaga == BLIS_NONUNIT_DIAG)
+	    {
+		    dcomplex inva = {1.0, 0.0};
+		    dcomplex a_dup;
+		    if(*transa == 'C' && *diaga == 'N')
+		    {
+			    a_dup.real = a->real;
+			    a_dup.imag = a->imag * -1.0;
+		    }
+		    else
+		    {
+			    a_dup.real = a->real;
+			    a_dup.imag = a->imag;
+		    }
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		    bli_zinvscals(a_dup, inva);
+#else
+		    inva.real = a_dup.real;
+		    inva.imag = a_dup.imag;
+#endif
+		    for(int indx = 0; indx < m0; indx ++)
+		    {
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+			    bli_zscals(inva, b[indx])
+#else
+
+			    bli_zinvscals(inva, b[indx])
+#endif
+		    }
+
+	    }
+
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    return;
 	}
     }
     else if( m0 == 1 )
@@ -1049,7 +1092,50 @@ void ztrsm_
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-		;
+            bli_zscalv_ex
+            (
+                conja,
+                n0,
+                (dcomplex*)alpha,
+                (dcomplex*)b, cs_b,
+                NULL,
+                NULL
+            );
+            if(blis_diaga == BLIS_NONUNIT_DIAG)
+            {
+                dcomplex inva = {1.0, 0.0};
+		dcomplex a_dup;
+                if(*transa == 'C' && *diaga == 'N')
+                {
+                        a_dup.real = a->real;
+                        a_dup.imag = a->imag * -1.0;
+                }
+                else
+                {
+			a_dup.real = a->real;
+                        a_dup.imag = a->imag;
+                }
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		bli_zinvscals(a_dup, inva);
+#else
+		inva.real = a_dup.real;
+		inva.imag = a_dup.imag;
+#endif
+                for(int indx = 0; indx < n0; indx ++)
+                {
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+			bli_zscals(inva ,b[indx * cs_b])
+#else
+
+			bli_zinvscals(inva ,b[indx * cs_b])
+#endif
+                }
+            }
+
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    return;
+
         }
     }
 
@@ -1141,7 +1227,7 @@ void ctrsm_
     trans_t blis_transa;
     diag_t  blis_diaga;
     dim_t   m0, n0;
-    conj_t  conja = BLIS_NO_CONJUGATE ;
+    conj_t  conja = BLIS_NO_CONJUGATE;
 
     /* Initialize BLIS. */
     bli_init_auto();
@@ -1218,7 +1304,50 @@ void ctrsm_
         }
         else if( ( blis_side == BLIS_RIGHT ) && ( m0 != 1 ) )
         {
-			;
+            bli_cscalv_ex
+            (
+                conja,
+                m0,
+                (scomplex*)alpha,
+                (scomplex*)b, rs_b,
+                NULL,
+                NULL
+            );
+            if(blis_diaga == BLIS_NONUNIT_DIAG)
+            {
+                scomplex inva = {1.0, 0.0};
+		scomplex a_dup;
+                if(*transa == 'C' && *diaga == 'N')
+                {
+                        a_dup.real = a->real;
+                        a_dup.imag = a->imag * -1.0;
+                }
+                else
+                {
+			a_dup.real = a->real;
+                        a_dup.imag = a->imag;
+                }
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		bli_cinvscals(a_dup, inva);
+#else
+		inva.real = a_dup.real;
+		inva.imag = a_dup.imag;
+#endif
+
+                for(int indx = 0; indx < m0; indx ++)
+                {
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+			bli_cscals(inva ,b[indx])
+#else
+			bli_cinvscals(inva, b[indx])
+#endif
+                }
+            }
+
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    return;
+
         }
     }
     else if( m0 == 1 )
@@ -1270,7 +1399,49 @@ void ctrsm_
         }
         else if(( blis_side == BLIS_LEFT ) && ( n0 != 1 ))
         {
-			;
+            bli_cscalv_ex
+            (
+                conja,
+                n0,
+                (scomplex*)alpha,
+                (scomplex*)b, cs_b,
+                NULL,
+                NULL
+            );
+            if(blis_diaga == BLIS_NONUNIT_DIAG)
+            {
+                scomplex inva = {1.0, 0.0};
+		scomplex a_dup;
+                if(*transa == 'C' && *diaga == 'N')
+                {
+                        a_dup.real = a->real;
+                        a_dup.imag = a->imag * -1.0;
+                }
+                else
+                {
+			a_dup.real = a->real;
+                        a_dup.imag = a->imag;
+                }
+
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+		bli_cinvscals(a_dup, inva)
+#else
+		inva.real = a_dup.real;
+		inva.imag = a_dup.imag;
+#endif
+                for(int indx = 0; indx < n0; indx ++)
+                {
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+			bli_cscals(inva ,b[indx * cs_b])
+#else
+			bli_cinvscals(inva, b[indx * cs_b])
+#endif
+
+                }
+            }
+
+	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+	    return;
         }
     }
 

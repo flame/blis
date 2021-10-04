@@ -5823,11 +5823,15 @@ BLIS_INLINE void ztrsm_small_pack_diag_element
     dim_t size
 )
 {
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
     __m256d  ymm1, ymm2, ymm3, ymm4, ymm5, ymm6, ymm7, ymm8;
+    ymm7 = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
+#else
+    __m256d ymm1, ymm2, ymm3;
+#endif
     bool is_four = (size == 4) ? 1 : 0;
     dcomplex ones = {1.0, 1.0};
     ymm2 = ymm1 = _mm256_broadcast_pd((__m128d const *)&ones);
-    ymm7 = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
     if(!is_unitdiag)
     {
         //broadcast diagonal elements of A11
@@ -36977,11 +36981,15 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	dim_t size
 )
 {
-	__m256  ymm1, ymm2, ymm3, ymm4, ymm5, ymm6, ymm7, ymm8;
+	__m256  ymm1, ymm2, ymm3, ymm4, ymm5, ymm6, ymm8;
 	bool is_eight = (size == 8) ? 1 : 0;
 	scomplex ones = {1.0, 1.0};
 	ymm2 = ymm1 = _mm256_broadcast_ps((__m128 const *)&ones);
+#ifdef BLIS_ENABLE_TRSM_PREINVERSION
+	__m256  ymm7;
 	ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
+#endif
+
 	if(!is_unitdiag)
 	{
 		//broadcast diagonal elements of A11
@@ -37217,6 +37225,7 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	ymm16 = _mm256_broadcast_ps(( __m128 const *)(&AlphaVal));\
 	ymm16 = _mm256_permute_ps(ymm16, 0x44);\
 \
+	xmm4 = _mm_setzero_ps();\
 	xmm0 = _mm_loadu_ps((float const *)(b11));\
 	xmm1 = _mm_loadl_pi(xmm4, (__m64 const *)(b11 + 2));\
 	xmm2 = _mm_loadu_ps((float const *)(b11 + cs_b));\
