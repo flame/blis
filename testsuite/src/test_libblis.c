@@ -2386,7 +2386,11 @@ void libblis_test_op_driver
 
 
 	// Mark this operation as done.
-	op->test_done = TRUE;
+	if ( tdata->id == 0 )
+		op->test_done = TRUE;
+
+	// Wait here so that all threads know we are done
+	bli_pthread_barrier_wait( tdata->barrier );
 }
 
 
