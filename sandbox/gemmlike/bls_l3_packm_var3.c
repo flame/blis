@@ -35,7 +35,9 @@
 #include "blis.h"
 
 //
-// Define BLAS-like interfaces to the variants.
+// Variant 3 is similar to variant 1, except that it parallelizes packing
+// along the k dimension. (Our current hypothesis is that this method of
+// parallelizing the operation may perform better on some NUMA systems.)
 //
 
 #undef  GENTFUNC
@@ -66,13 +68,11 @@ void PASTECH2(bls_,ch,varname) \
 	dim_t           it, ic; \
 	dim_t           ic0; \
 	doff_t          ic_inc; \
-	dim_t           panel_len_full; \
-	dim_t           panel_len_i; \
+	dim_t           panel_len; \
 	dim_t           panel_len_max; \
-	dim_t           panel_len_max_i; \
-	dim_t           panel_dim_i; \
+	dim_t           panel_dim; \
 	dim_t           panel_dim_max; \
-	inc_t           vs_c; \
+	inc_t           incc; \
 	inc_t           ldc; \
 	inc_t           ldp; \
 	conj_t          conjc; \
@@ -95,10 +95,10 @@ void PASTECH2(bls_,ch,varname) \
 	{ \
 		/* Prepare to pack to row-stored column panels. */ \
 		iter_dim       = n; \
-		panel_len_full = m; \
+		panel_len      = m; \
 		panel_len_max  = m_max; \
 		panel_dim_max  = pd_p; \
-		vs_c           = cs_c; \
+		incc           = cs_c; \
 		ldc            = rs_c; \
 		ldp            = rs_p; \
 	} \
@@ -106,10 +106,10 @@ void PASTECH2(bls_,ch,varname) \
 	{ \
 		/* Prepare to pack to column-stored row panels. */ \
 		iter_dim       = m; \
-		panel_len_full = n; \
+		panel_len      = n; \
 		panel_len_max  = n_max; \
 		panel_dim_max  = pd_p; \
-		vs_c           = rs_c; \
+		incc           = rs_c; \
 		ldc            = cs_c; \
 		ldp            = cs_p; \
 	} \
@@ -124,8 +124,6 @@ void PASTECH2(bls_,ch,varname) \
 		ic_inc = panel_dim_max; \
 	} \
 \
-	ctype* restrict p_begin = p_cast; \
-\
 	/* Query the number of threads and thread ids from the current thread's
 	   packm thrinfo_t node. */ \
 	const dim_t nt  = bli_thread_n_way( thread ); \
@@ -135,64 +133,68 @@ void PASTECH2(bls_,ch,varname) \
 	( void )nt; \
 	( void )tid; \
 \
-	dim_t it_start, it_end, it_inc; \
+	dim_t pr_start, pr_end; \
 \
 	/* Determine the thread range and increment using the current thread's
-	   packm thrinfo_t node. NOTE: The definition of bli_thread_range_jrir()
-	   will depend on whether slab or round-robin partitioning was requested
-	   at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &it_start, &it_end, &it_inc ); \
+	   packm thrinfo_t node. */ \
+	bli_thread_range_sub( thread, panel_len, 1, FALSE, &pr_start, &pr_end ); \
+\
+	/* Define instances of panel_len and panel_len_max that are specific to
+	   the local thread. */ \
+	dim_t panel_len_loc     = pr_end - pr_start; \
+	dim_t panel_len_max_loc = panel_len_loc; \
+\
+	/* If panel_len_max > panel_len, then there are some columns in p that
+	   need to be zeroed. Of course, only the last thread will be responsible
+	   for this edge region. */ \
+	dim_t panel_len_zero = panel_len_max - panel_len; \
+	if ( tid == nt - 1 ) panel_len_max_loc += panel_len_zero; \
+\
+	/* Shift the pointer for c and p to the appropriate locations within the
+	   first micropanel. */ \
+	dim_t off_loc = pr_start; \
+	ctype* restrict c_begin_loc = c_cast + off_loc * ldc; \
+	ctype* restrict p_begin_loc = p_cast + off_loc * ldp; \
 \
 	/* Iterate over every logical micropanel in the source matrix. */ \
 	for ( ic  = ic0,    it  = 0; it < n_iter; \
 	      ic += ic_inc, it += 1 ) \
 	{ \
-		panel_dim_i = bli_min( panel_dim_max, iter_dim - ic ); \
+		panel_dim = bli_min( panel_dim_max, iter_dim - ic ); \
 \
-		ctype* restrict c_begin = c_cast   + (ic  )*vs_c; \
+		ctype* restrict c_use = c_begin_loc + (ic  )*incc; \
+		ctype* restrict p_use = p_begin_loc + (it  )*ps_p; \
 \
-		ctype* restrict c_use = c_begin; \
-		ctype* restrict p_use = p_begin; \
-\
-		panel_len_i     = panel_len_full; \
-		panel_len_max_i = panel_len_max; \
-\
-		/* The definition of bli_packm_my_iter() will depend on whether slab
-		   or round-robin partitioning was requested at configure-time. (The
-		   default is slab.) */ \
-		if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 		{ \
-			PASTEMAC(ch,packm_cxk) \
+			PASTECH2(bls_,ch,packm_cxk) \
 			( \
 			  conjc, \
 			  schema, \
-			  panel_dim_i, \
+			  panel_dim, \
 			  panel_dim_max, \
-			  panel_len_i, \
-			  panel_len_max_i, \
+			  panel_len_loc, \
+			  panel_len_max_loc, \
 			  kappa_cast, \
-			  c_use, vs_c, ldc, \
+			  c_use, incc, ldc, \
 			  p_use,       ldp, \
 			  cntx  \
 			); \
 		} \
-\
-/*
-if ( !row_stored ) \
-PASTEMAC(ch,fprintm)( stdout, "packm_var1: a packed", panel_dim_max, panel_len_max, \
-                               p_use, rs_p, cs_p, "%5.2f", "" ); \
-else \
-PASTEMAC(ch,fprintm)( stdout, "packm_var1: b packed", panel_len_max, panel_dim_max, \
-                               p_use, rs_p, cs_p, "%5.2f", "" ); \
-*/ \
-\
-		p_begin += ps_p; \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC0( packm_var1 )
-GENTFUNC( float,    s, packm_var1 )
-GENTFUNC( double,   d, packm_var1 )
-GENTFUNC( scomplex, c, packm_var1 )
-GENTFUNC( dcomplex, z, packm_var1 )
+//INSERT_GENTFUNC_BASIC0( packm_var3 )
+GENTFUNC( float,    s, packm_var3 )
+GENTFUNC( double,   d, packm_var3 )
+GENTFUNC( scomplex, c, packm_var3 )
+GENTFUNC( dcomplex, z, packm_var3 )
+
+/*
+if ( !row_stored ) \
+PASTEMAC(ch,fprintm)( stdout, "packm_var3: a packed", panel_dim_max, panel_len_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
+else \
+PASTEMAC(ch,fprintm)( stdout, "packm_var3: b packed", panel_len_max, panel_dim_max, \
+                               p_use, rs_p, cs_p, "%5.2f", "" ); \
+*/
 

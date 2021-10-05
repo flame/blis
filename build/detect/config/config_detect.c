@@ -33,12 +33,39 @@
 
 */
 
-#define BLIS_INLINE static
-#define BLIS_EXPORT_BLIS
-#include "bli_system.h"
-#include "bli_type_defs.h"
-#include "bli_arch.h"
-#include "bli_cpuid.h"
+// NOTE: This file will likely only ever get compiled as part of the BLIS
+// configure script, and therefore BLIS_CONFIGURETIME_CPUID is guaranteed to
+// be #defined. However, we preserve the cpp conditional for consistency with
+// the other three files mentioned above.
+#ifdef BLIS_CONFIGURETIME_CPUID
+
+  // NOTE: If you need to make any changes to this cpp branch, it's probably
+  // the case that you also need to modify bli_arch.c, bli_cpuid.c, and
+  // bli_env.c. Don't forget to update these other files as needed!
+
+  // The BLIS_ENABLE_SYSTEM macro must be defined so that the correct cpp
+  // branch in bli_system.h is processed. (This macro is normally defined in
+  // bli_config.h.)
+  #define BLIS_ENABLE_SYSTEM
+
+  // Use C-style static inline functions for any static inline functions that
+  // happen to be defined by the headers below. (This macro is normally defined
+  // in bli_config_macro_defs.h.)
+  #define BLIS_INLINE static
+
+  // Since we're not building a shared library, we can forgo the use of the
+  // BLIS_EXPORT_BLIS annotations by #defining them to be nothing. (This macro
+  // is normally defined in bli_config_macro_defs.h.)
+  #define BLIS_EXPORT_BLIS
+
+  #include "bli_system.h"
+  #include "bli_type_defs.h"
+  #include "bli_arch.h"
+  #include "bli_cpuid.h"
+  //#include "bli_env.h"
+#else
+  #include "blis.h"
+#endif
 
 int main( int argc, char** argv )
 {

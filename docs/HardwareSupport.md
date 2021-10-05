@@ -24,7 +24,7 @@ A few remarks / reminders:
 | AMD Steamroller (AVX/FMA3)           | `steamroller`          | `sdcz` |            |
 | AMD Excavator (AVX/FMA3)             | `excavator`            | `sdcz` |            |
 | AMD Zen (AVX/FMA3)                   | `zen`                  | `sdcz` |  `sd`      |
-| Intel Core2 (SSE3)                   | `penryn`               | `sd`   |  `d`       |
+| Intel Core2 (SSE3)                   | `penryn`               | `sd`   |   `d`      |
 | Intel Sandy/Ivy Bridge (AVX/FMA3)    | `sandybridge`          | `sdcz` |            |
 | Intel Haswell, Broadwell (AVX/FMA3)  | `haswell`              | `sdcz` |  `sd`      |
 | Intel Sky/Kaby/CoffeeLake (AVX/FMA3) | `haswell`              | `sdcz` |  `sd`      |
@@ -35,6 +35,8 @@ A few remarks / reminders:
 | ARMv7 Cortex-A15 (NEON)              | `cortex-a15`           | `sd`   |            |
 | ARMv8 Cortex-A53 (NEON)              | `cortex-a53`           | `sd`   |            |
 | ARMv8 Cortex-A57 (NEON)              | `cortex-a57`           | `sd`   |            |
+| ARMv8.1 ThunderX2 (NEON)             | `thunderx2`            | `sd`   |            |
+| ARMv8.1 A64FX (SVE)                  | `a64fx`                |  `d`   |            |
 | IBM Blue Gene/Q (QPX int)            | `bgq`                  |  `d`   |            |
 | IBM Power7 (QPX int)                 | `power7`               |  `d`   |            |
 | template (C99)                       | `template`             | `sdcz` | `sdcz`     |

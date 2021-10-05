@@ -94,7 +94,7 @@ void bls_gemm_ex
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
 	{
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
+		bls_gemm_check( alpha, a, b, beta, c, cntx );
 	}
 
 	// If C has a zero dimension, return early.
