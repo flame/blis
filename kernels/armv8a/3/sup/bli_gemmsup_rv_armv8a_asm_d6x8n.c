@@ -357,19 +357,29 @@ BNE(WRITE_MEM_C)
 LABEL(WRITE_MEM_R)
 " ld1r            {v24.2d}, [x4]                  \n\t" // Load alpha & beta.
 " ld1r            {v25.2d}, [x8]                  \n\t"
+" fmov            d26, #1.0                       \n\t"
+" fcmp            d24, d26                        \n\t"
+BEQ(UNIT_ALPHA_R)
+DSCALE8V(0,1,2,3,4,5,6,7,24,0)
+DSCALE8V(8,9,10,11,12,13,14,15,24,0)
+DSCALE8V(16,17,18,19,20,21,22,23,24,0)
+LABEL(UNIT_ALPHA_R)
+" fcmp            d25, #0.0                       \n\t"
+BEQ(ZERO_BETA_R_1)
 DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
-DSCALE4V(26,27,28,29,25,0)
-DSCALEA4V(26,27,28,29,0,1,2,3,24,0)
+DSCALEA4V(0,1,2,3,26,27,28,29,25,0)
+DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
+DSCALEA4V(4,5,6,7,26,27,28,29,25,0)
+LABEL(ZERO_BETA_R_1)
+DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
+BEQ(ZERO_BETA_R_2)
+DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
 DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
-DSCALE4V(0,1,2,3,25,0)
-DSCALEA4V(0,1,2,3,4,5,6,7,24,0)
-DSTOREC_4V_R_FWD(26,27,28,29,x5,0,x6)
-DLOADC_4V_R_FWD(4,5,6,7,x1,0,x6)
+DSCALEA8V(8,9,10,11,12,13,14,15,26,27,28,29,0,1,2,3,25,0)
 DLOADC_4V_R_FWD(26,27,28,29,x1,0,x6)
-DSCALE8V(4,5,6,7,26,27,28,29,25,0)
-DSCALEA8V(4,5,6,7,26,27,28,29,8,9,10,11,12,13,14,15,24,0)
-DLOADC_4V_R_FWD(8,9,10,11,x1,0,x6)
-DLOADC_4V_R_FWD(12,13,14,15,x1,0,x6)
+DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
+DSCALEA8V(16,17,18,19,20,21,22,23,26,27,28,29,0,1,2,3,25,0)
+LABEL(ZERO_BETA_R_2)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_R)
@@ -379,13 +389,11 @@ BRANCH(PRFM_END_R)
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_R)
 #endif
-DSCALE8V(8,9,10,11,12,13,14,15,25,0)
-DSCALEA8V(8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,0)
-DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
 DSTOREC_4V_R_FWD(4,5,6,7,x5,0,x6)
-DSTOREC_4V_R_FWD(26,27,28,29,x5,0,x6)
 DSTOREC_4V_R_FWD(8,9,10,11,x5,0,x6)
 DSTOREC_4V_R_FWD(12,13,14,15,x5,0,x6)
+DSTOREC_4V_R_FWD(16,17,18,19,x5,0,x6)
+DSTOREC_4V_R_FWD(20,21,22,23,x5,0,x6)
 BRANCH(END_WRITE_MEM)
 //
 // C storage in columns.
@@ -421,16 +429,29 @@ LABEL(WRITE_MEM_C)
 "                                                 \n\t"
 " ld1r            {v16.2d}, [x4]                  \n\t" // Load alpha & beta.
 " ld1r            {v17.2d}, [x8]                  \n\t"
+" fmov            d18, #1.0                       \n\t"
+" fcmp            d16, d18                        \n\t"
+BEQ(UNIT_ALPHA_C)
+DSCALE8V(24,25,26,27,28,29,30,31,16,0)
+DSCALE8V(0,1,2,3,4,5,6,7,16,0)
+DSCALE8V(8,9,10,11,12,13,14,15,16,0)
+LABEL(UNIT_ALPHA_C)
+" fcmp            d17, #0.0                       \n\t"
+BEQ(ZERO_BETA_C_1)
 DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
 DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
-DSCALE6V(18,19,20,21,22,23,17,0)
-DSCALEA6V(18,19,20,21,22,23,24,0,8,25,1,9,16,0)
-DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
-DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
+DSCALEA6V(24,0,8,25,1,9,18,19,20,21,22,23,17,0)
+LABEL(ZERO_BETA_C_1)
+DSTOREC_3V_C_FWD(24,0,8,x5,0,x7)
+DSTOREC_3V_C_FWD(25,1,9,x5,0,x7)
+BEQ(ZERO_BETA_C_2)
 DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
 DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
 DLOADC_3V_C_FWD(24,0,8,x1,0,x7)
 DLOADC_3V_C_FWD(25,1,9,x1,0,x7)
+DSCALEA6V(26,2,10,27,3,11,18,19,20,21,22,23,17,0)
+DSCALEA6V(28,4,12,29,5,13,24,0,8,25,1,9,17,0)
+LABEL(ZERO_BETA_C_2)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_C)
@@ -439,21 +460,19 @@ BRANCH(PRFM_END_C)
 " prfm  PLDL1STRM, [%[b_next], #16*0] \n\t"
 " prfm  PLDL1STRM, [%[b_next], #16*1] \n\t"
 LABEL(PRFM_END_C)
+" fcmp            d17, #0.0           \n\t" // Not the end. Reset branching reg.
 #endif
-DSCALE6V(18,19,20,21,22,23,17,0)
-DSCALEA6V(18,19,20,21,22,23,26,2,10,27,3,11,16,0)
-DSCALE6V(24,0,8,25,1,9,17,0)
-DSCALEA6V(24,0,8,25,1,9,28,4,12,29,5,13,16,0)
-DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
-DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
+DSTOREC_3V_C_FWD(26,2,10,x5,0,x7)
+DSTOREC_3V_C_FWD(27,3,11,x5,0,x7)
+BEQ(ZERO_BETA_C_3)
 DLOADC_3V_C_FWD(18,19,20,x1,0,x7)
 DLOADC_3V_C_FWD(21,22,23,x1,0,x7)
-DSTOREC_3V_C_FWD(24,0,8,x5,0,x7)
-DSTOREC_3V_C_FWD(25,1,9,x5,0,x7)
-DSCALE6V(18,19,20,21,22,23,17,0)
-DSCALEA6V(18,19,20,21,22,23,30,6,14,31,7,15,16,0)
-DSTOREC_3V_C_FWD(18,19,20,x5,0,x7)
-DSTOREC_3V_C_FWD(21,22,23,x5,0,x7)
+DSCALEA6V(30,6,14,31,7,15,18,19,20,21,22,23,17,0)
+LABEL(ZERO_BETA_C_3)
+DSTOREC_3V_C_FWD(28,4,12,x5,0,x7)
+DSTOREC_3V_C_FWD(29,5,13,x5,0,x7)
+DSTOREC_3V_C_FWD(30,6,14,x5,0,x7)
+DSTOREC_3V_C_FWD(31,7,15,x5,0,x7)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)

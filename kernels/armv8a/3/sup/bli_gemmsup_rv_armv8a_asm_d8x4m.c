@@ -289,6 +289,12 @@ LABEL(WRITE_MEM_PREP)
 " ldr             x8, %[beta]                     \n\t"
 " ld1r            {v16.2d}, [x4]                  \n\t" // Load alpha & beta (value).
 " ld1r            {v17.2d}, [x8]                  \n\t"
+" fmov            d18, #1.0                       \n\t"
+" fcmp            d16, d18                        \n\t"
+BEQ(UNIT_ALPHA)
+DSCALE8V(0,1,2,3,4,5,6,7,16,0)
+DSCALE8V(8,9,10,11,12,13,14,15,16,0)
+LABEL(UNIT_ALPHA)
 "                                                 \n\t"
 " mov             x1, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
@@ -297,15 +303,16 @@ BNE(WRITE_MEM_R)
 //
 // C storage in columns.
 LABEL(WRITE_MEM_C)
+" fcmp            d17, #0.0                       \n\t"
+BEQ(ZERO_BETA_C)
 DLOADC_4V_C_FWD(20,21,22,23,x1,0,x7)
 DLOADC_4V_C_FWD(24,25,26,27,x1,0,x7)
-DSCALE8V(20,21,22,23,24,25,26,27,17,0)
-DSCALEA8V(20,21,22,23,24,25,26,27,0,1,2,3,4,5,6,7,16,0)
+DSCALEA8V(0,1,2,3,4,5,6,7,20,21,22,23,24,25,26,27,17,0)
 //
-DLOADC_4V_C_FWD(0,1,2,3,x1,0,x7)
-DLOADC_4V_C_FWD(4,5,6,7,x1,0,x7)
-DSCALE8V(0,1,2,3,4,5,6,7,17,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0)
+DLOADC_4V_C_FWD(20,21,22,23,x1,0,x7)
+DLOADC_4V_C_FWD(24,25,26,27,x1,0,x7)
+DSCALEA8V(8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27,17,0)
+LABEL(ZERO_BETA_C)
 //
 DSTOREC_4V_C_FWD(20,21,22,23,x5,0,x7)
 DSTOREC_4V_C_FWD(24,25,26,27,x5,0,x7)
@@ -332,22 +339,23 @@ LABEL(WRITE_MEM_R)
 " trn1            v29.2d, v11.2d, v15.2d          \n\t"
 " trn2            v30.2d, v3.2d, v7.2d            \n\t" // Row 7.
 " trn2            v31.2d, v11.2d, v15.2d          \n\t"
-" ld1r            {v14.2d}, [x4]                  \n\t" // Reload alpha & beta (value).
+// " ld1r            {v14.2d}, [x4]                  \n\t" // Reload alpha & beta (value).
 " ld1r            {v15.2d}, [x8]                  \n\t"
+" fcmp            d15, #0.0                       \n\t"
+BEQ(ZERO_BETA_R)
 DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
 DLOADC_4V_R_FWD(4,5,6,7,x1,0,x6)
-DSCALE8V(0,1,2,3,4,5,6,7,15,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23,14,0)
+DSCALEA8V(16,17,18,19,20,21,22,23,0,1,2,3,4,5,6,7,15,0)
 //
-DLOADC_4V_R_FWD(16,17,18,19,x1,0,x6)
-DLOADC_4V_R_FWD(20,21,22,23,x1,0,x6)
-DSCALE8V(16,17,18,19,20,21,22,23,15,0)
-DSCALEA8V(16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,14,0)
+DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
+DLOADC_4V_R_FWD(4,5,6,7,x1,0,x6)
+DSCALEA8V(24,25,26,27,28,29,30,31,0,1,2,3,4,5,6,7,15,0)
+LABEL(ZERO_BETA_R)
 //
-DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
-DSTOREC_4V_R_FWD(4,5,6,7,x5,0,x6)
 DSTOREC_4V_R_FWD(16,17,18,19,x5,0,x6)
 DSTOREC_4V_R_FWD(20,21,22,23,x5,0,x6)
+DSTOREC_4V_R_FWD(24,25,26,27,x5,0,x6)
+DSTOREC_4V_R_FWD(28,29,30,31,x5,0,x6)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)

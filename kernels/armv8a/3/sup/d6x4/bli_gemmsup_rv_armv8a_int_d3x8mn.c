@@ -82,8 +82,9 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
 
   dim_t n;
   dim_t k;
-  uint64_t ps_a = bli_auxinfo_ps_a( data );
-  uint64_t ps_b = bli_auxinfo_ps_b( data );
+  uint64_t ps_a   = bli_auxinfo_ps_a( data );
+  uint64_t ps_b   = bli_auxinfo_ps_b( data );
+  uint64_t b_iszr = ( *beta == 0.0 );
   assert( cs_b == 1 );
 
   // Registers used to store a 3x8 block of C.
@@ -200,10 +201,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           else if ( n > 6 ) vb_3 = vld1q_lane_f64( c_loc + 0 * rs_c + 6, vb_3, 0 );
 
           // Scale.
-          vc_00 = vfmaq_f64( vc_00, vb_0, va_0 );
-          vc_01 = vfmaq_f64( vc_01, vb_1, va_0 );
-          vc_02 = vfmaq_f64( vc_02, vb_2, va_0 );
-          vc_03 = vfmaq_f64( vc_03, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_00 = vfmaq_f64( vc_00, vb_0, va_0 );
+            vc_01 = vfmaq_f64( vc_01, vb_1, va_0 );
+            vc_02 = vfmaq_f64( vc_02, vb_2, va_0 );
+            vc_03 = vfmaq_f64( vc_03, vb_3, va_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 0 * rs_c + 0, vc_00 );
@@ -228,10 +232,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           else if ( n > 6 ) vb_3 = vld1q_lane_f64( c_loc + 1 * rs_c + 6, vb_3, 0 );
 
           // Scale.
-          vc_10 = vfmaq_f64( vc_10, vb_0, va_0 );
-          vc_11 = vfmaq_f64( vc_11, vb_1, va_0 );
-          vc_12 = vfmaq_f64( vc_12, vb_2, va_0 );
-          vc_13 = vfmaq_f64( vc_13, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_10 = vfmaq_f64( vc_10, vb_0, va_0 );
+            vc_11 = vfmaq_f64( vc_11, vb_1, va_0 );
+            vc_12 = vfmaq_f64( vc_12, vb_2, va_0 );
+            vc_13 = vfmaq_f64( vc_13, vb_3, va_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 1 * rs_c + 0, vc_10 );
@@ -256,10 +263,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           else if ( n > 6 ) vb_3 = vld1q_lane_f64( c_loc + 2 * rs_c + 6, vb_3, 0 );
 
           // Scale.
-          vc_20 = vfmaq_f64( vc_20, vb_0, va_0 );
-          vc_21 = vfmaq_f64( vc_21, vb_1, va_0 );
-          vc_22 = vfmaq_f64( vc_22, vb_2, va_0 );
-          vc_23 = vfmaq_f64( vc_23, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_20 = vfmaq_f64( vc_20, vb_0, va_0 );
+            vc_21 = vfmaq_f64( vc_21, vb_1, va_0 );
+            vc_22 = vfmaq_f64( vc_22, vb_2, va_0 );
+            vc_23 = vfmaq_f64( vc_23, vb_3, va_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 2 * rs_c + 0, vc_20 );
@@ -290,10 +300,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           if ( n > 7 ) vb_3 = vld1q_lane_f64( c_loc + 0 + 7 * cs_c, vb_3, 1 );
 
           // Scale.
-          vc_00 = vfmaq_f64( vc_00, vb_0, va_0 );
-          vc_01 = vfmaq_f64( vc_01, vb_1, va_0 );
-          vc_02 = vfmaq_f64( vc_02, vb_2, va_0 );
-          vc_03 = vfmaq_f64( vc_03, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_00 = vfmaq_f64( vc_00, vb_0, va_0 );
+            vc_01 = vfmaq_f64( vc_01, vb_1, va_0 );
+            vc_02 = vfmaq_f64( vc_02, vb_2, va_0 );
+            vc_03 = vfmaq_f64( vc_03, vb_3, va_0 );
+          }
 
           // Store.
           if ( n > 0 ) vst1q_lane_f64( c_loc + 0 + 0 * cs_c, vc_00, 0 );
@@ -318,10 +331,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           if ( n > 7 ) vb_3 = vld1q_lane_f64( c_loc + 1 + 7 * cs_c, vb_3, 1 );
 
           // Scale.
-          vc_10 = vfmaq_f64( vc_10, vb_0, va_0 );
-          vc_11 = vfmaq_f64( vc_11, vb_1, va_0 );
-          vc_12 = vfmaq_f64( vc_12, vb_2, va_0 );
-          vc_13 = vfmaq_f64( vc_13, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_10 = vfmaq_f64( vc_10, vb_0, va_0 );
+            vc_11 = vfmaq_f64( vc_11, vb_1, va_0 );
+            vc_12 = vfmaq_f64( vc_12, vb_2, va_0 );
+            vc_13 = vfmaq_f64( vc_13, vb_3, va_0 );
+          }
 
           // Store.
           if ( n > 0 ) vst1q_lane_f64( c_loc + 1 + 0 * cs_c, vc_10, 0 );
@@ -346,10 +362,13 @@ void bli_dgemmsup_rv_armv8a_int_3x8mn
           if ( n > 7 ) vb_3 = vld1q_lane_f64( c_loc + 2 + 7 * cs_c, vb_3, 1 );
 
           // Scale.
-          vc_20 = vfmaq_f64( vc_20, vb_0, va_0 );
-          vc_21 = vfmaq_f64( vc_21, vb_1, va_0 );
-          vc_22 = vfmaq_f64( vc_22, vb_2, va_0 );
-          vc_23 = vfmaq_f64( vc_23, vb_3, va_0 );
+          if ( !b_iszr )
+          {
+            vc_20 = vfmaq_f64( vc_20, vb_0, va_0 );
+            vc_21 = vfmaq_f64( vc_21, vb_1, va_0 );
+            vc_22 = vfmaq_f64( vc_22, vb_2, va_0 );
+            vc_23 = vfmaq_f64( vc_23, vb_3, va_0 );
+          }
 
           // Store.
           if ( n > 0 ) vst1q_lane_f64( c_loc + 2 + 0 * cs_c, vc_20, 0 );

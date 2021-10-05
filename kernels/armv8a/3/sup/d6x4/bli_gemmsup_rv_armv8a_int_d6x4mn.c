@@ -82,8 +82,9 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
 
   dim_t n;
   dim_t k;
-  uint64_t ps_a = bli_auxinfo_ps_a( data );
-  uint64_t ps_b = bli_auxinfo_ps_b( data );
+  uint64_t ps_a   = bli_auxinfo_ps_a( data );
+  uint64_t ps_b   = bli_auxinfo_ps_b( data );
+  uint64_t b_iszr = ( *beta == 0.0 );
   assert( cs_b == 1 );
 
   // Registers used to store a 6x4 block of C.
@@ -204,8 +205,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 0 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
-          vc_01 = vfmaq_f64( vc_01, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_00 = vfmaq_f64( vc_00, va_0, vb_0 );
+            vc_01 = vfmaq_f64( vc_01, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 0 * rs_c + 0, vc_00 );
@@ -222,8 +226,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 1 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_10 = vfmaq_f64( vc_10, va_0, vb_0 );
-          vc_11 = vfmaq_f64( vc_11, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_10 = vfmaq_f64( vc_10, va_0, vb_0 );
+            vc_11 = vfmaq_f64( vc_11, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 1 * rs_c + 0, vc_10 );
@@ -240,8 +247,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 2 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_20 = vfmaq_f64( vc_20, va_0, vb_0 );
-          vc_21 = vfmaq_f64( vc_21, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_20 = vfmaq_f64( vc_20, va_0, vb_0 );
+            vc_21 = vfmaq_f64( vc_21, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 2 * rs_c + 0, vc_20 );
@@ -258,8 +268,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 3 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_30 = vfmaq_f64( vc_30, va_0, vb_0 );
-          vc_31 = vfmaq_f64( vc_31, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_30 = vfmaq_f64( vc_30, va_0, vb_0 );
+            vc_31 = vfmaq_f64( vc_31, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 3 * rs_c + 0, vc_30 );
@@ -276,8 +289,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 4 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_40 = vfmaq_f64( vc_40, va_0, vb_0 );
-          vc_41 = vfmaq_f64( vc_41, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_40 = vfmaq_f64( vc_40, va_0, vb_0 );
+            vc_41 = vfmaq_f64( vc_41, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 4 * rs_c + 0, vc_40 );
@@ -294,8 +310,11 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           else if ( n > 2 ) va_1 = vld1q_lane_f64( c_loc + 5 * rs_c + 2, va_1, 0 );
 
           // Scale.
-          vc_50 = vfmaq_f64( vc_50, va_0, vb_0 );
-          vc_51 = vfmaq_f64( vc_51, va_1, vb_0 );
+          if ( !b_iszr )
+          {
+            vc_50 = vfmaq_f64( vc_50, va_0, vb_0 );
+            vc_51 = vfmaq_f64( vc_51, va_1, vb_0 );
+          }
 
           // Store.
           if      ( n > 1 ) vst1q_f64     ( c_loc + 5 * rs_c + 0, vc_50 );
@@ -330,10 +349,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_f64( c_loc + 1 * cs_c + 0 );
             if ( n > 2 ) VTMP2 = vld1q_f64( c_loc + 2 * cs_c + 0 );
             if ( n > 3 ) VTMP3 = vld1q_f64( c_loc + 3 * cs_c + 0 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_f64( c_loc + 0 * cs_c + 0, VCOL0 );
             if ( n > 1 ) vst1q_f64( c_loc + 1 * cs_c + 0, VCOL1 );
             if ( n > 2 ) vst1q_f64( c_loc + 2 * cs_c + 0, VCOL2 );
@@ -345,10 +367,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_lane_f64( c_loc + 1 * cs_c + 0, VTMP1, 0 );
             if ( n > 2 ) VTMP2 = vld1q_lane_f64( c_loc + 2 * cs_c + 0, VTMP2, 0 );
             if ( n > 3 ) VTMP3 = vld1q_lane_f64( c_loc + 3 * cs_c + 0, VTMP3, 0 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_lane_f64( c_loc + 0 * cs_c + 0, VCOL0, 0 );
             if ( n > 1 ) vst1q_lane_f64( c_loc + 1 * cs_c + 0, VCOL1, 0 );
             if ( n > 2 ) vst1q_lane_f64( c_loc + 2 * cs_c + 0, VCOL2, 0 );
@@ -368,10 +393,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_f64( c_loc + 1 * cs_c + 2 );
             if ( n > 2 ) VTMP2 = vld1q_f64( c_loc + 2 * cs_c + 2 );
             if ( n > 3 ) VTMP3 = vld1q_f64( c_loc + 3 * cs_c + 2 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_f64( c_loc + 0 * cs_c + 2, VCOL0 );
             if ( n > 1 ) vst1q_f64( c_loc + 1 * cs_c + 2, VCOL1 );
             if ( n > 2 ) vst1q_f64( c_loc + 2 * cs_c + 2, VCOL2 );
@@ -383,10 +411,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_lane_f64( c_loc + 1 * cs_c + 2, VTMP1, 0 );
             if ( n > 2 ) VTMP2 = vld1q_lane_f64( c_loc + 2 * cs_c + 2, VTMP2, 0 );
             if ( n > 3 ) VTMP3 = vld1q_lane_f64( c_loc + 3 * cs_c + 2, VTMP3, 0 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_lane_f64( c_loc + 0 * cs_c + 2, VCOL0, 0 );
             if ( n > 1 ) vst1q_lane_f64( c_loc + 1 * cs_c + 2, VCOL1, 0 );
             if ( n > 2 ) vst1q_lane_f64( c_loc + 2 * cs_c + 2, VCOL2, 0 );
@@ -406,10 +437,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_f64( c_loc + 1 * cs_c + 4 );
             if ( n > 2 ) VTMP2 = vld1q_f64( c_loc + 2 * cs_c + 4 );
             if ( n > 3 ) VTMP3 = vld1q_f64( c_loc + 3 * cs_c + 4 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_f64( c_loc + 0 * cs_c + 4, VCOL0 );
             if ( n > 1 ) vst1q_f64( c_loc + 1 * cs_c + 4, VCOL1 );
             if ( n > 2 ) vst1q_f64( c_loc + 2 * cs_c + 4, VCOL2 );
@@ -421,10 +455,13 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
             if ( n > 1 ) VTMP1 = vld1q_lane_f64( c_loc + 1 * cs_c + 4, VTMP1, 0 );
             if ( n > 2 ) VTMP2 = vld1q_lane_f64( c_loc + 2 * cs_c + 4, VTMP2, 0 );
             if ( n > 3 ) VTMP3 = vld1q_lane_f64( c_loc + 3 * cs_c + 4, VTMP3, 0 );
-            VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
-            VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
-            VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
-            VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            if ( !b_iszr )
+            {
+              VCOL0 = vfmaq_f64( VCOL0, VTMP0, vb_0 );
+              VCOL1 = vfmaq_f64( VCOL1, VTMP1, vb_0 );
+              VCOL2 = vfmaq_f64( VCOL2, VTMP2, vb_0 );
+              VCOL3 = vfmaq_f64( VCOL3, VTMP3, vb_0 );
+            }
             if ( n > 0 ) vst1q_lane_f64( c_loc + 0 * cs_c + 4, VCOL0, 0 );
             if ( n > 1 ) vst1q_lane_f64( c_loc + 1 * cs_c + 4, VCOL1, 0 );
             if ( n > 2 ) vst1q_lane_f64( c_loc + 2 * cs_c + 4, VCOL2, 0 );

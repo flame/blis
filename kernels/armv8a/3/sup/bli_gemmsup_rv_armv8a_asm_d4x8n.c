@@ -320,15 +320,18 @@ BNE(WRITE_MEM_C)
 LABEL(WRITE_MEM_R)
 " ld1r            {v16.2d}, [x4]                  \n\t" // Load alpha & beta.
 " ld1r            {v17.2d}, [x8]                  \n\t"
+" fcmp            d17, #0.0                       \n\t"
+DSCALE8V(0,1,2,3,4,5,6,7,16,0)
+DSCALE8V(8,9,10,11,12,13,14,15,16,0)
+BEQ(ZERO_BETA_R)
 DLOADC_4V_R_FWD(20,21,22,23,x1,0,x6)
 DLOADC_4V_R_FWD(24,25,26,27,x1,0,x6)
-DSCALE8V(20,21,22,23,24,25,26,27,17,0)
-DSCALEA8V(20,21,22,23,24,25,26,27,0,1,2,3,4,5,6,7,16,0)
+DSCALEA8V(0,1,2,3,4,5,6,7,20,21,22,23,24,25,26,27,17,0)
 //
-DLOADC_4V_R_FWD(0,1,2,3,x1,0,x6)
-DLOADC_4V_R_FWD(4,5,6,7,x1,0,x6)
-DSCALE8V(0,1,2,3,4,5,6,7,17,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,0)
+DLOADC_4V_R_FWD(20,21,22,23,x1,0,x6)
+DLOADC_4V_R_FWD(24,25,26,27,x1,0,x6)
+DSCALEA8V(8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27,17,0)
+LABEL(ZERO_BETA_R)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_R)
@@ -339,10 +342,10 @@ BRANCH(PRFM_END_R)
 LABEL(PRFM_END_R)
 #endif
 //
-DSTOREC_4V_R_FWD(20,21,22,23,x5,0,x6)
-DSTOREC_4V_R_FWD(24,25,26,27,x5,0,x6)
 DSTOREC_4V_R_FWD(0,1,2,3,x5,0,x6)
 DSTOREC_4V_R_FWD(4,5,6,7,x5,0,x6)
+DSTOREC_4V_R_FWD(8,9,10,11,x5,0,x6)
+DSTOREC_4V_R_FWD(12,13,14,15,x5,0,x6)
 BRANCH(END_WRITE_MEM)
 //
 // C storage in columns.
@@ -366,15 +369,15 @@ LABEL(WRITE_MEM_C)
 " trn2            v31.2d, v11.2d, v15.2d          \n\t"
 " ld1r            {v14.2d}, [x4]                  \n\t" // Load alpha & beta.
 " ld1r            {v15.2d}, [x8]                  \n\t"
+DSCALE8V(16,17,18,19,20,21,22,23,14,0)
+DSCALE8V(24,25,26,27,28,29,30,31,14,0)
 DLOADC_4V_C_FWD(0,1,2,3,x1,0,x7)
 DLOADC_4V_C_FWD(4,5,6,7,x1,0,x7)
-DSCALE8V(0,1,2,3,4,5,6,7,15,0)
-DSCALEA8V(0,1,2,3,4,5,6,7,16,17,18,19,20,21,22,23,14,0)
+DSCALEA8V(16,17,18,19,20,21,22,23,0,1,2,3,4,5,6,7,15,0)
 //
-DLOADC_4V_C_FWD(16,17,18,19,x1,0,x7)
-DLOADC_4V_C_FWD(20,21,22,23,x1,0,x7)
-DSCALE8V(16,17,18,19,20,21,22,23,15,0)
-DSCALEA8V(16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,14,0)
+DLOADC_4V_C_FWD(0,1,2,3,x1,0,x7)
+DLOADC_4V_C_FWD(4,5,6,7,x1,0,x7)
+DSCALEA8V(24,25,26,27,28,29,30,31,0,1,2,3,4,5,6,7,15,0)
 #ifndef __clang__
 " cmp   x12, #1                       \n\t"
 BRANCH(PRFM_END_C)
@@ -385,10 +388,10 @@ BRANCH(PRFM_END_C)
 LABEL(PRFM_END_C)
 #endif
 //
-DSTOREC_4V_C_FWD(0,1,2,3,x5,0,x7)
-DSTOREC_4V_C_FWD(4,5,6,7,x5,0,x7)
 DSTOREC_4V_C_FWD(16,17,18,19,x5,0,x7)
 DSTOREC_4V_C_FWD(20,21,22,23,x5,0,x7)
+DSTOREC_4V_C_FWD(24,25,26,27,x5,0,x7)
+DSTOREC_4V_C_FWD(28,29,30,31,x5,0,x7)
 //
 // End of this microkernel.
 LABEL(END_WRITE_MEM)
