@@ -69,8 +69,8 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	//                                           s      d      c      z
 	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   240,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,  2048,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   252,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,  3072,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  8192,    -1,    -1 );
 
 	// Update the context with the current architecture's register and cache
@@ -122,8 +122,7 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
 	//                                           s      d      c      z
-	bli_blksz_init     ( &blkszs[ BLIS_MR ],    -1,     6,    -1,    -1,
-	                                            -1,     8,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    -1,     6,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,     8,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_MC ],    -1,   240,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_KC ],    -1,  1024,    -1,    -1 );
