@@ -129,8 +129,8 @@ void bli_dgemmsup_rv_armv8a_asm_8x4m
   uint64_t k_mker = k0 / 6;
   uint64_t k_left = k0 % 6;
 
-  uint64_t m_iter = m0 / 8;
-  uint64_t m_left = m0 % 8;
+  int64_t  m_iter = m0 / 8;
+  int64_t  m_left = m0 % 8;
 
   uint64_t rs_a   = rs_a0;
   uint64_t cs_a   = cs_a0;
