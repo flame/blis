@@ -190,8 +190,8 @@ void PASTEF77(ch,blasname) \
     /* ----------------------------------------------------------- */ \
     /*    TRSM API: AX = B, where X = B                            */ \
     /*    CALL TRSV when X & B are vector and when A is Matrix     */ \
-    /*    Case 1: LEFT  : TRSM,  C(mxn) = A(mxm) * B(mxn)          */ \
-    /*    Case 2: RIGHT : TRSM,  C(mxn) = B(mxn) * A(nxn)          */ \
+    /*    Case 1: LEFT  : TRSM,  B(mxn) = A(mxm) * X(mxn)          */ \
+    /*    Case 2: RIGHT : TRSM,  B(mxn) = X(mxn) * A(nxn)          */ \
     /* |--------|-------|-------|-------|------------------------| */ \
     /* |        |   A   |   X   |   B   |   Implementation       | */ \
     /* |--------|-------|-------|-------|------------------------| */ \
@@ -494,7 +494,7 @@ void strsm_
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 float inva = 1.0/ *a;
-                for(int indx = 0; indx < m0; indx ++)
+                for(dim_t indx = 0; indx < m0; indx ++)
                 {
                     b[indx] = ( inva * b[indx] );
                 }
@@ -565,7 +565,7 @@ void strsm_
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 float inva = 1.0/ *a;
-                for(int indx = 0; indx < n0; indx ++)
+                for(dim_t indx = 0; indx < n0; indx ++)
                 {
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
                 }
@@ -751,7 +751,7 @@ void dtrsm_
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 double inva = 1.0/ *a;
-                for(int indx = 0; indx < m0; indx ++)
+                for(dim_t indx = 0; indx < m0; indx ++)
                 {
                     b[indx] = ( inva * b[indx] );
                 }
@@ -822,7 +822,7 @@ void dtrsm_
             if(blis_diaga == BLIS_NONUNIT_DIAG)
             {
                 double inva = 1.0/ *a;
-                for(int indx = 0; indx < n0; indx ++)
+                for(dim_t indx = 0; indx < n0; indx ++)
                 {
                     b[indx*cs_b] = (inva * b[indx*cs_b] );
                 }
@@ -1010,6 +1010,12 @@ void ztrsm_
 	    {
 		    dcomplex inva = {1.0, 0.0};
 		    dcomplex a_dup;
+		    /**
+		     * For conjugate transpose and non-unit diagonal
+		     * kernel, negating imaginary part of A.
+		     * As the dimension of A is 1x1, there's going to
+		     * be only one 1 element of A.
+		     */
 		    if(*transa == 'C' && *diaga == 'N')
 		    {
 			    a_dup.real = a->real;
@@ -1027,7 +1033,7 @@ void ztrsm_
 		    inva.real = a_dup.real;
 		    inva.imag = a_dup.imag;
 #endif
-		    for(int indx = 0; indx < m0; indx ++)
+		    for(dim_t indx = 0; indx < m0; indx ++)
 		    {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 			    bli_zscals(inva, b[indx])
@@ -1105,6 +1111,12 @@ void ztrsm_
             {
                 dcomplex inva = {1.0, 0.0};
 		dcomplex a_dup;
+		/**
+		 * For conjugate transpose and non-unit diagonal
+		 * kernel, negating imaginary part of A.
+		 * As the dimension of A is 1x1, there's going to
+		 * be only one 1 element of A.
+		 */
                 if(*transa == 'C' && *diaga == 'N')
                 {
                         a_dup.real = a->real;
@@ -1122,7 +1134,7 @@ void ztrsm_
 		inva.real = a_dup.real;
 		inva.imag = a_dup.imag;
 #endif
-                for(int indx = 0; indx < n0; indx ++)
+                for(dim_t indx = 0; indx < n0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 			bli_zscals(inva ,b[indx * cs_b])
@@ -1317,6 +1329,12 @@ void ctrsm_
             {
                 scomplex inva = {1.0, 0.0};
 		scomplex a_dup;
+		/**
+		 * For conjugate transpose and non-unit diagonal
+		 * kernel, negating imaginary part of A.
+		 * As the dimension of A is 1x1, there's going to
+		 * be only one 1 element of A.
+		 */
                 if(*transa == 'C' && *diaga == 'N')
                 {
                         a_dup.real = a->real;
@@ -1335,7 +1353,7 @@ void ctrsm_
 		inva.imag = a_dup.imag;
 #endif
 
-                for(int indx = 0; indx < m0; indx ++)
+                for(dim_t indx = 0; indx < m0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 			bli_cscals(inva ,b[indx])
@@ -1412,6 +1430,12 @@ void ctrsm_
             {
                 scomplex inva = {1.0, 0.0};
 		scomplex a_dup;
+		/**
+		 * For conjugate transpose and non-unit diagonal
+		 * kernel, negating imaginary part of A.
+		 * As the dimension of A is 1x1, there's going to
+		 * be only one 1 element of A.
+		 */
                 if(*transa == 'C' && *diaga == 'N')
                 {
                         a_dup.real = a->real;
@@ -1429,7 +1453,7 @@ void ctrsm_
 		inva.real = a_dup.real;
 		inva.imag = a_dup.imag;
 #endif
-                for(int indx = 0; indx < n0; indx ++)
+                for(dim_t indx = 0; indx < n0; indx ++)
                 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 			bli_cscals(inva ,b[indx * cs_b])
