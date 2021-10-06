@@ -387,7 +387,7 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           VCOL2 = vtrn1q_f64(vc_21, vc_31);
           VCOL3 = vtrn2q_f64(vc_21, vc_31);
 
-          if ( m0 > 1 )
+          if ( m0 > 3 )
           {
             if ( n > 0 ) VTMP0 = vld1q_f64( c_loc + 0 * cs_c + 2 );
             if ( n > 1 ) VTMP1 = vld1q_f64( c_loc + 1 * cs_c + 2 );
@@ -431,7 +431,7 @@ void bli_dgemmsup_rv_armv8a_int_6x4mn
           VCOL2 = vtrn1q_f64(vc_41, vc_51);
           VCOL3 = vtrn2q_f64(vc_41, vc_51);
 
-          if ( m0 > 1 )
+          if ( m0 > 5 )
           {
             if ( n > 0 ) VTMP0 = vld1q_f64( c_loc + 0 * cs_c + 4 );
             if ( n > 1 ) VTMP1 = vld1q_f64( c_loc + 1 * cs_c + 4 );
