@@ -438,7 +438,7 @@ void DTL_DumpData(
 } /* DTL_DumpData */
 #endif
 
-#if (AOCL_DTL_TRACE_ENABLE || AOCL_DTL_LOG_ENABLE)
+#if (AOCL_DTL_LOG_ENABLE)
 void AOCL_DTL_start_perf_timer(void)
 {
     AOCL_TID current_thread = AOCL_gettid();
