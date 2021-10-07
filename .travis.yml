@@ -48,6 +48,13 @@ matrix:
       CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
       PACKAGES="gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
+  # Apple M1 (firestorm) build and fast testsuite (qemu)
+  - os: linux
+    compiler: aarch64-linux-gnu-gcc
+    env: OOT=0 TEST=FAST SDE=0 THR="none" CONF="firestorm" \
+      CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ \
+      PACKAGES="gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
+      TESTSUITE_WRAPPER="qemu-aarch64 -L /usr/aarch64-linux-gnu/"
   # armsve build and fast testsuite (qemu)
   - os: linux
     compiler: aarch64-linux-gnu-gcc-10

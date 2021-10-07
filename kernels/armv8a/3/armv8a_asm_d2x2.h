@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2021, The University of Tokyo
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -30,32 +31,25 @@
    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+
 */
 
-PACKM_KER_PROT( float,    s, packm_armv8a_int_8xk )
-PACKM_KER_PROT( float,    s, packm_armv8a_int_12xk )
-PACKM_KER_PROT( double,   d, packm_armv8a_int_6xk )
-PACKM_KER_PROT( double,   d, packm_armv8a_int_8xk )
+/* C     A   B
+ * || <- | * --
+ * ||    |
+ *
+ * or:
+ * C     B * A
+ * -- <- |   --
+ * --    |
+ */
+#define DGEMM_2X2_NANOKERNEL(C0,C1,A,B) \
+" fmla  v"#C0".2d, v"#A".2d, v"#B".d[0] \n\t" \
+" fmla  v"#C1".2d, v"#A".2d, v"#B".d[1] \n\t"
 
-GEMM_UKR_PROT( float,    s, gemm_armv8a_asm_8x12 )
-GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8 )
-// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_6x8r )
-// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_8x4 )
-// GEMM_UKR_PROT( double,   d, gemm_armv8a_asm_4x4 )
-
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x8n )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x8m )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_6x8n )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_6x8m )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_4x8n )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_4x8m )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_asm_8x4m )
-
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_2x8 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_int_3x4 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_3x4 )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rd_armv8a_asm_6x3 )
-
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_6x4mn )
-GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armv8a_int_3x8mn )
+#define SGEMM_4X4_NANOKERNEL(C0,C1,C2,C3,A,B) \
+" fmla  v"#C0".4s, v"#A".4s, v"#B".s[0] \n\t" \
+" fmla  v"#C1".4s, v"#A".4s, v"#B".s[1] \n\t" \
+" fmla  v"#C2".4s, v"#A".4s, v"#B".s[2] \n\t" \
+" fmla  v"#C3".4s, v"#A".4s, v"#B".s[3] \n\t"
 
