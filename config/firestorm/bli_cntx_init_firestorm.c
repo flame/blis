@@ -50,7 +50,7 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	(
 	  2,
 	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armv8a_asm_8x12, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8r, TRUE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armv8a_asm_6x8,  FALSE,
 	  cntx
 	);
 
