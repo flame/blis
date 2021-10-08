@@ -231,19 +231,26 @@ MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
 " b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t"
+" fmov            d29, #0.0                       \n\t"
+" fcmp            d31, #0.0                       \n\t" // Whether Imag(beta) == 0.
+" fccmp           d30, d29, 0, eq                 \n\t" // Whether Real(beta) == 0.
+" b.eq            ZERO_BETA_C_0_1_2_3             \n\t"
 GEMM_CCMPLX_LOAD_COL2_C(z12,z13,z14,z15,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z16,z17,z18,z19,p0,x9,%4)
 GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
+" ZERO_BETA_C_0_1_2_3:                            \n\t"
 GEMM_CCMPLX_STORE_COL2_C(z20,z21,z22,z23,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z24,z25,z26,z27,p0,%2,%4)
 "                                                 \n\t"
+" b.eq            ZERO_BETA_C_4_5_6_7_8_9         \n\t"
 GEMM_CCMPLX_LOAD_COL2_C(z12,z13,z14,z15,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z16,z17,z18,z19,p0,x9,%4)
 GEMM_CCMPLX_LOAD_COL2_C(z20,z21,z22,z23,p0,x9,%4)
 GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
 GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
+" ZERO_BETA_C_4_5_6_7_8_9:                        \n\t"
 GEMM_CCMPLX_STORE_COL2_C(z0 ,z1 ,z2 ,z3 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z4 ,z5 ,z6 ,z7 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
@@ -252,19 +259,26 @@ GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
 " WRITE_MEM_G:                                    \n\t"
 " add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
 " index           z28.d, xzr, %3                  \n\t" //  s.t. 2*sizeof(double) = 2*8 = 16.
+" fmov            d29, #0.0                       \n\t"
+" fcmp            d31, #0.0                       \n\t" // Whether Imag(beta) == 0.
+" fccmp           d30, d29, 0, eq                 \n\t" // Whether Real(beta) == 0.
+" b.eq            ZERO_BETA_G_0_1_2_3             \n\t"
 GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
 GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
+" ZERO_BETA_G_0_1_2_3:                            \n\t"
 GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
 "                                                 \n\t"
+" b.eq            ZERO_BETA_G_4_5_6_7_8_9         \n\t"
 GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
 GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
 GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
 GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
 GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
+" ZERO_BETA_G_4_5_6_7_8_9:                        \n\t"
 GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
 GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
