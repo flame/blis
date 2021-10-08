@@ -231,7 +231,7 @@ MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
 " b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t"
-" fmov            s29, #0.0                       \n\t"
+" fmov            s29, wzr                        \n\t"
 " fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
 " fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
 " b.eq            ZERO_BETA_C_0_1_2_3             \n\t"
@@ -260,7 +260,7 @@ GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
 " add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
 " mov             x3, %3                          \n\t" //  s.t. 2*sizeof(float) = 2*4 = 8.
 " index           z28.s, wzr, w3                  \n\t"
-" fmov            s29, #0.0                       \n\t"
+" fmov            s29, wzr                        \n\t"
 " fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
 " fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
 " b.eq            ZERO_BETA_G_0_1_2_3             \n\t"
