@@ -56,6 +56,6 @@
 // When running HPL with pure MPI without DGEMM threading (Single-threaded
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0
-#define BLIS_ENABLE_FAST_MATH
+//#define BLIS_ENABLE_FAST_MATH
 
 #endif
