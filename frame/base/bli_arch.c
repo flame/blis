@@ -125,7 +125,7 @@ void bli_arch_set_id( void )
 
 		// Architecture families.
 		#if defined BLIS_FAMILY_INTEL64      || \
-		    defined BLIS_FAMILY_AMDEPYC      || \
+		    defined BLIS_FAMILY_AMDZEN       || \
 			defined BLIS_FAMILY_AMD64_LEGACY || \
 		    defined BLIS_FAMILY_X86_64       || \
 		    defined BLIS_FAMILY_ARM64        || \

@@ -136,8 +136,8 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_INTEL64
 #include "bli_family_intel64.h"
 #endif
-#ifdef BLIS_FAMILY_AMDEPYC
-#include "bli_family_amdepyc.h"
+#ifdef BLIS_FAMILY_AMDZEN
+#include "bli_family_amdzen.h"
 #endif
 #ifdef BLIS_FAMILY_AMD64_LEGACY
 #include "bli_family_amd64_legacy.h"

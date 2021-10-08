@@ -4,7 +4,6 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2014, The University of Texas at Austin
 #  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -36,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := amdepyc
+THIS_CONFIG    := amdzen
 
 # For architecture independent files we still need to define
 # the required flags

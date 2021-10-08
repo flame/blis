@@ -4,7 +4,6 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -33,8 +32,8 @@
 
 */
 
-#ifndef BLIS_FAMILY_AMD64_H
-#define BLIS_FAMILY_AMD64_H
+#ifndef BLIS_FAMILY_AMDZEN_H
+#define BLIS_FAMILY_AMDZEN_H
 
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
@@ -60,7 +59,7 @@
 // BLIS), defining this macro as 1 yields better performance.
 #define AOCL_BLIS_MULTIINSTANCE   0
 
-#define BLIS_ENABLE_FAST_MATH
+//#define BLIS_ENABLE_FAST_MATH
 
 #endif
 

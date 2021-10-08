@@ -411,17 +411,9 @@ BASE_LIB_PATH      := $(LIB_PATH)
 
 # The base name of the BLIS library that we will build.
 ifeq ($(THREADING_MODEL),off)
-ifeq ($(MK_BLAS_INT_TYPE_SIZE), 64)
-LIBBLIS            := libblis-ilp64
+LIBBLIS            := libblis
 else
-LIBBLIS            := libblis-lp64
-endif
-else
-ifeq ($(MK_BLAS_INT_TYPE_SIZE), 64)
-LIBBLIS            := libblis-mt-ilp64
-else
-LIBBLIS            := libblis-mt-lp64
-endif
+LIBBLIS            := libblis-mt
 endif
 
 # The shared (dynamic) library file suffix is different for Linux and OS X.
