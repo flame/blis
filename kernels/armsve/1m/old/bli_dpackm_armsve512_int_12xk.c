@@ -36,11 +36,8 @@
 #include "blis.h"
 #include <stdio.h>
 
-#ifdef __ARM_FEATURE_SVE
+#if (defined(BLIS_FAMILY_ARMSVE) && !defined(BLIS_FAMILY_A64FX))
 #include <arm_sve.h>
-#else
-#error "No Arm SVE intrinsics support in compiler"
-#endif // __ARM_FEATURE_SVE
 
 // assumption:
 //   SVE vector length = 512 bits.
@@ -48,7 +45,7 @@
 //   2-rows -> 3 vectors packing and use predicator only in odd num of rows to be packed.
 //   prefetching is needed.
 
-void bli_dpackm_armsve512_asm_12xk
+void bli_dpackm_armsve512_int_12xk
      (
        conj_t           conja,
        pack_t           schema,
@@ -357,3 +354,5 @@ void bli_dpackm_armsve512_asm_12xk
         );
     }
 }
+
+#endif // __has_include(<arm_sve.h>)

@@ -35,17 +35,14 @@
 
 #include "blis.h"
 
-#ifdef __ARM_FEATURE_SVE
+#if (defined(BLIS_FAMILY_ARMSVE) && !defined(BLIS_FAMILY_A64FX))
 #include <arm_sve.h>
-#else
-#error "No Arm SVE intrinsics support in compiler"
-#endif // __ARM_FEATURE_SVE
 
 // assumption:
 //   SVE vector length = 256 bits.
 //
 
-void bli_dpackm_armsve256_asm_8xk
+void bli_dpackm_armsve256_int_8xk
      (
        conj_t           conja,
        pack_t           schema,
@@ -230,3 +227,5 @@ void bli_dpackm_armsve256_asm_8xk
         );
     }
 }
+
+#endif // __has_include(<arm_sve.h>)
