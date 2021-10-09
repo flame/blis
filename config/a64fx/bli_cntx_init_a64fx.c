@@ -49,9 +49,11 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	// their storage preferences.
 	bli_cntx_set_l3_nat_ukrs
 	(
-	  2,
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  4,
+	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed, FALSE,
+	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed, FALSE,
 	  cntx
 	);
 
@@ -67,11 +69,11 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    10,    10,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   256,   128,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  2048,  2048,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 23040, 26880,    -1,    -1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,    16,     8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    10,    10,    10,    10 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   256,   128,   192,    96 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  2048,  2048,  1536,  1536 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 23040, 26880, 11520, 11760 );
 
 	// Update the context with the current architecture's register and cache
 	// blocksizes (and multiples) for native execution.
