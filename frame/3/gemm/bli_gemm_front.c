@@ -173,7 +173,24 @@ void bli_gemm_front
 		// or the inlined code above.
 		bli_obj_swap_pack_schemas( &a_local, &b_local );
 	}
-
+	
+	dim_t m_dim_local = bli_obj_length( &c_local );
+	dim_t n_dim_local = bli_obj_width( &c_local );
+	dim_t k_dim_local = bli_obj_width( &a_local );
+#ifdef BLIS_CONFIG_EPYC
+	// Regression observed in sgemm native path in cases where m >= 4 * n 
+	// after BLIS_THREAD_RATIO_M updated from 2 to 1 as part of commit 
+	// 11dfc176a3c422729f453f6c23204cf023e9954d. Temporary workaround for
+	// the issue.
+	if( bli_obj_is_float( &c_local ) &&
+	    ( n_dim_local >= 1024 ) &&
+	    ( k_dim_local >= 1024 ) &&
+	    ( m_dim_local >= ( 4 * n_dim_local ) ) )
+	{
+		m_dim_local *= 2;
+	}
+#endif
+	
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -181,9 +198,9 @@ void bli_gemm_front
 	(
 	  BLIS_GEMM,
 	  BLIS_LEFT, // ignored for gemm/hemm/symm
-	  bli_obj_length( &c_local ),
-	  bli_obj_width( &c_local ),
-	  bli_obj_width( &a_local ),
+	  m_dim_local,
+	  n_dim_local,
+	  k_dim_local,
 	  rntm
 	);
 
