@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
     PUBLIC
@@ -11,7 +11,7 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_cntl.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_cntx.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_const.c
-    #${CMAKE_CURRENT_SOURCE_DIR}/bli_cpuid.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_cpuid.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_env.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_error.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_func.c

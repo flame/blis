@@ -17,7 +17,7 @@ set(AOCL_BLIS_ZEN TRUE)
 set (PYTHON_EXE "python")
 
 if ("${AOCL_BLIS_FAMILY}" STREQUAL "")
-  message(FATAL_ERROR "Machine configuration missing! Select one of zen, zen2, zen3 or amd64")
+  message(FATAL_ERROR "Machine configuration missing! Select one of zen, zen2, zen3 or amdzen")
 endif ()
 
 if (${AOCL_BLIS_FAMILY} STREQUAL "auto")
@@ -50,7 +50,7 @@ elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen3")
   add_definitions(-DBLIS_KERNELS_ZEN2)
   add_definitions(-DBLIS_KERNELS_ZEN)
   add_definitions(-DBLIS_KERNELS_HASWELL)
-elseif (${AOCL_BLIS_FAMILY} STREQUAL "amd64")
+elseif (${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
   set(AOCL_BLIS_ZEN FALSE)
   add_definitions(-DBLIS_FAMILY_AMDZEN)
   add_definitions(-DBLIS_CONFIG_ZEN3)
@@ -63,7 +63,7 @@ elseif (${AOCL_BLIS_FAMILY} STREQUAL "amd64")
   add_definitions(-DBLIS_KERNELS_ZEN)
   add_definitions(-DBLIS_KERNELS_GENERIC)
 else ()
-  message(FATAL_ERROR "Wrong machine configuration. Select one of zen, zen2, zen3 or amd64")
+  message(FATAL_ERROR "Wrong machine configuration. Select one of zen, zen2, zen3 or amdzen")
 endif ()
 
 set(TARGET_ARCH ${AOCL_BLIS_FAMILY})
@@ -97,6 +97,17 @@ option (ENABLE_COMPLEX_RETURN_INTEL "Enable complex_return_intel" OFF)
 option (ENABLE_TRSM_PREINVERSION "Enable TRSM preinversion" ON)
 option (ENABLE_AOCL_DYNAMIC "Enable Dynamic Multi-threading" OFF)
 
+if (${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
+  set(REF_KERNEL_MIRRORING_PY "${CMAKE_SOURCE_DIR}/build/blis_ref_kernel_mirror.py")
+  message("ref_kernel mirroring for fat binary")
+  # Run python script to find the architecture family name
+  execute_process(
+        COMMAND ${PYTHON_EXE} ${REF_KERNEL_MIRRORING_PY} ${CMAKE_BINARY_DIR}
+        RESULT_VARIABLE CMD_RESULT
+        OUTPUT_VARIABLE CMD_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+  message( STATUS "Ref Kernel Mirroring :" ${CMD_OUTPUT})
+endif()
 if(ENABLE_NO_UNDERSCORE_API)
     add_definitions(-DBLIS_ENABLE_NO_UNDERSCORE_API)
 endif()
@@ -305,8 +316,10 @@ add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 
 #add_definitions(-DBLIS_OS_WINDOWS)
 add_definitions(-D_MSC_VER)
+if (${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
+else()
 add_definitions(-DBLIS_CNAME=${TARGET_ARCH})
-
+endif()
 # Generate the bli_config.h header file
 configure_file (build/bli_win_config.h.in ${CMAKE_SOURCE_DIR}/bli_config.h @ONLY)
 
@@ -380,6 +393,12 @@ include_directories(${CMAKE_SOURCE_DIR}/config/generic)
 include_directories(${CMAKE_SOURCE_DIR}/config/zen)
 include_directories(${CMAKE_SOURCE_DIR}/config/zen2)
 include_directories(${CMAKE_SOURCE_DIR}/config/zen3)
+if(${AOCL_BLIS_FAMILY} STREQUAL "amdzen")
+    include_directories(${CMAKE_BINARY_DIR}/ref_kernels/generic)
+    include_directories(${CMAKE_BINARY_DIR}/ref_kernels/zen)
+    include_directories(${CMAKE_BINARY_DIR}/ref_kernels/zen2)
+    include_directories(${CMAKE_BINARY_DIR}/ref_kernels/zen3)
+endif()
 include_directories(${CMAKE_SOURCE_DIR}/ref_kernels)
 include_directories(${CMAKE_SOURCE_DIR}/kernels)
 include_directories(${CMAKE_SOURCE_DIR}/kernels/haswell)
@@ -409,15 +428,13 @@ elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen2")
     " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen2/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/"
-elseif (${AOCL_BLIS_FAMILY} STREQUAL "amd64")
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/amd64/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/bulldozer/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/excavator/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/amdzen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen2/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/config/zen3/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/config/generic/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/piledriver/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/config/steamroller/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/piledriver/"
-    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/bulldozer/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen/"
+    " ${CMAKE_CURRENT_SOURCE_DIR}/kernels/haswell/"
 endif ()
     " ${CMAKE_CURRENT_SOURCE_DIR}/frame/0/"
     " ${CMAKE_CURRENT_SOURCE_DIR}/frame/0/copysc/"
