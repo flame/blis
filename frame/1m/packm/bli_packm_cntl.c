@@ -70,6 +70,12 @@ cntl_t* bli_packm_cntl_create_node
 	params->rev_iter_if_lower = rev_iter_if_lower;
 	params->pack_schema       = pack_schema;
 	params->pack_buf_type     = pack_buf_type;
+	#ifdef BLIS_ENABLE_DMA
+	params->a_dma             = NULL;
+	params->p_dma             = NULL;
+	params->mem_p_dma         = NULL;
+	params->event_dma         = NULL;
+	#endif  // BLIS_ENABLE_DMA
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_packm_cntl_create_node(): " );

@@ -174,5 +174,17 @@ void bli_l3_packm
 
 	// Barrier so that packing is done before computation.
 	bli_thread_barrier( thread );
+
+#ifdef BLIS_ENABLE_DMA
+	// After packing, recycle the DMA buffer to prefetch next block
+	obj_t*       a_dma     = bli_cntl_packm_params_a_dma( cntl );
+	obj_t*       p_dma     = bli_cntl_packm_params_p_dma( cntl );
+	mem_t*       mem_p_dma = bli_cntl_packm_params_mem_p_dma( cntl );
+	dma_event_t* event_dma = bli_cntl_packm_params_event_dma( cntl );
+	if ( a_dma && p_dma && mem_p_dma )
+	{
+		bli_dma_get( a_dma, p_dma, mem_p_dma, event_dma, rntm, thread );
+	}
+#endif // BLIS_ENABLE_DMA
 }
 

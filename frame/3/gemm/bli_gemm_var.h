@@ -58,6 +58,11 @@ GENPROT( gemm_blk_var3 )
 GENPROT( gemm_packa )
 GENPROT( gemm_packb )
 
+#ifdef BLIS_ENABLE_DMA
+GENPROT( gemm_blk_var1_dma )
+GENPROT( gemm_blk_var3_dma )
+#endif // BLIS_ENABLE_DMA
+
 GENPROT( gemm_ker_var1 )
 
 GENPROT( gemm_ker_var2 )
