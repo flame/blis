@@ -373,7 +373,15 @@ void bli_pool_grow
 	{
 		// To prevent this from happening often, we double the current
 		// length of the block_ptrs array.
-		const siz_t block_ptrs_len_new = 2 * block_ptrs_len_cur;
+		// Sanity: make sure that the block_ptrs_len_new will be at least
+		// num_blocks_new, in case doubling the block_ptrs_len_cur is not enough.
+		// Example 1:
+		// - block_ptrs_len_cur == num_blocks_cur == 0 and num_blocks_add = 1
+		// - So doubling: 2 * block_ptrs_len_cur = 0, whereas 1 is expected
+		// Example 2:
+		// - block_ptrs_len_cur == num_blocks_cur == 10 and num_blocks_add = 30
+		// - So doubling: 2 * block_ptrs_len_cur = 20, whereas 40 is expected
+		const siz_t block_ptrs_len_new = bli_max( (2 * block_ptrs_len_cur), num_blocks_new );
 
 		#ifdef BLIS_ENABLE_MEM_TRACING
 		printf( "bli_pool_grow(): growing block_ptrs_len (%d -> %d): ",
