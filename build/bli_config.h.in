@@ -85,6 +85,10 @@
 #define BLIS_DISABLE_MEM_TRACING
 #endif
 
+#if @enable_dma@
+#define BLIS_ENABLE_DMA
+#endif
+
 #if @int_type_size@ == 64
 #define BLIS_INT_TYPE_SIZE 64
 #elif @int_type_size@ == 32

@@ -112,6 +112,10 @@ static char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 	[-BLIS_NC_MAX_NONMULTIPLE_OF_NR]             = "Maximum NC is non-multiple of NR for one or more datatypes.",
 	[-BLIS_KC_DEF_NONMULTIPLE_OF_KR]             = "Default KC is non-multiple of KR for one or more datatypes.",
 	[-BLIS_KC_MAX_NONMULTIPLE_OF_KR]             = "Maximum KC is non-multiple of KR for one or more datatypes.",
+
+	[-BLIS_DMA_GET_FAILURE]                      = "DMA-get failure.",
+	[-BLIS_DMA_PUT_FAILURE]                      = "DMA-put failure.",
+	[-BLIS_DMA_WAIT_FAILURE]                     = "DMA-wait failure.",
 };
 
 // -----------------------------------------------------------------------------

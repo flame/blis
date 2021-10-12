@@ -74,6 +74,7 @@ BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_slab( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_thread_part_jrir_rr( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_memkind( void );
 BLIS_EXPORT_BLIS gint_t bli_info_get_enable_sandbox( void );
+BLIS_EXPORT_BLIS gint_t bli_info_get_enable_dma( void );
 
 
 // -- Kernel implementation-related --------------------------------------------

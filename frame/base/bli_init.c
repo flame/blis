@@ -84,6 +84,14 @@ void bli_finalize_once( void )
 
 void bli_init_apis( void )
 {
+#ifdef BLIS_ENABLE_DMA
+	// Since a DMA system may want to change and initialize the default memory
+	// allocator (SMEM), we call bli_dma_backend_init() first, to be sure
+	// that the SMEM allocator is ready before any later internal or sba/pba
+	// allocation in other init steps.
+	bli_dma_backend_init();
+#endif // BLIS_ENABLE_DMA
+
 	// Initialize various sub-APIs.
 	bli_gks_init();
 	bli_ind_init();
@@ -104,11 +112,16 @@ void bli_init_apis( void )
 void bli_finalize_apis( void )
 {
 	// Finalize various sub-APIs.
+
 	bli_memsys_finalize();
 	bli_pack_finalize();
 	bli_thread_finalize();
 	bli_ind_finalize();
 	bli_gks_finalize();
+
+#ifdef BLIS_ENABLE_DMA
+	bli_dma_backend_finalize();
+#endif // BLIS_ENABLE_DMA
 
 	// Reset the control variable that will allow (re-)initialization.
 	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the

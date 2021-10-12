@@ -91,6 +91,11 @@ extern "C" {
 #include "bli_extern_defs.h"
 
 
+// -- DMA definitions --
+#ifdef BLIS_ENABLE_DMA
+#include "bli_dma.h"
+#endif // BLIS_ENABLE_DMA
+
 // -- BLIS architecture/kernel definitions --
 
 #include "bli_l1v_ker_prot.h"
