@@ -54,6 +54,11 @@ void bli_pool_init
 	// Make sure that block_ptrs_len is at least num_blocks.
 	block_ptrs_len = bli_max( block_ptrs_len, num_blocks );
 
+	// Handle the case where block_ptrs_len is zero, we explicitly set it to 1,
+	// to avoid any malloc() with zero size, whose behavior is not fixed, and
+	// also to prevent from falling into any further memory corruption bug.
+	block_ptrs_len = ( block_ptrs_len == 0 ) ? 1 : block_ptrs_len;
+
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_pool_init(): allocating block_ptrs (length %d): ",
 	        ( int )block_ptrs_len );
