@@ -155,7 +155,7 @@ CFLAGS         += -I$(TEST_SRC_PATH)
 #
 
 # Define the operations we will test.
-TEST_OPS := dotv axpyv scalv \
+TEST_OPS := dotv axpyv \
             gemv ger hemv her her2 trmv trsv \
             gemm hemm herk her2k trmm trsm \
 

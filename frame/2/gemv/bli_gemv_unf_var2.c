@@ -394,7 +394,7 @@ void bli_zgemv_unf_var2
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is hadled by scalv internally */
-    bli_zscalv_zen_int10
+/*    bli_zscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
       n_elem,
@@ -402,7 +402,16 @@ void bli_zgemv_unf_var2
       y,
       incy,
       cntx
-    );
+    );*/
+    bli_zscalv_ex
+	    (
+	     BLIS_NO_CONJUGATE,
+	     n_elem,
+	     beta,
+	     y, incy,
+	     cntx,
+	     NULL
+	    );
 
     if( bli_zeq0( *alpha ) )
     {
@@ -498,7 +507,7 @@ void bli_cgemv_unf_var2
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is hadled by scalv internally */
-    bli_cscalv_zen_int10
+    /*bli_cscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
       n_elem,
@@ -506,7 +515,18 @@ void bli_cgemv_unf_var2
       y,
       incy,
       cntx
-    );
+    );*/
+    bli_cscalv_ex
+	    (
+	     BLIS_NO_CONJUGATE,
+	     n_elem,
+	     beta,
+	     y, incy,
+	     cntx,
+	     NULL
+	    );
+
+
 
     if( bli_ceq0( *alpha ) )
     {

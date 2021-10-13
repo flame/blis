@@ -151,8 +151,10 @@ GENTFUNCR2( dcomplex, double, z, d, blasname, blisname )
 // -- Extended two-operand macro (used only for scal) --
 
 
-#define INSERT_GENTFUNCSCAL_BLAS_CsZd( blasname, blisname ) \
+#define INSERT_GENTFUNCSCAL_BLAS_CZ( blasname, blisname ) \
 \
+GENTFUNCSCAL( scomplex, scomplex, c,  , blasname, blisname ) \
+GENTFUNCSCAL( dcomplex, dcomplex, z,  , blasname, blisname ) \
 GENTFUNCSCAL( scomplex, float,    c, s, blasname, blisname ) \
 GENTFUNCSCAL( dcomplex, double,   z, d, blasname, blisname )
 
