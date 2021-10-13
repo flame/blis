@@ -112,52 +112,6 @@ siz_t bli_packm_init
 		return 0;
 	}
 
-#if 0
-	pack_t schema;
-
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	{
-		// We now ignore the pack_schema field in the control tree and
-		// extract the schema from the context, depending on whether we are
-		// preparing to pack a block of A or panel of B. For A and B, we must
-		// obtain the schema from the context since the induced methods reuse
-		// the same control trees used by native execution, and those induced
-		// methods specify the schema used by the current execution phase
-		// within the context (whereas the control tree does not change).
-
-		if ( pack_buf_type == BLIS_BUFFER_FOR_A_BLOCK )
-		{
-			schema = bli_cntx_schema_a_block( cntx );
-		}
-		else if ( pack_buf_type == BLIS_BUFFER_FOR_B_PANEL )
-		{
-			schema = bli_cntx_schema_b_panel( cntx );
-		}
-		else // if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
-		{
-			schema = bli_cntl_packm_params_pack_schema( cntl );
-		}
-	}
-	else // ( bli_cntx_method( cntx ) == BLIS_NAT )
-	{
-		// For native execution, we obtain the schema from the control tree
-		// node. (Notice that it doesn't matter if the pack_buf_type is for
-		// A or B.)
-		schema = bli_cntl_packm_params_pack_schema( cntl );
-	}
-	// This is no longer needed now that we branch between native and
-	// non-native cases above.
-#if 0
-	if ( pack_buf_type == BLIS_BUFFER_FOR_C_PANEL )
-	{
-		// If we get a request to pack C for some reason, it is likely
-		// not part of an induced method, and so it would be safe (and
-		// necessary) to read the pack schema from the control tree.
-		schema = bli_cntl_packm_params_pack_schema( cntl );
-	}
-#endif
-#endif
-
 	// Prepare a few other variables based on properties of the control
 	// tree.
 

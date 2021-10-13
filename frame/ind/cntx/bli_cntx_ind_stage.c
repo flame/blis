@@ -74,18 +74,18 @@ void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx )
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 	else if ( stage == 1 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else // if ( stage == 2 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RPI, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RPI, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RPI, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RPI, cntx );
 	}
 }
 
@@ -102,23 +102,23 @@ void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx )
 	// Set the pack_t schemas as a function of the stage of execution.
 	if ( stage == 0 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 	else if ( stage == 1 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else if ( stage == 2 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_RO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_IO, cntx );
 	}
 	else // if ( stage == 3 )
 	{
-		bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
-		bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
+		//bli_cntx_set_schema_a_block( BLIS_PACKED_ROW_PANELS_IO, cntx );
+		//bli_cntx_set_schema_b_panel( BLIS_PACKED_COL_PANELS_RO, cntx );
 	}
 }
 

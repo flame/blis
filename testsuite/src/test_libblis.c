@@ -1790,8 +1790,8 @@ void libblis_test_op_driver
 		}
 	}
 
-	// Enumerate all combinations of datatype domains requested, but only
-	// for the gemm operation.
+	// Enumerate all combinations of datatypes requested, but only for the
+	// gemm operation.
 
 	if      ( !mixed_domain &&  mixed_precision && op->opid == BLIS_GEMM )
 	{

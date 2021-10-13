@@ -63,12 +63,11 @@ void bli_dpackm_armsve512_asm_16xk
     const bool    unitk = bli_deq1( *kappa );
 
 #ifdef _A64FX
-    if ( bli_cntx_schema_a_block(cntx) != bli_cntx_schema_b_panel(cntx) )
     {
-        // A twisted way to infer whether A or B is being packed.
-        if ( schema == bli_cntx_schema_a_block(cntx) )
+        // Infer whether A or B is being packed.
+        if ( schema == BLIS_PACKED_ROWS )
             p = ( (uint64_t)0x1 << 56 ) | (uint64_t)p;
-        if ( schema == bli_cntx_schema_b_panel(cntx) )
+        if ( schema == BLIS_PACKED_COLUMNS )
             p = ( (uint64_t)0x2 << 56 ) | (uint64_t)p;
     }
 #endif
