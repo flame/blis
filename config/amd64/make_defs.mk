@@ -42,8 +42,26 @@ THIS_CONFIG    := amd64
 # --- Determine the C compiler and related flags ---
 #
 
-# These setting should come from makefiles for individial configuration
-# included in this bundle.
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    :=
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
+
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O2
+endif
+
+# Setting for reference and optimized kernels are taken from
+# Individual configuration makefiles in this family.
 
 # Store all of the variables here to new variables containing the
 # configuration name.
