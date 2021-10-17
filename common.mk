@@ -101,6 +101,7 @@ get-noopt-cflags-for     = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
+                                   $(CSANITIZEFLAGS) \
                                    $(CINCFLAGS) $(VERS_DEF) \
                             )
 
@@ -112,6 +113,7 @@ get-noopt-cxxflags-for   = $(strip $(CFLAGS_PRESET) \
                                    $(call load-var-for,CXXLANGFLAGS,$(1)) \
                                    $(call load-var-for,CPPROCFLAGS,$(1)) \
                                    $(CTHREADFLAGS) \
+                                   $(CSANITIZEFLAGS) \
                                    $(CINCFLAGS) $(VERS_DEF) \
                             )
 
@@ -512,6 +514,17 @@ endif
 ifeq ($(DEBUG_TYPE),sde)
 LDFLAGS    := $(filter-out $(LIBMEMKIND),$(LDFLAGS))
 endif
+
+ifeq ($(DEBUG_TYPE),address)
+CSANITIZEFLAGS := -fsanitize=address
+LDFLAGS        += -fsanitize=address -static-libasan
+endif
+
+ifeq ($(DEBUG_TYPE),thread)
+CSANITIZEFLAGS := -fsanitize=thread
+LDFLAGS        += -fsanitize=thread -static-libasan
+endif
+
 
 # Specify the shared library's 'soname' field.
 # NOTE: The flag for creating shared objects is different for Linux and OS X.

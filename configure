@@ -132,6 +132,9 @@ print_usage()
 	echo "                 kept in the framework, otherwise optimization is"
 	echo "                 turned off."
 	echo " "
+	echo "                 If DEBUG is 'address', then -fsanitize=address is added."
+	echo "                 If DEBUG is 'thread', then -fsanitize=thread is added."
+	echo " "
 	echo "   --disable-static, --enable-static"
 	echo " "
 	echo "                 Disable (enabled by default) building BLIS as a static"
@@ -2926,6 +2929,12 @@ main()
 		elif [ "x${debug_type}" = "xsde" ]; then
 			debug_type='sde'
 			echo "${script_name}: enabling SDE processor emulation."
+		elif [ "x${debug_type}" = "xaddress" ]; then
+			debug_type='address'
+			echo "${script_name}: enabling debug symbols; -fsanitize=address."
+		elif [ "x${debug_type}" = "xthread" ]; then
+			debug_type='thread'
+			echo "${script_name}: enabling debug symbols; -fsanitize=thread."
 		else
 			debug_type='noopt'
 			echo "${script_name}: enabling debug symbols; optimizations disabled."
