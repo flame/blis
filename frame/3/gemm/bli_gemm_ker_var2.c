@@ -312,55 +312,151 @@ void PASTEMAC(ch,varname) \
 	dim_t ir_nt  = bli_thread_n_way( caucus ); \
 	dim_t ir_tid = bli_thread_work_id( caucus ); \
 \
-	dim_t jr_start, jr_end; \
-	dim_t ir_start, ir_end; \
-	dim_t jr_inc,   ir_inc; \
+	/* Mis-balancing detection: if n_iter (or m_iter) is not multiple of
+	  jr_nt (or ir_nt), then we collapse the two JR/IR loops and dispatch
+	  work on jr_nt * ir_nt threads. */ \
+	const bool misbalancing = ((n_iter % jr_nt) != 0) || ((m_iter % ir_nt) != 0); \
 \
-	/* Determine the thread range and increment for the 2nd and 1st loops.
-	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
-	   slab or round-robin partitioning was requested at configure-time. */ \
-	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
-	bli_thread_range_jrir( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
-\
-	/* Loop over the n dimension (NR columns at a time). */ \
-	for ( j = jr_start; j < jr_end; j += jr_inc ) \
+	if ( !misbalancing ) \
 	{ \
-		ctype* restrict a1; \
-		ctype* restrict c11; \
-		ctype* restrict b2; \
+		/* Use traditional two loops */ \
+		dim_t jr_start, jr_end; \
+		dim_t ir_start, ir_end; \
+		dim_t jr_inc,   ir_inc; \
 \
-		b1 = b_cast + j * cstep_b; \
-		c1 = c_cast + j * cstep_c; \
+		/* Determine the thread range and increment for the 2nd and 1st loops.
+		   NOTE: The definition of bli_thread_range_jrir() will depend on whether
+		   slab or round-robin partitioning was requested at configure-time. */ \
+		bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
+		bli_thread_range_jrir( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
-		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
-\
-		/* Initialize our next panel of B to be the current panel of B. */ \
-		b2 = b1; \
-\
-		/* Loop over the m dimension (MR rows at a time). */ \
-		for ( i = ir_start; i < ir_end; i += ir_inc ) \
+		/* Loop over the n dimension (NR columns at a time). */ \
+		for ( j = jr_start; j < jr_end; j += jr_inc ) \
 		{ \
-			ctype* restrict a2; \
+			ctype* restrict a1; \
+			ctype* restrict c11; \
+			ctype* restrict b2; \
 \
-			a1  = a_cast + i * rstep_a; \
-			c11 = c1     + i * rstep_c; \
+			b1 = b_cast + j * cstep_b; \
+			c1 = c_cast + j * cstep_c; \
 \
-			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
+			n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
-			/* Compute the addresses of the next panels of A and B. */ \
-			a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
-			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
+			/* Initialize our next panel of B to be the current panel of B. */ \
+			b2 = b1; \
+\
+			/* Loop over the m dimension (MR rows at a time). */ \
+			for ( i = ir_start; i < ir_end; i += ir_inc ) \
 			{ \
-				a2 = a_cast; \
-				b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
-				if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
-					b2 = b_cast; \
+				ctype* restrict a2; \
+\
+				a1  = a_cast + i * rstep_a; \
+				c11 = c1     + i * rstep_c; \
+\
+				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
+\
+				/* Compute the addresses of the next panels of A and B. */ \
+				a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc ); \
+				if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) ) \
+				{ \
+					a2 = a_cast; \
+					b2 = bli_gemm_get_next_b_upanel( b1, cstep_b, jr_inc ); \
+					if ( bli_is_last_iter( j, jr_end, jr_tid, jr_nt ) ) \
+						b2 = b_cast; \
+				} \
+\
+				/* Save addresses of next panels of A and B to the auxinfo_t
+				   object. */ \
+				bli_auxinfo_set_next_a( a2, &aux ); \
+				bli_auxinfo_set_next_b( b2, &aux ); \
+\
+				/* Handle interior and edge cases separately. */ \
+				if ( m_cur == MR && n_cur == NR ) \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
+					( \
+					  k, \
+					  alpha_cast, \
+					  a1, \
+					  b1, \
+					  beta_cast, \
+					  c11, rs_c, cs_c, \
+					  &aux, \
+					  cntx  \
+					); \
+				} \
+				else \
+				{ \
+					/* Invoke the gemm micro-kernel. */ \
+					gemm_ukr \
+					( \
+					  k, \
+					  alpha_cast, \
+					  a1, \
+					  b1, \
+					  zero, \
+					  ct, rs_ct, cs_ct, \
+					  &aux, \
+					  cntx  \
+					); \
+\
+					/* Scale the bottom edge of C and add the result from above. */ \
+					PASTEMAC(ch,xpbys_mxn)( m_cur, n_cur, \
+					                        ct,  rs_ct, cs_ct, \
+					                        beta_cast, \
+					                        c11, rs_c,  cs_c ); \
+				} \
 			} \
+		} \
+	} \
+	else /* misbalancing == TRUE */ \
+	{ \
+		/* Fused number of threads in JR and IR loops */ \
+		dim_t jrir_nt = jr_nt * ir_nt; \
+\
+		/* My thread id in the fused thread-domain */ \
+		dim_t jrir_tid = ir_tid * jr_nt + jr_tid; \
+\
+		/* Build a temporary thrinfo_t for dispatching
+		   NOTE: Only n_way and work_id is needed for bli_thread_range_jrir() */ \
+		thrinfo_t jrir_tinfo; \
+		bli_thrinfo_init( &jrir_tinfo, NULL, 0, jrir_nt, jrir_tid, FALSE, BLIS_NO_PART, NULL ); \
+\
+		/* Dispatch (n_iter * m_iter) micro-tiles */ \
+		dim_t jrir_start, jrir_end; \
+		dim_t jrir_inc; \
+		bli_thread_range_jrir( &jrir_tinfo, (n_iter * m_iter), 1, FALSE, \
+		                       &jrir_start, &jrir_end, &jrir_inc ); \
+\
+		/* Loop over the fused JR/IR dimension. */ \
+		for ( dim_t ji = jrir_start; ji < jrir_end; ji += jrir_inc ) \
+		{ \
+			ctype* restrict a1; \
+			ctype* restrict c11; \
+\
+			/* Update current tile */ \
+			j = ji % n_iter; \
+			i = ji / n_iter; \
+			a1 = a_cast + i * rstep_a; \
+			b1 = b_cast + j * cstep_b; \
+\
+			/* Next tile and panels */ \
+			dim_t jnext = (ji + jrir_inc) % n_iter; \
+			dim_t inext = (ji + jrir_inc) / n_iter; \
+			ctype* restrict a2 = a_cast + inext * rstep_a; \
+			ctype* restrict b2 = b_cast + jnext * cstep_b; \
 \
 			/* Save addresses of next panels of A and B to the auxinfo_t
 			   object. */ \
 			bli_auxinfo_set_next_a( a2, &aux ); \
 			bli_auxinfo_set_next_b( b2, &aux ); \
+\
+			c1  = c_cast + j * cstep_c; \
+			c11 = c1     + i * rstep_c; \
+\
+			n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
+			m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
 			/* Handle interior and edge cases separately. */ \
 			if ( m_cur == MR && n_cur == NR ) \
@@ -400,7 +496,7 @@ void PASTEMAC(ch,varname) \
 				                        c11, rs_c,  cs_c ); \
 			} \
 		} \
-	} \
+	} /* misbalancing */ \
 \
 /*
 PASTEMAC(ch,fprintm)( stdout, "gemm_ker_var2: b1", k, NR, b1, NR, 1, "%4.1f", "" ); \
