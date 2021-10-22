@@ -320,9 +320,11 @@ void bli_pool_checkin_block
 	if ( bli_pblk_block_size( block ) != bli_pool_block_size( pool ) )
 	{
 		// Query the offset size of the pool.
+		// Note: what if the offset_size has been changed since the last time ?
 		const siz_t offset_size = bli_pool_offset_size( pool );
 
 		// Query the free() function pointer for the pool.
+		// Note: what if the free_fp has been changed since the last time ?
 		free_ft free_fp = bli_pool_free_fp( pool );
 
 		bli_pool_free_block( offset_size, free_fp, block );
@@ -591,6 +593,11 @@ void bli_pool_free_block
 	// Extract the pblk_t buffer, which is the aligned address returned from
 	// bli_fmalloc_align() when the block was allocated.
 	void* restrict buf = bli_pblk_buf( block );
+
+	// Sanity: if buf is NULL for any reason (e.g. block already checked out),
+	// then early return to avoid free-ing an invalid pointer after subtraction
+	// by (non-zero) offset_size.
+	if ( buf == NULL ) { return; }
 
 	// Undo the pointer advancement by offset_size bytes performed previously
 	// by bli_pool_alloc_block().
