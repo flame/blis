@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -146,15 +146,28 @@ void sswap_
         incy0 = ( inc_t )(*incy);
     }
 
-
-    /* Call BLIS kernel */
-    bli_sswapv_zen_int8
-    (
-        n0,
-        x0, incx0,
-        y0, incy0,
-        NULL
-    );
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+/* Call BLIS kernel */
+	    bli_sswapv_zen_int8
+		    (
+		     n0,
+		     x0, incx0,
+		     y0, incy0,
+		     NULL
+		    );
+    }
+    else{
+	    PASTEMAC2(s,swapv,BLIS_TAPI_EX_SUF) \
+		    ( \
+		      n0, \
+		      x0, incx0, \
+		      y0, incy0, \
+		      NULL, \
+		      NULL  \
+		    ); \
+    }
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();
@@ -224,13 +237,27 @@ void dswap_
 
 
     /* Call BLIS kernel */
-    bli_dswapv_zen_int8
-    (
-        n0,
-        x0, incx0,
-        y0, incy0,
-        NULL
-    );
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+	    bli_dswapv_zen_int8
+		    (
+		     n0,
+		     x0, incx0,
+		     y0, incy0,
+		     NULL
+		    );
+    }
+    else{
+	    PASTEMAC2(d,swapv,BLIS_TAPI_EX_SUF) \
+		    ( \
+		      n0, \
+		      x0, incx0, \
+		      y0, incy0, \
+		      NULL, \
+		      NULL  \
+		    ); \
+    }
 
     /* Finalize BLIS. */
 //    bli_finalize_auto();

@@ -293,8 +293,18 @@ void bli_dtrsv_unf_var2
     PASTECH(d,axpyf_ker_ft) kfp_af;
 
     /* Assign kernel function pointer and fusing factor. */
-    kfp_af = bli_daxpyf_zen_int_16x4;
-    b_fuse = 4;
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+	    kfp_af = bli_daxpyf_zen_int_16x4;
+	    b_fuse = 4;
+    }
+    else
+    {
+	    num_t dt = PASTEMAC(d,type);
+	    kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+    }
 
     /* We reduce all of the possible cases down to just lower/upper. */
     if      ( bli_is_upper( uploa_trans ) )
@@ -479,8 +489,21 @@ void bli_strsv_unf_var2
     PASTECH(s, axpyf_ker_ft) kfp_af;
 
     /* Assign function pointer and fusing factor. */
-    kfp_af = bli_saxpyf_zen_int_5;
-    b_fuse = 5;
+/*    kfp_af = bli_saxpyf_zen_int_5;
+    b_fuse = 5;*/
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+	    kfp_af = bli_saxpyf_zen_int_5;
+	    b_fuse = 5;
+    }
+    else
+    {
+
+	    num_t dt = PASTEMAC(s,type);
+	    kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+    }
 
     /* We reduce all of the possible cases down to just lower/upper. */
     if      ( bli_is_upper( uploa_trans ) )

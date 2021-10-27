@@ -595,35 +595,38 @@ void strsm_
 
     bli_obj_set_struc( struca, &ao );
 
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    /* bli_strsm_small is performing better existing native 
-     * implementations for [m,n]<=1000 for single thread.
-     * In case of multithread when [m,n]<=128 sinlge thread implemenation
-     * is doing better than native multithread */
-    bool nt = bli_thread_get_is_parallel();
-    if((nt==0 && m0<=1000 && n0<=1000) ||
-       (nt && (m0+n0)<320) )
-    {
-        err_t status;
-        status = bli_trsm_small
-                 (
-                     blis_side,
-                     &alphao,
-                     &ao,
-                     &bo,
-                     NULL,
-                     NULL
-                 );
-        if (status == BLIS_SUCCESS)
-        {
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
-        }
-    }
+	    /* bli_strsm_small is performing better existing native
+	     * implementations for [m,n]<=1000 for single thread.
+	     * In case of multithread when [m,n]<=128 sinlge thread implemenation
+	     * is doing better than native multithread */
+	    bool nt = bli_thread_get_is_parallel();
+	    if((nt==0 && m0<=1000 && n0<=1000) ||
+			    (nt && (m0+n0)<320) )
+	    {
+		    err_t status;
+		    status = bli_trsm_small
+                (
+                 blis_side,
+			     &alphao,
+			     &ao,
+			     &bo,
+			     NULL,
+			     NULL
+			    );
+		    if (status == BLIS_SUCCESS)
+		    {
+			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+			    /* Finalize BLIS. */
+			    bli_finalize_auto();
+			    return;
+		    }
+	    }
 #endif
-
+    }
     bli_trsmnat
     (
         blis_side,
@@ -853,35 +856,38 @@ void dtrsm_
 
     bli_obj_set_struc( struca, &ao );
 
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    /* bli_dtrsm_small is performing better existing native 
-     * implementations for [m,n]<=1000 for single thread.
-     * In case of multithread when [m,n]<=128 sinlge thread implemenation
-     * is doing better than native multithread */
-    bool nt = bli_thread_get_is_parallel();
-    if((nt==0 && m0<=1000 && n0<=1000) ||
-       (nt && (m0+n0)<320) )
-    {
-        err_t status;
-        status = bli_trsm_small
-                 (
-                     blis_side,
-                     &alphao,
-                     &ao,
-                     &bo,
-                     NULL,
-                     NULL
-                 );
-        if (status == BLIS_SUCCESS)
-        {
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
-        }
-    }
+	    /* bli_dtrsm_small is performing better existing native
+	     * implementations for [m,n]<=1000 for single thread.
+	     * In case of multithread when [m,n]<=128 sinlge thread implemenation
+	     * is doing better than native multithread */
+	    bool nt = bli_thread_get_is_parallel();
+	    if((nt==0 && m0<=1000 && n0<=1000) ||
+			    (nt && (m0+n0)<320) )
+	    {
+		    err_t status;
+		    status = bli_trsm_small
+			    (
+			     blis_side,
+			     &alphao,
+			     &ao,
+			     &bo,
+			     NULL,
+			     NULL
+			    );
+		    if (status == BLIS_SUCCESS)
+		    {
+			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+			    /* Finalize BLIS. */
+			    bli_finalize_auto();
+			    return;
+		    }
+	    }
 #endif
-
+    }
     bli_trsmnat
     (
         blis_side,
