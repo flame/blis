@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -154,17 +154,42 @@ float sdot_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_sdotv_zen_int10
-    (
-      BLIS_NO_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_sdotv_zen_int10
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(s,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_NO_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
@@ -235,17 +260,42 @@ double ddot_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_ddotv_zen_int10
-    (
-      BLIS_NO_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_ddotv_zen_int10
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(d,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_NO_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
@@ -322,17 +372,42 @@ scomplex cdotu_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_cdotv_zen_int5
-    (
-      BLIS_NO_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_cdotv_zen_int5
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_NO_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
@@ -404,18 +479,43 @@ dcomplex zdotu_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_zdotv_zen_int5
-    (
-      BLIS_NO_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
 
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_zdotv_zen_int5
+        (
+        BLIS_NO_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_NO_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
+ 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
 
@@ -489,17 +589,42 @@ scomplex cdotc_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_cdotv_zen_int5
-    (
-      BLIS_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_cdotv_zen_int5
+        (
+        BLIS_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();
@@ -507,6 +632,7 @@ scomplex cdotc_
 
     return rho;
 }
+
 dcomplex zdotc_
      (
        const f77_int* n,
@@ -570,17 +696,46 @@ dcomplex zdotc_
         incy0 = ( inc_t )(*incy);
     }
 
-    /* Call BLIS kernel. */
-    bli_zdotv_zen_int5
-    (
-      BLIS_CONJUGATE,
-      BLIS_NO_CONJUGATE,
-      n0,
-      x0, incx0,
-      y0, incy0,
-      &rho,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel. */
+        bli_zdotv_zen_int5
+        (
+        BLIS_CONJUGATE,
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL
+        );
+    }
+    else
+    {
+        /* Call BLIS interface. */ 
+        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF) 
+        ( 
+        BLIS_CONJUGATE, 
+        BLIS_NO_CONJUGATE,
+        n0,
+        x0, incx0,
+        y0, incy0,
+        &rho,
+        NULL,
+        NULL
+        );
+    }
+
+    
+
+    
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();

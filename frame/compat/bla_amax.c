@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -34,7 +34,6 @@
 */
 
 #include "blis.h"
-
 
 //
 // Define BLAS-to-BLIS interfaces.
@@ -107,6 +106,7 @@ f77_int isamax_
        const float* x, const f77_int* incx
      )
 {
+
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1);
     AOCL_DTL_LOG_AMAX_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'S', *n, *incx);
 
@@ -159,15 +159,36 @@ f77_int isamax_
         incx0 = ( inc_t )(*incx);
     }
 
-    /* Call BLIS kernel. */
-    bli_samaxv_zen_int
-    (
-      n0,
-      x0, incx0,
-      &bli_index,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
 
+    if (bamdzen)
+    {
+        /* Call BLIS kernel */
+        bli_samaxv_zen_int
+        (
+          n0,
+          x0, incx0,
+          &bli_index,
+          NULL
+        );
+    }
+    else
+    {
+      PASTEMAC2(s,amaxv,BLIS_TAPI_EX_SUF)
+      ( 
+        n0,
+        x0, incx0,
+        &bli_index,
+        NULL,
+        NULL
+      );
+    }
+    
     /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
        index. Also, if the BLAS integer size differs from the BLIS
        integer size, that typecast occurs here. */
@@ -239,14 +260,35 @@ f77_int idamax_
         incx0 = ( inc_t )(*incx);
     }
 
-    /* Call BLIS kernel. */
-    bli_damaxv_zen_int
-    (
-      n0,
-      x0, incx0,
-      &bli_index,
-      NULL
-    );
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen)
+    {
+        /* Call BLIS kernel */
+        bli_damaxv_zen_int
+        (
+          n0,
+          x0, incx0,
+          &bli_index,
+          NULL
+        );
+    }
+    else
+    {
+      PASTEMAC2(d,amaxv,BLIS_TAPI_EX_SUF)
+      ( 
+        n0,
+        x0, incx0,
+        &bli_index,
+        NULL,
+        NULL
+      );
+    }
 
     /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
        index. Also, if the BLAS integer size differs from the BLIS
