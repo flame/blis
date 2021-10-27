@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -153,16 +153,37 @@ void scopy_
 		incy0 = (inc_t)(*incy);
 	}
 
+	// When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+	// This function is invoked on all architectures including ‘generic’.
+	// Invoke architecture specific kernels only if we are sure that we are running on zen,
+	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
 
-	/* Call BLIS kernel */
-	bli_scopyv_zen_int
-	(
-		BLIS_NO_CONJUGATE,
-		n0,
-		x0, incx0,
-		y0, incy0,
-		NULL
-	);
+	if (bamdzen)
+	{
+		/* Call BLIS kernel */
+		bli_scopyv_zen_int
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			NULL
+		);
+	}
+	else
+	{
+		PASTEMAC2(s, copyv, BLIS_TAPI_EX_SUF)
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			NULL,
+			NULL
+		);
+	}
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */
@@ -232,16 +253,38 @@ void dcopy_
 		incy0 = (inc_t)(*incy);
 	}
 
+	// When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+	// This function is invoked on all architectures including ‘generic’.
+	// Invoke architecture specific kernels only if we are sure that we are running on zen,
+	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
 
-	/* Call BLIS kernel */
-	bli_dcopyv_zen_int
-	(
-		BLIS_NO_CONJUGATE,
-		n0,
-		x0, incx0,
-		y0, incy0,
-		NULL
-	);
+	if (bamdzen)
+	{
+		/* Call BLIS kernel */
+		bli_dcopyv_zen_int
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			NULL
+		);
+	}
+	else
+	{
+		PASTEMAC2(d, copyv, BLIS_TAPI_EX_SUF)
+		(
+			BLIS_NO_CONJUGATE,
+			n0,
+			x0, incx0,
+			y0, incy0,
+			NULL,
+			NULL
+		);
+	}
+
 
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
 	/* Finalize BLIS. */

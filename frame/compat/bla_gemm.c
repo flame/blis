@@ -362,7 +362,63 @@ void dgemm_
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
-    if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+	// When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+	// This function is invoked on all architectures including ‘generic’.
+	// Invoke architecture specific kernels only if we are sure that we are running on zen,
+	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+	arch_t id = bli_arch_query_id();
+	bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+	if (!bamdzen)
+	{
+		// This code is duplicated below, however we don't want to move it out of
+		// this IF block as it will affect the performance on Zen architetures
+		// Also this is temporary fix which will be replaced later.
+		const num_t dt = BLIS_DOUBLE;
+
+		obj_t alphao = BLIS_OBJECT_INITIALIZER_1X1;
+		obj_t ao = BLIS_OBJECT_INITIALIZER;
+		obj_t bo = BLIS_OBJECT_INITIALIZER;
+		obj_t betao = BLIS_OBJECT_INITIALIZER_1X1;
+		obj_t co = BLIS_OBJECT_INITIALIZER;
+
+		dim_t m0_a, n0_a;
+		dim_t m0_b, n0_b;
+
+		bli_set_dims_with_trans(blis_transa, m0, k0, &m0_a, &n0_a);
+		bli_set_dims_with_trans(blis_transb, k0, n0, &m0_b, &n0_b);
+
+		bli_obj_init_finish_1x1(dt, (double *)alpha, &alphao);
+		bli_obj_init_finish_1x1(dt, (double *)beta, &betao);
+
+		bli_obj_init_finish(dt, m0_a, n0_a, (double *)a, rs_a, cs_a, &ao);
+		bli_obj_init_finish(dt, m0_b, n0_b, (double *)b, rs_b, cs_b, &bo);
+		bli_obj_init_finish(dt, m0, n0, (double *)c, rs_c, cs_c, &co);
+
+		bli_obj_set_conjtrans(blis_transa, &ao);
+		bli_obj_set_conjtrans(blis_transb, &bo);
+
+		// Will call parallelized dgemm code - sup & native
+		PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+		(
+			&alphao,
+			&ao,
+			&bo,
+			&betao,
+			&co,
+			NULL,
+			NULL
+		);
+
+		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+		return;
+	}
+
+	if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
     {
 	bli_dgemm_ref_k1_nn( m0, n0, k0,
 			  (double*)alpha,
