@@ -305,6 +305,7 @@ void bli_dtrsv_unf_var1
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    num_t dt = PASTEMAC(d,type);
 	    kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );
@@ -506,6 +507,7 @@ void bli_strsv_unf_var1
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    num_t dt = PASTEMAC(s,type);
 	    kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx );

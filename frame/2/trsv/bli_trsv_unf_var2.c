@@ -301,6 +301,7 @@ void bli_dtrsv_unf_var2
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_AF, cntx );
     }
@@ -496,6 +497,7 @@ void bli_strsv_unf_var2
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_FLOAT, BLIS_AXPYF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_FLOAT, BLIS_AF, cntx );
     }
@@ -691,6 +693,7 @@ void bli_ztrsv_unf_var2
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_DCOMPLEX, BLIS_AXPYF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_AF, cntx );
     }
@@ -885,6 +888,7 @@ void bli_ctrsv_unf_var2
     }
     else
     {
+	    if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_SCOMPLEX, BLIS_AXPYF_KER, cntx );
 	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_AF, cntx );
     }

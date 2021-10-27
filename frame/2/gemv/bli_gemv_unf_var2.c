@@ -174,6 +174,80 @@ void bli_dgemv_unf_var2
 
     conja = bli_extract_conj( transa );
 
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen == 0)
+    {
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+        const num_t dt = PASTEMAC(d,type);
+        double*  x1;
+        double*  y1;
+        /* If beta is zero, use setv. Otherwise, scale by beta. */
+        if ( PASTEMAC(d,eq0)( *beta ) )
+        {
+            double*  zero = PASTEMAC(d,0);
+            /* y = 0; */
+            PASTEMAC2(d,setv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              zero,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+        else
+        {
+            /* y = beta * y; */
+            PASTEMAC2(d,scalv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              beta,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+
+        PASTECH(d,axpyf_ker_ft) kfp_af;
+
+        /* Query the context for the kernel function pointer and fusing factor. */
+        kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+        dim_t b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+            A1 = a + (0  )*rs_at + (i  )*cs_at;
+            x1 = x + (i  )*incx;
+            y1 = y + (0  )*incy;
+
+            /* y = y + alpha * A1 * x1; */
+            kfp_af
+            (
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y1, incy,
+              cntx
+            );
+        }
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return;
+    }
+
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is hadled by scalv internally */
@@ -312,6 +386,78 @@ void bli_sgemv_unf_var2
 
     conja = bli_extract_conj( transa );
 
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen == 0)
+    {
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+        const num_t dt = PASTEMAC(s,type);
+        /* If beta is zero, use setv. Otherwise, scale by beta. */
+        if ( PASTEMAC(s,eq0)( *beta ) )
+        {
+            float*  zero = PASTEMAC(s,0);
+            /* y = 0; */
+            PASTEMAC2(s,setv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              zero,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+        else
+        {
+            /* y = beta * y; */
+            PASTEMAC2(s,scalv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              beta,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+
+        PASTECH(s,axpyf_ker_ft) kfp_af;
+
+        /* Query the context for the kernel function pointer and fusing factor. */
+        kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+        b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+            A1 = a + (0  )*rs_at + (i  )*cs_at;
+            x1 = x + (i  )*incx;
+            y1 = y + (0  )*incy;
+
+            /* y = y + alpha * A1 * x1; */
+            kfp_af
+            (
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y1, incy,
+              cntx
+            );
+        }
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return;
+    }
+
     /* If beta is zero, use setv. Otherwise, scale by beta. */
         /* y = beta * y; */
     /* beta=0 case is hadled by scalv internally */
@@ -392,9 +538,10 @@ void bli_zgemv_unf_var2
     conja = bli_extract_conj( transa );
 
     /* If beta is zero, use setv. Otherwise, scale by beta. */
-        /* y = beta * y; */
+      /* y = beta * y; */
+
     /* beta=0 case is hadled by scalv internally */
-/*    bli_zscalv_zen_int10
+    /*    bli_zscalv_zen_int10
     (
       BLIS_NO_CONJUGATE,
       n_elem,
@@ -403,15 +550,88 @@ void bli_zgemv_unf_var2
       incy,
       cntx
     );*/
+
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen == 0)
+    {
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+        const num_t dt = PASTEMAC(z,type);
+        /* If beta is zero, use setv. Otherwise, scale by beta. */
+        if ( PASTEMAC(z,eq0)( *beta ) )
+        {
+            dcomplex*  zero = PASTEMAC(z,0);
+            /* y = 0; */
+            PASTEMAC2(z,setv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              zero,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+        else
+        {
+            /* y = beta * y; */
+            PASTEMAC2(z,scalv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              beta,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+
+        PASTECH(z,axpyf_ker_ft) kfp_af;
+
+        /* Query the context for the kernel function pointer and fusing factor. */
+        kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+        b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+            A1 = a + (0  )*rs_at + (i  )*cs_at;
+            x1 = x + (i  )*incx;
+            y1 = y + (0  )*incy;
+
+            /* y = y + alpha * A1 * x1; */
+            kfp_af
+            (
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y1, incy,
+              cntx
+            );
+        }
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return;
+    }
+
     bli_zscalv_ex
-	    (
-	     BLIS_NO_CONJUGATE,
-	     n_elem,
-	     beta,
-	     y, incy,
-	     cntx,
-	     NULL
-	    );
+    (
+      BLIS_NO_CONJUGATE,
+      n_elem,
+      beta,
+      y, incy,
+      cntx,
+      NULL
+    );
 
     if( bli_zeq0( *alpha ) )
     {
@@ -516,6 +736,79 @@ void bli_cgemv_unf_var2
       incy,
       cntx
     );*/
+
+    // When dynamic dispatch is enabled i.e. library is built for ‘amdzen’ configuration.
+    // This function is invoked on all architectures including ‘generic’.
+    // Invoke architecture specific kernels only if we are sure that we are running on zen,
+    // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+    if (bamdzen == 0)
+    {
+        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+        const num_t dt = PASTEMAC(c,type);
+        /* If beta is zero, use setv. Otherwise, scale by beta. */
+        if ( PASTEMAC(c,eq0)( *beta ) )
+        {
+            scomplex*  zero = PASTEMAC(c,0);
+            /* y = 0; */
+            PASTEMAC2(c,setv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              zero,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+        else
+        {
+            /* y = beta * y; */
+            PASTEMAC2(c,scalv,BLIS_TAPI_EX_SUF)
+            (
+              BLIS_NO_CONJUGATE,
+              n_elem,
+              beta,
+              y, incy,
+              cntx,
+              NULL
+            );
+        }
+
+        PASTECH(c,axpyf_ker_ft) kfp_af;
+
+        /* Query the context for the kernel function pointer and fusing factor. */
+        kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+        b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+            A1 = a + (0  )*rs_at + (i  )*cs_at;
+            x1 = x + (i  )*incx;
+            y1 = y + (0  )*incy;
+
+            /* y = y + alpha * A1 * x1; */
+            kfp_af
+            (
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y1, incy,
+              cntx
+            );
+        }
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
+        return;
+    }
+
     bli_cscalv_ex
 	    (
 	     BLIS_NO_CONJUGATE,
