@@ -301,9 +301,8 @@ void bli_dtrsv_unf_var2
     }
     else
     {
-	    num_t dt = PASTEMAC(d,type);
-	    kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
-	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_DOUBLE, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_DOUBLE, BLIS_AF, cntx );
     }
 
     /* We reduce all of the possible cases down to just lower/upper. */
@@ -489,8 +488,6 @@ void bli_strsv_unf_var2
     PASTECH(s, axpyf_ker_ft) kfp_af;
 
     /* Assign function pointer and fusing factor. */
-/*    kfp_af = bli_saxpyf_zen_int_5;
-    b_fuse = 5;*/
     arch_t id = bli_arch_query_id();
     bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
     if (bamdzen) {
@@ -499,10 +496,8 @@ void bli_strsv_unf_var2
     }
     else
     {
-
-	    num_t dt = PASTEMAC(s,type);
-	    kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
-	    b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx );
+	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_FLOAT, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_FLOAT, BLIS_AF, cntx );
     }
 
     /* We reduce all of the possible cases down to just lower/upper. */
@@ -688,9 +683,17 @@ void bli_ztrsv_unf_var2
     PASTECH(z, axpyf_ker_ft) kfp_af;
 
     /* Assign function pointer and fusing factor. */
-    kfp_af = bli_zaxpyf_zen_int_5;
-    b_fuse = 5;
-
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+	    kfp_af = bli_zaxpyf_zen_int_5;
+	    b_fuse = 5;
+    }
+    else
+    {
+	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_DCOMPLEX, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_DCOMPLEX, BLIS_AF, cntx );
+    }
     /* We reduce all of the possible cases down to just lower/upper. */
     if      ( bli_is_upper( uploa_trans ) )
     {
@@ -874,9 +877,17 @@ void bli_ctrsv_unf_var2
     PASTECH(c, axpyf_ker_ft) kfp_af;
 
     /* Assign function pointer and fusing factor. */
-    kfp_af = bli_caxpyf_zen_int_5;
-    b_fuse = 5;
-
+    arch_t id = bli_arch_query_id();
+    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    if (bamdzen) {
+	    kfp_af = bli_caxpyf_zen_int_5;
+	    b_fuse = 5;
+    }
+    else
+    {
+	    kfp_af = bli_cntx_get_l1f_ker_dt( BLIS_SCOMPLEX, BLIS_AXPYF_KER, cntx );
+	    b_fuse = bli_cntx_get_blksz_def_dt( BLIS_SCOMPLEX, BLIS_AF, cntx );
+    }
     /* We reduce all of the possible cases down to just lower/upper. */
     if      ( bli_is_upper( uploa_trans ) )
     {
