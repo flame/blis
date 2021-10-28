@@ -224,12 +224,6 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 			double   msclr = msclrs[ i ];
 
 			blksz_t* blksz = blkszs[ i ];
-			// NOTE: This is a bug! We need to grab the actual blocksize
-			// multiple, which is not at blkszs[i], but rather somewhere else
-			// in the array. In order to fix this, you probably need to store
-			// the contents of blkszs (and all the other arrays) by bs_id
-			// rather than i in the first loop.
-			blksz_t* bmult = blkszs[ i ];
 
 			blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
@@ -248,20 +242,6 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 				// blocksize object.
 				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_SCOMPLEX, cntx_blksz );
 				bli_blksz_scale_def( 1, ( dim_t )dsclr, BLIS_DCOMPLEX, cntx_blksz );
-
-				// Perform rounding to ensure the newly scaled values are still
-				// multiples of their register blocksize multiples. But only
-				// perform this rounding when the blocksize id is not equal to
-				// the blocksize multiple id (ie: we don't round down scaled
-				// register blocksizes since they are their own multiples).
-				// Also, we skip the rounding for 1m since it should never need
-				// such rounding.
-				if ( bs_id != bm_id && method != BLIS_1M )
-				{
-					// Round the newly-scaled blocksizes down to their multiple.
-					bli_blksz_reduce_def_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
-					bli_blksz_reduce_def_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
-				}
 			}
 
 			// Similarly, if the maximum blocksize scalar is non-unit, we need
@@ -272,20 +252,6 @@ void bli_cntx_set_blkszs( ind_t method, dim_t n_bs, ... )
 				// blocksize object.
 				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_SCOMPLEX, cntx_blksz );
 				bli_blksz_scale_max( 1, ( dim_t )msclr, BLIS_DCOMPLEX, cntx_blksz );
-
-				// Perform rounding to ensure the newly scaled values are still
-				// multiples of their register blocksize multiples. But only
-				// perform this rounding when the blocksize id is not equal to
-				// the blocksize multiple id (ie: we don't round down scaled
-				// register blocksizes since they are their own multiples).
-				// Also, we skip the rounding for 1m since it should never need
-				// such rounding.
-				if ( bs_id != bm_id && method != BLIS_1M )
-				{
-					// Round the newly-scaled blocksizes down to their multiple.
-					bli_blksz_reduce_max_to( BLIS_FLOAT,  bmult, BLIS_SCOMPLEX, cntx_blksz );
-					bli_blksz_reduce_max_to( BLIS_DOUBLE, bmult, BLIS_DCOMPLEX, cntx_blksz );
-				}
 			}
 
 			// Copy the blocksize multiple id into the context.
@@ -422,14 +388,10 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, dim_t n_bs, ... )
 
 			//blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 
-			// Query the blocksize multiple's blocksize id.
-			bszid_t  bm_id = bli_cntx_get_bmult_id( bs_id, cntx );
-
 			// Query the context for the blksz_t object assoicated with the
 			// current blocksize id, and also query the object corresponding
 			// to the blocksize multiple.
 			blksz_t* cntx_blksz = bli_cntx_get_blksz( bs_id, cntx );
-			blksz_t* cntx_bmult = bli_cntx_get_bmult( bs_id, cntx );
 
 			// Copy the real domain value of the blksz_t object into the
 			// corresponding complex domain slot of the same object.
@@ -442,19 +404,6 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, dim_t n_bs, ... )
 				// Scale the default blocksize value corresponding to the given
 				// datatype.
 				bli_blksz_scale_def( 1, ( dim_t )dsclr, dt, cntx_blksz );
-
-				// Perform rounding to ensure the newly scaled values are still
-				// multiples of their register blocksize multiples. But only
-				// perform this rounding when the blocksize id is not equal to
-				// the blocksize multiple id (ie: we don't round down scaled
-				// register blocksizes since they are their own multiples).
-				// Also, we skip the rounding for 1m since it should never need
-				// such rounding.
-				if ( bs_id != bm_id && method != BLIS_1M )
-				{
-					// Round the newly-scaled blocksize down to its multiple.
-					bli_blksz_reduce_def_to( dt_real, cntx_bmult, dt, cntx_blksz );
-				}
 			}
 
 			// Similarly, if the maximum blocksize scalar is non-unit, we need
@@ -464,19 +413,6 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, dim_t n_bs, ... )
 				// Scale the maximum blocksize value corresponding to the given
 				// datatype.
 				bli_blksz_scale_max( 1, ( dim_t )msclr, dt, cntx_blksz );
-
-				// Perform rounding to ensure the newly scaled values are still
-				// multiples of their register blocksize multiples. But only
-				// perform this rounding when the blocksize id is not equal to
-				// the blocksize multiple id (ie: we don't round down scaled
-				// register blocksizes since they are their own multiples).
-				// Also, we skip the rounding for 1m since it should never need
-				// such rounding.
-				if ( bs_id != bm_id && method != BLIS_1M )
-				{
-					// Round the newly-scaled blocksize down to their multiple.
-					bli_blksz_reduce_max_to( dt_real, cntx_bmult, dt, cntx_blksz );
-				}
 			}
 		}
 	}

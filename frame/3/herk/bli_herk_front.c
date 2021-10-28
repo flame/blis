@@ -51,10 +51,6 @@ void bli_herk_front
 	obj_t   ah_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_herk_check( alpha, a, beta, c, cntx );
-
 	// If alpha is zero, scale by beta, zero the imaginary components of
 	// the diagonal elements, and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )

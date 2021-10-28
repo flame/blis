@@ -203,9 +203,6 @@ void PASTEMAC(ch,varname) \
 	inc_t           rstep_c, cstep_c; \
 	inc_t           istep_a; \
 	inc_t           istep_b; \
-	inc_t           off_scl; \
-	inc_t           ss_b_num; \
-	inc_t           ss_b_den; \
 	inc_t           ps_b_cur; \
 	inc_t           is_b_cur; \
 	auxinfo_t       aux; \
@@ -244,30 +241,6 @@ void PASTEMAC(ch,varname) \
 	   this unreduced value of k. */ \
 	k_full = k; \
 \
-	/* Compute indexing scaling factor for for 4m or 3m. This is
-	   needed because one of the packing register blocksizes (PACKMR
-	   or PACKNR) is used to index into the micro-panels of the non-
-	   triangular matrix when computing with a diagonal-intersecting
-	   micro-panel of the triangular matrix. In the case of 4m or 3m,
-	   real values are stored in both sub-panels, and so the indexing
-	   needs to occur in units of real values. The value computed
-	   here is divided into the complex pointer offset to cause the
-	   pointer to be advanced by the correct value. */ \
-	if ( bli_is_4mi_packed( schema_b ) || \
-	     bli_is_3mi_packed( schema_b ) || \
-	     bli_is_rih_packed( schema_b ) ) off_scl = 2; \
-	else                                 off_scl = 1; \
-\
-	/* Compute the storage stride scaling. Usually this is just 1.
-	   However, in the case of interleaved 3m, we need to scale the
-	   offset by 3/2. And if we are packing real-only, imag-only, or
-	   summed-only, we need to scale the computed panel sizes by 1/2
-	   to compensate for the fact that the pointer arithmetic occurs
-	   in terms of complex elements rather than real elements. */ \
-	if      ( bli_is_3mi_packed( schema_b ) ) { ss_b_num = 3; ss_b_den = 2; } \
-	else if ( bli_is_rih_packed( schema_b ) ) { ss_b_num = 1; ss_b_den = 2; } \
-	else                                      { ss_b_num = 1; ss_b_den = 1; } \
-\
 	/* If there is a zero region above where the diagonal of B intersects
 	   the left edge of the panel, adjust the pointer to A and treat this
 	   case as if the diagonal offset were zero. Note that we don't need to
@@ -278,7 +251,7 @@ void PASTEMAC(ch,varname) \
 		j        = -diagoffb; \
 		k        = k - j; \
 		diagoffb = 0; \
-		a_cast   = a_cast + ( j * PACKMR ) / off_scl; \
+		a_cast   = a_cast + j * PACKMR; \
 	} \
 \
 	/* If there is a zero region to the right of where the diagonal
@@ -324,9 +297,6 @@ void PASTEMAC(ch,varname) \
 \
 	/* Save the imaginary stride of A to the auxinfo_t object. */ \
 	bli_auxinfo_set_is_a( istep_a, &aux ); \
-\
-	/* Save the desired output datatype (indicating no typecasting). */ \
-	/*bli_auxinfo_set_dt_on_output( dt, &aux );*/ \
 \
 	thrinfo_t* caucus = bli_thrinfo_sub_node( thread ); \
 \
@@ -387,10 +357,6 @@ void PASTEMAC(ch,varname) \
 		b2 = b1; \
 \
 		{ \
-			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
-			   object. */ \
-			bli_auxinfo_set_is_b( istep_b, &aux ); \
-\
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = ir_start; i < ir_end; i += ir_inc ) \
 			{ \
@@ -504,13 +470,9 @@ void PASTEMAC(ch,varname) \
 			   intersecting micro-panel. */ \
 			is_b_cur  = k_b1121 * PACKNR; \
 			is_b_cur += ( bli_is_odd( is_b_cur ) ? 1 : 0 ); \
-			ps_b_cur  = ( is_b_cur * ss_b_num ) / ss_b_den; \
+			ps_b_cur  = is_b_cur; \
 \
 			if ( bli_trmm_my_iter_rr( j, thread ) ) { \
-\
-			/* Save the 4m1/3m1 imaginary stride of B to the auxinfo_t
-			   object. */ \
-			bli_auxinfo_set_is_b( is_b_cur, &aux ); \
 \
 			/* Loop over the m dimension (MR rows at a time). */ \
 			for ( i = 0; i < m_iter; ++i ) \
@@ -522,7 +484,7 @@ void PASTEMAC(ch,varname) \
 \
 				m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left ); \
 \
-				a1_i = a1 + ( off_b1121 * PACKMR ) / off_scl; \
+				a1_i = a1 + off_b1121 * PACKMR; \
 \
 				/* Compute the addresses of the next panels of A and B. */ \
 				a2 = a1; \

@@ -53,10 +53,6 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{

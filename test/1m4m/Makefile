@@ -186,20 +186,10 @@ BLA_DEF  := -DBLAS
 EIG_DEF  := -DEIGEN
 
 # Complex implementation type
-D3MHW    := -DIND=BLIS_3MH
-D3M1     := -DIND=BLIS_3M1
-D4MHW    := -DIND=BLIS_4MH
-D4M1B    := -DIND=BLIS_4M1B
-D4M1A    := -DIND=BLIS_4M1A
 D1M      := -DIND=BLIS_1M
 DNAT     := -DIND=BLIS_NAT
 
 # Implementation string
-#STR_3MHW := -DSTR=\"3mhw\"
-#STR_3M1  := -DSTR=\"3m1\"
-#STR_4MHW := -DSTR=\"4mhw\"
-#STR_4M1B := -DSTR=\"4m1b\"
-STR_4M1A := -DSTR=\"4m1a_blis\"
 STR_1M   := -DSTR=\"1m_blis\"
 STR_NAT  := -DSTR=\"asm_blis\"
 STR_OBL  := -DSTR=\"openblas\"
@@ -234,19 +224,18 @@ all-st:     blis-st openblas-st mkl-st
 all-1s:     blis-1s openblas-1s mkl-1s
 all-2s:     blis-2s openblas-2s mkl-2s
 
-blis-st:    blis-nat-st blis-1m-st blis-4m1a-st
-blis-1s:    blis-nat-1s blis-1m-1s blis-4m1a-1s
-blis-2s:    blis-nat-2s blis-1m-2s blis-4m1a-2s
+blis-st:    blis-nat-st blis-1m-st
+blis-1s:    blis-nat-1s blis-1m-1s
+blis-2s:    blis-nat-2s blis-1m-2s
 
 #blis-ind:   blis-ind-st blis-ind-mt
 blis-nat:   blis-nat-st  blis-nat-1s  blis-nat-2s
 blis-1m:    blis-1m-st   blis-1m-1s   blis-1m-2s
-blis-4m1a:  blis-4m1a-st blis-4m1a-1s blis-4m1a-2s
 
 # Define the datatypes, operations, and implementations.
 DTS    := s d c z
 OPS    := gemm
-BIMPLS := asm_blis 4m1a_blis 1m_blis openblas vendor
+BIMPLS := asm_blis 1m_blis openblas vendor
 EIMPLS := eigen
 
 # Define functions to construct object filenames from the datatypes and
@@ -264,13 +253,6 @@ BLIS_1M_1S_OBJS := $(call get-1s-objs,1m_blis)
 BLIS_1M_1S_BINS := $(patsubst %.o,%.x,$(BLIS_1M_1S_OBJS))
 BLIS_1M_2S_OBJS := $(call get-2s-objs,1m_blis)
 BLIS_1M_2S_BINS := $(patsubst %.o,%.x,$(BLIS_1M_2S_OBJS))
-
-BLIS_4M1A_ST_OBJS := $(call get-st-objs,4m1a_blis)
-BLIS_4M1A_ST_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_ST_OBJS))
-BLIS_4M1A_1S_OBJS := $(call get-1s-objs,4m1a_blis)
-BLIS_4M1A_1S_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_1S_OBJS))
-BLIS_4M1A_2S_OBJS := $(call get-2s-objs,4m1a_blis)
-BLIS_4M1A_2S_BINS := $(patsubst %.o,%.x,$(BLIS_4M1A_2S_OBJS))
 
 BLIS_NAT_ST_OBJS := $(call get-st-objs,asm_blis)
 BLIS_NAT_ST_BINS := $(patsubst %.o,%.x,$(BLIS_NAT_ST_OBJS))
@@ -309,10 +291,6 @@ blis-1m-st: $(BLIS_1M_ST_BINS)
 blis-1m-1s: $(BLIS_1M_1S_BINS)
 blis-1m-2s: $(BLIS_1M_2S_BINS)
 
-blis-4m1a-st: $(BLIS_4M1A_ST_BINS)
-blis-4m1a-1s: $(BLIS_4M1A_1S_BINS)
-blis-4m1a-2s: $(BLIS_4M1A_2S_BINS)
-
 openblas-st: $(OPENBLAS_ST_BINS)
 openblas-1s: $(OPENBLAS_1S_BINS)
 openblas-2s: $(OPENBLAS_2S_BINS)
@@ -337,7 +315,6 @@ armpl-2s: vendor-2s
 # automatically after building the binaries on which they depend.
 .INTERMEDIATE: $(BLIS_NAT_ST_OBJS) $(BLIS_NAT_1S_OBJS) $(BLIS_NAT_2S_OBJS)
 .INTERMEDIATE: $(BLIS_1M_ST_OBJS)  $(BLIS_1M_1S_OBJS)  $(BLIS_1M_2S_OBJS)
-.INTERMEDIATE: $(BLIS_4M1A_ST_OBJS) $(BLIS_4M1A_1S_OBJS) $(BLIS_4M1A_2S_OBJS)
 .INTERMEDIATE: $(OPENBLAS_ST_OBJS) $(OPENBLAS_1S_OBJS) $(OPENBLAS_2S_OBJS)
 .INTERMEDIATE: $(EIGEN_ST_OBJS)    $(EIGEN_1S_OBJS)    $(EIGEN_2S_OBJS)
 .INTERMEDIATE: $(VENDOR_ST_OBJS)   $(VENDOR_1S_OBJS)   $(VENDOR_2S_OBJS)
@@ -358,8 +335,7 @@ get-dt-cpp = $(strip \
 
 get-in-cpp = $(strip \
              $(if $(findstring   1m_blis,$(1)),-DIND=BLIS_1M,\
-             $(if $(findstring 4m1a_blis,$(1)),-DIND=BLIS_4M1A,\
-                                               -DIND=BLIS_NAT)))
+                                               -DIND=BLIS_NAT))
 
 # A function to return other cpp macros that help the test driver
 # identify the implementation.
@@ -371,7 +347,6 @@ get-in-cpp = $(strip \
 
 get-bl-cpp = $(strip \
              $(if $(findstring   1m_blis,$(1)),$(STR_1M) $(BLI_DEF),\
-             $(if $(findstring 4m1a_blis,$(1)),$(STR_4M1A) $(BLI_DEF),\
              $(if $(findstring  asm_blis,$(1)),$(STR_NAT) $(BLI_DEF),\
              $(if $(findstring  openblas,$(1)),$(STR_OBL) $(BLA_DEF),\
              $(if $(and $(findstring eigen,$(1)),\
@@ -379,7 +354,7 @@ get-bl-cpp = $(strip \
                                               $(STR_EIG) $(EIG_DEF),\
              $(if       $(findstring eigen,$(1)),\
                                               $(STR_EIG) $(BLA_DEF),\
-                                              $(STR_VEN) $(BLA_DEF))))))))
+                                              $(STR_VEN) $(BLA_DEF)))))))
 
 
 # Rules for BLIS and BLAS libraries.
@@ -453,16 +428,6 @@ test_%_$(P1_MAX)_1m_blis_1s.x: test_%_$(P1_MAX)_1m_blis_1s.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 test_%_$(P2_MAX)_1m_blis_2s.x: test_%_$(P2_MAX)_1m_blis_2s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-
-test_%_$(PS_MAX)_4m1a_blis_st.x: test_%_$(PS_MAX)_4m1a_blis_st.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P1_MAX)_4m1a_blis_1s.x: test_%_$(P1_MAX)_4m1a_blis_1s.o $(LIBBLIS_LINK)
-	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
-
-test_%_$(P2_MAX)_4m1a_blis_2s.x: test_%_$(P2_MAX)_4m1a_blis_2s.o $(LIBBLIS_LINK)
 	$(CC) $(strip $<                    $(LIBBLIS_LINK) $(LDFLAGS) -o $@)
 
 

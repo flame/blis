@@ -98,7 +98,7 @@ void bli_hemm_check
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
 	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
 
@@ -248,7 +248,7 @@ void bli_syr2k_check
 	bli_check_error_code( e_val );
 }
 
-void bli_trmm_check
+void bli_trmm3_check
      (
        side_t  side,
        obj_t*  alpha,
@@ -261,9 +261,30 @@ void bli_trmm_check
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
 	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check object structure.
+
+	e_val = bli_check_triangular_object( a );
+	bli_check_error_code( e_val );
+}
+
+void bli_trmm_check
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to hemm/symm/trmm/trsm.
+
+	bli_hemm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// Check object structure.
 
@@ -277,16 +298,14 @@ void bli_trsm_check
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
        cntx_t* cntx
      )
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
-	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+	bli_hemm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// Check object structure.
 
