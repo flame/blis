@@ -53,10 +53,6 @@ void bli_trmm3_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_trmm_check( side, alpha, a, b, beta, c, cntx );
-
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{

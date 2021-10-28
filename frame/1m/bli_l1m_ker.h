@@ -74,51 +74,6 @@ INSERT_GENTPROT_BASIC0( unpackm_14xk_ker_name )
 INSERT_GENTPROT_BASIC0( unpackm_16xk_ker_name )
 
 
-// 3mis packm kernels
-
-#undef  GENTPROT
-#define GENTPROT PACKM_3MIS_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_2xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_4xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_6xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_8xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_10xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_12xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_14xk_3mis_ker_name )
-INSERT_GENTPROT_BASIC0( packm_16xk_3mis_ker_name )
-
-
-// 4mi packm kernels
-
-#undef  GENTPROT
-#define GENTPROT PACKM_4MI_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_2xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_4xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_6xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_8xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_10xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_12xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_14xk_4mi_ker_name )
-INSERT_GENTPROT_BASIC0( packm_16xk_4mi_ker_name )
-
-
-// rih packm kernels
-
-#undef  GENTPROT
-#define GENTPROT PACKM_RIH_KER_PROT
-
-INSERT_GENTPROT_BASIC0( packm_2xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_4xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_6xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_8xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_10xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_12xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_14xk_rih_ker_name )
-INSERT_GENTPROT_BASIC0( packm_16xk_rih_ker_name )
-
-
 // 1e/1r packm kernels
 
 #undef  GENTPROT

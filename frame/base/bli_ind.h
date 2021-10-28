@@ -32,13 +32,32 @@
 
 */
 
-void bli_cntx_ind_stage( ind_t method, dim_t stage, cntx_t* cntx );
+#ifndef BLIS_IND_H
+#define BLIS_IND_H
 
-void bli_cntx_3mh_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_3m1_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4mh_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4mb_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_4m1_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_1m_stage( dim_t stage, cntx_t* cntx );
-void bli_cntx_nat_stage( dim_t stage, cntx_t* cntx );
+// level-3 induced method management
+#include "bli_l3_ind.h"
+
+void   bli_ind_init( void );
+void   bli_ind_finalize( void );
+
+BLIS_EXPORT_BLIS void    bli_ind_enable( ind_t method );
+BLIS_EXPORT_BLIS void    bli_ind_disable( ind_t method );
+BLIS_EXPORT_BLIS void    bli_ind_disable_all( void );
+
+BLIS_EXPORT_BLIS void    bli_ind_enable_dt( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS void    bli_ind_disable_dt( ind_t method, num_t dt );
+BLIS_EXPORT_BLIS void    bli_ind_disable_all_dt( num_t dt );
+
+BLIS_EXPORT_BLIS void    bli_ind_oper_enable_only( opid_t oper, ind_t method, num_t dt );
+
+BLIS_EXPORT_BLIS bool    bli_ind_oper_is_impl( opid_t oper, ind_t method );
+BLIS_EXPORT_BLIS ind_t   bli_ind_oper_find_avail( opid_t oper, num_t dt );
+BLIS_EXPORT_BLIS char*   bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt );
+
+char*  bli_ind_get_impl_string( ind_t method );
+num_t  bli_ind_map_cdt_to_index( num_t dt );
+
+
+#endif
 

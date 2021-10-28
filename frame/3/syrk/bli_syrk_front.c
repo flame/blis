@@ -69,10 +69,6 @@ void bli_syrk_front
 #endif
 #endif
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_syrk_check( alpha, a, beta, c, cntx );
-
 	// If alpha is zero, scale by beta and return.
 	if ( bli_obj_equals( alpha, &BLIS_ZERO ) )
 	{
