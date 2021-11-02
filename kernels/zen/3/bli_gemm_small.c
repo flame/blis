@@ -113,7 +113,19 @@ err_t bli_gemm_small
 #ifdef BLIS_ENABLE_MULTITHREADING
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
+#else
+	// When dynamic dispatch is enabled i.e. library is built for 'amdzen' configuration.
+	// Invoke architecture specific kernels only if we are sure that we are running on zen,
+	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
+	arch_t id = bli_arch_query_id();
+	bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+
+	if (0 == bamdzen)
+	{
+		return BLIS_NOT_YET_IMPLEMENTED;
+	}
 #endif
+
     // If alpha is zero, scale by beta and return.
     if (bli_obj_equals(alpha, &BLIS_ZERO))
     {
