@@ -32,13 +32,18 @@
 
 */
 
-#ifndef BLIS_ERROR_MACRO_DEFS_H
-#define BLIS_ERROR_MACRO_DEFS_H
 
-// Used to insert filenames and line numbers into error-checking code.
-#define bli_check_error_code( code ) \
-        bli_check_error_code_helper( code, __FILE__, __LINE__ )
+//
+// Prototype object-based check functions.
+//
 
-
-#endif
+void bls_gemm_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+    );
 

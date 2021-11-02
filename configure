@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -143,6 +143,12 @@ print_usage()
 	echo "                 Disable (enabled by default) building BLIS as a shared"
 	echo "                 library. If the shared library build is disabled, the"
 	echo "                 static library build must remain enabled."
+	echo " "
+	echo "   --enable-rpath, --disable-rpath"
+	echo " "
+	echo "                 Enable (disabled by default) setting an install_name for"
+    echo "                 dynamic libraries on macOS which starts with @rpath rather"
+    echo "                 than the absolute install path."
 	echo " "
 	echo "   -e SYMBOLS, --export-shared[=SYMBOLS]"
 	echo " "
@@ -852,7 +858,7 @@ build_kconfig_registry()
 			assign_key_value "kconfig_registry" "${kernel}" "${newvalue}"
 
 		done
-		
+
 	done
 }
 
@@ -1488,6 +1494,8 @@ check_compiler()
 	#   cortexa15: any
 	#   cortexa9: any
 	#
+	#   armsve: clang11+, gcc10+
+	#
 	#   generic: any
 	#
 	# Note: These compiler requirements were originally modeled after similar
@@ -1502,6 +1510,8 @@ check_compiler()
 	#
 
 	echo "${script_name}: checking for blacklisted configurations due to ${cc} ${cc_version}."
+
+	# Fixme: check on a64fx, neoverse, and others
 
 	# gcc
 	if [ "x${cc_vendor}" = "xgcc" ]; then
@@ -1532,6 +1542,9 @@ check_compiler()
 			blacklistcc_add "skx"
 			# gcc 5.x may support POWER9 but it is unverified.
 			blacklistcc_add "power9"
+		fi
+		if [ ${cc_major} -lt 10 ]; then
+			blacklistcc_add "armsve"
 		fi
 	fi
 
@@ -1594,6 +1607,9 @@ check_compiler()
 				# See comment above regarding zen support.
 				#blacklistcc_add "zen"
 				: # explicit no-op since bash can't handle empty loop bodies.
+			fi
+			if [ ${cc_major} -lt 11 ]; then
+				blacklistcc_add "armsve"
 			fi
 		fi
 	fi
@@ -2040,6 +2056,7 @@ main()
 	enable_arg_max_hack='no'
 	enable_static='yes'
 	enable_shared='yes'
+    enable_rpath='no'
 	export_shared='public'
 	enable_pba_pools='yes'
 	enable_sba_pools='yes'
@@ -2164,6 +2181,12 @@ main()
 							;;
 						disable-shared)
 							enable_shared='no'
+							;;
+						enable-rpath)
+							enable_rpath='yes'
+							;;
+						disable-rpath)
+							enable_rpath='no'
 							;;
 						export-shared=*)
 							export_shared=${OPTARG#*=}
@@ -2394,7 +2417,7 @@ main()
 	fi
 
 	echo "${script_name}: using '${found_cc}' C compiler."
-	
+
 	# Also check the compiler to see if we are (cross-)compiling for Windows
 	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
 		is_win=yes
@@ -3152,7 +3175,7 @@ main()
 
 		enable_sandbox_01=0
 	fi
-	
+
 	# Check the method used for returning complex numbers
 	if [ "x${complex_return}" = "xdefault" ]; then
 		if [ -n "${FC}" ]; then
@@ -3183,7 +3206,7 @@ main()
 			complex_return='gnu'
 		fi
 	fi
-	
+
 	if [ "x${complex_return}" = "xgnu"  ]; then
 		complex_return_intel01='0'
 	elif [ "x${complex_return}" = "xintel" ]; then
@@ -3336,6 +3359,7 @@ main()
 		| sed -e "s/@enable_arg_max_hack@/${enable_arg_max_hack}/g" \
 		| sed -e "s/@enable_static@/${enable_static}/g" \
 		| sed -e "s/@enable_shared@/${enable_shared}/g" \
+		| sed -e "s/@enable_rpath@/${enable_rpath}/g" \
 		| sed -e "s/@export_shared@/${export_shared}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
@@ -3343,7 +3367,7 @@ main()
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		> "${config_mk_out_path}"
-		
+
 
 	# Begin substituting information into the bli_config_h_in file, outputting
 	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
