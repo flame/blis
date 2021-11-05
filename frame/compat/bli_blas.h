@@ -199,6 +199,12 @@
 #include "bla_trsm_check.h"
 #include "bla_gemmt_check.h"
 
+// -- Transpose and Copy Routines --
+#include "bla_omatadd.h"
+#include "bla_omatcopy.h"
+#include "bla_omatcopy2.h"
+#include "bla_imatcopy.h"
+
 // -- Fortran-compatible APIs to BLIS functions --
 
 #include "b77_thread.h"
