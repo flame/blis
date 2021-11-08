@@ -36,7 +36,7 @@
 #ifndef BLIS_FAMILY_AMD64_LEGACY_H
 #define BLIS_FAMILY_AMD64_LEGACY_H
 
-// Place holder for bundle configuration.
+// Placeholder for bundle configuration.
 
 #endif
 

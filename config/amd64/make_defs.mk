@@ -60,8 +60,8 @@ else
 COPTFLAGS      := -O2
 endif
 
-# Setting for reference and optimized kernels are taken from
-# Individual configuration makefiles in this family.
+# Setting for reference and optimized kernels are taken from individual
+# subconfiguration makefile fragments in this family.
 
 # Store all of the variables here to new variables containing the
 # configuration name.

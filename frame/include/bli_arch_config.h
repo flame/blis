@@ -42,6 +42,7 @@
 //
 
 // -- Intel64 architectures --
+
 #ifdef BLIS_CONFIG_SKX
 CNTX_INIT_PROTS( skx )
 #endif
@@ -62,6 +63,7 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
+
 #ifdef BLIS_CONFIG_ZEN3
 CNTX_INIT_PROTS( zen3 )
 #endif
@@ -156,6 +158,7 @@ CNTX_INIT_PROTS( generic )
 #endif
 
 // -- Intel64 architectures --
+
 #ifdef BLIS_FAMILY_SKX
 #include "bli_family_skx.h"
 #endif

@@ -32,9 +32,6 @@
 #
 #
 
-# FLAGS that are specific to the 'zen3' architecture are added here.
-# FLAGS that are common for all the AMD architectures are present in
-# config/zen/amd_config.mk.
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
@@ -60,76 +57,55 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-#frame pointers are needed to execution tracing
-ifeq ($(ETRACE_ENABLE),1)
 COPTFLAGS      := -O3
-else
-COPTFLAGS      := -O3 -fomit-frame-pointer
-endif
 endif
 
-
-#
-# --- Enable ETRACE across the library if enabled ETRACE_ENABLE=[0,1] -----------------------
-#
-
-ifeq ($(ETRACE_ENABLE),1)
-CDBGFLAGS += -pg -finstrument-functions -DAOCL_DTL_AUTO_TRACE_ENABLE
-LDFLAGS += -ldl
-endif
-
-# Flags specific to optimized kernels.
-CKOPTFLAGS     := $(COPTFLAGS)
+# Flags specific to optimized and reference kernels.
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS         := $(COPTFLAGS) -fomit-frame-pointer
+CROPTFLAGS         := $(CKOPTFLAGS)
+CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
+CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 ifeq ($(CC_VENDOR),gcc)
-GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
-#gcc or clang version must be atleast 4.0
-# gcc 9.0 or later:
-ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
-CKVECFLAGS     += -march=znver2
-else
-# If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
-# as the fallback option.
-CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
-CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
-endif
+  ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions older than 9.1.
+    CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
+  else
+  ifeq ($(GCC_OT_10_1_0),yes) # gcc versions 9.1 or newer, but older than 10.1.
+    CVECFLAGS_VER  := -march=znver2
+  else                        # gcc versions 10.1 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
+  endif
 else
 ifeq ($(CC_VENDOR),clang)
-
-# AOCC clang has various formats for the version line
-
-# AOCC.LLVM.2.0.0.B191.2019_07_19 clang version 8.0.0 (CLANG: Jenkins AOCC_2_0_0-Build#191) (based on LLVM AOCC.LLVM.2.0.0.B191.2019_07_19)
-# AOCC.LLVM.2.1.0.B1030.2019_11_12 clang version 9.0.0 (CLANG: Build#1030) (based on LLVM AOCC.LLVM.2.1.0.B1030.2019_11_12)
-# AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
-# AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
-# AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
-
-# For our prupose we just want to know if it version 2x or 3x
-
-# for version 3x we will enable znver3
-ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
-CKVECFLAGS += -march=znver3
+  ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
+    CVECFLAGS_VER  := -march=znver1
+  else
+  ifeq ($(CLANG_OT_12_0_0),yes) # clang versions 9.0 or newer, but older than 12.0.
+    CVECFLAGS_VER  := -march=znver2
+  else                          # clang versions 12.0 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
+  endif
 else
-# for version 2x we will enable znver2
-ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
-CKVECFLAGS += -march=znver2
+ifeq ($(CC_VENDOR),aocc)
+  ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
+    CVECFLAGS_VER  := -march=znver1
+  else
+  ifeq ($(AOCC_OT_3_0_0),yes)   # aocc versions 2.0 or newer, but older than 3.0.
+    CVECFLAGS_VER  := -march=znver2
+  else                          # aocc versions 3.0 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
+  endif
 else
-#if compiling with clang
-VENDOR_STRING := $(strip $(shell ${CC_VENDOR} --version | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*'))
-CC_MAJOR := $(shell (echo ${VENDOR_STRING} | cut -d. -f1))
-#clang 9.0 or later:
-ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
-CKVECFLAGS += -march=znver2
-else
-CKVECFLAGS += -march=znver1
-endif # ge 9
-endif # aocc 2
-endif # aocc 3
-endif # clang
-endif # gcc
-
-# Flags specific to reference kernels.
-CROPTFLAGS     := $(CKOPTFLAGS)
-CRVECFLAGS     := $(CKVECFLAGS)
+  $(error gcc, clang, or aocc is required for this configuration.)
+endif
+endif
+endif
+CKVECFLAGS         += $(CVECFLAGS_VER)
+CRVECFLAGS         += $(CVECFLAGS_VER)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

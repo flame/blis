@@ -35,10 +35,10 @@
 #ifndef BLIS_FAMILY_AMD64_H
 #define BLIS_FAMILY_AMD64_H
 
-//To enable framework optimizations for EPYC family processors.
-//With this macro defined, we can call kernels directly from
-//BLAS interfaces for levels 1 & 2.
-//This macro needs to be defined for all EPYC configurations.
+// Enable framework optimizations for EPYC family processors.
+// With this macro defined, we can call kernels directly from
+// BLAS interfaces for levels 1 & 2.
+// This macro needs to be defined for all EPYC configurations.
 #define BLIS_CONFIG_EPYC
 
 #endif
