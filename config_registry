@@ -11,7 +11,7 @@
 x86_64:      intel64 amd64
 intel64:     skx knl haswell sandybridge penryn generic
 amd64:       zen2 zen excavator steamroller piledriver bulldozer generic
-arm64:       thunderx2 cortexa57 cortexa53 generic
+arm64:       firestorm thunderx2 cortexa57 cortexa53 generic
 arm32:       cortexa15 cortexa9 generic
 
 # Intel architectures.
@@ -32,6 +32,7 @@ bulldozer:   bulldozer
 # ARM architectures.
 armsve:      armsve/armsve
 a64fx:       a64fx/armsve
+firestorm:   firestorm/armv8a
 thunderx2:   thunderx2/armv8a
 cortexa57:   cortexa57/armv8a
 cortexa53:   cortexa53/armv8a

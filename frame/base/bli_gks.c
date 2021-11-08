@@ -50,7 +50,7 @@ static void_fp  cntx_ref_init[ BLIS_NUM_ARCHS ];
 // Define a function pointer type for context initialization functions.
 typedef void (*nat_cntx_init_ft)( cntx_t* cntx );
 typedef void (*ref_cntx_init_ft)( cntx_t* cntx );
-typedef void (*ind_cntx_init_ft)( ind_t method, num_t dt, cntx_t* cntx );
+typedef void (*ind_cntx_init_ft)( ind_t method, cntx_t* cntx );
 
 // -----------------------------------------------------------------------------
 
@@ -158,6 +158,11 @@ void bli_gks_init( void )
 		bli_gks_register_cntx( BLIS_ARCH_A64FX,       bli_cntx_init_a64fx,
 		                                              bli_cntx_init_a64fx_ref,
 		                                              bli_cntx_init_a64fx_ind );
+#endif
+#ifdef BLIS_CONFIG_FIRESTORM
+		bli_gks_register_cntx( BLIS_ARCH_FIRESTORM,   bli_cntx_init_firestorm,
+		                                              bli_cntx_init_firestorm_ref,
+		                                              bli_cntx_init_firestorm_ind );
 #endif
 #ifdef BLIS_CONFIG_CORTEXA15
 		bli_gks_register_cntx( BLIS_ARCH_CORTEXA15,   bli_cntx_init_cortexa15,
@@ -577,7 +582,7 @@ cntx_t* bli_gks_query_ind_cntx
 			// function for the current induced method. (That function assumes
 			// that the context is pre- initialized with values for native
 			// execution.)
-			f( ind, dt, gks_id_ind );
+			f( ind, gks_id_ind );
 		}
 	}
 	// END CRITICAL SECTION

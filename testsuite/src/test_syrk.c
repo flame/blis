@@ -276,8 +276,6 @@ void libblis_test_syrk_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_syrk( alpha, a, beta, c );
-		//bli_syrk4m( alpha, a, beta, c );
-		//bli_syrk3m( alpha, a, beta, c );
 		break;
 
 		default:

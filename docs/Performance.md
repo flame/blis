@@ -550,9 +550,9 @@ The `runthese.m` file will contain example invocations of the function.
 * Operating system: RHEL 8.3
 * Page size: 256 bytes
 * Compiler: gcc 10.1.0
-* Results gathered: 2 April 2021; BLIS and SSL2 updated on 20 May 2021
+* Results gathered: 2 April 2021; BLIS and SSL2 updated on 21 Sept 2021
 * Implementations tested:
-  * BLIS 61584de (post-0.8.1)
+  * BLIS b05279d (post-0.8.1)
     * configured with:
       * `../configure -t none CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (single-threaded)
       * `../configure -t openmp CFLAGS="-DCACHE_SECTOR_SIZE_READONLY" a64fx` (multithreaded)
@@ -574,7 +574,7 @@ The `runthese.m` file will contain example invocations of the function.
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12`
     * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48`
     * **NOTE**: While this version of ARMPL does provide multithreaded implementations of `symm`/`hemm`, `syrk`/`herk`, `trmm`, or `trsm` (with the exception `dtrsm`), but these implementations yield very low performance, and their long run times led us to skip collecting these data altogether.
-  * Fujitsu SSL2 (Fujitsu toolchain 1.2.31)
+  * Fujitsu SSL2 (Fujitsu toolchain 1.2.33)
     * Single-threaded (1 core) execution requested via `export OMP_NUM_THREADS=1 NPARALLEL=1`
     * Multithreaded (12 core) execution requested via `export OMP_NUM_THREADS=12 NPARALLEL=12`
     * Multithreaded (48 core) execution requested via `export OMP_NUM_THREADS=48 NPARALLEL=48`
