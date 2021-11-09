@@ -133,7 +133,7 @@ BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,BLIS_TAPI_EX_SUF) \
        uplo_t  uploc, \
        trans_t transa, \
        dim_t   m, \
-       dim_t   n, \
+       dim_t   k, \
        ctype*  alpha, \
        ctype*  a, inc_t rs_a, inc_t cs_a, \
        ctype*  beta, \

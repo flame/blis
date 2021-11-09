@@ -46,6 +46,7 @@
 #include "bli_l3_direct.h"
 #include "bli_l3_prune.h"
 #include "bli_l3_packm.h"
+#include "bli_l3_schema.h"
 
 // Prototype object APIs (basic and expert).
 #include "bli_l3_oapi.h"
