@@ -129,7 +129,7 @@ void cblas_dgemm_batch(enum CBLAS_ORDER Order,
             else
             {
                 cblas_xerbla(2, "cblas_dgemm_batch",
-                       "Illegal TransA setting %d for group %d\n", TransB_array[i], i);
+                       "Illegal TransB setting %d for group %d\n", TransB_array[i], i);
                 CBLAS_CallFromC = 0;
                 RowMajorStrg = 0;
                 return;

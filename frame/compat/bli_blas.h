@@ -200,7 +200,8 @@
 #include "bla_trsm_check.h"
 #include "bla_gemmt_check.h"
 
-// -- Batch Extension prototypes -- 
+// -- Batch prototypes --
+
 #include "bla_gemm_batch.h"
 
 

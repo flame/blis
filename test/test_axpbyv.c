@@ -159,31 +159,31 @@ int main( int argc, char** argv )
 #ifdef BLIS
 
             bli_axpbyv( &alpha,
-                       &x,
-                   &beta,
-                       &y );
+                        &x,
+                        &beta,
+                        &y );
 #else
             if ( bli_is_float( dt ) )
             {
                 f77_int nn     = bli_obj_length( &x );
                 f77_int incx   = bli_obj_vector_inc( &x );
                 f77_int incy   = bli_obj_vector_inc( &y );
-                float   alphap = *(float *)bli_obj_buffer( &alpha );
-                float   betap  = *(float *)bli_obj_buffer( &beta  );
+                float   alphap = *(( float * )bli_obj_buffer( &alpha ));
+                float   betap  = *(( float * )bli_obj_buffer( &beta  ));
                 float*  xp     = bli_obj_buffer( &x );
                 float*  yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_saxpby( nn,
-                          alphap,
-                          xp, incx,
-                          betap,
-                          yp, incy );
+                              alphap,
+                              xp, incx,
+                              betap,
+                              yp, incy );
 #else
                 saxpby_( &nn,
-                        &alphap,
-                        xp, &incx,
-                    &betap,
-                        yp, &incy );
+                         &alphap,
+                         xp, &incx,
+                         &betap,
+                         yp, &incy );
 
 #endif
             }
@@ -193,45 +193,45 @@ int main( int argc, char** argv )
                 f77_int  nn     = bli_obj_length( &x );
                 f77_int  incx   = bli_obj_vector_inc( &x );
                 f77_int  incy   = bli_obj_vector_inc( &y );
-                double   alphap = *(double *)bli_obj_buffer( &alpha );
-                double   betap  = *(double *)bli_obj_buffer( &beta  );
+                double   alphap = *(( double * )bli_obj_buffer( &alpha ));
+                double   betap  = *(( double * )bli_obj_buffer( &beta  ));
                 double*  xp     = bli_obj_buffer( &x );
                 double*  yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_daxpby( nn,
-                          alphap,
-                          xp, incx,
-                          betap,
-                          yp, incy );
+                              alphap,
+                              xp, incx,
+                              betap,
+                              yp, incy );
 #else
                 daxpby_( &nn,
-                        &alphap,
-                        xp, &incx,
-                    &betap,
-                        yp, &incy );
+                         &alphap,
+                         xp, &incx,
+                         &betap,
+                         yp, &incy );
 #endif
             }
             else if ( bli_is_scomplex( dt ) )
             {
                 f77_int  nn     = bli_obj_length( &x );
                 f77_int  incx   = bli_obj_vector_inc( &x );
-                    f77_int  incy   = bli_obj_vector_inc( &y );
+                f77_int  incy   = bli_obj_vector_inc( &y );
                 void*    alphap = bli_obj_buffer( &alpha );
                 void*    betap  = bli_obj_buffer( &beta  );
                 void*    xp     = bli_obj_buffer( &x );
                 void*    yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_caxpby( nn,
-                          alphap,
-                          xp, incx,
-                          betap,
-                          yp, incy );
+                              alphap,
+                              xp, incx,
+                              betap,
+                              yp, incy );
 #else
                 caxpby_( &nn,
-                     (scomplex*)alphap,
-                     (scomplex*)xp, &incx,
-                     (scomplex*)betap,
-                     (scomplex*)yp, &incy );
+                         ( scomplex* )alphap,
+                         ( scomplex* )xp, &incx,
+                         ( scomplex* )betap,
+                         ( scomplex* )yp, &incy );
 #endif
             }
             else if ( bli_is_dcomplex( dt ))
@@ -245,16 +245,16 @@ int main( int argc, char** argv )
                 void*    yp     = bli_obj_buffer( &y );
 #ifdef CHECK_CBLAS
                 cblas_zaxpby( nn,
-                          alphap,
-                          xp, incx,
-                          betap,
-                          yp, incy );
+                              alphap,
+                              xp, incx,
+                              betap,
+                              yp, incy );
 #else
                 zaxpby_( &nn,
-                     (dcomplex*)alphap,
-                     (dcomplex*)xp, &incx,
-                     (dcomplex*)betap,
-                     (dcomplex*)yp, &incy );
+                         ( dcomplex* )alphap,
+                         ( dcomplex* )xp, &incx,
+                         ( dcomplex* )betap,
+                         ( dcomplex* )yp, &incy );
 #endif
             }
 #endif

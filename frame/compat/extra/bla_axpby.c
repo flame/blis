@@ -50,38 +50,38 @@ void PASTEF77(ch,blasname) \
              ftype*   y, const f77_int* incy  \
      ) \
 { \
-    dim_t  n0; \
-    ftype* x0; \
-    ftype* y0; \
-    inc_t  incx0; \
-    inc_t  incy0; \
+	dim_t  n0; \
+	ftype* x0; \
+	ftype* y0; \
+	inc_t  incx0; \
+	inc_t  incy0; \
 \
-    /* Initialize BLIS. */ \
-    bli_init_auto(); \
+	/* Initialize BLIS. */ \
+	bli_init_auto(); \
 \
-    /* Convert/typecast negative values of n to zero. */ \
-    bli_convert_blas_dim1( *n, n0 ); \
+	/* Convert/typecast negative values of n to zero. */ \
+	bli_convert_blas_dim1( *n, n0 ); \
 \
-    /* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */ \
-    bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
-    bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */ \
+	bli_convert_blas_incv( n0, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( n0, (ftype*)y, *incy, y0, incy0 ); \
 \
-    /* Call BLIS interface. */ \
-    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-    ( \
-      BLIS_NO_CONJUGATE, \
-      n0, \
-      (ftype*)alpha, \
-      x0, incx0, \
-      (ftype*)beta,  \
-      y0, incy0, \
-      NULL, \
-      NULL  \
-    ); \
+	/* Call BLIS interface. */ \
+	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+	( \
+	  BLIS_NO_CONJUGATE, \
+	  n0, \
+	  (ftype*)alpha, \
+	  x0, incx0, \
+	  (ftype*)beta,  \
+	  y0, incy0, \
+	  NULL, \
+	  NULL  \
+	); \
 \
-    /* Finalize BLIS. */ \
-    bli_finalize_auto(); \
+	/* Finalize BLIS. */ \
+	bli_finalize_auto(); \
 }
 
 #ifdef BLIS_ENABLE_BLAS
