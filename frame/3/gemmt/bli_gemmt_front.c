@@ -108,7 +108,7 @@ void bli_gemmt_front
 	bli_l3_thread_decorator
 	(
 	  bli_gemm_int,
-	  BLIS_HERK, // operation family id (gemmt uses 'herk' family)
+	  BLIS_GEMMT, // operation family id
 	  alpha,
 	  &a_local,
 	  &b_local,
