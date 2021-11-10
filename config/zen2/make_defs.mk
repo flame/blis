@@ -1,6 +1,6 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -87,7 +87,7 @@ ifeq ($(CC_VENDOR),clang)
 else
 ifeq ($(CC_VENDOR),aocc)
   ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
-    CVECFLAGS_VER  := -march=znver1
+    CVECFLAGS_VER  := -march=znver1 -mllvm -disable-licm-vrp
   else                          # aocc versions 2.0 or newer.
     CVECFLAGS_VER  := -march=znver2
   endif
