@@ -53,18 +53,6 @@ void bli_gemmt_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-#if 0
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-	gint_t status = bli_gemmt_small( alpha, &a_local, &at_local, beta, &c_local,
-	                                 cntx, cntl );
-	if ( status == BLIS_SUCCESS ) return;
-#endif
-#endif
-
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemmt_check( alpha, a, b, beta, c, cntx );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -87,6 +75,10 @@ void bli_gemmt_front
 	bli_obj_alias_to( c, &c_local );
 	bli_obj_set_as_root( &c_local );
 
+    bli_obj_remove_offs( &a_local );
+    bli_obj_remove_offs( &b_local );
+    bli_obj_remove_offs( &c_local );
+
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
@@ -100,6 +92,9 @@ void bli_gemmt_front
 		bli_obj_induce_trans( &c_local );
 	}
 
+	// Set the pack schemas within the objects, as appropriate.
+	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
+
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
@@ -112,17 +107,6 @@ void bli_gemmt_front
 	  bli_obj_width( &a_local ),
 	  rntm
 	);
-
-	// A sort of hack for communicating the desired pach schemas for A and B
-	// to bli_gemm_cntl_create() (via bli_l3_thread_decorator() and
-	// bli_l3_cntl_create_if()). This allows us to access the schemas from
-	// the control tree, which hopefully reduces some confusion, particularly
-	// in bli_packm_init().
-	pack_t schema_a = bli_cntx_schema_a_block( cntx );
-	pack_t schema_b = bli_cntx_schema_b_panel( cntx );
-
-	bli_obj_set_pack_schema( schema_a, &a_local );
-	bli_obj_set_pack_schema( schema_b, &b_local );
 
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator

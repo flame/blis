@@ -108,9 +108,6 @@ int main( int argc, char** argv )
 
 	ind_t ind_mod = ind;
 
-	// A hack to use 3m1 as 1mpb (with 1m as 1mbp).
-	if ( ind == BLIS_3M1 ) ind_mod = BLIS_1M;
-
 	// Initialize a context for the current induced method and datatype.
 	cntx = bli_gks_query_ind_cntx( ind_mod, dt );
 
@@ -120,8 +117,7 @@ int main( int argc, char** argv )
 #elif 0
 
 	#ifdef BLIS
-	if      ( ind == BLIS_4M1A ) k_input = 128;
-	else if ( ind == BLIS_1M )   k_input = 128;
+	if      ( ind == BLIS_1M )   k_input = 128;
 	else                         k_input = 256;
 	#else
 	k_input = 192;

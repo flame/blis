@@ -315,7 +315,7 @@ bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
-    cntl_t* cntl_b;
+    cntl_t* cntl_b = NULL;
 
 	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
@@ -404,7 +404,8 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	// Free the control tree nodes and release their cached mem_t entries
 	// back to the memory broker.
 	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
-	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+    if ( cntl_b )
+	    bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.
 	bli_obj_free( &a_big );

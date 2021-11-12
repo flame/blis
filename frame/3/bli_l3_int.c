@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -101,27 +100,6 @@ void bli_l3_int
 	if ( !bli_obj_pack_fn( &b_local ) )
 		bli_obj_set_pack_fn( bli_packm_blk_var1, &b_local );
 
-	// If we are using the default packing functon, ensure that the
-	// packing parameters are set. If using a custom packing function,
-	// it's up to the user to make sure there are valid parameters.
-	/*
-	packm_blk_var1_params_t params_a, params_b;
-
-	if ( bli_obj_pack_fn( &a_local ) == bli_packm_blk_var1 &&
-	     !bli_obj_pack_params( &a_local ) )
-	{
-		bli_packm_blk_var1_init_params( &params_a );
-		bli_obj_set_pack_params( &params_a, &a_local );
-	}
-
-	if ( bli_obj_pack_fn( &b_local ) == bli_packm_blk_var1 &&
-	     !bli_obj_pack_params( &b_local ) )
-	{
-		bli_packm_blk_var1_init_params( &params_b );
-		bli_obj_set_pack_params( &params_b, &b_local );
-	}
-	*/
-
 	// If we are about to call a leaf-level implementation, and matrix C
 	// still needs a transposition, then we must induce one by swapping the
 	// strides and dimensions. Note that this transposition would normally
@@ -157,17 +135,6 @@ void bli_l3_int
 
 	// Extract the function pointer from the current control tree node.
 	l3_var_oft f = bli_cntl_var_func( cntl );
-
-	// Somewhat hackish support for 4m1b method implementation.
-	{
-		ind_t im = bli_cntx_method( cntx );
-
-		if ( im != BLIS_NAT )
-		{
-			if ( im == BLIS_4M1B )
-			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
-		}
-	}
 
 	// Invoke the variant.
 	f

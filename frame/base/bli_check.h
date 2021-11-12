@@ -103,7 +103,7 @@ err_t bli_check_valid_malloc_buf( void* ptr );
 
 err_t bli_check_valid_packbuf( packbuf_t buf_type );
 err_t bli_check_if_exhausted_pool( pool_t* pool );
-err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx );
+err_t bli_check_sufficient_stack_buf_size( cntx_t* cntx );
 err_t bli_check_alignment_is_power_of_two( size_t align_size );
 err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size );
 

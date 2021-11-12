@@ -972,7 +972,7 @@ et al
 
 #ifdef __APPLE__
 #include <sys/types.h>
-#include <sys/sysctl.h>
+// #include <sys/sysctl.h>
 #endif
 
 static uint32_t get_coretype
@@ -1126,10 +1126,10 @@ static uint32_t get_coretype
 		case 0x61:		// Apple
 			switch (part)
 			{
-#ifdef BLIS_CONFIG_THUNDERX2
+#ifdef BLIS_CONFIG_FIRESTORM
 				case 0x022: // Icestorm (M1.LITTLE)
 				case 0x023: // Firestorm (M1.big)
-					return BLIS_ARCH_THUNDERX2; //placeholder for M1
+					return BLIS_ARCH_FIRESTORM;
 #endif
 			}
 			break;

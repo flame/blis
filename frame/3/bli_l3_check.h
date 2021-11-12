@@ -52,6 +52,8 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( gemm )
 GENPROT( gemmt )
+GENPROT( her2k )
+GENPROT( syr2k )
 
 
 #undef  GENPROT
@@ -70,6 +72,37 @@ void PASTEMAC(opname,_check) \
 
 GENPROT( hemm )
 GENPROT( symm )
+GENPROT( trmm3 )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx  \
+    );
+
+GENPROT( herk )
+GENPROT( syrk )
+
+
+#undef  GENPROT
+#define GENPROT( opname ) \
+\
+void PASTEMAC(opname,_check) \
+     ( \
+       side_t  side, \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  b, \
+       cntx_t* cntx  \
+    );
+
 GENPROT( trmm )
 GENPROT( trsm )
 
@@ -102,6 +135,28 @@ void bli_hemm_basic_check
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     );
+
+void bli_herk_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  ah,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     );
+
+void bli_her2k_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  bh,
+       obj_t*  b,
+       obj_t*  ah,
        obj_t*  beta,
        obj_t*  c,
        cntx_t* cntx

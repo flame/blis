@@ -47,18 +47,15 @@
 #include "bli_l3_blocksize.h"
 #include "bli_l3_direct.h"
 #include "bli_l3_prune.h"
+#include "bli_l3_schema.h"
 
-// Prototype object APIs (expert and non-expert).
+// Prototype object APIs (basic and expert).
 #include "bli_l3_oapi.h"
+#include "bli_l3_oapi_ex.h"
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
+// Prototype typed APIs (basic and expert).
 #include "bli_l3_tapi.h"
-#include "bli_xapi_undef.h"
-
-#include "bli_tapi_ba.h"
-#include "bli_l3_tapi.h"
-#include "bli_xapi_undef.h"
+#include "bli_l3_tapi_ex.h"
 
 // Define function types for small/unpacked handlers/kernels.
 #include "bli_l3_sup_oft.h"

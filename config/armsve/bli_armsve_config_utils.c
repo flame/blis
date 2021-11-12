@@ -89,4 +89,6 @@ void PASTEMAC(ch, _blksz_armsve) (dim_t *m_r_, dim_t *n_r_, \
 
 EXPANDMAC_BLKSZ_ARMSVE( s, 4 )
 EXPANDMAC_BLKSZ_ARMSVE( d, 8 )
+EXPANDMAC_BLKSZ_ARMSVE( c, 8  )
+EXPANDMAC_BLKSZ_ARMSVE( z, 16 )
 

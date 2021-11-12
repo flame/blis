@@ -155,44 +155,12 @@ bool bli_packm_init
 	// scaled by 3) must be even.
 	if ( bli_is_odd( ps_p ) ) ps_p += 1;
 
-	// Set the imaginary stride (in units of fundamental elements) for
-	// 3m and 4m (separated or interleaved). We use ps_p_orig since
-	// that variable tracks the number of real part elements contained
-	// within each micropanel of the source matrix. Therefore, this
-	// is the number of real elements that must be traversed before
-	// reaching the imaginary part (3mi/4mi) of the packed micropanel,
-	// or the real part of the next micropanel (3ms).
-	inc_t is_p;
-	if      ( bli_is_3mi_packed( schema ) ) is_p = ps_p;
-	else if ( bli_is_4mi_packed( schema ) ) is_p = ps_p;
-	else if ( bli_is_3ms_packed( schema ) ) is_p = ps_p * ( m_p_pad / m_panel );
-	else                                    is_p = 1;
-
-	// Here, we adjust the panel stride, if necessary. Remember: ps_p is
-	// always interpreted as being in units of the datatype of the object
-	// which is not necessarily how the micropanels will be stored. For
-	// interleaved 3m, we will increase ps_p by 50%, and for ro/io/rpi,
-	// we halve ps_p. Why? Because the macro-kernel indexes in units of
-	// the complex datatype. So these changes "trick" it into indexing
-	// the correct amount.
-	if ( bli_is_3mi_packed( schema ) )
-	{
-		ps_p = ( ps_p * 3 ) / 2;
-	}
-	else if ( bli_is_3ms_packed( schema ) ||
-	          bli_is_ro_packed( schema )  ||
-	          bli_is_io_packed( schema )  ||
-	          bli_is_rpi_packed( schema ) )
-	{
-		// Despite the fact that the packed micropanels will contain
-		// real elements, the panel stride that we store in the obj_t
-		// (which is passed into the macro-kernel) needs to be in units
-		// of complex elements, since the macro-kernel will index through
-		// micropanels via complex pointer arithmetic for trmm/trsm.
-		// Since the indexing "increment" will be twice as large as each
-		// actual stored element, we divide the panel_stride by 2.
-		ps_p = ps_p / 2;
-	}
+	// Set the imaginary stride (in units of fundamental elements).
+	// This is the number of real elements that must be traversed before
+	// reaching the imaginary part of the packed micropanel. NOTE: the
+	// imaginary stride is mostly vestigial and left over from the 3m
+	// and 4m implementations.
+	inc_t is_p = 1;
 
 	// Store the strides and panel dimension in P.
 	bli_obj_set_strides( rs_p, cs_p, p );

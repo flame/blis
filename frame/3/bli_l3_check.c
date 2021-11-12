@@ -98,13 +98,78 @@ void bli_hemm_check
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
 	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
 
 	// Check object structure.
 
 	e_val = bli_check_hermitian_object( a );
+	bli_check_error_code( e_val );
+}
+
+void bli_herk_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t ah;
+
+	// Alias A to A^H so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+
+	// Check basic properties of the operation.
+
+	bli_herk_basic_check( alpha, a, &ah, beta, c, cntx );
+
+	// Check for real-valued alpha and beta.
+
+	e_val = bli_check_real_valued_object( alpha );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_real_valued_object( beta );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_hermitian_object( c );
+	bli_check_error_code( e_val );
+}
+
+void bli_her2k_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t ah, bh;
+
+	// Alias A and B to A^H and B^H so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );
+	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, b, &bh );
+
+	// Check basic properties of the operation.
+
+	bli_her2k_basic_check( alpha, a, &bh, b, &ah, beta, c, cntx );
+
+	// Check for real-valued beta.
+
+	e_val = bli_check_real_valued_object( beta );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_hermitian_object( c );
 	bli_check_error_code( e_val );
 }
 
@@ -131,7 +196,59 @@ void bli_symm_check
 	bli_check_error_code( e_val );
 }
 
-void bli_trmm_check
+void bli_syrk_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t at;
+
+	// Alias A to A^T so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+
+	// Check basic properties of the operation.
+
+	bli_herk_basic_check( alpha, a, &at, beta, c, cntx );
+
+	// Check matrix structure.
+
+	e_val = bli_check_symmetric_object( c );
+	bli_check_error_code( e_val );
+}
+
+void bli_syr2k_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+	obj_t at, bt;
+
+	// Alias A and B to A^T and B^T so we can perform dimension checks.
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, a, &at );
+	bli_obj_alias_with_trans( BLIS_TRANSPOSE, b, &bt );
+
+	// Check basic properties of the operation.
+
+	bli_her2k_basic_check( alpha, a, &bt, b, &at, beta, c, cntx );
+
+	// Check matrix structure.
+
+	e_val = bli_check_symmetric_object( c );
+	bli_check_error_code( e_val );
+}
+
+void bli_trmm3_check
      (
        side_t  side,
        obj_t*  alpha,
@@ -144,9 +261,30 @@ void bli_trmm_check
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
 	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+
+	// Check object structure.
+
+	e_val = bli_check_triangular_object( a );
+	bli_check_error_code( e_val );
+}
+
+void bli_trmm_check
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform checks common to hemm/symm/trmm/trsm.
+
+	bli_hemm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// Check object structure.
 
@@ -160,16 +298,14 @@ void bli_trsm_check
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
        cntx_t* cntx
      )
 {
 	err_t e_val;
 
-	// Perform checks common to hemm/symm.
+	// Perform checks common to hemm/symm/trmm/trsm.
 
-	bli_hemm_basic_check( side, alpha, a, b, beta, c, cntx );
+	bli_hemm_basic_check( side, alpha, a, b, &BLIS_ZERO, b, cntx );
 
 	// Check object structure.
 
@@ -295,6 +431,110 @@ void bli_hemm_basic_check
 	bli_check_error_code( e_val );
 }
 
+void bli_herk_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  ah,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform standard checks.
+
+	bli_l3_basic_check( alpha, a, ah, beta, c, cntx );
+
+	// Check object dimensions.
+
+	e_val = bli_check_level3_dims( a, ah, c );
+	bli_check_error_code( e_val );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( c );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_general_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( ah );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, ah );
+	bli_check_error_code( e_val );
+}
+
+void bli_her2k_basic_check
+     (
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  bh,
+       obj_t*  b,
+       obj_t*  ah,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx
+     )
+{
+	err_t e_val;
+
+	// Perform standard checks.
+
+	bli_l3_basic_check( alpha, a, bh, beta, c, cntx );
+	bli_l3_basic_check( alpha, b, ah, beta, c, cntx );
+
+	// Check object dimensions.
+
+	e_val = bli_check_level3_dims( a, bh, c );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_level3_dims( b, ah, c );
+	bli_check_error_code( e_val );
+
+	// Check matrix squareness.
+
+	e_val = bli_check_square_object( c );
+	bli_check_error_code( e_val );
+
+	// Check matrix structure.
+
+	e_val = bli_check_general_object( a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( bh );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_general_object( ah );
+	bli_check_error_code( e_val );
+
+	// Check for consistent datatypes.
+
+	e_val = bli_check_consistent_object_datatypes( c, a );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, ah );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, b );
+	bli_check_error_code( e_val );
+
+	e_val = bli_check_consistent_object_datatypes( c, bh );
+	bli_check_error_code( e_val );
+}
+
 void bli_l3_basic_check
      (
        obj_t*  alpha,
@@ -356,11 +596,6 @@ void bli_l3_basic_check
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_object_buffer( c );
-	bli_check_error_code( e_val );
-
-	// Check for sufficiently sized stack buffers
-
-	e_val = bli_check_sufficient_stack_buf_size( bli_obj_dt( a ), cntx );
 	bli_check_error_code( e_val );
 }
 
