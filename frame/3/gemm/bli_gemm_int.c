@@ -112,17 +112,6 @@ void bli_gemm_int
 	// Extract the function pointer from the current control tree node.
 	f = bli_cntl_var_func( cntl );
 
-	// Somewhat hackish support for 4m1b method implementation.
-	{
-		ind_t im = bli_cntx_method( cntx );
-
-		if ( im != BLIS_NAT )
-		{
-			if ( im == BLIS_4M1B )
-			if ( f == bli_gemm_ker_var2 ) f = bli_gemm4mb_ker_var2;
-		}
-	}
-
 	// Invoke the variant.
 	f
 	(

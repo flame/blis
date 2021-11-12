@@ -678,7 +678,7 @@ siz_t bli_thread_range_mdim
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
 	if      ( family == BLIS_GEMM ) { x = a; use_weighted = FALSE; }
-	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
 	else if ( family == BLIS_TRMM ) { x = a; use_weighted = TRUE;  }
 	else    /*family == BLIS_TRSM*/ { x = a; use_weighted = FALSE; }
 
@@ -737,7 +737,7 @@ siz_t bli_thread_range_ndim
 	// structured matrix, even though they represent part of that matrix
 	// that will be dense and full (after packing).
 	if      ( family == BLIS_GEMM ) { x = b; use_weighted = FALSE; }
-	else if ( family == BLIS_HERK ) { x = c; use_weighted = TRUE;  }
+	else if ( family == BLIS_GEMMT ) { x = c; use_weighted = TRUE;  }
 	else if ( family == BLIS_TRMM ) { x = b; use_weighted = TRUE;  }
 	else    /*family == BLIS_TRSM*/ { x = b; use_weighted = FALSE; }
 

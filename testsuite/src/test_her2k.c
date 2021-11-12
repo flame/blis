@@ -285,8 +285,6 @@ void libblis_test_her2k_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_her2k( alpha, a, b, beta, c );
-		//bli_her2k4m( alpha, a, b, beta, c );
-		//bli_her2k3m( alpha, a, b, beta, c );
 		break;
 
 		default:

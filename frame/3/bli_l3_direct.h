@@ -53,7 +53,7 @@ dir_t PASTEMAC0(opname) \
       );
 
 GENPROT( gemm_direct )
-GENPROT( herk_direct )
+GENPROT( gemmt_direct )
 GENPROT( trmm_direct )
 GENPROT( trsm_direct )
 

@@ -91,6 +91,7 @@ BLIS_EXPORT_BLIS char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t 
 // -- BLIS implementation query (level-3) --------------------------------------
 
 BLIS_EXPORT_BLIS char* bli_info_get_gemm_impl_string( num_t dt );
+BLIS_EXPORT_BLIS char* bli_info_get_gemmt_impl_string( num_t dt );
 BLIS_EXPORT_BLIS char* bli_info_get_hemm_impl_string( num_t dt );
 BLIS_EXPORT_BLIS char* bli_info_get_herk_impl_string( num_t dt );
 BLIS_EXPORT_BLIS char* bli_info_get_her2k_impl_string( num_t dt );

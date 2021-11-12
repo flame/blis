@@ -53,10 +53,6 @@ void bli_gemmt_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemmt_check( alpha, a, b, beta, c, cntx );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -112,7 +108,7 @@ void bli_gemmt_front
 	bli_l3_thread_decorator
 	(
 	  bli_gemm_int,
-	  BLIS_HERK, // operation family id (gemmt uses 'herk' family)
+	  BLIS_GEMMT, // operation family id
 	  alpha,
 	  &a_local,
 	  &b_local,

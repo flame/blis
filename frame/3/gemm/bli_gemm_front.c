@@ -53,10 +53,6 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -91,6 +87,13 @@ void bli_gemm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
+#ifdef BLIS_ENABLE_GEMM_MD
+	// Don't perform the following optimization for ccr or crc cases, as
+	// those cases are sensitive to the ukernel storage preference (ie:
+	// transposing the operation would break them).
+	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
+	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
+#endif
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
@@ -145,14 +148,6 @@ void bli_gemm_front
 	// now been typecast and attached to the matrices above.
 	alpha = &BLIS_ONE;
 	beta  = &BLIS_ONE;
-
-#ifdef BLIS_ENABLE_GEMM_MD
-	// Don't perform the following optimization for ccr or crc cases, as
-	// those cases are sensitive to the ukernel storage preference (ie:
-	// transposing the operation would break them).
-	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
-	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
-#endif
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
