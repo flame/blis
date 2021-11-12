@@ -301,7 +301,8 @@ bool bli_cpuid_is_zen3
 	if ( family != 0x19 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x00-0xff (THIS NEEDS UPDATING)
+	// - 0x00 ~ 0xff
+	// NOTE: We accept any model because the family 25 (0x19) is unique.
 	const bool is_arch
 	=
 	( 0x00 <= model && model <= 0xff );
@@ -329,7 +330,9 @@ bool bli_cpuid_is_zen2
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x30-0xff (THIS NEEDS UPDATING)
+	// - 0x30 ~ 0xff
+	// NOTE: We must check model because the family 23 (0x17) is shared with
+	// zen.
 	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0xff );
@@ -357,10 +360,12 @@ bool bli_cpuid_is_zen
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x00-0xff (THIS NEEDS UPDATING)
+	// - 0x00 ~ 0x2f
+	// NOTE: We must check model because the family 23 (0x17) is shared with
+	// zen2.
 	const bool is_arch
 	=
-	( 0x00 <= model && model <= 0xff );
+	( 0x00 <= model && model <= 0x2f );
 
 	if ( !is_arch ) return FALSE;
 
@@ -385,7 +390,7 @@ bool bli_cpuid_is_excavator
 	if ( family != 0x15 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x60-0x7f
+	// - 0x60 ~ 0x7f
 	const bool is_arch
 	=
 	( 0x60 <= model && model <= 0x7f );
@@ -413,7 +418,7 @@ bool bli_cpuid_is_steamroller
 	if ( family != 0x15 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x30-0x3f
+	// - 0x30 ~ 0x3f
 	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0x3f );
@@ -442,7 +447,7 @@ bool bli_cpuid_is_piledriver
 
 	// Finally, check for specific models:
 	// - 0x02
-	// - 0x10-0x1f
+	// - 0x10 ~ 0x1f
 	const bool is_arch
 	=
 	model == 0x02 || ( 0x10 <= model && model <= 0x1f );
