@@ -14,7 +14,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -200,9 +200,20 @@
 /*
 * BLAS extensions
 */
-#define F77_sgemmt sgemmt_
-#define F77_dgemmt dgemmt_
-#define F77_cgemmt cgemmt_
-#define F77_zgemmt zgemmt_
+#define F77_sgemmt  sgemmt_
+#define F77_dgemmt  dgemmt_
+#define F77_cgemmt  cgemmt_
+#define F77_zgemmt  zgemmt_
+
+#define F77_saxpby  saxpby_
+#define F77_daxpby  daxpby_
+#define F77_caxpby  caxpby_
+#define F77_zaxpby  zaxpby_
+
+#define F77_sgemm_batch  sgemm_batch_
+#define F77_dgemm_batch  dgemm_batch_
+#define F77_cgemm_batch  cgemm_batch_
+#define F77_zgemm_batch  zgemm_batch_
+
 
 #endif /*  CBLAS_F77_H */

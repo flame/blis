@@ -1009,9 +1009,11 @@ BLIS_H_FLAT     := $(BASE_INC_PATH)/$(BLIS_H)
 #
 
 # Isolate the path to cblas.h by filtering the file from the list of framework
-# header files.
+# header files, and then strip the filename to obtain the directory in which
+# cblas.h resides.
 CBLAS_H          := cblas.h
 CBLAS_H_SRC_PATH := $(filter %/$(CBLAS_H), $(FRAME_H99_FILES))
+CBLAS_H_DIRPATH  := $(dir $(CBLAS_H_SRC_PATH))
 
 # Construct the path to what will be the intermediate flattened/monolithic
 # cblas.h file.
@@ -1037,7 +1039,8 @@ REF_KER_H_PATHS := $(strip $(foreach header, $(REF_KER_HEADERS), \
                                               $(FRAME_H99_FILES)))))
 
 # Add -I to each header path so we can specify our include search paths to the
-# C compiler. Then add frame/include since it's needed for bli_oapi_w[o]_cntx.h.
+# C compiler. Then add frame/include since it's needed when compiling source
+# files that #include bli_oapi_ba.h or bli_oapi_ex.h.
 REF_KER_I_PATHS := $(strip $(patsubst %, -I%, $(REF_KER_H_PATHS)))
 REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 
@@ -1045,6 +1048,13 @@ REF_KER_I_PATHS += -I$(DIST_PATH)/frame/include
 # NOTE: We no longer need every header path in the source tree since we
 # now #include the monolithic/flattened blis.h instead.
 CINCFLAGS       := -I$(BASE_INC_PATH) $(REF_KER_I_PATHS)
+
+# If CBLAS is enabled, we also include the path to the cblas.h directory so
+# that the compiler will be able to find cblas.h as the CBLAS source code is
+# being compiled.
+ifeq ($(MK_ENABLE_CBLAS),yes)
+CINCFLAGS       += -I$(CBLAS_H_DIRPATH)
+endif
 
 # Obtain a list of header paths in the configured sandbox. Then add -I to each
 # header path.
