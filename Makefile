@@ -114,6 +114,7 @@ BASE_OBJ_CONFIG_PATH   := $(BASE_OBJ_PATH)/$(CONFIG_DIR)
 BASE_OBJ_FRAME_PATH    := $(BASE_OBJ_PATH)/$(FRAME_DIR)
 BASE_OBJ_REFKERN_PATH  := $(BASE_OBJ_PATH)/$(REFKERN_DIR)
 BASE_OBJ_KERNELS_PATH  := $(BASE_OBJ_PATH)/$(KERNELS_DIR)
+BASE_OBJ_ADDON_PATH    := $(BASE_OBJ_PATH)/$(ADDON_DIR)
 BASE_OBJ_SANDBOX_PATH  := $(BASE_OBJ_PATH)/$(SANDBOX_DIR)
 
 # --- Define install target names for static libraries ---
@@ -210,6 +211,10 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
 
+# Generate object file paths for the addon source code. If one or more addons
+# were not enabled a configure-time, this variable will we empty.
+MK_ADDON_OBJS       := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDON_SRC),$(ADDON_PATH),$(BASE_OBJ_ADDON_PATH))
+
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
 MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
@@ -219,6 +224,7 @@ MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
                        $(MK_KERNELS_OBJS) \
                        $(MK_REFKERN_OBJS) \
                        $(MK_FRAME_OBJS) \
+                       $(MK_ADDON_OBJS) \
                        $(MK_SANDBOX_OBJS)
 
 # Optionally filter out the BLAS and CBLAS compatibility layer object files.
@@ -551,6 +557,28 @@ endef
 
 # first argument: a configuration name from the union of config_list and
 # config_name, used to look up the CFLAGS to use during compilation.
+define make-c99-addon-rule
+$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CC) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-addon-c99text-for,$(1))
+	@$(CC) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
+define make-cxx-addon-rule
+$(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_HXX_FILES) $(MAKE_DEFS_MK_PATHS)
+ifeq ($(ENABLE_VERBOSE),yes)
+	$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+else
+	@echo "Compiling $$@" $(call get-addon-cxxtext-for,$(1))
+	@$(CXX) $(call get-addon-cxxflags-for,$(1)) -c $$< -o $$@
+endif
+endef
+
+# first argument: a configuration name from the union of config_list and
+# config_name, used to look up the CFLAGS to use during compilation.
 define make-c99-sandbox-rule
 $(BASE_OBJ_SANDBOX_PATH)/%.o: $(SANDBOX_PATH)/%.$(2) $(BLIS_H_FLAT) $(SANDBOX_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
@@ -600,6 +628,16 @@ $(foreach conf, $(CONFIG_LIST), $(eval $(call make-refkern-rule,$(conf))))
 # specified by the KCONFIG_MAP.
 $(foreach suf, $(KERNELS_SRC_SUFS), \
 $(foreach kset, $(KERNEL_LIST), $(eval $(call make-kernels-rule,$(kset),$(call get-config-for-kset,$(kset)),$(suf)))))
+
+# Instantiate the build rule for C addon files. Use the CFLAGS for the
+# configuration family.
+$(foreach suf, $(ADDON_C99_SUFS), \
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-c99-addon-rule,$(conf),$(suf)))))
+
+# Instantiate the build rule for C++ addon files. Use the CFLAGS for the
+# configuration family.
+$(foreach suf, $(ADDON_CXX_SUFS), \
+$(foreach conf, $(CONFIG_NAME), $(eval $(call make-cxx-addon-rule,$(conf),$(suf)))))
 
 # Instantiate the build rule for C sandbox files. Use the CFLAGS for the
 # configuration family.
@@ -1078,6 +1116,9 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(FIND) $(FRAME_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	- $(FIND) $(KERNELS_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+ifneq ($(ADDON_LIST),)
+	- $(FIND) $(ADDON_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+endif
 ifneq ($(SANDBOX),)
 	- $(FIND) $(SANDBOX_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 endif
@@ -1090,6 +1131,10 @@ else
 	@- $(FIND) $(REFKERN_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
 	@echo "Removing makefile fragments from $(KERNELS_FRAG_PATH)"
 	@- $(FIND) $(KERNELS_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+ifneq ($(ADDON_LIST),)
+	@echo "Removing makefile fragments from $(ADDON_FRAG_PATH)"
+	@- $(FIND) $(ADDON_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
+endif
 ifneq ($(SANDBOX),)
 	@echo "Removing makefile fragments from $(SANDBOX_FRAG_PATH)"
 	@- $(FIND) $(SANDBOX_FRAG_PATH) -name "$(FRAGMENT_MK)" | $(XARGS) $(RM_F)
@@ -1210,6 +1255,7 @@ endif # IS_CONFIGURED
 distclean: cleanmk cleanh cleanlib cleantest
 ifeq ($(IS_CONFIGURED),yes)
 ifeq ($(ENABLE_VERBOSE),yes)
+	- $(RM_F) $(BLIS_ADDON_H)
 	- $(RM_F) $(BLIS_CONFIG_H)
 	- $(RM_F) $(CONFIG_MK_FILE)
 	- $(RM_F) $(PC_OUT_FILE)
@@ -1217,6 +1263,8 @@ ifeq ($(ENABLE_VERBOSE),yes)
 	- $(RM_RF) $(LIB_DIR)
 	- $(RM_RF) $(INCLUDE_DIR)
 else
+	@echo "Removing $(BLIS_ADDON_H)"
+	@$(RM_F) $(BLIS_ADDON_H)
 	@echo "Removing $(BLIS_CONFIG_H)"
 	@$(RM_F) $(BLIS_CONFIG_H)
 	@echo "Removing $(CONFIG_MK_FILE)"
