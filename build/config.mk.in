@@ -183,6 +183,10 @@ MK_ENABLE_CBLAS   := @enable_cblas@
 # Whether libblis will depend on libmemkind for certain memory allocations.
 MK_ENABLE_MEMKIND := @enable_memkind@
 
+# The names of the addons to include when building BLIS. If empty, no addons
+# will be included.
+ADDON_LIST        := @addon_list@
+
 # The name of a sandbox defining an alternative gemm implementation. If empty,
 # no sandbox will be used and the conventional gemm implementation will remain
 # enabled.

@@ -186,6 +186,14 @@ extern "C" {
 #include "bli_util.h"
 
 
+// -- addon definitions --
+
+// NOTE: These definitions should not be included much earlier since an addon
+// may wish to utilize other types and definitions provided by BLIS.
+
+#include "bli_addon.h"
+
+
 // -- sandbox implementation --
 
 #include "bli_sbox.h"

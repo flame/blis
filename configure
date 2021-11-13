@@ -264,6 +264,15 @@ print_usage()
 	echo "                 \"small\" depends on thresholds that may vary by sub-"
 	echo "                 configuration."
 	echo " "
+	echo "   -a NAME --enable-addon=NAME"
+	echo " "
+	echo "                 Enable the code provided by an addon. An addon consists"
+	echo "                 of a separate directory of code that provides additional"
+	echo "                 APIs, implementations, and/or operations that would"
+	echo "                 otherwise not be present within a build of BLIS. This"
+	echo "                 option may be used multiple times to specify the inclusion"
+	echo "                 of multiple addons. By default, no addons are enabled."
+	echo " "
 	echo "   -s NAME --enable-sandbox=NAME"
 	echo " "
 	echo "                 Enable a separate sandbox implementation of gemm. This"
@@ -938,6 +947,18 @@ canonicalize_ws()
 
 	# Update the input argument.
 	echo "${str}"
+}
+
+rm_duplicate_words_simple()
+{
+	local str revstr revres res
+
+	str="$1"
+
+	# Remote duplicates, keeping the first occurrence.
+	res=$(echo "${str}" | awk '{for (i=1;i<=NF;i++) if (!a[$i]++) printf("%s%s",$i,FS)}{printf("\n")}')
+
+	echo "${res}"
 }
 
 rm_duplicate_words()
@@ -1915,6 +1936,13 @@ main()
 	bli_config_h_in_path="${build_dirpath}/${bli_config_h_in}"
 	bli_config_h_out_path="${cur_dirpath}/${bli_config_h_out}"
 
+	# The names/paths for the template bli_addon.h.in and its instantiated
+	# counterpart.
+	bli_addon_h_in='bli_addon.h.in'
+	bli_addon_h_out='bli_addon.h'
+	bli_addon_h_in_path="${build_dirpath}/${bli_addon_h_in}"
+	bli_addon_h_out_path="${cur_dirpath}/${bli_addon_h_out}"
+
 	# Path to 'mirror-tree.sh' script.
 	mirror_tree_sh="${build_dirpath}/mirror-tree.sh"
 
@@ -1941,6 +1969,9 @@ main()
 	# The root directory of the BLIS framework.
 	aocldtl_dir='aocl_dtl'
 	aocldtl_dirpath="${dist_path}/${aocldtl_dir}"
+	# The names of the addons.
+	addon_dir='addon'
+	addon_dirpath="${dist_path}/${addon_dir}"
 
 	# The name of the sandbox directory.
 	sandbox_dir='sandbox'
@@ -2049,6 +2080,10 @@ main()
 	force_version='no'
 	complex_return='default'
 
+	# The addon flag and names.
+	addon_flag=''
+	addon_list=''
+
 	# The sandbox flag and name.
 	sandbox_flag=''
 	sandbox=''
@@ -2093,7 +2128,7 @@ main()
 
 		# Process our command line options.
 		unset OPTIND
-		while getopts ":hp:d:e:s:t:r:qci:b:-:" opt; do
+		while getopts ":hp:d:e:a:s:t:r:qci:b:-:" opt; do
 			case $opt in
 				-)
 					case "$OPTARG" in
@@ -2194,12 +2229,21 @@ main()
 						disable-mem-tracing)
 							enable_mem_tracing='no'
 							;;
+						enable-addon=*)
+							addon_flag=1
+							addon_name=${OPTARG#*=}
+							# Append the addon name to the list.
+							addon_list="${addon_list} ${addon_name}"
+							;;
+						disable-addon)
+							addon_flag=''
+							;;
 						enable-sandbox=*)
 							sandbox_flag=1
 							sandbox=${OPTARG#*=}
 							;;
 						disable-sandbox)
-							sandbox_flag=0
+							sandbox_flag=''
 							;;
 						int-size=*)
 							int_type_size=${OPTARG#*=}
@@ -2281,6 +2325,12 @@ main()
 					;;
 				e)
 					export_shared=$OPTARG
+					;;
+				a)
+					addon_flag=1
+					addon_name=$OPTARG
+					# Append the addon name to the list.
+					addon_list="${addon_list} ${addon_name}"
 					;;
 				s)
 					sandbox_flag=1
@@ -3141,6 +3191,34 @@ main()
 		exit 1
 	fi
 
+	# Check if addons were given.
+	if [ -n "${addon_flag}" ]; then
+
+		# Remove duplicates in the addon list, if they exist.
+		addon_list=$(rm_duplicate_words_simple "${addon_list}")
+
+		echo "${script_name}: configuring with addons:"
+
+		for addon in ${addon_list}; do
+
+			echo "${script_name}:   ${addon_dir}/${addon}"
+
+			addon_fullpath="${addon_dirpath}/${addon}"
+
+			if [ ! -d "${addon_fullpath}" ]; then
+				echo "${script_name}: requested addon sub-directory does not exist! Cannot continue."
+				echo "${script_name}: *** Please verify addon existence and name."
+				exit 1
+			fi
+		done
+
+		enable_addons_01=1
+	else
+		echo "${script_name}: configuring with no addons."
+
+		enable_addons_01=0
+	fi
+
 	# Check if a sandbox was given.
 	if [ -n "${sandbox_flag}" ]; then
 
@@ -3292,6 +3370,15 @@ main()
 		kernel_list_defines="${kernel_list_defines}#define ${kernel_define}\n"
 	done
 
+	# Create a list of #includes, one for each addon in addon_list.
+	addon_list_includes=""
+	for addon in ${addon_list}; do
+
+		# Create a #define and add it to the running list.
+		addon_header="\"${addon}.h\""
+		addon_list_includes="${addon_list_includes}#include ${addon_header}\n"
+	done
+
 
 	# -- Determine whether we are performing an out-of-tree build --------------
 
@@ -3319,7 +3406,7 @@ main()
 	fi
 
 
-	# -- Instantiate config.mk, bli_config.h files from templates --------------
+	# -- Instantiate config.mk file from template ------------------------------
 
 	# Begin substituting information into the config_mk_in file, outputting
 	# to config_mk_out.
@@ -3365,6 +3452,7 @@ main()
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
+		| sed -e "s/@addon_list@/${addon_list}/g" \
 		| sed -e "s/@sandbox@/${sandbox}/g" \
 		| sed -e "s/@enable_trsm_preinversion@/${enable_trsm_preinversion}/g" \
 		| sed -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic}/g" \
@@ -3373,6 +3461,7 @@ main()
 		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen}/g" \
 		> "${config_mk_out_path}"
 
+	# -- Instantiate bli_config.h file from template ---------------------------
 
 	# Begin substituting information into the bli_config_h_in file, outputting
 	# to bli_config_h_out. NOTE: We use perl instead of sed because the version
@@ -3409,6 +3498,17 @@ main()
 		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
 		> "${bli_config_h_out_path}"
 
+	# -- Instantiate bli_addon.h file from template ----------------------------
+
+	# Begin substituting information into the bli_addon_h_in file, outputting
+	# to bli_addon_h_out. NOTE: We use perl instead of sed because the version
+	# of sed used on OS X is old and does not handle the '\n' character
+	# intuitively, which was used when constructing ${addon_list_includes}.
+	echo "${script_name}: creating ${bli_addon_h_out_path} from ${bli_addon_h_in_path}"
+	cat "${bli_addon_h_in_path}" \
+		| perl -pe "s/\@addon_list_includes\@/${addon_list_includes}/g" \
+		| sed   -e "s/@enable_addons@/${enable_addons_01}/g" \
+		> "${bli_addon_h_out_path}"
 
 	# -- Create top-level object directories -----------------------------------
 
@@ -3421,7 +3521,6 @@ main()
 
 	obj_config_dirpath="${base_obj_dirpath}/${config_dir}"
 
-	#echo "${script_name}: creating ${obj_config_dirpath}"
 	mkdir -p ${obj_config_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_config_dirpath}/${conf}"
@@ -3431,7 +3530,6 @@ main()
 
 	obj_kernels_dirpath="${base_obj_dirpath}/${kernels_dir}"
 
-	#echo "${script_name}: creating ${obj_kernels_dirpath}"
 	mkdir -p ${obj_kernels_dirpath}
 	for kern in ${kernel_list}; do
 		echo "${script_name}: creating ${obj_kernels_dirpath}/${kern}"
@@ -3441,7 +3539,6 @@ main()
 
 	obj_refkern_dirpath="${base_obj_dirpath}/${refkern_dir}"
 
-	#echo "${script_name}: creating ${obj_refkern_dirpath}"
 	mkdir -p ${obj_refkern_dirpath}
 	for conf in ${config_list}; do
 		echo "${script_name}: creating ${obj_refkern_dirpath}/${conf}"
@@ -3459,6 +3556,18 @@ main()
 
 	echo "${script_name}: creating ${obj_frame_dirpath}"
 	mkdir -p ${obj_frame_dirpath}
+
+
+	if [ -n "${addon_flag}" ]; then
+
+		obj_addon_dirpath="${base_obj_dirpath}/${addon_dir}"
+
+		for addon in ${addon_list}; do
+			echo "${script_name}: creating ${obj_addon_dirpath}/${addon}"
+			mkdir -p ${obj_addon_dirpath}/${addon}
+		done
+	fi
+
 
 	if [ -n "${sandbox_flag}" ]; then
 
@@ -3486,6 +3595,7 @@ main()
 
 	echo "${script_name}: creating ${base_lib_dirpath}"
 	mkdir -p ${base_lib_dirpath}
+
 
 	# Create include directory (if it does not already exist).
 	base_include_dirpath="${include_dirpath}/${config_name}"
@@ -3544,6 +3654,16 @@ main()
 	# Mirror framework source tree to its object sub-directory.
 	echo "${script_name}: mirroring ${aocldtl_dirpath} to ${obj_aocldtl_dirpath}"
 	${mirror_tree_sh} ${aocldtl_dirpath} ${obj_aocldtl_dirpath}
+
+	# Mirror the chosen addon source tree to its object sub-directory.
+	if [ -n "${addon_flag}" ]; then
+
+		for addon in ${addon_list}; do
+
+			echo "${script_name}: mirroring ${addon_dirpath}/${addon} to ${obj_addon_dirpath}/${addon}"
+			${mirror_tree_sh} "${addon_dirpath}/${addon}" "${obj_addon_dirpath}/${addon}"
+		done
+	fi
 
 	# Mirror the chosen sandbox source tree to its object sub-directory.
 	if [ -n "${sandbox_flag}" ]; then
@@ -3642,6 +3762,25 @@ main()
 			 ${gen_make_frags_dirpath}/fragment.mk \
 			 ${gen_make_frags_dirpath}/suffix_list \
 			 ${gen_make_frags_dirpath}/ignore_list
+
+	# Generate makefile fragments in the addon sub-directory.
+	if [ -n "${addon_flag}" ]; then
+
+		for addon in ${addon_list}; do
+
+			echo "${script_name}: creating makefile fragments in ${obj_addon_dirpath}/${addon}"
+			${gen_make_frags_sh} \
+					 -h -r -v0 \
+					 -o ${script_name} \
+					 -p 'ADDON' \
+					 ${addon_dirpath}/${addon} \
+					 ${obj_addon_dirpath}/${addon} \
+					 ${gen_make_frags_dirpath}/fragment.mk \
+					 ${gen_make_frags_dirpath}/suffix_list \
+					 ${gen_make_frags_dirpath}/ignore_list
+		done
+	fi
+
 
 	# Generate makefile fragments in the sandbox sub-directory.
 	if [ -n "${sandbox_flag}" ]; then

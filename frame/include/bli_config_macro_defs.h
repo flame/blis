@@ -241,8 +241,9 @@
   #endif
 #endif
 
-#define BLIS_EXPORT_BLIS BLIS_EXPORT
-#define BLIS_EXPORT_BLAS BLIS_EXPORT
+#define BLIS_EXPORT_BLIS  BLIS_EXPORT
+#define BLIS_EXPORT_BLAS  BLIS_EXPORT
+#define BLIS_EXPORT_ADDON BLIS_EXPORT
 
 
 // -- STATIC INLINE FUNCTIONS --------------------------------------------------
