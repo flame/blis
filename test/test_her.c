@@ -141,45 +141,75 @@ int main( int argc, char** argv )
 #endif
 
 #ifdef BLIS
-			//bli_obj_toggle_conj( &x );
 
-			//bli_syr( &alpha,
 			bli_her( &alpha,
 			         &x,
 			         &a );
 
 #else
-			if ( bli_is_scomplex( dt_a ) )
+			if ( bli_is_float( dt_a ) )
 			{
 				f77_char uplo   = 'L';
 				f77_int  mm     = bli_obj_length( &a );
 				f77_int  incx   = bli_obj_vector_inc( &x );
 				f77_int  lda    = bli_obj_col_stride( &a );
-				float*  alphap = bli_obj_buffer( &alpha );
-				scomplex* xp   = bli_obj_buffer( &x );
-				scomplex* ap   = bli_obj_buffer( &a );
+				float*   alphap = bli_obj_buffer( &alpha );
+				float*   xp     = bli_obj_buffer( &x );
+				float*   ap     = bli_obj_buffer( &a );
 
-				cher_( &uplo,
-					&mm,
-					alphap,
-					xp, &incx,
-					ap, &lda );
+				ssyr_( &uplo,
+				       &mm,
+				       alphap,
+				       xp, &incx,
+				       ap, &lda );
 			}
-			else if ( bli_is_dcomplex( dt_a ) )
+			else if ( bli_is_double( dt_a ) )
 			{
 				f77_char uplo   = 'L';
 				f77_int  mm     = bli_obj_length( &a );
 				f77_int  incx   = bli_obj_vector_inc( &x );
 				f77_int  lda    = bli_obj_col_stride( &a );
 				double*  alphap = bli_obj_buffer( &alpha );
-				dcomplex* xp   = bli_obj_buffer( &x );
-				dcomplex* ap   = bli_obj_buffer( &a );
+				double*  xp     = bli_obj_buffer( &x );
+				double*  ap     = bli_obj_buffer( &a );
+
+				dsyr_( &uplo,
+				       &mm,
+				       alphap,
+				       xp, &incx,
+				       ap, &lda );
+			}
+			else if ( bli_is_scomplex( dt_a ) )
+			{
+				f77_char  uplo   = 'L';
+				f77_int   mm     = bli_obj_length( &a );
+				f77_int   incx   = bli_obj_vector_inc( &x );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				float*    alphap = bli_obj_buffer( &alpha );
+				scomplex* xp     = bli_obj_buffer( &x );
+				scomplex* ap     = bli_obj_buffer( &a );
+
+				cher_( &uplo,
+				       &mm,
+				       alphap,
+				       xp, &incx,
+				       ap, &lda );
+			}
+			else if ( bli_is_dcomplex( dt_a ) )
+			{
+				f77_char  uplo   = 'L';
+				f77_int   mm     = bli_obj_length( &a );
+				f77_int   incx   = bli_obj_vector_inc( &x );
+				f77_int   lda    = bli_obj_col_stride( &a );
+				double*   alphap = bli_obj_buffer( &alpha );
+				dcomplex* xp     = bli_obj_buffer( &x );
+				dcomplex* ap     = bli_obj_buffer( &a );
 
 				zher_( &uplo,
-					&mm,
-					alphap,
-					xp, &incx,
-					ap, &lda );
+				       &mm,
+				       alphap,
+				       xp, &incx,
+				       ap, &lda );
 			}
 #endif
 
