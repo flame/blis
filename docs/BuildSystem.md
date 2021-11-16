@@ -40,14 +40,14 @@ Finally, we also require various other shell utilities that are so ubiquitous th
 Before starting, you must obtain a copy of BLIS.
 
 If you are an end-user (i.e., not a developer), you can download a tarball or zip file of the latest tagged version by returning to the main [BLIS homepage](https://github.com/flame/blis) and clicking on the [releases](https://github.com/flame/blis/releases) link. **However**, we highly recommend that you instead clone a copy using the command:
-```
+```bash
 $ git clone https://github.com/flame/blis.git
 ```
 
 Cloning a repository allows users and developers alike to quickly and easily pull in new commits as they are available, including commits that occur **between** tagged releases.
 
 Once you download the BLIS distribution, the top-level directory should look something like:
-```
+```bash
 $ ls
 CHANGELOG  Makefile      common.mk        configure  mpi_test     testsuite
 CREDITS    README.md     config           frame      obj          version
@@ -63,7 +63,7 @@ The first step is to choose how to configure BLIS. Specifically, a user must dec
 Configurations are described in detail in the [Configuration Guide](ConfigurationHowTo.md).
 
 Generally speaking, a configuration consists of several files that reside in a sub-directory of the `config` directory. To see a list of the available configurations, you may inspect this directory, or run `configure` with no arguments. Here are the current (as of this writing) contents of the `config` directory:
-```
+```bash
 $ ls config
 amd64      cortexa15  excavator  intel64  old         power7       template
 bgq        cortexa57  generic    knc      penryn      sandybridge  zen
@@ -85,19 +85,19 @@ Multithreading in BLIS is disabled by default. For more information on enabling 
 ## Step 2: Running `configure`
 
 This step should be somewhat familiar to many people who use open source software. To configure the build system, simply run:
-```
+```bash
 $ ./configure <configname>
 ```
 where `<configname>` is the configuration sub-directory name you chose in [Step 1](BuildSystem.md#step-1-choose-a-framework-configuration) above. If `<configname>` is not given, a helpful message is printed reminding you to explicit specify a configuration name along with a list of valid configuration families and their implied sub-configurations. For more information on sub-configurations and families, please see the BLIS [Configuration Guide](ConfigurationHowTo.md).
 
 Alternatively, `configure` can automatically select a configuration based on your hardware:
-```
+```bash
 $ ./configure auto
 ```
 However, as of this writing, BLIS lacks support for automatically detecting some architectures. If the `configure` script is not able to detect your architecture, the `generic` configuration will be used.
 
 Upon running configure, you will get output similar to the following. The exact output will depend on whether you cloned BLIS from a `git` repository or whether you obtained BLIS via a downloadable tarball from the [releases](https://github.com/flame/blis/releases) page.
-```
+```bash
 $ ./configure --prefix=$HOME/blis haswell
 configure: using 'gcc' compiler.
 configure: found gcc version 5.4.0 (maj: 5, min: 4, rev: 0).
@@ -174,17 +174,17 @@ configure: creating makefile fragments in ./frame
 configure: configured to build within top-level directory of source distribution.
 ```
 The installation prefix can be specified via the `--prefix=PREFIX` option:
-```
+```bash
 $ ./configure --prefix=/usr <configname>
 ```
 This will cause libraries to eventually be installed (via `make install`) to `PREFIX/lib` and development headers to be installed to `PREFIX/include`. (The default value of `PREFIX` is `/usr/local`.) You can also specify the library install directory separately from the development header install directory with the `--libdir=LIBDIR` and `--includedir=INCDIR` options, respectively:
-```
+```bash
 $ ./configure --libdir=/usr/lib --includedir=/usr/include <configname>
 ```
 The `--libdir=LIBDIR` and `--includedir=INCDIR` options will override any path implied by `PREFIX`, whether it was specified explicitly via `--prefix` or implicitly (via the default). That is, `LIBDIR` defaults to `EXECPREFIX/lib` (where `EXECPREFIX`, set via `--exec-prefix=EXECPREFIX`, defaults to `PREFIX`) and `INCDIR` defaults to `PREFIX/include`, but `LIBDIR` and `INCDIR` will each be overriden by their respective `--libdir`/`--includedir` options. There is a third related option, `--sharedir=SHAREDIR`, where `SHAREDIR` defaults to `PREFIX/share`. This option specifies the installation directory for certain makefile fragments that contain variables determined by `configure` (e.g. `CC`, `CFLAGS`, `LDFLAGS`, etc.). These files allow certain BLIS makefiles, such as those in the `examples` or `testsuite` directories, to operate on an installed copy of BLIS rather than a local (and possibly uninstalled) copy.
 
 For a complete list of supported `configure` options and arguments, run `configure` with the `-h` option:
-```
+```bash
 $ ./configure -h
 ```
 The output from this invocation of `configure` should give you an up-to-date list of options and their descriptions.
@@ -192,7 +192,7 @@ The output from this invocation of `configure` should give you an up-to-date lis
 ## Step 3: Compilation
 
 Once `configure` is finished, you are ready to instantiate (compile) BLIS into a library by running `make`. Running `make` will result in output similar to:
-```
+```bash
 $ make
 Generating monolithic blis.h.........................................................
 .....................................................................................
@@ -209,11 +209,11 @@ Compiling obj/haswell/kernels/zen/1/bli_dotv_zen_int.o ('haswell' CFLAGS for ker
 Compiling obj/haswell/kernels/zen/1/bli_dotv_zen_int10.o ('haswell' CFLAGS for kernels)
 ```
 If you want to see the individual command line invocations of the compiler, you can run `make` as follows:
-```
+```bash
 $ make V=1
 ```
 Also, if you are compiling on a multicore system, you can get parallelism via:
-```
+```bash
 $ make -j<n>
 ```
 where `<n>` is the number of jobs `make` is allowed to run simultaneously. Generally, you should limit `<n>` to p+1, where p is the number of processor cores on your system.
@@ -236,7 +236,7 @@ The archiver and/or linker should no longer choke when creating the libraries.
 ## Step 3b: Testing (optional)
 
 If you would like to run some ready-made tests that exercise BLIS in a number of ways, including through its BLAS compatibility layer, run `make check`:
-```
+```bash
 $ make check
 ```
 Watch the output near the end. You should see the following messages, though not necessarily in immediate succession:
@@ -263,7 +263,7 @@ Archiving lib/haswell/libblis.a
 Dynamically linking lib/haswell/libblis.so
 ```
 Now you have a BLIS library (in static and shared forms) residing in the `lib/<configname>/` directory. To install the libraries and the header files associated with it, simply execute:
-```
+```bash
 $ make install
 ```
 This installs copies of the libraries and header files, and also creates conventional symbolic links of shared libraries:
@@ -275,7 +275,7 @@ Installing symlink libblis.so.0 into /u/field/blis/lib/
 Installing blis.h into /u/field/blis/include/blis/
 ```
 This results in your `PREFIX` directory looking like:
-```
+```bash
 # Check the contents of 'PREFIX'.
 $ ls -l $HOME/blis
 drwxr-xr-x 3 field dept 4096 May 10 17:36 include
@@ -296,14 +296,14 @@ lrwxrwxrwx 1 field dept      16 May 10 17:42 libblis.so.0 -> libblis.so.0.0.0
 ## Cleaning out build products
 
 If you want to remove various build products, you can use one of the `make` targets already defined for you in the BLIS Makefile:
-```
+```bash
 $ make clean
 Removing flattened header files from ./include/haswell.
 Removing object files from ./obj/haswell.
 Removing libraries from ./lib/haswell.
 ```
 Executing the `clean` target will remove all binary object files and library builds from the `obj` and `lib` directories, as well as any flattened header files. Any other configurations' build products are left untouched.
-```
+```bash
 $ make cleanmk
 Removing makefile fragments from ./config.
 Removing makefile fragments from ./frame.
@@ -311,7 +311,7 @@ Removing makefile fragments from ./ref_kernels.
 Removing makefile fragments from ./kernels.
 ```
 The `cleanmk` target results in removal of all makefile fragments from the framework source tree. (Makefile fragments are named `.fragment.mk` and are generated at configure-time.)
-```
+```bash
 $ make distclean
 Removing makefile fragments from ./config.
 Removing makefile fragments from ./frame.
@@ -357,7 +357,7 @@ If the BLAS compatibility layer was enabled at configure-time (as it is by defau
 ### Disabling BLAS prototypes
 
 Some applications already `#include` a header that contains BLAS prototypes. This can cause problems if those applications also try to `#include` the BLIS header file, as shown above. Suppose for a moment that `otherstuff.h` in the example above already provides BLAS prototypes.
-```
+```bash
 $ gcc -I/path/to/blis -I/path/to/otherstuff -c main.c -o main.o
 In file included from main.c:41:0:
 /path/to/blis/blis.h:36900:111: error: conflicting declaration of C function ‘int xerbla_(const bla_character*, const bla_integer*, ftnlen)’
@@ -413,7 +413,7 @@ The makefile shown above a very simple example. If you need help linking your ap
 ## Uninstalling
 
 If you decide that you want to uninstall BLIS, simply run `make uninstall`
-```
+```bash
 $ make uninstall
 Uninstalling libraries libblis.a libblis.so.0.0.0 from /u/field/blis/lib/.
 Uninstalling symlinks libblis.so libblis.so.0 from /u/field/blis/lib/.

@@ -337,7 +337,7 @@ slightly out of date.)
 URL by clicking on the green button above the file/directory listing near the
 top of this page (as rendered by GitHub). Generally speaking, it will amount
 to executing the following command in your terminal shell:
-   ```
+   ```bash
    git clone https://github.com/flame/blis.git
    ```
 
@@ -375,18 +375,18 @@ as discussed in [the previous section](#how-to-download-blis).*
 If you just want to build a sequential (not parallelized) version of BLIS
 in a hurry and come back and explore other topics later, you can configure
 and build BLIS as follows:
-```
+```bash
 $ ./configure auto
 $ make [-j]
 ```
 You can then verify your build by running BLAS- and BLIS-specific test
 drivers via `make check`:
-```
+```bash
 $ make check [-j]
 ```
 And if you would like to install BLIS to the directory specified to `configure`
 via the `--prefix` option, run the `install` target:
-```
+```bash
 $ make install
 ```
 Please read the output of `./configure --help` for a full list of configure-time
@@ -417,11 +417,11 @@ built (but not necessarily installed) BLIS two directories up, in `../..`. If
 you have already installed BLIS to some permanent directory, you may refer to
 that installation by setting the environment variable `BLIS_INSTALL_PATH` prior
 to running make:
-```
+```bash
 export BLIS_INSTALL_PATH=/usr/local; make
 ```
 or by setting the same variable as part of the make command:
-```
+```bash
 make BLIS_INSTALL_PATH=/usr/local
 ```
 **Once the executable files have been built, we recommend reading the code and
