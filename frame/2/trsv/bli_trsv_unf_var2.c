@@ -294,7 +294,11 @@ void bli_dtrsv_unf_var2
 
     /* Assign kernel function pointer and fusing factor. */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    kfp_af = bli_daxpyf_zen_int_16x4;
 	    b_fuse = 4;
@@ -490,7 +494,11 @@ void bli_strsv_unf_var2
 
     /* Assign function pointer and fusing factor. */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    kfp_af = bli_saxpyf_zen_int_5;
 	    b_fuse = 5;
@@ -686,7 +694,11 @@ void bli_ztrsv_unf_var2
 
     /* Assign function pointer and fusing factor. */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    kfp_af = bli_zaxpyf_zen_int_5;
 	    b_fuse = 5;
@@ -881,7 +893,11 @@ void bli_ctrsv_unf_var2
 
     /* Assign function pointer and fusing factor. */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    kfp_af = bli_caxpyf_zen_int_5;
 	    b_fuse = 5;

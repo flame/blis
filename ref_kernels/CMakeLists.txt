@@ -5,6 +5,7 @@ add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/generic ${CMAKE_BINARY_DIR}/ref
 add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen ${CMAKE_BINARY_DIR}/ref_kernels/zen)
 add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen2 ${CMAKE_BINARY_DIR}/ref_kernels/zen2)
 add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen3 ${CMAKE_BINARY_DIR}/ref_kernels/zen3)
+add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen4 ${CMAKE_BINARY_DIR}/ref_kernels/zen4)
 else()
 target_sources("${PROJECT_NAME}"
         PRIVATE

@@ -147,7 +147,11 @@ void sswap_
     }
 
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 /* Call BLIS kernel */
 	    bli_sswapv_zen_int8
@@ -238,7 +242,11 @@ void dswap_
 
     /* Call BLIS kernel */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    bli_dswapv_zen_int8
 		    (

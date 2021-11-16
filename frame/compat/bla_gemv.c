@@ -274,7 +274,10 @@ void dgemv_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen == 0)
     {
@@ -462,7 +465,10 @@ void sgemv_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen == 0)
     {
@@ -639,7 +645,10 @@ void cgemv_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if( m_y == 1 )
     {
@@ -660,10 +669,10 @@ void cgemv_
         }
         else
         {
-            /* Call BLIS interface. */ 
-            PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF) 
-            ( 
-              conja, 
+            /* Call BLIS interface. */
+            PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF)
+            (
+              conja,
               BLIS_NO_CONJUGATE,
               n_x,
               (scomplex*)a, bli_is_notrans(blis_transa)?cs_a:rs_a,
@@ -869,7 +878,10 @@ void zgemv_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if( m_y == 1 )
     {
@@ -891,10 +903,10 @@ void zgemv_
         }
         else
         {
-            /* Call BLIS interface. */ 
-            PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF) 
-            ( 
-              conja, 
+            /* Call BLIS interface. */
+            PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF)
+            (
+              conja,
               BLIS_NO_CONJUGATE,
               n_x,
               (dcomplex*)a, bli_is_notrans(blis_transa)?cs_a:rs_a,

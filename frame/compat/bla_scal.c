@@ -147,7 +147,11 @@ void sscal_
     }
     /* Call BLIS kernel */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 	    bli_sscalv_zen_int10
 		    (
@@ -228,7 +232,11 @@ void dscal_
     }
     /* Call BLIS kernel */
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen){
 	    bli_dscalv_zen_int10
 		    (

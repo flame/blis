@@ -596,7 +596,11 @@ void strsm_
     bli_obj_set_struc( struca, &ao );
 
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	    /* bli_strsm_small is performing better existing native
@@ -857,7 +861,11 @@ void dtrsm_
     bli_obj_set_struc( struca, &ao );
 
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
+
     if (bamdzen) {
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
 	    /* bli_dtrsm_small is performing better existing native

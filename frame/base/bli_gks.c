@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2021, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -97,6 +97,11 @@ void bli_gks_init( void )
 #endif
 
 		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN4
+		bli_gks_register_cntx( BLIS_ARCH_ZEN4,        bli_cntx_init_zen4,
+		                                              bli_cntx_init_zen4_ref,
+		                                              bli_cntx_init_zen4_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		bli_gks_register_cntx( BLIS_ARCH_ZEN3,        bli_cntx_init_zen3,
 		                                              bli_cntx_init_zen3_ref,
@@ -165,7 +170,7 @@ void bli_gks_init( void )
 		bli_gks_register_cntx( BLIS_ARCH_POWER10,     bli_cntx_init_power10,
 		                                              bli_cntx_init_power10_ref,
 		                                              bli_cntx_init_power10_ind );
-#endif													  
+#endif
 #ifdef BLIS_CONFIG_POWER9
 		bli_gks_register_cntx( BLIS_ARCH_POWER9,      bli_cntx_init_power9,
 		                                              bli_cntx_init_power9_ref,
@@ -247,7 +252,7 @@ void bli_gks_finalize( void )
 void bli_gks_init_index( void )
 {
 	// This function is called by bli_gks_init(). It simply initializes all
-	// architecture id elements of the internal arrays to NULL. 
+	// architecture id elements of the internal arrays to NULL.
 
 	const size_t gks_size = sizeof( cntx_t* ) * BLIS_NUM_ARCHS;
 	const size_t fpa_size = sizeof( void_fp ) * BLIS_NUM_ARCHS;
@@ -360,7 +365,7 @@ void bli_gks_register_cntx
 	// functions for reference kernels and induced method execution. The
 	// former will be used whenever we need to obtain reference kernels and
 	// latter will be used later on if the user calls a level-3 function
-	// with induced execution enabled. 
+	// with induced execution enabled.
 	cntx_ref_init[ id ] = ref_fp;
 	cntx_ind_init[ id ] = ind_fp;
 
@@ -554,7 +559,7 @@ cntx_t* bli_gks_query_ind_cntx
 			// function on the newly allocated structure, we must first copy
 			// over the contents of the native context.
 			*gks_id_ind = *gks_id_nat;
-			
+
 			// Use the architecture id to look up the function pointer to the
 			// context initialization function for induced methods.
 			ind_cntx_init_ft f = cntx_ind_init[ id ];

@@ -47,7 +47,7 @@
 #define D_BLIS_SMALL_MATRIX_THRES (BLIS_SMALL_MATRIX_THRES / 2 )
 #define D_BLIS_SMALL_M_RECT_MATRIX_THRES (BLIS_SMALL_M_RECT_MATRIX_THRES / 2)
 #define D_BLIS_SMALL_K_RECT_MATRIX_THRES (BLIS_SMALL_K_RECT_MATRIX_THRES / 2)
-#define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called. 
+#define BLIS_ATBN_M_THRES 40 // Threshold value of M for/below which small matrix code is called.
 #define AT_MR 4 // The kernel dimension of the A transpose GEMM kernel.(AT_MR * NR).
 static err_t bli_sgemm_small
      (
@@ -109,7 +109,7 @@ err_t bli_gemm_small
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
-	
+
 #ifdef BLIS_ENABLE_MULTITHREADING
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
@@ -118,7 +118,10 @@ err_t bli_gemm_small
 	// Invoke architecture specific kernels only if we are sure that we are running on zen,
 	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
 	arch_t id = bli_arch_query_id();
-	bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
 	if (0 == bamdzen)
 	{
@@ -262,7 +265,7 @@ static err_t bli_sgemm_small
 
         const num_t    dt_exec   = bli_obj_dt( c );
         float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
-        float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
+        float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
         /*Beta Zero Check*/
         bool is_beta_non_zero=0;
@@ -299,11 +302,11 @@ static err_t bli_sgemm_small
         bli_membrk_rntm_set_membrk( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
-        // We will use the same size to avoid pool re-initialization 
+        // We will use the same size to avoid pool re-initialization
         siz_t buffer_size = bli_pool_block_size(bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
                                                 bli_rntm_membrk(&rntm)));
 
-        // Based on the available memory in the buffer we will decide if 
+        // Based on the available memory in the buffer we will decide if
         // we want to do packing or not.
         //
         // This kernel assumes that "A" will be un-packged if N <= 3.
@@ -315,18 +318,18 @@ static err_t bli_sgemm_small
         // If this check is removed it will result in the crash as
         // reported in CPUPL-587.
         //
-        
+
         if ((N <= 3) || (((MR * K) << 2) > buffer_size))
         {
             required_packing_A = 0;
         }
-        else 
+        else
         {
 #ifdef BLIS_ENABLE_MEM_TRACING
             printf( "bli_sgemm_small: Requesting mem pool block of size %lu\n", buffer_size);
 #endif
             // Get the buffer from the pool, if there is no pool with
-            // required size, it will be created. 
+            // required size, it will be created.
             bli_membrk_acquire_m(&rntm,
                                  buffer_size,
                                  BLIS_BITVAL_BUFFER_FOR_A_BLOCK,
@@ -1730,7 +1733,7 @@ static err_t bli_sgemm_small
             bli_membrk_release(&rntm,
                                &local_mem_buf_A_s);
         }
-		
+
 		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
         return BLIS_SUCCESS;
     }
@@ -1757,7 +1760,7 @@ static err_t bli_sgemm_small
      )
 {
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-	
+
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_width( a );  // number of columns of OP(A), will be updated if OP(A) is Transpose(A) .
@@ -1771,7 +1774,7 @@ static err_t bli_sgemm_small
     /* 			); */
     /*     return BLIS_NOT_YET_IMPLEMENTED; VK */
     /* 	} */
-    
+
 
   if(L && K ) // Non-zero dimensions will be handled by either sup or native kernels
     {
@@ -1844,7 +1847,7 @@ static err_t bli_sgemm_small
         bli_membrk_rntm_set_membrk( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
-        // We will use the same size to avoid pool re-initliazaton 
+        // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
             bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
                             bli_rntm_membrk(&rntm)));
@@ -1865,7 +1868,7 @@ static err_t bli_sgemm_small
         {
             required_packing_A = 0;
         }
-        
+
         if (required_packing_A == 1)
         {
 #ifdef BLIS_ENABLE_MEM_TRACING
@@ -3345,7 +3348,7 @@ static err_t bli_sgemm_small_atbn
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-	
+
 	gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
@@ -3371,7 +3374,7 @@ static err_t bli_sgemm_small_atbn
     float scratch[8] = {0.0};
     const num_t    dt_exec   = bli_obj_dt( c );
     float* restrict alpha_cast = bli_obj_buffer_for_1x1( dt_exec, alpha );
-    float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );	
+    float* restrict beta_cast  = bli_obj_buffer_for_1x1( dt_exec, beta );
 
     /*Beta Zero Check*/
     bool is_beta_non_zero=0;
@@ -3822,7 +3825,7 @@ static err_t bli_dgemm_small_atbn
      )
 {
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO);
-	
+
     gint_t M = bli_obj_length( c ); // number of rows of Matrix C
     gint_t N = bli_obj_width( c );  // number of columns of Matrix C
     gint_t K = bli_obj_length( b ); // number of rows of Matrix B
@@ -4358,7 +4361,7 @@ err_t bli_dgemm_small_At
         bli_membrk_rntm_set_membrk( &rntm );
 
         // Get the current size of the buffer pool for A block packing.
-        // We will use the same size to avoid pool re-initliazaton 
+        // We will use the same size to avoid pool re-initliazaton
         siz_t buffer_size = bli_pool_block_size(
             bli_membrk_pool(bli_packbuf_index(BLIS_BITVAL_BUFFER_FOR_A_BLOCK),
                             bli_rntm_membrk(&rntm)));

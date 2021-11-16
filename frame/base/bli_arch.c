@@ -154,6 +154,9 @@ void bli_arch_set_id( void )
 		#endif
 
 		// AMD microarchitectures.
+		#ifdef BLIS_FAMILY_ZEN4
+		id = BLIS_ARCH_ZEN4;
+		#endif
 		#ifdef BLIS_FAMILY_ZEN3
 		id = BLIS_ARCH_ZEN3;
 		#endif
@@ -236,6 +239,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "sandybridge",
     "penryn",
 
+    "zen4",
     "zen3",
     "zen2",
     "zen",

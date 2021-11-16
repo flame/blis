@@ -164,7 +164,10 @@ f77_int isamax_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -180,7 +183,7 @@ f77_int isamax_
     else
     {
       PASTEMAC2(s,amaxv,BLIS_TAPI_EX_SUF)
-      ( 
+      (
         n0,
         x0, incx0,
         &bli_index,
@@ -188,7 +191,7 @@ f77_int isamax_
         NULL
       );
     }
-    
+
     /* Convert zero-based BLIS (C) index to one-based BLAS (Fortran)
        index. Also, if the BLAS integer size differs from the BLIS
        integer size, that typecast occurs here. */
@@ -265,7 +268,10 @@ f77_int idamax_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -281,7 +287,7 @@ f77_int idamax_
     else
     {
       PASTEMAC2(d,amaxv,BLIS_TAPI_EX_SUF)
-      ( 
+      (
         n0,
         x0, incx0,
         &bli_index,

@@ -62,6 +62,9 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
+#ifdef BLIS_CONFIG_ZEN4
+CNTX_INIT_PROTS( zen4 )
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 CNTX_INIT_PROTS( zen3 )
 #endif

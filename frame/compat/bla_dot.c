@@ -159,7 +159,10 @@ float sdot_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -177,10 +180,10 @@ float sdot_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(s,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_NO_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(s,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_NO_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -265,7 +268,10 @@ double ddot_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -283,10 +289,10 @@ double ddot_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(d,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_NO_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(d,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_NO_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -377,7 +383,10 @@ scomplex cdotu_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -395,10 +404,10 @@ scomplex cdotu_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_NO_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_NO_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -484,7 +493,10 @@ dcomplex zdotu_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -502,10 +514,10 @@ dcomplex zdotu_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_NO_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_NO_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -515,7 +527,7 @@ dcomplex zdotu_
         NULL
         );
     }
- 
+
     /* Finalize BLIS. */
 //  bli_finalize_auto();
 
@@ -594,7 +606,10 @@ scomplex cdotc_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -612,10 +627,10 @@ scomplex cdotc_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(c,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -701,7 +716,10 @@ dcomplex zdotc_
     // Invoke architecture specific kernels only if we are sure that we are running on zen,
     // zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
     if (bamdzen)
     {
@@ -719,10 +737,10 @@ dcomplex zdotc_
     }
     else
     {
-        /* Call BLIS interface. */ 
-        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF) 
-        ( 
-        BLIS_CONJUGATE, 
+        /* Call BLIS interface. */
+        PASTEMAC2(z,dotv,BLIS_TAPI_EX_SUF)
+        (
+        BLIS_CONJUGATE,
         BLIS_NO_CONJUGATE,
         n0,
         x0, incx0,
@@ -733,9 +751,9 @@ dcomplex zdotc_
         );
     }
 
-    
 
-    
+
+
 
     /* Finalize BLIS. */
 //  bli_finalize_auto();

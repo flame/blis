@@ -114,6 +114,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN4
+		if ( bli_cpuid_is_zen4( family, model, features ) )
+			return BLIS_ARCH_ZEN4;
+#endif
 #ifdef BLIS_CONFIG_ZEN3
 		if ( bli_cpuid_is_zen3( family, model, features ) )
 			return BLIS_ARCH_ZEN3;
@@ -264,6 +268,44 @@ bool bli_cpuid_is_penryn
 }
 
 // -----------------------------------------------------------------------------
+bool bli_cpuid_is_zen4
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected =   FEATURE_SSE3     |
+                                FEATURE_SSSE3    |
+                                FEATURE_SSE41    |
+                                FEATURE_SSE42    |
+                                FEATURE_AVX      |
+                                FEATURE_AVX2     |
+                                FEATURE_FMA3     |
+                                FEATURE_AVX512F  |
+                                FEATURE_AVX512DQ |
+                                FEATURE_AVX512CD |
+                                FEATURE_AVX512BW |
+                                FEATURE_AVX512VL ;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// For zen4 the family id is 0x19
+	if ( family != 0x19 ) return FALSE;
+
+	// Finally, check for specific models:
+	// Zen 4 maps to couple of different model number ranges
+	// we check for all of them.
+	const bool is_arch
+	=
+	(0x10 <= model && model <= 0x1f );
+
+	if ( !is_arch ) return FALSE;
+
+	return TRUE;
+}
+
 bool bli_cpuid_is_zen3
      (
        uint32_t family,

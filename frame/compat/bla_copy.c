@@ -158,7 +158,10 @@ void scopy_
 	// Invoke architecture specific kernels only if we are sure that we are running on zen,
 	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
 	if (bamdzen)
 	{
@@ -258,7 +261,10 @@ void dcopy_
 	// Invoke architecture specific kernels only if we are sure that we are running on zen,
 	// zen2 or zen3 otherwise fall back to reference kernels (via framework and context).
     arch_t id = bli_arch_query_id();
-    bool bamdzen = (id == BLIS_ARCH_ZEN3) || (id == BLIS_ARCH_ZEN2) || (id == BLIS_ARCH_ZEN);
+    bool bamdzen = (id == BLIS_ARCH_ZEN4) ||
+                   (id == BLIS_ARCH_ZEN3) ||
+                   (id == BLIS_ARCH_ZEN2) ||
+                   (id == BLIS_ARCH_ZEN);
 
 	if (bamdzen)
 	{

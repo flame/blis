@@ -1,6 +1,9 @@
 ##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved. ##
 
-if(${TARGET_ARCH} STREQUAL zen3)
+if(${TARGET_ARCH} STREQUAL zen4)
+message("The configuration is : ${TARGET_ARCH}")
+add_subdirectory(zen4)
+elseif(${TARGET_ARCH} STREQUAL zen3)
 message("The configuration is : ${TARGET_ARCH}")
 add_subdirectory(zen3)
 elseif(${TARGET_ARCH} STREQUAL zen2)
@@ -15,6 +18,7 @@ add_subdirectory(generic)
 add_subdirectory(zen)
 add_subdirectory(zen2)
 add_subdirectory(zen3)
+add_subdirectory(zen4)
 elseif(${TARGET_ARCH} STREQUAL haswell)
 message("The configuration is : ${TARGET_ARCH}")
 add_subdirectory(haswell)

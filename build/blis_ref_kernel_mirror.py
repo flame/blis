@@ -68,13 +68,17 @@ def remove_lines_in_file(filename):
     with open(filename, 'r') as fd:
         file_content = fd.read()
     file_content = file_content.replace(
-        'if(${TARGET_ARCH} STREQUAL amdzen)\nadd_subdirectory(${CMAKE_BINARY_'
-        'DIR}/ref_kernels/generic ${CMAKE_BINARY_DIR}/ref_kernels/generic)\n'
-        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen ${CMAKE_BINARY_'
-        'DIR}/ref_kernels/zen)\nadd_subdirectory(${CMAKE_BINARY_DIR}/'
-        'ref_kernels/zen2 ${CMAKE_BINARY_DIR}/ref_kernels/zen2)\n'
+        'if(${TARGET_ARCH} STREQUAL amdzen)\n'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/generic'
+        '${CMAKE_BINARY_DIR}/ref_kernels/generic)\n'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen'
+        '${CMAKE_BINARY_DIR}/ref_kernels/zen)\n'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen2'
+        '${CMAKE_BINARY_DIR}/ref_kernels/zen2)\n'
         'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen3 '
-        '${CMAKE_BINARY_DIR}/ref_kernels/zen3)\nelse()', '\n')
+        '${CMAKE_BINARY_DIR}/ref_kernels/zen3)\n'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen4 '
+        '${CMAKE_BINARY_DIR}/ref_kernels/zen4)\nelse()', '\n')
     data = file_content.replace('endif()', '\n')
     with open(filename, 'w') as fd:
         fd.write(data + '\n')
