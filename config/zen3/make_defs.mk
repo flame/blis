@@ -1,6 +1,6 @@
 #
 #
-#  BLIS
+#  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -35,7 +35,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen
+THIS_CONFIG    := zen3 
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -57,28 +57,48 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+COPTFLAGS      := -O3
 endif
 
 # Flags specific to optimized and reference kernels.
 # NOTE: The -fomit-frame-pointer option is needed for some kernels because
 # they make explicit use of the rbp register.
-CKOPTFLAGS         := $(COPTFLAGS) -O3
+CKOPTFLAGS         := $(COPTFLAGS) -fomit-frame-pointer
 CROPTFLAGS         := $(CKOPTFLAGS)
 CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
 CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 ifeq ($(CC_VENDOR),gcc)
-  ifeq ($(GCC_OT_6_1_0),yes)  # gcc versions older than 6.1.
-    CVECFLAGS_VER  := -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-  else
+  ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions older than 9.1.
     CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
+  else
+  ifeq ($(GCC_OT_10_1_0),yes) # gcc versions 9.1 or newer, but older than 10.1.
+    CVECFLAGS_VER  := -march=znver2
+  else                        # gcc versions 10.1 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
   endif
 else
 ifeq ($(CC_VENDOR),clang)
-  CVECFLAGS_VER    := -march=znver1
+  ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
+    CVECFLAGS_VER  := -march=znver1
+  else
+  ifeq ($(CLANG_OT_12_0_0),yes) # clang versions 9.0 or newer, but older than 12.0.
+    CVECFLAGS_VER  := -march=znver2
+  else                          # clang versions 12.0 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
+  endif
 else
 ifeq ($(CC_VENDOR),aocc)
-  CVECFLAGS_VER    := -march=znver1 -mllvm -disable-licm-vrp
+  ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
+    CVECFLAGS_VER  := -march=znver1
+  else
+  ifeq ($(AOCC_OT_3_0_0),yes)   # aocc versions 2.0 or newer, but older than 3.0.
+    CVECFLAGS_VER  := -march=znver2
+  else                          # aocc versions 3.0 or newer.
+    CVECFLAGS_VER  := -march=znver3
+  endif
+  endif
 else
   $(error gcc, clang, or aocc is required for this configuration.)
 endif
