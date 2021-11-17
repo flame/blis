@@ -1,9 +1,10 @@
 #
 #
-#  BLIS
+#  BLIS    
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
+#  Copyright (C) 2014, The University of Texas at Austin
 #  Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
@@ -35,7 +36,7 @@
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
-THIS_CONFIG    := zen
+THIS_CONFIG    := amd64_legacy
 #CONFIGS_INCL   += $(THIS_CONFIG)
 
 #
@@ -57,35 +58,11 @@ endif
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
-COPTFLAGS      := -O2 -fomit-frame-pointer
+COPTFLAGS      := -O2
 endif
 
-# Flags specific to optimized and reference kernels.
-# NOTE: The -fomit-frame-pointer option is needed for some kernels because
-# they make explicit use of the rbp register.
-CKOPTFLAGS         := $(COPTFLAGS) -O3
-CROPTFLAGS         := $(CKOPTFLAGS)
-CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
-CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
-ifeq ($(CC_VENDOR),gcc)
-  ifeq ($(GCC_OT_6_1_0),yes)  # gcc versions older than 6.1.
-    CVECFLAGS_VER  := -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-  else
-    CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
-  endif
-else
-ifeq ($(CC_VENDOR),clang)
-  CVECFLAGS_VER    := -march=znver1
-else
-ifeq ($(CC_VENDOR),aocc)
-  CVECFLAGS_VER    := -march=znver1 -mllvm -disable-licm-vrp
-else
-  $(error gcc, clang, or aocc is required for this configuration.)
-endif
-endif
-endif
-CKVECFLAGS         += $(CVECFLAGS_VER)
-CRVECFLAGS         += $(CVECFLAGS_VER)
+# Setting for reference and optimized kernels are taken from individual
+# subconfiguration makefile fragments in this family.
 
 # Store all of the variables here to new variables containing the
 # configuration name.
