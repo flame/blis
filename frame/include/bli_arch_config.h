@@ -42,6 +42,7 @@
 //
 
 // -- Intel64 architectures --
+
 #ifdef BLIS_CONFIG_SKX
 CNTX_INIT_PROTS( skx )
 #endif
@@ -62,6 +63,10 @@ CNTX_INIT_PROTS( penryn )
 #endif
 
 // -- AMD64 architectures --
+
+#ifdef BLIS_CONFIG_ZEN3
+CNTX_INIT_PROTS( zen3 )
+#endif
 #ifdef BLIS_CONFIG_ZEN2
 CNTX_INIT_PROTS( zen2 )
 #endif
@@ -145,11 +150,15 @@ CNTX_INIT_PROTS( generic )
 #ifdef BLIS_FAMILY_AMD64
 #include "bli_family_amd64.h"
 #endif
+#ifdef BLIS_FAMILY_AMD64_LEGACY
+#include "bli_family_amd64_legacy.h"
+#endif
 #ifdef BLIS_FAMILY_X86_64
 #include "bli_family_x86_64.h"
 #endif
 
 // -- Intel64 architectures --
+
 #ifdef BLIS_FAMILY_SKX
 #include "bli_family_skx.h"
 #endif
@@ -171,6 +180,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- AMD64 architectures --
 
+#ifdef BLIS_FAMILY_ZEN3
+#include "bli_family_zen3.h"
+#endif
 #ifdef BLIS_FAMILY_ZEN2
 #include "bli_family_zen2.h"
 #endif

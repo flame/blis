@@ -1,11 +1,10 @@
 #
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-#  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2019, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,9 +32,6 @@
 #
 #
 
-# FLAGS that are specific to the 'zen2' architecture are added here.
-# FLAGS that are common for all the AMD architectures are present in
-# config/zen/amd_config.mk.
 
 # Declare the name of the current configuration and add it to the
 # running list of configurations included by common.mk.
@@ -46,41 +42,62 @@ THIS_CONFIG    := zen2
 # --- Determine the C compiler and related flags ---
 #
 
-# Include file containing common flags for all AMD architectures.
-AMD_CONFIG_FILE := amd_config.mk
-AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
--include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
+# NOTE: The build system will append these variables with various
+# general-purpose/configuration-agnostic flags in common.mk. You
+# may specify additional flags here as needed.
+CPPROCFLAGS    :=
+CMISCFLAGS     :=
+CPICFLAGS      :=
+CWARNFLAGS     :=
 
+ifneq ($(DEBUG_TYPE),off)
+CDBGFLAGS      := -g
+endif
+
+ifeq ($(DEBUG_TYPE),noopt)
+COPTFLAGS      := -O0
+else
+COPTFLAGS      := -O2 -fomit-frame-pointer
+endif
+
+# Flags specific to optimized and reference kernels.
+# NOTE: The -fomit-frame-pointer option is needed for some kernels because
+# they make explicit use of the rbp register.
+CKOPTFLAGS         := $(COPTFLAGS) -O3
+CROPTFLAGS         := $(CKOPTFLAGS)
+CKVECFLAGS         := -mavx2 -mfma -mfpmath=sse
+CRVECFLAGS         := $(CKVECFLAGS) -funsafe-math-optimizations -ffp-contract=fast
 ifeq ($(CC_VENDOR),gcc)
-ifeq ($(GCC_OT_9_1_0),yes)
-ifeq ($(GCC_OT_6_1_0),yes)
-# If gcc is older than 6.1.0, we must use -march=bdver4 and then remove the
-# Bulldozer instruction sets that were omitted from Zen.
-CRVECFLAGS += -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-CKVECFLAGS += -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
-else
-# If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
-# as the fallback option.
-CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
-CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
-endif
-else
-# If gcc is at least 9.1.0, then we can specify the microarchitecture using
-# the preferred option.
-CRVECFLAGS += -march=znver2
-CKVECFLAGS += -march=znver2
-endif
+  ifeq ($(GCC_OT_6_1_0),yes)  # gcc versions older than 6.1.
+    CVECFLAGS_VER  := -march=bdver4 -mno-fma4 -mno-tbm -mno-xop -mno-lwp
+  else
+  ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions 6.1 or newer, but older than 9.1.
+    CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
+  else                        # gcc versions 9.1 or newer.
+    CVECFLAGS_VER  := -march=znver2
+  endif
+  endif
 else
 ifeq ($(CC_VENDOR),clang)
-# I couldn't find which versions of clang added support for -march=znver1
-# or -march=znver2, so we don't even bother attempting the differentiation
-# that appears in the gcc branch above.
-CRVECFLAGS += -march=znver1
-CKVECFLAGS += -march=znver1
+  ifeq ($(CLANG_OT_9_0_0),yes)  # clang versions older than 9.0.
+    CVECFLAGS_VER  := -march=znver1
+  else                          # clang versions 9.0 or newer.
+    CVECFLAGS_VER  := -march=znver2
+  endif
 else
-$(error gcc or clang are required for this configuration.)
+ifeq ($(CC_VENDOR),aocc)
+  ifeq ($(AOCC_OT_2_0_0),yes)   # aocc versions older than 2.0.
+    CVECFLAGS_VER  := -march=znver1 -mllvm -disable-licm-vrp
+  else                          # aocc versions 2.0 or newer.
+    CVECFLAGS_VER  := -march=znver2
+  endif
+else
+  $(error gcc, clang, or aocc is required for this configuration.)
 endif
 endif
+endif
+CKVECFLAGS         += $(CVECFLAGS_VER)
+CRVECFLAGS         += $(CVECFLAGS_VER)
 
 # Store all of the variables here to new variables containing the
 # configuration name.

@@ -63,7 +63,7 @@ cntl_t* bli_gemmbp_cntl_create
 	// Use the function pointers to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
 	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
-	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2;
+	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_x_ker_var2;
 	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
@@ -167,8 +167,8 @@ cntl_t* bli_gemmpb_cntl_create
 {
 	void_fp macro_kernel_p = bli_gemm_ker_var1;
 
-	// Change the macro-kernel if the operation family is herk or trmm.
-	//if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
+	// Change the macro-kernel if the operation family is gemmt or trmm.
+	//if      ( family == BLIS_GEMMT ) macro_kernel_p = bli_gemmt_x_ker_var2;
 	//else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
 	// Create two nodes for the macro-kernel.

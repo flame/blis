@@ -84,11 +84,7 @@
 // Operation-specific headers.
 #include "bli_gemm.h"
 #include "bli_hemm.h"
-#include "bli_herk.h"
-#include "bli_her2k.h"
 #include "bli_symm.h"
-#include "bli_syrk.h"
-#include "bli_syr2k.h"
 #include "bli_trmm.h"
 #include "bli_trmm3.h"
 #include "bli_trsm.h"

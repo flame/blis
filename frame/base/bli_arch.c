@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -171,6 +171,9 @@ void bli_arch_set_id( void )
 		#endif
 
 		// AMD microarchitectures.
+		#ifdef BLIS_FAMILY_ZEN3
+		id = BLIS_ARCH_ZEN3;
+		#endif
 		#ifdef BLIS_FAMILY_ZEN2
 		id = BLIS_ARCH_ZEN2;
 		#endif
@@ -259,6 +262,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "sandybridge",
     "penryn",
 
+    "zen3",
     "zen2",
     "zen",
     "excavator",
@@ -279,7 +283,7 @@ static char* config_name[ BLIS_NUM_ARCHS ] =
     "power9",
     "power7",
     "bgq",
-
+    
     "generic"
 };
 

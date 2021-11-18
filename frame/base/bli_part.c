@@ -266,7 +266,7 @@ void bli_acquire_mpart_mdim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_root_is_general( sub_obj ) &&
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -274,10 +274,10 @@ void bli_acquire_mpart_mdim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in herk produces subpartitions that
+		// incremental packing/computing in gemmt produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// herk_int() back-end.)
+		// gemmt_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root
@@ -489,7 +489,7 @@ void bli_acquire_mpart_ndim
 	// diagonal), and the subpartition does not intersect the root matrix's
 	// diagonal, then we might need to modify some of the subpartition's
 	// properties, depending on its structure type.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_root_is_general( sub_obj ) &&
 	      bli_obj_is_outside_diag( sub_obj ) )
 	{
 		// NOTE: This comment may be out-of-date since we now distinguish
@@ -497,10 +497,10 @@ void bli_acquire_mpart_ndim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in herk produces subpartitions that
+		// incremental packing/computing in gemmt produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// herk_int() back-end.)
+		// gemmt_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root
@@ -742,7 +742,7 @@ void bli_acquire_mpart_mndim
 	// diagonal, then set the subpartition structure to "general"; otherwise
 	// we let the subpartition inherit the storage structure of its immediate
 	// parent.
-	if ( !bli_obj_root_is_general( sub_obj ) && 
+	if ( !bli_obj_root_is_general( sub_obj ) &&
 	     req_part != BLIS_SUBPART00 &&
 	     req_part != BLIS_SUBPART11 &&
 	     req_part != BLIS_SUBPART22 )
@@ -762,10 +762,10 @@ void bli_acquire_mpart_mndim
 		// Note that we cannot mark the subpartition object as general/dense
 		// here since it makes sense to preserve the existing uplo information
 		// a while longer so that the correct kernels are invoked. (Example:
-		// incremental packing/computing in herk produces subpartitions that
+		// incremental packing/computing in gemmt produces subpartitions that
 		// appear general/dense, but their uplo fields are needed to be either
 		// lower or upper, to determine which macro-kernel gets called in the
-		// herk_int() back-end.)
+		// gemmt_int() back-end.)
 
 		// If the subpartition lies entirely in an "unstored" triangle of the
 		// root matrix, then we need to tweak the subpartition. If the root

@@ -47,7 +47,7 @@ void bli_l3_prune_unref_mparts_m
 	opid_t family = bli_cntl_family( cntl );
 
 	if      ( family == BLIS_GEMM ) return; // No pruning is necessary for gemm.
-	else if ( family == BLIS_HERK ) bli_herk_prune_unref_mparts_m( a, b, c );
+	else if ( family == BLIS_GEMMT ) bli_gemmt_prune_unref_mparts_m( a, b, c );
 	else if ( family == BLIS_TRMM ) bli_trmm_prune_unref_mparts_m( a, b, c );
 	else if ( family == BLIS_TRSM ) bli_trsm_prune_unref_mparts_m( a, b, c );
 }
@@ -68,7 +68,7 @@ void PASTEMAC(l3_prune_unref_mparts_,dim) \
 	opid_t family = bli_cntl_family( cntl ); \
 \
 	if      ( family == BLIS_GEMM ) return; /* No pruning is necessary for gemm. */ \
-	else if ( family == BLIS_HERK ) PASTEMAC(herk_prune_unref_mparts_,dim)( a, b, c ); \
+	else if ( family == BLIS_GEMMT ) PASTEMAC(gemmt_prune_unref_mparts_,dim)( a, b, c ); \
 	else if ( family == BLIS_TRMM ) PASTEMAC(trmm_prune_unref_mparts_,dim)( a, b, c ); \
 	else if ( family == BLIS_TRSM ) PASTEMAC(trsm_prune_unref_mparts_,dim)( a, b, c ); \
 }
@@ -152,7 +152,7 @@ void PASTEMAC(opname,_prune_unref_mparts_k) \
 	   for the k dimension. */ \
 }
 
-GENFRONT( herk )
+GENFRONT( gemmt )
 
 // -----------------------------------------------------------------------------
 

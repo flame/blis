@@ -99,11 +99,6 @@ void bls_gemm_check
 	e_val = bli_check_object_buffer( c );
 	bli_check_error_code( e_val );
 
-	// Check for sufficiently sized stack buffers
-
-	e_val = bli_check_sufficient_stack_buf_size( bli_obj_dt( a ), cntx );
-	bli_check_error_code( e_val );
-
 	// Check object dimensions.
 
 	e_val = bli_check_level3_dims( a, b, c );
