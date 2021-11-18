@@ -13,8 +13,9 @@ Contents
 * **[Key Features](#key-features)**
 * **[How to Download BLIS](#how-to-download-blis)**
 * **[Getting Started](#getting-started)**
-* **[Performance](#performance)**
+* **[Example Code](#example-code)**
 * **[Documentation](#documentation)**
+* **[Performance](#performance)**
 * **[External Packages](#external-packages)**
 * **[Discussion](#discussion)**
 * **[Contributing](#contributing)**
@@ -394,23 +395,41 @@ If/when you have time, we *strongly* encourage you to read the detailed
 walkthrough of the build system found in our [Build System](docs/BuildSystem.md)
 guide.
 
-Performance
------------
+Example Code
+------------
 
-We provide graphs that report performance of several implementations across a
-range of hardware types, multithreading configurations, problem sizes,
-operations, and datatypes. These pages also document most of the details needed
-to reproduce these experiments.
+The BLIS source distribution provides example code in the `examples` directory.
+Example code focuses on using BLIS APIs (not BLAS or CBLAS), and resides in
+two subdirectories: [examples/oapi](examples/oapi) (which demonstrates the
+[object API](docs/BLISObjectAPI.md)) and [examples/tapi](examples/tapi) (which
+demonstrates the [typed API](docs/BLISTypedAPI.md)).
 
- * **[Performance](docs/Performance.md).** This document reports empirically
-measured performance of a representative set of level-3 operations on a variety
-of hardware architectures, as implemented within BLIS and other BLAS libraries
-for all four of the standard floating-point datatypes.
+Either directory contains several files, each containing various pieces of
+code that exercise core functionality of the BLIS API in question (object or
+typed). These example files should be thought of collectively like a tutorial,
+and therefore it is recommended to start from the beginning (the file that
+starts in `00`).
 
- * **[PerformanceSmall](docs/PerformanceSmall.md).** This document reports
-empirically measured performance of `gemm` on select hardware architectures
-within BLIS and other BLAS libraries when performing matrix problems where one
-or two dimensions is exceedingly small.
+You can build all of the examples by simply running `make` from either example
+subdirectory (`examples/oapi` or `examples/tapi`). (You can also run
+`make clean`.) The local `Makefile` assumes that you've already configured and
+built (but not necessarily installed) BLIS two directories up, in `../..`. If
+you have already installed BLIS to some permanent directory, you may refer to
+that installation by setting the environment variable `BLIS_INSTALL_PATH` prior
+to running make:
+```
+export BLIS_INSTALL_PATH=/usr/local; make
+```
+or by setting the same variable as part of the make command:
+```
+make BLIS_INSTALL_PATH=/usr/local
+```
+**Once the executable files have been built, we recommend reading the code and
+the corresponding executable output side by side. This will help you see the
+effects of each section of code.**
+
+This tutorial is not exhaustive or complete; several object API functions were
+omitted (mostly for brevity's sake) and thus more examples could be written.
 
 Documentation
 -------------
@@ -432,16 +451,12 @@ included BLAS test drivers.
 
  * **[BLIS Typed API Reference](docs/BLISTypedAPI.md).** Here we document the
 so-called "typed" (or BLAS-like) API. This is the API that many users who are
-already familiar with the BLAS will likely want to use. You can find lots of
-example code for the typed API in the [examples/tapi](examples/tapi) directory
-included in the BLIS source distribution.
+already familiar with the BLAS will likely want to use.
 
  * **[BLIS Object API Reference](docs/BLISObjectAPI.md).** Here we document
 the object API. This is API abstracts away properties of vectors and matrices
 within `obj_t` structs that can be queried with accessor functions. Many
-developers and experts prefer this API over the typed API. You can find lots of
-example code for the object API in the [examples/oapi](examples/oapi) directory
-included in the BLIS source distribution.
+developers and experts prefer this API over the typed API.
 
  * **[Hardware Support](docs/HardwareSupport.md).** This document maintains a
 table of supported microarchitectures.
@@ -500,6 +515,24 @@ please read this thorough walkthrough of the configuration system.
  * **[Sandbox Guide](docs/Sandboxes.md).** If you are interested in learning
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
+
+Performance
+-----------
+
+We provide graphs that report performance of several implementations across a
+range of hardware types, multithreading configurations, problem sizes,
+operations, and datatypes. These pages also document most of the details needed
+to reproduce these experiments.
+
+ * **[Performance](docs/Performance.md).** This document reports empirically
+measured performance of a representative set of level-3 operations on a variety
+of hardware architectures, as implemented within BLIS and other BLAS libraries
+for all four of the standard floating-point datatypes.
+
+ * **[PerformanceSmall](docs/PerformanceSmall.md).** This document reports
+empirically measured performance of `gemm` on select hardware architectures
+within BLIS and other BLAS libraries when performing matrix problems where one
+or two dimensions is exceedingly small.
 
 External Packages
 -----------------

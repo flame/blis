@@ -12,17 +12,17 @@ matrix:
   - os: linux
     compiler: gcc
     env: OOT=1 TEST=ALL SDE=1 THR="none" CONF="x86_64" \
-      PACKAGES="gcc-8 binutils"
+      PACKAGES="gcc-9 binutils"
   # openmp build
   - os: linux
     compiler: gcc
     env: OOT=0 TEST=FAST SDE=0 THR="openmp" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
+      PACKAGES="gcc-9 binutils"
   # pthreads build
   - os: linux
     compiler: gcc
     env: OOT=0 TEST=FAST SDE=0 THR="pthreads" CONF="auto" \
-      PACKAGES="gcc-8 binutils"
+      PACKAGES="gcc-9 binutils"
   # clang build
   - os: linux
     compiler: clang
@@ -63,7 +63,7 @@ matrix:
       PACKAGES="gcc-10-aarch64-linux-gnu g++-10-aarch64-linux-gnu libc6-dev-arm64-cross qemu-system-arm qemu-user" \
       TESTSUITE_WRAPPER="qemu-aarch64 -cpu max,sve=true,sve512=true -L /usr/aarch64-linux-gnu/"
 install:
-- if [ "$CC" = "gcc"  ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-8"; fi
+- if [ "$CC" = "gcc"  ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then export CC="gcc-9"; fi
 - if [ -n "$PACKAGES" ] && [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -y $PACKAGES; fi
 script:
 - export DIST_PATH=.

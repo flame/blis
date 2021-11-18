@@ -819,22 +819,26 @@ err_t bli_check_if_exhausted_pool( pool_t* pool )
 	return e_val;
 }
 
-err_t bli_check_sufficient_stack_buf_size( num_t dt, cntx_t* cntx )
+err_t bli_check_sufficient_stack_buf_size( cntx_t* cntx )
 {
 	err_t e_val = BLIS_SUCCESS;
+	num_t dt;
 
-	dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
-	dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
-	siz_t dt_size = bli_dt_size( dt );
+	for ( dt = BLIS_DT_LO; dt <= BLIS_DT_HI; ++dt )
+	{
+		dim_t mr      = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+		dim_t nr      = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+		siz_t dt_size = bli_dt_size( dt );
 
-	// NOTE: For induced methods, we use the size of the complex datatypes
-	// (rather than the size of the native micro-kernels' datatype) because
-	// the macro-kernel needs this larger micro-tile footprint, even if the
-	// virtual micro-kernel implementation will only ever be writing to half
-	// of it (real or imaginary part) at a time.
+		// NOTE: For induced methods, we use the size of the complex datatypes
+		// (rather than the size of the native micro-kernels' datatype) because
+		// the macro-kernel needs this larger micro-tile footprint, even if the
+		// virtual micro-kernel implementation will only ever be writing to half
+		// of it (real or imaginary part) at a time.
 
-	if ( mr * nr * dt_size > BLIS_STACK_BUF_MAX_SIZE )
-		e_val = BLIS_INSUFFICIENT_STACK_BUF_SIZE;
+		if ( mr * nr * dt_size > BLIS_STACK_BUF_MAX_SIZE )
+			e_val = BLIS_INSUFFICIENT_STACK_BUF_SIZE;
+	}
 
 	return e_val;
 }

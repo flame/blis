@@ -44,12 +44,12 @@
 #define bli_gemm_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
 #define bli_gemm_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
-// herk
+// gemmt
 
-// NOTE: The definition of bli_herk_get_next_?_upanel() does not need to
+// NOTE: The definition of bli_gemmt_get_next_?_upanel() does not need to
 // change depending on BLIS_ENABLE_JRIR_SLAB / BLIS_ENABLE_JRIR_RR.
-#define bli_herk_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
-#define bli_herk_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
+#define bli_gemmt_get_next_a_upanel( a1, step, inc ) ( a1 + step * inc )
+#define bli_gemmt_get_next_b_upanel( b1, step, inc ) ( b1 + step * inc )
 
 // trmm
 
