@@ -156,6 +156,14 @@ gint_t bli_info_get_enable_sandbox( void )
 	return 0;
 #endif
 }
+gint_t bli_info_get_enable_dma( void )
+{
+#ifdef BLIS_ENABLE_DMA
+  return 1;
+#else
+  return 0;
+#endif
+}
 
 
 

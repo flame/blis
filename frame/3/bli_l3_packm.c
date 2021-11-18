@@ -75,14 +75,14 @@ void bli_l3_packm
 	// Query the address of the mem_t entry within the control tree node.
 	cntl_mem_p = bli_cntl_pack_mem( cntl );
 
+	mem_t* local_mem_p;
+	mem_t  local_mem_s;
+
 	// Check the mem_t field in the control tree. If it is unallocated, then
 	// we need to acquire a block from the memory broker and broadcast it to
 	// all threads in the chief's thread group.
 	if ( bli_mem_is_unalloc( cntl_mem_p ) )
 	{
-		mem_t* local_mem_p;
-		mem_t  local_mem_s;
-
 		if ( bli_thread_am_ochief( thread ) )
 		{
 			#ifdef BLIS_ENABLE_MEM_TRACING
@@ -110,9 +110,6 @@ void bli_l3_packm
 	}
 	else // ( bli_mem_is_alloc( cntl_mem_p ) )
 	{
-		mem_t* local_mem_p;
-		mem_t  local_mem_s;
-
 		// If the mem_t entry in the control tree does NOT contain a NULL
 		// buffer, then a block has already been acquired from the memory
 		// broker and cached in the control tree.
@@ -152,17 +149,11 @@ void bli_l3_packm
 			// this thread's control tree node.
 			*cntl_mem_p = *local_mem_p;
 		}
-		else
-		{
-			// If the mem_t entry is already allocated and sufficiently large,
-			// then we use it as-is. No action is needed, because all threads
-			// will already have the cached values in their local control
-			// trees' mem_t entries, currently pointed to by cntl_mem_p.
-
-			bli_thread_barrier( thread );
-		}
 	}
 
+	// Barrier so that all threads have read the content of local_mem_p,
+	// located in the stack of the chief thread.
+	bli_thread_barrier( thread );
 
 	// Update the buffer address in x_pack to point to the buffer associated
 	// with the mem_t entry acquired from the memory broker (now cached in
@@ -183,5 +174,17 @@ void bli_l3_packm
 
 	// Barrier so that packing is done before computation.
 	bli_thread_barrier( thread );
+
+#ifdef BLIS_ENABLE_DMA
+	// After packing, recycle the DMA buffer to prefetch next block
+	obj_t*       a_dma     = bli_cntl_packm_params_a_dma( cntl );
+	obj_t*       p_dma     = bli_cntl_packm_params_p_dma( cntl );
+	mem_t*       mem_p_dma = bli_cntl_packm_params_mem_p_dma( cntl );
+	dma_event_t* event_dma = bli_cntl_packm_params_event_dma( cntl );
+	if ( a_dma && p_dma && mem_p_dma )
+	{
+		bli_dma_get( a_dma, p_dma, mem_p_dma, event_dma, rntm, thread );
+	}
+#endif // BLIS_ENABLE_DMA
 }
 

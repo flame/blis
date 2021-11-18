@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Kalray Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,74 +33,20 @@
 
 */
 
-
-//
-// Prototype object-based interfaces.
-//
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       cntl_t* cntl, \
-       thrinfo_t* thread  \
-     );
-
-GENPROT( trsm_blk_var1 )
-GENPROT( trsm_blk_var2 )
-GENPROT( trsm_blk_var3 )
-
-#ifdef BLIS_ENABLE_DMA
-GENPROT( trsm_blk_var1_dma )
-GENPROT( trsm_blk_var3_dma )
-#endif // BLIS_ENABLE_DMA
-
-GENPROT( trsm_packa )
-GENPROT( trsm_packb )
-
-GENPROT( trsm_xx_ker_var2 )
-
-GENPROT( trsm_ll_ker_var2 )
-GENPROT( trsm_lu_ker_var2 )
-GENPROT( trsm_rl_ker_var2 )
-GENPROT( trsm_ru_ker_var2 )
+#ifndef BLIS_DMA_TYPE_DEFS_H
+#define BLIS_DMA_TYPE_DEFS_H
 
 
-//
-// Prototype BLAS-like interfaces with void pointer operands.
-//
+// -- DMA type and macro definitions -------------------------------------------
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       doff_t  diagoff, \
-       pack_t  schema_a, \
-       pack_t  schema_b, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       void*   alpha1, \
-       void*   a, inc_t cs_a, \
-                  dim_t pd_a, inc_t ps_a, \
-       void*   b, inc_t rs_b, \
-                  dim_t pd_b, inc_t ps_b, \
-       void*   alpha2, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
-     );
+// coordinates type for DMA 2D-copy
+typedef struct point2d_s
+{
+	int32_t xpos;   // x-position (or offset) in elements from the buffer pointer
+	int32_t ypos;   // y-position (or offset) in elements from the buffer pointer
+	int32_t xdim;   // x-dim of the allocated buffer
+	int32_t ydim;   // y-dim of the allocated buffer
+} point2d_t;
 
-INSERT_GENTPROT_BASIC0( trsm_ll_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_lu_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_rl_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_ru_ker_var2 )
 
+#endif // BLIS_DMA_TYPE_DEFS_H

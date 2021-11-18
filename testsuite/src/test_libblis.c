@@ -856,6 +856,9 @@ void libblis_test_output_params_struct( FILE* os, test_params_t* params )
 	libblis_test_fprintf_c( os, "gemm sandbox                     \n" );
 	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_sandbox() );
 	libblis_test_fprintf_c( os, "\n" );
+	libblis_test_fprintf_c( os, "DMA                              \n" );
+	libblis_test_fprintf_c( os, "  enabled?                     %d\n", ( int )bli_info_get_enable_dma() );
+	libblis_test_fprintf_c( os, "\n" );
 	libblis_test_fprintf_c( os, "floating-point types           s       d       c       z \n" );
 	libblis_test_fprintf_c( os, "  sizes (bytes)          %7u %7u %7u %7u\n", sizeof(float),
 	                                                                          sizeof(double),

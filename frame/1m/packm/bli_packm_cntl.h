@@ -44,6 +44,25 @@ struct packm_params_s
 	bool          rev_iter_if_lower;
 	pack_t        pack_schema;
 	packbuf_t     pack_buf_type;
+
+#ifdef BLIS_ENABLE_DMA
+	// Extra information to trigger a DMA-prefetch right after each packing.
+	// The idea is to recycle the input buffer of packm (which is originally
+	// a DMA-buffer) to trigger a new DMA copy immediately after the end of
+	// packing and before the subsequent computation, since the packed submatrix
+	// has been written to another buffer:
+	//
+	//                       DDR     ->   SMEM  ->   SMEM
+	// 1. DMA            : a_global  ->  a_dma
+	// 2. Packing        :               a_dma  ->  a_packed
+	// 3. DMA next block : a_global' ->  a_dma
+	// 4. Computation    :                          a_packed -> bli_gemm_int() ...
+	obj_t*        a_dma;
+	obj_t*        p_dma;
+	mem_t*        mem_p_dma;
+	dma_event_t*  event_dma;
+#endif  // BLIS_ENABLE_DMA
+
 };
 typedef struct packm_params_s packm_params_t;
 
@@ -86,6 +105,48 @@ BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( cntl_t* cntl )
 {
 	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_buf_type;
 }
+
+#ifdef BLIS_ENABLE_DMA
+BLIS_INLINE obj_t* bli_cntl_packm_params_a_dma( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->a_dma;
+}
+
+BLIS_INLINE obj_t* bli_cntl_packm_params_p_dma( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->p_dma;
+}
+
+BLIS_INLINE mem_t* bli_cntl_packm_params_mem_p_dma( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->mem_p_dma;
+}
+
+BLIS_INLINE dma_event_t* bli_cntl_packm_params_event_dma( cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->event_dma;
+}
+
+BLIS_INLINE void bli_cntl_packm_params_set_a_dma( obj_t* a_dma, cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; ppp->a_dma = a_dma;
+}
+
+BLIS_INLINE void bli_cntl_packm_params_set_p_dma( obj_t* p_dma, cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; ppp->p_dma = p_dma;
+}
+
+BLIS_INLINE void bli_cntl_packm_params_set_mem_p_dma( mem_t* mem_p_dma, cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; ppp->mem_p_dma = mem_p_dma;
+}
+
+BLIS_INLINE void bli_cntl_packm_params_set_event_dma( dma_event_t* event_dma, cntl_t* cntl )
+{
+	packm_params_t* ppp = ( packm_params_t* )cntl->params; ppp->event_dma = event_dma;
+}
+#endif  // BLIS_ENABLE_DMA
 
 // -----------------------------------------------------------------------------
 

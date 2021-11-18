@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Kalray Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,74 +33,27 @@
 
 */
 
+#ifndef BLIS_DMA_OAPI_H
+#define BLIS_DMA_OAPI_H
 
-//
-// Prototype object-based interfaces.
-//
+void bli_dma_get
+      (
+        obj_t*       a,
+        obj_t*       p,
+        mem_t*       mem_p_dma,
+        dma_event_t* event,
+        rntm_t*      rntm,
+        thrinfo_t*   thread
+      );
 
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       cntl_t* cntl, \
-       thrinfo_t* thread  \
-     );
+void bli_dma_put
+      (
+        obj_t*       a,
+        obj_t*       p,
+        dma_event_t* event,
+        thrinfo_t*   thread
+      );
 
-GENPROT( trsm_blk_var1 )
-GENPROT( trsm_blk_var2 )
-GENPROT( trsm_blk_var3 )
+void bli_dma_wait( dma_event_t* event, thrinfo_t* thread );
 
-#ifdef BLIS_ENABLE_DMA
-GENPROT( trsm_blk_var1_dma )
-GENPROT( trsm_blk_var3_dma )
-#endif // BLIS_ENABLE_DMA
-
-GENPROT( trsm_packa )
-GENPROT( trsm_packb )
-
-GENPROT( trsm_xx_ker_var2 )
-
-GENPROT( trsm_ll_ker_var2 )
-GENPROT( trsm_lu_ker_var2 )
-GENPROT( trsm_rl_ker_var2 )
-GENPROT( trsm_ru_ker_var2 )
-
-
-//
-// Prototype BLAS-like interfaces with void pointer operands.
-//
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       doff_t  diagoff, \
-       pack_t  schema_a, \
-       pack_t  schema_b, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       void*   alpha1, \
-       void*   a, inc_t cs_a, \
-                  dim_t pd_a, inc_t ps_a, \
-       void*   b, inc_t rs_b, \
-                  dim_t pd_b, inc_t ps_b, \
-       void*   alpha2, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
-     );
-
-INSERT_GENTPROT_BASIC0( trsm_ll_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_lu_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_rl_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_ru_ker_var2 )
-
+#endif // BLIS_DMA_OAPI_H

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2021, Kalray Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,74 +33,38 @@
 
 */
 
+#ifndef BLIS_DMA_VENDOR_TYPE_DEFS_H
+#define BLIS_DMA_VENDOR_TYPE_DEFS_H
 
+
+// -- Vendor-specific DMA headers ----------------------------------------------
 //
-// Prototype object-based interfaces.
+// This is the place where vendors define the `dma_event_t` type, based on
+// their own DMA library, as well as overriding the default DMA backend API:
 //
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-void PASTEMAC0(opname) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       cntl_t* cntl, \
-       thrinfo_t* thread  \
-     );
-
-GENPROT( trsm_blk_var1 )
-GENPROT( trsm_blk_var2 )
-GENPROT( trsm_blk_var3 )
-
-#ifdef BLIS_ENABLE_DMA
-GENPROT( trsm_blk_var1_dma )
-GENPROT( trsm_blk_var3_dma )
-#endif // BLIS_ENABLE_DMA
-
-GENPROT( trsm_packa )
-GENPROT( trsm_packb )
-
-GENPROT( trsm_xx_ker_var2 )
-
-GENPROT( trsm_ll_ker_var2 )
-GENPROT( trsm_lu_ker_var2 )
-GENPROT( trsm_rl_ker_var2 )
-GENPROT( trsm_ru_ker_var2 )
-
-
+// #define BLIS_DMA_BACKEND_INIT          your_favorite_dma_func_init
+// #define BLIS_DMA_BACKEND_FINALIZE      your_favorite_dma_func_finalize
+// #define BLIS_DMA_BACKEND_GET2D         your_favorite_dma_func_get2d
+// #define BLIS_DMA_BACKEND_PUT2D         your_favorite_dma_func_put2d
+// #define BLIS_DMA_BACKEND_WAIT          your_favorite_dma_func_wait
 //
-// Prototype BLAS-like interfaces with void pointer operands.
-//
+// NOTE:
+// - The current DMA support calls bli_pba_acquire_m() (bli_dma_oapi.c) to
+// allocate a DMA buffer in an expected-to-be local/scratchpad memory (SMEM).
+// Developer should accordingly map the PBA allocator onto SMEM.
+// Generally, having packed buffers in such a near-core, fast scratchpad memory
+// is always worth for performance.
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       doff_t  diagoff, \
-       pack_t  schema_a, \
-       pack_t  schema_b, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       void*   alpha1, \
-       void*   a, inc_t cs_a, \
-                  dim_t pd_a, inc_t ps_a, \
-       void*   b, inc_t rs_b, \
-                  dim_t pd_b, inc_t ps_b, \
-       void*   alpha2, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
-     );
+#if defined(BLIS_OS_YOUR_FAVORITE_ARCH)
 
-INSERT_GENTPROT_BASIC0( trsm_ll_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_lu_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_rl_ker_var2 )
-INSERT_GENTPROT_BASIC0( trsm_ru_ker_var2 )
+	// Define your vendor-specific dma_event_t here
+	// ...
 
+#else  // Reference DMA
+	// No vendor-specific DMA library, define a reference `dma_event_t` to
+	// work with bli_pthread.
+	typedef dma_event_ref_t dma_event_t;
+#endif
+
+
+#endif // BLIS_DMA_VENDOR_TYPE_DEFS_H

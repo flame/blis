@@ -270,6 +270,38 @@ dim_t bli_determine_blocksize_f
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );
 
+#ifdef BLIS_ENABLE_DMA
+	// When DMA is enabled on herm_or_symm, blocksize in MC and NC dimension
+	// must not exceed KC, because we are currently doing Lower-squarization.
+	// This is complementary to the further partitioning in KC dimension
+	// (bli_l3_blocksize.c), in which KC will be also aligned to MC/NC.
+	// This squarization of subpartitions is only needed on herm_or_symm,
+	// with DMA enabled.
+	if ( bli_obj_root_is_herm_or_symm( obj ) )
+	{
+		dim_t kc = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
+
+		// Ensure b_alg to be smaller or equal to KC, and also multiple of MR/NR
+		dim_t mnr = 0;
+		if ( bszid == BLIS_MC )
+		{
+			mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+		}
+		else if ( bszid == BLIS_NC )
+		{
+			mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+		}
+		else
+		{
+			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		}
+		b_alg = bli_min( b_alg, kc+1-mnr );
+		b_max = bli_min( b_max, kc+1-mnr );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
+#endif // BLIS_ENABLE_DMA
+
 	b_use = bli_determine_blocksize_f_sub( i, dim, b_alg, b_max );
 
 	return b_use;
@@ -295,6 +327,38 @@ dim_t bli_determine_blocksize_b
 	bsize = bli_cntx_get_blksz( bszid, cntx );
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );
+
+#ifdef BLIS_ENABLE_DMA
+	// When DMA is enabled on herm_or_symm, blocksize in MC and NC dimension
+	// must not exceed KC, because we are currently doing Lower-squarization.
+	// This is complementary to the further partitioning in KC dimension
+	// (bli_l3_blocksize.c), in which KC will be also aligned to MC/NC.
+	// This squarization of subpartitions is only needed on herm_or_symm,
+	// with DMA enabled.
+	if ( bli_obj_root_is_herm_or_symm( obj ) )
+	{
+		dim_t kc = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
+
+		// Ensure b_alg to be smaller or equal to KC, and also multiple of MR/NR
+		dim_t mnr = 0;
+		if ( bszid == BLIS_MC )
+		{
+			mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
+		}
+		else if ( bszid == BLIS_NC )
+		{
+			mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
+		}
+		else
+		{
+			bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
+		}
+		b_alg = bli_min( b_alg, kc+1-mnr );
+		b_max = bli_min( b_max, kc+1-mnr );
+		b_alg = bli_align_dim_to_mult( b_alg, mnr );
+		b_max = bli_align_dim_to_mult( b_max, mnr );
+	}
+#endif // BLIS_ENABLE_DMA
 
 	b_use = bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 

@@ -1599,7 +1599,12 @@ typedef enum
 	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-164),
 	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-165),
 
-	BLIS_ERROR_CODE_MAX                        = (-170)
+	// DMA-related error
+	BLIS_DMA_GET_FAILURE                       = (-170),
+	BLIS_DMA_PUT_FAILURE                       = (-171),
+	BLIS_DMA_WAIT_FAILURE                      = (-172),
+
+	BLIS_ERROR_CODE_MAX                        = (-180)
 } err_t;
 
 #endif

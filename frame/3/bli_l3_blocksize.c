@@ -142,12 +142,50 @@ dim_t PASTEMAC0(opname) \
 	if      ( bli_obj_root_is_herm_or_symm( a ) ) \
 	{ \
 		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		/* When DMA is enabled on herm_or_symm, and in the case where KC is
+		   larger than the other dimension (MC or NC), the copied DMA panel
+		   should be extended to cover the stored region, used to "symmetrize"
+		   the unstored one. This extension requires implicit extra local
+		   memory allocation that the developer might not anticipate. We call
+		   this increasing of KC as "Upper-squarization".
+
+		   On some embedded platforms, the developer may even not afford this
+		   increase of memory footprint, due to some resource limitation; and
+		   doing so exceeds the HW capacity that likely to fail at execution.
+		   In such situation, we prefer to reduce KC to be equal to MC (or NC),
+		   so that the DMA transfer is not to be extended, as the mirror-region
+		   is now entirely covered by the DMA panel. We call this
+		   "Lower-squarization".
+
+		   We are aware that this choice is sub-optimal, the best solution
+		   will be computing a trade-off between KC and MC (or NC) so that
+		   the DMA panel does not exceed the initially allocated buffer.
+		   We call this "Mid-squarization". Contribution is welcome.
+
+		   Reference: Section 9.3.4. Special cases handling in
+		   https://tel.archives-ouvertes.fr/tel-02426014/document
+		   */ \
+		if( bli_info_get_enable_dma() ) \
+		{ \
+			dim_t mnc = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx ); \
+			b_alg = bli_min( b_alg, mnc+1-mnr ); \
+			b_max = bli_min( b_max, mnc+1-mnr ); \
+		} \
+\
 		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 		b_max = bli_align_dim_to_mult( b_max, mnr ); \
 	} \
 	else if ( bli_obj_root_is_herm_or_symm( b ) ) \
 	{ \
 		mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		/* DMA: same reason as above. */ \
+		if( bli_info_get_enable_dma() ) \
+		{ \
+			dim_t mnc = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx ); \
+			b_alg = bli_min( b_alg, mnc+1-mnr ); \
+			b_max = bli_min( b_max, mnc+1-mnr ); \
+		} \
+\
 		b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 		b_max = bli_align_dim_to_mult( b_max, mnr ); \
 	} \
@@ -232,6 +270,7 @@ dim_t PASTEMAC0(opname) \
 	num_t    dt; \
 	blksz_t* bsize; \
 	dim_t    mnr; \
+	dim_t    mnc; \
 	dim_t    b_alg, b_max; \
 	dim_t    b_use; \
  \
@@ -258,9 +297,22 @@ dim_t PASTEMAC0(opname) \
 	   multiple of MR if the triangular matrix is on the left, or NR
 	   if the triangular matrix is one the right. */ \
 	if ( bli_obj_root_is_triangular( a ) ) \
+	{ \
 		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+		mnc = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx ); \
+	} \
 	else \
+	{ \
 		mnr = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+		mnc = bli_cntx_get_blksz_def_dt( dt, BLIS_NC, cntx ); \
+	} \
+\
+	/* DMA: lower-squarization to minimize footprint */ \
+	if( bli_info_get_enable_dma() ) \
+	{ \
+		b_alg = bli_min( b_alg, mnc+1-mnr ); \
+		b_max = bli_min( b_max, mnc+1-mnr ); \
+	} \
 \
 	b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 	b_max = bli_align_dim_to_mult( b_max, mnr ); \
@@ -321,6 +373,15 @@ dim_t PASTEMAC0(opname) \
 	   matrix uses MR, since only left-side trsm micro-kernels are
 	   supported. */ \
 	mnr   = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+\
+	/* DMA: lower-squarization to minimize footprint */ \
+	if( bli_info_get_enable_dma() ) \
+	{ \
+		dim_t mnc = bli_cntx_get_blksz_def_dt( dt, BLIS_MC, cntx ); \
+		b_alg = bli_min( b_alg, mnc+1-mnr ); \
+		b_max = bli_min( b_max, mnc+1-mnr ); \
+	} \
+\
 	b_alg = bli_align_dim_to_mult( b_alg, mnr ); \
 	b_max = bli_align_dim_to_mult( b_max, mnr ); \
 \

@@ -158,7 +158,11 @@ cntl_t* bli_trsm_l_cntl_create
 	  rntm,
 	  family,
 	  BLIS_MC,
+#ifdef BLIS_ENABLE_DMA
+	  bli_trsm_blk_var1_dma,
+#else
 	  bli_trsm_blk_var1,
+#endif // BLIS_ENABLE_DMA
 	  gemm_cntl_packa
 	);
 
@@ -189,7 +193,11 @@ cntl_t* bli_trsm_l_cntl_create
 	  rntm,
 	  family,
 	  BLIS_KC,
+#ifdef BLIS_ENABLE_DMA
+	  bli_trsm_blk_var3_dma,
+#else
 	  bli_trsm_blk_var3,
+#endif // BLIS_ENABLE_DMA
 	  trsm_cntl_packb
 	);
 
@@ -262,7 +270,11 @@ cntl_t* bli_trsm_r_cntl_create
 	  rntm,
 	  family,
 	  BLIS_MC,
+#ifdef BLIS_ENABLE_DMA
+	  bli_trsm_blk_var1_dma,
+#else
 	  bli_trsm_blk_var1,
+#endif // BLIS_ENABLE_DMA
 	  trsm_cntl_packa
 	);
 
@@ -288,7 +300,11 @@ cntl_t* bli_trsm_r_cntl_create
 	  rntm,
 	  family,
 	  BLIS_KC,
+#ifdef BLIS_ENABLE_DMA
+	  bli_trsm_blk_var3_dma,
+#else
 	  bli_trsm_blk_var3,
+#endif // BLIS_ENABLE_DMA
 	  trsm_cntl_packb
 	);
 
