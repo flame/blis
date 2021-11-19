@@ -152,18 +152,35 @@ get-kernel-cflags-for    = $(strip $(call load-var-for,CKOPTFLAGS,$(1)) \
 
 # When compiling sandboxes, we use flags similar to those of general framework
 # source. This ensures that the same code can be linked and run across various
-# sub-configurations. (If we switch to using refkern/kernel flags, we should
-# prevent enabling sandboxes for umbrella families by verifying that
-# config_list == config_name if --enable-sandbox is given.)
+# sub-configurations.
+get-addon-c99flags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cflags-for,$(1)) \
+                                   $(CADDONINCFLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
+                            )
+get-addon-cxxflags-for   = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
+                                   $(call get-noopt-cxxflags-for,$(1)) \
+                                   $(CADDONINCFLAGS) \
+                                   $(BUILD_CPPFLAGS) \
+                                   $(BUILD_SYMFLAGS) \
+                            )
+
+# When compiling sandboxes, we use flags similar to those of general framework
+# source. This ensures that the same code can be linked and run across various
+# sub-configurations. (NOTE: If we ever switch to using refkernel or kernel
+# flags, we should prevent enabling sandboxes for umbrella families by verifying
+# that config_list == config_name if --enable-sandbox is given. THIS ALSO
+# APPLIES TO ADDONS ABOVE.)
 get-sandbox-c99flags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cflags-for,$(1)) \
-                                   $(CSBOXINCFLAGS) \
+                                   $(CSANDINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
 get-sandbox-cxxflags-for = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
                                    $(call get-noopt-cxxflags-for,$(1)) \
-                                   $(CSBOXINCFLAGS) \
+                                   $(CSANDINCFLAGS) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
                             )
@@ -188,6 +205,8 @@ get-refkern-text-for    = "('$(1)' CFLAGS for ref. kernels)"
 get-config-text-for     = "('$(1)' CFLAGS for config code)"
 get-frame-text-for      = "('$(1)' CFLAGS for framework code)"
 get-kernel-text-for     = "('$(1)' CFLAGS for kernels)"
+get-addon-c99text-for   = "('$(1)' CFLAGS for addons)"
+get-addon-cxxtext-for   = "('$(1)' CXXFLAGS for addons)"
 get-sandbox-c99text-for = "('$(1)' CFLAGS for sandboxes)"
 get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
 
@@ -201,6 +220,10 @@ get-sandbox-cxxtext-for = "('$(1)' CXXFLAGS for sandboxes)"
 # omit) an arbitrary substring $(2).
 files-that-contain      = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),$(f),)))
 files-that-dont-contain = $(strip $(foreach f, $(1), $(if $(findstring $(2),$(f)),,$(f))))
+
+# Define a function that removes duplicate strings *without* using the sort
+# function.
+rm-dups = $(if $1,$(firstword $1) $(call rm-dups,$(filter-out $(firstword $1),$1)))
 
 
 #
@@ -286,6 +309,7 @@ CONFIG_DIR         := config
 FRAME_DIR          := frame
 REFKERN_DIR        := ref_kernels
 KERNELS_DIR        := kernels
+ADDON_DIR          := addon
 SANDBOX_DIR        := sandbox
 OBJ_DIR            := obj
 LIB_DIR            := lib
@@ -302,10 +326,12 @@ REFNM              := ref
 
 # Source suffixes.
 CONFIG_SRC_SUFS    := c
-
 KERNELS_SRC_SUFS   := c s S
-
 FRAME_SRC_SUFS     := c
+
+ADDON_C99_SUFS     := c
+ADDON_CXX_SUFS     := cc cpp cxx
+ADDON_SRC_SUFS     := $(ADDON_C99_SUFS) $(ADDON_CXX_SUFS)
 
 SANDBOX_C99_SUFS   := c
 SANDBOX_CXX_SUFS   := cc cpp cxx
@@ -314,15 +340,21 @@ SANDBOX_SRC_SUFS   := $(SANDBOX_C99_SUFS) $(SANDBOX_CXX_SUFS)
 # Header suffixes.
 FRAME_HDR_SUFS     := h
 
+ADDON_H99_SUFS     := h
+ADDON_HXX_SUFS     := hh hpp hxx
+ADDON_HDR_SUFS     := $(ADDON_H99_SUFS) $(ADDON_HXX_SUFS)
+
 SANDBOX_H99_SUFS   := h
 SANDBOX_HXX_SUFS   := hh hpp hxx
 SANDBOX_HDR_SUFS   := $(SANDBOX_H99_SUFS) $(SANDBOX_HXX_SUFS)
 
 # Combine all header suffixes and remove duplicates via sort().
 ALL_HDR_SUFS       := $(sort $(FRAME_HDR_SUFS) \
+                             $(ADDON_HDR_SUFS) \
                              $(SANDBOX_HDR_SUFS) )
 
 ALL_H99_SUFS       := $(sort $(FRAME_HDR_SUFS) \
+                             $(ADDON_HDR_SUFS) \
                              $(SANDBOX_H99_SUFS) )
 
 # The names of scripts that check output from the BLAS test drivers and
@@ -349,11 +381,13 @@ SHELL              := bash
 
 # Construct paths to the four primary directories of source code:
 # the config directory, general framework code, reference kernel code,
-# and optimized kernel code.
+# and optimized kernel code. Also process paths for addon and sandbox
+# directories.
 CONFIG_PATH        := $(DIST_PATH)/$(CONFIG_DIR)
 FRAME_PATH         := $(DIST_PATH)/$(FRAME_DIR)
 REFKERN_PATH       := $(DIST_PATH)/$(REFKERN_DIR)
 KERNELS_PATH       := $(DIST_PATH)/$(KERNELS_DIR)
+ADDON_PATH         := $(DIST_PATH)/$(ADDON_DIR)
 SANDBOX_PATH       := $(DIST_PATH)/$(SANDBOX_DIR)
 
 # Construct paths to some optional C++ template headers contributed by AMD.
@@ -367,6 +401,7 @@ CONFIG_FRAG_PATH   := ./obj/$(CONFIG_NAME)/$(CONFIG_DIR)
 FRAME_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(FRAME_DIR)
 REFKERN_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(REFKERN_DIR)
 KERNELS_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(KERNELS_DIR)
+ADDON_FRAG_PATH    := ./obj/$(CONFIG_NAME)/$(ADDON_DIR)
 SANDBOX_FRAG_PATH  := ./obj/$(CONFIG_NAME)/$(SANDBOX_DIR)
 
 
@@ -855,6 +890,7 @@ MK_CONFIG_SRC      :=
 MK_KERNELS_SRC     :=
 MK_REFKERN_SRC     :=
 MK_FRAME_SRC       :=
+MK_ADDON_SRC       :=
 MK_SANDBOX_SRC     :=
 
 # -- config --
@@ -905,6 +941,24 @@ PARENT_PATH        := $(OBJ_DIR)/$(CONFIG_NAME)
 -include $(addsuffix /$(FRAGMENT_MK), $(REFKERN_FRAG_PATH))
 -include $(addsuffix /$(FRAGMENT_MK), $(FRAME_FRAG_PATH))
 
+# -- addon --
+
+# Construct paths to each addon.
+# NOTE: If $(ADDON_LIST) is empty (because no addon was enabled at configure-
+# time) then $(ADDON_PATHS) will also be empty, which will cause no fragments
+# to be included.
+ADDON_PATHS        := $(addprefix $(ADDON_FRAG_PATH)/, $(ADDON_LIST))
+
+# This variable is used by the include statements as they recursively include
+# one another. For the 'addons' directory, we initialize it to that directory
+# in preparation to include the fragments in the configuration sub-directory.
+PARENT_SRC_PATH    := $(ADDON_PATH)
+PARENT_PATH        := $(ADDON_FRAG_PATH)
+
+# Recursively include the makefile fragments in each of the addons sub-
+# directories.
+-include $(addsuffix /$(FRAGMENT_MK), $(ADDON_PATHS))
+
 # -- sandbox --
 
 # Construct paths to each sandbox. (At present, there can be only one.)
@@ -921,6 +975,8 @@ PARENT_PATH        := $(SANDBOX_FRAG_PATH)
 
 # Recursively include the makefile fragments in the sandbox sub-directory.
 -include $(addsuffix /$(FRAGMENT_MK), $(SANDBOX_PATHS))
+
+# -- post-processing --
 
 # Create a list of the makefile fragments using the variable into which each
 # of the above include statements accumulated their directory paths.
@@ -940,14 +996,14 @@ endif
 #
 
 # Define a function that will expand all of the directory paths given in $(1)
-# to actual filepaths using the list of suffixes provided $(2).
+# to actual filepaths using the list of suffixes provided in $(2).
 get-filepaths = $(strip $(foreach path, $(1), \
                             $(foreach suf, $(2), \
                                 $(wildcard $(path)/*.$(suf)) \
                  )       )   )
 
 # Define a function that will expand all of the directory paths given in $(1)
-# to actual filepaths using the list of suffixes provided $(2), taking only
+# to actual filepaths using the list of suffixes provided in $(2), taking only
 # the first expansion from each directory with at least one file matching
 # the current suffix. Finally, strip the filenames from all resulting files,
 # returning only the directory paths.
@@ -957,20 +1013,29 @@ get-dirpaths  = $(dir $(foreach path, $(1), \
                                   $(wildcard $(path)/*.$(suf)) \
                  )     )   )   )
 
-# We'll use two directory lists. The first is a list of all of the directories
-# in which makefile fragments were generated (plus the current directory). The
-# second is the subset of the first that begins with the sandbox root path.
+# We'll use three directory lists. The first is a list of all of the directories
+# in which makefile fragments were generated, plus the current directory. (The
+# current directory is needed so we include bli_config.h and bli_addon.h in the
+# processing of header files.) The second and third are subsets of the first
+# that begins with the addon and sandbox root paths, respectively.
 ALLFRAG_DIR_PATHS := . $(FRAGMENT_DIR_PATHS)
+ADDON_DIR_PATHS   := $(filter $(ADDON_PATH)/%,$(ALLFRAG_DIR_PATHS))
 SANDBOX_DIR_PATHS := $(filter $(SANDBOX_PATH)/%,$(ALLFRAG_DIR_PATHS))
 
 ALL_H99_FILES     := $(call get-filepaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
-FRAME_H99_FILES   := $(filter-out $(SANDBOX_PATH)/%,$(ALL_H99_FILES))
+FRAME_H99_FILES   := $(filter-out $(ADDON_PATH)/%, \
+                        $(filter-out $(SANDBOX_PATH)/%, \
+                                    $(ALL_H99_FILES) \
+                      )  )
 
-ALL_H99_DIRPATHS  := $(call get-dirpaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
+ALL_H99_DIRPATHS     := $(call get-dirpaths,$(ALLFRAG_DIR_PATHS),$(ALL_H99_SUFS))
 
-SANDBOX_H99_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_H99_SUFS))
-SANDBOX_HXX_FILES := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_HXX_SUFS))
+ADDON_H99_FILES      := $(call get-filepaths,$(ADDON_DIR_PATHS),$(ADDON_H99_SUFS))
+ADDON_HXX_FILES      := $(call get-filepaths,$(ADDON_DIR_PATHS),$(ADDON_HXX_SUFS))
+ADDON_HDR_DIRPATHS   := $(call get-dirpaths,$(ADDON_DIR_PATHS),$(ALL_HDR_SUFS))
 
+SANDBOX_H99_FILES    := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_H99_SUFS))
+SANDBOX_HXX_FILES    := $(call get-filepaths,$(SANDBOX_DIR_PATHS),$(SANDBOX_HXX_SUFS))
 SANDBOX_HDR_DIRPATHS := $(call get-dirpaths,$(SANDBOX_DIR_PATHS),$(ALL_HDR_SUFS))
 
 
@@ -1025,8 +1090,8 @@ CBLAS_H_FLAT    := $(BASE_INC_PATH)/$(CBLAS_H)
 #
 
 # Obtain a list of header files #included inside of the bli_cntx_ref.c file.
-# Paths to these files will be needed when compiling with the monolithic
-# header.
+# Due to the way that bli_cntx_ref.c uses headers and macros, paths to these
+# files will be needed when compiling bli_cntx_ref.c with the monolithic header.
 ifeq ($(strip $(SHARE_PATH)),.)
 REF_KER_SRC     := $(DIST_PATH)/$(REFKERN_DIR)/bli_cntx_ref.c
 REF_KER_HEADERS := $(shell $(GREP) "\#include" $(REF_KER_SRC) | sed -e "s/\#include [\"<]\([a-zA-Z0-9\_\.\/\-]*\)[\">].*/\1/g" | $(GREP) -v $(BLIS_H))
@@ -1034,9 +1099,10 @@ endif
 
 # Match each header found above with the path to that header, and then strip
 # leading, trailing, and internal whitespace.
-REF_KER_H_PATHS := $(strip $(foreach header, $(REF_KER_HEADERS), \
-                               $(dir $(filter %/$(header), \
-                                              $(FRAME_H99_FILES)))))
+REF_KER_H_PATHS := $(call rm-dups,$(strip \
+                                  $(foreach header, $(REF_KER_HEADERS), \
+                                      $(dir $(filter %/$(header), \
+                                                     $(FRAME_H99_FILES))))))
 
 # Add -I to each header path so we can specify our include search paths to the
 # C compiler. Then add frame/include since it's needed when compiling source
@@ -1056,17 +1122,22 @@ ifeq ($(MK_ENABLE_CBLAS),yes)
 CINCFLAGS       += -I$(CBLAS_H_DIRPATH)
 endif
 
+# Obtain a list of header paths in the configured addons. Then add -I to each
+# header path.
+CADDONINCFLAGS  := $(strip $(patsubst %, -I%, $(ADDON_HDR_DIRPATHS)))
+
 # Obtain a list of header paths in the configured sandbox. Then add -I to each
 # header path.
-CSBOXINCFLAGS   := $(strip $(patsubst %, -I%, $(SANDBOX_HDR_DIRPATHS)))
+CSANDINCFLAGS   := $(strip $(patsubst %, -I%, $(SANDBOX_HDR_DIRPATHS)))
 
 
 #
 # --- BLIS configuration header definitions ------------------------------------
 #
 
-# This file was created by configure, but we need to define it here so we can
-# remove it as part of the clean targets.
+# These files were created by configure, but we need to define them here so we
+# can remove them as part of the clean targets.
+BLIS_ADDON_H    := ./bli_addon.h
 BLIS_CONFIG_H   := ./bli_config.h
 
 
