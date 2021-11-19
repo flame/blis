@@ -512,6 +512,11 @@ learn how to add new sub-configurations or configuration families, or are simply
 interested in learning how BLIS organizes its configurations and kernel sets,
 please read this thorough walkthrough of the configuration system.
 
+ * **[Addon Guide](docs/Addons.md).** If you are interested in learning
+about using BLIS addons--that is, enabling existing (or creating new) bundles
+of operation or API code that are built into a BLIS library--please read this
+document.
+
  * **[Sandbox Guide](docs/Sandboxes.md).** If you are interested in learning
 about using sandboxes in BLIS--that is, providing alternative implementations
 of the `gemm` operation--please read this document.
