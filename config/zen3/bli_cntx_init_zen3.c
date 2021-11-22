@@ -4,7 +4,8 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -108,44 +109,48 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-	  16,
+      20,
+#if 1
+      // amaxv
+      BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
+      BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+#endif
+      // axpyv
 
-	  // amaxv
-	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
-	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
+      // axpyv
+      BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
+      BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+      BLIS_AXPYV_KER,  BLIS_SCOMPLEX, bli_caxpyv_zen_int5,
+      BLIS_AXPYV_KER,  BLIS_DCOMPLEX, bli_zaxpyv_zen_int5,
 
-	  // axpyv
+      // dotv
+      BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
+      BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
+      BLIS_DOTV_KER,   BLIS_SCOMPLEX, bli_cdotv_zen_int5,
+      BLIS_DOTV_KER,   BLIS_DCOMPLEX, bli_zdotv_zen_int5,
 
-	  // axpyv
-	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
-	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
+      // dotxv
+      BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
+      BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
 
-	  // dotv
-	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int10,
-	  BLIS_DOTV_KER,   BLIS_DOUBLE, bli_ddotv_zen_int10,
+      // scalv
+      BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
+      BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 
-	  // dotxv
-	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
-	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+      //swap
+      BLIS_SWAPV_KER, BLIS_FLOAT,   bli_sswapv_zen_int8,
+      BLIS_SWAPV_KER, BLIS_DOUBLE,  bli_dswapv_zen_int8,
 
-	  // scalv
-	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
-	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
+      //copy
+      BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
+      BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
 
-	  //swap
-	  BLIS_SWAPV_KER, BLIS_FLOAT,   bli_sswapv_zen_int8,
-	  BLIS_SWAPV_KER, BLIS_DOUBLE,  bli_dswapv_zen_int8,
+      //set
+      BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
+      BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
 
-	  //copy
-	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
-	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
-
-	  //set
-	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
-	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
-
-	  cntx
-	);
+      cntx
+  );
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//
@@ -295,4 +300,3 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  cntx
 	);
 }
-

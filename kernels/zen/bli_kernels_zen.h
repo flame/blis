@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -53,6 +53,8 @@ AXPYV_KER_PROT( double,   d, axpyv_zen_int )
 // axpyv (intrinsics unrolled x10)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int10 )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int10 )
+AXPYV_KER_PROT( scomplex, c, axpyv_zen_int5 )
+AXPYV_KER_PROT( dcomplex, z, axpyv_zen_int5 )
 
 // dotv (intrinsics)
 DOTV_KER_PROT( float,    s, dotv_zen_int )
@@ -61,6 +63,8 @@ DOTV_KER_PROT( double,   d, dotv_zen_int )
 // dotv (intrinsics, unrolled x10)
 DOTV_KER_PROT( float,    s, dotv_zen_int10 )
 DOTV_KER_PROT( double,   d, dotv_zen_int10 )
+DOTV_KER_PROT( scomplex,  c, dotv_zen_int5 )
+DOTV_KER_PROT( dcomplex,  z, dotv_zen_int5 )
 
 // dotxv (intrinsics)
 DOTXV_KER_PROT( float,    s, dotxv_zen_int )
@@ -115,7 +119,7 @@ GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x8 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_1x8 )
 
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_6x4 )
-GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 ) 
+GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_5x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_4x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_3x4 )
 GEMMSUP_KER_PROT( float,   s, gemmsup_rv_zen_asm_2x4 )
