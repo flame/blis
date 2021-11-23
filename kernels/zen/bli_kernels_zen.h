@@ -32,6 +32,14 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+// hemv helper function
+void bli_pre_hemv_8x8(double *a, double *x,
+		double *y, double *alpha,
+		dim_t cs_a, dim_t rs_a);
+
+void bli_post_hemv_8x8(double *a, double *x,
+		double *y, double *alpha,
+		dim_t cs_a, dim_t rs_a);
 
 // -- level-1m --
 PACKM_KER_PROT(double, d, packm_8xk_gen_zen)
@@ -110,6 +118,9 @@ AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4 )
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
+
+// dotxaxpyf (intrinsics)
+DOTXAXPYF_KER_PROT( double,   d, dotxaxpyf_zen_int_8 )
 
 // -- level-2 ----------------------------------------------------------------
 
