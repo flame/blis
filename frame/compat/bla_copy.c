@@ -82,7 +82,7 @@ void PASTEF77(ch,blasname) \
 }
 
 #ifdef BLIS_ENABLE_BLAS
-#ifdef BLIS_CONFIG_ZEN2
+#ifdef BLIS_CONFIG_EPYC
 
 void scopy_
 (
