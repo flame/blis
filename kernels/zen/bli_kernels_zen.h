@@ -201,16 +201,3 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
 
 
-// gemm square matrix size friendly implementation
-err_t bli_gemm_sqp
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       cntl_t* cntl
-      );
-
-
