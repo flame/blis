@@ -85,24 +85,24 @@ void PASTEMAC(ch,varname) \
 		   matrices. */ \
 		PASTEMAC(ch,packm_herm_cxk_1er) \
 		( \
-          strucc, \
-          diagc, \
-          uploc, \
-          conjc, \
-          schema, \
-          invdiag, \
-          panel_dim, \
-          panel_len, \
-          panel_dim_max, \
-          panel_len_max, \
-          panel_dim_off, \
-          panel_len_off, \
-          kappa, \
-          c, incc, ldc, \
-          p,       ldp, \
-             is_p, \
+		  strucc, \
+		  diagc, \
+		  uploc, \
+		  conjc, \
+		  schema, \
+		  invdiag, \
+		  panel_dim, \
+		  panel_len, \
+		  panel_dim_max, \
+		  panel_len_max, \
+		  panel_dim_off, \
+		  panel_len_off, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp, \
+		     is_p, \
 		  cntx, \
-          params \
+		  params \
 		); \
 	} \
 	else /* ( bli_is_triangular( strucc ) ) */ \
@@ -111,24 +111,24 @@ void PASTEMAC(ch,varname) \
 		   matrices. */ \
 		PASTEMAC(ch,packm_tri_cxk_1er) \
 		( \
-          strucc, \
-          diagc, \
-          uploc, \
-          conjc, \
-          schema, \
-          invdiag, \
-          panel_dim, \
-          panel_len, \
-          panel_dim_max, \
-          panel_len_max, \
-          panel_dim_off, \
-          panel_len_off, \
-          kappa, \
-          c, incc, ldc, \
-          p,       ldp, \
-             is_p, \
+		  strucc, \
+		  diagc, \
+		  uploc, \
+		  conjc, \
+		  schema, \
+		  invdiag, \
+		  panel_dim, \
+		  panel_len, \
+		  panel_dim_max, \
+		  panel_len_max, \
+		  panel_dim_off, \
+		  panel_len_off, \
+		  kappa, \
+		  c, incc, ldc, \
+		  p,       ldp, \
+		     is_p, \
 		  cntx, \
-          params \
+		  params \
 		); \
 	} \
 }

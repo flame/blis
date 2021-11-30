@@ -85,7 +85,7 @@ bool bli_packm_init
 
 	// Update the storage datatype of P to be the target datatype of A.
 	bli_obj_set_dt( dt_tar, p );
-    bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
+	bli_obj_set_elem_size( bli_dt_size( dt_tar ), p );
 
 	// Store the pack schema to the object.
 	bli_obj_set_pack_schema( schema, p );
@@ -94,7 +94,7 @@ bool bli_packm_init
 	// in BLIS is deemed to take care of all conjugation necessary.
 	bli_obj_set_conj( BLIS_NO_CONJUGATE, p );
 
-	// If we are packing micropanels, mark P as dense.
+	// Since we are packing micropanels, mark P as dense.
 	bli_obj_set_uplo( BLIS_DENSE, p );
 
 	// Reset the view offsets to (0,0).
@@ -118,9 +118,9 @@ bool bli_packm_init
 	bli_obj_set_padded_dims( m_p_pad, n_p_pad, p );
 
 	// Now we prepare to compute strides, align them, and compute the
-	// total number of bytes needed for the packed buffer. The caller
-	// will then use that value to acquire an appropriate block of memory
-	// from the memory allocator.
+	// total number of bytes needed for the packed buffer. Then we use
+	// that value to acquire an appropriate block of memory from the
+	// memory allocator.
 
 	// Extract the element size for the packed object.
 	siz_t elem_size_p = bli_obj_elem_size( p );
@@ -148,11 +148,10 @@ bool bli_packm_init
 	// dimension of the matrix is not a whole multiple of MR.
 	inc_t ps_p = cs_p * n_p_pad;
 
-	// As a general rule, we don't want micropanel strides to be odd. This
-	// is primarily motivated by our desire to support interleaved 3m
-	// micropanels, in which case we have to scale the panel stride
-	// by 3/2. That division by 2 means the numerator (prior to being
-	// scaled by 3) must be even.
+	// As a general rule, we don't want micropanel strides to be odd. There
+	// are very few instances where this can happen, but we've seen it happen
+	// more than zero times (such as for certain small problems), and so we
+	// check for it here.
 	if ( bli_is_odd( ps_p ) ) ps_p += 1;
 
 	// Set the imaginary stride (in units of fundamental elements).
@@ -173,6 +172,7 @@ bool bli_packm_init
 	// Compute the size of the packed buffer.
 	siz_t size_p = ps_p * ( m_p_pad / m_panel ) * elem_size_p;
 
+	// If the requested size is zero, then we don't need to do any allocation.
 	if ( size_p == 0 )
 		return false;
 

@@ -65,9 +65,13 @@ void bli_hemm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
-    bli_obj_remove_offs( &a_local );
-    bli_obj_remove_offs( &b_local );
-    bli_obj_remove_offs( &c_local );
+	// Set the obj_t buffer field to the location currently implied by the row
+	// and column offsets and then zero the offsets. If any of the original
+	// obj_t's were views into larger matrices, this step effectively makes
+	// those obj_t's "forget" their lineage.
+	bli_obj_reset_origin( &a_local );
+	bli_obj_reset_origin( &b_local );
+	bli_obj_reset_origin( &c_local );
 
 #ifdef BLIS_DISABLE_HEMM_RIGHT
 	// NOTE: This case casts right-side hemm in terms of left side. This is

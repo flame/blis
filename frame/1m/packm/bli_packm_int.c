@@ -47,9 +47,10 @@ void bli_packm_int
 	bli_init_once();
 
 	// Extract the function pointer from the object.
-    packm_var_oft f = bli_obj_pack_fn( a );
+	packm_var_oft f = bli_obj_pack_fn( a );
 
-	// FGVZ: Not sure why we need this barrier, but we do.
+	// Barrier so that we know threads are done with previous computation
+	// with the same packing buffer before starting to pack.
 	bli_thread_barrier( thread );
 
 	// Invoke the variant with kappa_use.
@@ -58,7 +59,7 @@ void bli_packm_int
 	  a,
 	  p,
 	  cntx,
-      rntm,
+	  rntm,
 	  cntl,
 	  thread
 	);

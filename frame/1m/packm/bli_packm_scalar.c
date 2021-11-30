@@ -48,7 +48,7 @@ void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 	// applying a real scalar is easy, but applying a complex one is
 	// harder, so we avoid the need altogether with the code below.)
 	if ( bli_obj_scalar_has_nonzero_imag( p ) &&
-         !bli_is_nat_packed( schema ) )
+	     !bli_is_nat_packed( schema ) )
 	{
 		//printf( "applying non-zero imag kappa\n_p" );
 
@@ -58,7 +58,7 @@ void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 		// Reset the attached scalar (to 1.0).
 		bli_obj_scalar_reset( p );
 
-	    return bli_obj_buffer_for_1x1( dt_p, kappa );
+		return bli_obj_buffer_for_1x1( dt_p, kappa );
 	}
 	// This branch is also for native execution, where we assume that
 	// the micro-kernel will always apply the alpha scalar of the
@@ -70,7 +70,7 @@ void* bli_packm_scalar( obj_t* kappa, obj_t* p )
 		// If the internal scalar of A has only a real component, then
 		// we will apply it later (in the micro-kernel), and so we will
 		// use BLIS_ONE to indicate no scaling during packing.
-	    return bli_obj_buffer_for_1x1( dt_p, &BLIS_ONE );
+		return bli_obj_buffer_for_1x1( dt_p, &BLIS_ONE );
 	}
 }
 

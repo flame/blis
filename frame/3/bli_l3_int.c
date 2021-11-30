@@ -93,7 +93,7 @@ void bli_l3_int
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
-	// Ensure that a valid packing function is set on A and B
+	// Ensure that a valid packing function is set on A and B.
 	if ( !bli_obj_pack_fn( &a_local ) )
 		bli_obj_set_pack_fn( bli_packm_blk_var1, &a_local );
 

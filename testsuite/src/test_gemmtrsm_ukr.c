@@ -283,7 +283,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	bli_copym( &b11, &c11 );
 	bli_copym( &c11, &c11_save );
 
-    rntm_t rntm;
+	rntm_t rntm;
 	bli_rntm_init( &rntm );
 	bli_pba_rntm_set_pba( &rntm );
 
@@ -298,7 +298,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
 	  cntx,
-      &rntm
+	  &rntm
 	);
 
 	// Set the diagonal offset of ap.
@@ -315,40 +315,40 @@ bli_printm( "a", &a, "%5.2f", "" );
 bli_printm( "ap", &ap, "%5.2f", "" );
 #endif
 
-    cntl_t* cntl_b = NULL;
+	cntl_t* cntl_b = NULL;
 
 	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copym( &c11_save, &c11 );
 
-        // Transpose B to B^T for packing
-        bli_obj_induce_trans( &b );
+		// Transpose B to B^T for packing.
+		bli_obj_induce_trans( &b );
 
-    	cntl_b = libblis_test_pobj_create
-    	(
-    	  BLIS_NR,
-    	  BLIS_MR,
-    	  BLIS_NO_INVERT_DIAG,
-    	  BLIS_PACKED_COL_PANELS,
-    	  BLIS_BUFFER_FOR_B_PANEL,
-    	  &b, &bp,
-    	  cntx,
-          &rntm
-    	);
+		cntl_b = libblis_test_pobj_create
+		(
+		  BLIS_NR,
+		  BLIS_MR,
+		  BLIS_NO_INVERT_DIAG,
+		  BLIS_PACKED_COL_PANELS,
+		  BLIS_BUFFER_FOR_B_PANEL,
+		  &b, &bp,
+		  cntx,
+		  &rntm
+		);
 
-        // Transpose B^T back to B and Bp^T back to Bp
-        bli_obj_induce_trans( &b );
-        bli_obj_induce_trans( &bp );
+		// Transpose B^T back to B and Bp^T back to Bp.
+		bli_obj_induce_trans( &b );
+		bli_obj_induce_trans( &bp );
 
-    	// Create subpartitions from the a and b panels.
-    	bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
-    	                                &a1xp, &a11p, &bx1p, &b11p );
+		// Create subpartitions from the a and b panels.
+		bli_gemmtrsm_ukr_make_subparts( k, &ap, &bp,
+		                                &a1xp, &a11p, &bx1p, &b11p );
 
-    	// Set the uplo field of a11p since the default for packed objects is
-    	// BLIS_DENSE, and the _ukernel() wrapper needs this information to
-    	// know which set of micro-kernels (lower or upper) to choose from.
-    	bli_obj_set_uplo( uploa, &a11p );
+		// Set the uplo field of a11p since the default for packed objects is
+		// BLIS_DENSE, and the _ukernel() wrapper needs this information to
+		// know which set of micro-kernels (lower or upper) to choose from.
+		bli_obj_set_uplo( uploa, &a11p );
 
 		time = bli_clock();
 
@@ -358,14 +358,14 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 		time_min = bli_clock_min_diff( time_min, time );
 
-        // On the last pass, we must keep the packed B buffer checked out in order
-        // to perform the correctness check later.
-        if (i < n_repeats-1)
-        {
-        	// Free the control tree nodes and release their cached mem_t entries
-        	// back to the memory broker.
-        	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
-        }
+		// On the last pass, we must keep the packed B buffer checked out in order
+		// to perform the correctness check later.
+		if ( i < n_repeats - 1 )
+		{
+			// Free the control tree nodes and release their cached mem_t entries
+			// back to the memory broker.
+			bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+		}
 	}
 
 	// Estimate the performance of the best experiment repeat.
@@ -402,9 +402,9 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	//libblis_test_check_empty_problem( &c11, perf, resid );
 
 	// Free the control tree nodes and release their cached mem_t entries
-	// back to the memory broker.
+	// back to the pba.
 	bli_cntl_free( &rntm, cntl_a, &BLIS_PACKM_SINGLE_THREADED );
-    if ( cntl_b )
+	if ( cntl_b )
 	    bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 
 	// Free the test objects.

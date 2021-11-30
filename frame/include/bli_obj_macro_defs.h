@@ -1353,12 +1353,16 @@ BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, obj_t* obj )
 	       );
 }
 
-// Adjust pointer based on offsets and then zero them
+// Adjust the pointer based on current offsets, zero the offsets, and then
+// set the current object as the root. For obj_t's with at least one non-zero
+// offset, this effectively makes the obj_t "forget" that it was ever a view
+// into a larger matrix.
 
-BLIS_INLINE void bli_obj_remove_offs( obj_t* obj )
+BLIS_INLINE void bli_obj_reset_origin( obj_t* obj )
 {
     bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
     bli_obj_set_offs( 0, 0, obj );
+	bli_obj_set_as_root( obj );
 }
 
 // Make a full alias (shallow copy).
@@ -1486,7 +1490,13 @@ BLIS_INLINE void bli_obj_scalar_set_dt_buffer( obj_t* obj, num_t dt_aux, num_t* 
 
 BLIS_INLINE void bli_obj_swap( obj_t* a, obj_t* b )
 {
+	bool a_root_is_self = ( bli_obj_root( a ) == a );
+	bool b_root_is_self = ( bli_obj_root( b ) == b );
+
 	obj_t t = *b; *b = *a; *a = t;
+
+	if ( a_root_is_self ) bli_obj_set_as_root( b );
+	if ( b_root_is_self ) bli_obj_set_as_root( a );
 }
 
 // Swap object pack schemas.

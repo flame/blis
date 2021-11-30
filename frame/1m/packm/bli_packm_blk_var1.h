@@ -34,7 +34,7 @@
 */
 
 //
-// Prototype object-based interfaces.
+// packm params types.
 //
 
 typedef struct
@@ -42,6 +42,10 @@ typedef struct
     //                   Type of C          Type of P
     packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
 } packm_blk_var1_params_t;
+
+//
+// Prototype object-based interfaces.
+//
 
 BLIS_EXPORT_BLIS void bli_packm_blk_var1
      (

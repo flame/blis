@@ -232,7 +232,7 @@ void libblis_test_trsm_ukr_experiment
 	libblis_test_mobj_randomize( params, TRUE, &c );
 	bli_copym( &c, &c_save );
 
-    rntm_t rntm;
+	rntm_t rntm;
 	bli_rntm_init( &rntm );
 	bli_pba_rntm_set_pba( &rntm );
 
@@ -247,7 +247,7 @@ void libblis_test_trsm_ukr_experiment
 	  BLIS_BUFFER_FOR_A_BLOCK,
 	  &a, &ap,
 	  cntx,
-      &rntm
+	  &rntm
 	);
 
 	// Set the diagonal offset of ap.
@@ -268,24 +268,24 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	{
 		bli_copym( &c_save, &c );
 
-        // Transpose B to B^T for packing
-        bli_obj_induce_trans( &b );
+		// Transpose B to B^T for packing.
+		bli_obj_induce_trans( &b );
 
-    	cntl_t* cntl_b = libblis_test_pobj_create
-    	(
-    	  BLIS_NR,
-    	  BLIS_MR,
-    	  BLIS_NO_INVERT_DIAG,
-    	  BLIS_PACKED_COL_PANELS,
-    	  BLIS_BUFFER_FOR_B_PANEL,
-    	  &b, &bp,
-    	  cntx,
-          &rntm
-    	);
+		cntl_t* cntl_b = libblis_test_pobj_create
+		(
+		  BLIS_NR,
+		  BLIS_MR,
+		  BLIS_NO_INVERT_DIAG,
+		  BLIS_PACKED_COL_PANELS,
+		  BLIS_BUFFER_FOR_B_PANEL,
+		  &b, &bp,
+		  cntx,
+		  &rntm
+		);
 
-        // Transpose B^T back to B and Bp^T back to Bp
-        bli_obj_induce_trans( &b );
-        bli_obj_induce_trans( &bp );
+		// Transpose B^T back to B and Bp^T back to Bp.
+		bli_obj_induce_trans( &b );
+		bli_obj_induce_trans( &bp );
 
 		time = bli_clock();
 
@@ -295,9 +295,9 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 
 		time_min = bli_clock_min_diff( time_min, time );
 
-    	// Free the control tree nodes and release their cached mem_t entries
-    	// back to the memory broker.
-    	bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
+		// Free the control tree nodes and release their cached mem_t entries
+		// back to the memory broker.
+		bli_cntl_free( &rntm, cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 	}
 
 	// Estimate the performance of the best experiment repeat.

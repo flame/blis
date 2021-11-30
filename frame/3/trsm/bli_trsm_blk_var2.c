@@ -60,7 +60,7 @@ void bli_trsm_blk_var2
 	bli_thread_range_ndim
 	(
 	  direct, thread, a, b, c, cntl, cntx,
-      &my_start, &my_end
+	  &my_start, &my_end
 	);
 
 	// Partition along the n dimension.
