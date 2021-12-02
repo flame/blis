@@ -155,13 +155,6 @@ void bli_trmm_front
 	// Set the pack schemas within the objects.
 	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
 
-	// Set each alias as the root object.
-	// NOTE: We MUST wait until we are done potentially swapping the objects
-	// before setting the root fields!
-	bli_obj_set_as_root( &a_local );
-	bli_obj_set_as_root( &b_local );
-	bli_obj_set_as_root( &c_local );
-
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
 	// additional modifications necessary for the current operation.
