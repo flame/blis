@@ -58,7 +58,7 @@ void bli_trsm_blk_var1
 	bli_l3_prune_unref_mparts_m( a, b, c, cntl );
 
 	// Isolate the diagonal block A11 and its corresponding row panel C1.
-	const dim_t kc = bli_obj_width( a );
+	const dim_t kc = bli_obj_width_after_trans( a );
 	obj_t a11, c1;
 	bli_acquire_mpart_mdim( direct, BLIS_SUBPART1,
 	                        0, kc, a, &a11 );
@@ -96,7 +96,7 @@ void bli_trsm_blk_var1
 #endif
 
 		// Perform trsm subproblem.
-		bli_trsm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a11_1,
@@ -169,7 +169,7 @@ void bli_trsm_blk_var1
 
 		// Perform gemm subproblem. (Note that we use the same backend
 		// function as before, since we're calling the same macrokernel.)
-		bli_trsm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a11,

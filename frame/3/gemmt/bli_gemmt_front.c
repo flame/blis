@@ -73,7 +73,14 @@ void bli_gemmt_front
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
-	bli_obj_set_as_root( &c_local );
+
+	// Set the obj_t buffer field to the location currently implied by the row
+	// and column offsets and then zero the offsets. If any of the original
+	// obj_t's were views into larger matrices, this step effectively makes
+	// those obj_t's "forget" their lineage.
+	bli_obj_reset_origin( &a_local );
+	bli_obj_reset_origin( &b_local );
+	bli_obj_reset_origin( &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -107,7 +114,7 @@ void bli_gemmt_front
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_gemm_int,
+	  bli_l3_int,
 	  BLIS_GEMMT, // operation family id
 	  alpha,
 	  &a_local,

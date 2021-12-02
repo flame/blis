@@ -118,6 +118,11 @@ void bli_obj_create_without_buffer
 	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_diag_offset( 0, obj );
 
+	bli_obj_set_pack_fn( NULL, obj );
+	bli_obj_set_pack_params( NULL, obj );
+	bli_obj_set_ker_fn( NULL, obj );
+	bli_obj_set_ker_params( NULL, obj );
+
 	// Set the internal scalar to 1.0.
 	bli_obj_set_scalar_dt( dt, obj );
 	s = bli_obj_internal_scalar_buffer( obj );
@@ -356,7 +361,7 @@ void bli_obj_free
 
 	buf_a = bli_obj_buffer_at_off( a );
 
-	bli_zzsets( 0.0, 0.0, value ); 
+	bli_zzsets( 0.0, 0.0, value );
 
 	if ( bli_obj_is_float( a ) )
 	{
@@ -500,7 +505,7 @@ void bli_adjust_strides
 			// Set the column stride to indicate that this is a column vector
 			// stored in column-major order. This is done for legacy reasons,
 			// because we at one time we had to satisify the error checking
-			// in the underlying BLAS library, which expects the leading 
+			// in the underlying BLAS library, which expects the leading
 			// dimension to be set to at least m, even if it will never be
 			// used for indexing since it is a vector and thus only has one
 			// column of data.
