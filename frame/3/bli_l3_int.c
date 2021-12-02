@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,7 +34,7 @@
 
 #include "blis.h"
 
-void bli_gemm_int
+void bli_l3_int
      (
        obj_t*  alpha,
        obj_t*  a,
@@ -48,10 +47,12 @@ void bli_gemm_int
        thrinfo_t* thread
      )
 {
-	obj_t        a_local;
-	obj_t        b_local;
-	obj_t        c_local;
-	gemm_var_oft f;
+	obj_t a_local;
+	obj_t b_local;
+	obj_t c_local;
+
+	// Return early if the current control tree node is NULL.
+	if ( bli_cntl_is_null( cntl ) ) return;
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -92,25 +93,48 @@ void bli_gemm_int
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
-	// If alpha is non-unit, typecast and apply it to the scalar attached
-	// to B.
-	if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+	// Ensure that a valid packing function is set on A and B.
+	if ( !bli_obj_pack_fn( &a_local ) )
+		bli_obj_set_pack_fn( bli_packm_blk_var1, &a_local );
+
+	if ( !bli_obj_pack_fn( &b_local ) )
+		bli_obj_set_pack_fn( bli_packm_blk_var1, &b_local );
+
+	// If we are about to call a leaf-level implementation, and matrix C
+	// still needs a transposition, then we must induce one by swapping the
+	// strides and dimensions. Note that this transposition would normally
+	// be handled explicitly in the packing of C, but if C is not being
+	// packed, this is our last chance to handle the transposition.
+	//if ( bli_cntl_is_leaf( cntl ) && bli_obj_has_trans( c ) )
+	if ( bli_obj_has_trans( c ) )
 	{
-		bli_obj_scalar_apply_scalar( alpha, &b_local );
+		bli_obj_induce_trans( &c_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &c_local );
+	}
+
+	// If alpha is non-unit, typecast and apply it to the scalar attached
+	// to B, unless it happens to be triangular.
+	if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, &a_local );
+	}
+	else // if ( bli_obj_root_is_triangular( b ) )
+	{
+		if ( !bli_obj_equals( alpha, &BLIS_ONE ) )
+			bli_obj_scalar_apply_scalar( alpha, &b_local );
 	}
 
 	// If beta is non-unit, typecast and apply it to the scalar attached
 	// to C.
 	if ( !bli_obj_equals( beta, &BLIS_ONE ) )
-	{
 		bli_obj_scalar_apply_scalar( beta, &c_local );
-	}
 
 	// Create the next node in the thrinfo_t structure.
 	bli_thrinfo_grow( rntm, cntl, thread );
 
 	// Extract the function pointer from the current control tree node.
-	f = bli_cntl_var_func( cntl );
+	l3_var_oft f = bli_cntl_var_func( cntl );
 
 	// Invoke the variant.
 	f

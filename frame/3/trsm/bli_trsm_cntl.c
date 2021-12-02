@@ -57,15 +57,10 @@ cntl_t* bli_trsm_l_cntl_create
      )
 {
 	void_fp macro_kernel_p;
-	void_fp packa_fp;
-	void_fp packb_fp;
 
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
 	macro_kernel_p = bli_trsm_xx_ker_var2;
-
-	packa_fp = bli_packm_blk_var1;
-	packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -95,8 +90,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa, // trsm operation's packm function for A.
-	  packa_fp,
+	  bli_l3_packa, // trsm operation's packm function for A.
 	  BLIS_MR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -133,8 +127,7 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa, // trsm operation's packm function for A.
-	  packa_fp,
+	  bli_l3_packa, // trsm operation's packm function for A.
 	  BLIS_MR,
 	  BLIS_MR,
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
@@ -171,10 +164,9 @@ cntl_t* bli_trsm_l_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packb,
-	  packb_fp,
-	  BLIS_MR,
+	  bli_l3_packb,
 	  BLIS_NR,
+	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
@@ -208,16 +200,13 @@ cntl_t* bli_trsm_l_cntl_create
 
 cntl_t* bli_trsm_r_cntl_create
      (
-	   rntm_t* rntm,
+       rntm_t* rntm,
        pack_t  schema_a,
        pack_t  schema_b
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
-
-	void_fp packa_fp = bli_packm_blk_var1;
-	void_fp packb_fp = bli_packm_blk_var1;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -244,8 +233,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packa,
-	  packa_fp,
+	  bli_l3_packa,
 	  BLIS_NR,
 	  BLIS_MR,
 	  FALSE,   // do NOT invert diagonal
@@ -270,8 +258,7 @@ cntl_t* bli_trsm_r_cntl_create
 	cntl_t* trsm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_trsm_packb,
-	  packb_fp,
+	  bli_l3_packb,
 	  BLIS_MR,
 	  BLIS_MR,
 	  TRUE,    // do NOT invert diagonal

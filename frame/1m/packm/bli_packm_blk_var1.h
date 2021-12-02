@@ -33,13 +33,27 @@
 
 */
 
-void bli_l3_packm
+//
+// packm params types.
+//
+
+typedef struct
+{
+    //                   Type of C          Type of P
+    packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+} packm_blk_var1_params_t;
+
+//
+// Prototype object-based interfaces.
+//
+
+BLIS_EXPORT_BLIS void bli_packm_blk_var1
      (
-       obj_t*  x,
-       obj_t*  x_pack,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       obj_t*   c,
+       obj_t*   p,
+       cntx_t*  cntx,
+       rntm_t*  rntm,
+       cntl_t*  cntl,
+       thrinfo_t* t
      );
 

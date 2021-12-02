@@ -53,7 +53,7 @@ void bli_gemm_check
 	// Check object structure.
 
 	// NOTE: Can't perform these checks as long as bli_gemm_check() is called
-	// from bli_gemm_int(), which is in the execution path for structured
+	// from bli_l3_int(), which is in the execution path for structured
 	// level-3 operations such as hemm.
 
 	//e_val = bli_check_general_object( a );
@@ -109,7 +109,7 @@ void bli_hemm_check
 }
 
 void bli_herk_check
-     ( 
+     (
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  beta,
@@ -197,7 +197,7 @@ void bli_symm_check
 }
 
 void bli_syrk_check
-     ( 
+     (
        obj_t*  alpha,
        obj_t*  a,
        obj_t*  beta,

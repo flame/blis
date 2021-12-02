@@ -32,16 +32,5 @@
 
 */
 
-void bli_gemm_int
-     (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
-     );
+BLIS_EXPORT_BLIS void* bli_packm_scalar( obj_t* kappa, obj_t* p );
 

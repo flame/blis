@@ -32,35 +32,106 @@
 
 */
 
-void bli_packm_unb_var1
+#include "blis.h"
+
+void bli_l3_packa
      (
+       obj_t*  a,
+       obj_t*  b,
        obj_t*  c,
-       obj_t*  p,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
-     );
+     )
+{
+	obj_t a_local, a_pack;
 
+	bli_obj_alias_to( a, &a_local );
+	if ( bli_obj_has_trans( a ) )
+	{
+		bli_obj_induce_trans( &a_local );
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &a_local );
+	}
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       struc_t strucc, \
-       doff_t  diagoffc, \
-       diag_t  diagc, \
-       uplo_t  uploc, \
-       trans_t transc, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   m_max, \
-       dim_t   n_max, \
-       void*   kappa, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       void*   p, inc_t rs_p, inc_t cs_p, \
-       cntx_t* cntx  \
-     );
+	// Pack matrix A according to the control tree node.
+	bli_packm_int
+	(
+	  &a_local,
+	  &a_pack,
+	  cntx,
+	  rntm,
+	  cntl,
+	  thread
+	);
 
-INSERT_GENTPROT_BASIC0( packm_unb_var1 )
+	// Proceed with execution using packed matrix A.
+	bli_l3_int
+	(
+	  &BLIS_ONE,
+	  &a_pack,
+	  b,
+	  &BLIS_ONE,
+	  c,
+	  cntx,
+	  rntm,
+	  bli_cntl_sub_node( cntl ),
+	  bli_thrinfo_sub_node( thread )
+	);
+}
+
+// -----------------------------------------------------------------------------
+
+void bli_l3_packb
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
+     )
+{
+	obj_t bt_local, bt_pack;
+
+	// We always pass B^T to bli_l3_packm.
+	bli_obj_alias_to( b, &bt_local );
+	if ( bli_obj_has_trans( b ) )
+	{
+		bli_obj_set_onlytrans( BLIS_NO_TRANSPOSE, &bt_local );
+	}
+	else
+	{
+		bli_obj_induce_trans( &bt_local );
+	}
+
+	// Pack matrix B according to the control tree node.
+	bli_packm_int
+	(
+	  &bt_local,
+	  &bt_pack,
+	  cntx,
+	  rntm,
+	  cntl,
+	  thread
+	);
+
+	// Transpose packed object back to B.
+	bli_obj_induce_trans( &bt_pack );
+
+	// Proceed with execution using packed matrix B.
+	bli_l3_int
+	(
+	  &BLIS_ONE,
+	  a,
+	  &bt_pack,
+	  &BLIS_ONE,
+	  c,
+	  cntx,
+	  rntm,
+	  bli_cntl_sub_node( cntl ),
+	  bli_thrinfo_sub_node( thread )
+	);
+}
 

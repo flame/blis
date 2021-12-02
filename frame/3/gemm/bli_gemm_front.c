@@ -87,13 +87,14 @@ void bli_gemm_front
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
 
-#ifdef BLIS_ENABLE_GEMM_MD
-	// Don't perform the following optimization for ccr or crc cases, as
-	// those cases are sensitive to the ukernel storage preference (ie:
-	// transposing the operation would break them).
-	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
-	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
-#endif
+	// Set the obj_t buffer field to the location currently implied by the row
+	// and column offsets and then zero the offsets. If any of the original
+	// obj_t's were views into larger matrices, this step effectively makes
+	// those obj_t's "forget" their lineage.
+	bli_obj_reset_origin( &a_local );
+	bli_obj_reset_origin( &b_local );
+	bli_obj_reset_origin( &c_local );
+
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
@@ -251,7 +252,7 @@ void bli_gemm_front
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_gemm_int,
+	  bli_l3_int,
 	  BLIS_GEMM, // operation family id
 	  alpha,
 	  &a_local,

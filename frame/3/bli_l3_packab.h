@@ -32,29 +32,25 @@
 
 */
 
-void bli_unpackm_unb_var1
+void bli_l3_packa
      (
-       obj_t*  p,
+       obj_t*  a,
+       obj_t*  b,
        obj_t*  c,
        cntx_t* cntx,
+       rntm_t* rntm,
        cntl_t* cntl,
        thrinfo_t* thread
      );
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       doff_t  diagoffp, \
-       uplo_t  uplop, \
-       trans_t transp, \
-       dim_t   m, \
-       dim_t   n, \
-       void*   p, inc_t rs_p, inc_t cs_p, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx  \
+void bli_l3_packb
+     (
+       obj_t*  a,
+       obj_t*  b,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      );
-
-INSERT_GENTPROT_BASIC0( unpackm_unb_var1 )
 
