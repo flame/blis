@@ -45,6 +45,7 @@
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
+#define BLIS_ENABLE_ZEN_BLOCK_SIZES
 
 // Vanilla BLIS disables AMD's small matrix handling by default.
 #if 0
