@@ -78,7 +78,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       packnr      = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
-	const pack_t      schema_b    = bli_auxinfo_schema_b( data ); \
+	const pack_t      schema_b    = bli_cntx_schema_b_panel( cntx ); \
 \
 	const dim_t       k2          = 2 * k; \
 \
@@ -153,6 +153,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	   upper: bt = -1.0 * a12 * b21; */ \
 	rgemm_ukr \
 	( \
+      mr_r, \
+      nr_r, \
 	  k2, \
 	  minus_one_r, \
 	  a1x_r, \

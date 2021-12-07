@@ -39,6 +39,8 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -59,6 +61,8 @@ void PASTEMAC(ch,opname) \
 \
 	/* Invoke the typed function for the given datatype. */ \
 	f( \
+	   m, \
+	   n, \
 	   k, \
 	   alpha, \
 	   a, \

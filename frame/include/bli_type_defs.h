@@ -1144,6 +1144,13 @@ typedef struct
 	inc_t  ps_a;
 	inc_t  ps_b;
 
+	// The type to convert to on output.
+	//num_t  dt_on_output;
+
+    // (Virtual) microkernel address and additional parameters
+    void_fp ukr;
+    void*   params;
+
 } auxinfo_t;
 
 

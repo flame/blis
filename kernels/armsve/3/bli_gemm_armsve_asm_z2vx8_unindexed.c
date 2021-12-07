@@ -42,6 +42,8 @@
 // 2vx8 microkernels.
 #include "armsve_asm_2vx8cmplx.h"
 
+#include "arm_sve.h"
+
 void bli_zgemm_armsve_asm_2vx8_unindexed
      (
        dim_t               k0,
@@ -64,6 +66,9 @@ void bli_zgemm_armsve_asm_2vx8_unindexed
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
+
+  uint64_t mr = svcntd();
+  GEMM_UKR_SETUP_CT( z, mr, 8, false );
 
   __asm__ volatile (
 // " ldr             x0, %[a]                        \n\t"
@@ -286,5 +291,7 @@ GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z16,%2,%4,x16)
   "z24","z25","z26","z27",
   "z28","z29","z30","z31"
   );
+
+  GEMM_UKR_FLUSH_CT( z );
 }
 

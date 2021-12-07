@@ -44,6 +44,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -107,8 +109,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < mr; ++i ) \
-			for ( dim_t j = 0; j < nr; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
 			PASTEMAC(ch,copys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -117,8 +119,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( dim_t i = 0; i < mr; ++i ) \
-			for ( dim_t j = 0; j < nr; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
 			PASTEMAC(ch,xpbys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -133,8 +135,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t j = 0; j < nr; ++j ) \
-			for ( dim_t i = 0; i < mr; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			PASTEMAC(ch,copys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -143,8 +145,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( dim_t j = 0; j < nr; ++j ) \
-			for ( dim_t i = 0; i < mr; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			PASTEMAC(ch,xpbys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -171,6 +173,8 @@ GENTFUNC( dcomplex, z, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -188,9 +192,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
-\
-	const dim_t     m      = mr; \
-	const dim_t     n      = nr; \
 \
 	const inc_t     cs_a   = packmr; \
 \

@@ -32,10 +32,31 @@
 
 */
 
-GEMM_UKR_PROT( float,    s, gemm_armv7a_asm_4x4 )
-GEMM_UKR_PROT( double,   d, gemm_armv7a_asm_4x4 )
-GEMM_UKR_PROT( scomplex, c, gemm_armv7a_asm_2x2 )
-GEMM_UKR_PROT( dcomplex, z, gemm_armv7a_asm_2x2 )
+void bli_sgemm_armv7a_asm_4x4(dim_t k, float *restrict alpha,
+                              float *restrict a, float *restrict b,
+                              float *restrict beta, float *restrict c,
+                              inc_t rs_c, inc_t cs_c, auxinfo_t *restrict data,
+                              cntx_t *restrict cntx);
+void bli_dgemm_armv7a_asm_4x4(dim_t k, double *restrict alpha,
+                              double *restrict a, double *restrict b,
+                              double *restrict beta, double *restrict c,
+                              inc_t rs_c, inc_t cs_c, auxinfo_t *restrict data,
+                              cntx_t *restrict cntx);
+void bli_cgemm_armv7a_asm_2x2(dim_t k, scomplex *restrict alpha,
+                              scomplex *restrict a, scomplex *restrict b,
+                              scomplex *restrict beta, scomplex *restrict c,
+                              inc_t rs_c, inc_t cs_c, auxinfo_t *restrict data,
+                              cntx_t *restrict cntx);
+void bli_zgemm_armv7a_asm_2x2(dim_t k, dcomplex *restrict alpha,
+                              dcomplex *restrict a, dcomplex *restrict b,
+                              dcomplex *restrict beta, dcomplex *restrict c,
+                              inc_t rs_c, inc_t cs_c, auxinfo_t *restrict data,
+                              cntx_t *restrict cntx);
+
+GEMM_UKR_PROT( float,    s, gemm_armv7a_asm_wrap_4x4 )
+GEMM_UKR_PROT( double,   d, gemm_armv7a_asm_wrap_4x4 )
+GEMM_UKR_PROT( scomplex, c, gemm_armv7a_asm_wrap_2x2 )
+GEMM_UKR_PROT( dcomplex, z, gemm_armv7a_asm_wrap_2x2 )
 
 GEMM_UKR_PROT( float,    s, gemm_armv7a_int_4x4 )
 GEMM_UKR_PROT( double,   d, gemm_armv7a_int_4x4 )

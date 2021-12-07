@@ -40,20 +40,22 @@ cntl_t* bli_trsm_cntl_create
        rntm_t* rntm,
        side_t  side,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
 	if ( bli_is_left( side ) )
-		return bli_trsm_l_cntl_create( rntm, schema_a, schema_b );
+		return bli_trsm_l_cntl_create( rntm, schema_a, schema_b, ker );
 	else
-		return bli_trsm_r_cntl_create( rntm, schema_a, schema_b );
+		return bli_trsm_r_cntl_create( rntm, schema_a, schema_b, ker );
 }
 
 cntl_t* bli_trsm_l_cntl_create
      (
        rntm_t* rntm,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
 	void_fp macro_kernel_p;
@@ -61,6 +63,7 @@ cntl_t* bli_trsm_l_cntl_create
 	// Use the function pointer to the macrokernels that use slab
 	// assignment of micropanels to threads in the jr and ir loops.
 	macro_kernel_p = bli_trsm_xx_ker_var2;
+    if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -200,13 +203,15 @@ cntl_t* bli_trsm_l_cntl_create
 
 cntl_t* bli_trsm_r_cntl_create
      (
-       rntm_t* rntm,
+	   rntm_t* rntm,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
+    if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
 
