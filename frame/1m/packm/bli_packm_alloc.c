@@ -46,6 +46,25 @@ void* bli_packm_alloc
 	// Query the pack buffer type from the control tree node.
 	packbuf_t pack_buf_type = bli_cntl_packm_params_pack_buf_type( cntl );
 
+    return bli_packm_alloc_ex
+      (
+        size_needed,
+        pack_buf_type,
+        rntm,
+        cntl,
+        thread
+      );
+}
+
+void* bli_packm_alloc_ex
+      (
+        siz_t      size_needed,
+        packbuf_t  pack_buf_type,
+        rntm_t*    rntm,
+        cntl_t*    cntl,
+        thrinfo_t* thread
+      )
+{
 	// Query the address of the mem_t entry within the control tree node.
 	mem_t* cntl_mem_p = bli_cntl_pack_mem( cntl );
 

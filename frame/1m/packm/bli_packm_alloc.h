@@ -40,3 +40,12 @@ BLIS_EXPORT_BLIS  void* bli_packm_alloc
         thrinfo_t* thread
       );
 
+BLIS_EXPORT_BLIS void* bli_packm_alloc_ex
+      (
+        siz_t      size_needed,
+        packbuf_t  pack_buf_type,
+        rntm_t*    rntm,
+        cntl_t*    cntl,
+        thrinfo_t* thread
+      );
+

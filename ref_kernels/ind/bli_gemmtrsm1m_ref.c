@@ -78,7 +78,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       packnr      = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
-	const pack_t      schema_b    = bli_cntx_schema_b_panel( cntx ); \
+	const pack_t      schema_b    = bli_auxinfo_schema_b( data ); \
 \
 	const dim_t       k2          = 2 * k; \
 \
