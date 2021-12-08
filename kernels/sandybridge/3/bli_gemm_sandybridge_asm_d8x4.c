@@ -79,7 +79,7 @@ void bli_sgemm_sandybridge_asm_8x8
 
 	mov(var(c), rcx) // load address of c
 	mov(var(cs_c), rdi) // load cs_c
-	lea(mem( rdi, 4), rdi) // cs_c *= sizeof(float)
+	lea(mem(, rdi, 4), rdi) // cs_c *= sizeof(float)
 	lea(mem(rcx, rdi, 4), r10) // load address of c + 4*cs_c;
 
 	lea(mem(rdi, rdi, 2), r14) // r14 = 3*cs_c;
@@ -412,11 +412,11 @@ void bli_sgemm_sandybridge_asm_8x8
 
 
 	mov(var(rs_c), rsi) // load rs_c
-	lea(mem( rsi, 4), rsi) // rsi = rs_c * sizeof(float)
+	lea(mem(, rsi, 4), rsi) // rsi = rs_c * sizeof(float)
 
 	lea(mem(rcx, rsi, 4), rdx) // load address of c + 4*rs_c;
 
-	lea(mem( rsi, 2), r12) // r12 = 2*rs_c;
+	lea(mem(, rsi, 2), r12) // r12 = 2*rs_c;
 	lea(mem(r12, rsi, 1), r13) // r13 = 3*rs_c;
 
 
@@ -529,9 +529,7 @@ void bli_sgemm_sandybridge_asm_8x8
 	  "memory"
 	)
 
-    \
-if ( _use_ct ) bli_sxpbys_mxn ( m , n , _ct , _rs_ct , _cs_ct , _beta , _c , _rs_c , _cs_c ) ;
-    ;
+    GEMM_UKR_FLUSH_CT( s );
 }
 
 void bli_dgemm_sandybridge_asm_8x4
