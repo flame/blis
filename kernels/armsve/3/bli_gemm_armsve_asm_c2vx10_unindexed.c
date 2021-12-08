@@ -46,6 +46,8 @@
 
 void bli_cgemm_armsve_asm_2vx10_unindexed
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k0,
        scomplex*  restrict alpha,
        scomplex*  restrict a,

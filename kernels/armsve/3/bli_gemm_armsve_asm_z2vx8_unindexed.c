@@ -46,6 +46,8 @@
 
 void bli_zgemm_armsve_asm_2vx8_unindexed
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k0,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,

@@ -37,8 +37,6 @@
 extern
 void bli_sgemm_armv7a_ker_4x4
      (
-       uint32_t            m,
-       uint32_t            n,
        uint32_t            k,
        float*     restrict alpha,
        float*     restrict a,
@@ -64,7 +62,9 @@ void bli_sgemm_armv7a_asm_4x4
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	bli_sgemm_armv7a_ker_4x4( m, n, k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_SETUP_CT_ANY( s, 4, 4, false );
+	bli_sgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_FLUSH_CT( s );
 }
 
 
@@ -72,8 +72,6 @@ void bli_sgemm_armv7a_asm_4x4
 extern
 void bli_dgemm_armv7a_ker_4x4
      (
-       uint32_t            m,
-       uint32_t            n,
        uint32_t            k,
        double*    restrict alpha,
        double*    restrict a,
@@ -99,7 +97,9 @@ void bli_dgemm_armv7a_asm_4x4
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	bli_dgemm_armv7a_ker_4x4( m, n, k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_SETUP_CT_ANY( d, 4, 4, false );
+	bli_dgemm_armv7a_ker_4x4( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 
@@ -107,8 +107,6 @@ void bli_dgemm_armv7a_asm_4x4
 extern
 void bli_cgemm_armv7a_ker_2x2
      (
-       uint32_t            m,
-       uint32_t            n,
        uint32_t            k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
@@ -134,7 +132,9 @@ void bli_cgemm_armv7a_asm_2x2
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	bli_cgemm_armv7a_ker_2x2( m, n, k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_SETUP_CT_ANY( c, 2, 2, false );
+	bli_cgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_FLUSH_CT( c );
 }
 
 
@@ -142,8 +142,6 @@ void bli_cgemm_armv7a_asm_2x2
 extern
 void bli_zgemm_armv7a_ker_2x2
      (
-       uint32_t            m,
-       uint32_t            n,
        uint32_t            k,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
@@ -169,6 +167,8 @@ void bli_zgemm_armv7a_asm_2x2
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
 	// different size than is expected by load instructions.
-	bli_zgemm_armv7a_ker_2x2( m, n, k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_SETUP_CT_ANY( z, 2, 2, false );
+	bli_zgemm_armv7a_ker_2x2( k, alpha, a, b, beta, c, rs_c, cs_c, data );
+	GEMM_UKR_FLUSH_CT( z );
 }
 

@@ -42,6 +42,8 @@
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10.h"
 
+#include "arm_sve.h"
+
 void bli_sgemm_armsve_asm_2vx10_unindexed
      (
        dim_t               m,
