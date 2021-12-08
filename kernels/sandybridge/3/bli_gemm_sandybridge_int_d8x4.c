@@ -34,7 +34,6 @@
 
 #include <emmintrin.h>
 #include <immintrin.h>
-#include "bli_misc_macro_defs.h"
 #include "blis.h"
 
 
