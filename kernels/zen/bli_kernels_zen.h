@@ -118,6 +118,8 @@ AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4 )
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
 DOTXF_KER_PROT( double,   d, dotxf_zen_int_8 )
+DOTXF_KER_PROT( double,   d, dotxf_zen_int_4 )
+DOTXF_KER_PROT( double,   d, dotxf_zen_int_2 )
 
 // dotxaxpyf (intrinsics)
 DOTXAXPYF_KER_PROT( double,   d, dotxaxpyf_zen_int_8 )
