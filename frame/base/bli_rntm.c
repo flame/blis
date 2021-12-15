@@ -574,6 +574,10 @@ void bli_nthreads_optimum(
 			if(n < 15) n_threads_ideal = 1;
 			else	   n_threads_ideal = 4;
 		      }
+		    else if( ( m < 34) && (k < 68) && ( m < 34)) 
+		    {
+			n_threads_ideal = 1;
+		    }
 		    else
 		      {
 			if(n < 20) n_threads_ideal = 1;

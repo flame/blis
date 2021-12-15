@@ -2847,6 +2847,7 @@ BLIS_INLINE err_t dtrsm_XAltB_ref
 #define BLIS_PRE_STRSM_SMALL_3N_2M(AlphaVal,b11,cs_b)\
     ymm15 = _mm256_broadcast_ss((float const *)&AlphaVal);         /*register to hold alpha*/\
 \
+    xmm5 = _mm_setzero_ps();\
     xmm5 = _mm_loadl_pi(xmm5,(__m64*)(b11));\
     ymm6 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
     ymm3 = _mm256_fmsub_ps(ymm6, ymm15, ymm3);\
@@ -3009,6 +3010,7 @@ BLIS_INLINE err_t dtrsm_XAltB_ref
 #define BLIS_PRE_STRSM_SMALL_2N_2M(AlphaVal,b11,cs_b)\
     ymm15 = _mm256_broadcast_ss((float const *)&AlphaVal);         /*register to hold alpha*/\
 \
+    xmm5 = _mm_setzero_ps();\
     xmm5 = _mm_loadl_pi(xmm5,(__m64*)(b11));\
     ymm6 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
     ymm3 = _mm256_fmsub_ps(ymm6, ymm15, ymm3);\
@@ -3116,6 +3118,7 @@ BLIS_INLINE err_t dtrsm_XAltB_ref
 #define BLIS_PRE_STRSM_SMALL_1N_2M(AlphaVal,b11,cs_b)\
     ymm15 = _mm256_broadcast_ss((float const *)&AlphaVal);         /*register to hold alpha*/\
 \
+    xmm5 = _mm_setzero_ps();\
     xmm5 = _mm_loadl_pi(xmm5,(__m64*)(b11));\
     ymm6 = _mm256_insertf128_ps(ymm0, xmm5, 0);\
     ymm3 = _mm256_fmsub_ps(ymm6, ymm15, ymm3);
