@@ -186,7 +186,7 @@ err_t bli_gemm_sqp
        cntl_t* cntl
      )
 {
-    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
+    //AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 
     // if row major format return.
     if ((bli_obj_row_stride( a ) != 1) ||
@@ -277,7 +277,7 @@ err_t bli_gemm_sqp
         return bli_sqp_dgemm( m, n, k, ap, lda, bp, ldb, cp, ldc, *alpha_cast, *beta_cast, isTransA, nt);
     }
 
-    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
+    //AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -377,8 +377,9 @@ void bli_sqp_dgemm_m(   gint_t i_start,
 #if SQP_THREAD_ENABLE
     if(pack_on==true)
     {
+        err_t r_val;
         //NEEDED IN THREADING CASE:
-        aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx);
+        aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx, &r_val);
         if(aligned==NULL)
         {
             return BLIS_MALLOC_RETURNED_NULL;// return to be removed
@@ -594,7 +595,8 @@ gint_t bli_getaligned(mem_block* mem_req)
     address += (-address) & 63; //64 bytes alignment done.
     mem_req->alignedBuf = (double*)address;
 #else
-    mem_req->alignedBuf = bli_malloc_user( memSize );
+    err_t r_val;
+    mem_req->alignedBuf = bli_malloc_user( memSize, &r_val);
     if (mem_req->alignedBuf == NULL)
     {
         return -1;
@@ -814,7 +816,8 @@ err_t allocate_3m_Sqp_workspace(workspace_3m_sqp *mem_3m_sqp,
     mem_3m_sqp->ci_unaligned = (double*)mci.unalignedBuf;
 
     // A packing buffer
-    mem_3m_sqp->aPacked = (double*)bli_malloc_user(sizeof(double) * kx * mx);
+    err_t r_val;
+    mem_3m_sqp->aPacked = (double*)bli_malloc_user(sizeof(double) * kx * mx, &r_val);
     if (mem_3m_sqp->aPacked == NULL)
     {
         return BLIS_FAILURE;
@@ -1162,7 +1165,8 @@ BLIS_INLINE err_t bli_sqp_dgemm(gint_t m,
 
     if(nt<=1)//single pack buffer allocated for single thread case
     {
-        a_aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx);
+        err_t r_val;
+        a_aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx, &r_val);
     }
 
     gint_t nx = n;//MAX;
