@@ -35,10 +35,11 @@
 #include "immintrin.h"
 #include "bli_gemm_sqp_kernels.h"
 
-#define SQP_THREAD_ENABLE 0//currently disabled
+#define SQP_THREAD_ENABLE 0// Currently disabled: simple threading model along m dimension.
+                           // Works well when m is large and other dimensions are relatively smaller.
 #define BLI_SQP_MAX_THREADS 128
 #define BLIS_LOADFIRST 0
-#define MEM_ALLOC 1//malloc performs better than bli_malloc.
+#define MEM_ALLOC 1        // malloc performs better than bli_malloc. Reason to be understood.
 
 #define SET_TRANS(X,Y)\
     Y = BLIS_NO_TRANSPOSE;\
@@ -55,7 +56,7 @@
         Y = BLIS_CONJ_NO_TRANSPOSE;\
     }
 
-//Macro for 3m_sqp n loop
+//Macro for 3m_sqp nx loop
 #define BLI_SQP_ZGEMM_N(MX)\
     int j=0;\
     for(; j<=(n-nx); j+= nx)\
@@ -67,7 +68,7 @@
         status = bli_sqp_zgemm_m8( m, n-j, k, a, lda, b+(j*ldb), ldb, c+(j*ldc), ldc, alpha_real, beta_real, transa, MX,  p_istart, kx, &mem_3m_sqp);\
     }
 
-//Macro for sqp_dgemm n loop
+//Macro for sqp_dgemm nx loop
 #define BLI_SQP_DGEMM_N(MX)\
     int j=0;\
     for(; j<=(n-nx); j+= nx)\
@@ -88,20 +89,25 @@ typedef struct  {
 
 // 3m_sqp workspace data-structure
 typedef struct {
-    double *ar;
-    double *ai;
-    double *as;
 
-    double *br;
-    double *bi;
-    double *bs;
+    //list of aligned buffers used in 3m_sqp algorithm
+    double *ar; //A matrix real component buffer pointer
+    double *ai; //A matrix imaginary component buffer pointer
+    double *as; //as = ar + ai
 
-    double *cr;
-    double *ci;
+    double *br; //B matrix real component buffer pointer
+    double *bi; //B matrix complex component buffer pointer
+    double *bs; //bs = br + bi
 
-    double *w;
-    double *aPacked;
+    double *cr; //C matrix real component buffer pointer
+    double *ci; //C matrix imaginary component buffer pointer
 
+    double *w;  //workspace buffer
+
+    double *aPacked; //A packed buffer
+
+    /* Other unaligned buffer, which are allocated and
+     buffer pointers are stored to free at the end task completion. */
     double *ar_unaligned;
     double *ai_unaligned;
     double *as_unaligned;
@@ -117,7 +123,7 @@ typedef struct {
 
 }workspace_3m_sqp;
 
-//sqp threading datastructure
+//sqp threading datastructure:
 typedef struct bli_sqp_thread_info
 {
     gint_t i_start;
@@ -186,7 +192,6 @@ err_t bli_gemm_sqp
        cntl_t* cntl
      )
 {
-    //AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_7);
 
     // if row major format return.
     if ((bli_obj_row_stride( a ) != 1) ||
@@ -277,7 +282,6 @@ err_t bli_gemm_sqp
         return bli_sqp_dgemm( m, n, k, ap, lda, bp, ldb, cp, ldc, *alpha_cast, *beta_cast, isTransA, nt);
     }
 
-    //AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_7);
     return BLIS_NOT_YET_IMPLEMENTED;
 };
 
@@ -461,17 +465,19 @@ BLIS_INLINE err_t bli_sqp_dgemm_m8( gint_t m,
         pack_on = true;
     }
 
-#if 0//SQP_THREAD_ENABLE//ENABLE Threading
+#if SQP_THREAD_ENABLE//ENABLE Threading
     gint_t status = 0;
     gint_t workitems = (m-(*p_istart))/mx;
     gint_t inputThreadCount = bli_thread_get_num_threads();
     inputThreadCount = bli_min(inputThreadCount, BLI_SQP_MAX_THREADS);
-    inputThreadCount = bli_min(inputThreadCount,workitems);// limit input thread count when workitems are lesser.
+    // limit input thread count when workitems are lesser.
+    inputThreadCount = bli_min(inputThreadCount,workitems);
     inputThreadCount = bli_max(inputThreadCount,1);
     gint_t num_threads;
     num_threads = bli_max(inputThreadCount,1);
-    gint_t mx_per_thread = workitems/num_threads;//no of workitems per thread
-    //printf("\nistart %d workitems %d inputThreadCount %d num_threads %d mx_per_thread %d mx %d " ,
+    //no of workitems per thread
+    gint_t mx_per_thread = workitems/num_threads;
+
     *p_istart, workitems,inputThreadCount,num_threads,mx_per_thread, mx);
 
     pthread_t ptid[BLI_SQP_MAX_THREADS];
@@ -480,14 +486,13 @@ BLIS_INLINE err_t bli_sqp_dgemm_m8( gint_t m,
     //create threads
     for (gint_t t = 0; t < num_threads; t++)
     {
-        //ptid[t].tid = t;
         gint_t i_end = ((mx_per_thread*(t+1))*mx)+(*p_istart);
         if(i_end>m)
         {
             i_end = m;
         }
 
-        if(t==(num_threads-1))
+        if(t==(num_threads-1))//for last thread allocate remaining work.
         {
             if((i_end+mx)==m)
             {
@@ -502,7 +507,7 @@ BLIS_INLINE err_t bli_sqp_dgemm_m8( gint_t m,
 
         thread_info[t].i_start = ((mx_per_thread*t)*mx)+(*p_istart);
         thread_info[t].i_end = i_end;
-        //printf("\n threadid %d istart %d iend %d m %d mx %d", t, thread_info[t].i_start, i_end, m, mx);
+
         thread_info[t].m = m;
         thread_info[t].n = n;
         thread_info[t].k = k;
@@ -518,16 +523,12 @@ BLIS_INLINE err_t bli_sqp_dgemm_m8( gint_t m,
         thread_info[t].mx = mx;
         thread_info[t].pack_on = pack_on;
         thread_info[t].aligned = aligned;
-#if 1
+
         if ((status = pthread_create(&ptid[t], NULL, bli_sqp_thread, (void*)&thread_info[t])))
         {
             printf("error sqp pthread_create\n");
             return BLIS_FAILURE;
         }
-#else
-        //simulate thread for debugging..
-        bli_sqp_thread((void*)&thread_info[t]);
-#endif
     }
 
     //wait for completion
@@ -542,16 +543,16 @@ BLIS_INLINE err_t bli_sqp_dgemm_m8( gint_t m,
     }
 #else//SQP_THREAD_ENABLE
 
+    // single thread code segement.
     if(pack_on==true)
     {
-        //aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx); // allocation moved to top.
         if(aligned==NULL)
         {
             return BLIS_MALLOC_RETURNED_NULL;
         }
     }
 
-    for (i = (*p_istart); i <= (m-mx); i += mx) //this loop can be threaded. no of workitems = m/8
+    for (i = (*p_istart); i <= (m-mx); i += mx)
     {
         int p = 0;
         for(; p <= (k-kx); p += kx)
@@ -913,7 +914,9 @@ BLIS_INLINE err_t bli_sqp_zgemm_m8( gint_t m,
     inc_t i;
     gint_t max_m = (m2-mxmul2);
 
-    //get workspace
+    /*
+    get workspace for packing and
+    for storing sum of real and imag component */
     double* ar, * ai, * as;
     ar = mem_3m_sqp->ar;
     ai = mem_3m_sqp->ai;
@@ -1163,13 +1166,16 @@ BLIS_INLINE err_t bli_sqp_dgemm(gint_t m,
     gint_t kx = k;
     double* a_aligned = NULL;
 
-    if(nt<=1)//single pack buffer allocated for single thread case
+    //single pack buffer allocated for single thread case
+    if(nt<=1)
     {
         err_t r_val;
         a_aligned = (double*)bli_malloc_user(sizeof(double) * kx * mx, &r_val);
     }
 
-    gint_t nx = n;//MAX;
+    /* nx assigned to n, but can be assigned with lower value
+       to add partition along n dimension */
+    gint_t nx = n;.
     if(nx>n)
     {
         nx = n;
@@ -1199,7 +1205,8 @@ BLIS_INLINE err_t bli_sqp_dgemm(gint_t m,
         }
     }
 
-    if(nt<=1)//single pack buffer allocated for single thread case
+    //single pack buffer allocated for single thread case
+    if(nt<=1)
     {
         bli_free_user(a_aligned);
     }

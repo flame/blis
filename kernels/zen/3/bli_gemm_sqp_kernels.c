@@ -182,7 +182,7 @@ inc_t bli_sqp_dgemm_kernel_8mx6n(gint_t n,
 
         pc += ldc6;pb += ldb6;
     }
-    //printf(" 8x6:j:%d ", j);
+
     return j;
 }
 
@@ -309,7 +309,7 @@ inc_t bli_sqp_dgemm_kernel_8mx5n(   gint_t n,
 
         pc += ldc5;pb += ldb5;
     }
-    //printf(" 8x5:j:%d ", j);
+
     return j;
 }
 
@@ -381,7 +381,7 @@ inc_t bli_sqp_dgemm_kernel_8mx4n(   gint_t n,
 
         pc += ldc4;pb += ldb4;
     }// j loop 4 multiple
-    //printf(" 8x4:j:%d ", j);
+
     return j;
 }
 
@@ -448,7 +448,7 @@ inc_t bli_sqp_dgemm_kernel_8mx3n(   gint_t n,
 
         pc += ldc3;pb += ldb3;
     }// j loop 3 multiple
-    //printf(" 8x3:j:%d ", j);
+
     return j;
 }
 
@@ -506,7 +506,7 @@ inc_t bli_sqp_dgemm_kernel_8mx2n(   gint_t n,
 
         pc += ldc2;pb += ldb2;
     }// j loop 2 multiple
-    //printf(" 8x2:j:%d ", j);
+
     return j;
 }
 
@@ -571,98 +571,7 @@ inc_t bli_sqp_dgemm_kernel_4mx10n(  gint_t n,
                                     double* c,
                                     guint_t ldc)
 {
-    gint_t p;
-    /*            incomplete */
-    __m256d av0;
-    __m256d bv0, bv1, bv2, bv3;
-    __m256d cv0, cv1, cv2, cv3;
-    __m256d cx0, cx1, cx2, cx3;
-    __m256d bv4, cv4, cx4;
-    double* pb, * pc;
-
-    pb = b;
-    pc = c;
-    inc_t ldc10 = ldc * 10; inc_t ldb10 = ldb * 10;
-
-    for (j = 0; j <= (n - 10); j += 10) {
-
-        double* pcldc = pc + ldc; double* pcldc2 = pcldc + ldc; double* pcldc3 = pcldc2 + ldc; double* pcldc4 = pcldc3 + ldc;
-        double* pbldb = pb + ldb; double* pbldb2 = pbldb + ldb; double* pbldb3 = pbldb2 + ldb; double* pbldb4 = pbldb3 + ldb;
-
-#if BLIS_ENABLE_PREFETCH
-        _mm_prefetch((char*)(pc), _MM_HINT_T0);
-        _mm_prefetch((char*)(pcldc), _MM_HINT_T0);
-        _mm_prefetch((char*)(pcldc2), _MM_HINT_T0);
-        _mm_prefetch((char*)(pcldc3), _MM_HINT_T0);
-        _mm_prefetch((char*)(pcldc4), _MM_HINT_T0);
-
-        _mm_prefetch((char*)(aPacked), _MM_HINT_T0);
-
-        _mm_prefetch((char*)(pb), _MM_HINT_T0);
-        _mm_prefetch((char*)(pbldb), _MM_HINT_T0);
-        _mm_prefetch((char*)(pbldb2), _MM_HINT_T0);
-        _mm_prefetch((char*)(pbldb3), _MM_HINT_T0);
-        _mm_prefetch((char*)(pbldb4), _MM_HINT_T0);
-#endif
-        /* C matrix column major load */
-#if BLIS_LOADFIRST
-        cv0 = _mm256_loadu_pd(pc);
-        cv1 = _mm256_loadu_pd(pcldc);
-        cv2 = _mm256_loadu_pd(pcldc2);
-        cv3 = _mm256_loadu_pd(pcldc3);
-        cv4 = _mm256_loadu_pd(pcldc4);
-#else
-        cv0 = _mm256_setzero_pd();
-        cv1 = _mm256_setzero_pd();
-        cv2 = _mm256_setzero_pd();
-        cv3 = _mm256_setzero_pd();
-        cv4 = _mm256_setzero_pd();
-#endif
-        double* x = aPacked;
-        double* pb0 = pb;
-        for (p = 0; p < k; p += 1) {
-            bv0 = _mm256_broadcast_sd(pb0); pb0++;
-            bv1 = _mm256_broadcast_sd(pbldb); pbldb++;
-            bv2 = _mm256_broadcast_sd(pbldb2); pbldb2++;
-            bv3 = _mm256_broadcast_sd(pbldb3);pbldb3++;
-            bv4 = _mm256_broadcast_sd(pbldb4);pbldb4++;
-
-            av0 = _mm256_loadu_pd(x); x += 4;
-            cv0 = _mm256_fmadd_pd(av0, bv0, cv0);
-            cv1 = _mm256_fmadd_pd(av0, bv1, cv1);
-            cv2 = _mm256_fmadd_pd(av0, bv2, cv2);
-            cv3 = _mm256_fmadd_pd(av0, bv3, cv3);
-            cv4 = _mm256_fmadd_pd(av0, bv4, cv4);
-
-        }
-#if BLIS_LOADFIRST
-#else
-        bv0 = _mm256_loadu_pd(pc);
-        cv0 = _mm256_add_pd(cv0, bv0);
-
-        bv2 = _mm256_loadu_pd(pcldc);
-        cv1 = _mm256_add_pd(cv1, bv2);
-
-        bv0 = _mm256_loadu_pd(pcldc2);
-        cv2 = _mm256_add_pd(cv2, bv0);
-
-        bv2 = _mm256_loadu_pd(pcldc3);
-        cv3 = _mm256_add_pd(cv3, bv2);
-
-        bv0 = _mm256_loadu_pd(pcldc4);
-        cv4 = _mm256_add_pd(cv4, bv0);
-#endif
-        /* C matrix column major store */
-        _mm256_storeu_pd(pc, cv0);
-        _mm256_storeu_pd(pcldc, cv1);
-        _mm256_storeu_pd(pcldc2, cv2);
-        _mm256_storeu_pd(pcldc3, cv3);
-        _mm256_storeu_pd(pcldc4, cv4);
-
-
-        pc += ldc10;pb += ldb10;
-    }
-
+    //tbd
     return j;
 }
 
@@ -680,30 +589,9 @@ inc_t bli_sqp_dgemm_kernel_4mx1n(   gint_t n,
                                     double* c,
                                     guint_t ldc)
 {
-    gint_t p;
-    __m256d av0;
-    __m256d bv0;
-    __m256d cv0;
-    double* pb, * pc;
-
-    pb = b;
-    pc = c;
-
-    for (; j <= (n - 1); j += 1) {
-        cv0 = _mm256_loadu_pd(pc);
-        double* x = aPacked;
-        double* pb0 = pb;
-        for (p = 0; p < k; p += 1) {
-            bv0 = _mm256_broadcast_sd(pb0); pb0++;
-            av0 = _mm256_loadu_pd(x); x += 4;
-            cv0 = _mm256_fmadd_pd(av0, bv0, cv0);
-        }
-        _mm256_storeu_pd(pc, cv0);
-        pc += ldc;pb += ldb;
-    }// j loop 1 multiple
+    //tbd
     return j;
 }
-
 #endif
 /************************************************************************************************************/
 /************************** dgemm kernels (1mxn) column preffered  ******************************************/
@@ -768,7 +656,7 @@ inc_t bli_sqp_dgemm_kernel_mxn( gint_t n,
     pc = c;
 
     for (; j <= (n - 1); j += 1) {
-        //cv0 = _mm256_loadu_pd(pc);
+
         for (int i = 0; i < mx; i++)
         {
             cx[i] = *(pc + i);
@@ -777,17 +665,15 @@ inc_t bli_sqp_dgemm_kernel_mxn( gint_t n,
         double* x = aPacked;
         double* pb0 = pb;
         for (p = 0; p < k; p += 1) {
-            //bv0 = _mm256_broadcast_sd(pb0);
+
             double b0 = *pb0;
             pb0++;
             for (int i = 0; i < mx; i++)
             {
-                cx[i] += (*(x + i)) * b0;//cv0 = _mm256_fmadd_pd(av0, bv0, cv0);
+                cx[i] += (*(x + i)) * b0;
             }
-            //av0 = _mm256_loadu_pd(x);
             x += mx;
         }
-        //_mm256_storeu_pd(pc, cv0);
         for (int i = 0; i < mx; i++)
         {
             *(pc + i) = cx[i];
