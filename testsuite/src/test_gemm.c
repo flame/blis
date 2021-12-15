@@ -474,6 +474,8 @@ bli_printm( "c", c, "%5.2f", "" );
 #if TEST_SQP
 	if(bli_gemm_sqp(alpha,a,b,beta,c,NULL,NULL)!=BLIS_SUCCESS)
 	{
+		printf("\n configuration not supported or failed while calling bli_gemm_sqp.
+		\n falling back to bli_gemm API");
 		bli_gemm( alpha, a, b, beta, c );
 	}
 #else//TEST_SQP

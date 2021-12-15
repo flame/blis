@@ -1175,7 +1175,7 @@ BLIS_INLINE err_t bli_sqp_dgemm(gint_t m,
 
     /* nx assigned to n, but can be assigned with lower value
        to add partition along n dimension */
-    gint_t nx = n;.
+    gint_t nx = n;
     if(nx>n)
     {
         nx = n;
