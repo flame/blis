@@ -68,7 +68,7 @@ void bli_i8gemm_power10_mma_8x16
     )
 {
     uint64_t k_iter = (k-1) / 4;
-	uint64_t k_left = (k-1) % 4;
+    uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -101,19 +101,19 @@ void bli_i8gemm_power10_mma_8x16
     I8_INCREMENT
 
     // k loop (unrolled by 4)
-	for (int k = 0; k<k_iter; k++)
-	{
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-	}
+    for (int k = 0; k<k_iter; k++)
+    {
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+    }
 
-	// edge loop
-	for (int k = 0; k<k_left; k++)
-	{
-		I8_AB_PRODUCT
-	}
+    // edge loop
+    for (int k = 0; k<k_left; k++)
+    {
+        I8_AB_PRODUCT
+    }
 
     // handle beta cases
     if (beta_ != 0.0)

@@ -64,8 +64,8 @@ void PASTEMAC2(ch,opname,suf) \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 \
-	dim_t             mr_r = mr; \
-	dim_t             nr_r = nr; \
+	dim_t             mr_r      = mr; \
+	dim_t             nr_r      = nr; \
 \
 	ctype             ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                      / sizeof( ctype_r ) ] \
@@ -154,18 +154,16 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		rs_c_use = rs_ct; \
 		cs_c_use = cs_ct; \
 \
-		/* Convert the strides from being in units of complex elements to
-		   be in units of real elements. Note that we don't need to check for
-		   general storage here because that case corresponds to the scenario
-		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		/* Convert the strides and corresponding microtile dimension from being
+		   in units of complex elements to be in units of real elements. */ \
 		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) { cs_c_use *= 2; mr_r *= 2; } \
 		else                                           { rs_c_use *= 2; nr_r *= 2; }\
 \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-          mr_r, \
-          nr_r, \
+		  mr_r, \
+		  nr_r, \
 		  k, \
 		  alpha_r, \
 		  a_r, \
@@ -176,13 +174,11 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		  cntx  \
 		); \
 \
-		dim_t i, j; \
-\
 		/* Accumulate the final result in ct back to c. */ \
 		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
 				                   *(c  + i*rs_c  + j*cs_c ) ); \
@@ -190,8 +186,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		} \
 		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *(c  + i*rs_c  + j*cs_c ) ); \
@@ -199,8 +195,8 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		} \
 		else \
 		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *beta, \
@@ -216,21 +212,19 @@ PASTEMAC(chr,fprintm)( stdout, "gemm_ukr: c before", mr, nr, \
 		c_use    = ( ctype_r* )c; \
 		rs_c_use = rs_c; \
 		cs_c_use = cs_c; \
-		m_use = m; \
-		n_use = n; \
+		m_use    = m; \
+		n_use    = n; \
 \
-		/* Convert the strides from being in units of complex elements to
-		   be in units of real elements. Note that we don't need to check for
-		   general storage here because that case corresponds to the scenario
-		   where we are using the ct buffer and its rs_ct/cs_ct strides. */ \
+		/* Convert the strides and corresponding microtile dimension from being
+		   in units of complex elements to be in units of real elements. */ \
 		if ( bli_is_col_stored( rs_c_use, cs_c_use ) ) { cs_c_use *= 2; m_use *= 2; } \
 		else                                           { rs_c_use *= 2; n_use *= 2; } \
 \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-          m_use, \
-          n_use, \
+		  m_use, \
+		  n_use, \
 		  k, \
 		  alpha_r, \
 		  a_r, \

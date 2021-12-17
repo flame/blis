@@ -58,7 +58,7 @@ BLIS_INLINE void bli_gemm_ind_recast_1m_params
 	     !bli_is_gen_stored( *rs_c, *cs_c ) )
 	{
 		*dt_exec = bli_dt_proj_to_real( *dt_exec );
-		*dt_c = bli_dt_proj_to_real( *dt_c );
+		*dt_c    = bli_dt_proj_to_real( *dt_c );
 
 		if ( bli_is_1e_packed( schema_a ) )
 		{

@@ -77,8 +77,8 @@ void PASTEMAC0(opname) \
 \
 	f \
 	( \
-      m, \
-      n, \
+	  m, \
+	  n, \
 	  k, \
 	  buf_alpha, \
 	  buf_a, \

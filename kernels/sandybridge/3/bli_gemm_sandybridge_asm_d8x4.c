@@ -64,9 +64,9 @@ void bli_sgemm_sandybridge_asm_8x8
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( s, 8, 8, false );
+	GEMM_UKR_SETUP_CT( s, 8, 8, false );
 
-    begin_asm()
+	begin_asm()
 
 
 	mov(var(a), rax) // load address of a.
@@ -426,99 +426,99 @@ void bli_sgemm_sandybridge_asm_8x8
 	vucomiss(xmm0, xmm4) // set ZF if beta == 0.
 	je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	vmovups(mem(rcx), ymm0) // load c00:c70,
-    	vmulps(ymm4, ymm0, ymm0) // scale by beta,
-    	vaddps(ymm15, ymm0, ymm0) // add the gemm result,
-    	vmovups(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c00:c70,
+		vmulps(ymm4, ymm0, ymm0) // scale by beta,
+		vaddps(ymm15, ymm0, ymm0) // add the gemm result,
+		vmovups(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm1) // load c01:c71,
-    	vmulps(ymm4, ymm1, ymm1) // scale by beta,
-    	vaddps(ymm14, ymm1, ymm1) // add the gemm result,
-    	vmovups(ymm1, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm1) // load c01:c71,
+		vmulps(ymm4, ymm1, ymm1) // scale by beta,
+		vaddps(ymm14, ymm1, ymm1) // add the gemm result,
+		vmovups(ymm1, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm0) // load c02:c72,
-    	vmulps(ymm4, ymm0, ymm0) // scale by beta,
-    	vaddps(ymm13, ymm0, ymm0) // add the gemm result,
-    	vmovups(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c02:c72,
+		vmulps(ymm4, ymm0, ymm0) // scale by beta,
+		vaddps(ymm13, ymm0, ymm0) // add the gemm result,
+		vmovups(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm1) // load c03:c73,
-    	vmulps(ymm4, ymm1, ymm1) // scale by beta,
-    	vaddps(ymm12, ymm1, ymm1) // add the gemm result,
-    	vmovups(ymm1, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm1) // load c03:c73,
+		vmulps(ymm4, ymm1, ymm1) // scale by beta,
+		vaddps(ymm12, ymm1, ymm1) // add the gemm result,
+		vmovups(ymm1, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm0) // load c04:c74,
-    	vmulps(ymm4, ymm0, ymm0) // scale by beta,
-    	vaddps(ymm11, ymm0, ymm0) // add the gemm result,
-    	vmovups(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c04:c74,
+		vmulps(ymm4, ymm0, ymm0) // scale by beta,
+		vaddps(ymm11, ymm0, ymm0) // add the gemm result,
+		vmovups(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm1) // load c05:c75,
-    	vmulps(ymm4, ymm1, ymm1) // scale by beta,
-    	vaddps(ymm10, ymm1, ymm1) // add the gemm result,
-    	vmovups(ymm1, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm1) // load c05:c75,
+		vmulps(ymm4, ymm1, ymm1) // scale by beta,
+		vaddps(ymm10, ymm1, ymm1) // add the gemm result,
+		vmovups(ymm1, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm0) // load c06:c76,
-    	vmulps(ymm4, ymm0, ymm0) // scale by beta,
-    	vaddps(ymm9, ymm0, ymm0) // add the gemm result,
-    	vmovups(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c06:c76,
+		vmulps(ymm4, ymm0, ymm0) // scale by beta,
+		vaddps(ymm9, ymm0, ymm0) // add the gemm result,
+		vmovups(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(mem(rcx), ymm1) // load c07:c77,
-    	vmulps(ymm4, ymm1, ymm1) // scale by beta,
-    	vaddps(ymm8, ymm1, ymm1) // add the gemm result,
-    	vmovups(ymm1, mem(rcx)) // and store back to memory.
+		vmovups(mem(rcx), ymm1) // load c07:c77,
+		vmulps(ymm4, ymm1, ymm1) // scale by beta,
+		vaddps(ymm8, ymm1, ymm1) // add the gemm result,
+		vmovups(ymm1, mem(rcx)) // and store back to memory.
 
-    	jmp(.SDONE) // jump to end.
+		jmp(.SDONE) // jump to end.
 
 	label(.SBETAZERO)
 
-    	vmovups(ymm15, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm15, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm14, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm14, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm13, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm13, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm12, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm12, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm11, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm11, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm10, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm10, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm9, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm9, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm8, mem(rcx)) // and store back to memory.
+		vmovups(ymm8, mem(rcx)) // and store back to memory.
 
 	label(.SDONE)
 
 	vzeroupper()
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -529,7 +529,7 @@ void bli_sgemm_sandybridge_asm_8x8
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_CT( s );
 }
 
 void bli_dgemm_sandybridge_asm_8x4
@@ -556,7 +556,7 @@ void bli_dgemm_sandybridge_asm_8x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( d, 8, 4, false );
+	GEMM_UKR_SETUP_CT( d, 8, 4, false );
 
 	begin_asm()
 
@@ -882,105 +882,105 @@ void bli_dgemm_sandybridge_asm_8x4
 	vucomisd(xmm0, xmm2) // set ZF if beta == 0.
 	je(.DBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	 // update c00:c33
+		 // update c00:c33
 
-    	vmovupd(mem(rcx), ymm0) // load c00:c30,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm9, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c00:c30,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm9, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(mem(rcx), ymm0) // load c01:c31,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm11, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c01:c31,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm11, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(mem(rcx), ymm0) // load c02:c32,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm13, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rcx)) // and store back to memory.
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c02:c32,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm13, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rcx)) // and store back to memory.
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(mem(rcx), ymm0) // load c03:c33,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm15, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rcx)) // and store back to memory.
+		vmovupd(mem(rcx), ymm0) // load c03:c33,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm15, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rcx)) // and store back to memory.
 
-    	 // update c40:c73
+		 // update c40:c73
 
-    	vmovupd(mem(rdx), ymm0) // load c40:c70,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm8, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rdx)) // and store back to memory.
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c40:c70,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm8, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rdx)) // and store back to memory.
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(mem(rdx), ymm0) // load c41:c71,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm10, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rdx)) // and store back to memory.
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c41:c71,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm10, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rdx)) // and store back to memory.
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(mem(rdx), ymm0) // load c42:c72,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm12, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rdx)) // and store back to memory.
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c42:c72,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm12, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rdx)) // and store back to memory.
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(mem(rdx), ymm0) // load c43:c73,
-    	vmulpd(ymm2, ymm0, ymm0) // scale by beta,
-    	vaddpd(ymm14, ymm0, ymm0) // add the gemm result,
-    	vmovupd(ymm0, mem(rdx)) // and store back to memory.
+		vmovupd(mem(rdx), ymm0) // load c43:c73,
+		vmulpd(ymm2, ymm0, ymm0) // scale by beta,
+		vaddpd(ymm14, ymm0, ymm0) // add the gemm result,
+		vmovupd(ymm0, mem(rdx)) // and store back to memory.
 
-    	jmp(.DDONE) // jump to end.
+		jmp(.DDONE) // jump to end.
 
 	label(.DBETAZERO)
 
-    	 // update c00:c33
+		 // update c00:c33
 
-    	vmovupd(ymm9, mem(rcx)) // store c00:c30
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm9, mem(rcx)) // store c00:c30
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm11, mem(rcx)) // store c01:c31
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm11, mem(rcx)) // store c01:c31
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm13, mem(rcx)) // store c02:c32
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm13, mem(rcx)) // store c02:c32
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm15, mem(rcx)) // store c03:c33
+		vmovupd(ymm15, mem(rcx)) // store c03:c33
 
-    	 // update c40:c73
+		 // update c40:c73
 
-    	vmovupd(ymm8, mem(rdx)) // store c40:c70
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm8, mem(rdx)) // store c40:c70
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm10, mem(rdx)) // store c41:c71
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm10, mem(rdx)) // store c41:c71
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm12, mem(rdx)) // store c42:c72
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm12, mem(rdx)) // store c42:c72
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm14, mem(rdx)) // store c43:c73
+		vmovupd(ymm14, mem(rdx)) // store c43:c73
 
 	label(.DDONE)
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next)/*, // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next)/*, // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -991,7 +991,7 @@ void bli_dgemm_sandybridge_asm_8x4
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 void bli_cgemm_sandybridge_asm_8x4
@@ -1018,7 +1018,7 @@ void bli_cgemm_sandybridge_asm_8x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( c, 8, 4, false );
+	GEMM_UKR_SETUP_CT( c, 8, 4, false );
 
 	begin_asm()
 
@@ -1547,141 +1547,141 @@ void bli_cgemm_sandybridge_asm_8x4
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.CBETAZERO) // if ZF = 0, jump to beta == 0 case
 
-    	 // update c00:c70
+		 // update c00:c70
 
-    	vmovups(mem(rcx), ymm0) // load c00:c70 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm15, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rcx)) // store c00:c70
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c00:c70 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm15, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rcx)) // store c00:c70
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c80:cf0
+		 // update c80:cf0
 
-    	vmovups(mem(rdx), ymm0) // load c80:f0 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm14, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rdx)) // store c80:cf0
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(mem(rdx), ymm0) // load c80:f0 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm14, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rdx)) // store c80:cf0
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c00:c70
+		 // update c00:c70
 
-    	vmovups(mem(rcx), ymm0) // load c01:c71 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm13, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rcx)) // store c01:c71
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c01:c71 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm13, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rcx)) // store c01:c71
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c81:cf1
+		 // update c81:cf1
 
-    	vmovups(mem(rdx), ymm0) // load c81:f1 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm12, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rdx)) // store c81:cf1
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(mem(rdx), ymm0) // load c81:f1 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm12, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rdx)) // store c81:cf1
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c02:c72
+		 // update c02:c72
 
-    	vmovups(mem(rcx), ymm0) // load c02:c72 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm11, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rcx)) // store c02:c72
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c02:c72 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm11, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rcx)) // store c02:c72
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c82:cf2
+		 // update c82:cf2
 
-    	vmovups(mem(rdx), ymm0) // load c82:f2 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm10, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rdx)) // store c82:cf2
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(mem(rdx), ymm0) // load c82:f2 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm10, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rdx)) // store c82:cf2
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c03:c73
+		 // update c03:c73
 
-    	vmovups(mem(rcx), ymm0) // load c03:c73 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm9, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rcx)) // store c03:c73
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(mem(rcx), ymm0) // load c03:c73 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm9, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rcx)) // store c03:c73
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c83:cf3
+		 // update c83:cf3
 
-    	vmovups(mem(rdx), ymm0) // load c83:f3 into ymm0
-    	vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
-    	vmulps(ymm7, ymm0, ymm0)
-    	vmulps(ymm6, ymm2, ymm2)
-    	vaddsubps(ymm2, ymm0, ymm0)
-    	vaddps(ymm8, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovups(ymm0, mem(rdx)) // store c83:cf3
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(mem(rdx), ymm0) // load c83:f3 into ymm0
+		vpermilps(imm(0xb1), ymm0, ymm2) // scale ymm0 by beta
+		vmulps(ymm7, ymm0, ymm0)
+		vmulps(ymm6, ymm2, ymm2)
+		vaddsubps(ymm2, ymm0, ymm0)
+		vaddps(ymm8, ymm0, ymm0) // add the gemm result to ymm0
+		vmovups(ymm0, mem(rdx)) // store c83:cf3
+		add(rdi, rdx) // c += cs_c;
 
-    	jmp(.CDONE) // jump to end.
+		jmp(.CDONE) // jump to end.
 
 	label(.CBETAZERO)
 
-    	vmovups(ymm15, mem(rcx)) // store c00:c70
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm15, mem(rcx)) // store c00:c70
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm14, mem(rdx)) // store c80:cf0
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(ymm14, mem(rdx)) // store c80:cf0
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovups(ymm13, mem(rcx)) // store c01:c71
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm13, mem(rcx)) // store c01:c71
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm12, mem(rdx)) // store c81:cf1
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(ymm12, mem(rdx)) // store c81:cf1
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovups(ymm11, mem(rcx)) // store c02:c72
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm11, mem(rcx)) // store c02:c72
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm10, mem(rdx)) // store c82:cf2
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(ymm10, mem(rdx)) // store c82:cf2
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovups(ymm9, mem(rcx)) // store c03:c73
-    	add(rdi, rcx) // c += cs_c;
+		vmovups(ymm9, mem(rcx)) // store c03:c73
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovups(ymm8, mem(rdx)) // store c83:cf3
-    	add(rdi, rdx) // c += cs_c;
+		vmovups(ymm8, mem(rdx)) // store c83:cf3
+		add(rdi, rdx) // c += cs_c;
 
 	label(.CDONE)
 
-    vzeroupper()
+	vzeroupper()
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next)/*, // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next)/*, // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1692,7 +1692,7 @@ void bli_cgemm_sandybridge_asm_8x4
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( c );
+	GEMM_UKR_FLUSH_CT( c );
 }
 
 
@@ -1721,7 +1721,7 @@ void bli_zgemm_sandybridge_asm_4x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( z, 4, 4, false );
+	GEMM_UKR_SETUP_CT( z, 4, 4, false );
 
 	begin_asm()
 
@@ -2192,139 +2192,139 @@ void bli_zgemm_sandybridge_asm_4x4
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.ZBETAZERO) // if ZF = 0, jump to beta == 0 case
 
-    	 // update c00:c30
+		 // update c00:c30
 
-    	vmovupd(mem(rcx), ymm0) // load c00:c30 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm15, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rcx)) // store c00:c30
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c00:c30 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm15, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rcx)) // store c00:c30
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c40:c70
+		 // update c40:c70
 
-    	vmovupd(mem(rdx), ymm0) // load c40:c70 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm14, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rdx)) // store c40:c70
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c40:c70 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm14, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rdx)) // store c40:c70
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c01:c31
+		 // update c01:c31
 
-    	vmovupd(mem(rcx), ymm0) // load c01:c31 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm13, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rcx)) // store c01:c31
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c01:c31 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm13, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rcx)) // store c01:c31
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c41:c71
+		 // update c41:c71
 
-    	vmovupd(mem(rdx), ymm0) // load c41:c71 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm12, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rdx)) // store c41:c71
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c41:c71 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm12, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rdx)) // store c41:c71
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c02:c32
+		 // update c02:c32
 
-    	vmovupd(mem(rcx), ymm0) // load c02:c32 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm11, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rcx)) // store c02:c32
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c02:c32 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm11, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rcx)) // store c02:c32
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c42:c72
+		 // update c42:c72
 
-    	vmovupd(mem(rdx), ymm0) // load c42:c72 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm10, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rdx)) // store c42:c72
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(mem(rdx), ymm0) // load c42:c72 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm10, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rdx)) // store c42:c72
+		add(rdi, rdx) // c += cs_c;
 
-    	 // update c03:c33
+		 // update c03:c33
 
-    	vmovupd(mem(rcx), ymm0) // load c03:c33 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm9, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rcx)) // store c03:c33
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(mem(rcx), ymm0) // load c03:c33 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm9, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rcx)) // store c03:c33
+		add(rdi, rcx) // c += cs_c;
 
-    	 // update c43:c73
+		 // update c43:c73
 
-    	vmovupd(mem(rdx), ymm0) // load c43:c73 into ymm0
-    	vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
-    	vmulpd(ymm7, ymm0, ymm0)
-    	vmulpd(ymm6, ymm2, ymm2)
-    	vaddsubpd(ymm2, ymm0, ymm0)
-    	vaddpd(ymm8, ymm0, ymm0) // add the gemm result to ymm0
-    	vmovupd(ymm0, mem(rdx)) // store c43:c73
+		vmovupd(mem(rdx), ymm0) // load c43:c73 into ymm0
+		vpermilpd(imm(0x5), ymm0, ymm2) // scale ymm0 by beta
+		vmulpd(ymm7, ymm0, ymm0)
+		vmulpd(ymm6, ymm2, ymm2)
+		vaddsubpd(ymm2, ymm0, ymm0)
+		vaddpd(ymm8, ymm0, ymm0) // add the gemm result to ymm0
+		vmovupd(ymm0, mem(rdx)) // store c43:c73
 
-    	jmp(.ZDONE) // jump to end.
+		jmp(.ZDONE) // jump to end.
 
 	label(.ZBETAZERO)
 
-    	vmovupd(ymm15, mem(rcx)) // store c00:c30
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm15, mem(rcx)) // store c00:c30
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm14, mem(rdx)) // store c40:c70
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm14, mem(rdx)) // store c40:c70
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm13, mem(rcx)) // store c01:c31
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm13, mem(rcx)) // store c01:c31
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm12, mem(rdx)) // store c41:c71
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm12, mem(rdx)) // store c41:c71
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm11, mem(rcx)) // store c02:c32
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm11, mem(rcx)) // store c02:c32
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm10, mem(rdx)) // store c42:c72
-    	add(rdi, rdx) // c += cs_c;
+		vmovupd(ymm10, mem(rdx)) // store c42:c72
+		add(rdi, rdx) // c += cs_c;
 
-    	vmovupd(ymm9, mem(rcx)) // store c03:c33
-    	add(rdi, rcx) // c += cs_c;
+		vmovupd(ymm9, mem(rcx)) // store c03:c33
+		add(rdi, rcx) // c += cs_c;
 
-    	vmovupd(ymm8, mem(rdx)) // store c43:c73
+		vmovupd(ymm8, mem(rdx)) // store c43:c73
 
 	label(.ZDONE)
 
-    vzeroupper()
+	vzeroupper()
 
 
 	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -2335,7 +2335,7 @@ void bli_zgemm_sandybridge_asm_4x4
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( z );
+	GEMM_UKR_FLUSH_CT( z );
 }
 
 

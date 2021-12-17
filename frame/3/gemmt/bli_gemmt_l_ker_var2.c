@@ -387,8 +387,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k, \
 				  alpha_cast, \
 				  a1, \
@@ -470,8 +470,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  MR, \
-                  NR, \
+				  MR, \
+				  NR, \
 				  k, \
 				  alpha_cast, \
 				  a1, \
@@ -494,8 +494,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k, \
 				  alpha_cast, \
 				  a1, \

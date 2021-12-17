@@ -86,8 +86,8 @@ void bli_zgemmtrsm_l_template_noopt
 	/* b11 = alpha * b11 - a10 * b01; */
 	bli_zgemm_template_noopt
 	(
-      mr,
-      nr,
+	  mr,
+	  nr,
 	  k,
 	  minus_one,
 	  a10,

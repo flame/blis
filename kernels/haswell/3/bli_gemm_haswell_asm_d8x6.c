@@ -100,7 +100,7 @@ void bli_sgemm_haswell_asm_16x6
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( s, 16, 6, true );
+	GEMM_UKR_SETUP_CT( s, 16, 6, true );
 
 	begin_asm()
 
@@ -332,78 +332,78 @@ void bli_sgemm_haswell_asm_16x6
 	vucomiss(xmm0, xmm3) // set ZF if beta == 0.
 	je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm4)
-    	vmovups(ymm4, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm5)
-    	vmovups(ymm5, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm4)
+		vmovups(ymm4, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm5)
+		vmovups(ymm5, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm6)
-    	vmovups(ymm6, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm7)
-    	vmovups(ymm7, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm6)
+		vmovups(ymm6, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm7)
+		vmovups(ymm7, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm8)
-    	vmovups(ymm8, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm9)
-    	vmovups(ymm9, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm8)
+		vmovups(ymm8, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm9)
+		vmovups(ymm9, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm10)
-    	vmovups(ymm10, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm11)
-    	vmovups(ymm11, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm10)
+		vmovups(ymm10, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm11)
+		vmovups(ymm11, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm12)
-    	vmovups(ymm12, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm13)
-    	vmovups(ymm13, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm12)
+		vmovups(ymm12, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm13)
+		vmovups(ymm13, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231ps(mem(rcx), ymm3, ymm14)
-    	vmovups(ymm14, mem(rcx))
-    	vfmadd231ps(mem(rcx,32), ymm3, ymm15)
-    	vmovups(ymm15, mem(rcx,32))
-    	//add(rdi, rcx)
+		vfmadd231ps(mem(rcx), ymm3, ymm14)
+		vmovups(ymm14, mem(rcx))
+		vfmadd231ps(mem(rcx,32), ymm3, ymm15)
+		vmovups(ymm15, mem(rcx,32))
+		//add(rdi, rcx)
 
 	jmp(.SDONE) // jump to end.
 
 	label(.SBETAZERO)
 
-    	vmovups(ymm4, mem(rcx))
-    	vmovups(ymm5, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovups(ymm4, mem(rcx))
+		vmovups(ymm5, mem(rcx,32))
+		add(rdi, rcx)
 
-    	vmovups(ymm6, mem(rcx))
-    	vmovups(ymm7, mem(rcx,32))
-    	add(rdi, rcx)
-
-
-    	vmovups(ymm8, mem(rcx))
-    	vmovups(ymm9, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovups(ymm6, mem(rcx))
+		vmovups(ymm7, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovups(ymm10, mem(rcx))
-    	vmovups(ymm11, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovups(ymm8, mem(rcx))
+		vmovups(ymm9, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovups(ymm12, mem(rcx))
-    	vmovups(ymm13, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovups(ymm10, mem(rcx))
+		vmovups(ymm11, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovups(ymm14, mem(rcx))
-    	vmovups(ymm15, mem(rcx,32))
-    	//add(rdi, rcx)
+		vmovups(ymm12, mem(rcx))
+		vmovups(ymm13, mem(rcx,32))
+		add(rdi, rcx)
+
+
+		vmovups(ymm14, mem(rcx))
+		vmovups(ymm15, mem(rcx,32))
+		//add(rdi, rcx)
 
 	label(.SDONE)
 
@@ -412,17 +412,17 @@ void bli_sgemm_haswell_asm_16x6
 	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -433,7 +433,7 @@ void bli_sgemm_haswell_asm_16x6
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_CT( s );
 }
 
 #define DGEMM_INPUT_GS_BETA_NZ \
@@ -484,7 +484,7 @@ void bli_dgemm_haswell_asm_8x6
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( d, 8, 6, false );
+	GEMM_UKR_SETUP_CT( d, 8, 6, false );
 
 	begin_asm()
 
@@ -716,97 +716,97 @@ void bli_dgemm_haswell_asm_8x6
 	vucomisd(xmm0, xmm3) // set ZF if beta == 0.
 	je(.DBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm4)
-    	vmovupd(ymm4, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm5)
-    	vmovupd(ymm5, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm4)
+		vmovupd(ymm4, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm5)
+		vmovupd(ymm5, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm6)
-    	vmovupd(ymm6, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm7)
-    	vmovupd(ymm7, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm6)
+		vmovupd(ymm6, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm7)
+		vmovupd(ymm7, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm8)
-    	vmovupd(ymm8, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm9)
-    	vmovupd(ymm9, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm8)
+		vmovupd(ymm8, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm9)
+		vmovupd(ymm9, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm10)
-    	vmovupd(ymm10, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm11)
-    	vmovupd(ymm11, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm10)
+		vmovupd(ymm10, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm11)
+		vmovupd(ymm11, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm12)
-    	vmovupd(ymm12, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm13)
-    	vmovupd(ymm13, mem(rcx,32))
-    	add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm12)
+		vmovupd(ymm12, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm13)
+		vmovupd(ymm13, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vfmadd231pd(mem(rcx), ymm3, ymm14)
-    	vmovupd(ymm14, mem(rcx))
-    	vfmadd231pd(mem(rcx,32), ymm3, ymm15)
-    	vmovupd(ymm15, mem(rcx,32))
-    	//add(rdi, rcx)
+		vfmadd231pd(mem(rcx), ymm3, ymm14)
+		vmovupd(ymm14, mem(rcx))
+		vfmadd231pd(mem(rcx,32), ymm3, ymm15)
+		vmovupd(ymm15, mem(rcx,32))
+		//add(rdi, rcx)
 
-    	jmp(.DDONE) // jump to end.
+		jmp(.DDONE) // jump to end.
 
 	label(.DBETAZERO)
 
-    	vmovupd(ymm4, mem(rcx))
-    	vmovupd(ymm5, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovupd(ymm4, mem(rcx))
+		vmovupd(ymm5, mem(rcx,32))
+		add(rdi, rcx)
 
-    	vmovupd(ymm6, mem(rcx))
-    	vmovupd(ymm7, mem(rcx,32))
-    	add(rdi, rcx)
-
-
-    	vmovupd(ymm8, mem(rcx))
-    	vmovupd(ymm9, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovupd(ymm6, mem(rcx))
+		vmovupd(ymm7, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovupd(ymm10, mem(rcx))
-    	vmovupd(ymm11, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovupd(ymm8, mem(rcx))
+		vmovupd(ymm9, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovupd(ymm12, mem(rcx))
-    	vmovupd(ymm13, mem(rcx,32))
-    	add(rdi, rcx)
+		vmovupd(ymm10, mem(rcx))
+		vmovupd(ymm11, mem(rcx,32))
+		add(rdi, rcx)
 
 
-    	vmovupd(ymm14, mem(rcx))
-    	vmovupd(ymm15, mem(rcx,32))
-    	//add(rdi, rcx)
+		vmovupd(ymm12, mem(rcx))
+		vmovupd(ymm13, mem(rcx,32))
+		add(rdi, rcx)
+
+
+		vmovupd(ymm14, mem(rcx))
+		vmovupd(ymm15, mem(rcx,32))
+		//add(rdi, rcx)
 
 	label(.DDONE)
 
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -817,7 +817,7 @@ void bli_dgemm_haswell_asm_8x6
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 
@@ -854,7 +854,7 @@ void bli_cgemm_haswell_asm_8x3
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( c, 8, 3, false );
+	GEMM_UKR_SETUP_CT( c, 8, 3, false );
 
 	begin_asm()
 
@@ -1136,68 +1136,68 @@ void bli_cgemm_haswell_asm_8x3
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.CBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx))
-    	vaddps(ymm4, ymm0, ymm0)
-    	vmovups(ymm0, mem(rcx))
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx))
+		vaddps(ymm4, ymm0, ymm0)
+		vmovups(ymm0, mem(rcx))
 
 
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx,32))
-    	vaddps(ymm5, ymm0, ymm0)
-    	vmovups(ymm0, mem(rcx,32))
-
-
-
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11))
-    	vaddps(ymm8, ymm0, ymm0)
-    	vmovups(ymm0, mem(r11))
-
-
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11,32))
-    	vaddps(ymm9, ymm0, ymm0)
-    	vmovups(ymm0, mem(r11,32))
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx,32))
+		vaddps(ymm5, ymm0, ymm0)
+		vmovups(ymm0, mem(rcx,32))
 
 
 
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12))
-    	vaddps(ymm12, ymm0, ymm0)
-    	vmovups(ymm0, mem(r12))
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11))
+		vaddps(ymm8, ymm0, ymm0)
+		vmovups(ymm0, mem(r11))
 
 
-    	CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12,32))
-    	vaddps(ymm13, ymm0, ymm0)
-    	vmovups(ymm0, mem(r12,32))
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11,32))
+		vaddps(ymm9, ymm0, ymm0)
+		vmovups(ymm0, mem(r11,32))
 
-    	jmp(.CDONE) // jump to end.
+
+
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12))
+		vaddps(ymm12, ymm0, ymm0)
+		vmovups(ymm0, mem(r12))
+
+
+		CGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12,32))
+		vaddps(ymm13, ymm0, ymm0)
+		vmovups(ymm0, mem(r12,32))
+
+		jmp(.CDONE) // jump to end.
 
 	label(.CBETAZERO)
 
-    	vmovups(ymm4, mem(rcx))
-    	vmovups(ymm5, mem(rcx,32))
+		vmovups(ymm4, mem(rcx))
+		vmovups(ymm5, mem(rcx,32))
 
-    	vmovups(ymm8, mem(r11))
-    	vmovups(ymm9, mem(r11,32))
+		vmovups(ymm8, mem(r11))
+		vmovups(ymm9, mem(r11,32))
 
-    	vmovups(ymm12, mem(r12))
-    	vmovups(ymm13, mem(r12,32))
+		vmovups(ymm12, mem(r12))
+		vmovups(ymm13, mem(r12,32))
 
 	label(.CDONE)
 
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c)/*,   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)*/  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c)/*,   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)*/  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1208,7 +1208,7 @@ void bli_cgemm_haswell_asm_8x3
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( c );
+	GEMM_UKR_FLUSH_CT( c );
 }
 
 
@@ -1245,7 +1245,7 @@ void bli_zgemm_haswell_asm_4x3
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( z, 4, 3, false );
+	GEMM_UKR_SETUP_CT( z, 4, 3, false );
 
 	begin_asm()
 
@@ -1528,55 +1528,55 @@ void bli_zgemm_haswell_asm_4x3
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.ZBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx))
-    	vaddpd(ymm4, ymm0, ymm0)
-    	vmovupd(ymm0, mem(rcx))
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx))
+		vaddpd(ymm4, ymm0, ymm0)
+		vmovupd(ymm0, mem(rcx))
 
 
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx,32))
-    	vaddpd(ymm5, ymm0, ymm0)
-    	vmovupd(ymm0, mem(rcx,32))
-
-
-
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11))
-    	vaddpd(ymm8, ymm0, ymm0)
-    	vmovupd(ymm0, mem(r11))
-
-
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11,32))
-    	vaddpd(ymm9, ymm0, ymm0)
-    	vmovupd(ymm0, mem(r11,32))
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(rcx,32))
+		vaddpd(ymm5, ymm0, ymm0)
+		vmovupd(ymm0, mem(rcx,32))
 
 
 
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12))
-    	vaddpd(ymm12, ymm0, ymm0)
-    	vmovupd(ymm0, mem(r12))
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11))
+		vaddpd(ymm8, ymm0, ymm0)
+		vmovupd(ymm0, mem(r11))
 
 
-    	ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12,32))
-    	vaddpd(ymm13, ymm0, ymm0)
-    	vmovupd(ymm0, mem(r12,32))
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r11,32))
+		vaddpd(ymm9, ymm0, ymm0)
+		vmovupd(ymm0, mem(r11,32))
 
-	    jmp(.ZDONE) // jump to end.
+
+
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12))
+		vaddpd(ymm12, ymm0, ymm0)
+		vmovupd(ymm0, mem(r12))
+
+
+		ZGEMM_INPUT_SCALE_CS_BETA_NZ(mem(r12,32))
+		vaddpd(ymm13, ymm0, ymm0)
+		vmovupd(ymm0, mem(r12,32))
+
+		jmp(.ZDONE) // jump to end.
 
 	label(.ZBETAZERO)
 
-    	vmovupd(ymm4, mem(rcx))
-    	vmovupd(ymm5, mem(rcx,32))
+		vmovupd(ymm4, mem(rcx))
+		vmovupd(ymm5, mem(rcx,32))
 
-    	vmovupd(ymm8, mem(r11))
-    	vmovupd(ymm9, mem(r11,32))
+		vmovupd(ymm8, mem(r11))
+		vmovupd(ymm9, mem(r11,32))
 
-    	vmovupd(ymm12, mem(r12))
-    	vmovupd(ymm13, mem(r12,32))
+		vmovupd(ymm12, mem(r12))
+		vmovupd(ymm13, mem(r12,32))
 
 	label(.ZDONE)
 
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
 	  [k_iter] "m" (k_iter), // 0
@@ -1600,7 +1600,7 @@ void bli_zgemm_haswell_asm_4x3
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( z );
+	GEMM_UKR_FLUSH_CT( z );
 }
 
 

@@ -70,8 +70,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
 	gemm_ukr \
 	( \
-      mr, \
-      nr, \
+	  mr, \
+	  nr, \
 	  k, \
 	  minus_one, \
 	  a1x, \

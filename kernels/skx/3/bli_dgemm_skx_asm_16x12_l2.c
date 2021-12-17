@@ -287,18 +287,19 @@ static int64_t offsets[16] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15};
 
 
-void bli_dgemm_skx_asm_16x12_l2(
-                             dim_t            m,
-                             dim_t            n,
-                             dim_t            k_,
-                             double* restrict alpha,
-                             double* restrict a,
-                             double* restrict b,
-                             double* restrict beta,
-                             double* restrict c, inc_t rs_c_, inc_t cs_c_,
-                             auxinfo_t*       data,
-                             cntx_t* restrict cntx
-                           )
+void bli_dgemm_skx_asm_16x12_l2
+     (
+       dim_t            m,
+       dim_t            n,
+       dim_t            k_,
+       double* restrict alpha,
+       double* restrict a,
+       double* restrict b,
+       double* restrict beta,
+       double* restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t*       data,
+       cntx_t* restrict cntx
+     )
 {
     (void)data;
     (void)cntx;

@@ -60,10 +60,10 @@ cntl_t* bli_trsm_l_cntl_create
 {
 	void_fp macro_kernel_p;
 
-	// Use the function pointer to the macrokernels that use slab
-	// assignment of micropanels to threads in the jr and ir loops.
+	// Set the default macrokernel. If a non-NULL kernel function pointer is
+	// passed in, we use that instead.
 	macro_kernel_p = bli_trsm_xx_ker_var2;
-    if ( ker ) macro_kernel_p = ker;
+	if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
 
@@ -203,15 +203,17 @@ cntl_t* bli_trsm_l_cntl_create
 
 cntl_t* bli_trsm_r_cntl_create
      (
-	   rntm_t* rntm,
+       rntm_t* rntm,
        pack_t  schema_a,
        pack_t  schema_b,
        void_fp ker
      )
 {
 	// NOTE: trsm macrokernels are presently disabled for right-side execution.
+	// Set the default macrokernel. If a non-NULL kernel function pointer is
+	// passed in, we use that instead.
 	void_fp macro_kernel_p = bli_trsm_xx_ker_var2;
-    if ( ker ) macro_kernel_p = ker;
+	if ( ker ) macro_kernel_p = ker;
 
 	const opid_t family = BLIS_TRSM;
 

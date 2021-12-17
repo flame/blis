@@ -291,8 +291,8 @@ void PASTEMAC(ch,varname) \
 	dim_t jr_inc; \
 \
 	/* Determine the thread range and increment for the 2nd loop.
-       NOTE: The definition of bli_thread_range_jrir() will depend on whether
-       slab or round-robin partitioning was requested at configure-time. \
+	   NOTE: The definition of bli_thread_range_jrir() will depend on whether
+	   slab or round-robin partitioning was requested at configure-time. \
 	   NOTE: Parallelism in the 1st loop is disabled for now. */ \
 	bli_thread_range_jrir( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
 	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/ \
@@ -366,8 +366,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k_a1011, \
 				  alpha_cast, \
 				  a1, \
@@ -406,8 +406,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k, \
 				  alpha_cast, \
 				  a1, \

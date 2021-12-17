@@ -1147,9 +1147,9 @@ typedef struct
 	// The type to convert to on output.
 	//num_t  dt_on_output;
 
-    // (Virtual) microkernel address and additional parameters
-    void_fp ukr;
-    void*   params;
+	// (Virtual) microkernel address and additional parameters.
+	void_fp ukr;
+	void*   params;
 
 } auxinfo_t;
 

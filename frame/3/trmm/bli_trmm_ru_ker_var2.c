@@ -397,8 +397,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k_b0111, \
 				  alpha_cast, \
 				  a1_i, \
@@ -433,9 +433,9 @@ void PASTEMAC(ch,varname) \
 	bli_thread_range_jrir( caucus, m_iter,     1, FALSE, &ir_start, &ir_end, &ir_inc ); \
 \
 	/* Advance the start and end iteration offsets for the rectangular region
-       by the number of iterations used for the triangular region. */ \
-    jr_start += n_iter_tri; \
-    jr_end   += n_iter_tri; \
+	   by the number of iterations used for the triangular region. */ \
+	jr_start += n_iter_tri; \
+	jr_end   += n_iter_tri; \
 	jb0       = n_iter_tri; \
 \
 	/* Save the resulting value of b1 from the previous loop since it represents
@@ -453,7 +453,7 @@ void PASTEMAC(ch,varname) \
 		   the starting address of the rectangular region (which is already
 		   n_iter_tri logical iterations through B). */ \
 		b1 = b_cast + (j-jb0) * cstep_b; \
-        c1 = c_cast +  j      * cstep_c; \
+		c1 = c_cast +  j      * cstep_c; \
 \
 		n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left ); \
 \
@@ -493,8 +493,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k, \
 				  alpha_cast, \
 				  a1, \

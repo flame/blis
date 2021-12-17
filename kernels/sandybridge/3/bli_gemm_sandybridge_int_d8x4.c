@@ -81,10 +81,10 @@ void bli_dgemm_sandybridge_int_8x4
 	uint64_t cs_c   = cs_c0;
 	uint64_t i;
 
-    GEMM_UKR_SETUP_CT( d, 8, 4, false );
+	GEMM_UKR_SETUP_CT( d, 8, 4, false );
 
-    double *c00, *c01, *c02, *c03;
-    double *c40, *c41, *c42, *c43;
+	double *c00, *c01, *c02, *c03;
+	double *c40, *c41, *c42, *c43;
 
 	// Quad registers.
 	__m256d va0_3, va4_7;
@@ -132,19 +132,19 @@ void bli_dgemm_sandybridge_int_8x4
 	va4_7b_3 = _mm256_setzero_pd();
 
 	// Load va0_3
- 	va0_3 = _mm256_load_pd( a );
+	va0_3 = _mm256_load_pd( a );
 	// Load va4_7
- 	va4_7 = _mm256_load_pd( a + 4 );
+	va4_7 = _mm256_load_pd( a + 4 );
 
 	// Load vb (b0,b1,b2,b3)
- 	vb0 = _mm256_load_pd( b );
+	vb0 = _mm256_load_pd( b );
 
 	for( i = 0; i < k_iter; ++i )
 	{
 		__asm__ volatile( "prefetcht0 192(%0)          \n\t" : :"r"(a)  );
 
 		// Load va0_3 (Prefetch)
- 		vA0_3 = _mm256_load_pd( a + 8 );
+		vA0_3 = _mm256_load_pd( a + 8 );
 
 		// Iteration 0.
 		vtmp = _mm256_mul_pd( va0_3, vb0 );
@@ -154,10 +154,10 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_0 = _mm256_add_pd( va4_7b_0, vtmp );
 
 		// Load va4_7 (Prefetch)
- 		vA4_7 = _mm256_load_pd( a + 12 );
+		vA4_7 = _mm256_load_pd( a + 12 );
 
 		// Shuffle vb (b1,b0,b3,b2)
- 		vb1 = _mm256_shuffle_pd( vb0, vb0, 0x5 );
+		vb1 = _mm256_shuffle_pd( vb0, vb0, 0x5 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb1 );
 		va0_3b_1 = _mm256_add_pd( va0_3b_1, vtmp );
@@ -166,10 +166,10 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_1 = _mm256_add_pd( va4_7b_1, vtmp );
 
 		// Permute vb (b3,b2,b1,b0)
- 		vb2 = _mm256_permute2f128_pd( vb1, vb1, 0x1 );
+		vb2 = _mm256_permute2f128_pd( vb1, vb1, 0x1 );
 
 		// Load vb (b0,b1,b2,b3) (Prefetch)
- 		vB0 = _mm256_load_pd( b + 4 );
+		vB0 = _mm256_load_pd( b + 4 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb2 );
 		va0_3b_2 = _mm256_add_pd( va0_3b_2, vtmp );
@@ -178,7 +178,7 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_2 = _mm256_add_pd( va4_7b_2, vtmp );
 
 		// Shuffle vb (b3,b2,b1,b0)
- 		vb3 = _mm256_shuffle_pd( vb2, vb2, 0x5 );
+		vb3 = _mm256_shuffle_pd( vb2, vb2, 0x5 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb3 );
 		va0_3b_3 = _mm256_add_pd( va0_3b_3, vtmp );
@@ -191,12 +191,12 @@ void bli_dgemm_sandybridge_int_8x4
 		__asm__ volatile( "prefetcht0 512(%0)          \n\t" : :"r"(a)  );
 
 		// Load va0_3 (Next iteration)
- 		va0_3 = _mm256_load_pd( a + 16 );
+		va0_3 = _mm256_load_pd( a + 16 );
 
 		vtmp = _mm256_mul_pd( vA0_3, vB0 );
 		va0_3b_0 = _mm256_add_pd( va0_3b_0, vtmp );
 
- 		vb1 = _mm256_shuffle_pd( vB0, vB0, 0x5 );
+		vb1 = _mm256_shuffle_pd( vB0, vB0, 0x5 );
 
 		vtmp = _mm256_mul_pd( vA4_7, vB0 );
 		va4_7b_0 = _mm256_add_pd( va4_7b_0, vtmp );
@@ -205,9 +205,9 @@ void bli_dgemm_sandybridge_int_8x4
 		va0_3b_1 = _mm256_add_pd( va0_3b_1, vtmp );
 
 		// Load va4_7 (Next iteration)
- 		va4_7 = _mm256_load_pd( a + 20 );
+		va4_7 = _mm256_load_pd( a + 20 );
 
- 		vb2 = _mm256_permute2f128_pd( vb1, vb1, 0x1 );
+		vb2 = _mm256_permute2f128_pd( vb1, vb1, 0x1 );
 
 		vtmp = _mm256_mul_pd( vA4_7, vb1 );
 		va4_7b_1 = _mm256_add_pd( va4_7b_1, vtmp );
@@ -215,13 +215,13 @@ void bli_dgemm_sandybridge_int_8x4
 		vtmp = _mm256_mul_pd( vA0_3, vb2 );
 		va0_3b_2 = _mm256_add_pd( va0_3b_2, vtmp );
 
- 		vb3 = _mm256_shuffle_pd( vb2, vb2, 0x5 );
+		vb3 = _mm256_shuffle_pd( vb2, vb2, 0x5 );
 
 		vtmp = _mm256_mul_pd( vA4_7, vb2 );
 		va4_7b_2 = _mm256_add_pd( va4_7b_2, vtmp );
 
 		// Load vb0(Next iteration)
- 		vb0 = _mm256_load_pd( b + 8 );
+		vb0 = _mm256_load_pd( b + 8 );
 
 		vtmp = _mm256_mul_pd( vA0_3, vb3 );
 		va0_3b_3 = _mm256_add_pd( va0_3b_3, vtmp );
@@ -239,12 +239,12 @@ void bli_dgemm_sandybridge_int_8x4
 		// Iteration 0.
 
 		// Load va0_3
- 		va0_3 = _mm256_load_pd( a );
+		va0_3 = _mm256_load_pd( a );
 		// Load va4_7
- 		va4_7 = _mm256_load_pd( a + 4 );
+		va4_7 = _mm256_load_pd( a + 4 );
 
 		// Load vb (b0,b1,b2,b3)
- 		vb = _mm256_load_pd( b );
+		vb = _mm256_load_pd( b );
 
 		vtmp = _mm256_mul_pd( va0_3, vb );
 		va0_3b_0 = _mm256_add_pd( va0_3b_0, vtmp );
@@ -253,7 +253,7 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_0 = _mm256_add_pd( va4_7b_0, vtmp );
 
 		// Shuffle vb (b1,b0,b3,b2)
- 		vb = _mm256_shuffle_pd( vb, vb, 0x5 );
+		vb = _mm256_shuffle_pd( vb, vb, 0x5 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb );
 		va0_3b_1 = _mm256_add_pd( va0_3b_1, vtmp );
@@ -262,7 +262,7 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_1 = _mm256_add_pd( va4_7b_1, vtmp );
 
 		// Permute vb (b3,b2,b1,b0)
- 		vb = _mm256_permute2f128_pd( vb, vb, 0x1 );
+		vb = _mm256_permute2f128_pd( vb, vb, 0x1 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb );
 		va0_3b_2 = _mm256_add_pd( va0_3b_2, vtmp );
@@ -271,7 +271,7 @@ void bli_dgemm_sandybridge_int_8x4
 		va4_7b_2 = _mm256_add_pd( va4_7b_2, vtmp );
 
 		// Shuffle vb (b3,b2,b1,b0)
- 		vb = _mm256_shuffle_pd( vb, vb, 0x5 );
+		vb = _mm256_shuffle_pd( vb, vb, 0x5 );
 
 		vtmp = _mm256_mul_pd( va0_3, vb );
 		va0_3b_3 = _mm256_add_pd( va0_3b_3, vtmp );
@@ -312,7 +312,7 @@ void bli_dgemm_sandybridge_int_8x4
 	va4_7b1 = _mm256_permute2f128_pd( vtmpa_4_7b_1, vtmpa_4_7b_3, 0x30 );
 	va4_7b2 = _mm256_permute2f128_pd( vtmpa_4_7b_3, vtmpa_4_7b_1, 0x30 );
 
-    __m128d vzero = _mm_setzero_pd( );
+	__m128d vzero = _mm_setzero_pd( );
 
 	if( _mm_comieq_sd( _mm256_castpd256_pd128(vbeta), vzero ) )
 	{
@@ -487,7 +487,7 @@ void bli_dgemm_sandybridge_int_8x4
 		_mm256_store_pd( c43, vc4_7_3 );
 	}
 
-    GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 

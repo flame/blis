@@ -317,18 +317,19 @@ ahead*/
 static int64_t offsets[16] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15};
 
-void bli_sgemm_skx_asm_32x12_l2(
-                             dim_t            m,
-                             dim_t            n,
-                             dim_t            k_,
-                             float* restrict alpha,
-                             float* restrict a,
-                             float* restrict b,
-                             float* restrict beta,
-                             float* restrict c, inc_t rs_c_, inc_t cs_c_,
-                             auxinfo_t*       data,
-                             cntx_t* restrict cntx
-                           )
+void bli_sgemm_skx_asm_32x12_l2
+     (
+       dim_t            m,
+       dim_t            n,
+       dim_t            k_,
+       float* restrict alpha,
+       float* restrict a,
+       float* restrict b,
+       float* restrict beta,
+       float* restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t*       data,
+       cntx_t* restrict cntx
+     )
 {
     (void)data;
     (void)cntx;
@@ -384,7 +385,7 @@ void bli_sgemm_skx_asm_32x12_l2(
 #endif
 
 #ifdef PREFETCH_B_BEFORE
-	/* Prefetching 3 cachlines of B (4 iterations worth of data
+    /* Prefetching 3 cachlines of B (4 iterations worth of data
        (12 (NR) x 4 (sizeof(float)) x 4 iter /64 = 3 cachelines) */
     PREFETCH(0, MEM(RBX,0*64))
     PREFETCH(0, MEM(RBX,1*64))

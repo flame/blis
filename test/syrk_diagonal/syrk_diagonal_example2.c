@@ -44,43 +44,43 @@ void PASTEMAC(ch,op) \
        void* restrict p,             inc_t ldp \
     ) \
 { \
-    ctype* restrict a_cast     = a; \
-    ctype* restrict p_cast     = p; \
-    ctype* restrict d_cast     = d; \
-    ctype           kappa_cast = *( ctype* )kappa; \
+	ctype* restrict a_cast     = a; \
+	ctype* restrict p_cast     = p; \
+	ctype* restrict d_cast     = d; \
+	ctype           kappa_cast = *( ctype* )kappa; \
 \
-    if ( conja ) \
-    { \
-        for ( dim_t j = 0; j < panel_len; j++ ) \
-        { \
-            ctype kappa_d; \
-            PASTEMAC(ch,scal2s)( kappa_cast, d_cast[ j*incd ], kappa_d ); \
+	if ( conja ) \
+	{ \
+		for ( dim_t j = 0; j < panel_len; j++ ) \
+		{ \
+			ctype kappa_d; \
+			PASTEMAC(ch,scal2s)( kappa_cast, d_cast[ j*incd ], kappa_d ); \
 \
-            for (dim_t i = 0;i < panel_dim;i++) \
-                PASTEMAC(ch,scal2js)( kappa_d, a_cast[ i*inca + j*lda ], p_cast[ i + j*ldp ] ); \
+			for (dim_t i = 0;i < panel_dim;i++) \
+				PASTEMAC(ch,scal2js)( kappa_d, a_cast[ i*inca + j*lda ], p_cast[ i + j*ldp ] ); \
 \
-            for (dim_t i = panel_dim;i < panel_dim_max;i++) \
-                PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
-        } \
-    } \
-    else \
-    { \
-        for ( dim_t j = 0; j < panel_len; j++ ) \
-        { \
-            ctype kappa_d; \
-            PASTEMAC(ch,scal2s)( kappa_cast, d_cast[ j*incd ], kappa_d ); \
+			for (dim_t i = panel_dim;i < panel_dim_max;i++) \
+				PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
+		} \
+	} \
+	else \
+	{ \
+		for ( dim_t j = 0; j < panel_len; j++ ) \
+		{ \
+			ctype kappa_d; \
+			PASTEMAC(ch,scal2s)( kappa_cast, d_cast[ j*incd ], kappa_d ); \
 \
-            for (dim_t i = 0;i < panel_dim;i++) \
-                PASTEMAC(ch,scal2s)( kappa_d, a_cast[ i*inca + j*lda ], p_cast[ i + j*ldp ] ); \
+			for (dim_t i = 0;i < panel_dim;i++) \
+				PASTEMAC(ch,scal2s)( kappa_d, a_cast[ i*inca + j*lda ], p_cast[ i + j*ldp ] ); \
 \
-            for (dim_t i = panel_dim;i < panel_dim_max;i++) \
-                PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
-        } \
-    } \
+			for (dim_t i = panel_dim;i < panel_dim_max;i++) \
+				PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
+		} \
+	} \
 \
-    for (dim_t j = panel_len;j < panel_len_max;j++) \
-        for (dim_t i = 0;i < panel_dim_max;i++) \
-            PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
+	for (dim_t j = panel_len;j < panel_len_max;j++) \
+		for (dim_t i = 0;i < panel_dim_max;i++) \
+			PASTEMAC(ch,set0s)( p_cast[ i + j*ldp ] ); \
 }
 
 INSERT_GENTFUNC_BASIC0(packm_diag_ukr);
@@ -109,7 +109,7 @@ void packm_diag
 	dim_t dt_size   = bli_dt_size( dt );
 
 	if ( dt_scalar != dt || dt_tar != dt )
-       bli_abort();
+		bli_abort();
 
 	// Extract various fields from the control tree.
 	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
@@ -119,9 +119,9 @@ void packm_diag
 	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
 	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
 
-    if ( schema != BLIS_PACKED_ROW_PANELS &&
-         schema != BLIS_PACKED_COL_PANELS )
-       bli_abort();
+	if ( schema != BLIS_PACKED_ROW_PANELS &&
+	     schema != BLIS_PACKED_COL_PANELS )
+		bli_abort();
 
 	// Store the pack schema to the object.
 	bli_obj_set_pack_schema( schema, p );
@@ -215,9 +215,9 @@ void packm_diag
 	dim_t   panel_len_off  = bli_obj_col_off( a );
 	conj_t  conja          = bli_obj_conj_status( a );
 
-    packm_diag_params_t* params = bli_obj_pack_params( a );
-    char*   d_cast         = params->d;
-    inc_t   incd           = params->incd;
+	packm_diag_params_t* params = bli_obj_pack_params( a );
+	char*   d_cast         = params->d;
+	inc_t   incd           = params->incd;
 
 	obj_t   kappa_local;
 	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
@@ -241,22 +241,25 @@ void packm_diag
 	{
 		dim_t panel_dim_i = bli_min( bmult_m_def, m_p - it*bmult_m_def );
 
-        char* d_begin     = d_cast +    panel_len_off*incd*dt_size;
+		char* d_begin     = d_cast +    panel_len_off*incd*dt_size;
 		char* a_begin     = a_cast + it*  bmult_m_def*inca*dt_size;
-	    char* p_begin     = p_cast + it*              ps_p*dt_size;
+		char* p_begin     = p_cast + it*              ps_p*dt_size;
 
 		if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) )
 		{
-    		packm_ker_cast( conja,
-                            panel_dim_i,
-    		                n_p,
-    		                bmult_m_def,
-    		                n_p_pad,
-    		                kappa_cast,
-                            d_begin, incd,
-    		                a_begin, inca, lda,
-    		                p_begin, bmult_m_pack );
-        }
+			packm_ker_cast
+			(
+			  conja,
+			  panel_dim_i,
+			  n_p,
+			  bmult_m_def,
+			  n_p_pad,
+			  kappa_cast,
+			  d_begin, incd,
+			  a_begin, inca, lda,
+			  p_begin, bmult_m_pack
+			);
+		}
 	}
 }
 
@@ -267,15 +270,15 @@ void packm_diag
  */
 void attach_diagonal_factor( packm_diag_params_t* params, obj_t* d, obj_t* a )
 {
-    // Assumes D is a column vector
-    params->d    = bli_obj_buffer_at_off( d );
-    params->incd = bli_obj_row_stride( d );
+	// Assumes D is a column vector
+	params->d    = bli_obj_buffer_at_off( d );
+	params->incd = bli_obj_row_stride( d );
 
-    // Set the custom pack function.
-    bli_obj_set_pack_fn( packm_diag, a );
+	// Set the custom pack function.
+	bli_obj_set_pack_fn( packm_diag, a );
 
-    // Attach the parameters to the A object.
-    bli_obj_set_pack_params( params, a );
+	// Attach the parameters to the A object.
+	bli_obj_set_pack_params( params, a );
 }
 
 /*
@@ -285,67 +288,67 @@ void attach_diagonal_factor( packm_diag_params_t* params, obj_t* d, obj_t* a )
  */
 void syrk_diag( obj_t* alpha, obj_t* a, obj_t* d, obj_t* beta, obj_t* c )
 {
-    obj_t ad; // this is (D * A^T)
-    packm_diag_params_t params;
+	obj_t ad; // this is (D * A^T)
+	packm_diag_params_t params;
 
-    bli_obj_alias_to( a, &ad );
-    bli_obj_toggle_trans( &ad ); // because gemmt is A*B instead of A*B^T
-    attach_diagonal_factor( &params, d, &ad );
+	bli_obj_alias_to( a, &ad );
+	bli_obj_toggle_trans( &ad ); // because gemmt is A*B instead of A*B^T
+	attach_diagonal_factor( &params, d, &ad );
 
-    // Does C := alpha * A * B + beta * C using B = (D + A^T)
-    bli_gemmt( alpha, a, &ad, beta, c );
+	// Does C := alpha * A * B + beta * C using B = (D + A^T)
+	bli_gemmt( alpha, a, &ad, beta, c );
 }
 
-int main()
+int main( void )
 {
-    obj_t a;
-    obj_t d;
-    obj_t c;
-    obj_t c_copy;
-    obj_t norm;
+	obj_t a;
+	obj_t d;
+	obj_t c;
+	obj_t c_copy;
+	obj_t norm;
 
-    dim_t m = 10;
-    dim_t k = 10;
+	dim_t m = 10;
+	dim_t k = 10;
 
-    for ( int dt_ = BLIS_DT_LO; dt_ <= BLIS_DT_HI; dt_++ )
-    for ( int upper = 0; upper <= 1; upper++ )
-    for ( int transa = 0; transa <= 1; transa++ )
-    for ( int transc = 0; transc <= 1; transc++ )
-    {
-        num_t dt = dt_;
-        uplo_t uplo = upper ? BLIS_UPPER : BLIS_LOWER;
+	for ( int dt_ = BLIS_DT_LO; dt_ <= BLIS_DT_HI; dt_++ )
+	for ( int upper = 0; upper <= 1; upper++ )
+	for ( int transa = 0; transa <= 1; transa++ )
+	for ( int transc = 0; transc <= 1; transc++ )
+	{
+		num_t dt = dt_;
+		uplo_t uplo = upper ? BLIS_UPPER : BLIS_LOWER;
 
-        bli_obj_create( dt, m, k, transa ? k : 1, transa ? 1 : m, &a );
-        bli_obj_create( dt, k, 1,              1,              1, &d );
-        bli_obj_create( dt, m, m, transc ? m : 1, transc ? 1 : m, &c );
-        bli_obj_create( dt, m, m, transc ? m : 1, transc ? 1 : m, &c_copy );
-        bli_obj_set_struc( BLIS_SYMMETRIC , &c );
-        bli_obj_set_struc( BLIS_SYMMETRIC , &c_copy );
-        bli_obj_set_uplo( uplo , &c );
-        bli_obj_set_uplo( uplo , &c_copy );
-        bli_obj_create_1x1( bli_dt_proj_to_real( dt ), &norm );
+		bli_obj_create( dt, m, k, transa ? k : 1, transa ? 1 : m, &a );
+		bli_obj_create( dt, k, 1,              1,          1,     &d );
+		bli_obj_create( dt, m, m, transc ? m : 1, transc ? 1 : m, &c );
+		bli_obj_create( dt, m, m, transc ? m : 1, transc ? 1 : m, &c_copy );
+		bli_obj_set_struc( BLIS_SYMMETRIC , &c );
+		bli_obj_set_struc( BLIS_SYMMETRIC , &c_copy );
+		bli_obj_set_uplo( uplo , &c );
+		bli_obj_set_uplo( uplo , &c_copy );
+		bli_obj_create_1x1( bli_dt_proj_to_real( dt ), &norm );
 
-        bli_randm( &a );
-        bli_randm( &d );
-        bli_randm( &c );
-        bli_copym( &c, &c_copy );
+		bli_randm( &a );
+		bli_randm( &d );
+		bli_randm( &c );
+		bli_copym( &c, &c_copy );
 
-        syrk_diag( &BLIS_ONE, &a, &d, &BLIS_ONE, &c );
-        syrk_diag_ref( &BLIS_ONE, &a, &d, &BLIS_ONE, &c_copy );
+		syrk_diag( &BLIS_ONE, &a, &d, &BLIS_ONE, &c );
+		syrk_diag_ref( &BLIS_ONE, &a, &d, &BLIS_ONE, &c_copy );
 
-        bli_subm( &c_copy, &c );
-        bli_normfm( &c, &norm );
+		bli_subm( &c_copy, &c );
+		bli_normfm( &c, &norm );
 
-        double normr, normi;
-        bli_getsc( &norm, &normr, &normi );
+		double normr, normi;
+		bli_getsc( &norm, &normr, &normi );
 
-        printf("dt: %d, upper: %d, transa: %d, transc: %d, norm: %g\n",
-               dt, upper, transa, transc, normr);
+		printf( "dt: %d, upper: %d, transa: %d, transc: %d, norm: %g\n",
+		        dt, upper, transa, transc, normr );
 
-        bli_obj_free( &a );
-        bli_obj_free( &d );
-        bli_obj_free( &c );
-        bli_obj_free( &c_copy );
-        bli_obj_free( &norm );
-    }
+		bli_obj_free( &a );
+		bli_obj_free( &d );
+		bli_obj_free( &c );
+		bli_obj_free( &c_copy );
+		bli_obj_free( &norm );
+	}
 }

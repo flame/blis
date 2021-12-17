@@ -376,7 +376,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Compute the addresses of the panel B10 and the triangular
 			   block B11. */ \
-			b01       = b1; \
+			b01 = b1; \
 			b11 = b1 + k_b01 * PACKNR; \
 			/*b11 = bli_ptr_inc_by_frac( b1, sizeof( ctype ), k_b01 * PACKNR, 1 );*/ \
 \
@@ -494,8 +494,8 @@ void PASTEMAC(ch,varname) \
 				/* Invoke the gemm micro-kernel. */ \
 				gemm_ukr \
 				( \
-                  m_cur, \
-                  n_cur, \
+				  m_cur, \
+				  n_cur, \
 				  k, \
 				  minus_one, \
 				  b1, \

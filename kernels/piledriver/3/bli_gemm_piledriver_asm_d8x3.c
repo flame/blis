@@ -64,7 +64,7 @@ void bli_sgemm_piledriver_asm_16x3
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( s, 16, 3, false );
+	GEMM_UKR_SETUP_CT( s, 16, 3, false );
 
 	begin_asm()
 
@@ -457,57 +457,57 @@ void bli_sgemm_piledriver_asm_16x3
 	vucomiss(xmm0, xmm2) // set ZF if beta == 0.
 	je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	vfmadd231ps(mem(rcx, 0*16), xmm2, xmm4)
-    	vfmadd231ps(mem(rcx, 1*16), xmm2, xmm7)
-    	vfmadd231ps(mem(rcx, 2*16), xmm2, xmm10)
-    	vfmadd231ps(mem(rcx, 3*16), xmm2, xmm13)
+		vfmadd231ps(mem(rcx, 0*16), xmm2, xmm4)
+		vfmadd231ps(mem(rcx, 1*16), xmm2, xmm7)
+		vfmadd231ps(mem(rcx, 2*16), xmm2, xmm10)
+		vfmadd231ps(mem(rcx, 3*16), xmm2, xmm13)
 
-    	vfmadd231ps(mem(r10, 0*16), xmm2, xmm5)
-    	vfmadd231ps(mem(r10, 1*16), xmm2, xmm8)
-    	vfmadd231ps(mem(r10, 2*16), xmm2, xmm11)
-    	vfmadd231ps(mem(r10, 3*16), xmm2, xmm14)
+		vfmadd231ps(mem(r10, 0*16), xmm2, xmm5)
+		vfmadd231ps(mem(r10, 1*16), xmm2, xmm8)
+		vfmadd231ps(mem(r10, 2*16), xmm2, xmm11)
+		vfmadd231ps(mem(r10, 3*16), xmm2, xmm14)
 
-    	vfmadd231ps(mem(r11, 0*16), xmm2, xmm6)
-    	vfmadd231ps(mem(r11, 1*16), xmm2, xmm9)
-    	vfmadd231ps(mem(r11, 2*16), xmm2, xmm12)
-    	vfmadd231ps(mem(r11, 3*16), xmm2, xmm15)
+		vfmadd231ps(mem(r11, 0*16), xmm2, xmm6)
+		vfmadd231ps(mem(r11, 1*16), xmm2, xmm9)
+		vfmadd231ps(mem(r11, 2*16), xmm2, xmm12)
+		vfmadd231ps(mem(r11, 3*16), xmm2, xmm15)
 
-        // fall through
+		 // fall through
 
 	label(.SBETAZERO)
 
-    	vmovups(xmm4, mem(rcx, 0*16))
-    	vmovups(xmm7, mem(rcx, 1*16))
-    	vmovups(xmm10, mem(rcx, 2*16))
-    	vmovups(xmm13, mem(rcx, 3*16))
+		vmovups(xmm4, mem(rcx, 0*16))
+		vmovups(xmm7, mem(rcx, 1*16))
+		vmovups(xmm10, mem(rcx, 2*16))
+		vmovups(xmm13, mem(rcx, 3*16))
 
-    	vmovups(xmm5, mem(r10, 0*16))
-    	vmovups(xmm8, mem(r10, 1*16))
-    	vmovups(xmm11, mem(r10, 2*16))
-    	vmovups(xmm14, mem(r10, 3*16))
+		vmovups(xmm5, mem(r10, 0*16))
+		vmovups(xmm8, mem(r10, 1*16))
+		vmovups(xmm11, mem(r10, 2*16))
+		vmovups(xmm14, mem(r10, 3*16))
 
-    	vmovups(xmm6, mem(r11, 0*16))
-    	vmovups(xmm9, mem(r11, 1*16))
-    	vmovups(xmm12, mem(r11, 2*16))
-    	vmovups(xmm15, mem(r11, 3*16))
+		vmovups(xmm6, mem(r11, 0*16))
+		vmovups(xmm9, mem(r11, 1*16))
+		vmovups(xmm12, mem(r11, 2*16))
+		vmovups(xmm15, mem(r11, 3*16))
 
 	label(.SDONE)
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -518,7 +518,7 @@ void bli_sgemm_piledriver_asm_16x3
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_CT( s );
 }
 
 void bli_dgemm_piledriver_asm_8x3
@@ -545,7 +545,7 @@ void bli_dgemm_piledriver_asm_8x3
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( d, 8, 3, false );
+	GEMM_UKR_SETUP_CT( d, 8, 3, false );
 
 	begin_asm()
 
@@ -897,73 +897,73 @@ void bli_dgemm_piledriver_asm_8x3
 	vucomisd(xmm0, xmm2) // set ZF if beta == 0.
 	je(.DBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    	 // xmm4:   xmm5:   xmm6:
-    	 // ( ab00  ( ab01  ( ab02
-    	 //   ab10 )  ab11 )  ab12 )
-    	 //
-    	 // xmm7:   xmm8:   xmm9:
-    	 // ( ab20  ( ab21  ( ab22
-    	 //   ab30 )  ab31 )  ab32 )
-    	 //
-    	 // xmm10:  xmm11:  xmm12:
-    	 // ( ab40  ( ab41  ( ab42
-    	 //   ab50 )  ab51 )  ab52 )
-    	 //
-    	 // xmm13:  xmm14:  xmm15:
-    	 // ( ab60  ( ab61  ( ab62
-    	 //   ab70 )  ab71 )  ab72 )
+		 // xmm4:   xmm5:   xmm6:
+		 // ( ab00  ( ab01  ( ab02
+		 //   ab10 )  ab11 )  ab12 )
+		 //
+		 // xmm7:   xmm8:   xmm9:
+		 // ( ab20  ( ab21  ( ab22
+		 //   ab30 )  ab31 )  ab32 )
+		 //
+		 // xmm10:  xmm11:  xmm12:
+		 // ( ab40  ( ab41  ( ab42
+		 //   ab50 )  ab51 )  ab52 )
+		 //
+		 // xmm13:  xmm14:  xmm15:
+		 // ( ab60  ( ab61  ( ab62
+		 //   ab70 )  ab71 )  ab72 )
 
-    	vfmadd231pd(mem(rcx, 0*16), xmm2, xmm4)
-    	vfmadd231pd(mem(rcx, 1*16), xmm2, xmm7)
-    	vfmadd231pd(mem(rcx, 2*16), xmm2, xmm10)
-    	vfmadd231pd(mem(rcx, 3*16), xmm2, xmm13)
+		vfmadd231pd(mem(rcx, 0*16), xmm2, xmm4)
+		vfmadd231pd(mem(rcx, 1*16), xmm2, xmm7)
+		vfmadd231pd(mem(rcx, 2*16), xmm2, xmm10)
+		vfmadd231pd(mem(rcx, 3*16), xmm2, xmm13)
 
-    	vfmadd231pd(mem(r10, 0*16), xmm2, xmm5)
-    	vfmadd231pd(mem(r10, 1*16), xmm2, xmm8)
-    	vfmadd231pd(mem(r10, 2*16), xmm2, xmm11)
-    	vfmadd231pd(mem(r10, 3*16), xmm2, xmm14)
+		vfmadd231pd(mem(r10, 0*16), xmm2, xmm5)
+		vfmadd231pd(mem(r10, 1*16), xmm2, xmm8)
+		vfmadd231pd(mem(r10, 2*16), xmm2, xmm11)
+		vfmadd231pd(mem(r10, 3*16), xmm2, xmm14)
 
-    	vfmadd231pd(mem(r11, 0*16), xmm2, xmm6)
-    	vfmadd231pd(mem(r11, 1*16), xmm2, xmm9)
-    	vfmadd231pd(mem(r11, 2*16), xmm2, xmm12)
-    	vfmadd231pd(mem(r11, 3*16), xmm2, xmm15)
+		vfmadd231pd(mem(r11, 0*16), xmm2, xmm6)
+		vfmadd231pd(mem(r11, 1*16), xmm2, xmm9)
+		vfmadd231pd(mem(r11, 2*16), xmm2, xmm12)
+		vfmadd231pd(mem(r11, 3*16), xmm2, xmm15)
 
-        // fall through
+		 // fall through
 
 	label(.DBETAZERO)
 
-    	vmovups(xmm4, mem(rcx, 0*16))
-    	vmovups(xmm7, mem(rcx, 1*16))
-    	vmovups(xmm10, mem(rcx, 2*16))
-    	vmovups(xmm13, mem(rcx, 3*16))
+		vmovups(xmm4, mem(rcx, 0*16))
+		vmovups(xmm7, mem(rcx, 1*16))
+		vmovups(xmm10, mem(rcx, 2*16))
+		vmovups(xmm13, mem(rcx, 3*16))
 
-    	vmovups(xmm5, mem(r10, 0*16))
-    	vmovups(xmm8, mem(r10, 1*16))
-    	vmovups(xmm11, mem(r10, 2*16))
-    	vmovups(xmm14, mem(r10, 3*16))
+		vmovups(xmm5, mem(r10, 0*16))
+		vmovups(xmm8, mem(r10, 1*16))
+		vmovups(xmm11, mem(r10, 2*16))
+		vmovups(xmm14, mem(r10, 3*16))
 
-    	vmovups(xmm6, mem(r11, 0*16))
-    	vmovups(xmm9, mem(r11, 1*16))
-    	vmovups(xmm12, mem(r11, 2*16))
-    	vmovups(xmm15, mem(r11, 3*16))
+		vmovups(xmm6, mem(r11, 0*16))
+		vmovups(xmm9, mem(r11, 1*16))
+		vmovups(xmm12, mem(r11, 2*16))
+		vmovups(xmm15, mem(r11, 3*16))
 
 	label(.DDONE)
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -974,7 +974,7 @@ void bli_dgemm_piledriver_asm_8x3
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 void bli_cgemm_piledriver_asm_4x2
@@ -1001,7 +1001,7 @@ void bli_cgemm_piledriver_asm_4x2
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( c, 4, 2, false );
+	GEMM_UKR_SETUP_CT( c, 4, 2, false );
 
 	begin_asm()
 
@@ -1317,63 +1317,63 @@ void bli_cgemm_piledriver_asm_4x2
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.CBETAZERO) // if ZF = 0, jump to beta == 0 case
 
-    	vmovups(mem(rcx), xmm0) // load c00:c10
-    	vmovups(mem(rcx, 16), xmm2) // load c20:c30
-    	vpermilps(imm(0xb1), xmm0, xmm1)
-    	vpermilps(imm(0xb1), xmm2, xmm3)
+		vmovups(mem(rcx), xmm0) // load c00:c10
+		vmovups(mem(rcx, 16), xmm2) // load c20:c30
+		vpermilps(imm(0xb1), xmm0, xmm1)
+		vpermilps(imm(0xb1), xmm2, xmm3)
 
-    	vmulps(xmm6, xmm0, xmm0)
-    	vmulps(xmm7, xmm1, xmm1)
-    	vaddsubps(xmm1, xmm0, xmm0)
-    	vaddps(xmm8, xmm0, xmm0)
+		vmulps(xmm6, xmm0, xmm0)
+		vmulps(xmm7, xmm1, xmm1)
+		vaddsubps(xmm1, xmm0, xmm0)
+		vaddps(xmm8, xmm0, xmm0)
 
-    	vmulps(xmm6, xmm2, xmm2)
-    	vmulps(xmm7, xmm3, xmm3)
-    	vaddsubps(xmm3, xmm2, xmm2)
-    	vaddps(xmm12, xmm2, xmm2)
+		vmulps(xmm6, xmm2, xmm2)
+		vmulps(xmm7, xmm3, xmm3)
+		vaddsubps(xmm3, xmm2, xmm2)
+		vaddps(xmm12, xmm2, xmm2)
 
-    	vmovups(mem(r10), xmm0) // load c01:c11
-    	vmovups(mem(r10, 16), xmm2) // load c21:c31
-    	vpermilps(imm(0xb1), xmm0, xmm1)
-    	vpermilps(imm(0xb1), xmm2, xmm3)
+		vmovups(mem(r10), xmm0) // load c01:c11
+		vmovups(mem(r10, 16), xmm2) // load c21:c31
+		vpermilps(imm(0xb1), xmm0, xmm1)
+		vpermilps(imm(0xb1), xmm2, xmm3)
 
-    	vmulps(xmm6, xmm0, xmm0)
-    	vmulps(xmm7, xmm1, xmm1)
-    	vaddsubps(xmm1, xmm0, xmm0)
-    	vaddps(xmm10, xmm0, xmm0)
+		vmulps(xmm6, xmm0, xmm0)
+		vmulps(xmm7, xmm1, xmm1)
+		vaddsubps(xmm1, xmm0, xmm0)
+		vaddps(xmm10, xmm0, xmm0)
 
-    	vmulps(xmm6, xmm2, xmm2)
-    	vmulps(xmm7, xmm3, xmm3)
-    	vaddsubps(xmm3, xmm2, xmm2)
-    	vaddps(xmm14, xmm2, xmm2)
+		vmulps(xmm6, xmm2, xmm2)
+		vmulps(xmm7, xmm3, xmm3)
+		vaddsubps(xmm3, xmm2, xmm2)
+		vaddps(xmm14, xmm2, xmm2)
 
-        // fall through
+		 // fall through
 
 	label(.CBETAZERO)
 
-    	vmovups(xmm8, mem(rcx)) // store c00:c10
-    	vmovups(xmm12, mem(rcx, 16)) // store c20:c30
+		vmovups(xmm8, mem(rcx)) // store c00:c10
+		vmovups(xmm12, mem(rcx, 16)) // store c20:c30
 
-    	vmovups(xmm10, mem(r10)) // store c01:c11
-    	vmovups(xmm14, mem(r10, 16)) // store c21:c31
+		vmovups(xmm10, mem(r10)) // store c01:c11
+		vmovups(xmm14, mem(r10, 16)) // store c21:c31
 
 	label(.CDONE)
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1384,7 +1384,7 @@ void bli_cgemm_piledriver_asm_4x2
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( c );
+	GEMM_UKR_FLUSH_CT( c );
 }
 
 void bli_zgemm_piledriver_asm_2x2
@@ -1411,7 +1411,7 @@ void bli_zgemm_piledriver_asm_2x2
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT( z, 2, 2, false );
+	GEMM_UKR_SETUP_CT( z, 2, 2, false );
 
 	begin_asm()
 
@@ -1729,63 +1729,63 @@ void bli_zgemm_piledriver_asm_2x2
 	and(r8b, r9b) // set ZF if r8b & r9b == 1.
 	jne(.ZBETAZERO) // if ZF = 0, jump to beta == 0 case
 
-    	vmovups(mem(rcx), xmm0) // load c00
-    	vmovups(mem(rcx, 16), xmm2) // load c10
-    	vpermilpd(imm(0x1), xmm0, xmm1)
-    	vpermilpd(imm(0x1), xmm2, xmm3)
+		vmovups(mem(rcx), xmm0) // load c00
+		vmovups(mem(rcx, 16), xmm2) // load c10
+		vpermilpd(imm(0x1), xmm0, xmm1)
+		vpermilpd(imm(0x1), xmm2, xmm3)
 
-    	vmulpd(xmm6, xmm0, xmm0)
-    	vmulpd(xmm7, xmm1, xmm1)
-    	vaddsubpd(xmm1, xmm0, xmm0)
-    	vaddpd(xmm8, xmm0, xmm0)
+		vmulpd(xmm6, xmm0, xmm0)
+		vmulpd(xmm7, xmm1, xmm1)
+		vaddsubpd(xmm1, xmm0, xmm0)
+		vaddpd(xmm8, xmm0, xmm0)
 
-    	vmulpd(xmm6, xmm2, xmm2)
-    	vmulpd(xmm7, xmm3, xmm3)
-    	vaddsubpd(xmm3, xmm2, xmm2)
-    	vaddpd(xmm12, xmm2, xmm2)
+		vmulpd(xmm6, xmm2, xmm2)
+		vmulpd(xmm7, xmm3, xmm3)
+		vaddsubpd(xmm3, xmm2, xmm2)
+		vaddpd(xmm12, xmm2, xmm2)
 
-    	vmovups(mem(r10), xmm0) // load c01
-    	vmovups(mem(r10, 16), xmm2) // load c11
-    	vpermilpd(imm(0x1), xmm0, xmm1)
-    	vpermilpd(imm(0x1), xmm2, xmm3)
+		vmovups(mem(r10), xmm0) // load c01
+		vmovups(mem(r10, 16), xmm2) // load c11
+		vpermilpd(imm(0x1), xmm0, xmm1)
+		vpermilpd(imm(0x1), xmm2, xmm3)
 
-    	vmulpd(xmm6, xmm0, xmm0)
-    	vmulpd(xmm7, xmm1, xmm1)
-    	vaddsubpd(xmm1, xmm0, xmm0)
-    	vaddpd(xmm10, xmm0, xmm0)
+		vmulpd(xmm6, xmm0, xmm0)
+		vmulpd(xmm7, xmm1, xmm1)
+		vaddsubpd(xmm1, xmm0, xmm0)
+		vaddpd(xmm10, xmm0, xmm0)
 
-    	vmulpd(xmm6, xmm2, xmm2)
-    	vmulpd(xmm7, xmm3, xmm3)
-    	vaddsubpd(xmm3, xmm2, xmm2)
-    	vaddpd(xmm14, xmm2, xmm2)
+		vmulpd(xmm6, xmm2, xmm2)
+		vmulpd(xmm7, xmm3, xmm3)
+		vaddsubpd(xmm3, xmm2, xmm2)
+		vaddpd(xmm14, xmm2, xmm2)
 
-        // fall through
+		 // fall through
 
 	label(.ZBETAZERO)
 
-    	vmovups(xmm8, mem(rcx)) // store c00
-    	vmovups(xmm12, mem(rcx, 16)) // store c10
+		vmovups(xmm8, mem(rcx)) // store c00
+		vmovups(xmm12, mem(rcx, 16)) // store c10
 
-    	vmovups(xmm10, mem(r10)) // store c01
-    	vmovups(xmm14, mem(r10, 16)) // store c11
+		vmovups(xmm10, mem(r10)) // store c01
+		vmovups(xmm14, mem(r10, 16)) // store c11
 
 	label(.ZDONE)
 
 
-    end_asm(
+	end_asm(
 	: // output operands (none)
 	: // input operands
-      [k_iter] "m" (k_iter), // 0
-      [k_left] "m" (k_left), // 1
-      [a]      "m" (a),      // 2
-      [b]      "m" (b),      // 3
-      [alpha]  "m" (alpha),  // 4
-      [beta]   "m" (beta),   // 5
-      [c]      "m" (c),      // 6
-      [rs_c]   "m" (rs_c),   // 7
-      [cs_c]   "m" (cs_c),   // 8
-      [b_next] "m" (b_next), // 9
-      [a_next] "m" (a_next)  // 10
+	  [k_iter] "m" (k_iter), // 0
+	  [k_left] "m" (k_left), // 1
+	  [a]      "m" (a),      // 2
+	  [b]      "m" (b),      // 3
+	  [alpha]  "m" (alpha),  // 4
+	  [beta]   "m" (beta),   // 5
+	  [c]      "m" (c),      // 6
+	  [rs_c]   "m" (rs_c),   // 7
+	  [cs_c]   "m" (cs_c),   // 8
+	  [b_next] "m" (b_next), // 9
+	  [a_next] "m" (a_next)  // 10
 	: // register clobber list
 	  "rax", "rbx", "rcx", "rdx", "rsi", "rdi",
 	  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
@@ -1796,7 +1796,7 @@ void bli_zgemm_piledriver_asm_2x2
 	  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( z );
+	GEMM_UKR_FLUSH_CT( z );
 }
 
 

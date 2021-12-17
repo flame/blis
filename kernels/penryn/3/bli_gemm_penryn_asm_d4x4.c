@@ -61,7 +61,7 @@ void bli_sgemm_penryn_asm_8x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT_ALIGNED( s, 8, 4, false, 16 );
+	GEMM_UKR_SETUP_CT_ALIGNED( s, 8, 4, false, 16 );
 
 	begin_asm()
 
@@ -380,126 +380,126 @@ void bli_sgemm_penryn_asm_8x4
 		ucomisd(xmm0, xmm7) // check if beta == 0.
 		je(.SBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    		movaps(mem(rcx), xmm0) // load c00 ~ c30,
-    		mulps(xmm6, xmm8) // scale by alpha,
-    		mulps(xmm7, xmm0) // scale by beta,
-    		addps(xmm8, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
+			movaps(mem(rcx), xmm0) // load c00 ~ c30,
+			mulps(xmm6, xmm8) // scale by alpha,
+			mulps(xmm7, xmm0) // scale by beta,
+			addps(xmm8, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
 
-    		movaps(mem(rdx), xmm1) // load c40 ~ c70,
-    		mulps(xmm6, xmm12) // scale by alpha,
-    		mulps(xmm7, xmm1) // scale by beta,
-    		addps(xmm12, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
-
-
-
-    		movaps(mem(rcx), xmm0) // load c01 ~ c31,
-    		mulps(xmm6, xmm9) // scale by alpha,
-    		mulps(xmm7, xmm0) // scale by beta,
-    		addps(xmm9, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-
-    		movaps(mem(rdx), xmm1) // load c41 ~ c71,
-    		mulps(xmm6, xmm13) // scale by alpha,
-    		mulps(xmm7, xmm1) // scale by beta,
-    		addps(xmm13, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			movaps(mem(rdx), xmm1) // load c40 ~ c70,
+			mulps(xmm6, xmm12) // scale by alpha,
+			mulps(xmm7, xmm1) // scale by beta,
+			addps(xmm12, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
 
-    		movaps(mem(rcx), xmm0) // load c02 ~ c32,
-    		mulps(xmm6, xmm10) // scale by alpha,
-    		mulps(xmm7, xmm0) // scale by beta,
-    		addps(xmm10, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
+			movaps(mem(rcx), xmm0) // load c01 ~ c31,
+			mulps(xmm6, xmm9) // scale by alpha,
+			mulps(xmm7, xmm0) // scale by beta,
+			addps(xmm9, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
 
-    		movaps(mem(rdx), xmm1) // load c42 ~ c72,
-    		mulps(xmm6, xmm14) // scale by alpha,
-    		mulps(xmm7, xmm1) // scale by beta,
-    		addps(xmm14, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
-
-
-
-    		movaps(mem(rcx), xmm0) // load c03 ~ c33,
-    		mulps(xmm6, xmm11) // scale by alpha,
-    		mulps(xmm7, xmm0) // scale by beta,
-    		addps(xmm11, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
+			movaps(mem(rdx), xmm1) // load c41 ~ c71,
+			mulps(xmm6, xmm13) // scale by alpha,
+			mulps(xmm7, xmm1) // scale by beta,
+			addps(xmm13, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		movaps(mem(rdx), xmm1) // load c43 ~ c73,
-    		mulps(xmm6, xmm15) // scale by alpha,
-    		mulps(xmm7, xmm1) // scale by beta,
-    		addps(xmm15, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
 
-    		jmp(.SDONE) // jump to end.
+			movaps(mem(rcx), xmm0) // load c02 ~ c32,
+			mulps(xmm6, xmm10) // scale by alpha,
+			mulps(xmm7, xmm0) // scale by beta,
+			addps(xmm10, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+
+			movaps(mem(rdx), xmm1) // load c42 ~ c72,
+			mulps(xmm6, xmm14) // scale by alpha,
+			mulps(xmm7, xmm1) // scale by beta,
+			addps(xmm14, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
+
+
+
+			movaps(mem(rcx), xmm0) // load c03 ~ c33,
+			mulps(xmm6, xmm11) // scale by alpha,
+			mulps(xmm7, xmm0) // scale by beta,
+			addps(xmm11, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+
+
+			movaps(mem(rdx), xmm1) // load c43 ~ c73,
+			mulps(xmm6, xmm15) // scale by alpha,
+			mulps(xmm7, xmm1) // scale by beta,
+			addps(xmm15, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+
+			jmp(.SDONE) // jump to end.
 
 		label(.SBETAZERO)
 
-    		 // skip loading c00 ~ c30,
-    		mulps(xmm6, xmm8) // scale by alpha,
-    		movaps(xmm8, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c40 ~ c70,
-    		mulps(xmm6, xmm12) // scale by alpha,
-    		movaps(xmm12, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c00 ~ c30,
+			mulps(xmm6, xmm8) // scale by alpha,
+			movaps(xmm8, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c40 ~ c70,
+			mulps(xmm6, xmm12) // scale by alpha,
+			movaps(xmm12, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c01 ~ c31,
-    		mulps(xmm6, xmm9) // scale by alpha,
-    		movaps(xmm9, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c41 ~ c71,
-    		mulps(xmm6, xmm13) // scale by alpha,
-    		movaps(xmm13, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c01 ~ c31,
+			mulps(xmm6, xmm9) // scale by alpha,
+			movaps(xmm9, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c41 ~ c71,
+			mulps(xmm6, xmm13) // scale by alpha,
+			movaps(xmm13, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c02 ~ c32,
-    		mulps(xmm6, xmm10) // scale by alpha,
-    		movaps(xmm10, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c42 ~ c72,
-    		mulps(xmm6, xmm14) // scale by alpha,
-    		movaps(xmm14, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c02 ~ c32,
+			mulps(xmm6, xmm10) // scale by alpha,
+			movaps(xmm10, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c42 ~ c72,
+			mulps(xmm6, xmm14) // scale by alpha,
+			movaps(xmm14, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c03 ~ c33,
-    		mulps(xmm6, xmm11) // scale by alpha,
-    		movaps(xmm11, mem(rcx)) // and store back to memory.
+			 // skip loading c03 ~ c33,
+			mulps(xmm6, xmm11) // scale by alpha,
+			movaps(xmm11, mem(rcx)) // and store back to memory.
 
-    		 // skip loading c43 ~ c73,
-    		mulps(xmm6, xmm15) // scale by alpha,
-    		movaps(xmm15, mem(rdx)) // and store back to memory.
+			 // skip loading c43 ~ c73,
+			mulps(xmm6, xmm15) // scale by alpha,
+			movaps(xmm15, mem(rdx)) // and store back to memory.
 
 		label(.SDONE)
 
 
-    end_asm(
+	end_asm(
 		: // output operands (none)
 		: // input operands
-	      [k_iter] "m" (k_iter), // 0
-	      [k_left] "m" (k_left), // 1
-	      [a]      "m" (a),      // 2
-	      [b]      "m" (b),      // 3
-	      [alpha]  "m" (alpha),  // 4
-	      [beta]   "m" (beta),   // 5
-	      [c]      "m" (c),      // 6
-	      [rs_c]   "m" (rs_c),   // 7
-	      [cs_c]   "m" (cs_c),   // 8
-	      [b_next] "m" (b_next)/*, // 9
-	      [a_next] "m" (a_next)*/  // 10
+		  [k_iter] "m" (k_iter), // 0
+		  [k_left] "m" (k_left), // 1
+		  [a]      "m" (a),      // 2
+		  [b]      "m" (b),      // 3
+		  [alpha]  "m" (alpha),  // 4
+		  [beta]   "m" (beta),   // 5
+		  [c]      "m" (c),      // 6
+		  [rs_c]   "m" (rs_c),   // 7
+		  [cs_c]   "m" (cs_c),   // 8
+		  [b_next] "m" (b_next)/*, // 9
+		  [a_next] "m" (a_next)*/  // 10
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -509,7 +509,7 @@ void bli_sgemm_penryn_asm_8x4
 		  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( s );
+	GEMM_UKR_FLUSH_CT( s );
 }
 
 void bli_dgemm_penryn_asm_4x4
@@ -536,7 +536,7 @@ void bli_dgemm_penryn_asm_4x4
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-    GEMM_UKR_SETUP_CT_ALIGNED( d, 4, 4, false, 16 );
+	GEMM_UKR_SETUP_CT_ALIGNED( d, 4, 4, false, 16 );
 
 	begin_asm()
 
@@ -853,126 +853,126 @@ void bli_dgemm_penryn_asm_4x4
 		ucomisd(xmm0, xmm7) // check if beta == 0.
 		je(.DBETAZERO) // if ZF = 1, jump to beta == 0 case
 
-    		movaps(mem(rcx), xmm0) // load c00 and c10,
-    		mulpd(xmm6, xmm8) // scale by alpha,
-    		mulpd(xmm7, xmm0) // scale by beta,
-    		addpd(xmm8, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
+			movaps(mem(rcx), xmm0) // load c00 and c10,
+			mulpd(xmm6, xmm8) // scale by alpha,
+			mulpd(xmm7, xmm0) // scale by beta,
+			addpd(xmm8, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
 
-    		movaps(mem(rdx), xmm1) // load c20 and c30,
-    		mulpd(xmm6, xmm12) // scale by alpha,
-    		mulpd(xmm7, xmm1) // scale by beta,
-    		addpd(xmm12, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
-
-
-
-    		movaps(mem(rcx), xmm0) // load c01 and c11,
-    		mulpd(xmm6, xmm9) // scale by alpha,
-    		mulpd(xmm7, xmm0) // scale by beta,
-    		addpd(xmm9, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-
-    		movaps(mem(rdx), xmm1) // load c21 and c31,
-    		mulpd(xmm6, xmm13) // scale by alpha,
-    		mulpd(xmm7, xmm1) // scale by beta,
-    		addpd(xmm13, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			movaps(mem(rdx), xmm1) // load c20 and c30,
+			mulpd(xmm6, xmm12) // scale by alpha,
+			mulpd(xmm7, xmm1) // scale by beta,
+			addpd(xmm12, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
 
-    		movaps(mem(rcx), xmm0) // load c02 and c12,
-    		mulpd(xmm6, xmm10) // scale by alpha,
-    		mulpd(xmm7, xmm0) // scale by beta,
-    		addpd(xmm10, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
+			movaps(mem(rcx), xmm0) // load c01 and c11,
+			mulpd(xmm6, xmm9) // scale by alpha,
+			mulpd(xmm7, xmm0) // scale by beta,
+			addpd(xmm9, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
 
-    		movaps(mem(rdx), xmm1) // load c22 and c32,
-    		mulpd(xmm6, xmm14) // scale by alpha,
-    		mulpd(xmm7, xmm1) // scale by beta,
-    		addpd(xmm14, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
-
-
-
-    		movaps(mem(rcx), xmm0) // load c03 and c13,
-    		mulpd(xmm6, xmm11) // scale by alpha,
-    		mulpd(xmm7, xmm0) // scale by beta,
-    		addpd(xmm11, xmm0) // add the gemm result,
-    		movaps(xmm0, mem(rcx)) // and store back to memory.
+			movaps(mem(rdx), xmm1) // load c21 and c31,
+			mulpd(xmm6, xmm13) // scale by alpha,
+			mulpd(xmm7, xmm1) // scale by beta,
+			addpd(xmm13, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		movaps(mem(rdx), xmm1) // load c23 and c33,
-    		mulpd(xmm6, xmm15) // scale by alpha,
-    		mulpd(xmm7, xmm1) // scale by beta,
-    		addpd(xmm15, xmm1) // add the gemm result,
-    		movaps(xmm1, mem(rdx)) // and store back to memory.
 
-    		jmp(.DDONE) // jump to end.
+			movaps(mem(rcx), xmm0) // load c02 and c12,
+			mulpd(xmm6, xmm10) // scale by alpha,
+			mulpd(xmm7, xmm0) // scale by beta,
+			addpd(xmm10, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+
+			movaps(mem(rdx), xmm1) // load c22 and c32,
+			mulpd(xmm6, xmm14) // scale by alpha,
+			mulpd(xmm7, xmm1) // scale by beta,
+			addpd(xmm14, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
+
+
+
+			movaps(mem(rcx), xmm0) // load c03 and c13,
+			mulpd(xmm6, xmm11) // scale by alpha,
+			mulpd(xmm7, xmm0) // scale by beta,
+			addpd(xmm11, xmm0) // add the gemm result,
+			movaps(xmm0, mem(rcx)) // and store back to memory.
+
+
+			movaps(mem(rdx), xmm1) // load c23 and c33,
+			mulpd(xmm6, xmm15) // scale by alpha,
+			mulpd(xmm7, xmm1) // scale by beta,
+			addpd(xmm15, xmm1) // add the gemm result,
+			movaps(xmm1, mem(rdx)) // and store back to memory.
+
+			jmp(.DDONE) // jump to end.
 
 		label(.DBETAZERO)
 
-    		 // skip loading c00 and c10,
-    		mulpd(xmm6, xmm8) // scale by alpha,
-    		movaps(xmm8, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c20 and c30,
-    		mulpd(xmm6, xmm12) // scale by alpha,
-    		movaps(xmm12, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c00 and c10,
+			mulpd(xmm6, xmm8) // scale by alpha,
+			movaps(xmm8, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c20 and c30,
+			mulpd(xmm6, xmm12) // scale by alpha,
+			movaps(xmm12, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c01 and c11,
-    		mulpd(xmm6, xmm9) // scale by alpha,
-    		movaps(xmm9, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c21 and c31,
-    		mulpd(xmm6, xmm13) // scale by alpha,
-    		movaps(xmm13, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c01 and c11,
+			mulpd(xmm6, xmm9) // scale by alpha,
+			movaps(xmm9, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c21 and c31,
+			mulpd(xmm6, xmm13) // scale by alpha,
+			movaps(xmm13, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c02 and c12,
-    		mulpd(xmm6, xmm10) // scale by alpha,
-    		movaps(xmm10, mem(rcx)) // and store back to memory.
-    		add(rdi, rcx)
-    		 // skip loading c22 and c32,
-    		mulpd(xmm6, xmm14) // scale by alpha,
-    		movaps(xmm14, mem(rdx)) // and store back to memory.
-    		add(rdi, rdx)
+			 // skip loading c02 and c12,
+			mulpd(xmm6, xmm10) // scale by alpha,
+			movaps(xmm10, mem(rcx)) // and store back to memory.
+			add(rdi, rcx)
+			 // skip loading c22 and c32,
+			mulpd(xmm6, xmm14) // scale by alpha,
+			movaps(xmm14, mem(rdx)) // and store back to memory.
+			add(rdi, rdx)
 
 
-    		 // skip loading c03 and c13,
-    		mulpd(xmm6, xmm11) // scale by alpha,
-    		movaps(xmm11, mem(rcx)) // and store back to memory.
+			 // skip loading c03 and c13,
+			mulpd(xmm6, xmm11) // scale by alpha,
+			movaps(xmm11, mem(rcx)) // and store back to memory.
 
-    		 // skip loading c23 and c33,
-    		mulpd(xmm6, xmm15) // scale by alpha,
-    		movaps(xmm15, mem(rdx)) // and store back to memory.
+			 // skip loading c23 and c33,
+			mulpd(xmm6, xmm15) // scale by alpha,
+			movaps(xmm15, mem(rdx)) // and store back to memory.
 
 		label(.DDONE)
 
 
-    end_asm(
+	end_asm(
 		: // output operands (none)
 		: // input operands
-	      [k_iter] "m" (k_iter), // 0
-	      [k_left] "m" (k_left), // 1
-	      [a]      "m" (a),      // 2
-	      [b]      "m" (b),      // 3
-	      [alpha]  "m" (alpha),  // 4
-	      [beta]   "m" (beta),   // 5
-	      [c]      "m" (c),      // 6
-	      [rs_c]   "m" (rs_c),   // 7
-	      [cs_c]   "m" (cs_c),   // 8
-	      [b_next] "m" (b_next), // 9
-	      [a_next] "m" (a_next)  // 10
+		  [k_iter] "m" (k_iter), // 0
+		  [k_left] "m" (k_left), // 1
+		  [a]      "m" (a),      // 2
+		  [b]      "m" (b),      // 3
+		  [alpha]  "m" (alpha),  // 4
+		  [beta]   "m" (beta),   // 5
+		  [c]      "m" (c),      // 6
+		  [rs_c]   "m" (rs_c),   // 7
+		  [cs_c]   "m" (cs_c),   // 8
+		  [b_next] "m" (b_next), // 9
+		  [a_next] "m" (a_next)  // 10
 		: // register clobber list
 		  "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11", "r12",
 		  "xmm0", "xmm1", "xmm2", "xmm3",
@@ -982,7 +982,7 @@ void bli_dgemm_penryn_asm_4x4
 		  "memory"
 	)
 
-    GEMM_UKR_FLUSH_CT( d );
+	GEMM_UKR_FLUSH_CT( d );
 }
 
 

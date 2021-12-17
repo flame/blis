@@ -124,9 +124,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else                                                    using_ct = FALSE; \
 \
 \
-    /* If we are not packing a full micro-tile, then we must write to
-       ct and then accumulate to c afterwards. */ \
-    if ( mr != m || nr != n ) using_ct = TRUE; \
+	/* If we are not packing a full micro-tile, then we must write to
+	   ct and then accumulate to c afterwards. */ \
+	if ( mr != m || nr != n ) using_ct = TRUE; \
 \
 \
 	if ( using_ct ) \
@@ -159,8 +159,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-          mr_r, \
-          nr_r, \
+		  mr_r, \
+		  nr_r, \
 		  k2, \
 		  alpha_r, \
 		  a_r, \
@@ -227,8 +227,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
-          mr_r, \
-          nr_r, \
+		  mr_r, \
+		  nr_r, \
 		  k2, \
 		  alpha_r, \
 		  a_r, \

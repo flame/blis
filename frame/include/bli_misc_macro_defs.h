@@ -167,58 +167,70 @@ BLIS_INLINE void bli_toggle_bool( bool* b )
 // helper macros for gemm microkernels
 
 #define GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major) \
-PASTEMAC(ch,ctype)* restrict _beta   = beta; \
-PASTEMAC(ch,ctype)* restrict _c      = c; \
-const inc_t                  _rs_c   = rs_c; \
-const inc_t                  _cs_c   = cs_c; \
-PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,type) ) ] \
-	                            __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-const inc_t                  _rs_ct  = row_major ? nr :  1; \
-const inc_t                  _cs_ct  = row_major ?  1 : mr;
+\
+	PASTEMAC(ch,ctype)* restrict _beta   = beta; \
+	PASTEMAC(ch,ctype)* restrict _c      = c; \
+	const inc_t                  _rs_c   = rs_c; \
+	const inc_t                  _cs_c   = cs_c; \
+	PASTEMAC(ch,ctype)           _ct[ BLIS_STACK_BUF_MAX_SIZE / sizeof( PASTEMAC(ch,type) ) ] \
+		                            __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t                  _rs_ct  = row_major ? nr :  1; \
+	const inc_t                  _cs_ct  = row_major ?  1 : mr;
 
 #define GEMM_UKR_SETUP_CT_POST(ch) \
-PASTEMAC(ch,ctype) _zero; \
-PASTEMAC(ch,set0s)( _zero ); \
 \
-if ( _use_ct ) \
-{ \
-    c = _ct; \
-    rs_c = _rs_ct; \
-    cs_c = _cs_ct; \
-    beta = &_zero; \
-}
+	PASTEMAC(ch,ctype) _zero; \
+	PASTEMAC(ch,set0s)( _zero ); \
+	\
+	if ( _use_ct ) \
+	{ \
+		c = _ct; \
+		rs_c = _rs_ct; \
+		cs_c = _cs_ct; \
+		beta = &_zero; \
+	}
 
 #define GEMM_UKR_SETUP_CT(ch,mr,nr,row_major) \
-GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
-const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
-                     m != mr || n != nr; \
-GEMM_UKR_SETUP_CT_POST(ch);
+\
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
+						 m != mr || n != nr; \
+	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_AMBI(ch,mr,nr,row_major) \
-GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
-const bool _use_ct = ( cs_c != 1 && rs_c != 1 ) || \
-                     m != mr || n != nr; \
-GEMM_UKR_SETUP_CT_POST(ch);
+\
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	const bool _use_ct = ( cs_c != 1 && rs_c != 1 ) || \
+						 m != mr || n != nr; \
+	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_ANY(ch,mr,nr,row_major) \
-GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
-const bool _use_ct = m != mr || n != nr; \
-GEMM_UKR_SETUP_CT_POST(ch);
+\
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	const bool _use_ct = m != mr || n != nr; \
+	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_SETUP_CT_ALIGNED(ch,mr,nr,row_major,alignment) \
-GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
-const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
-                     m != mr || n != nr || \
-                     ( (uintptr_t)_c % alignment ) || \
-                     ( ( ( row_major ? _rs_c : _cs_c )*sizeof( PASTEMAC(ch,ctype) ) ) % alignment ); \
-GEMM_UKR_SETUP_CT_POST(ch);
+\
+	GEMM_UKR_SETUP_CT_PRE(ch,mr,nr,row_major); \
+	const bool _use_ct = ( row_major ? cs_c != 1 : rs_c != 1 ) || \
+						 m != mr || n != nr || \
+						 ( (uintptr_t)_c % alignment ) || \
+						 ( ( ( row_major ? _rs_c : _cs_c )*sizeof( PASTEMAC(ch,ctype) ) ) % alignment ); \
+	GEMM_UKR_SETUP_CT_POST(ch);
 
 #define GEMM_UKR_FLUSH_CT(ch) \
-if ( _use_ct ) \
-    PASTEMAC(ch,xpbys_mxn)( m, n, \
-                            _ct, _rs_ct, _cs_ct, \
-                            _beta, \
-                            _c, _rs_c,  _cs_c);
+\
+	if ( _use_ct ) \
+	{ \
+		PASTEMAC(ch,xpbys_mxn) \
+		( \
+		  m, n, \
+		  _ct, _rs_ct, _cs_ct, \
+		  _beta, \
+		  _c,  _rs_c,  _cs_c \
+		); \
+	} \
 
 
 #endif

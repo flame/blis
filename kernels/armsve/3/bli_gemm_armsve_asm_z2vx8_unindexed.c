@@ -48,7 +48,7 @@ void bli_zgemm_armsve_asm_2vx8_unindexed
      (
        dim_t               m,
        dim_t               n,
-       dim_t               k0,
+       dim_t               k,
        dcomplex*  restrict alpha,
        dcomplex*  restrict a,
        dcomplex*  restrict b,
@@ -63,8 +63,8 @@ void bli_zgemm_armsve_asm_2vx8_unindexed
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 6;
-  uint64_t k_left = k0 % 6;
+  uint64_t k_mker = k / 6;
+  uint64_t k_left = k % 6;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
