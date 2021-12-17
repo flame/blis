@@ -1337,19 +1337,19 @@ void bli_ddotxf_zen_int_2
 			rhov[7].v = _mm256_fmadd_pd(avec[7].v, xv[3].v, rhov[7].v);
 
 			// Load the input values.
-			xv[0].v = _mm256_loadu_pd(x0 + 0 * n_elem_per_reg);
-			xv[1].v = _mm256_loadu_pd(x0 + 1 * n_elem_per_reg);
-			xv[2].v = _mm256_loadu_pd(x0 + 2 * n_elem_per_reg);
-			xv[3].v = _mm256_loadu_pd(x0 + 3 * n_elem_per_reg);
+			xv[0].v = _mm256_loadu_pd(x0 + 4 * n_elem_per_reg);
+			xv[1].v = _mm256_loadu_pd(x0 + 5 * n_elem_per_reg);
+			xv[2].v = _mm256_loadu_pd(x0 + 6 * n_elem_per_reg);
+			xv[3].v = _mm256_loadu_pd(x0 + 7 * n_elem_per_reg);
 
-			avec[0].v = _mm256_loadu_pd(av[0] + 0 * n_elem_per_reg);
-			avec[1].v = _mm256_loadu_pd(av[1] + 0 * n_elem_per_reg);
-			avec[2].v = _mm256_loadu_pd(av[0] + 1 * n_elem_per_reg);
-			avec[3].v = _mm256_loadu_pd(av[1] + 1 * n_elem_per_reg);
-			avec[4].v = _mm256_loadu_pd(av[0] + 2 * n_elem_per_reg);
-			avec[5].v = _mm256_loadu_pd(av[1] + 2 * n_elem_per_reg);
-			avec[6].v = _mm256_loadu_pd(av[0] + 3 * n_elem_per_reg);
-			avec[7].v = _mm256_loadu_pd(av[1] + 3 * n_elem_per_reg);
+			avec[0].v = _mm256_loadu_pd(av[0] + 4 * n_elem_per_reg);
+			avec[1].v = _mm256_loadu_pd(av[1] + 4 * n_elem_per_reg);
+			avec[2].v = _mm256_loadu_pd(av[0] + 5 * n_elem_per_reg);
+			avec[3].v = _mm256_loadu_pd(av[1] + 5 * n_elem_per_reg);
+			avec[4].v = _mm256_loadu_pd(av[0] + 6 * n_elem_per_reg);
+			avec[5].v = _mm256_loadu_pd(av[1] + 6 * n_elem_per_reg);
+			avec[6].v = _mm256_loadu_pd(av[0] + 7 * n_elem_per_reg);
+			avec[7].v = _mm256_loadu_pd(av[1] + 7 * n_elem_per_reg);
 
 			// perform: rho?v += a?v * x0v;
 			rhov[0].v = _mm256_fmadd_pd(avec[0].v, xv[0].v, rhov[0].v);
