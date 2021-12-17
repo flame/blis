@@ -218,9 +218,15 @@ void PASTEMAC(ch,varname) \
 
 #ifdef BLIS_CONFIG_EPYC
 
-void post_hemv_8x8(double *a, double *x,
-		double *y, double *alpha,
-		dim_t cs_a, dim_t rs_a);
+void bli_post_hemv_8x8
+     (
+       double *a,
+       double *x,
+       double *y,
+       double *alpha,
+       dim_t cs_a,
+       dim_t rs_a
+     );
 
 void bli_dhemv_unf_var1
      (

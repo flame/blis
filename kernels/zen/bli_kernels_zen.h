@@ -32,16 +32,6 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-// hemv helper function
-void bli_pre_hemv_8x8(double *a, double *x,
-               double *y, double *alpha,
-               dim_t cs_a, dim_t rs_a);
-
-void bli_post_hemv_8x8(double *a, double *x,
-               double *y, double *alpha,
-               dim_t cs_a, dim_t rs_a);
-
-
 // -- level-1m --
 PACKM_KER_PROT(double, d, packm_8xk_gen_zen)
 PACKM_KER_PROT(double, d, packm_6xk_gen_zen)
