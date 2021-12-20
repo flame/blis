@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -177,6 +177,18 @@ void bli_gemm_front
 	dim_t m_dim_local = bli_obj_length( &c_local );
 	dim_t n_dim_local = bli_obj_width( &c_local );
 	dim_t k_dim_local = bli_obj_width( &a_local );
+	
+	// Regression observed in sgemm native path in cases where m >= 4 * n 
+	// after BLIS_THREAD_RATIO_M updated from 2 to 1 as part of commit 
+	// 11dfc176a3c422729f453f6c23204cf023e9954d. Temporary workaround for
+	// the issue.
+	if( bli_obj_is_float( &c_local ) &&
+	    ( n_dim_local >= 1024 ) &&
+	    ( k_dim_local >= 1024 ) &&
+	    ( m_dim_local >= ( 4 * n_dim_local ) ) )
+	{
+		m_dim_local *= 2;
+	}
 	
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any

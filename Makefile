@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -211,6 +211,27 @@ MK_REFKERN_OBJS     := $(foreach arch, $(CONFIG_LIST), \
 
 # Generate object file paths for all of the portable framework source code.
 MK_FRAME_OBJS       := $(call gen-obj-paths-from-src,$(FRAME_SRC_SUFS),$(MK_FRAME_SRC),$(FRAME_PATH),$(BASE_OBJ_FRAME_PATH))
+
+# AMD has optimized some of the framework files, these optimizations
+# may not be compatible with other platforms.
+#
+# In order to keep main framework code independent of AMD changes,
+# AMD has duplicated the files and updated them for example
+# frame/compact/bla_gemm.c : generic framework file
+# frame/compact/bla_gemm_amd.c : AMD optimized framework file
+# Based on the archiecture we choose correct files
+
+ifeq ($(MK_IS_ARCH_ZEN),yes)
+# Build is being done for AMD platforms, remove the objects which
+# don't have amd suffix (for which exists AMD specific implementation).
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+FILES_TO_REMOVE := $(subst _amd.o,.o, $(MK_FRAME_AMD_OBJS))
+MK_FRAME_OBJS := $(filter-out $(FILES_TO_REMOVE), $(MK_FRAME_OBJS))
+else
+# Build is done for non AMD platforms, remove the amd specific objects
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+MK_FRAME_OBJS := $(filter-out $(MK_FRAME_AMD_OBJS), $(MK_FRAME_OBJS))
+endif
 
 # Generate object file paths for all of the debgu and trace logger.
 MK_AOCLDTL_OBJS       := $(call gen-obj-paths-from-src,$(AOCLDTL_SRC_SUFS),$(MK_AOCLDTL_SRC),$(AOCLDTL_PATH),$(BASE_OBJ_AOCLDTL_PATH))
@@ -1338,4 +1359,3 @@ else
 	@echo "Uninstalling $(@F) from $(@D)/"
 	@- $(RM_F) $@
 endif
-

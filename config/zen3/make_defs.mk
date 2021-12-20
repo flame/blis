@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -50,15 +50,7 @@ THIS_CONFIG    := zen3
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 
-# Since we removed BLIS_CONFIG_EPYC from header file, we need to
-# add it here at two places,
-#     CPPROCFLAGS = This will enable it for framework code
-#                   This flag is used when configure is invoked with specific architecture
-#     CKOPTFLAGS  = This will enable it for architecture specific kernels
-#                   This flag is used for kernels assocaited with this architecture
-#                   irrespective of the configuration it is built for.
-
-CPPROCFLAGS    := -DBLIS_CONFIG_EPYC
+CPPROCFLAGS    :=
 CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     :=
@@ -131,10 +123,6 @@ endif # gcc
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 CRVECFLAGS     := $(CKVECFLAGS)
-
-# Add this after updating variables for reference kernels
-# we don't want this defined for them
-CKOPTFLAGS += -DBLIS_CONFIG_EPYC
 
 # Store all of the variables here to new variables containing the
 # configuration name.

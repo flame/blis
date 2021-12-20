@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -95,29 +95,6 @@ void bli_caxpyf_zen_int_4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-        for ( i = 0; i < b_n; ++i )
-        {
-            scomplex* a1   = a + (0  )*inca + (i  )*lda;
-            scomplex* chi1 = x + (i  )*incx;
-            scomplex* y1   = y + (0  )*incy;
-            scomplex  alpha_chi1;
-
-            bli_ccopycjs( conjx, *chi1, alpha_chi1 );
-            bli_cscals( *alpha, alpha_chi1 );
-
-            bli_caxpyv_zen_int5
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-
-#else
         caxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -141,7 +118,6 @@ void bli_caxpyf_zen_int_4
             );
         }
 
-#endif
         return;
     }
 
@@ -357,28 +333,6 @@ void bli_zaxpyf_zen_int_4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-        for ( i = 0; i < b_n; ++i )
-        {
-            dcomplex* a1   = a + (0  )*inca + (i  )*lda;
-            dcomplex* chi1 = x + (i  )*incx;
-            dcomplex* y1   = y + (0  )*incy;
-            dcomplex  alpha_chi1;
-
-            bli_zcopycjs( conjx, *chi1, alpha_chi1 );
-            bli_zscals( *alpha, alpha_chi1 );
-
-            bli_zaxpyv_zen_int5
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-#else
         zaxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DCOMPLEX, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -402,7 +356,6 @@ void bli_zaxpyf_zen_int_4
             );
         }
 
-#endif
         return;
     }
 

@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -3370,6 +3370,7 @@ main()
 		| sed -e "s/@enable_aocl_dynamic@/${enable_aocl_dynamic}/g" \
 		| sed -e "s/@complex_return@/${complex_return}/g" \
 		| sed -e "s/@blas_int_type_size@/${blas_int_type_size}/g" \
+		| sed   -e "s/\@enable_aocl_zen\@/${enable_aocl_zen}/g" \
 		> "${config_mk_out_path}"
 
 

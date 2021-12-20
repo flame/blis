@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+#  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -46,24 +46,11 @@ AMD_CONFIG_FILE := amd_config.mk
 AMD_CONFIG_PATH := $(BASE_SHARE_PATH)/config/zen
 -include $(AMD_CONFIG_PATH)/$(AMD_CONFIG_FILE)
 
-
-# Since we removed BLIS_CONFIG_EPYC from header file, we need to
-# add it here at two places,
-#     CPPROCFLAGS = This will enable it for framework code
-#                   This flag is used when configure is invoked with specific architecture
-#     CKOPTFLAGS  = This will enable it for architecture specific kernels
-#                   This flag is used for kernels assocaited with this architecture
-#                   irrespective of the configuration it is built for.
-
-CPPROCFLAGS    := -DBLIS_CONFIG_EPYC
-
-
 ifeq ($(DEBUG_TYPE),noopt)
 COPTFLAGS      := -O0
 else
 COPTFLAGS      := -O3
 endif
-
 
 #
 # --- Enable ETRACE across the library if enabled ETRACE_ENABLE=[0,1] -----------------------
@@ -85,10 +72,6 @@ CRVECFLAGS     := $(CKVECFLAGS) -funsafe-math-optimizations
 else
 CRVECFLAGS     := $(CKVECFLAGS)
 endif
-
-# Add this after updating variables for reference kernels
-# we don't want this defined for them
-CKOPTFLAGS += -DBLIS_CONFIG_EPYC
 
 # Store all of the variables here to new variables containing the
 # configuration name.

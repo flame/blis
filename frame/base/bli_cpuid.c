@@ -501,6 +501,25 @@ bool bli_cpuid_is_bulldozer
 	return TRUE;
 }
 
+bool bli_cpuid_is_avx_supported( void )
+{
+	uint32_t family, model, features;
+
+	// Call the CPUID instruction and parse its results into a family id,
+	// model id, and a feature bit field. The return value encodes the
+	// vendor.
+	bli_cpuid_query( &family, &model, &features );
+
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX     |
+	                          FEATURE_FMA3    |
+	                          FEATURE_AVX2;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	return TRUE;
+}
+
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
 arch_t bli_cpuid_query_id( void )

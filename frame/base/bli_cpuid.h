@@ -133,7 +133,7 @@ BLIS_INLINE bool bli_cpuid_has_features( uint32_t have, uint32_t want )
 
 void get_cpu_name( char *cpu_name );
 int  vpu_count( void );
-
+bool bli_cpuid_is_avx_supported(void);
 
 enum
 {
@@ -159,6 +159,8 @@ enum
 	FEATURE_AVX512BW = 0x2000,
 	FEATURE_AVX512VL = 0x4000
 };
+
+
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
