@@ -4,11 +4,7 @@
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
-<<<<<<< HEAD
 #  Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
-=======
-#  Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
->>>>>>> 06113811... Added support for zen4 architecture
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -53,19 +49,7 @@ THIS_CONFIG    := zen4
 # general-purpose/configuration-agnostic flags in common.mk. You
 # may specify additional flags here as needed.
 
-<<<<<<< HEAD
 CPPROCFLAGS    :=
-=======
-# Since we removed BLIS_CONFIG_EPYC from header file, we need to
-# add it here at two places,
-#     CPPROCFLAGS = This will enable it for framework code
-#                   This flag is used when configure is invoked with specific architecture
-#     CKOPTFLAGS  = This will enable it for architecture specific kernels
-#                   This flag is used for kernels assocaited with this architecture
-#                   irrespective of the configuration it is built for.
-
-CPPROCFLAGS    := -DBLIS_CONFIG_EPYC
->>>>>>> 06113811... Added support for zen4 architecture
 CMISCFLAGS     :=
 CPICFLAGS      :=
 CWARNFLAGS     :=
@@ -139,13 +123,6 @@ endif # gcc
 CROPTFLAGS     := $(CKOPTFLAGS)
 CRVECFLAGS     := $(CKVECFLAGS)
 
-<<<<<<< HEAD
-=======
-# Add this after updating variables for reference kernels
-# we don't want this defined for them
-CKOPTFLAGS += -DBLIS_CONFIG_EPYC
-
->>>>>>> 06113811... Added support for zen4 architecture
 # Store all of the variables here to new variables containing the
 # configuration name.
 $(eval $(call store-make-defs,$(THIS_CONFIG)))

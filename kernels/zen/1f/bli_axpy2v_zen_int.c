@@ -186,7 +186,6 @@ void bli_daxpy2v_zen_int
 		);
 	}
 }
-<<<<<<< HEAD
 
 /**
  * zaxpy2v kernel performs axpy2v operation.
@@ -720,5 +719,3 @@ void bli_zaxpy2v_zen_int
     }
     AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_4)
 }
-=======
->>>>>>> 8b5b2707... Optimized daxpy2v implementation
