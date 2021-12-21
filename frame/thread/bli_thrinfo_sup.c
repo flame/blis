@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -167,8 +167,23 @@ thrinfo_t* bli_thrinfo_sup_create_for_cntl
 
 	thrcomm_t*  static_comms[ BLIS_NUM_STATIC_COMMS ];
 	thrcomm_t** new_comms = NULL;
+	
+	const bool packa = bli_rntm_pack_a( rntm );
+	const bool packb = bli_rntm_pack_b( rntm );
+	dim_t parent_nt_in = 0;
 
-	const dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
+	// thrinfo ocomm is not created when neither packa nor packb is
+	// enabled. Need to derive parent_nt_in without depending on ocomm in
+	// those cases.
+	if ( packa || packb )
+	{	
+		parent_nt_in   = bli_thread_num_threads( thread_par );
+	}
+	else
+	{
+		parent_nt_in   = bli_rntm_calc_num_threads_in( bszid_par, rntm );
+	}
+
 	const dim_t parent_n_way   = bli_thread_n_way( thread_par );
 	const dim_t parent_comm_id = bli_thread_ocomm_id( thread_par );
 	const dim_t parent_work_id = bli_thread_work_id( thread_par );
@@ -193,50 +208,75 @@ thrinfo_t* bli_thrinfo_sup_create_for_cntl
 
 //printf( "thread %d: child_n_way = %d child_nt_in = %d parent_n_way = %d (bszid = %d->%d)\n", (int)child_comm_id, (int)child_nt_in, (int)child_n_way, (int)parent_n_way, (int)bli_cntl_bszid( cntl_par ), (int)bszid_chl );
 
-	// The parent's chief thread creates a temporary array of thrcomm_t
-	// pointers.
-	if ( bli_thread_am_ochief( thread_par ) )
+	thrinfo_t* thread_chl = NULL;
+
+	// The communicators are only used when either packa or packb is
+	// enabled. This means that the communicator creation along with the
+	// overhead from the barriers (required for synchronizing comm across
+	// threads) are not required when both packa and packb are disabled.
+	if ( packa || packb )
 	{
-		if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
-			new_comms = bli_malloc_intl( parent_n_way * sizeof( thrcomm_t* ) );
-		else
-			new_comms = static_comms;
+		// The parent's chief thread creates a temporary array of thrcomm_t
+		// pointers.
+		if ( bli_thread_am_ochief( thread_par ) )
+		{
+			if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
+				new_comms = bli_malloc_intl( parent_n_way * sizeof( thrcomm_t* ) );
+			else
+				new_comms = static_comms;
+		}
+
+		// Broadcast the temporary array to all threads in the parent's
+		// communicator.
+		new_comms = bli_thread_broadcast( thread_par, new_comms );
+
+		// Chiefs in the child communicator allocate the communicator
+		// object and store it in the array element corresponding to the
+		// parent's work id.
+		if ( child_comm_id == 0 )
+			new_comms[ parent_work_id ] = bli_thrcomm_create( rntm, child_nt_in );
+
+		bli_thread_barrier( thread_par );
+
+		// All threads create a new thrinfo_t node using the communicator
+		// that was created by their chief, as identified by parent_work_id.
+		thread_chl = bli_thrinfo_create
+		(
+		  rntm,                        // rntm
+		  new_comms[ parent_work_id ], // ocomm
+		  child_comm_id,               // ocomm_id
+		  child_n_way,                 // n_way
+		  child_work_id,               // work_id
+		  TRUE,                        // free_comm
+		  *bszid_chl,                  // bszid
+		  NULL                         // sub_node
+		);
+
+		bli_thread_barrier( thread_par );
+
+		// The parent's chief thread frees the temporary array of thrcomm_t
+		// pointers.
+		if ( bli_thread_am_ochief( thread_par ) )
+		{
+			if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
+				bli_free_intl( new_comms );
+		}
 	}
-
-	// Broadcast the temporary array to all threads in the parent's
-	// communicator.
-	new_comms = bli_thread_broadcast( thread_par, new_comms );
-
-	// Chiefs in the child communicator allocate the communicator
-	// object and store it in the array element corresponding to the
-	// parent's work id.
-	if ( child_comm_id == 0 )
-		new_comms[ parent_work_id ] = bli_thrcomm_create( rntm, child_nt_in );
-
-	bli_thread_barrier( thread_par );
-
-	// All threads create a new thrinfo_t node using the communicator
-	// that was created by their chief, as identified by parent_work_id.
-	thrinfo_t* thread_chl = bli_thrinfo_create
-	(
-	  rntm,                        // rntm
-	  new_comms[ parent_work_id ], // ocomm
-	  child_comm_id,               // ocomm_id
-	  child_n_way,                 // n_way
-	  child_work_id,               // work_id
-	  TRUE,                        // free_comm
-	  *bszid_chl,                  // bszid
-	  NULL                         // sub_node
-	);
-
-	bli_thread_barrier( thread_par );
-
-	// The parent's chief thread frees the temporary array of thrcomm_t
-	// pointers.
-	if ( bli_thread_am_ochief( thread_par ) )
+	else
 	{
-		if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
-			bli_free_intl( new_comms );
+		// No communicator is reqiured in cases where neither packa nor
+		// packb is enabled.
+		thread_chl = bli_thrinfo_create
+		(
+		  rntm,                        // rntm
+		  NULL,                        // ocomm
+		  child_comm_id,               // ocomm_id
+		  child_n_way,                 // n_way
+		  child_work_id,               // work_id
+		  FALSE,                        // free_comm
+		  *bszid_chl,                  // bszid
+		  NULL                         // sub_node
+		);
 	}
 
 	return thread_chl;
