@@ -57,6 +57,16 @@ AXPBYV_KER_PROT( dcomplex, z, axpbyv_zen_int )
 AXPBYV_KER_PROT( float,    s, axpbyv_zen_int10 )
 AXPBYV_KER_PROT( double,   d, axpbyv_zen_int10 )
 
+// axpbyv (intrinsics)
+AXPBYV_KER_PROT( float,    s, axpbyv_zen_int )
+AXPBYV_KER_PROT( double,   d, axpbyv_zen_int )
+AXPBYV_KER_PROT( scomplex, c, axpbyv_zen_int )
+AXPBYV_KER_PROT( dcomplex, z, axpbyv_zen_int )
+
+// axpbyv (intrinsics, unrolled x10)
+AXPBYV_KER_PROT( float,    s, axpbyv_zen_int10 )
+AXPBYV_KER_PROT( double,   d, axpbyv_zen_int10 )
+
 // axpyv (intrinsics)
 AXPYV_KER_PROT( float,    s, axpyv_zen_int )
 AXPYV_KER_PROT( double,   d, axpyv_zen_int )
