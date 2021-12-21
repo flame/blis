@@ -124,7 +124,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else                                                    using_ct = FALSE; \
 \
 \
-	/* If we are not packing a full micro-tile, then we must write to
+	/* If we are not computing a full micro-tile, then we must write to
 	   ct and then accumulate to c afterwards. */ \
 	if ( mr != m || nr != n ) using_ct = TRUE; \
 \

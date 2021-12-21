@@ -114,6 +114,6 @@ void* bli_packm_alloc_ex
 		bli_thread_barrier( thread );
 	}
 
-    return bli_mem_buffer( cntl_mem_p );
+	return bli_mem_buffer( cntl_mem_p );
 }
 
