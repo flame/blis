@@ -69,11 +69,11 @@ def remove_lines_in_file(filename):
         file_content = fd.read()
     file_content = file_content.replace(
         'if(${TARGET_ARCH} STREQUAL amdzen)\n'
-        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/generic'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/generic '
         '${CMAKE_BINARY_DIR}/ref_kernels/generic)\n'
-        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen '
         '${CMAKE_BINARY_DIR}/ref_kernels/zen)\n'
-        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen2'
+        'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen2 '
         '${CMAKE_BINARY_DIR}/ref_kernels/zen2)\n'
         'add_subdirectory(${CMAKE_BINARY_DIR}/ref_kernels/zen3 '
         '${CMAKE_BINARY_DIR}/ref_kernels/zen3)\n'
@@ -115,6 +115,7 @@ if __name__ == '__main__':
     create_folder(os.path.join(dest_path, 'zen'))
     create_folder(os.path.join(dest_path, 'zen2'))
     create_folder(os.path.join(dest_path, 'zen3'))
+    create_folder(os.path.join(dest_path, 'zen4'))
     create_folder(os.path.join(dest_path, 'generic'))
     execute_and_check('XCOPY {} {} /E'.format(
         temp, os.path.join(dest_path, 'zen')))
@@ -122,6 +123,8 @@ if __name__ == '__main__':
         temp, os.path.join(dest_path, 'zen2')))
     execute_and_check('XCOPY {} {} /E'.format(
         temp, os.path.join(dest_path, 'zen3')))
+    execute_and_check('XCOPY {} {} /E'.format(
+        temp, os.path.join(dest_path, 'zen4')))
     execute_and_check('XCOPY {} {} /E'.format(
         temp, os.path.join(dest_path, 'generic')))
     remove_folder(temp)
@@ -133,6 +136,8 @@ if __name__ == '__main__':
         dest_path, 'zen2', 'CMakeLists.txt'))
     remove_lines_in_file(os.path.join(
         dest_path, 'zen3', 'CMakeLists.txt'))
+    remove_lines_in_file(os.path.join(
+        dest_path, 'zen4', 'CMakeLists.txt'))
     cfiles_in_generic = execute_and_check('cd {} && dir / s / b / o: gn *.c'
                                           .format(os.path.join(dest_path,
                                                                'generic')))
@@ -140,20 +145,22 @@ if __name__ == '__main__':
     add_macro_to_cfiles(cfiles_in_generic,
                         '\n#define BLIS_CNAME_INFIX _generic\n')
     cfiles_in_zen = execute_and_check('cd {} && dir / s / b / o: gn *.c'
-                                          .format(os.path.join(dest_path,
-                                                               'zen')))
+                                      .format(os.path.join(dest_path, 'zen')))
     cfiles_in_zen = cfiles_in_zen.split('\r\n')
     add_macro_to_cfiles(cfiles_in_zen,
                         '\n#define BLIS_CNAME_INFIX _zen\n')
     cfiles_in_zen2 = execute_and_check('cd {} && dir / s / b / o: gn *.c'
-                                          .format(os.path.join(dest_path,
-                                                               'zen2')))
+                                       .format(os.path.join(dest_path, 'zen2')))
     cfiles_in_zen2 = cfiles_in_zen2.split('\r\n')
     add_macro_to_cfiles(cfiles_in_zen2,
                         '\n#define BLIS_CNAME_INFIX _zen2\n')
     cfiles_in_zen3 = execute_and_check('cd {} && dir / s / b / o: gn *.c'
-                                          .format(os.path.join(dest_path,
-                                                               'zen3')))
+                                       .format(os.path.join(dest_path, 'zen3')))
     cfiles_in_zen3 = cfiles_in_zen3.split('\r\n')
     add_macro_to_cfiles(cfiles_in_zen3,
                         '\n#define BLIS_CNAME_INFIX _zen3\n')
+    cfiles_in_zen4 = execute_and_check('cd {} && dir / s / b / o: gn *.c'
+                                       .format(os.path.join(dest_path, 'zen4')))
+    cfiles_in_zen4 = cfiles_in_zen4.split('\r\n')
+    add_macro_to_cfiles(cfiles_in_zen4,
+                        '\n#define BLIS_CNAME_INFIX _zen4\n')

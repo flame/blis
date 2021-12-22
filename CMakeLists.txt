@@ -10,8 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 
 SET(AOCL_BLIS_FAMILY "zen" CACHE STRING "AOCL BLIS family name")
-SET(OPENMP_PATH "C:\\Program Files\\LLVM\\lib" CACHE STRING "openmp library
-path")
+SET(OMP_LIB "C:\\Program Files\\LLVM\\lib\\libomp.lib" CACHE STRING "openmp library path")
 set(TARGET_ARCH ${AOCL_BLIS_FAMILY})
 set(AOCL_BLIS_ZEN TRUE)
 set (PYTHON_EXE "python")
@@ -542,15 +541,14 @@ file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
 add_definitions(-DBLIS_VERSION_STRING="AOCL BLIS ${BLIS_VERSION_STRING}")
 
-message( STATUS "OPENMP PATH:" ${OPENMP_PATH})
-link_directories("${OPENMP_PATH}")
+message( STATUS "OPENMP Library:" ${OMP_LIB})
 
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     if(ENABLE_OPENMP)
-        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OPENMP_PATH}/libomp.lib")
+        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OMP_LIB}")
     endif()
     target_compile_definitions("${PROJECT_NAME}" PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
@@ -560,9 +558,10 @@ if(NOT BUILD_SHARED_LIBS)
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     if(ENABLE_OPENMP)
-        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OPENMP_PATH}/libomp.lib")
+        set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OMP_LIB}")
+    else()
+    	set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
     endif()
-    set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
 endif()
 
 link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
