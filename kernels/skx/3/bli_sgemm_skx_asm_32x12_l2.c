@@ -317,24 +317,28 @@ ahead*/
 static int64_t offsets[16] __attribute__((aligned(64))) =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15};
 
-void bli_sgemm_skx_asm_32x12_l2(
-                             dim_t            k_,
-                             float* restrict alpha,
-                             float* restrict a,
-                             float* restrict b,
-                             float* restrict beta,
-                             float* restrict c, inc_t rs_c_, inc_t cs_c_,
-                             auxinfo_t*       data,
-                             cntx_t* restrict cntx
-                           )
+void bli_sgemm_skx_asm_32x12_l2
+     (
+       dim_t            m,
+       dim_t            n,
+       dim_t            k_,
+       float* restrict alpha,
+       float* restrict a,
+       float* restrict b,
+       float* restrict beta,
+       float* restrict c, inc_t rs_c_, inc_t cs_c_,
+       auxinfo_t*       data,
+       cntx_t* restrict cntx
+     )
 {
     (void)data;
     (void)cntx;
 
-    const int64_t* offsetPtr = &offsets[0];
-    const int64_t k = k_;
-    const int64_t rs_c = rs_c_;
-    const int64_t cs_c = cs_c_;
+    int64_t k = k_;
+    int64_t rs_c = rs_c_;
+    int64_t cs_c = cs_c_;
+
+    GEMM_UKR_SETUP_CT( s, 32, 12, false );
 
     BEGIN_ASM()
 
@@ -381,7 +385,7 @@ void bli_sgemm_skx_asm_32x12_l2(
 #endif
 
 #ifdef PREFETCH_B_BEFORE
-	/* Prefetching 3 cachlines of B (4 iterations worth of data
+    /* Prefetching 3 cachlines of B (4 iterations worth of data
        (12 (NR) x 4 (sizeof(float)) x 4 iter /64 = 3 cachelines) */
     PREFETCH(0, MEM(RBX,0*64))
     PREFETCH(0, MEM(RBX,1*64))
@@ -485,66 +489,26 @@ void bli_sgemm_skx_asm_32x12_l2(
 
     MOV(RAX, VAR(cs_c))
     LEA(RAX, MEM(,RAX,4))
-    MOV(RBX, VAR(rs_c))
-    LEA(RBX, MEM(,RBX,4))
 
+    VCOMISS(XMM(1), XMM(7))
+    JE(COLSTORBZ)
 
-    // Check if C is column major (rs_c = 1). If not, jump to the slow scattered update
-    CMP(RBX, IMM(4))
-    JNE(SCATTEREDUPDATE)
-
-        VCOMISS(XMM(1), XMM(7))
-        JE(COLSTORBZ)
-
-            UPDATE_C( 8, 9,10,11)
-            UPDATE_C(12,13,14,15)
-            UPDATE_C(16,17,18,19)
-            UPDATE_C(20,21,22,23)
-            UPDATE_C(24,25,26,27)
-            UPDATE_C(28,29,30,31)
-
-        JMP(END)
-        LABEL(COLSTORBZ)
-
-            UPDATE_C_BZ( 8, 9,10,11)
-            UPDATE_C_BZ(12,13,14,15)
-            UPDATE_C_BZ(16,17,18,19)
-            UPDATE_C_BZ(20,21,22,23)
-            UPDATE_C_BZ(24,25,26,27)
-            UPDATE_C_BZ(28,29,30,31)
+        UPDATE_C( 8, 9,10,11)
+        UPDATE_C(12,13,14,15)
+        UPDATE_C(16,17,18,19)
+        UPDATE_C(20,21,22,23)
+        UPDATE_C(24,25,26,27)
+        UPDATE_C(28,29,30,31)
 
     JMP(END)
-    LABEL(SCATTEREDUPDATE)
+    LABEL(COLSTORBZ)
 
-        LEA(RDX, MEM(RCX,RBX,8))
-        LEA(RDX, MEM(RDX,RBX,8))
-
-        MOV(RDI, VAR(offsetPtr))
-        VMOVDQA64(ZMM(2), MEM(RDI,0*64))
-        VMOVDQA64(ZMM(3), MEM(RDI,1*64))
-        VPBROADCASTQ(ZMM(6), RBX)
-        VPMULLQ(ZMM(2), ZMM(6), ZMM(2))
-        VPMULLQ(ZMM(3), ZMM(6), ZMM(3))
-
-        VCOMISS(XMM(1), XMM(7))
-        JE(SCATTERBZ)
-
-            UPDATE_C_ROW_SCATTERED( 8, 9,10,11)
-            UPDATE_C_ROW_SCATTERED(12,13,14,15)
-            UPDATE_C_ROW_SCATTERED(16,17,18,19)
-            UPDATE_C_ROW_SCATTERED(20,21,22,23)
-            UPDATE_C_ROW_SCATTERED(24,25,26,27)
-            UPDATE_C_ROW_SCATTERED(28,29,30,31)
-
-        JMP(END)
-        LABEL(SCATTERBZ)
-
-            UPDATE_C_BZ_ROW_SCATTERED( 8, 9,10,11)
-            UPDATE_C_BZ_ROW_SCATTERED(12,13,14,15)
-            UPDATE_C_BZ_ROW_SCATTERED(16,17,18,19)
-            UPDATE_C_BZ_ROW_SCATTERED(20,21,22,23)
-            UPDATE_C_BZ_ROW_SCATTERED(24,25,26,27)
-            UPDATE_C_BZ_ROW_SCATTERED(28,29,30,31)
+        UPDATE_C_BZ( 8, 9,10,11)
+        UPDATE_C_BZ(12,13,14,15)
+        UPDATE_C_BZ(16,17,18,19)
+        UPDATE_C_BZ(20,21,22,23)
+        UPDATE_C_BZ(24,25,26,27)
+        UPDATE_C_BZ(28,29,30,31)
 
     LABEL(END)
 
@@ -560,8 +524,7 @@ void bli_sgemm_skx_asm_32x12_l2(
       [beta]      "m" (beta),
       [c]         "m" (c),
       [rs_c]      "m" (rs_c),
-      [cs_c]      "m" (cs_c),
-      [offsetPtr] "m" (offsetPtr)
+      [cs_c]      "m" (cs_c)
     : // register clobber list
       "rax", "rbx", "rcx", "rdx", "rdi", "rsi", "r8", "r9", "r10", "r11", "r12",
       "r13", "r14", "r15", "zmm0", "zmm1", "zmm2", "zmm3", "zmm4", "zmm5",
@@ -570,4 +533,6 @@ void bli_sgemm_skx_asm_32x12_l2(
       "zmm22", "zmm23", "zmm24", "zmm25", "zmm26", "zmm27", "zmm28", "zmm29",
       "zmm30", "zmm31", "memory"
     )
+
+    GEMM_UKR_FLUSH_CT( s );
 }

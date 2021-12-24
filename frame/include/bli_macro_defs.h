@@ -98,6 +98,7 @@
 #include "bli_gentprot_macro_defs.h"
 
 #include "bli_misc_macro_defs.h"
+#include "bli_edge_case_macro_defs.h"
 #include "bli_param_macro_defs.h"
 #include "bli_obj_macro_defs.h"
 #include "bli_complex_macro_defs.h"

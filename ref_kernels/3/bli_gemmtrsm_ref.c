@@ -52,6 +52,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
+	const inc_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
+	const inc_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
 	const inc_t     rs_b   = packnr; \
@@ -68,6 +70,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
 	gemm_ukr \
 	( \
+	  mr, \
+	  nr, \
 	  k, \
 	  minus_one, \
 	  a1x, \
