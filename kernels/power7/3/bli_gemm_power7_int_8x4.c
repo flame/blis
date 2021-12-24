@@ -50,32 +50,28 @@
  */
 void bli_sgemm_power7_int_8x4
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        float*     restrict alpha,
        float*     restrict a,
        float*     restrict b,
        float*     restrict beta,
-       float*     restrict c, inc_t rs_c0, inc_t cs_c0,
+       float*     restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k      = k0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_S, NR = BLIS_DEFAULT_NR_S;
     const long LDA = MR, LDB = NR;
     long i, j, kk;
     float c00;
 
-    for (i=0; i < MR; i++) {
-        for (j=0; j < NR; j++) {
+    for (i=0; i < m; i++) {
+        for (j=0; j < n; j++) {
             c00 = c[BLIS_INDEX(i,j,rs_c,cs_c)] * *beta;
-            for (kk=0; kk < k; kk++) 
+            for (kk=0; kk < k; kk++)
                 c00 += *alpha * (a[COLMAJ_INDEX(i,kk,LDA)] * b[ROWMAJ_INDEX(kk,j,LDB)]);
             c[BLIS_INDEX(i,j,rs_c,cs_c)] = c00;
         }
@@ -96,24 +92,160 @@ void bli_sgemm_power7_int_8x4
  */
 void bli_dgemm_power7_int_8x4
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        double*    restrict alpha,
        double*    restrict a,
        double*    restrict b,
        double*    restrict beta,
-       double*    restrict c, inc_t rs_c0, inc_t cs_c0,
+       double*    restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k      = k0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
+    if ( cs_c == 1 )
+    {
+        // Optimized code for case where C rows are contiguous (i.e. C is row-major)
 
-#if 1
-    if (rs_c == 1) {
+        vector double vzero = vec_splats( 0.0 );
+
+        vector double vc00_01 = vzero;
+        vector double vc02_03 = vzero;
+        vector double vc10_11 = vzero;
+        vector double vc12_13 = vzero;
+        vector double vc20_21 = vzero;
+        vector double vc22_23 = vzero;
+        vector double vc30_31 = vzero;
+        vector double vc32_33 = vzero;
+        vector double vc40_41 = vzero;
+        vector double vc42_43 = vzero;
+        vector double vc50_51 = vzero;
+        vector double vc52_53 = vzero;
+        vector double vc60_61 = vzero;
+        vector double vc62_63 = vzero;
+        vector double vc70_71 = vzero;
+        vector double vc72_73 = vzero;
+
+        unsigned long long pa = (unsigned long long)a;
+        unsigned long long pb = (unsigned long long)b;
+
+#if 0
+        unsigned long long d1 = 1*sizeof(double);
+        unsigned long long d2 = 2*sizeof(double);
+        unsigned long long d3 = 3*sizeof(double);
+        unsigned long long d4 = 4*sizeof(double);
+        unsigned long long d6 = 6*sizeof(double);
+#else
+        // ppc64 linux abi: r14-r31   Nonvolatile registers used for local variables
+        register unsigned long long d1 __asm ("r21") = 1*sizeof(double);
+        register unsigned long long d2 __asm ("r22") = 2*sizeof(double);
+        register unsigned long long d3 __asm ("r23") = 3*sizeof(double);
+        register unsigned long long d4 __asm ("r24") = 4*sizeof(double);
+        register unsigned long long d5 __asm ("r25") = 5*sizeof(double);
+        register unsigned long long d6 __asm ("r26") = 6*sizeof(double);
+        register unsigned long long d7 __asm ("r27") = 7*sizeof(double);
+
+        __asm__ volatile (";" : "=r" (d1) : "r" (d1) );
+        __asm__ volatile (";" : "=r" (d2) : "r" (d2) );
+        __asm__ volatile (";" : "=r" (d3) : "r" (d3) );
+        __asm__ volatile (";" : "=r" (d4) : "r" (d4) );
+        __asm__ volatile (";" : "=r" (d5) : "r" (d5) );
+        __asm__ volatile (";" : "=r" (d6) : "r" (d6) );
+        __asm__ volatile (";" : "=r" (d7) : "r" (d7) );
+#endif
+
+        int kk;
+        for (kk=k; kk > 0; kk--) {
+            vector double va00 = vec_splats( *(double *)( pa+0 ) );
+            vector double va10 = vec_splats( *(double *)( pa+d1 ) );
+            vector double va20 = vec_splats( *(double *)( pa+d2 ) );
+            vector double va30 = vec_splats( *(double *)( pa+d3 ) );
+            vector double va40 = vec_splats( *(double *)( pa+d4 ) );
+            vector double va50 = vec_splats( *(double *)( pa+d5 ) );
+            vector double va60 = vec_splats( *(double *)( pa+d6 ) );
+            vector double va70 = vec_splats( *(double *)( pa+d7 ) );
+            pa += 8*sizeof(double);
+
+            vector double vb00_01 = *(vector double *)( pb+0 );
+            vector double vb02_03 = *(vector double *)( pb+d2 );
+            pb += 4*sizeof(double);
+
+            vc00_01 = vec_madd(va00, vb00_01, vc00_01);
+            vc02_03 = vec_madd(va00, vb02_03, vc02_03);
+            vc10_11 = vec_madd(va10, vb00_01, vc10_11);
+            vc12_13 = vec_madd(va10, vb02_03, vc12_13);
+            vc20_21 = vec_madd(va20, vb00_01, vc20_21);
+            vc22_23 = vec_madd(va20, vb02_03, vc22_23);
+            vc30_31 = vec_madd(va30, vb00_01, vc30_31);
+            vc32_33 = vec_madd(va30, vb02_03, vc32_33);
+            vc40_41 = vec_madd(va40, vb00_01, vc40_41);
+            vc42_43 = vec_madd(va40, vb02_03, vc42_43);
+            vc50_51 = vec_madd(va50, vb00_01, vc50_51);
+            vc52_53 = vec_madd(va50, vb02_03, vc52_53);
+            vc60_61 = vec_madd(va60, vb00_01, vc60_61);
+            vc62_63 = vec_madd(va60, vb02_03, vc62_63);
+            vc70_71 = vec_madd(va70, vb00_01, vc70_71);
+            vc72_73 = vec_madd(va70, vb02_03, vc72_73);
+        }
+
+        vector double valpha = vec_splats( *alpha );
+        vector double vbeta  = (vector double) { *beta, *beta };
+
+        vector double *pc = (vector double *)c;
+
+        vc00_01 = vec_mul(valpha, vc00_01);
+        vc02_03 = vec_mul(valpha, vc02_03);
+        pc[0] = vec_madd( pc[0], vbeta, vc00_01);
+        pc[1] = vec_madd( pc[1], vbeta, vc02_03);
+        pc += rs_c/2;
+
+        vc10_11 = vec_mul(valpha, vc10_11);
+        vc12_13 = vec_mul(valpha, vc12_13);
+        pc[0] = vec_madd( pc[0], vbeta, vc10_11);
+        pc[1] = vec_madd( pc[1], vbeta, vc12_13);
+        pc += rs_c/2;
+
+        vc20_21 = vec_mul(valpha, vc20_21);
+        vc22_23 = vec_mul(valpha, vc22_23);
+        pc[0] = vec_madd( pc[0], vbeta, vc20_21);
+        pc[1] = vec_madd( pc[1], vbeta, vc22_23);
+        pc += rs_c/2;
+
+        vc30_31 = vec_mul(valpha, vc30_31);
+        vc32_33 = vec_mul(valpha, vc32_33);
+        pc[0] = vec_madd( pc[0], vbeta, vc30_31);
+        pc[1] = vec_madd( pc[1], vbeta, vc32_33);
+        pc += rs_c/2;
+
+        vc40_41 = vec_mul(valpha, vc40_41);
+        vc42_43 = vec_mul(valpha, vc42_43);
+        pc[0] = vec_madd( pc[0], vbeta, vc40_41);
+        pc[1] = vec_madd( pc[1], vbeta, vc42_43);
+        pc += rs_c/2;
+
+        vc50_51 = vec_mul(valpha, vc50_51);
+        vc52_53 = vec_mul(valpha, vc52_53);
+        pc[0] = vec_madd( pc[0], vbeta, vc50_51);
+        pc[1] = vec_madd( pc[1], vbeta, vc52_53);
+        pc += rs_c/2;
+
+        vc60_61 = vec_mul(valpha, vc60_61);
+        vc62_63 = vec_mul(valpha, vc62_63);
+        pc[0] = vec_madd( pc[0], vbeta, vc60_61);
+        pc[1] = vec_madd( pc[1], vbeta, vc62_63);
+        pc += rs_c/2;
+
+        vc70_71 = vec_mul(valpha, vc70_71);
+        vc72_73 = vec_mul(valpha, vc72_73);
+        pc[0] = vec_madd( pc[0], vbeta, vc70_71);
+        pc[1] = vec_madd( pc[1], vbeta, vc72_73);
+        pc += rs_c/2;
+    }
+    else
+    {
+        GEMM_UKR_SETUP_CT( d, 8, 4, false );
+
         // Optimized code for case where C columns are contiguous (column-major C)
         vector double vzero = vec_splats( 0.0 );
 
@@ -301,168 +433,8 @@ void bli_dgemm_power7_int_8x4
         pc[1] = vec_madd( pc[1], vbeta, vc23_33);
         pc[2] = vec_madd( pc[2], vbeta, vc43_53);
         pc[3] = vec_madd( pc[3], vbeta, vc63_73);
-    }
-    else
-#endif
-#if 1
-    if ( cs_c == 1 ) {
-        // Optimized code for case where C rows are contiguous (i.e. C is row-major)
 
-        vector double vzero = vec_splats( 0.0 );
-
-        vector double vc00_01 = vzero;
-        vector double vc02_03 = vzero;
-        vector double vc10_11 = vzero;
-        vector double vc12_13 = vzero;
-        vector double vc20_21 = vzero;
-        vector double vc22_23 = vzero;
-        vector double vc30_31 = vzero;
-        vector double vc32_33 = vzero;
-        vector double vc40_41 = vzero;
-        vector double vc42_43 = vzero;
-        vector double vc50_51 = vzero;
-        vector double vc52_53 = vzero;
-        vector double vc60_61 = vzero;
-        vector double vc62_63 = vzero;
-        vector double vc70_71 = vzero;
-        vector double vc72_73 = vzero;
-
-        unsigned long long pa = (unsigned long long)a;
-        unsigned long long pb = (unsigned long long)b;
-
-#if 0
-        unsigned long long d1 = 1*sizeof(double);
-        unsigned long long d2 = 2*sizeof(double);
-        unsigned long long d3 = 3*sizeof(double);
-        unsigned long long d4 = 4*sizeof(double);
-        unsigned long long d6 = 6*sizeof(double);
-#else
-        // ppc64 linux abi: r14-r31   Nonvolatile registers used for local variables
-        register unsigned long long d1 __asm ("r21") = 1*sizeof(double);
-        register unsigned long long d2 __asm ("r22") = 2*sizeof(double);
-        register unsigned long long d3 __asm ("r23") = 3*sizeof(double);
-        register unsigned long long d4 __asm ("r24") = 4*sizeof(double);
-        register unsigned long long d5 __asm ("r25") = 5*sizeof(double);
-        register unsigned long long d6 __asm ("r26") = 6*sizeof(double);
-        register unsigned long long d7 __asm ("r27") = 7*sizeof(double);
-
-        __asm__ volatile (";" : "=r" (d1) : "r" (d1) );
-        __asm__ volatile (";" : "=r" (d2) : "r" (d2) );
-        __asm__ volatile (";" : "=r" (d3) : "r" (d3) );
-        __asm__ volatile (";" : "=r" (d4) : "r" (d4) );
-        __asm__ volatile (";" : "=r" (d5) : "r" (d5) );
-        __asm__ volatile (";" : "=r" (d6) : "r" (d6) );
-        __asm__ volatile (";" : "=r" (d7) : "r" (d7) );
-#endif
-
-        int kk;
-        for (kk=k; kk > 0; kk--) {
-            vector double va00 = vec_splats( *(double *)( pa+0 ) ); 
-            vector double va10 = vec_splats( *(double *)( pa+d1 ) );
-            vector double va20 = vec_splats( *(double *)( pa+d2 ) );
-            vector double va30 = vec_splats( *(double *)( pa+d3 ) );
-            vector double va40 = vec_splats( *(double *)( pa+d4 ) );
-            vector double va50 = vec_splats( *(double *)( pa+d5 ) );
-            vector double va60 = vec_splats( *(double *)( pa+d6 ) );
-            vector double va70 = vec_splats( *(double *)( pa+d7 ) );
-            pa += 8*sizeof(double);
-
-            vector double vb00_01 = *(vector double *)( pb+0 ); 
-            vector double vb02_03 = *(vector double *)( pb+d2 );
-            pb += 4*sizeof(double);
-
-            vc00_01 = vec_madd(va00, vb00_01, vc00_01);
-            vc02_03 = vec_madd(va00, vb02_03, vc02_03);
-            vc10_11 = vec_madd(va10, vb00_01, vc10_11);
-            vc12_13 = vec_madd(va10, vb02_03, vc12_13);
-            vc20_21 = vec_madd(va20, vb00_01, vc20_21);
-            vc22_23 = vec_madd(va20, vb02_03, vc22_23);
-            vc30_31 = vec_madd(va30, vb00_01, vc30_31);
-            vc32_33 = vec_madd(va30, vb02_03, vc32_33);
-            vc40_41 = vec_madd(va40, vb00_01, vc40_41);
-            vc42_43 = vec_madd(va40, vb02_03, vc42_43);
-            vc50_51 = vec_madd(va50, vb00_01, vc50_51);
-            vc52_53 = vec_madd(va50, vb02_03, vc52_53);
-            vc60_61 = vec_madd(va60, vb00_01, vc60_61);
-            vc62_63 = vec_madd(va60, vb02_03, vc62_63);
-            vc70_71 = vec_madd(va70, vb00_01, vc70_71);
-            vc72_73 = vec_madd(va70, vb02_03, vc72_73);
-        }
-
-        vector double valpha = vec_splats( *alpha );
-        vector double vbeta  = (vector double) { *beta, *beta };
-
-        vector double *pc = (vector double *)c;
-
-        vc00_01 = vec_mul(valpha, vc00_01);
-        vc02_03 = vec_mul(valpha, vc02_03);
-        pc[0] = vec_madd( pc[0], vbeta, vc00_01);
-        pc[1] = vec_madd( pc[1], vbeta, vc02_03);
-        pc += rs_c/2;
-
-        vc10_11 = vec_mul(valpha, vc10_11);
-        vc12_13 = vec_mul(valpha, vc12_13);
-        pc[0] = vec_madd( pc[0], vbeta, vc10_11);
-        pc[1] = vec_madd( pc[1], vbeta, vc12_13);
-        pc += rs_c/2;
-
-        vc20_21 = vec_mul(valpha, vc20_21);
-        vc22_23 = vec_mul(valpha, vc22_23);
-        pc[0] = vec_madd( pc[0], vbeta, vc20_21);
-        pc[1] = vec_madd( pc[1], vbeta, vc22_23);
-        pc += rs_c/2;
-
-        vc30_31 = vec_mul(valpha, vc30_31);
-        vc32_33 = vec_mul(valpha, vc32_33);
-        pc[0] = vec_madd( pc[0], vbeta, vc30_31);
-        pc[1] = vec_madd( pc[1], vbeta, vc32_33);
-        pc += rs_c/2;
-
-        vc40_41 = vec_mul(valpha, vc40_41);
-        vc42_43 = vec_mul(valpha, vc42_43);
-        pc[0] = vec_madd( pc[0], vbeta, vc40_41);
-        pc[1] = vec_madd( pc[1], vbeta, vc42_43);
-        pc += rs_c/2;
-
-        vc50_51 = vec_mul(valpha, vc50_51);
-        vc52_53 = vec_mul(valpha, vc52_53);
-        pc[0] = vec_madd( pc[0], vbeta, vc50_51);
-        pc[1] = vec_madd( pc[1], vbeta, vc52_53);
-        pc += rs_c/2;
-
-        vc60_61 = vec_mul(valpha, vc60_61);
-        vc62_63 = vec_mul(valpha, vc62_63);
-        pc[0] = vec_madd( pc[0], vbeta, vc60_61);
-        pc[1] = vec_madd( pc[1], vbeta, vc62_63);
-        pc += rs_c/2;
-
-        vc70_71 = vec_mul(valpha, vc70_71);
-        vc72_73 = vec_mul(valpha, vc72_73);
-        pc[0] = vec_madd( pc[0], vbeta, vc70_71);
-        pc[1] = vec_madd( pc[1], vbeta, vc72_73);
-        pc += rs_c/2;
-
-    }
-    else
-#endif
-    { /* General case. Just do it right.  */
-#if 1 || defined(UTEST)
-        const long MR = BLIS_DEFAULT_MR_D, NR = BLIS_DEFAULT_NR_D;
-        const long LDA = MR, LDB = NR;
-        int i, j, kk;
-        double c00;
-
-        for (i=0; i < MR; i++) {
-            for (j=0; j < NR; j++) {
-                c00 = c[BLIS_INDEX(i,j,rs_c,cs_c)] * *beta;
-                for (kk=0; kk < k; kk++) 
-                    c00 += *alpha * (a[COLMAJ_INDEX(i,kk,LDA)] * b[ROWMAJ_INDEX(kk,j,LDB)]);
-                c[BLIS_INDEX(i,j,rs_c,cs_c)] = c00;
-            }
-        }
-#else
-		//BLIS_DGEMM_UKERNEL_REF(k, alpha, a, b, beta, c, rs_c, cs_c, data);
-#endif
+        GEMM_UKR_FLUSH_CT( d );
     }
 }
 
@@ -477,30 +449,26 @@ void bli_dgemm_power7_int_8x4
  */
 void bli_cgemm_power7_int_8x4
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k      = k0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_C, NR = BLIS_DEFAULT_NR_C;
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     scomplex c00;
 
-    for (i=0; i < MR; i++) {
-        for (j=0; j < NR; j++) {
+    for (i=0; i < m; i++) {
+        for (j=0; j < n; j++) {
             scomplex tmpc, tmpa, tmpb, tmp;
             //c00 = c[BLIS_INDEX(i,j,rs_c,cs_c)] * *beta;
             tmpc = c[BLIS_INDEX(i,j,rs_c,cs_c)];
@@ -534,30 +502,26 @@ void bli_cgemm_power7_int_8x4
  */
 void bli_zgemm_power7_int_8x4
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
        scomplex*  restrict beta,
-       scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
+       scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
        auxinfo_t* restrict data,
        cntx_t*    restrict cntx
      )
 {
-	// Typecast local copies of integers in case dim_t and inc_t are a
-	// different size than is expected by load instructions.
-	uint64_t k      = k0;
-	uint64_t rs_c   = rs_c0;
-	uint64_t cs_c   = cs_c0;
-
 #if 1 || defined(UTEST)
     const long MR = BLIS_DEFAULT_MR_Z, NR = BLIS_DEFAULT_NR_Z;
     const long LDA = MR, LDB = NR;
     int i, j, kk;
     dcomplex c00;
 
-    for (i=0; i < MR; i++) {
-        for (j=0; j < NR; j++) {
+    for (i=0; i < m; i++) {
+        for (j=0; j < n; j++) {
             dcomplex tmpc, tmpa, tmpb, tmp;
             //c00 = c[BLIS_INDEX(i,j,rs_c,cs_c)] * *beta;
             tmpc = c[BLIS_INDEX(i,j,rs_c,cs_c)];

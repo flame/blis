@@ -74,6 +74,15 @@ BLIS_INLINE inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
 	return ai->ps_b;
 }
 
+BLIS_INLINE void_fp bli_auxinfo_ukr( auxinfo_t* ai )
+{
+    return ai->ukr;
+}
+BLIS_INLINE void* bli_auxinfo_params( auxinfo_t* ai )
+{
+    return ai->params;
+}
+
 
 // auxinfo_t field modification
 
@@ -118,5 +127,14 @@ BLIS_INLINE void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
 	ai->ps_b = ps;
 }
 
-#endif 
+BLIS_INLINE void bli_auxinfo_set_ukr( void_fp ukr, auxinfo_t* ai )
+{
+    ai->ukr = ukr;
+}
+BLIS_INLINE void bli_auxinfo_set_params( void* params, auxinfo_t* ai )
+{
+    ai->params = params;
+}
+
+#endif
 

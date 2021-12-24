@@ -55,7 +55,9 @@
 
 void bli_i8gemm_power10_mma_8x16
     (
-        dim_t               k0,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
         int32_t*       restrict alpha,
         int8_t*    restrict a,
         int8_t*    restrict b,
@@ -65,8 +67,8 @@ void bli_i8gemm_power10_mma_8x16
         cntx_t*    restrict cntx
     )
 {
-    uint64_t k_iter = (k0-1) / 4;
-	uint64_t k_left = (k0-1) % 4;
+    uint64_t k_iter = (k-1) / 4;
+    uint64_t k_left = (k-1) % 4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -81,11 +83,11 @@ void bli_i8gemm_power10_mma_8x16
     iv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
-    __vector_quad acc0, acc1, acc2, acc3, 
+    __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
     vec_t *ca = (vec_t *) A0;
-    vec_t *rb = (vec_t *) B0;        
+    vec_t *rb = (vec_t *) B0;
 
     __builtin_mma_xvi8ger4 (&acc0, ca[0], rb[0]);
     __builtin_mma_xvi8ger4 (&acc1, ca[0], rb[1]);
@@ -99,19 +101,19 @@ void bli_i8gemm_power10_mma_8x16
     I8_INCREMENT
 
     // k loop (unrolled by 4)
-	for (int k = 0; k<k_iter; k++)
-	{
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-		I8_AB_PRODUCT
-	}
-	
-	// edge loop
-	for (int k = 0; k<k_left; k++)
-	{
-		I8_AB_PRODUCT
-	}
+    for (int k = 0; k<k_iter; k++)
+    {
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+        I8_AB_PRODUCT
+    }
+
+    // edge loop
+    for (int k = 0; k<k_left; k++)
+    {
+        I8_AB_PRODUCT
+    }
 
     // handle beta cases
     if (beta_ != 0.0)

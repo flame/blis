@@ -42,9 +42,13 @@
 // 2vx10 microkernels.
 #include "armsve_asm_2vx10cmplx.h"
 
+#include "arm_sve.h"
+
 void bli_cgemm_armsve_asm_2vx10_unindexed
      (
-       dim_t               k0,
+       dim_t               m,
+       dim_t               n,
+       dim_t               k,
        scomplex*  restrict alpha,
        scomplex*  restrict a,
        scomplex*  restrict b,
@@ -59,11 +63,14 @@ void bli_cgemm_armsve_asm_2vx10_unindexed
 
   // Typecast local copies of integers in case dim_t and inc_t are a
   // different size than is expected by load instructions.
-  uint64_t k_mker = k0 / 4;
-  uint64_t k_left = k0 % 4;
+  uint64_t k_mker = k / 4;
+  uint64_t k_left = k % 4;
   uint64_t rs_c   = rs_c0;
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
+
+  uint64_t mr = svcntw();
+  GEMM_UKR_SETUP_CT( c, mr, 10, false );
 
   __asm__ volatile (
 // " ldr             x0, %[a]                        \n\t"
@@ -310,5 +317,7 @@ GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
   "z24","z25","z26","z27",
   "z28","z29","z30","z31"
   );
+
+  GEMM_UKR_FLUSH_CT( c );
 }
 

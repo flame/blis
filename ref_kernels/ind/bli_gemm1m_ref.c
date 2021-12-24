@@ -39,6 +39,8 @@
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -59,6 +61,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr        = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+\
+	const dim_t       mr_r      = bli_cntx_get_blksz_def_dt( dt_r, BLIS_MR, cntx ); \
+	const dim_t       nr_r      = bli_cntx_get_blksz_def_dt( dt_r, BLIS_NR, cntx ); \
 \
 	const dim_t       k2        = 2 * k; \
 \
@@ -119,6 +124,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else                                                    using_ct = FALSE; \
 \
 \
+	/* If we are not computing a full micro-tile, then we must write to
+	   ct and then accumulate to c afterwards. */ \
+	if ( mr != m || nr != n ) using_ct = TRUE; \
+\
+\
 	if ( using_ct ) \
 	{ \
 		/* In the atypical cases, we compute the result into temporary
@@ -149,6 +159,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
+		  mr_r, \
+		  nr_r, \
 		  k2, \
 		  alpha_r, \
 		  a_r, \
@@ -164,8 +176,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* Accumulate the final result in ct back to c. */ \
 		if ( PASTEMAC(ch,eq1)( *beta ) ) \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
 				                   *(c  + i*rs_c  + j*cs_c ) ); \
@@ -173,8 +185,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *(c  + i*rs_c  + j*cs_c ) ); \
@@ -182,8 +194,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( j = 0; j < nr; ++j ) \
-			for ( i = 0; i < mr; ++i ) \
+			for ( j = 0; j < n; ++j ) \
+			for ( i = 0; i < m; ++i ) \
 			{ \
 				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
 				                    *beta, \
@@ -215,6 +227,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		/* c = beta * c + alpha_r * a * b; */ \
 		rgemm_ukr \
 		( \
+		  mr_r, \
+		  nr_r, \
 		  k2, \
 		  alpha_r, \
 		  a_r, \
