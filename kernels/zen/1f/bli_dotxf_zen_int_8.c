@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2018, The University of Texas at Austin
-   Copyright (C) 2017 - 21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2017 - 22, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -1542,4 +1542,904 @@ void bli_ddotxf_zen_int_2
 	}
 }
 
+/**
+ * Performs dotxf operation on dcomplex.
+ * x and y are vectors and a is the matrix.
+ * Computation is done on 6 columns at a time
+ * Marches through vectors in multiple of 2.
+ */
+void bli_zdotxf_zen_int_6
+	(
+		 conj_t conjat,
+		 conj_t conjx,
+		 dim_t m,
+		 dim_t b_n,
+		 dcomplex* restrict alpha,
+		 dcomplex* restrict a, inc_t inca, inc_t lda,
+		 dcomplex* restrict x, inc_t incx,
+		 dcomplex* restrict beta,
+		 dcomplex* restrict y, inc_t incy,
+		 cntx_t* restrict cntx
+ 	)
+{
+	/**
+	 * Handles only unit stride cases and 6 column at a time
+	 * b_n check for columns to be 6.
+	 */
+	if ( (inca == 1) && (incx == 1) && (incy == 1) && (b_n == 6) )
+	{
+		/* Temporary rho buffer holds computed dot product result */
+		dcomplex r[ 6 ];
+
+		/* If beta is zero, clear y. Otherwise, scale by beta. */
+		if ( PASTEMAC(z,eq0)( *beta ) )
+		{
+			for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(z,set0s)( y[i] );
+			}
+		}
+		else
+		{
+			for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(z,scals)( *beta, y[i] );
+			}
+		}
+
+		/* If the vectors are empty or if alpha is zero, return early*/
+		if ( bli_zero_dim1( m ) || PASTEMAC(z,eq0)( *alpha ) ) return;
+
+		/* Initialize r vector to 0. */
+		for ( dim_t i = 0; i < 6; ++i ) PASTEMAC(z,set0s)( r[i] );
+
+		/* If a must be conjugated, we do so indirectly by first
+		 * toggling the effective conjugation of x and then conjugating
+		 * the resulting do products.
+		 * Rather conjugating each element of a matrix, final computed result
+		 * can be conjugated at the end of loop. This takes off the overhead
+		 * of conjugating each element inside the loop and improves the
+		 * performance.
+		 */
+		conj_t conjx_use = conjx;
+
+		if ( bli_is_conj( conjat ) )
+		{
+			bli_toggle_conj( &conjx_use );
+		}
+
+		/* Setting rho vectors to 0 */
+		v4df_t rho0v; rho0v.v = _mm256_setzero_pd();
+		v4df_t rho1v; rho1v.v = _mm256_setzero_pd();
+		v4df_t rho2v; rho2v.v = _mm256_setzero_pd();
+		v4df_t rho3v; rho3v.v = _mm256_setzero_pd();
+		v4df_t rho4v; rho4v.v = _mm256_setzero_pd();
+		v4df_t rho5v; rho5v.v = _mm256_setzero_pd();
+
+		v4df_t rho6v; rho6v.v = _mm256_setzero_pd();
+		v4df_t rho7v; rho7v.v = _mm256_setzero_pd();
+		v4df_t rho8v; rho8v.v = _mm256_setzero_pd();
+		v4df_t rho9v; rho9v.v = _mm256_setzero_pd();
+		v4df_t rho10v; rho10v.v = _mm256_setzero_pd();
+		v4df_t rho11v; rho11v.v = _mm256_setzero_pd();
+
+		/* Holds 2 dcomplex element of x vector
+		 * for computing dot product with A tile
+		 */
+		v4df_t x0v, x1v;
+		/* Holds 2x6 tile of matrix A */
+		v4df_t a0v, a1v, a2v, a3v, a4v, a5v;
+		/**
+		 * Since complex datatype multiplication is
+		 * being held in two sets of rho vectors.
+		 * Where first set holds the computaion with
+		 * real part of vector x and other holds
+		 * imaginary part of vector x.
+		 * For final computation, based on conj sign
+		 * of imaginary component needs to be toggled.
+		 */
+		__m256d no_conju = _mm256_setr_pd(-1, 1, -1, 1);
+		__m256d conju = _mm256_setr_pd(1, -1, 1, -1);
+		dim_t iter = m / 2;
+		dim_t rem = m % 2;
+		dim_t i = 0;
+
+		if ( bli_is_noconj( conjx_use ) )
+		{
+			if(iter)
+			{
+				for ( ; (i+1) < m; i+=2)
+				{
+					/*Load 2 dcomplex elements from
+					 * vector x
+					 */
+					x0v.v = _mm256_loadu_pd(
+							(double *)(x + i) );
+					/* x1v.v holds imaginary part of dcomplex
+					 * elements from vector x
+					 * It will do following operation.
+					 * R0 I0 R1 I1 => I0 I0 I1 I1
+					 *
+					 */
+					x1v.v = _mm256_permute_pd( x0v.v, 15 );
+					/* x1v.v holds real part of dcomplex
+					 * elements from vector x
+					 * It will do following operation.
+					 * R0 I0 R1 I1 => R0 R0 R1 R1
+					 */
+					x0v.v = _mm256_permute_pd( x0v.v, 0 );
+
+					/*Load 2x6 tile of matrix A*/
+					a0v.v = _mm256_loadu_pd( (double *)
+							(a + i + 0 * lda) );
+					a1v.v = _mm256_loadu_pd( (double *)
+							(a + i + 1 * lda) );
+					a2v.v = _mm256_loadu_pd( (double *)
+							(a + i + 2 * lda) );
+					a3v.v = _mm256_loadu_pd( (double *)
+							(a + i + 3 * lda) );
+					a4v.v = _mm256_loadu_pd( (double *)
+							(a + i + 4 * lda) );
+					a5v.v = _mm256_loadu_pd( (double *)
+							(a + i + 5 * lda) );
+
+					// perform: rho?v += a?v * x0v;
+					rho0v.v = _mm256_fmadd_pd( a0v.v,
+							x0v.v, rho0v.v );
+					rho6v.v = _mm256_fmadd_pd( a0v.v,
+							x1v.v, rho6v.v );
+
+					rho1v.v = _mm256_fmadd_pd( a1v.v,
+							x0v.v, rho1v.v );
+					rho7v.v = _mm256_fmadd_pd( a1v.v,
+							x1v.v, rho7v.v );
+
+					rho2v.v = _mm256_fmadd_pd( a2v.v,
+							x0v.v, rho2v.v );
+					rho8v.v = _mm256_fmadd_pd( a2v.v,
+							x1v.v, rho8v.v );
+
+					rho3v.v = _mm256_fmadd_pd( a3v.v,
+							x0v.v, rho3v.v );
+					rho9v.v = _mm256_fmadd_pd( a3v.v,
+							x1v.v, rho9v.v );
+
+					rho4v.v = _mm256_fmadd_pd( a4v.v,
+							x0v.v, rho4v.v );
+					rho10v.v = _mm256_fmadd_pd( a4v.v,
+							x1v.v, rho10v.v );
+
+					rho5v.v = _mm256_fmadd_pd( a5v.v,
+							x0v.v, rho5v.v );
+					rho11v.v = _mm256_fmadd_pd( a5v.v,
+							x1v.v, rho11v.v );
+				}
+
+				/*Swapping position of real and imag component
+				 * for horizontal addition to get the final
+				 * dot product computation
+				 * rho register are holding computation which needs
+				 * to be arranged in following manner.
+				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
+				 *             ||
+				 *             \/
+				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
+				 */
+				rho6v.v = _mm256_permute_pd(rho6v.v, 0x05);
+				rho7v.v = _mm256_permute_pd(rho7v.v, 0x05);
+				rho8v.v = _mm256_permute_pd(rho8v.v, 0x05);
+				rho9v.v = _mm256_permute_pd(rho9v.v, 0x05);
+				rho10v.v = _mm256_permute_pd(rho10v.v, 0x05);
+				rho11v.v = _mm256_permute_pd(rho11v.v, 0x05);
+
+				/*Negating imaginary part for computing
+				 * the final result of dcomplex multiplication
+				 */
+				rho6v.v = _mm256_mul_pd(rho6v.v, no_conju);
+				rho7v.v = _mm256_mul_pd(rho7v.v, no_conju);
+				rho8v.v = _mm256_mul_pd(rho8v.v, no_conju);
+				rho9v.v = _mm256_mul_pd(rho9v.v, no_conju);
+				rho10v.v = _mm256_mul_pd(rho10v.v, no_conju);
+				rho11v.v = _mm256_mul_pd(rho11v.v, no_conju);
+
+				rho0v.v = _mm256_add_pd(rho0v.v, rho6v.v);
+				rho1v.v = _mm256_add_pd(rho1v.v, rho7v.v);
+				rho2v.v = _mm256_add_pd(rho2v.v, rho8v.v);
+				rho3v.v = _mm256_add_pd(rho3v.v, rho9v.v);
+				rho4v.v = _mm256_add_pd(rho4v.v, rho10v.v);
+				rho5v.v = _mm256_add_pd(rho5v.v, rho11v.v);
+
+				/*rho0, rho1, rho2 holds final dot product
+				 * result of 6 dcomplex elements.
+				 */
+				rho0v.d[0] += rho0v.d[2];
+				rho0v.d[1] += rho0v.d[3];
+
+				rho0v.d[2] = rho1v.d[0] + rho1v.d[2];
+				rho0v.d[3] = rho1v.d[1] + rho1v.d[3];
+
+				rho1v.d[0] = rho2v.d[0] + rho2v.d[2];
+				rho1v.d[1] = rho2v.d[1] + rho2v.d[3];
+
+				rho1v.d[2] = rho3v.d[0] + rho3v.d[2];
+				rho1v.d[3] = rho3v.d[1] + rho3v.d[3];
+
+				rho2v.d[0] = rho4v.d[0] + rho4v.d[2];
+				rho2v.d[1] = rho4v.d[1] + rho4v.d[3];
+
+				rho2v.d[2] = rho5v.d[0] + rho5v.d[2];
+				rho2v.d[3] = rho5v.d[1] + rho5v.d[3];
+
+				/*Computed dot product result is being stored
+				 * in temp buffer r for further computation.
+				 */
+				_mm256_storeu_pd((double *)r, rho0v.v);
+				_mm256_storeu_pd((double *)(r+2) , rho1v.v);
+				_mm256_storeu_pd((double *)(r+4) , rho2v.v);
+
+			}
+			/*handles remainder cases*/
+			if(rem)
+			{
+				PRAGMA_SIMD
+					for(dim_t p = 0; p < 6 ; p++)
+					{
+						PASTEMAC(z,axpys)( a[i + p*lda]
+								, x[i], r[p] );
+					}
+			}
+		}
+		else
+		{
+			if(iter)
+			{
+				for ( ; (i+1) < m; i+=2)
+				{
+					/*Load 2 dcomplex elements from
+					 * vector x
+					 */
+					x0v.v = _mm256_loadu_pd( (double *)
+							(x + i) );
+					/* x1v.v holds imaginary part of dcomplex
+					 * elements from vector x
+					 */
+					x1v.v = _mm256_permute_pd( x0v.v, 15 );
+					/* x1v.v holds real part of dcomplex
+					 * elements from vector x
+					 */
+					x0v.v = _mm256_permute_pd( x0v.v, 0 );
+
+					/*Load 2x6 tile of matrix A*/
+					a0v.v = _mm256_loadu_pd( (double *)
+							(a + i + 0 * lda));
+					a1v.v = _mm256_loadu_pd( (double *)
+							(a + i + 1 * lda));
+					a2v.v = _mm256_loadu_pd( (double *)
+							(a + i + 2 * lda));
+					a3v.v = _mm256_loadu_pd( (double *)
+							(a + i + 3 * lda));
+					a4v.v = _mm256_loadu_pd( (double *)
+							(a + i + 4 * lda));
+					a5v.v = _mm256_loadu_pd( (double *)
+							(a + i + 5 * lda));
+
+					// perform: rho?v += a?v * x0v;
+					rho0v.v = _mm256_fmadd_pd( a0v.v,
+							x0v.v, rho0v.v );
+					rho6v.v = _mm256_fmadd_pd( a0v.v,
+							x1v.v, rho6v.v );
+
+					rho1v.v = _mm256_fmadd_pd( a1v.v,
+							x0v.v, rho1v.v );
+					rho7v.v = _mm256_fmadd_pd( a1v.v,
+							x1v.v, rho7v.v );
+
+					rho2v.v = _mm256_fmadd_pd( a2v.v,
+							x0v.v, rho2v.v );
+					rho8v.v = _mm256_fmadd_pd( a2v.v,
+							x1v.v, rho8v.v );
+
+					rho3v.v = _mm256_fmadd_pd( a3v.v,
+							x0v.v, rho3v.v );
+					rho9v.v = _mm256_fmadd_pd( a3v.v,
+							x1v.v, rho9v.v );
+
+					rho4v.v = _mm256_fmadd_pd( a4v.v,
+							x0v.v, rho4v.v );
+					rho10v.v = _mm256_fmadd_pd( a4v.v,
+							x1v.v, rho10v.v );
+
+					rho5v.v = _mm256_fmadd_pd( a5v.v,
+							x0v.v, rho5v.v );
+					rho11v.v = _mm256_fmadd_pd( a5v.v,
+							x1v.v, rho11v.v );
+				}
+
+				/*Swapping position of real and imag component
+				 * for horizontal addition to get the final
+				 * dot product computation
+				 * rho register are holding computation which needs
+				 * to be arranged in following manner.
+				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
+				 *             ||
+				 *             \/
+				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
+				 */
+				rho6v.v = _mm256_permute_pd(rho6v.v, 0x05);
+				rho7v.v = _mm256_permute_pd(rho7v.v, 0x05);
+				rho8v.v = _mm256_permute_pd(rho8v.v, 0x05);
+				rho9v.v = _mm256_permute_pd(rho9v.v, 0x05);
+				rho10v.v = _mm256_permute_pd(rho10v.v, 0x05);
+				rho11v.v = _mm256_permute_pd(rho11v.v, 0x05);
+
+				/*Negating imaginary part for computing
+				 * the final result of dcomplex multiplication
+				 */
+				rho6v.v = _mm256_mul_pd(rho6v.v, conju);
+				rho7v.v = _mm256_mul_pd(rho7v.v, conju);
+				rho8v.v = _mm256_mul_pd(rho8v.v, conju);
+				rho9v.v = _mm256_mul_pd(rho9v.v, conju);
+				rho10v.v = _mm256_mul_pd(rho10v.v, conju);
+				rho11v.v = _mm256_mul_pd(rho11v.v, conju);
+
+				rho0v.v = _mm256_add_pd(rho0v.v, rho6v.v);
+				rho1v.v = _mm256_add_pd(rho1v.v, rho7v.v);
+				rho2v.v = _mm256_add_pd(rho2v.v, rho8v.v);
+				rho3v.v = _mm256_add_pd(rho3v.v, rho9v.v);
+				rho4v.v = _mm256_add_pd(rho4v.v, rho10v.v);
+				rho5v.v = _mm256_add_pd(rho5v.v, rho11v.v);
+
+				/*rho0, rho1, rho2 holds final dot product
+				 * result of 6 dcomplex elements.
+				 */
+				rho0v.d[0] += rho0v.d[2];
+				rho0v.d[1] += rho0v.d[3];
+
+				rho0v.d[2] = rho1v.d[0] + rho1v.d[2];
+				rho0v.d[3] = rho1v.d[1] + rho1v.d[3];
+
+				rho1v.d[0] = rho2v.d[0] + rho2v.d[2];
+				rho1v.d[1] = rho2v.d[1] + rho2v.d[3];
+
+				rho1v.d[2] = rho3v.d[0] + rho3v.d[2];
+				rho1v.d[3] = rho3v.d[1] + rho3v.d[3];
+
+				rho2v.d[0] = rho4v.d[0] + rho4v.d[2];
+				rho2v.d[1] = rho4v.d[1] + rho4v.d[3];
+
+				rho2v.d[2] = rho5v.d[0] + rho5v.d[2];
+				rho2v.d[3] = rho5v.d[1] + rho5v.d[3];
+
+				/*Computed dot product result is being stored
+				 * in temp buffer r for further computation.
+				 */
+				_mm256_storeu_pd((double *)r, rho0v.v);
+				_mm256_storeu_pd((double *)(r+2) , rho1v.v);
+				_mm256_storeu_pd((double *)(r+4) , rho2v.v);
+
+			}
+			if(rem)
+			{
+				PRAGMA_SIMD
+					for(dim_t p = 0; p < 6 ; p++)
+					{
+						PASTEMAC(z,axpyjs)(a[i + p*lda]
+								, x[i], r[p] );
+					}
+			}
+		}
+
+		if ( bli_is_conj( conjat ) )
+			for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(z,conjs)( r[i] );
+			}
+
+		/*scaling dot product result with alpha and
+		 * adding the result to vector
+		 */
+		for ( dim_t i = 0; i < 6; ++i )
+		{
+			PASTEMAC(z,axpys)( *alpha, r[i], y[i] );
+		}
+	}
+	else
+	{
+		/* Query the context for the kernel function pointer. */
+		const num_t              dt     = PASTEMAC(z,type);
+		PASTECH(z,dotxv_ker_ft) kfp_dv
+			=
+			bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx );
+
+		for ( dim_t i = 0; i < b_n; ++i )
+		{
+			dcomplex* restrict a1   = a + (0  )*inca + (i  )*lda;
+			dcomplex* restrict x1   = x + (0  )*incx;
+			dcomplex* restrict psi1 = y + (i  )*incy;
+
+			kfp_dv
+				(
+				 conjat,
+				 conjx,
+				 m,
+				 alpha,
+				 a1, inca,
+				 x1, incx,
+				 beta,
+				 psi1,
+				 cntx
+				);
+		}
+	}
+
+}
+
+
+/**
+ * Performs dotxf operation on scomplex.
+ * x and y are vectors and a is the matrix.
+ * Computation is done on 6 columns at a time
+ * Marches through vectors in multiple of 4 and 2.
+ */
+void bli_cdotxf_zen_int_6
+	(
+		 conj_t conjat,
+		 conj_t conjx,
+		 dim_t m,
+		 dim_t b_n,
+		 scomplex* restrict alpha,
+		 scomplex* restrict a, inc_t inca, inc_t lda,
+		 scomplex* restrict x, inc_t incx,
+		 scomplex* restrict beta,
+		 scomplex* restrict y, inc_t incy,
+		 cntx_t* restrict cntx
+	)
+{
+        if ( (inca == 1) && (incx == 1) && (incy == 1) && (b_n == 6) )
+        {
+                /* Temporary rho buffer holds computed dot product result */
+                scomplex r[ 6 ];
+
+                /* If beta is zero, clear y. Otherwise, scale by beta. */
+                if ( PASTEMAC(c,eq0)( *beta ) )
+                {
+                        for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(c,set0s)( y[i] );
+			}
+                }
+                else
+                {
+                        for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(c,scals)( *beta, y[i] );
+			}
+                }
+
+                /* If the vectors are empty or if alpha is zero, return early. */
+                if ( bli_zero_dim1( m ) || PASTEMAC(c,eq0)( *alpha ) ) return;
+
+                /* Initialize r vector to 0. */
+                for ( dim_t i = 0; i < 6; ++i ) PASTEMAC(c,set0s)( r[i] );
+
+                /* If a must be conjugated, we do so indirectly by first toggling the
+                   effective conjugation of x and then conjugating the resulting do
+                   products. */
+                conj_t conjx_use = conjx;
+
+                if ( bli_is_conj( conjat ) )
+                        bli_toggle_conj( &conjx_use );
+
+                dim_t iter = m / 2;
+                dim_t iter4 = m / 4;
+                dim_t rem = m % 2;
+                dim_t i = 0;
+                if(iter)
+                {
+                        if(iter4)
+                        {
+                                /* Setting rho vectors to 0 */
+                                __m256 rho0v; rho0v = _mm256_setzero_ps();
+                                __m256 rho1v; rho1v = _mm256_setzero_ps();
+                                __m256 rho2v; rho2v = _mm256_setzero_ps();
+                                __m256 rho3v; rho3v = _mm256_setzero_ps();
+                                __m256 rho4v; rho4v = _mm256_setzero_ps();
+                                __m256 rho5v; rho5v = _mm256_setzero_ps();
+
+                                __m256 rho6v; rho6v = _mm256_setzero_ps();
+                                __m256 rho7v; rho7v = _mm256_setzero_ps();
+                                __m256 rho8v; rho8v = _mm256_setzero_ps();
+                                __m256 rho9v; rho9v = _mm256_setzero_ps();
+                                __m256 rho10v; rho10v = _mm256_setzero_ps();
+                                __m256 rho11v; rho11v = _mm256_setzero_ps();
+                                /* Holds 2 dcomplex element of x vector
+                                 * for computing dot product with A tile
+                                 */
+                                __m256 x0v, x1v;
+                                /* Holds 2x6 tile of matrix A */
+				__m256 a0v, a1v, a2v, a3v, a4v, a5v;
+				/**
+				 * Since complex datatype multiplication is
+				 * being held in two sets of rho vectors.
+				 * Where first set holds the computaion with
+				 * real part of vector x and other holds
+				 * imaginary part of vector x.
+				 * For final computation, based on conj sign
+				 * of imaginary component needs to be toggled.
+				 */
+				__m256 no_conju = _mm256_setr_ps(-1, 1, -1, 1, -1, 1, -1, 1);
+                                __m256 conju = _mm256_setr_ps(1, -1, 1, -1, 1, -1, 1, -1);
+
+				// March through vectos in multiple of 4.
+                                for ( ; (i+3) < m; i+=4)
+                                {
+                                        /*Load 4 scomplex elements from vector x*/
+                                        x0v = _mm256_loadu_ps( (float *) (x + i) );
+                                        /* x1v.v holds imaginary part of dcomplex
+                                         * elements from vector x
+                                         */
+                                        x1v = _mm256_permute_ps( x0v, 0xf5 );
+                                        /* x1v.v holds real part of dcomplex
+                                         * elements from vector x
+                                         */
+                                        x0v = _mm256_permute_ps( x0v, 0xa0);
+                                        /* x1v.v holds imag part of dcomplex
+                                        Load 4x6 tile of matrix A*/
+					a0v = _mm256_loadu_ps( (float *)(a + i + 0 * lda));
+                                        a1v = _mm256_loadu_ps( (float *)(a + i + 1 * lda));
+                                        a2v = _mm256_loadu_ps( (float *)(a + i + 2 * lda));
+                                        a3v = _mm256_loadu_ps( (float *)(a + i + 3 * lda));
+                                        a4v = _mm256_loadu_ps( (float *)(a + i + 4 * lda));
+                                        a5v = _mm256_loadu_ps( (float *)(a + i + 5 * lda));
+
+                                        // perform: rho?v += a?v * x0v;
+
+                                        rho0v = _mm256_fmadd_ps( a0v, x0v, rho0v );
+                                        rho6v = _mm256_fmadd_ps( a0v, x1v, rho6v );
+
+                                        rho1v = _mm256_fmadd_ps( a1v, x0v, rho1v );
+                                        rho7v = _mm256_fmadd_ps( a1v, x1v, rho7v );
+
+                                        rho2v = _mm256_fmadd_ps( a2v, x0v, rho2v );
+                                        rho8v = _mm256_fmadd_ps( a2v, x1v, rho8v );
+
+                                        rho3v = _mm256_fmadd_ps( a3v, x0v, rho3v );
+                                        rho9v = _mm256_fmadd_ps( a3v, x1v, rho9v );
+
+                                        rho4v = _mm256_fmadd_ps( a4v, x0v, rho4v );
+                                        rho10v = _mm256_fmadd_ps( a4v, x1v, rho10v );
+
+                                        rho5v = _mm256_fmadd_ps( a5v, x0v, rho5v );
+                                        rho11v = _mm256_fmadd_ps( a5v, x1v, rho11v );
+                                }
+
+
+                                /*Swapping position of real and imag component
+                                 * for horizontal addition to get the final
+                                 * dot product computation
+				 * rho register are holding computation which needs
+				 * to be arranged in following manner.
+				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
+				 *             ||
+				 *             \/
+				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
+                                 */
+
+                                rho6v = _mm256_permute_ps(rho6v, 0xb1);
+                                rho7v = _mm256_permute_ps(rho7v, 0xb1);
+                                rho8v = _mm256_permute_ps(rho8v, 0xb1);
+                                rho9v = _mm256_permute_ps(rho9v, 0xb1);
+                                rho10v = _mm256_permute_ps(rho10v, 0xb1);
+                                rho11v = _mm256_permute_ps(rho11v, 0xb1);
+
+                                /*Negating imaginary part for computing
+                                 * the final result of dcomplex multiplication*/
+                                if ( bli_is_noconj( conjx_use ) )
+                                {
+                                        rho6v = _mm256_mul_ps(rho6v, no_conju);
+                                        rho7v = _mm256_mul_ps(rho7v, no_conju);
+                                        rho8v = _mm256_mul_ps(rho8v, no_conju);
+                                        rho9v = _mm256_mul_ps(rho9v, no_conju);
+                                        rho10v = _mm256_mul_ps(rho10v, no_conju);
+                                        rho11v = _mm256_mul_ps(rho11v, no_conju);
+                                }
+				else
+                                {
+
+                                        rho6v = _mm256_mul_ps(rho6v, conju);
+                                        rho7v = _mm256_mul_ps(rho7v, conju);
+                                        rho8v = _mm256_mul_ps(rho8v, conju);
+                                        rho9v = _mm256_mul_ps(rho9v, conju);
+                                        rho10v = _mm256_mul_ps(rho10v, conju);
+                                        rho11v = _mm256_mul_ps(rho11v, conju);
+
+                                }
+
+                                rho0v = _mm256_add_ps(rho0v, rho6v);
+                                rho1v = _mm256_add_ps(rho1v, rho7v);
+                                rho2v = _mm256_add_ps(rho2v, rho8v);
+                                rho3v = _mm256_add_ps(rho3v, rho9v);
+                                rho4v = _mm256_add_ps(rho4v, rho10v);
+                                rho5v = _mm256_add_ps(rho5v, rho11v);
+
+				/**
+				 * Horizontal addition of rho elements
+				 * for computing final dotxf result.
+				 * ptr pointer addresses all 6 rho
+				 * register one by one and store the
+				 * computed result into r buffer.
+				 */
+                                scomplex *ptr = (scomplex *)&rho0v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[0].real += ptr[i].real;
+                                        r[0].imag += ptr[i].imag;
+                                }
+                                ptr = (scomplex *)&rho1v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[1].real += ptr[i].real;
+                                        r[1].imag += ptr[i].imag;
+                                }
+                                ptr = (scomplex *)&rho2v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[2].real += ptr[i].real;
+                                        r[2].imag += ptr[i].imag;
+                                }
+                                ptr = (scomplex *)&rho3v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[3].real += ptr[i].real;
+                                        r[3].imag += ptr[i].imag;
+                                }
+                                ptr = (scomplex *)&rho4v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[4].real += ptr[i].real;
+                                        r[4].imag += ptr[i].imag;
+                                }
+                                ptr = (scomplex *)&rho5v;
+                                for(dim_t i = 0; i < 4; i++)
+                                {
+                                        r[5].real += ptr[i].real;
+                                        r[5].imag += ptr[i].imag;
+                                }
+                        }
+			// March through vectos in multiple of 2.
+                        if(i+1 < m)
+                        {
+                                /* Setting rho vectors to 0 */
+                                __m128 rho0v; rho0v = _mm_setzero_ps();
+                                __m128 rho1v; rho1v = _mm_setzero_ps();
+                                __m128 rho2v; rho2v = _mm_setzero_ps();
+                                __m128 rho3v; rho3v = _mm_setzero_ps();
+                                __m128 rho4v; rho4v = _mm_setzero_ps();
+                                __m128 rho5v; rho5v = _mm_setzero_ps();
+
+                                __m128 rho6v; rho6v = _mm_setzero_ps();
+                                __m128 rho7v; rho7v = _mm_setzero_ps();
+                                __m128 rho8v; rho8v = _mm_setzero_ps();
+                                __m128 rho9v; rho9v = _mm_setzero_ps();
+                                __m128 rho10v; rho10v = _mm_setzero_ps();
+                                __m128 rho11v; rho11v = _mm_setzero_ps();
+                                /* Holds 2 dcomplex element of x vector
+                                 * for computing dot product with A tile
+                                 */
+                                __m128 x0v, x1v;
+                                /* Holds 2x6 tile of matrix A */
+                                __m128 a0v, a1v, a2v, a3v, a4v, a5v;
+				/**
+				 * Since complex datatype multiplication is
+				 * being held in two sets of rho vectors.
+				 * Where first set holds the computaion with
+				 * real part of vector x and other holds
+				 * imaginary part of vector x.
+				 * For final computation, based on conj sign
+				 * of imaginary component needs to be toggled.
+				 */
+                                __m128 no_conju = _mm_setr_ps(-1, 1, -1, 1);
+                                __m128 conju = _mm_setr_ps(1, -1, 1, -1);
+
+                                for ( ; (i+1) < m; i+=2)
+                                {
+                                        /*Load 4 scomplex elements from vector x*/
+                                        x0v = _mm_loadu_ps( (float *)(x + i) );
+                                        /* x1v.v holds imaginary part of dcomplex
+                                         * elements from vector x
+                                         */
+                                        x1v = _mm_permute_ps( x0v,  0xf5 );
+                                        /* x1v.v holds real part of dcomplex
+                                         * elements from vector x
+                                         */
+                                        x0v = _mm_permute_ps( x0v, 0xa0);
+                                        /* x1v.v holds imag part of dcomplex
+                                        Load 4x6 tile of matrix A*/
+
+                                        a0v = _mm_loadu_ps( (float *)(a + i + 0 * lda));
+                                        a1v = _mm_loadu_ps( (float *)(a + i + 1 * lda));
+                                        a2v = _mm_loadu_ps( (float *)(a + i + 2 * lda));
+                                        a3v = _mm_loadu_ps( (float *)(a + i + 3 * lda));
+                                        a4v = _mm_loadu_ps( (float *)(a + i + 4 * lda));
+                                        a5v = _mm_loadu_ps( (float *)(a + i + 5 * lda));
+
+                                        // perform: rho?v += a?v * x0v;
+
+                                        rho0v = _mm_fmadd_ps( a0v, x0v, rho0v );
+                                        rho6v = _mm_fmadd_ps( a0v, x1v, rho6v );
+
+                                        rho1v = _mm_fmadd_ps( a1v, x0v, rho1v );
+                                        rho7v = _mm_fmadd_ps( a1v, x1v, rho7v );
+
+                                        rho2v = _mm_fmadd_ps( a2v, x0v, rho2v );
+                                        rho8v = _mm_fmadd_ps( a2v, x1v, rho8v );
+
+                                        rho3v = _mm_fmadd_ps( a3v, x0v, rho3v );
+                                        rho9v = _mm_fmadd_ps( a3v, x1v, rho9v );
+
+                                        rho4v = _mm_fmadd_ps( a4v, x0v, rho4v );
+                                        rho10v = _mm_fmadd_ps( a4v, x1v, rho10v );
+
+                                        rho5v = _mm_fmadd_ps( a5v, x0v, rho5v );
+					rho11v = _mm_fmadd_ps( a5v, x1v, rho11v );
+				}
+				/*Swapping position of real and imag component
+				 * for horizontal addition to get the final
+				 * dot product computation
+				 * rho register are holding computation which needs
+				 * to be arranged in following manner.
+				 * Ra0*Ix0 | Ia0*Ix0 | Ra1*Ix1 | Ia1*Ix1
+				 *             ||
+				 *             \/
+				 * Ia0*Ix0 | Ra0*Ix0 | Ia1*Ix1 | Ra1*Ix1
+				 */
+				rho6v = _mm_permute_ps(rho6v, 0xb1);
+				rho7v = _mm_permute_ps(rho7v, 0xb1);
+				rho8v = _mm_permute_ps(rho8v, 0xb1);
+				rho9v = _mm_permute_ps(rho9v, 0xb1);
+				rho10v = _mm_permute_ps(rho10v, 0xb1);
+				rho11v = _mm_permute_ps(rho11v, 0xb1);
+
+				/*Negating imaginary part for computing
+				 * the final result of dcomplex multiplication*/
+				if ( bli_is_noconj( conjx_use ) )
+				{
+
+					rho6v = _mm_mul_ps(rho6v, no_conju);
+					rho7v = _mm_mul_ps(rho7v, no_conju);
+					rho8v = _mm_mul_ps(rho8v, no_conju);
+					rho9v = _mm_mul_ps(rho9v, no_conju);
+					rho10v = _mm_mul_ps(rho10v, no_conju);
+					rho11v = _mm_mul_ps(rho11v, no_conju);
+				}
+				else
+				{
+					rho6v = _mm_mul_ps(rho6v, conju);
+					rho7v = _mm_mul_ps(rho7v, conju);
+					rho8v = _mm_mul_ps(rho8v, conju);
+					rho9v = _mm_mul_ps(rho9v, conju);
+					rho10v = _mm_mul_ps(rho10v, conju);
+					rho11v = _mm_mul_ps(rho11v, conju);
+				}
+
+				rho0v = _mm_add_ps(rho0v, rho6v);
+				rho1v = _mm_add_ps(rho1v, rho7v);
+				rho2v = _mm_add_ps(rho2v, rho8v);
+				rho3v = _mm_add_ps(rho3v, rho9v);
+				rho4v = _mm_add_ps(rho4v, rho10v);
+				rho5v = _mm_add_ps(rho5v, rho11v);
+
+				/**
+				 * Horizontal addition of rho elements
+				 * for computing final dotxf result.
+				 * ptr pointer addresses all 6 rho
+				 * register one by one and store the
+				 * computed result into r buffer.
+				 */
+				scomplex *ptr = (scomplex *)&rho0v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[0].real += ptr[i].real;
+					r[0].imag += ptr[i].imag;
+				}
+				ptr = (scomplex *)&rho1v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[1].real += ptr[i].real;
+					r[1].imag += ptr[i].imag;
+				}
+				ptr = (scomplex *)&rho2v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[2].real += ptr[i].real;
+					r[2].imag += ptr[i].imag;
+				}
+				ptr = (scomplex *)&rho3v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[3].real += ptr[i].real;
+					r[3].imag += ptr[i].imag;
+				}
+				ptr = (scomplex *)&rho4v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[4].real += ptr[i].real;
+					r[4].imag += ptr[i].imag;
+				}
+				ptr = (scomplex *)&rho5v;
+				for(dim_t i = 0; i < 2; i++)
+				{
+					r[5].real += ptr[i].real;
+					r[5].imag += ptr[i].imag;
+				}
+			}
+		}
+                /*handles remainder cases*/
+                if(rem)
+                {
+                        if ( bli_is_noconj( conjx_use ) )
+                        {
+
+                                PRAGMA_SIMD
+                                        for(dim_t p = 0; p < 6 ; p++)
+                                        {
+                                                PASTEMAC(c,axpys)( a[i + p*lda], x[i], r[p] );
+                                        }
+                        }
+                        else
+                        {
+                                PRAGMA_SIMD
+                                        for(dim_t p = 0; p < 6 ; p++)
+                                        {
+                                                PASTEMAC(c,axpyjs)( a[i + p*lda], x[i], r[p] );
+                                        }
+
+                        }
+                }
+
+                if ( bli_is_conj( conjat ) )
+		{
+                        for ( dim_t i = 0; i < 6; ++i )
+			{
+				PASTEMAC(c,conjs)( r[i] );
+			}
+		}
+
+                /*scaling dot product result with alpha and
+                 * adding the result to vector
+                 */
+                for ( dim_t i = 0; i < 6; ++i )
+                {
+                        PASTEMAC(c,axpys)( *alpha, r[i], y[i] );
+                }
+	}
+	else
+	{
+		/* Query the context for the kernel function pointer. */
+		const num_t              dt     = PASTEMAC(c,type);
+		PASTECH(c,dotxv_ker_ft) kfp_dv
+			=
+			bli_cntx_get_l1v_ker_dt( dt, BLIS_DOTXV_KER, cntx );
+
+		for ( dim_t i = 0; i < b_n; ++i )
+		{
+			scomplex* restrict a1   = a + (0  )*inca + (i  )*lda;
+	                scomplex* restrict x1   = x + (0  )*incx;
+	                scomplex* restrict psi1 = y + (i  )*incy;
+
+	                kfp_dv
+	                        (
+	                         conjat,
+	                         conjx,
+	                         m,
+	                         alpha,
+	                         a1, inca,
+	                         x1, incx,
+	                         beta,
+	                         psi1,
+	                         cntx
+				);
+		}
+	}
+}
 
