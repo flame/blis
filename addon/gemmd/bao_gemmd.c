@@ -197,9 +197,7 @@ void bao_gemmd_int
 	// In this function, we choose the gemmd implementation that is executed
 	// on each thread.
 
-#if 1
-	// Call the block-panel algorithm that calls the kernel directly, which
-	// exposes edge-case handling.
+	// Call the block-panel algorithm.
 	bao_gemmd_bp_var1
 	(
 	  alpha,
@@ -212,22 +210,6 @@ void bao_gemmd_int
 	  rntm,
 	  thread
 	);
-#else
-	// Call the block-panel algorithm that calls the kernel indirectly via a
-	// wrapper function, which hides edge-case handling.
-	bao_gemmd_bp_var2
-	(
-	  alpha,
-	  a,
-	  d,
-	  b,
-	  beta,
-	  c,
-	  cntx,
-	  rntm,
-	  thread
-	);
-#endif
 }
 
 //
