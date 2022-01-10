@@ -100,7 +100,7 @@ void bli_sgemm_haswell_asm_16x6
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
 
-	GEMM_UKR_SETUP_CT( s, 16, 6, true );
+	GEMM_UKR_SETUP_CT( s, 16, 6, false );
 
 	begin_asm()
 
