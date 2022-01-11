@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -83,14 +84,10 @@ int main( int argc, char** argv )
 	m_input = 3;
 	k_input = 1;
 #endif
-
-#if 1
-	//dt = BLIS_FLOAT;
-	dt = BLIS_DOUBLE;
-#else
+	
+	// herk supports complex and double complex 
 	//dt = BLIS_SCOMPLEX;
 	dt = BLIS_DCOMPLEX;
-#endif
 
 	uploc = BLIS_LOWER;
 	//uploc = BLIS_UPPER;
@@ -145,7 +142,7 @@ int main( int argc, char** argv )
 
 
 		bli_copym( &c, &c_save );
-	
+
 		dtime_save = DBL_MAX;
 
 		for ( r = 0; r < n_repeats; ++r )
@@ -171,14 +168,14 @@ int main( int argc, char** argv )
 #else
 		if ( bli_is_float( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  kk     = bli_obj_width_after_trans( &a );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			float*   alphap = bli_obj_buffer( &alpha );
-			float*   ap     = bli_obj_buffer( &a );
-			float*   betap  = bli_obj_buffer( &beta );
-			float*   cp     = bli_obj_buffer( &c );
+			f77_int mm     = bli_obj_length( &c );
+			f77_int kk     = bli_obj_width_after_trans( &a );
+			f77_int lda    = bli_obj_col_stride( &a );
+			f77_int ldc    = bli_obj_col_stride( &c );
+			float*  alphap = bli_obj_buffer( &alpha );
+			float*  ap     = bli_obj_buffer( &a );
+			float*  betap  = bli_obj_buffer( &beta );
+			float*  cp     = bli_obj_buffer( &c );
 
 			ssyrk_( &f77_uploc,
 			        &f77_transa,
@@ -191,14 +188,14 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_double( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  kk     = bli_obj_width_after_trans( &a );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			double*  alphap = bli_obj_buffer( &alpha );
-			double*  ap     = bli_obj_buffer( &a );
-			double*  betap  = bli_obj_buffer( &beta );
-			double*  cp     = bli_obj_buffer( &c );
+			f77_int mm     = bli_obj_length( &c );
+			f77_int kk     = bli_obj_width_after_trans( &a );
+			f77_int lda    = bli_obj_col_stride( &a );
+			f77_int ldc    = bli_obj_col_stride( &c );
+			double* alphap = bli_obj_buffer( &alpha );
+			double* ap     = bli_obj_buffer( &a );
+			double* betap  = bli_obj_buffer( &beta );
+			double* cp     = bli_obj_buffer( &c );
 
 			dsyrk_( &f77_uploc,
 			        &f77_transa,
@@ -211,14 +208,14 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_scomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  kk     = bli_obj_width_after_trans( &a );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			float*     alphap = bli_obj_buffer( &alpha );
-			scomplex*  ap     = bli_obj_buffer( &a );
-			float*     betap  = bli_obj_buffer( &beta );
-			scomplex*  cp     = bli_obj_buffer( &c );
+			f77_int   mm     = bli_obj_length( &c );
+			f77_int   kk     = bli_obj_width_after_trans( &a );
+			f77_int   lda    = bli_obj_col_stride( &a );
+			f77_int   ldc    = bli_obj_col_stride( &c );
+			float*    alphap = bli_obj_buffer( &alpha );
+			scomplex* ap     = bli_obj_buffer( &a );
+			float*    betap  = bli_obj_buffer( &beta );
+			scomplex* cp     = bli_obj_buffer( &c );
 
 			cherk_( &f77_uploc,
 			        &f77_transa,
@@ -231,14 +228,14 @@ int main( int argc, char** argv )
 		}
 		else if ( bli_is_dcomplex( dt ) )
 		{
-			f77_int  mm     = bli_obj_length( &c );
-			f77_int  kk     = bli_obj_width_after_trans( &a );
-			f77_int  lda    = bli_obj_col_stride( &a );
-			f77_int  ldc    = bli_obj_col_stride( &c );
-			double*    alphap = bli_obj_buffer( &alpha );
-			dcomplex*  ap     = bli_obj_buffer( &a );
-			double*    betap  = bli_obj_buffer( &beta );
-			dcomplex*  cp     = bli_obj_buffer( &c );
+			f77_int   mm     = bli_obj_length( &c );
+			f77_int   kk     = bli_obj_width_after_trans( &a );
+			f77_int   lda    = bli_obj_col_stride( &a );
+			f77_int   ldc    = bli_obj_col_stride( &c );
+			double*   alphap = bli_obj_buffer( &alpha );
+			dcomplex* ap     = bli_obj_buffer( &a );
+			double*   betap  = bli_obj_buffer( &beta );
+			dcomplex* cp     = bli_obj_buffer( &c );
 
 			zherk_( &f77_uploc,
 			        &f77_transa,

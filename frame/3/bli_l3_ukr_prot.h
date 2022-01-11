@@ -42,6 +42,8 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype_out* restrict alpha, \
        ctype_in*  restrict a, \

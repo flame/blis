@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -97,6 +97,11 @@ void bli_gks_init( void )
 #endif
 
 		// AMD architectures
+#ifdef BLIS_CONFIG_ZEN3
+		bli_gks_register_cntx( BLIS_ARCH_ZEN3,        bli_cntx_init_zen3,
+		                                              bli_cntx_init_zen3_ref,
+		                                              bli_cntx_init_zen3_ind );
+#endif
 #ifdef BLIS_CONFIG_ZEN2
 		bli_gks_register_cntx( BLIS_ARCH_ZEN2,        bli_cntx_init_zen2,
 		                                              bli_cntx_init_zen2_ref,
@@ -449,6 +454,11 @@ void bli_gks_register_cntx
 	e_val = bli_check_valid_mc_mod_mult( mc, nr ); bli_check_error_code( e_val );
 	e_val = bli_check_valid_nc_mod_mult( nc, mr ); bli_check_error_code( e_val );
 #endif
+
+	// Verify that the register blocksizes in the context are sufficiently large
+	// relative to the maximum stack buffer size defined at configure-time.
+	e_val = bli_check_sufficient_stack_buf_size( gks_id_nat );
+	bli_check_error_code( e_val );
 }
 
 // -----------------------------------------------------------------------------

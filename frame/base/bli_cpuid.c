@@ -5,7 +5,8 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -131,6 +132,10 @@ arch_t bli_cpuid_query_id( void )
 
 		// Check for each AMD configuration that is enabled, check for that
 		// microarchitecture. We check from most recent to most dated.
+#ifdef BLIS_CONFIG_ZEN3
+		if ( bli_cpuid_is_zen3( family, model, features ) )
+			return BLIS_ARCH_ZEN3;
+#endif
 #ifdef BLIS_CONFIG_ZEN2
 		if ( bli_cpuid_is_zen2( family, model, features ) )
 			return BLIS_ARCH_ZEN2;
@@ -278,6 +283,35 @@ bool bli_cpuid_is_penryn
 
 // -----------------------------------------------------------------------------
 
+bool bli_cpuid_is_zen3
+     (
+       uint32_t family,
+       uint32_t model,
+       uint32_t features
+     )
+{
+	// Check for expected CPU features.
+	const uint32_t expected = FEATURE_AVX  |
+	                          FEATURE_FMA3 |
+	                          FEATURE_AVX2;
+
+	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+
+	// All Zen3 cores have a family of 0x19.
+	if ( family != 0x19 ) return FALSE;
+
+	// Finally, check for specific models:
+	// - 0x00 ~ 0xff
+	// NOTE: We accept any model because the family 25 (0x19) is unique.
+	const bool is_arch
+	=
+	( 0x00 <= model && model <= 0xff );
+
+	if ( !is_arch ) return FALSE;
+
+	return TRUE;
+}
+
 bool bli_cpuid_is_zen2
      (
        uint32_t family,
@@ -296,7 +330,9 @@ bool bli_cpuid_is_zen2
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x30-0xff (THIS NEEDS UPDATING)
+	// - 0x30 ~ 0xff
+	// NOTE: We must check model because the family 23 (0x17) is shared with
+	// zen.
 	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0xff );
@@ -324,10 +360,12 @@ bool bli_cpuid_is_zen
 	if ( family != 0x17 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x00-0xff (THIS NEEDS UPDATING)
+	// - 0x00 ~ 0x2f
+	// NOTE: We must check model because the family 23 (0x17) is shared with
+	// zen2.
 	const bool is_arch
 	=
-	( 0x00 <= model && model <= 0xff );
+	( 0x00 <= model && model <= 0x2f );
 
 	if ( !is_arch ) return FALSE;
 
@@ -352,7 +390,7 @@ bool bli_cpuid_is_excavator
 	if ( family != 0x15 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x60-0x7f
+	// - 0x60 ~ 0x7f
 	const bool is_arch
 	=
 	( 0x60 <= model && model <= 0x7f );
@@ -380,7 +418,7 @@ bool bli_cpuid_is_steamroller
 	if ( family != 0x15 ) return FALSE;
 
 	// Finally, check for specific models:
-	// - 0x30-0x3f
+	// - 0x30 ~ 0x3f
 	const bool is_arch
 	=
 	( 0x30 <= model && model <= 0x3f );
@@ -409,7 +447,7 @@ bool bli_cpuid_is_piledriver
 
 	// Finally, check for specific models:
 	// - 0x02
-	// - 0x10-0x1f
+	// - 0x10 ~ 0x1f
 	const bool is_arch
 	=
 	model == 0x02 || ( 0x10 <= model && model <= 0x1f );

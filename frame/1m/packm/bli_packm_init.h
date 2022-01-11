@@ -32,24 +32,13 @@
 
 */
 
-siz_t bli_packm_init
+BLIS_EXPORT_BLIS bool bli_packm_init
      (
        obj_t*  a,
        obj_t*  p,
        cntx_t* cntx,
-       cntl_t* cntl
-     );
-
-BLIS_EXPORT_BLIS siz_t bli_packm_init_pack
-     (
-       invdiag_t invert_diag,
-       pack_t    schema,
-       packord_t pack_ord_if_up,
-       packord_t pack_ord_if_lo,
-       bszid_t   bmult_id_m,
-       bszid_t   bmult_id_n,
-       obj_t*    a,
-       obj_t*    p,
-       cntx_t*   cntx
+       rntm_t* rntm,
+       cntl_t* cntl,
+       thrinfo_t* thread
      );
 

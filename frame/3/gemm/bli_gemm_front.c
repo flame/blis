@@ -53,10 +53,6 @@ void bli_gemm_front
 	obj_t   b_local;
 	obj_t   c_local;
 
-	// Check parameters.
-	if ( bli_error_checking_is_enabled() )
-		bli_gemm_check( alpha, a, b, beta, c, cntx );
-
 	// If C has a zero dimension, return early.
 	if ( bli_obj_has_zero_dim( c ) )
 	{
@@ -90,6 +86,14 @@ void bli_gemm_front
 	bli_obj_alias_to( a, &a_local );
 	bli_obj_alias_to( b, &b_local );
 	bli_obj_alias_to( c, &c_local );
+
+	// Set the obj_t buffer field to the location currently implied by the row
+	// and column offsets and then zero the offsets. If any of the original
+	// obj_t's were views into larger matrices, this step effectively makes
+	// those obj_t's "forget" their lineage.
+	bli_obj_reset_origin( &a_local );
+	bli_obj_reset_origin( &b_local );
+	bli_obj_reset_origin( &c_local );
 
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
@@ -145,14 +149,6 @@ void bli_gemm_front
 	// now been typecast and attached to the matrices above.
 	alpha = &BLIS_ONE;
 	beta  = &BLIS_ONE;
-
-#ifdef BLIS_ENABLE_GEMM_MD
-	// Don't perform the following optimization for ccr or crc cases, as
-	// those cases are sensitive to the ukernel storage preference (ie:
-	// transposing the operation would break them).
-	if ( !bli_gemm_md_is_ccr( &a_local, &b_local, &c_local ) &&
-	     !bli_gemm_md_is_crc( &a_local, &b_local, &c_local ) )
-#endif
 
 	// Parse and interpret the contents of the rntm_t object to properly
 	// set the ways of parallelism for each loop, and then make any
@@ -256,7 +252,7 @@ void bli_gemm_front
 	// Invoke the internal back-end via the thread handler.
 	bli_l3_thread_decorator
 	(
-	  bli_gemm_int,
+	  bli_l3_int,
 	  BLIS_GEMM, // operation family id
 	  alpha,
 	  &a_local,
@@ -286,91 +282,4 @@ void bli_gemm_front
 #endif
 #endif
 }
-
-// -----------------------------------------------------------------------------
-
-#if 0
-	if ( bli_obj_dt( a ) != bli_obj_dt( b ) ||
-	     bli_obj_dt( a ) != bli_obj_dt( c ) ||
-	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) )
-	{
-		const bool a_is_real = bli_obj_is_real( a );
-		const bool a_is_comp = bli_obj_is_complex( a );
-		const bool b_is_real = bli_obj_is_real( b );
-		const bool b_is_comp = bli_obj_is_complex( b );
-		const bool c_is_real = bli_obj_is_real( c );
-		const bool c_is_comp = bli_obj_is_complex( c );
-
-		const bool a_is_single = bli_obj_is_single_prec( a );
-		const bool a_is_double = bli_obj_is_double_prec( a );
-		const bool b_is_single = bli_obj_is_single_prec( b );
-		const bool b_is_double = bli_obj_is_double_prec( b );
-		const bool c_is_single = bli_obj_is_single_prec( c );
-		const bool c_is_double = bli_obj_is_double_prec( c );
-
-		const bool comp_single = bli_obj_comp_prec( c ) == BLIS_SINGLE_PREC;
-		const bool comp_double = bli_obj_comp_prec( c ) == BLIS_DOUBLE_PREC;
-
-		const bool mixeddomain = bli_obj_domain( c ) != bli_obj_domain( a ) ||
-		                         bli_obj_domain( c ) != bli_obj_domain( b );
-
-		( void )a_is_real; ( void )a_is_comp;
-		( void )b_is_real; ( void )b_is_comp;
-		( void )c_is_real; ( void )c_is_comp;
-		( void )a_is_single; ( void )a_is_double;
-		( void )b_is_single; ( void )b_is_double;
-		( void )c_is_single; ( void )c_is_double;
-		( void )comp_single; ( void )comp_double;
-
-		if (
-		     //( c_is_comp && a_is_comp && b_is_real ) ||
-		     //( c_is_comp && a_is_real && b_is_comp ) ||
-		     //( c_is_real && a_is_comp && b_is_comp ) ||
-		     //( c_is_comp && a_is_real && b_is_real ) ||
-		     //( c_is_real && a_is_comp && b_is_real ) ||
-		     //( c_is_real && a_is_real && b_is_comp ) ||
-		     //FALSE
-		     TRUE
-		   )
-		{
-			if (
-			     ( c_is_single && a_is_single && b_is_single && mixeddomain ) ||
-			     ( c_is_single && a_is_single && b_is_single && comp_single ) ||
-			     ( c_is_single && a_is_single && b_is_single && comp_double ) ||
-			     ( c_is_single && a_is_single && b_is_double                ) ||
-			     ( c_is_single && a_is_double && b_is_single                ) ||
-			     ( c_is_double && a_is_single && b_is_single                ) ||
-			     ( c_is_single && a_is_double && b_is_double                ) ||
-			     ( c_is_double && a_is_single && b_is_double                ) ||
-			     ( c_is_double && a_is_double && b_is_single                ) ||
-			     ( c_is_double && a_is_double && b_is_double && comp_single ) ||
-			     ( c_is_double && a_is_double && b_is_double && comp_double ) ||
-			     ( c_is_double && a_is_double && b_is_double && mixeddomain ) ||
-			     FALSE
-			   )
-				bli_gemm_md_front( alpha, a, b, beta, c, cntx, cntl );
-			else
-				bli_gemm_md_zgemm( alpha, a, b, beta, c, cntx, cntl );
-		}
-		else
-			bli_gemm_md_zgemm( alpha, a, b, beta, c, cntx, cntl );
-		return;
-	}
-#else
-#if 0
-	// If any of the storage datatypes differ, or if the execution precision
-	// differs from the storage precision of C, utilize the mixed datatype
-	// code path.
-	// NOTE: We could check the exec dt against the storage dt of C, but for
-	// now we don't support the caller setting the execution domain
-	// explicitly.
-	if ( bli_obj_dt( a ) != bli_obj_dt( b ) ||
-	     bli_obj_dt( a ) != bli_obj_dt( c ) ||
-	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) )
-	{
-		bli_gemm_md_front( alpha, a, b, beta, c, cntx, cntl );
-		return;
-	}
-#endif
-#endif
 

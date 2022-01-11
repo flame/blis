@@ -39,6 +39,8 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a, \
@@ -58,16 +60,19 @@ void PASTEMAC(ch,opname) \
 	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f( \
-	   k, \
-	   alpha, \
-	   a, \
-	   b, \
-	   beta, \
-	   c, rs_c, cs_c, \
-	   data, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  m, \
+	  n, \
+	  k, \
+	  alpha, \
+	  a, \
+	  b, \
+	  beta, \
+	  c, rs_c, cs_c, \
+	  data, \
+	  cntx  \
+	); \
 } \
 
 INSERT_GENTFUNC_BASIC2( gemm_ukernel, gemm, BLIS_GEMM_UKR )
@@ -98,17 +103,18 @@ void PASTEMAC(ch,opname) \
 	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f( \
-	   k, \
-	   alpha, \
-	   a1x, \
-	   a11, \
-	   bx1, \
-	   b11, \
-	   c11, rs_c, cs_c, \
-	   data, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  k, \
+	  alpha, \
+	  a1x, \
+	  a11, \
+	  bx1, \
+	  b11, \
+	  c11, rs_c, cs_c, \
+	  data, \
+	  cntx  \
+	); \
 } \
 
 INSERT_GENTFUNC_BASIC2( gemmtrsm_l_ukernel, gemmtrsm, BLIS_GEMMTRSM_L_UKR )
@@ -136,13 +142,14 @@ void PASTEMAC(ch,opname) \
 	PASTECH2(ch,tname,_ukr_ft) f = bli_cntx_get_l3_vir_ukr_dt( dt, kerid, cntx ); \
 \
 	/* Invoke the typed function for the given datatype. */ \
-	f( \
-	   a, \
-	   b, \
-	   c, rs_c, cs_c, \
-	   data, \
-	   cntx  \
-	 ); \
+	f \
+	( \
+	  a, \
+	  b, \
+	  c, rs_c, cs_c, \
+	  data, \
+	  cntx  \
+	); \
 } \
 
 INSERT_GENTFUNC_BASIC2( trsm_l_ukernel, trsm, BLIS_TRSM_L_UKR )

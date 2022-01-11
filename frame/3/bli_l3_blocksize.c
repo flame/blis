@@ -51,8 +51,8 @@ dim_t bli_l3_determine_kc
 
 	if      ( family == BLIS_GEMM )
 		return bli_gemm_determine_kc( direct, i, dim, a, b, bszid, cntx );
-	else if ( family == BLIS_HERK )
-		return bli_herk_determine_kc( direct, i, dim, a, b, bszid, cntx );
+	else if ( family == BLIS_GEMMT )
+		return bli_gemmt_determine_kc( direct, i, dim, a, b, bszid, cntx );
 	else if ( family == BLIS_TRMM )
 		return bli_trmm_determine_kc( direct, i, dim, a, b, bszid, cntx );
 	else if ( family == BLIS_TRSM )
@@ -91,7 +91,7 @@ dim_t PASTEMAC0(opname) \
 }
 
 GENFRONT( gemm_determine_kc, gemm )
-GENFRONT( herk_determine_kc, herk )
+GENFRONT( gemmt_determine_kc, gemmt )
 GENFRONT( trmm_determine_kc, trmm )
 GENFRONT( trsm_determine_kc, trsm )
 
@@ -201,7 +201,7 @@ dim_t PASTEMAC0(opname) \
 	b_alg = bli_blksz_get_def( dt, bsize ); \
 	b_max = bli_blksz_get_max( dt, bsize ); \
 \
-	/* Notice that for herk, we do not need to perform any special handling
+	/* Notice that for gemmt, we do not need to perform any special handling
 	   for the default and maximum kc blocksizes vis-a-vis MR or NR. */ \
 \
 	/* Call the bli_determine_blocksize_[fb]_sub() helper routine defined
@@ -211,8 +211,8 @@ dim_t PASTEMAC0(opname) \
 	return b_use; \
 }
 
-GENFRONT( herk_determine_kc_f, f )
-GENFRONT( herk_determine_kc_b, b )
+GENFRONT( gemmt_determine_kc_f, f )
+GENFRONT( gemmt_determine_kc_b, b )
 
 // -----------------------------------------------------------------------------
 

@@ -33,29 +33,25 @@
 
 */
 
+#include "bli_packm_alloc.h"
 #include "bli_packm_cntl.h"
 #include "bli_packm_check.h"
 #include "bli_packm_init.h"
 #include "bli_packm_int.h"
+#include "bli_packm_scalar.h"
 
 #include "bli_packm_part.h"
 
-#include "bli_packm_var.h"
-
 #include "bli_packm_struc_cxk.h"
-#include "bli_packm_struc_cxk_4mi.h"
-#include "bli_packm_struc_cxk_3mis.h"
-#include "bli_packm_struc_cxk_rih.h"
 #include "bli_packm_struc_cxk_1er.h"
 
 #include "bli_packm_cxk.h"
-#include "bli_packm_cxk_4mi.h"
-#include "bli_packm_cxk_3mis.h"
-#include "bli_packm_cxk_rih.h"
 #include "bli_packm_cxk_1er.h"
 
 // Mixed datatype support.
 #ifdef BLIS_ENABLE_GEMM_MD
-#include "bli_packm_md.h"
+#include "bli_packm_struc_cxk_md.h"
 #endif
+
+#include "bli_packm_blk_var1.h"
 

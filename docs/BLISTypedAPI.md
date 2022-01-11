@@ -2015,15 +2015,8 @@ char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 ```
 
 Possible implementation (ie: the `ind_t method` argument) types are:
- * `BLIS_3MH`: Implementation based on the 3m method applied at the highest level, outside the 5th loop around the microkernel.
- * `BLIS_3M1`: Implementation based on the 3m method applied within the 1st loop around the microkernel.
- * `BLIS_4MH`: Implementation based on the 4m method applied at the highest level, outside the 5th loop around the microkernel.
- * `BLIS_4M1B`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that the 1st loop is fissured into two loops, the first of which multiplies the real part of the current micropanel of packed matrix B (against all real and imaginary parts of packed matrix A), and the second of which multiplies the imaginary part of the current micropanel of packed matrix B.
- * `BLIS_4M1A`: Implementation based on the 4m method applied within the 1st loop around the microkernel. Computation is ordered such that real and imaginary components of the current micropanels are completely used before proceeding to the next virtual microkernel invocation.
  * `BLIS_1M`: Implementation based on the 1m method. (This is the default induced method when real domain kernels are present but complex kernels are missing.)
  * `BLIS_NAT`: Implementation based on "native" execution (ie: NOT an induced method).
-
-**NOTE**: `BLIS_3M3` and `BLIS_3M2` have been deprecated from the `typedef enum` of `ind_t`, and `BLIS_4M1B` is also effectively no longer available, though the `typedef enum` value still exists.
 
 Possible microkernel types (ie: the return values for `bli_info_get_*_ukr_impl_string()`) are:
  * `BLIS_REFERENCE_UKERNEL` (`"refrnce"`): This value is returned when the queried microkernel is provided by the reference implementation.

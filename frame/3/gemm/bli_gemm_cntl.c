@@ -40,10 +40,11 @@ cntl_t* bli_gemm_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
-	return bli_gemmbp_cntl_create( rntm, family, schema_a, schema_b );
+	return bli_gemmbp_cntl_create( rntm, family, schema_a, schema_b, ker );
 }
 
 // -----------------------------------------------------------------------------
@@ -53,22 +54,21 @@ cntl_t* bli_gemmbp_cntl_create
        rntm_t* rntm,
        opid_t  family,
        pack_t  schema_a,
-       pack_t  schema_b
+       pack_t  schema_b,
+       void_fp ker
      )
 {
 	void_fp macro_kernel_fp;
-	void_fp packa_fp;
-	void_fp packb_fp;
 
-	// Use the function pointers to the macrokernels that use slab
-	// assignment of micropanels to threads in the jr and ir loops.
+	// Choose the default macrokernel based on the operation family...
 	if      ( family == BLIS_GEMM ) macro_kernel_fp = bli_gemm_ker_var2;
-	else if ( family == BLIS_HERK ) macro_kernel_fp = bli_herk_x_ker_var2;
+	else if ( family == BLIS_GEMMT ) macro_kernel_fp = bli_gemmt_x_ker_var2;
 	else if ( family == BLIS_TRMM ) macro_kernel_fp = bli_trmm_xx_ker_var2;
 	else /* should never execute */ macro_kernel_fp = NULL;
 
-	packa_fp = bli_packm_blk_var1;
-	packb_fp = bli_packm_blk_var1;
+	// ...unless a non-NULL kernel function pointer is passed in, in which
+	// case we use that instead.
+	if ( ker ) macro_kernel_fp = ker;
 
 	// Create two nodes for the macro-kernel.
 	cntl_t* gemm_cntl_bu_ke = bli_gemm_cntl_create_node
@@ -93,8 +93,7 @@ cntl_t* bli_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packa = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_gemm_packa,  // pack the left-hand operand
-	  packa_fp,
+	  bli_l3_packa,  // pack the left-hand operand
 	  BLIS_MR,
 	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
@@ -119,10 +118,9 @@ cntl_t* bli_gemmbp_cntl_create
 	cntl_t* gemm_cntl_packb = bli_packm_cntl_create_node
 	(
 	  rntm,
-	  bli_gemm_packb,  // pack the right-hand operand
-	  packb_fp,
-	  BLIS_KR,
+	  bli_l3_packb,  // pack the right-hand operand
 	  BLIS_NR,
+	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?
@@ -167,8 +165,8 @@ cntl_t* bli_gemmpb_cntl_create
 {
 	void_fp macro_kernel_p = bli_gemm_ker_var1;
 
-	// Change the macro-kernel if the operation family is herk or trmm.
-	//if      ( family == BLIS_HERK ) macro_kernel_p = bli_herk_x_ker_var2;
+	// Change the macro-kernel if the operation family is gemmt or trmm.
+	//if      ( family == BLIS_GEMMT ) macro_kernel_p = bli_gemmt_x_ker_var2;
 	//else if ( family == BLIS_TRMM ) macro_kernel_p = bli_trmm_xx_ker_var2;
 
 	// Create two nodes for the macro-kernel.
@@ -194,8 +192,8 @@ cntl_t* bli_gemmpb_cntl_create
 	(
 	  bli_gemm_packb,  // pack the right-hand operand
 	  bli_packm_blk_var1,
-	  BLIS_KR,
 	  BLIS_MR,
+	  BLIS_KR,
 	  FALSE,   // do NOT invert diagonal
 	  FALSE,   // reverse iteration if upper?
 	  FALSE,   // reverse iteration if lower?

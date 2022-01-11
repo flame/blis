@@ -285,8 +285,6 @@ void libblis_test_syr2k_impl
 	{
 		case BLIS_TEST_SEQ_FRONT_END:
 		bli_syr2k( alpha, a, b, beta, c );
-		//bli_syr2k4m( alpha, a, b, beta, c );
-		//bli_syr2k3m( alpha, a, b, beta, c );
 		break;
 
 		default:

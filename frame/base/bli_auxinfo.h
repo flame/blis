@@ -74,12 +74,14 @@ BLIS_INLINE inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
 	return ai->ps_b;
 }
 
-#if 0
-BLIS_INLINE inc_t bli_auxinfo_dt_on_output( auxinfo_t* ai )
+BLIS_INLINE void_fp bli_auxinfo_ukr( auxinfo_t* ai )
 {
-	return ai->dt_on_output;
+    return ai->ukr;
 }
-#endif
+BLIS_INLINE void* bli_auxinfo_params( auxinfo_t* ai )
+{
+    return ai->params;
+}
 
 
 // auxinfo_t field modification
@@ -125,12 +127,14 @@ BLIS_INLINE void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
 	ai->ps_b = ps;
 }
 
-#if 0
-BLIS_INLINE void bli_auxinfo_set_dt_on_output( num_t dt_on_output, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_ukr( void_fp ukr, auxinfo_t* ai )
 {
-	ai->dt_on_output = dt_on_output;
+    ai->ukr = ukr;
 }
-#endif
+BLIS_INLINE void bli_auxinfo_set_params( void* params, auxinfo_t* ai )
+{
+    ai->params = params;
+}
 
-#endif 
+#endif
 

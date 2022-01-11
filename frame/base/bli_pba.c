@@ -282,17 +282,6 @@ void bli_pba_acquire_v
 #endif
 
 
-void bli_pba_rntm_set_pba
-     (
-       rntm_t* rntm
-     )
-{
-	pba_t* pba = bli_pba_query();
-
-	bli_rntm_set_pba( pba, rntm );
-}
-
-
 siz_t bli_pba_pool_size
      (
        pba_t*    pba,

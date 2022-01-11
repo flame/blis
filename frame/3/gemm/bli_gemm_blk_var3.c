@@ -71,7 +71,7 @@ void bli_gemm_blk_var3
 		                        i, b_alg, b, &b1 );
 
 		// Perform gemm subproblem.
-		bli_gemm_int
+		bli_l3_int
 		(
 		  &BLIS_ONE,
 		  &a1,
@@ -93,7 +93,7 @@ void bli_gemm_blk_var3
 		// can simply overwrite the internal beta scalar with BLIS_ONE once
 		// it has been used in the first iteration. However...
 
-		// Unlike variant 3 of gemm and herk, which reset the internal scalar
+		// Unlike variant 3 of gemm and gemmt, which reset the internal scalar
 		// on C at the end of the first iteration so that subsequent iterations
 		// do not erroneously apply beta more than once, it is important that
 		// this behavior not be applied to trmm. That is because the order of

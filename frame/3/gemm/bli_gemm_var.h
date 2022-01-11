@@ -35,6 +35,16 @@
 
 
 //
+// gemm kernel parameter struct.
+//
+
+typedef struct
+{
+	gemm_ukr_vft ukr;
+} gemm_ker_params_t;
+
+
+//
 // Prototype object-based interfaces.
 //
 
@@ -55,45 +65,7 @@ void PASTEMAC0(opname) \
 GENPROT( gemm_blk_var1 )
 GENPROT( gemm_blk_var2 )
 GENPROT( gemm_blk_var3 )
-GENPROT( gemm_packa )
-GENPROT( gemm_packb )
 
 GENPROT( gemm_ker_var1 )
-
 GENPROT( gemm_ker_var2 )
-
-// Headers for induced algorithms:
-GENPROT( gemm4mb_ker_var2 ) // 4m1b
-
-
-//
-// Prototype BLAS-like interfaces with void pointer operands.
-//
-
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       pack_t  schema_a, \
-       pack_t  schema_b, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       void*   alpha, \
-       void*   a, inc_t cs_a, inc_t is_a, \
-                  dim_t pd_a, inc_t ps_a, \
-       void*   b, inc_t rs_b, inc_t is_b, \
-                  dim_t pd_b, inc_t ps_b, \
-       void*   beta, \
-       void*   c, inc_t rs_c, inc_t cs_c, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
-     );
-
-INSERT_GENTPROT_BASIC0( gemm_ker_var2 )
-
-// Headers for induced algorithms:
-INSERT_GENTPROT_BASIC0( gemm4mb_ker_var2 ) // 4m1b
 

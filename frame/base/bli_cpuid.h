@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2020, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -61,6 +61,7 @@ bool bli_cpuid_is_sandybridge( uint32_t family, uint32_t model, uint32_t feature
 bool bli_cpuid_is_penryn( uint32_t family, uint32_t model, uint32_t features );
 
 // AMD
+bool bli_cpuid_is_zen3( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen2( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_zen( uint32_t family, uint32_t model, uint32_t features );
 bool bli_cpuid_is_excavator( uint32_t family, uint32_t model, uint32_t features );

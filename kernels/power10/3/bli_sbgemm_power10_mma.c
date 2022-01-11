@@ -42,21 +42,23 @@
     __builtin_mma_xvbf16ger2pp (&acc4, ca[1], rb[0]); \
     __builtin_mma_xvbf16ger2pp (&acc5, ca[1], rb[1]); \
     __builtin_mma_xvbf16ger2pp (&acc6, ca[1], rb[2]); \
-    __builtin_mma_xvbf16ger2pp (&acc7, ca[1], rb[3]); 
+    __builtin_mma_xvbf16ger2pp (&acc7, ca[1], rb[3]);
 
 #define B_INCREMENT \
     A0+=16; \
-    B0+=32; 
-    
+    B0+=32;
+
 #define B_AB_PRODUCT \
     LOAD_VECTORS \
     B_INCREMENT \
-    B_ACCUMULATE 
+    B_ACCUMULATE
 
 
 void bli_sbgemm_power10_mma_8x16
     (
-        dim_t               k0,
+        dim_t               m,
+        dim_t               n,
+        dim_t               k,
         float*     restrict alpha,
         bfloat16*  restrict a,
         bfloat16*  restrict b,
@@ -67,8 +69,8 @@ void bli_sbgemm_power10_mma_8x16
     )
 {
 
-    uint64_t k_iter = (k0-1)/4;
-    uint64_t k_left = (k0-1)%4;
+    uint64_t k_iter = (k-1)/4;
+    uint64_t k_left = (k-1)%4;
 
     uint64_t rs_c   = rs_c0;
 
@@ -83,7 +85,7 @@ void bli_sbgemm_power10_mma_8x16
     fv4sf_t *rowC;
 
     // accumulators that will hold the matrix product
-    __vector_quad acc0, acc1, acc2, acc3, 
+    __vector_quad acc0, acc1, acc2, acc3,
                   acc4, acc5, acc6, acc7;
 
     vec_t *ca = (vec_t *) A0;

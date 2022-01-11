@@ -55,8 +55,6 @@ void PASTEMAC0(opname) \
 GENPROT( trsm_blk_var1 )
 GENPROT( trsm_blk_var2 )
 GENPROT( trsm_blk_var3 )
-GENPROT( trsm_packa )
-GENPROT( trsm_packb )
 
 GENPROT( trsm_xx_ker_var2 )
 

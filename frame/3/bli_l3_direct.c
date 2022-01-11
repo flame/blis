@@ -46,7 +46,7 @@ dir_t bli_l3_direct
 	opid_t family = bli_cntl_family( cntl );
 
 	if      ( family == BLIS_GEMM ) return bli_gemm_direct( a, b, c );
-	else if ( family == BLIS_HERK ) return bli_herk_direct( a, b, c );
+	else if ( family == BLIS_GEMMT ) return bli_gemmt_direct( a, b, c );
 	else if ( family == BLIS_TRMM ) return bli_trmm_direct( a, b, c );
 	else if ( family == BLIS_TRSM ) return bli_trsm_direct( a, b, c );
 
@@ -68,14 +68,14 @@ dir_t bli_gemm_direct
 	return BLIS_FWD;
 }
 
-dir_t bli_herk_direct
+dir_t bli_gemmt_direct
      (
        obj_t* a,
        obj_t* b,
        obj_t* c
      )
 {
-	// For herk, movement may be forwards (or backwards).
+	// For gemmt, movement may be forwards (or backwards).
 
 	return BLIS_FWD;
 }

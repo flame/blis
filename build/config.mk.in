@@ -93,6 +93,11 @@ CC                := @CC@
 GCC_OT_4_9_0      := @gcc_older_than_4_9_0@
 GCC_OT_6_1_0      := @gcc_older_than_6_1_0@
 GCC_OT_9_1_0      := @gcc_older_than_9_1_0@
+GCC_OT_10_1_0     := @gcc_older_than_10_1_0@
+CLANG_OT_9_0_0    := @clang_older_than_9_0_0@
+CLANG_OT_12_0_0   := @clang_older_than_12_0_0@
+AOCC_OT_2_0_0     := @aocc_older_than_2_0_0@
+AOCC_OT_3_0_0     := @aocc_older_than_3_0_0@
 
 # The C++ compiler. NOTE: A C++ is typically not needed.
 CXX               := @CXX@
@@ -184,6 +189,10 @@ MK_ENABLE_CBLAS   := @enable_cblas@
 
 # Whether libblis will depend on libmemkind for certain memory allocations.
 MK_ENABLE_MEMKIND := @enable_memkind@
+
+# The names of the addons to include when building BLIS. If empty, no addons
+# will be included.
+ADDON_LIST        := @addon_list@
 
 # The name of a sandbox defining an alternative gemm implementation. If empty,
 # no sandbox will be used and the conventional gemm implementation will remain

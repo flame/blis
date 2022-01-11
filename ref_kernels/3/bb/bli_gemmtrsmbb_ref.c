@@ -87,6 +87,8 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
 	gemm_ukr \
 	( \
+	  mr, \
+	  nr, \
 	  k, \
 	  minus_one, \
 	  a1x, \

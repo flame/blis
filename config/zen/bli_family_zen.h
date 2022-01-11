@@ -45,6 +45,7 @@
 #define BLIS_THREAD_MAX_IR      1
 #define BLIS_THREAD_MAX_JR      1
 
+#define BLIS_ENABLE_ZEN_BLOCK_SIZES
 
 // Vanilla BLIS disables AMD's small matrix handling by default.
 #if 0
@@ -58,8 +59,8 @@
 
 #define BLIS_SMALL_MATRIX_THRES_TRSM   32768 //128(128+128) => m*(m+n)
 #define BLIS_SMALL_MATRIX_A_THRES_TRSM	128
-#define BLIS_SMALL_MATRIX_A_THRES_M_SYRK	96
-#define BLIS_SMALL_MATRIX_A_THRES_N_SYRK	128
+#define BLIS_SMALL_MATRIX_A_THRES_M_GEMMT	96
+#define BLIS_SMALL_MATRIX_A_THRES_N_GEMMT	128
 
 //This macro will enable  BLIS DGEMM to choose block sizes for a  single instance mode
 #define BLIS_ENABLE_SINGLE_INSTANCE_BLOCK_SIZES 	0
