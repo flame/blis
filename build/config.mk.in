@@ -203,5 +203,7 @@ SANDBOX           := @sandbox@
 # variable is set to the empty value.
 LIBPTHREAD        := @libpthread@
 
+MK_IS_ARCH_ZEN := @enable_aocl_zen@
+
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

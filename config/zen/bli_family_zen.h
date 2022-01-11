@@ -33,12 +33,6 @@
 
 */
 
-// To enable framework optimizations for EPYC family porcessors.
-// With this macro defined, we can call kernels directly from
-// BLAS interfaces for levels 1 & 2.
-// This macro needs to be defined for all EPYC configurations.
-#define BLIS_CONFIG_EPYC
-
 // By default, it is effective to parallelize the outer loops.
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.

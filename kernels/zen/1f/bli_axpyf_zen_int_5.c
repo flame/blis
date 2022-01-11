@@ -108,29 +108,7 @@ void bli_saxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-        for ( i = 0; i < b_n; ++i )
-        {
-            float* a1   = a + (0  )*inca + (i  )*lda;
-            float* chi1 = x + (i  )*incx;
-            float* y1   = y + (0  )*incy;
-            float  alpha_chi1;
-
-            bli_scopycjs( conjx, *chi1, alpha_chi1 );
-            bli_sscals( *alpha, alpha_chi1 );
-
-            bli_saxpyv_zen_int10
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-
-#else
+        if(cntx == NULL) cntx = bli_gks_query_cntx();
         saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -153,8 +131,7 @@ void bli_saxpyf_zen_int_5
               cntx
             );
         }
-
-#endif
+        
         return;
     }
 
@@ -382,29 +359,6 @@ void bli_daxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-        for ( i = 0; i < b_n; ++i )
-        {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
-
-            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
-            bli_dscals( *alpha, alpha_chi1 );
-
-            bli_daxpyv_zen_int10
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-
-#else
         daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -427,8 +381,7 @@ void bli_daxpyf_zen_int_5
               cntx
             );
         }
-
-#endif
+        
         return;
     }
 
@@ -655,29 +608,6 @@ static void bli_daxpyf_zen_int_16x2
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-        for ( i = 0; i < b_n; ++i )
-        {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
-
-            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
-            bli_dscals( *alpha, alpha_chi1 );
-
-            bli_daxpyv_zen_int10
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-
-#else
         daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -701,7 +631,6 @@ static void bli_daxpyf_zen_int_16x2
             );
         }
 
-#endif
         return;
     }
 
@@ -966,43 +895,7 @@ void bli_daxpyf_zen_int_16x4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-#ifdef BLIS_CONFIG_EPYC
-    if(b_n & 2)
-    {
-        bli_daxpyf_zen_int_16x2( conja,
-                              conjx,
-                              m, 2,
-                              alpha, a, inca, lda,
-                              x, incx,
-                              y, incy,
-                              cntx             
-                        );
-        b_n -= 2;
-        a += 2*lda;
-	x += 2 * incx;
-    }
-        for ( i = 0; i < b_n; ++i )
-        {
-            double* a1   = a + (0  )*inca + (i  )*lda;
-            double* chi1 = x + (i  )*incx;
-            double* y1   = y + (0  )*incy;
-            double  alpha_chi1;
-
-            bli_dcopycjs( conjx, *chi1, alpha_chi1 );
-            bli_dscals( *alpha, alpha_chi1 );
-
-            bli_daxpyv_zen_int10
-            (
-              conja,
-              m,
-              &alpha_chi1,
-              a1, inca,
-              y1, incy,
-              cntx
-            );
-        }
-
-#else
+        if(cntx == NULL) cntx = bli_gks_query_cntx();
         daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -1026,7 +919,6 @@ void bli_daxpyf_zen_int_16x4
             );
         }
 
-#endif
         return;
     }
 
