@@ -101,21 +101,21 @@ void bli_thrcomm_cleanup( thrcomm_t* comm )
 
 void bli_thrcomm_barrier( dim_t t_id, thrcomm_t* comm )
 {
-#if 0
+#if BLIS_USE_SYNC_ADD_AND_FETCH_BARRIER
 	if ( comm == NULL || comm->n_threads == 1 ) return;
-	bool  my_sense = comm->sense;
+	gint_t  my_sense = comm->barrier_sense;
 	dim_t my_threads_arrived;
 
-	my_threads_arrived = __sync_add_and_fetch(&(comm->threads_arrived), 1);
+	my_threads_arrived = __sync_add_and_fetch(&(comm->barrier_threads_arrived), 1);
 
 	if ( my_threads_arrived == comm->n_threads )
 	{
-		comm->threads_arrived = 0;
-		comm->sense = !comm->sense;
+		comm->barrier_threads_arrived = 0;
+		comm->barrier_sense = !comm->barrier_sense;
 	}
 	else
 	{
-		volatile bool* listener = &comm->sense;
+		volatile gint_t* listener = &comm->barrier_sense;
 		while( *listener == my_sense ) {}
 	}
 #endif
