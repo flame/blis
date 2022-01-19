@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -159,7 +159,8 @@ void bli_packm_blk_var1
 
 	// Treatment of kappa (ie: packing during scaling) depends on
 	// whether we are executing an induced method.
-	if ( bli_is_nat_packed( schema ) )
+	// For dzgemm, scale alpha during packing.
+	if ( bli_is_nat_packed( schema ) && cntl && bli_cntl_family(cntl) != BLIS_GEMM_MD)
 	{
 		// This branch is for native execution, where we assume that
 		// the micro-kernel will always apply the alpha scalar of the

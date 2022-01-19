@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -323,8 +324,10 @@ void bli_gemm_basic_check
 
 	// When mixing datatypes, make sure that alpha does not have a non-zero
 	// imaginary component.
-	if ( bli_obj_dt( c ) != bli_obj_dt( a ) ||
-	     bli_obj_dt( c ) != bli_obj_dt( b ) ||
+	// To support dzgemm, we continue execution when datatypes of C and A
+	// do not match instead of aborting with an error message.
+	// Non-zero imaginary component of alpha is handled while packing B.
+	if ( bli_obj_dt( c ) != bli_obj_dt( b ) ||
 	     bli_obj_comp_prec( c ) != bli_obj_prec( c ) )
 	if ( !bli_obj_imag_is_zero( alpha ) )
 	{

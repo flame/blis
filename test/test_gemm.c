@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -382,8 +382,7 @@ int main( int argc, char** argv )
                                  cp, ldc
                                  );
 #else
-//Disabled dzgemm function temporarily.
-#if 0
+#if 1
 		    if( bli_is_double( dt_a ) )
 		    {
 		    	dzgemm_(
@@ -401,7 +400,6 @@ int main( int argc, char** argv )
 		    }
 		    else
 		    {
-#else
                     	zgemm_( &f77_transa,
                             &f77_transb,
                             &mm,
@@ -412,7 +410,7 @@ int main( int argc, char** argv )
                             bp, (f77_int*)&ldb,
                             betap,
                             cp, (f77_int*)&ldc );
-//		   }
+		   }
 #endif
 #endif
                 }
