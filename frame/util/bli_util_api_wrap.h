@@ -35,7 +35,8 @@
 // file define different formats of BLAS APIs- uppercase with
 // and without underscore, lowercase without underscore.
 
-#ifdef BLIS_ENABLE_API_WRAPPER
+#ifndef BLIS_ENABLE_NO_UNDERSCORE_API
+#ifndef BLIS_ENABLE_UPPERCASE_API
 //Level 1 APIs
 BLIS_EXPORT_BLIS void SROTG(float  *sa, float  *sb, float  *c, float  *s);
 
@@ -1728,4 +1729,5 @@ BLIS_EXPORT_BLIS void zomatcopy(f77_char* trans,  f77_int* rows,  f77_int* cols,
 BLIS_EXPORT_BLIS void ZOMATCOPY_(f77_char* trans,  f77_int* rows,  f77_int* cols,  const dcomplex* alpha,  const dcomplex* aptr,  f77_int* lda,  dcomplex* bptr,  f77_int* ldb);
 
 
+#endif
 #endif
