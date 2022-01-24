@@ -1,4 +1,4 @@
-##Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
 
 cmake_minimum_required(VERSION 3.0.0)
 
@@ -33,17 +33,20 @@ endif ()
 
 if(${AOCL_BLIS_FAMILY} STREQUAL "zen")
   add_definitions(-DBLIS_FAMILY_ZEN)
+  add_definitions(-DBLIS_CONFIG_EPYC)
   add_definitions(-DBLIS_CONFIG_ZEN)
   add_definitions(-DBLIS_KERNELS_ZEN)
   add_definitions(-DBLIS_KERNELS_HASWELL)
 elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen2")
   add_definitions(-DBLIS_FAMILY_ZEN2)
+  add_definitions(-DBLIS_CONFIG_EPYC)
   add_definitions(-DBLIS_CONFIG_ZEN2)
   add_definitions(-DBLIS_KERNELS_ZEN2)
   add_definitions(-DBLIS_KERNELS_ZEN)
   add_definitions(-DBLIS_KERNELS_HASWELL)
 elseif (${AOCL_BLIS_FAMILY} STREQUAL "zen3")
   add_definitions(-DBLIS_FAMILY_ZEN3)
+  add_definitions(-DBLIS_CONFIG_EPYC)
   add_definitions(-DBLIS_CONFIG_ZEN3)
   add_definitions(-DBLIS_KERNELS_ZEN3)
   add_definitions(-DBLIS_KERNELS_ZEN2)
