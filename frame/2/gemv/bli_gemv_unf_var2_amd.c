@@ -313,27 +313,87 @@ void bli_dgemv_unf_var2
         }
     }
 
-    for ( i = 0; i < n_iter; i += f )
+    dim_t fuse_factor = 8;
+    dim_t f_temp = 0;
+
+    // Change the fuse factor based on
+    // Input size and available kernels
+    // This ensures that fusing is possible when the number of
+    // left over colums is less (better problem decomposition)
+    if (n < 5) fuse_factor = 4; 
+    else if (n < 8) fuse_factor = 5;
+
+    for (i = 0; i < n_iter; i += f)
     {
-        f  = bli_determine_blocksize_dim_f( i, n_iter, BLIS_DGEMV_VAR2_FUSE );
+      f = bli_determine_blocksize_dim_f(i, n_iter, fuse_factor);
 
-        A1 = a + (0  )*rs_at + (i  )*cs_at;
-        x1 = x + (i  )*incx;
+      A1 = a + (i)*cs_at;
+      x1 = x + (i)*incx;
 
-        /* y = y + alpha * A1 * x1; */
-        bli_daxpyf_zen_int_16x4
-        (
-          conja,
-          conjx,
-          n_elem,
-          f,
-          alpha,
-          A1, rs_at, cs_at,
-          x1, incx,
-          y_buf, buf_incy,
-          cntx
-        );
+      // Pick kernel based on problem size
+      switch (f)
+      {
+      case 8:
+
+        bli_daxpyf_zen_int_8(
+            conja,
+            conjx,
+            n_elem,
+            f,
+            alpha,
+            A1, rs_at, cs_at,
+            x1, incx,
+            y_buf, buf_incy,
+            cntx);
+
+        break;
+      default:
+
+        if (f < 5)
+        {
+          bli_daxpyf_zen_int_16x4(
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y_buf, buf_incy,
+              cntx);
+        }
+        else
+        {
+          bli_daxpyf_zen_int_5(
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1, rs_at, cs_at,
+              x1, incx,
+              y_buf, buf_incy,
+              cntx);
+        }
+      }
+
+      // Calculate the next problem size
+      f_temp = bli_determine_blocksize_dim_f(i + f, n_iter, fuse_factor);
+
+      // Change fuse factor based on the next problem size
+      if (f_temp < fuse_factor)
+      {
+        if (f_temp < 5)
+        {
+          fuse_factor = 4;
+        }
+        else
+        {
+          fuse_factor = 5;
+        }
+      }
     }
+
     if ((incy > 1) && bli_mem_is_alloc( &mem_bufY ))
     {
         //store the result from unit strided y_buf to non-unit strided Y
