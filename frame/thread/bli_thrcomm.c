@@ -41,7 +41,7 @@ void* bli_thrcomm_bcast
        void*      to_send,
        thrcomm_t* comm
      )
-{   
+{
 	if ( comm == NULL || comm->n_threads == 1 ) return to_send;
 
 	if ( id == 0 ) comm->sent_object = to_send;
@@ -82,7 +82,7 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 	// the current barrier. The first n-1 threads will spin on this variable
 	// until it changes. The sense variable gets incremented by the last
 	// thread to enter the barrier, just before it exits. But it turns out
-	// that you don't need many unique IDs before you can wrap around. In 
+	// that you don't need many unique IDs before you can wrap around. In
 	// fact, if everything else is working, a binary variable is sufficient,
 	// which is what we do here (i.e., 0 is incremented to 1, which is then
 	// decremented back to 0, and so forth).
@@ -111,8 +111,53 @@ void bli_thrcomm_barrier_atomic( dim_t t_id, thrcomm_t* comm )
 		// If the current thread is NOT the last thread to have arrived, then
 		// it spins on the sense variable until that sense variable changes at
 		// which time these threads will exit the barrier.
-		while ( __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense )
-			; // Empty loop body.
+
+		// A progressive back-off scheme is employed: the configuration (or
+		// configuration family) defines zero or more (up to three) mechanisms
+		// for backoff along with the maximum number of attempts to acquire for
+		// each mechanism. The "outermost" mechanism always gets an unlimited
+		// number of attempts
+
+#ifndef BLIS_BARRIER_YIELD_1
+#define BLIS_BARRIER_YIELD_1
+#endif
+
+#ifdef BLIS_BARRIER_BACKOFF_2
+#define BLIS_BARRIER_BACKOFF_COND_1 i < BLIS_BARRIER_BACKOFF_1
+#else
+#define BLIS_BARRIER_BACKOFF_COND_1 true
+#endif
+
+#ifdef BLIS_BARRIER_BACKOFF_3
+#define BLIS_BARRIER_BACKOFF_COND_2 i < BLIS_BARRIER_BACKOFF_2
+#else
+#define BLIS_BARRIER_BACKOFF_COND_2 true
+#endif
+
+// Always "true" since there is no other backoff mechanism after this
+#define BLIS_BARRIER_BACKOFF_COND_3 true
+
+		// Backoff mechanism 1 (e.g. pause, defaults to an empty loop)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_1 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_1;
+
+#ifdef BLIS_BARRIER_BACKOFF_2
+
+		// Backoff mechanism 2 (e.g. sched_yield)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_2 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_2;
+
+#ifdef BLIS_BARRIER_BACKOFF_3
+
+		// Backoff mechanism 3 (e.g. sleep)
+		for ( gint_t i = 0 ; BLIS_BARRIER_BACKOFF_COND_3 &&
+		                     __atomic_load_n( &comm->barrier_sense, __ATOMIC_ACQUIRE ) == orig_sense ; i++ )
+			BLIS_BARRIER_YIELD_3;
+
+#endif //BLIS_BARRIER_BACKOFF_3
+#endif //BLIS_BARRIER_BACKOFF_2
 	}
 }
 
