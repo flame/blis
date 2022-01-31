@@ -129,6 +129,7 @@ get-refkern-cflags-for   = $(strip $(call load-var-for,CROPTFLAGS,$(1)) \
                                    -DBLIS_CNAME=$(1) \
                                    $(BUILD_CPPFLAGS) \
                                    $(BUILD_SYMFLAGS) \
+                                   -include $(CONFIG_PATH)/$(1)/bli_kernel_defs_$(1).h \
                             )
 
 get-config-cflags-for    = $(strip $(call load-var-for,COPTFLAGS,$(1)) \
