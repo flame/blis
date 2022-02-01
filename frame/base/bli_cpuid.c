@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018-2022, Advanced Micro Devices, Inc. All rights reserved.
    Copyright (C) 2019, Dave Love, University of Manchester
 
    Redistribution and use in source and binary forms, with or without
@@ -501,13 +501,23 @@ bool bli_cpuid_is_bulldozer
 	return TRUE;
 }
 
-bool bli_cpuid_is_avx_supported( void )
+// Check (at runtime) if AVX is supported on the current platform, this is to 
+// ensure that AVX kernels are not used on legacy platforms which results in crash
+
+// The support for AVX is checked only once (when this API is called first time)
+// On subsequent calls the cached value is returned. This is achieved using 
+// pthread_once mechanism since this information does not change once the library
+// is loaded.
+static bool is_avx_supported = FALSE;
+
+
+// Determine if the CPU has support for AVX.
+void bli_cpuid_check_avx_support( void )
 {
 	uint32_t family, model, features;
 
 	// Call the CPUID instruction and parse its results into a family id,
-	// model id, and a feature bit field. The return value encodes the
-	// vendor.
+	// model id, and a feature bit field.
 	bli_cpuid_query( &family, &model, &features );
 
 	// Check for expected CPU features.
@@ -515,9 +525,32 @@ bool bli_cpuid_is_avx_supported( void )
 	                          FEATURE_FMA3    |
 	                          FEATURE_AVX2;
 
-	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
+	if ( !bli_cpuid_has_features( features, expected ) ) 
+	{
+		is_avx_supported = FALSE;
+	}
+	else 
+	{
+		is_avx_supported = TRUE;
+	}
+}
 
-	return TRUE;
+static bli_pthread_once_t once_check_avx_support = BLIS_PTHREAD_ONCE_INIT;
+
+// Ensure that actual support determincation happens only once
+void bli_cpuid_check_avx_support_once( void )
+{
+#ifndef BLIS_CONFIGURETIME_CPUID
+	bli_pthread_once( &once_check_avx_support,  bli_cpuid_check_avx_support );
+#endif
+}
+
+// API to check if AVX is supported or not on the current platform.
+bool bli_cpuid_is_avx_supported( void )
+{
+	bli_cpuid_check_avx_support_once();
+
+	return is_avx_supported;
 }
 
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
