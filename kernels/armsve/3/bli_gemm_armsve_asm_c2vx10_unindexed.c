@@ -118,8 +118,8 @@ void bli_cgemm_armsve_asm_2vx10_unindexed
 GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 "                                                 \n\t"
 " CCOL_PRFM:                                      \n\t"
-" cmp             %3, #1                          \n\t"
-" b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
+// " cmp             %3, #1                          \n\t"
+// " b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
 " mov             x16, %2                         \n\t"
 " prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, %4                    \n\t"
@@ -140,7 +140,7 @@ GEMM_ACOLCMPLX_CONTIGUOUS_LOAD_FWD(z28,z29,p0,%0,x2)
 " prfm            PLDL1KEEP, [x16]                \n\t"
 " add             x16, x16, %4                    \n\t"
 " prfm            PLDL1KEEP, [x16]                \n\t"
-" END_CCOL_PRFM:                                  \n\t"
+// " END_CCOL_PRFM:                                  \n\t"
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
 "                                                 \n\t"
@@ -233,8 +233,8 @@ MOV_COL2(z8 ,z9 ,z10,z11,z16,z17,z18,z19)
 " WRITE_MEM_EXEC:                                 \n\t"
 " mov             x9, %2                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is %2 itself.
-" cmp             %3, #1                          \n\t"
-" b.ne            WRITE_MEM_G                     \n\t"
+// " cmp             %3, #1                          \n\t"
+// " b.ne            WRITE_MEM_G                     \n\t"
 "                                                 \n\t"
 " WRITE_MEM_C:                                    \n\t"
 " fmov            s29, wzr                        \n\t"
@@ -260,38 +260,38 @@ GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
 GEMM_CCMPLX_STORE_COL2_C(z0 ,z1 ,z2 ,z3 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z4 ,z5 ,z6 ,z7 ,p0,%2,%4)
 GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
-" b               END_WRITE_MEM                   \n\t"
-"                                                 \n\t"
-" WRITE_MEM_G:                                    \n\t"
-" add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
-" mov             x3, %3                          \n\t" //  s.t. 2*sizeof(float) = 2*4 = 8.
-" index           z28.s, wzr, w3                  \n\t"
-" fmov            s29, wzr                        \n\t"
-" fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
-" fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
-" b.eq            ZERO_BETA_G_0_1_2_3             \n\t"
-GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
-GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
-GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
-GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
-" ZERO_BETA_G_0_1_2_3:                            \n\t"
-GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
-GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
-"                                                 \n\t"
-" b.eq            ZERO_BETA_G_4_5_6_7_8_9         \n\t"
-GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
-GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
-GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
-GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
-GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
-GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
-" ZERO_BETA_G_4_5_6_7_8_9:                        \n\t"
-GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
-GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
-GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
-"                                                 \n\t"
-" END_WRITE_MEM:                                  \n\t"
-" b               END_EXEC                        \n\t"
+// " b               END_WRITE_MEM                   \n\t"
+// "                                                 \n\t"
+// " WRITE_MEM_G:                                    \n\t"
+// " add             %3, %3, %3                      \n\t" // Skips passed to index is multiplied by 2,
+// " mov             x3, %3                          \n\t" //  s.t. 2*sizeof(float) = 2*4 = 8.
+// " index           z28.s, wzr, w3                  \n\t"
+// " fmov            s29, wzr                        \n\t"
+// " fcmp            s31, #0.0                       \n\t" // Whether Imag(beta) == 0.
+// " fccmp           s30, s29, 0, eq                 \n\t" // Whether Real(beta) == 0.
+// " b.eq            ZERO_BETA_G_0_1_2_3             \n\t"
+// GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
+// GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
+// GEMM_FMLACMPLX_COL2(z20,z21,z22,z23,p0,z12,z13,z14,z15,z30,z31)
+// GEMM_FMLACMPLX_COL2(z24,z25,z26,z27,p0,z16,z17,z18,z19,z30,z31)
+// " ZERO_BETA_G_0_1_2_3:                            \n\t"
+// GEMM_CCMPLX_STORE_COL2_G(z20,z21,z22,z23,p0,z28,%2,%4,x16)
+// GEMM_CCMPLX_STORE_COL2_G(z24,z25,z26,z27,p0,z28,%2,%4,x16)
+// "                                                 \n\t"
+// " b.eq            ZERO_BETA_G_4_5_6_7_8_9         \n\t"
+// GEMM_CCMPLX_LOAD_COL2_G(z12,z13,z14,z15,p0,z28,x9,%4,x16)
+// GEMM_CCMPLX_LOAD_COL2_G(z16,z17,z18,z19,p0,z28,x9,%4,x16)
+// GEMM_CCMPLX_LOAD_COL2_G(z20,z21,z22,z23,p0,z28,x9,%4,x16)
+// GEMM_FMLACMPLX_COL2(z0 ,z1 ,z2 ,z3 ,p0,z12,z13,z14,z15,z30,z31)
+// GEMM_FMLACMPLX_COL2(z4 ,z5 ,z6 ,z7 ,p0,z16,z17,z18,z19,z30,z31)
+// GEMM_FMLACMPLX_COL2(z8 ,z9 ,z10,z11,p0,z20,z21,z22,z23,z30,z31)
+// " ZERO_BETA_G_4_5_6_7_8_9:                        \n\t"
+// GEMM_CCMPLX_STORE_COL2_G(z0 ,z1 ,z2 ,z3 ,p0,z28,%2,%4,x16)
+// GEMM_CCMPLX_STORE_COL2_G(z4 ,z5 ,z6 ,z7 ,p0,z28,%2,%4,x16)
+// GEMM_CCMPLX_STORE_COL2_G(z8 ,z9 ,z10,z11,p0,z28,%2,%4,x16)
+// "                                                 \n\t"
+// " END_WRITE_MEM:                                  \n\t"
+// " b               END_EXEC                        \n\t"
 "                                                 \n\t"
 " END_EXEC:                                       \n\t"
 " mov             %11, #0                         \n\t" // Return normal.
