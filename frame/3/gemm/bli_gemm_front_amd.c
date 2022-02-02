@@ -176,7 +176,7 @@ void bli_gemm_front
 	
 	dim_t m_dim_local = bli_obj_length( &c_local );
 	dim_t n_dim_local = bli_obj_width( &c_local );
-	dim_t k_dim_local = bli_obj_width( &a_local );
+	dim_t k_dim_local = bli_obj_width_after_trans( &a_local );
 	
 	// Regression observed in sgemm native path in cases where m >= 4 * n 
 	// after BLIS_THREAD_RATIO_M updated from 2 to 1 as part of commit 
