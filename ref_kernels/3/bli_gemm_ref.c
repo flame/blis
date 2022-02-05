@@ -40,7 +40,7 @@
 // instructions via constant loop bounds + #pragma omp simd directives.
 
 #undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf, mr, nr ) \
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
 void PASTEMAC3(ch,opname,arch,suf) \
      ( \
@@ -56,14 +56,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t*    restrict cntx  \
      ) \
 { \
-	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+    const dim_t     mr = PASTECH(BLIS_MR_,ch); \
+    const dim_t     nr = PASTECH(BLIS_NR_,ch); \
+\
+	ctype           ab[ mr * nr ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t     rs_ab  = nr; \
 	const inc_t     cs_ab  = 1; \
 \
-	const inc_t     cs_a   = mr; \
-	const inc_t     rs_b   = nr; \
+	const inc_t     cs_a   = PASTECH(BLIS_PACKMR_,ch); \
+	const inc_t     rs_b   = PASTECH(BLIS_PACKNR_,ch); \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
@@ -103,14 +104,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	/* Output/accumulate intermediate result ab based on the storage
 	   of c and the value of beta. */ \
-	if ( cs_c == 1 ) \
+	if ( cs_c == 1 && m == mr && n == nr ) \
 	{ \
-		/* C is row-stored. */ \
+		/* C is row-stored and a full tile. */ \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < m; ++i ) \
-			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < mr ++i ) \
+	        PRAGMA_SIMD \
+			for ( dim_t j = 0; j < nr; ++j ) \
 			PASTEMAC(ch,copys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -119,8 +121,9 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		} \
 		else \
 		{ \
-			for ( dim_t i = 0; i < m; ++i ) \
-			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
+	        PRAGMA_SIMD \
+			for ( dim_t j = 0; j < nr; ++j ) \
 			PASTEMAC(ch,xpbys) \
 			( \
 			  ab[ i*rs_ab + j*cs_ab ], \
@@ -131,7 +134,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 	else \
 	{ \
-		/* C is column-stored or general-stored. */ \
+		/* C is column-stored, general-stored, or an edge case. */ \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
@@ -157,11 +160,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-//INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-GENTFUNC( float,    s, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 16 )
-GENTFUNC( double,   d, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( scomplex, c, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 8 )
-GENTFUNC( dcomplex, z, gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, 4, 4 )
+INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 #else
 

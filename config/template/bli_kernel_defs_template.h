@@ -43,18 +43,18 @@
 // an optimized kernel is provided).
 //
 
-#define BLIS_MR_Z   4
+#define BLIS_MR_z   4
 
-#define BLIS_NR_Z   4
+#define BLIS_NR_z   4
 
 //
 // PACKMR/PACKNR do not need to be defined unless they are different from the
 // "normal" MR/NR.
 //
 
-//#define BLIS_PACKMR_Z   4
+//#define BLIS_PACKMR_z   4
 
-//#define BLIS_PACKNR_Z   4
+//#define BLIS_PACKNR_z   4
 
 //#endif
 

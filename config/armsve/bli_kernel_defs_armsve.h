@@ -44,15 +44,15 @@
 // armsve can't use reference kernels!
 //
 
-#define BLIS_MR_S   -1
-#define BLIS_MR_D   -1
-#define BLIS_MR_C   -1
-#define BLIS_MR_Z   -1
+#define BLIS_MR_s   -1
+#define BLIS_MR_d   -1
+#define BLIS_MR_c   -1
+#define BLIS_MR_z   -1
 
-#define BLIS_NR_S   -1
-#define BLIS_NR_D   -1
-#define BLIS_NR_C   -1
-#define BLIS_NR_Z   -1
+#define BLIS_NR_s   -1
+#define BLIS_NR_d   -1
+#define BLIS_NR_c   -1
+#define BLIS_NR_z   -1
 
 //#endif
 

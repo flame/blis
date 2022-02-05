@@ -245,7 +245,75 @@
 #define BLIS_POOL_ADDR_OFFSET_SIZE_GEN   0
 #endif
 
+// -- MR and NR block sizes (only for kernels) --------------------------------
 
+#ifdef BLIS_IN_KERNEL
+
+#ifndef BLIS_MR_s
+#define BLIS_MR_s 4
+#endif
+
+#ifndef BLIS_MR_d
+#define BLIS_MR_d 4
+#endif
+
+#ifndef BLIS_MR_c
+#define BLIS_MR_c 4
+#endif
+
+#ifndef BLIS_MR_z
+#define BLIS_MR_z 4
+#endif
+
+#ifndef BLIS_NR_s
+#define BLIS_NR_s 16
+#endif
+
+#ifndef BLIS_NR_d
+#define BLIS_NR_d 8
+#endif
+
+#ifndef BLIS_NR_c
+#define BLIS_NR_c 8
+#endif
+
+#ifndef BLIS_NR_z
+#define BLIS_NR_z 4
+#endif
+
+#ifndef BLIS_PACKMR_s
+#define BLIS_PACKMR_s BLIS_MR_s
+#endif
+
+#ifndef BLIS_PACKMR_d
+#define BLIS_PACKMR_d BLIS_MR_d
+#endif
+
+#ifndef BLIS_PACKMR_c
+#define BLIS_PACKMR_c BLIS_MR_c
+#endif
+
+#ifndef BLIS_PACKMR_z
+#define BLIS_PACKMR_z BLIS_MR_z
+#endif
+
+#ifndef BLIS_PACKNR_s
+#define BLIS_PACKNR_s BLIS_NR_s
+#endif
+
+#ifndef BLIS_PACKNR_d
+#define BLIS_PACKNR_d BLIS_NR_d
+#endif
+
+#ifndef BLIS_PACKNR_c
+#define BLIS_PACKNR_c BLIS_NR_c
+#endif
+
+#ifndef BLIS_PACKNR_z
+#define BLIS_PACKNR_z BLIS_NR_z
+#endif
+
+#endif
 
 #endif
 
