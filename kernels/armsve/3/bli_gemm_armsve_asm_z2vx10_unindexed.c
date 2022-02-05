@@ -68,10 +68,10 @@ void bli_zgemm_armsve_asm_2vx10_unindexed
   uint64_t cs_c   = cs_c0;
   uint64_t info   = 0;
 
-  uint64_t mr = bli_vl_bytes_armsve() * 2 / 16;
-  GEMM_UKR_SETUP_CT( z, mr, 10, false );
+  GEMM_UKR_SETUP_CT( z, m, 10, false );
 
   __asm__ volatile (
+" whilelo         p0.d, xzr, %12                  \n\t"
 // " ldr             x0, %[a]                        \n\t"
 // " ldr             x1, %[b]                        \n\t"
 " mov             x2, xzr                         \n\t"
@@ -97,7 +97,6 @@ void bli_zgemm_armsve_asm_2vx10_unindexed
 " madd            x2, x16, x2, xzr                \n\t" // cs_a
 " madd            x3, x16, x3, xzr                \n\t" // rs_b
 " madd            %4, x16, %4, xzr                \n\t" // cs_c
-" ptrue           p0.d                            \n\t"
 "                                                 \n\t"
 // " ldr             x5, %[k_mker]                   \n\t" // Number of loops.
 // " ldr             x6, %[k_left]                   \n\t"
@@ -306,7 +305,7 @@ GEMM_CCMPLX_STORE_COL2_C(z8 ,z9 ,z10,z11,p0,%2,%4)
   "+r" (a_next), // %9
   "+r" (b_next), // %10
   "=r" (info)    // %11
-:
+: "r"  (m)       // %12
 : "x2","x3","x9","x16",
   "z0","z1","z2","z3","z4","z5","z6","z7",
   "z8","z9","z10","z11","z12","z13","z14","z15",
