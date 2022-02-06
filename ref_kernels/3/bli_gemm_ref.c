@@ -110,7 +110,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 		if ( PASTEMAC(ch,eq0)( *beta ) ) \
 		{ \
-			for ( dim_t i = 0; i < mr ++i ) \
+			for ( dim_t i = 0; i < mr; ++i ) \
 	        PRAGMA_SIMD \
 			for ( dim_t j = 0; j < nr; ++j ) \
 			PASTEMAC(ch,copys) \

@@ -72,9 +72,9 @@ printf( "bli_gemmtrsmbb_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
 	ctype*          minus_one = PASTEMAC(ch,m1); \
 \
 	PASTECH(ch,gemm_ukr_ft) \
-	              gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	              gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	PASTECH(ch,trsm_ukr_ft) \
-	              trsm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, trsmkerid, cntx ); \
+	              trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
 \
 /*
 PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \

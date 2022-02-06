@@ -117,7 +117,7 @@ void bli_hemm_front
 	// micro-kernel to access elements of C in its preferred manner.
 	//if ( !bli_obj_is_1x1( &c_local ) ) // NOTE: This conditional should NOT
 	                                     // be enabled. See issue #342 comments.
-	if ( bli_cntx_l3_vir_ukr_dislikes_storage_of( &c_local, BLIS_GEMM_UKR, cntx ) )
+	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
 	{
 		bli_toggle_side( &side );
 		bli_obj_toggle_conj( &a_local );

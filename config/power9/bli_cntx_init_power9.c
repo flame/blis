@@ -72,32 +72,24 @@ void bli_cntx_init_power9( cntx_t* cntx )
 
 	// -------------------------------------------------------------------------
 
-	// Update the context with optimized native gemm micro-kernels and
-	// their storage preferences.
-	bli_cntx_set_l3_nat_ukrs
+	// Update the context with optimized native gemm micro-kernels.
+	bli_cntx_set_ukrs
 	(
-	  12,
-	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemmbb_power9_ref,        FALSE,
-	  BLIS_TRSM_L_UKR,     BLIS_FLOAT,    bli_strsmbb_l_power9_ref,      FALSE,
-	  BLIS_TRSM_U_UKR,     BLIS_FLOAT,    bli_strsmbb_u_power9_ref,      FALSE,
+	  cntx,
 
-	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,     FALSE,
-	  
-	  BLIS_TRSM_L_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_l_power9_ref,      FALSE,
-	  BLIS_TRSM_U_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_u_power9_ref,      FALSE,
-	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemmbb_power9_ref,        FALSE,
-	  BLIS_TRSM_L_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_l_power9_ref,      FALSE,
-	  BLIS_TRSM_U_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_u_power9_ref,      FALSE,
-	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemmbb_power9_ref,        FALSE,
-	  BLIS_TRSM_L_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_l_power9_ref,      FALSE,
-	  BLIS_TRSM_U_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_u_power9_ref,      FALSE,
-	  cntx
-	);
-
-	// Update the context with customized virtual [gemm]trsm micro-kernels.
-	bli_cntx_set_l3_vir_ukrs
-	(
-	  8,
+      // level-3
+	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemmbb_power9_ref,
+	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_power9_asm_12x6,
+	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemmbb_power9_ref,
+	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemmbb_power9_ref,
+	  BLIS_TRSM_L_UKR,     BLIS_FLOAT,    bli_strsmbb_l_power9_ref,
+	  BLIS_TRSM_U_UKR,     BLIS_FLOAT,    bli_strsmbb_u_power9_ref,
+	  BLIS_TRSM_L_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_l_power9_ref,
+	  BLIS_TRSM_U_UKR,     BLIS_DOUBLE,   bli_dtrsmbb_u_power9_ref,
+	  BLIS_TRSM_L_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_l_power9_ref,
+	  BLIS_TRSM_U_UKR,     BLIS_SCOMPLEX, bli_ctrsmbb_u_power9_ref,
+	  BLIS_TRSM_L_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_l_power9_ref,
+	  BLIS_TRSM_U_UKR,     BLIS_DCOMPLEX, bli_ztrsmbb_u_power9_ref,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_l_power9_ref,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsmbb_u_power9_ref,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsmbb_l_power9_ref,
@@ -106,16 +98,34 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	  BLIS_GEMMTRSM_U_UKR, BLIS_SCOMPLEX, bli_cgemmtrsmbb_u_power9_ref,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_l_power9_ref,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_u_power9_ref,
-	  cntx
-	);
 
-	// Update the context with optimized packm kernels.
-	bli_cntx_set_packm_kers
-	(
-	  2,
+      // packm
 	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_6xk_bb4_power9_ref,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_6xk_bb2_power9_ref,
-	  cntx
+
+      -1
+	);
+
+	// Update the context with storage preferences.
+	bli_cntx_set_ukr_prefs
+	(
+	  cntx,
+
+      // level-3
+	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_FLOAT,    FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_DOUBLE,   FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_SCOMPLEX, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_DCOMPLEX, FALSE,
+	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
+	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
+	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
+	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
+	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
+	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
+	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
+	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
+
+      -1
 	);
 
 
@@ -131,14 +141,15 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 5,
+	  cntx,
+
 	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  cntx
-	);
 
+      -1
+	);
 }

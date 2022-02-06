@@ -91,7 +91,7 @@ void PASTEMAC(ch,varname) \
 { \
 	const num_t dt  = PASTEMAC(ch,type); \
 \
-	PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_l1v_ker_dt( dt, BLIS_COPYV_KER, cntx ); \
+	PASTECH(ch,copyv_ft) copyv_p = bli_cntx_get_ukr_dt( dt, BLIS_COPYV_KER, cntx ); \
 \
 	copyv_p \
 	( \

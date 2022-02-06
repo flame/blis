@@ -124,7 +124,7 @@ void bli_saxpyf_zen_int_5
         }
 
 #else
-        saxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
+        saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -264,7 +264,7 @@ void bli_saxpyf_zen_int_5
             a3 += n_elem_per_reg;
             a4 += n_elem_per_reg;
         }
-    
+
         // If there are leftover iterations, perform them with scalar code.
         for ( ; (i + 0) < m ; ++i )
         {
@@ -316,7 +316,7 @@ void bli_saxpyf_zen_int_5
             a1 += inca;
             a2 += inca;
             a3 += inca;
-            a4 += inca; 
+            a4 += inca;
             y0 += incy;
         }
 
@@ -398,7 +398,7 @@ void bli_daxpyf_zen_int_5
         }
 
 #else
-        daxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
+        daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {
@@ -538,7 +538,7 @@ void bli_daxpyf_zen_int_5
             a3 += n_elem_per_reg;
             a4 += n_elem_per_reg;
         }
-    
+
         // If there are leftover iterations, perform them with scalar code.
         for ( ; (i + 0) < m ; ++i )
         {
@@ -590,7 +590,7 @@ void bli_daxpyf_zen_int_5
             a1 += inca;
             a2 += inca;
             a3 += inca;
-            a4 += inca; 
+            a4 += inca;
             y0 += incy;
         }
 

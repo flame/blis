@@ -54,15 +54,15 @@ void PASTECH2(bls_,ch,opname) \
 	/* Note that we use panel_dim_max, not panel_dim, to query the packm
 	   kernel function pointer. This means that we always use the same
 	   kernel, even for edge cases. */ \
-	num_t     dt     = PASTEMAC(ch,type); \
-	l1mkr_t   ker_id = panel_dim_max; \
+	num_t dt     = PASTEMAC(ch,type); \
+	ukr_t ker_id = ( ukr_t )( BLIS_PACKM_0XK_KER + panel_dim_max ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \
 	/* Query the context for the packm kernel corresponding to the current
 	   panel dimension, or kernel id. If the id is invalid, the function will
 	   return NULL. */ \
-	f = bli_cntx_get_packm_ker_dt( dt, ker_id, cntx ); \
+	f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
 \
 	/* If there exists a kernel implementation for the micro-panel dimension
 	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \

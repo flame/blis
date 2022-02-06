@@ -110,7 +110,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const num_t              dt     = PASTEMAC(ch,type); \
 		PASTECH(ch,axpyv_ker_ft) kfp_av \
 		= \
-		bli_cntx_get_l1v_ker_dt( dt, BLIS_AXPYV_KER, cntx ); \
+		bli_cntx_get_ukr_dt( dt, BLIS_AXPYV_KER, cntx ); \
 \
 		kfp_av \
 		( \
