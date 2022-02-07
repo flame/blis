@@ -104,9 +104,9 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
 " ldr             x4, %[k_mker]                   \n\t" // Number of loops.
 " ldr             x8, %[k_left]                   \n\t"
 "                                                 \n\t"
-" LOAD_ABC:                                       \n\t"
+LABEL(LOAD_ABC)
 " cmp             x4, #0                          \n\t" // Don't preload if no microkernel there.
-" b.eq            END_CCOL_PRFM                   \n\t"
+BEQ(END_CCOL_PRFM)
 
 " ld1rw           z20.s, p0/z, [x1]               \n\t" // Load 8/10 of first B row.
 " ld1rw           z21.s, p0/z, [x1, 4]            \n\t"
@@ -119,9 +119,9 @@ void bli_sgemm_armsve_asm_2vx10_unindexed
 "                                                 \n\t"
 GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p0,p1,x0)
 "                                                 \n\t"
-" CCOL_PRFM:                                      \n\t"
+LABEL(CCOL_PRFM)
 // " cmp             x6, #1                          \n\t"
-// " b.ne            END_CCOL_PRFM                   \n\t" // Do not prefetch for generic C storage.
+// BNE(END_CCOL_PRFM) // Do not prefetch for generic C storage.
 " mov             x16, x5                         \n\t"
 " prfm            PLDL1STRM, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
@@ -142,14 +142,14 @@ GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p0,p1,x0)
 " prfm            PLDL1STRM, [x16]                \n\t"
 " add             x16, x16, x7                    \n\t"
 " prfm            PLDL1STRM, [x16]                \n\t"
-" END_CCOL_PRFM:                                  \n\t"
+LABEL(END_CCOL_PRFM)
 "                                                 \n\t"
 CLEAR_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19)
 "                                                 \n\t"
 " cmp             x4, #0                          \n\t" // If no 4-microkernel can be applied
-" b.eq            K_LEFT_LOOP                     \n\t"
+BEQ(K_LEFT_LOOP)
 "                                                 \n\t"
-" K_MKER_LOOP:                                    \n\t"
+LABEL(K_MKER_LOOP)
 "                                                 \n\t"
 " add             x0, x0, x2                      \n\t" // Forward A's address to the next column.
 GEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p0,p1,x0)
@@ -164,20 +164,20 @@ GEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p0,p1,x0)
 GEMM_2VX10_MKER_LOOP_PLAIN_C_3(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z28,z29,z20,z21,z22,z23,z24,z25,z26,z27,x1,x3)
 "                                                 \n\t"
 " subs            x4, x4, #1                      \n\t" // Decrease counter before final replica.
-" b.eq            FIN_MKER_LOOP                   \n\t" // Branch early to avoid reading excess mem.
+BEQ(FIN_MKER_LOOP) // Branch early to avoid reading excess mem.
 "                                                 \n\t"
 " add             x0, x0, x2                      \n\t" // Forward A's address to the next column.
 GEMM_ACOL_CONTIGUOUS_LOAD(z28,z29,p0,p1,x0)
 GEMM_2VX10_MKER_LOOP_PLAIN_C_4(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x1,x3)
-" b               K_MKER_LOOP                     \n\t"
+BRANCH(K_MKER_LOOP)
 "                                                 \n\t"
-" FIN_MKER_LOOP:                                  \n\t"
+LABEL(FIN_MKER_LOOP)
 GEMM_2VX10_MKER_LOOP_PLAIN_C_4_RESIDUAL(z0,z2,z4,z6,z8,z10,z12,z14,z16,z18,z1,z3,z5,z7,z9,z11,z13,z15,z17,z19,p0,z30,z31,z20,z21,z22,z23,z24,z25,z26,z27,x1,x3)
 " add             x0, x0, x2                      \n\t" // Forward A to fill the blank.
 "                                                 \n\t"
-" K_LEFT_LOOP:                                    \n\t"
+LABEL(K_LEFT_LOOP)
 " cmp             x8, #0                          \n\t" // End of execution.
-" b.eq            WRITE_MEM_PREP                  \n\t"
+BEQ(WRITE_MEM_PREP)
 "                                                 \n\t"
 GEMM_ACOL_CONTIGUOUS_LOAD(z30,z31,p0,p1,x0)
 " ld1rw           z20.s, p0/z, [x1]               \n\t" // Load 8/10 of first B row.
@@ -203,9 +203,9 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 " add             x0, x0, x2                      \n\t" // Forward A.
 " add             x1, x1, x3                      \n\t" // Forward B.
 " sub             x8, x8, #1                      \n\t"
-" b               K_LEFT_LOOP                     \n\t" // Next column / row.
+BRANCH(K_LEFT_LOOP)
 "                                                 \n\t"
-" WRITE_MEM_PREP:                                 \n\t"
+LABEL(WRITE_MEM_PREP)
 "                                                 \n\t"
 " ldr             x4, %[alpha]                    \n\t" // Load alpha & beta (address).
 " ldr             x8, %[beta]                     \n\t"
@@ -214,7 +214,7 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 " dup             z30.s, w4                       \n\t" // Broadcast alpha & beta into vectors.
 " dup             z31.s, w8                       \n\t"
 "                                                 \n\t"
-" PREFETCH_ABNEXT:                                \n\t"
+LABEL(PREFETCH_ABNEXT)
 " ldr             x0, %[a_next]                   \n\t"
 " ldr             x1, %[b_next]                   \n\t"
 " prfm            PLDL2KEEP, [x0]                 \n\t"
@@ -244,41 +244,42 @@ GEMM_FMLA2(z18,z19,p0,z30,z31,z29)
 " prfm            PLDL2KEEP, [x1, 256*8]          \n\t"
 " prfm            PLDL2KEEP, [x1, 256*9]          \n\t"
 "                                                 \n\t"
-" WRITE_MEM:                                      \n\t"
+LABEL(WRITE_MEM)
 "                                                 \n\t"
 " fmov            s28, #1.0                       \n\t"
 " fmov            w16, s28                        \n\t"
 " cmp             w16, w4                         \n\t"
-" b.eq            UNIT_ALPHA                      \n\t"
+BEQ(UNIT_ALPHA)
 "                                                 \n\t"
 SCALE_COL20(z0,z1,z2,z3,z4,z5,z6,z7,z8,z9,z10,z11,z12,z13,z14,z15,z16,z17,z18,z19,z30)
 "                                                 \n\t"
-" UNIT_ALPHA:                                     \n\t"
+LABEL(UNIT_ALPHA)
 " mov             x9, x5                          \n\t" // C address for loading.
 "                                                 \n\t" // C address for storing is x5 itself.
 // " cmp             x6, #1                          \n\t"
-// " b.ne            WRITE_MEM_G                     \n\t"
+// BNE(WRITE_MEM_G)
 "                                                 \n\t"
-" WRITE_MEM_C:                                    \n\t" // Available scratch: Z[20-30].
+LABEL(WRITE_MEM_C)
+"                                                 \n\t" // Available scratch: Z[20-30].
 "                                                 \n\t" // Here used scratch: Z[20-29].
 " fcmp            s31, #0.0                       \n\t"
-" b.eq            BETA_ZERO_C                     \n\t"
+BEQ(BETA_ZERO_C)
 GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p1,x9,x7)
 GEMM_C_FMLA_UKER(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
 GEMM_C_LOAD_UKER_C(z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,p0,p1,x9,x7)
 GEMM_C_FMLA_UKER(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,p0,z20,z22,z24,z26,z28,z21,z23,z25,z27,z29,z31)
 "                                                 \n\t"
-" BETA_ZERO_C:                                    \n\t"
+LABEL(BETA_ZERO_C)
 GEMM_C_STORE_UKER_C(z0,z2,z4,z6,z8,z1,z3,z5,z7,z9,p0,p1,x5,x7)
 GEMM_C_STORE_UKER_C(z10,z12,z14,z16,z18,z11,z13,z15,z17,z19,p0,p1,x5,x7)
-// " b               END_WRITE_MEM                   \n\t"
+// BRANCH(END_WRITE_MEM)
 // "                                                 \n\t"
-// " END_WRITE_MEM:                                  \n\t"
-// " b               END_EXEC                        \n\t"
+// LABEL(END_WRITE_MEM)
+// BRANCH(END_EXEC)
 // "                                                 \n\t"
-// " END_ERROR:                                      \n\t"
+// LABEL(END_ERROR)
 // " mov             x0, #1                          \n\t" // Return error.
-" END_EXEC:                                       \n\t"
+LABEL(END_EXEC)
 " mov             x0, #0                          \n\t" // Return normal.
 :
 : [m]      "m" (m),
