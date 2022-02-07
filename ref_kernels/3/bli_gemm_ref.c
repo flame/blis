@@ -34,143 +34,13 @@
 
 #include "blis.h"
 
-#if 1
-
-// An implementation that attempts to facilitate emission of vectorized
-// instructions via constant loop bounds + #pragma omp simd directives.
+// Completely generic gemm ukr implementation which checks MR/NR at
+// runtime. Very slow, but has to be used in certain cases.
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf ) \
 \
-void PASTEMAC3(ch,opname,arch,suf) \
-     ( \
-       dim_t               m, \
-       dim_t               n, \
-       dim_t               k, \
-       ctype*     restrict alpha, \
-       ctype*     restrict a, \
-       ctype*     restrict b, \
-       ctype*     restrict beta, \
-       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
-     ) \
-{ \
-    const dim_t     mr = PASTECH(BLIS_MR_,ch); \
-    const dim_t     nr = PASTECH(BLIS_NR_,ch); \
-\
-	ctype           ab[ mr * nr ] __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ab  = nr; \
-	const inc_t     cs_ab  = 1; \
-\
-	const inc_t     cs_a   = PASTECH(BLIS_PACKMR_,ch); \
-	const inc_t     rs_b   = PASTECH(BLIS_PACKNR_,ch); \
-\
-\
-	/* Initialize the accumulator elements in ab to zero. */ \
-	PRAGMA_SIMD \
-	for ( dim_t i = 0; i < mr * nr; ++i ) \
-	{ \
-		PASTEMAC(ch,set0s)( ab[ i ] ); \
-	} \
-\
-	/* Perform a series of k rank-1 updates into ab. */ \
-	for ( dim_t l = 0; l < k; ++l ) \
-	{ \
-		for ( dim_t i = 0; i < mr; ++i ) \
-		{ \
-			PRAGMA_SIMD \
-			for ( dim_t j = 0; j < nr; ++j ) \
-			{ \
-				PASTEMAC(ch,dots) \
-				( \
-				  a[ i ], \
-				  b[ j ], \
-				  ab[ i*rs_ab + j*cs_ab ]  \
-				); \
-			} \
-		} \
-\
-		a += cs_a; \
-		b += rs_b; \
-	} \
-\
-	/* Scale the result in ab by alpha. */ \
-	PRAGMA_SIMD \
-	for ( dim_t i = 0; i < mr * nr; ++i ) \
-	{ \
-		PASTEMAC(ch,scals)( *alpha, ab[ i ] ); \
-	} \
-\
-	/* Output/accumulate intermediate result ab based on the storage
-	   of c and the value of beta. */ \
-	if ( cs_c == 1 && m == mr && n == nr ) \
-	{ \
-		/* C is row-stored and a full tile. */ \
-\
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
-		{ \
-			for ( dim_t i = 0; i < mr; ++i ) \
-	        PRAGMA_SIMD \
-			for ( dim_t j = 0; j < nr; ++j ) \
-			PASTEMAC(ch,copys) \
-			( \
-			  ab[ i*rs_ab + j*cs_ab ], \
-			  c [ i*rs_c  + j*1     ]  \
-			); \
-		} \
-		else \
-		{ \
-			for ( dim_t i = 0; i < mr; ++i ) \
-	        PRAGMA_SIMD \
-			for ( dim_t j = 0; j < nr; ++j ) \
-			PASTEMAC(ch,xpbys) \
-			( \
-			  ab[ i*rs_ab + j*cs_ab ], \
-			  *beta, \
-			  c [ i*rs_c  + j*1     ]  \
-			); \
-		} \
-	} \
-	else \
-	{ \
-		/* C is column-stored, general-stored, or an edge case. */ \
-\
-		if ( PASTEMAC(ch,eq0)( *beta ) ) \
-		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
-			PASTEMAC(ch,copys) \
-			( \
-			  ab[ i*rs_ab + j*cs_ab ], \
-			  c [ i*rs_c  + j*cs_c  ]  \
-			); \
-		} \
-		else \
-		{ \
-			for ( dim_t j = 0; j < n; ++j ) \
-			for ( dim_t i = 0; i < m; ++i ) \
-			PASTEMAC(ch,xpbys) \
-			( \
-			  ab[ i*rs_ab + j*cs_ab ], \
-			  *beta, \
-			  c [ i*rs_c  + j*cs_c  ]  \
-			); \
-		} \
-	} \
-}
-
-INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
-
-#else
-
-// An implementation that uses variable loop bounds (queried from the context)
-// and makes no use of #pragma omp simd.
-
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname, arch, suf ) \
-\
-void PASTEMAC3(ch,opname,arch,suf) \
+static void PASTEMAC3(ch,opname,arch,suf) \
      ( \
        dim_t               m, \
        dim_t               n, \
@@ -186,9 +56,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
 \
-	const dim_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
-	const dim_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
-\
 	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
@@ -200,7 +67,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t     rs_ab  = 1; \
-	const inc_t     cs_ab  = mr; \
+	const inc_t     cs_ab  = m; \
 \
 	dim_t           l, j, i; \
 \
@@ -264,7 +131,153 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
+INSERT_GENTFUNC_BASIC2( gemm_unr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+
+// An implementation that attempts to facilitate emission of vectorized
+// instructions via constant loop bounds + #pragma omp simd directives.
+// If compile-time MR/NR are not available (indicated by BLIS_[MN]R_x = -1),
+// then the non-unrolled version (above) is used.
+
+#undef  GENTFUNC
+#define GENTFUNC( ctype, ch, opname, arch, suf ) \
+\
+void PASTEMAC3(ch,opname,arch,suf) \
+     ( \
+       dim_t               m, \
+       dim_t               n, \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, \
+       ctype*     restrict b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict data, \
+       cntx_t*    restrict cntx  \
+     ) \
+{ \
+\
+	const dim_t     mr = PASTECH(BLIS_MR_,ch); \
+	const dim_t     nr = PASTECH(BLIS_NR_,ch); \
+\
+	if ( mr == -1 || nr == -1 ) \
+	{ \
+		PASTEMAC3(ch,gemm_unr,arch,suf) \
+		( \
+		  m, \
+		  n, \
+		  k, \
+		  alpha, \
+		  a, \
+		  b, \
+		  beta, \
+		  c, rs_c, cs_c, \
+		  data, \
+		  cntx \
+		); \
+		return; \
+	} \
+\
+	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+                        / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t rs_ab  = nr; \
+	const inc_t cs_ab  = 1; \
+\
+	const inc_t cs_a   = PASTECH(BLIS_PACKMR_,ch); \
+	const inc_t rs_b   = PASTECH(BLIS_PACKNR_,ch); \
+\
+\
+	/* Initialize the accumulator elements in ab to zero. */ \
+	PRAGMA_SIMD \
+	for ( dim_t i = 0; i < mr * nr; ++i ) \
+	{ \
+		PASTEMAC(ch,set0s)( ab[ i ] ); \
+	} \
+\
+	/* Perform a series of k rank-1 updates into ab. */ \
+	for ( dim_t l = 0; l < k; ++l ) \
+	{ \
+		for ( dim_t i = 0; i < mr; ++i ) \
+		{ \
+			PRAGMA_SIMD \
+			for ( dim_t j = 0; j < nr; ++j ) \
+			{ \
+				PASTEMAC(ch,dots) \
+				( \
+				  a[ i ], \
+				  b[ j ], \
+				  ab[ i*rs_ab + j*cs_ab ]  \
+				); \
+			} \
+		} \
+\
+		a += cs_a; \
+		b += rs_b; \
+	} \
+\
+	/* Scale the result in ab by alpha. */ \
+	PRAGMA_SIMD \
+	for ( dim_t i = 0; i < mr * nr; ++i ) \
+	{ \
+		PASTEMAC(ch,scals)( *alpha, ab[ i ] ); \
+	} \
+\
+	/* Output/accumulate intermediate result ab based on the storage
+	   of c and the value of beta. */ \
+	if ( cs_c == 1 ) \
+	{ \
+		/* C is row-stored. */ \
+\
+		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			PASTEMAC(ch,copys) \
+			( \
+			  ab[ i*rs_ab + j*cs_ab ], \
+			  c [ i*rs_c  + j*1     ]  \
+			); \
+		} \
+		else \
+		{ \
+			for ( dim_t i = 0; i < m; ++i ) \
+			for ( dim_t j = 0; j < n; ++j ) \
+			PASTEMAC(ch,xpbys) \
+			( \
+			  ab[ i*rs_ab + j*cs_ab ], \
+			  *beta, \
+			  c [ i*rs_c  + j*1     ]  \
+			); \
+		} \
+	} \
+	else \
+	{ \
+		/* C is column-stored or general-stored. */ \
+\
+		if ( PASTEMAC(ch,eq0)( *beta ) ) \
+		{ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			PASTEMAC(ch,copys) \
+			( \
+			  ab[ i*rs_ab + j*cs_ab ], \
+			  c [ i*rs_c  + j*cs_c  ]  \
+			); \
+		} \
+		else \
+		{ \
+			for ( dim_t j = 0; j < n; ++j ) \
+			for ( dim_t i = 0; i < m; ++i ) \
+			PASTEMAC(ch,xpbys) \
+			( \
+			  ab[ i*rs_ab + j*cs_ab ], \
+			  *beta, \
+			  c [ i*rs_c  + j*cs_c  ]  \
+			); \
+		} \
+	} \
+}
+
 INSERT_GENTFUNC_BASIC2( gemm, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
-#endif
 
