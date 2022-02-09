@@ -56,10 +56,8 @@ void bli_cntx_init_a64fx( cntx_t* cntx )
 	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed,
 
       // packm
-	  BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-	  // 12xk is not used and disabled for GCC 8-9 compatibility.
-	  // BLIS_PACKM_12XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_int_12xk,
-	  BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
 
       -1
 	);

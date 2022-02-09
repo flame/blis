@@ -34,6 +34,9 @@
 
 #include "blis.h"
 
+// An implementation that indexes through B with the assumption that all
+// elements were broadcast (duplicated) by a factor of NP/NR.
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, trsmkerid ) \
 \
@@ -54,10 +57,15 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	const inc_t     mr     = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const inc_t     nr     = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
+\
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = 1; \
+	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+/*
+printf( "bli_gemmtrsm_ref(): cs_b = %d\n", (int)cs_b ); \
+printf( "bli_gemmtrsm_ref(): k nr = %d %d\n", (int)k, (int)nr ); \
+*/ \
 \
 	ctype*          minus_one = PASTEMAC(ch,m1); \
 \
@@ -65,6 +73,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	              gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	PASTECH(ch,trsm_ukr_ft) \
 	              trsm_ukr = bli_cntx_get_ukr_dt( dt, trsmkerid, cntx ); \
+\
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b01", k, nr, \
+                     (double*)bx1, rs_b, cs_b, "%5.2f", "" ); \
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
 \
 	/* lower: b11 = alpha * b11 - a10 * b01; */ \
 	/* upper: b11 = alpha * b11 - a12 * b21; */ \
@@ -81,6 +96,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  data, \
 	  cntx  \
 	); \
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after gemm", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
 \
 	/* b11 = inv(a11) * b11;
 	   c11 = b11; */ \
@@ -91,6 +110,19 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	  c11, rs_c, cs_c, \
 	  data, \
 	  cntx  \
+	); \
+/*
+PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11 after trsm", mr, 2*nr, \
+                     (double*)b11, rs_b, 1, "%5.2f", "" ); \
+*/ \
+\
+	/* Broadcast the elements of the updated b11 submatrix to their
+	   duplicated neighbors. */ \
+	PASTEMAC(ch,bcastbbs_mxn) \
+	( \
+	  mr, \
+	  nr, \
+	  b11, rs_b, cs_b  \
 	); \
 \
 /*

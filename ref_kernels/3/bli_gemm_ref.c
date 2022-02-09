@@ -59,9 +59,11 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
 	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
+	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
 	const inc_t     cs_a   = packmr; \
 \
 	const inc_t     rs_b   = packnr; \
+	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 \
 	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
@@ -90,11 +92,11 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 		   are typically fully unrolled. */ \
 		for ( j = 0; j < n; ++j ) \
 		{ \
-			bj = *(b + j); \
+			bj = *(b + j*cs_b); \
 \
 			for ( i = 0; i < m; ++i ) \
 			{ \
-				ai = *(a + i); \
+				ai = *(a + i*rs_a); \
 \
 				PASTEMAC(ch,dots)( ai, bj, *abij ); \
 \
@@ -131,7 +133,7 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 }
 
-INSERT_GENTFUNC_BASIC2( gemm_unr, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
+INSERT_GENTFUNC_BASIC2( gemm_gen, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )
 
 // An implementation that attempts to facilitate emission of vectorized
 // instructions via constant loop bounds + #pragma omp simd directives.
@@ -161,7 +163,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	if ( mr == -1 || nr == -1 ) \
 	{ \
-		PASTEMAC3(ch,gemm_unr,arch,suf) \
+		PASTEMAC3(ch,gemm_gen,arch,suf) \
 		( \
 		  m, \
 		  n, \
@@ -183,8 +185,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const inc_t rs_ab  = nr; \
 	const inc_t cs_ab  = 1; \
 \
+	const inc_t rs_a   = PASTECH(BLIS_BBM_,ch); \
 	const inc_t cs_a   = PASTECH(BLIS_PACKMR_,ch); \
 	const inc_t rs_b   = PASTECH(BLIS_PACKNR_,ch); \
+	const inc_t cs_b   = PASTECH(BLIS_BBN_,ch); \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
@@ -204,8 +208,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			{ \
 				PASTEMAC(ch,dots) \
 				( \
-				  a[ i ], \
-				  b[ j ], \
+				  a[ i*rs_a ], \
+				  b[ j*cs_b ], \
 				  ab[ i*rs_ab + j*cs_ab ]  \
 				); \
 			} \

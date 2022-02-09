@@ -39,6 +39,7 @@
 void PASTEMAC(ch,varname) \
      ( \
        conj_t  conjp, \
+       pack_t  schema, \
        dim_t   panel_dim, \
        dim_t   panel_len, \
        ctype*  kappa, \

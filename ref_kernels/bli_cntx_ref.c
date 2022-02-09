@@ -107,60 +107,20 @@
 
 // -- Level-1m (packm/unpackm) kernel prototype redefinitions ------------------
 
-#undef  packm_2xk_ker_name
-#define packm_2xk_ker_name  GENARNAME(packm_2xk)
-#undef  packm_3xk_ker_name
-#define packm_3xk_ker_name  GENARNAME(packm_3xk)
-#undef  packm_4xk_ker_name
-#define packm_4xk_ker_name  GENARNAME(packm_4xk)
-#undef  packm_6xk_ker_name
-#define packm_6xk_ker_name  GENARNAME(packm_6xk)
-#undef  packm_8xk_ker_name
-#define packm_8xk_ker_name  GENARNAME(packm_8xk)
-#undef  packm_10xk_ker_name
-#define packm_10xk_ker_name GENARNAME(packm_10xk)
-#undef  packm_12xk_ker_name
-#define packm_12xk_ker_name GENARNAME(packm_12xk)
-#undef  packm_14xk_ker_name
-#define packm_14xk_ker_name GENARNAME(packm_14xk)
-#undef  packm_16xk_ker_name
-#define packm_16xk_ker_name GENARNAME(packm_16xk)
-#undef  packm_24xk_ker_name
-#define packm_24xk_ker_name GENARNAME(packm_24xk)
+#undef  packm_mrxk_ker_name
+#define packm_mrxk_ker_name  GENARNAME(packm_mrxk)
+#undef  packm_nrxk_ker_name
+#define packm_nrxk_ker_name  GENARNAME(packm_nrxk)
 
-#undef  unpackm_2xk_ker_name
-#define unpackm_2xk_ker_name  GENARNAME(unpackm_2xk)
-#undef  unpackm_4xk_ker_name
-#define unpackm_4xk_ker_name  GENARNAME(unpackm_4xk)
-#undef  unpackm_6xk_ker_name
-#define unpackm_6xk_ker_name  GENARNAME(unpackm_6xk)
-#undef  unpackm_8xk_ker_name
-#define unpackm_8xk_ker_name  GENARNAME(unpackm_8xk)
-#undef  unpackm_10xk_ker_name
-#define unpackm_10xk_ker_name GENARNAME(unpackm_10xk)
-#undef  unpackm_12xk_ker_name
-#define unpackm_12xk_ker_name GENARNAME(unpackm_12xk)
-#undef  unpackm_14xk_ker_name
-#define unpackm_14xk_ker_name GENARNAME(unpackm_14xk)
-#undef  unpackm_16xk_ker_name
-#define unpackm_16xk_ker_name GENARNAME(unpackm_16xk)
+#undef  packm_mrxk_1er_ker_name
+#define packm_mrxk_1er_ker_name  GENARNAME(packm_mrxk_1er)
+#undef  packm_nrxk_1er_ker_name
+#define packm_nrxk_1er_ker_name  GENARNAME(packm_nrxk_1er)
 
-#undef  packm_2xk_1er_ker_name
-#define packm_2xk_1er_ker_name  GENARNAME(packm_2xk_1er)
-#undef  packm_4xk_1er_ker_name
-#define packm_4xk_1er_ker_name  GENARNAME(packm_4xk_1er)
-#undef  packm_6xk_1er_ker_name
-#define packm_6xk_1er_ker_name  GENARNAME(packm_6xk_1er)
-#undef  packm_8xk_1er_ker_name
-#define packm_8xk_1er_ker_name  GENARNAME(packm_8xk_1er)
-#undef  packm_10xk_1er_ker_name
-#define packm_10xk_1er_ker_name GENARNAME(packm_10xk_1er)
-#undef  packm_12xk_1er_ker_name
-#define packm_12xk_1er_ker_name GENARNAME(packm_12xk_1er)
-#undef  packm_14xk_1er_ker_name
-#define packm_14xk_1er_ker_name GENARNAME(packm_14xk_1er)
-#undef  packm_16xk_1er_ker_name
-#define packm_16xk_1er_ker_name GENARNAME(packm_16xk_1er)
+#undef  unpackm_mrxk_ker_name
+#define unpackm_mrxk_ker_name  GENARNAME(unpackm_mrxk)
+#undef  unpackm_nrxk_ker_name
+#define unpackm_nrxk_ker_name  GENARNAME(unpackm_nrxk)
 
 // Instantiate prototypes for above functions via the level-1m kernel API
 // template.
@@ -272,18 +232,20 @@ void GENBARNAME(cntx_init)
 
 	// -- Set blocksizes -------------------------------------------------------
 
-	//                                          s     d     c     z
-	bli_blksz_init_easy( &blkszs[ BLIS_KR ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],    4,    4,    4,    4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],   16,    8,    8,    4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],  256,  128,  128,   64 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],  256,  256,  256,  256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ], 4096, 4096, 4096, 4096 );
-	bli_blksz_init_easy( &blkszs[ BLIS_M2 ], 1000, 1000, 1000, 1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_N2 ], 1000, 1000, 1000, 1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF ],    8,    8,    8,    8 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF ],    6,    6,    6,    6 );
-	bli_blksz_init_easy( &blkszs[ BLIS_XF ],    4,    4,    4,    4 );
+	//                                           s     d     c     z
+	bli_blksz_init_easy( &blkszs[ BLIS_KR  ],    1,    1,    1,    1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MR  ],    4,    4,    4,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NR  ],   16,    8,    8,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC  ],  256,  128,  128,   64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC  ],  256,  256,  256,  256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC  ], 4096, 4096, 4096, 4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_M2  ], 1000, 1000, 1000, 1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_N2  ], 1000, 1000, 1000, 1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF  ],    8,    8,    8,    8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF  ],    6,    6,    6,    6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_XF  ],    4,    4,    4,    4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    1,    1,    1,    1 );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    1,    1,    1,    1 );
 
 	// -- Set level-3 small/unpacked thresholds --------------------------------
 
@@ -305,20 +267,22 @@ void GENBARNAME(cntx_init)
 	bli_cntx_set_blkszs
 	(
 	  cntx,
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-	  BLIS_KR, &blkszs[ BLIS_KR ], BLIS_KR,
-	  BLIS_M2, &blkszs[ BLIS_M2 ], BLIS_M2,
-	  BLIS_N2, &blkszs[ BLIS_N2 ], BLIS_N2,
-	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
-	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
-	  BLIS_XF, &blkszs[ BLIS_XF ], BLIS_XF,
-	  BLIS_MT, &blkszs[ BLIS_MT ], BLIS_MT,
-	  BLIS_NT, &blkszs[ BLIS_NT ], BLIS_NT,
-	  BLIS_KT, &blkszs[ BLIS_KT ], BLIS_KT,
+	  BLIS_NC,  &blkszs[ BLIS_NC  ], BLIS_NR,
+	  BLIS_KC,  &blkszs[ BLIS_KC  ], BLIS_KR,
+	  BLIS_MC,  &blkszs[ BLIS_MC  ], BLIS_MR,
+	  BLIS_NR,  &blkszs[ BLIS_NR  ], BLIS_NR,
+	  BLIS_MR,  &blkszs[ BLIS_MR  ], BLIS_MR,
+	  BLIS_KR,  &blkszs[ BLIS_KR  ], BLIS_KR,
+	  BLIS_M2,  &blkszs[ BLIS_M2  ], BLIS_M2,
+	  BLIS_N2,  &blkszs[ BLIS_N2  ], BLIS_N2,
+	  BLIS_AF,  &blkszs[ BLIS_AF  ], BLIS_AF,
+	  BLIS_DF,  &blkszs[ BLIS_DF  ], BLIS_DF,
+	  BLIS_XF,  &blkszs[ BLIS_XF  ], BLIS_XF,
+	  BLIS_MT,  &blkszs[ BLIS_MT  ], BLIS_MT,
+	  BLIS_NT,  &blkszs[ BLIS_NT  ], BLIS_NT,
+	  BLIS_KT,  &blkszs[ BLIS_KT  ], BLIS_KT,
+	  BLIS_BBM, &blkszs[ BLIS_BBM ], BLIS_BBM,
+	  BLIS_BBN, &blkszs[ BLIS_BBN ], BLIS_BBN,
 	  -1
 	);
 
@@ -417,37 +381,14 @@ void GENBARNAME(cntx_init)
 
 	// -- Set level-1m (packm/unpackm) kernels ---------------------------------
 
-	// Initialize all packm kernel func_t entries to NULL.
-	for ( i = BLIS_PACKM_0XK_KER; i <= BLIS_PACKM_31XK_KER; ++i )
-	{
-		bli_func_init_null( &funcs[ i ] );
-	}
+	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
+	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
 
-	gen_func_init( &funcs[ BLIS_PACKM_2XK_KER ],  packm_2xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_3XK_KER ],  packm_3xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_4XK_KER ],  packm_4xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_6XK_KER ],  packm_6xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_8XK_KER ],  packm_8xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_10XK_KER ], packm_10xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_ker_name );
-	gen_func_init( &funcs[ BLIS_PACKM_24XK_KER ], packm_24xk_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
 
-	// Initialize all packm kernel func_t entries to NULL.
-	for ( i = BLIS_UNPACKM_0XK_KER; i <= BLIS_UNPACKM_31XK_KER; ++i )
-	{
-		bli_func_init_null( &funcs[ i ] );
-	}
-
-	gen_func_init( &funcs[ BLIS_UNPACKM_2XK_KER ],  unpackm_2xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_4XK_KER ],  unpackm_4xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_6XK_KER ],  unpackm_6xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_8XK_KER ],  unpackm_8xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_10XK_KER ], unpackm_10xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_12XK_KER ], unpackm_12xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_14XK_KER ], unpackm_14xk_ker_name );
-	gen_func_init( &funcs[ BLIS_UNPACKM_16XK_KER ], unpackm_16xk_ker_name );
+	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
+	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
 
 
 	// -- Set level-3 small/unpacked handlers ----------------------------------
@@ -479,7 +420,6 @@ void GENBAINAME(cntx_init)
      )
 {
 	func_t* funcs;
-	dim_t   i;
 
 	// This function is designed to modify a copy of an existing native
 	// context to enable computation via an induced method for complex
@@ -530,36 +470,22 @@ void GENBAINAME(cntx_init)
 
 	// -- Set induced method packm kernels -------------------------------------
 
-	// Initialize all packm kernel func_t entries to NULL.
-	for ( i = BLIS_PACKM_0XK_KER; i <= BLIS_PACKM_31XK_KER; ++i )
-	{
-		bli_func_init_null( &funcs[ i ] );
-	}
-
 	if ( method == BLIS_1M )
 	{
-		gen_func_init_co( &funcs[ BLIS_PACKM_2XK_KER ],  packm_2xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_4XK_KER ],  packm_4xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_6XK_KER ],  packm_6xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_8XK_KER ],  packm_8xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_10XK_KER ], packm_10xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_1er_ker_name );
-		gen_func_init_co( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_1er_ker_name );
+    	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_1er_ker_name );
+    	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_1er_ker_name );
 	}
 	else // if ( method == BLIS_NAT )
 	{
-		gen_func_init( &funcs[ BLIS_PACKM_2XK_KER ],  packm_2xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_3XK_KER ],  packm_3xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_4XK_KER ],  packm_4xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_6XK_KER ],  packm_6xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_8XK_KER ],  packm_8xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_10XK_KER ], packm_10xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_12XK_KER ], packm_12xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_14XK_KER ], packm_14xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_16XK_KER ], packm_16xk_ker_name );
-		gen_func_init( &funcs[ BLIS_PACKM_24XK_KER ], packm_24xk_ker_name );
+    	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
+    	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
 	}
+
+	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
+
+	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
+	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
 
 
 	// -- Set induced method cache and register blocksizes ---------------------

@@ -87,15 +87,15 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
-		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
-		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
+		BLIS_PACKM_NRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
 		-1
 	  );
 	else if (m_r_d==8)
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
-		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
+		BLIS_PACKM_MRXK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
 		-1
 	  );
 

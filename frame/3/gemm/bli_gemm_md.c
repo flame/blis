@@ -433,10 +433,8 @@ mddm_t bli_gemm_md_rcc
 	func_t* cntx_funcs    = bli_cntx_ukrs_buf( *cntx );
 	func_t* cntx_1m_funcs = bli_cntx_ukrs_buf( cntx_1m );
 
-	for ( dim_t i = BLIS_PACKM_0XK_KER; i <= BLIS_PACKM_31XK_KER; ++i )
-	{
-		cntx_funcs[ i ] = cntx_1m_funcs[ i ];
-	}
+	cntx_funcs[ BLIS_PACKM_MRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_MRXK_KER ];
+	cntx_funcs[ BLIS_PACKM_NRXK_KER ] = cntx_1m_funcs[ BLIS_PACKM_NRXK_KER ];
 
 	// Return the computation and execution domains.
 	return doms;

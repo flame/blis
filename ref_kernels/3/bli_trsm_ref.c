@@ -34,17 +34,8 @@
 
 #include "blis.h"
 
-#if 0
-
-// An implementation that attempts to facilitate emission of vectorized
-// instructions via constant loop bounds + #pragma omp simd directives.
-
-// (Deleted. See 'old' directory.)
-
-#else
-
-// An implementation that uses variable loop bounds (queried from the context)
-// and makes no use of #pragma omp simd.
+// An implementation that indexes through B with the assumption that all
+// elements were broadcast (duplicated) by a factor of NP/NR.
 
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, arch, suf, diagop ) \
@@ -69,11 +60,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \
 \
-	const inc_t     rs_a   = 1; \
+	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
 	const inc_t     cs_a   = packmr; \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = 1; \
+	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 \
 	dim_t           iter, i, j, l; \
 	dim_t           n_behind; \
@@ -114,7 +105,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			   (1.0/alpha11) is stored during packing instead alpha11 so we
 			   can multiply rather than divide. When preinversion is disabled,
 			   alpha11 is stored and division happens below explicitly. */ \
-			PASTEMAC(ch,diagop)( *alpha11, beta11c ); \
+			PASTEMAC(ch,scals)( *alpha11, beta11c ); \
 \
 			/* Output final result to matrix c. */ \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
@@ -155,11 +146,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const dim_t     m      = mr; \
 	const dim_t     n      = nr; \
 \
-	const inc_t     rs_a   = 1; \
+	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
 	const inc_t     cs_a   = packmr; \
 \
 	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = 1; \
+	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 \
 	dim_t           iter, i, j, l; \
 	dim_t           n_behind; \
@@ -217,4 +208,3 @@ INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, scals )
 INSERT_GENTFUNC_BASIC3( trsm_u, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX, invscals )
 #endif
 
-#endif

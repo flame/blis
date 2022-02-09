@@ -40,6 +40,7 @@
 void PASTEMAC(ch,opname) \
      ( \
        conj_t  conjp, \
+       pack_t  schema, \
        dim_t   panel_dim, \
        dim_t   panel_len, \
        ctype*  kappa, \
@@ -49,7 +50,7 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = ( ukr_t )( BLIS_UNPACKM_0XK_KER + panel_dim ); \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER : BLIS_UNPACKM_MRXK_KER; \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \

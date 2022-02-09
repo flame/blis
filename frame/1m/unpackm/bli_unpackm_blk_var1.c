@@ -164,6 +164,7 @@ void PASTEMAC(ch,varname) \
 	inc_t           ldp; \
 	dim_t*          m_panel_full; \
 	dim_t*          n_panel_full; \
+    pack_t          schema; \
 \
 \
 	/* If c needs a transposition, induce it so that we can more simply
@@ -182,6 +183,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
+        schema        = BLIS_PACKED_COL_PANELS; \
 		iter_dim      = n; \
 		panel_len     = m; \
 		panel_dim_max = pd_p; \
@@ -196,6 +198,7 @@ void PASTEMAC(ch,varname) \
 	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
+        schema        = BLIS_PACKED_ROW_PANELS; \
 		iter_dim      = m; \
 		panel_len     = n; \
 		panel_dim_max = pd_p; \
@@ -256,6 +259,7 @@ void PASTEMAC(ch,varname) \
 			PASTEMAC(ch,unpackm_cxk) \
 			( \
 			  BLIS_NO_CONJUGATE, \
+              schema, \
 			  panel_dim_i, \
 			  panel_len, \
 			  one, \

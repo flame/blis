@@ -42,5 +42,8 @@
 
 #define BLIS_NR_d   6
 
+#define BLIS_BBN_s   4
+#define BLIS_BBN_d   2
+
 //#endif
 

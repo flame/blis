@@ -71,14 +71,14 @@ void bli_cntx_init_haswell( cntx_t* cntx )
 
 #if 1
       // packm
-	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
-	  BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
-	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
-	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
-	  BLIS_PACKM_3XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
-	  BLIS_PACKM_8XK_KER,  BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
-	  BLIS_PACKM_3XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
-	  BLIS_PACKM_4XK_KER,  BLIS_DCOMPLEX, bli_zpackm_haswell_asm_4xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DOUBLE,   bli_dpackm_haswell_asm_8xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_3xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_SCOMPLEX, bli_cpackm_haswell_asm_8xk,
+	  BLIS_PACKM_MRXK_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_3xk,
+	  BLIS_PACKM_NRXK_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_4xk,
 #endif
 
 	  // axpyf

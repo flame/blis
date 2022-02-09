@@ -49,10 +49,10 @@
 #define BLIS_MR_c   -1
 #define BLIS_MR_z   -1
 
-#define BLIS_NR_s   -1
-#define BLIS_NR_d   -1
-#define BLIS_NR_c   -1
-#define BLIS_NR_z   -1
+#define BLIS_NR_s   10
+#define BLIS_NR_d   10
+#define BLIS_NR_c   10
+#define BLIS_NR_z   10
 
 //#endif
 
