@@ -48,17 +48,17 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_8x12,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_6x8,
 
-      // packm
+	  // packm
 	  BLIS_PACKM_8XK_KER,  BLIS_FLOAT,  bli_spackm_armv8a_int_8xk,
 	  BLIS_PACKM_12XK_KER, BLIS_FLOAT,  bli_spackm_armv8a_int_12xk,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE, bli_dpackm_armv8a_int_6xk,
 	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE, bli_dpackm_armv8a_int_8xk,
 
-      // gemmsup
+	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m,
 	  BLIS_GEMMSUP_RRC_UKR, BLIS_DOUBLE, bli_dgemmsup_rd_armv8a_asm_6x8m,
 	  BLIS_GEMMSUP_RCR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m,
@@ -68,7 +68,7 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  BLIS_GEMMSUP_CCR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n,
 	  BLIS_GEMMSUP_CCC_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -76,11 +76,11 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 
-      // gemmsup
+	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
 	  BLIS_GEMMSUP_RRC_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
 	  BLIS_GEMMSUP_RCR_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
@@ -90,7 +90,7 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  BLIS_GEMMSUP_CCR_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
 	  BLIS_GEMMSUP_CCC_UKR_ROW_PREF, BLIS_DOUBLE, TRUE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -122,26 +122,26 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      // sup thresholds
+	  // sup thresholds
 	  BLIS_MT, &blkszs[ BLIS_MT ], BLIS_MT,
 	  BLIS_NT, &blkszs[ BLIS_NT ], BLIS_NT,
 	  BLIS_KT, &blkszs[ BLIS_KT ], BLIS_KT,
 
-      // level-3 sup
+	  // level-3 sup
 	  BLIS_NC_SUP, &blkszs[ BLIS_NC_SUP ], BLIS_NR_SUP,
 	  BLIS_KC_SUP, &blkszs[ BLIS_KC_SUP ], BLIS_KR_SUP,
 	  BLIS_MC_SUP, &blkszs[ BLIS_MC_SUP ], BLIS_MR_SUP,
 	  BLIS_NR_SUP, &blkszs[ BLIS_NR_SUP ], BLIS_NR_SUP,
 	  BLIS_MR_SUP, &blkszs[ BLIS_MR_SUP ], BLIS_MR_SUP,
 
-	  -1
+	  BLIS_VA_END
 	);
 }
 

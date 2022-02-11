@@ -69,15 +69,15 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   alphax, \
-	   alphay, \
-	   x, incx, \
-	   y, incy, \
-	   z, incz, \
-	   cntx  \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  alphax, \
+	  alphay, \
+	  x, incx, \
+	  y, incy, \
+	  z, incz, \
+	  cntx  \
 	); \
 }
 
@@ -113,15 +113,15 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conja, \
-	   conjx, \
-	   m, \
-	   b_n, \
-	   alpha, \
-	   a, inca, lda, \
-	   x, incx, \
-	   y, incy, \
-	   cntx  \
+	  conja, \
+	  conjx, \
+	  m, \
+	  b_n, \
+	  alpha, \
+	  a, inca, lda, \
+	  x, incx, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 
@@ -158,16 +158,16 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjxt, \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   y, incy, \
-	   rho, \
-	   z, incz, \
-	   cntx  \
+	  conjxt, \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  y, incy, \
+	  rho, \
+	  z, incz, \
+	  cntx  \
 	); \
 }
 
@@ -208,20 +208,20 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjat, \
-	   conja, \
-	   conjw, \
-	   conjx, \
-	   m, \
-	   b_n, \
-	   alpha, \
-	   a, inca, lda, \
-	   w, incw, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   z, incz, \
-	   cntx  \
+	  conjat, \
+	  conja, \
+	  conjw, \
+	  conjx, \
+	  m, \
+	  b_n, \
+	  alpha, \
+	  a, inca, lda, \
+	  w, incw, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  z, incz, \
+	  cntx  \
 	); \
 }
 
@@ -258,16 +258,16 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjat, \
-	   conjx, \
-	   m, \
-	   b_n, \
-	   alpha, \
-	   a, inca, lda, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   cntx  \
+	  conjat, \
+	  conjx, \
+	  m, \
+	  b_n, \
+	  alpha, \
+	  a, inca, lda, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 

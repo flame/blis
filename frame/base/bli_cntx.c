@@ -48,8 +48,8 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	// This function can be called from the bli_cntx_init_*() function for
 	// a particular architecture if the kernel developer wishes to use
 	// non-default blocksizes. It should be called after
-	// bli_cntx_init_defaults() so that the context begins with default
-	// blocksizes across all datatypes.
+	// bli_cntx_init_<subconfig>_ref() so that the context begins with
+	// default blocksizes across all datatypes.
 
 	/* Example prototypes:
 
@@ -60,7 +60,7 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	     bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id,
 	     bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id,
 	     ...,
-         -1
+	     BLIS_VA_END
 	   );
 	*/
 
@@ -73,20 +73,17 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	blksz_t* cntx_blkszs = bli_cntx_blkszs_buf( cntx );
 	bszid_t* cntx_bmults = bli_cntx_bmults_buf( cntx );
 
-	// Now that we have the context address, we want to copy the values
-	// from the temporary buffers into the corresponding buffers in the
-	// context.
-
 	// Initialize variable argument environment.
 	va_list args;
 	va_start( args, cntx );
 
-	// Process block sizes until we get a -1.
+	// Process blocksizes until we get a BLIS_VA_END.
 	while ( true )
 	{
-        int bs_id0 = va_arg( args, int );
-        if ( bs_id0 == -1 )
-            break;
+		int bs_id0 = va_arg( args, int );
+
+		// If we find a bszid_t id of BLIS_VA_END, then we are done.
+		if ( bs_id0 == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
 		// - the bszid_t of the blocksize we're about to process (already done),
@@ -128,7 +125,7 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... )
 	     bszid_t bs1_id, dim_t def_scalr1, dim_t max_scalr1,
 	     bszid_t bs2_id, dim_t def_scalr2, dim_t max_scalr2,
 	     ...,
-         -1
+	     BLIS_VA_END
 	   );
 
 		NOTE: This function modifies an existing context that is presumed
@@ -144,20 +141,17 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... )
 	// Save the execution type into the context.
 	bli_cntx_set_method( method, cntx );
 
-	// Now that we have the context address, we want to copy the values
-	// from the temporary buffers into the corresponding buffers in the
-	// context.
-
 	// Initialize variable argument environment.
 	va_list args;
 	va_start( args, cntx );
 
-	// Process block sizes until we get a -1.
+	// Process blocksizes until we get a BLIS_VA_END.
 	while ( true )
 	{
-        int bs_id0 = va_arg( args, int );
-        if ( bs_id0 == -1 )
-            break;
+		int bs_id0 = va_arg( args, int );
+
+		// If we find a bszid_t id of BLIS_VA_END, then we are done.
+		if ( bs_id0 == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
 		// - the bszid_t of the blocksize we're about to process (already done),
@@ -207,8 +201,8 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	// This function can be called from the bli_cntx_init_*() function for
 	// a particular architecture if the kernel developer wishes to use
 	// non-default microkernels. It should be called after
-	// bli_cntx_init_defaults() so that the context begins with default
-	// microkernels across all datatypes.
+	// bli_cntx_init_<subconfig>_ref() so that the context begins with
+	// default microkernels across all datatypes.
 
 	/* Example prototypes:
 
@@ -219,7 +213,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	     ukr_t ukr1_id, num_t dt1, void_fp ukr1_fp,
 	     ukr_t ukr2_id, num_t dt2, void_fp ukr2_fp,
 	     ...,
-         -1
+	     BLIS_VA_END
 	   );
 	*/
 
@@ -230,20 +224,18 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	va_list   args;
 	va_start( args, cntx );
 
-	// Process ukernels until -1 is reached.
+	// Process ukernels until BLIS_VA_END is reached.
 	while ( true )
 	{
-        const int ukr_id0 = va_arg( args, int );
+		const int ukr_id0 = va_arg( args, int );
 
-        // If we find a ukr ID of -1, then we are done.
-        if ( ukr_id0 == -1 )
-            break;
+		// If we find a ukernel id of BLIS_VA_END, then we are done.
+		if ( ukr_id0 == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
 		// - the ukr_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		// that we need to store to the context.
 		const ukr_t   ukr_id = ( ukr_t   )ukr_id0;
 		const num_t   ukr_dt = ( num_t   )va_arg( args, num_t   );
 		      void_fp ukr_fp = ( void_fp )va_arg( args, void_fp );
@@ -253,7 +245,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 		func_t* ukrs = &cntx_ukrs[ ukr_id ];
 
 		// Store the ukernel function pointer into the context.
-        // Notice that we redundantly store the native
+		// Notice that we redundantly store the native
 		// ukernel address in both the native and virtual ukernel slots
 		// in the context. This is standard practice when creating a
 		// native context. (Induced method contexts will overwrite the
@@ -261,18 +253,20 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 		// virtual ukernel.)
 		bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
 
-        switch ( ukr_id )
-        {
-        	case BLIS_GEMM_UKR:       ukrs = &cntx_ukrs[ BLIS_GEMM_VIR_UKR ];
-        	case BLIS_GEMMTRSM_L_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_L_VIR_UKR ];
-        	case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ];
-        	case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ];
-        	case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ];
-            default:                  ukrs = NULL;
-        };
+		// Locate the virtual ukernel func_t pointer that corresponds to the
+		// ukernel id provided by the caller.
+		switch ( ukr_id )
+		{
+			case BLIS_GEMM_UKR:       ukrs = &cntx_ukrs[ BLIS_GEMM_VIR_UKR ];
+			case BLIS_GEMMTRSM_L_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_L_VIR_UKR ];
+			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ];
+			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ];
+			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ];
+		    default:                  ukrs = NULL;
+		};
 
-        if ( ukrs )
-		    bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
+		if ( ukrs )
+			bli_func_set_dt( ukr_fp, ukr_dt, ukrs );
 	}
 
 	// Shutdown variable argument environment and clean up stack.
@@ -286,8 +280,8 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	// This function can be called from the bli_cntx_init_*() function for
 	// a particular architecture if the kernel developer wishes to use
 	// non-default microkernel preferences. It should be called after
-	// bli_cntx_init_defaults() so that the context begins with default
-	// preferences across all datatypes.
+	// bli_cntx_init_<subconfig>_ref() so that the context begins with
+	// default preferences across all datatypes.
 
 	/* Example prototypes:
 
@@ -298,7 +292,7 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	     ukr_pref_t ukr_pref1_id, num_t dt1, bool ukr_pref1,
 	     ukr_pref_t ukr_pref2_id, num_t dt2, bool ukr_pref2,
 	     ...,
-         -1
+	     BLIS_VA_END
 	   );
 	*/
 
@@ -309,20 +303,18 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	va_list   args;
 	va_start( args, cntx );
 
-	// Process ukernel preferences until -1 is reached.
+	// Process ukernel preferences until BLIS_VA_END is reached.
 	while ( true )
 	{
-        const int ukr_pref_id0 = va_arg( args, int );
+		const int ukr_pref_id0 = va_arg( args, int );
 
-        // If we find a ukr pref ID of -1, then we are done.
-        if ( ukr_pref_id0 == -1 )
-            break;
+		// If we find a ukernel pref id of BLIS_VA_END, then we are done.
+		if ( ukr_pref_id0 == BLIS_VA_END ) break;
 
 		// Here, we query the variable argument list for:
 		// - the ukr_t of the kernel we're about to process (already done),
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
-		// that we need to store to the context.
 		const ukr_pref_t ukr_pref_id = ( ukr_pref_t )ukr_pref_id0;
 		const bool       ukr_pref_dt = ( num_t      )va_arg( args, num_t   );
 		const bool       ukr_pref    = ( bool       )va_arg( args, int );
@@ -341,101 +333,55 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_set_l3_sup_handlers( dim_t n_ops, ... )
+void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... )
 {
 	// This function can be called from the bli_cntx_init_*() function for
 	// a particular architecture if the kernel developer wishes to use
 	// non-default level-3 operation handler for small/unpacked matrices. It
-	// should be called after bli_cntx_init_defaults() so that the context
-	// begins with default sup handlers across all datatypes.
+	// should be called after bli_cntx_init_<subconfig>_ref() so that the
+	// context begins with default sup handlers across all datatypes.
 
 	/* Example prototypes:
 
 	   void bli_cntx_set_l3_sup_handlers
 	   (
-	     dim_t   n_ops,
-	     opid_t  op0_id, void* handler0_fp,
-	     opid_t  op1_id, void* handler1_fp,
-	     opid_t  op2_id, void* handler2_fp,
-	     ...
 	     cntx_t* cntx
+	     opid_t  op0_id, void_fp handler0_fp,
+	     opid_t  op1_id, void_fp handler1_fp,
+	     opid_t  op2_id, void_fp handler2_fp,
+	     ...,
+	     BLIS_VA_END
 	   );
 	*/
 
-	va_list   args;
-	dim_t     i;
-	err_t     r_val;
-
-	// Allocate some temporary local arrays.
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_cntx_set_l3_sup_handlers(): " );
-	#endif
-	opid_t* op_ids = bli_malloc_intl( n_ops * sizeof( opid_t ), &r_val );
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_cntx_set_l3_sup_handlers(): " );
-	#endif
-	void**  op_fps = bli_malloc_intl( n_ops * sizeof( void*  ), &r_val );
-
-	// -- Begin variable argument section --
+	// Query the context for the address of the l3 sup handlers array.
+	void_fp* cntx_l3_sup_handlers = bli_cntx_l3_sup_handlers_buf( cntx );
 
 	// Initialize variable argument environment.
-	va_start( args, n_ops );
+	va_list   args;
+	va_start( args, cntx );
 
-	// Process n_ukrs tuples.
-	for ( i = 0; i < n_ops; ++i )
+	// Process sup handlers until BLIS_VA_END is reached.
+	while ( true )
 	{
+		const int op_id0 = va_arg( args, int );
+
+		// If we find an operation id of BLIS_VA_END, then we are done.
+		if ( op_id0 == BLIS_VA_END ) break;
+
 		// Here, we query the variable argument list for:
 		// - the opid_t of the operation we're about to process,
 		// - the sup handler function pointer
-		// that we need to store to the context.
-		const opid_t op_id = ( opid_t )va_arg( args, opid_t );
-		      void*  op_fp = ( void*  )va_arg( args, void*  );
-
-		// Store the values in our temporary arrays.
-		op_ids[ i ] = op_id;
-		op_fps[ i ] = op_fp;
-	}
-
-	// The last argument should be the context pointer.
-	cntx_t* cntx = ( cntx_t* )va_arg( args, cntx_t* );
-
-	// Shutdown variable argument environment and clean up stack.
-	va_end( args );
-
-	// -- End variable argument section --
-
-	// Query the context for the addresses of:
-	// - the l3 small/unpacked handlers array
-	void** cntx_l3_sup_handlers = bli_cntx_l3_sup_handlers_buf( cntx );
-
-	// Now that we have the context address, we want to copy the values
-	// from the temporary buffers into the corresponding buffers in the
-	// context.
-
-	// Process each operation id tuple provided.
-	for ( i = 0; i < n_ops; ++i )
-	{
-		// Read the current operation id and handler function pointer.
-		const opid_t op_id = op_ids[ i ];
-		      void*  op_fp = op_fps[ i ];
+		const opid_t  op_id = ( opid_t  )op_id0;
+		      void_fp op_fp = ( void_fp )va_arg( args, void_fp );
 
 		// Store the sup handler function pointer into the slot for the
 		// specified operation id.
 		cntx_l3_sup_handlers[ op_id ] = op_fp;
 	}
 
-	// Free the temporary local arrays.
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_cntx_set_l3_sup_handlers(): " );
-	#endif
-	bli_free_intl( op_ids );
-
-	#ifdef BLIS_ENABLE_MEM_TRACING
-	printf( "bli_cntx_set_l3_sup_handlers(): " );
-	#endif
-	bli_free_intl( op_fps );
+	// Shutdown variable argument environment and clean up stack.
+	va_end( args );
 }
 
 // -----------------------------------------------------------------------------

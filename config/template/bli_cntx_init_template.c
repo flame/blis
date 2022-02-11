@@ -49,25 +49,25 @@ void bli_cntx_init_template( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_template_noopt,
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_l_template_noopt,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsm_u_template_noopt,
 	  BLIS_TRSM_L_UKR,     BLIS_DCOMPLEX, bli_ztrsm_l_template_noopt,
 	  BLIS_TRSM_U_UKR,     BLIS_DCOMPLEX, bli_ztrsm_u_template_noopt,
 
-      // level-1f
+	  // level-1f
 	  BLIS_AXPY2V_KER,    BLIS_DCOMPLEX, bli_zaxpy2v_template_noopt,
 	  BLIS_DOTAXPYV_KER,  BLIS_DCOMPLEX, bli_zdotaxpyv_template_noopt,
 	  BLIS_AXPYF_KER,     BLIS_DCOMPLEX, bli_zaxpyf_template_noopt,
 	  BLIS_DOTXF_KER,     BLIS_DCOMPLEX, bli_zdotxf_template_noopt,
 	  BLIS_DOTXAXPYF_KER, BLIS_DCOMPLEX, bli_zdotxaxpyf_template_noopt,
 
-      // level-1v
+	  // level-1v
 	  BLIS_AXPYV_KER, BLIS_DCOMPLEX, bli_zaxpyv_template_noopt,
 	  BLIS_DOTV_KER,  BLIS_DCOMPLEX, bli_zdotv_template_noopt,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -75,14 +75,14 @@ void bli_cntx_init_template( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF,       BLIS_DCOMPLEX, FALSE,
 	  BLIS_GEMMTRSM_L_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 	  BLIS_GEMMTRSM_U_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 	  BLIS_TRSM_L_UKR_ROW_PREF,     BLIS_DCOMPLEX, FALSE,
 	  BLIS_TRSM_U_UKR_ROW_PREF,     BLIS_DCOMPLEX, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -99,14 +99,14 @@ void bli_cntx_init_template( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      -1
+	  BLIS_VA_END
 	);
 }
 

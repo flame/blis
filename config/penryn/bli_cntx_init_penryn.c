@@ -48,7 +48,7 @@ void bli_cntx_init_penryn( cntx_t* cntx )
 	(
 	  cntx,
 
-      //level-3
+	  //level-3
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_penryn_asm_8x4,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_penryn_asm_4x4,
 	  //BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_penryn_asm_8x4,
@@ -56,7 +56,7 @@ void bli_cntx_init_penryn( cntx_t* cntx )
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE, bli_dgemmtrsm_l_penryn_asm_4x4,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE, bli_dgemmtrsm_u_penryn_asm_4x4,
 
-	  -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -64,7 +64,7 @@ void bli_cntx_init_penryn( cntx_t* cntx )
 	(
 	  cntx,
 
-      //level-3
+	  //level-3
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 	  //BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
@@ -72,7 +72,7 @@ void bli_cntx_init_penryn( cntx_t* cntx )
 	  BLIS_GEMMTRSM_L_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 	  BLIS_GEMMTRSM_U_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 
-	  -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -89,14 +89,14 @@ void bli_cntx_init_penryn( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-1
+	  // level-1
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      -1
+	  BLIS_VA_END
 	);
 }
 

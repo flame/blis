@@ -77,7 +77,7 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_power10_mma_8x16,
 	  BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_power10_mma_8x8,
 	  BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemmbb_power10_ref,
@@ -99,11 +99,11 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	  BLIS_GEMMTRSM_L_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_l_power10_ref,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DCOMPLEX, bli_zgemmtrsmbb_u_power10_ref,
 
-      // packm
+	  // packm
 	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_6xk_bb4_power10_ref,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_6xk_bb2_power10_ref,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -111,7 +111,7 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_FLOAT,    TRUE,
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_DOUBLE,   TRUE,
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_SCOMPLEX, FALSE,
@@ -125,7 +125,7 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	//                                           s      d      c      z
@@ -149,7 +149,7 @@ void bli_cntx_init_power10( cntx_t* cntx )
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      -1
+	  BLIS_VA_END
 	);
 
 }

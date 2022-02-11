@@ -58,14 +58,14 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  // These are vector-length agnostic kernels. Yet knowing mr is required at runtime.
 	  BLIS_GEMM_UKR, BLIS_FLOAT,    bli_sgemm_armsve_asm_2vx10_unindexed,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE,   bli_dgemm_armsve_asm_2vx10_unindexed,
 	  BLIS_GEMM_UKR, BLIS_SCOMPLEX, bli_cgemm_armsve_asm_2vx10_unindexed,
 	  BLIS_GEMM_UKR, BLIS_DCOMPLEX, bli_zgemm_armsve_asm_2vx10_unindexed,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -73,31 +73,35 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,    FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE,   FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_SCOMPLEX, FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Set VL-specific packing routines if applicable.
-	if (m_r_d==16)
+	if ( m_r_d == 16 )
+	{
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
 		BLIS_PACKM_10XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_10xk,
 		BLIS_PACKM_16XK_KER, BLIS_DOUBLE, bli_dpackm_armsve512_asm_16xk,
-		-1
+		BLIS_VA_END
 	  );
-	else if (m_r_d==8)
+	}
+	else if ( m_r_d == 8 )
+	{
 	  bli_cntx_set_ukrs
 	  (
 		cntx,
 		BLIS_PACKM_8XK_KER, BLIS_DOUBLE, bli_dpackm_armsve256_int_8xk,
-		-1
+		BLIS_VA_END
 	  );
+	}
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
 	//                                           s      d      c      z
@@ -113,14 +117,14 @@ void bli_cntx_init_armsve( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      -1
+	  BLIS_VA_END
 	);
 }
 

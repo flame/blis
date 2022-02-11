@@ -65,7 +65,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,
 
-      // gemmsup
+	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m,
 	  BLIS_GEMMSUP_RRC_UKR, BLIS_DOUBLE, bli_dgemmsup_rd_haswell_asm_6x8m,
 	  BLIS_GEMMSUP_RCR_UKR, BLIS_DOUBLE, bli_dgemmsup_rv_haswell_asm_6x8m,
@@ -111,7 +111,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_GEMMSUP_CCC_UKR, BLIS_DCOMPLEX, bli_zgemmsup_rv_zen_asm_3x4n,
 #endif
 
-      // packm
+	  // packm
 	  BLIS_PACKM_6XK_KER,  BLIS_FLOAT,    bli_spackm_haswell_asm_6xk,
 	  BLIS_PACKM_16XK_KER, BLIS_FLOAT,    bli_spackm_haswell_asm_16xk,
 	  BLIS_PACKM_6XK_KER,  BLIS_DOUBLE,   bli_dpackm_haswell_asm_6xk,
@@ -175,7 +175,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
 #endif
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -197,7 +197,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_GEMMTRSM_U_UKR_ROW_PREF, BLIS_FLOAT,    TRUE,
 	  BLIS_GEMMTRSM_U_UKR_ROW_PREF, BLIS_DOUBLE,   TRUE,
 
-      // gemmsup
+	  // gemmsup
 	  BLIS_GEMMSUP_RRR_UKR, BLIS_DOUBLE, TRUE,
 	  BLIS_GEMMSUP_RRC_UKR, BLIS_DOUBLE, TRUE,
 	  BLIS_GEMMSUP_RCR_UKR, BLIS_DOUBLE, TRUE,
@@ -233,7 +233,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_GEMMSUP_CCC_UKR, BLIS_DCOMPLEX, TRUE,
 #endif
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -315,29 +315,33 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
 	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
 
-      // sup thresholds
+	  // sup thresholds
 	  BLIS_MT, &blkszs[ BLIS_MT ], BLIS_MT,
 	  BLIS_NT, &blkszs[ BLIS_NT ], BLIS_NT,
 	  BLIS_KT, &blkszs[ BLIS_KT ], BLIS_KT,
 
-      // gemmsup
+	  // gemmsup
 	  BLIS_NC_SUP, &blkszs[ BLIS_NC_SUP ], BLIS_NR_SUP,
 	  BLIS_KC_SUP, &blkszs[ BLIS_KC_SUP ], BLIS_KR_SUP,
 	  BLIS_MC_SUP, &blkszs[ BLIS_MC_SUP ], BLIS_MR_SUP,
 	  BLIS_NR_SUP, &blkszs[ BLIS_NR_SUP ], BLIS_NR_SUP,
 	  BLIS_MR_SUP, &blkszs[ BLIS_MR_SUP ], BLIS_MR_SUP,
 
-	  -1
+	  BLIS_VA_END
 	);
 
 	// -------------------------------------------------------------------------
 
+#if 0
 	// Initialize the context with the sup handlers.
 	bli_cntx_set_l3_sup_handlers
 	(
-	  1,
+	  cntx,
+	  
 	  BLIS_GEMM, bli_gemmsup_ref,
 	  //BLIS_GEMMT, bli_gemmtsup_ref,
-	  cntx
+
+	  BLIS_VA_END
 	);
+#endif
 }

@@ -635,7 +635,7 @@ void bli_gks_init_ref_cntx
 bool bli_gks_cntx_l3_nat_ukr_is_ref
      (
        num_t   dt,
-       ukr_t ukr_id,
+       ukr_t   ukr_id,
        cntx_t* cntx
      )
 {
@@ -745,9 +745,9 @@ kimpl_t bli_gks_l3_ukr_impl_type( ukr_t ukr, ind_t method, num_t dt )
 		cntx_t* nat_cntx = bli_gks_lookup_nat_cntx( id );
 
 		if ( bli_gks_cntx_l3_nat_ukr_is_ref( dt, ukr, nat_cntx ) )
-            return BLIS_REFERENCE_UKERNEL;
+			return BLIS_REFERENCE_UKERNEL;
 		else
-            return BLIS_OPTIMIZED_UKERNEL;
+			return BLIS_OPTIMIZED_UKERNEL;
 	}
 }
 

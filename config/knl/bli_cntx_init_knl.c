@@ -48,11 +48,11 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_knl_asm_24x16,
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_knl_asm_24x8,
 
-      // packm
+	  // packm
 	  BLIS_PACKM_8XK_KER,  BLIS_DOUBLE, bli_dpackm_knl_asm_8xk,
 	  BLIS_PACKM_24XK_KER, BLIS_DOUBLE, bli_dpackm_knl_asm_24xk,
 
@@ -96,7 +96,7 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -104,11 +104,11 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -140,7 +140,7 @@ void bli_cntx_init_knl( cntx_t* cntx )
 	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
 	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
 
-	  -1
+	  BLIS_VA_END
 	);
 }
 
