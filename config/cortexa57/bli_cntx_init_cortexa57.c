@@ -61,8 +61,8 @@ void bli_cntx_init_cortexa57( cntx_t* cntx )
 	  cntx,
 
       // level-3
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  FALSE,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
+	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 
       -1
 	);
