@@ -34,6 +34,21 @@
 
 #include "blis.h"
 
+#define UNPACKM_BODY( ctype, ch, pragma, cdim, inca, op ) \
+\
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; mn++ ) \
+			PASTEMAC(ch,op)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*inca) ); \
+\
+		alpha1 += lda; \
+		pi1    += ldp; \
+	} \
+} while(0)
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
 \
@@ -62,70 +77,19 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( inca == 1 ) \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-						PASTEMAC(ch,scal2js)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*1) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
-			else \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-						PASTEMAC(ch,scal2s)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*1) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2js ); \
+			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2s ); \
 		} \
 		else \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-						PASTEMAC(ch,scal2js)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*inca) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
-			else \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-						PASTEMAC(ch,scal2s)( *kappa_cast, *(pi1 + mn*dfac), *(alpha1 + mn*inca) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2js ); \
+			else                        UNPACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2s ); \
 		} \
 	} \
 	else /* if ( cdim < mnr ) */ \
 	{ \
-		PASTEMAC(ch,scal2s_mxn) \
-		( \
-		  conja, \
-		  cdim, \
-		  n, \
-		  kappa, \
-		  p, dfac, ldp, \
-		  a, inca, lda \
-		); \
+			if ( bli_is_conj( conja ) ) UNPACKM_BODY( ctype, ch, , cdim, inca, scal2js ); \
+			else                        UNPACKM_BODY( ctype, ch, , cdim, inca, scal2s ); \
 	} \
 }
 

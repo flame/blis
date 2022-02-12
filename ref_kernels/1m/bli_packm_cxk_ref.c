@@ -34,6 +34,22 @@
 
 #include "blis.h"
 
+#define PACKM_BODY( ctype, ch, pragma, cdim, inca, op ) \
+\
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; mn++ ) \
+		for ( dim_t d = 0; d < dfac; d++ ) \
+			PASTEMAC(ch,op)( kappa_cast, *(alpha1 + mn*inca), *(pi1 + mn*dfac + d) ); \
+\
+		alpha1 += lda; \
+		pi1    += ldp; \
+	} \
+} while(0)
+
 #undef  GENTFUNC
 #define GENTFUNC( ctype, ch, opname, mnr0, bb0, arch, suf ) \
 \
@@ -51,6 +67,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	const dim_t     mnr        = PASTECH2(mnr0, _, ch); \
+    const num_t     dt         = PASTEMAC(ch,type); \
+	const dim_t     cdim_max   = bli_cntx_get_blksz_def_dt( dt, mnr0, cntx ); \
 	const dim_t     dfac       = PASTECH2(bb0, _, ch); \
 \
 	ctype           kappa_cast = *( ctype* )kappa; \
@@ -61,112 +79,27 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	{ \
 		if ( inca == 1 ) \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-					for ( dim_t d = 0; d < dfac; d++ ) \
-						PASTEMAC(ch,scal2js)( kappa_cast, *(alpha1 + mn*1), *(pi1 + mn*dfac + d) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
-			else \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-					for ( dim_t d = 0; d < dfac; d++ ) \
-						PASTEMAC(ch,scal2s)( kappa_cast, *(alpha1 + mn*1), *(pi1 + mn*dfac + d) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
+			if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2js ); \
+            else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2s ); \
 		} \
 		else \
 		{ \
-			if ( bli_is_conj( conja ) ) \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-					for ( dim_t d = 0; d < dfac; d++ ) \
-						PASTEMAC(ch,scal2js)( kappa_cast, *(alpha1 + mn*inca), *(pi1 + mn*dfac + d) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
-			else \
-			{ \
-				for ( dim_t k = n; k != 0; --k ) \
-				{ \
-					PRAGMA_SIMD \
-					for ( dim_t mn = 0; mn < mnr; mn++ ) \
-					for ( dim_t d = 0; d < dfac; d++ ) \
-						PASTEMAC(ch,scal2s)( kappa_cast, *(alpha1 + mn*inca), *(pi1 + mn*dfac + d) ); \
-\
-					alpha1 += lda; \
-					pi1    += ldp; \
-				} \
-			} \
+			if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2js ); \
+            else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2s ); \
 		} \
 	} \
 	else /* if ( cdim < mnr ) */ \
 	{ \
-		PASTEMAC(ch,scal2bbs_mxn) \
-		( \
-		  conja, \
-		  cdim, \
-		  n, \
-		  kappa, \
-		  a, inca, lda, \
-		  p, dfac, ldp  \
-		); \
-\
-		const dim_t     i      = cdim; \
-		/* use ldp instead of mnr, in case the latter is -1 \
-		   this may write extra zeros, but not too many \
-		   this also automatically accounts for dfac when \
-		   using set0s_mxn instead of set0bbs_mxn */ \
-		const dim_t     m_edge = ldp - cdim*dfac; \
-		const dim_t     n_edge = n_max; \
-		ctype* restrict p_cast = p; \
-		ctype* restrict p_edge = p_cast + (i  )*dfac; \
-\
-		PASTEMAC(ch,set0s_mxn) \
-		( \
-		  m_edge, \
-		  n_edge, \
-		  p_edge, 1, ldp  \
-		); \
+		if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, , cdim, inca, scal2js ); \
+        else                        PACKM_BODY( ctype, ch, , cdim, inca, scal2s ); \
 	} \
 \
-	if ( n < n_max ) \
-	{ \
-		const dim_t     j      = n; \
-		/* use ldp instead of mnr, in case the latter is -1 \
-		   this may write extra zeros, but not too many \
-		   this also automatically accounts for dfac when \
-		   using set0s_mxn instead of set0bbs_mxn */ \
-		const dim_t     m_edge = ldp; \
-		const dim_t     n_edge = n_max - n; \
-		ctype* restrict p_cast = p; \
-		ctype* restrict p_edge = p_cast + (j  )*ldp; \
-\
-		PASTEMAC(ch,set0s_mxn) \
-		( \
-		  m_edge, \
-		  n_edge, \
-		  p_edge, 1, ldp  \
-		); \
-	} \
+	PASTEMAC(ch,set0s_edge) \
+	( \
+	  cdim, cdim_max, \
+	  n, n_max, \
+	  p, ldp  \
+	); \
 }
 
 INSERT_GENTFUNC_BASIC4( packm_mrxk, BLIS_MR, BLIS_BBM, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

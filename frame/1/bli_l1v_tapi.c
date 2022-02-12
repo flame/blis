@@ -65,11 +65,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   x, incx, \
-	   y, incy, \
-	   cntx  \
+	  conjx, \
+	  n, \
+	  x, incx, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 
@@ -102,10 +102,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   x, incx, \
-	   index, \
-	   cntx  \
+	  n, \
+	  x, incx, \
+	  index, \
+	  cntx  \
 	); \
 }
 
@@ -139,13 +139,13 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   cntx  \
+	  conjx, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 
@@ -179,12 +179,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   y, incy, \
-	   cntx  \
+	  conjx, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 
@@ -219,13 +219,13 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   x, incx, \
-	   y, incy, \
-	   rho, \
-	   cntx  \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  x, incx, \
+	  y, incy, \
+	  rho, \
+	  cntx  \
 	); \
 }
 
@@ -261,15 +261,15 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   y, incy, \
-	   beta, \
-	   rho, \
-	   cntx  \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  y, incy, \
+	  beta, \
+	  rho, \
+	  cntx  \
 	); \
 }
 
@@ -299,9 +299,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   x, incx, \
-	   cntx  \
+	  n, \
+	  x, incx, \
+	  cntx  \
 	); \
 }
 
@@ -333,11 +333,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjalpha, \
-	   n, \
-	   alpha, \
-	   x, incx, \
-	   cntx  \
+	  conjalpha, \
+	  n, \
+	  alpha, \
+	  x, incx, \
+	  cntx  \
 	); \
 }
 
@@ -369,10 +369,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   x, incx, \
-	   y, incy, \
-	   cntx  \
+	  n, \
+	  x, incx, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 
@@ -404,12 +404,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   x, incx, \
-	   beta, \
-	   y, incy, \
-	   cntx  \
+	  conjx, \
+	  n, \
+	  x, incx, \
+	  beta, \
+	  y, incy, \
+	  cntx  \
 	); \
 }
 

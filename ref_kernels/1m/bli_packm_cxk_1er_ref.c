@@ -34,6 +34,46 @@
 
 #include "blis.h"
 
+#define PACKM_1E_BODY( ctype, ch, pragma, cdim, inca2, op ) \
+\
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; ++mn ) \
+		for ( dim_t d = 0; d < dfac; ++d ) \
+		{ \
+			PASTEMAC(ch,op)(  kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                                    *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
+			PASTEMAC(ch,op)( -kappa_i, kappa_r, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                                    *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
+		} \
+\
+		alpha1 += lda2; \
+		pi1_ri += ldp2; \
+		pi1_ir += ldp2; \
+	} \
+} while(0)
+
+#define PACKM_1R_BODY( ctype, ch, pragma, cdim, inca2, op ) \
+\
+do \
+{ \
+	for ( dim_t k = n; k != 0; --k ) \
+	{ \
+		pragma \
+		for ( dim_t mn = 0; mn < cdim; ++mn ) \
+		for ( dim_t d = 0; d < dfac; ++d ) \
+			PASTEMAC(ch,op)( kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
+			                                   *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
+\
+		alpha1 += lda2; \
+		pi1_r  += ldp2; \
+		pi1_i  += ldp2; \
+	} \
+} while(0)
+
 #undef  GENTFUNCCO
 #define GENTFUNCCO( ctype, ctype_r, ch, chr, opname, mnr0, bb0, arch, suf ) \
 \
@@ -50,234 +90,92 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t* restrict cntx  \
      ) \
 { \
-	const dim_t mnr  = PASTECH2(mnr0, _, ch); \
-	const dim_t dfac = PASTECH2(bb0, _, ch); \
+	const dim_t dfac = PASTECH2(bb0, _, chr); \
+    const num_t dt_r = PASTEMAC(chr,type); \
 \
-	if ( cdim == mnr && mnr != -1 ) \
+	if ( bli_is_1e_packed( schema ) ) \
 	{ \
-		if ( bli_is_1e_packed( schema ) ) \
-		{ \
-			const inc_t       inca2      = 2 * inca; \
-			const inc_t       lda2       = 2 * lda; \
-			const inc_t       ldp2       = 2 * ldp; \
+        /* cdim and mnr are in units of complex values */ \
+    	const dim_t mnr      = PASTECH2(mnr0, _, chr) == -1 ? -1 : PASTECH2(mnr0, _, chr) / 2; \
+    	const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ) / 2; \
 \
-			ctype_r           kappa_r    = ( ( ctype_r* )kappa )[0]; \
-			ctype_r           kappa_i    = ( ( ctype_r* )kappa )[1]; \
-			ctype_r* restrict alpha1     = ( ctype_r* )a; \
-			ctype_r* restrict pi1_ri     = ( ctype_r* )p; \
-			ctype_r* restrict pi1_ir     = ( ctype_r* )p + ldp; \
+		const inc_t       inca2      = 2 * inca; \
+		const inc_t       lda2       = 2 * lda; \
+		const inc_t       ldp2       = 2 * ldp; \
 \
+		ctype_r           kappa_r    = ( ( ctype_r* )kappa )[0]; \
+		ctype_r           kappa_i    = ( ( ctype_r* )kappa )[1]; \
+		ctype_r* restrict alpha1     = ( ctype_r* )a; \
+		ctype_r* restrict pi1_ri     = ( ctype_r* )p; \
+		ctype_r* restrict pi1_ir     = ( ctype_r* )p + ldp; \
+\
+    	if ( cdim == mnr && mnr != -1 ) \
+    	{ \
 			if ( inca == 1 ) \
 			{ \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-						{ \
-							PASTEMAC(ch,scal2jris)(  kappa_r, kappa_i, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                           *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
-							PASTEMAC(ch,scal2jris)( -kappa_i, kappa_r, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                           *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
-						} \
-\
-						alpha1 += lda2; \
-						pi1_ri += ldp2; \
-						pi1_ir += ldp2; \
-					} \
-				} \
-				else \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-						{ \
-							PASTEMAC(ch,scal2ris)(  kappa_r, kappa_i, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                          *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
-							PASTEMAC(ch,scal2ris)( -kappa_i, kappa_r, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                          *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
-						} \
-\
-						alpha1 += lda2; \
-						pi1_ri += ldp2; \
-						pi1_ir += ldp2; \
-					} \
-				} \
+				if ( bli_is_conj( conja ) ) PACKM_1E_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2jris ); \
+				else                        PACKM_1E_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2ris ); \
 			} \
 			else \
 			{ \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-						{ \
-							PASTEMAC(ch,scal2jris)(  kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                           *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
-							PASTEMAC(ch,scal2jris)( -kappa_i, kappa_r, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                           *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
-						} \
-\
-						alpha1 += lda2; \
-						pi1_ri += ldp2; \
-						pi1_ir += ldp2; \
-					} \
-				} \
-				else \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-						{ \
-							PASTEMAC(ch,scal2ris)(  kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                          *(pi1_ri + (mn*2 + 0)*dfac + d), *(pi1_ri + (mn*2 + 1)*dfac + d) ); \
-							PASTEMAC(ch,scal2ris)( -kappa_i, kappa_r, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                          *(pi1_ir + (mn*2 + 0)*dfac + d), *(pi1_ir + (mn*2 + 1)*dfac + d) ); \
-						} \
-\
-						alpha1 += lda2; \
-						pi1_ri += ldp2; \
-						pi1_ir += ldp2; \
-					} \
-				} \
+				if ( bli_is_conj( conja ) ) PACKM_1E_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2jris ); \
+				else                        PACKM_1E_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2ris ); \
 			} \
 		} \
 		else \
 		{ \
-			const inc_t       inca2      = 2 * inca; \
-			const inc_t       lda2       = 2 * lda; \
-			const inc_t       ldp2       = 2 * ldp; \
-\
-			ctype_r           kappa_r    = ( ( ctype_r* )kappa )[0]; \
-			ctype_r           kappa_i    = ( ( ctype_r* )kappa )[1]; \
-			ctype_r* restrict alpha1     = ( ctype_r* )a; \
-			ctype_r* restrict pi1_r      = ( ctype_r* )p; \
-			ctype_r* restrict pi1_i      = ( ctype_r* )p + ldp; \
-\
-			if ( inca == 1 ) \
-			{ \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-							PASTEMAC(ch,scal2jris)( kappa_r, kappa_i, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                          *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
-\
-						alpha1 += lda2; \
-						pi1_r  += ldp2; \
-						pi1_i  += ldp2; \
-					} \
-				} \
-				else \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-							PASTEMAC(ch,scal2ris)( kappa_r, kappa_i, *(alpha1 + mn*2 + 0), *(alpha1 + mn*2 + 1), \
-							                                         *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
-\
-						alpha1 += lda2; \
-						pi1_r  += ldp2; \
-						pi1_i  += ldp2; \
-					} \
-				} \
-			} \
-			else \
-			{ \
-				if ( bli_is_conj( conja ) ) \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-							PASTEMAC(ch,scal2jris)( kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                          *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
-\
-						alpha1 += lda2; \
-						pi1_r  += ldp2; \
-						pi1_i  += ldp2; \
-					} \
-				} \
-				else \
-				{ \
-					for ( dim_t k = n; k != 0; --k ) \
-					{ \
-						PRAGMA_SIMD \
-						for ( dim_t mn = 0; mn < mnr; ++mn ) \
-						for ( dim_t d = 0; d < dfac; ++d ) \
-							PASTEMAC(ch,scal2ris)( kappa_r, kappa_i, *(alpha1 + mn*inca2 + 0), *(alpha1 + mn*inca2 + 1), \
-							                                         *(pi1_r + mn*dfac + d), *(pi1_i + mn*dfac + d) ); \
-\
-						alpha1 += lda2; \
-						pi1_r  += ldp2; \
-						pi1_i  += ldp2; \
-					} \
-				} \
-			} \
+			if ( bli_is_conj( conja ) ) PACKM_1E_BODY( ctype, ch, , cdim, inca2, scal2jris ); \
+			else                        PACKM_1E_BODY( ctype, ch, , cdim, inca2, scal2ris ); \
 		} \
-	} \
-	else /* if ( cdim < mnr ) */ \
+\
+    	PASTEMAC(chr,set0s_edge) \
+    	( \
+    	  2*cdim, 2*cdim_max, \
+    	  2*n, 2*n_max, \
+    	  ( ctype_r* )p, ldp  \
+    	); \
+    } \
+	else /* ( bli_is_1r_packed( schema ) ) */ \
 	{ \
-		PASTEMAC(ch,scal21ms_mxn) \
-		( \
-		  schema, \
-		  conja, \
-		  cdim, \
-		  n, \
-		  kappa, \
-		  a, inca, lda, \
-		  p, 1,    ldp, ldp  \
-		); \
+    	const dim_t mnr      = PASTECH2(mnr0, _, chr); \
+    	const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ); \
 \
-		const dim_t       i      = cdim; \
-		const dim_t       erfac  = bli_is_1e_packed( schema ) ? 2 : 1; \
-		/* use ldp instead of mnr, in case the latter is -1 \
-		   this may write extra zeros, but not too many \
-		   this also automatically accounts for dfac when \
-		   using set0s_mxn instead of set0bbs_mxn */ \
-		const dim_t       m_edge = ldp - cdim*dfac*erfac; \
-		const dim_t       n_edge = 2*n_max; \
-		ctype_r* restrict p_cast = ( ctype_r* )p; \
-		ctype_r* restrict p_edge = p_cast + (i  )*dfac*erfac; \
+		const inc_t       inca2      = 2 * inca; \
+		const inc_t       lda2       = 2 * lda; \
+		const inc_t       ldp2       = 2 * ldp; \
 \
-		PASTEMAC(chr,set0s_mxn) \
-		( \
-		  m_edge, \
-		  n_edge, \
-		  p_edge, 1, ldp  \
-		); \
+		ctype_r           kappa_r    = ( ( ctype_r* )kappa )[0]; \
+		ctype_r           kappa_i    = ( ( ctype_r* )kappa )[1]; \
+		ctype_r* restrict alpha1     = ( ctype_r* )a; \
+		ctype_r* restrict pi1_r      = ( ctype_r* )p; \
+		ctype_r* restrict pi1_i      = ( ctype_r* )p + ldp; \
+\
+    	if ( cdim == mnr && mnr != -1 ) \
+    	{ \
+    		if ( inca == 1 ) \
+    		{ \
+    			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2jris ); \
+    			else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2ris ); \
+    		} \
+    		else \
+    		{ \
+    			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2jris ); \
+    			else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2ris ); \
+    		} \
+        } \
+		else \
+		{ \
+			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, , cdim, inca2, scal2jris ); \
+			else                        PACKM_1R_BODY( ctype, ch, , cdim, inca2, scal2ris ); \
+		} \
+\
+    	PASTEMAC(chr,set0s_edge) \
+    	( \
+    	  cdim, cdim_max, \
+    	  2*n, 2*n_max, \
+    	  ( ctype_r* )p, ldp  \
+    	); \
 	} \
-\
-	const dim_t       i      = n; \
-	/* use ldp instead of mnr, in case the latter is -1 \
-	   this may write extra zeros, but not too many \
-	   this also automatically accounts for dfac when \
-	   using set0s_mxn instead of set0bbs_mxn */ \
-	const dim_t       m_edge = ldp; \
-	const dim_t       n_edge = 2*(n_max-i); \
-	ctype_r* restrict p_cast = ( ctype_r* )p; \
-	ctype_r* restrict p_edge = p_cast + (i  )*ldp*2; \
-\
-	PASTEMAC(chr,set0s_mxn) \
-	( \
-	  m_edge, \
-	  n_edge, \
-	  p_edge, 1, ldp  \
-	); \
 }
 
 INSERT_GENTFUNCCO_BASIC4( packm_mrxk_1er, BLIS_MR, BLIS_BBM, BLIS_CNAME_INFIX, BLIS_REF_SUFFIX )

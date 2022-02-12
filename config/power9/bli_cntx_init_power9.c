@@ -48,10 +48,10 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_power9_asm_12x6,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -59,7 +59,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	(
 	  cntx,
 
-      // level-3
+	  // level-3
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_FLOAT,    FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_DOUBLE,   FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF,   BLIS_SCOMPLEX, FALSE,
@@ -73,7 +73,7 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	  BLIS_TRSM_L_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 	  BLIS_TRSM_U_UKR_ROW_PREF, BLIS_DCOMPLEX, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 
@@ -98,6 +98,6 @@ void bli_cntx_init_power9( cntx_t* cntx )
 	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
 	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
 
-      -1
+	  BLIS_VA_END
 	);
 }

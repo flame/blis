@@ -92,7 +92,7 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 #endif
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Update the context with storage preferences.
@@ -104,7 +104,7 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT , FALSE,
 	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
 
-      -1
+	  BLIS_VA_END
 	);
 
 	// Initialize level-3 blocksize objects with architecture-specific values.
@@ -135,7 +135,7 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
 	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
 
-	  -1
+	  BLIS_VA_END
 	);
 }
 

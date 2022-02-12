@@ -860,18 +860,18 @@ BLIS_INLINE stor3_t bli_stor3_trans( stor3_t id )
 
 BLIS_INLINE ukr_t bli_stor3_ukr( stor3_t id )
 {
-    switch ( id )
-    {
-        case BLIS_RRR: return BLIS_GEMMSUP_RRR_UKR;
-        case BLIS_RRC: return BLIS_GEMMSUP_RRC_UKR;
-        case BLIS_RCR: return BLIS_GEMMSUP_RCR_UKR;
-        case BLIS_RCC: return BLIS_GEMMSUP_RCC_UKR;
-        case BLIS_CRR: return BLIS_GEMMSUP_CRR_UKR;
-        case BLIS_CRC: return BLIS_GEMMSUP_CRC_UKR;
-        case BLIS_CCR: return BLIS_GEMMSUP_CCR_UKR;
-        case BLIS_CCC: return BLIS_GEMMSUP_CCC_UKR;
-        default: return BLIS_GEMMSUP_XXX_UKR;
-    }
+	switch ( id )
+	{
+		case BLIS_RRR: return BLIS_GEMMSUP_RRR_UKR;
+		case BLIS_RRC: return BLIS_GEMMSUP_RRC_UKR;
+		case BLIS_RCR: return BLIS_GEMMSUP_RCR_UKR;
+		case BLIS_RCC: return BLIS_GEMMSUP_RCC_UKR;
+		case BLIS_CRR: return BLIS_GEMMSUP_CRR_UKR;
+		case BLIS_CRC: return BLIS_GEMMSUP_CRC_UKR;
+		case BLIS_CCR: return BLIS_GEMMSUP_CCR_UKR;
+		case BLIS_CCC: return BLIS_GEMMSUP_CCC_UKR;
+		default: return BLIS_GEMMSUP_XXX_UKR;
+	}
 }
 
 BLIS_INLINE stor3_t bli_stor3_transa( stor3_t id )

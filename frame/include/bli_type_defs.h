@@ -626,7 +626,7 @@ typedef enum
 
 typedef enum
 {
-    // l1v kernels
+	// l1v kernels
 	BLIS_ADDV_KER,
 	BLIS_AMAXV_KER,
 	BLIS_AXPBYV_KER,
@@ -644,36 +644,36 @@ typedef enum
 	BLIS_AXPY2V_KER,
 	BLIS_DOTAXPYV_KER,
 
-    // l1f kernels
+	// l1f kernels
 	BLIS_AXPYF_KER,
 	BLIS_DOTXF_KER,
 	BLIS_DOTXAXPYF_KER,
 
-    // pack kernels
+	// pack kernels
 	BLIS_PACKM_MRXK_KER,
 	BLIS_PACKM_NRXK_KER,
 	BLIS_PACKM_MRXK_1ER_KER,
 	BLIS_PACKM_NRXK_1ER_KER,
 
-    // unpack kernels
+	// unpack kernels
 	BLIS_UNPACKM_MRXK_KER,
 	BLIS_UNPACKM_NRXK_KER,
 
-    // l3 nat kernels
+	// l3 native kernels
 	BLIS_GEMM_UKR,
 	BLIS_GEMMTRSM_L_UKR,
 	BLIS_GEMMTRSM_U_UKR,
 	BLIS_TRSM_L_UKR,
 	BLIS_TRSM_U_UKR,
 
-    // l3 virt kernels
+	// l3 virtual kernels
 	BLIS_GEMM_VIR_UKR,
 	BLIS_GEMMTRSM_L_VIR_UKR,
 	BLIS_GEMMTRSM_U_VIR_UKR,
 	BLIS_TRSM_L_VIR_UKR,
 	BLIS_TRSM_U_VIR_UKR,
 
-    // gemmsup kernels
+	// gemmsup kernels
 	BLIS_GEMMSUP_RRR_UKR,
 	BLIS_GEMMSUP_RRC_UKR,
 	BLIS_GEMMSUP_RCR_UKR,
@@ -684,8 +684,8 @@ typedef enum
 	BLIS_GEMMSUP_CCC_UKR,
 	BLIS_GEMMSUP_XXX_UKR,
 
-    // BLIS_NUM_UKRS must be last!
-    BLIS_NUM_UKRS
+	// BLIS_NUM_UKRS must be last!
+	BLIS_NUM_UKRS
 } ukr_t;
 
 
@@ -862,25 +862,25 @@ typedef enum
 	BLIS_KC,
 	BLIS_NC,
 
-    // broadcast factors for packing
-    BLIS_BBM,
-    BLIS_BBN,
+	// broadcast factors for packing
+	BLIS_BBM,
+	BLIS_BBN,
 
-    // level-2 blocksizes
+	// level-2 blocksizes
 	BLIS_M2, // level-2 blocksize in m dimension
 	BLIS_N2, // level-2 blocksize in n dimension
 
-    // level-1f blocksizes
+	// level-1f blocksizes
 	BLIS_AF, // level-1f axpyf fusing factor
 	BLIS_DF, // level-1f dotxf fusing factor
 	BLIS_XF, // level-1f dotxaxpyf fusing factor
 
-    // gemmsup thresholds
+	// gemmsup thresholds
 	BLIS_MT, // level-3 small/unpacked matrix threshold in m dimension
 	BLIS_NT, // level-3 small/unpacked matrix threshold in n dimension
 	BLIS_KT, // level-3 small/unpacked matrix threshold in k dimension
 
-    // gemmsup block sizes
+	// gemmsup block sizes
 	BLIS_KR_SUP,
 	BLIS_MR_SUP,
 	BLIS_NR_SUP,
@@ -888,9 +888,10 @@ typedef enum
 	BLIS_KC_SUP,
 	BLIS_NC_SUP,
 
-    // BLIS_NO_PART (= BLIS_NUM_BLKSZS) must be last!
-	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable.
-    BLIS_NUM_BLKSZS = BLIS_NO_PART
+	// BLIS_NO_PART (= BLIS_NUM_BLKSZS) must be last!
+	BLIS_NO_PART, // used as a placeholder when blocksizes are not applicable,
+	              // such as when characterizing a packm operation.
+	BLIS_NUM_BLKSZS = BLIS_NO_PART
 } bszid_t;
 
 
@@ -1409,7 +1410,7 @@ typedef struct cntx_s
 	func_t    ukrs[ BLIS_NUM_UKRS ];
 	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
 
-	void*     l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
+	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
 
 	ind_t     method;
 

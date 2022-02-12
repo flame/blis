@@ -222,7 +222,7 @@ void GENBARNAME(cntx_init)
 	func_t*  funcs;
 	mbool_t* mbools;
 	dim_t    i;
-	void**   vfuncs;
+	void_fp* vfuncs;
 
 
 	// -- Clear the context ----------------------------------------------------
@@ -283,7 +283,7 @@ void GENBARNAME(cntx_init)
 	  BLIS_KT,  &blkszs[ BLIS_KT  ], BLIS_KT,
 	  BLIS_BBM, &blkszs[ BLIS_BBM ], BLIS_BBM,
 	  BLIS_BBN, &blkszs[ BLIS_BBN ], BLIS_BBN,
-	  -1
+	  BLIS_VA_END
 	);
 
 
@@ -472,13 +472,13 @@ void GENBAINAME(cntx_init)
 
 	if ( method == BLIS_1M )
 	{
-    	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_1er_ker_name );
-    	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_1er_ker_name );
+		gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_1er_ker_name );
+		gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_1er_ker_name );
 	}
 	else // if ( method == BLIS_NAT )
 	{
-    	gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
-    	gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
+		gen_func_init( &funcs[ BLIS_PACKM_MRXK_KER ],  packm_mrxk_ker_name );
+		gen_func_init( &funcs[ BLIS_PACKM_NRXK_KER ],  packm_nrxk_ker_name );
 	}
 
 	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
@@ -516,22 +516,14 @@ void GENBAINAME(cntx_init_blkszs)
        cntx_t* cntx
      )
 {
-	// We MUST set the induced method in the context prior to calling
-	// bli_cntx_l3_vir_ukr_prefers_cols_dt() because that function queries
-	// the induced method. That function needs the induced method value in
-	// order to determine whether to evaluate the "prefers column storage"
-	// predicate using the storage preference of the kernel for dt, or
-	// the storage preference of the kernel for the real projection of
-	// dt. Failing to set the induced method here can lead to strange
-	// undefined behavior at runtime if the native complex kernel's
-	// storage preference happens to not equal that of the native real
-	// kernel.
+	// Set the induced method in the context.
 	bli_cntx_set_method( method, cntx );
 
-    num_t dt_r = bli_dt_proj_to_real( dt );
+	num_t dt_r = bli_dt_proj_to_real( dt );
 
 	// Initialize the blocksizes according to the micro-kernel preference as
 	// well as the algorithm.
+	//if ( bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ) )
 	if ( ! bli_cntx_get_ukr_prefs_dt( dt_r, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
 	{
 		// This branch is used for algorithm 1m_c_bp.
@@ -545,7 +537,7 @@ void GENBAINAME(cntx_init_blkszs)
 		  BLIS_NR, 1.0, 1.0,
 		  BLIS_MR, 2.0, 1.0, // ...and mr (but NOT packmr)
 		  BLIS_KR, 1.0, 1.0,
-		  -1
+		  BLIS_VA_END
 		);
 	}
 	else // if ( bli_cntx_get_ukr_prefs_dt( dt, BLIS_GEMM_UKR_ROW_PREF, cntx ) )
@@ -561,7 +553,7 @@ void GENBAINAME(cntx_init_blkszs)
 		  BLIS_NR, 2.0, 1.0, // ...and nr (but NOT packnr)
 		  BLIS_MR, 1.0, 1.0,
 		  BLIS_KR, 1.0, 1.0,
-		  -1
+		  BLIS_VA_END
 		);
 	}
 }

@@ -32,63 +32,42 @@
 
 */
 
-#include "blis.h"
+#ifndef BLIS_SET0S_EDGE_H
+#define BLIS_SET0S_EDGE_H
 
-void bli_cntx_init_cortexa57( cntx_t* cntx )
-{
-	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
+// set0s_mxn
 
-	// Set default kernel blocksizes and functions.
-	bli_cntx_init_cortexa57_ref( cntx );
+// Notes:
+// - The first char encodes the type of x.
+// - The second char encodes the type of y.
 
-	// -------------------------------------------------------------------------
-
-	// Update the context with optimized native gemm micro-kernels.
-	bli_cntx_set_ukrs
-	(
-	  cntx,
-
-	  // level-3
-	  BLIS_GEMM_UKR, BLIS_FLOAT,  bli_sgemm_armv8a_asm_8x12,
-	  BLIS_GEMM_UKR, BLIS_DOUBLE, bli_dgemm_armv8a_asm_6x8,
-
-	  BLIS_VA_END
-	);
-
-	// Update the context with storage preferences.
-	bli_cntx_set_ukr_prefs
-	(
-	  cntx,
-
-	  // level-3
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_FLOAT,  FALSE,
-	  BLIS_GEMM_UKR_ROW_PREF, BLIS_DOUBLE, FALSE,
-
-	  BLIS_VA_END
-	);
-
-	// Initialize level-3 blocksize objects with architecture-specific values.
-	//                                           s      d      c      z
-	bli_blksz_init_easy( &blkszs[ BLIS_MR ],     8,     6,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,     8,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC ],   120,   120,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC ],   640,   240,    -1,    -1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3072,    -1,    -1 );
-
-	// Update the context with the current architecture's register and cache
-	// blocksizes (and multiples) for native execution.
-	bli_cntx_set_blkszs
-	(
-	  cntx,
-
-	  // level-3
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
-
-	  BLIS_VA_END
-	);
+#define GENTFUNC(ctype,ch,op) \
+\
+BLIS_INLINE void PASTEMAC(ch,op)( const dim_t i, const dim_t m, \
+                                  const dim_t j, const dim_t n, \
+                                  ctype* restrict p, const inc_t ldp ) \
+{ \
+    if ( i < m ) \
+    { \
+    	PASTEMAC(ch,set0s_mxn) \
+        ( \
+          m - i, \
+          j, \
+          p + i*1, 1, ldp \
+        ); \
+    } \
+\
+    if ( j < n ) \
+    { \
+    	PASTEMAC(ch,set0s_mxn) \
+        ( \
+          m, \
+          n - j, \
+          p + j*ldp, 1, ldp \
+        ); \
+    } \
 }
 
+INSERT_GENTFUNC_BASIC0(set0s_edge)
+
+#endif
