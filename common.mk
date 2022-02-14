@@ -552,7 +552,7 @@ endif
 # NOTE: The flag for creating shared objects is different for Linux and OS X.
 ifeq ($(OS_NAME),Darwin)
 # OS X shared library link flags.
-SOFLAGS    := -dynamiclib -Wl,-flat_namespace
+SOFLAGS    := -dynamiclib
 ifeq ($(MK_ENABLE_RPATH),yes)
 SOFLAGS    += -Wl,-install_name,@rpath/$(LIBBLIS_SONAME)
 else
