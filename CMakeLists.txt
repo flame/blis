@@ -10,7 +10,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
 
 
 SET(AOCL_BLIS_FAMILY "zen" CACHE STRING "AOCL BLIS family name")
-SET(OMP_LIB "C:\\Program Files\\LLVM\\lib\\libomp.lib" CACHE STRING "openmp library path")
+SET(OpenMP_libomp_LIBRARY "C:/Program Files/LLVM/lib/libomp.lib" CACHE STRING "openmp library
+path")
 set(TARGET_ARCH ${AOCL_BLIS_FAMILY})
 set(AOCL_BLIS_ZEN TRUE)
 set (PYTHON_EXE "python")
@@ -267,6 +268,9 @@ if(ENABLE_MULTITHREADING)
     find_package(OpenMP)
     if (OPENMP_FOUND)
       set(BLIS_ENABLE_OPENMP TRUE)
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
     else()
       message (FATAL_ERROR "Openmp Not Found")
     endif()
@@ -538,14 +542,12 @@ file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
 add_definitions(-DBLIS_VERSION_STRING="AOCL BLIS ${BLIS_VERSION_STRING}")
 
-message( STATUS "OPENMP Library:" ${OMP_LIB})
-
 if(BUILD_SHARED_LIBS)
     add_library("${PROJECT_NAME}" SHARED ${CMAKE_SOURCE_DIR}/bli_config.h
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     if(ENABLE_OPENMP)
-        target_link_libraries("${PROJECT_NAME}" PUBLIC "${OMP_LIB}")
+        target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
     endif()
     target_compile_definitions("${PROJECT_NAME}" PUBLIC -DBLIS_IS_BUILDING_LIBRARY)
     set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
@@ -555,9 +557,10 @@ if(NOT BUILD_SHARED_LIBS)
                          ${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/blis.h
                          ${headers})
     if(ENABLE_OPENMP)
-        set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OMP_LIB}")
+        set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
     else()
     	set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
+        target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
     endif()
 endif()
 
