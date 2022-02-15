@@ -38,8 +38,8 @@
 
 // -- MEMORY ALLOCATION --------------------------------------------------------
 
-#define BLIS_SIMD_ALIGN_SIZE    256
-#define BLIS_SIMD_NUM_REGISTERS 32
+#define BLIS_SIMD_ALIGN_SIZE        256
+#define BLIS_SIMD_MAX_NUM_REGISTERS 32
 
 // SVE-specific configs.
 #define N_L1_SVE_DEFAULT 64
