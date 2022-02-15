@@ -83,6 +83,8 @@ INSERT_GENTFUNC_BASIC2( gemm_ukernel, gemm, BLIS_GEMM_UKR )
 \
 void PASTEMAC(ch,opname) \
      ( \
+       dim_t               m, \
+       dim_t               n, \
        dim_t               k, \
        ctype*     restrict alpha, \
        ctype*     restrict a1x, \
@@ -105,6 +107,8 @@ void PASTEMAC(ch,opname) \
 	/* Invoke the typed function for the given datatype. */ \
 	f \
 	( \
+	  m, \
+	  n, \
 	  k, \
 	  alpha, \
 	  a1x, \
