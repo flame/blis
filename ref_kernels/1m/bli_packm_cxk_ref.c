@@ -96,7 +96,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	PASTEMAC(ch,set0s_edge) \
 	( \
-	  cdim, cdim_max, \
+	  cdim*dfac, cdim_max*dfac, \
 	  n, n_max, \
 	  p, ldp  \
 	); \

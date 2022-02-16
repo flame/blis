@@ -777,6 +777,14 @@ BLIS_INLINE void bli_reflect_about_diag( doff_t* diagoff, uplo_t* uplo, dim_t* m
 	bli_toggle_uplo( uplo );
 }
 
+// we don't know the type of a, so this must be a macro
+// rs_a and cs_a must be variables and not expressions
+#define bli_reflect_to_stored_part( diagoff, a, rs_a, cs_a ) \
+do { \
+	a += ( diagoff ) * ( cs_a - rs_a ); \
+	bli_swap_incs( &rs_a, &cs_a ); \
+} while (0) \
+
 BLIS_INLINE void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 {
 	dim_t start2 = n - *start;

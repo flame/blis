@@ -130,7 +130,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
     	PASTEMAC(chr,set0s_edge) \
     	( \
-    	  2*cdim, 2*cdim_max, \
+    	  2*cdim*dfac, 2*cdim_max*dfac, \
     	  2*n, 2*n_max, \
     	  ( ctype_r* )p, ldp  \
     	); \
@@ -171,7 +171,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
     	PASTEMAC(chr,set0s_edge) \
     	( \
-    	  cdim, cdim_max, \
+    	  cdim*dfac, cdim_max*dfac, \
     	  2*n, 2*n_max, \
     	  ( ctype_r* )p, ldp  \
     	); \

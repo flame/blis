@@ -305,7 +305,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	if ( bli_obj_is_complex( &b ) ) *perf *= 4.0;
 
 	// Perform checks.
-	libblis_test_trsm_ukr_check( params, side, &ap, &c, &b, resid );
+	libblis_test_trsm_ukr_check( params, side, &a, &c, &b, resid );
 
 	// Zero out performance and residual if output matrix is empty.
 	//libblis_test_check_empty_problem( &c, perf, resid );
@@ -418,9 +418,11 @@ void libblis_test_trsm_ukr_check
 bli_printm( "a11", a, "%5.2f", "" );
 #endif
 
+#if 0
 	// Restore the diagonal of a11 to its original, un-inverted state
 	// (needed for trsv).
 	bli_invertd( a );
+#endif
 
 	if ( bli_is_left( side ) )
 	{

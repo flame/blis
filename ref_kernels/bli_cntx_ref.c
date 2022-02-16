@@ -117,6 +117,16 @@
 #undef  packm_nrxk_1er_ker_name
 #define packm_nrxk_1er_ker_name  GENARNAME(packm_nrxk_1er)
 
+#undef  packm_mrxmr_diag_ker_name
+#define packm_mrxmr_diag_ker_name  GENARNAME(packm_mrxmr_diag)
+#undef  packm_nrxnr_diag_ker_name
+#define packm_nrxnr_diag_ker_name  GENARNAME(packm_nrxnr_diag)
+
+#undef  packm_mrxmr_diag_1er_ker_name
+#define packm_mrxmr_diag_1er_ker_name  GENARNAME(packm_mrxmr_diag_1er)
+#undef  packm_nrxnr_diag_1er_ker_name
+#define packm_nrxnr_diag_1er_ker_name  GENARNAME(packm_nrxnr_diag_1er)
+
 #undef  unpackm_mrxk_ker_name
 #define unpackm_mrxk_ker_name  GENARNAME(unpackm_mrxk)
 #undef  unpackm_nrxk_ker_name
@@ -232,20 +242,27 @@ void GENBARNAME(cntx_init)
 
 	// -- Set blocksizes -------------------------------------------------------
 
-	//                                           s     d     c     z
-	bli_blksz_init_easy( &blkszs[ BLIS_KR  ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MR  ],    4,    4,    4,    4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NR  ],   16,    8,    8,    4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_MC  ],  256,  128,  128,   64 );
-	bli_blksz_init_easy( &blkszs[ BLIS_KC  ],  256,  256,  256,  256 );
-	bli_blksz_init_easy( &blkszs[ BLIS_NC  ], 4096, 4096, 4096, 4096 );
-	bli_blksz_init_easy( &blkszs[ BLIS_M2  ], 1000, 1000, 1000, 1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_N2  ], 1000, 1000, 1000, 1000 );
-	bli_blksz_init_easy( &blkszs[ BLIS_AF  ],    8,    8,    8,    8 );
-	bli_blksz_init_easy( &blkszs[ BLIS_DF  ],    6,    6,    6,    6 );
-	bli_blksz_init_easy( &blkszs[ BLIS_XF  ],    4,    4,    4,    4 );
-	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    1,    1,    1,    1 );
-	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    1,    1,    1,    1 );
+	// NOTE: The macro values for register blocksizes and packm broadcast factors are
+	// used here as defined in the bli_kernel_defs_<family>.h or generic values from
+	// bli_kernel_macro_defs.h otherwise. Configurations should also initialize the
+	// blocksizes in the context explicitly, but using the correct values here helps
+	// to prevent accidents.
+	//                                                    s              d              c              z
+	bli_blksz_init_easy( &blkszs[ BLIS_KR  ],             1,             1,             1,             1 );
+	bli_blksz_init     ( &blkszs[ BLIS_MR  ],     BLIS_MR_s,     BLIS_MR_d,     BLIS_MR_c,     BLIS_MR_z,
+	                                          BLIS_PACKMR_s, BLIS_PACKMR_d, BLIS_PACKMR_c, BLIS_PACKMR_z );
+	bli_blksz_init     ( &blkszs[ BLIS_NR  ],     BLIS_NR_s,     BLIS_NR_d,     BLIS_NR_c,     BLIS_NR_z,
+	                                          BLIS_PACKNR_s, BLIS_PACKNR_d, BLIS_PACKNR_c, BLIS_PACKNR_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_MC  ],           256,           128,           128,            64 );
+	bli_blksz_init_easy( &blkszs[ BLIS_KC  ],           256,           256,           256,           256 );
+	bli_blksz_init_easy( &blkszs[ BLIS_NC  ],          4096,          4096,          4096,          4096 );
+	bli_blksz_init_easy( &blkszs[ BLIS_M2  ],          1000,          1000,          1000,          1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_N2  ],          1000,          1000,          1000,          1000 );
+	bli_blksz_init_easy( &blkszs[ BLIS_AF  ],             8,             8,             8,             8 );
+	bli_blksz_init_easy( &blkszs[ BLIS_DF  ],             6,             6,             6,             6 );
+	bli_blksz_init_easy( &blkszs[ BLIS_XF  ],             4,             4,             4,             4 );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBM ],    BLIS_BBM_s,    BLIS_BBM_d,    BLIS_BBM_c,    BLIS_BBM_z );
+	bli_blksz_init_easy( &blkszs[ BLIS_BBN ],    BLIS_BBN_s,    BLIS_BBN_d,    BLIS_BBN_c,    BLIS_BBN_z );
 
 	// -- Set level-3 small/unpacked thresholds --------------------------------
 
@@ -386,6 +403,12 @@ void GENBARNAME(cntx_init)
 
 	gen_func_init_co( &funcs[ BLIS_PACKM_MRXK_1ER_KER ],  packm_mrxk_1er_ker_name );
 	gen_func_init_co( &funcs[ BLIS_PACKM_NRXK_1ER_KER ],  packm_nrxk_1er_ker_name );
+
+	gen_func_init( &funcs[ BLIS_PACKM_MRXMR_DIAG_KER ],  packm_mrxmr_diag_ker_name );
+	gen_func_init( &funcs[ BLIS_PACKM_NRXNR_DIAG_KER ],  packm_nrxnr_diag_ker_name );
+
+	gen_func_init_co( &funcs[ BLIS_PACKM_MRXMR_DIAG_1ER_KER ],  packm_mrxmr_diag_1er_ker_name );
+	gen_func_init_co( &funcs[ BLIS_PACKM_NRXNR_DIAG_1ER_KER ],  packm_nrxnr_diag_1er_ker_name );
 
 	gen_func_init( &funcs[ BLIS_UNPACKM_MRXK_KER ],  unpackm_mrxk_ker_name );
 	gen_func_init( &funcs[ BLIS_UNPACKM_NRXK_KER ],  unpackm_nrxk_ker_name );
