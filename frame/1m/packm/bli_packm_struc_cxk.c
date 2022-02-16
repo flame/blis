@@ -228,7 +228,7 @@ void PASTEMAC(ch,varname) \
 \
     	if ( bli_is_lower( uploc ) ) \
         { \
-            bli_reflect_to_stored_part( -panel_dim, c12, incc12, ldc12 ); \
+            bli_reflect_to_stored_part( diagoffc - i, c12, incc12, ldc12 ); \
 \
     		if ( bli_is_hermitian( strucc ) ) \
     			bli_toggle_conj( &conjc12 ); \
