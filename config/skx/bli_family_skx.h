@@ -47,8 +47,8 @@
 
 #define BLIS_SIMD_ALIGN_SIZE             64
 
-#define BLIS_SIMD_SIZE                   64
-#define BLIS_SIMD_NUM_REGISTERS          32
+#define BLIS_SIMD_MAX_SIZE               64
+#define BLIS_SIMD_MAX_NUM_REGISTERS      32
 
 //#include <stdlib.h>
 

@@ -111,6 +111,8 @@ void PASTEMAC0(opname) \
 \
 	num_t     dt        = bli_obj_dt( c11 ); \
 \
+	dim_t     m         = bli_obj_length( c11 ); \
+	dim_t     n         = bli_obj_width( c11 ); \
 	dim_t     k         = bli_obj_width( a1x ); \
 	void*     buf_a1x   = bli_obj_buffer_at_off( a1x ); \
 	void*     buf_a11   = bli_obj_buffer_at_off( a11 ); \
@@ -140,6 +142,8 @@ void PASTEMAC0(opname) \
 \
 		f \
 		( \
+		  m, \
+		  n, \
 		  k, \
 		  buf_alpha, \
 		  buf_a1x, \
@@ -160,6 +164,8 @@ void PASTEMAC0(opname) \
 \
 		f \
 		( \
+		  m, \
+		  n, \
 		  k, \
 		  buf_alpha, \
 		  buf_a1x, \

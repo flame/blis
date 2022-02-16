@@ -54,8 +54,8 @@ gint_t bli_info_get_int_type_size( void )             { return BLIS_INT_TYPE_SIZ
 gint_t bli_info_get_num_fp_types( void )              { return BLIS_NUM_FP_TYPES; }
 gint_t bli_info_get_max_type_size( void )             { return BLIS_MAX_TYPE_SIZE; }
 gint_t bli_info_get_page_size( void )                 { return BLIS_PAGE_SIZE; }
-gint_t bli_info_get_simd_num_registers( void )        { return BLIS_SIMD_NUM_REGISTERS; }
-gint_t bli_info_get_simd_size( void )                 { return BLIS_SIMD_SIZE; }
+gint_t bli_info_get_simd_num_registers( void )        { return BLIS_SIMD_MAX_NUM_REGISTERS; }
+gint_t bli_info_get_simd_size( void )                 { return BLIS_SIMD_MAX_SIZE; }
 gint_t bli_info_get_simd_align_size( void )           { return BLIS_SIMD_ALIGN_SIZE; }
 gint_t bli_info_get_stack_buf_max_size( void )        { return BLIS_STACK_BUF_MAX_SIZE; }
 gint_t bli_info_get_stack_buf_align_size( void )      { return BLIS_STACK_BUF_ALIGN_SIZE; }

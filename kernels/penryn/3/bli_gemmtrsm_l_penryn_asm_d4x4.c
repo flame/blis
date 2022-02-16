@@ -56,6 +56,8 @@ void bli_sgemmtrsm_l_penryn_asm_8x4
 
 void bli_dgemmtrsm_l_penryn_asm_4x4
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k0,
        double*    restrict alpha,
        double*    restrict a10,
@@ -75,6 +77,8 @@ void bli_dgemmtrsm_l_penryn_asm_4x4
 	uint64_t k_left = k0 % 4;
 	uint64_t rs_c   = rs_c0;
 	uint64_t cs_c   = cs_c0;
+
+	GEMMTRSM_UKR_SETUP_CT( d, 4, 4, false );
 
 	begin_asm()
 		
@@ -561,6 +565,7 @@ void bli_dgemmtrsm_l_penryn_asm_4x4
 		  "memory"
 	)
 
+	GEMMTRSM_UKR_FLUSH_CT( d );
 }
 
 

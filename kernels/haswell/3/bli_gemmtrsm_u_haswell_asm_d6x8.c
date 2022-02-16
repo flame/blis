@@ -58,6 +58,8 @@
 
 void bli_sgemmtrsm_u_haswell_asm_6x16
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k0,
        float*     restrict alpha,
        float*     restrict a10,
@@ -80,6 +82,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	uint64_t cs_c   = cs_c0;
 
 	float*   beta   = bli_sm1;
+
+	GEMMTRSM_UKR_SETUP_CT_ANY( s, 6, 16, true );
 
 	begin_asm()
 
@@ -830,6 +834,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+
+	GEMMTRSM_UKR_FLUSH_CT( s );
 }
 
 
@@ -848,6 +854,8 @@ void bli_sgemmtrsm_u_haswell_asm_6x16
 
 void bli_dgemmtrsm_u_haswell_asm_6x8
      (
+       dim_t               m,
+       dim_t               n,
        dim_t               k0,
        double*    restrict alpha,
        double*    restrict a10,
@@ -870,6 +878,8 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	uint64_t cs_c   = cs_c0;
 
 	double*  beta   = bli_dm1;
+
+	GEMMTRSM_UKR_SETUP_CT_ANY( d, 6, 8, true );
 
 	begin_asm()
 
@@ -1583,6 +1593,8 @@ void bli_dgemmtrsm_u_haswell_asm_6x8
 	  "xmm12", "xmm13", "xmm14", "xmm15",
 	  "memory"
 	)
+
+	GEMMTRSM_UKR_FLUSH_CT( d );
 }
 
 
