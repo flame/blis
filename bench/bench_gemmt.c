@@ -107,7 +107,7 @@ int main( int argc, char** argv )
         printf("Error opening output file %s\n", argv[2]);
         exit(1);
       }
-    fprintf(fout, "Dt uplo  n\t  k\t lda\t ldb\t ldc\t transa transb alphaR\t alphaI\t betaR\t betaI\t gflops\n");
+    fprintf(fout, "Dt\t uplo\t  n\t  k\t lda\t ldb\t ldc\t transa\t transb\t alphaR\t alphaI\t betaR\t betaI\t gflops\n");
 
 
     inc_t lda;
@@ -455,7 +455,7 @@ int main( int argc, char** argv )
 
         if ( bli_is_complex( dt ) ) gflops *= 4.0;
 
-        printf("data_gemm_%s", BLAS);
+        printf("data_gemmt_%s", BLAS);
         p_inc++;
 
         printf( "( %2lu, 1:4 ) = [ %4lu %4lu %7.2f ];\n",
@@ -463,7 +463,7 @@ int main( int argc, char** argv )
                 ( unsigned long )n,
                 ( unsigned long )k, gflops );
 
-        fprintf(fout, "%c %c %ld\t %ld\t %ld\t %ld\t %ld\t %c %c %lf\t %lf\t %lf\t %lf\t %6.3f\n", \
+        fprintf(fout, "%c\t %c\t %ld\t %ld\t %ld\t %ld\t %ld\t %c\t %c\t %lf\t %lf\t %lf\t %lf\t %6.3f\n", \
                 dt_ch, uplo_c, n, k, lda, ldb, ldc, 
                 transA_c,
                 transB_c,

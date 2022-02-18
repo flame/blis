@@ -203,6 +203,7 @@ err_t bli_gemmtsup_int
 
 	const dim_t  m           = bli_obj_length( c );
 	const dim_t  n           = m;
+	const dim_t  k           = bli_obj_width( a );
 	const dim_t  MR          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx );
 	const dim_t  NR          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx );
 	const bool   auto_factor = bli_rntm_auto_factor( rntm );
@@ -251,6 +252,14 @@ err_t bli_gemmtsup_int
 			// new ways of parallelism value for the jc loop.
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
 			bli_l3_sup_thrinfo_update_root( rntm, thread );
+			/* Enable packing for B matrix for higher sizes. Note that pack B
+			 * * becomes pack A inside var2m because this is transpose case*/
+			if(bli_is_double(dt) && ((n_threads==1)))
+			{
+				if((m > 320) &&  (k > 50))
+					bli_rntm_set_pack_b( 1, rntm );
+			}
+
 		}
 
 
@@ -317,6 +326,14 @@ err_t bli_gemmtsup_int
 			// new ways of parallelism value for the jc loop.
 			bli_rntm_set_ways_only( jc_new, 1, ic_new, 1, 1, rntm );
 			bli_l3_sup_thrinfo_update_root( rntm, thread );
+
+			/* Enable packing for A matrix for higher sizes. Note that pack A
+			 * * becomes pack B inside var2m because this is transpose case*/
+			if(bli_is_double(dt) && (n_threads==1))
+			{
+				if((m > 320) &&  (k > 50))
+					bli_rntm_set_pack_a( 1, rntm );
+			}
 		}
 
 

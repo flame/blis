@@ -37,16 +37,31 @@
 // -- gemmt specific function
 bool bli_cntx_gemmtsup_thresh_is_met_zen( obj_t* a, obj_t* b, obj_t* c, cntx_t* cntx )
 {
-    num_t dt = bli_obj_dt( c );
+    num_t       dt          =   bli_obj_dt( c );
+    dim_t       n           =   bli_obj_length( c );
+    dim_t       k           =   bli_obj_width_after_trans( a );
+    rntm_t rntm;
 
-    dim_t n = bli_obj_length( c );
-    dim_t k = bli_obj_width_after_trans( a );
+    bli_rntm_init_from_global( &rntm );
+
+    // Query the number of threads from rntm object.
+    const dim_t n_threads   =   bli_rntm_num_threads( &rntm );
 
     if( bli_is_double( dt ))
     {
-        if ( n < 300 )       return TRUE;
-        if ( (k / n ) > 50 ) return TRUE;
-
+        if( n_threads == 16)
+        {
+            /*Push sizes for n<1200 into SUP path*/
+            if ( n < 1200 )                 return TRUE;
+            /*For 1200<n<1600 and n/k <5 SUP is performing better than Native
+              n/k >5 , With packing , Native path performance is better */
+            if ( n < 1600 && (n / k) < 5)   return TRUE;
+        }
+        else
+        {
+            if ( n < 800 )       return TRUE;
+            if ( (k / n ) > 50 ) return TRUE;
+        }
         return FALSE;
     }
     else if ( bli_is_dcomplex( dt ) )
