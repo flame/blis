@@ -35,9 +35,12 @@
 #include "blis.h"
 #include <sys/auxv.h>
 
+#ifndef HWCAP_SVE
+#define HWCAP_SVE (1 << 22)
+#endif
+
 void bli_cntx_init_armsve( cntx_t* cntx )
 {
-	const int HWCAP_SVE = 1 << 22;
 	if (!(getauxval( AT_HWCAP ) & HWCAP_SVE))
 		return;
 
