@@ -33,9 +33,14 @@
 */
 
 #include "blis.h"
+#include <sys/auxv.h>
 
 void bli_cntx_init_armsve( cntx_t* cntx )
 {
+	const int HWCAP_SVE = 1 << 22;
+	if (!(getauxval( AT_HWCAP ) & HWCAP_SVE))
+		return;
+
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 #if 0
 	blksz_t thresh[ BLIS_NUM_THRESH ];
