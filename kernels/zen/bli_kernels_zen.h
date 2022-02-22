@@ -127,6 +127,7 @@ AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_5 )
 AXPYF_KER_PROT( dcomplex, z, axpyf_zen_int_4 )
 // axpy2v (intrinsics)
 AXPY2V_KER_PROT(double, d, axpy2v_zen_int )
+AXPY2V_KER_PROT(dcomplex, z, axpy2v_zen_int )
 
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
