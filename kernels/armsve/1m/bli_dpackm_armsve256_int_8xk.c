@@ -35,7 +35,7 @@
 
 #include "blis.h"
 
-#if (defined(BLIS_FAMILY_ARMSVE) && !defined(BLIS_FAMILY_A64FX))
+#if !defined(BLIS_FAMILY_A64FX)
 #include <arm_sve.h>
 
 // assumption:
