@@ -560,7 +560,6 @@ if(NOT BUILD_SHARED_LIBS)
         set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}" STATIC_LIBRARY_OPTIONS "${OpenMP_libomp_LIBRARY}")
     else()
     	set_target_properties("${PROJECT_NAME}" PROPERTIES LINKER_LANGUAGE C OUTPUT_NAME "${LIB_NAME}")
-        target_link_libraries("${PROJECT_NAME}" PRIVATE OpenMP::OpenMP_CXX)
     endif()
 endif()
 
