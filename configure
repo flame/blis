@@ -1079,44 +1079,6 @@ get_ranlib_search_list()
 	echo "${list}"
 }
 
-select_tool()
-{
-	local search_list CC_env the_cc cc
-
-	# This is the list of compilers/tools to search for, and the order in
-	# which to search for them.
-	search_list=$1
-
-	# The environment variable associated with the compiler/tool type we
-	# are searching (e.g. CC, CXX, PYTHON).
-	#CC_env=$2
-
-	# If CC_env contains something, add it to the beginning of our default
-	# search list.
-	#if [ -n "${CC_env}" ]; then
-	#	search_list="${CC_env} ${search_list}"
-	#fi
-
-	# Initialize our selected compiler/tool to empty.
-	the_cc=""
-
-	# Try each compiler/tool in the list and select the first one we find that
-	# works.
-	for cc in ${search_list}; do
-
-		# See if the current compiler/tool works and/or is present.
-		${cc} --version > /dev/null 2>&1
-
-		if [ "$?" == 0 ]; then
-			the_cc=${cc}
-			break
-		fi
-	done
-
-	# Return the selected compiler/tool.
-	echo "${the_cc}"
-}
-
 auto_detect()
 {
 	local cc cflags config_defines detected_config rval cmd
@@ -2086,7 +2048,7 @@ set_default_version()
 
 select_tool_w_env()
 {
-	local _search_list _env_var _env_str _tool_str _found_var
+	local search_list env_var env_str tool_str found_var
 	local _the_tool
 
 	# Example calling sequence:
@@ -2094,81 +2056,213 @@ select_tool_w_env()
 	#  select_tool_w_env "${cc_search_list}" "${CC}" "CC" "C compiler" "yes" found_cc
 	#
 
-	_search_list="$1" # the tool's default search list.
-	_env_var="$2"     # the value of the environment variable for this tool.
-	_env_str="$3"     # a string naming the source of _env_var.
-	_tool_str="$4"    # a human-readable string identifying the tool.
-	_is_required="$5" # is it fatal if _env_var doesn't exist/work? (yes or no)
-	_found_var="$6"   # the variable into which to save the selected tool.
+	search_list="$1" # the tool's default search list.
+	env_var="$2"     # the value of the environment variable for this tool.
+	env_str="$3"     # a string naming the source of env_var.
+	tool_str="$4"    # a human-readable string identifying the tool.
+	is_required="$5" # is it fatal if env_var doesn't exist/work? (yes or no)
+	found_var="$6"   # the variable into which to save the selected tool.
 
 	# If the environment variable contains something, verify that it exists. If
 	# it is unset or empty, we proceed with the default search list.
-	if [ -n "${_env_var}" ]; then
+	if [ -n "${env_var}" ]; then
 
-		echo "${script_name}: user specified a ${_tool_str} via ${_env_str} (${_env_var})."
+		echo "${script_name}: user specified a ${tool_str} via ${env_str} (${env_var})."
 
-		# See if the binary specified by _env_var exists.
-		_the_tool=$(select_tool "${_env_var}")
+		# See if the binary specified by env_var exists.
+		_the_tool=$(select_tool "${env_var}" "${env_str}")
 
-		# Copy the result into the variable specified by _found_var.
-		eval "${_found_var}=\"${_the_tool}\""
+		# Copy the result into the variable specified by found_var.
+		eval "${found_var}=\"${_the_tool}\""
 
-		# If the tool specified by _env_var doesn't exist, throw a tantrum.
+		# If the tool specified by env_var doesn't exist, throw a tantrum.
 		if [ -z "${_the_tool}" ]; then
 
-			echo "${script_name}: *** Could not find the ${_tool_str} specified via ${_env_str} ('${_env_var}')."
+			echo "${script_name}: *** Could not find the ${tool_str} specified via ${env_str} ('${env_var}')."
 
-			# Whether the tantrum is fatal depends on the _is_required argument.
-			if [ "${_is_required}" == "yes" ]; then
-				echo "${script_name}: *** A working ${_tool_str} is required. Please set ${_env_str}"
-				echo "${script_name}: *** to a ${_tool_str} that exists (or unset ${_env_str})."
+			# Whether the tantrum is fatal depends on the is_required argument.
+			if [ "${is_required}" == "yes" ]; then
+				echo "${script_name}: *** A working ${tool_str} is required. Please set ${env_str}"
+				echo "${script_name}: *** to a ${tool_str} that exists (or unset ${env_str})."
 				exit 1
 			else
-				echo "${script_name}: *** Note that a ${_tool_str} will not be available."
+				echo "${script_name}: *** Note that a ${tool_str} will not be available."
 
-				# Set the _found_var variable to *something* so that the output
+				# Set the found_var variable to *something* so that the output
 				# makefile fragment contains a record that the tool wasn't found.
-				eval "${_found_var}=\"${_env_str}\"-not-found"
+				eval "${found_var}=\"${env_str}\"-not-found"
 			fi
 		else
 			# The user-specified tool was found.
 			echo "${script_name}: ${_the_tool} exists and appears to work."
-			echo "${script_name}: using '${_the_tool}' as ${_tool_str}."
+			echo "${script_name}: using '${_the_tool}' as ${tool_str}."
 		fi
 
 	else
 
-		echo "${script_name}: ${_tool_str} search list is: ${_search_list}."
+		echo "${script_name}: ${tool_str} search list is: ${search_list}."
 
 		# Search for a working tool from the search list.
-		_the_tool=$(select_tool "${_search_list}")
+		_the_tool=$(select_tool "${search_list}" "${env_str}")
 
-		# Copy the result into the variable specified by _found_var.
-		eval "${_found_var}=\"${_the_tool}\""
+		# Copy the result into the variable specified by found_var.
+		eval "${found_var}=\"${_the_tool}\""
 
 		# If we didn't find a working tool from the search list, throw a tantrum.
 		if [ -z "${_the_tool}" ]; then
 
-			echo "${script_name}: *** Could not find a ${_tool_str} from the search list."
+			echo "${script_name}: *** Could not find a ${tool_str} from the search list."
 
-			# Whether the tantrum is fatal depends on the _is_required argument.
-			if [ "${_is_required}" == "yes" ]; then
-				echo "${script_name}: *** A working ${_tool_str} is required. Cannot continue."
+			# Whether the tantrum is fatal depends on the is_required argument.
+			if [ "${is_required}" == "yes" ]; then
+				echo "${script_name}: *** A working ${tool_str} is required. Cannot continue."
 				exit 1
 			else
-				echo "${script_name}: *** Note that a ${_tool_str} will not be available."
+				echo "${script_name}: *** Note that a ${tool_str} will not be available."
 
-				# Set the _found_var variable to *something* so that the output
+				# Set the found_var variable to *something* so that the output
 				# makefile fragment contains a record that the tool wasn't found.
-				eval "${_found_var}=\"${_env_str}-not-found\""
+				eval "${found_var}=\"${env_str}-not-found\""
 			fi
 		else
 			# A tool from the search list was found.
 			echo "${script_name}: found '${_the_tool}'."
-			echo "${script_name}: using '${_the_tool}' as ${_tool_str}."
+			echo "${script_name}: using '${_the_tool}' as ${tool_str}."
 		fi
 	fi
 }
+
+select_tool()
+{
+	local search_list env_str
+	local the_tool tool the_flags rval
+
+	# This is the list of tools to search for, and the order in which
+	# to search for them.
+	search_list="$1"
+
+	# This is the name of the environment variable associated with the tool. For
+	# example, if search_list is a list of C compilers, env_str will be "CC".
+	env_str="$2"
+
+	# Initialize our selected tool to empty.
+	the_tool=""
+
+	# Try each tool in the list and select the first one we find that works.
+	for tool in ${search_list}; do
+
+		# Map each tool (via its canonical environment variable form) to the set
+		# of options we should use to check that it is working and available.
+		the_flags=$(get_tool_checkflags "${env_str}")
+
+		# Check that the tool works with at least one of the flags in the_flags
+		# the_flags (or, if the_flags is empty, check that the tool exists).
+		rval=$(check_tool "${tool}" "${the_flags}")
+
+		# If check_tool() returns 0, we're done.
+		if [ "${rval}" == "0" ]; then
+			the_tool=${tool}
+			break
+		fi
+	done
+
+	# Return the selected tool.
+	echo "${the_tool}"
+}
+
+get_tool_checkflags()
+{
+	local env_str
+	local allflags flaglist
+
+	# The tool for which we will determine the flag/option to pass in
+	# when testing that the tool works. Notice that it's not actually
+	# the tool but rather its equivalent environment variable.
+	env_str="${1}"
+
+	# The default list of flags to use in most circumstances.
+	allflags="--version -V -h"
+
+	if [ "${os_name}" = "Linux" ]; then
+
+		# If we are on Linux, it is very likely that all the tools will respond
+		# to at least one of the usual flags.
+		flaglist="${allflags}"
+
+	else
+
+		# If we are on Darwin/OSX/BSD or something else, we sometimes skip flag
+		# checks. (Note that when the list of flags to check is empty, we end
+		# up testing for the existence of the tool instead.)
+		if   [ "${env_str}" = "AR" -o \
+		       "${env_str}" = "RANLIB" ]; then
+
+			# AR, RANLIB may not respond to the normal flags on Darwin/OSX/BSD,
+			# so all we can really do is check for their existence.
+			flaglist=""
+		else
+			# Even on Darwin/OSX/BSD, we expect that CC, CXX, FC, PYTHON will
+			# respond to the typical flag checklist.
+			flaglist="${allflags}"
+		fi
+	fi
+
+	echo "${flaglist}"
+}
+
+check_tool()
+{
+	local tool the_flags
+	local rval opt toolpath
+
+	# This is the name, or filepath, of the tool to check for.
+	tool="$1"
+
+	# Some command line options to try to determine that the tool works.
+	the_flags="$2"
+
+	# Start with the assuming that the tool doesn't work/exist.
+	rval=1
+
+	if [ -n "${the_flags}" ]; then
+
+		# If the list of flags to check non-empty, we will iterate through the
+		# list in search of a flag that works. Failure to find one that works
+		# means the tool doesn't work (or, if the user specified the tool via
+		# its environment variable, failure might mean that the tool doesn't
+		# even exist).
+
+		# Try each flag in the list of flags.
+		for opt in ${the_flags}; do
+
+			# See if the tool responds to the current flag.
+			${tool} ${opt} > /dev/null 2>&1
+
+			# If the tool responded to the flag with a nominal error code of
+			# 0, we found one that works and set rval accoringly.
+			if [ "$?" == 0 ]; then
+				rval=0
+				break
+			fi
+		done
+	else
+
+		# If the list of flags to check is empty, we interpret this as a
+		# request to instead check for the existence of the tool.
+
+		# Use 'which' to determine if the tool exists.
+		toolpath="$(which ${tool} 2> /dev/null)"
+
+		# If the tool doesn't exist, we set rval accordingly.
+		if [ -n "${toolpath}" ]; then
+			rval=0
+		fi
+	fi
+
+	# Return the error code.
+	echo "${rval}"
+}
+
 
 
 #
