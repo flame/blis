@@ -249,9 +249,13 @@ void bli_dher2_unf_var1
         PASTECH(d,axpy2v_ker_ft) kfp_2v;
 
         /* Query the context for the kernel function pointer. */
-        kfp_2v = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPY2V_KER, cntx );
+	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
+	kfp_2v = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPY2V_KER, cntx );
 
-	if( (incx == 1) && (incy == 1) && (rs_ct == 1))
+	if ( (bli_cpuid_is_avx_supported() == TRUE)
+	   && (incx == 1)
+	   && (incy == 1)
+	   && (rs_ct == 1))
 	{
 		for ( i = 0; i < m; )
 		{
@@ -265,29 +269,43 @@ void bli_dher2_unf_var1
 
 			if((n_behind >= 3))
 			{
-				bli_dher2_trans_zen_int_4(c10t, x0, y0, &alpha0, n_behind + 1, cs_ct);
+				bli_dher2_trans_zen_int_4(c10t, x0, y0,
+						         &alpha0,
+						         n_behind + 1,
+						         cs_ct);
 				i+=4;
 			}
 			else
 			{
-				/* Apply conjx and/or conjy to chi1 and/or psi1. */
-				PASTEMAC(d,copycjs)( conjx, *chi1, conjx0_chi1 );
-				PASTEMAC(d,copycjs)( conjy, *psi1, conjy1_psi1 );
-				PASTEMAC(d,copycjs)( conj0, *psi1, conjy0_psi1 );
+				/* Apply conjx and/or conjy to chi1
+				 * and/or psi1. */
+				PASTEMAC(d,copycjs)( conjx, *chi1,
+						   conjx0_chi1 );
+				PASTEMAC(d,copycjs)( conjy, *psi1,
+						   conjy1_psi1 );
+				PASTEMAC(d,copycjs)( conj0, *psi1,
+						   conjy0_psi1 );
 
-				/* Compute scalars for vector subproblems. */
-				PASTEMAC(d,scal2s)( alpha0, conjx0_chi1, alpha0_chi1 );
-				PASTEMAC(d,scal2s)( alpha1, conjy1_psi1, alpha1_psi1 );
+				/* Compute scalars for vector
+				 * subproblems. */
+				PASTEMAC(d,scal2s)( alpha0,
+						  conjx0_chi1,
+						  alpha0_chi1 );
+				PASTEMAC(d,scal2s)( alpha1,
+						  conjy1_psi1,
+						  alpha1_psi1 );
 
-				/* Compute alpha * chi1 * conj(psi1) after both chi1
-				 * and psi1 have already been conjugated, if needed,
+				/* Compute alpha * chi1 * conj(psi1)
+				 * after both chi1 and psi1 have
+				 * already been conjugated, if needed
 				 * by conjx and conjy.
 				 */
-				PASTEMAC(d,scal2s)( alpha0_chi1, conjy0_psi1,
-						alpha0_chi1_psi1 );
+				PASTEMAC(d,scal2s)( alpha0_chi1,
+						  conjy0_psi1,
+						  alpha0_chi1_psi1 );
 
-				/* c10t = c10t +      alpha  * chi1 * y0'; */
-				/* c10t = c10t + conj(alpha) * psi1 * x0'; */
+				/* c10t = c10t + alpha  * chi1 * y0';*/
+				/* c10t = c10t + conj(alpha) * psi1 * x0';*/
 				kfp_2v
 					(
 					 conj0,
@@ -301,10 +319,12 @@ void bli_dher2_unf_var1
 					 cntx
 					);
 
-				/* gamma11 = gamma11 +      alpha  * chi1 * conj(psi1)
-				   + conj(alpha) * psi1 * conj(chi1); */
-				PASTEMAC(d,adds)( alpha0_chi1_psi1, *gamma11 );
-				PASTEMAC(d,adds)( alpha0_chi1_psi1, *gamma11 );
+				/* gamma11 = gamma11 + alpha  * chi1 *conj(psi1)
+				 * + conj(alpha) * psi1 * conj(chi1);*/
+				PASTEMAC(d,adds)( alpha0_chi1_psi1,
+						*gamma11 );
+				PASTEMAC(d,adds)( alpha0_chi1_psi1,
+						*gamma11 );
 
 				i+=1;
 			}
