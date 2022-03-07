@@ -53,3 +53,13 @@ out.*
 GPATH
 GRTAGS
 GTAGS
+
+# Windows Build
+build/*
+bin/*
+*.dll
+*.lib
+*.pdb
+*.exe
+
+.vscode

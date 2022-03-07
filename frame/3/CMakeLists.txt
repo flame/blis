@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
@@ -12,7 +12,6 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_packm.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_prune.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_int.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_packm_a.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_packm_b.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_packm_var.c
@@ -27,6 +26,21 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_oapi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_tapi.c
     )
+# Select AMD specific sources for AMD configurations.
+if(${TARGET_ARCH} STREQUAL zen OR 
+   ${TARGET_ARCH} STREQUAL zen2 OR 
+   ${TARGET_ARCH} STREQUAL zen3 OR 
+   ${TARGET_ARCH} STREQUAL amdzen)
+    target_sources("${PROJECT_NAME}"
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_int_amd.c
+    )
+else()
+    target_sources("${PROJECT_NAME}"
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_int_amd.c
+    )
+endif()
 
 set(SUBDIRECTORIES "gemm" "hemm" "her2k" "herk" "symm" "syr2k" "syrk" "trmm" "trmm3" "trsm" "gemmt")
 
