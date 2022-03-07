@@ -54,12 +54,12 @@ static void_fp GENARRAY2_ALL(packm_struc_cxk_md,packm_struc_cxk_md);
 
 void bli_packm_blk_var1
      (
-       obj_t*   c,
-       obj_t*   p,
-       cntx_t*  cntx,
+       const obj_t*   c,
+             obj_t*   p,
+       const cntx_t*  cntx,
        rntm_t*  rntm,
        cntl_t*  cntl,
-       thrinfo_t* thread
+       const thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.

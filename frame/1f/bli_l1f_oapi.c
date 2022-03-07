@@ -45,11 +45,11 @@
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alphax, \
-       obj_t*  alphay, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t*  alphax, \
+       const obj_t*  alphay, \
+       const obj_t*  x, \
+       const obj_t*  y, \
+       const obj_t*  z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -115,10 +115,10 @@ GENFRONT( axpy2v )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  x, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -184,12 +184,12 @@ GENFRONT( axpyf )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  xt, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho, \
-       obj_t*  z  \
+       const obj_t*  alpha, \
+       const obj_t*  xt, \
+       const obj_t*  x, \
+       const obj_t*  y, \
+       const obj_t*  rho, \
+       const obj_t*  z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -253,14 +253,14 @@ GENFRONT( dotaxpyv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  at, \
-       obj_t*  a, \
-       obj_t*  w, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t*  alpha, \
+       const obj_t*  at, \
+       const obj_t*  a, \
+       const obj_t*  w, \
+       const obj_t*  x, \
+       const obj_t*  beta, \
+       const obj_t*  y, \
+       const obj_t*  z  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -342,11 +342,11 @@ GENFRONT( dotxaxpyf )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t*  alpha, \
+       const obj_t*  a, \
+       const obj_t*  x, \
+       const obj_t*  beta, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \

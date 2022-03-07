@@ -75,54 +75,54 @@ typedef struct thrinfo_s thrinfo_t;
 
 // thrinfo_t query (field only)
 
-BLIS_INLINE dim_t bli_thread_num_threads( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_num_threads( const thrinfo_t* t )
 {
 	return (t->ocomm)->n_threads;
 }
 
-BLIS_INLINE dim_t bli_thread_ocomm_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_ocomm_id( const thrinfo_t* t )
 {
 	return t->ocomm_id;
 }
 
-BLIS_INLINE dim_t bli_thread_n_way( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_n_way( const thrinfo_t* t )
 {
 	return t->n_way;
 }
 
-BLIS_INLINE dim_t bli_thread_work_id( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_work_id( const thrinfo_t* t )
 {
 	return t->work_id;
 }
 
-BLIS_INLINE thrcomm_t* bli_thrinfo_ocomm( thrinfo_t* t )
+BLIS_INLINE thrcomm_t* bli_thrinfo_ocomm( const thrinfo_t* t )
 {
 	return t->ocomm;
 }
 
-BLIS_INLINE bool bli_thrinfo_needs_free_comm( thrinfo_t* t )
+BLIS_INLINE bool bli_thrinfo_needs_free_comm( const thrinfo_t* t )
 {
 	return t->free_comm;
 }
 
-BLIS_INLINE dim_t bli_thread_bszid( thrinfo_t* t )
+BLIS_INLINE dim_t bli_thread_bszid( const thrinfo_t* t )
 {
 	return t->bszid;
 }
 
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_node( const thrinfo_t* t )
 {
 	return t->sub_node;
 }
 
-BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( thrinfo_t* t )
+BLIS_INLINE thrinfo_t* bli_thrinfo_sub_prenode( const thrinfo_t* t )
 {
 	return t->sub_prenode;
 }
 
 // thrinfo_t query (complex)
 
-BLIS_INLINE bool bli_thread_am_ochief( thrinfo_t* t )
+BLIS_INLINE bool bli_thread_am_ochief( const thrinfo_t* t )
 {
 	return t->ocomm_id == 0;
 }
@@ -171,12 +171,12 @@ BLIS_INLINE void bli_thrinfo_set_sub_prenode( thrinfo_t* sub_prenode, thrinfo_t*
 
 // other thrinfo_t-related functions
 
-BLIS_INLINE void* bli_thread_broadcast( thrinfo_t* t, void* p )
+BLIS_INLINE void* bli_thread_broadcast( const thrinfo_t* t, void* p )
 {
 	return bli_thrcomm_bcast( t->ocomm_id, p, t->ocomm );
 }
 
-BLIS_INLINE void bli_thread_barrier( thrinfo_t* t )
+BLIS_INLINE void bli_thread_barrier( const thrinfo_t* t )
 {
 	bli_thrcomm_barrier( t->ocomm_id, t->ocomm );
 }
@@ -192,7 +192,7 @@ thrinfo_t* bli_thrinfo_create
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
@@ -204,7 +204,7 @@ void bli_thrinfo_init
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node

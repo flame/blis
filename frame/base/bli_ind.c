@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-static char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
+static const char* bli_ind_impl_str[BLIS_NUM_IND_METHODS] =
 {
 /* 1m   */ "1m",
 /* nat  */ "native",
@@ -46,7 +46,7 @@ void bli_ind_init( void )
 {
 	// NOTE: Instead of calling bli_gks_query_cntx(), we call
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
-	cntx_t* cntx     = bli_gks_query_cntx_noinit();
+	const cntx_t* cntx = bli_gks_query_cntx_noinit();
 
 	// For each precision, enable the default induced method (1m) if both of
 	// the following conditions are met:
@@ -176,7 +176,7 @@ ind_t bli_ind_oper_find_avail( opid_t oper, num_t dt )
 	return method;
 }
 
-char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
+const char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
 {
 	ind_t method = bli_ind_oper_find_avail( oper, dt );
 
@@ -185,7 +185,7 @@ char* bli_ind_oper_get_avail_impl_string( opid_t oper, num_t dt )
 
 // -----------------------------------------------------------------------------
 
-char* bli_ind_get_impl_string( ind_t method )
+const char* bli_ind_get_impl_string( ind_t method )
 {
 	return bli_ind_impl_str[ method ];
 }

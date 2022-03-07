@@ -48,10 +48,10 @@ pba_t* bli_pba_query( void )
 
 void bli_pba_init
      (
-       cntx_t* restrict cntx
+       const cntx_t* cntx
      )
 {
-	pba_t* restrict pba = bli_pba_query();
+	pba_t* pba = bli_pba_query();
 
 	const siz_t align_size = BLIS_POOL_ADDR_ALIGN_SIZE_GEN;
 	malloc_ft   malloc_fp  = BLIS_MALLOC_POOL;
@@ -284,8 +284,8 @@ void bli_pba_acquire_v
 
 siz_t bli_pba_pool_size
      (
-       pba_t*    pba,
-       packbuf_t buf_type
+       const pba_t* pba,
+       packbuf_t    buf_type
      )
 {
 	siz_t r_val;
@@ -304,7 +304,7 @@ siz_t bli_pba_pool_size
 		// Acquire the pointer to the pool corresponding to the buf_type
 		// provided.
 		pool_index = bli_packbuf_index( buf_type );
-		pool       = bli_pba_pool( pool_index, pba );
+		pool       = bli_pba_pool( pool_index, ( pba_t* )pba );
 
 		// Compute the pool "size" as the product of the block size
 		// and the number of blocks in the pool.
@@ -319,8 +319,8 @@ siz_t bli_pba_pool_size
 
 void bli_pba_init_pools
      (
-       cntx_t* cntx,
-       pba_t*  pba
+       const cntx_t* cntx,
+       pba_t*        pba
      )
 {
 	// Map each of the packbuf_t values to an index starting at zero.
@@ -402,10 +402,10 @@ void bli_pba_finalize_pools
 
 void bli_pba_compute_pool_block_sizes
      (
-       siz_t*  bs_a,
-       siz_t*  bs_b,
-       siz_t*  bs_c,
-       cntx_t* cntx
+       siz_t*        bs_a,
+       siz_t*        bs_b,
+       siz_t*        bs_c,
+       const cntx_t* cntx
      )
 {
 	const ind_t im = bli_cntx_method( cntx );
@@ -449,21 +449,21 @@ void bli_pba_compute_pool_block_sizes
 
 void bli_pba_compute_pool_block_sizes_dt
      (
-       num_t   dt,
-       siz_t*  bs_a,
-       siz_t*  bs_b,
-       siz_t*  bs_c,
-       cntx_t* cntx
+       num_t         dt,
+       siz_t*        bs_a,
+       siz_t*        bs_b,
+       siz_t*        bs_c,
+       const cntx_t* cntx
      )
 {
 	siz_t    size_dt = bli_dt_size( dt );
 
-	blksz_t* mr;
-	blksz_t* nr;
+	const blksz_t* mr;
+	const blksz_t* nr;
 
-	blksz_t* mc;
-	blksz_t* kc;
-	blksz_t* nc;
+	const blksz_t* mc;
+	const blksz_t* kc;
+	const blksz_t* nc;
 
 	dim_t    mr_dt;
 	dim_t    nr_dt;

@@ -40,11 +40,11 @@ dim_t bli_l3_determine_kc
         dir_t   direct,
         dim_t   i,
         dim_t   dim,
-        obj_t*  a,
-        obj_t*  b,
+        const obj_t*  a,
+        const obj_t*  b,
         bszid_t bszid,
-        cntx_t* cntx,
-        cntl_t* cntl
+        const cntx_t* cntx,
+        const cntl_t* cntl
       )
 {
 	opid_t family = bli_cntl_family( cntl );
@@ -78,10 +78,10 @@ dim_t PASTEMAC0(opname) \
         dir_t   direct, \
         dim_t   i, \
         dim_t   dim, \
-        obj_t*  a, \
-        obj_t*  b, \
+        const obj_t*  a, \
+        const obj_t*  b, \
         bszid_t bszid, \
-        cntx_t* cntx  \
+        const cntx_t* cntx  \
       ) \
 { \
 	if ( direct == BLIS_FWD ) \
@@ -104,14 +104,14 @@ dim_t PASTEMAC0(opname) \
       ( \
         dim_t   i, \
         dim_t   dim, \
-        obj_t*  a, \
-        obj_t*  b, \
+        const obj_t*  a, \
+        const obj_t*  b, \
         bszid_t bszid, \
-        cntx_t* cntx  \
+        const cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
-	blksz_t* bsize; \
+	const blksz_t* bsize; \
 	dim_t    mnr; \
 	dim_t    b_alg, b_max; \
 	dim_t    b_use; \
@@ -171,14 +171,14 @@ dim_t PASTEMAC0(opname) \
       ( \
         dim_t   i, \
         dim_t   dim, \
-        obj_t*  a, \
-        obj_t*  b, \
+        const obj_t*  a, \
+        const obj_t*  b, \
         bszid_t bszid, \
-        cntx_t* cntx  \
+        const cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
-	blksz_t* bsize; \
+	const blksz_t* bsize; \
 	dim_t    b_alg, b_max; \
 	dim_t    b_use; \
  \
@@ -223,14 +223,14 @@ dim_t PASTEMAC0(opname) \
       ( \
         dim_t   i, \
         dim_t   dim, \
-        obj_t*  a, \
-        obj_t*  b, \
+        const obj_t*  a, \
+        const obj_t*  b, \
         bszid_t bszid, \
-        cntx_t* cntx  \
+        const cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
-	blksz_t* bsize; \
+	const blksz_t* bsize; \
 	dim_t    mnr; \
 	dim_t    b_alg, b_max; \
 	dim_t    b_use; \
@@ -284,14 +284,14 @@ dim_t PASTEMAC0(opname) \
       ( \
         dim_t   i, \
         dim_t   dim, \
-        obj_t*  a, \
-        obj_t*  b, \
+        const obj_t*  a, \
+        const obj_t*  b, \
         bszid_t bszid, \
-        cntx_t* cntx  \
+        const cntx_t* cntx  \
       ) \
 { \
 	num_t    dt; \
-	blksz_t* bsize; \
+	const blksz_t* bsize; \
 	dim_t    mnr; \
 	dim_t    b_alg, b_max; \
 	dim_t    b_use; \

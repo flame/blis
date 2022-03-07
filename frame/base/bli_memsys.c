@@ -44,7 +44,7 @@ void bli_memsys_init( void )
 	// contexts for induced methods.
 	// NOTE: Instead of calling bli_gks_query_cntx(), we call
 	// bli_gks_query_cntx_noinit() to avoid the call to bli_init_once().
-	cntx_t* cntx_p = bli_gks_query_cntx_noinit();
+	const cntx_t* cntx_p = bli_gks_query_cntx_noinit();
 
 	// Initialize the packing block allocator and its data structures.
 	bli_pba_init( cntx_p );

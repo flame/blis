@@ -45,13 +45,13 @@
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       diag_t  diagx, \
-       trans_t transx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t        diagoffx, \
+       diag_t        diagx, \
+       trans_t       transx, \
+       dim_t         m, \
+       dim_t         n, \
+       const ctype*  x, inc_t rs_x, inc_t cs_x, \
+             ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -61,7 +61,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*      x1; \
+	const ctype*      x1; \
 	ctype*      y1; \
 	conj_t      conjx; \
 	dim_t       n_elem; \
@@ -124,14 +124,14 @@ INSERT_GENTFUNC_BASIC2( subd,  subv,  BLIS_SUBV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       diag_t  diagx, \
-       trans_t transx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t        diagoffx, \
+       diag_t        diagx, \
+       trans_t       transx, \
+       dim_t         m, \
+       dim_t         n, \
+       const ctype*  alpha, \
+       const ctype*  x, inc_t rs_x, inc_t cs_x, \
+             ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -141,7 +141,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*      x1; \
+	const ctype*      x1; \
 	ctype*      y1; \
 	conj_t      conjx; \
 	dim_t       n_elem; \
@@ -260,12 +260,12 @@ INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjalpha, \
-       doff_t  diagoffx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       conj_t        conjalpha, \
+       doff_t        diagoffx, \
+       dim_t         m, \
+       dim_t         n, \
+       const ctype*  alpha, \
+             ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -321,11 +321,11 @@ INSERT_GENTFUNC_BASIC2( setd,  setv,  BLIS_SETV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t   diagoffx, \
-       dim_t    m, \
-       dim_t    n, \
-       ctype_r* alpha, \
-       ctype*   x, inc_t rs_x, inc_t cs_x  \
+       doff_t         diagoffx, \
+       dim_t          m, \
+       dim_t          n, \
+       const ctype_r* alpha, \
+       ctype*         x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -397,11 +397,11 @@ INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       doff_t        diagoffx, \
+       dim_t         m, \
+       dim_t         n, \
+       const ctype*  alpha, \
+             ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -456,14 +456,14 @@ INSERT_GENTFUNC_BASIC2( shiftd, addv, BLIS_ADDV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       diag_t  diagx, \
-       trans_t transx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  beta, \
-       ctype*  y, inc_t rs_y, inc_t cs_y  \
+       doff_t        diagoffx, \
+       diag_t        diagx, \
+       trans_t       transx, \
+       dim_t         m, \
+       dim_t         n, \
+       const ctype*  x, inc_t rs_x, inc_t cs_x, \
+       const ctype*  beta, \
+             ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -473,7 +473,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	ctype*      x1; \
+	const ctype*      x1; \
 	ctype*      y1; \
 	conj_t      conjx; \
 	dim_t       n_elem; \

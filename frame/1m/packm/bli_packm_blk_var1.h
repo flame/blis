@@ -49,11 +49,11 @@ typedef struct
 
 BLIS_EXPORT_BLIS void bli_packm_blk_var1
      (
-       obj_t*   c,
-       obj_t*   p,
-       cntx_t*  cntx,
+       const obj_t*   c,
+             obj_t*   p,
+       const cntx_t*  cntx,
        rntm_t*  rntm,
        cntl_t*  cntl,
-       thrinfo_t* t
+       const thrinfo_t* t
      );
 

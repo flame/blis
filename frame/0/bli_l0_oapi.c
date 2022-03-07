@@ -43,17 +43,17 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  absq  \
+       const obj_t*  chi, \
+       const obj_t*  absq  \
      ) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi; \
-	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
+	num_t       dt_chi; \
+	num_t       dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
 \
-	void*     buf_chi; \
-	void*     buf_absq   = bli_obj_buffer_at_off( absq ); \
+	const void* buf_chi; \
+	void*       buf_absq   = bli_obj_buffer_at_off( absq ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
 	    PASTEMAC(opname,_check)( chi, absq ); \
@@ -61,7 +61,7 @@ void PASTEMAC0(opname) \
 	/* If chi is a scalar constant, use dt_absq_c to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
 	   within the chi object and extract the buffer at the chi offset. */ \
-	bli_obj_scalar_set_dt_buffer( chi, dt_absq_c, &dt_chi, &buf_chi ); \
+	bli_obj_scalar_set_dt_buffer( chi, dt_absq_c, &dt_chi, ( void** )&buf_chi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -83,8 +83,8 @@ GENFRONT( normfsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -122,7 +122,7 @@ GENFRONT( subsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi  \
+       const obj_t*  chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -155,8 +155,8 @@ GENFRONT( invertsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -188,9 +188,9 @@ GENFRONT( sqrtsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const obj_t* chi, \
+       double*      zeta_r, \
+       double*      zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -234,7 +234,7 @@ void PASTEMAC0(opname) \
      ( \
        double  zeta_r, \
        double  zeta_i, \
-       obj_t*  chi  \
+       const obj_t*  chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -266,9 +266,9 @@ GENFRONT( setsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i  \
+       const obj_t* chi, \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -309,9 +309,9 @@ GENFRONT( unzipsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i, \
-       obj_t*  chi  \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i, \
+       const obj_t* chi  \
      ) \
 { \
 	bli_init_once(); \

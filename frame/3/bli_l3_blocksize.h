@@ -37,11 +37,11 @@ dim_t bli_l3_determine_kc
         dir_t   direct,
         dim_t   i,
         dim_t   dim,
-        obj_t*  a,
-        obj_t*  b,
+        const obj_t*  a,
+        const obj_t*  b,
         bszid_t bszid,
-        cntx_t* cntx,
-        cntl_t* cntl
+        const cntx_t* cntx,
+        const cntl_t* cntl
       );
 
 
@@ -53,10 +53,10 @@ dim_t PASTEMAC0(opname) \
          dir_t   direct, \
          dim_t   i, \
          dim_t   dim, \
-         obj_t*  a, \
-         obj_t*  b, \
+         const obj_t*  a, \
+         const obj_t*  b, \
          bszid_t bszid, \
-         cntx_t* cntx  \
+         const cntx_t* cntx  \
       );
 
 GENPROT( gemm_determine_kc )
@@ -72,10 +72,10 @@ dim_t PASTEMAC0(opname) \
       ( \
          dim_t   i, \
          dim_t   dim, \
-         obj_t*  a, \
-         obj_t*  b, \
+         const obj_t*  a, \
+         const obj_t*  b, \
          bszid_t bszid, \
-         cntx_t* cntx  \
+         const cntx_t* cntx  \
       );
 
 GENPROT( gemm_determine_kc_f )

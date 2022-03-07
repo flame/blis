@@ -36,10 +36,10 @@
 
 dir_t bli_l3_direct
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntl_t* cntl
      )
 {
 	// Query the operation family.
@@ -58,9 +58,9 @@ dir_t bli_l3_direct
 
 dir_t bli_gemm_direct
      (
-       obj_t* a,
-       obj_t* b,
-       obj_t* c
+       const obj_t* a,
+       const obj_t* b,
+       const obj_t* c
      )
 {
 	// For gemm, movement may be forwards (or backwards).
@@ -70,9 +70,9 @@ dir_t bli_gemm_direct
 
 dir_t bli_gemmt_direct
      (
-       obj_t* a,
-       obj_t* b,
-       obj_t* c
+       const obj_t* a,
+       const obj_t* b,
+       const obj_t* c
      )
 {
 	// For gemmt, movement may be forwards (or backwards).
@@ -82,9 +82,9 @@ dir_t bli_gemmt_direct
 
 dir_t bli_trmm_direct
      (
-       obj_t* a,
-       obj_t* b,
-       obj_t* c
+       const obj_t* a,
+       const obj_t* b,
+       const obj_t* c
      )
 {
 	dir_t direct;
@@ -111,9 +111,9 @@ dir_t bli_trmm_direct
 
 dir_t bli_trsm_direct
      (
-       obj_t* a,
-       obj_t* b,
-       obj_t* c
+       const obj_t* a,
+       const obj_t* b,
+       const obj_t* c
      )
 {
 	dir_t direct;

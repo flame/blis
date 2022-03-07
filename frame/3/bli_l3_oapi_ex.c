@@ -44,11 +44,11 @@
 
 void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -117,11 +117,11 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -166,11 +166,11 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -212,11 +212,11 @@ void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -245,11 +245,11 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
      (
        side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -295,11 +295,11 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
      (
        side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -345,11 +345,11 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
      (
        side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -394,10 +394,10 @@ void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -428,10 +428,10 @@ void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  beta,
-       obj_t*  c,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  beta,
+       const obj_t*  c,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -454,9 +454,9 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
 void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
      (
        side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
        cntx_t* cntx,
        rntm_t* rntm
      )
@@ -501,9 +501,9 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
      (
        side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
        cntx_t* cntx,
        rntm_t* rntm
      )

@@ -37,7 +37,7 @@ BLIS_EXPORT_BLIS void* bli_packm_alloc
        siz_t      size_needed,
        rntm_t*    rntm,
        cntl_t*    cntl,
-       thrinfo_t* thread
+       const thrinfo_t* thread
      );
 
 BLIS_EXPORT_BLIS void* bli_packm_alloc_ex
@@ -46,6 +46,6 @@ BLIS_EXPORT_BLIS void* bli_packm_alloc_ex
        packbuf_t  pack_buf_type,
        rntm_t*    rntm,
        cntl_t*    cntl,
-       thrinfo_t* thread
+       const thrinfo_t* thread
      );
 

@@ -43,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1v_xy_check( x, y ); \
@@ -61,8 +61,8 @@ GENFRONT( swapv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  index  \
+       const obj_t* x, \
+       const obj_t* index  \
      ) \
 { \
 	bli_l1v_xi_check( x, index ); \
@@ -76,10 +76,10 @@ GENFRONT( amaxv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1v_axby_check( alpha, x, beta, y ); \
@@ -93,9 +93,9 @@ GENFRONT( axpbyv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1v_axy_check( alpha, x, y ); \
@@ -110,9 +110,9 @@ GENFRONT( scal2v )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* rho  \
      ) \
 { \
 	bli_l1v_dot_check( &BLIS_ONE, x, y, &BLIS_ONE, rho ); \
@@ -126,11 +126,11 @@ GENFRONT( dotv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  beta, \
-       obj_t*  rho  \
+       const obj_t* alpha, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* beta, \
+       const obj_t* rho  \
      ) \
 { \
 	bli_l1v_dot_check( alpha, x, y, beta, rho ); \
@@ -144,7 +144,7 @@ GENFRONT( dotxv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
      ) \
 { \
 	bli_l1v_x_check( x ); \
@@ -158,8 +158,8 @@ GENFRONT( invertv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t* alpha, \
+       const obj_t* x  \
      ) \
 { \
 	bli_l1v_ax_check( alpha, x ); \
@@ -174,9 +174,9 @@ GENFRONT( setv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
      ) \
 { \
 	bli_l1v_xby_check( x, beta, y ); \
@@ -189,8 +189,8 @@ GENFRONT( xpbyv )
 
 void bli_l1v_xy_check
      (
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -230,9 +230,9 @@ void bli_l1v_xy_check
 
 void bli_l1v_axy_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -281,9 +281,9 @@ void bli_l1v_axy_check
 
 void bli_l1v_xby_check
      (
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -332,10 +332,10 @@ void bli_l1v_xby_check
 
 void bli_l1v_axby_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  beta,
-       obj_t*  y
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -393,11 +393,11 @@ void bli_l1v_axby_check
 
 void bli_l1v_dot_check
      (
-       obj_t*  alpha,
-       obj_t*  x,
-       obj_t*  y,
-       obj_t*  beta,
-       obj_t*  rho 
+       const obj_t* alpha,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* beta,
+       const obj_t* rho
      )
 {
 	err_t e_val;
@@ -467,7 +467,7 @@ void bli_l1v_dot_check
 
 void bli_l1v_x_check
      (
-       obj_t*  x 
+       const obj_t* x
      )
 {
 	err_t e_val;
@@ -490,8 +490,8 @@ void bli_l1v_x_check
 
 void bli_l1v_ax_check
      (
-       obj_t*  alpha,
-       obj_t*  x 
+       const obj_t* alpha,
+       const obj_t* x
      )
 {
 	err_t e_val;
@@ -523,8 +523,8 @@ void bli_l1v_ax_check
 
 void bli_l1v_xi_check
      (
-       obj_t*  x,
-       obj_t*  index
+       const obj_t* x,
+       const obj_t* index
      )
 {
 	err_t e_val;

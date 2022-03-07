@@ -61,16 +61,14 @@ BLIS_INLINE  bli_pthread_mutex_t* bli_apool_mutex( apool_t* apool )
 	return &(apool->mutex);
 }
 
-BLIS_INLINE siz_t bli_apool_def_array_len( apool_t* pool )
+BLIS_INLINE siz_t bli_apool_def_array_len( const apool_t* pool )
 {
 	return pool->def_array_len;
 }
 
-BLIS_INLINE bool bli_apool_is_exhausted( apool_t* apool )
+BLIS_INLINE bool bli_apool_is_exhausted( const apool_t* apool )
 {
-	pool_t* restrict pool = bli_apool_pool( apool );
-
-	return bli_pool_is_exhausted( pool );
+	return bli_pool_is_exhausted( &apool->pool );
 }
 
 // apool action

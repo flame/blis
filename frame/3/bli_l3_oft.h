@@ -48,12 +48,12 @@
 \
 typedef void (*PASTECH(opname,_oft)) \
 ( \
-  obj_t*  alpha, \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  beta, \
-  obj_t*  c, \
-  cntx_t* cntx, \
+  const obj_t*  alpha, \
+  const obj_t*  a, \
+  const obj_t*  b, \
+  const obj_t*  beta, \
+  const obj_t*  c, \
+  const cntx_t* cntx, \
   rntm_t* rntm  \
 );
 
@@ -71,12 +71,12 @@ GENTDEF( syr2k )
 typedef void (*PASTECH(opname,_oft)) \
 ( \
   side_t  side, \
-  obj_t*  alpha, \
-  obj_t*  a, \
-  obj_t*  b, \
-  obj_t*  beta, \
-  obj_t*  c, \
-  cntx_t* cntx, \
+  const obj_t*  alpha, \
+  const obj_t*  a, \
+  const obj_t*  b, \
+  const obj_t*  beta, \
+  const obj_t*  c, \
+  const cntx_t* cntx, \
   rntm_t* rntm  \
 );
 
@@ -92,11 +92,11 @@ GENTDEF( trmm3 )
 \
 typedef void (*PASTECH(opname,_oft)) \
 ( \
-  obj_t*  alpha, \
-  obj_t*  a, \
-  obj_t*  beta, \
-  obj_t*  c, \
-  cntx_t* cntx, \
+  const obj_t*  alpha, \
+  const obj_t*  a, \
+  const obj_t*  beta, \
+  const obj_t*  c, \
+  const cntx_t* cntx, \
   rntm_t* rntm  \
 );
 
@@ -112,10 +112,10 @@ GENTDEF( syrk )
 typedef void (*PASTECH(opname,_oft)) \
 ( \
   side_t  side, \
-  obj_t*  alpha, \
-  obj_t*  a, \
-  obj_t*  b, \
-  cntx_t* cntx, \
+  const obj_t*  alpha, \
+  const obj_t*  a, \
+  const obj_t*  b, \
+  const cntx_t* cntx, \
   rntm_t* rntm  \
 );
 

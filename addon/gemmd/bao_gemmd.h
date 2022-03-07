@@ -38,24 +38,24 @@
 
 BLIS_EXPORT_ADDON void bao_gemmd
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  d,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
      );
 
 BLIS_EXPORT_ADDON void bao_gemmd_ex
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  d,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm
      );
 
 //
@@ -64,15 +64,15 @@ BLIS_EXPORT_ADDON void bao_gemmd_ex
 
 void bao_gemmd_int
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  d,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  d,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+       const rntm_t* rntm,
+       const thrinfo_t* thread
      );
 
 //
@@ -84,17 +84,17 @@ void bao_gemmd_int
 \
 BLIS_EXPORT_ADDON void PASTECH2(bao_,ch,opname) \
      ( \
-       trans_t transa, \
-       trans_t transb, \
-       dim_t   m, \
-       dim_t   n, \
-       dim_t   k, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  d, inc_t incd, \
-       ctype*  b, inc_t rs_b, inc_t cs_b, \
-       ctype*  beta, \
-       ctype*  c, inc_t rs_c, inc_t cs_c  \
+       trans_t       transa, \
+       trans_t       transb, \
+       dim_t         m, \
+       dim_t         n, \
+       dim_t         k, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  d, inc_t incd, \
+       const ctype*  b, inc_t rs_b, inc_t cs_b, \
+       const ctype*  beta, \
+             ctype*  c, inc_t rs_c, inc_t cs_c  \
      );
 
 //INSERT_GENTPROT_BASIC0( gemmd )

@@ -40,7 +40,7 @@ void bli_l3_prune_unref_mparts_m
        obj_t*  a,
        obj_t*  b,
        obj_t*  c,
-       cntl_t* cntl
+       const cntl_t* cntl
      )
 {
 	// Query the operation family.
@@ -61,7 +61,7 @@ void PASTEMAC(l3_prune_unref_mparts_,dim) \
        obj_t*  a, \
        obj_t*  b, \
        obj_t*  c, \
-       cntl_t* cntl  \
+       const cntl_t* cntl  \
      ) \
 { \
 	/* Query the operation family. */ \

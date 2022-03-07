@@ -45,8 +45,8 @@
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  asum  \
+       const obj_t*  x, \
+       const obj_t*  asum  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -88,7 +88,7 @@ GENFRONT( asumv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  a  \
+       const obj_t*  a  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -132,8 +132,8 @@ GENFRONT( mktrim )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  norm  \
+       const obj_t*  x, \
+       const obj_t*  norm  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -176,8 +176,8 @@ GENFRONT( normiv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  norm  \
+       const obj_t*  x, \
+       const obj_t*  norm  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -229,7 +229,7 @@ GENFRONT( normim )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x  \
+       const obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -269,7 +269,7 @@ GENFRONT( randnv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x  \
+       const obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -316,9 +316,9 @@ GENFRONT( randnm )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  scale, \
-       obj_t*  sumsq  \
+       const obj_t*  x, \
+       const obj_t*  scale, \
+       const obj_t*  sumsq  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -366,9 +366,9 @@ GENFRONT( sumsqv )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi, \
-       bool*   is_eq  \
+       const obj_t* chi, \
+       const obj_t* psi, \
+       bool*        is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -427,9 +427,9 @@ GENFRONT( eqsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       bool*        is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -474,9 +474,9 @@ GENFRONT( eqv )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       bool*        is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -531,11 +531,11 @@ GENFRONT( eqm )
 \
 void PASTEMAC0(opname) \
      ( \
-       FILE*   file, \
-       char*   s1, \
-       obj_t*  x, \
-       char*   format, \
-       char*   s2  \
+       FILE*        file, \
+       const char*  s1, \
+       const obj_t* x, \
+       const char*  format, \
+       const char*  s2  \
      ) \
 { \
 	bli_init_once(); \
@@ -579,11 +579,11 @@ GENFRONT( fprintv )
 \
 void PASTEMAC0(opname) \
      ( \
-       FILE*   file, \
-       char*   s1, \
-       obj_t*  x, \
-       char*   format, \
-       char*   s2  \
+       FILE*        file, \
+       const char*  s1, \
+       const obj_t* x, \
+       const char*  format, \
+       const char*  s2  \
      ) \
 { \
 	bli_init_once(); \
@@ -645,10 +645,10 @@ GENFRONT( fprintm )
 \
 void PASTEMAC0(opname) \
      ( \
-       char*   s1, \
-       obj_t*  x, \
-       char*   format, \
-       char*   s2  \
+       const char*   s1, \
+       const obj_t*  x, \
+       const char*   format, \
+       const char*   s2  \
      ) \
 { \
 	bli_init_once(); \

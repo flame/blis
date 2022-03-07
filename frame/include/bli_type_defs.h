@@ -1162,23 +1162,23 @@ struct thrinfo_s;
 
 typedef void (*obj_pack_fn_t)
     (
-      struct obj_s*     a,
+      const struct obj_s*     a,
       struct obj_s*     ap,
-      struct cntx_s*    cntx,
+      const struct cntx_s*    cntx,
       struct rntm_s*    rntm,
       struct cntl_s*    cntl,
-      struct thrinfo_s* thread
+      const struct thrinfo_s* thread
     );
 
 typedef void (*obj_ker_fn_t)
     (
-      struct obj_s*     a,
-      struct obj_s*     b,
-      struct obj_s*     c,
-      struct cntx_s*    cntx,
+      const struct obj_s*     a,
+      const struct obj_s*     b,
+      const struct obj_s*     c,
+      const struct cntx_s*    cntx,
       struct rntm_s*    rntm,
       struct cntl_s*    cntl,
-      struct thrinfo_s* thread
+      const struct thrinfo_s* thread
     );
 
 typedef struct obj_s
@@ -1297,7 +1297,7 @@ typedef struct obj_s
 // Define these macros here since they must be updated if contents of
 // obj_t changes.
 
-BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_full_shallow_copy_of( const obj_t* a, obj_t* b )
 {
 	b->root        = a->root;
 
@@ -1332,7 +1332,7 @@ BLIS_INLINE void bli_obj_init_full_shallow_copy_of( obj_t* a, obj_t* b )
 	b->ker_params  = a->ker_params;
 }
 
-BLIS_INLINE void bli_obj_init_subpart_from( obj_t* a, obj_t* b )
+BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 {
 	b->root        = a->root;
 

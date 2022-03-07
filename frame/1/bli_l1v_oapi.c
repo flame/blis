@@ -45,8 +45,8 @@
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t*  x, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -92,8 +92,8 @@ GENFRONT( subv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  index  \
+       const obj_t*  x, \
+       const obj_t*  index  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -135,10 +135,10 @@ GENFRONT( amaxv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t*  alpha, \
+       const obj_t*  x, \
+       const obj_t*  beta, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -199,9 +199,9 @@ GENFRONT( axpbyv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t*  alpha, \
+       const obj_t*  x, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -257,9 +257,9 @@ GENFRONT( scal2v )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho  \
+       const obj_t*  x, \
+       const obj_t*  y, \
+       const obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -307,11 +307,11 @@ GENFRONT( dotv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  beta, \
-       obj_t*  rho  \
+       const obj_t*  alpha, \
+       const obj_t*  x, \
+       const obj_t*  y, \
+       const obj_t*  beta, \
+       const obj_t*  rho  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -376,7 +376,7 @@ GENFRONT( dotxv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x  \
+       const obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -415,8 +415,8 @@ GENFRONT( invertv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  x  \
+       const obj_t*  alpha, \
+       const obj_t*  x  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -469,8 +469,8 @@ GENFRONT( setv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t*  x, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \
@@ -512,9 +512,9 @@ GENFRONT( swapv )
 \
 void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t*  x, \
+       const obj_t*  beta, \
+       const obj_t*  y  \
        BLIS_OAPI_EX_PARAMS  \
      ) \
 { \

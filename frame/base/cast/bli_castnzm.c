@@ -41,11 +41,11 @@
 
 typedef void (*FUNCPTR_T)
      (
-       trans_t        transa,
-       dim_t          m,
-       dim_t          n,
-       void* restrict a, inc_t rs_a, inc_t cs_a,
-       void* restrict b, inc_t rs_b, inc_t cs_b
+       trans_t              transa,
+       dim_t                m,
+       dim_t                n,
+       const void* restrict a, inc_t rs_a, inc_t cs_a,
+             void* restrict b, inc_t rs_b, inc_t cs_b
      );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,castnzm);
@@ -56,8 +56,8 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,castnzm);
 
 void bli_castnzm
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      )
 {
 	num_t     dt_a     = bli_obj_dt( a );
@@ -68,7 +68,7 @@ void bli_castnzm
 	dim_t     m        = bli_obj_length( b );
 	dim_t     n        = bli_obj_width( b );
 
-	void*     buf_a    = bli_obj_buffer_at_off( a );
+	const void*     buf_a    = bli_obj_buffer_at_off( a );
 	inc_t     rs_a     = bli_obj_row_stride( a );
 	inc_t     cs_a     = bli_obj_col_stride( a );
 
@@ -117,14 +117,14 @@ void bli_castnzm
 \
 void PASTEMAC2(cha,chb,opname) \
      ( \
-       trans_t        transa, \
-       dim_t          m, \
-       dim_t          n, \
-       void* restrict a, inc_t rs_a, inc_t cs_a, \
-       void* restrict b, inc_t rs_b, inc_t cs_b  \
+       trans_t              transa, \
+       dim_t                m, \
+       dim_t                n, \
+       const void* restrict a, inc_t rs_a, inc_t cs_a, \
+             void* restrict b, inc_t rs_b, inc_t cs_b  \
      ) \
 { \
-	ctype_a* restrict a_cast = a; \
+	const ctype_a* restrict a_cast = a; \
 	ctype_b* restrict b_cast = b; \
 	conj_t            conja; \
 	dim_t             n_iter; \
@@ -150,7 +150,7 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
 				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
@@ -163,7 +163,7 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
 				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
@@ -182,7 +182,7 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
 				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
@@ -195,7 +195,7 @@ void PASTEMAC2(cha,chb,opname) \
 		{ \
 			for ( j = 0; j < n_iter; ++j ) \
 			{ \
-				ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
+				const ctype_a* restrict a1 = a_cast + (j  )*lda + (0  )*inca; \
 				ctype_b* restrict b1 = b_cast + (j  )*ldb + (0  )*incb; \
 \
 				for ( i = 0; i < n_elem; ++i ) \
@@ -221,8 +221,8 @@ INSERT_GENTFUNC2_MIXDP0( castnzm )
 
 void bli_castnzm_check
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      )
 {
 	err_t e_val;

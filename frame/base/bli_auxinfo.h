@@ -38,47 +38,47 @@
 
 // auxinfo_t field query
 
-BLIS_INLINE pack_t bli_auxinfo_schema_a( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_a( const auxinfo_t* ai )
 {
 	return ai->schema_a;
 }
-BLIS_INLINE pack_t bli_auxinfo_schema_b( auxinfo_t* ai )
+BLIS_INLINE pack_t bli_auxinfo_schema_b( const auxinfo_t* ai )
 {
 	return ai->schema_b;
 }
 
-BLIS_INLINE void* bli_auxinfo_next_a( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_a( const auxinfo_t* ai )
 {
 	return ai->a_next;
 }
-BLIS_INLINE void* bli_auxinfo_next_b( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_next_b( const auxinfo_t* ai )
 {
 	return ai->b_next;
 }
 
-BLIS_INLINE inc_t bli_auxinfo_is_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_a( const auxinfo_t* ai )
 {
 	return ai->is_a;
 }
-BLIS_INLINE inc_t bli_auxinfo_is_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_is_b( const auxinfo_t* ai )
 {
 	return ai->is_b;
 }
 
-BLIS_INLINE inc_t bli_auxinfo_ps_a( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_a( const auxinfo_t* ai )
 {
 	return ai->ps_a;
 }
-BLIS_INLINE inc_t bli_auxinfo_ps_b( auxinfo_t* ai )
+BLIS_INLINE inc_t bli_auxinfo_ps_b( const auxinfo_t* ai )
 {
 	return ai->ps_b;
 }
 
-BLIS_INLINE void_fp bli_auxinfo_ukr( auxinfo_t* ai )
+BLIS_INLINE void_fp bli_auxinfo_ukr( const auxinfo_t* ai )
 {
     return ai->ukr;
 }
-BLIS_INLINE void* bli_auxinfo_params( auxinfo_t* ai )
+BLIS_INLINE void* bli_auxinfo_params( const auxinfo_t* ai )
 {
     return ai->params;
 }

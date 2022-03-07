@@ -43,10 +43,10 @@ void PASTEMAC(ch,opname) \
        dim_t            m, \
        dim_t            k, \
        dim_t            mr, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+       const cntx_t*    cntx, \
+       rntm_t*          rntm, \
+       mem_t*           mem, \
+       const thrinfo_t* thread  \
      ); \
 
 INSERT_GENTPROT_BASIC0( packm_sup_init_mem_a )
@@ -58,9 +58,9 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_mem_a )
 void PASTEMAC(ch,opname) \
      ( \
        bool             did_pack, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+       rntm_t*          rntm, \
+       mem_t*           mem, \
+       const thrinfo_t* thread  \
      ); \
 
 INSERT_GENTPROT_BASIC0( packm_sup_finalize_mem_a )

@@ -41,7 +41,7 @@ void PASTEMAC(l3_prune_unref_mparts_,dim) \
        obj_t*  a, \
        obj_t*  b, \
        obj_t*  c, \
-       cntl_t* cntl  \
+       const cntl_t* cntl  \
      );
 
 GENPROT( m )

@@ -34,7 +34,7 @@
 
 #include "blis.h"
 
-bool bli_obj_equals( obj_t* a, obj_t* b )
+bool bli_obj_equals( const obj_t* a, const obj_t* b )
 {
 #if 0
 	bool  r_val = FALSE;
@@ -95,7 +95,7 @@ bool bli_obj_equals( obj_t* a, obj_t* b )
 #endif
 }
 
-bool bli_obj_imag_equals( obj_t* a, obj_t* b )
+bool bli_obj_imag_equals( const obj_t* a, const obj_t* b )
 {
 #if 0
 	bool  r_val = FALSE;
@@ -165,7 +165,7 @@ bool bli_obj_imag_equals( obj_t* a, obj_t* b )
 	return r_val;
 }
 
-bool bli_obj_imag_is_zero( obj_t* a )
+bool bli_obj_imag_is_zero( const obj_t* a )
 {
 	bool r_val = TRUE;
 

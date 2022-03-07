@@ -66,7 +66,7 @@ void bli_thread_finalize( void );
 BLIS_EXPORT_BLIS
 void bli_thread_range_sub
      (
-       thrinfo_t* thread,
+       const thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
        bool       handle_edge_low,
@@ -80,12 +80,12 @@ void bli_thread_range_sub
 siz_t PASTEMAC0( opname ) \
      ( \
        dir_t      direct, \
-       thrinfo_t* thr, \
-       obj_t*     a, \
-       obj_t*     b, \
-       obj_t*     c, \
-       cntl_t*    cntl, \
-       cntx_t*    cntx, \
+       const thrinfo_t* thr, \
+       const obj_t*     a, \
+       const obj_t*     b, \
+       const obj_t*     c, \
+       const cntl_t*    cntl, \
+       const cntx_t*    cntx, \
        dim_t*     start, \
        dim_t*     end  \
      );
@@ -98,9 +98,9 @@ GENPROT( thread_range_ndim )
 \
 siz_t PASTEMAC0( opname ) \
      ( \
-       thrinfo_t* thr, \
-       obj_t*     a, \
-       blksz_t*   bmult, \
+       const thrinfo_t* thr, \
+       const obj_t*     a, \
+       const blksz_t*   bmult, \
        dim_t*     start, \
        dim_t*     end  \
      );
@@ -136,7 +136,7 @@ siz_t bli_find_area_trap_l
      );
 siz_t bli_thread_range_weighted_sub
      (
-       thrinfo_t* restrict thread,
+       const thrinfo_t* restrict thread,
        doff_t              diagoff,
        uplo_t              uplo,
        dim_t               m,
@@ -157,9 +157,9 @@ typedef struct
     dim_t f;
 } bli_prime_factors_t;
 
-void bli_prime_factorization(dim_t n, bli_prime_factors_t* factors);
+void bli_prime_factorization( dim_t n, bli_prime_factors_t* factors );
 
-dim_t bli_next_prime_factor(bli_prime_factors_t* factors);
+dim_t bli_next_prime_factor( bli_prime_factors_t* factors );
 bool  bli_is_prime( dim_t n );
 
 void bli_thread_partition_2x2
@@ -211,7 +211,7 @@ void  bli_thread_init_rntm_from_env( rntm_t* rntm );
 
 BLIS_INLINE void bli_thread_range_jrir_rr
      (
-       thrinfo_t* thread,
+       const thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
        bool       handle_edge_low,
@@ -228,7 +228,7 @@ BLIS_INLINE void bli_thread_range_jrir_rr
 
 BLIS_INLINE void bli_thread_range_jrir_sl
      (
-       thrinfo_t* thread,
+       const thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
        bool       handle_edge_low,
@@ -244,7 +244,7 @@ BLIS_INLINE void bli_thread_range_jrir_sl
 
 BLIS_INLINE void bli_thread_range_jrir
      (
-       thrinfo_t* thread,
+       const thrinfo_t* thread,
        dim_t      n,
        dim_t      bf,
        bool       handle_edge_low,

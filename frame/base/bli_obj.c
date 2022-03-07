@@ -264,8 +264,8 @@ void bli_obj_create_1x1_with_attached_buffer
 
 void bli_obj_create_conf_to
      (
-       obj_t* s,
-       obj_t* d
+       const obj_t* s,
+             obj_t* d
      )
 {
 	const num_t dt = bli_obj_dt( s );
@@ -552,7 +552,7 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"int"
 };
 
-char* bli_dt_string
+const char* bli_dt_string
      (
        num_t dt
      )
@@ -600,8 +600,8 @@ dim_t bli_align_dim_to_size
 
 dim_t bli_align_ptr_to_size
      (
-       void*  p,
-       size_t align_size
+       const void* p,
+       size_t      align_size
      )
 {
 	dim_t dim;
@@ -634,8 +634,8 @@ num_t bli_dt_union( num_t dt1, num_t dt2 )
 
 void bli_obj_print
      (
-       char*  label,
-       obj_t* obj
+       const char*  label,
+       const obj_t* obj
      )
 {
 	bli_init_once();

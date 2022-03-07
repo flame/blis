@@ -41,7 +41,7 @@ thrinfo_t* bli_thrinfo_create
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
@@ -57,7 +57,7 @@ thrinfo_t* bli_thrinfo_create
 	(
 	  thread,
 	  ocomm, ocomm_id,
-	  n_way, work_id, 
+	  n_way, work_id,
 	  free_comm,
 	  bszid,
 	  sub_node
@@ -72,7 +72,7 @@ void bli_thrinfo_init
        thrcomm_t* ocomm,
        dim_t      ocomm_id,
        dim_t      n_way,
-       dim_t      work_id, 
+       dim_t      work_id,
        bool       free_comm,
        bszid_t    bszid,
        thrinfo_t* sub_node
@@ -97,7 +97,7 @@ void bli_thrinfo_init_single
 	bli_thrinfo_init
 	(
 	  thread,
-	  &BLIS_SINGLE_COMM, 0,
+	  ( thrcomm_t* )&BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
 	  FALSE,
