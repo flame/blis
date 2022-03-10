@@ -146,18 +146,11 @@ void GEMM_FUNC_NAME(ch) \
                     {    \
                         int irb = bli_min( MR, ib-ir ); \
                         \
-                        if (jrb == NR && irb == MR) \
-                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, beta, cmicrotile, rsc, csc, NULL, NULL); \
-                        else \
-                        { \
-                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, &zero, tmp_cmicrotile, rsct, csct, NULL, NULL); \
-                            \
-                            for (int j=0; j<jrb;j++) \
-                                for (int i=0; i<irb;i++)  \
-                                    cmicrotile[i*rsc + j*csc] = \
-                                        beta_ * cmicrotile[i*rsc + j*csc] + \
-                                        tmp_cmicrotile[i*rsct + j*csct]; \
-                        } \
+                        MICROKERNEL \
+                        ( \
+                          irb, jrb, new_pb, alpha, amicropanel, bmicropanel, \
+                          beta, cmicrotile, rsc, csc, NULL, NULL \
+                        ); \
                         amicropanel += a_ps; \
                         cmicrotile += rstep_mt_c; \
                     } \
