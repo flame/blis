@@ -115,7 +115,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
-      24,
+      26,
 #if 1
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
@@ -142,6 +142,8 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // dotxv
 	  BLIS_DOTXV_KER,  BLIS_FLOAT,  bli_sdotxv_zen_int,
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
+	  BLIS_DOTXV_KER,  BLIS_DCOMPLEX, bli_zdotxv_zen_int,
+	  BLIS_DOTXV_KER,  BLIS_SCOMPLEX, bli_cdotxv_zen_int,
 
 	  // scalv
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
