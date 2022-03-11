@@ -160,6 +160,7 @@ thrinfo_t* bli_thrinfo_sup_create_for_cntl
 		  BLIS_NO_PART,                // bszid
 		  NULL                         // sub_node
 		);
+
 		return thread_chl;
 	}
 
