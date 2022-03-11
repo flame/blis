@@ -104,7 +104,7 @@ void cblas_zgemm(enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
       F77_zgemm(F77_TA, F77_TB, &F77_N, &F77_M, &F77_K, (dcomplex*)alpha, (dcomplex*)B,
                   &F77_ldb, (dcomplex*)A, &F77_lda, (dcomplex*)beta, (dcomplex*)C, &F77_ldc);
    } 
-   else  cblas_xerbla(1, "cblas_zgemm", "Illegal Order setting, %d\n", Order);
+   else cblas_xerbla(1, "cblas_zgemm", "Illegal Order setting, %d\n", Order);
    CBLAS_CallFromC = 0;
    RowMajorStrg = 0;
    return;
