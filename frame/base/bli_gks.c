@@ -134,6 +134,11 @@ void bli_gks_init( void )
 #endif
 
 		// ARM architectures
+#ifdef BLIS_CONFIG_NEOVERSEN1
+		bli_gks_register_cntx( BLIS_ARCH_NEOVERSEN1,   bli_cntx_init_neoversen1,
+		                                              bli_cntx_init_neoversen1_ref,
+		                                              bli_cntx_init_neoversen1_ind );
+#endif
 #ifdef BLIS_CONFIG_A64FX
 		bli_gks_register_cntx( BLIS_ARCH_A64FX,   bli_cntx_init_a64fx,
 		                                              bli_cntx_init_a64fx_ref,

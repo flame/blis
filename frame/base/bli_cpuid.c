@@ -1127,9 +1127,9 @@ static uint32_t get_coretype
 				case 0xd03: // Cortex A53
 					return BLIS_ARCH_CORTEXA53;
 #endif
-#ifdef BLIS_CONFIG_THUNDERX2
+#ifdef BLIS_CONFIG_NEOVERSEN1
 				case 0xd0c: // Neoverse N1 (and Graviton G2?)
-					return BLIS_ARCH_THUNDERX2; //placeholder for N1
+					return BLIS_ARCH_NEOVERSEN1; //placeholder for N1
 #endif
 			}
 			break;

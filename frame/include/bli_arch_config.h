@@ -88,6 +88,9 @@ CNTX_INIT_PROTS( bulldozer )
 
 // -- ARM architectures --
 
+#ifdef BLIS_CONFIG_NEOVERSEN1
+CNTX_INIT_PROTS( neoversen1 )
+#endif
 #ifdef BLIS_CONFIG_ARMSVE
 CNTX_INIT_PROTS( armsve )
 #endif
@@ -212,6 +215,9 @@ CNTX_INIT_PROTS( generic )
 
 // -- ARM architectures --
 
+#ifdef BLIS_FAMILY_NEOVERSEN1
+#include "bli_family_neoversen1.h"
+#endif
 #ifdef BLIS_FAMILY_ARMSVE
 #include "bli_family_armsve.h"
 #endif
