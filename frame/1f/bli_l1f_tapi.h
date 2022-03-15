@@ -42,9 +42,9 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         n, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   n, \
        const ctype*  alphax, \
        const ctype*  alphay, \
        const ctype*  x, inc_t incx, \
@@ -61,10 +61,10 @@ INSERT_GENTPROT_BASIC0( axpy2v )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conja, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  x, inc_t incx, \
@@ -80,10 +80,10 @@ INSERT_GENTPROT_BASIC0( axpyf )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjxt, \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         n, \
+             conj_t  conjxt, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -100,12 +100,12 @@ INSERT_GENTPROT_BASIC0( dotaxpyv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjat, \
-       conj_t        conja, \
-       conj_t        conjw, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conjat, \
+             conj_t  conja, \
+             conj_t  conjw, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  w, inc_t incw, \
@@ -124,10 +124,10 @@ INSERT_GENTPROT_BASIC0( dotxaxpyf )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjat, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conjat, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  x, inc_t incx, \

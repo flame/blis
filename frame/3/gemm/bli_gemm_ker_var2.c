@@ -77,38 +77,38 @@ static xpbys_mxn_vft GENARRAY2_ALL(xbpys_mxn, xbpys_mxn_fn);
 
 void bli_gemm_ker_var2
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_exec_dt( c );
-	num_t     dt_c      = bli_obj_dt( c );
+	      num_t  dt_exec   = bli_obj_exec_dt( c );
+	      num_t  dt_c      = bli_obj_dt( c );
 
-	pack_t    schema_a  = bli_obj_pack_schema( a );
-	pack_t    schema_b  = bli_obj_pack_schema( b );
+	      pack_t schema_a  = bli_obj_pack_schema( a );
+	      pack_t schema_b  = bli_obj_pack_schema( b );
 
-	dim_t     m         = bli_obj_length( c );
-	dim_t     n         = bli_obj_width( c );
-	dim_t     k         = bli_obj_width( a );
+	      dim_t  m         = bli_obj_length( c );
+	      dim_t  n         = bli_obj_width( c );
+	      dim_t  k         = bli_obj_width( a );
 
-	char*     a_cast    = bli_obj_buffer_at_off( a );
-	inc_t     is_a      = bli_obj_imag_stride( a );
-	dim_t     pd_a      = bli_obj_panel_dim( a );
-	inc_t     ps_a      = bli_obj_panel_stride( a );
+	const char*  a_cast    = bli_obj_buffer_at_off( a );
+	      inc_t  is_a      = bli_obj_imag_stride( a );
+	      dim_t  pd_a      = bli_obj_panel_dim( a );
+	      inc_t  ps_a      = bli_obj_panel_stride( a );
 
-	char*     b_cast    = bli_obj_buffer_at_off( b );
-	inc_t     is_b      = bli_obj_imag_stride( b );
-	dim_t     pd_b      = bli_obj_panel_dim( b );
-	inc_t     ps_b      = bli_obj_panel_stride( b );
+	const char*  b_cast    = bli_obj_buffer_at_off( b );
+	      inc_t  is_b      = bli_obj_imag_stride( b );
+	      dim_t  pd_b      = bli_obj_panel_dim( b );
+	      inc_t  ps_b      = bli_obj_panel_stride( b );
 
-	char*     c_cast    = bli_obj_buffer_at_off( c );
-	inc_t     rs_c      = bli_obj_row_stride( c );
-	inc_t     cs_c      = bli_obj_col_stride( c );
+	      char*  c_cast    = bli_obj_buffer_at_off( c );
+	      inc_t  rs_c      = bli_obj_row_stride( c );
+	      inc_t  cs_c      = bli_obj_col_stride( c );
 
 	// If any dimension is zero, return immediately.
 	if ( bli_zero_dim3( m, n, k ) ) return;
@@ -129,8 +129,8 @@ void bli_gemm_ker_var2
 	// that casts the scalars of A and B to dt_exec via scalar_a and scalar_b,
 	// and we know that the internal scalar in C is already of the type dt_c
 	// due to the casting in the implementation of bli_obj_scalar_attach().
-	char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
-	char* beta_cast  = bli_obj_internal_scalar_buffer( c );
+	const char* alpha_cast = bli_obj_internal_scalar_buffer( &scalar_b );
+	const char* beta_cast  = bli_obj_internal_scalar_buffer( c );
 
 	// If 1m is being employed on a column- or row-stored matrix with a
 	// real-valued beta, we can use the real domain macro-kernel, which
@@ -174,14 +174,12 @@ void bli_gemm_ker_var2
 	}
 #endif
 
-	siz_t        dt_size   = bli_dt_size( dt_exec );
-	siz_t        dt_c_size = bli_dt_size( dt_c );
+	const siz_t dt_size   = bli_dt_size( dt_exec );
+	const siz_t dt_c_size = bli_dt_size( dt_c );
 
 	// Alias some constants to simpler names.
-	const dim_t  MR        = pd_a;
-	const dim_t  NR        = pd_b;
-	//const dim_t PACKMR     = cs_a;
-	//const dim_t PACKNR     = rs_b;
+	const dim_t MR = pd_a;
+	const dim_t NR = pd_b;
 
 	// Query the context for the micro-kernel address and cast it to its
 	// function pointer type.
@@ -191,7 +189,7 @@ void bli_gemm_ker_var2
 	// field of the params struct. If that function pointer is non-NULL, use it
 	// as our microkernel instead of the default microkernel queried from the
 	// cntx above.
-	gemm_ker_params_t* params = bli_obj_ker_params( c );
+	const gemm_ker_params_t* params = bli_obj_ker_params( c );
 	gemm_ukr_vft user_ukr = params ? params->ukr : NULL;
 	if ( user_ukr ) gemm_ukr = user_ukr;
 
@@ -204,7 +202,7 @@ void bli_gemm_ker_var2
 	const bool  col_pref    = bli_cntx_ukr_prefers_cols_dt( dt_exec, BLIS_GEMM_VIR_UKR, cntx );
 	const inc_t rs_ct       = ( col_pref ? 1 : NR );
 	const inc_t cs_ct       = ( col_pref ? MR : 1 );
-	char*       zero        = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
+	const char* zero        = bli_obj_buffer_for_const( dt_exec, &BLIS_ZERO );
 
 	//
 	// Assumptions/assertions:
@@ -277,24 +275,24 @@ void bli_gemm_ker_var2
 	// Loop over the n dimension (NR columns at a time).
 	for ( dim_t j = jr_start; j < jr_end; j += jr_inc )
 	{
-		char* b1 = b_cast + j * cstep_b;
-		char* c1 = c_cast + j * cstep_c;
+		const char* b1 = b_cast + j * cstep_b;
+		      char* c1 = c_cast + j * cstep_c;
 
-		dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
+		const dim_t n_cur = ( bli_is_not_edge_f( j, n_iter, n_left ) ? NR : n_left );
 
 		// Initialize our next panel of B to be the current panel of B.
-		char* b2 = b1;
+		const char* b2 = b1;
 
 		// Loop over the m dimension (MR rows at a time).
 		for ( dim_t i = ir_start; i < ir_end; i += ir_inc )
 		{
-			char* a1  = a_cast + i * rstep_a;
-			char* c11 = c1     + i * rstep_c;
+			const char* a1  = a_cast + i * rstep_a;
+			      char* c11 = c1     + i * rstep_c;
 
-			dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
+			const dim_t m_cur = ( bli_is_not_edge_f( i, m_iter, m_left ) ? MR : m_left );
 
 			// Compute the addresses of the next panels of A and B.
-			char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc );
+			const char* a2 = bli_gemm_get_next_a_upanel( a1, rstep_a, ir_inc );
 			if ( bli_is_last_iter( i, ir_end, ir_tid, ir_nt ) )
 			{
 				a2 = a_cast;
@@ -320,13 +318,13 @@ void bli_gemm_ker_var2
 				  m_cur,
 				  n_cur,
 				  k,
-				  alpha_cast,
-				  a1,
-				  b1,
-				  beta_cast,
-				  c11, rs_c, cs_c,
+				  ( void* )alpha_cast,
+				  ( void* )a1,
+				  ( void* )b1,
+				  ( void* )beta_cast,
+				           c11, rs_c, cs_c,
 				  &aux,
-				  cntx
+				  ( cntx_t* )cntx
 				);
 			}
 			else
@@ -337,13 +335,13 @@ void bli_gemm_ker_var2
 				  MR,
 				  NR,
 				  k,
-				  alpha_cast,
-				  a1,
-				  b1,
-				  zero,
-				  &ct, rs_ct, cs_ct,
+				  ( void* )alpha_cast,
+				  ( void* )a1,
+				  ( void* )b1,
+				  ( void* )zero,
+				           &ct, rs_ct, cs_ct,
 				  &aux,
-				  cntx
+				  ( cntx_t* )cntx
 				);
 
 				// Accumulate to C with type-casting.
@@ -351,7 +349,7 @@ void bli_gemm_ker_var2
 				(
 				    m_cur, n_cur,
 				    &ct, rs_ct, cs_ct,
-				    beta_cast,
+				    ( void* )beta_cast,
 				    c11, rs_c, cs_c
 				);
 			}

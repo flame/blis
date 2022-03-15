@@ -156,8 +156,8 @@ BLIS_INLINE void bli_pba_rntm_set_pba
 
 siz_t bli_pba_pool_size
      (
-       const pba_t* pba,
-       packbuf_t    buf_type
+       const pba_t*    pba,
+             packbuf_t buf_type
      );
 
 // ----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ siz_t bli_pba_pool_size
 void bli_pba_init_pools
      (
        const cntx_t* cntx,
-       pba_t*        pba
+             pba_t*  pba
      );
 void bli_pba_finalize_pools
      (
@@ -174,17 +174,17 @@ void bli_pba_finalize_pools
 
 void bli_pba_compute_pool_block_sizes
      (
-       siz_t*        bs_a,
-       siz_t*        bs_b,
-       siz_t*        bs_c,
+             siz_t*  bs_a,
+             siz_t*  bs_b,
+             siz_t*  bs_c,
        const cntx_t* cntx
      );
 void bli_pba_compute_pool_block_sizes_dt
      (
-       num_t         dt,
-       siz_t*        bs_a,
-       siz_t*        bs_b,
-       siz_t*        bs_c,
+             num_t   dt,
+             siz_t*  bs_a,
+             siz_t*  bs_b,
+             siz_t*  bs_c,
        const cntx_t* cntx
      );
 

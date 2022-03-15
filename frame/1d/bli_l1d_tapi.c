@@ -45,11 +45,11 @@
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
@@ -108,9 +108,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  conjx, \
 	  n_elem, \
-	  x1, incx, \
-	  y1, incy, \
-	  cntx  \
+	  ( ctype* )x1, incx, \
+	            y1, incy, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -124,11 +124,11 @@ INSERT_GENTFUNC_BASIC2( subd,  subv,  BLIS_SUBV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
@@ -188,10 +188,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  conjx, \
 	  n_elem, \
-	  alpha, \
-	  x1, incx, \
-	  y1, incy, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	  ( ctype* )x1, incx, \
+	            y1, incy, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -248,7 +248,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  n_elem, \
 	  x1, incx, \
-	  cntx  \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -260,10 +260,10 @@ INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjalpha, \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             conj_t  conjalpha, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -306,9 +306,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  conjalpha, \
 	  n_elem, \
-	  alpha, \
-	  x1, incx, \
-	  cntx  \
+	  ( ctype* )alpha, \
+	            x1, incx, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -321,11 +321,11 @@ INSERT_GENTFUNC_BASIC2( setd,  setv,  BLIS_SETV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t         diagoffx, \
-       dim_t          m, \
-       dim_t          n, \
+             doff_t   diagoffx, \
+             dim_t    m, \
+             dim_t    n, \
        const ctype_r* alpha, \
-       ctype*         x, inc_t rs_x, inc_t cs_x  \
+             ctype*   x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -383,9 +383,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n_elem, \
-	  alpha, \
-	  x1, incx, \
-	  cntx  \
+	  ( ctype_r* )alpha, \
+	              x1, incx, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -397,9 +397,9 @@ INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -442,9 +442,9 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  BLIS_NO_CONJUGATE, \
 	  n_elem, \
-	  alpha, 0, \
-	  x1, incx, \
-	  cntx  \
+	  ( ctype* )alpha, 0, \
+	            x1, incx, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 
@@ -456,11 +456,11 @@ INSERT_GENTFUNC_BASIC2( shiftd, addv, BLIS_ADDV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
        const ctype*  beta, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
@@ -520,10 +520,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	( \
 	  conjx, \
 	  n_elem, \
-	  x1, incx, \
-	  beta, \
-	  y1, incy, \
-	  cntx  \
+	  ( ctype* )x1, incx, \
+	  ( ctype* )beta, \
+	            y1, incy, \
+	  ( cntx_t* )cntx  \
 	); \
 }
 

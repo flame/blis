@@ -334,7 +334,7 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
-       const rntm_t*  restrict rntm
+       const rntm_t* rntm
      )
 {
 	dim_t n_threads;
@@ -387,8 +387,8 @@ void bli_rntm_print
 
 dim_t bli_rntm_calc_num_threads_in
      (
-       const bszid_t* restrict bszid_cur,
-       const rntm_t*  restrict rntm
+       const bszid_t* bszid_cur,
+       const rntm_t*  rntm
      );
 
 #endif

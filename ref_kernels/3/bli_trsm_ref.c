@@ -45,8 +45,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
@@ -132,8 +132,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \

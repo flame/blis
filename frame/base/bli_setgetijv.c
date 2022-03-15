@@ -45,10 +45,10 @@ static setijv_fp GENARRAY(ftypes_setijv,setijv);
 
 err_t bli_setijv
      (
-       double ar,
-       double ai,
-       dim_t  i,
-       obj_t* x
+             double ar,
+             double ai,
+             dim_t  i,
+       const obj_t* x
      )
 {
 	dim_t n    = bli_obj_vector_dim( x );
@@ -103,19 +103,19 @@ INSERT_GENTFUNC_BASIC0( setijv )
 
 typedef void (*getijv_fp)
      (
-       dim_t       i,
-       const void* x, inc_t incx,
-       double*     ar,
-       double*     ai
+             dim_t   i,
+       const void*   x, inc_t incx,
+             double* ar,
+             double* ai
      );
 static getijv_fp GENARRAY(ftypes_getijv,getijv);
 
 err_t bli_getijv
       (
-        dim_t        i,
-        const obj_t* x,
-        double*      ar,
-        double*      ai
+              dim_t   i,
+        const obj_t*  x,
+              double* ar,
+              double* ai
       )
 {
 	dim_t n    = bli_obj_vector_dim( x );
@@ -151,10 +151,10 @@ err_t bli_getijv
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t       i, \
-       const void* x, inc_t incx, \
-       double*     ar, \
-       double*     ai  \
+             dim_t   i, \
+       const void*   x, inc_t incx, \
+             double* ar, \
+             double* ai  \
      ) \
 { \
 	const ctype* restrict x_cast = ( const ctype* )x; \

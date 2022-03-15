@@ -600,8 +600,8 @@ dim_t bli_align_dim_to_size
 
 dim_t bli_align_ptr_to_size
      (
-       const void* p,
-       size_t      align_size
+       const void*  p,
+             size_t align_size
      )
 {
 	dim_t dim;

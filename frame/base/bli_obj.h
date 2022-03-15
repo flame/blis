@@ -139,8 +139,8 @@ BLIS_EXPORT_BLIS dim_t bli_align_dim_to_size
 
 BLIS_EXPORT_BLIS dim_t bli_align_ptr_to_size
      (
-       const void* p,
-       size_t      align_size
+       const void*  p,
+             size_t align_size
      );
 
 BLIS_EXPORT_BLIS void bli_obj_print

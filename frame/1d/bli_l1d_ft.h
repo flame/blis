@@ -44,11 +44,11 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
@@ -65,11 +65,11 @@ INSERT_GENTDEF( subd )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
@@ -102,10 +102,10 @@ INSERT_GENTDEF( invertd )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjalpha, \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             conj_t  conjalpha, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -121,9 +121,9 @@ INSERT_GENTDEF( setd )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t         diagoffx, \
-       dim_t          m, \
-       dim_t          n, \
+             doff_t   diagoffx, \
+             dim_t    m, \
+             dim_t    n, \
        const ctype_r* alpha, \
              ctype*   x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -138,9 +138,9 @@ INSERT_GENTDEFR( setid )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -155,11 +155,11 @@ INSERT_GENTDEF( shiftd )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
        const ctype*  beta, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \

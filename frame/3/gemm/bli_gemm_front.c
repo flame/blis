@@ -37,14 +37,14 @@
 
 void bli_gemm_front
      (
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl
      )
 {
 	bli_init_once();
@@ -163,8 +163,8 @@ void bli_gemm_front
 	  rntm
 	);
 
-	obj_t* cp    = &c_local;
-	obj_t* betap = beta;
+	      obj_t* cp    = &c_local;
+	const obj_t* betap = beta;
 
 #ifdef BLIS_ENABLE_GEMM_MD
 #ifdef BLIS_ENABLE_GEMM_MD_EXTRA_MEM

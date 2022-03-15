@@ -43,15 +43,15 @@ typedef void (*FUNCPTR_T)
        dim_t            m,
        dim_t            n,
        dim_t            k,
-       const void*      alpha,
-       const void*      a, inc_t rs_a, inc_t cs_a,
-       const void*      d, inc_t incd,
-       const void*      b, inc_t rs_b, inc_t cs_b,
-       const void*      beta,
-             void*      c, inc_t rs_c, inc_t cs_c,
-       const cntx_t*    cntx,
-       const rntm_t*    rntm,
-       const thrinfo_t* thread
+       void*   restrict alpha,
+       void*   restrict a, inc_t rs_a, inc_t cs_a,
+       void*   restrict d, inc_t incd,
+       void*   restrict b, inc_t rs_b, inc_t cs_b,
+       void*   restrict beta,
+       void*   restrict c, inc_t rs_c, inc_t cs_c,
+       cntx_t* restrict cntx,
+       rntm_t* restrict rntm,
+       thrinfo_t* restrict thread
      );
 
 //
@@ -64,43 +64,43 @@ static FUNCPTR_T GENARRAY_PREF(ftypes,bao_,gemmd_bp_var1);
 
 void bao_gemmd_bp_var1
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  d,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-       const rntm_t* rntm,
-       const thrinfo_t* thread
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  d,
+       obj_t*  b,
+       obj_t*  beta,
+       obj_t*  c,
+       cntx_t* cntx,
+       rntm_t* rntm,
+       thrinfo_t* thread
      )
 {
-	const num_t  dt        = bli_obj_dt( c );
+	const num_t    dt        = bli_obj_dt( c );
 
-	const conj_t conja     = bli_obj_conj_status( a );
-	const conj_t conjb     = bli_obj_conj_status( b );
+	const conj_t   conja     = bli_obj_conj_status( a );
+	const conj_t   conjb     = bli_obj_conj_status( b );
 
-	const dim_t  m         = bli_obj_length( c );
-	const dim_t  n         = bli_obj_width( c );
-	const dim_t  k         = bli_obj_width( a );
+	const dim_t    m         = bli_obj_length( c );
+	const dim_t    n         = bli_obj_width( c );
+	const dim_t    k         = bli_obj_width( a );
 
-	const void*  buf_a     = bli_obj_buffer_at_off( a );
-	const inc_t  rs_a      = bli_obj_row_stride( a );
-	const inc_t  cs_a      = bli_obj_col_stride( a );
+	void* restrict buf_a     = bli_obj_buffer_at_off( a );
+	const inc_t    rs_a      = bli_obj_row_stride( a );
+	const inc_t    cs_a      = bli_obj_col_stride( a );
 
-	const void*  buf_d     = bli_obj_buffer_at_off( d );
-	const inc_t  incd      = bli_obj_vector_inc( d );
+	void* restrict buf_d     = bli_obj_buffer_at_off( d );
+	const inc_t    incd      = bli_obj_vector_inc( d );
 
-	const void*  buf_b     = bli_obj_buffer_at_off( b );
-	const inc_t  rs_b      = bli_obj_row_stride( b );
-	const inc_t  cs_b      = bli_obj_col_stride( b );
+	void* restrict buf_b     = bli_obj_buffer_at_off( b );
+	const inc_t    rs_b      = bli_obj_row_stride( b );
+	const inc_t    cs_b      = bli_obj_col_stride( b );
 
-	      void*  buf_c     = bli_obj_buffer_at_off( c );
-	const inc_t  rs_c      = bli_obj_row_stride( c );
-	const inc_t  cs_c      = bli_obj_col_stride( c );
+	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t    rs_c      = bli_obj_row_stride( c );
+	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	const void*  buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
-	const void*  buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
 
 	// Index into the function pointer array to extract the correct
 	// typed function pointer based on the chosen datatype.
@@ -140,15 +140,15 @@ void PASTECH2(bao_,ch,varname) \
        dim_t            m, \
        dim_t            n, \
        dim_t            k, \
-       const void*      alpha, \
-       const void*      a, inc_t rs_a, inc_t cs_a, \
-       const void*      d, inc_t incd, \
-       const void*      b, inc_t rs_b, inc_t cs_b, \
-       const void*      beta, \
-             void*      c, inc_t rs_c, inc_t cs_c, \
-       const cntx_t*    cntx, \
-       const rntm_t*    rntm, \
-       const thrinfo_t* thread  \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict d, inc_t incd, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -180,12 +180,12 @@ void PASTECH2(bao_,ch,varname) \
 \
 	const inc_t irstep_c = rs_c * MR; \
 \
-	const ctype* a_00       = a; \
-	const ctype* d_00       = d; \
-	const ctype* b_00       = b; \
-	      ctype* c_00       = c; \
-	const ctype* alpha_cast = alpha; \
-	const ctype* beta_cast  = beta; \
+	ctype* restrict a_00       = a; \
+	ctype* restrict d_00       = d; \
+	ctype* restrict b_00       = b; \
+	ctype* restrict c_00       = c; \
+	ctype* restrict alpha_cast = alpha; \
+	ctype* restrict beta_cast  = beta; \
 \
 	/* Make local copies of the scalars to prevent any unnecessary sharing of
 	   cache lines between the cores' caches. */ \
@@ -212,21 +212,21 @@ void PASTECH2(bao_,ch,varname) \
 	                      BLIS_MR,      /* 1st loop */ \
 	                      BLIS_KR };    /* microkernel loop */  \
 \
-	const bszid_t* bszids_jc = &bszids[0]; \
-	const bszid_t* bszids_pc = &bszids[1]; \
-	/*const bszid_t* bszids_pb = &bszids[2];*/ \
-	const bszid_t* bszids_ic = &bszids[3]; \
-	/*const bszid_t* bszids_pa = &bszids[4];*/ \
-	const bszid_t* bszids_jr = &bszids[5]; \
-	/*const bszid_t* bszids_ir = &bszids[6];*/ \
+	bszid_t* restrict bszids_jc = &bszids[0]; \
+	bszid_t* restrict bszids_pc = &bszids[1]; \
+	/*bszid_t* restrict bszids_pb = &bszids[2];*/ \
+	bszid_t* restrict bszids_ic = &bszids[3]; \
+	/*bszid_t* restrict bszids_pa = &bszids[4];*/ \
+	bszid_t* restrict bszids_jr = &bszids[5]; \
+	/*bszid_t* restrict bszids_ir = &bszids[6];*/ \
 \
-	thrinfo_t* thread_jc = NULL; \
-	thrinfo_t* thread_pc = NULL; \
-	thrinfo_t* thread_pb = NULL; \
-	thrinfo_t* thread_ic = NULL; \
-	thrinfo_t* thread_pa = NULL; \
-	thrinfo_t* thread_jr = NULL; \
-	thrinfo_t* thread_ir = NULL; \
+	thrinfo_t* restrict thread_jc = NULL; \
+	thrinfo_t* restrict thread_pc = NULL; \
+	thrinfo_t* restrict thread_pb = NULL; \
+	thrinfo_t* restrict thread_ic = NULL; \
+	thrinfo_t* restrict thread_pa = NULL; \
+	thrinfo_t* restrict thread_jr = NULL; \
+	thrinfo_t* restrict thread_ir = NULL; \
 \
 	/* Identify the current thrinfo_t node and then grow the tree. */ \
 	thread_jc = thread; \
@@ -239,7 +239,7 @@ void PASTECH2(bao_,ch,varname) \
 \
 	/* Compute number of primary and leftover components of the JC loop. */ \
 	/*const dim_t jc_iter = ( n_local + NC - 1 ) / NC;*/ \
-	const dim_t jc_left = n_local % NC; \
+	const dim_t jc_left =   n_local % NC; \
 \
 	/* Loop over the n dimension (NC rows/columns at a time). */ \
 	for ( dim_t jj = jc_start; jj < jc_end; jj += NC ) \
@@ -247,8 +247,8 @@ void PASTECH2(bao_,ch,varname) \
 		/* Calculate the thread's current JC block dimension. */ \
 		const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
 \
-		const ctype* b_jc = b_00 + jj * jcstep_b; \
-		      ctype* c_jc = c_00 + jj * jcstep_c; \
+		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
+		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
 \
 		/* Identify the current thrinfo_t node and then grow the tree. */ \
 		thread_pc = bli_thrinfo_sub_node( thread_jc ); \
@@ -268,14 +268,14 @@ void PASTECH2(bao_,ch,varname) \
 			/* Calculate the thread's current PC block dimension. */ \
 			const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
 \
-			const ctype* a_pc = a_00 + pp * pcstep_a; \
-			const ctype* d_pc = d_00 + pp * pcstep_d; \
-			const ctype* b_pc = b_jc + pp * pcstep_b; \
+			ctype* restrict a_pc = a_00 + pp * pcstep_a; \
+			ctype* restrict d_pc = d_00 + pp * pcstep_d; \
+			ctype* restrict b_pc = b_jc + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
-			const ctype* beta_use = ( pp == 0 ? &beta_local : &one_local ); \
+			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
 \
-			const ctype* b_use; \
+			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
 \
 			/* Identify the current thrinfo_t node. Note that the thrinfo_t
@@ -306,7 +306,7 @@ void PASTECH2(bao_,ch,varname) \
 \
 			/* Alias b_use so that it's clear this is our current block of
 			   matrix B. */ \
-			const ctype* b_pc_use = b_use; \
+			ctype* restrict b_pc_use = b_use; \
 \
 			/* Identify the current thrinfo_t node and then grow the tree. */ \
 			thread_ic = bli_thrinfo_sub_node( thread_pb ); \
@@ -327,10 +327,10 @@ void PASTECH2(bao_,ch,varname) \
 				/* Calculate the thread's current IC block dimension. */ \
 				const dim_t mc_cur = ( MC <= ic_end - ii ? MC : ic_left ); \
 \
-				const ctype* a_ic = a_pc + ii * icstep_a; \
-				      ctype* c_ic = c_jc + ii * icstep_c; \
+				ctype* restrict a_ic = a_pc + ii * icstep_a; \
+				ctype* restrict c_ic = c_jc + ii * icstep_c; \
 \
-				const ctype* a_use; \
+				ctype* a_use; \
 				inc_t  rs_a_use, cs_a_use, ps_a_use; \
 \
 				/* Identify the current thrinfo_t node. Note that the thrinfo_t
@@ -361,7 +361,7 @@ void PASTECH2(bao_,ch,varname) \
 \
 				/* Alias a_use so that it's clear this is our current block of
 				   matrix A. */ \
-				const ctype* a_ic_use = a_use; \
+				ctype* restrict a_ic_use = a_use; \
 \
 				/* Identify the current thrinfo_t node and then grow the tree. */ \
 				thread_jr = bli_thrinfo_sub_node( thread_pa ); \
@@ -387,12 +387,12 @@ void PASTECH2(bao_,ch,varname) \
 					const dim_t nr_cur \
 					= ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? NR : jr_left ); \
 \
-					const ctype* b_jr = b_pc_use + j * ps_b_use; \
-					      ctype* c_jr = c_ic     + j * jrstep_c; \
+					ctype* restrict b_jr = b_pc_use + j * ps_b_use; \
+					ctype* restrict c_jr = c_ic     + j * jrstep_c; \
 \
 					/* Assume for now that our next panel of B to be the current panel
 					   of B. */ \
-					const ctype* b2 = b_jr; \
+					ctype* restrict b2 = b_jr; \
 \
 					/* Identify the current thrinfo_t node. */ \
 					thread_ir = bli_thrinfo_sub_node( thread_jr ); \
@@ -417,10 +417,10 @@ void PASTECH2(bao_,ch,varname) \
 						const dim_t mr_cur \
 						= ( bli_is_not_edge_f( i, ir_iter, ir_left ) ? MR : ir_left ); \
 \
-						const ctype* a_ir = a_ic_use + i * ps_a_use; \
-						      ctype* c_ir = c_jr     + i * irstep_c; \
+						ctype* restrict a_ir = a_ic_use + i * ps_a_use; \
+						ctype* restrict c_ir = c_jr     + i * irstep_c; \
 \
-						const ctype* a2; \
+						ctype* restrict a2; \
 \
 						/* Compute the addresses of the next micropanels of A and B. */ \
 						a2 = bli_gemm_get_next_a_upanel( a_ir, ps_a_use, 1 ); \

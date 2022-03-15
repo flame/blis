@@ -37,9 +37,9 @@
 
 void* bli_packm_alloc
      (
-       siz_t      size_needed,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
+             siz_t      size_needed,
+             rntm_t*    rntm,
+             cntl_t*    cntl,
        const thrinfo_t* thread
      )
 {
@@ -58,10 +58,10 @@ void* bli_packm_alloc
 
 void* bli_packm_alloc_ex
      (
-       siz_t      size_needed,
-       packbuf_t  pack_buf_type,
-       rntm_t*    rntm,
-       cntl_t*    cntl,
+             siz_t      size_needed,
+             packbuf_t  pack_buf_type,
+             rntm_t*    rntm,
+             cntl_t*    cntl,
        const thrinfo_t* thread
      )
 {

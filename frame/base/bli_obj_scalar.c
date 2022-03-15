@@ -59,8 +59,8 @@ void bli_obj_scalar_init_detached
 
 void bli_obj_scalar_init_detached_copy_of
      (
-       num_t        dt,
-       conj_t       conj,
+             num_t  dt,
+             conj_t conj,
        const obj_t* alpha,
              obj_t* beta
      )
@@ -103,9 +103,9 @@ void bli_obj_scalar_detach
 
 void bli_obj_scalar_attach
      (
-       conj_t conj,
-       obj_t* alpha,
-       obj_t* a
+             conj_t conj,
+       const obj_t* alpha,
+             obj_t* a
      )
 {
 	obj_t alpha_cast;

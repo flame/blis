@@ -39,23 +39,23 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       struc_t         strucc, \
-       diag_t          diagc, \
-       uplo_t          uploc, \
-       conj_t          conjc, \
-       pack_t          schema, \
-       bool            invdiag, \
-       dim_t           panel_dim, \
-       dim_t           panel_len, \
-       dim_t           panel_dim_max, \
-       dim_t           panel_len_max, \
-       dim_t           panel_dim_off, \
-       dim_t           panel_len_off, \
-       ctype* restrict kappa, \
-       ctype* restrict c, inc_t incc, inc_t ldc, \
-       ctype* restrict p,             inc_t ldp, \
-                          inc_t is_p, \
-       cntx_t*         cntx  \
+       struc_t strucc, \
+       diag_t  diagc, \
+       uplo_t  uploc, \
+       conj_t  conjc, \
+       pack_t  schema, \
+       bool    invdiag, \
+       dim_t   panel_dim, \
+       dim_t   panel_len, \
+       dim_t   panel_dim_max, \
+       dim_t   panel_len_max, \
+       dim_t   panel_dim_off, \
+       dim_t   panel_len_off, \
+       ctype*  kappa, \
+       ctype*  c, inc_t incc, inc_t ldc, \
+       ctype*  p,             inc_t ldp, \
+                  inc_t is_p, \
+       cntx_t* cntx  \
      ) \
 { \
 	num_t   dt            = PASTEMAC(ch,type); \
@@ -132,7 +132,7 @@ void PASTEMAC(ch,varname) \
         { \
             if ( bli_is_1m_packed( schema ) ) \
             { \
-    		    ctype_r* restrict zero = PASTEMAC(chr,0); \
+    		    ctype_r* zero = PASTEMAC(chr,0); \
         		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
         		( \
         		  BLIS_NO_CONJUGATE, \
@@ -149,7 +149,7 @@ void PASTEMAC(ch,varname) \
             } \
             else \
             { \
-    		    ctype* restrict zero = PASTEMAC(ch,0); \
+    		    ctype* zero = PASTEMAC(ch,0); \
         		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
         		( \
         		  BLIS_NO_CONJUGATE, \
@@ -239,7 +239,7 @@ void PASTEMAC(ch,varname) \
         { \
             if ( bli_is_1m_packed( schema ) ) \
             { \
-    		    ctype_r* restrict zero = PASTEMAC(chr,0); \
+    		    ctype_r* zero = PASTEMAC(chr,0); \
         		PASTEMAC2(chr,setm,BLIS_TAPI_EX_SUF) \
         		( \
         		  BLIS_NO_CONJUGATE, \
@@ -256,7 +256,7 @@ void PASTEMAC(ch,varname) \
             } \
             else \
             { \
-    		    ctype* restrict zero = PASTEMAC(ch,0); \
+    		    ctype* zero = PASTEMAC(ch,0); \
         		PASTEMAC2(ch,setm,BLIS_TAPI_EX_SUF) \
         		( \
         		  BLIS_NO_CONJUGATE, \

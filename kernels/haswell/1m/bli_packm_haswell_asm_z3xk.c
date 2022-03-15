@@ -51,7 +51,7 @@ void bli_zpackm_haswell_asm_3xk
        dcomplex*  restrict kappa,
        dcomplex*  restrict a, inc_t inca0, inc_t lda0,
        dcomplex*  restrict p,              inc_t ldp0,
-       cntx_t*    restrict cntx
+       cntx_t*             cntx
      )
 {
 #if 0

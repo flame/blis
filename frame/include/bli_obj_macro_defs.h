@@ -1261,7 +1261,7 @@ BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t
 	bli_obj_set_buffer( p, obj );
 
 	bli_obj_set_scalar_dt( dt, obj );
-	void* restrict s = bli_obj_internal_scalar_buffer( obj );
+	void* s = bli_obj_internal_scalar_buffer( obj );
 
 	if      ( bli_dt_prec_is_single( dt ) ) { (( scomplex* )s)->real = 1.0F;
 	                                          (( scomplex* )s)->imag = 0.0F; }

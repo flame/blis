@@ -42,8 +42,8 @@ err_t bli_gemmsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+             rntm_t* rntm,
+             thrinfo_t* thread
      )
 {
 #if 0
@@ -246,8 +246,8 @@ err_t bli_gemmtsup_int
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+             rntm_t* rntm,
+             thrinfo_t* thread
      )
 {
 	const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );

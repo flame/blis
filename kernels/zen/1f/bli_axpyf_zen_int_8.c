@@ -64,7 +64,7 @@ void bli_saxpyf_zen_int_8
        float*  restrict a, inc_t inca, inc_t lda,
        float*  restrict x, inc_t incx,
        float*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      fuse_fac       = 8;
@@ -273,7 +273,7 @@ void bli_daxpyf_zen_int_8
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      fuse_fac       = 8;

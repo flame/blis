@@ -368,7 +368,7 @@ void PASTEMAC0(opname) \
      ( \
        const obj_t* chi, \
        const obj_t* psi, \
-       bool*        is_eq  \
+             bool*  is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -429,7 +429,7 @@ void PASTEMAC0(opname) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       bool*        is_eq  \
+             bool*  is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -476,7 +476,7 @@ void PASTEMAC0(opname) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       bool*        is_eq  \
+             bool* is_eq  \
      ) \
 { \
 	bli_init_once(); \
@@ -531,7 +531,7 @@ GENFRONT( eqm )
 \
 void PASTEMAC0(opname) \
      ( \
-       FILE*        file, \
+             FILE*  file, \
        const char*  s1, \
        const obj_t* x, \
        const char*  format, \
@@ -579,7 +579,7 @@ GENFRONT( fprintv )
 \
 void PASTEMAC0(opname) \
      ( \
-       FILE*        file, \
+             FILE*  file, \
        const char*  s1, \
        const obj_t* x, \
        const char*  format, \
@@ -602,11 +602,11 @@ void PASTEMAC0(opname) \
 	/* Handle constants up front. */ \
 	if ( dt == BLIS_CONSTANT ) \
 	{ \
-		float*    sp = bli_obj_buffer_for_const( BLIS_FLOAT,    x ); \
-		double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   x ); \
-		scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, x ); \
-		dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, x ); \
-		gint_t*   ip = bli_obj_buffer_for_const( BLIS_INT,      x ); \
+		const float*    sp = bli_obj_buffer_for_const( BLIS_FLOAT,    x ); \
+		const double*   dp = bli_obj_buffer_for_const( BLIS_DOUBLE,   x ); \
+		const scomplex* cp = bli_obj_buffer_for_const( BLIS_SCOMPLEX, x ); \
+		const dcomplex* zp = bli_obj_buffer_for_const( BLIS_DCOMPLEX, x ); \
+		const gint_t*   ip = bli_obj_buffer_for_const( BLIS_INT,      x ); \
 \
 		fprintf( file, "%s\n", s1 ); \
 		fprintf( file, " float:     %9.2e\n",         bli_sreal( *sp ) ); \

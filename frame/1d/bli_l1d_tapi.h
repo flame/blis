@@ -42,11 +42,11 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
        BLIS_TAPI_EX_PARAMS  \
@@ -62,11 +62,11 @@ INSERT_GENTPROT_BASIC0( subd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \
@@ -97,10 +97,10 @@ INSERT_GENTPROT_BASIC0( invertd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjalpha, \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             conj_t  conjalpha, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -115,11 +115,11 @@ INSERT_GENTPROT_BASIC0( setd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t         diagoffx, \
-       dim_t          m, \
-       dim_t          n, \
+             doff_t   diagoffx, \
+             dim_t    m, \
+             dim_t    n, \
        const ctype_r* alpha, \
-       ctype*         x, inc_t rs_x, inc_t cs_x  \
+             ctype*   x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -131,9 +131,9 @@ INSERT_GENTPROTR_BASIC0( setid )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
              ctype*  x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
@@ -147,11 +147,11 @@ INSERT_GENTPROT_BASIC0( shiftd )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t        diagoffx, \
-       diag_t        diagx, \
-       trans_t       transx, \
-       dim_t         m, \
-       dim_t         n, \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  x, inc_t rs_x, inc_t cs_x, \
        const ctype*  beta, \
              ctype*  y, inc_t rs_y, inc_t cs_y  \

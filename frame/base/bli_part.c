@@ -40,10 +40,10 @@
 
 void bli_acquire_mpart
      (
-       dim_t        i,
-       dim_t        j,
-       dim_t        bm,
-       dim_t        bn,
+             dim_t  i,
+             dim_t  j,
+             dim_t  bm,
+             dim_t  bn,
        const obj_t* parent,
              obj_t* child
      )
@@ -83,11 +83,11 @@ void bli_acquire_mpart
 
 void bli_acquire_mpart_t2b
      (
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -96,11 +96,11 @@ void bli_acquire_mpart_t2b
 
 void bli_acquire_mpart_b2t
      (
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_BWD, req_part, i, b, obj, sub_obj );
@@ -109,12 +109,12 @@ void bli_acquire_mpart_b2t
 
 void bli_acquire_mpart_mdim
      (
-       dir_t        direct,
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -307,11 +307,11 @@ void bli_acquire_mpart_mdim
 
 void bli_acquire_mpart_l2r
      (
-       subpart_t    req_part,
-       dim_t        j,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_ndim( BLIS_FWD, req_part, j, b, obj, sub_obj );
@@ -320,11 +320,11 @@ void bli_acquire_mpart_l2r
 
 void bli_acquire_mpart_r2l
      (
-       subpart_t    req_part,
-       dim_t        j,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_ndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -333,12 +333,12 @@ void bli_acquire_mpart_r2l
 
 void bli_acquire_mpart_ndim
      (
-       dir_t        direct,
-       subpart_t    req_part,
-       dim_t        j,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -530,11 +530,11 @@ void bli_acquire_mpart_ndim
 
 void bli_acquire_mpart_tl2br
      (
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -543,11 +543,11 @@ void bli_acquire_mpart_tl2br
 
 void bli_acquire_mpart_br2tl
      (
-       subpart_t    req_part,
-       dim_t        j,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -556,12 +556,12 @@ void bli_acquire_mpart_br2tl
 
 void bli_acquire_mpart_mndim
      (
-       dir_t        direct,
-       subpart_t    req_part,
-       dim_t        ij,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     ij,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -798,11 +798,11 @@ void bli_acquire_mpart_mndim
 
 void bli_acquire_vpart_f2b
      (
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -814,11 +814,11 @@ void bli_acquire_vpart_f2b
 
 void bli_acquire_vpart_b2f
      (
-       subpart_t    req_part,
-       dim_t        i,
-       dim_t        b,
-       const obj_t* obj,
-             obj_t* sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -833,8 +833,8 @@ void bli_acquire_vpart_b2f
 
 void bli_acquire_mij
      (
-       dim_t        i,
-       dim_t        j,
+             dim_t  i,
+             dim_t  j,
        const obj_t* obj,
              obj_t* sub_obj
      )
@@ -848,7 +848,7 @@ void bli_acquire_mij
 
 void bli_acquire_vi
      (
-       dim_t        i,
+             dim_t  i,
        const obj_t* obj,
              obj_t* sub_obj
      )

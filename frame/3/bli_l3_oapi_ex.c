@@ -49,8 +49,8 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -122,8 +122,8 @@ void PASTEMAC(gemmt,BLIS_OAPI_EX_SUF)
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -171,8 +171,8 @@ void PASTEMAC(her2k,BLIS_OAPI_EX_SUF)
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -217,8 +217,8 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -244,14 +244,14 @@ void PASTEMAC(syr2k,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -294,14 +294,14 @@ void PASTEMAC(hemm,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -344,14 +344,14 @@ void PASTEMAC(symm,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(trmm3,BLIS_OAPI_EX_SUF)
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -398,8 +398,8 @@ void PASTEMAC(herk,BLIS_OAPI_EX_SUF)
        const obj_t*  a,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -432,8 +432,8 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
        const obj_t*  a,
        const obj_t*  beta,
        const obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -453,12 +453,12 @@ void PASTEMAC(syrk,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -500,12 +500,12 @@ void PASTEMAC(trmm,BLIS_OAPI_EX_SUF)
 
 void PASTEMAC(trsm,BLIS_OAPI_EX_SUF)
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
-       cntx_t* cntx,
-       rntm_t* rntm
+       const cntx_t* cntx,
+             rntm_t* rntm
      )
 {
 	bli_init_once();

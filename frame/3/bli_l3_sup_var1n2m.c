@@ -38,22 +38,22 @@
 
 typedef void (*FUNCPTR_T)
      (
-       bool             packa,
-       bool             packb,
-       conj_t           conja,
-       conj_t           conjb,
-       dim_t            m,
-       dim_t            n,
-       dim_t            k,
-       void*   restrict alpha,
-       void*   restrict a, inc_t rs_a, inc_t cs_a,
-       void*   restrict b, inc_t rs_b, inc_t cs_b,
-       void*   restrict beta,
-       void*   restrict c, inc_t rs_c, inc_t cs_c,
-       stor3_t          eff_id,
-       cntx_t* restrict cntx,
-       rntm_t* restrict rntm,
-       thrinfo_t* restrict thread
+       bool       packa,
+       bool       packb,
+       conj_t     conja,
+       conj_t     conjb,
+       dim_t      m,
+       dim_t      n,
+       dim_t      k,
+       void*      alpha,
+       void*      a, inc_t rs_a, inc_t cs_a,
+       void*      b, inc_t rs_b, inc_t cs_b,
+       void*      beta,
+       void*      c, inc_t rs_c, inc_t cs_c,
+       stor3_t    eff_id,
+       cntx_t*    cntx,
+       rntm_t*    rntm,
+       thrinfo_t* thread
      );
 
 //
@@ -64,16 +64,16 @@ static FUNCPTR_T GENARRAY(ftypes_var1n,gemmsup_ref_var1n);
 
 void bli_gemmsup_ref_var1n
      (
-       trans_t trans,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       stor3_t eff_id,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+             trans_t trans,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c,
+             stor3_t eff_id,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             thrinfo_t* thread
      )
 {
 #if 0
@@ -98,41 +98,41 @@ void bli_gemmsup_ref_var1n
 
 	const dim_t    k         = bli_obj_width( &at );
 
-	void* restrict buf_a     = bli_obj_buffer_at_off( &at );
+	void* buf_a     = bli_obj_buffer_at_off( &at );
 	const inc_t    rs_a      = bli_obj_row_stride( &at );
 	const inc_t    cs_a      = bli_obj_col_stride( &at );
 
-	void* restrict buf_b     = bli_obj_buffer_at_off( &bt );
+	void* buf_b     = bli_obj_buffer_at_off( &bt );
 	const inc_t    rs_b      = bli_obj_row_stride( &bt );
 	const inc_t    cs_b      = bli_obj_col_stride( &bt );
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
 
 #else
-	const num_t    dt        = bli_obj_dt( c );
+	const num_t  dt    = bli_obj_dt( c );
 
-	const bool     packa     = bli_rntm_pack_a( rntm );
-	const bool     packb     = bli_rntm_pack_b( rntm );
+	const bool   packa = bli_rntm_pack_a( rntm );
+	const bool   packb = bli_rntm_pack_b( rntm );
 
-	const conj_t   conja     = bli_obj_conj_status( a );
-	const conj_t   conjb     = bli_obj_conj_status( b );
+	const conj_t conja = bli_obj_conj_status( a );
+	const conj_t conjb = bli_obj_conj_status( b );
 
-	const dim_t    m         = bli_obj_length( c );
-	const dim_t    n         = bli_obj_width( c );
-	      dim_t    k;
+	const dim_t  m     = bli_obj_length( c );
+	const dim_t  n     = bli_obj_width( c );
+	      dim_t  k;
 
-	void* restrict buf_a = bli_obj_buffer_at_off( a );
-	      inc_t    rs_a;
-	      inc_t    cs_a;
+	const void*  buf_a = bli_obj_buffer_at_off( a );
+	      inc_t  rs_a;
+	      inc_t  cs_a;
 
-	void* restrict buf_b = bli_obj_buffer_at_off( b );
-	      inc_t    rs_b;
-	      inc_t    cs_b;
+	const void*  buf_b = bli_obj_buffer_at_off( b );
+	      inc_t  rs_b;
+	      inc_t  cs_b;
 
 	if ( bli_obj_has_notrans( a ) )
 	{
@@ -162,12 +162,12 @@ void bli_gemmsup_ref_var1n
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
-	const inc_t    rs_c      = bli_obj_row_stride( c );
-	const inc_t    cs_c      = bli_obj_col_stride( c );
+	      void* buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t rs_c      = bli_obj_row_stride( c );
+	const inc_t cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	const void* buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	const void* buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
 
 #endif
 
@@ -193,13 +193,13 @@ void bli_gemmsup_ref_var1n
 		  m,
 		  n,
 		  k,
-		  buf_alpha,
-		  buf_a, rs_a, cs_a,
-		  buf_b, rs_b, cs_b,
-		  buf_beta,
-		  buf_c, rs_c, cs_c,
+		  ( void* )buf_alpha,
+		  ( void* )buf_a, rs_a, cs_a,
+		  ( void* )buf_b, rs_b, cs_b,
+		  ( void* )buf_beta,
+		           buf_c, rs_c, cs_c,
 		  eff_id,
-		  cntx,
+		  ( cntx_t* )cntx,
 		  rntm,
 		  thread
 		);
@@ -216,13 +216,13 @@ void bli_gemmsup_ref_var1n
 		  n,                 // swap the m and n dimensions.
 		  m,
 		  k,
-		  buf_alpha,
-		  buf_b, cs_b, rs_b, // swap the positions of A and B.
-		  buf_a, cs_a, rs_a, // swap the strides of A and B.
-		  buf_beta,
-		  buf_c, cs_c, rs_c, // swap the strides of C.
+		  ( void* )buf_alpha,
+		  ( void* )buf_b, cs_b, rs_b, // swap the positions of A and B.
+		  ( void* )buf_a, cs_a, rs_a, // swap the strides of A and B.
+		  ( void* )buf_beta,
+		           buf_c, cs_c, rs_c, // swap the strides of C.
 		  bli_stor3_trans( eff_id ), // transpose the stor3_t id.
-		  cntx,
+          ( cntx_t* )cntx,
 		  rntm,
 		  thread
 		);
@@ -235,22 +235,22 @@ void bli_gemmsup_ref_var1n
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool             packa, \
-       bool             packb, \
-       conj_t           conja, \
-       conj_t           conjb, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
-       stor3_t          stor_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       thrinfo_t* restrict thread  \
+       bool       packa, \
+       bool       packb, \
+       conj_t     conja, \
+       conj_t     conjb, \
+       dim_t      m, \
+       dim_t      n, \
+       dim_t      k, \
+       void*      alpha, \
+       void*      a, inc_t rs_a, inc_t cs_a, \
+       void*      b, inc_t rs_b, inc_t cs_b, \
+       void*      beta, \
+       void*      c, inc_t rs_c, inc_t cs_c, \
+       stor3_t    stor_id, \
+       cntx_t*    cntx, \
+       rntm_t*    rntm, \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -365,20 +365,20 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the sup microkernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+	    gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
-	ctype* restrict a_00       = a; \
-	ctype* restrict b_00       = b; \
-	ctype* restrict c_00       = c; \
-	ctype* restrict alpha_cast = alpha; \
-	ctype* restrict beta_cast  = beta; \
+	ctype* a_00       = a; \
+	ctype* b_00       = b; \
+	ctype* c_00       = c; \
+	ctype* alpha_cast = alpha; \
+	ctype* beta_cast  = beta; \
 \
 	/* Make local copies of beta and one scalars to prevent any unnecessary
 	   sharing of cache lines between the cores' caches. */ \
 	ctype           beta_local = *beta_cast; \
 	ctype           one_local  = *PASTEMAC(ch,1); \
 \
-	auxinfo_t       aux; \
+	auxinfo_t aux; \
 \
 	/* Parse and interpret the contents of the rntm_t object to properly
 	   set the ways of parallelism for each loop. */ \
@@ -408,12 +408,12 @@ void PASTEMAC(ch,varname) \
 	   That is, this panel-block algorithm partitions an NC x KC submatrix
 	   of A to be packed in the 4th loop, and a KC x MC submatrix of B
 	   to be packed in the 3rd loop. */ \
-	/*                           5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */ \
+	/*                                  5thloop  4thloop         packa  3rdloop         packb  2ndloop  1stloop  ukrloop */ \
 	bszid_t bszids_nopack[6] = { BLIS_NC, BLIS_KC,               BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
 	bszid_t bszids_packa [7] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
 	bszid_t bszids_packb [7] = { BLIS_NC, BLIS_KC,               BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
 	bszid_t bszids_packab[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t* restrict bszids; \
+	bszid_t* bszids; \
 \
 	/* Set the bszids pointer to the correct bszids array above based on which
 	   matrices (if any) are being packed. */ \
@@ -425,16 +425,16 @@ void PASTEMAC(ch,varname) \
 	/* Determine whether we are using more than one thread. */ \
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
-	thrinfo_t* restrict thread_jc = NULL; \
-	thrinfo_t* restrict thread_pc = NULL; \
-	thrinfo_t* restrict thread_pa = NULL; \
-	thrinfo_t* restrict thread_ic = NULL; \
-	thrinfo_t* restrict thread_pb = NULL; \
-	thrinfo_t* restrict thread_jr = NULL; \
+	thrinfo_t* thread_jc = NULL; \
+	thrinfo_t* thread_pc = NULL; \
+	thrinfo_t* thread_pa = NULL; \
+	thrinfo_t* thread_ic = NULL; \
+	thrinfo_t* thread_pb = NULL; \
+	thrinfo_t* thread_jr = NULL; \
 \
 	/* Grow the thrinfo_t tree. */ \
-	bszid_t*   restrict bszids_jc = bszids; \
-	                    thread_jc = thread; \
+	bszid_t*   bszids_jc = bszids; \
+	               thread_jc = thread; \
 	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
@@ -453,12 +453,12 @@ void PASTEMAC(ch,varname) \
 		/* Calculate the thread's current JC block dimension. */ \
 		const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
 \
-		ctype* restrict a_jc = a_00 + jj * jcstep_a; \
-		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
+		ctype* a_jc = a_00 + jj * jcstep_a; \
+		ctype* c_jc = c_00 + jj * jcstep_c; \
 \
 		/* Grow the thrinfo_t tree. */ \
-		bszid_t*   restrict bszids_pc = &bszids_jc[1]; \
-		                    thread_pc = bli_thrinfo_sub_node( thread_jc ); \
+		bszid_t*   bszids_pc = &bszids_jc[1]; \
+		               thread_pc = bli_thrinfo_sub_node( thread_jc ); \
 		bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc ); \
 \
 		/* Compute the PC loop thread range for the current thread. */ \
@@ -476,14 +476,14 @@ void PASTEMAC(ch,varname) \
 			/* Calculate the thread's current PC block dimension. */ \
 			const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
 \
-			ctype* restrict a_pc = a_jc + pp * pcstep_a; \
-			ctype* restrict b_pc = b_00 + pp * pcstep_b; \
+			ctype* a_pc = a_jc + pp * pcstep_a; \
+			ctype* b_pc = b_00 + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
-			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
+			ctype* beta_use = ( pp == 0 ? &beta_local : &one_local ); \
 \
 			ctype* a_use; \
-			inc_t  rs_a_use, cs_a_use, ps_a_use; \
+			      inc_t  rs_a_use, cs_a_use, ps_a_use; \
 \
 			/* Set the bszid_t array and thrinfo_t pointer based on whether
 			   we will be packing A. If we won't be packing A, we alias to
@@ -493,7 +493,7 @@ void PASTEMAC(ch,varname) \
 			   previous call to bli_thrinfo_grow(), since bszid values of
 			   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
 			   bszid that is a normal bszid_t value). */ \
-			bszid_t*   restrict bszids_pa; \
+			bszid_t*   bszids_pa; \
 			if ( packa ) { bszids_pa = &bszids_pc[1]; \
 			               thread_pa = bli_thrinfo_sub_node( thread_pc ); } \
 			else         { bszids_pa = &bszids_pc[0]; \
@@ -526,7 +526,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Alias a_use so that it's clear this is our current block of
 			   matrix A. */ \
-			ctype* restrict a_pc_use = a_use; \
+			ctype* a_pc_use = a_use; \
 \
 			/* We don't need to embed the panel stride of A within the auxinfo_t
 			   object because this variant iterates through A in the jr loop,
@@ -535,8 +535,8 @@ void PASTEMAC(ch,varname) \
 			/*bli_auxinfo_set_ps_a( ps_a_use, &aux );*/ \
 \
 			/* Grow the thrinfo_t tree. */ \
-			bszid_t*   restrict bszids_ic = &bszids_pa[1]; \
-			                    thread_ic = bli_thrinfo_sub_node( thread_pa ); \
+			bszid_t*   bszids_ic = &bszids_pa[1]; \
+			               thread_ic = bli_thrinfo_sub_node( thread_pa ); \
 			bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic ); \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
@@ -555,11 +555,11 @@ void PASTEMAC(ch,varname) \
 				/* Calculate the thread's current IC block dimension. */ \
 				const dim_t mc_cur = ( MC <= ic_end - ii ? MC : ic_left ); \
 \
-				ctype* restrict b_ic = b_pc + ii * icstep_b; \
-				ctype* restrict c_ic = c_jc + ii * icstep_c; \
+				ctype* b_ic = b_pc + ii * icstep_b; \
+				ctype* c_ic = c_jc + ii * icstep_c; \
 \
 				ctype* b_use; \
-				inc_t  rs_b_use, cs_b_use, ps_b_use; \
+				      inc_t  rs_b_use, cs_b_use, ps_b_use; \
 \
 				/* Set the bszid_t array and thrinfo_t pointer based on whether
 				   we will be packing A. If we won't be packing A, we alias to
@@ -569,7 +569,7 @@ void PASTEMAC(ch,varname) \
 				   previous call to bli_thrinfo_grow(), since bszid values of
 				   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
 				   bszid that is a normal bszid_t value). */ \
-				bszid_t*   restrict bszids_pb; \
+				bszid_t*   bszids_pb; \
 				if ( packb ) { bszids_pb = &bszids_ic[1]; \
 							   thread_pb = bli_thrinfo_sub_node( thread_ic ); } \
 				else         { bszids_pb = &bszids_ic[0]; \
@@ -602,7 +602,7 @@ void PASTEMAC(ch,varname) \
 \
 				/* Alias b_use so that it's clear this is our current block of
 				   matrix B. */ \
-				ctype* restrict b_ic_use = b_use; \
+				ctype* b_ic_use = b_use; \
 \
 				/* Embed the panel stride of B within the auxinfo_t object. The
 				   millikernel will query and use this to iterate through
@@ -610,8 +610,8 @@ void PASTEMAC(ch,varname) \
 				bli_auxinfo_set_ps_b( ps_b_use, &aux ); \
 \
 				/* Grow the thrinfo_t tree. */ \
-				bszid_t*   restrict bszids_jr = &bszids_pb[1]; \
-				                    thread_jr = bli_thrinfo_sub_node( thread_pb ); \
+				bszid_t*   bszids_jr = &bszids_pb[1]; \
+				               thread_jr = bli_thrinfo_sub_node( thread_pb ); \
 				bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr ); \
 \
 				/* Compute number of primary and leftover components of the JR loop. */ \
@@ -640,10 +640,10 @@ void PASTEMAC(ch,varname) \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? MR : jr_left ); \
 \
 					/*
-					ctype* restrict a_jr = a_pc + j * jrstep_a; \
+					ctype* a_jr = a_pc + j * jrstep_a; \
 					*/ \
-					ctype* restrict a_jr = a_pc_use + j * ps_a_use; \
-					ctype* restrict c_jr = c_ic     + j * jrstep_c; \
+					ctype* a_jr = a_pc_use + j * ps_a_use; \
+					ctype* c_jr = c_ic     + j * jrstep_c; \
 \
 					/*
 					const dim_t ir_iter = ( mc_cur + NR - 1 ) / NR; \
@@ -664,7 +664,7 @@ void PASTEMAC(ch,varname) \
 						  a_jr,     rs_a_use, cs_a_use, \
 						  b_ic_use, rs_b_use, cs_b_use, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						            c_jr,     rs_c,     cs_c, \
 						  &aux, \
 						  cntx  \
 						); \
@@ -712,16 +712,16 @@ static FUNCPTR_T GENARRAY(ftypes_var2m,gemmsup_ref_var2m);
 
 void bli_gemmsup_ref_var2m
      (
-       trans_t trans,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  beta,
-       obj_t*  c,
-       stor3_t eff_id,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       thrinfo_t* thread
+             trans_t    trans,
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+             stor3_t    eff_id,
+       const cntx_t*    cntx,
+             rntm_t*    rntm,
+             thrinfo_t* thread
      )
 {
 #if 0
@@ -746,41 +746,41 @@ void bli_gemmsup_ref_var2m
 
 	const dim_t    k         = bli_obj_width( &at );
 
-	void* restrict buf_a     = bli_obj_buffer_at_off( &at );
+	void* buf_a     = bli_obj_buffer_at_off( &at );
 	const inc_t    rs_a      = bli_obj_row_stride( &at );
 	const inc_t    cs_a      = bli_obj_col_stride( &at );
 
-	void* restrict buf_b     = bli_obj_buffer_at_off( &bt );
+	void* buf_b     = bli_obj_buffer_at_off( &bt );
 	const inc_t    rs_b      = bli_obj_row_stride( &bt );
 	const inc_t    cs_b      = bli_obj_col_stride( &bt );
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
+	void* buf_c     = bli_obj_buffer_at_off( c );
 	const inc_t    rs_c      = bli_obj_row_stride( c );
 	const inc_t    cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	void* buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	void* buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
 
 #else
-	const num_t    dt        = bli_obj_dt( c );
+	const num_t  dt    = bli_obj_dt( c );
 
-	const bool     packa     = bli_rntm_pack_a( rntm );
-	const bool     packb     = bli_rntm_pack_b( rntm );
+	const bool   packa = bli_rntm_pack_a( rntm );
+	const bool   packb = bli_rntm_pack_b( rntm );
 
-	const conj_t   conja     = bli_obj_conj_status( a );
-	const conj_t   conjb     = bli_obj_conj_status( b );
+	const conj_t conja = bli_obj_conj_status( a );
+	const conj_t conjb = bli_obj_conj_status( b );
 
-	const dim_t    m         = bli_obj_length( c );
-	const dim_t    n         = bli_obj_width( c );
-	      dim_t    k;
+	const dim_t  m     = bli_obj_length( c );
+	const dim_t  n     = bli_obj_width( c );
+	      dim_t  k;
 
-	void* restrict buf_a = bli_obj_buffer_at_off( a );
-	      inc_t    rs_a;
-	      inc_t    cs_a;
+	const void*  buf_a = bli_obj_buffer_at_off( a );
+	      inc_t  rs_a;
+	      inc_t  cs_a;
 
-	void* restrict buf_b = bli_obj_buffer_at_off( b );
-	      inc_t    rs_b;
-	      inc_t    cs_b;
+	const void*  buf_b = bli_obj_buffer_at_off( b );
+	      inc_t  rs_b;
+	      inc_t  cs_b;
 
 	if ( bli_obj_has_notrans( a ) )
 	{
@@ -810,12 +810,12 @@ void bli_gemmsup_ref_var2m
 		cs_b  = bli_obj_row_stride( b );
 	}
 
-	void* restrict buf_c     = bli_obj_buffer_at_off( c );
-	const inc_t    rs_c      = bli_obj_row_stride( c );
-	const inc_t    cs_c      = bli_obj_col_stride( c );
+	      void* buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t rs_c      = bli_obj_row_stride( c );
+	const inc_t cs_c      = bli_obj_col_stride( c );
 
-	void* restrict buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
-	void* restrict buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
+	const void* buf_alpha = bli_obj_buffer_for_1x1( dt, alpha );
+	const void* buf_beta  = bli_obj_buffer_for_1x1( dt, beta );
 
 #endif
 
@@ -841,13 +841,13 @@ void bli_gemmsup_ref_var2m
 		  m,
 		  n,
 		  k,
-		  buf_alpha,
-		  buf_a, rs_a, cs_a,
-		  buf_b, rs_b, cs_b,
-		  buf_beta,
-		  buf_c, rs_c, cs_c,
+		  ( void* )buf_alpha,
+		  ( void* )buf_a, rs_a, cs_a,
+		  ( void* )buf_b, rs_b, cs_b,
+		  ( void* )buf_beta,
+		           buf_c, rs_c, cs_c,
 		  eff_id,
-		  cntx,
+		  ( cntx_t* )cntx,
 		  rntm,
 		  thread
 		);
@@ -864,13 +864,13 @@ void bli_gemmsup_ref_var2m
 		  n,                 // swap the m and n dimensions.
 		  m,
 		  k,
-		  buf_alpha,
-		  buf_b, cs_b, rs_b, // swap the positions of A and B.
-		  buf_a, cs_a, rs_a, // swap the strides of A and B.
-		  buf_beta,
-		  buf_c, cs_c, rs_c, // swap the strides of C.
+		  ( void* )buf_alpha,
+		  ( void* )buf_b, cs_b, rs_b, // swap the positions of A and B.
+		  ( void* )buf_a, cs_a, rs_a, // swap the strides of A and B.
+		  ( void* )buf_beta,
+		           buf_c, cs_c, rs_c, // swap the strides of C.
 		  bli_stor3_trans( eff_id ), // transpose the stor3_t id.
-		  cntx,
+		  ( cntx_t* )cntx,
 		  rntm,
 		  thread
 		);
@@ -883,22 +883,22 @@ void bli_gemmsup_ref_var2m
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool             packa, \
-       bool             packb, \
-       conj_t           conja, \
-       conj_t           conjb, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
-       stor3_t          stor_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       thrinfo_t* restrict thread  \
+       bool       packa, \
+       bool       packb, \
+       conj_t     conja, \
+       conj_t     conjb, \
+       dim_t      m, \
+       dim_t      n, \
+       dim_t      k, \
+       void*      alpha, \
+       void*      a, inc_t rs_a, inc_t cs_a, \
+       void*      b, inc_t rs_b, inc_t cs_b, \
+       void*      beta, \
+       void*      c, inc_t rs_c, inc_t cs_c, \
+       stor3_t    stor_id, \
+       cntx_t*    cntx, \
+       rntm_t*    rntm, \
+       thrinfo_t* thread  \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -998,13 +998,13 @@ void PASTEMAC(ch,varname) \
 	/* Query the context for the sup microkernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemmsup_ker_ft) \
-               gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
+        gemmsup_ker = bli_cntx_get_l3_sup_ker_dt( dt, stor_id, cntx ); \
 \
-	ctype* restrict a_00       = a; \
-	ctype* restrict b_00       = b; \
-	ctype* restrict c_00       = c; \
-	ctype* restrict alpha_cast = alpha; \
-	ctype* restrict beta_cast  = beta; \
+	ctype* a_00       = a; \
+	ctype* b_00       = b; \
+	ctype* c_00       = c; \
+	ctype* alpha_cast = alpha; \
+	ctype* beta_cast  = beta; \
 \
 	/* Make local copies of beta and one scalars to prevent any unnecessary
 	   sharing of cache lines between the cores' caches. */ \
@@ -1035,7 +1035,7 @@ void PASTEMAC(ch,varname) \
 	bszid_t bszids_packa [7] = { BLIS_NC, BLIS_KC,               BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
 	bszid_t bszids_packb [7] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC,               BLIS_NR, BLIS_MR, BLIS_KR }; \
 	bszid_t bszids_packab[8] = { BLIS_NC, BLIS_KC, BLIS_NO_PART, BLIS_MC, BLIS_NO_PART, BLIS_NR, BLIS_MR, BLIS_KR }; \
-	bszid_t* restrict bszids; \
+	bszid_t* bszids; \
 \
 	/* Set the bszids pointer to the correct bszids array above based on which
 	   matrices (if any) are being packed. */ \
@@ -1047,16 +1047,16 @@ void PASTEMAC(ch,varname) \
 	/* Determine whether we are using more than one thread. */ \
 	const bool is_mt = ( bli_rntm_calc_num_threads( rntm ) > 1 ); \
 \
-	thrinfo_t* restrict thread_jc = NULL; \
-	thrinfo_t* restrict thread_pc = NULL; \
-	thrinfo_t* restrict thread_pb = NULL; \
-	thrinfo_t* restrict thread_ic = NULL; \
-	thrinfo_t* restrict thread_pa = NULL; \
-	thrinfo_t* restrict thread_jr = NULL; \
+	thrinfo_t* thread_jc = NULL; \
+	thrinfo_t* thread_pc = NULL; \
+	thrinfo_t* thread_pb = NULL; \
+	thrinfo_t* thread_ic = NULL; \
+	thrinfo_t* thread_pa = NULL; \
+	thrinfo_t* thread_jr = NULL; \
 \
 	/* Grow the thrinfo_t tree. */ \
-	bszid_t*   restrict bszids_jc = bszids; \
-	                    thread_jc = thread; \
+	bszid_t*   bszids_jc = bszids; \
+	               thread_jc = thread; \
 	bli_thrinfo_sup_grow( rntm, bszids_jc, thread_jc ); \
 \
 	/* Compute the JC loop thread range for the current thread. */ \
@@ -1075,12 +1075,12 @@ void PASTEMAC(ch,varname) \
 		/* Calculate the thread's current JC block dimension. */ \
 		const dim_t nc_cur = ( NC <= jc_end - jj ? NC : jc_left ); \
 \
-		ctype* restrict b_jc = b_00 + jj * jcstep_b; \
-		ctype* restrict c_jc = c_00 + jj * jcstep_c; \
+		ctype* b_jc = b_00 + jj * jcstep_b; \
+		ctype* c_jc = c_00 + jj * jcstep_c; \
 \
 		/* Grow the thrinfo_t tree. */ \
-		bszid_t*   restrict bszids_pc = &bszids_jc[1]; \
-		                    thread_pc = bli_thrinfo_sub_node( thread_jc ); \
+		bszid_t*   bszids_pc = &bszids_jc[1]; \
+		               thread_pc = bli_thrinfo_sub_node( thread_jc ); \
 		bli_thrinfo_sup_grow( rntm, bszids_pc, thread_pc ); \
 \
 		/* Compute the PC loop thread range for the current thread. */ \
@@ -1098,11 +1098,11 @@ void PASTEMAC(ch,varname) \
 			/* Calculate the thread's current PC block dimension. */ \
 			const dim_t kc_cur = ( KC <= pc_end - pp ? KC : pc_left ); \
 \
-			ctype* restrict a_pc = a_00 + pp * pcstep_a; \
-			ctype* restrict b_pc = b_jc + pp * pcstep_b; \
+			ctype* a_pc = a_00 + pp * pcstep_a; \
+			ctype* b_pc = b_jc + pp * pcstep_b; \
 \
 			/* Only apply beta to the first iteration of the pc loop. */ \
-			ctype* restrict beta_use = ( pp == 0 ? &beta_local : &one_local ); \
+			ctype* beta_use = ( pp == 0 ? &beta_local : &one_local ); \
 \
 			ctype* b_use; \
 			inc_t  rs_b_use, cs_b_use, ps_b_use; \
@@ -1115,7 +1115,7 @@ void PASTEMAC(ch,varname) \
 			   previous call to bli_thrinfo_grow(), since bszid values of
 			   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
 			   bszid that is a normal bszid_t value). */ \
-			bszid_t*   restrict bszids_pb; \
+			bszid_t*   bszids_pb; \
 			if ( packb ) { bszids_pb = &bszids_pc[1]; \
 			               thread_pb = bli_thrinfo_sub_node( thread_pc ); } \
 			else         { bszids_pb = &bszids_pc[0]; \
@@ -1146,7 +1146,7 @@ void PASTEMAC(ch,varname) \
 \
 			/* Alias b_use so that it's clear this is our current block of
 			   matrix B. */ \
-			ctype* restrict b_pc_use = b_use; \
+			ctype* b_pc_use = b_use; \
 \
 			/* We don't need to embed the panel stride of B within the auxinfo_t
 			   object because this variant iterates through B in the jr loop,
@@ -1155,8 +1155,8 @@ void PASTEMAC(ch,varname) \
 			/*bli_auxinfo_set_ps_b( ps_b_use, &aux );*/ \
 \
 			/* Grow the thrinfo_t tree. */ \
-			bszid_t*   restrict bszids_ic = &bszids_pb[1]; \
-			                    thread_ic = bli_thrinfo_sub_node( thread_pb ); \
+			bszid_t*   bszids_ic = &bszids_pb[1]; \
+			               thread_ic = bli_thrinfo_sub_node( thread_pb ); \
 			bli_thrinfo_sup_grow( rntm, bszids_ic, thread_ic ); \
 \
 			/* Compute the IC loop thread range for the current thread. */ \
@@ -1175,8 +1175,8 @@ void PASTEMAC(ch,varname) \
 				/* Calculate the thread's current IC block dimension. */ \
 				const dim_t mc_cur = ( MC <= ic_end - ii ? MC : ic_left ); \
 \
-				ctype* restrict a_ic = a_pc + ii * icstep_a; \
-				ctype* restrict c_ic = c_jc + ii * icstep_c; \
+				ctype* a_ic = a_pc + ii * icstep_a; \
+				ctype* c_ic = c_jc + ii * icstep_c; \
 \
 				ctype* a_use; \
 				inc_t  rs_a_use, cs_a_use, ps_a_use; \
@@ -1189,7 +1189,7 @@ void PASTEMAC(ch,varname) \
 				   previous call to bli_thrinfo_grow(), since bszid values of
 				   BLIS_NO_PART cause the tree to grow by two (e.g. to the next
 				   bszid that is a normal bszid_t value). */ \
-				bszid_t*   restrict bszids_pa; \
+				bszid_t*   bszids_pa; \
 				if ( packa ) { bszids_pa = &bszids_ic[1]; \
 							   thread_pa = bli_thrinfo_sub_node( thread_ic ); } \
 				else         { bszids_pa = &bszids_ic[0]; \
@@ -1220,7 +1220,7 @@ void PASTEMAC(ch,varname) \
 \
 				/* Alias a_use so that it's clear this is our current block of
 				   matrix A. */ \
-				ctype* restrict a_ic_use = a_use; \
+				ctype* a_ic_use = a_use; \
 \
 				/* Embed the panel stride of A within the auxinfo_t object. The
 				   millikernel will query and use this to iterate through
@@ -1228,8 +1228,8 @@ void PASTEMAC(ch,varname) \
 				bli_auxinfo_set_ps_a( ps_a_use, &aux ); \
 \
 				/* Grow the thrinfo_t tree. */ \
-				bszid_t*   restrict bszids_jr = &bszids_pa[1]; \
-				                    thread_jr = bli_thrinfo_sub_node( thread_pa ); \
+				bszid_t*   bszids_jr = &bszids_pa[1]; \
+				               thread_jr = bli_thrinfo_sub_node( thread_pa ); \
 				bli_thrinfo_sup_grow( rntm, bszids_jr, thread_jr ); \
 \
 				/* Compute number of primary and leftover components of the JR loop. */ \
@@ -1258,10 +1258,10 @@ void PASTEMAC(ch,varname) \
 					const dim_t nr_cur = ( bli_is_not_edge_f( j, jr_iter, jr_left ) ? NR : jr_left ); \
 \
 					/*
-					ctype* restrict b_jr = b_pc_use + j * jrstep_b; \
+					ctype* b_jr = b_pc_use + j * jrstep_b; \
 					*/ \
-					ctype* restrict b_jr = b_pc_use + j * ps_b_use; \
-					ctype* restrict c_jr = c_ic     + j * jrstep_c; \
+					ctype* b_jr = b_pc_use + j * ps_b_use; \
+					ctype* c_jr = c_ic     + j * jrstep_c; \
 \
 					/*
 					const dim_t ir_iter = ( mc_cur + MR - 1 ) / MR; \
@@ -1282,7 +1282,7 @@ void PASTEMAC(ch,varname) \
 						  a_ic_use, rs_a_use, cs_a_use, \
 						  b_jr,     rs_b_use, cs_b_use, \
 						  beta_use, \
-						  c_jr,     rs_c,     cs_c, \
+						            c_jr,     rs_c,     cs_c, \
 						  &aux, \
 						  cntx  \
 						); \

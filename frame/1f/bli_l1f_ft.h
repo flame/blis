@@ -44,9 +44,9 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         n, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   n, \
        const ctype*  alpha1, \
        const ctype*  alpha2, \
        const ctype*  x, inc_t incx, \
@@ -64,10 +64,10 @@ INSERT_GENTDEF( axpy2v )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conja, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  x, inc_t incx, \
@@ -84,10 +84,10 @@ INSERT_GENTDEF( axpyf )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjxt, \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         m, \
+             conj_t  conjxt, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -105,10 +105,10 @@ INSERT_GENTDEF( dotaxpyv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjat, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conjat, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  x, inc_t incx, \
@@ -126,12 +126,12 @@ INSERT_GENTDEF( dotxf )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjat, \
-       conj_t        conja, \
-       conj_t        conjw, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         b_n, \
+             conj_t  conjat, \
+             conj_t  conja, \
+             conj_t  conjw, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   b_n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t inca, inc_t lda, \
        const ctype*  w, inc_t incw, \

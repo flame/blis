@@ -54,7 +54,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-  rntm_t* rntm  \
+        rntm_t* rntm  \
 );
 
 GENTDEF( gemm )
@@ -70,14 +70,14 @@ GENTDEF( syr2k )
 \
 typedef void (*PASTECH(opname,_oft)) \
 ( \
-  side_t  side, \
+        side_t  side, \
   const obj_t*  alpha, \
   const obj_t*  a, \
   const obj_t*  b, \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-  rntm_t* rntm  \
+        rntm_t* rntm  \
 );
 
 GENTDEF( hemm )
@@ -97,7 +97,7 @@ typedef void (*PASTECH(opname,_oft)) \
   const obj_t*  beta, \
   const obj_t*  c, \
   const cntx_t* cntx, \
-  rntm_t* rntm  \
+        rntm_t* rntm  \
 );
 
 GENTDEF( herk )
@@ -111,12 +111,12 @@ GENTDEF( syrk )
 \
 typedef void (*PASTECH(opname,_oft)) \
 ( \
-  side_t  side, \
+        side_t  side, \
   const obj_t*  alpha, \
   const obj_t*  a, \
   const obj_t*  b, \
   const cntx_t* cntx, \
-  rntm_t* rntm  \
+        rntm_t* rntm  \
 );
 
 GENTDEF( trmm )

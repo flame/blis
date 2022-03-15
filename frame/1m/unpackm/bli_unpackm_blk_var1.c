@@ -143,28 +143,28 @@ void PASTEMAC(ch,varname) \
        const cntx_t* cntx  \
      ) \
 { \
-	ctype* restrict one       = PASTEMAC(ch,1); \
-	ctype* restrict c_cast    = c; \
-	ctype* restrict p_cast    = p; \
-	ctype* restrict c_begin; \
-	ctype* restrict p_begin; \
+	ctype* one    = PASTEMAC(ch,1); \
+	ctype* c_cast = c; \
+	ctype* p_cast = p; \
+	ctype* c_begin; \
+	ctype* p_begin; \
 \
-	dim_t           iter_dim; \
-	dim_t           num_iter; \
-	dim_t           it, ic, ip; \
-    dim_t           ic0, ip0; \
-	doff_t          ic_inc, ip_inc; \
-    doff_t          diagoffc_i; \
-    doff_t          diagoffc_inc; \
-	dim_t           panel_len; \
-	dim_t           panel_dim_i; \
-	dim_t           panel_dim_max; \
-	inc_t           vs_c; \
-	inc_t           incc, ldc; \
-	inc_t           ldp; \
-	dim_t*          m_panel_full; \
-	dim_t*          n_panel_full; \
-    pack_t          schema; \
+	dim_t  iter_dim; \
+	dim_t  num_iter; \
+	dim_t  it, ic, ip; \
+    dim_t  ic0, ip0; \
+	doff_t ic_inc, ip_inc; \
+    doff_t diagoffc_i; \
+    doff_t diagoffc_inc; \
+	dim_t  panel_len; \
+	dim_t  panel_dim_i; \
+	dim_t  panel_dim_max; \
+	inc_t  vs_c; \
+	inc_t  incc, ldc; \
+	inc_t  ldp; \
+	dim_t* m_panel_full; \
+	dim_t* n_panel_full; \
+    pack_t schema; \
 \
 \
 	/* If c needs a transposition, induce it so that we can more simply
@@ -272,7 +272,7 @@ void PASTEMAC(ch,varname) \
 			  one, \
 			  p_begin,       ldp, \
 			  c_begin, incc, ldc, \
-			  cntx  \
+			  ( cntx_t* )cntx  \
 			); \
 		} \
 \

@@ -39,7 +39,7 @@
 void bli_setrm
      (
        const obj_t* alpha,
-             obj_t* b
+       const obj_t* b
      )
 {
 	obj_t alpha_real;
@@ -68,7 +68,7 @@ void bli_setrm
 void bli_setrv
      (
        const obj_t* alpha,
-             obj_t* x
+       const obj_t* x
      )
 {
 	obj_t alpha_real;
@@ -99,7 +99,7 @@ void bli_setrv
 void bli_setim
      (
        const obj_t* alpha,
-             obj_t* b
+       const obj_t* b
      )
 {
 	obj_t alpha_real;
@@ -131,7 +131,7 @@ void bli_setim
 void bli_setiv
      (
        const obj_t* alpha,
-             obj_t* x
+       const obj_t* x
      )
 {
 	obj_t alpha_real;

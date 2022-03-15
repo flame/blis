@@ -316,8 +316,8 @@ const cntx_t* bli_gks_lookup_ind_cntx
 
 	// Index into the array of context pointers for the given architecture id,
 	// and then index into the subarray for the given induced method.
-	cntx_t** restrict gks_id     = gks[ id ];
-	cntx_t*  restrict gks_id_ind = gks_id[ ind ];
+	cntx_t** gks_id     = gks[ id ];
+	cntx_t*  gks_id_ind = gks_id[ ind ];
 
 	// Return the context pointer at gks_id_ind.
 	return gks_id_ind;
@@ -405,7 +405,7 @@ void bli_gks_register_cntx
 	gks[ id ] = bli_calloc_intl( sizeof( cntx_t* ) * BLIS_NUM_IND_METHODS, &r_val );
 
 	// Alias the allocated array for readability.
-	cntx_t** restrict gks_id = gks[ id ];
+	cntx_t** gks_id = gks[ id ];
 
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_gks_register_cntx(): " );
@@ -417,7 +417,7 @@ void bli_gks_register_cntx
 	gks_id[ BLIS_NAT ] = bli_calloc_intl( sizeof( cntx_t ), &r_val );
 
 	// Alias the allocated context address for readability.
-	cntx_t* restrict gks_id_nat = gks_id[ BLIS_NAT ];
+	cntx_t* gks_id_nat = gks_id[ BLIS_NAT ];
 
 	// Call the context initialization function on the element of the newly
 	// allocated array corresponding to native execution.

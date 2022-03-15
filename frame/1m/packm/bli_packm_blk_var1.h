@@ -52,8 +52,8 @@ BLIS_EXPORT_BLIS void bli_packm_blk_var1
        const obj_t*   c,
              obj_t*   p,
        const cntx_t*  cntx,
-       rntm_t*  rntm,
-       cntl_t*  cntl,
+             rntm_t*  rntm,
+             cntl_t*  cntl,
        const thrinfo_t* t
      );
 

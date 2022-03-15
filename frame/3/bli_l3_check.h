@@ -61,7 +61,7 @@ GENPROT( syr2k )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b, \
@@ -96,7 +96,7 @@ GENPROT( syrk )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b, \
@@ -131,7 +131,7 @@ void bli_gemmt_basic_check
 
 void bli_hemm_basic_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,

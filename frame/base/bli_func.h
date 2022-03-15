@@ -38,7 +38,7 @@
 
 BLIS_INLINE void_fp bli_func_get_dt
      (
-       num_t         dt,
+             num_t   dt,
        const func_t* func
      )
 {
@@ -96,7 +96,7 @@ void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool bli_func_is_null_dt( num_t   dt,
+bool bli_func_is_null_dt(       num_t   dt,
                           const func_t* f );
 bool bli_func_is_null( const func_t* f );
 

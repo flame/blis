@@ -61,7 +61,7 @@ GENPROT( syr2k )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b, \
@@ -94,7 +94,7 @@ GENPROT( syrk )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b  \

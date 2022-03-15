@@ -42,15 +42,15 @@
 \
 void PASTECH(bao_,opname) \
      ( \
-       const obj_t*  alpha, \
-       const obj_t*  a, \
-       const obj_t*  d, \
-       const obj_t*  b, \
-       const obj_t*  beta, \
-       const obj_t*  c, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm, \
-       const thrinfo_t* thread  \
+       obj_t*  alpha, \
+       obj_t*  a, \
+       obj_t*  d, \
+       obj_t*  b, \
+       obj_t*  beta, \
+       obj_t*  c, \
+       cntx_t* cntx, \
+       rntm_t* rntm, \
+       thrinfo_t* thread  \
      );
 
 GENPROT( gemmd_bp_var1 )
@@ -65,20 +65,20 @@ GENPROT( gemmd_bp_var1 )
 \
 void PASTECH2(bao_,ch,varname) \
      ( \
-       conj_t        conja, \
-       conj_t        conjb, \
-       dim_t         m, \
-       dim_t         n, \
-       dim_t         k, \
-       const void*   alpha, \
-       const void*   a, inc_t rs_a, inc_t cs_a, \
-       const void*   d, inc_t incd, \
-       const void*   b, inc_t rs_b, inc_t cs_b, \
-       const void*   beta, \
-             void*   c, inc_t rs_c, inc_t cs_c, \
-       const cntx_t* cntx, \
-       const rntm_t* rntm, \
-       const thrinfo_t* thread  \
+       conj_t           conja, \
+       conj_t           conjb, \
+       dim_t            m, \
+       dim_t            n, \
+       dim_t            k, \
+       void*   restrict alpha, \
+       void*   restrict a, inc_t rs_a, inc_t cs_a, \
+       void*   restrict d, inc_t incd, \
+       void*   restrict b, inc_t rs_b, inc_t cs_b, \
+       void*   restrict beta, \
+       void*   restrict c, inc_t rs_c, inc_t cs_c, \
+       cntx_t* restrict cntx, \
+       rntm_t* restrict rntm, \
+       thrinfo_t* restrict thread  \
      );
 
 //INSERT_GENTPROT_BASIC0( gemmd_bp_var1 )
@@ -97,18 +97,18 @@ GENTPROT( dcomplex, z, gemmd_bp_var1 )
 \
 void PASTECH2(bao_,ch,varname) \
      ( \
-       const dim_t      MR, \
-       const dim_t      NR, \
-       dim_t            mr_cur, \
-       dim_t            nr_cur, \
-       dim_t            k, \
-       const ctype*     alpha, \
-       const ctype*     a, inc_t rs_a, inc_t cs_a, \
-       const ctype*     b, inc_t rs_b, inc_t cs_b, \
-       const ctype*     beta, \
-             ctype*     c, inc_t rs_c, inc_t cs_c, \
-       const auxinfo_t* aux, \
-       const cntx_t*    cntx  \
+       const dim_t         MR, \
+       const dim_t         NR, \
+       dim_t               mr_cur, \
+       dim_t               nr_cur, \
+       dim_t               k, \
+       ctype*     restrict alpha, \
+       ctype*     restrict a, inc_t rs_a, inc_t cs_a, \
+       ctype*     restrict b, inc_t rs_b, inc_t cs_b, \
+       ctype*     restrict beta, \
+       ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
+       auxinfo_t* restrict aux, \
+       cntx_t*    restrict cntx  \
      );
 
 //INSERT_GENTPROT_BASIC0( gemm_kernel )

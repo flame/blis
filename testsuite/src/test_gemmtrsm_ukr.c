@@ -207,7 +207,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 
 
 	// Query a context.
-	cntx = bli_gks_query_cntx();
+	cntx = ( cntx_t* )bli_gks_query_cntx();
 
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );

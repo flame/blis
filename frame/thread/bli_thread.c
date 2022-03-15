@@ -35,9 +35,9 @@
 
 #include "blis.h"
 
-const thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
-const thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
-const thrcomm_t BLIS_SINGLE_COMM           = {};
+thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
+thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
+thrcomm_t BLIS_SINGLE_COMM           = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
@@ -50,9 +50,9 @@ extern bli_pthread_mutex_t global_rntm_mutex;
 
 void bli_thread_init( void )
 {
-	bli_thrcomm_init( 1, ( thrcomm_t* )&BLIS_SINGLE_COMM );
-	bli_packm_thrinfo_init_single( ( thrinfo_t* )&BLIS_PACKM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( (thrinfo_t* )&BLIS_GEMM_SINGLE_THREADED );
+	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
+	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
+	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
@@ -68,11 +68,11 @@ void bli_thread_finalize( void )
 void bli_thread_range_sub
      (
        const thrinfo_t* thread,
-       dim_t      n,
-       dim_t      bf,
-       bool       handle_edge_low,
-       dim_t*     start,
-       dim_t*     end
+             dim_t      n,
+             dim_t      bf,
+             bool       handle_edge_low,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	dim_t      n_way      = bli_thread_n_way( thread );
@@ -214,8 +214,8 @@ siz_t bli_thread_range_l2r
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -234,8 +234,8 @@ siz_t bli_thread_range_r2l
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -254,8 +254,8 @@ siz_t bli_thread_range_t2b
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -274,8 +274,8 @@ siz_t bli_thread_range_b2t
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -505,14 +505,14 @@ siz_t bli_find_area_trap_l
 siz_t bli_thread_range_weighted_sub
      (
        const thrinfo_t* thread,
-       doff_t           diagoff,
-       uplo_t           uplo,
-       dim_t            m,
-       dim_t            n,
-       dim_t            bf,
-       bool             handle_edge_low,
-       dim_t*           j_start_thr,
-       dim_t*           j_end_thr
+             doff_t     diagoff,
+             uplo_t     uplo,
+             dim_t      m,
+             dim_t      n,
+             dim_t      bf,
+             bool       handle_edge_low,
+             dim_t*     j_start_thr,
+             dim_t*     j_end_thr
      )
 {
 	dim_t      n_way   = bli_thread_n_way( thread );
@@ -641,15 +641,15 @@ siz_t bli_thread_range_weighted_sub
 
 siz_t bli_thread_range_mdim
      (
-       dir_t      direct,
+             dir_t      direct,
        const thrinfo_t* thr,
        const obj_t*     a,
        const obj_t*     b,
        const obj_t*     c,
        const cntl_t*    cntl,
        const cntx_t*    cntx,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
@@ -700,15 +700,15 @@ siz_t bli_thread_range_mdim
 
 siz_t bli_thread_range_ndim
      (
-       dir_t      direct,
+             dir_t      direct,
        const thrinfo_t* thr,
        const obj_t*     a,
        const obj_t*     b,
        const obj_t*     c,
        const cntl_t*    cntl,
        const cntx_t*    cntx,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
@@ -762,8 +762,8 @@ siz_t bli_thread_range_weighted_l2r
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -812,8 +812,8 @@ siz_t bli_thread_range_weighted_r2l
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -864,8 +864,8 @@ siz_t bli_thread_range_weighted_t2b
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -916,8 +916,8 @@ siz_t bli_thread_range_weighted_b2t
        const thrinfo_t* thr,
        const obj_t*     a,
        const blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;

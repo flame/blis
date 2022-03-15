@@ -87,7 +87,7 @@ void bli_gemmt_check
 
 void bli_hemm_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
@@ -175,7 +175,7 @@ void bli_her2k_check
 
 void bli_symm_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
@@ -250,7 +250,7 @@ void bli_syr2k_check
 
 void bli_trmm3_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
@@ -273,7 +273,7 @@ void bli_trmm3_check
 
 void bli_trmm_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
@@ -294,7 +294,7 @@ void bli_trmm_check
 
 void bli_trsm_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
@@ -389,7 +389,7 @@ void bli_gemmt_basic_check
 
 void bli_hemm_basic_check
      (
-       side_t  side,
+             side_t  side,
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,

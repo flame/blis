@@ -164,7 +164,7 @@ void bli_dgemm_skx_asm_16x14
        double* restrict beta,
        double* restrict c, inc_t rs_c_, inc_t cs_c_,
        auxinfo_t*       data,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     (void)data;

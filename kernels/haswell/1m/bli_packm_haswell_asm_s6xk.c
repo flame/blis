@@ -51,7 +51,7 @@ void bli_spackm_haswell_asm_6xk
        float*     restrict kappa,
        float*     restrict a, inc_t inca0, inc_t lda0,
        float*     restrict p,              inc_t ldp0,
-       cntx_t*    restrict cntx
+       cntx_t*             cntx
      )
 {
 #if 0
@@ -100,14 +100,14 @@ void bli_spackm_haswell_asm_6xk
 	// NOTE: If/when this kernel ever supports scaling by kappa within the
 	// assembly region, this constraint should be lifted.
 	const bool     unitk  = bli_seq1( *kappa );
-	
+
 
 	// -------------------------------------------------------------------------
 
 	if ( cdim0 == mnr && !gs && unitk )
 	{
 		begin_asm()
-		
+
 		mov(var(a), rax)                   // load address of a.
 
 		mov(var(inca), r8)                 // load inca
@@ -121,13 +121,13 @@ void bli_spackm_haswell_asm_6xk
 
 		mov(var(one), rdx)                 // load address of 1.0 constant
 		vmovss(mem(rdx), xmm1)             // load 1.0
-		
+
 		mov(var(kappa), rcx)               // load address of kappa
 		vmovss(mem(rcx), xmm0)             // load kappa
-		
+
 
 										   // now branch on kappa == 1.0
-		
+
 		vucomiss(xmm0, xmm1)               // set ZF if kappa == 1.0
 		je(.SKAPPAUNIT)                    // if ZF = 1, jump to beta == 0 case
 
@@ -137,7 +137,7 @@ void bli_spackm_haswell_asm_6xk
 
 		cmp(imm(4), r8)                    // set ZF if (4*inca) == 4.
 		jz(.SCOLNONU)                      // jump to column storage case
-		
+
 		// -- kappa non-unit, row storage on A -------------------------------------
 
 		label(.SROWNONU)
@@ -150,7 +150,7 @@ void bli_spackm_haswell_asm_6xk
 		label(.SCOLNONU)
 
 		jmp(.SDONE)                        // jump to end.
-		
+
 
 
 
@@ -161,7 +161,7 @@ void bli_spackm_haswell_asm_6xk
 
 
 		// -- kappa unit, row storage on A -----------------------------------------
-		
+
 		label(.SROWUNIT)
 
 		lea(mem(r8,  r8,  2), r13)         // r13 = 3*inca
@@ -274,7 +274,7 @@ void bli_spackm_haswell_asm_6xk
 		// -- kappa unit, column storage on A --------------------------------------
 
 		label(.SCOLUNIT)
-		
+
 		lea(mem(r10, r10, 2), r13)         // r13 = 3*lda
 		lea(mem(r13, r10, 2), r15)         // r15 = 5*lda
 		lea(mem(r13, r10, 4), rdx)         // rdx = 7*lda
@@ -361,8 +361,8 @@ void bli_spackm_haswell_asm_6xk
 
 
 		label(.SDONE)
-		
-		
+
+
 
 		end_asm(
 		: // output operands (none)
@@ -416,7 +416,7 @@ void bli_spackm_haswell_asm_6xk
 			(
 			  m_edge,
 			  n_edge,
-			  p_edge, 1, ldp 
+			  p_edge, 1, ldp
 			);
 		}
 	}
@@ -434,7 +434,7 @@ void bli_spackm_haswell_asm_6xk
 		(
 		  m_edge,
 		  n_edge,
-		  p_edge, 1, ldp 
+		  p_edge, 1, ldp
 		);
 	}
 }

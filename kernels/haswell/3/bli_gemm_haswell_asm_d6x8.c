@@ -87,8 +87,8 @@ void bli_sgemm_haswell_asm_6x16
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -767,8 +767,8 @@ void bli_dgemm_haswell_asm_6x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -1326,8 +1326,8 @@ void bli_cgemm_haswell_asm_3x8
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -1719,8 +1719,8 @@ void bli_zgemm_haswell_asm_3x4
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );

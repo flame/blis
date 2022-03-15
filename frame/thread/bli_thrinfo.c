@@ -97,7 +97,7 @@ void bli_thrinfo_init_single
 	bli_thrinfo_init
 	(
 	  thread,
-	  ( thrcomm_t* )&BLIS_SINGLE_COMM, 0,
+	  &BLIS_SINGLE_COMM, 0,
 	  1,
 	  0,
 	  FALSE,

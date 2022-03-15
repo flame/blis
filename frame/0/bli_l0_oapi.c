@@ -188,9 +188,9 @@ GENFRONT( sqrtsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       const obj_t* chi, \
-       double*      zeta_r, \
-       double*      zeta_i  \
+       const obj_t*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -232,8 +232,8 @@ GENFRONT( getsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
+             double  zeta_r, \
+             double  zeta_i, \
        const obj_t*  chi  \
      ) \
 { \

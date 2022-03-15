@@ -44,10 +44,10 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       trans_t       transa, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         n, \
+             trans_t transa, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
        const ctype*  x, inc_t incx, \
@@ -65,10 +65,10 @@ INSERT_GENTDEF( gemv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         m, \
-       dim_t         n, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -85,10 +85,10 @@ INSERT_GENTDEF( ger )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       uplo_t        uploa, \
-       conj_t        conja, \
-       conj_t        conjx, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
        const ctype*  x, inc_t incx, \
@@ -107,9 +107,9 @@ INSERT_GENTDEF( symv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       uplo_t         uploa, \
-       conj_t         conjx, \
-       dim_t          m, \
+             uplo_t   uploa, \
+             conj_t   conjx, \
+             dim_t    m, \
        const ctype_r* alpha, \
        const ctype*   x, inc_t incx, \
              ctype*   a, inc_t rs_a, inc_t cs_a  \
@@ -125,9 +125,9 @@ INSERT_GENTDEFR( her )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       uplo_t       uploa, \
-       conj_t       conjx, \
-       dim_t        m, \
+             uplo_t uploa, \
+             conj_t conjx, \
+             dim_t  m, \
        const ctype* alpha, \
        const ctype* x, inc_t incx, \
              ctype* a, inc_t rs_a, inc_t cs_a  \
@@ -143,10 +143,10 @@ INSERT_GENTDEF( syr )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       uplo_t        uploa, \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -164,10 +164,10 @@ INSERT_GENTDEF( syr2 )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       uplo_t        uploa, \
-       trans_t       transa, \
-       diag_t        diaga, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             trans_t transa, \
+             diag_t  diaga, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
              ctype*  x, inc_t incx  \

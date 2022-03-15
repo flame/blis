@@ -40,9 +40,9 @@ void bli_l3_packa
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
 	obj_t a_local, a_pack;
@@ -88,9 +88,9 @@ void bli_l3_packb
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
 	obj_t bt_local, bt_pack;

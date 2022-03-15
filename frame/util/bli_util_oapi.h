@@ -139,19 +139,6 @@ GENPROT( sumsqv )
 
 #ifdef BLIS_OAPI_BASIC
 
-/*
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
-     ( \
-       const obj_t* chi, \
-       const obj_t* psi, \
-       bool*        is_eq  \
-     );
-
-GENPROT( eqsc )
-
 
 #undef  GENPROT
 #define GENPROT( opname ) \
@@ -160,21 +147,7 @@ BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
        const obj_t* x, \
        const obj_t* y, \
-       bool*        is_eq  \
-     );
-
-GENPROT( eqv )
-*/
-
-
-#undef  GENPROT
-#define GENPROT( opname ) \
-\
-BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
-     ( \
-       const obj_t* x, \
-       const obj_t* y, \
-       bool*        is_eq  \
+             bool*  is_eq  \
      );
 
 GENPROT( eqsc )
@@ -187,7 +160,7 @@ GENPROT( eqm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       FILE*        file, \
+             FILE*  file, \
        const char*  s1, \
        const obj_t* x, \
        const char*  format, \

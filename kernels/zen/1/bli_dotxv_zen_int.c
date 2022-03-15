@@ -64,7 +64,7 @@ void bli_sdotxv_zen_int
        float*  restrict y, inc_t incy,
        float*  restrict beta,
        float*  restrict rho,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      n_elem_per_reg = 8;
@@ -192,7 +192,7 @@ void bli_ddotxv_zen_int
        double* restrict y, inc_t incy,
        double* restrict beta,
        double* restrict rho,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      n_elem_per_reg = 4;
@@ -264,7 +264,7 @@ void bli_ddotxv_zen_int
 
 		x3v.v = _mm256_loadu_pd( x0 + 3*n_elem_per_reg );
 		y3v.v = _mm256_loadu_pd( y0 + 3*n_elem_per_reg );
-		
+
 		// Compute the element-wise product of the x and y vectors,
 		// storing in the corresponding rho vectors.
 		rho0v.v = _mm256_fmadd_pd( x0v.v, y0v.v, rho0v.v );

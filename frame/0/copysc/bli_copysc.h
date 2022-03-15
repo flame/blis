@@ -57,9 +57,9 @@ GENFRONT( copysc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,varname) \
      ( \
-       conj_t      conjchi, \
-       const void* chi, \
-             void* psi \
+             conj_t conjchi, \
+       const void*  chi, \
+             void*  psi \
      );
 
 INSERT_GENTPROT2_BASIC0( copysc )

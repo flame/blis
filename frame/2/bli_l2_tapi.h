@@ -42,10 +42,10 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       trans_t       transa, \
-       conj_t        conjx, \
-       dim_t         m, \
-       dim_t         n, \
+             trans_t transa, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
        const ctype*  x, inc_t incx, \
@@ -62,10 +62,10 @@ INSERT_GENTPROT_BASIC0( gemv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         m, \
-       dim_t         n, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
+             dim_t   n, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -81,10 +81,10 @@ INSERT_GENTPROT_BASIC0( ger )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t        uploa, \
-       conj_t        conja, \
-       conj_t        conjx, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             conj_t  conja, \
+             conj_t  conjx, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
        const ctype*  x, inc_t incx, \
@@ -102,9 +102,9 @@ INSERT_GENTPROT_BASIC0( symv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t         uploa, \
-       conj_t         conjx, \
-       dim_t          m, \
+             uplo_t   uploa, \
+             conj_t   conjx, \
+             dim_t    m, \
        const ctype_r* alpha, \
        const ctype*   x, inc_t incx, \
              ctype*   a, inc_t rs_a, inc_t cs_a  \
@@ -119,9 +119,9 @@ INSERT_GENTPROTR_BASIC0( her )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t         uploa, \
-       conj_t         conjx, \
-       dim_t          m, \
+             uplo_t   uploa, \
+             conj_t   conjx, \
+             dim_t    m, \
        const ctype*   alpha, \
        const ctype*   x, inc_t incx, \
              ctype*   a, inc_t rs_a, inc_t cs_a  \
@@ -136,10 +136,10 @@ INSERT_GENTPROT_BASIC0( syr )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t        uploa, \
-       conj_t        conjx, \
-       conj_t        conjy, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             conj_t  conjx, \
+             conj_t  conjy, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  x, inc_t incx, \
        const ctype*  y, inc_t incy, \
@@ -156,10 +156,10 @@ INSERT_GENTPROT_BASIC0( syr2 )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t        uploa, \
-       trans_t       transa, \
-       diag_t        diaga, \
-       dim_t         m, \
+             uplo_t  uploa, \
+             trans_t transa, \
+             diag_t  diaga, \
+             dim_t   m, \
        const ctype*  alpha, \
        const ctype*  a, inc_t rs_a, inc_t cs_a, \
              ctype*  x, inc_t incx  \

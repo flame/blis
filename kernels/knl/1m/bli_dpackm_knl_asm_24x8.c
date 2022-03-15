@@ -116,7 +116,7 @@ void bli_dpackm_knl_asm_8xk
        double* restrict kappa_,
        double* restrict a_, inc_t inca_, inc_t lda_,
        double* restrict p_,              inc_t ldp_,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];
@@ -367,7 +367,7 @@ void bli_dpackm_knl_asm_24xk
        double* restrict kappa_,
        double* restrict a_, inc_t inca_, inc_t lda_,
        double* restrict p_,              inc_t ldp_,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const int32_t* offsetPtr = &offsets[0];

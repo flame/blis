@@ -41,9 +41,9 @@
 
 typedef void (*FUNCPTR_T)
      (
-       conj_t      conjchi,
-       const void* chi,
-             void* psi
+             conj_t conjchi,
+       const void*  chi,
+             void*  psi
      );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
@@ -105,9 +105,9 @@ GENFRONT( copysc )
 \
 void PASTEMAC2(chx,chy,varname) \
      ( \
-       conj_t      conjchi, \
-       const void* chi, \
-             void* psi \
+             conj_t conjchi, \
+       const void*  chi, \
+             void*  psi \
      ) \
 { \
 	bli_init_once(); \

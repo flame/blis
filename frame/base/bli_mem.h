@@ -66,33 +66,33 @@ BLIS_INLINE pblk_t* bli_mem_pblk( mem_t* mem )
 	return &(mem->pblk);
 }
 
-BLIS_INLINE void* bli_mem_buffer( mem_t* mem )
+BLIS_INLINE void* bli_mem_buffer( const mem_t* mem )
 {
-	return bli_pblk_buf( bli_mem_pblk( mem ) );
+	return bli_pblk_buf( bli_mem_pblk( ( mem_t* )mem ) );
 }
 
-BLIS_INLINE packbuf_t bli_mem_buf_type( mem_t* mem )
+BLIS_INLINE packbuf_t bli_mem_buf_type( const mem_t* mem )
 {
 	return mem->buf_type;
 }
 
-BLIS_INLINE pool_t* bli_mem_pool( mem_t* mem )
+BLIS_INLINE pool_t* bli_mem_pool( const mem_t* mem )
 {
 	return mem->pool;
 }
 
-BLIS_INLINE siz_t bli_mem_size( mem_t* mem )
+BLIS_INLINE siz_t bli_mem_size( const mem_t* mem )
 {
 	return mem->size;
 }
 
-BLIS_INLINE bool bli_mem_is_alloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_alloc( const mem_t* mem )
 {
 	return ( bool )
 	       ( bli_mem_buffer( mem ) != NULL );
 }
 
-BLIS_INLINE bool bli_mem_is_unalloc( mem_t* mem )
+BLIS_INLINE bool bli_mem_is_unalloc( const mem_t* mem )
 {
 	return ( bool )
 	       ( bli_mem_buffer( mem ) == NULL );
@@ -160,4 +160,4 @@ BLIS_INLINE void bli_mem_clear( mem_t* mem )
 }
 
 
-#endif 
+#endif

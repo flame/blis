@@ -90,7 +90,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      );
 
 INSERT_GENTDEF( packm_cxk )
@@ -109,7 +109,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        ctype*  restrict kappa, \
        ctype*  restrict p,             inc_t ldp, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t* restrict cntx \
+       cntx_t*          cntx \
      );
 
 INSERT_GENTDEF( unpackm_cxk )
@@ -132,7 +132,7 @@ typedef void (*PASTECH3(ch,opname,_ker,tsuf)) \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx \
+       cntx_t*          cntx \
      );
 
 INSERT_GENTDEF( packm_cxc_diag )

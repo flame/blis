@@ -103,7 +103,7 @@ void bli_array_finalize
 
 void* bli_array_elem
      (
-       siz_t          index,
+             siz_t    index,
        const array_t* array
      );
 void bli_array_set_elem

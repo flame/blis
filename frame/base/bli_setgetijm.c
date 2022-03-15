@@ -46,11 +46,11 @@ static setijm_fp GENARRAY(ftypes_setijm,setijm);
 
 err_t bli_setijm
      (
-       double  ar,
-       double  ai,
-       dim_t   i,
-       dim_t   j,
-       obj_t*  b
+             double  ar,
+             double  ai,
+             dim_t   i,
+             dim_t   j,
+       const obj_t*  b
      )
 {
 	dim_t m  = bli_obj_length( b );
@@ -110,21 +110,21 @@ INSERT_GENTFUNC_BASIC0( setijm )
 
 typedef void (*getijm_fp)
      (
-       dim_t       i,
-       dim_t       j,
-       const void* b, inc_t rs, inc_t cs,
-       double*     ar,
-       double*     ai
+             dim_t   i,
+             dim_t   j,
+       const void*   b, inc_t rs, inc_t cs,
+             double* ar,
+             double* ai
      );
 static getijm_fp GENARRAY(ftypes_getijm,getijm);
 
 err_t bli_getijm
       (
-        dim_t        i,
-        dim_t        j,
-        const obj_t* b,
-        double*      ar,
-        double*      ai
+              dim_t   i,
+              dim_t   j,
+        const obj_t*  b,
+              double* ar,
+              double* ai
       )
 {
 	dim_t m  = bli_obj_length( b );
@@ -164,11 +164,11 @@ err_t bli_getijm
 \
 void PASTEMAC(ch,opname) \
      ( \
-       dim_t       i, \
-       dim_t       j, \
-       const void* b, inc_t rs, inc_t cs, \
-       double*     ar, \
-       double*     ai  \
+             dim_t   i, \
+             dim_t   j, \
+       const void*   b, inc_t rs, inc_t cs, \
+             double* ar, \
+             double* ai  \
      ) \
 { \
 	const ctype* b_cast = ( const ctype* )b; \

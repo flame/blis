@@ -264,8 +264,8 @@ void bli_dgemm_knc_asm_30x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     double * a_next = bli_auxinfo_next_a( data );

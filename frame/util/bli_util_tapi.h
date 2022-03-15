@@ -42,9 +42,9 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t        n, \
-       const ctype* x, inc_t incx, \
-       ctype_r*     asum  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* asum  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -72,9 +72,9 @@ INSERT_GENTPROT_BASIC0( mktrim )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t        n, \
-       const ctype* x, inc_t incx, \
-       ctype_r*     norm  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* norm  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -88,13 +88,13 @@ INSERT_GENTPROTR_BASIC0( normiv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t       diagoffx, \
-       diag_t       diagx, \
-       uplo_t       uplox, \
-       dim_t        m, \
-       dim_t        n, \
-       const ctype* x, inc_t rs_x, inc_t cs_x, \
-       ctype_r*     norm  \
+             doff_t   diagoffx, \
+             diag_t   diagx, \
+             uplo_t   uplox, \
+             dim_t    m, \
+             dim_t    n, \
+       const ctype*   x, inc_t rs_x, inc_t cs_x, \
+             ctype_r* norm  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -139,10 +139,10 @@ INSERT_GENTPROT_BASIC0( randnm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t        n, \
-       const ctype* x, inc_t incx, \
-       ctype_r*     scale, \
-       ctype_r*     sumsq  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* scale, \
+             ctype_r* sumsq  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -159,10 +159,10 @@ INSERT_GENTPROTR_BASIC0( sumsqv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       conj_t       conjchi, \
+             conj_t conjchi, \
        const ctype* chi, \
        const ctype* psi, \
-       bool*        is_eq  \
+             bool*  is_eq  \
      );
 
 INSERT_GENTPROT_BASIC0( eqsc )
@@ -173,11 +173,11 @@ INSERT_GENTPROT_BASIC0( eqsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
       ( \
-        conj_t       conjx, \
-        dim_t        n, \
+              conj_t conjx, \
+              dim_t  n, \
         const ctype* x, inc_t incx, \
         const ctype* y, inc_t incy, \
-        bool*        is_eq  \
+              bool*  is_eq  \
       );
 
 INSERT_GENTPROT_BASIC0( eqv )
@@ -188,15 +188,15 @@ INSERT_GENTPROT_BASIC0( eqv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       doff_t       diagoffx, \
-       diag_t       diagx, \
-       uplo_t       uplox, \
-       trans_t      transx, \
-       dim_t        m, \
-       dim_t        n, \
-       const ctype* x, inc_t rs_x, inc_t cs_x, \
-       const ctype* y, inc_t rs_y, inc_t cs_y, \
-       bool*        is_eq  \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             uplo_t  uplox, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  x, inc_t rs_x, inc_t cs_x, \
+       const ctype*  y, inc_t rs_y, inc_t cs_y, \
+             bool*   is_eq  \
      );
 
 INSERT_GENTPROT_BASIC0( eqm )
@@ -208,7 +208,7 @@ INSERT_GENTPROT_BASIC0( eqm )
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        const char* s1, \
-       dim_t       n, \
+             dim_t n, \
        const void* x, inc_t incx, \
        const char* format, \
        const char* s2  \
@@ -223,8 +223,8 @@ INSERT_GENTPROT_BASIC0_I( printv )
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
        const char* s1, \
-       dim_t       m, \
-       dim_t       n, \
+             dim_t m, \
+             dim_t n, \
        const void* x, inc_t rs_x, inc_t cs_x, \
        const char* format, \
        const char* s2  \

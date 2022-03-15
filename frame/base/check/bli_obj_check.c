@@ -34,11 +34,11 @@
 
 #include "blis.h"
 
-void bli_obj_create_check( num_t  dt,
-                           dim_t  m,
-                           dim_t  n,
-                           inc_t  rs,
-                           inc_t  cs,
+void bli_obj_create_check(       num_t  dt,
+                                 dim_t  m,
+                                 dim_t  n,
+                                 inc_t  rs,
+                                 inc_t  cs,
                            const obj_t* obj )
 {
 	err_t e_val;
@@ -53,9 +53,9 @@ void bli_obj_create_check( num_t  dt,
 	bli_check_error_code( e_val );
 }
 
-void bli_obj_create_without_buffer_check( num_t  dt,
-                                          dim_t  m,
-                                          dim_t  n,
+void bli_obj_create_without_buffer_check(       num_t  dt,
+                                                dim_t  m,
+                                                dim_t  n,
                                           const obj_t* obj )
 {
 	err_t e_val;
@@ -67,9 +67,9 @@ void bli_obj_create_without_buffer_check( num_t  dt,
 	bli_check_error_code( e_val );
 }
 
-void bli_obj_alloc_buffer_check( inc_t  rs,
-                                 inc_t  cs,
-                                 inc_t  is,
+void bli_obj_alloc_buffer_check(       inc_t  rs,
+                                       inc_t  cs,
+                                       inc_t  is,
                                  const obj_t* obj )
 {
 	err_t e_val;
@@ -84,9 +84,9 @@ void bli_obj_alloc_buffer_check( inc_t  rs,
 }
 
 void bli_obj_attach_buffer_check( const void*  p,
-                                  inc_t  rs,
-                                  inc_t  cs,
-                                  inc_t  is,
+                                        inc_t  rs,
+                                        inc_t  cs,
+                                        inc_t  is,
                                   const obj_t* obj )
 {
 	err_t e_val;
@@ -109,7 +109,7 @@ void bli_obj_attach_buffer_check( const void*  p,
 	bli_check_error_code( e_val );
 }
 
-void bli_obj_create_scalar_check( num_t  dt,
+void bli_obj_create_scalar_check(       num_t  dt,
                                   const obj_t* obj )
 {
 	err_t e_val;

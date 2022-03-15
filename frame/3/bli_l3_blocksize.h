@@ -34,12 +34,12 @@
 
 dim_t bli_l3_determine_kc
       (
-        dir_t   direct,
-        dim_t   i,
-        dim_t   dim,
+              dir_t   direct,
+              dim_t   i,
+              dim_t   dim,
         const obj_t*  a,
         const obj_t*  b,
-        bszid_t bszid,
+              bszid_t bszid,
         const cntx_t* cntx,
         const cntl_t* cntl
       );
@@ -50,12 +50,12 @@ dim_t bli_l3_determine_kc
 \
 dim_t PASTEMAC0(opname) \
       ( \
-         dir_t   direct, \
-         dim_t   i, \
-         dim_t   dim, \
+               dir_t   direct, \
+               dim_t   i, \
+               dim_t   dim, \
          const obj_t*  a, \
          const obj_t*  b, \
-         bszid_t bszid, \
+               bszid_t bszid, \
          const cntx_t* cntx  \
       );
 
@@ -70,11 +70,11 @@ GENPROT( trsm_determine_kc )
 \
 dim_t PASTEMAC0(opname) \
       ( \
-         dim_t   i, \
-         dim_t   dim, \
+               dim_t   i, \
+               dim_t   dim, \
          const obj_t*  a, \
          const obj_t*  b, \
-         bszid_t bszid, \
+               bszid_t bszid, \
          const cntx_t* cntx  \
       );
 

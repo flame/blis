@@ -44,30 +44,30 @@ void bli_sba_finalize( void );
 
 array_t* bli_sba_checkout_array
      (
-       const siz_t n_threads
+       siz_t n_threads
      );
 
 void bli_sba_checkin_array
      (
-       array_t* restrict array
+       array_t* array
      );
 
 void bli_sba_rntm_set_pool
      (
-       siz_t             index,
-       array_t* restrict array,
-       rntm_t*  restrict rntm
+       siz_t    index,
+       array_t* array,
+       rntm_t*  rntm
      );
 
 void* bli_sba_acquire
      (
-       rntm_t* restrict rntm,
-       siz_t            req_size
+       rntm_t* rntm,
+       siz_t   req_size
      );
 void bli_sba_release
      (
-       rntm_t* restrict rntm,
-       void*   restrict block
+       rntm_t* rntm,
+       void*   block
      );
 
 

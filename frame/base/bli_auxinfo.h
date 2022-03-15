@@ -47,11 +47,11 @@ BLIS_INLINE pack_t bli_auxinfo_schema_b( const auxinfo_t* ai )
 	return ai->schema_b;
 }
 
-BLIS_INLINE void* bli_auxinfo_next_a( const auxinfo_t* ai )
+BLIS_INLINE const void* bli_auxinfo_next_a( const auxinfo_t* ai )
 {
 	return ai->a_next;
 }
-BLIS_INLINE void* bli_auxinfo_next_b( const auxinfo_t* ai )
+BLIS_INLINE const void* bli_auxinfo_next_b( const auxinfo_t* ai )
 {
 	return ai->b_next;
 }
@@ -78,7 +78,7 @@ BLIS_INLINE void_fp bli_auxinfo_ukr( const auxinfo_t* ai )
 {
     return ai->ukr;
 }
-BLIS_INLINE void* bli_auxinfo_params( const auxinfo_t* ai )
+BLIS_INLINE const void* bli_auxinfo_params( const auxinfo_t* ai )
 {
     return ai->params;
 }
@@ -95,15 +95,15 @@ BLIS_INLINE void bli_auxinfo_set_schema_b( pack_t schema, auxinfo_t* ai )
 	ai->schema_b = schema;
 }
 
-BLIS_INLINE void bli_auxinfo_set_next_a( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_a( const void* p, auxinfo_t* ai )
 {
 	ai->a_next = p;
 }
-BLIS_INLINE void bli_auxinfo_set_next_b( void* p, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_b( const void* p, auxinfo_t* ai )
 {
 	ai->b_next = p;
 }
-BLIS_INLINE void bli_auxinfo_set_next_ab( void* ap, void* bp, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_next_ab( const void* ap, const void* bp, auxinfo_t* ai )
 {
 	ai->a_next = ap;
 	ai->b_next = bp;
@@ -131,7 +131,7 @@ BLIS_INLINE void bli_auxinfo_set_ukr( void_fp ukr, auxinfo_t* ai )
 {
     ai->ukr = ukr;
 }
-BLIS_INLINE void bli_auxinfo_set_params( void* params, auxinfo_t* ai )
+BLIS_INLINE void bli_auxinfo_set_params( const void* params, auxinfo_t* ai )
 {
     ai->params = params;
 }

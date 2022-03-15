@@ -46,10 +46,10 @@
 typedef void (*PASTECH(opname,_var_oft)) \
 ( \
   const obj_t*  a, \
-  obj_t*  p, \
+        obj_t*  p, \
   const cntx_t* cntx, \
-  rntm_t* rntm, \
-  cntl_t* cntl, \
+        rntm_t* rntm, \
+        cntl_t* cntl, \
   const thrinfo_t* thread  \
 );
 

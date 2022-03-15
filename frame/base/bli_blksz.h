@@ -36,7 +36,7 @@
 
 BLIS_INLINE dim_t bli_blksz_get_def
      (
-       num_t          dt,
+             num_t    dt,
        const blksz_t* b
      )
 {
@@ -45,7 +45,7 @@ BLIS_INLINE dim_t bli_blksz_get_def
 
 BLIS_INLINE dim_t bli_blksz_get_max
      (
-       num_t          dt,
+             num_t    dt,
        const blksz_t* b
      )
 {
@@ -252,29 +252,29 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-       dir_t         direct,
-       dim_t         i,
-       dim_t         dim,
+             dir_t   direct,
+             dim_t   i,
+             dim_t   dim,
        const obj_t*  obj,
-       bszid_t       bszid,
+             bszid_t bszid,
        const cntx_t* cntx
      );
 
 dim_t bli_determine_blocksize_f
      (
-       dim_t         i,
-       dim_t         dim,
+             dim_t   i,
+             dim_t   dim,
        const obj_t*  obj,
-       bszid_t       bszid,
+             bszid_t bszid,
        const cntx_t* cntx
      );
 
 dim_t bli_determine_blocksize_b
      (
-       dim_t         i,
-       dim_t         dim,
+             dim_t   i,
+             dim_t   dim,
        const obj_t*  obj,
-       bszid_t       bszid,
+             bszid_t bszid,
        const cntx_t* cntx
      );
 

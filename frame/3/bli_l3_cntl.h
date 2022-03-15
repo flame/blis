@@ -40,15 +40,15 @@
 
 void bli_l3_cntl_create_if
      (
-       opid_t   family,
-       pack_t   schema_a,
-       pack_t   schema_b,
+             opid_t   family,
+             pack_t   schema_a,
+             pack_t   schema_b,
        const obj_t*   a,
        const obj_t*   b,
        const obj_t*   c,
-       rntm_t*  rntm,
-       cntl_t*  cntl_orig,
-       cntl_t** cntl_use
+             rntm_t*  rntm,
+             cntl_t*  cntl_orig,
+             cntl_t** cntl_use
      );
 
 void bli_l3_cntl_free

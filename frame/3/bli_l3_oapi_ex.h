@@ -48,8 +48,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  b, \
        const obj_t*  beta, \
        const obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      );
 
 GENPROT( gemm )
@@ -63,14 +63,14 @@ GENPROT( syr2k )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b, \
        const obj_t*  beta, \
        const obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      );
 
 GENPROT( hemm )
@@ -87,8 +87,8 @@ BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
        const obj_t*  a, \
        const obj_t*  beta, \
        const obj_t*  c, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      );
 
 GENPROT( herk )
@@ -100,12 +100,12 @@ GENPROT( syrk )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,BLIS_OAPI_EX_SUF) \
      ( \
-       side_t  side, \
+             side_t  side, \
        const obj_t*  alpha, \
        const obj_t*  a, \
        const obj_t*  b, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       const cntx_t* cntx, \
+             rntm_t* rntm  \
      );
 
 GENPROT( trmm )

@@ -245,7 +245,7 @@ BLIS_INLINE bool bli_cntx_ukr_prefers_cols_dt( num_t dt, ukr_t ukr_id, const cnt
 	return ! bli_cntx_ukr_prefers_rows_dt( dt, ukr_id, cntx );
 }
 
-BLIS_INLINE bool bli_cntx_prefers_storage_of( obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_prefers_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
 {
 	const bool ukr_prefers_rows
 		= bli_cntx_ukr_prefers_rows_dt( bli_obj_dt( obj ), ukr_id, cntx );
@@ -256,7 +256,7 @@ BLIS_INLINE bool bli_cntx_prefers_storage_of( obj_t* obj, ukr_t ukr_id, const cn
 	return FALSE;
 }
 
-BLIS_INLINE bool bli_cntx_dislikes_storage_of( obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
+BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
 {
 	return ! bli_cntx_prefers_storage_of( obj, ukr_id, cntx );
 }
@@ -286,7 +286,7 @@ BLIS_INLINE void bli_cntx_set_blksz_max_dt( num_t dt, bszid_t bs_id, dim_t bs, c
 	bli_blksz_set_max( bs, dt, &cntx->blkszs[ bs_id ]);
 }
 
-BLIS_INLINE void bli_cntx_set_ukr( ukr_t ukr_id, func_t* func, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_ukr( ukr_t ukr_id, const func_t* func, cntx_t* cntx )
 {
 	cntx->ukrs[ ukr_id ] = *func;
 }

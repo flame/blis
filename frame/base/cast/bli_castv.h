@@ -51,10 +51,10 @@ BLIS_EXPORT_BLIS void bli_castv
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(chx,chy,opname) \
      ( \
-       conj_t      conjx, \
-       dim_t       n, \
-       const void* x, inc_t incx, \
-             void* y, inc_t incy  \
+             conj_t conjx, \
+             dim_t  n, \
+       const void*  x, inc_t incx, \
+             void*  y, inc_t incy  \
      );
 
 INSERT_GENTPROT2_BASIC0( castv )

@@ -40,8 +40,8 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_init_detached
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_init_detached_copy_of
      (
-       num_t        dt,
-       conj_t       conj,
+             num_t  dt,
+             conj_t conj,
        const obj_t* alpha,
              obj_t* beta
      );
@@ -54,9 +54,9 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_detach
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_attach
      (
-       conj_t conj,
-       obj_t* alpha,
-       obj_t* a
+             conj_t conj,
+       const obj_t* alpha,
+             obj_t* a
      );
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_cast_to

@@ -54,6 +54,6 @@
 // to NULL. The "( void )" statements are to prevent unused variable
 // warnings by the compiler.
 #undef  BLIS_TAPI_EX_DECLS
-#define BLIS_TAPI_EX_DECLS   cntx_t* cntx = NULL; ( void )cntx; \
-                             rntm_t* rntm = NULL; ( void )rntm;
+#define BLIS_TAPI_EX_DECLS   const cntx_t* cntx = NULL; ( void )cntx; \
+                                   rntm_t* rntm = NULL; ( void )rntm;
 

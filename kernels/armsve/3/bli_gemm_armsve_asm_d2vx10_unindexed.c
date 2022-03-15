@@ -53,8 +53,8 @@ void bli_dgemm_armsve_asm_2vx10_unindexed
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   void* a_next = bli_auxinfo_next_a( data );

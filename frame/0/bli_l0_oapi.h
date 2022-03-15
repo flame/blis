@@ -82,9 +82,9 @@ GENPROT( invertsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       const obj_t* chi, \
-       double*      zeta_r, \
-       double*      zeta_i  \
+       const obj_t*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      );
 
 GENPROT( getsc )
@@ -95,8 +95,8 @@ GENPROT( getsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
+             double  zeta_r, \
+             double  zeta_i, \
        const obj_t*  chi  \
      );
 
