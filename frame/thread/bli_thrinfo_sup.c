@@ -33,7 +33,6 @@
 
 */
 
-#include "bli_thrcomm_openmp.h"
 #include "blis.h"
 
 void bli_thrinfo_sup_grow

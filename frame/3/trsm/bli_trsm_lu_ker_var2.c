@@ -71,7 +71,7 @@ void bli_trsm_lu_ker_var2
 {
 	const num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	const doff_t    diagoffb  = bli_obj_diag_offset( b );
+	const doff_t    diagoffa  = bli_obj_diag_offset( a );
 
 	const pack_t    schema_a  = bli_obj_pack_schema( a );
 	const pack_t    schema_b  = bli_obj_pack_schema( b );
@@ -95,12 +95,12 @@ void bli_trsm_lu_ker_var2
 	const inc_t     cs_c      = bli_obj_col_stride( c );
 
 	// Grab the address of the internal scalar buffer for the scalar
-	// attached to A (the non-triangular matrix). This will be the alpha
+	// attached to B (the non-triangular matrix). This will be the alpha
 	// scalar used in the gemmtrsm subproblems (ie: the scalar that would
-	// be applied to the packed copy of A prior to it being updated by
+	// be applied to the packed copy of B prior to it being updated by
 	// the trsm subproblem). This scalar may be unit, if for example it
 	// was applied during packing.
-	const void* buf_alpha1 = bli_obj_internal_scalar_buffer( a );
+	const void* buf_alpha1 = bli_obj_internal_scalar_buffer( b );
 
 	// Grab the address of the internal scalar buffer for the scalar
 	// attached to C. This will be the "beta" scalar used in the gemm-only
@@ -114,7 +114,7 @@ void bli_trsm_lu_ker_var2
 	// function pointer.
 	ftypes[dt_exec]
 	(
-	  diagoffb,
+	  diagoffa,
 	  schema_a,
 	  schema_b,
 	  m,

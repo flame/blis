@@ -71,7 +71,7 @@ void bli_trmm_ll_ker_var2
 {
 	const num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	const doff_t    diagoffb  = bli_obj_diag_offset( b );
+	const doff_t    diagoffa  = bli_obj_diag_offset( a );
 
 	const pack_t    schema_a  = bli_obj_pack_schema( a );
 	const pack_t    schema_b  = bli_obj_pack_schema( b );
@@ -109,7 +109,7 @@ void bli_trmm_ll_ker_var2
 	// function pointer.
 	ftypes[dt_exec]
 	(
-	  diagoffb,
+	  diagoffa,
 	  schema_a,
 	  schema_b,
 	  m,
