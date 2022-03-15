@@ -51,10 +51,10 @@ void bli_trsm_blk_var3
 	bli_obj_alias_to( c, &cs );
 
 	// Determine the direction in which to partition (forwards or backwards).
-	dir_t direct = bli_l3_direct( &ap, &bp, c, cntl );
+	dir_t direct = bli_l3_direct( &ap, &bp, &cs, cntl );
 
 	// Prune any zero region that exists along the partitioning dimension.
-	bli_l3_prune_unref_mparts_k( &ap, &bp, c, cntl );
+	bli_l3_prune_unref_mparts_k( &ap, &bp, &cs, cntl );
 
 	// Query dimension in partitioning direction.
 	dim_t k_trans = bli_obj_width_after_trans( &ap );
@@ -81,7 +81,7 @@ void bli_trsm_blk_var3
 		  &a1,
 		  &b1,
 		  &BLIS_ONE,
-		  c,
+		  &cs,
 		  cntx,
 		  rntm,
 		  bli_cntl_sub_node( cntl ),
@@ -96,7 +96,8 @@ void bli_trsm_blk_var3
 		// that they are only used in the first iteration.
 		if ( i == 0 )
 		{
-			bli_obj_scalar_reset( &ap ); bli_obj_scalar_reset( &bp );
+			bli_obj_scalar_reset( &ap );
+			bli_obj_scalar_reset( &bp );
 			bli_obj_scalar_reset( &cs );
 		}
 	}
