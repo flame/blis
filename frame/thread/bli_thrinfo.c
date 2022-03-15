@@ -298,6 +298,24 @@ thrinfo_t* bli_thrinfo_create_for_cntl
        thrinfo_t* thread_par
      )
 {
+	// If we are running with a single thread, all of the code can be reduced
+	// and simplified to this.
+	if ( bli_rntm_calc_num_threads( rntm ) == 1 )
+	{
+		thrinfo_t* thread_chl = bli_thrinfo_create
+		(
+		  rntm,                        // rntm
+		  &BLIS_SINGLE_COMM,           // ocomm
+		  0,                           // ocomm_id
+		  1,                           // n_way
+		  0,                           // work_id
+		  FALSE,                       // free_comm
+		  BLIS_NO_PART,                // bszid
+		  NULL                         // sub_node
+		);
+		return thread_chl;
+	}
+
 	thrcomm_t*  static_comms[ BLIS_NUM_STATIC_COMMS ];
 	thrcomm_t** new_comms = NULL;
 

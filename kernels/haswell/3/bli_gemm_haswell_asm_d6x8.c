@@ -123,7 +123,7 @@ void bli_sgemm_haswell_asm_6x16
 	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 4), rsi) // cs_c *= sizeof(float)
 
-	cmp(imm(4), rsi) // set ZF if (4*cs_c) == 4.
+	cmp(imm(4), rdi) // set ZF if (4*rs_c) == 4.
 	jz(.SCOLPREFETCH) // jump to column prefetch case
 
 		lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
@@ -803,8 +803,8 @@ void bli_dgemm_haswell_asm_6x8
 	mov(var(cs_c), rsi) // load cs_c
 	lea(mem(, rsi, 8), rsi) // cs_c *= sizeof(double)
 
-	cmp(imm(8), rsi) // set ZF if (8*cs_c) == 8.
-	jz(.SCOLPREFETCH) // jump to column prefetch case
+	cmp(imm(8), rdi) // set ZF if (8*rs_c) == 8.
+	jz(.DCOLPREFETCH) // jump to column prefetch case
 
 		lea(mem(rdi, rdi, 2), r13) // r13 = 3*rs_c;
 		lea(mem(rcx, r13, 1), rdx) // rdx = c + 3*rs_c;
@@ -815,9 +815,9 @@ void bli_dgemm_haswell_asm_6x8
 		prefetch(0, mem(rdx, rdi, 1, 7*8)) // prefetch c + 4*rs_c
 		prefetch(0, mem(rdx, rdi, 2, 7*8)) // prefetch c + 5*rs_c
 
-		jmp(.SPREFETCHDONE)
+		jmp(.DPREFETCHDONE)
 
-	label(.SCOLPREFETCH)
+	label(.DCOLPREFETCH)
 
 		lea(mem(rsi, rsi, 2), r13) // r13 = 3*cs_c;
 		lea(mem(rcx, r13, 1), rdx) // rdx = c + 3*cs_c;
@@ -830,7 +830,7 @@ void bli_dgemm_haswell_asm_6x8
 		prefetch(0, mem(rdx, r13, 1, 7*8)) // prefetch c + 6*cs_c
 		prefetch(0, mem(rdx, rsi, 4, 7*8)) // prefetch c + 7*cs_c
 
-	label(.SPREFETCHDONE)
+	label(.DPREFETCHDONE)
 
 
 	mov(var(k_iter), rsi) // i = k_iter;

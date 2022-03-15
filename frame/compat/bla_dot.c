@@ -92,9 +92,10 @@ INSERT_GENTFUNCDOTR_BLAS( dot, dotv )
 
 INSERT_GENTFUNCDOTC_BLAS( dot, dotv )
 
-#else
+#else // #ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
 
-// For the "intel" complex return type, use a hidden parameter to return the result
+// For the "intel" complex return type, use a hidden preceding parameter to
+// return the result rather than an actual return value.
 #undef  GENTFUNCDOT
 #define GENTFUNCDOT( ftype, ch, chc, blis_conjx, blasname, blisname ) \
 \

@@ -360,15 +360,18 @@ print_usage()
 	echo "   CC            Specifies the C compiler to use."
 	echo "   CXX           Specifies the C++ compiler to use (sandbox only)."
 	echo "   FC            Specifies the Fortran compiler to use (only to determine --complex-return)."
-	echo "   RANLIB        Specifies the ranlib executable to use."
-	echo "   AR            Specifies the archiver to use."
+	echo "   AR            Specifies the static library archiver to use."
+	echo "   RANLIB        Specifies the ranlib (library indexer) executable to use."
+	echo "   PYTHON        Specifies the python interpreter to use."
 	echo "   CFLAGS        Specifies additional compiler flags to use (prepended)."
 	echo "   LDFLAGS       Specifies additional linker flags to use (prepended)."
 	echo "   LIBPTHREAD    Pthreads library to use."
-	echo "   PYTHON        Specifies the python interpreter to use."
 	echo " "
-	echo "   Environment variables may also be specified as command line"
-	echo "   options, e.g.:"
+	echo "   Environment variables are traditionally set prior to running configure:"
+	echo " "
+	echo "     CC=gcc ./configure [options] haswell"
+	echo " "
+	echo "   However, they may also be specified as command line options, e.g.:"
 	echo " "
 	echo "     ./configure [options] CC=gcc haswell"
 	echo " "
@@ -418,10 +421,10 @@ assign_key_value()
 #	# found in a blacklist.
 #
 #	# Note: $2 can actually be a list of items.
-#	dlist=\$"$1"
-#	ditem=\$"$2"
+#	ditem=\$"$1"
+#	dlist=\$"$2"
 #
-#	# Acquire the contents of $list and $item and store them in list_c
+#	# Acquire the contents of $dlist and $ditem and store them in list_c
 #	# and item_c, respectively.
 #	list_c=$(eval "expr \"$dlist\" ")
 #	item_c=$(eval "expr \"$ditem\" ")
@@ -438,7 +441,7 @@ assign_key_value()
 #	done
 #
 #	# Update the argument.
-#	eval "$1=\"${list_c}\""
+#	eval "$2=\"${list_c}\""
 #}
 
 pass_config_kernel_registries()
@@ -1049,42 +1052,31 @@ get_cxx_search_list()
 	echo "${list}"
 }
 
-select_tool()
+get_fc_search_list()
 {
-	local search_list CC_env the_cc cc
+	local list
 
-	# This is the list of compilers/tools to search for, and the order in
-	# which to search for them.
-	search_list=$1
+	list="gfortran ifort"
 
-	# The environment variable associated with the compiler/tool type we
-	# are searching (e.g. CC, CXX, PYTHON).
-	CC_env=$2
+	echo "${list}"
+}
 
-	# If CC_env contains something, add it to the beginning of our default
-	# search list.
-	if [ -n "${CC_env}" ]; then
-		search_list="${CC_env} ${search_list}"
-	fi
+get_ar_search_list()
+{
+	local list
 
-	# Initialize our selected compiler/tool to empty.
-	the_cc=""
+	list="ar"
 
-	# Try each compiler/tool in the list and select the first one we find that
-	# works.
-	for cc in ${search_list}; do
+	echo "${list}"
+}
 
-		# See if the current compiler/tool works and/or is present.
-		${cc} --version > /dev/null 2>&1
+get_ranlib_search_list()
+{
+	local list
 
-		if [ "$?" == 0 ]; then
-			the_cc=${cc}
-			break
-		fi
-	done
+	list="ranlib"
 
-	# Return the selected compiler/tool.
-	echo "${the_cc}"
+	echo "${list}"
 }
 
 auto_detect()
@@ -2054,6 +2046,223 @@ set_default_version()
 	fi
 }
 
+select_tool_w_env()
+{
+	local search_list env_var env_str tool_str found_var
+	local _the_tool
+
+	# Example calling sequence:
+	#
+	#  select_tool_w_env "${cc_search_list}" "${CC}" "CC" "C compiler" "yes" found_cc
+	#
+
+	search_list="$1" # the tool's default search list.
+	env_var="$2"     # the value of the environment variable for this tool.
+	env_str="$3"     # a string naming the source of env_var.
+	tool_str="$4"    # a human-readable string identifying the tool.
+	is_required="$5" # is it fatal if env_var doesn't exist/work? (yes or no)
+	found_var="$6"   # the variable into which to save the selected tool.
+
+	# If the environment variable contains something, verify that it exists. If
+	# it is unset or empty, we proceed with the default search list.
+	if [ -n "${env_var}" ]; then
+
+		echo "${script_name}: user specified a ${tool_str} via ${env_str} (${env_var})."
+
+		# See if the binary specified by env_var exists.
+		_the_tool=$(select_tool "${env_var}" "${env_str}")
+
+		# Copy the result into the variable specified by found_var.
+		eval "${found_var}=\"${_the_tool}\""
+
+		# If the tool specified by env_var doesn't exist, throw a tantrum.
+		if [ -z "${_the_tool}" ]; then
+
+			echo "${script_name}: *** Could not find the ${tool_str} specified via ${env_str} ('${env_var}')."
+
+			# Whether the tantrum is fatal depends on the is_required argument.
+			if [ "${is_required}" == "yes" ]; then
+				echo "${script_name}: *** A working ${tool_str} is required. Please set ${env_str}"
+				echo "${script_name}: *** to a ${tool_str} that exists (or unset ${env_str})."
+				exit 1
+			else
+				echo "${script_name}: *** Note that a ${tool_str} will not be available."
+
+				# Set the found_var variable to *something* so that the output
+				# makefile fragment contains a record that the tool wasn't found.
+				eval "${found_var}=\"${env_str}\"-not-found"
+			fi
+		else
+			# The user-specified tool was found.
+			echo "${script_name}: ${_the_tool} exists and appears to work."
+			echo "${script_name}: using '${_the_tool}' as ${tool_str}."
+		fi
+
+	else
+
+		echo "${script_name}: ${tool_str} search list is: ${search_list}."
+
+		# Search for a working tool from the search list.
+		_the_tool=$(select_tool "${search_list}" "${env_str}")
+
+		# Copy the result into the variable specified by found_var.
+		eval "${found_var}=\"${_the_tool}\""
+
+		# If we didn't find a working tool from the search list, throw a tantrum.
+		if [ -z "${_the_tool}" ]; then
+
+			echo "${script_name}: *** Could not find a ${tool_str} from the search list."
+
+			# Whether the tantrum is fatal depends on the is_required argument.
+			if [ "${is_required}" == "yes" ]; then
+				echo "${script_name}: *** A working ${tool_str} is required. Cannot continue."
+				exit 1
+			else
+				echo "${script_name}: *** Note that a ${tool_str} will not be available."
+
+				# Set the found_var variable to *something* so that the output
+				# makefile fragment contains a record that the tool wasn't found.
+				eval "${found_var}=\"${env_str}-not-found\""
+			fi
+		else
+			# A tool from the search list was found.
+			echo "${script_name}: found '${_the_tool}'."
+			echo "${script_name}: using '${_the_tool}' as ${tool_str}."
+		fi
+	fi
+}
+
+select_tool()
+{
+	local search_list env_str
+	local the_tool tool the_flags rval
+
+	# This is the list of tools to search for, and the order in which
+	# to search for them.
+	search_list="$1"
+
+	# This is the name of the environment variable associated with the tool. For
+	# example, if search_list is a list of C compilers, env_str will be "CC".
+	env_str="$2"
+
+	# Initialize our selected tool to empty.
+	the_tool=""
+
+	# Try each tool in the list and select the first one we find that works.
+	for tool in ${search_list}; do
+
+		# Map each tool (via its canonical environment variable form) to the set
+		# of options we should use to check that it is working and available.
+		the_flags=$(get_tool_checkflags "${env_str}")
+
+		# Check that the tool works with at least one of the flags in the_flags
+		# the_flags (or, if the_flags is empty, check that the tool exists).
+		rval=$(check_tool "${tool}" "${the_flags}")
+
+		# If check_tool() returns 0, we're done.
+		if [ "${rval}" == "0" ]; then
+			the_tool=${tool}
+			break
+		fi
+	done
+
+	# Return the selected tool.
+	echo "${the_tool}"
+}
+
+get_tool_checkflags()
+{
+	local env_str
+	local allflags flaglist
+
+	# The tool for which we will determine the flag/option to pass in
+	# when testing that the tool works. Notice that it's not actually
+	# the tool but rather its equivalent environment variable.
+	env_str="${1}"
+
+	# The default list of flags to use in most circumstances.
+	allflags="--version -V -h"
+
+	if [ "${os_name}" = "Linux" ]; then
+
+		# If we are on Linux, it is very likely that all the tools will respond
+		# to at least one of the usual flags.
+		flaglist="${allflags}"
+
+	else
+
+		# If we are on Darwin/OSX/BSD or something else, we sometimes skip flag
+		# checks. (Note that when the list of flags to check is empty, we end
+		# up testing for the existence of the tool instead.)
+		if   [ "${env_str}" = "AR" -o \
+		       "${env_str}" = "RANLIB" ]; then
+
+			# AR, RANLIB may not respond to the normal flags on Darwin/OSX/BSD,
+			# so all we can really do is check for their existence.
+			flaglist=""
+		else
+			# Even on Darwin/OSX/BSD, we expect that CC, CXX, FC, PYTHON will
+			# respond to the typical flag checklist.
+			flaglist="${allflags}"
+		fi
+	fi
+
+	echo "${flaglist}"
+}
+
+check_tool()
+{
+	local tool the_flags
+	local rval opt toolpath
+
+	# This is the name, or filepath, of the tool to check for.
+	tool="$1"
+
+	# Some command line options to try to determine that the tool works.
+	the_flags="$2"
+
+	# Start with the assuming that the tool doesn't work/exist.
+	rval=1
+
+	if [ -n "${the_flags}" ]; then
+
+		# If the list of flags to check non-empty, we will iterate through the
+		# list in search of a flag that works. Failure to find one that works
+		# means the tool doesn't work (or, if the user specified the tool via
+		# its environment variable, failure might mean that the tool doesn't
+		# even exist).
+
+		# Try each flag in the list of flags.
+		for opt in ${the_flags}; do
+
+			# See if the tool responds to the current flag.
+			${tool} ${opt} > /dev/null 2>&1
+
+			# If the tool responded to the flag with a nominal error code of
+			# 0, we found one that works and set rval accoringly.
+			if [ "$?" == 0 ]; then
+				rval=0
+				break
+			fi
+		done
+	else
+
+		# If the list of flags to check is empty, we interpret this as a
+		# request to instead check for the existence of the tool.
+
+		# Use 'which' to determine if the tool exists.
+		toolpath="$(which ${tool} 2> /dev/null)"
+
+		# If the tool doesn't exist, we set rval accordingly.
+		if [ -n "${toolpath}" ]; then
+			rval=0
+		fi
+	fi
+
+	# Return the error code.
+	echo "${rval}"
+}
+
 
 
 #
@@ -2568,24 +2777,13 @@ main()
 
 	# -- Find a python interpreter ---------------------------------------------
 
-	# Acquire the python search order. This may vary based on the os found
-	# above.
+	# Acquire the default python search order.
 	python_search_list=$(get_python_search_list)
 
-	echo "${script_name}: python interpeter search list is: ${python_search_list}."
-
-	# Find a working python interpreter.
-	found_python=$(select_tool "${python_search_list}" "${PYTHON}")
-
-	# If we didn't find any working python interpreters, we print an error
-	# message.
-	if [ -z "${found_python}" ]; then
-		echo "${script_name}: *** Could not find working python interperter! Cannot continue."
-		exit 1
-	fi
-
-	echo "${script_name}: using '${found_python}' python interpreter."
-
+	# Select a python interpreter from the default list, or from PYTHON if it
+	# refers to a valid binary.
+	select_tool_w_env "${python_search_list}" "${PYTHON}" "PYTHON" \
+	                  "python interpreter" "yes" found_python
 
 	# -- Check the python version ----------------------------------------------
 
@@ -2596,48 +2794,18 @@ main()
 
 	# -- Find a C compiler -----------------------------------------------------
 
-	# Acquire the compiler search order. This will vary based on the os found
-	# above.
+	# Acquire the default compiler search order. This will vary based on os_name.
 	cc_search_list=$(get_cc_search_list)
 
-	echo "${script_name}: C compiler search list is: ${cc_search_list}."
-
-	# Find a working C compiler.
-	found_cc=$(select_tool "${cc_search_list}" "${CC}")
-
-	# If we didn't find any working C compilers, we print an error message.
-	if [ -z "${found_cc}" ]; then
-		echo "${script_name}: *** Could not find working C compiler! Cannot continue."
-		exit 1
-	fi
-
-	echo "${script_name}: using '${found_cc}' C compiler."
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cc_search_list}" "${CC}" "CC" \
+	                  "C compiler" "yes" found_cc
 
 	# Also check the compiler to see if we are (cross-)compiling for Windows
 	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
 		is_win=yes
 	fi
-
-
-	# -- Find a C++ compiler ---------------------------------------------------
-
-	# Acquire the compiler search order. This will vary based on the os
-	# found above.
-	cxx_search_list=$(get_cxx_search_list)
-
-	echo "${script_name}: C++ compiler search list is: ${cxx_search_list}."
-
-	# Find a working C++ compiler. NOTE: We can reuse the select_tool()
-	# function since it is written in a way that is general-purpose.
-	found_cxx=$(select_tool "${cxx_search_list}" "${CXX}")
-
-	# If we didn't find any working C++ compilers, we print an error message.
-	if [ -z "${found_cxx}" ]; then
-		echo "${script_name}: Could not find working C++ compiler! C++ will not be available in sandbox."
-		found_cxx="c++notfound"
-	fi
-
-	echo "${script_name}: using '${found_cxx}' C++ compiler (for sandbox only)."
 
 
 	# -- Check the compiler version --------------------------------------------
@@ -2668,6 +2836,57 @@ main()
 		echo "${script_name}: configuration blacklist:"
 		echo "${script_name}:   ${config_blist}"
 	fi
+
+
+	# -- Find a C++ compiler ---------------------------------------------------
+
+	# Acquire the default C++ compiler search order. This will vary based on
+	# os_name.
+	cxx_search_list=$(get_cxx_search_list)
+
+	# Select a C compiler from the default list, or from CC if it refers to a
+	# valid binary.
+	select_tool_w_env "${cxx_search_list}" "${CXX}" "CXX" \
+	                  "C++ compiler" "no" found_cxx
+
+
+	# -- Find a Fortran compiler -----------------------------------------------
+
+	# Acquire the default Fortran compiler search order.
+	fc_search_list=$(get_fc_search_list)
+
+	# Select a Fortran compiler from the default list, or from FC if it refers
+	# to a valid binary.
+	# NOTE: A Fortran compiler is not necessary for building BLIS. The only
+	# reason we might want to query it is to detect the style of returning
+	# complex values from functions. The 'gnu' style returns complex values
+	# from functions normally, via the C language return statement, while the
+	# 'intel' style returns them in a "hidden" parameter (inserted by the
+	# compiler) that precedes all other function parameters.
+	select_tool_w_env "${fc_search_list}" "${FC}" "FC" \
+	                  "Fortran compiler" "no" found_fc
+
+
+	# -- Find a static library archiver ----------------------------------------
+
+	# Acquire the default archiver search order.
+	ar_search_list=$(get_ar_search_list)
+
+	# Select an archiver from the default list, or from AR if it refers
+	# to a valid binary.
+	select_tool_w_env "${ar_search_list}" "${AR}" "AR" \
+	                  "library archiver" "yes" found_ar
+
+
+	# -- Find an archive indexer -----------------------------------------------
+
+	# Acquire the default archive indexer search order.
+	ranlib_search_list=$(get_ranlib_search_list)
+
+	# Select an archive indexer from the default list, or from RANLIB if it
+	# refers to a valid binary.
+	select_tool_w_env "${ranlib_search_list}" "${RANLIB}" "RANLIB" \
+	                  "archive indexer" "yes" found_ranlib
 
 
 	# -- Read the configuration registry ---------------------------------------
@@ -3399,10 +3618,16 @@ main()
 		enable_sandbox_01=0
 	fi
 
-	# Check the method used for returning complex numbers
+	# Check the method used for returning complex numbers.
 	if [ "x${complex_return}" = "xdefault" ]; then
-		if [ -n "${FC}" ]; then
-			# Determine the complex return type from the given Fortran compiler
+
+		# If we prevoiusly found a Fortran compiler, let's query it to see what
+		# kind of complex return type it uses (gnu or intel). The 'gnu' style
+		# returns complex values from functions normally, via the C language
+		# return statement, while the 'intel' style returns them in a "hidden"
+		# parameter (inserted by the compiler) that precedes all other function
+		# parameters.
+		if [ -n "${found_fc}" ]; then
 
 			# Query the full vendor version string output. This includes the
 			# version number along with (potentially) a bunch of other textual
@@ -3411,8 +3636,7 @@ main()
 			# stdout. But it works for now.
 			vendor_string="$(${FC} --version 2>/dev/null)"
 
-			# Query the compiler "vendor" (ie: the compiler's simple name) and
-			# isolate the version number.
+			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
 			fc_vendor=$(echo "${vendor_string}" | egrep -o 'ifort|GNU' | { read first rest ; echo $first ; })
@@ -3445,23 +3669,19 @@ main()
 	# Variables that may contain forward slashes, such as paths, need extra
 	# escaping when used in sed commands. We insert those extra escape
 	# characters here so that the sed commands below do the right thing.
-	os_name_esc=$(echo     "${os_name}"     | sed 's/\//\\\//g')
-	prefix_esc=$(echo      "${prefix}"      | sed 's/\//\\\//g')
-	exec_prefix_esc=$(echo "${exec_prefix}" | sed 's/\//\\\//g')
-	libdir_esc=$(echo      "${libdir}"      | sed 's/\//\\\//g')
-	includedir_esc=$(echo  "${includedir}"  | sed 's/\//\\\//g')
-	sharedir_esc=$(echo    "${sharedir}"    | sed 's/\//\\\//g')
-	dist_path_esc=$(echo   "${dist_path}"   | sed 's/\//\\\//g')
-	cc_esc=$(echo          "${found_cc}"    | sed 's/\//\\\//g')
-	cxx_esc=$(echo         "${found_cxx}"   | sed 's/\//\\\//g')
-	python_esc=$(echo      "${found_python}"    | sed 's/\//\\\//g')
-	#sandbox_relpath_esc=$(echo "${sandbox_relpath}" | sed 's/\//\\\//g')
+	os_name_esc=$(echo     "${os_name}"      | sed 's/\//\\\//g')
+	prefix_esc=$(echo      "${prefix}"       | sed 's/\//\\\//g')
+	exec_prefix_esc=$(echo "${exec_prefix}"  | sed 's/\//\\\//g')
+	libdir_esc=$(echo      "${libdir}"       | sed 's/\//\\\//g')
+	includedir_esc=$(echo  "${includedir}"   | sed 's/\//\\\//g')
+	sharedir_esc=$(echo    "${sharedir}"     | sed 's/\//\\\//g')
+	dist_path_esc=$(echo   "${dist_path}"    | sed 's/\//\\\//g')
+	cc_esc=$(echo          "${found_cc}"     | sed 's/\//\\\//g')
+	cxx_esc=$(echo         "${found_cxx}"    | sed 's/\//\\\//g')
+	ar_esc=$(echo          "${found_ar}"     | sed 's/\//\\\//g')
+	ranlib_esc=$(echo      "${found_ranlib}" | sed 's/\//\\\//g')
+	python_esc=$(echo      "${found_python}" | sed 's/\//\\\//g')
 
-	# For RANLIB, if the variable is not set, we use a default value of
-	# 'ranlib'.
-	ranlib_esc=$(echo "${RANLIB:-ranlib}" | sed 's/\//\\\//g')
-	# For AR, if the variable is not set, we use a default value of 'ar'.
-	ar_esc=$(echo "${AR:-ar}" | sed 's/\//\\\//g')
 	libpthread_esc=$(echo "${LIBPTHREAD--lpthread}" | sed 's/\//\\\//g')
 	cflags_preset_esc=$(echo "${cflags_preset}" | sed 's/\//\\\//g')
 	ldflags_preset_esc=$(echo "${ldflags_preset}" | sed 's/\//\\\//g')
@@ -3577,8 +3797,8 @@ main()
 		| sed -e "s/@aocc_older_than_3_0_0@/${aocc_older_than_3_0_0}/g" \
 		| sed -e "s/@CC@/${cc_esc}/g" \
 		| sed -e "s/@CXX@/${cxx_esc}/g" \
-		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@AR@/${ar_esc}/g" \
+		| sed -e "s/@RANLIB@/${ranlib_esc}/g" \
 		| sed -e "s/@PYTHON@/${python_esc}/g" \
 		| sed -e "s/@libpthread@/${libpthread_esc}/g" \
 		| sed -e "s/@cflags_preset@/${cflags_preset_esc}/g" \
