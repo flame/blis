@@ -257,12 +257,12 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 		// ukernel id provided by the caller.
 		switch ( ukr_id )
 		{
-			case BLIS_GEMM_UKR:       ukrs = &cntx_ukrs[ BLIS_GEMM_VIR_UKR ];
-			case BLIS_GEMMTRSM_L_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_L_VIR_UKR ];
-			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ];
-			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ];
-			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ];
-		    default:                  ukrs = NULL;
+			case BLIS_GEMM_UKR:       ukrs = &cntx_ukrs[ BLIS_GEMM_VIR_UKR ]; break;
+			case BLIS_GEMMTRSM_L_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_L_VIR_UKR ]; break;
+			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ]; break;
+			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ]; break;
+			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ]; break;
+		    default:                  ukrs = NULL; break;
 		};
 
 		if ( ukrs )
