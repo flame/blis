@@ -1633,20 +1633,46 @@ void bli_thread_init_rntm_from_env
 	// Try to read BLIS_NUM_THREADS first.
 	nt = bli_env_get_var( "BLIS_NUM_THREADS", -1 );
 
-	// If BLIS_NUM_THREADS was not set, try to read OMP_NUM_THREADS.
-	if ( nt == -1 )
-		nt = bli_env_get_var( "OMP_NUM_THREADS", -1 );
 
 #ifdef BLIS_ENABLE_OPENMP
-	// If both environment variables are not set -
-	// number of threads can also be set by the application by calling omp_set_num_threads(nt)
-	// The next parallel region when encountered will run with number of threads set by the above API.
-	// We can know about the number of threads by using the API "omp_get_max_threads()"
-	if (nt == -1) nt = omp_get_max_threads();
-	// If application is multithreaded and number of threads is set using omp_set_num_threads(nt)
+
+	// Scenarios:
+	// 1. If BLIS_NUM_THREADS is set with valid value, set the nt using omp_set_num_threads(nt)
+	// so that this value can be fetched inside BLIS API as well.
+	// 2. If BLIS_NUM_THREADS is not set, then if Application is multithreaded and issued
+	// omp_set_num_threads(nt) with desired number of threads,
+	// omp_get_max_threads() API will fetch the number of threads set earlier.
+	// 3. If BLIS_NUM_THREADS is not set, omp_set_num_threads(nt) is not called by the application,
+	// but only OMP_NUM_THREADS is set,
+	// omp_get_max_threads() API will fetch the value of OMP_NUM_THREADS.
+	// 4. If both environment variables are not set, or if they are set with invalid values, and
+	// omp_set_num_threads(nt) is not issued by application,
+	// omp_get_max_threads() API will return the number of the cores in the current context.
+	//
 	// BLIS will rntm->num_threads will also get initialized with the same value.
 	// However if omp_set_nested is false - BLIS APIs called from parallel threads will run in sequential.
 	// But if nested parallelism is enabled - Then each application will launch MT BLIS.
+	//
+	// Order of precedence used for number of threads:
+	// 1. valid value set for BLIS_NUM_THREADS environment variable
+	// 2. omp_set_num_threads(nt) issued by the application
+	// 3. valid value set for OMP_NUM_THREADS environment variable
+	// 4. Number of cores
+	//
+	// Note: If nt is not a valid value for omp_set_num_threads(nt) API, number of threads would be set to 1.
+	// omp_get_max_threads() API will return 1.
+	//
+	// OMP_NUM_THREADS environment variable is applicable only when OpenMP is enabled.
+
+	if(nt > 0)
+	{
+		omp_set_num_threads(nt);
+	}
+	else
+	{
+		nt = omp_get_max_threads();
+	}
+
 #endif
 	// Read the environment variables for the number of threads (ways
 	// of parallelism) for each individual loop.

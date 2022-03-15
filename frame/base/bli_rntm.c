@@ -49,8 +49,22 @@ void bli_rntm_init_from_global( rntm_t* rntm )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+	// Fetch the number of threads based on the order of precedence,
+	// or the latest value of number of threads,
+	// if set by the Application using omp_set_num_threads(nt) API.
+#ifdef BLIS_ENABLE_OPENMP
+        dim_t n_threads = omp_get_max_threads();
+#endif
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
+
+	// Update the latest value of number of threads into global rntm structure,
+	// before copying into local rntm structure. This updated value will be
+	// used in the subsequent parallel regions.
+#ifdef BLIS_ENABLE_OPENMP
+        global_rntm.num_threads = n_threads;
+#endif
 
 	*rntm = global_rntm;
 
