@@ -534,6 +534,23 @@ execute_process(
         OUTPUT_VARIABLE CMD_OUTPUT)
 message( STATUS "Generating monolithic header file :" ${CMD_OUTPUT})
 
+# Logic to generate the cblas.h in include folder.
+set(CBLAS_H "cblas.h")
+# Arguements for python script
+set(C_COMMENT "-c")
+set(VERBOSE "-v1")
+set(INPUT "${CMAKE_SOURCE_DIR}/frame/compat/cblas/src/${CBLAS_H}")
+set(OUTPUT "${CMAKE_SOURCE_DIR}/include/${TARGET_ARCH}/${CBLAS_H}")
+set(TEMP_DIR "${INCLUDE}")
+set(DIR_H_PATH "${HEADER_PATH}")
+
+# Run python script to generate monolithic header at configuration time
+execute_process(
+        COMMAND ${PYTHON_EXE} ${FLATTEN_PY} "${C_COMMENT}" "${VERBOSE}" "${INPUT}" "${OUTPUT}" "${TEMP_DIR}" "${DIR_H_PATH}"
+        RESULT_VARIABLE CMD_RESULT
+        OUTPUT_VARIABLE CMD_OUTPUT)
+message( STATUS "Generating monolithic cblas header file :" ${CMD_OUTPUT})
+
 # setting the blis version string
 file (STRINGS "version" BLIS_VERSION)
 set(BLIS_VERSION_STRING ${BLIS_VERSION})
