@@ -138,6 +138,8 @@ DOTXF_KER_PROT( dcomplex,   z, dotxf_zen_int_6 )
 DOTXF_KER_PROT( scomplex,   c, dotxf_zen_int_6 )
 // dotxaxpyf (intrinsics)
 DOTXAXPYF_KER_PROT( double,   d, dotxaxpyf_zen_int_8 )
+DOTXAXPYF_KER_PROT( scomplex, c, dotxaxpyf_zen_int_8 )
+DOTXAXPYF_KER_PROT( dcomplex, z, dotxaxpyf_zen_int_8 )
 
 // -- level-2 ----------------------------------------------------------------
 

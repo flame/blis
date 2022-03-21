@@ -80,12 +80,15 @@ void bli_cntx_init_zen( cntx_t* cntx )
     // Update the context with optimized level-1f kernels.
     bli_cntx_set_l1f_kers
     (
-      10,
+      12,
       // axpyf
       BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
       BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
       BLIS_AXPYF_KER,     BLIS_SCOMPLEX,  bli_caxpyf_zen_int_5,
       BLIS_AXPYF_KER,     BLIS_DCOMPLEX, bli_zaxpyf_zen_int_5,
+      // dotxaxpyf
+      BLIS_DOTXAXPYF_KER, BLIS_SCOMPLEX, bli_cdotxaxpyf_zen_int_8,
+      BLIS_DOTXAXPYF_KER, BLIS_DCOMPLEX, bli_zdotxaxpyf_zen_int_8,
       // dotxf
       BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
       BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,

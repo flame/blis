@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,6 +39,12 @@ typedef union{
 	__m256d v;
 	double d[4] __attribute__((aligned(64)));
 }vec;
+
+typedef union
+{
+    __m256  v;
+    float   f[8] __attribute__((aligned(64)));
+} v8sf_t;
 
 /**
  * bli_pre_hemv_lower_8x8 is a helper function which computes
@@ -467,8 +473,9 @@ void bli_ddotxaxpyf_zen_int_8
 	/* A is m x n.                  */
 	/* y = beta * y + alpha * A^T w; */
 	/* z =        z + alpha * A   x; */
-	if ((inca == 1) && (incw == 1) && (incx == 1)
-			&& (incy == 1) && (incz == 1) && (b_n == 8))
+	if ( ( bli_cpuid_is_avx_supported() == TRUE ) && 
+	     (inca == 1) && (incw == 1) && (incx == 1)
+	     && (incy == 1) && (incz == 1) && (b_n == 8) )
 	{
 		 __m256d r0, r1;
 		 r0 = _mm256_setzero_pd();
@@ -703,6 +710,825 @@ void bli_ddotxaxpyf_zen_int_8
 		PASTECH(d,dotxf_ker_ft) kfp_df 	=
 			bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
 		PASTECH(d,axpyf_ker_ft) kfp_af 	=
+			bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+
+		kfp_df
+			(
+			 conjat,
+			 conjw,
+			 m,
+			 b_n,
+			 alpha,
+			 a, inca, lda,
+			 w, incw,
+			 beta,
+			 y, incy,
+			 cntx
+			);
+
+		kfp_af
+			(
+			 conja,
+			 conjx,
+			 m,
+			 b_n,
+			 alpha,
+			 a, inca, lda,
+			 x, incx,
+			 z, incz,
+			 cntx
+			);
+	}
+}
+
+/**
+ * zdotxaxpyf kernel performs dot and apxy function together.
+ * y := conj(beta) * y + conj(alpha) * conj(A)^t * conj(w)      (dotxf)
+ * z := z + alpha * conj(A) * conj(x)                           (axpyf)
+ * where,
+ *      A is an m x b matrix.
+ *      w, z are vectors of length m.
+ *      x, y are vectors of length b.
+ *      alpha, beta are scalars
+ */
+void bli_zdotxaxpyf_zen_int_8
+(
+ conj_t              conjat,
+ conj_t              conja,
+ conj_t              conjw,
+ conj_t              conjx,
+ dim_t               m,
+ dim_t               b_n,
+ dcomplex*  restrict alpha,
+ dcomplex*  restrict a, inc_t inca, inc_t lda,
+ dcomplex*  restrict w, inc_t incw,
+ dcomplex*  restrict x, inc_t incx,
+ dcomplex*  restrict beta,
+ dcomplex*  restrict y, inc_t incy,
+ dcomplex*  restrict z, inc_t incz,
+ cntx_t*	restrict cntx
+ )
+{
+	// 	  A: m x b
+	// w, z: m
+	// x, y: b
+	//
+	// y = beta * y + alpha * A^T w;
+	// z =        z + alpha * A   x;
+	if ( ( bli_cpuid_is_avx_supported() == TRUE ) &&
+	     ( inca == 1 ) && ( incw == 1 ) && ( incx == 1 )
+	     && ( incy == 1 ) && ( incz == 1 ) && ( b_n == 4 ) )
+	{
+		// Temporary rho buffer holds computed dot product result
+		dcomplex 	rho[ 4 ];
+
+		// chi? variables to hold scaled scaler values from x vector
+		dcomplex	chi0;
+		dcomplex	chi1;
+		dcomplex	chi2;
+		dcomplex	chi3;
+
+		// If beta is zero, clear y
+		// Else, scale by beta
+		if ( PASTEMAC(z,eq0)( *beta ) )
+		{
+			for ( dim_t i = 0; i < 4; ++i )
+			{
+				PASTEMAC(z,set0s)( y[i] );
+			}
+		}
+		else
+		{
+			for ( dim_t i = 0; i < 4; ++i )
+			{
+				PASTEMAC(z,scals)( *beta, y[i] );
+			}
+		}
+
+		// If the vectors are empty or if alpha is zero, return early
+		if ( bli_zero_dim1( m ) || PASTEMAC(z,eq0)( *alpha ) ) return;
+
+		// Initialize rho vector to 0
+		for ( dim_t i = 0; i < 4; ++i ) PASTEMAC(z,set0s)( rho[i] );
+
+		// Set conj use variable for dot operation
+		conj_t conjdot_use = conjw;
+		if ( bli_is_conj( conjat ) )
+		{
+			bli_toggle_conj( &conjdot_use );
+		}
+
+		// Set conj use variable for dotxf operation, scalar
+		dim_t conjdotxf = 1;
+		if ( bli_is_conj( conjdot_use ) )
+		{
+			conjdotxf = -1;
+		}
+
+		// Set conj use variable for axpyf operation, scalar
+		dim_t conjaxpyf = 1;
+		if ( bli_is_conj( conja ) )
+		{
+			conjaxpyf = -1;
+		}
+
+		// Store each element of x vector in a scalar and apply conjx
+		if( bli_is_noconj( conjx ) )
+		{
+			chi0 = *( x + 0*incx );
+			chi1 = *( x + 1*incx );
+			chi2 = *( x + 2*incx );
+			chi3 = *( x + 3*incx );
+		}
+		else
+		{
+			bli_zcopycjs( conjx, *( x + 0*incx ), chi0 );
+			bli_zcopycjs( conjx, *( x + 1*incx ), chi1 );
+			bli_zcopycjs( conjx, *( x + 2*incx ), chi2 );
+			bli_zcopycjs( conjx, *( x + 3*incx ), chi3 );
+		}
+
+		// Scale each chi scalar by alpha
+		bli_zscals( *alpha, chi0 );
+		bli_zscals( *alpha, chi1 );
+		bli_zscals( *alpha, chi2 );
+		bli_zscals( *alpha, chi3 );
+
+		dim_t row = 0;
+		dim_t iter = m / 2;
+		dim_t rem = m % 2;
+		if (iter)
+		{
+			vec x0R, x1R, x2R, x3R;     // x?R holds real part of x[?]
+			vec x0I, x1I, x2I, x3I;     // x?I hold real part of x[?]
+			vec a_tile0, a_tile1;       // a_tile? holds columns of a
+			vec temp1, temp2, temp3;    // temp? registers for intermediate op
+			vec wR, wI;                 // holds real & imag components of w
+			vec z_vec;                  // holds the z vector
+
+			// rho? registers hold results of fmadds for dotxf operation
+			vec rho0, rho1, rho2, rho3;
+			vec rho4, rho5, rho6, rho7;
+
+			// For final computation, based on conjdot_use
+			// sign of imaginary component needs to be toggled
+			__m256d no_conju = _mm256_setr_pd( -1,  1, -1,  1 );
+			__m256d conju    = _mm256_setr_pd(  1, -1,  1, -1 );
+
+			// Clear the temp registers
+			temp1.v = _mm256_setzero_pd();
+			temp2.v = _mm256_setzero_pd();
+			temp3.v = _mm256_setzero_pd();
+
+			// Clear rho registers
+			// Once micro tile is computed, horizontal addition
+			// of all rho's will provide us with the result of
+			// dotxf opereation
+			rho0.v = _mm256_setzero_pd();
+			rho1.v = _mm256_setzero_pd();
+			rho2.v = _mm256_setzero_pd();
+			rho3.v = _mm256_setzero_pd();
+			rho4.v = _mm256_setzero_pd();
+			rho5.v = _mm256_setzero_pd();
+			rho6.v = _mm256_setzero_pd();
+			rho7.v = _mm256_setzero_pd();
+
+			// Broadcast real & imag parts of 4 elements of x
+		 	// to perform axpyf operation with 4x8 tile of A
+			x0R.v = _mm256_broadcast_sd( &chi0.real );	// real part of x0
+			x0I.v = _mm256_broadcast_sd( &chi0.imag );	// imag part of x0
+			x1R.v = _mm256_broadcast_sd( &chi1.real );	// real part of x1
+			x1I.v = _mm256_broadcast_sd( &chi1.imag );	// imag part of x1
+			x2R.v = _mm256_broadcast_sd( &chi2.real );	// real part of x2
+			x2I.v = _mm256_broadcast_sd( &chi2.imag );	// imag part of x2
+			x3R.v = _mm256_broadcast_sd( &chi3.real );	// real part of x3
+			x3I.v = _mm256_broadcast_sd( &chi3.imag );	// imag part of x3
+
+			for ( ; ( row + 1 ) < m; row += 2)
+			{
+				// Load first two columns of A
+				// a_tile0.v -> a00R a00I a10R a10I
+				// a_tile1.v -> a01R a01I a11R a11I
+				a_tile0.v = _mm256_loadu_pd( (double *)&a[row + 0 * lda] );
+				a_tile1.v = _mm256_loadu_pd( (double *)&a[row + 1 * lda] );
+
+				temp1.v = _mm256_mul_pd( a_tile0.v, x0R.v );
+				temp2.v = _mm256_mul_pd( a_tile0.v, x0I.v );
+
+				temp1.v = _mm256_fmadd_pd( a_tile1.v, x1R.v, temp1.v );
+				temp2.v = _mm256_fmadd_pd( a_tile1.v, x1I.v, temp2.v );
+
+				// Load w vector
+				// wR.v                 -> w0R w0I w1R w1I
+				// wI.v ( shuf wR.v )   -> w0I w0I w1I w1I
+				// wR.v ( shuf wR.v )   -> w0R w0R w1R w1R
+				wR.v =   _mm256_loadu_pd( (double *)&w[row] );
+				wI.v = _mm256_permute_pd( wR.v, 15 );
+				wR.v = _mm256_permute_pd( wR.v, 0 );
+
+				rho0.v = _mm256_fmadd_pd( a_tile0.v, wR.v, rho0.v);
+				rho4.v = _mm256_fmadd_pd( a_tile0.v, wI.v, rho4.v);
+
+				rho1.v = _mm256_fmadd_pd( a_tile1.v, wR.v, rho1.v);
+				rho5.v = _mm256_fmadd_pd( a_tile1.v, wI.v, rho5.v);
+
+				// Load 3rd and 4th columns of A
+				// a_tile0.v -> a20R a20I a30R a30I
+				// a_tile1.v -> a21R a21I a31R a31I
+				a_tile0.v = _mm256_loadu_pd( (double *)&a[row + 2 * lda] );
+				a_tile1.v = _mm256_loadu_pd( (double *)&a[row + 3 * lda] );
+
+				temp1.v = _mm256_fmadd_pd( a_tile0.v, x2R.v, temp1.v );
+				temp2.v = _mm256_fmadd_pd( a_tile0.v, x2I.v, temp2.v );
+
+				temp1.v = _mm256_fmadd_pd( a_tile1.v, x3R.v, temp1.v );
+				temp2.v = _mm256_fmadd_pd( a_tile1.v, x3I.v, temp2.v );
+
+				rho2.v = _mm256_fmadd_pd( a_tile0.v, wR.v, rho2.v);
+				rho6.v = _mm256_fmadd_pd( a_tile0.v, wI.v, rho6.v);
+
+				rho3.v = _mm256_fmadd_pd( a_tile1.v, wR.v, rho3.v);
+				rho7.v = _mm256_fmadd_pd( a_tile1.v, wI.v, rho7.v);
+
+				// Load z vector
+				z_vec.v = _mm256_loadu_pd( (double *)&z[row] );
+
+				// Permute the result and alternatively add-sub final values
+				if( bli_is_noconj( conja ) )
+				{
+					temp2.v = _mm256_permute_pd(temp2.v, 5);
+					temp3.v = _mm256_addsub_pd(temp1.v, temp2.v);
+				}
+				else
+				{
+					temp1.v = _mm256_permute_pd( temp1.v, 5 );
+					temp3.v = _mm256_addsub_pd( temp2.v, temp1.v );
+					temp3.v = _mm256_permute_pd( temp3.v, 5 );
+				}
+
+				// Add & store result to z_vec
+				z_vec.v = _mm256_add_pd( temp3.v, z_vec.v );
+				_mm256_storeu_pd( (double *)&z[row], z_vec.v );
+			}
+
+			// Swapping position of real and imag component
+			// for horizontal addition to get the final
+			// dot product computation
+			// rho register are holding computation which needs
+			// to be arranged in following manner.
+			// a0R * x0I | a0I * x0I | a1R * x1I | a1I * x1R
+			//                      ||
+			//                      \/
+			// a0I * x0I | a0R * x0I | a1I * x1R | a1R * x1I
+
+			rho4.v = _mm256_permute_pd(rho4.v, 0x05);
+			rho5.v = _mm256_permute_pd(rho5.v, 0x05);
+			rho6.v = _mm256_permute_pd(rho6.v, 0x05);
+			rho7.v = _mm256_permute_pd(rho7.v, 0x05);
+
+			// Negating imaginary part for computing
+			// the final result of dcomplex multiplication
+			if ( bli_is_noconj( conjdot_use ) )
+			{
+				rho4.v = _mm256_mul_pd(rho4.v, no_conju);
+				rho5.v = _mm256_mul_pd(rho5.v, no_conju);
+				rho6.v = _mm256_mul_pd(rho6.v, no_conju);
+				rho7.v = _mm256_mul_pd(rho7.v, no_conju);
+			}
+			else
+			{
+				rho4.v = _mm256_mul_pd(rho4.v, conju);
+				rho5.v = _mm256_mul_pd(rho5.v, conju);
+				rho6.v = _mm256_mul_pd(rho6.v, conju);
+				rho7.v = _mm256_mul_pd(rho7.v, conju);
+			}
+
+			rho0.v = _mm256_add_pd(rho0.v, rho4.v);
+			rho1.v = _mm256_add_pd(rho1.v, rho5.v);
+			rho2.v = _mm256_add_pd(rho2.v, rho6.v);
+			rho3.v = _mm256_add_pd(rho3.v, rho7.v);
+
+			// rho0 & rho1 hold final dot product
+			// result of 4 dcomplex elements
+			rho0.d[0] += rho0.d[2];
+			rho0.d[1] += rho0.d[3];
+
+			rho0.d[2] = rho1.d[0] + rho1.d[2];
+			rho0.d[3] = rho1.d[1] + rho1.d[3];
+
+			rho1.d[0] = rho2.d[0] + rho2.d[2];
+			rho1.d[1] = rho2.d[1] + rho2.d[3];
+
+			rho1.d[2] = rho3.d[0] + rho3.d[2];
+			rho1.d[3] = rho3.d[1] + rho3.d[3];
+
+			// Storing the computed dot product
+			// in temp buffer rho for further computation.
+			_mm256_storeu_pd( (double *)rho, rho0.v );
+			_mm256_storeu_pd( (double *)(rho+2) , rho1.v );
+		}
+
+		// To handle the remaining cases
+		if ( rem )
+		{
+			PRAGMA_SIMD
+				for ( dim_t p = row; p < m; ++p )
+				{
+					const dcomplex a0c = a[p + 0 * lda];
+					const dcomplex a1c = a[p + 1 * lda];
+					const dcomplex a2c = a[p + 2 * lda];
+					const dcomplex a3c = a[p + 3 * lda];
+
+					// dot
+					dcomplex r0c = rho[0];
+					dcomplex r1c = rho[1];
+					dcomplex r2c = rho[2];
+					dcomplex r3c = rho[3];
+
+					dcomplex w0c = w[p];
+
+					r0c.real += a0c.real * w0c.real - a0c.imag * w0c.imag
+					            * conjdotxf;
+					r0c.imag += a0c.imag * w0c.real + a0c.real * w0c.imag
+					            * conjdotxf;
+					r1c.real += a1c.real * w0c.real - a1c.imag * w0c.imag
+					            * conjdotxf;
+					r1c.imag += a1c.imag * w0c.real + a1c.real * w0c.imag
+					            * conjdotxf;
+					r2c.real += a2c.real * w0c.real - a2c.imag * w0c.imag
+					            * conjdotxf;
+					r2c.imag += a2c.imag * w0c.real + a2c.real * w0c.imag
+					            * conjdotxf;
+					r3c.real += a3c.real * w0c.real - a3c.imag * w0c.imag
+					            * conjdotxf;
+					r3c.imag += a3c.imag * w0c.real + a3c.real * w0c.imag
+					            * conjdotxf;
+
+					rho[0] = r0c;
+					rho[1] = r1c;
+					rho[2] = r2c;
+					rho[3] = r3c;
+
+					// axpy
+					dcomplex z0c = z[p];
+
+					z0c.real += chi0.real * a0c.real - chi0.imag * a0c.imag
+					            * conjaxpyf;
+					z0c.real += chi1.real * a1c.real - chi1.imag * a1c.imag
+					            * conjaxpyf;
+					z0c.real += chi2.real * a2c.real - chi2.imag * a2c.imag
+					            * conjaxpyf;
+					z0c.real += chi3.real * a3c.real - chi3.imag * a3c.imag
+					            * conjaxpyf;
+					z0c.imag += chi0.imag * a0c.real + chi0.real * a0c.imag
+					            * conjaxpyf;
+					z0c.imag += chi1.imag * a1c.real + chi1.real * a1c.imag
+					            * conjaxpyf;
+					z0c.imag += chi2.imag * a2c.real + chi2.real * a2c.imag
+					            * conjaxpyf;
+					z0c.imag += chi3.imag * a3c.real + chi3.real * a3c.imag
+					            * conjaxpyf;
+
+					z[p] = z0c;
+				}
+		}
+
+		// Conjugating the final result if conjat
+		if ( bli_is_conj( conjat ) )
+		{
+			for ( dim_t i = 0; i < 4; ++i )
+			{
+				PASTEMAC(z,conjs)( rho[i] );
+			}
+		}
+
+		// Scaling the dot product result with alpha
+		// and adding the result to vector y
+		for ( dim_t i = 0; i < 4; ++i )
+		{
+			PASTEMAC(z,axpys)( *alpha, rho[i], y[i] );
+		}
+	}
+	else
+	{
+		// For non-unit increments
+		/* Query the context for the kernel function pointer. */
+		const num_t dt     = PASTEMAC(z,type);
+		PASTECH(z,dotxf_ker_ft) kfp_df 	=
+			bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
+		PASTECH(z,axpyf_ker_ft) kfp_af 	=
+			bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
+
+		kfp_df
+			(
+			 conjat,
+			 conjw,
+			 m,
+			 b_n,
+			 alpha,
+			 a, inca, lda,
+			 w, incw,
+			 beta,
+			 y, incy,
+			 cntx
+			);
+
+		kfp_af
+			(
+			 conja,
+			 conjx,
+			 m,
+			 b_n,
+			 alpha,
+			 a, inca, lda,
+			 x, incx,
+			 z, incz,
+			 cntx
+			);
+	}
+}
+
+/**
+ * cdotxaxpyf kernel performs dot and apxy function together.
+ * y := conj(beta) * y + conj(alpha) * conj(A)^t * conj(w)      (dotxf)
+ * z := z + alpha * conj(A) * conj(x)                           (axpyf)
+ * where,
+ *      A is an m x b matrix.
+ *      w, z are vectors of length m.
+ *      x, y are vectors of length b.
+ *      alpha, beta are scalars
+ */
+void bli_cdotxaxpyf_zen_int_8
+(
+ conj_t              conjat,
+ conj_t              conja,
+ conj_t              conjw,
+ conj_t              conjx,
+ dim_t               m,
+ dim_t               b_n,
+ scomplex*  restrict alpha,
+ scomplex*  restrict a, inc_t inca, inc_t lda,
+ scomplex*  restrict w, inc_t incw, 
+ scomplex*  restrict x, inc_t incx,
+ scomplex*  restrict beta,
+ scomplex*  restrict y, inc_t incy,
+ scomplex*  restrict z, inc_t incz,
+ cntx_t*	restrict cntx
+ )
+{
+	//    A: m x b
+	// w, z: m
+	// x, y: b
+	//
+	// y = beta * y + alpha * A^T w;
+	// z =        z + alpha * A   x;
+	if ( ( bli_cpuid_is_avx_supported() == TRUE ) &&
+	     ( inca == 1 ) && ( incw == 1 ) && ( incx == 1 )
+	     && ( incy == 1 ) && ( incz == 1 ) && ( b_n == 4 ) )
+	{
+		// Temporary rho buffer holds computed dot product result
+		scomplex rho[ 4 ];
+
+		// chi? variables to hold scaled scaler values from x vector
+		scomplex    chi0;
+		scomplex    chi1;
+		scomplex    chi2;
+		scomplex    chi3;
+
+		// If beta is zero, clear y
+		// Else, scale by beta
+		if ( PASTEMAC(c,eq0)( *beta ) )
+		{
+			for ( dim_t i = 0; i < 4; ++i )
+			{
+				PASTEMAC(c,set0s)( y[i] );
+			}
+		}
+		else
+		{
+			for ( dim_t i = 0; i < 4; ++i )
+			{
+				PASTEMAC(c,scals)( *beta, y[i] );
+			}
+		}
+
+		// If the vectors are empty or if alpha is zero, return early
+		if ( bli_zero_dim1( m ) || PASTEMAC(c,eq0)( *alpha ) ) return;
+
+		// Initialize rho vector to 0
+		for ( dim_t i = 0; i < 4; ++i ) PASTEMAC(c,set0s)( rho[i] );
+
+		// Set conj use variable for dot operation
+		conj_t conjdot_use = conjw;
+		if ( bli_is_conj( conjat ) )
+		{
+			bli_toggle_conj( &conjdot_use );
+		}
+
+		// Set conj use variable for dotxf operation, scalar
+		dim_t conjdotxf = 1;
+		if ( bli_is_conj( conjdot_use ) )
+		{
+			conjdotxf = -1;
+		}
+
+		// Set conj use variable for axpyf operation, scalar
+		dim_t conjaxpyf = 1;
+		if ( bli_is_conj( conja ) )
+		{
+			conjaxpyf = -1;
+		}
+
+		// Store each element of x vector in a scalar and apply conjx
+		if( bli_is_noconj( conjx ) )
+		{
+			chi0 = *( x + 0*incx );
+			chi1 = *( x + 1*incx );
+			chi2 = *( x + 2*incx );
+			chi3 = *( x + 3*incx );
+		}
+		else
+		{
+			bli_ccopycjs( conjx, *( x + 0*incx ), chi0 );
+			bli_ccopycjs( conjx, *( x + 1*incx ), chi1 );
+			bli_ccopycjs( conjx, *( x + 2*incx ), chi2 );
+			bli_ccopycjs( conjx, *( x + 3*incx ), chi3 );
+		}
+
+		// Scale each chi scalar by alpha
+		bli_cscals( *alpha, chi0 );
+		bli_cscals( *alpha, chi1 );
+		bli_cscals( *alpha, chi2 );
+		bli_cscals( *alpha, chi3 );
+
+		dim_t i = 0;
+		dim_t iter = m / 4;
+		dim_t rem = m % 4;
+		if (iter)
+		{
+			v8sf_t x0R, x1R, x2R, x3R;     // x?R holds real part of x[?]
+			v8sf_t x0I, x1I, x2I, x3I;     // x?I hold real part of x[?]
+			v8sf_t a_tile0, a_tile1;       // a_tile? holds columns of a
+			v8sf_t temp1, temp2, temp3;    // temp? registers for intermediate op
+			v8sf_t wR, wI;                 // holds real & imag components of w
+			v8sf_t z_vec;                  // holds the z vector
+
+			// For final computation, based on conjdot_use
+			// sign of imaginary component needs to be toggled
+			__m256 no_conju = _mm256_setr_ps( -1,  1, -1,  1, -1,  1, -1,  1 );
+			__m256 conju    = _mm256_setr_ps(  1, -1,  1, -1,  1, -1,  1, -1 );
+
+			// Clear the temp registers
+			temp1.v = _mm256_setzero_ps();
+			temp2.v = _mm256_setzero_ps();
+			temp3.v = _mm256_setzero_ps();
+
+			// Clear rho registers
+			// Once micro tile is computed, horizontal addition
+			// of all rho's will provide us with the result of
+			// dotxf opereation
+			__m256 rho0v; rho0v = _mm256_setzero_ps();
+			__m256 rho1v; rho1v = _mm256_setzero_ps();
+			__m256 rho2v; rho2v = _mm256_setzero_ps();
+			__m256 rho3v; rho3v = _mm256_setzero_ps();
+
+			__m256 rho4v; rho4v = _mm256_setzero_ps();
+			__m256 rho5v; rho5v = _mm256_setzero_ps();
+			__m256 rho6v; rho6v = _mm256_setzero_ps();
+			__m256 rho7v; rho7v = _mm256_setzero_ps();
+
+			// Broadcast real & imag parts of 4 elements of x
+		 	// to perform axpyf operation with 4x8 tile of A
+			x0R.v = _mm256_broadcast_ss( &chi0.real );	// real part of x0
+			x0I.v = _mm256_broadcast_ss( &chi0.imag );	// imag part of x0
+			x1R.v = _mm256_broadcast_ss( &chi1.real );	// real part of x1
+			x1I.v = _mm256_broadcast_ss( &chi1.imag );	// imag part of x1
+			x2R.v = _mm256_broadcast_ss( &chi2.real );	// real part of x2
+			x2I.v = _mm256_broadcast_ss( &chi2.imag );	// imag part of x2
+			x3R.v = _mm256_broadcast_ss( &chi3.real );	// real part of x3
+			x3I.v = _mm256_broadcast_ss( &chi3.imag );	// imag part of x3
+
+			for ( ; ( i + 3 ) < m; i += 4)
+			{
+				// Load first two columns of A
+				// a_tile0.v -> a00R a00I a10R a10I a20R a20I a30R a30I
+				// a_tile1.v -> a01R a01I a11R a11I a21R a21I a31R a31I
+				a_tile0.v = _mm256_loadu_ps( (float *)&a[i + 0 * lda] );
+				a_tile1.v = _mm256_loadu_ps( (float *)&a[i + 1 * lda] );
+
+				temp1.v = _mm256_mul_ps( a_tile0.v, x0R.v );
+				temp2.v = _mm256_mul_ps( a_tile0.v, x0I.v );
+
+				temp1.v = _mm256_fmadd_ps( a_tile1.v, x1R.v, temp1.v );
+				temp2.v = _mm256_fmadd_ps( a_tile1.v, x1I.v, temp2.v );
+
+				// Load w vector
+				// wR.v                 -> w0R w0I w1R w1I w2R w2I w3R w3I
+				// wI.v ( shuf wR.v )   -> w0I w0I w1I w1I w2I w2I w3I w3I
+				// wR.v ( shuf wR.v )   -> w0R w0R w1R w1R w2R w2R w3R w3R
+				wR.v = _mm256_loadu_ps( (float *) (w + i) );
+				wI.v = _mm256_permute_ps( wR.v, 0xf5 );
+				wR.v = _mm256_permute_ps( wR.v, 0xa0);
+
+				rho0v = _mm256_fmadd_ps( a_tile0.v, wR.v, rho0v );
+				rho4v = _mm256_fmadd_ps( a_tile0.v, wI.v, rho4v );
+
+				rho1v = _mm256_fmadd_ps( a_tile1.v, wR.v, rho1v );
+				rho5v = _mm256_fmadd_ps( a_tile1.v, wI.v, rho5v );
+
+				// Load 3rd and 4th columns of A
+				// a_tile0.v -> a20R a20I a30R a30I
+				// a_tile1.v -> a21R a21I a31R a31I
+				a_tile0.v = _mm256_loadu_ps( (float *)&a[i + 2 * lda] );
+				a_tile1.v = _mm256_loadu_ps( (float *)&a[i + 3 * lda] );
+
+				temp1.v = _mm256_fmadd_ps( a_tile0.v, x2R.v, temp1.v );
+				temp2.v = _mm256_fmadd_ps( a_tile0.v, x2I.v, temp2.v );
+
+				temp1.v = _mm256_fmadd_ps( a_tile1.v, x3R.v, temp1.v );
+				temp2.v = _mm256_fmadd_ps( a_tile1.v, x3I.v, temp2.v );
+
+				rho2v = _mm256_fmadd_ps( a_tile0.v, wR.v, rho2v );
+				rho6v = _mm256_fmadd_ps( a_tile0.v, wI.v, rho6v );
+
+				rho3v = _mm256_fmadd_ps( a_tile1.v, wR.v, rho3v );
+				rho7v = _mm256_fmadd_ps( a_tile1.v, wI.v, rho7v );
+
+				// Load z vector
+				z_vec.v = _mm256_loadu_ps( (float *)&z[i] );
+
+				// Permute the result and alternatively add-sub final values
+				if( bli_is_noconj( conja ) )
+				{
+					temp2.v = _mm256_permute_ps(temp2.v, 0xB1);
+					temp3.v =  _mm256_addsub_ps(temp1.v, temp2.v);
+				}
+				else
+				{
+					temp1.v = _mm256_permute_ps( temp1.v, 0xB1 );
+					temp3.v =  _mm256_addsub_ps( temp2.v, temp1.v );
+					temp3.v = _mm256_permute_ps( temp3.v, 0xB1 );
+				}
+
+				// Add & store result to z_vec
+				z_vec.v = _mm256_add_ps( temp3.v, z_vec.v );
+				_mm256_storeu_ps( (float *)&z[i], z_vec.v );
+			}
+
+			// Swapping position of real and imag component
+			// for horizontal addition to get the final
+			// dot product computation
+			// rho register are holding computation which needs
+			// to be arranged in following manner.
+			// a0R * x0I | a0I * x0I | a1R * x1I | a1I * x1R | ...
+			//                      ||
+			//                      \/
+			// a0I * x0I | a0R * x0I | a1I * x1R | a1R * x1I | ...
+
+			rho4v = _mm256_permute_ps(rho4v, 0xb1);
+			rho5v = _mm256_permute_ps(rho5v, 0xb1);
+			rho6v = _mm256_permute_ps(rho6v, 0xb1);
+			rho7v = _mm256_permute_ps(rho7v, 0xb1);
+
+			// Negating imaginary part for computing
+			// the final result of dcomplex multiplication
+			if ( bli_is_noconj( conjdot_use ) )
+			{
+				rho4v = _mm256_mul_ps(rho4v, no_conju);
+				rho5v = _mm256_mul_ps(rho5v, no_conju);
+				rho6v = _mm256_mul_ps(rho6v, no_conju);
+				rho7v = _mm256_mul_ps(rho7v, no_conju);
+			}
+			else
+			{
+				rho4v = _mm256_mul_ps(rho4v, conju);
+				rho5v = _mm256_mul_ps(rho5v, conju);
+				rho6v = _mm256_mul_ps(rho6v, conju);
+				rho7v = _mm256_mul_ps(rho7v, conju);
+			}
+
+			rho0v = _mm256_add_ps(rho0v, rho4v);
+			rho1v = _mm256_add_ps(rho1v, rho5v);
+			rho2v = _mm256_add_ps(rho2v, rho6v);
+			rho3v = _mm256_add_ps(rho3v, rho7v);
+
+			// Horizontal addition of rho elements for computing final dotxf
+			// and storing the results into rho buffer
+			scomplex *ptr = (scomplex *)&rho0v;
+			for(dim_t j = 0; j < 4; j++)
+			{
+				rho[0].real += ptr[j].real;
+				rho[0].imag += ptr[j].imag;
+			}
+			ptr = (scomplex *)&rho1v;
+			for(dim_t j = 0; j < 4; j++)
+			{
+				rho[1].real += ptr[j].real;
+				rho[1].imag += ptr[j].imag;
+			}
+			ptr = (scomplex *)&rho2v;
+			for(dim_t j = 0; j < 4; j++)
+			{
+				rho[2].real += ptr[j].real;
+				rho[2].imag += ptr[j].imag;
+			}
+			ptr = (scomplex *)&rho3v;
+			for(dim_t j = 0; j < 4; j++)
+			{
+				rho[3].real += ptr[j].real;
+				rho[3].imag += ptr[j].imag;
+			}
+		}
+
+		// To handle the remaining cases
+		if ( rem )
+		{
+			PRAGMA_SIMD
+			for ( dim_t p = i; p < m; ++p )
+			{
+				const scomplex a0c = a[p + 0 * lda];
+				const scomplex a1c = a[p + 1 * lda];
+				const scomplex a2c = a[p + 2 * lda];
+				const scomplex a3c = a[p + 3 * lda];
+
+				// dot
+				scomplex r0c = rho[0];
+				scomplex r1c = rho[1];
+				scomplex r2c = rho[2];
+				scomplex r3c = rho[3];
+
+				scomplex w0c = w[p];
+
+				r0c.real += a0c.real * w0c.real - a0c.imag * w0c.imag
+				            * conjdotxf;
+				r0c.imag += a0c.imag * w0c.real + a0c.real * w0c.imag
+				            * conjdotxf;
+				r1c.real += a1c.real * w0c.real - a1c.imag * w0c.imag
+				            * conjdotxf;
+				r1c.imag += a1c.imag * w0c.real + a1c.real * w0c.imag
+				            * conjdotxf;
+				r2c.real += a2c.real * w0c.real - a2c.imag * w0c.imag
+				            * conjdotxf;
+				r2c.imag += a2c.imag * w0c.real + a2c.real * w0c.imag
+				            * conjdotxf;
+				r3c.real += a3c.real * w0c.real - a3c.imag * w0c.imag
+				            * conjdotxf;
+				r3c.imag += a3c.imag * w0c.real + a3c.real * w0c.imag
+				            * conjdotxf;
+
+				rho[0] = r0c;
+				rho[1] = r1c;
+				rho[2] = r2c;
+				rho[3] = r3c;
+
+				// axpy
+				scomplex z0c = z[p];
+
+				z0c.real += chi0.real * a0c.real - chi0.imag * a0c.imag
+				            * conjaxpyf;
+				z0c.real += chi1.real * a1c.real - chi1.imag * a1c.imag
+				            * conjaxpyf;
+				z0c.real += chi2.real * a2c.real - chi2.imag * a2c.imag
+				            * conjaxpyf;
+				z0c.real += chi3.real * a3c.real - chi3.imag * a3c.imag
+				            * conjaxpyf;
+				z0c.imag += chi0.imag * a0c.real + chi0.real * a0c.imag
+				            * conjaxpyf;
+				z0c.imag += chi1.imag * a1c.real + chi1.real * a1c.imag
+				            * conjaxpyf;
+				z0c.imag += chi2.imag * a2c.real + chi2.real * a2c.imag
+				            * conjaxpyf;
+				z0c.imag += chi3.imag * a3c.real + chi3.real * a3c.imag
+				            * conjaxpyf;
+
+				z[p] = z0c;
+			}
+		}
+
+		// Conjugating the final result if conjat
+		if ( bli_is_conj( conjat ) )
+		{
+			for ( dim_t j = 0; j < 4; ++j )
+			{
+				PASTEMAC(c,conjs)( rho[j] );
+			}
+		}
+
+		// Scaling the dot product result with alpha
+		// and adding the result to vector y
+		for ( dim_t j = 0; j < 4; ++j )
+		{
+			PASTEMAC(c,axpys)( *alpha, rho[j], y[j] );
+		}
+	}
+	else
+	{
+		// For non-unit increments
+		/* Query the context for the kernel function pointer. */
+		const num_t dt     = PASTEMAC(c,type);
+		PASTECH(c,dotxf_ker_ft) kfp_df 	=
+			bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx );
+		PASTECH(c,axpyf_ker_ft) kfp_af 	=
 			bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx );
 
 		kfp_df
