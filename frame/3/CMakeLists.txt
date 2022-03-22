@@ -25,6 +25,7 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_fpa.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_oapi.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_ukr_tapi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_smart_threading.c
     )
 # Select AMD specific sources for AMD configurations.
 if(${TARGET_ARCH} STREQUAL zen OR 
@@ -38,7 +39,7 @@ if(${TARGET_ARCH} STREQUAL zen OR
 else()
     target_sources("${PROJECT_NAME}"
     PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_int_amd.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_l3_sup_int.c
     )
 endif()
 

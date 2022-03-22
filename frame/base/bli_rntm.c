@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -680,5 +680,85 @@ void bli_nthreads_optimum(
 	bli_rntm_set_num_threads_only( n_threads_opt, rntm );
 
 	return;
+}
+
+// Calculates the optimum number of threads along with the factorization
+// (ic, jc) using m, n, k dimensions. This function modifies only the local
+// copy of rntm with optimum threads. Since global rntm remains unchanged the
+// num_threads set by application is available in global_rntm data structure.
+err_t bli_smart_threading_sup
+				(
+				 obj_t*  a,
+				 obj_t*  b,
+				 obj_t*  c,
+				 opid_t  family,
+				 rntm_t* rntm,
+				 cntx_t* cntx
+				)
+{
+	// By default smart threading should be disabled.
+	err_t ret_val = BLIS_FAILURE;
+
+#ifndef BLIS_ENABLE_MULTITHREADING
+	return ret_val;
+#endif
+
+	dim_t n_threads = bli_rntm_num_threads( rntm );
+
+	// For non-openmp based threading, n_threads could be -1.
+	if ( ( n_threads == -1 ) || ( n_threads == 1 ) ) return ret_val;
+
+	dim_t ic_way = bli_rntm_ic_ways( rntm );
+	dim_t jc_way = bli_rntm_jc_ways( rntm );
+
+	// Dont enable smart threading if the user supplied the factorization.
+	if( ( ic_way > 0 ) || ( jc_way > 0 ) ) return ret_val;
+
+	// Only supporting sgemm for now.
+	if ( ( family == BLIS_GEMM ) && bli_obj_is_float( c ) )
+	{
+		dim_t k = bli_obj_width_after_trans(a);
+		dim_t m = 0;
+		dim_t n = 0;
+
+		bool trans_A_for_kernel = FALSE;
+
+		const stor3_t stor_id = bli_obj_stor3_from_strides( c, a, b );
+		const bool is_rrr_rrc_rcr_crr = (
+										  stor_id == BLIS_RRR ||
+										  stor_id == BLIS_RRC ||
+										  stor_id == BLIS_RCR ||
+										  stor_id == BLIS_CRR
+										);
+
+		// The A and B matrices are swapped based on the storage type in
+		// var1n2m. Need to account for this when determining ic and jc
+		// based on m and n dimensions of A and B.
+		if ( is_rrr_rrc_rcr_crr )
+		{
+			m = bli_obj_length( c );
+			n = bli_obj_width( c );
+			trans_A_for_kernel = bli_obj_has_trans( a );
+		}
+		else
+		{
+			m = bli_obj_width( c );
+			n = bli_obj_length( c );
+			trans_A_for_kernel = bli_obj_has_trans( b );
+		}
+
+		// Take default path if transpose is enabled for A matrix.
+		if ( trans_A_for_kernel == FALSE )
+		{
+			// A successfull call to smart threading api implies smart
+			// factorization and possibly native -> SUP path conversion.
+			// Optimal thread selection is not supported yet.
+			ret_val = bli_gemm_smart_threading_sup( bli_obj_dt( c ),
+						bli_obj_elem_size( c ),
+						is_rrr_rrc_rcr_crr, m, n, k, n_threads,
+						cntx, rntm );
+		}
+	}
+	return ret_val;
 }
 #endif // AOCL_DYNAMIC

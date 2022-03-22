@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2019-21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2019-22, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -101,6 +101,34 @@ err_t bli_gemmsup
     // that function assumes the context pointer is valid.
     if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
+    // Initialize a local runtime with global settings if necessary. Note
+    // that in the case that a runtime is passed in, we make a local copy.
+    rntm_t rntm_l;
+    if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
+    else                { rntm_l = *rntm;                       rntm = &rntm_l; }
+
+#ifdef AOCL_DYNAMIC
+    // Calculating optimal nt and corresponding factorization (ic,jc) here, so
+    // as to determine the matrix dimensions (A - m, B - n) per thread. This
+    // can be used to check if dimensions per thread falls under the SUP
+    // threshold and potentially move some of the native path gemm to SUP path
+    // in multi-threaded scenario.
+    err_t smart_threading = bli_smart_threading_sup( a, b, c, BLIS_GEMM, rntm, cntx );
+
+    if ( smart_threading != BLIS_SUCCESS )
+    {
+        thresh_func_ft func_fp;
+        func_fp = bli_cntx_get_l3_thresh_func(BLIS_GEMM, cntx);
+
+        // Return early if the sizes are beyond SUP thresholds
+        if ( !func_fp( a, b, c, cntx ) )
+        {
+            AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2,
+                            "SUP - Sizes are beyond SUP thresholds.");
+            return BLIS_FAILURE;
+        }
+    }
+#else
     thresh_func_ft func_fp;
 
     func_fp = bli_cntx_get_l3_thresh_func(BLIS_GEMM, cntx);
@@ -110,26 +138,7 @@ err_t bli_gemmsup
             AOCL_DTL_TRACE_EXIT_ERR(AOCL_DTL_LEVEL_TRACE_2, "SUP - Sizes are beyond SUP thresholds.");
             return BLIS_FAILURE;
     }
-
-    // Initialize a local runtime with global settings if necessary. Note
-    // that in the case that a runtime is passed in, we make a local copy.
-    rntm_t rntm_l;
-    if ( rntm == NULL ) { bli_rntm_init_from_global( &rntm_l ); rntm = &rntm_l; }
-    else                { rntm_l = *rntm;                       rntm = &rntm_l; }
-
-#if 0
-const num_t dt = bli_obj_dt( c );
-const dim_t m  = bli_obj_length( c );
-const dim_t n  = bli_obj_width( c );
-const dim_t k  = bli_obj_width_after_trans( a );
-const dim_t tm = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_MT, cntx );
-const dim_t tn = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_NT, cntx );
-const dim_t tk = bli_cntx_get_l3_sup_thresh_dt( dt, BLIS_KT, cntx );
-
-printf( "dims: %d %d %d (threshs: %d %d %d)\n",
-	(int)m, (int)n, (int)k, (int)tm, (int)tn, (int)tk );
 #endif
-
     // We've now ruled out the following two possibilities:
     // - the ukernel prefers the operation as-is, and the sup thresholds are
     //   unsatisfied.
