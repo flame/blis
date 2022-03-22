@@ -712,7 +712,12 @@ void zgemm_
 
 	//dim_t nt = bli_thread_get_num_threads(); // get number of threads
 	bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
-	if ( nt )
+#ifdef AOCL_DYNAMIC
+	//For smaller sizes zgemm_small is perfoming better
+	if (nt && (((m0 >32) || (n0>32) || (k0>32)) && ((m0+n0+k0)>100)) )
+#else
+	if (nt)
+#endif
 	{
 		// Will call parallelized zgemm code - sup & native
 		PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
@@ -733,6 +738,31 @@ void zgemm_
 	    return;
 	  }
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX
+	err_t status;
+
+	if((nt == 0) && (m0 <= 512 ) && ( n0 <= 512  ) && ( k0 <= 512 ))
+	{
+		status =  bli_gemm_small( &alphao,
+				&ao,
+				&bo,
+				&betao,
+				&co,
+				NULL, //cntx,
+				NULL
+				);
+	}
+
+	if (status == BLIS_SUCCESS)
+	{
+		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+		/* Finalize BLIS. */
+		bli_finalize_auto();
+
+		return;
+	}
+#endif
     // The code below will be called when number of threads = 1.
 #if ENABLE_INDUCED_METHOD
 	/* 3m_sqp is optimal for certain matrix shapes.
@@ -769,13 +799,13 @@ void zgemm_
 // sup has been enabled for single instance cases.
 	if(single_instance==1)
 	{
-		err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-		if(status==BLIS_SUCCESS)
-		{
-			AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-			return;
-		}
+			err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+			if(status==BLIS_SUCCESS)
+			{
+				AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+					return;
+			}
 
 	}
 	// fall back on native path when zgemm is not handled in sup path.
