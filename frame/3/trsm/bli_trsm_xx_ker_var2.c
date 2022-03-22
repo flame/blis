@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -87,6 +87,59 @@ void bli_trsm_xx_ker_var2
 	  cntl,
 	  thread
 	);
+
+	// Send progress update if enabled
+	if (AOCL_progress_ptr)
+	{
+
+		// Get the size of block processed in
+		// this iteration, add it to the accumulated
+		// total and send the update.
+		dim_t m = bli_obj_length(c);
+		dim_t n = bli_obj_width(c);
+		dim_t k = bli_obj_width(a);
+
+		num_t dt = bli_obj_dt(c);
+		char dt_c;
+
+		// Running total for current thread.
+		tls_aoclprogress_counter += m * n * k;
+
+		// Send the update only if number of elements processes so far
+		// has exceeded the freqency of reporting. 
+		if ((tls_aoclprogress_counter - tls_aoclprogress_last_update) >=
+			 AOCL_PROGRESS_FREQUENCY)
+		{
+
+			// reset the last update counter for next iteration.
+			tls_aoclprogress_last_update = tls_aoclprogress_counter;
+
+			switch (dt)
+			{
+			case BLIS_FLOAT:
+				dt_c = 's';
+				break;
+			case BLIS_DOUBLE:
+				dt_c = 'd';
+				break;
+			case BLIS_SCOMPLEX:
+				dt_c = 'c';
+				break;
+			case BLIS_DCOMPLEX:
+				dt_c = 'z';
+				break;
+			default:
+				dt_c = ' ';
+			}
+
+			AOCL_PROGRESS_DT(dt_c,
+			                 "trsm",
+			                 tls_aoclprogress_counter,
+			                 AOCL_gettid(),
+			                 bli_rntm_num_threads(rntm));
+		}
+	}
+
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_6);
 }
 

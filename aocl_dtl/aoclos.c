@@ -3,7 +3,7 @@
  *
  * Description : Abstraction for os services used by DTL.
  *
- * Copyright (C) 2020, Advanced Micro Devices, Inc
+ * Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 #include "aocltpdef.h"
@@ -85,8 +85,15 @@ uint64 AOCL_getTimestamp(void)
 #else  /* Non linux support */
 AOCL_TID AOCL_gettid(void)
 {
-    /* stub for other os's */
-    return 0;
+#ifdef BLIS_ENABLE_OPENMP
+  return omp_get_thread_num();
+#else
+#ifdef BLIS_ENABLE_PTHREADS
+  return pthread_self();
+#else
+  return 0;
+#endif
+#endif
 }
 
 pid_t  AOCL_getpid(void)

@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,36 +32,25 @@
 
 */
 
-#include "bli_util_check.h"
+#include "blis.h"
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_util_oapi.h"
+// The progress feature periodically updates the user with current state 
+// of the operation, We maintain the progress for each thread separately 
+// following variables are used to store the elements processed in each
+// thread using thread local storage.
+BLIS_TLS_TYPE dim_t tls_aoclprogress_counter;
 
-#include "bli_oapi_ba.h"
-#include "bli_util_oapi.h"
+// Store the counter when last update was sent, this is used to implement
+// update freqency.
+BLIS_TLS_TYPE dim_t tls_aoclprogress_last_update;
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_util_tapi.h"
-#include "bli_util_ft.h"
 
-#include "bli_tapi_ba.h"
-#include "bli_util_tapi.h"
-#include "bli_util_ft.h"
+// AOCL_progress_ptr contains the pointer to the callback function
+// By default it is set to NULL, which effectivly disabled the 
+// progress feature. 
+AOCL_progress_callback AOCL_progress_ptr = NULL;
 
-// Generate function pointer arrays for tapi functions (expert only).
-#include "bli_util_fpa.h"
-
-// Prototype level-1m implementations.
-#include "bli_util_unb_var1.h"
-
-//Routines to copy certain portion of a matrix to another
-#include "bli_util_update.h"
-
-// Header file define different formats of BLAS APIs- uppercase with
-// and without underscore, lowercase without underscore.
-#include "bli_util_api_wrap.h"
-
-// Public interface for the progress feature
-#include "bli_util_progress.h"
+void AOCL_BLIS_set_progress(AOCL_progress_callback func)
+{
+    AOCL_progress_ptr = func;
+}

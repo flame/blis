@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,36 +32,43 @@
 
 */
 
-#include "bli_util_check.h"
+#ifndef BLI_UTIL_PROGRESS_H
+#define BLI_UTIL_PROGRESS_H
 
-// Prototype object APIs (expert and non-expert).
-#include "bli_oapi_ex.h"
-#include "bli_util_oapi.h"
+// Public interface for the end user.
 
-#include "bli_oapi_ba.h"
-#include "bli_util_oapi.h"
+typedef dim_t (*AOCL_progress_callback)(char *api,
+                                      dim_t lapi,
+                                      dim_t progress,
+                                      dim_t current_thread,
+                                      dim_t total_threads);
 
-// Prototype typed APIs (expert and non-expert).
-#include "bli_tapi_ex.h"
-#include "bli_util_tapi.h"
-#include "bli_util_ft.h"
+BLIS_EXPORT_BLIS void AOCL_BLIS_set_progress(AOCL_progress_callback func);
 
-#include "bli_tapi_ba.h"
-#include "bli_util_tapi.h"
-#include "bli_util_ft.h"
+// Private interfaces for internal use
 
-// Generate function pointer arrays for tapi functions (expert only).
-#include "bli_util_fpa.h"
+extern AOCL_progress_callback AOCL_progress_ptr;
 
-// Prototype level-1m implementations.
-#include "bli_util_unb_var1.h"
+extern BLIS_TLS_TYPE dim_t tls_aoclprogress_counter;
+extern BLIS_TLS_TYPE dim_t tls_aoclprogress_last_update;
 
-//Routines to copy certain portion of a matrix to another
-#include "bli_util_update.h"
+// Define the frequency of reporting (number of elements).
+// Progress update will be sent only after these many 
+// elements are processed in the current thread.
+#define AOCL_PROGRESS_FREQUENCY 1e+9
 
-// Header file define different formats of BLAS APIs- uppercase with
-// and without underscore, lowercase without underscore.
-#include "bli_util_api_wrap.h"
+#define MAX_API_NAME_LEN 20
 
-// Public interface for the progress feature
-#include "bli_util_progress.h"
+// Macro to send update using datatype character and the api name
+#define AOCL_PROGRESS_DT(dt, api, progress, tid, nt) \
+        char buf[MAX_API_NAME_LEN]; \
+        snprintf(buf, MAX_API_NAME_LEN, "%c%s", dt, api); \
+        (*AOCL_progress_ptr) (buf, strlen(buf), progress, tid, nt); \
+
+// Macro to send update using api name alone.
+#define AOCL_PROGRESS_NAME(api, progress, tid, nt) \
+        char buf[MAX_API_NAME_LEN]; \
+        snprintf(buf, MAX_API_NAME_LEN, "%s", dt, api); \
+        (*AOCL_progress_ptr) (buf, strlen(buf), progress, tid, nt); \
+
+#endif // BLI_UTIL_PROGRESS_H

@@ -5,7 +5,7 @@
  *               It provides defination for all macros to be
  *               used by user to add debug/trace information.
  *
- * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -15,6 +15,7 @@
 #include "aocldtlcf.h"
 #include "aocltpdef.h"
 #include "aoclflist.h"
+#include "aoclos.h"
 
 #define TRACE_TYPE_FENTRY           (1)
 #define TRACE_TYPE_FEXIT            (2)
