@@ -80,9 +80,6 @@ void GEMM_FUNC_NAME(ch) \
         DTYPE_OUT*  c, inc_t rsc, inc_t csc \
     ) \
 { \
-    DTYPE_OUT zero  = 0.0; \
-    DTYPE_OUT beta_  = *beta; \
-    \
     DTYPE_IN * restrict btilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, B_ALIGN + KC * NC * sizeof( DTYPE_IN ) ); \
     DTYPE_IN * restrict atilde_sys = ( DTYPE_IN *) aligned_alloc( P10_PG_SIZE, A_ALIGN + MC * KC * sizeof( DTYPE_IN ) ); \
     \
@@ -103,10 +100,6 @@ void GEMM_FUNC_NAME(ch) \
     \
     DTYPE_OUT * restrict cblock = c; \
     DTYPE_IN  * restrict bblock = b; \
-    \
-    DTYPE_OUT tmp_cmicrotile[MR*NR];  \
-    int   rsct = ( rsc == 1 ? 1 : NR ); \
-    int   csct = ( rsc == 1 ? MR : 1 ); \
     \
     for ( int jc=0; jc<n; jc+=NC ) \
     { \
@@ -146,18 +139,11 @@ void GEMM_FUNC_NAME(ch) \
                     {    \
                         int irb = bli_min( MR, ib-ir ); \
                         \
-                        if (jrb == NR && irb == MR) \
-                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, beta, cmicrotile, rsc, csc, NULL, NULL); \
-                        else \
-                        { \
-                            MICROKERNEL (new_pb, alpha, amicropanel, bmicropanel, &zero, tmp_cmicrotile, rsct, csct, NULL, NULL); \
-                            \
-                            for (int j=0; j<jrb;j++) \
-                                for (int i=0; i<irb;i++)  \
-                                    cmicrotile[i*rsc + j*csc] = \
-                                        beta_ * cmicrotile[i*rsc + j*csc] + \
-                                        tmp_cmicrotile[i*rsct + j*csct]; \
-                        } \
+                        MICROKERNEL \
+                        ( \
+                          irb, jrb, new_pb, alpha, amicropanel, bmicropanel, \
+                          beta, cmicrotile, rsc, csc, NULL, NULL \
+                        ); \
                         amicropanel += a_ps; \
                         cmicrotile += rstep_mt_c; \
                     } \

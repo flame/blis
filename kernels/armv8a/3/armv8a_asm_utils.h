@@ -34,8 +34,8 @@
 
 */
 
-// Apple's local label requirements.
-#if defined(__APPLE__)
+// Apple/Clang's local label requirements.
+#if defined(__APPLE__) || defined(__clang__)
 #define LABEL(str) "   L" #str"%=: \n\t"
 #define BEQ(str) "b.eq L" #str"%=  \n\t"
 #define BNE(str) "b.ne L" #str"%=  \n\t"
