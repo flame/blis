@@ -66,6 +66,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+
 	  cntx
 	);
 
@@ -98,6 +99,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  // dotxf
 	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
 	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+
 	  cntx
 	);
 
@@ -119,7 +121,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
 #endif
 
-#if 0
+#if 1
 	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
@@ -152,9 +154,6 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
 #endif
  
-          BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
-          BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
-
 	  cntx
 	);
 

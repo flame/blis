@@ -5,7 +5,6 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 21, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,562 +34,138 @@
 
 #include "blis.h"
 
+
 //
 // Define BLAS-to-BLIS interfaces.
 //
-#undef GENTFUNC
-#define GENTFUNC(ftype, ch, blasname, blisname)                                     \
-                                                                                    \
-	void PASTEF77(ch, blasname)(                                                    \
-		const f77_char *transa,                                                     \
-		const f77_int *m,                                                           \
-		const f77_int *n,                                                           \
-		const ftype *alpha,                                                         \
-		const ftype *a, const f77_int *lda,                                         \
-		const ftype *x, const f77_int *incx,                                        \
-		const ftype *beta,                                                          \
-		ftype *y, const f77_int *incy)                                              \
-	{                                                                               \
-		trans_t blis_transa;                                                        \
-		dim_t m0, n0;                                                               \
-		dim_t m_y, n_x;                                                             \
-		ftype *x0;                                                                  \
-		ftype *y0;                                                                  \
-		inc_t incx0;                                                                \
-		inc_t incy0;                                                                \
-		inc_t rs_a, cs_a;                                                           \
-                                                                                    \
-		/* Initialize BLIS. */                                                      \
-		bli_init_auto();                                                            \
-                                                                                    \
-		/* Perform BLAS parameter checking. */                                      \
-		PASTEBLACHK(blasname)                                                       \
-		(                                                                           \
-			MKSTR(ch),                                                              \
-			MKSTR(blasname),                                                        \
-			transa,                                                                 \
-			m,                                                                      \
-			n,                                                                      \
-			lda,                                                                    \
-			incx,                                                                   \
-			incy);                                                                  \
-                                                                                    \
-		/* Map BLAS chars to their corresponding BLIS enumerated type value. */     \
-		bli_param_map_netlib_to_blis_trans(*transa, &blis_transa);                  \
-                                                                                    \
-		if (*m == 0 || *n == 0)                                                     \
-		{                                                                           \
-			return;                                                                 \
-		}                                                                           \
-                                                                                    \
-		/* Convert/typecast negative values of m and n to zero. */                  \
-		bli_convert_blas_dim1(*m, m0);                                              \
-		bli_convert_blas_dim1(*n, n0);                                              \
-                                                                                    \
-		/* Determine the dimensions of x and y so we can adjust the increments,     \
-		   if necessary.*/                                                          \
-		bli_set_dims_with_trans(blis_transa, m0, n0, &m_y, &n_x);                   \
-                                                                                    \
-		/* BLAS handles cases where trans(A) has no columns, and x has no elements, \
-		   in a peculiar way. In these situations, BLAS returns without performing  \
-		   any action, even though most sane interpretations of gemv would have the \
-		   the operation reduce to y := beta * y. Here, we catch those cases that   \
-		   BLAS would normally mishandle and emulate the BLAS exactly so as to      \
-		   provide "bug-for-bug" compatibility. Note that this extreme level of     \
-		   compatibility would not be as much of an issue if it weren't for the     \
-		   fact that some BLAS test suites actually test for these cases. Also, it  \
-		   should be emphasized that BLIS, if called natively, does NOT exhibit     \
-		   this quirky behavior; it will scale y by beta, as one would expect. */   \
-		if (m_y > 0 && n_x == 0)                                                    \
-		{                                                                           \
-			/* Finalize BLIS. */                                                    \
-			bli_finalize_auto();                                                    \
-                                                                                    \
-			return;                                                                 \
-		}                                                                           \
-                                                                                    \
-		/* If the input increments are negative, adjust the pointers so we can      \
-		   use positive increments instead. */                                      \
-		bli_convert_blas_incv(n_x, (ftype *)x, *incx, x0, incx0);                   \
-		bli_convert_blas_incv(m_y, (ftype *)y, *incy, y0, incy0);                   \
-                                                                                    \
-		/* Set the row and column strides of A. */                                  \
-		rs_a = 1;                                                                   \
-		cs_a = *lda;                                                                \
-                                                                                    \
-		/* Call BLIS interface. */                                                  \
-		PASTEMAC2(ch, blisname, BLIS_TAPI_EX_SUF)                                   \
-		(                                                                           \
-			blis_transa,                                                            \
-			BLIS_NO_CONJUGATE,                                                      \
-			m0,                                                                     \
-			n0,                                                                     \
-			(ftype *)alpha,                                                         \
-			(ftype *)a, rs_a, cs_a,                                                 \
-			x0, incx0,                                                              \
-			(ftype *)beta,                                                          \
-			y0, incy0,                                                              \
-			NULL,                                                                   \
-			NULL);                                                                  \
-                                                                                    \
-		/* Finalize BLIS. */                                                        \
-		bli_finalize_auto();                                                        \
-	}
+#undef  GENTFUNC
+#define GENTFUNC( ftype, ch, blasname, blisname ) \
+\
+void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    x, const f77_int* incx, \
+       const ftype*    beta, \
+             ftype*    y, const f77_int* incy  \
+     ) \
+{ \
+	trans_t blis_transa; \
+	dim_t   m0, n0; \
+	dim_t   m_y, n_x; \
+	ftype*  x0; \
+	ftype*  y0; \
+	inc_t   incx0; \
+	inc_t   incy0; \
+\
+	/* Initialize BLIS. */ \
+	/*bli_init_auto();*/ \
+\
+	/* Perform BLAS parameter checking. */ \
+	PASTEBLACHK(blasname) \
+	( \
+	  MKSTR(ch), \
+	  MKSTR(blasname), \
+	  transa, \
+	  m, \
+	  n, \
+	  lda, \
+	  incx, \
+	  incy  \
+	); \
+\
+	/* BLAS handles cases where y has no elements as well as those where x has
+	   no elements. In the case of the former, it cannot do any work since
+	   the output vector is empty; but in the latter case, BLAS has peculiar
+	   semantics. When x has no elements (and transa(A) has no columns), BLAS
+	   returns immediately without performing any computation even if the
+	   number of elements of y (and rows of transa(A)) is non-zero, in which
+	   case any sane interpretations of gemv would have the the operation
+	   reduce to y := beta * y. Here, we emulate the BLAS exactly so as to
+	   provide "bug-for-bug" compatibility. Note that this extreme level of
+	   compatibility would not be contemplated if it weren't for the fact
+	   that some BLAS unit tests actually check for this behavior. Also, it
+	   should be emphasized that BLIS, when called natively, does NOT exhibit
+	   this quirky behavior; it will scale y by beta as one would expect. */ \
+	if ( *m == 0 || *n == 0 ) \
+	{ \
+		/* Finalize BLIS. */ \
+		/*bli_finalize_auto();*/ \
+\
+		return; \
+	} \
+\
+	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+\
+	/* Convert/typecast negative values of m and n to zero. */ \
+	bli_convert_blas_dim1( *m, m0 ); \
+	bli_convert_blas_dim1( *n, n0 ); \
+\
+	/* Determine the dimensions of x and y so we can adjust the increments,
+	   if necessary.*/ \
+	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
+\
+	/* If the input increments are negative, adjust the pointers so we can
+	   use positive increments instead. */ \
+	bli_convert_blas_incv( n_x, (ftype*)x, *incx, x0, incx0 ); \
+	bli_convert_blas_incv( m_y, (ftype*)y, *incy, y0, incy0 ); \
+\
+	/* If alpha is zero, scale y by beta and return early. */ \
+	if ( PASTEMAC(ch,eq0)( *alpha ) ) \
+	{ \
+		PASTEMAC2(ch,scalv,BLIS_TAPI_EX_SUF) \
+		( \
+		  BLIS_NO_CONJUGATE, \
+		  m_y, \
+		  ( ftype* )beta, \
+		  ( ftype* )y0, incy0, \
+		  NULL, \
+		  NULL  \
+		); \
+		return; \
+	} \
+\
+	/* Set the row and column strides of A. */ \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
+\
+	/* Declare a void function pointer for the current operation. */ \
+	PASTECH2(ch,blisname,_unb_ft) f; \
+\
+	/* Choose the underlying implementation. */ \
+	if         ( bli_does_notrans( blis_transa ) )  f = PASTEMAC(ch,gemv_unf_var2); \
+	else /* if ( bli_does_trans( blis_transa ) ) */ f = PASTEMAC(ch,gemv_unf_var1); \
+\
+	/* Obtain a valid context from the gks. This is needed because these
+	   implementations of ?gemv_() skip calling gemv_ex() and instead
+	   call the unblocked fused variants directly. */ \
+	cntx_t* cntx = bli_gks_query_cntx(); \
+\
+	/* Invoke the variant chosen above, which loops over a level-1v or
+	   level-1f kernel to implement the current operation. */ \
+	f \
+	( \
+	  blis_transa, \
+	  BLIS_NO_CONJUGATE, \
+	  m0, \
+	  n0, \
+	  (ftype*)alpha, \
+	  (ftype*)a, rs_a, cs_a, \
+	  x0, incx0, \
+	  (ftype*)beta, \
+	  y0, incy0, \
+	  cntx  \
+	); \
+\
+	/* Finalize BLIS. */ \
+	/*bli_finalize_auto();*/ \
+}
 
 #ifdef BLIS_ENABLE_BLAS
-void dgemv_(
-	const f77_char *transa,
-	const f77_int *m,
-	const f77_int *n,
-	const double *alpha,
-	const double *a, const f77_int *lda,
-	const double *x, const f77_int *incx,
-	const double *beta,
-	double *y, const f77_int *incy)
-{
-	trans_t blis_transa;
-	dim_t m0, n0;
-	dim_t m_y, n_x;
-	double *x0;
-	double *y0;
-	inc_t incx0;
-	inc_t incy0;
-	inc_t rs_a, cs_a;
-
-	/* Perform BLAS parameter checking. */
-	PASTEBLACHK(gemv)
-	(
-		MKSTR(d),
-		MKSTR(gemv),
-		transa,
-		m,
-		n,
-		lda,
-		incx,
-		incy);
-
-	if (*m == 0 || *n == 0)
-	{
-		return;
-	}
-
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	if (*transa == 'n' || *transa == 'N')
-		blis_transa = BLIS_NO_TRANSPOSE;
-	else if (*transa == 't' || *transa == 'T')
-		blis_transa = BLIS_TRANSPOSE;
-	else if (*transa == 'c' || *transa == 'C')
-		blis_transa = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		//bli_check_error_code( BLIS_INVALID_TRANS );
-		blis_transa = BLIS_NO_TRANSPOSE;
-	}
-
-	/* Convert/typecast negative values of m and n to zero. */
-	if (*m < 0)
-		m0 = (dim_t)0;
-	else
-		m0 = (dim_t)(*m);
-
-	if (*n < 0)
-		n0 = (dim_t)0;
-	else
-		n0 = (dim_t)(*n);
-
-	/* Determine the dimensions of x and y so we can adjust the increments,
-     if necessary.*/
-	if (bli_does_notrans(blis_transa))
-	{
-		m_y = m0;
-		n_x = n0;
-	}
-	else
-	{
-		m_y = n0;
-		n_x = m0;
-	}
-
-	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
-     in a peculiar way. In these situations, BLAS returns without performing
-     any action, even though most sane interpretations of gemv would have the
-     the operation reduce to y := beta * y. Here, we catch those cases that
-     BLAS would normally mishandle and emulate the BLAS exactly so as to
-     provide "bug-for-bug" compatibility. Note that this extreme level of
-     compatibility would not be as much of an issue if it weren't for the
-     fact that some BLAS test suites actually test for these cases. Also, it
-     should be emphasized that BLIS, if called natively, does NOT exhibit
-     this quirky behavior; it will scale y by beta, as one would expect. */
-	if (m_y > 0 && n_x == 0)
-	{
-		/* Finalize BLIS. */
-		//      bli_finalize_auto();
-
-		return;
-	}
-
-	/* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-	if (*incx < 0)
-	{
-		x0 = ((double *)x) + (n_x - 1) * (-*incx);
-		incx0 = (inc_t)(*incx);
-	}
-	else
-	{
-		x0 = ((double *)x);
-		incx0 = (inc_t)(*incx);
-	}
-
-	if (*incy < 0)
-	{
-		y0 = ((double *)y) + (m_y - 1) * (-*incy);
-		incy0 = (inc_t)(*incy);
-	}
-	else
-	{
-		y0 = ((double *)y);
-		incy0 = (inc_t)(*incy);
-	}
-
-	/* Set the row and column strides of A. */
-	rs_a = 1;
-	cs_a = *lda;
-
-	/* Call variants based on transpose value. */
-	if (bli_does_notrans(blis_transa))
-	{
-		//variant_2 is chosen for column-storage
-		// and uses axpyf-based implementation
-		bli_dgemv_unf_var2(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(double *)alpha,
-			(double *)a, rs_a, cs_a,
-			x0, incx0,
-			(double *)beta,
-			y0, incy0,
-			NULL);
-	}
-	else
-	{
-		//var_1 is chosen for row-storage
-		//and uses dotxf-based implementation
-		bli_dgemv_unf_var1(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(double *)alpha,
-			(double *)a, rs_a, cs_a,
-			x0, incx0,
-			(double *)beta,
-			y0, incy0,
-			NULL);
-	}
-}
-
-void sgemv_(
-	const f77_char *transa,
-	const f77_int *m,
-	const f77_int *n,
-	const float *alpha,
-	const float *a, const f77_int *lda,
-	const float *x, const f77_int *incx,
-	const float *beta,
-	float *y, const f77_int *incy)
-{
-	trans_t blis_transa;
-	dim_t m0, n0;
-	dim_t m_y, n_x;
-	float *x0;
-	float *y0;
-	inc_t incx0;
-	inc_t incy0;
-	inc_t rs_a, cs_a;
-
-	/* Perform BLAS parameter checking. */
-	PASTEBLACHK(gemv)
-	(
-		MKSTR(s),
-		MKSTR(gemv),
-		transa,
-		m,
-		n,
-		lda,
-		incx,
-		incy);
-
-	if (*m == 0 || *n == 0)
-	{
-		return;
-	}
-
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	if (*transa == 'n' || *transa == 'N')
-		blis_transa = BLIS_NO_TRANSPOSE;
-	else if (*transa == 't' || *transa == 'T')
-		blis_transa = BLIS_TRANSPOSE;
-	else if (*transa == 'c' || *transa == 'C')
-		blis_transa = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		//bli_check_error_code( BLIS_INVALID_TRANS );
-		blis_transa = BLIS_NO_TRANSPOSE;
-	}
-
-	/* Convert/typecast negative values of m and n to zero. */
-	if (*m < 0)
-		m0 = (dim_t)0;
-	else
-		m0 = (dim_t)(*m);
-
-	if (*n < 0)
-		n0 = (dim_t)0;
-	else
-		n0 = (dim_t)(*n);
-
-	/* Determine the dimensions of x and y so we can adjust the increments,
-     if necessary.*/
-	if (bli_does_notrans(blis_transa))
-	{
-		m_y = m0;
-		n_x = n0;
-	}
-	else
-	{
-		m_y = n0;
-		n_x = m0;
-	}
-
-	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
-     in a peculiar way. In these situations, BLAS returns without performing
-     any action, even though most sane interpretations of gemv would have the
-     the operation reduce to y := beta * y. Here, we catch those cases that
-     BLAS would normally mishandle and emulate the BLAS exactly so as to
-     provide "bug-for-bug" compatibility. Note that this extreme level of
-     compatibility would not be as much of an issue if it weren't for the
-     fact that some BLAS test suites actually test for these cases. Also, it
-     should be emphasized that BLIS, if called natively, does NOT exhibit
-     this quirky behavior; it will scale y by beta, as one would expect. */
-	if (m_y > 0 && n_x == 0)
-	{
-		/* Finalize BLIS. */
-		//      bli_finalize_auto();
-		return;
-	}
-
-	/* If the input increments are negative, adjust the pointers so we can
-     use positive increments instead. */
-	if (*incx < 0)
-	{
-		x0 = ((float *)x) + (n_x - 1) * (-*incx);
-		incx0 = (inc_t)(*incx);
-	}
-	else
-	{
-		x0 = ((float *)x);
-		incx0 = (inc_t)(*incx);
-	}
-
-	if (*incy < 0)
-	{
-		y0 = ((float *)y) + (m_y - 1) * (-*incy);
-		incy0 = (inc_t)(*incy);
-	}
-	else
-	{
-		y0 = ((float *)y);
-		incy0 = (inc_t)(*incy);
-	}
-
-	/* Set the row and column strides of A. */
-	rs_a = 1;
-	cs_a = *lda;
-
-	/* Call variants based on transpose value. */
-	if (bli_does_notrans(blis_transa))
-	{
-		bli_sgemv_unf_var2(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(float *)alpha,
-			(float *)a, rs_a, cs_a,
-			x0, incx0,
-			(float *)beta,
-			y0, incy0,
-			NULL);
-	}
-	else
-	{
-		bli_sgemv_unf_var1(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(float *)alpha,
-			(float *)a, rs_a, cs_a,
-			x0, incx0,
-			(float *)beta,
-			y0, incy0,
-			NULL);
-	}
-}
-
-void cgemv_(
-	const f77_char *transa,
-	const f77_int *m,
-	const f77_int *n,
-	const scomplex *alpha,
-	const scomplex *a, const f77_int *lda,
-	const scomplex *x, const f77_int *incx,
-	const scomplex *beta,
-	scomplex *y, const f77_int *incy)
-{
-
-	trans_t blis_transa;
-	dim_t m0, n0;
-	dim_t m_y, n_x;
-	scomplex *x0;
-	scomplex *y0;
-	inc_t incx0;
-	inc_t incy0;
-	inc_t rs_a, cs_a;
-
-	/* Perform BLAS parameter checking. */
-	PASTEBLACHK(gemv)
-	(
-		MKSTR(c),
-		MKSTR(gemv),
-		transa,
-		m,
-		n,
-		lda,
-		incx,
-		incy);
-
-	if (*m == 0 || *n == 0)
-	{
-		return;
-	}
-
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	if (*transa == 'n' || *transa == 'N')
-		blis_transa = BLIS_NO_TRANSPOSE;
-	else if (*transa == 't' || *transa == 'T')
-		blis_transa = BLIS_TRANSPOSE;
-	else if (*transa == 'c' || *transa == 'C')
-		blis_transa = BLIS_CONJ_TRANSPOSE;
-	else
-	{
-		// See comment for bli_param_map_netlib_to_blis_side() above.
-		// bli_check_error_code( BLIS_INVALID_TRANS );
-		blis_transa = BLIS_NO_TRANSPOSE;
-	}
-
-	/* Convert/typecast negative values of m and n to zero. */
-	if (*m < 0)
-		m0 = (dim_t)0;
-	else
-		m0 = (dim_t)(*m);
-
-	if (*n < 0)
-		n0 = (dim_t)0;
-	else
-		n0 = (dim_t)(*n);
-
-	/* Determine the dimensions of x and y so we can adjust the increments,
-       if necessary.*/
-	if (bli_does_notrans(blis_transa))
-	{
-		m_y = m0, n_x = n0;
-	}
-	else
-	{
-		m_y = n0;
-		n_x = m0;
-	}
-
-	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
-       in a peculiar way. In these situations, BLAS returns without performing
-       any action, even though most sane interpretations of gemv would have the
-       the operation reduce to y := beta * y. Here, we catch those cases that
-       BLAS would normally mishandle and emulate the BLAS exactly so as to
-       provide "bug-for-bug" compatibility. Note that this extreme level of
-       compatibility would not be as much of an issue if it weren't for the
-       fact that some BLAS test suites actually test for these cases. Also, it
-       should be emphasized that BLIS, if called natively, does NOT exhibit
-       this quirky behavior; it will scale y by beta, as one would expect. */
-
-	if (m_y > 0 && n_x == 0)
-	{
-		return;
-	}
-
-	/* If the input increments are negative, adjust the pointers so we can
-       use positive increments instead. */
-	if (*incx < 0)
-	{
-		x0 = ((scomplex *)x) + (n_x - 1) * (-*incx);
-		incx0 = (inc_t)(*incx);
-	}
-	else
-	{
-		x0 = ((scomplex *)x);
-		incx0 = (inc_t)(*incx);
-	}
-
-	if (*incy < 0)
-	{
-		y0 = ((scomplex *)y) + (m_y - 1) * (-*incy);
-		incy0 = (inc_t)(*incy);
-	}
-	else
-	{
-		y0 = ((scomplex *)y);
-		incy0 = (inc_t)(*incy);
-	}
-
-	/* Set the row and column strides of A. */
-	rs_a = 1;
-	cs_a = *lda;
-
-	/* call variants based on transpose value */
-	if (bli_does_notrans(blis_transa))
-	{
-		bli_cgemv_unf_var2(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(scomplex *)alpha,
-			(scomplex *)a, rs_a, cs_a,
-			x0, incx0,
-			(scomplex *)beta,
-			y0, incy0,
-			NULL);
-	}
-	else
-	{
-		bli_cgemv_unf_var1(
-			blis_transa,
-			BLIS_NO_CONJUGATE,
-			m0,
-			n0,
-			(scomplex *)alpha,
-			(scomplex *)a, rs_a, cs_a,
-			x0, incx0,
-			(scomplex *)beta,
-			y0, incy0,
-			NULL);
-	}
-}
-
-INSERT_GENTFUNC_BLAS_Z(gemv, gemv)
+INSERT_GENTFUNC_BLAS( gemv, gemv )
 #endif
+

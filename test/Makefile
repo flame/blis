@@ -224,4 +224,4 @@ clean: cleanx
 
 cleanx:
 	- $(RM_F) *.o *.x
-	
+

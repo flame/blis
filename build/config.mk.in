@@ -203,7 +203,8 @@ SANDBOX           := @sandbox@
 # variable is set to the empty value.
 LIBPTHREAD        := @libpthread@
 
-MK_IS_ARCH_ZEN := @enable_aocl_zen@
+# Whether we should use AMD-customized versions of certain framework files.
+ENABLE_AMD_FRAME_TWEAKS := @enable_amd_frame_tweaks@
 
 # end of ifndef CONFIG_MK_INCLUDED conditional block
 endif

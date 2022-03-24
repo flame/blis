@@ -440,3 +440,33 @@ void bli_dscalv_zen_int10
 	}
 }
 
+// -----------------------------------------------------------------------------
+
+//
+// NOTE: This function definition is provided as a placeholder in order to allow
+// function names of scalv kernels to be hard-coded in bli_gemv_unf_var2_amd.c.
+//
+
+void bli_cscalv_zen_int10
+     (
+       conj_t             conjalpha,
+       dim_t              n,
+       scomplex* restrict alpha,
+       scomplex* restrict x, inc_t incx,
+       cntx_t*   restrict cntx
+     )
+{
+	const num_t dt = BLIS_SCOMPLEX;
+
+	cscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx );
+
+	f
+	(
+	  conjalpha,
+	  n,
+	  alpha,
+	  x, incx,
+	  cntx
+	);
+}
+

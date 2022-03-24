@@ -60,7 +60,6 @@ void PASTEF77(ch,blasname) \
 	ftype*  y0; \
 	inc_t   incx0; \
 	inc_t   incy0; \
-	inc_t   rs_a, cs_a; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -89,16 +88,19 @@ void PASTEF77(ch,blasname) \
 	   if necessary.*/ \
 	bli_set_dims_with_trans( blis_transa, m0, n0, &m_y, &n_x ); \
 \
-	/* BLAS handles cases where trans(A) has no columns, and x has no elements,
-	   in a peculiar way. In these situations, BLAS returns without performing
-	   any action, even though most sane interpretations of gemv would have the
-	   the operation reduce to y := beta * y. Here, we catch those cases that
-	   BLAS would normally mishandle and emulate the BLAS exactly so as to
+	/* BLAS handles cases where y has no elements as well as those where x has
+	   no elements. In the case of the former, it cannot do any work since
+	   the output vector is empty; but in the latter case, BLAS has peculiar
+	   semantics. When x has no elements (and transa(A) has no columns), BLAS
+	   returns immediately without performing any computation even if the
+	   number of elements of y (and rows of transa(A)) is non-zero, in which
+	   case any sane interpretations of gemv would have the the operation
+	   reduce to y := beta * y. Here, we emulate the BLAS exactly so as to
 	   provide "bug-for-bug" compatibility. Note that this extreme level of
-	   compatibility would not be as much of an issue if it weren't for the
-	   fact that some BLAS test suites actually test for these cases. Also, it
-	   should be emphasized that BLIS, if called natively, does NOT exhibit
-	   this quirky behavior; it will scale y by beta, as one would expect. */ \
+	   compatibility would not be contemplated if it weren't for the fact
+	   that some BLAS unit tests actually check for this behavior. Also, it
+	   should be emphasized that BLIS, when called natively, does NOT exhibit
+	   this quirky behavior; it will scale y by beta as one would expect. */ \
 	if ( m_y > 0 && n_x == 0 ) \
 	{ \
 		/* Finalize BLIS. */ \
@@ -113,8 +115,8 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( m_y, (ftype*)y, *incy, y0, incy0 ); \
 \
 	/* Set the row and column strides of A. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \

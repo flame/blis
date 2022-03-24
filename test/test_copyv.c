@@ -35,15 +35,16 @@
 #include <unistd.h>
 #include "blis.h"
 
-
-
 //#define BLIS_ACCURACY_TEST
 #ifdef BLIS_ACCURACY_TEST
 
-bool_t scompare_result(int n, float *x, int incx, float *y, int incy) {
-	for (int i = 0; i < n; i++) {
-		if ((*x) != (*y)) {
-			printf("%4f != %4f at location %d\n", *x, *y, i);
+bool scompare_result( int n, float *x, int incx, float *y, int incy )
+{
+	for ( int i = 0; i < n; i++ )
+	{
+		if ( (*x) != (*y) )
+		{
+			printf( "%4f != %4f at location %d\n", *x, *y, i );
 			return FALSE;
 		}
 		x += incx;
@@ -52,10 +53,13 @@ bool_t scompare_result(int n, float *x, int incx, float *y, int incy) {
 	return TRUE;
 }
 
-bool_t dcompare_result(int n, double *x, int incx, double *y, int incy) {
-	for (int i = 0; i < n; i++) {
-		if ((*x) != (*y)) {
-			printf("%4f != %4f at location %d\n", *x, *y, i);
+bool dcompare_result( int n, double *x, int incx, double *y, int incy )
+{
+	for ( int i = 0; i < n; i++ )
+	{
+		if ( (*x) != (*y) )
+		{
+			printf( "%4f != %4f at location %d\n", *x, *y, i );
 			return FALSE;
 		}
 		x += incx;
@@ -63,10 +67,11 @@ bool_t dcompare_result(int n, double *x, int incx, double *y, int incy) {
 	}
 	return TRUE;
 }
+
 #endif
 
 
-int main(int argc, char** argv)
+int main( int argc, char** argv )
 {
 	obj_t x, y;
 	dim_t n;
@@ -78,7 +83,7 @@ int main(int argc, char** argv)
 
 	double dtime;
 	double dtime_save;
-	double Gbps;
+	double gbps;
 
 	//bli_init();
 
@@ -106,109 +111,108 @@ int main(int argc, char** argv)
 	dt = BLIS_DCOMPLEX;
 #endif
 
-	if (dt == BLIS_DOUBLE)
-		sizeof_dt = sizeof(double);
-	else if (dt == BLIS_FLOAT)
-		sizeof_dt = sizeof(float);
+	if      ( dt == BLIS_FLOAT  ) sizeof_dt = sizeof( float );
+	else if ( dt == BLIS_DOUBLE ) sizeof_dt = sizeof( double );
 
-	printf("executable\t n\t GBs per sec\n");
-	for (p = p_begin; p <= p_end; p += p_inc)
+	printf( "executable\t n\t GBs per sec\n" );
+
+	for ( p = p_begin; p <= p_end; p += p_inc )
 	{
 
-		if (n_input < 0) n = p * (dim_t)abs(n_input);
-		else               n = (dim_t)n_input;
+		if ( n_input < 0 ) n = p * ( dim_t )abs( n_input );
+		else               n =     ( dim_t )     n_input;
 
-		bli_obj_create(dt, n, 1, 0, 0, &x);
-		bli_obj_create(dt, n, 1, 0, 0, &y);
-		bli_randm(&x);
+		bli_obj_create( dt, n, 1, 0, 0, &x );
+		bli_obj_create( dt, n, 1, 0, 0, &y );
 
+		bli_randm( &x );
 
 		dtime_save = DBL_MAX;
 
-		for (r = 0; r < n_repeats; ++r)
+		for ( r = 0; r < n_repeats; ++r )
 		{
+
 			dtime = bli_clock();
 
 #ifdef BLIS
-			bli_copyv(&x,
-				&y
-			);
+			bli_copyv( &x,
+			           &y );
 #else
-			if (bli_is_float(dt))
+			if ( bli_is_float( dt ) )
 			{
-				f77_int nn = bli_obj_length(&x);
-				f77_int incx = bli_obj_vector_inc(&x);
-				float*  xp = bli_obj_buffer(&x);
-				f77_int incy = bli_obj_vector_inc(&y);
-				float*  yp = bli_obj_buffer(&y);
+				f77_int nn   = bli_obj_length( &x );
+				f77_int incx = bli_obj_vector_inc( &x );
+				float*  xp   = bli_obj_buffer( &x );
+				f77_int incy = bli_obj_vector_inc( &y );
+				float*  yp   = bli_obj_buffer( &y );
 
-				scopy_(&nn,
-					xp, &incx,
-					yp, &incy);
+				scopy_( &nn,
+				        xp, &incx,
+				        yp, &incy );
 
 			}
-			else if (bli_is_double(dt))
+			else if ( bli_is_double( dt ) )
 			{
 
-				f77_int  nn = bli_obj_length(&x);
-				f77_int  incx = bli_obj_vector_inc(&x);
-				double*  xp = bli_obj_buffer(&x);
-				f77_int incy = bli_obj_vector_inc(&y);
-				double*  yp = bli_obj_buffer(&y);
+				f77_int nn   = bli_obj_length( &x );
+				f77_int incx = bli_obj_vector_inc( &x );
+				double* xp   = bli_obj_buffer( &x );
+				f77_int incy = bli_obj_vector_inc( &y );
+				double* yp   = bli_obj_buffer( &y );
 
-				dcopy_(&nn,
-					xp, &incx,
-					yp, &incy
-				);
+				dcopy_( &nn,
+				        xp, &incx,
+				        yp, &incy );
 			}
 #endif
-			dtime_save = bli_clock_min_diff(dtime_save, dtime);
+			dtime_save = bli_clock_min_diff( dtime_save, dtime );
+
 #ifdef BLIS_ACCURACY_TEST
-			if (dt == BLIS_FLOAT) {
-				int nn = bli_obj_length(&x);
-				int incx = bli_obj_vector_inc(&x);
-				float*  xp = bli_obj_buffer(&x);
-				int incy = bli_obj_vector_inc(&y);
-				float*  yp = bli_obj_buffer(&y);
-				if (scompare_result(nn, xp, incx, yp, incy))
-					printf("Copy Successful\n");
+			if ( dt == BLIS_FLOAT )
+			{
+				int     nn   = bli_obj_length( &x );
+				int     incx = bli_obj_vector_inc( &x );
+				float*  xp   = bli_obj_buffer( &x );
+				int     incy = bli_obj_vector_inc( &y );
+				float*  yp   = bli_obj_buffer( &y );
+				if ( scompare_result( nn, xp, incx, yp, incy ) )
+					printf( "Copy Successful\n" );
 				else
-					printf("ALERT!!! Copy Failed\n");
+					printf( "ALERT!!! Copy Failed\n" );
 			}
-			if (dt == BLIS_DOUBLE) {
-				int nn = bli_obj_length(&x);
-				int incx = bli_obj_vector_inc(&x);
-				double*  xp = bli_obj_buffer(&x);
-				int incy = bli_obj_vector_inc(&y);
-				double*  yp = bli_obj_buffer(&y);
-				if (dcompare_result(nn, xp, incx, yp, incy))
-					printf("Copy Successful\n");
+			if ( dt == BLIS_DOUBLE )
+			{
+				int     nn   = bli_obj_length( &x );
+				int     incx = bli_obj_vector_inc( &x );
+				double* xp   = bli_obj_buffer( &x );
+				int     incy = bli_obj_vector_inc( &y );
+				double* yp   = bli_obj_buffer( &y );
+				if ( dcompare_result( nn, xp, incx, yp, incy ) )
+					printf( "Copy Successful\n" );
 				else
-					printf("ALERT!!! Copy Failed\n");
+					printf( "ALERT!!! Copy Failed\n" );
 			}
 #endif
 		}
+
 		// Size of the vectors are incrementd by 1000, to test wide range of inputs.
-		if (p >= 1000)
-			p_inc = 1000;
+		if ( p >= 1000  ) p_inc = 1000;
+		if ( p >= 10000 ) p_inc = 10000;
+		gbps = ( n * sizeof_dt ) / ( dtime_save * 1.0e9 );
 
-		if (p >= 10000)
-			p_inc = 10000;
-		Gbps = (n * sizeof_dt) / (dtime_save * 1.0e9);
 #ifdef BLIS
-		printf("data_copyv_blis\t");
+		printf( "data_copyv_blis\t" );
 #else
-		printf("data_copyv_%s\t", BLAS);
+		printf( "data_copyv_%s\t", BLAS );
 #endif
-		printf("%4lu\t %7.2f\n", 
-			(unsigned long)n, Gbps);
+		printf( "%4lu\t %7.2f\n",
+		        ( unsigned long )n, gbps );
 
-		bli_obj_free(&x);
-		bli_obj_free(&y);
+		bli_obj_free( &x );
+		bli_obj_free( &y );
 	}
 
-	//	bli_finalize();
+	//bli_finalize();
 
 	return 0;
 }
-

@@ -54,8 +54,8 @@
 
     __m256 ymm0, ymm1, ymm2, ymm3;
     __m256 ymm4, ymm5, ymm6, ymm7;
-    __m256 ymm8, ymm9, ymm10, ymm11;
-    __m256 ymm12, ymm13, ymm14, ymm15;
+    __m256 ymm8,       ymm10;
+    __m256 ymm12, ymm13;
 
     float* ap[4];
     float* y0 = (float*)y;
