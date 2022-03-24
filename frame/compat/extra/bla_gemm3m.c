@@ -62,9 +62,6 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
-	inc_t   rs_c, cs_c; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -94,12 +91,12 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_dim1( *k, k0 ); \
 \
 	/* Set the row and column strides of the matrix operands. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
-	rs_b = 1; \
-	cs_b = *ldb; \
-	rs_c = 1; \
-	cs_c = *ldc; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
+	const inc_t rs_b = 1; \
+	const inc_t cs_b = *ldb; \
+	const inc_t rs_c = 1; \
+	const inc_t cs_c = *ldc; \
 \
 	/* As a placeholder, invoke 1m since BLIS does no longer contains an
 	   official 3m implementation. Note that we do this by inlining an
