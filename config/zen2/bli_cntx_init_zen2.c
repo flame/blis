@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -64,6 +64,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // gemmtrsm_u
 	  BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
 	  BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+
 	  cntx
 	);
 
@@ -96,6 +97,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  // dotxf
 	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
 	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+
 	  cntx
 	);
 
@@ -135,6 +137,7 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 	  //set
 	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
 	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+
 	  cntx
 	);
 

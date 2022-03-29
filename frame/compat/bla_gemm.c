@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2019-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -62,9 +62,6 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transa; \
 	trans_t blis_transb; \
 	dim_t   m0, n0, k0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
-	inc_t   rs_c, cs_c; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -94,12 +91,12 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_dim1( *k, k0 ); \
 \
 	/* Set the row and column strides of the matrix operands. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
-	rs_b = 1; \
-	cs_b = *ldb; \
-	rs_c = 1; \
-	cs_c = *ldc; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
+	const inc_t rs_b = 1; \
+	const inc_t cs_b = *ldb; \
+	const inc_t rs_c = 1; \
+	const inc_t cs_c = *ldc; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
@@ -179,6 +176,48 @@ void PASTEF77(ch,blasname) \
 	const inc_t cs_b = *ldb; \
 	const inc_t rs_c = 1; \
 	const inc_t cs_c = *ldc; \
+\
+	/* Handle special cases of m == 1 or n == 1 via gemv. */ \
+	if ( n0 == 1 ) \
+	{ \
+		dim_t m0t, k0t; \
+		bli_set_dims_with_trans( blis_transa, m0, k0, &m0t, &k0t ); \
+\
+		PASTEMAC2(ch,gemv,BLIS_TAPI_EX_SUF) \
+		( \
+		  blis_transa, \
+		  bli_extract_conj( blis_transb ), \
+		  m0t, k0t, \
+		  ( ftype* )alpha, \
+		  ( ftype* )a, rs_a, cs_a, \
+		  ( ftype* )b, ( bli_does_notrans( blis_transb ) ? rs_b : cs_b ), \
+		  ( ftype* )beta, \
+		            c, rs_c, \
+		  NULL, \
+		  NULL  \
+		); \
+		return; \
+	} \
+	else if ( m0 == 1 ) \
+	{ \
+		dim_t n0t, k0t; \
+		bli_set_dims_with_trans( blis_transb, n0, k0, &n0t, &k0t ); \
+\
+		PASTEMAC2(ch,gemv,BLIS_TAPI_EX_SUF) \
+		( \
+		  blis_transb, \
+		  bli_extract_conj( blis_transa ), \
+		  n0t, k0t, \
+		  ( ftype* )alpha, \
+		  ( ftype* )b, cs_b, rs_b, \
+		  ( ftype* )a, ( bli_does_notrans( blis_transa ) ? cs_a : rs_a ), \
+		  ( ftype* )beta, \
+		            c, cs_c, \
+		  NULL, \
+		  NULL  \
+		); \
+		return; \
+	} \
 \
 	const num_t dt     = PASTEMAC(ch,type); \
 \

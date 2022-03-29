@@ -5,7 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
-#  Copyright (C) 2020, Advanced Micro Devices, Inc.
+#  Copyright (C) 2020-2022, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -269,6 +269,21 @@ print_usage()
 	echo "                 medium and large problems. Note that what qualifies as"
 	echo "                 \"small\" depends on thresholds that may vary by sub-"
 	echo "                 configuration."
+	echo " "
+	echo "   --enable-amd-frame-tweaks, --disable-amd-frame-tweaks"
+	echo " "
+	echo "                 Enable building with certain framework files that have"
+	echo "                 been customized by AMD for Zen-based microarchitectures."
+	echo "                 The default counterparts of these files must be portable,"
+	echo "                 and so these customized files may provide some (typically"
+	echo "                 modest) performance improvement for some select operations"
+	echo "                 and/or APIs, though there may a few (tiny dimension) cases"
+	echo "                 where the improvement is more pronounced. Note that the"
+	echo "                 target configuration must be Zen-based (or 'amd64') for"
+	echo "                 this option to have any effect. (Also note that this"
+	echo "                 option is NOT to be confused with enabling AMD *kernels*,"
+	echo "                 which are determined by the BLIS subconfiguration used at"
+	echo "                 runtime.) By default, these customized files are disabled."
 	echo " "
 	echo "   -a NAME --enable-addon=NAME"
 	echo " "
@@ -2453,6 +2468,7 @@ main()
 	enable_mixed_dt='yes'
 	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
+	enable_amd_frame_tweaks='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
 	force_version='no'
@@ -2664,6 +2680,12 @@ main()
 							;;
 						disable-sup-handling)
 							enable_sup_handling='no'
+							;;
+						enable-amd-frame-tweaks)
+							enable_amd_frame_tweaks='yes'
+							;;
+						disable-amd-frame-tweaks)
+							enable_amd_frame_tweaks='no'
 							;;
 						with-memkind)
 							enable_memkind='yes'
@@ -3567,6 +3589,29 @@ main()
 		exit 1
 	fi
 
+	# Check whether we should use AMD-customized versions of certain framework
+	# files.
+	if [ "x${enable_amd_frame_tweaks}" = "xyes" ]; then
+
+		echo "${script_name}: AMD-specific framework files will be considered."
+		echo "${script_name}:   checking eligibility of target configuration."
+
+		# Make sure we are targeting either one of the zen subconfigs or the
+		# amd64 umbrella family.
+		uconf=$(echo ${config_name} | grep -c 'zen\|amd64')
+
+		if [[ $uconf == 0 ]]; then
+			echo "${script_name}:   target configuration '${config_name}' is not eligible."
+			echo "${script_name}:   disabling AMD-specific framework files."
+			enable_amd_frame_tweaks='no'
+		else
+			echo "${script_name}:   target configuration '${config_name}' is eligible."
+			echo "${script_name}:   enabling AMD-specific framework files."
+		fi
+	else
+		echo "${script_name}: AMD-specific framework files will not be considered."
+	fi
+
 	# Check if addons were given.
 	if [ -n "${addon_flag}" ]; then
 
@@ -3709,7 +3754,7 @@ main()
 	# Create a #define for the configuration family (config_name).
 	uconf=$(echo ${config_name} | tr '[:lower:]' '[:upper:]')
 	config_name_define="#define BLIS_FAMILY_${uconf}\n"
-
+	
 	# Create a list of #defines, one for each configuration in config_list.
 	config_list_defines=""
 	for conf in ${config_list}; do
@@ -3820,6 +3865,7 @@ main()
 		| sed -e "s/@export_shared@/${export_shared}/g" \
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
+		| sed -e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@addon_list@/${addon_list}/g" \

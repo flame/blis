@@ -5,6 +5,7 @@
 #  libraries.
 #
 #  Copyright (C) 2014, The University of Texas at Austin
+#  Copyright (C) 2022, Advanced Micro Devices, Inc.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -218,6 +219,28 @@ MK_ADDON_OBJS       := $(call gen-obj-paths-from-src,$(ADDON_SRC_SUFS),$(MK_ADDO
 # Generate object file paths for the sandbox source code. If a sandbox was not
 # enabled a configure-time, this variable will we empty.
 MK_SANDBOX_OBJS     := $(call gen-obj-paths-from-src,$(SANDBOX_SRC_SUFS),$(MK_SANDBOX_SRC),$(SANDBOX_PATH),$(BASE_OBJ_SANDBOX_PATH))
+
+# AMD has chosen to introduce AOCL-specific optimizations to certain BLIS
+# framework files that are otherwise intended to remain generic. Upstream
+# developers of vanilla BLIS have agreed to integrate some of these
+# optimizations, but in a way that keeps the AOCL-specific code segregated
+# in separate files containing the suffix '_amd'. For example, the BLAS
+# compatibility layer in vanilla BLIS contains a generic file named
+# 'bla_gemm.c'. AMD's version of this file is named 'bla_gemm_amd.c'.
+# Only one or the other is ever built and included in libblis. Currently,
+# these files are chosen automatically based on the target configuration.
+ifeq ($(ENABLE_AMD_FRAME_TWEAKS),yes)
+# Build is being done for AMD platforms; remove the objects which DO NOT have
+# an "_amd" suffix.
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+FILES_TO_REMOVE := $(subst _amd.o,.o, $(MK_FRAME_AMD_OBJS))
+MK_FRAME_OBJS := $(filter-out $(FILES_TO_REMOVE), $(MK_FRAME_OBJS))
+else
+# Build is being done for non-AMD platforms; remove the objects which DO have
+# an "_amd" suffix.
+MK_FRAME_AMD_OBJS  := $(filter $(BASE_OBJ_FRAME_PATH)/%amd.o, $(MK_FRAME_OBJS))
+MK_FRAME_OBJS := $(filter-out $(MK_FRAME_AMD_OBJS), $(MK_FRAME_OBJS))
+endif
 
 # Combine all of the object files into some readily-accessible variables.
 MK_BLIS_OBJS        := $(MK_CONFIG_OBJS) \
