@@ -67,7 +67,7 @@ void PASTEF77(ch,blasname) \
 	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
+	PASTEBLACHK(blisname) \
 	( \
 	  MKSTR(ch), \
 	  MKSTR(blasname), \
@@ -162,7 +162,7 @@ void PASTEF77(ch,blasname) \
 	bli_init_auto(); \
 \
 	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
+	PASTEBLACHK(blisname) \
 	( \
 	  MKSTR(ch), \
 	  MKSTR(blasname), \
