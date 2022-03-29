@@ -199,3 +199,5 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
+
+
