@@ -155,10 +155,6 @@ GENTFUNC( double,   d, tfuncname ) \
 GENTFUNC( scomplex, c, tfuncname ) \
 GENTFUNC( dcomplex, z, tfuncname )
 
-#define INSERT_GENTFUNC_BASIC0_Z( tfuncname ) \
-\
-GENTFUNC( dcomplex, z, tfuncname )
-
 // -- (one auxiliary argument) --
 
 #define INSERT_GENTFUNC_BASIC( tfuncname, varname ) \
