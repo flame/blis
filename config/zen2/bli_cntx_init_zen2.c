@@ -174,17 +174,31 @@ void bli_cntx_init_zen2( cntx_t* cntx )
 
 	// -------------------------------------------------------------------------
 
-	// Initialize sup thresholds with architecture-appropriate values.
-	//                                          s     d     c     z
-#if 1
-	bli_blksz_init_easy( &thresh[ BLIS_MT ],  500,  249,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ],  500,  249,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ],  500,  249,   -1,   -1 );
-#else
-	bli_blksz_init_easy( &thresh[ BLIS_MT ], 100000, 100000,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_NT ], 100000, 100000,   -1,   -1 );
-	bli_blksz_init_easy( &thresh[ BLIS_KT ], 100000, 100000,   -1,   -1 );
-#endif
+    //Initialize TRSM blocksize objects with architecture-specific values.
+	//Using different cache block sizes for TRSM instead of common level-3 block sizes.
+	//Tuning is done for double-precision only.
+    //                                          s      d      c      z
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    72 );
+    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   492,   256,   256 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  1600,  4080,  4080 );
+
+	// Update the context with the current architecture's register and cache
+	// blocksizes for level-3 TRSM problems.
+	bli_cntx_set_trsm_blkszs
+	(
+	  5,
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
+	  cntx
+	);
+
+	// Initialize sup thresholds with architecture-appropriate values. s d c z
+	bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_NT ],   200,  100,   -1,   -1 );
+	bli_blksz_init_easy( &thresh[ BLIS_KT ],   240,  120,   -1,   -1 );
 
 	// Initialize the context with the sup thresholds.
 	bli_cntx_set_l3_sup_thresh
