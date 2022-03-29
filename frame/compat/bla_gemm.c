@@ -35,11 +35,10 @@
 
 #include "blis.h"
 
-
 //
 // Define BLAS-to-BLIS interfaces.
 //
-
+#define ENABLE_INDUCED_METHOD 0
 #ifdef BLIS_BLAS3_CALLS_TAPI
 
 #undef  GENTFUNC
@@ -218,7 +217,6 @@ void PASTEF77(ch,blasname) \
 	/* Finalize BLIS. */ \
 	bli_finalize_auto(); \
 }
-
 #endif
 
 #ifdef BLIS_ENABLE_BLAS
