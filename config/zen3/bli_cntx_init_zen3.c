@@ -4,6 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
+   Copyright (C) 2014, The University of Texas at Austin
    Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -36,6 +37,7 @@
 
 void bli_cntx_init_zen3( cntx_t* cntx )
 {
+
 	blksz_t blkszs[ BLIS_NUM_BLKSZS ];
 	blksz_t thresh[ BLIS_NUM_THRESH ];
 
@@ -92,19 +94,21 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	);
 #endif
 
-	// Update the context with optimized level-1f kernels.
-	bli_cntx_set_l1f_kers
-	(
-	  4,
-	  // axpyf
-	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
-	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
-	  // dotxf
-	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
-	  cntx
-	);
-
+  // Update the context with optimized level-1f kernels.
+  bli_cntx_set_l1f_kers
+  (
+    6,
+    // axpyf
+    BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
+    BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
+    BLIS_AXPYF_KER,     BLIS_SCOMPLEX, bli_caxpyf_zen_int_5,
+    BLIS_AXPYF_KER,     BLIS_DCOMPLEX, bli_zaxpyf_zen_int_5,
+    // dotxf
+    BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+    BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+    cntx
+  );
+  
 	// Update the context with optimized level-1v kernels.
 	bli_cntx_set_l1v_kers
 	(
@@ -295,4 +299,3 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  cntx
 	);
 }
-

@@ -55,6 +55,19 @@ GENTFUNC( double,   d, blasname, blisname ) \
 GENTFUNC( scomplex, c, blasname, blisname ) \
 GENTFUNC( dcomplex, z, blasname, blisname )
 
+<<<<<<< HEAD
+=======
+#define INSERT_GENTFUNC_BLAS_SC( blasname, blisname ) \
+\
+GENTFUNC( float,    s, blasname, blisname ) \
+GENTFUNC( scomplex, c, blasname, blisname )
+
+
+#define INSERT_GENTFUNC_BLAS_CZ( blasname, blisname ) \
+\
+GENTFUNC( scomplex, c, blasname, blisname ) \
+GENTFUNC( dcomplex, z, blasname, blisname )
+>>>>>>> 2e1a5bc1d... Optimized double complex axpyf kernel for zgemv
 
 // -- Basic one-operand macro with real domain only --
 
