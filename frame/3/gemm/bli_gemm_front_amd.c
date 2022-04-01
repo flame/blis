@@ -50,6 +50,16 @@ void bli_gemm_front
 	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_3);
 	bli_init_once();
 
+	#ifdef AOCL_DYNAMIC
+	// If dynamic-threading is enabled, calculate optimum number
+        //  of threads.
+        //  rntm will be updated with optimum number of threads.
+        if( bli_obj_is_dcomplex(c))// This will enable for ZGEMM
+        {
+            bli_nthreads_optimum(a, b, c, BLIS_GEMM, rntm);
+        }
+        #endif
+
 	obj_t   a_local;
 	obj_t   b_local;
 	obj_t   c_local;
@@ -73,22 +83,6 @@ void bli_gemm_front
 		bli_scalm( beta, c );
 		return;
 	}
-
-#ifdef BLIS_ENABLE_SMALL_MATRIX
-	// Only handle small problems separately for homogeneous datatypes.
-	if ( bli_obj_dt( a ) == bli_obj_dt( b ) &&
-	     bli_obj_dt( a ) == bli_obj_dt( c ) &&
-	     bli_obj_comp_prec( c ) == bli_obj_prec( c ) )
-	{
-		err_t status = bli_gemm_small( alpha, a, b, beta, c, cntx, cntl );
-
-		if ( status == BLIS_SUCCESS )
-		{
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
-			return;
-		}
-	}
-#endif
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );

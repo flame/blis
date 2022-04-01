@@ -55,76 +55,76 @@ void PASTEF77(ch,blasname) \
        const ftype*    a, const f77_int* lda, \
        const ftype*    b, const f77_int* ldb, \
        const ftype*    beta, \
-	     ftype*    c, const f77_int* ldc  \
+         ftype*    c, const f77_int* ldc  \
      ) \
 { \
-	trans_t blis_transa; \
-	trans_t blis_transb; \
-	dim_t   m0, n0, k0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
-	inc_t   rs_c, cs_c; \
+    trans_t blis_transa; \
+    trans_t blis_transb; \
+    dim_t   m0, n0, k0; \
+    inc_t   rs_a, cs_a; \
+    inc_t   rs_b, cs_b; \
+    inc_t   rs_c, cs_c; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
-				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+    AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+                (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  transa, \
-	  transb, \
-	  m, \
-	  n, \
-	  k, \
-	  lda, \
-	  ldb, \
-	  ldc  \
-	); \
+    /* Perform BLAS parameter checking. */ \
+    PASTEBLACHK(blasname) \
+    ( \
+      MKSTR(ch), \
+      MKSTR(blasname), \
+      transa, \
+      transb, \
+      m, \
+      n, \
+      k, \
+      lda, \
+      ldb, \
+      ldc  \
+    ); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-	bli_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+    bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+    bli_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
 \
-	/* Typecast BLAS integers to BLIS integers. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-	bli_convert_blas_dim1( *n, n0 ); \
-	bli_convert_blas_dim1( *k, k0 ); \
+    /* Typecast BLAS integers to BLIS integers. */ \
+    bli_convert_blas_dim1( *m, m0 ); \
+    bli_convert_blas_dim1( *n, n0 ); \
+    bli_convert_blas_dim1( *k, k0 ); \
 \
-	/* Set the row and column strides of the matrix operands. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
-	rs_b = 1; \
-	cs_b = *ldb; \
-	rs_c = 1; \
-	cs_c = *ldc; \
+    /* Set the row and column strides of the matrix operands. */ \
+    rs_a = 1; \
+    cs_a = *lda; \
+    rs_b = 1; \
+    cs_b = *ldb; \
+    rs_c = 1; \
+    cs_c = *ldc; \
 \
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  blis_transa, \
-	  blis_transb, \
-	  m0, \
-	  n0, \
-	  k0, \
-	  (ftype*)alpha, \
-	  (ftype*)a, rs_a, cs_a, \
-	  (ftype*)b, rs_b, cs_b, \
-	  (ftype*)beta, \
-	  (ftype*)c, rs_c, cs_c, \
-	  NULL, \
-	  NULL  \
-	); \
+    /* Call BLIS interface. */ \
+    PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
+    ( \
+      blis_transa, \
+      blis_transb, \
+      m0, \
+      n0, \
+      k0, \
+      (ftype*)alpha, \
+      (ftype*)a, rs_a, cs_a, \
+      (ftype*)b, rs_b, cs_b, \
+      (ftype*)beta, \
+      (ftype*)c, rs_c, cs_c, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
-	/* Finalize BLIS. */				 \
-	bli_finalize_auto(); \
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */                 \
+    bli_finalize_auto(); \
 }
 
 #else
@@ -143,175 +143,175 @@ void PASTEF77(ch,blasname) \
        const ftype*    a, const f77_int* lda, \
        const ftype*    b, const f77_int* ldb, \
        const ftype*    beta, \
-	     ftype*    c, const f77_int* ldc  \
+         ftype*    c, const f77_int* ldc  \
      ) \
 { \
 \
-	trans_t blis_transa; \
-	trans_t blis_transb; \
-	dim_t   m0, n0, k0; \
+    trans_t blis_transa; \
+    trans_t blis_transb; \
+    dim_t   m0, n0, k0; \
 \
-	dim_t       m0_a, n0_a; \
-	dim_t       m0_b, n0_b; \
+    dim_t       m0_a, n0_a; \
+    dim_t       m0_b, n0_b; \
 \
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
+    /* Initialize BLIS. */ \
+    bli_init_auto(); \
 \
-	AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
-	AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
-				(void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
+    AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1); \
+    AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(ch), *transa, *transb, *m, *n, *k, \
+                (void*)alpha, *lda, *ldb, (void*)beta, *ldc); \
 \
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  transa, \
-	  transb, \
-	  m, \
-	  n, \
-	  k, \
-	  lda, \
-	  ldb, \
-	  ldc  \
-	); \
+    /* Perform BLAS parameter checking. */ \
+    PASTEBLACHK(blasname) \
+    ( \
+      MKSTR(ch), \
+      MKSTR(blasname), \
+      transa, \
+      transb, \
+      m, \
+      n, \
+      k, \
+      lda, \
+      ldb, \
+      ldc  \
+    ); \
 \
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-	bli_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
+    bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
+    bli_param_map_netlib_to_blis_trans( *transb, &blis_transb ); \
 \
-	/* Typecast BLAS integers to BLIS integers. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-	bli_convert_blas_dim1( *n, n0 ); \
-	bli_convert_blas_dim1( *k, k0 ); \
+    /* Typecast BLAS integers to BLIS integers. */ \
+    bli_convert_blas_dim1( *m, m0 ); \
+    bli_convert_blas_dim1( *n, n0 ); \
+    bli_convert_blas_dim1( *k, k0 ); \
 \
-	/* Set the row and column strides of the matrix operands. */ \
-	const inc_t rs_a = 1; \
-	const inc_t cs_a = *lda; \
-	const inc_t rs_b = 1; \
-	const inc_t cs_b = *ldb; \
-	const inc_t rs_c = 1; \
-	const inc_t cs_c = *ldc; \
+    /* Set the row and column strides of the matrix operands. */ \
+    const inc_t rs_a = 1; \
+    const inc_t cs_a = *lda; \
+    const inc_t rs_b = 1; \
+    const inc_t cs_b = *ldb; \
+    const inc_t rs_c = 1; \
+    const inc_t cs_c = *ldc; \
 \
-	if( n0 == 1 ) \
-	{ \
-		if(bli_is_notrans(blis_transa)) \
-		{ \
-			PASTEMAC(ch,gemv_unf_var2)( \
-					BLIS_NO_TRANSPOSE, \
-					bli_extract_conj(blis_transb), \
-					m0, k0, \
-					(ftype*)alpha, \
-					(ftype*)a, rs_a, cs_a,\
-					(ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
-					(ftype*) beta, \
-					c, rs_c, \
-					NULL \
-					); \
-		} \
-		else \
-		{ \
-			PASTEMAC(ch,gemv_unf_var1)( \
-					blis_transa, \
-					bli_extract_conj(blis_transb), \
-					k0, m0, \
-					(ftype*)alpha, \
-					(ftype*)a, rs_a, cs_a, \
-					(ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
-					(ftype*)beta, \
-					c, rs_c, \
-					NULL \
-					); \
-		} \
-		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
-		return; \
-	} \
-	else if( m0 == 1 ) \
-	{ \
-		if(bli_is_notrans(blis_transb)) \
-		{ \
-			PASTEMAC(ch,gemv_unf_var1)( \
-					blis_transb, \
-					bli_extract_conj(blis_transa), \
-					n0, k0, \
-					(ftype*)alpha, \
-					(ftype*)b, cs_b, rs_b, \
-					(ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
-					(ftype*)beta, \
-					c, cs_c, \
-					NULL \
-					); \
-		} \
-		else \
-		{ \
-			PASTEMAC(ch,gemv_unf_var2)( \
-					blis_transb, \
-					bli_extract_conj(blis_transa), \
-					k0, n0, \
-					(ftype*)alpha, \
-					(ftype*)b, cs_b, rs_b, \
-					(ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
-					(ftype*)beta, \
-					c, cs_c, \
-					NULL \
-					); \
-		} \
-		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
-		return; \
-	} \
+    if( n0 == 1 ) \
+    { \
+        if(bli_is_notrans(blis_transa)) \
+        { \
+            PASTEMAC(ch,gemv_unf_var2)( \
+                    BLIS_NO_TRANSPOSE, \
+                    bli_extract_conj(blis_transb), \
+                    m0, k0, \
+                    (ftype*)alpha, \
+                    (ftype*)a, rs_a, cs_a,\
+                    (ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
+                    (ftype*) beta, \
+                    c, rs_c, \
+                    NULL \
+                    ); \
+        } \
+        else \
+        { \
+            PASTEMAC(ch,gemv_unf_var1)( \
+                    blis_transa, \
+                    bli_extract_conj(blis_transb), \
+                    k0, m0, \
+                    (ftype*)alpha, \
+                    (ftype*)a, rs_a, cs_a, \
+                    (ftype*)b, bli_is_notrans(blis_transb)?rs_b:cs_b, \
+                    (ftype*)beta, \
+                    c, rs_c, \
+                    NULL \
+                    ); \
+        } \
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+        return; \
+    } \
+    else if( m0 == 1 ) \
+    { \
+        if(bli_is_notrans(blis_transb)) \
+        { \
+            PASTEMAC(ch,gemv_unf_var1)( \
+                    blis_transb, \
+                    bli_extract_conj(blis_transa), \
+                    n0, k0, \
+                    (ftype*)alpha, \
+                    (ftype*)b, cs_b, rs_b, \
+                    (ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
+                    (ftype*)beta, \
+                    c, cs_c, \
+                    NULL \
+                    ); \
+        } \
+        else \
+        { \
+            PASTEMAC(ch,gemv_unf_var2)( \
+                    blis_transb, \
+                    bli_extract_conj(blis_transa), \
+                    k0, n0, \
+                    (ftype*)alpha, \
+                    (ftype*)b, cs_b, rs_b, \
+                    (ftype*)a, bli_is_notrans(blis_transa)?cs_a:rs_a, \
+                    (ftype*)beta, \
+                    c, cs_c, \
+                    NULL \
+                    ); \
+        } \
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+        return; \
+    } \
 \
-	const num_t dt     = PASTEMAC(ch,type); \
+    const num_t dt     = PASTEMAC(ch,type); \
 \
-	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
-	obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
-	obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
-	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
-	obj_t       co     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1; \
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER; \
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1; \
+    obj_t       co     = BLIS_OBJECT_INITIALIZER; \
 \
-	bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a ); \
-	bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b ); \
+    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a ); \
+    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b ); \
 \
-	bli_obj_init_finish_1x1( dt, (ftype*)alpha, &alphao ); \
-	bli_obj_init_finish_1x1( dt, (ftype*)beta,  &betao  ); \
+    bli_obj_init_finish_1x1( dt, (ftype*)alpha, &alphao ); \
+    bli_obj_init_finish_1x1( dt, (ftype*)beta,  &betao  ); \
 \
-	bli_obj_init_finish( dt, m0_a, n0_a, (ftype*)a, rs_a, cs_a, &ao ); \
-	bli_obj_init_finish( dt, m0_b, n0_b, (ftype*)b, rs_b, cs_b, &bo ); \
-	bli_obj_init_finish( dt, m0,   n0,   (ftype*)c, rs_c, cs_c, &co ); \
+    bli_obj_init_finish( dt, m0_a, n0_a, (ftype*)a, rs_a, cs_a, &ao ); \
+    bli_obj_init_finish( dt, m0_b, n0_b, (ftype*)b, rs_b, cs_b, &bo ); \
+    bli_obj_init_finish( dt, m0,   n0,   (ftype*)c, rs_c, cs_c, &co ); \
 \
-	bli_obj_set_conjtrans( blis_transa, &ao ); \
-	bli_obj_set_conjtrans( blis_transb, &bo ); \
+    bli_obj_set_conjtrans( blis_transa, &ao ); \
+    bli_obj_set_conjtrans( blis_transb, &bo ); \
 \
-	PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
-	( \
-	  &alphao, \
-	  &ao, \
-	  &bo, \
-	  &betao, \
-	  &co, \
-	  NULL, \
-	  NULL  \
-	); \
+    PASTEMAC(blisname,BLIS_OAPI_EX_SUF) \
+    ( \
+      &alphao, \
+      &ao, \
+      &bo, \
+      &betao, \
+      &co, \
+      NULL, \
+      NULL  \
+    ); \
 \
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
-	/* Finalize BLIS. */				 \
-	bli_finalize_auto(); \
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k); \
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1) \
+    /* Finalize BLIS. */                 \
+    bli_finalize_auto(); \
 }
 #endif
 
 #ifdef BLIS_ENABLE_BLAS
 void dgemm_
 (
-	const f77_char* transa,
-	const f77_char* transb,
-	const f77_int* m,
-	const f77_int* n,
-	const f77_int* k,
-	const double* alpha,
-	const double* a, const f77_int* lda,
-	const double* b, const f77_int* ldb,
-	const double* beta,
-	double* c, const f77_int* ldc
+    const f77_char* transa,
+    const f77_char* transb,
+    const f77_int* m,
+    const f77_int* n,
+    const f77_int* k,
+    const double* alpha,
+    const double* a, const f77_int* lda,
+    const double* b, const f77_int* ldb,
+    const double* beta,
+    double* c, const f77_int* ldc
 )
 {
 
@@ -343,7 +343,7 @@ void dgemm_
      ldc
     );
 
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */
   bli_param_map_netlib_to_blis_trans(*transa, &blis_transa);
   bli_param_map_netlib_to_blis_trans(*transb, &blis_transb);
 
@@ -361,141 +361,141 @@ void dgemm_
     const inc_t rs_c = 1;
     const inc_t cs_c = *ldc;
 
-	// This function is invoked on all architectures including ‘generic’.
-	// Non-AVX platforms will use the kernels derived from the context.
-	if (bli_cpuid_is_avx_supported() == FALSE)
-	{
-		// This code is duplicated below, however we don't want to move it out of
-		// this IF block as it will affect the performance on Zen architetures
-		// Also this is temporary fix which will be replaced later.
-		const num_t dt = BLIS_DOUBLE;
-
-		obj_t alphao = BLIS_OBJECT_INITIALIZER_1X1;
-		obj_t ao = BLIS_OBJECT_INITIALIZER;
-		obj_t bo = BLIS_OBJECT_INITIALIZER;
-		obj_t betao = BLIS_OBJECT_INITIALIZER_1X1;
-		obj_t co = BLIS_OBJECT_INITIALIZER;
-
-		dim_t m0_a, n0_a;
-		dim_t m0_b, n0_b;
-
-		bli_set_dims_with_trans(blis_transa, m0, k0, &m0_a, &n0_a);
-		bli_set_dims_with_trans(blis_transb, k0, n0, &m0_b, &n0_b);
-
-		bli_obj_init_finish_1x1(dt, (double *)alpha, &alphao);
-		bli_obj_init_finish_1x1(dt, (double *)beta, &betao);
-
-		bli_obj_init_finish(dt, m0_a, n0_a, (double *)a, rs_a, cs_a, &ao);
-		bli_obj_init_finish(dt, m0_b, n0_b, (double *)b, rs_b, cs_b, &bo);
-		bli_obj_init_finish(dt, m0, n0, (double *)c, rs_c, cs_c, &co);
-
-		bli_obj_set_conjtrans(blis_transa, &ao);
-		bli_obj_set_conjtrans(blis_transb, &bo);
-
-		// Will call parallelized dgemm code - sup & native
-		PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
-		(
-			&alphao,
-			&ao,
-			&bo,
-			&betao,
-			&co,
-			NULL,
-			NULL
-		);
-
-		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-		return;
-	}
-
-	if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+    // This function is invoked on all architectures including ‘generic’.
+    // Non-AVX platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx_supported() == FALSE)
     {
-	bli_dgemm_ref_k1_nn( m0, n0, k0,
-			  (double*)alpha,
-			  (double*)a, *lda,
-			  (double*)b, *ldb,
-			  (double*)beta,
-			  c, *ldc
-			);
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-	/* Finalize BLIS */
-	bli_finalize_auto();
+        // This code is duplicated below, however we don't want to move it out of
+        // this IF block as it will affect the performance on Zen architetures
+        // Also this is temporary fix which will be replaced later.
+        const num_t dt = BLIS_DOUBLE;
 
-	return;
+        obj_t alphao = BLIS_OBJECT_INITIALIZER_1X1;
+        obj_t ao = BLIS_OBJECT_INITIALIZER;
+        obj_t bo = BLIS_OBJECT_INITIALIZER;
+        obj_t betao = BLIS_OBJECT_INITIALIZER_1X1;
+        obj_t co = BLIS_OBJECT_INITIALIZER;
+
+        dim_t m0_a, n0_a;
+        dim_t m0_b, n0_b;
+
+        bli_set_dims_with_trans(blis_transa, m0, k0, &m0_a, &n0_a);
+        bli_set_dims_with_trans(blis_transb, k0, n0, &m0_b, &n0_b);
+
+        bli_obj_init_finish_1x1(dt, (double *)alpha, &alphao);
+        bli_obj_init_finish_1x1(dt, (double *)beta, &betao);
+
+        bli_obj_init_finish(dt, m0_a, n0_a, (double *)a, rs_a, cs_a, &ao);
+        bli_obj_init_finish(dt, m0_b, n0_b, (double *)b, rs_b, cs_b, &bo);
+        bli_obj_init_finish(dt, m0, n0, (double *)c, rs_c, cs_c, &co);
+
+        bli_obj_set_conjtrans(blis_transa, &ao);
+        bli_obj_set_conjtrans(blis_transb, &bo);
+
+        // Will call parallelized dgemm code - sup & native
+        PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+        (
+            &alphao,
+            &ao,
+            &bo,
+            &betao,
+            &co,
+            NULL,
+            NULL
+        );
+
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        bli_finalize_auto();
+        return;
+    }
+
+    if((k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+    {
+    bli_dgemm_ref_k1_nn( m0, n0, k0,
+              (double*)alpha,
+              (double*)a, *lda,
+              (double*)b, *ldb,
+              (double*)beta,
+              c, *ldc
+            );
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS */
+    bli_finalize_auto();
+
+    return;
     }
 
     if (n0 == 1)
     {
-	if (bli_is_notrans(blis_transa))
-	{
-	    bli_dgemv_unf_var2(
-		BLIS_NO_TRANSPOSE,
-		bli_extract_conj(blis_transb),
-		m0, k0,
-		(double*)alpha,
-		(double*)a, rs_a, cs_a,
-		(double*)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
-		(double*)beta,
-		c, rs_c,
-		((void*)0)
-	    );
-	}
-	else
-	{
-	    bli_dgemv_unf_var1(
-		blis_transa,
-		bli_extract_conj(blis_transb),
-		k0, m0,
-		(double*)alpha,
-		(double*)a, rs_a, cs_a,
-		(double*)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
-		(double*)beta,
-		c, rs_c,
-		((void*)0)
-	    );
-	}
+    if (bli_is_notrans(blis_transa))
+    {
+        bli_dgemv_unf_var2(
+        BLIS_NO_TRANSPOSE,
+        bli_extract_conj(blis_transb),
+        m0, k0,
+        (double*)alpha,
+        (double*)a, rs_a, cs_a,
+        (double*)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+        (double*)beta,
+        c, rs_c,
+        ((void*)0)
+        );
+    }
+    else
+    {
+        bli_dgemv_unf_var1(
+        blis_transa,
+        bli_extract_conj(blis_transb),
+        k0, m0,
+        (double*)alpha,
+        (double*)a, rs_a, cs_a,
+        (double*)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+        (double*)beta,
+        c, rs_c,
+        ((void*)0)
+        );
+    }
 
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 
-	return;
+    return;
     }
     else if (m0 == 1)
     {
-	if (bli_is_notrans(blis_transb))
-	{
-	    bli_dgemv_unf_var1(
-		blis_transb,
-		bli_extract_conj(blis_transa),
-		n0, k0,
-		(double*)alpha,
-		(double*)b, cs_b, rs_b,
-		(double*)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
-		(double*)beta,
-		c, cs_c,
-		((void*)0)
-	    );
-	}
-	else
-	{
-	    bli_dgemv_unf_var2(
-		blis_transb,
-		bli_extract_conj(blis_transa),
-		k0, n0,
-		(double*)alpha,
-		(double*)b, cs_b, rs_b,
-		(double*)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
-		(double*)beta,
-		c, cs_c,
-		((void*)0)
-	    );
-	}
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	return;
+    if (bli_is_notrans(blis_transb))
+    {
+        bli_dgemv_unf_var1(
+        blis_transb,
+        bli_extract_conj(blis_transa),
+        n0, k0,
+        (double*)alpha,
+        (double*)b, cs_b, rs_b,
+        (double*)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+        (double*)beta,
+        c, cs_c,
+        ((void*)0)
+        );
+    }
+    else
+    {
+        bli_dgemv_unf_var2(
+        blis_transb,
+        bli_extract_conj(blis_transa),
+        k0, n0,
+        (double*)alpha,
+        (double*)b, cs_b, rs_b,
+        (double*)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+        (double*)beta,
+        c, cs_c,
+        ((void*)0)
+        );
+    }
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    return;
     }
 
     const num_t dt = BLIS_DOUBLE;
@@ -527,29 +527,29 @@ void dgemm_
     bool nt = bli_thread_get_is_parallel(); // Check if parallel dgemm is invoked.
 
 #ifdef AOCL_DYNAMIC
-    //For smaller sizes dgemm_small is perfoming better 
+    //For smaller sizes dgemm_small is perfoming better
     if (nt && (((m0 >32) || (n0>32) || (k0>32)) && ((m0+n0+k0)>150)) )
 #else
     if (nt)
 #endif
     {
-	// Will call parallelized dgemm code - sup & native
-	PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
-	(
-		&alphao,
-		&ao,
-		&bo,
-		&betao,
-		&co,
-		NULL,
-		NULL
+    // Will call parallelized dgemm code - sup & native
+    PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
+    (
+        &alphao,
+        &ao,
+        &bo,
+        &betao,
+        &co,
+        NULL,
+        NULL
         );
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-	/* Finalize BLIS. */
-	bli_finalize_auto();
-	return;
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS. */
+    bli_finalize_auto();
+    return;
     }
 
     // The code below will be called when number of threads = 1.
@@ -558,71 +558,71 @@ void dgemm_
 
     //if( ((m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) && (n0 > 2))
     if( ( ( (m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) ) ||
-	  ((n0 <= 10) && (k0 <=10)) )
+      ((n0 <= 10) && (k0 <=10)) )
       {
-	err_t status;
-	if (bli_is_notrans(blis_transa))
-	  {
-	    status =  bli_dgemm_small( &alphao,
-					   &ao,
-					   &bo,
-					   &betao,
-					   &co,
-					   NULL, //cntx,
-					   NULL
-					   );
-	  }
-	else
-	  {
-	    status =  bli_dgemm_small_At ( &alphao,
-					           &ao,
-					           &bo,
-					           &betao,
-					           &co,
-					           NULL, //cntx,
-					           NULL
-					         );
-	  }
+    err_t status;
+    if (bli_is_notrans(blis_transa))
+      {
+        status =  bli_dgemm_small( &alphao,
+                       &ao,
+                       &bo,
+                       &betao,
+                       &co,
+                       NULL, //cntx,
+                       NULL
+                       );
+      }
+    else
+      {
+        status =  bli_dgemm_small_At ( &alphao,
+                               &ao,
+                               &bo,
+                               &betao,
+                               &co,
+                               NULL, //cntx,
+                               NULL
+                             );
+      }
 
-	if (status == BLIS_SUCCESS)
-	  {
-	    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-	    /* Finalize BLIS. */
-	    bli_finalize_auto();
+    if (status == BLIS_SUCCESS)
+      {
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS. */
+        bli_finalize_auto();
 
-	    return;
-	  }
+        return;
+      }
       }
 
 #endif //#ifdef BLIS_ENABLE_SMALL_MATRIX
 
     err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-	if (status == BLIS_SUCCESS)
-	{
-		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-		return;
-	}
+    if (status == BLIS_SUCCESS)
+    {
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        return;
+    }
 
-	// fall back on native path when dgemm is not handled in sup path.
-	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    // fall back on native path when dgemm is not handled in sup path.
+    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
 
-	/* PASTEMAC(gemm, BLIS_OAPI_EX_SUF) */
-	/*	( */
-	/*		&alphao, */
-	/*		&ao, */
-	/*		&bo, */
-	/*		&betao, */
-	/*		&co, */
-	/*		NULL, */
-	/*		NULL */
-	/*	 ); */
+    /* PASTEMAC(gemm, BLIS_OAPI_EX_SUF) */
+    /*  ( */
+    /*      &alphao, */
+    /*      &ao, */
+    /*      &bo, */
+    /*      &betao, */
+    /*      &co, */
+    /*      NULL, */
+    /*      NULL */
+    /*   ); */
 
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-	/* Finalize BLIS. */
-	bli_finalize_auto();
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+    /* Finalize BLIS. */
+    bli_finalize_auto();
 } // end of dgemm_
 
 void zgemm_
@@ -648,176 +648,166 @@ void zgemm_
 
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
   AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *transa, *transb, *m, *n, *k,
-		(void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+        (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
   /* Perform BLAS parameter checking. */
-	PASTEBLACHK(gemm)
-	(
-	  MKSTR(z),
-	  MKSTR(gemm),
-	  transa,
-	  transb,
-	  m,
-	  n,
-	  k,
-	  lda,
-	  ldb,
-	  ldc
-	);
+    PASTEBLACHK(gemm)
+    (
+      MKSTR(z),
+      MKSTR(gemm),
+      transa,
+      transb,
+      m,
+      n,
+      k,
+      lda,
+      ldb,
+      ldc
+    );
 
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );
-	bli_param_map_netlib_to_blis_trans( *transb, &blis_transb );
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */
+    bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );
+    bli_param_map_netlib_to_blis_trans( *transb, &blis_transb );
 
-	/* Typecast BLAS integers to BLIS integers. */
-	bli_convert_blas_dim1( *m, m0 );
-	bli_convert_blas_dim1( *n, n0 );
-	bli_convert_blas_dim1( *k, k0 );
+    /* Typecast BLAS integers to BLIS integers. */
+    bli_convert_blas_dim1( *m, m0 );
+    bli_convert_blas_dim1( *n, n0 );
+    bli_convert_blas_dim1( *k, k0 );
 
-	/* Set the row and column strides of the matrix operands. */
-	const inc_t rs_a = 1;
-	const inc_t cs_a = *lda;
-	const inc_t rs_b = 1;
-	const inc_t cs_b = *ldb;
-	const inc_t rs_c = 1;
-	const inc_t cs_c = *ldc;
+    /* Set the row and column strides of the matrix operands. */
+    const inc_t rs_a = 1;
+    const inc_t cs_a = *lda;
+    const inc_t rs_b = 1;
+    const inc_t cs_b = *ldb;
+    const inc_t rs_c = 1;
+    const inc_t cs_c = *ldc;
 
-	const num_t dt     = BLIS_DCOMPLEX;
+    const num_t dt     = BLIS_DCOMPLEX;
 
-	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
-	obj_t       ao     = BLIS_OBJECT_INITIALIZER;
-	obj_t       bo     = BLIS_OBJECT_INITIALIZER;
-	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
-	obj_t       co     = BLIS_OBJECT_INITIALIZER;
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       co     = BLIS_OBJECT_INITIALIZER;
 
-	dim_t       m0_a, n0_a;
-	dim_t       m0_b, n0_b;
+    dim_t       m0_a, n0_a;
+    dim_t       m0_b, n0_b;
 
-	bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
-	bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
+    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
+    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
 
-	bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
-	bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
 
-	bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
-	bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
-	bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
+    bli_obj_init_finish( dt, m0_a, n0_a, (dcomplex*)a, rs_a, cs_a, &ao );
+    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
+    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
 
-	bli_obj_set_conjtrans( blis_transa, &ao );
-	bli_obj_set_conjtrans( blis_transb, &bo );
+    bli_obj_set_conjtrans( blis_transa, &ao );
+    bli_obj_set_conjtrans( blis_transb, &bo );
 
-	// default instance peformance tuning is done in zgemm.
-	// Single instance tuning is done based on env set.
-	dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
+    // default instance peformance tuning is done in zgemm.
+    // Single instance tuning is done based on env set.
+    //dim_t single_instance = bli_env_get_var( "BLIS_SINGLE_INSTANCE", -1 );
 
-	//dim_t nt = bli_thread_get_num_threads(); // get number of threads
-	bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
-#ifdef AOCL_DYNAMIC
-	//For smaller sizes zgemm_small is perfoming better
-	if (nt && (((m0 >32) || (n0>32) || (k0>32)) && ((m0+n0+k0)>100)) )
-#else
-	if (nt)
-#endif
-	{
-		// Will call parallelized zgemm code - sup & native
-		PASTEMAC(gemm, BLIS_OAPI_EX_SUF)
-			(
-			&alphao,
-			&ao,
-			&bo,
-			&betao,
-			&co,
-			NULL,
-			NULL
-			);
-
-	    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-	    /* Finalize BLIS. */
-	    bli_finalize_auto();
-	    return;
-	  }
+    //dim_t nt = bli_thread_get_num_threads(); // get number of threads
+    bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
-	err_t status;
 
-	if((nt == 0) && (m0 <= 512 ) && ( n0 <= 512  ) && ( k0 <= 512 ))
-	{
-		status =  bli_gemm_small( &alphao,
-				&ao,
-				&bo,
-				&betao,
-				&co,
-				NULL, //cntx,
-				NULL
-				);
-	}
+    if( ( (nt == 0) && (m0 <= 512 ) && ( n0 <= 512 ) && ( k0 <= 512 ) ) ||
+        ( (nt == 1) && ((( m0 <= 32)||(n0 <= 32)||(k0 <=32)) && ((m0+n0+k0)<=100)) )
+      )
+    {
+        err_t status = BLIS_NOT_YET_IMPLEMENTED;
+        if (bli_is_notrans(blis_transa))
+        {
+            status = bli_zgemm_small(&alphao,
+                                    &ao,
+                                    &bo,
+                                    &betao,
+                                    &co,
+                                    NULL, //cntx,
+                                    NULL
+                                    );
+        }
+        else
+        {
+            status = bli_zgemm_small_At(&alphao,
+                                        &ao,
+                                        &bo,
+                                        &betao,
+                                        &co,
+                                        NULL, //cntx,
+                                        NULL
+                                        );
+        }
 
-	if (status == BLIS_SUCCESS)
-	{
-		AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
-		/* Finalize BLIS. */
-		bli_finalize_auto();
-
-		return;
-	}
+        if (status == BLIS_SUCCESS)
+        {
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+            /* Finalize BLIS. */
+            bli_finalize_auto();
+            return;
+        }
+    }
 #endif
+
     // The code below will be called when number of threads = 1.
-#if ENABLE_INDUCED_METHOD
-	/* 3m_sqp is optimal for certain matrix shapes.
-	   Initial study that it works well for square sizes and sizes closer to square shape.
+#if 0//ENABLE_INDUCED_METHOD
+    /* 3m_sqp is optimal for certain matrix shapes.
+       Initial study that it works well for square sizes and sizes closer to square shape.
 
-	   * Usage of 3m_sqp is restricted to sizes, where it is found efficient compared to native, sup and other induced method.
-	   * Further investigation is necessary to make the usage choices more generic.  */
-	bool sqp_on = false;
-	if( (m0 == n0 ) && ( n0 == k0 ) && ( m0 == 128 ) )
-	{
-		sqp_on = true;
-	}
+       * Usage of 3m_sqp is restricted to sizes, where it is found efficient compared to native, sup and other induced method.
+       * Further investigation is necessary to make the usage choices more generic.  */
+    bool sqp_on = false;
+    if( (m0 == n0 ) && ( n0 == k0 ) && ( m0 == 128 ) )
+    {
+        sqp_on = true;
+    }
 
-	// current range of sizes used for 3m_sqp to be expaned after evaluation.
-	if( ( m0 >= 4200) && ( m0 <= 4600 ) && ( ( n0 >= 326 ) || (n0 <= 1600 ) )
+    // current range of sizes used for 3m_sqp to be expaned after evaluation.
+    if( ( m0 >= 4200) && ( m0 <= 4600 ) && ( ( n0 >= 326 ) || (n0 <= 1600 ) )
      && ( k0 == 1120 ) ) //to be tuned further.
-	{
-		sqp_on = true;
-	}
+    {
+        sqp_on = true;
+    }
 
-	if( ( blis_transb == BLIS_NO_TRANSPOSE) && ( sqp_on == true ) )
-	{
-		//sqp algo is found better for n > 40
-		if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
-		{
-			AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-			AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-			return;
-		}
-	}
+    if( ( blis_transb == BLIS_NO_TRANSPOSE) && ( sqp_on == true ) )
+    {
+        //sqp algo is found better for n > 40
+        if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
+        {
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+            return;
+        }
+    }
 #endif//ENABLE_INDUCED_METHOD
 
-// native tuning resulted in better numbers compared to sup in constrained multi-instance
-// sup has been enabled for single instance cases.
-	if(single_instance==1)
-	{
-			err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-			if(status==BLIS_SUCCESS)
-			{
-				AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-				AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-					return;
-			}
+// sup has been disabled. 
+    if(0)
+    {
+            err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+            if(status==BLIS_SUCCESS)
+            {
+                AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+                    return;
+            }
 
-	}
-	// fall back on native path when zgemm is not handled in sup path.
-	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-	AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-	return;
+    }
+    // fall back on native path when zgemm is not handled in sup path.
+    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    return;
 
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-	/* Finalize BLIS. */
-	bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    bli_finalize_auto();
 }// end of zgemm_
 
 
@@ -851,72 +841,72 @@ void dzgemm_
 
   AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_TRACE_1)
   AOCL_DTL_LOG_GEMM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, *MKSTR(z), *transa, *transb, *m, *n, *k,
-				(void*)alpha, *lda, *ldb, (void*)beta, *ldc);
+                (void*)alpha, *lda, *ldb, (void*)beta, *ldc);
 
   /* Perform BLAS parameter checking. */
-	PASTEBLACHK(gemm)
-	(
-	  MKSTR(z),
-	  MKSTR(gemm),
-	  transa,
-	  transb,
-	  m,
-	  n,
-	  k,
-	  lda,
-	  ldb,
-	  ldc
-	);
+    PASTEBLACHK(gemm)
+    (
+      MKSTR(z),
+      MKSTR(gemm),
+      transa,
+      transb,
+      m,
+      n,
+      k,
+      lda,
+      ldb,
+      ldc
+    );
 
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );
-	bli_param_map_netlib_to_blis_trans( *transb, &blis_transb );
+    /* Map BLAS chars to their corresponding BLIS enumerated type value. */
+    bli_param_map_netlib_to_blis_trans( *transa, &blis_transa );
+    bli_param_map_netlib_to_blis_trans( *transb, &blis_transb );
 
-	/* Typecast BLAS integers to BLIS integers. */
-	bli_convert_blas_dim1( *m, m0 );
-	bli_convert_blas_dim1( *n, n0 );
-	bli_convert_blas_dim1( *k, k0 );
+    /* Typecast BLAS integers to BLIS integers. */
+    bli_convert_blas_dim1( *m, m0 );
+    bli_convert_blas_dim1( *n, n0 );
+    bli_convert_blas_dim1( *k, k0 );
 
-	/* Set the row and column strides of the matrix operands. */
-	const inc_t rs_a = 1;
-	const inc_t cs_a = *lda;
-	const inc_t rs_b = 1;
-	const inc_t cs_b = *ldb;
-	const inc_t rs_c = 1;
-	const inc_t cs_c = *ldc;
+    /* Set the row and column strides of the matrix operands. */
+    const inc_t rs_a = 1;
+    const inc_t cs_a = *lda;
+    const inc_t rs_b = 1;
+    const inc_t cs_b = *ldb;
+    const inc_t rs_c = 1;
+    const inc_t cs_c = *ldc;
 
-	const num_t dt     = BLIS_DCOMPLEX;
-	const num_t dt_a   = BLIS_DOUBLE;
+    const num_t dt     = BLIS_DCOMPLEX;
+    const num_t dt_a   = BLIS_DOUBLE;
 
-	obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
-	obj_t       ao     = BLIS_OBJECT_INITIALIZER;
-	obj_t       bo     = BLIS_OBJECT_INITIALIZER;
-	obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
-	obj_t       co     = BLIS_OBJECT_INITIALIZER;
+    obj_t       alphao = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       ao     = BLIS_OBJECT_INITIALIZER;
+    obj_t       bo     = BLIS_OBJECT_INITIALIZER;
+    obj_t       betao  = BLIS_OBJECT_INITIALIZER_1X1;
+    obj_t       co     = BLIS_OBJECT_INITIALIZER;
 
-	dim_t       m0_a, n0_a;
-	dim_t       m0_b, n0_b;
+    dim_t       m0_a, n0_a;
+    dim_t       m0_b, n0_b;
 
-	bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
-	bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
+    bli_set_dims_with_trans( blis_transa, m0, k0, &m0_a, &n0_a );
+    bli_set_dims_with_trans( blis_transb, k0, n0, &m0_b, &n0_b );
 
-	bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
-	bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)alpha, &alphao );
+    bli_obj_init_finish_1x1( dt, (dcomplex*)beta,  &betao  );
 
-	bli_obj_init_finish( dt_a, m0_a, n0_a, (double*)a, rs_a, cs_a, &ao );
-	bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
-	bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
+    bli_obj_init_finish( dt_a, m0_a, n0_a, (double*)a, rs_a, cs_a, &ao );
+    bli_obj_init_finish( dt, m0_b, n0_b, (dcomplex*)b, rs_b, cs_b, &bo );
+    bli_obj_init_finish( dt, m0,   n0,   (dcomplex*)c, rs_c, cs_c, &co );
 
-	bli_obj_set_conjtrans( blis_transa, &ao );
-	bli_obj_set_conjtrans( blis_transb, &bo );
+    bli_obj_set_conjtrans( blis_transa, &ao );
+    bli_obj_set_conjtrans( blis_transb, &bo );
 
-		// fall back on native path when zgemm is not handled in sup path.
-	bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+        // fall back on native path when zgemm is not handled in sup path.
+    bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
 
 
-	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-	/* Finalize BLIS. */
-	bli_finalize_auto();
+    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+    /* Finalize BLIS. */
+    bli_finalize_auto();
 }// end of dzgemm_
 #endif
 #endif

@@ -271,6 +271,28 @@ err_t bli_dgemm_small_At
       cntl_t* cntl
     );
 
+err_t bli_zgemm_small
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
+err_t bli_zgemm_small_At
+    (
+      obj_t*  alpha,
+      obj_t*  a,
+      obj_t*  b,
+      obj_t*  beta,
+      obj_t*  c,
+      cntx_t* cntx,
+      cntl_t* cntl
+    );
+
 // gemm square matrix size friendly implementation
 err_t bli_gemm_sqp
      (
