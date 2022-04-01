@@ -357,7 +357,7 @@ This should reveal a link for downloading the zip file.
 3. **Download a source release via a tarball/zip file.**
 Alternatively, if you would like to stick to the code that is included in
 official releases, you may download either a tarball or zip file of any of
-BLIS's previous [tagged releases](https://github.com/flame/blis/releases).
+BLIS's previous [tagged releases](https://github.com/flame/blis/tags).
 We consider this option to be less than ideal for most people since it will
 likely mean you miss out on the latest bugfix or feature commits (in contrast
 to Options 1 or 2), and you also will not be able to update your code with a
