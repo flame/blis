@@ -902,7 +902,6 @@ void dtrsm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-#if 0
 void ztrsm_
 (
     const f77_char* side,
@@ -1184,8 +1183,10 @@ void ztrsm_
      * In case of multithread when [m,n]<=128 sinlge thread implemenation
      * is doing better than native multithread */
     bool nt = bli_thread_get_is_parallel();
-    if((nt==0 && m0<=500 && n0<=500) ||
-       (nt && (m0+n0)<128) )
+
+    if((blis_side == BLIS_RIGHT) || (blis_diaga == BLIS_UNIT_DIAG)) {
+    if(((nt==0) && (m0<=500) && (n0<=500)) ||
+       (nt && ((m0+n0)<128)))
     {
         err_t status;
         status = bli_trsm_small
@@ -1205,6 +1206,7 @@ void ztrsm_
             return;
         }
     }
+    }
 #endif
 
     bli_trsmnat
@@ -1221,7 +1223,6 @@ void ztrsm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-#endif
 #if 0
 void ctrsm_
 (
@@ -1539,6 +1540,6 @@ void ctrsm_
     bli_finalize_auto();
 }
 #endif
-INSERT_GENTFUNC_BLAS_CZ( trsm, trsm )
+INSERT_GENTFUNC_BLAS_C( trsm, trsm )
 
 #endif
