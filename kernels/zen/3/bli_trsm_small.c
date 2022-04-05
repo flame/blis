@@ -5771,68 +5771,58 @@ BLIS_INLINE err_t ztrsm_AuXB_ref
  * Performs dcomplex division of vec1 and vec2 with ymm1.
  * vec1 and vec2 gets divided by ymm1 which holds
  * diagonal element from buffer.
- * Function gets called while performing TRSM.
+ * Using bli_zinvscals() to avoid overflow and underflow
+ * scenarios. Function gets called while performing TRSM.
  */
 #define BLIS_ZTRSM_TWO_DIV(vec1, vec2) {\
     if(!is_unitdiag) {\
         if(conjtransa){\
             ymm1 = _mm256_mul_pd(ymm1, ymm0);\
         }\
-        ymm12 = _mm256_mul_pd(ymm1, ymm0);\
-        /*perform decomplex multiplication*/\
-        /* Switch the real and imaginary elements of vec2 */\
-        ymm14 = _mm256_permute_pd(ymm12, 0x5);\
-        /* Negate the imaginary elements of vec2 */\
-        ymm14 = _mm256_mul_pd(ymm14, ymm0);\
-        /* Multiply vec1 and vec2 */ \
-        ymm13 = _mm256_mul_pd(vec1, ymm12); /*vec3*/\
-        /* Multiply vec1 and the modified vec2 */\
-        ymm14 = _mm256_mul_pd(vec1, ymm14); /*vec4*/\
-        /* Horizontally subtract the elements in vec3 and vec4 */\
-        vec1 = _mm256_hsub_pd(ymm13, ymm14);\
-        \
-        ymm14 = _mm256_permute_pd(ymm12, 0x5);\
-        /* Negate the imaginary elements of vec2 */\
-        ymm14 = _mm256_mul_pd(ymm14, ymm0);\
-        ymm13 = _mm256_mul_pd(vec2, ymm12);\
-        ymm14 = _mm256_mul_pd(vec2, ymm14);\
-        vec2 = _mm256_hsub_pd(ymm13, ymm14);\
-        /*dcomplex multiplication is done*/\
-        /*Swapping real & imaginary component position for addition with respective
-         * components*/\
-        ymm12 = _mm256_mul_pd(ymm1, ymm1);\
-        ymm13 = _mm256_permute4x64_pd(ymm12, 0xb1);\
-        ymm14 = _mm256_add_pd(ymm12, ymm13);\
-        \
-        /*Finally dividing numerator by denominator*/\
-        vec1 = _mm256_div_pd(vec1, ymm14);\
-        vec2 = _mm256_div_pd(vec2, ymm14);\
+\
+        dcomplex b_data[4];\
+        dcomplex d11_data[2];\
+\
+        _mm256_storeu_pd((double *)(b_data), vec1);\
+        _mm256_storeu_pd((double *)(b_data + 2), vec2);\
+        _mm256_storeu_pd((double *)(d11_data), ymm1);\
+\
+        for(dim_t i = 0; i < 4; i++)\
+        {\
+            bli_zinvscals(d11_data[0],b_data[i]);\
+        }\
+\
+        vec1 = _mm256_loadu_pd((double *)b_data);\
+        vec2 = _mm256_loadu_pd((double *)(b_data+2));\
+\
     }\
 }
 
 /**
  * Performs dcomplex division of vec1 with ymm1.
  * ymm1 holds diagonal element from buffer.
- * Function gets called while performing TRSM.
+ * Using bli_zinvscals() to avoid overflow and underflow
+ * scenarios. Function gets called while performing TRSM.
  */
 #define BLIS_ZTRSM_DIV(vec1) {\
     if(!is_unitdiag){\
         if(conjtransa){\
             ymm1 = _mm256_mul_pd(ymm1, ymm0);\
         }\
-        ymm12 = _mm256_mul_pd(ymm1, ymm0); /*vec2 and ymm8 is vec1*/\
-        ymm14 = _mm256_permute_pd(ymm12, 0x5);\
-        ymm14 = _mm256_mul_pd(ymm14, ymm0);\
-        ymm13 = _mm256_mul_pd(vec1, ymm12); /*vec3*/\
-        ymm14 = _mm256_mul_pd(vec1, ymm14); /*vec4*/\
-        vec1 = _mm256_hsub_pd(ymm13, ymm14);\
-        \
-        ymm12 = _mm256_mul_pd(ymm1, ymm1);\
-        ymm13 = _mm256_permute4x64_pd(ymm12, 0xb1);\
-        ymm14 = _mm256_add_pd(ymm12, ymm13);\
-        \
-        /*Finally dividing numerator by denominator*/\
-        vec1 = _mm256_div_pd(vec1, ymm14);\
+\
+        dcomplex b_data[2];\
+        dcomplex d11_data[2];\
+\
+        _mm256_storeu_pd((double *)(b_data), vec1);\
+        _mm256_storeu_pd((double *)(d11_data), ymm1);\
+\
+        for(dim_t i = 0; i < 2; i++)\
+        {\
+            bli_zinvscals(d11_data[0],b_data[i]);\
+        }\
+\
+        vec1 = _mm256_loadu_pd((double *)b_data);\
+\
     }\
 }
 
@@ -6007,7 +5997,6 @@ BLIS_INLINE void bli_ztrsm_small_pack
 
 }
 
-
 BLIS_INLINE void ztrsm_small_pack_diag_element
 (
     bool is_unitdiag,
@@ -6018,64 +6007,31 @@ BLIS_INLINE void ztrsm_small_pack_diag_element
 )
 {
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-    __m256d  ymm1, ymm2, ymm3, ymm4, ymm5, ymm6, ymm7, ymm8;
-    ymm7 = _mm256_setr_pd(1.0, -1.0, 1.0, -1.0);
-#else
-    __m256d ymm1, ymm2, ymm3;
-#endif
-    bool is_four = (size == 4) ? 1 : 0;
-    dcomplex ones = {1.0, 1.0};
-    ymm2 = ymm1 = _mm256_broadcast_pd((__m128d const *)&ones);
-    if(!is_unitdiag)
+    // If Preinversion is enabled, inverse the diaganol
+    // elements from A and pack into diagonal buffer.
+    // In order to avoid the overflow and underflow scenarios,
+    // bli_zinvscals is used
+    for( dim_t i = 0; i < size; i++)
     {
-        //broadcast diagonal elements of A11
-        ymm1 = _mm256_broadcast_pd((__m128d const *)a11);
-        ymm2 = _mm256_broadcast_pd((__m128d const *)a11+ cs_a +1);
-        /*Pick one element frome each column and create 3 element vector
-        and store it*/
-        ymm1 = _mm256_permute2f128_pd(ymm1, ymm2, 0x20);
-        ymm2 = _mm256_broadcast_pd((__m128d const *)a11+ cs_a*2 + 2);
-
-        if(is_four)
-        {
-            ymm3 = _mm256_broadcast_pd((__m128d const *)a11+ cs_a*2 + 2);
-            ymm2 = _mm256_broadcast_pd((__m128d const *)a11+ cs_a*3 + 3);
-            ymm2 = _mm256_permute2f128_pd(ymm3, ymm2, 0x20);
-        }
-
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-        /*Taking denomerator multiplication of real & imaginary components*/
-        ymm4 = _mm256_mul_pd(ymm1, ymm1);
-        ymm5 = _mm256_mul_pd(ymm2,ymm2);
-        /*Swapping real & imaginary component position for addition with
-         * respective components*/
-        ymm6 = _mm256_permute4x64_pd(ymm4, 0xb1);
-        ymm4 = _mm256_add_pd(ymm4, ymm6);
-        ymm8 = _mm256_permute4x64_pd(ymm5, 0xb1);
-
-        ymm5 = _mm256_add_pd(ymm5, ymm8);
-        /*Negating imaginary component of numerator*/
-        ymm1 = _mm256_mul_pd(ymm1, ymm7);
-        ymm2 = _mm256_mul_pd(ymm2, ymm7);
-        /*Dividing numerator by denominator*/
-        ymm1 = _mm256_div_pd(ymm1, ymm4);
-        ymm2 = _mm256_div_pd(ymm2, ymm5);
-#endif
-
+        dim_t d = ((i*cs_a) + i);
+        dcomplex ones = {1.0, 0.0};
+        bli_zinvscals(a11[d], ones)
+        d11_pack[i].real = ones.real;
+        d11_pack[i].imag = ones.imag;
     }
-    _mm256_store_pd((double *)d11_pack, ymm1);
-    if(is_four)
+
+#else //BLIS_ENABLE_TRSM_PREINVERSION
+
+    // If Preinversion is disabled, pack the diaganol
+    // elements from A into diagonal buffer.
+    for( dim_t i = 0; i < size; i++)
     {
-        _mm256_store_pd((double *)(d11_pack + 2), ymm2);
+        dim_t d =  ((i*cs_a) + i);
+        bli_zcopys(a11[d],d11_pack[i]);
     }
-    else
-    {
-        _mm_store_pd((double *)(d11_pack + 2),
-                _mm256_extractf128_pd(ymm2,0));
 
-    }
+#endif //BLIS_ENABLE_TRSM_PREINVERSION
 }
-
 /*implements TRSM for the case XA = alpha * B
  *A is lower triangular, non-unit diagonal/unit diagonal, transpose
  *dimensions: X:mxn     A:nxn       B: mxn
@@ -14948,9 +14904,12 @@ BLIS_INLINE void strsm_small_pack_diag_element
     __m256 ymm0, ymm1, ymm2, ymm3;
     __m256 ymm4, ymm5, ymm6, ymm7;
     __m256 ymm8, ymm9, ymm10,ymm11;
-    __m256 ymm14, ymm15, ymm12,ymm13;
+    __m256 ymm14, ymm15, ymm12;
     float ones = 1.0;
-    ymm13 = ymm14 = ymm15 = _mm256_broadcast_ss((float const *)&ones);
+    ymm14 = ymm15 = _mm256_broadcast_ss((float const *)&ones);
+#ifdef  BLIS_ENABLE_TRSM_PREINVERSION
+    __m256 ymm13 = _mm256_broadcast_ss((float const *)&ones);
+#endif
     if(side=='L'||side=='l')
     {
         if(!is_unitdiag)

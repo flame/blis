@@ -1184,7 +1184,6 @@ void ztrsm_
      * is doing better than native multithread */
     bool nt = bli_thread_get_is_parallel();
 
-    if((blis_side == BLIS_RIGHT) || (blis_diaga == BLIS_UNIT_DIAG)) {
     if(((nt==0) && (m0<=500) && (n0<=500)) ||
        (nt && ((m0+n0)<128)))
     {
@@ -1205,7 +1204,6 @@ void ztrsm_
             bli_finalize_auto();
             return;
         }
-    }
     }
 #endif
 

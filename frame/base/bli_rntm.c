@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -639,6 +639,14 @@ void bli_nthreads_optimum(
 	  if(m<=512 && n<=512)
 	    n_threads_ideal = 4;
 	}
+	else if( family == BLIS_TRSM && bli_obj_is_dcomplex(c))
+        {
+            dim_t m = bli_obj_length(c);
+            dim_t n = bli_obj_width(c);
+
+	    if((m>=64) && (m<=256) && (n>=64) && (n<=256))
+                n_threads_ideal = 8;
+        }
 	else if( family == BLIS_GEMMT && bli_obj_is_double(c)  )
 	{
 		dim_t n = bli_obj_length(c);
