@@ -36,7 +36,7 @@
 #include "blis.h"
 
 
- void bli_caxpyf_zen_int_4
+void bli_caxpyf_zen_int_4
      (
        conj_t           conja,
        conj_t           conjx,
@@ -81,7 +81,7 @@
     {
 	if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
-        caxpyv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
+        caxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
         {

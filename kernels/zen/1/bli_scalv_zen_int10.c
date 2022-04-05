@@ -459,7 +459,7 @@ void bli_cscalv_zen_int10
 {
 	const num_t dt = BLIS_SCOMPLEX;
 
-	cscalv_ker_ft f = bli_cntx_get_l1v_ker_dt( dt, BLIS_SCALV_KER, cntx );
+	cscalv_ker_ft f = bli_cntx_get_ukr_dt( dt, BLIS_SCALV_KER, cntx );
 
 	f
 	(
