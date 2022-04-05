@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -461,8 +461,8 @@ void bli_daxpyf_zen_int_5
 
 
             // Store the output.
-            _mm256_storeu_pd( ( double* )(y0 + 0*n_elem_per_reg), y0v.v );
-            _mm256_storeu_pd( ( double* )(y0 + 1*n_elem_per_reg), y1v.v );
+            _mm256_storeu_pd( (double *)(y0 + 0*n_elem_per_reg), y0v.v );
+            _mm256_storeu_pd( (double *)(y0 + 1*n_elem_per_reg), y1v.v );
 
             y0 += n_iter_unroll * n_elem_per_reg;
             a0 += n_iter_unroll * n_elem_per_reg;

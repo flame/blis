@@ -4,6 +4,7 @@
 
 ## Contents
 
+* [Changes in 0.9.0](ReleaseNotes.md#changes-in-090)
 * [Changes in 0.8.1](ReleaseNotes.md#changes-in-081)
 * [Changes in 0.8.0](ReleaseNotes.md#changes-in-080)
 * [Changes in 0.7.0](ReleaseNotes.md#changes-in-070)
@@ -38,6 +39,115 @@
 * [Changes in 0.0.3](ReleaseNotes.md#changes-in-003)
 * [Changes in 0.0.2](ReleaseNotes.md#changes-in-002)
 * [Changes in 0.0.1](ReleaseNotes.md#changes-in-001)
+
+## Changes in 0.9.0
+April 1, 2022
+
+Improvements present in 0.9.0:
+
+Framework:
+- Added various fields to `obj_t` that relate to storing function pointers to custom `packm` kernels, microkernels, etc as well as accessor functions to set and query those fields. (Devin Matthews)
+- Enabled user-customized `packm` microkernels and variants via the aforementioned new `obj_t` fields. (Devin Matthews)
+- Moved edge-case handling out of the macrokernel and into the `gemm` and `gemmtrsm` microkernels. This also required updating of APIs and definitions of all existing microkernels in `kernels` directory. Edge-case handling functionality is now facilitated via new preprocessor macros found in `bli_edge_case_macro_defs.h`. (Devin Matthews)
+- Avoid `gemmsup` thread barriers when not packing A or B. This boosts performance for many small multithreaded problems. (Field Van Zee, AMD)
+- Allow the 1m method to operate normally when single and double real-domain microkernels mix row and column I/O preference. (Field Van Zee, Devin Matthews, RuQing Xu)
+- Removed support for execution of complex-domain level-3 operations via the 3m and 4m methods.
+- Refactored `herk`, `her2k`, `syrk`, `syr2k` in terms of `gemmt`. (Devin Matthews)
+- Defined `setijv` and `getijv` to set/get vector elements.
+- Defined `eqsc`, `eqv`, and `eqm` operations to test equality between two scalars, vectors, or matrices.
+- Added new bounds checking to `setijm` and `getijm` to prevent use of negative indices.
+- Renamed `membrk` files/variables/functions to `pba`.
+- Store error-checking level as a thread-local variable. (Devin Matthews)
+- Add `err_t*` "return" parameter to `bli_malloc_*()` and friends.
+- Switched internal mutexes of the `sba` and `pba` to static initialization.
+- Changed return value method of `bli_pack_get_pack_a()`, `bli_pack_get_pack_b()`.
+- Fixed a bug that allows `bli_init()` to be called more than once (without segfaulting). (@lschork2, Minh Quan Ho, Devin Matthews)
+- Removed a sanity check in `bli_pool_finalize()` that prevented BLIS from being re-initialized. (AMD)
+- Fixed insufficient `pool_t`-growing logic in `bli_pool.c`, and always allocate at least one element in `.block_ptrs` array. (Minh Quan Ho)
+- Cleanups related to the error message array in `bli_error.c`. (Minh Quan Ho)
+- Moved language-related definitions from `bli_macro_defs.h` to a new header, `bli_lang_defs.h`.
+- Renamed `BLIS_SIMD_NUM_REGISTERS` to `BLIS_SIMD_MAX_NUM_REGISTERS` and `BLIS_SIMD_SIZE` to `BLIS_SIMD_MAX_SIZE` for improved clarity. (Devin Matthews)
+- Many minor bugfixes.
+- Many cleanups, including removal of old and commented-out code.
+
+Compatibility:
+- Expanded BLAS layer to include support for `?axpby_()` and `?gemm_batch_()`. (Meghana Vankadari, AMD)
+- Added `gemm3m` APIs to BLAS and CBLAS layers. (Bhaskar Nallani, AMD)
+- Handle `?gemm_()` invocations where m or n is unit by calling `?gemv_()`. (Dipal M Zambare, AMD)
+- Removed option to finalize BLIS after every BLAS call.
+- Updated default definitions of `bli_slamch()` and `bli_dlamch()` to use constants from standard C library rather than values computed at runtime. (Devin Matthews)
+
+Kernels:
+- Added 512-bit SVE-based `a64fx` subconfiguration that uses empirically-tuned blocksizes (Stepan Nassyr, RuQing Xu)
+- Added a vector-length agnostic `armsve` subconfig that computes blocksizes via an analytical model. (Stepan Nassyr)
+- Added vector-length agnostic d/s/sh `gemm` kernels for Arm SVE. (Stepan Nassyr)
+- Added `gemmsup` kernels to the `armv8a` kernel set for use in new Apple Firestorm subconfiguration. (RuQing Xu)
+- Added 512-bit SVE `dpackm` kernels (16xk and 10xk) with in-register transpose. (RuQing Xu)
+- Extended 256-bit SVE `dpackm` kernels by Linaro Ltd. to 512-bit for size 12xk. (RuQing Xu)
+- Reorganized register usage in `bli_gemm_armv8a_asm_d6x8.c` to accommodate clang. (RuQing Xu)
+- Added `saxpyf`/`daxpyf`/`caxpyf` kernels to `zen` kernel set. (Dipal M Zambare, AMD)
+- Added `vzeroupper` instruction to `haswell` microkernels. (Devin Matthews)
+- Added explicit `beta == 0` handling in s/d `armsve` and `armv7a` `gemm` microkernels. (Devin Matthews)
+- Added a unique tag to branch labels to accommodate clang. (Devin Matthews, Jeff Hammond)
+- Fixed a copy-paste bug in the loading of `kappa_i` in the two assembly `cpackm` kernels in `haswell` kernel set. (Devin Matthews)
+- Fixed a bug in Mx1 `gemmsup` `haswell` kernels whereby the `vhaddpd` instruction is used with uninitialized registers. (Devin Matthews)
+- Fixed a bug in the `power10` microkernel I/O. (Nicholai Tukanov)
+- Many other Arm kernel updates and fixes. (RuQing Xu)
+
+Extras:
+- Added support for addons, which are similar to sandboxes but do not require the user to implement any particular operation.
+- Added a new `gemmlike` sandbox to allow rapid prototyping of `gemm`-like operations.
+- Various updates and improvements to the `power10` sandbox, including a new testsuite. (Nicholai Tukanov)
+
+Build system:
+- Added explicit support for AMD's Zen3 microarchitecture. (Dipal M Zambare, AMD, Field Van Zee)
+- Added runtime microarchitecture detection for Arm. (Dave Love, RuQing Xu, Devin Matthews)
+- Added a new `configure` option `--[en|dis]able-amd-frame-tweaks` that allows BLIS to compile certain framework files (each with the `_amd` suffix) that have been customized by AMD for improved performance (provided that the targeted configuration is eligible). By default, the more portable counterparts to these files are compiled. (Field Van Zee, AMD)
+- Added an explicit compiler predicate (`is_win`) for Windows in `configure`. (Devin Matthews)
+- Use `-march=haswell` instead of `-march=skylake-avx512` on Windows. (Devin Matthews, @h-vetinari)
+- Fixed `configure` breakage on MacOSX by accepting either `clang` or `LLVM` in vendor string. (Devin Matthews)
+- Blacklist clang10/gcc9 and older for `armsve` subconfig.
+- Added a `configure` option to control whether or not to use `@rpath`. (Devin Matthews)
+- Added armclang detection to `configure`. (Devin Matthews)
+- Use `@path`-based install name on MacOSX and use relocatable `RPATH` entries for testsuite binaries. (Devin Matthews)
+- For environment variables `CC`, `CXX`, `FC`, `PYTHON`, `AR`, and `RANLIB`, `configure` will now print an error message and abort if a user specifies a specific tool and that tool is not found. (Field Van Zee, Devin Matthews)
+- Added symlink to `blis.pc.in` for out-of-tree builds. (Andrew Wildman)
+- Register optimized real-domain `copyv`, `setv`, and `swapv` kernels in `zen` subconfig. (Dipal M Zambare, AMD)
+- Added Apple Firestorm (A14/M1) subconfiguration, `firestorm`. (RuQing Xu)
+- Added `armsve` subconfig to `arm64` configuration family. (RuQing Xu)
+- Allow using clang with the `thunderx2` subconfiguration. (Devin Matthews)
+- Fixed a subtle substitution bug in `configure`. (Chengguo Sun)
+- Updated top-level Makefile to reflect a dependency on the "flat" `blis.h` file for the BLIS and BLAS testsuite objects. (Devin Matthews)
+- Mark `xerbla_()` as a "weak" symbol on MacOSX. (Devin Matthews)
+- Fixed a long-standing bug in `common.mk` whereby the header path to `cblas.h` was omitted from the compiler flags when compiling CBLAS files within BLIS.
+- Added a custom-made recursive `sed` script to `build` directory.
+- Minor cleanups and fixes to `configure`, `common.mk`, and others.
+
+Testing:
+- Fixed a race condition in the testsuite when the SALT option (simulate application-level threading) is enabled. (Devin Matthews)
+- Test 1m method execution during `make check`. (Devin Matthews)
+- Test `make install` in Travis CI. (Devin Matthews)
+- Test C++ in Travis CI to make sure `blis.h` is C++-compatible. (Devin Matthews)
+- Disabled SDE testing of pre-Zen microarchitectures via Travis CI.
+- Added Travis CI support for testing Arm SVE. (RuQing Xu)
+- Updated SDE usage so that it is downloaded from a separate repository (ci-utils) in our GitHub organization. (Field Van Zee, Devin Matthews)
+- Updated octave scripts in `test/3` to be robust against missing datasets as well as to fixed a few minor issues.
+- Added `test_axpbyv.c` and `test_gemm_batch.c` test driver files to `test` directory. (Meghana Vankadari, AMD)
+- Support all four datatypes in `her`, `her2`, `herk`, and `her2k` drivers in `test` directory. (Madan mohan Manokar, AMD)
+
+Documentation:
+- Added documentation for: `setijv`, `getijv`, `eqsc`, `eqv`, `eqm`.
+- Added `docs/Addons.md`.
+- Added dedicated "Performance" and "Example Code" sections to `README.md`.
+- Updated `README.md`.
+- Updated `docs/Sandboxes.md`.
+- Updated `docs/Multithreading.md`. (Devin Matthews)
+- Updated `docs/KernelHowTo.md`.
+- Updated `docs/Performance.md` to report Fujitsu A64fx (512-bit SVE) results. (RuQing Xu)
+- Updated `docs/Performance.md` to report Graviton2 Neoverse N1 results. (Nicholai Tukanov)
+- Updated `docs/FAQ.md` with new questions.
+- Fixed typos in `docs/FAQ.md`. (Gaëtan Cassiers)
+- Various other minor fixes.
 
 ## Changes in 0.8.1
 March 22, 2021

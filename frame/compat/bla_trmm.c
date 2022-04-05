@@ -63,8 +63,6 @@ void PASTEF77(ch,blasname) \
 	trans_t blis_transa; \
 	diag_t  blis_diaga; \
 	dim_t   m0, n0; \
-	inc_t   rs_a, cs_a; \
-	inc_t   rs_b, cs_b; \
 \
 	/* Initialize BLIS. */ \
 	bli_init_auto(); \
@@ -95,10 +93,10 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_dim1( *n, n0 ); \
 \
 	/* Set the row and column strides of the matrix operands. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
-	rs_b = 1; \
-	cs_b = *ldb; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
+	const inc_t rs_b = 1; \
+	const inc_t cs_b = *ldb; \
 \
 	/* Call BLIS interface. */ \
 	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \

@@ -142,13 +142,13 @@ The manual way of specifying parallelism involves communicating which loops with
 
 The below chart describes the five loops used in BLIS's matrix multiplication operations.
 
-| Loop around microkernel  | Environment variable | Direction | Notes       |
-|:-------------------------|:---------------------|:----------|:------------|
-| 5th loop                 | `BLIS_JC_NT`         | `n`       |             |
-| 4th loop                 | _N/A_                | `k`       | Not enabled |
-| 3rd loop                 | `BLIS_IC_NT`         | `m`       |             |
-| 2nd loop                 | `BLIS_JR_NT`         | `n`       |             |
-| 1st loop                 | `BLIS_IR_NT`         | `m`       |             |
+| Loop around microkernel  | Environment variable | Direction | Notes          |
+|:-------------------------|:---------------------|:----------|:---------------|
+| 5th loop                 | `BLIS_JC_NT`         | `n`       |                |
+| 4th loop                 | _N/A_                | `k`       | Not enabled    |
+| 3rd loop                 | `BLIS_IC_NT`         | `m`       |                |
+| 2nd loop                 | `BLIS_JR_NT`         | `n`       | Typically <= 4 |
+| 1st loop                 | `BLIS_IR_NT`         | `m`       | Typically 1    |
 
 **Note**: Parallelization of the 4th loop is not currently enabled because each iteration of the loop updates the same part of the output matrix C. Thus, to safely parallelize it requires either a reduction or mutex locks when updating C.
 
@@ -161,7 +161,7 @@ In general, the way to choose how to set these environment variables is as follo
 Next, which combinations of loops to parallelize depends on which caches are shared. Here are some of the more common scenarios:
  * When compute resources have private L3 caches (example: multi-socket systems), try parallelizing  the `JC` loop. This means threads (or thread groups) will pack and compute with different row panels from matrix B.
  * For compute resources that have private L2 caches but that share an L3 cache (example: cores on a socket), try parallelizing the `IC` loop. In this situation, threads will share the same packed row panel from matrix B, but pack and compute with different blocks of matrix A.
- * If compute resources share an L2 cache but have private L1 caches (example: pairs of cores), try parallelizing the `JR` loop. Here, threads share the same packed block of matrix A but read different packed micropanels of B into their private L1 caches. In some situations, parallelizing the `IR` loop may also be effective.
+ * If compute resources share an L2 cache but have private L1 caches (example: pairs of cores), try parallelizing the `JR` loop. Here, threads share the same packed block of matrix A but read different packed micropanels of B into their private L1 caches. In some situations, *lightly* parallelizing the `IR` loop may also be effective.
 
 ![The primary algorithm for level-3 operations in BLIS](http://www.cs.utexas.edu/users/field/mm_algorithm_color.png)
 

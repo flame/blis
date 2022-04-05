@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2017 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2017 - 2022, Advanced Micro Devices, Inc.
    Copyright (C) 2018, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
@@ -85,6 +85,7 @@ void bli_sscalv_zen_int10
 		if ( cntx == NULL ) cntx = bli_gks_query_cntx();
 
 		ssetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
+
 		f
 		(
 		  BLIS_NO_CONJUGATE,

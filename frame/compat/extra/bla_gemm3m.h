@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -31,23 +31,29 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
-#include "./3/bli_armsve_utils.h"
 
-// GEMM_UKR_PROT( double,   d, gemm_armsve256_asm_8x8 )
-GEMM_UKR_PROT( double,   d, gemm_armsve_asm_2vx10_unindexed )
-GEMM_UKR_PROT( float,    s, gemm_armsve_asm_2vx10_unindexed )
-GEMM_UKR_PROT( scomplex, c, gemm_armsve_asm_2vx10_unindexed )
-GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx10_unindexed )
-// GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx8_unindexed )
-// GEMM_UKR_PROT( dcomplex, z, gemm_armsve_asm_2vx7_unindexed )
-//GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_2vx10_unindexed )
-//GEMMSUP_KER_PROT( double,   d, gemmsup_cv_armsve_2vx10_unindexed )
-//GEMMSUP_KER_PROT( double,   d, gemmsup_rv_armsve_10x2v_unindexed )
 
-// Use SVE intrinsics only for referred cases.
-#if !defined(BLIS_FAMILY_A64FX)
-PACKM_KER_PROT( double,   d, packm_armsve256_int_8xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_int_12xk )
+//
+// Prototype BLAS-to-BLIS interfaces.
+//
+#undef  GENTPROTCO
+#define GENTPROTCO( ftype, ftype_r, ch, chr, blasname ) \
+\
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
+     ( \
+       const f77_char* transa, \
+       const f77_char* transb, \
+       const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
+       const ftype*    a, const f77_int* lda, \
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     );
+
+#ifdef BLIS_ENABLE_BLAS
+INSERT_GENTPROTCO_BLAS( gemm3m )
 #endif
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_16xk )
-PACKM_KER_PROT( double,   d, packm_armsve512_asm_10xk )
+
