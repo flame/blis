@@ -122,31 +122,24 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_PACKM_NRXK_KER, BLIS_DCOMPLEX, bli_zpackm_haswell_asm_4xk,
 
 	  // axpyf
-	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_8,
-	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_8,
+	  BLIS_AXPYF_KER,  BLIS_FLOAT,  bli_saxpyf_zen_int_8,
+	  BLIS_AXPYF_KER,  BLIS_DOUBLE, bli_daxpyf_zen_int_8,
 
 	  // dotxf
-	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+	  BLIS_DOTXF_KER,  BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+	  BLIS_DOTXF_KER,  BLIS_DOUBLE, bli_ddotxf_zen_int_8,
 
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
 	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
 
 	  // axpyv
-#if 0
-	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int,
-	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int,
-#else
 	  BLIS_AXPYV_KER,  BLIS_FLOAT,  bli_saxpyv_zen_int10,
 	  BLIS_AXPYV_KER,  BLIS_DOUBLE, bli_daxpyv_zen_int10,
-#endif
 
-#if 0
 	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
-#endif
 
 	  // dotv
 	  BLIS_DOTV_KER,   BLIS_FLOAT,  bli_sdotv_zen_int,
@@ -157,23 +150,16 @@ void bli_cntx_init_zen( cntx_t* cntx )
 	  BLIS_DOTXV_KER,  BLIS_DOUBLE, bli_ddotxv_zen_int,
 
 	  // scalv
-#if 0
-	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int,
-	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int,
-#else
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
-#endif
 
-#if 0
 	  // setv
-	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
-	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_FLOAT,  bli_ssetv_zen_int,
+	  BLIS_SETV_KER,   BLIS_DOUBLE, bli_dsetv_zen_int,
 
 	  // swapv
 	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
 	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
-#endif
 
 	  BLIS_VA_END
 	);
@@ -282,7 +268,7 @@ void bli_cntx_init_zen( cntx_t* cntx )
 
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
-	//                                           s      d      c      z
+	//                                               s      d      c      z
 	bli_blksz_init     ( &blkszs[ BLIS_MR_SUP ],     6,     6,    -1,    -1,
 	                                                 9,     9,    -1,    -1 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],    16,     8,    -1,    -1 );

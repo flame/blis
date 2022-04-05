@@ -131,12 +131,12 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 #endif
 
 	  // axpyf
-	  BLIS_AXPYF_KER,     BLIS_FLOAT,  bli_saxpyf_zen_int_5,
-	  BLIS_AXPYF_KER,     BLIS_DOUBLE, bli_daxpyf_zen_int_5,
+	  BLIS_AXPYF_KER,  BLIS_FLOAT,  bli_saxpyf_zen_int_5,
+	  BLIS_AXPYF_KER,  BLIS_DOUBLE, bli_daxpyf_zen_int_5,
 
 	  // dotxf
-	  BLIS_DOTXF_KER,     BLIS_FLOAT,  bli_sdotxf_zen_int_8,
-	  BLIS_DOTXF_KER,     BLIS_DOUBLE, bli_ddotxf_zen_int_8,
+	  BLIS_DOTXF_KER,  BLIS_FLOAT,  bli_sdotxf_zen_int_8,
+	  BLIS_DOTXF_KER,  BLIS_DOUBLE, bli_ddotxf_zen_int_8,
 
 	  // amaxv
 	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
@@ -158,15 +158,15 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 	  BLIS_SCALV_KER,  BLIS_FLOAT,  bli_sscalv_zen_int10,
 	  BLIS_SCALV_KER,  BLIS_DOUBLE, bli_dscalv_zen_int10,
 
-	  //swap
-	  BLIS_SWAPV_KER, BLIS_FLOAT,   bli_sswapv_zen_int8,
-	  BLIS_SWAPV_KER, BLIS_DOUBLE,  bli_dswapv_zen_int8,
+	  // swapv
+	  BLIS_SWAPV_KER,  BLIS_FLOAT,  bli_sswapv_zen_int8,
+	  BLIS_SWAPV_KER,  BLIS_DOUBLE, bli_dswapv_zen_int8,
 
-	  //copy
+	  // copyv
 	  BLIS_COPYV_KER,  BLIS_FLOAT,  bli_scopyv_zen_int,
 	  BLIS_COPYV_KER,  BLIS_DOUBLE, bli_dcopyv_zen_int,
 
-	  //set
+	  // setv
 	  BLIS_SETV_KER,  BLIS_FLOAT,  bli_ssetv_zen_int,
 	  BLIS_SETV_KER,  BLIS_DOUBLE, bli_dsetv_zen_int,
 
@@ -251,7 +251,7 @@ void bli_cntx_init_zen3( cntx_t* cntx )
 
 	// Initialize level-3 sup blocksize objects with architecture-specific
 	// values.
-	//                                           s      d      c      z
+	//                                               s      d      c      z
 	bli_blksz_init     ( &blkszs[ BLIS_MR_SUP ],     6,     6,     3,     3,
 	                                                 9,     9,     3,     3 );
 	bli_blksz_init_easy( &blkszs[ BLIS_NR_SUP ],    16,     8,     8,     4 );
