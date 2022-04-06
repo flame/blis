@@ -36,21 +36,22 @@
 
 #define FUNCPTR_T unpackm_fp
 
-typedef void (*FUNCPTR_T)(
-                           struc_t strucc,
-                           doff_t  diagoffc,
-                           diag_t  diagc,
-                           uplo_t  uploc,
-                           trans_t transc,
-                           dim_t   m,
-                           dim_t   n,
-                           dim_t   m_panel,
-                           dim_t   n_panel,
-                           void*   p, inc_t rs_p, inc_t cs_p,
-                                      dim_t pd_p, inc_t ps_p,
-                           void*   c, inc_t rs_c, inc_t cs_c,
-                           cntx_t* cntx
-                         );
+typedef void (*FUNCPTR_T)
+     (
+       struc_t strucc,
+       doff_t  diagoffc,
+       diag_t  diagc,
+       uplo_t  uploc,
+       trans_t transc,
+       dim_t   m,
+       dim_t   n,
+       dim_t   m_panel,
+       dim_t   n_panel,
+       void*   p, inc_t rs_p, inc_t cs_p,
+                  dim_t pd_p, inc_t ps_p,
+       void*   c, inc_t rs_c, inc_t cs_c,
+       cntx_t* cntx
+     );
 
 static FUNCPTR_T GENARRAY(ftypes,unpackm_blk_var1);
 
@@ -152,10 +153,10 @@ void PASTEMAC(ch,varname) \
 	dim_t           iter_dim; \
 	dim_t           num_iter; \
 	dim_t           it, ic, ip; \
-    dim_t           ic0, ip0; \
+	dim_t           ic0, ip0; \
 	doff_t          ic_inc, ip_inc; \
-    doff_t          diagoffc_i; \
-    doff_t          diagoffc_inc; \
+	doff_t          diagoffc_i; \
+	doff_t          diagoffc_inc; \
 	dim_t           panel_len; \
 	dim_t           panel_dim_i; \
 	dim_t           panel_dim_max; \
@@ -164,7 +165,7 @@ void PASTEMAC(ch,varname) \
 	inc_t           ldp; \
 	dim_t*          m_panel_full; \
 	dim_t*          n_panel_full; \
-    pack_t          schema; \
+	pack_t          schema; \
 \
 \
 	/* If c needs a transposition, induce it so that we can more simply
@@ -183,7 +184,7 @@ void PASTEMAC(ch,varname) \
 	if ( bli_is_row_stored_f( m_panel, n_panel, rs_p, cs_p ) ) \
 	{ \
 		/* Prepare to unpack from column panels. */ \
-        schema        = BLIS_PACKED_COL_PANELS; \
+		schema        = BLIS_PACKED_COL_PANELS; \
 		iter_dim      = n; \
 		panel_len     = m; \
 		panel_dim_max = pd_p; \
@@ -198,7 +199,7 @@ void PASTEMAC(ch,varname) \
 	else /* if ( bli_is_col_stored_f( m_panel, n_panel, rs_p, cs_p ) ) */ \
 	{ \
 		/* Prepare to unpack from row panels. */ \
-        schema        = BLIS_PACKED_ROW_PANELS; \
+		schema        = BLIS_PACKED_ROW_PANELS; \
 		iter_dim      = m; \
 		panel_len     = n; \
 		panel_dim_max = pd_p; \
@@ -212,7 +213,8 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER : BLIS_UNPACKM_MRXK_KER; \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER \
+	                                           : BLIS_UNPACKM_MRXK_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \
@@ -266,7 +268,7 @@ void PASTEMAC(ch,varname) \
 			f \
 			( \
 			  BLIS_NO_CONJUGATE, \
-              schema, \
+			  schema, \
 			  panel_dim_i, \
 			  panel_len, \
 			  one, \

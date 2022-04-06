@@ -247,11 +247,11 @@
 
 // -- MR and NR blocksizes (only for reference kernels) ------------------------
 
-// The build system defines BLIS_IN_KERNEL, but only when compiling reference
-// kernels. By using compile-time constants for MR and NR, the compiler can
-// perform certain optimizations, such as unrolling and vectorization, that
-// would not be otherwise be possible.
-#ifdef BLIS_IN_KERNEL
+// The build system defines BLIS_IN_REF_KERNEL, but only when compiling
+// reference kernels. By using compile-time constants for MR and NR, the
+// compiler can perform certain optimizations, such as unrolling and
+// vectorization, that would not be otherwise be possible.
+#ifdef BLIS_IN_REF_KERNEL
 
 #ifndef BLIS_MR_s
 #define BLIS_MR_s 4

@@ -223,7 +223,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			); \
 \
 			PASTEMAC(ch,copyris)( -*beta11_ri_i, *beta11_ri_r, \
-                                   *beta11_ir_r, *beta11_ir_i ); \
+			                       *beta11_ir_r, *beta11_ir_i ); \
 		} \
 	} \
 	else /* if ( bli_is_1r_packed( schema_b ) ) */ \

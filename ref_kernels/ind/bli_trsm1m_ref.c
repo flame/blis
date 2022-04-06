@@ -151,10 +151,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
-                for ( dim_t d = 0; d < cs_b; ++d ) \
-                { \
-    				PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
-    				PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+				{ \
+					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
                 } \
 			} \
 		} \
@@ -236,11 +236,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				                   beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
-                for ( dim_t d = 0; d < cs_b; ++d ) \
-    				PASTEMAC(ch,copyris)( beta11c_r, \
-    				                      beta11c_i, \
-    				                      *(beta11_r + d), \
-    				                      *(beta11_i + d) ); \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+					PASTEMAC(ch,copyris)( beta11c_r, \
+					                      beta11c_i, \
+					                      *(beta11_r + d), \
+					                      *(beta11_i + d) ); \
 			} \
 		} \
 	} \
@@ -369,10 +369,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				PASTEMAC(ch,sets)(  beta11c_r, beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
-                for ( dim_t d = 0; d < cs_b; ++d ) \
-                { \
-    				PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
-    				PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+				{ \
+					PASTEMAC(ch,copyris)(  beta11c_r, beta11c_i, *(beta11_ri_r + d), *(beta11_ri_i + d) ); \
+					PASTEMAC(ch,copyris)( -beta11c_i, beta11c_r, *(beta11_ir_r + d), *(beta11_ir_i + d) ); \
                 } \
 			} \
 		} \
@@ -454,11 +454,11 @@ void PASTEMAC3(ch,opname,arch,suf) \
 				                   beta11c_i, *gamma11 ); \
 \
 				/* Store the local values back to b11. */ \
-                for ( dim_t d = 0; d < cs_b; ++d ) \
-    				PASTEMAC(ch,copyris)( beta11c_r, \
-    				                      beta11c_i, \
-    				                      *(beta11_r + d), \
-    				                      *(beta11_i + d) ); \
+				for ( dim_t d = 0; d < cs_b; ++d ) \
+					PASTEMAC(ch,copyris)( beta11c_r, \
+					                      beta11c_i, \
+					                      *(beta11_r + d), \
+					                      *(beta11_i + d) ); \
 			} \
 		} \
 	} \

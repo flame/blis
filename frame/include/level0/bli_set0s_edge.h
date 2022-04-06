@@ -43,29 +43,35 @@
 
 #define GENTFUNC(ctype,ch,op) \
 \
-BLIS_INLINE void PASTEMAC(ch,op)( const dim_t i, const dim_t m, \
-                                  const dim_t j, const dim_t n, \
-                                  ctype* restrict p, const inc_t ldp ) \
+BLIS_INLINE void PASTEMAC(ch,op) \
+     ( \
+       const dim_t     i, \
+       const dim_t     m, \
+       const dim_t     j, \
+       const dim_t     n, \
+       ctype* restrict p, \
+       const inc_t     ldp \
+     ) \
 { \
-    if ( i < m ) \
-    { \
-    	PASTEMAC(ch,set0s_mxn) \
-        ( \
-          m - i, \
-          j, \
-          p + i*1, 1, ldp \
-        ); \
-    } \
+	if ( i < m ) \
+	{ \
+		PASTEMAC(ch,set0s_mxn) \
+		( \
+		  m - i, \
+		  j, \
+		  p + i*1, 1, ldp \
+		); \
+	} \
 \
-    if ( j < n ) \
-    { \
-    	PASTEMAC(ch,set0s_mxn) \
-        ( \
-          m, \
-          n - j, \
-          p + j*ldp, 1, ldp \
-        ); \
-    } \
+	if ( j < n ) \
+	{ \
+		PASTEMAC(ch,set0s_mxn) \
+		( \
+		  m, \
+		  n - j, \
+		  p + j*ldp, 1, ldp \
+		); \
+	} \
 }
 
 INSERT_GENTFUNC_BASIC0(set0s_edge)

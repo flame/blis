@@ -91,13 +91,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	const dim_t dfac = PASTECH2(bb0, _, chr); \
-    const num_t dt_r = PASTEMAC(chr,type); \
+	const num_t dt_r = PASTEMAC(chr,type); \
 \
 	if ( bli_is_1e_packed( schema ) ) \
 	{ \
-        /* cdim and mnr are in units of complex values */ \
-    	const dim_t mnr      = PASTECH2(mnr0, _, chr) == -1 ? -1 : PASTECH2(mnr0, _, chr) / 2; \
-    	const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ) / 2; \
+		/* cdim and mnr are in units of complex values */ \
+		const dim_t mnr      = PASTECH2(mnr0, _, chr) == -1 ? -1 : PASTECH2(mnr0, _, chr) / 2; \
+		const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ) / 2; \
 \
 		const inc_t       inca2      = 2 * inca; \
 		const inc_t       lda2       = 2 * lda; \
@@ -109,8 +109,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		ctype_r* restrict pi1_ri     = ( ctype_r* )p; \
 		ctype_r* restrict pi1_ir     = ( ctype_r* )p + ldp; \
 \
-    	if ( cdim == mnr && mnr != -1 ) \
-    	{ \
+		if ( cdim == mnr && mnr != -1 ) \
+		{ \
 			if ( inca == 1 ) \
 			{ \
 				if ( bli_is_conj( conja ) ) PACKM_1E_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2jris ); \
@@ -128,17 +128,17 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			else                        PACKM_1E_BODY( ctype, ch, , cdim, inca2, scal2ris ); \
 		} \
 \
-    	PASTEMAC(chr,set0s_edge) \
-    	( \
-    	  2*cdim*dfac, 2*cdim_max*dfac, \
-    	  2*n, 2*n_max, \
-    	  ( ctype_r* )p, ldp  \
-    	); \
-    } \
+		PASTEMAC(chr,set0s_edge) \
+		( \
+		  2*cdim*dfac, 2*cdim_max*dfac, \
+		  2*n, 2*n_max, \
+		  ( ctype_r* )p, ldp  \
+		); \
+	} \
 	else /* ( bli_is_1r_packed( schema ) ) */ \
 	{ \
-    	const dim_t mnr      = PASTECH2(mnr0, _, chr); \
-    	const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ); \
+		const dim_t mnr      = PASTECH2(mnr0, _, chr); \
+		const dim_t cdim_max = bli_cntx_get_blksz_def_dt( dt_r, mnr0, cntx ); \
 \
 		const inc_t       inca2      = 2 * inca; \
 		const inc_t       lda2       = 2 * lda; \
@@ -150,31 +150,31 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		ctype_r* restrict pi1_r      = ( ctype_r* )p; \
 		ctype_r* restrict pi1_i      = ( ctype_r* )p + ldp; \
 \
-    	if ( cdim == mnr && mnr != -1 ) \
-    	{ \
-    		if ( inca == 1 ) \
-    		{ \
-    			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2jris ); \
-    			else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2ris ); \
-    		} \
-    		else \
-    		{ \
-    			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2jris ); \
-    			else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2ris ); \
-    		} \
-        } \
+		if ( cdim == mnr && mnr != -1 ) \
+		{ \
+			if ( inca == 1 ) \
+			{ \
+				if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2jris ); \
+				else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, 2, scal2ris ); \
+			} \
+			else \
+			{ \
+				if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2jris ); \
+				else                        PACKM_1R_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca2, scal2ris ); \
+			} \
+		} \
 		else \
 		{ \
 			if ( bli_is_conj( conja ) ) PACKM_1R_BODY( ctype, ch, , cdim, inca2, scal2jris ); \
 			else                        PACKM_1R_BODY( ctype, ch, , cdim, inca2, scal2ris ); \
 		} \
 \
-    	PASTEMAC(chr,set0s_edge) \
-    	( \
-    	  cdim*dfac, cdim_max*dfac, \
-    	  2*n, 2*n_max, \
-    	  ( ctype_r* )p, ldp  \
-    	); \
+		PASTEMAC(chr,set0s_edge) \
+		( \
+		  cdim*dfac, cdim_max*dfac, \
+		  2*n, 2*n_max, \
+		  ( ctype_r* )p, ldp  \
+		); \
 	} \
 }
 

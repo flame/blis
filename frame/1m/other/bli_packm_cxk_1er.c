@@ -55,7 +55,8 @@ void PASTEMAC(ch,opname) \
 	   kernel function pointer. This means that we always use the same
 	   kernel, even for edge cases. */ \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_1ER_KER : BLIS_PACKM_MRXK_1ER_KER; \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_1ER_KER \
+	                                           : BLIS_PACKM_MRXK_1ER_KER; \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \
