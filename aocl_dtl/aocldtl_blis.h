@@ -3,7 +3,7 @@
  *
  * Description : BLIS library specific debug helpes.
  *
- * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
  *
  *==================================================================*/
 
@@ -385,115 +385,148 @@ void AOCL_DTL_log_trmm_sizes(int8 loglevel,
 
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)    \
-    AOCL_DTL_log_gemm_sizes(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_sizes(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc, \
+                                __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_GEMM_STATS(loglevel, m, n, k)    \
-    AOCL_DTL_log_gemm_stats(loglevel, m, n, k);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemm_stats(loglevel, m, n, k);
 
 #define AOCL_DTL_LOG_TRSM_INPUTS(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb)     \
-    AOCL_DTL_log_trsm_sizes(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_trsm_sizes(loglevel, dt, side, uploa, transa, diaga, m, n, alpha, lda, ldb, \
+                                __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_GEMMT_INPUTS(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc)  \
-    AOCL_DTL_log_gemmt_sizes(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc,  __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemmt_sizes(loglevel, dt, uplo, transa, transb, n, k, alpha, lda, ldb, beta, ldc, \
+                                 __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_HEMM_INPUTS(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc)  \
-    AOCL_DTL_log_hemm_sizes(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc, \
-                            __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hemm_sizes(loglevel, dt_type, side, uplo, m, n, alpha, lda, ldb, beta, ldc, \
+                                __FILE__, __FUNCTION__, __LINE__);
 
 // Level-3 Macros
 #define AOCL_DTL_LOG_HERK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc)\
-  AOCL_DTL_log_herk_sizes(loglevel, dt_type, transa, uploc, m, k, alpha, lda, beta, ldc, __FILE__,\
-                          __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_herk_sizes(loglevel, dt_type, transa, uploc, m, k, alpha, lda, beta, ldc, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_HER2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc)\
-  AOCL_DTL_log_her2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc, __FILE__,\
-                          __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_her2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_SYMM_INPUTS(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc)\
-  AOCL_DTL_log_symm_sizes(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc, __FILE__,\
-                          __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_symm_sizes(loglevel, dt_type, side, uploa, m, n, alpha, lda, ldb, beta, ldc, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 // Level-2 Macros
 #define AOCL_DTL_LOG_GEMV_INPUTS(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy) \
-    AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
-                          __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_gemv_sizes(loglevel, dt_type, transa, m, n, alp, lda, incx, beta, incy, __FILE__,\
+                            __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_GER_INPUTS(loglevel, dt_type, m, n, alpha, incx, incy, lda) \
-    AOCL_DTL_log_ger_sizes(loglevel, dt_type, m, n, alpha, incx, incy, lda, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_ger_sizes(loglevel, dt_type, m, n, alpha, incx, incy, lda, __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_HER_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda )\
-    AOCL_DTL_log_her_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,  __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_her_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,  __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_SYMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy)\
-  AOCL_DTL_log_symv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, __FILE__,\
-                          __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_symv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 // Level-1 Macros
 #define AOCL_DTL_LOG_COPY_INPUTS(loglevel, dt_type, n, incx, incy) \
-    AOCL_DTL_log_copy_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_copy_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_SCAL_INPUTS(loglevel, dt_type, alpha, n, incx )\
-    AOCL_DTL_log_scal_sizes(loglevel, dt_type, alpha, n, incx,  __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_scal_sizes(loglevel, dt_type, alpha, n, incx,  __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_SWAP_INPUTS(loglevel, dt_type, n, incx, incy)\
-    AOCL_DTL_log_swap_sizes(loglevel, dt_type, n, incx, incy,  __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_swap_sizes(loglevel, dt_type, n, incx, incy,  __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_NRM2_INPUTS(loglevel, dt_type, n, incx)\
-    AOCL_DTL_log_nrm2_sizes(loglevel, dt_type, n, incx, __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_nrm2_sizes(loglevel, dt_type, n, incx, __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_HEMV_INPUTS(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy) \
-    AOCL_DTL_log_hemv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, \
-                          __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_hemv_sizes(loglevel, dt_type, uploa, m, alpha, lda, incx, beta, incy, \
+                            __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_HER2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
-    AOCL_DTL_log_her2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, \
-                          __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_her2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, \
+                            __FILE__, __FUNCTION__, __LINE__);
 
 // Level-1 Macros
 #define AOCL_DTL_LOG_AMAX_INPUTS(loglevel, dt_type, n, incx) \
-    AOCL_DTL_log_amax_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_amax_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_ASUM_INPUTS(loglevel, dt_type, n, incx) \
-    AOCL_DTL_log_asum_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_asum_sizes(loglevel, dt_type, n, incx, __FILE__, __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_AXPBY_INPUTS(loglevel, dt_type, n, alpha, incx, beta, incy) \
-    AOCL_DTL_log_axpby_sizes(loglevel, dt_type, n, alpha, incx, beta, incy, __FILE__,\
-                            __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_axpby_sizes(loglevel, dt_type, n, alpha, incx, beta, incy, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_AXPY_INPUTS(loglevel, dt_type, n, alpha, incx, incy) \
-    AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
-                            __FUNCTION__, __LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_axpy_sizes(loglevel, dt_type, n, alpha, incx, incy, __FILE__,\
+                                __FUNCTION__, __LINE__);
 
 #define AOCL_DTL_LOG_DOTV_INPUTS(loglevel, dt_type, n, incx, incy) \
-  AOCL_DTL_log_dotv_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_dotv_sizes(loglevel, dt_type, n, incx, incy, __FILE__, __FUNCTION__, __LINE__); \
 
 #define AOCL_DTL_LOG_SYR2_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, incy, lda) \
-    AOCL_DTL_log_syr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, __FILE__,\
-                            __FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_syr2_sizes(loglevel, dt_type, uploa, m, alpha, incx, incy, lda, __FILE__,\
+                                __FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_SYR2K_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta, ldc) \
-    AOCL_DTL_log_syr2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta,\
-                            ldc, __FILE__, __FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_syr2k_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, ldb, beta,\
+                                ldc, __FILE__, __FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_SYR_INPUTS(loglevel, dt_type, uploa, m, alpha, incx, lda) \
-    AOCL_DTL_log_syr_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,\
-                            __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_syr_sizes(loglevel, dt_type, uploa, m, alpha, incx, lda,\
+                                __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_SYRK_INPUTS(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc) \
-    AOCL_DTL_log_syrk_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc, __FILE__,\
-                            __FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_syrk_sizes(loglevel, dt_type, uploc, transa, m, k, alpha, lda, beta, ldc, __FILE__,\
+                                __FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_TRMM_INPUTS(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb) \
-    AOCL_DTL_log_trmm_sizes(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__,\
-                            __FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_trmm_sizes(loglevel, dt_type, side, uploa, transa, diaga, m, n, alpha, lda, ldb, __FILE__,\
+                                __FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_TRMV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx) \
-    AOCL_DTL_log_trmv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
-                            __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_trmv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
 
 #define AOCL_DTL_LOG_TRSV_INPUTS(loglevel, dt_type, uploa, transa, diaga, m, lda, incx ) \
-    AOCL_DTL_log_trsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
-                            __FILE__,__FUNCTION__,__LINE__);
+    if (gbIsLoggingEnabled) \
+        AOCL_DTL_log_trsv_sizes(loglevel, dt_type, uploa, transa, diaga, m, lda, incx,\
+                                __FILE__,__FUNCTION__,__LINE__);
 #else
 
 #define AOCL_DTL_LOG_GEMM_INPUTS(loglevel, dt, transa, transb, m, n, k, alpha, lda, ldb, beta, ldc)

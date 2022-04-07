@@ -5,7 +5,7 @@
  *               These functions are invoked though macros by
  *               end user.
  *
- * Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+ * Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
  *
  *=======================================================================*/
 #include "blis.h"
@@ -56,6 +56,10 @@ static char *pchDTL_LOG_FILE = AOCL_DTL_LOG_FILE;
 
 /* Global file pointer for logging the results */
 AOCL_FLIST_Node *gpLogFileList = NULL;
+
+
+/* Global flag to check if logging is enabled or not */
+Bool gbIsLoggingEnabled = FALSE;
 #endif
 
 #if AOCL_DTL_AUTO_TRACE_ENABLE
@@ -82,6 +86,23 @@ AOCL_FLIST_Node *gpAutoTraceFileList = NULL;
 void DTL_Initialize(
     uint32 ui32CurrentLogLevel)
 {
+    /*
+     * This function can be invoked multiple times either via library
+     * initialization function (e.g. bli_init()) or when user changes
+     * logging state using API. However we want it to run only once
+     * This flag ensure that it is executed only once.
+     * 
+     * DTL can be used with many libraries hence it needs its own
+     * method to ensure this.
+     */
+
+    static Bool bIsDTLInitDone = FALSE;
+    
+    if (bIsDTLInitDone) 
+    {
+        return;
+    }
+
     /* If user selects invalid trace log level then the dafault trace log level
       will be AOCL_DTL_LEVEL_ALL */
     if ((ui32CurrentLogLevel < 1) || (ui32CurrentLogLevel > AOCL_DTL_LEVEL_ALL))
@@ -107,15 +128,9 @@ void DTL_Initialize(
 #endif
 
 #if (AOCL_DTL_LOG_ENABLE || AOCL_DTL_DUMP_ENABLE)
-    /* Create/Open the file to log the log data */
-    AOCL_FLIST_AddFile(pchDTL_LOG_FILE, &gpLogFileList, AOCL_gettid());
-
-    if (NULL == gpLogFileList)
-    {
-        /* Unable to open the specified file.*/
-        AOCL_DEBUGPRINT("Unable to create the log file %s\n", pchDTL_LOG_FILE);
-        return;
-    }
+    
+    /* Check if DTL logging is requested via envoronment variable */ 
+    gbIsLoggingEnabled = bli_env_get_var( "AOCL_VERBOSE", FALSE );
 #endif
 
 #if AOCL_DTL_AUTO_TRACE_ENABLE
@@ -132,6 +147,9 @@ void DTL_Initialize(
 
     /* Save Id for main thread */
     gtidMainThreadID = AOCL_gettid();
+
+    // Ensure that this function is executed only once
+    bIsDTLInitDone = TRUE;
 
 } /* DTL_Initialize */
 #endif
@@ -193,6 +211,19 @@ void DTL_Trace(
 {
     uint8 i = 0;
     AOCL_FAL_FILE *pOutFile = NULL;
+    
+#if AOCL_DTL_LOG_ENABLE
+    /* 
+     * For performance reasons we check the logging state in end user
+     * macros, this is just an additional check in case the function
+     * is invoked from any other context.
+     */
+    if (gbIsLoggingEnabled == FALSE && ui8LogType == TRACE_TYPE_LOG)
+    {
+        return;
+    }
+#endif
+    
     uint64 u64EventTime = AOCL_getTimestamp();
     dim_t u64RequestedThreadsCount = AOCL_get_requested_threads_count();
 

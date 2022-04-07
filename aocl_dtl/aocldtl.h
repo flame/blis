@@ -109,6 +109,31 @@
 void AOCL_DTL_start_perf_timer(void);
 uint64 AOCL_DTL_get_time_spent(void);
 
+/*
+ * Logging of inputs can be enabled by two methods:
+ *
+ * 1. Using environment variable AOCL_VERBOSE.
+ * 2. APIs
+ * 
+ * The API takes precedence over environment variable.
+ * 
+ * The global flag is maintain in the code to track the final
+ * state of the logging feature.
+ */
+extern Bool gbIsLoggingEnabled;
+
+/* API to enable logging at runtime */
+#define AOCL_DTL_Enable_Logs() \
+    /* Initialize DTL if not alredy done so */ \
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL); \
+    gbIsLoggingEnabled = TRUE;
+
+/* API to disable logging at runtime */
+#define AOCL_DTL_Disable_Logs() \
+    /* Initialize DTL if not alredy done so */ \
+    AOCL_DTL_INITIALIZE(AOCL_DTL_TRACE_LEVEL); \
+    gbIsLoggingEnabled = FALSE;
+
 /* Macro to log the Data */
 #define AOCL_DTL_START_PERF_TIMER() \
     AOCL_DTL_start_perf_timer()
