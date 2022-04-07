@@ -36852,33 +36852,19 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
  */
 
 #define SCOMPLEX_INV(a, b) {\
-	a.real = b.real;\
-	a.imag = (b.imag * -1.0);\
-	/*Compute denominator eliminating imaginary component*/\
-	float dnm = (b.real * b.real);\
-        /*multiply two times with -1 for correct  result as
-         * dcomplex number with positive imaginary part will
-         * invert the sign if not multiplied twice with -1*/\
-	dnm += ((-1.0 * (b.imag * b.imag)) * -1.0);\
-	/*Compute the final result by dividing real and imag part by dnm*/\
-	a.real /= dnm;\
-	a.imag /= dnm;\
+	a.real = 1.0;\
+	a.imag = 0.0;\
+	bli_cinvscals(b, a);\
 }
 
 #define SCOMPLEX_MUL(a, b, c) {\
-	float real = a.real * b.real;\
-	real += ((a.imag * b.imag) * -1.0);\
-	float imag = (a.real * b.imag);\
-	imag += (a.imag * b.real);\
-	c.real = real;\
-	c.imag = imag;\
+	c.real = b.real;\
+	c.imag = b.imag;\
+	bli_cscals(a,c);\
 }
 
 #define SCOMPLEX_DIV(a, b){\
-	float dnm = b.real * b.real;\
-	dnm += (-1.0 * (b.imag * (b.imag * -1.0) ));\
-	a.real /= dnm;\
-	a.imag /= dnm;\
+	bli_cinvscals(b,a); \
 }
 
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
@@ -36904,13 +36890,10 @@ BLIS_INLINE err_t bli_ztrsm_small_XAltB_XAuB
 
 #ifdef BLIS_DISABLE_TRSM_PREINVERSION
 #define CTRSM_DIAG_ELE_EVAL_OPS(a,b,c){\
-	 if(!is_unitdiag)\
-	 {\
-		 a.real = b.real;\
-		 a.imag = (b.imag * -1.0);\
-		 SCOMPLEX_MUL(c, a, c)\
-		 SCOMPLEX_DIV(c, b)\
-	}\
+       if(!is_unitdiag)\
+       {\
+	     bli_cinvscals(b, c);\
+       }\
 }
 #endif
 
@@ -37306,72 +37289,30 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 	dim_t size
 )
 {
-	__m256  ymm1, ymm2, ymm3, ymm4, ymm5, ymm6, ymm8;
-	bool is_eight = (size == 8) ? 1 : 0;
-	scomplex ones = {1.0, 1.0};
-	ymm2 = ymm1 = _mm256_broadcast_ps((__m128 const *)&ones);
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
-	__m256  ymm7;
-	ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-#endif
-
-	if(!is_unitdiag)
+	// If Preinversion is disabled, inverse the diaganol
+	// elements from A and pack into diagonal buffer.
+	// In order to avoid the overflow and underflow scenarios,
+	// bli_cinvscals is used.
+	for( dim_t i = 0; i < size; i++)
 	{
-		//broadcast diagonal elements of A11
-		ymm1 = _mm256_broadcast_ps((__m128  const *)a11);
-		ymm2 = _mm256_broadcast_ps((__m128  const *) (a11+ cs_a +1));
-		ymm3 = _mm256_broadcast_ps((__m128  const *) (a11+ cs_a*2 +2));
-
-		ymm1 = _mm256_shuffle_ps(ymm1, ymm2, 0x44);
-
-		if(is_eight) {
-			ymm4 = _mm256_broadcast_ps((__m128 const *)(a11 + 4 + cs_a*4));
-			ymm5 = _mm256_broadcast_ps((__m128 const *)(a11 + 5 + cs_a*5));
-			ymm6 = _mm256_shuffle_ps(ymm4, ymm5, 0x44);
-
-			ymm4 = _mm256_broadcast_ps((__m128 const *)(a11 + 6 + cs_a*6));
-			ymm5 = _mm256_broadcast_ps((__m128 const *)(a11 + 7 + cs_a*7));
-			ymm8 = _mm256_shuffle_ps(ymm4, ymm5, 0x44);
-
-			ymm2 = _mm256_blend_ps(ymm6, ymm8, 0xF0);
-
-			ymm4 = _mm256_broadcast_ps((__m128 const *)(a11 + 3 + cs_a*3));
-			ymm3 = _mm256_shuffle_ps(ymm3, ymm4, 0x44);
-		}
-
-		ymm1 = _mm256_blend_ps(ymm1, ymm3, 0xF0);
-
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-		/*Taking denomerator multiplication of real & imaginary components*/
-		ymm4 = _mm256_mul_ps(ymm1, ymm1);
-		ymm5 = _mm256_mul_ps(ymm2, ymm2);
-		/*Swapping real & imaginary component position for addition with
-		 * respective components*/
-		//BEFORE
-		//a[0] a[1] a[2] a[3]
-		//AFTER
-		//a[1] a[0] a[3] a[2]
-		//MESS
-		ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-		ymm8 = _mm256_permute_ps(ymm5, 0xB1);
-		ymm4 = _mm256_add_ps(ymm4, ymm6);
-		ymm5 = _mm256_add_ps(ymm5, ymm8);
-
-		/*Negating imaginary component of numerator*/
-		ymm1 = _mm256_mul_ps(ymm1, ymm7);
-		ymm2 = _mm256_mul_ps(ymm2, ymm7);
-
-		/*Dividing numerator by denominator*/
-		ymm1 = _mm256_div_ps(ymm1, ymm4);
-		ymm2 = _mm256_div_ps(ymm2, ymm5);
-
-#endif
+		dim_t d = ((i*cs_a) + i);
+		scomplex ones = {1.0, 0.0};
+		bli_cinvscals(a11[d], ones)
+		d11_pack[i].real = ones.real;
+		d11_pack[i].imag = ones.imag;
 	}
-	_mm256_store_ps((float *)d11_pack, ymm1);
-	if(is_eight)
+
+#else //BLIS_ENABLE_TRSM_PREINVERSION
+	// If Preinversion is disabled, pack the diaganol
+	// elements from A into diagonal buffer.
+	for( dim_t i = 0; i < size; i++)
 	{
-		_mm256_store_ps((float *)(d11_pack + 4), ymm2);
+		dim_t d =  ((i*cs_a) + i);
+		bli_ccopys(a11[d],d11_pack[i]);
 	}
+
+#endif //BLIS_ENABLE_TRSM_PREINVERSION
 }
 
 /**
@@ -37619,26 +37560,19 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 			ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
 			ymm1 = _mm256_mul_ps(ymm1, ymm2);\
 		}\
-		/*Negating imaginary component of numerator*/\
-		ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
-		ymm1 = _mm256_mul_ps(ymm1, ymm2);\
-		/*BLIS_CTRSM_MUL(vec1)*/\
-		/*BLIS_CTRSM_MUL(vec2)*/\
-		/*vec1 * ymm1*/\
-		ymm3 = _mm256_shuffle_ps(ymm1, ymm1, 0x11);\
-		ymm2 = _mm256_shuffle_ps(vec1, vec1, 0xA0);\
-		ymm16 = _mm256_shuffle_ps(vec1, vec1,0xF5);\
-		ymm16 = _mm256_mul_ps(ymm16, ymm3);\
-		vec1 = _mm256_fmaddsub_ps(ymm2, ymm1, ymm16);\
-		/*vec1 * ymm1*/\
-		ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
-		ymm1 = _mm256_mul_ps(ymm1, ymm2);\
-		/*Taking denomerator multiplication of real & imaginary components*/\
-		ymm3 = _mm256_mul_ps(ymm1, ymm1);\
-		ymm2 = _mm256_permute_ps(ymm3, 0xB1);\
-		ymm3 = _mm256_add_ps(ymm2, ymm3);\
-		/*Dividing numerator by denominator*/\
-		vec1 = _mm256_div_ps(vec1, ymm3);\
+		scomplex b_data[4];\
+		scomplex d11_data[4];\
+		\
+		_mm256_storeu_ps((float *)(b_data), vec1);\
+		_mm256_storeu_ps((float *)(d11_data), ymm1);\
+		\
+		for(dim_t i = 0; i < 4; i++)\
+		{\
+			bli_cinvscals(d11_data[0],b_data[i]);\
+		}\
+		\
+		vec1 = _mm256_loadu_ps((float *)b_data);\
+		\
 	}\
 }
 
@@ -37649,32 +37583,21 @@ BLIS_INLINE void ctrsm_small_pack_diag_element
 			ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
 			ymm1 = _mm256_mul_ps(ymm1, ymm2);\
 		}\
-		/*Negating imaginary component of numerator*/\
-		ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
-		ymm1 = _mm256_mul_ps(ymm1, ymm2);\
-		/*BLIS_CTRSM_MUL(vec1)*/\
-		/*BLIS_CTRSM_MUL(vec2)*/\
-		/*vec1 * ymm1*/\
-		ymm3 = _mm256_shuffle_ps(ymm1, ymm1, 0x11);\
-		ymm2 = _mm256_shuffle_ps(vec1, vec1, 0xA0);\
-		ymm16 = _mm256_shuffle_ps(vec1, vec1,0xF5);\
-		ymm16 = _mm256_mul_ps(ymm16, ymm3);\
-		vec1 = _mm256_fmaddsub_ps(ymm2, ymm1, ymm16);\
-		/*vec1 * ymm1*/\
-		ymm2 = _mm256_shuffle_ps(vec2, vec2, 0xA0);\
-		ymm16 = _mm256_shuffle_ps(vec2, vec2,0xF5);\
-		ymm16 = _mm256_mul_ps(ymm16, ymm3);\
-		vec2 = _mm256_fmaddsub_ps(ymm2, ymm1, ymm16);\
-		/*done*/\
-		ymm2 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);\
-		ymm1 = _mm256_mul_ps(ymm1, ymm2);\
-		/*Taking denomerator multiplication of real & imaginary components*/\
-		ymm3 = _mm256_mul_ps(ymm1, ymm1);\
-		ymm2 = _mm256_permute_ps(ymm3, 0xB1);\
-		ymm3 = _mm256_add_ps(ymm2, ymm3);\
-		/*Dividing numerator by denominator*/\
-		vec1 = _mm256_div_ps(vec1, ymm3);\
-		vec2 = _mm256_div_ps(vec2, ymm3);\
+		scomplex b_data[8];\
+		scomplex d11_data[4];\
+		\
+		_mm256_storeu_ps((float *)(b_data), vec1);\
+		_mm256_storeu_ps((float *)(b_data + 4), vec2);\
+		_mm256_storeu_ps((float *)(d11_data), ymm1);\
+		\
+		for(dim_t i = 0; i < 8; i++)\
+		{\
+			bli_cinvscals(d11_data[0],b_data[i]);\
+		}\
+		\
+		vec1 = _mm256_loadu_ps((float *)b_data);\
+		vec2 = _mm256_loadu_ps((float *)(b_data+4));\
+		\
 	}\
 }
 
@@ -40308,43 +40231,13 @@ BLIS_INLINE err_t bli_ctrsm_small_AutXB_AlXB
 		{
 			if(transa)
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*1 + 1));
-				ymm2 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*2 + 2));
-				ymm3 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*3 + 3));
-				ymm0 = _mm256_permute_ps(ymm0, 0x44);
-				ymm1 = _mm256_permute_ps(ymm1, 0x44);
-				ymm2 = _mm256_permute_ps(ymm2, 0x44);
-				ymm3 = _mm256_permute_ps(ymm3, 0x44);
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,m_rem);
 			}
 			else
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*1 + 1));
-				ymm2 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*2 + 2));
-				ymm3 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*3 + 3));
-				ymm0 = _mm256_permute_ps(ymm0, 0x44);
-				ymm1 = _mm256_permute_ps(ymm1, 0x44);
-				ymm2 = _mm256_permute_ps(ymm2, 0x44);
-				ymm3 = _mm256_permute_ps(ymm3, 0x44);
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,m_rem);
 			}
-
-			ymm1 = _mm256_shuffle_ps(ymm0, ymm1, 0x44);
-			ymm2 = _mm256_shuffle_ps(ymm2, ymm3, 0x44);
-			ymm1 = _mm256_blend_ps(ymm1, ymm2, 0xF0);
-
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
 		}
-		_mm256_storeu_ps((float *)(d11_pack), ymm1);
 
 		for(j = 0; (j+d_nr-1) < n; j += d_nr)
 		{
@@ -42555,43 +42448,13 @@ BLIS_INLINE err_t bli_ctrsm_small_AltXB_AuXB
 		{
 			if(transa)
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*1 + 1));
-				ymm2 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*2 + 2));
-				ymm3 = _mm256_broadcast_ps((__m128 const *)(a11+cs_a*3 + 3));
-				ymm0 = _mm256_permute_ps(ymm0, 0x44);
-				ymm1 = _mm256_permute_ps(ymm1, 0x44);
-				ymm2 = _mm256_permute_ps(ymm2, 0x44);
-				ymm3 = _mm256_permute_ps(ymm3, 0x44);
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,m_rem);
 			}
 			else
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*1 + 1));
-				ymm2 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*2 + 2));
-				ymm3 = _mm256_broadcast_ps((__m128 const *)(a11+rs_a*3 + 3));
-				ymm0 = _mm256_permute_ps(ymm0, 0x44);
-				ymm1 = _mm256_permute_ps(ymm1, 0x44);
-				ymm2 = _mm256_permute_ps(ymm2, 0x44);
-				ymm3 = _mm256_permute_ps(ymm3, 0x44);
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,m_rem);
 			}
-
-			ymm1 = _mm256_shuffle_ps(ymm0, ymm1, 0x44);
-			ymm2 = _mm256_shuffle_ps(ymm2, ymm3, 0x44);
-			ymm1 = _mm256_blend_ps(ymm1, ymm2, 0xF0);
-
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
 		}
-		_mm256_storeu_ps((float *)(d11_pack), ymm1);
 
 		for(j = (n - d_nr); (j + 1) > 0; j -= d_nr)
 		{
@@ -44147,30 +44010,13 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 		{
 			if(transa)
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)
-						(a11+cs_a*1 + 1));
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 			}
 			else
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)
-						(a11+rs_a*1 + 1));
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
 			}
-			ymm1 = _mm256_shuffle_ps(ymm0, ymm1, 0x44);
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
 		}
-		_mm_store_ps((float *)(d11_pack),
-				_mm256_extractf128_ps(ymm1,0));
 
 		for(i = (m-d_mr); (i+1) > 0; i -= d_mr)
 		{
@@ -44626,25 +44472,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAutB_XAlB
 
 		}
 
-
-		ymm1 = _mm256_broadcast_ps((__m128 const *)&ones);
-		ymm1 = _mm256_permute_ps(ymm1, 0x44);
 		if(!is_unitdiag)
 		{
-				//broadcast diagonal elements of A11
-			ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-			ymm1 = _mm256_blend_ps(ymm0, ymm1, 0xC0);
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
+			ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 		}
-		_mm_store_ps((float *)(d11_pack), 
-				_mm256_extractf128_ps(ymm1,0));
 
 		for(i = (m-d_mr); (i+1) > 0; i -= d_mr)
 		{
@@ -44899,7 +44730,6 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 
 	scomplex *a01, *a11, *b10, *b11;    //pointers that point to blocks for GEMM and TRSM
 
-	scomplex ones = {1.0, 1.0};
 	bool is_unitdiag = bli_obj_has_unit_diag(a);
 
 	//scratch registers
@@ -45658,37 +45488,17 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			}
 		}
 
-
-		ymm1 = _mm256_broadcast_ps((__m128 const *)&ones);
-		ymm1 = _mm256_permute_ps(ymm1, 0x44);
 		if(!is_unitdiag)
 		{
 			if(transa)
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)
-						(a11+cs_a*1 + 1));
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 			}
 			else
 			{
-				//broadcast diagonal elements of A11
-				ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-				ymm1 = _mm256_broadcast_ps((__m128 const *)
-						(a11+rs_a*1 + 1));
+				ctrsm_small_pack_diag_element(is_unitdiag,a11,rs_a,d11_pack,n_rem);
 			}
-			ymm1 = _mm256_shuffle_ps(ymm0, ymm1, 0x44);
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
 		}
-		_mm_store_ps((float *)(d11_pack),
-				_mm256_extractf128_ps(ymm1,0));
 
 		for(i = 0; (i+d_mr-1) < m; i += d_mr)
 		{
@@ -46153,25 +45963,10 @@ BLIS_INLINE  err_t bli_ctrsm_small_XAltB_XAuB
 			}
 		}
 
-
-		ymm1 = _mm256_broadcast_ps((__m128 const *)&ones);
-		ymm1 = _mm256_permute_ps(ymm1, 0x44);
 		if(!is_unitdiag)
 		{
-				//broadcast diagonal elements of A11
-			ymm0 = _mm256_broadcast_ps((__m128 const *)(a11));
-			ymm1 = _mm256_blend_ps(ymm0, ymm1, 0xC0);
-#ifdef BLIS_ENABLE_TRSM_PREINVERSION
-			ymm7 = _mm256_setr_ps(1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0);
-			ymm4 = _mm256_mul_ps(ymm1, ymm1);
-			ymm6 = _mm256_permute_ps(ymm4, 0xB1);
-			ymm4 = _mm256_add_ps(ymm4, ymm6);
-			ymm1 = _mm256_mul_ps(ymm1, ymm7);
-			ymm1 = _mm256_div_ps(ymm1, ymm4);
-#endif
+			 ctrsm_small_pack_diag_element(is_unitdiag,a11,cs_a,d11_pack,n_rem);
 		}
-		_mm_store_ps((float *)(d11_pack),
-				_mm256_extractf128_ps(ymm1,0));
 
 		for(i = 0; (i+d_mr-1) < m; i += d_mr)
 		{

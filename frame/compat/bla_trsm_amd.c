@@ -902,6 +902,8 @@ void dtrsm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
+
+
 void ztrsm_
 (
     const f77_char* side,
@@ -1221,7 +1223,8 @@ void ztrsm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-#if 0
+
+
 void ctrsm_
 (
     const f77_char* side,
@@ -1236,7 +1239,7 @@ void ctrsm_
 )
 {
     AOCL_DTL_TRACE_ENTRY(AOCL_DTL_LEVEL_INFO)
-    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 's',
+    AOCL_DTL_LOG_TRSM_INPUTS(AOCL_DTL_LEVEL_TRACE_1, 'c',
                              *side, *uploa,*transa, *diaga, *m, *n,
                             (void*)alpha,*lda, *ldb);
 
@@ -1537,7 +1540,5 @@ void ctrsm_
     /* Finalize BLIS. */
     bli_finalize_auto();
 }
-#endif
-INSERT_GENTFUNC_BLAS_C( trsm, trsm )
 
 #endif
