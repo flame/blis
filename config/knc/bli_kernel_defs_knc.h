@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,68 +32,17 @@
 
 */
 
-#include "blis.h"
+//#ifndef BLIS_KERNEL_DEFS_H
+//#define BLIS_KERNEL_DEFS_H
 
-#undef  GENTFUNC
-#define GENTFUNC( ctype, ch, opname ) \
-\
-void PASTEMAC(ch,opname) \
-     ( \
-       conj_t  conjp, \
-       dim_t   panel_dim, \
-       dim_t   panel_len, \
-       ctype*  kappa, \
-       ctype*  p,             inc_t ldp, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       cntx_t* cntx  \
-     ) \
-{ \
-	num_t     dt     = PASTEMAC(ch,type); \
-	l1mkr_t   ker_id = panel_dim; \
-\
-	PASTECH2(ch,opname,_ker_ft) f; \
-\
-	/* Query the context for the unpackm kernel corresponding to the current
-	   panel dimension, or kernel id. If the id is invalid, the function will
-	   return NULL. */ \
-	f = bli_cntx_get_unpackm_ker_dt( dt, ker_id, cntx ); \
-\
-	/* If there exists a kernel implementation for the micro-panel dimension
-	   provided, we invoke the implementation. Otherwise, we use scal2m. */ \
-	if ( f != NULL ) \
-	{ \
-		f \
-		( \
-		  conjp, \
-		  panel_len, \
-		  kappa, \
-		  p,       ldp, \
-		  a, inca, lda, \
-		  cntx  \
-		); \
-	} \
-	else \
-	{ \
-		trans_t transp = ( trans_t )conjp; \
-\
-		/* Treat the micro-panel as panel_dim x panel_len and column-stored
-		   (unit row stride). */ \
-		PASTEMAC2(ch,scal2m,BLIS_TAPI_EX_SUF) \
-		( \
-		  0, \
-		  BLIS_NONUNIT_DIAG, \
-		  BLIS_DENSE, \
-		  transp, \
-		  panel_dim, \
-		  panel_len, \
-		  kappa, \
-		  p, 1,    ldp, \
-		  a, inca, lda, \
-		  cntx, \
-		  NULL  \
-		); \
-	} \
-}
 
-INSERT_GENTFUNC_BASIC0( unpackm_cxk )
+// -- REGISTER BLOCK SIZES (FOR REFERENCE KERNELS) ----------------------------
+
+#define BLIS_MR_d   30
+
+#define BLIS_NR_d   8
+
+#define BLIS_PACKMR_d   32
+
+//#endif
 

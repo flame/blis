@@ -56,12 +56,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	const num_t       dt_r        = PASTEMAC(chr,type); \
 \
 	PASTECH(chr,gemm_ukr_ft) \
-	                  rgemm_ukr   = bli_cntx_get_l3_nat_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	                  rgemm_ukr   = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
 	PASTECH(ch,trsm_ukr_ft) \
 	                ctrsm_vir_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, trsmkerid, cntx ); \
 \
-	const bool        col_pref_r  = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const bool        col_pref_r  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
 \
 	const dim_t       mr          = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
 	const dim_t       nr          = bli_cntx_get_blksz_def_dt( dt, BLIS_NR, cntx ); \
@@ -89,7 +89,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	ctype_r* restrict bx1_r       = ( ctype_r* )bx1; \
 \
 	const inc_t       rs_b        = packnr; \
-	const inc_t       cs_b        = 1; \
+	const inc_t       cs_b        = bli_cntx_get_blksz_def_dt( dt_r, BLIS_BBN, cntx ); \
 \
 	ctype_r* restrict zero_r      = PASTEMAC(chr,0); \
 	ctype_r* restrict minus_one_r = PASTEMAC(chr,m1); \
@@ -106,7 +106,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	                      __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
 	   instead? */ \
-	const bool        col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool        col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
 	const inc_t       rs_ct       = ( col_pref ? 1 : nr ); \
 	const inc_t       cs_ct       = ( col_pref ? mr : 1 ); \
 \
@@ -192,24 +192,25 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	if ( bli_is_1e_packed( schema_b ) ) \
 	{ \
-		const inc_t     ld_b = rs_b; \
+		const inc_t       ld_b   =     rs_b; \
+		const inc_t       rs_b2  = 2 * rs_b; \
+		const inc_t       cs_b2  = 2 * cs_b; \
 \
-		ctype* restrict b11_ri = ( ctype* )b11; \
-		ctype* restrict b11_ir = ( ctype* )b11 + ld_b/2; \
-\
-		dim_t i, j; \
+		ctype_r* restrict b11_ri = ( ctype_r* )b11; \
+		ctype_r* restrict b11_ir = ( ctype_r* )b11 + ld_b; \
 \
 		/* b11 = alpha * b11 + bt; */ \
-		for ( j = 0; j < nr; ++j ) \
-		for ( i = 0; i < mr; ++i ) \
+		for ( dim_t j = 0; j < nr; ++j ) \
+		for ( dim_t i = 0; i < mr; ++i ) \
+		for ( dim_t d = 0; d < cs_b; ++d ) \
 		{ \
-			ctype*   restrict beta11t   = bt     + i*rs_bt + j*cs_bt; \
-			ctype_r* restrict beta11t_r = &PASTEMAC(ch,real)( *beta11t ); \
-			ctype_r* restrict beta11t_i = &PASTEMAC(ch,imag)( *beta11t ); \
-			ctype*   restrict beta11_ri = b11_ri + i*rs_b  + j*cs_b; \
-			ctype_r* restrict beta11_r  = &PASTEMAC(ch,real)( *beta11_ri ); \
-			ctype_r* restrict beta11_i  = &PASTEMAC(ch,imag)( *beta11_ri ); \
-			ctype*   restrict beta11_ir = b11_ir + i*rs_b  + j*cs_b; \
+			ctype*   restrict beta11t     = bt     + i*rs_bt + j*cs_bt; \
+			ctype_r* restrict beta11t_r   = &PASTEMAC(ch,real)( *beta11t ); \
+			ctype_r* restrict beta11t_i   = &PASTEMAC(ch,imag)( *beta11t ); \
+			ctype_r* restrict beta11_ri_r = b11_ri + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
+			ctype_r* restrict beta11_ri_i = b11_ri + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
+			ctype_r* restrict beta11_ir_r = b11_ir + i*rs_b2 + j*cs_b2 + 0*cs_b + d; \
+			ctype_r* restrict beta11_ir_i = b11_ir + i*rs_b2 + j*cs_b2 + 1*cs_b + d; \
 \
 			PASTEMAC3(ch,chr,ch,xpbyris) \
 			( \
@@ -217,12 +218,12 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			  *beta11t_i, \
 			  alpha_r, \
 			  alpha_i, /* alpha_i not referenced */ \
-			  *beta11_r, \
-			  *beta11_i  \
+			  *beta11_ri_r, \
+			  *beta11_ri_i  \
 			); \
 \
-			PASTEMAC(ch,sets)( -*beta11_i, \
-			                    *beta11_r, *beta11_ir ); \
+			PASTEMAC(ch,copyris)( -*beta11_ri_i, *beta11_ri_r, \
+			                       *beta11_ir_r, *beta11_ir_i ); \
 		} \
 	} \
 	else /* if ( bli_is_1r_packed( schema_b ) ) */ \
@@ -234,17 +235,16 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		ctype_r* restrict b11_r = ( ctype_r* )b11; \
 		ctype_r* restrict b11_i = ( ctype_r* )b11 + ld_b; \
 \
-		dim_t i, j; \
-\
 		/* b11 = alpha * b11 + bt; */ \
-		for ( j = 0; j < nr; ++j ) \
-		for ( i = 0; i < mr; ++i ) \
+		for ( dim_t j = 0; j < nr; ++j ) \
+		for ( dim_t i = 0; i < mr; ++i ) \
+		for ( dim_t d = 0; d < cs_b; ++d ) \
 		{ \
 			ctype*   restrict beta11t   = bt    + i*rs_bt + j*cs_bt; \
 			ctype_r* restrict beta11t_r = &PASTEMAC(ch,real)( *beta11t ); \
 			ctype_r* restrict beta11t_i = &PASTEMAC(ch,imag)( *beta11t ); \
-			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2; \
-			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2; \
+			ctype_r* restrict beta11_r  = b11_r + i*rs_b2 + j*cs_b2 + d; \
+			ctype_r* restrict beta11_i  = b11_i + i*rs_b2 + j*cs_b2 + d; \
 \
 			PASTEMAC3(ch,chr,ch,xpbyris) \
 			( \

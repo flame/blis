@@ -245,7 +245,111 @@
 #define BLIS_POOL_ADDR_OFFSET_SIZE_GEN   0
 #endif
 
+// -- MR and NR blocksizes (only for reference kernels) ------------------------
 
+// The build system defines BLIS_IN_REF_KERNEL, but only when compiling
+// reference kernels. By using compile-time constants for MR and NR, the
+// compiler can perform certain optimizations, such as unrolling and
+// vectorization, that would not be otherwise be possible.
+#ifdef BLIS_IN_REF_KERNEL
+
+#ifndef BLIS_MR_s
+#define BLIS_MR_s 4
+#endif
+
+#ifndef BLIS_MR_d
+#define BLIS_MR_d 4
+#endif
+
+#ifndef BLIS_MR_c
+#define BLIS_MR_c 4
+#endif
+
+#ifndef BLIS_MR_z
+#define BLIS_MR_z 4
+#endif
+
+#ifndef BLIS_NR_s
+#define BLIS_NR_s 16
+#endif
+
+#ifndef BLIS_NR_d
+#define BLIS_NR_d 8
+#endif
+
+#ifndef BLIS_NR_c
+#define BLIS_NR_c 8
+#endif
+
+#ifndef BLIS_NR_z
+#define BLIS_NR_z 4
+#endif
+
+#ifndef BLIS_BBM_s
+#define BLIS_BBM_s 1
+#endif
+
+#ifndef BLIS_BBM_d
+#define BLIS_BBM_d 1
+#endif
+
+#ifndef BLIS_BBM_c
+#define BLIS_BBM_c 1
+#endif
+
+#ifndef BLIS_BBM_z
+#define BLIS_BBM_z 1
+#endif
+
+#ifndef BLIS_BBN_s
+#define BLIS_BBN_s 1
+#endif
+
+#ifndef BLIS_BBN_d
+#define BLIS_BBN_d 1
+#endif
+
+#ifndef BLIS_BBN_c
+#define BLIS_BBN_c 1
+#endif
+
+#ifndef BLIS_BBN_z
+#define BLIS_BBN_z 1
+#endif
+
+#ifndef BLIS_PACKMR_s
+#define BLIS_PACKMR_s (BLIS_MR_s*BLIS_BBM_s)
+#endif
+
+#ifndef BLIS_PACKMR_d
+#define BLIS_PACKMR_d (BLIS_MR_d*BLIS_BBM_d)
+#endif
+
+#ifndef BLIS_PACKMR_c
+#define BLIS_PACKMR_c (BLIS_MR_c*BLIS_BBM_c)
+#endif
+
+#ifndef BLIS_PACKMR_z
+#define BLIS_PACKMR_z (BLIS_MR_z*BLIS_BBM_z)
+#endif
+
+#ifndef BLIS_PACKNR_s
+#define BLIS_PACKNR_s (BLIS_NR_s*BLIS_BBN_s)
+#endif
+
+#ifndef BLIS_PACKNR_d
+#define BLIS_PACKNR_d (BLIS_NR_d*BLIS_BBN_d)
+#endif
+
+#ifndef BLIS_PACKNR_c
+#define BLIS_PACKNR_c (BLIS_NR_c*BLIS_BBN_c)
+#endif
+
+#ifndef BLIS_PACKNR_z
+#define BLIS_PACKNR_z (BLIS_NR_z*BLIS_BBN_z)
+#endif
+
+#endif
 
 #endif
 

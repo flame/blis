@@ -102,7 +102,7 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,axpyf_ker_ft) kfp_af; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	kfp_af = bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
+	kfp_af = bli_cntx_get_ukr_dt( dt, BLIS_AXPYF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_AF, cntx ); \
 \
 	/* We reduce all of the possible cases down to just lower/upper. */ \

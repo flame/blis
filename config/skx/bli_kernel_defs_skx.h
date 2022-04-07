@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, The University of Texas at Austin
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,20 +32,17 @@
 
 */
 
+//#ifndef BLIS_KERNEL_DEFS_H
+//#define BLIS_KERNEL_DEFS_H
 
-#undef  GENTPROT
-#define GENTPROT( ctype, ch, varname ) \
-\
-void PASTEMAC(ch,varname) \
-     ( \
-       conj_t  conjp, \
-       dim_t   panel_dim, \
-       dim_t   panel_len, \
-       ctype*  kappa, \
-       ctype*  p,             inc_t ldp, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       cntx_t* cntx  \
-     );
 
-INSERT_GENTPROT_BASIC0( unpackm_cxk )
+// -- REGISTER BLOCK SIZES (FOR REFERENCE KERNELS) ----------------------------
+
+#define BLIS_MR_s   32
+#define BLIS_MR_d   16
+
+#define BLIS_NR_s   12
+#define BLIS_NR_d   14
+
+//#endif
 

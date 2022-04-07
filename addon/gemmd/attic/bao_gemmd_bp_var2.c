@@ -164,7 +164,7 @@ void PASTECH2(bao_,ch,varname) \
 	   function pointer type. */ \
 	/*
 	PASTECH(ch,gemm_ukr_ft) \
-               gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+               gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	*/ \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
@@ -175,7 +175,7 @@ void PASTECH2(bao_,ch,varname) \
 	ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                / sizeof( ctype ) ] \
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool col_pref = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t rs_ct   = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct   = ( col_pref ? MR : 1 ); \
 	*/ \
@@ -536,7 +536,7 @@ void PASTECH2(bao_,ch,varname) \
 	/* Query the context for the microkernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-               gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+               gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the
@@ -545,7 +545,7 @@ void PASTECH2(bao_,ch,varname) \
 	ctype       ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                / sizeof( ctype ) ] \
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool col_pref = bli_cntx_l3_nat_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool col_pref = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
 	const inc_t rs_ct   = ( col_pref ? 1 : NR ); \
 	const inc_t cs_ct   = ( col_pref ? MR : 1 ); \
 \

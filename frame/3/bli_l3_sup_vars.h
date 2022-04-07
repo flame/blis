@@ -127,7 +127,7 @@ BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
        cntx_t*  cntx
      )
 {
-	const bool row_pref = bli_cntx_l3_sup_ker_prefers_rows_dt( dt, *eff_id, cntx );
+	const bool row_pref = bli_cntx_ukr_prefers_rows_dt( dt, bli_stor3_ukr( *eff_id ), cntx );
 
 	// Handle row- and column-preferrential kernels separately.
 	if ( row_pref )

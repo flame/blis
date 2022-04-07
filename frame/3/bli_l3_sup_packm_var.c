@@ -123,6 +123,14 @@ void PASTEMAC(ch,varname) \
 		ldp            = cs_p; \
 	} \
 \
+	num_t dt     = PASTEMAC(ch,type); \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
+	                                           : BLIS_PACKM_MRXK_KER; \
+\
+	/* Query the context for the unpackm kernel corresponding to the current
+	   panel dimension, or kernel id. */ \
+	PASTECH2(ch,packm_cxk,_ker_ft) f = bli_cntx_get_ukr_dt( dt, ker_id, cntx ); \
+\
 	/* Compute the total number of iterations we'll need. */ \
 	n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 ); \
 \
@@ -171,12 +179,11 @@ void PASTEMAC(ch,varname) \
 			   or round-robin partitioning was requested at configure-time. */ \
 			if ( bli_packm_my_iter( it, it_start, it_end, tid, nt ) ) \
 			{ \
-				PASTEMAC(ch,packm_cxk) \
+				f \
 				( \
 				  conjc, \
 				  schema, \
 				  panel_dim_i, \
-				  panel_dim_max, \
 				  panel_len_i, \
 				  panel_len_max_i, \
 				  kappa_cast, \

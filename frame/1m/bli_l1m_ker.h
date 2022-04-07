@@ -47,16 +47,8 @@
 #undef  GENTPROT
 #define GENTPROT PACKM_KER_PROT
 
-INSERT_GENTPROT_BASIC0( packm_2xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_3xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_4xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_6xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_8xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_10xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_12xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_14xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_16xk_ker_name )
-INSERT_GENTPROT_BASIC0( packm_24xk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_mrxk_ker_name )
+INSERT_GENTPROT_BASIC0( packm_nrxk_ker_name )
 
 
 // native unpackm kernels
@@ -64,27 +56,33 @@ INSERT_GENTPROT_BASIC0( packm_24xk_ker_name )
 #undef  GENTPROT
 #define GENTPROT UNPACKM_KER_PROT
 
-INSERT_GENTPROT_BASIC0( unpackm_2xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_4xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_6xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_8xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_10xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_12xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_14xk_ker_name )
-INSERT_GENTPROT_BASIC0( unpackm_16xk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_mrxk_ker_name )
+INSERT_GENTPROT_BASIC0( unpackm_nrxk_ker_name )
 
 
 // 1e/1r packm kernels
 
 #undef  GENTPROT
-#define GENTPROT PACKM_1ER_KER_PROT
+#define GENTPROT PACKM_KER_PROT
 
-INSERT_GENTPROT_BASIC0( packm_2xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_4xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_6xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_8xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_10xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_12xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_14xk_1er_ker_name )
-INSERT_GENTPROT_BASIC0( packm_16xk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_mrxk_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_nrxk_1er_ker_name )
+
+
+// packm kernels for diagonal blocks
+
+#undef  GENTPROT
+#define GENTPROT PACKM_DIAG_KER_PROT
+
+INSERT_GENTPROT_BASIC0( packm_mrxmr_diag_ker_name )
+INSERT_GENTPROT_BASIC0( packm_nrxnr_diag_ker_name )
+
+
+// 1e/1r packm kernels for diagonal blocks
+
+#undef  GENTPROT
+#define GENTPROT PACKM_DIAG_KER_PROT
+
+INSERT_GENTPROT_BASIC0( packm_mrxmr_diag_1er_ker_name )
+INSERT_GENTPROT_BASIC0( packm_nrxnr_diag_1er_ker_name )
 

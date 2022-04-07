@@ -178,7 +178,7 @@ void PASTEMAC(ch,varname) \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const bool      col_pref    = bli_cntx_l3_vir_ukr_prefers_cols_dt( dt, BLIS_GEMM_UKR, cntx ); \
+	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : NR ); \
 	const inc_t     cs_ct       = ( col_pref ? MR : 1 ); \
 \
@@ -337,7 +337,7 @@ void PASTEMAC(ch,varname) \
 	dim_t jr_inc; \
 \
 	/* Use round-robin assignment of micropanels to threads in the 2nd loop for
-	   the initial rectangular region of C (if it exists). 
+	   the initial rectangular region of C (if it exists).
 	   NOTE: Parallelism in the 1st loop is disabled for now. */ \
 	bli_thread_range_jrir_rr( thread, n_iter, 1, FALSE, &jr_start, &jr_end, &jr_inc ); \
 	/*bli_thread_range_jrir_rr( caucus, m_iter, 1, FALSE, &ir_start, &ir_end, &ir_inc );*/ \

@@ -66,7 +66,7 @@ void bli_cntx_init_armv7a( cntx_t* cntx )
 	// blocksizes (and multiples) for native execution.
 	bli_cntx_set_blkszs
 	(
-	  BLIS_NAT, 5,
+	  5,
 	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
 	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
 	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,

@@ -104,7 +104,7 @@ void bli_ddotv_penryn_int
 	// Call the reference implementation if needed.
 	if ( use_ref == TRUE )
 	{
-		ddotv_ker_ft f = bli_cntx_get_l1v_ker_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
+		ddotv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_DOTV_KER, cntx );
 
 		f
 		(

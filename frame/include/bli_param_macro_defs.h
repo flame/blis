@@ -754,7 +754,7 @@ BLIS_INLINE void bli_prune_unstored_region_bottom_u( doff_t* diagoff, dim_t* m, 
 	*offm_inc = 0;
 
 	// If the diagonal intersects the right side of the matrix,
-	// ignore the area below that intersection. 
+	// ignore the area below that intersection.
 	if ( *m > -(*diagoff) + *n )
 	{
 		*m = -(*diagoff) + *n;
@@ -776,6 +776,14 @@ BLIS_INLINE void bli_reflect_about_diag( doff_t* diagoff, uplo_t* uplo, dim_t* m
 	bli_negate_diag_offset( diagoff );
 	bli_toggle_uplo( uplo );
 }
+
+// we don't know the type of a, so this must be a macro
+// rs_a and cs_a must be variables and not expressions
+#define bli_reflect_to_stored_part( diagoff, a, rs_a, cs_a ) \
+do { \
+	a += ( diagoff ) * ( cs_a - rs_a ); \
+	bli_swap_incs( &rs_a, &cs_a ); \
+} while (0) \
 
 BLIS_INLINE void bli_reverse_index_direction( dim_t n, dim_t* start, dim_t* end )
 {
@@ -856,6 +864,22 @@ BLIS_INLINE stor3_t bli_stor3_trans( stor3_t id )
 	       ( ( ( id & 0x1 ) ^ 0x1 ) << 1 ) | // flip b bit and move to a position
 	       ( ( ( id & 0x2 ) ^ 0x2 ) >> 1 );  // flip a bit and move to b position
 #endif
+}
+
+BLIS_INLINE ukr_t bli_stor3_ukr( stor3_t id )
+{
+	switch ( id )
+	{
+		case BLIS_RRR: return BLIS_GEMMSUP_RRR_UKR;
+		case BLIS_RRC: return BLIS_GEMMSUP_RRC_UKR;
+		case BLIS_RCR: return BLIS_GEMMSUP_RCR_UKR;
+		case BLIS_RCC: return BLIS_GEMMSUP_RCC_UKR;
+		case BLIS_CRR: return BLIS_GEMMSUP_CRR_UKR;
+		case BLIS_CRC: return BLIS_GEMMSUP_CRC_UKR;
+		case BLIS_CCR: return BLIS_GEMMSUP_CCR_UKR;
+		case BLIS_CCC: return BLIS_GEMMSUP_CCC_UKR;
+		default: return BLIS_GEMMSUP_XXX_UKR;
+	}
 }
 
 BLIS_INLINE stor3_t bli_stor3_transa( stor3_t id )

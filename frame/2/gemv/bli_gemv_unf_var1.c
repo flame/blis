@@ -71,7 +71,7 @@ void PASTEMAC(ch,varname) \
 	PASTECH(ch,dotxf_ker_ft) kfp_df; \
 \
 	/* Query the context for the kernel function pointer and fusing factor. */ \
-	kfp_df = bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+	kfp_df = bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
 	b_fuse = bli_cntx_get_blksz_def_dt( dt, BLIS_DF, cntx ); \
 \
 	for ( i = 0; i < n_iter; i += f ) \

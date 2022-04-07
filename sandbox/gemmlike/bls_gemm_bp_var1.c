@@ -156,7 +156,7 @@ void PASTECH2(bls_,ch,varname) \
 	/* Query the context for the microkernel address and cast it to its
 	   function pointer type. */ \
 	PASTECH(ch,gemm_ukr_ft) \
-               gemm_ukr = bli_cntx_get_l3_nat_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+               gemm_ukr = bli_cntx_get_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
 \
 	/* Compute partitioning step values for each matrix of each loop. */ \
 	const inc_t jcstep_c = cs_c; \

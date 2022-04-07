@@ -165,10 +165,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		const num_t              dt     = PASTEMAC(ch,type); \
 		PASTECH(ch,dotxf_ker_ft) kfp_df \
 		= \
-		bli_cntx_get_l1f_ker_dt( dt, BLIS_DOTXF_KER, cntx ); \
+		bli_cntx_get_ukr_dt( dt, BLIS_DOTXF_KER, cntx ); \
 		PASTECH(ch,axpyf_ker_ft) kfp_af \
 		= \
-		bli_cntx_get_l1f_ker_dt( dt, BLIS_AXPYF_KER, cntx ); \
+		bli_cntx_get_ukr_dt( dt, BLIS_AXPYF_KER, cntx ); \
 \
 		kfp_df \
 		( \

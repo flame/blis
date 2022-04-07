@@ -49,8 +49,8 @@
 // NOTE: These macros are not used by other scalar macros, but they are
 // related to those defined in bli_sets.h, and so we #include them here.
 
-#include "bli_setrs.h"   // sets real component only 
-#include "bli_setis.h"   // sets imaginary component only 
+#include "bli_setrs.h"   // sets real component only
+#include "bli_setis.h"   // sets imaginary component only
 
 // NOTE: This macro also needs to be defined early on since it determines
 // how real and imaginary components are accessed (ie: whether the fields
@@ -194,6 +194,7 @@
 #include "bli_adds_mxn.h"
 #include "bli_adds_mxn_uplo.h"
 #include "bli_set0s_mxn.h"
+#include "bli_set0s_edge.h"
 #include "bli_copys_mxn.h"
 #include "bli_scal2s_mxn.h"
 #include "bli_xpbys_mxn.h"
@@ -230,7 +231,7 @@
 #include "bli_scal21rs.h"
 #include "bli_scal2j1rs.h"
 
-// 1m (1e or 1r) 
+// 1m (1e or 1r)
 #include "bli_invert1ms_mxn_diag.h"
 
 #include "bli_scal1ms_mxn.h"
