@@ -124,7 +124,8 @@ void PASTEMAC(ch,varname) \
 	} \
 \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER : BLIS_PACKM_MRXK_KER; \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_PACKM_NRXK_KER \
+	                                           : BLIS_PACKM_MRXK_KER; \
 \
 	/* Query the context for the unpackm kernel corresponding to the current
 	   panel dimension, or kernel id. */ \

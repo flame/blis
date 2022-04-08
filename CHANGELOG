@@ -1,10 +1,2888 @@
-commit 8535b3e11d2297854991c4272932ce4974dda629 (HEAD -> master, tag: 0.8.1)
+commit 14c86f66b20901b60ee276da355c1b62642c18d2 (HEAD -> master, tag: 0.9.0)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 1 08:12:06 2022 -0500
+
+    Version file update (0.9.0)
+
+commit 99bb9002f1aff598d347eae2821a3f7bdd1f48e8 (origin/master, origin/HEAD)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 1 08:10:59 2022 -0500
+
+    ReleaseNotes.md update in advance of next version.
+
+commit bee7678b2558a691ac850819dbe33fefe4fdbee3 (origin/dev, origin/amd, dev, amd)
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Mar 31 14:09:39 2022 -0500
+
+    CREDITS file update.
+
+commit cf06364327bd2d21d606392371ff3c5962bee5ba
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 29 16:18:25 2022 -0500
+
+    Fixed typo in BLAS gemm3m call to _check().
+    
+    Details:
+    - Fixed an unresolved symbol issue leftover from #590 whereby ?gemm3m_()
+      as defined in bla_gemm3m.c was referencing bla_gemm3m_check(), which
+      does not exist. It should have simply called the _check() function for
+      gemm.
+
+commit 1ec020b33ece1681c0041e2549eed2bd4c6cf356
+Author: Dipal M Zambare <71366780+dzambare@users.noreply.github.com>
+Date:   Wed Mar 30 02:45:36 2022 +0530
+
+    AMD kernel updates; frame-specific AMD updates. (#597)
+    
+    Details:
+    - Allow building BLIS with certain framework files (each with the '_amd'
+      suffix) that have been customized by AMD for Zen-based hardware. These
+      customized files were derived from portable versions of the same files
+      (i.e., those without the '_amd' suffix). Whether the portable or AMD-
+      specific files are compiled is now controlled by a new configure
+      option, --[en|dis]able-amd-frame-tweaks. This option is disabled by
+      default in vanilla BLIS, though AMD may choose to enable it by default
+      in their fork. For now, the added AMD-specific files are:
+      - bli_gemv_unf_var2_amd.c
+      - bla_copy_amd.c
+      - bla_gemv_amd.c
+      These files reside in 'amd' subdirectories found within the directory
+      housing their generic counterparts.
+    - Register optimized real-domain copyv, setv, and swapv kernels in
+      bli_cntx_init_zen.c.
+    - Various minor updates to level-1v kernels in 'zen' kernel set.
+    - Added caxpyf kernel as well as saxpyf and multiple daxpyf kernels to
+      the 'zen' kernel set
+    - If the problem passed to ?gemm_() in bla_gemm.c has a unit m or n dim,
+      call gemv instead and return early.
+    - Combined variable declarations with their initialization in various
+      level-2 and level-3 BLAS compatibility files, and also inserted
+      'const' qualifer in those same declaration statements.
+    - Moved frame/compat/bla_gemmt.c and .h to frame/compat/extra/ .
+    - Added copyv and swapv test drivers to 'test' directory.
+    - Whitespace, comment changes.
+
+commit 0db2bd5341c5c3ed5f1cc2bffa90952735efa45f
+Author: Bhaskar Nallani <Nallani.Bhaskar@amd.com>
+Date:   Fri Mar 25 05:11:55 2022 +0530
+
+    Added BLAS/CBLAS APIs for gemm3m. (#590)
+    
+    Details:
+    - Created ?gemm3m_() and cblas_?gemm3m() APIs that (for now) simply
+      invoke the 1m implementation unconditionally. (Note that these APIs
+      bypass sup handling.)
+    - Added BLAS prototypes for gemm3m in frame/compat/bla_gemm3m.h.
+    - Added CBLAS prototypes for gemm3m in frame/compat/cblas/src/cblas.h.
+    - Relocated:
+        frame/compat/cblas/src/cblas_?gemmt.c
+      files into
+        frame/compat/cblas/src/extra/
+    - Relocated frame/compat/bla_gemmt.? into frame/compat/extra/ .
+    - Minor reorganization of prototypes and cpp macro directives in
+      bli_blas.h, cblas.h, and cblas_f77.h.
+    - Trival whitespace change to cblas_zgemm.c.
+
+commit d6810000e961fe807dc5a7db81180a8355f3eac0
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Mar 14 10:29:54 2022 -0500
+
+    Update Multithreading.md
+    
+    Add notes about `BLIS_IR_NT` (should typically be 1) and `BLIS_JR_NT` (should typically be small, e.g. <= 4). [ci skip]
+
+commit f1dbb0e514f53a3240d3a6cbdc3306b01a2206f5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 11 13:38:28 2022 -0600
+
+    Trival whitespace change; commit log addendum.
+    
+    Details:
+    - A co-attribution to Mithun Mohan was inadvertently omitted from the
+      commit log for headline change in the previous commit, 7c07b47.
+
+commit 7c07b477e432adbbce5812ed9341ba3092b03976
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Mar 11 13:28:50 2022 -0600
+
+    Avoid gemmsup barriers when not packing A or B. (#622)
+    
+    Details:
+    - Implemented a multithreaded optimization for the special (and common)
+      case of employing the gemmsup code path when the user requests
+      (implicitly or explicitly) that neither A nor B be packed during
+      computation. This optimization takes the form of a greatly reduced
+      code branch in bli_thrinfo_sup_create_for_cntl(), which avoids a
+      broadcast and two barriers, and results in higher performance when
+      obtaining two-way or higher parallelism within BLIS. Thanks to
+      Bhaskar Nallani of AMD for proposing this change via issue #605.
+    - Added an early return branch to bli_thrinfo_create_for_cntl() that
+      detects and quickly handles cases where no parallelism is being
+      obtained within BLIS (i.e., single-threaded execution). Note that
+      this special case handling was/is already present in
+      bli_thrinfo_sup_create_for_cntl().
+    - CREDITS file update.
+
+commit cad10410b2305bc0e328c5f2517ab02593b53428
+Author: Ivan Korostelev <ivan23kor@gmail.com>
+Date:   Thu Mar 10 09:58:14 2022 -0600
+
+    POWER10: edge cases in microkernel (#620)
+    
+    Use new API for POWER10 gemm microkernel
+
+commit 71851a0549276b17db18a0a0c8ab4f54493bf033
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Mar 8 17:38:09 2022 -0600
+
+    Fixed level-3 performance bug in haswell ukernels.
+    
+    Details:
+    - Fixed a performance regression affecting nearly all level-3 operations
+      that use the 'haswell' sgemm and dgemm microkernels. This regression
+      was introduced in 54fa28b, caused by an ill-formed conditional
+      expression in the assembly code that controls whether cache lines of C
+      should be prefetched as rows or as columns. Essentially, the two
+      branches were reversed, causing incomplete prefetching to occur for
+      both row- and column-stored instances of matrix C. Thanks to Devin
+      Matthews for his help finding and fixing this bug.
+
+commit 84732bf95634ac606c5f2661d9474318e366c386
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Feb 28 12:19:31 2022 -0600
+
+    Revamp how tools are handled/checked by configure.
+    
+    Details:
+    - Consolidate handling of tools that are specifiable via CC, CXX, FC,
+      PYTHON, AR, and RANLIB into one bash function, select_tool_w_env().
+      - If the user specifies a tool via an environment variable (e.g.
+        CC=gcc) and that tool does not seem valid, print an error message
+        and abort configure, unless the tool is optional (e.g. CXX or FC),
+        in which case a warning message is printed instead.
+      - The definition of "seems valid" above amounts to:
+        - responding to at least one of a basic set of command line options
+          (e.g. --version, -V, -h) if the os_name is Linux (since GNU tools
+          tend to respond to flags such as --version) or if the tool in
+          question is CC, CXX, FC, or PYTHON (which tend to respond to the
+          expected flags regardless of OS)
+        - the binary merely existing for AR and RANLIB on Darwin/OSX/BSD.
+          (These OSes tend to have non-GNU versions of ar and ranlib, which
+          typically do not respond to --version and friends.)
+    - This PR addresses #584. Thanks to Devin Matthews for suggesting some
+      of the changes in this commit.
+
+commit d5146582b1f1bcdccefe23925d3b114d40cd7e31
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Feb 23 03:35:46 2022 +0900
+
+    ArmSVE Ensure Non-zero Block Size (#615)
+    
+    Fixes #613. There are several macros/environment variables which need to be tuned to get good cache block sizes. It would be nice to have a way of getting values automatically.
+
+commit 4d8352309784403ed6719528968531ffb4483947
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Feb 23 01:03:47 2022 +0900
+
+    Add armsve to arm64 Metaconfig (#614)
+    
+    Availability of the `armsve` subconfig is controlled by the compiler version (gcc/clang). Tested for SVE and non-SVE. Fixes #612.
+
+commit c9700f369aa84fc00f36c4b817ffb7dab72b865d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 15 15:36:52 2022 -0600
+
+    Renamed SIMD-related macro constants for clarity.
+    
+    Details:
+    - Renamed the following macros defined in bli_kernel_macro_defs.h:
+    
+        BLIS_SIMD_NUM_REGISTERS -> BLIS_SIMD_MAX_NUM_REGISTERS
+        BLIS_SIMD_SIZE          -> BLIS_SIMD_MAX_SIZE
+    
+      Also updated all instances of these macros elsewhere, including
+      subconfigurations, source code, and documentation. Thanks to Devin
+      Matthews for suggesting this change.
+
+commit ee9ff988c49f16696679d4c6cd3dcfcac7295be7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Feb 15 15:01:51 2022 -0600
+
+    Move edge cases to gemmtrsm ukrs; doc updates.
+    
+    Details:
+    - Moved edge-case handling into the gemmtrsm microkernel. This required
+      changing the microkernel API to take m and n dimension parameters as
+      well as updating all existing gemmtrsm microkernel function pointer
+      types, function signatures, and related definitions to take m and n
+      dimensions. Also updated all existing gemmtrsm kernels in the
+      'kernels' directory (which for now is limited to haswell and penryn
+      kernel sets, plus native and 1m-based reference kernels in
+      'ref_kernels') to take m and n dimensions, and implemented edge-case
+      handling within those microkernels via a collection of new C
+      preprocessor macros defined within bli_edge_case_macro_defs.h. Note
+      that the edge-case handling for gemm-like operations had already
+      been relocated into the gemm microkernel in 54fa28b.
+    - Added desriptive comments to GEMM_UKR_SETUP_CT() and related macros in
+      bli_edge_case_macro_defs.h to allow for easier reading.
+    - Updated docs/KernelsHowTo.md to reflect above changes. Also cleaned up
+      the bullet under "Implementation Notes for gemm" that covers alignment
+      issues. (Thanks to Ivan Korostelev for pointing out the confusing and
+      outdated language in issue #591.)
+    - Other minor tweaks to KernelsHowTo.md.
+
+commit 25061593460767221e1066f9d720fa6676bbed8f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Feb 13 20:11:55 2022 -0600
+
+    Don't use `-Wl,-flat-namespace`.
+    
+    Flat namespaces can cause problems due to conflicting system libraries,
+    etc., so just mark `xerbla_` as a weak symbol on macOS instead.
+
+commit 5a4d3f5208d3d8cc1827f8cc90414c764b7ebab3
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Feb 13 17:28:30 2022 -0600
+
+    Use -flat_namespace option to link on macOS
+    
+    Fixes #611.
+
+commit 26742910a087947780a089360e2baf82ea109e01
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Feb 13 16:53:45 2022 -0600
+
+    Update CC_VENDOR logic
+    
+    Look for `GCC` in addition to `gcc` to handle weird conda version strings. [ci skip]
+
+commit 2f3872e01d51545c687ae2c8b2650e00552111a7
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Feb 7 17:14:49 2022 +0900
+
+    ArmSVE Adopts Label Wrapper
+    
+    For clang (& armclang?) compilation.
+    
+    Hopefully solves #609 .
+
+commit 72089bb2917b78d99cf4f27c69125bf213ee54e6
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Feb 5 16:56:04 2022 +0900
+
+    ArmSVE Use Predicate in M-Direction
+    
+    No need to query MR during kernel runtime.
+
+commit 9cc897f37455d52fbba752e3801f1a9d4a5bfdc1
+Author: Ruqing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Feb 3 16:40:02 2022 +0000
+
+    Fix SVE Compil.
+
+commit b5df1811f1bc8212b2cda6bb97b79819afe236a8
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Feb 3 02:31:29 2022 +0900
+
+    Armv8a, ArmSVE: Simplify Gen-C
+
+commit 35195bb5cea5d99eb3eaf41e3815137d14ceb52d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jan 31 10:29:50 2022 -0600
+
+    Add armclang detection to configure.
+    
+    armclang is treated as regular clang. Fixes #606. [ci skip]
+
+commit 0be9282cdccf73342d8571d3f7971a9b0af72363
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Jan 26 17:46:24 2022 -0600
+
+    Updated zen3 macro constant names.
+    
+    Details:
+    - In config/zen3/bli_family_zen3.h, renamed:
+        BLIS_SMALL_MATRIX_A_THRES_M_GEMMT -> _M_SYRK
+        BLIS_SMALL_MATRIX_A_THRES_N_GEMMT -> _N_SYRK
+      Thanks to Jeff Diamond for helping spot the stale _SYRK naming.
+
+commit 0ab20c0e72402ba0b17fe2c3ed3e16bf2ace0fd3
+Author: Jeff Hammond <jehammond@nvidia.com>
+Date:   Thu Jan 13 07:29:56 2022 -0800
+
+    the Apple local label thing is required by Clang in general
+    
+    @egaudry and I both saw this issue on Linux with Clang 10.
+    
+    ```
+    Compiling obj/thunderx2/kernels/armv8a/3/sup/bli_gemmsup_rv_armv8a_asm_d4x8m.o ('thunderx2' CFLAGS for kernels)
+    kernels/armv8a/3/bli_gemm_armv8a_asm_d6x8.c:171:49: fatal error: invalid symbol redefinition
+            "                                            \n\t"
+                                                           ^
+    <inline asm>:90:5: note: instantiated into assembly here
+               .SLOOPKITER:
+               ^
+    1 error generated.
+    ```
+    
+    Signed-off-by: Jeff Hammond <jehammond@nvidia.com>
+
+commit 81f93be0561c705ae6823d19e40849facc40bef7
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jan 10 10:19:47 2022 -0600
+
+    Fix row-/column-major pref. in 16x8 haswell sgemm ukr (unused)
+
+commit 268ce1f29a717d18304713ecc25a2eafe41838c7
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jan 10 10:17:17 2022 -0600
+
+    Relax alignment constraints
+    
+    Remove alignment of temporary AB buffer in edge case handling macros unless alignment is specifically requested (e.g. Core2, SDB/IVB). Fixes #595.
+
+commit 3f2440b0226d5e23a43d12105d74aa917cd6c610
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Jan 6 14:57:36 2022 -0600
+
+    Added m, n dims to gemmd/gemmlike ukernel calls.
+    
+    Details:
+    - Updated the gemmd addon and the gemmlike sandbox code to use the new
+      microkernel calling sequence, which now includes m and n dimensions so
+      that the microkernel has all the information necessary to handle edge
+      cases. Thanks to Jeff Diamond for catching this, which ideally would
+      have been included in commit 54fa28b.
+    - Retired var2 of both gemmd and gemmlike to 'attic' directories and
+      removed their corresponding prototypes. In both cases, var2 was a
+      variant of the block-panel algorithm where edge-case handling was
+      abstracted away to a microkernel wrapper. (Since this is now the
+      official behavior of BLIS microkernels, I saw no need to have it
+      included as a separate code path.)
+    - Comment updates.
+
+commit 864bfab4486ac910ef9a366e9ade4b45a39747fc
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jan 4 15:10:34 2022 -0600
+
+    CREDITS file update.
+
+commit 466b68a3ad118342dc49a8130b7b02f5e7748521
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun Jan 2 14:59:41 2022 -0600
+
+    Add unique tag to branch labels for Apple ARM64.
+    
+    Add `%=` tag to branch labels, which expands to a unique identifier for each inline assembly block. This prevents duplicate symbol errors on Apple Silicon (#594). Fixes #594. [ci skip] since we can't test Apple Silicon anyways...
+
+commit 08174a2f6ebbd8ed5aa2bc4edc45da80962f06bb
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jan 1 21:35:19 2022 +0900
+
+    Evict <arm_sve.h> Requirement for SVE GEMM
+    
+    For 8<= GCC < 10 compatibility.
+
+commit 54fa28bd847b389215cffb57a83dc9b3dce79c86
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Dec 24 08:00:33 2021 -0600
+
+    Move edge cases to gemm ukr; more user-custom mods. (#583)
+    
+    Details:
+    - Moved edge-case handling into the gemm microkernel. This required
+      changing the microkernel API to take m and n dimension parameters.
+      This required updating all existing gemm microkernel function pointer
+      types, function signatures, and related definitions to take m and n
+      dimensions. We also updated all existing kernels in the 'kernels'
+      directory to take m and n dimensions, and implemented edge-case
+      handling within those microkernels via a collection of new C
+      preprocessor macros defined within bli_edge_case_macro_defs.h. Also
+      removed the assembly code that formerly would handle general stride
+      IO on the microtile, since this can now be handled by the same code
+      that does edge cases.
+    - Pass the obj_t.ker_fn (of matrix C) into bli_gemm_cntl_create() and
+      bli_trsm_cntl_create(), where this function pointer is used in lieu of
+      the default macrokernel when it is non-NULL, and ignored when it is
+      NULL.
+    - Re-implemented macrokernel in bli_gemm_ker_var2.c to be a single
+      function using byte pointers rather that one function for each
+      floating-point datatype. Also, obtain the microkernel function pointer
+      from the .ukr field of the params struct embedded within the obj_t
+      for matrix C (assuming params is non-NULL and contains a non-NULL
+      value in the .ukr field). Communicate both the gemm microkernel
+      pointer to use as well as the params struct to the microkernel via
+      the auxinfo_t struct.
+    - Defined gemm_ker_params_t type (for the aforementioned obj_t.params
+      struct) in bli_gemm_var.h.
+    - Retired the separate _md macrokernel for mixed datatype computation.
+      We now use the reimplemented bli_gemm_ker_var2() instead.
+    - Updated gemmt macrokernels to pass m and n dimensions into microkernel
+      calls.
+    - Removed edge-case handling from trmm and trsm macrokernels.
+    - Moved most of bli_packm_alloc() code into a new helper function,
+      bli_packm_alloc_ex().
+    - Fixed a typo bug in bli_gemmtrsm_u_template_noopt_mxn.c.
+    - Added test/syrk_diagonal and test/tensor_contraction directories with
+      associated code to test those operations.
+
+commit 961d9d509dd94f3a66f7095057e3dc8eb6d89839
+Author: Kiran <kiran.varaganti@amd.com>
+Date:   Wed Dec 8 03:00:38 2021 +0530
+
+    Re-add BLIS_ENABLE_ZEN_BLOCK_SIZES macro for 'zen'.
+    
+    Details:
+    - Added previously-deleted cpp macro block to bli_cntx_init_zen.c
+      targeting the Naples microarchitecture that enabled different cache
+      blocksizes when the number of threads exceeds 16. This commit
+      represents PR #573.
+
+commit cf7d616a2fd58e293b496770654040818bf5609c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Dec 2 17:10:03 2021 -0600
+
+    Enable user-customized packm ukernel/variant. (#549)
+    
+    Details:
+    - Added four new fields to obj_t: .pack_fn, .pack_params, .ker_fn, and
+      .ker_params. These fields store pointers to functions and data that
+      will allow the user to more flexibly create custom operations while
+      recycling BLIS's existing partitioning infrastructure.
+    - Updated typed API to packm variant and structure-aware kernels to
+      replace the diagonal offset with panel offsets, and changed strides
+      of both C and P to inc/ldim semantics. Updated object API to the packm
+      variant to include rntm_t*.
+    - Removed the packm variant function pointer from the packm cntl_t node
+      definition since it has been replaced by the .pack_fn pointer in the
+      obj_t.
+    - Updated bli_packm_int() to read the new packm variant function pointer
+      from the obj_t and call it instead of from the cntl_t node.
+    - Moved some of the logic of bli_l3_packm.c to a new file,
+      bli_packm_alloc.c.
+    - Rewrote bli_packm_blk_var1.c so that it uses byte (char*) pointers
+      instead of typed pointers, allowing a single function to be used
+      regardless of datatype. This obviated having a separate implementation
+      in bli_packm_blk_var1_md.c. Also relegated handling of scalars to a
+      new function, bli_packm_scalar().
+    - Employed a new standard whereby right-hand matrix operands ("B") are
+      always packed as column-stored row panels -- that is, identically to
+      that of left-hand matrix operands ("A"). This means that while we pack
+      matrix A normally, we actually pack B in a transposed state. This
+      allowed us to simplify a lot of code throughout the framework, and
+      also affected some of the logic in bli_l3_packa() and _packb().
+    - Simplified bli_packm_init.c in light of the new B^T convention
+      described above. bli_packm_init()--which is now called from within
+      bli_packm_blk_var1()--also now calls bli_packm_alloc() and returns
+      a bool that indicates whether packing should be performed (or
+      skipped).
+    - Consolidated bli_gemm_int() and bli_trsm_int() into a bli_l3_int(),
+      which, among other things, defaults the new .pack_fn field of the
+      obj_t to bli_packm_blk_var1() if the field is NULL.
+    - Defined a new function, bli_obj_reset_origin(), which permanently
+      refocuses the view of an object so that it "forgets" any offsets from
+      its original pointer. This function also sets the object's root field
+      to itself. Calls to bli_obj_reset_origin() for each matrix operand
+      appear in the _front() functions, after the obj_t's are aliased. This
+      resetting of the underlying matrices' origins is needed in preparation
+      for more advanced features from within custom packm kernels.
+    - Redefined bli_pba_rntm_set_pba() from a regular function to a static
+      inline function.
+    - Updated gemm_ukr, gemmtrsm_ukr, and trsm_ukr testsuite modules to use
+      libblis_test_pobj_create() to create local packed objects. Previously,
+      these packed objects were created by calling lower-level functions.
+
+commit e229e049ca08dfbd45794669df08a71dba892925
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Dec 1 17:36:22 2021 -0600
+
+    Added recu-sed.sh script to 'build' directory.
+    
+    Details:
+    - Added a recursive sed script to the 'build' directory.
+
+commit 12c66a4acc77bf4927b01e2358e2ac10b61e0a53
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 19 14:43:53 2021 -0600
+
+    Minor updates to README.md, docs/Addons.md.
+    
+    Details:
+    - Add additional mentions of addons to README.md, including in the
+      "What's New" section.
+    - Removed mention of sandboxes from the long list of advantages
+      provided by BLIS.
+    - Very minor description update to opening line of Addons.md.
+
+commit a4bc03b990fe0572001eb6409efd12cd70677dcf
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 19 13:29:00 2021 -0600
+
+    Brief mention/link to Addons.md in README.md.
+    
+    Details:
+    - Add a blurb about the new addons feature to the "Documentation for
+      BLIS developers" section of the README.md, which also links to the
+      Addons.md document.
+
+commit b727645eb7a8df39dee74068f734da66322fe0b3
+Merge: 9be97c15 7bde468c
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Nov 19 13:22:09 2021 -0600
+
+    Merge branch 'dev'
+
+commit 9be97c150e19fa58bca30cb993a6509ae21e2025
+Author: Madan mohan Manokar <86282872+madanm3@users.noreply.github.com>
+Date:   Thu Nov 18 00:46:46 2021 +0530
+
+    Support all four dts in test/test_her[2][k].c (#578)
+    
+    Details:
+    - Replaced the hard-coded calls to double-precision real syr, syr2,
+      syrk, and syrk in the corresponding standalone test drivers in the
+      'test' directory with conditional branches that will call the
+      appropriate BLAS interface depending on which datatype is enabled.
+      Thanks to Madan mohan Manokar for this improvement.
+    - CREDITS file update.
+
+commit 26e4b6b29312b472c3cadf95ccdf5240764777f4
+Author: Dipal M Zambare <71366780+dzambare@users.noreply.github.com>
+Date:   Thu Nov 18 00:32:00 2021 +0530
+
+    Added support for AMD's Zen3 microarchitecture.
+    
+    Details:
+    - Added a new 'zen3' subconfiguration targeting support for the AMD Zen3
+      microarchitecture (#561). Thanks to AMD for this contribution.
+    - Restructured clang and AOCC support for zen, zen2, and zen3
+      make_defs.mk files. The clang and AOCC version detection now happens
+      in configure, not in the subconfigurations' makefile fragments. That
+      is, we've added logic to configure that detects the version of
+      clang/AOCC, outputs an appropriate variable to config.mk
+      (ie: CLANG_OT_*, AOCC_OT_*), and then checks for it within the
+      makefile fragment (as is currently done for the GCC_OT_* variables).
+    - Added configure support for a GCC_OT_10_1_0 variable (and associated
+      substitution anchor) to communicate whether the gcc version is older
+      than 10.1.0, and use this variable to check for recent enough versions
+      of gcc to use -march=znver3 in the zen3 subconfig.
+    - Inlined the contents of config/zen/amd_config.mk into the zen and zen2
+      make_defs.mk so that the files are self-contained, harmonizing the
+      format of all three Zen-based subconfigurations' make_defs.mk files.
+    - Added indenting (with spaces) of GNU make conditionals for easier
+      reading in zen, zen2, and zen3 make_defs.mk files.
+    - Adjusted the range of models checked by bli_cpuid_is_zen() (which was
+      previously 0x00 ~ 0xff and is now 0x00 ~ 0x2f) so that it is
+      completely disjoint from the models checked by bli_cpuid_is_zen2()
+      (0x30 ~ 0xff). This is normally necessary because Zen and Zen2
+      microarchitectures share the same family (23, or 0x17), and so the
+      model code is the only way to differentiate the two. But in our case,
+      fixing the model range for zen *wasn't* actually necessary since we
+      checked for zen2 first, and therefore the wide zen range acted like
+      the 'else' of an 'if-else' statement. That said, the change helps
+      improve clarity for the reader by encoding useful knowledge, which
+      was obtained from https://en.wikichip.org/wiki/amd/cpuid .
+    - Added zen2.def and zen3.def files to the collection in travis/cpuid.
+      Note that support for zen, zen2, and zen3 is now present, and while
+      all the three microarchitectures have identical instruction sets from
+      the perspective of BLIS microkernels, they each correspond to
+      different subconfigurations and therefore merit separate testing.
+      Thanks to Devin Matthews for his guidance in hacking these files as
+      slight modifications of zen.def.
+    - Enabled testing of zen2 and zen3 via the SDE in travis/do_sde.sh.
+      Now, zen, zen2, and zen3 are tested through the SDE via Travis CI
+      builds.
+    - Updated travis/do_sde.sh to grab the SDE tarball from a new ci-utils
+      repository on GitHub rather than on Intel's website. This change was
+      made in an attempt to circumvent recent troubles with Travis CI not
+      being able to download the SDE directly from Intel's website via curl.
+      Thanks to Devin Matthews for suggesting the idea.
+    - Updated travis/do_sde.sh to grab the latest version (8.69.1) of the
+      Intel SDE from the flame/ci-utils repository.
+    - Updated .travis.yml to use gcc 9. The file was previously using gcc 8,
+      which did not support -march=znver2.
+    - Created amd64_legacy umbrella family in config_registry for targeting
+      older (bulldozer, piledriver, steamroller, and excavator)
+      microarchitectures and moved those same subconfigs out of the amd64
+      umbrella family. However, x86_64 retains amd64_legacy as a constituent
+      member.
+    - Fixed a bug in configure related to the building of the so-called
+      config list. When processing the contents of config_registry,
+      configure creates a series of structures and lists that allow for
+      various mappings related to configuration families, subconfigs, and
+      kernel sets. Two of those lists are built via substitution of
+      umbrella families with their subconfig members, and one of those
+      lists was improperly performing the substitution in a way that would
+      erroneously match on partial umbrella family names. That code was
+      changed to match the code that was already doing the substitution
+      properly, via substitute_words(). Also added comments noting the
+      importance of using substitute_words() in both instances.
+    - Comment updates.
+
+commit 74c0c622216aba0c24aa2c3a923811366a160cf5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 16 16:06:33 2021 -0600
+
+    Reverted cbc88fe.
+    
+    Details:
+    - Reverted the annotation of some markdown code blocks with 'bash'
+      after realizing that the in-browser syntax highlighting was not
+      worthwhile.
+
+commit cbc88feb51b949ce562d044cf9f99c4e46bb8a39
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 16 16:02:39 2021 -0600
+
+    Marked some markdown shell code blocks as 'bash'.
+    
+    Details:
+    - Annotated the code blocks that represent shell commands and output as
+      'bash' in README.md and BuildSystem.md.
+
+commit 78cd1b045155ddf0b9ec6e2ab815f2b216ad9a9e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Nov 16 15:53:40 2021 -0600
+
+    Added 'Example Code' section to README.md.
+    
+    Details:
+    - Inserted a new 'Example Code' section into the README.md immediately
+      after the 'Getting Started' section. Thanks to Devin Matthews for
+      recommending this addition.
+    - Moved the 'Performance' section of the README down slightly so that it
+      appears after the 'Documentation' section.
+
+commit 7bde468c6f7ecc4b5322d2ade1ae9c0b88e6b9f3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Nov 13 16:39:37 2021 -0600
+
+    Added support for addons.
+    
+    Details:
+    - Implemented a new feature called addons, which are similar to
+      sandboxes except that there is no requirement to define gemm or any
+      other particular operation.
+    - Updated configure to accept --enable-addon=<name> or -a <name> syntax
+      for requesting an addon be included within a BLIS build. configure now
+      outputs the list of enabled addons into config.mk. It also outputs the
+      corresponding #include directives for the addons' headers to a new
+      companion to the bli_config.h header file named bli_addon.h. Because
+      addons may wish to make use of existing BLIS types within their own
+      definitions, the addons' headers must be included sometime after that
+      of bli_config.h (which currently is #included before bli_type_defs.h).
+      This is why the #include directives needed to go into a new top-level
+      header file rather than the existing bli_config.h file.
+    - Added a markdown document, docs/Addons.md, to explain addons, how to
+      build with them, and what assumptions their authors should keep in
+      mind as they create them.
+    - Added a gemmlike-like implementation of sandwich gemm called 'gemmd'
+      as an addon in addon/gemmd. The code uses a 'bao_' prefix for local
+      functions, including the user-level object and typed APIs.
+    - Updated .gitignore so that git ignores bli_addon.h files.
+
+commit 7bc8ab485e89cfc6032932e57929e208a28f4be5
+Author: Meghana-vankadari <74656386+Meghana-vankadari@users.noreply.github.com>
+Date:   Fri Nov 12 04:16:14 2021 +0530
+
+    Added BLAS/CBLAS APIs for axpby, gemm_batch. (#566)
+    
+    Details:
+    - Expanded the BLAS compatibility layer to include support for
+      ?axpby_() and ?gemm_batch_(). The former is a straightforward
+      BLAS-like interface into the axpbyv operation while the latter
+      implements a batched gemm via loops over bli_?gemm(). Also
+      expanded the CBLAS compatibility layer to include support for
+      cblas_?axpby() and cblas_?gemm_batch(), which serve as wrappers to
+      the corresponding (new) BLAS-like APIs. Thanks to Meghana Vankadari
+      for submitting these new APIs via #566.
+    - Fixed a long-standing bug in common.mk that for some reason never
+      manifested until now. Previously, CBLAS source files were compiled
+      *without* the location of cblas.h being specified via a -I flag.
+      I'm not sure why this worked, but it may be due to the fact that
+      the cblas.h file resided in the same directory as all of the CBLAS
+      source, and perhaps compilers implicitly add a -I flag for the
+      directory that corresponds to the location of the source file being
+      compiled. This bug only showed up because some CBLAS-like source code
+      was moved into an 'extra' subdirectory of that frame/compat/cblas/src
+      directory. After moving the code, compilation for those files failed
+      (because the cblas.h header file, presumably, could not be found in
+      the same location). This bug was fixed within common.mk by explicitly
+      adding the cblas.h directory to the list of -I flags passed to the
+      compiler.
+    - Added test_axpbyv.c and test_gemm_batch.c files to 'test' directory,
+      and updated test/Makefile to build those drivers.
+    - Fixed typo in error message string in cblas_sgemm.c.
+
+commit 28b0982ea70c21841fb23802d38f6b424f8200e1
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Nov 10 12:34:50 2021 -0600
+
+    Refactored her[2]k/syr[2]k in terms of gemmt. (#531)
+    
+    Details:
+    - Renamed herk macrokernels and supporting files and functions to gemmt,
+      which is possible since at the macrokernel level they are identical.
+      Then recast herk/her2k/syrk/syr2k in terms of gemmt within the expert
+      level-3 oapi (bli_l3_oapi_ex.c) while also redefining them as literal
+      functions rather than cpp macros that instantiate multiple functions.
+      Thanks to Devin Matthews for his efforts on this issue (#531).
+    - Check that the maximum stack buffer size is sufficiently large
+      relative to the register blocksizes for each datatype, and do so when
+      the context is initialized rather than when an operation is called.
+      Note that with this change, users who pass in their own contexts into
+      the expert interfaces currently will *not* have any checks performed.
+      Thanks to Devin Matthews for suggesting this change.
+
+commit cfa3db3f3465dc58dbbd842f4462e4b49e7768b4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Nov 3 18:13:56 2021 -0500
+
+    Fixed bug in mixed-dt gemm introduced in e9da642.
+    
+    Details:
+    - Fixed a bug that broke certain mixed-datatype gemm behavior. This
+      bug was introduced recently in e9da642 when the code that performs
+      the operation transposition (for microkernel IO preference purposes)
+      was moved up so that it occurred sooner. However, when I moved that
+      code, I failed to notice that there was a cpp-protected "if"
+      conditional that applied to the entire code block that was moved. Once
+      the code block was relocated, the orphaned if-statement was now
+      (erroneously) glomming on to the next thing that happened to be in the
+      function, which happened to be the call to bli_rntm_set_ways_for_op(),
+      causing a rather odd memory exhaustion error in the sba due to the
+      num_threads field of the rntm_t still being -1 (because the rntm_t
+      field were never processed as they should have been). Thanks to
+      @ArcadioN09 (Snehith) for reporting this error and helpfully including
+      relevant memory trace output.
+
+commit f065a8070f187739ec2b34417b8ab864a7de5d7e
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 28 16:05:43 2021 -0500
+
+    Removed support for 3m, 4m induced methods.
+    
+    Details:
+    - Removed support for all induced methods except for 1m. This included
+      removing code related to 3mh, 3m1, 4mh, 4m1a, and 4m1b as well as any
+      code that existed only to support those implementations. These
+      implementations were rarely used and posed code maintenance challenges
+      for BLIS's maintainers going forward.
+    - Removed reference kernels for packm that pack 3m and 4m micropanels,
+      and removed 3m/4m-related code from bli_cntx_ref.c.
+    - Removed support for 3m/4m from the code in frame/ind, then reorganized
+      and streamlined the remaining code in that directory. The *ind(),
+      *nat(), and *1m() APIs were all removed. (These additional API layers
+      no longer made as much sense with only one induced method (1m) being
+      supported.) The bli_ind.c file (and header) were moved to frame/base
+      and bli_l3_ind.c (and header) and bli_l3_ind_tapi.h were moved to
+      frame/3.
+    - Removed 3m/4m support from the code in frame/1m/packm.
+    - Removed 3m/4m support from trmm/trsm macrokernels and simplified some
+      pointer arithmetic that was previously expressed in terms of the
+      bli_ptr_inc_by_frac() static inline function (whose definition was
+      also removed).
+    - Removed the following subdirectories of level-0 macro headers from
+      frame/include/level0: ri3, rih, ri, ro, rpi. The level-0 scalar macros
+      defined in these directories were used exclusively for 3m and 4m
+      method codes.
+    - Simplified bli_cntx_set_blkszs() and bli_cntx_set_ind_blkszs() in
+      light of 1m being the only induced method left within BLIS.
+    - Removed dt_on_output field within auxinfo_t and its associated
+      accessor functions.
+    - Re-indexed the 1e/1r pack schemas after removing those associated with
+      variants of the 3m and 4m methods. This leaves two bits unused within
+      the pack format portion of the schema bitfield. (See bli_type_defs.h
+      for more info.)
+    - Spun off the basic and expert interfaces to the object and typed APIs
+      into separate files: bli_l3_oapi.c and bli_l3_oapi_ex.c; bli_l3_tapi.c
+      and bli_l3_tapi_ex.c.
+    - Moved the level-3 operation-specific _check function calls from the
+      operations' _front() functions to the corresponding _ex() function of
+      the object API. (This change roughly maintains where the _check()
+      functions are called in the call stack but lays the groundwork for
+      future changes that may come to the level-3 object APIs.) Minor
+      modifications to bli_l3_check.c to allow the check() functions to be
+      called from the expert interface APIs.
+    - Removed support within the testsuite for testing the aforementioned
+      induced methods, and updated the standalone test drivers in the 'test'
+      directory so reflect the retirement of those induced methods.
+    - Modified the sandbox contract so that the user is obliged to define
+      bli_gemm_ex() instead of bli_gemmnat(). (This change was made in light
+      of the *nat() functions no longer existing.) Also updated the existing
+      'power10' and 'gemmlike' sandboxes to come into compliance with the
+      new sandbox rules.
+    - Updated BLISObjectAPI.md, BLISTypedAPI.md, Testsuite.md documentation
+      to reflect the retirement of 3m/4m, and also modified Sandboxes.md to
+      bring the document into alignment with new conventions.
+    - Updated various comments; removed segments of commented-out code.
+
+commit e8caf200a908859fa5f5ea2049911a9bdaa3d270
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Oct 18 13:04:15 2021 -0500
+
+    Updated do_sde.sh to get SDE from GitHub.
+    
+    Details:
+    - Updated travis/do_sde.sh so that the script downloads the SDE tarball
+      from a new ci-utils repository on GitHub rather than from Intel's
+      website. This change is being made in an attempt to circumvent Travis
+      CI's recent troubles with downloading the SDE from Intel's website via
+      curl. Thanks to Devin Matthews for suggesting the idea.
+
+commit 290ff4b1c26737b074d5abbf76966bc22af8c562
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 14 16:09:43 2021 -0500
+
+    Disable SDE testing of old AMD microarchitectures.
+    
+    Details:
+    - Skip testing on piledriver, steamroller, and excavator platforms
+      in travis/do_sde.sh.
+
+commit 514fd101742dee557e5eb43d0023a221ae8a7172
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Oct 14 13:50:28 2021 -0500
+
+    Fixed substitution bug in configure.
+    
+    Details:
+    - Fixed a bug in configure related to the building of the so-called
+      config list. When processing the contents of config_registry,
+      configure creates a series of structures and list that allow for
+      various mappings related to configuration families, subconfigs,
+      and kernel sets. Two of those lists are built via subsitituion
+      of umbrella families with their subconfig members, and one of
+      those lists was improperly performing the subtitution in a way
+      that would erroneously match on partial umbrella family names.
+      That code was changed to match the code that was already doing
+      the subtitution properly, via substitute_words().
+    - Added comments noting the importance of using substitute_words()
+      in both instances.
+
+commit e9da6425e27a9d63c9fef92afc2dd750c601ccd7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Oct 13 14:15:38 2021 -0500
+
+    Allow use of 1m with mixing of row/col-pref ukrs.
+    
+    Details:
+    - Fixed a bug that broke the use of 1m for dcomplex when the single-
+      precision real and double-precision real ukernels had opposing I/O
+      preferences (row-preferential sgemm ukernel + column-preferential
+      dgemm ukernel, or vice versa). The fix involved adjusting the API
+      to bli_cntx_set_ind_blkszs() so that the induced method context init
+      function (e.g., bli_cntx_init_<subconfig>_ind()) could call that
+      function for only one datatype at a time. This allowed the blocksize
+      scaling (which varies depending on whether we're doing 1m_r or 1m_c)
+      to happen on a per-datatype basis. This fixes issue #557. Thanks to
+      Devin Matthews and RuQing Xu for helping discover and report this bug.
+    - The aforementioned 1m fix required moving the 1m_r/1m_c logic from
+      bli_cntx_ref.c into a new function, bli_l3_set_schemas(), which is
+      called from each level-3 _front() function. The pack_t schemas in the
+      cntx_t were also removed entirely, along with the associated accessor
+      functions. This in turn required updating the trsm1m-related virtual
+      ukernels to read the pack schema for B from the auxinfo_t struct
+      rather than the context. This also required slight tweaks to
+      bli_gemm_md.c.
+    - Repositioned the logic for transposing the operation to accommodate
+      the microkernel IO preference. This mostly only affects gemm. Thanks
+      to Devin Matthews for his help with this.
+    - Updated dpackm pack ukernels in the 'armsve' kernel set to avoid
+      querying pack_t schemas from the context.
+    - Removed the num_t dt argument from the ind_cntx_init_ft type defined
+      in bli_gks.c. The context initialization functions for induced methods
+      were previously passed a dt argument, but I can no longer figure out
+      *why* they were passed this value. To reduce confusion, I've removed
+      the dt argument (including also from the function defintion +
+      prototype).
+    - Commented out setting of cntx_t schemas in bli_cntx_ind_stage.c. This
+      breaks high-leve implementations of 3m and 4m, but this is okay since
+      those implementations will be removed very soon.
+    - Removed some older blocks of preprocessor-disabled code.
+    - Comment update to test_libblis.c.
+
+commit 81e103463214d589071ccbe2d90b8d7c19a186e4
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Wed Oct 13 20:28:02 2021 +0200
+
+    Alloc at least 1 elem in pool_t block_ptrs. (#560)
+    
+    Details:
+    - Previously, the block_ptrs field of the pool_t was allowed to be
+      initialized as any unsigned integer, including 0. However, a length of
+      0 could be problematic given that malloc(0) is undefined and therefore
+      variable across implementations. As a safety measure, we check for
+      block_ptrs array lengths of 0 and, in that case, increase them to 1.
+    - Co-authored-by: Minh Quan Ho <minh-quan.ho@kalray.eu>
+
+commit 327481a4b0acf485d0cbdd8635dd9b886ba3f2a7
+Author: Minh Quan Ho <1337056+hominhquan@users.noreply.github.com>
+Date:   Tue Oct 12 19:53:04 2021 +0200
+
+    Fix insufficient pool-growing logic in bli_pool.c. (#559)
+    
+    Details:
+    - The current mechanism for growing a pool_t doubles the length of the
+      block_ptrs array every time the array length needs to be increased
+      due to new blocks being added. However, that logic did not take in
+      account the new total number of blocks, and the fact that the caller
+      may be requesting more blocks that would fit even after doubling the
+      current length of block_ptrs. The code comments now contain two
+      illustrating examples that show why, even after doubling, we must
+      always have at least enough room to fit all of the old blocks plus
+      the newly requested blocks.
+    - This commit also happens to fix a memory corruption issue that stems
+      from growing any pool_t that is initialized with a block_ptrs length
+      of 0. (Previously, the memory pool for packed buffers of C was
+      initialized with a block_ptrs length of 0, but because it is unused
+      this bug did not manifest by default.)
+    - Co-authored-by: Minh Quan Ho <minh-quan.ho@kalray.eu>
+
+commit 32a6d93ef6e2af5e486dfd5e46f8272153d3d53d
+Merge: 408906fd 2604f407
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Oct 9 15:53:54 2021 -0500
+
+    Merge pull request #543 from xrq-phys/armsve-packm-fix
+    
+    ARMSVE Block SVE-Intrinsic Kernels for GCC 8-9
+
+commit 408906fdd8892032aa11bd061b7971128f453bef
+Merge: 4277fec0 ccf16289
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Oct 9 15:50:25 2021 -0500
+
+    Merge pull request #542 from xrq-phys/armsve-zgemm
+    
+    Arm SVE CGEMM / ZGEMM Natural Kernels
+
+commit ccf16289d2e71fd9511ccf2d13dcebbfa29deabc
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Oct 8 12:34:14 2021 +0900
+
+    Arm SVE C/ZGEMM Fix FMOV 0 Mistake
+    
+    FMOV [hsd]M, #imm does not allow zero immediate.
+    Use wzr, xzr instead.
+
+commit 82b61283b2005f900101056e6df2a108258db602
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Oct 8 12:17:29 2021 +0900
+
+    SH Kernel Unused Eigher
+
+commit 1749dfa493054abd2e4ddba7cb21278d337e4f74
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Oct 8 12:11:53 2021 +0900
+
+    Arm SVE C/ZGEMM Support *beta==0
+
+commit 4b648e47daad256ab8ab698173a97f71ab9f75eb
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Sep 22 16:42:09 2021 +0900
+
+    Arm SVE Config armsve Use ZGEMM/CGEMM
+
+commit f76ea905e216cf640975e6319c6d2f54aeafed2e
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Tue Sep 21 20:38:44 2021 +0900
+
+    Arm SVE: Update Perf. Graph
+    
+    Pic. size seems a bit different from upstream.
+    Generaged w/ MATLAB. Open to any change.
+
+commit 66a018e6ad00d9e8967b67e1aa3e23b20a7efdfe
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Sep 20 00:16:11 2021 +0900
+
+    Arm SVE CGEMM 2Vx10 Unindex Process Alpha=1.0
+
+commit 9e1e781cb59f8fadb2a10a02376d3feac17ce38d
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sun Sep 19 23:30:42 2021 +0900
+
+    Arm SVE ZGEMM 2Vx10 Unindex Process Alpha=1.0
+
+commit f7c6c2b119423e7ba7a24ae2156790e076071cba
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 01:47:42 2021 +0900
+
+    A64FX Config Use ZGEMM/CGEMM
+
+commit e4cabb977d038688688aca39b366f98f9c36b7eb
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 01:34:26 2021 +0900
+
+    Arm SVE Typo Fix ZGEMM/CGEMM C Prefetch Reg
+
+commit b677e0d61b23f26d9536e5c363fd6bbab6ee1540
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 01:18:54 2021 +0900
+
+    Arm SVE Add SGEMM 2Vx10 Unindexed
+
+commit 3f68e8309f2c5b31e25c0964395a180a80014d36
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 01:00:54 2021 +0900
+
+    Arm SVE ZGEMM Support Gather Load / Scatt. St.
+
+commit c19db2ff826e2ea6ac54569e8aa37e91bdf7cabe
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Sep 15 23:39:53 2021 +0900
+
+    Arm SVE Add ZGEMM 2Vx10 Unindexed
+
+commit e13abde30b9e0e381c730c496e74bc7ae062a674
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Sep 15 04:19:45 2021 +0900
+
+    Arm SVE Add ZGEMM 2Vx7 Unindexed
+
+commit 49b9d7998eb86f340ae7b26af3e5a135d6a8feee
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Tue Sep 14 04:02:47 2021 +0900
+
+    Arm SVE Add ZGEMM 2Vx8 Unindexed
+
+commit 4277fec0d0293400497ae8bcfc32be5e62319ae9
+Merge: 2329d990 f44149f7
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Oct 7 13:47:22 2021 -0500
+
+    Merge pull request #533 from xrq-phys/arm64-hi-bw
+    
+    ARMv8 PACKM and GEMMSUP Kernels + Apple Firestorm Subconfig
+
+commit 2329d99016fe1aeb86da4552295f497543cea311 (origin/1m_row_col_problem)
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Oct 7 12:37:58 2021 -0500
+
+    Update Travis CI badge
+    
+    [ci skip]
+
+commit f44149f787ae3d4b53d9c4d8e6f23b2818b7770d
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Oct 8 02:35:58 2021 +0900
+
+    Armv8 Trash New Bulk Kernels
+    
+    - They didn't make much improvements.
+    - Can't register row-preferral and column-preferral ukrs at the same time.
+      Will break 1m.
+
+commit 70b52cadc5ef4c16431e1876b407019e6286614e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Oct 7 12:34:35 2021 -0500
+
+    Enable testing 1m in `make check`.
+
+commit 2604f4071300d109f28c8438be845aeaf3ec44e4
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 02:39:00 2021 +0900
+
+    Config ArmSVE Unregister 12xk. Move 12xk to Old
+
+commit 1e3200326be9109eb0f8c7b9e4f952e45700cbba
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 02:37:14 2021 +0900
+
+    Revert __has_include(). Distinguish w/ BLIS_FAMILY_**
+
+commit a4066f278a5c06f73b16ded25f115ca4b7728ecb
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 02:26:05 2021 +0900
+
+    Register firestorm into arm64 Metaconfig
+
+commit d7a3372247c37568d142110a1537632b34b8f2ff
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 02:25:14 2021 +0900
+
+    Armv8 DGEMMSUP Fix Edge 6x4 Switch Case Typo
+
+commit 2920dde5ac52e09f84aa42990aab8340421522ce
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 02:01:45 2021 +0900
+
+    Armv8 DGEMMSUP Fix 8x4m Store Inst. Typo
+
+commit 14b13583f1802c002e195b3b48874b3ebadbeb20
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Oct 6 10:22:34 2021 -0500
+
+    Add test for Apple M1 (firestorm)
+    
+    This test will run on Linux, but all the kernels should run just fine. This does not test autodetection but then none of the other ARM tests do either.
+
+commit a024715065532400da6257b8b3124ca5aecda405
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Oct 7 00:15:54 2021 +0900
+
+    Firestorm CPUID Dispatcher
+    
+    Commenting out <sys/sysctl.h> due to possibly a Xcode bug.
+
+commit b9da6d55fec447d05c8b67f34ce83617123d8357
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Oct 6 12:25:54 2021 +0900
+
+    Armv8 GEMMSUP Edge Cases Require Signed Ints
+    
+    Fix a bug in bli_gemmsup_rd_armv8a_asm_d6x8m.c.
+    For safety upon similar strategies in the future,
+     change all [mn]_[iter/left] into signed ints.
+
+commit 34919de3df5dda7a06fc09dcec12ca46dc8b26f4
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Oct 2 18:48:50 2021 -0500
+
+    Make error checking level a thread-local variable.
+    
+    Previously, this was a global variable. Setting the value was synchronized via a mutex but reading the value was not. Of course, these accesses are almost certainly atomic, but there is still the possibility of one thread attempting to set the value and then reading the value set by another thread. For correct operation under user threading (e.g. pthreads), this should probably be thread-local with no mutex.
+
+commit c3024993c3d50236fad112822215f066496c5831
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 5 15:20:27 2021 -0500
+
+    Fix data race in testsuite.
+
+commit 353a0d82572f26e78102cee25693130ce6e0ea5b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Oct 5 14:24:17 2021 -0500
+
+    Update .appveyor.yml
+    
+    [ci skip]
+
+commit 4bfadf9b561d4ebe0bbaf8b6d332f07ff531d618
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Oct 6 01:51:26 2021 +0900
+
+    Firestorm Block Size Fixes
+
+commit 40baf83f0ea2749199b93b5a8ac45c01794b008c
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Oct 6 01:00:52 2021 +0900
+
+    Armv8 Handle *beta == 0 for GEMMSUP ??r Case.
+
+commit 079fbd42ce8cf7ea67a939b0f80f488de5821319
+Merge: f5c03e9f 9905f443
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 17:21:48 2021 -0500
+
+    Merge branch 'master' into arm64-hi-bw
+
+commit 9905f44347eea4c57ef4927b81f1c63e76a92739
+Merge: 6d3036e3 64a421f6
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 15:58:59 2021 -0500
+
+    Merge pull request #553 from flame/rpath-fix
+    
+    Add an option to use an @rpath-dependent install_name on macOS
+
+commit 6d3036e31d8a2c1acbc1260489eeb8f535a8f97a
+Merge: 53377fcc eaa554aa
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 15:58:43 2021 -0500
+
+    Merge pull request #545 from hominhquan/clean_error
+    
+    bli_error: more cleanup on the error strings array
+
+commit 53377fcca91e595787b38e2a47780ac0c35a7e7c
+Merge: d0a0b4b8 80c5366e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 15:45:53 2021 -0500
+
+    Merge pull request #554 from flame/armsve-cleanup
+    
+    Move unused ARM SVE kernels to "old" directory.
+
+commit 80c5366e4a9b8b72d97fba1eab89bab8989c44f4
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 15:40:28 2021 -0500
+
+    Move unused ARM SVE kernels to "old" directory.
+
+commit 64a421f6983ab5bc0b55df30a2ddcfff5bfd73be
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 13:40:43 2021 -0500
+
+    Add an option to control whether or not to use @rpath.
+    
+    Adds `--enable-rpath/--disable--rpath` (default disabled) to use an install_name starting with @rpath/. Otherwise, set the install_name to the absolute path of the install library, which was the previous behavior.
+
+commit c4a31683dd6f4da3065d86c11dd998da5192740a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 13:27:10 2021 -0500
+
+    Fix $ORIGIN usage on linux.
+
+commit d0a0b4b841fce56b7b2d3c03c5d93ad173ce2b97
+Author: Dave Love <dave.love@manchester.ac.uk>
+Date:   Mon Oct 4 18:03:04 2021 +0000
+
+    Arm micro-architecture dispatch (#344)
+    
+    Details:
+    - Reworked support for ARM hardware detection in bli_cpuid.c to parse
+      the result of a CPUID-like instruction.
+    - Added a64fx support to bli_gks.c.
+    - #include arm64 and arm32 family headers from bli_arch_config.h.
+    - Fix the ordering of the "armsve" and "a64fx" strings in the
+      config_name string array in bli_arch.c. The ordering did not match
+      the ordering of the corresponding arch_t values in bli_type_defs.h,
+      as it should have all along.
+    - Added clang support to make_defs.mk in arm64, cortexa53, cortexa57
+      subconfigs.
+    - Updated arm64 and arm32 families in config_registry.
+    - Updated docs/HardwareSupport.md to reflect added ARM support.
+    - Thanks to Dave Love, RuQing Xu, and Devin Matthews for their
+      contributions in this PR (#344).
+
+commit 91408d161a2b80871463ffb6f34c455bdfb72492
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Oct 4 11:37:48 2021 -0500
+
+    Use @path-based install name on MacOS and use relocatable RPATH entries for testsuite inaries.
+    
+    - RPATH entries (and DYLD_LIBRARY_PATH) do nothing on macOS unless the install_name of the library starts with @rpath/. While the install_name can be set to the absolute install path, this makes the installation non-relocatable. When using @path in the install_name, install paths within the normal DYLD_LIBRARY_PATH work with no changes on the user side, but for install paths off the beaten track, users must specify an RPATH entry when linking (or modify DYLD_LIBRARY_PATH at runtime). Perhaps this could be made into a configure-time option.
+    - Having relocable testsuite binaries is not necessarily a priority but it is easy to do with @executable_path (macOS) or $ORIGIN (linux/BSD).
+
+commit f5c03e9fe808f9bd8a3e0c62786334e13c46b0fc
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sun Oct 3 16:51:51 2021 +0900
+
+    Armv8 Handle *beta == 0 for GEMMSUP ?rc Case.
+
+commit abc648352c591e26ceee436bd3a45400115b70c5
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sun Oct 3 13:14:19 2021 +0900
+
+    Armv8 Fix 6x8 Row-Maj Ukr
+    
+    - Fixed for 6x8 only, 4x4 & 4x8 pending;
+    - Installed to config firestorm as benchmark seems to show better perf:
+       Old:
+    blis_dgemm_ukr_c                     6     8   320    36.87   2.43e-17   PASS
+    blis_dgemm_ukr_c                     6     8   352    40.55   1.04e-17   PASS
+    blis_dgemm_ukr_c                     6     8   384    44.24   5.68e-17   PASS
+    blis_dgemm_ukr_c                     6     8   416    41.67   3.51e-17   PASS
+    blis_dgemm_ukr_c                     6     8   448    34.41   2.94e-17   PASS
+    blis_dgemm_ukr_c                     6     8   480    42.53   2.35e-17   PASS
+    
+       New:
+    blis_dgemm_ukr_r                     6     8   352    50.69   1.59e-17   PASS
+    blis_dgemm_ukr_r                     6     8   384    49.15   5.55e-17   PASS
+    blis_dgemm_ukr_r                     6     8   416    50.44   2.86e-17   PASS
+    blis_dgemm_ukr_r                     6     8   448    46.92   3.12e-17   PASS
+    blis_dgemm_ukr_r                     6     8   480    48.08   4.08e-17   PASS
+
+commit 0a45bc0fbc7aee3876c315ed567fc37f19cdc57f
+Merge: 5013a6cb 13dbd5b5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Oct 2 18:59:43 2021 -0500
+
+    Merge pull request #552 from flame/armsve_beta_0
+    
+    Add explicit handling for beta == 0 in armsve sd and armv7a d gemm ukrs.
+
+commit 13dbd5b5d3dbf27e33ecf0e98d43c97019a6339d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Oct 2 20:40:25 2021 +0000
+
+    Apply patch from @xrq-phys.
+
+commit ae0eeeaf77c77892db17027cef10b95ec97c904f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Sep 29 16:42:33 2021 -0500
+
+    Add explicit handling for beta == 0 in armsve sd and armv7a d gemm ukrs.
+
+commit 5013a6cb7110746c417da96e4a1308ef681b0b88
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Sep 29 10:38:50 2021 -0500
+
+    More edits and fixes to docs/FAQ.md.
+
+commit b36fb0fbc5fda13d9a52cc64953341d3d53067ee
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 28 18:47:45 2021 -0500
+
+    Fixed newly broken link to CREDITS in FAQ.md.
+
+commit 3442d4002b3bfffd8848f72103b30691df2b19b1
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 28 18:43:23 2021 -0500
+
+    More minor fixes to FAQ.md and Sandboxes.md.
+
+commit 89aaf00650d6cc19b83af2aea6c8d04ddd3769cb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 28 18:34:33 2021 -0500
+
+    Updates to FAQ.md, Sandboxes.md, and README.md.
+    
+    Details:
+    - Updated FAQ.md to include two new questions, reordered an existing
+      question, and also removed an outdated and redundant question about
+      BLIS vs. AMD BLIS.
+    - Updated Sandboxes.md to use 'gemmlike' as its main example, along with
+      other smaller details.
+    - Added ARM as a funder to README.md.
+
+commit c52c43115ec2264fda9380c48d9e6bb1e1ea2ead
+Merge: 1fc23d21 1f527a93
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Sep 26 15:56:54 2021 -0500
+
+    Merge branch 'dev'
+
+commit 1fc23d2141189c7b583a5bff2cffd87fd5261444
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Sep 21 14:54:20 2021 -0500
+
+    Safelist 'master', 'dev', 'amd' branches.
+    
+    Details:
+    - Modified .travis.yml so that only commits to 'master', 'dev', and
+      'amd' branches get built by Travis CI. Thanks to Devin Matthews for
+      helping to track down the syntax for this change.
+
+commit 1f527a93b996093e06ef7a8e94fb47ee7e690ce0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 20 17:56:36 2021 -0500
+
+    Re-enable and fix fb93d24.
+    
+    Details:
+    - Re-enabled the changes made in fb93d24.
+    - Defined BLIS_ENABLE_SYSTEM in bli_arch.c, bli_cpuid.c, and bli_env.c,
+      all of which needed the definition (in addition to config_detect.c) in
+      order for the configure-time hardware detection binary to be compiled
+      properly. Thanks to Minh Quan Ho for helping identify these additional
+      files as needing to be updated.
+    - Added additional comments to all four source files, most notably to
+      prompt the reader to remember to update all of the files when updating
+      any of the files. Also made the cpp code in each of the files as
+      consistent/similar as possible.
+    - Refer to issues #532 and PR #546 for more history.
+
+commit 7b39c1492067de941f81b49a3b6c1583290336fd
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 20 16:13:50 2021 -0500
+
+    Reverted fb93d24.
+    
+    Details:
+    - The latest changes in fb93d24 are still causing problems. Reverting
+      and preparing to move them to a branch.
+
+commit fb93d242a4fef4694ce2680436da23087bbdd5fe
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Sep 20 15:42:08 2021 -0500
+
+    Re-enable and fix 8e0c425 (BLIS_ENABLE_SYSTEM).
+    
+    Details:
+    - Re-enable the changes originally made in 8e0c425 but quickly reverted
+      in 2be78fc.
+    - Moved the #include of bli_config.h so that it occurs before the
+      #include of bli_system.h. This allows the #define BLIS_ENABLE_SYSTEM
+      or #define BLIS_DISABLE_SYSTEM in bli_config.h to be processed by the
+      time it is needed in bli_system.h. This change should have been
+      in the original 8e0c425, but was accidentally omitted. Thanks to Minh
+      Quan Ho for catching this.
+    - Add #define BLIS_ENABLE_SYSTEM to config_detect.c so that the proper
+      cpp conditional branch executes in bli_system.h when compiling the
+      hardware detection binary. The changes made in 8e0c425 were an attempt
+      to support the definition of BLIS_OS_NONE when configuring with
+      --disable-system (in issue #532).  That commit failed because, aside
+      from the required but omitted header reordering (second bullet above),
+      AppVeyor was unable to compile the hardware detection binary as a
+      result of missing Windows headers. This commit, which builds on PR
+      #546, should help fix that issue. Thanks to Minh Quan Ho for his
+      assistance and patience on this matter.
+
+commit eaa554aa52b879d181fdc87ba0bfad3ab6131517
+Author: Minh Quan HO <minh-quan.ho@kalray.eu>
+Date:   Wed Sep 15 15:39:36 2021 +0200
+
+    bli_error: more cleanup on the error strings array
+    
+    - There was redundance between the macro BLIS_MAX_NUM_ERR_MSGS (=200) and
+      the enum BLIS_ERROR_CODE_MAX (-170), while they both mean the same thing:
+      the maximal number of error codes/messages.
+    - The previous initialization of error messages at compile time ignored that
+      the 'bli_error_string' array still occupies useless memory due to 2D char[][]
+      declaration. Instead, it should be just an array of pointers, pointing at
+      strings in .rodata section.
+    - This commit does the two modifications:
+       * retired macros BLIS_MAX_NUM_ERR_MSGS and BLIS_MAX_ERR_MSG_LENGTH everywhere
+       * switch bli_error_string from char[][] to char *[] to reduce its footprint
+         from 40KB (200*200) to 1.3KB (170*sizeof(char*)).
+         (No problem to use the enum BLIS_ERROR_CODE_MAX at compile-time,
+         since compiler is smart enough to determine its value is 170.)
+
+commit 52f29f739dbbb878c4cde36dbe26b82847acd4e9
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Sep 17 08:38:29 2021 -0500
+
+    Removed last vestige of #define BLIS_NUM_ARCHS.
+    
+    Details:
+    - Removed the commented-out #define BLIS_NUM_ARCHS in bli_type_defs.h
+      and its associated (now outdated) comments. BLIS_NUM_ARCHS has been
+      part of the arch_t enum for some time now, and so this change is
+      mostly about removing any opportunity for confusion for people who
+      may be reading the code. Thanks to Minh Quan Ho for leading me to
+      cleanup.
+
+commit 849aae09f4fbf8d7abf11f4df1471f1d057e874b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Sep 16 14:47:45 2021 -0500
+
+    Added new packm var3 to 'gemmlike'.
+    
+    Details:
+    - Defined a new packm variant for the 'gemmlike' sandbox. This new
+      variant (bls_l3_packm_var3.c) parallelizes the packing operation over
+      the k dimension rather than the m or n dimensions. Note that the
+      gemmlike implementation still uses var1 by default, and use of the new
+      code would require changing bls_l3_packm_a.c and/or bls_l3_packm_b.c
+      so that var3 is called instead. Thanks to Jeff Diamond for proposing
+      this (perhaps NUMA-friendly) solution.
+
+commit b6f71fd378b7cd0cdc5c780e0b8c975a7abde998
+Merge: 9293a68e e3dc1954
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Sep 16 12:24:33 2021 -0500
+
+    Merge pull request #544 from flame/haswell-gemmsup-fpe
+    
+    Fix more copy-paste errors in the haswell gemmsup code.
+
+commit e3dc1954ffb5eee2a8b41fce85ba589f75770eea
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Sep 16 10:59:37 2021 -0500
+
+    Fix problem where uninitialized registers are included in vhaddpd in the Mx1 gemmsup kernels for haswell.
+    
+    The fix is to use the same (valid) source register twice in the horizontal addition.
+
+commit 5191c43faccf45975f577c60b9089abee25722c9
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Sep 16 10:16:17 2021 -0500
+
+    Fix more copy-paste errors in the haswell gemmsup code.
+    
+    Fixes #486.
+
+commit 30c29b256ef13f0141ca9e9169cbdc7a45ce3a61
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 05:01:03 2021 +0900
+
+    Arm SVE Exclude SVE-Intrinsic Kernels for GCC 8-9
+    
+    Affected configs: a64fx.
+
+commit bffa85be59dece8e756b9444e762f18892c06ee1
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Sep 16 04:31:45 2021 +0900
+
+    Arm SVE: Correct PACKM Ker Name: Intrinsic Kers
+    
+    SVE-Intrinsic-based kernels ought not to use asm in their names.
+
+commit 9293a68eb6557a9ea43a846435908c3d52d4218b
+Merge: ade10f42 98ce6e8b
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 14:13:29 2021 -0500
+
+    Merge pull request #534 from flame/cxx_test
+    
+    Add test to Travis using C++ compiler to make sure blis.h is C++-compatible
+
+commit 98ce6e8bc916e952510872caa60d818d62a31e69
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 14:12:13 2021 -0500
+
+    Do a fast test on OSX. [ci skip]
+
+commit c76fcad0c2836e7140b6bef3942e0a632a5f2cda
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 13:57:02 2021 -0500
+
+    Fix AArch64 tests and consolidate some other tests.
+
+commit e486d666ffefee790d5e39895222b575886ac1ea
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 13:50:16 2021 -0500
+
+    Use C++ cross-compiler for ARM tests.
+
+commit fbb3560cb8e2aeab205c47c2b096d4fa306d93db
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 13:38:27 2021 -0500
+
+    Attempt to fix cxx-test for OOT builds.
+
+commit 9c0064f3f67d59263c62d57ae19605562bb87cc2
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Sep 10 10:39:04 2021 -0500
+
+    Fix config_name in bli_arch.c
+
+commit ade10f427835d5274411cafc9618ac12966eb1e7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 27 12:47:12 2021 -0500
+
+    Updated travis-ci.org link in README.md to .com.
+
+commit 2be78fc97777148c83d20b8509e38aa1fc1b4540
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 27 12:17:26 2021 -0500
+
+    Disabled (at least temporarily) commit 8e0c425.
+    
+    Details:
+    - Reverted changes in 8e0c425 due to AppVeyor build failures that we do
+      not yet understand.
+
+commit 820f11a4694aee5f234e24277aecca40885ae9d4
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Aug 27 13:40:26 2021 +0900
+
+    Arm Whole GEMMSUP Call Route is Asm/Int Optimized
+    
+    - `ref2` call in `bli_gemmsup_rv_armv8a_asm_d6x8m.c` is commented out.
+    - `bli_gemmsup_rv_armv8a_asm_d4x8m.c` contains a tail `ref2` call but
+      it's not called by any upper routine.
+
+commit 8e0c4255de52a0a5cffecbebf6314aa52120ebe4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 26 15:29:18 2021 -0500
+
+    Define BLIS_OS_NONE when using --disable-system.
+    
+    Details:
+    - Modified bli_system.h so that the cpp macro BLIS_OS_NONE is defined
+      when BLIS_DISABLE_SYSTEM is defined. Otherwise, the previous OS-
+      detecting macro conditionals are considered. This change is to
+      accommodate a solution to a cross-compilation issue described in
+      #532.
+
+commit d6eb70fbc382ad7732dedb4afa01cf9f53e3e027
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 26 13:12:39 2021 -0500
+
+    Updated stale calls to malloc_intl() in gemmlike.
+    
+    Details:
+    - Updated two out-of-date calls to bli_malloc_intl() within the gemmlike
+      sandbox. These calls to malloc_intl(), which resided in
+      bls_l3_decor_pthreads.c, were missing the err_t argument that the
+      function uses to report errors. Thanks to Jeff Diamond for helping
+      isolate this issue.
+
+commit 2f7325b2b770a15ff8aaaecc087b22238f0c67b7
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 23 15:04:05 2021 -0500
+
+    Blacklist clang10/gcc9 and older for 'armsve'.
+    
+    Details:
+    - Prohibit use of clang 10.x and older or gcc 9.x and older for the
+      'armsve' subconfiguration. Addresses issue #535.
+
+commit 7e2951e61fda1c325d6a76ca9956253482d84924
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Aug 23 17:06:44 2021 +0900
+
+    Arm: DGEMMSUP `Macro' Edge Cases Stop Calling Ref
+    
+    Ref cannot handle panel strides (packed cases) thus cannot be called
+    from the beginning of `gemmsup` (i.e. cannot be dispatch target of
+    gemmsup to other sizes.)
+
+commit 4fd82b0e9348553d83e258bd4969e49a81f8fcf0
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Aug 23 05:18:32 2021 +0900
+
+    Header Typo
+
+commit 35409ebe67557c0e7cf5ced138c8166c9c1c909f
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Aug 23 04:51:47 2021 +0900
+
+    Arm: DGEMMSUP ??r(rv) Invoke Edge Size
+    
+    Plus some fix at edges.
+    
+    TODO: Should ensure that no ref kernel appear in beginning of gemmsup
+    kernels. As ref does not recognise panel stride.
+
+commit a361492c24fdd919ee037763fc6523e8d7d2967a
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Mon Aug 23 01:13:39 2021 +0900
+
+    Arm: DGEMMSUP ?rc(rd) Invoke Edge Size
+
+commit eaea67401c2ab31f2e51eede59725f64c1a21785
+Merge: 5fc65cdd e320ec6d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Aug 21 16:09:31 2021 -0500
+
+    Merge branch 'master' into cxx_test
+
+commit 5fc65cdd9e4134c5dcb16d21cd4a79ff426ca9f3
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Aug 21 15:59:27 2021 -0500
+
+    Add test to Travis using C++ compiler to make sure blis.h is C++-compatible.
+
+commit e320ec6d5cd44e03cb2e2faa1d7625e84f76d668
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 20 17:15:20 2021 -0500
+
+    Moved lang defs from _macro_def.h to _lang_defs.h.
+    
+    Details:
+    - Moved miscellaneous language-related definitions, including defs
+      related to the handling of the 'restrict' keyword, from the top half
+      of bli_macro_defs.h into a new file, bli_lang_defs.h, which is now
+      #included immediately after "bli_system.h" in blis.h. This change is
+      an attempt to fix a report of recent breakage of C++ compilers due
+      to the recent introduction of 'restrict' in bli_type_defs.h (which
+      previously was being included *before* bli_macro_defs.h and its
+      restrict handling therein. Thanks to Ivan Korostelev for reporting
+      this issue in #527.
+    - CREDITS file update.
+
+commit e6799b26a6ecf1e80661a77d857d1c9e9adf50dc
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Aug 21 02:39:38 2021 +0900
+
+    Arm: Implement GEMMSUP Fallback Method
+    
+    bli_dgemmsup_rv_armv8a_int_6x4mn
+
+commit 7d5903d8d7570090eb37c592094424d1c64805d1
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Aug 21 01:55:50 2021 +0900
+
+    Arm64 Fix: Support Alpha/Beta in GEMMSUP Intrin
+    
+    Forgot to support `alpha`/`beta` in gemmsup_armv8a_int.
+
+commit 3b275f810b2479eb5d6cf2296e97a658cf1bb769
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 19 16:06:46 2021 -0500
+
+    Minor tweaks to gemmlike sandbox.
+    
+    Details:
+    - In the gemmlike sandbox, changed the loop index variable of inner
+      loop of packm_cxk() from 'd' to 'i' (and likewise for the
+      corresponding inlined code within packm_var2()).
+    - Pack matrices A and B using packm_var1() instead of packm_var2().
+
+commit 3eccfd456e7e84052c9a429dcde1183a7ecfaa48
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 19 13:22:10 2021 -0500
+
+    Added local _check() code to gemmlike sandbox.
+    
+    Details:
+    - Added code to the gemmlike sandbox that handles parameter checking.
+      Previously, the gemmlike implementation called bli_gemm_check(), which
+      resides within the BLIS framework proper. Certain modifications that a
+      user may wish to perform on the sandbox, such as adding a new matrix
+      or vector operand, would have required additional checks, and so these
+      changes make it easier for such a person to implement those checks for
+      their custom gemm-like operation.
+
+commit 7144230cdb0653b70035ddd91f7f41e06ad8d011
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 18 13:25:39 2021 -0500
+
+    README.md citation updates (e.g. BLIS7 bibtex).
+
+commit 4a955e939044cfd2048cf9f3e33024e3ad1fbe00
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Aug 16 13:49:27 2021 -0500
+
+    Tweaks to gemmlike to facilitate 3rd party mods.
+    
+    Details:
+    - Changed the implementation in the 'gemmlike' sandbox to more easily
+      allow others to provide custom implementations of packm. These changes
+      include:
+      - Calling a local version of packm_cxk() that can be modified. This
+        version of packm_cxk() uses inlined loops in packm_cxk() rather
+        than querying the context for packm kernels (or even using scal2m).
+      - Providing two variants of packm, one of which calls the
+        aforementioned packm_cxk(), the other of which inlines the contents
+        of packm_cxk() into the variant itself, making it self-contained.
+        To switch from one to the other, simply change which function gets
+        called within bls_packm_a() and bls_packm_b().
+      - Simplified and cleaned up some variant names in both variants of
+        packm, relative to their parent code.
+
+commit 2c0b4150e40c83ea814f69ca766da74c19ed0a58
+Merge: c99fae50 4b8ed99d
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sat Aug 14 18:41:35 2021 -0500
+
+    Merge pull request #527 from flame/obj_t_makeover
+    
+    Implement proposed new function pointer fields for obj_t.
+
+commit 4b8ed99d926876fbf54c15468feae4637268eb6b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Aug 13 15:31:10 2021 -0500
+
+    Whitespace tweaks.
+
+commit c99fae50ac3de0b5380a085aeebebfe67a645407
+Merge: e6d68bc4 4f70eb79
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Aug 13 14:48:00 2021 -0500
+
+    Merge pull request #530 from flame/fix_clang_warnings
+    
+    Clean up some warnings that show up on clang/OSX.
+
+commit e6d68bc4fd0981bea90d7f045779cacfe53f6ae8
+Merge: 20a1c401 ec06b6a5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Aug 13 14:47:46 2021 -0500
+
+    Merge pull request #529 from flame/fix_make_check_dependencies
+    
+    Add dependency on the "flat" blis.h file for the BLIS and BLAS testuite objects.
+
+commit 1772db029e10e0075b5a59d3fb098487b1ad542a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Aug 13 14:46:35 2021 -0500
+
+    Add row- and column-strides for A/B in obj_ukr_fn_t.
+
+commit 4f70eb7913ad3ded193870361b6da62b20ec3823
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Aug 13 11:12:43 2021 -0500
+
+    Clean up some warnings that show up on clang/OSX.
+
+commit 3cddce1e2a021be6064b90af30022b99cbfea986
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 12 22:32:34 2021 -0500
+
+    Remove schema field on obj_t (redundant) and add new API functions.
+
+commit ec06b6a503a203fa0cdb23273af3c0e3afeae7fa
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Aug 12 19:27:31 2021 -0500
+
+    Add dependency on the "flat" blis.h file for the BLIS and BLAS testsuite objects.
+    
+    This fixes a bug where "make -j<N> check" may fail after a change to one or more header files, or where testsuite code doesn't get properly recompiled after internal changes.
+
+commit 20a1c4014c999063e6bc1cfa605b152454c5cbf4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 12 14:44:04 2021 -0500
+
+    Disabled sanity check in bli_pool_finalize().
+    
+    Details:
+    - Disabled a sanity check in bli_pool_finalize() that was meant to alert
+      the user if a pool_t was being finalized while some blocks were still
+      checked out. However, this is exactly the situation that might happen
+      when a pool_t is re-initialized for a larger blocksize, and currently
+      bli_pool_reinit() is implemeneted as _finalize() followed by _init().
+      So, this sanity check is not universally appropriate. Thanks to
+      AMD-India for reporting this issue.
+
+commit e366665cd2b5ae8d7683f5ba2de345df0a41096f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 12 14:06:53 2021 -0500
+
+    Fixed stale API calls to membrk API in gemmlike.
+    
+    Details:
+    - Updated stale calls to the bli_membrk API within the 'gemmlike'
+      sandbox. This API is now called bli_pba (packed block allocator).
+      Ideally, this forgotten update would have been included as part of
+      21911d6, which is when the branch where the membrk->pba changes was
+      introduced was merged into 'master'.
+    - Comment updates.
+
+commit e38ca28689f31c5e5bd2347704dc33042e5ea176
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Aug 13 03:21:19 2021 +0900
+
+    Added Apple Firestorm (A14/M1) Subconfig
+    
+    - Use the same bulk kernel as Cortex-A53 / ThunderX2;
+    - Larger block size;
+    - Use gemmsup kernels for double precision.
+
+commit 3df0e9b653fbb1293cad93010273eea579e753d9
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jul 17 04:21:53 2021 +0900
+
+    Arm64 8x4 Kernel Use Less Regs
+
+commit 4e7e225057a05b9722ce65ddf75a9c31af9fbf36
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Jun 9 15:46:36 2021 +0900
+
+    Armv8-A Supplimentary GEMMSUP Sizes for RD
+
+commit c792d506ba09530395c439051727631fd164f59a
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jun 5 04:20:24 2021 +0900
+
+    Armv8-A Fix GEMMSUP-RD Kernels on GNU Asm
+    
+    Suffixed NEON opcode is not supported by GNU assembler
+
+commit ce4473520975c2c8790c82c65a69d75f8ad758ea
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jun 5 04:08:14 2021 +0900
+
+    Armv8-A Adjust Types for PACKM Kernels
+    
+    GCC does not have full NEON intrinsics support.
+
+commit 8a32d19af85b61af92fcab1c316fb3be1a8d42ce
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jun 5 03:31:30 2021 +0900
+
+    Armv8-A GEMMSUP-RD 6x8m
+    
+    Armv8-A now has a complete set of GEMMSUP kernels..
+
+commit afd0fa6ad1889ed073f781c8aa8635f99e76b601
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat Jun 5 01:19:01 2021 +0900
+
+    Armv8-A GEMMSUP-RD 6x8n
+
+commit 3c5f7405148ab142dee565d00da331d95a7a07b9
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Jun 4 21:50:51 2021 +0900
+
+    Armv8-A s/d Packing Kernels Fix Typo
+    
+    For GCC.
+
+commit 49b05df7929ec3abc0d27b475d2d406116fe2682
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Fri Jun 4 18:04:59 2021 +0900
+
+    Armv8-A Introduced s/d Packing Kernels
+    
+    Sizes according to the 2014 kernels.
+
+commit c3faf93168c3371ff48a2d40d597bdb27021cad4
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Jun 3 23:09:05 2021 +0900
+
+    Armv8-A DGEMMSUP 6x8m Kernel
+    
+    Recommended kernels set:
+      ...
+      BLIS_RRR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m, TRUE,
+      BLIS_RCR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m, TRUE,
+      BLIS_RCC, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n, TRUE,
+      BLIS_CRR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8m, TRUE,
+      BLIS_CCR, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n, TRUE,
+      BLIS_CCC, BLIS_DOUBLE, bli_dgemmsup_rv_armv8a_asm_6x8n, TRUE,
+      ...
+      bli_blksz_init     ( &blkszs[ BLIS_MR ],    -1,     6,    -1,    -1,
+                                                  -1,     8,    -1,    -1 );
+      bli_blksz_init_easy( &blkszs[ BLIS_NR ],    -1,     8,    -1,    -1 );
+      ...
+
+commit 3efe707b5500954941061d4c2363d6ed41d17233
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Jun 3 17:20:57 2021 +0900
+
+    Armv8-A DGEMMSUP Adjustments
+
+commit 8ed8f5e625de9b77a0f14883283effe79af01771
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Jun 3 16:37:37 2021 +0900
+
+    Armv8-A Add More DGEMMSUP
+    
+    - Add 6x8 GEMMSUP.
+    - Adjust prefetching.
+    - Workaround for Clang's disability to handle reg clobbering.
+    - Subproduct 6x8 row-major GEMM <- incomplete.
+
+commit a9ba79ea14de3b5a271e5970cb473d3c52e2fa5f
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Jun 2 15:04:29 2021 +0900
+
+    Armv8-A Add GEMMSUP 4x8n Kernel
+    
+    - Compile w/ both GCC & Clang.
+    - Edge cases use ref-kernels.
+    - Can give performance boost in some contexts.
+
+commit df40efe8fbfd399d76c6000ec03791a9b76ffbdf
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed Jun 2 00:04:20 2021 +0900
+
+    Armv8-A Add Part of GEMMSUP 8x4m Kernel
+    
+    - Compile w/ both GCC & Clang
+    - Only block part is implement. Edge cases WIP
+    - Not Optimal kernel scheme. Should do 4x8 instead
+
+commit 66399992881316514f64d68ec9eb60a87d53f674
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 05:52:05 2021 +0900
+
+    Armv8A DGEMM 4x4 Kernel WIP. Slow
+    
+    Quite slow.
+
+commit a29c16394ccef02d29141c79b71fb408e20073e6
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 04:58:45 2021 +0900
+
+    Armv8-A Add 8x4 Kernel WIP
+    
+    Test result: a bit lower GFlOps than 6x8.
+
+commit 64a1f786d58001284aa4f7faf9fae17f0be7a018
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Aug 11 17:53:12 2021 -0500
+
+    Implement proposed new function pointer fields for obj_t.
+    
+    The added fields:
+    1. `pack_t schema`: storing the pack schema on the object allows the macrokernel to act accordingly without side-channel information from the rntm_t and cntx_t. The pack schema and "pack_[ab]" fields could be removed from those structs.
+    2. `void* user_data`: this field can be used to store any sort of additional information provided by the user. The pointer is propagated to submatrix objects and copies, but is otherwise ignored by the framework and the default implementations of the following three fields. User-specified pack, kernel, or ukr functions can do whatever they want with the data, and the user is 100% responsible for allocating, assigning, and freeing this buffer.
+    3. `obj_pack_fn_t pack`: the function called when a matrix is packed. This functions receives the expected arguments, as well as a mdim_t and mem_t* as memory must be allocated inside this function, and behavior may differ based on which matrix is being backed (i.e. transposition for B). This could also be achieved by passing a desired pack schema, but this would require additional information to travel down the control tree.
+    4. `obj_ker_fn_t ker`: the function called when we get to the "second loop", or the macro-kernel. Behavior may depend on the pack schemas of the input matrices. The default implementation would perform the inner two loops around the ukr, and then call either the default ukr or a user-supplied one (next field).
+    5. `obj_ukr_fn_t ukr`: the function called by the default macrokernel. This would replace the various current "virtual" microkernels, and could also be used to supply user-defined behavior. Users could supply both a custom kernel (above) and microkernel, although the user-specified kernel does **not** necessarily have to call the ukr function specified on the obj_t.
+    
+    Note that no macros or functions for accessing these new fields have been defined yet. That is next once these are finalized. Addresses https://github.com/flame/blis/projects/1#card-62357687.
+
+commit a32257eeab2e9946e71546a05a1847a39341ec6b
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 5 16:23:02 2021 -0500
+
+    Fixed bli_init.c compile-time error on OSX clang.
+    
+    Details:
+    - Fixed a compile-time error in bli_init.c when compiling with OSX's
+      clang. This error was introduced in 868b901, which introduced a
+      post-declaration struct assignment where the RHS was a struct
+      initialization expression (i.e. { ... }). This use of struct
+      initializer expressions apparently works with gcc despite it not
+      being strict C99. The fix included in this commit declares a temporary
+      variable for the purposes of being initialized to the desired value,
+      via the struct initializer, and then copies the temporary struct (via
+      '=' struct assignment) to the persistent struct. Thanks to Devin
+      Matthews for his help with this.
+
+commit c8728cfbd19ecde9d43af05829e00bcfe7d86eed
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu Aug 5 15:17:09 2021 -0500
+
+    Fixed configure breakage on OSX clang.
+    
+    Details:
+    - Accept either 'clang' or 'LLVM' in vendor string when greping for
+      the version number (after determining that we're working with clang).
+      Thanks to Devin Matthews for this fix.
+
+commit 868b90138e64c873c780d9df14150d2a370a7a42
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Aug 4 18:31:01 2021 -0500
+
+    Fixed one-time use property of bli_init() (#525).
+    
+    Details:
+    - Fixes a rather obvious bug that resulted in segmentation fault
+      whenever the calling application tried to re-initialize BLIS after
+      its first init/finalize cycle. The bug resulted from the fact that
+      the bli_init.c APIs made no effort to allow bli_init() to be called
+      subsequent times at all due to it, and bli_finalize(), being
+      implemented in terms of pthread_once(). This has been fixed by
+      resetting the pthread_once_t control variable for initialization
+      at the end of bli_finalize_apis(), and by resetting the control
+      variable for finalization at the end of bli_init_apis(). Thanks to
+      @lschork2 for reporting this issue (#525), and to Minh Quan Ho and
+      Devin Matthews for suggesting the chosen solution.
+    - CREDITS file update.
+
+commit 8dba1e752c6846a85dea50907135bbc5cbc54ee5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 27 12:38:24 2021 -0500
+
+    CREDITS file update.
+
+commit cc9206df667b7c710b57b190b8ad351176de53b8
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 16 15:48:37 2021 -0500
+
+    Added Graviton2 Neoverse N1 performance results.
+    
+    Details:
+    - Added single-threaded and multithreaded performance results to
+      docs/Performance.md. These results were gathered on a Graviton2
+      Neoverse N1 server. Special thanks to Nicholai Tukanov for
+      collecting these results via the Arm-HPC/AWS hackaton.
+    - Corrected what was supposed to be a temporary tweak to the legend
+      labels in test/3/octave/plot_l3_perf.m.
+
+commit fab5c86d68137b59800715efb69214c0a7e458a7
+Merge: 84f9dcd4 d073fc9a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jul 13 16:46:21 2021 -0500
+
+    Merge pull request #516 from nicholaiTukanov/p10-sandbox-rework
+    
+    P10 sandbox rework
+
+commit 84f9dcd449fa7a4cf4087fca8ec4ca0d10e9b801
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jul 13 16:45:44 2021 -0500
+
+    Remove unnecesary windows/zen2 directory.
+
+commit 21911d6ed3438ca4ba942d05851ba5d7e9835586
+Merge: 17729cf4 689fa0f4
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Jul 9 18:10:46 2021 -0500
+
+    Merge branch 'dev'
+
+commit 17729cf449919d1db9777cea5b65d2efc77e2692
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jul 9 14:59:48 2021 -0500
+
+    Add vzeroupper to Haswell microkernels. (#524)
+    
+    Details:
+    - Added vzeroupper instruction to the end of all 'gemm' and 'gemmtrsm'
+      microkernels so as to avoid a performance penalty when mixing AVX
+      and SSE instructions. These vzeroupper instructions were once part
+      of the haswell kernels, but were inadvertently removed during a source
+      code shuffle some time ago when we were managing duplicate 'haswell'
+      and 'zen' kernel sets. Thanks to Devin Matthews for tracking this down
+      and re-inserting the missing instructions.
+
+commit c9a7f59aa84daa54d8f8c771f1f1ef2bd8730da2
+Merge: 75f03907 9a8e649c
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Thu Jul 8 14:00:38 2021 -0500
+
+    Merge pull request #522 from flame/windows-avx512
+    
+    Fix Win64 AVX512 bug.
+
+commit 9a8e649c5ac89eba951bbee7136ca28aeb24d731
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jul 7 15:23:57 2021 -0500
+
+    Fix Win64 AVX512 bug.
+    
+    Use `-march=haswell` for kernels. Fixes #514.
+
+commit 75f03907c58385b656c8bd35d111db245814a9f3
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jul 7 15:44:11 2021 -0500
+
+    Add comment about make checkblas on Windows
+    
+    [ci skip]
+
+commit 4651583b1204a965e4aa672c7ad6de60f3ab1600
+Merge: 69205ac2 174f7fc9
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jul 7 01:11:20 2021 -0500
+
+    Merge pull request #520 from flame/travis-ci-install
+    
+    Test installation in Travis CI
+
+commit 69205ac266947723ad4d7bb028b7521fe5c76991
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Jul 6 20:39:22 2021 -0500
+
+    CREDITS file update.
+    
+    Details:
+    - Thanks to Chengguo Sun for submitting #515 (5ef7f68).
+    - Thanks to Andrew Wildman for submitting #519 (551c6b4).
+    - Whitespace update to configure (spaces to tabs).
+
+commit 174f7fc9a11712c7bd1a61510bdc5c262b3e8e1f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jul 6 19:35:55 2021 -0500
+
+    Test installation in Travis CI
+
+commit 551c6b4ee8cd9dd2e1d1b46c8dde09eb50b91b2c
+Merge: 78eac6a0 f648df4e
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jul 6 19:32:53 2021 -0500
+
+    Merge pull request #519 from awild82/oot_build_bugfix
+    
+    Fix installation from out-of-tree builds
+
+commit f648df4e5588f069b2db96f8be320ead0c1967ef
+Author: Andrew Wildman <apw4@uw.edu>
+Date:   Tue Jul 6 16:35:12 2021 -0700
+
+    Add symlink to blis.pc.in for out-of-tree builds
+
+commit 78eac6a0ab78c995c3f4e46a9e87388b5c3e1af6
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jul 6 11:05:43 2021 -0500
+
+    Revert "Always run `make check`."
+    
+    This reverts commit a201a53440c51244739aaee20e3309b50121cc68.
+
+commit a201a53440c51244739aaee20e3309b50121cc68
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jul 5 21:39:18 2021 -0500
+
+    Always run `make check`.
+    
+    I'm concerned that problems may lurk for `x86_64` builds on Windows which may be uncovered by a fuller `make check`.
+
+commit 5ef7f684dc75fc707c82f919e0836615f90a2627
+Merge: aaa10c87 ad6231cc
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon Jul 5 21:35:07 2021 -0500
+
+    Merge pull request #515 from chengguosun/bug-fix
+    
+    Fixed configure script bug.
+
+commit ad6231cca3fc1e477752ecd31b1ee2323398a642
+Author: sunchengguo <sunchengguo@higon.com>
+Date:   Tue Jul 6 07:30:00 2021 -0400
+
+    Fixed configure script bug.
+    Details:
+    - Fixed kernel list string substitution error by adding function substitute_words in configure script.
+      if the string contains zen and zen2, and zen need to be replaced with another string, then zen2
+      also be incorrectly replaced.
+
+commit d073fc9acac9d702556cab9fbbb3a253eeb1f998
+Author: nicholaiTukanov <nicholaitukanov@gmail.com>
+Date:   Fri Jul 2 19:54:33 2021 -0500
+
+    Update POWER10.md
+
+commit 907226c0af4afb6323b4e02be4f73f5fb89cddaf
+Author: nicholaiTukanov <nicholaitukanov@gmail.com>
+Date:   Fri Jul 2 19:47:18 2021 -0500
+
+    Rework POWER10 sandbox
+    
+    - Add a testsuite for gathering performance (in GFLOPs) and measuring correctness for the POWER10 GEMM reduced precision/integer kernels.
+    - Reworked GENERIC_GEMM template to hardcode the cache parameters.
+    - Remove kernel wrapper that checked that only allowed matrices that weren't transposed or conjugated. However, the kernels still assume the matrices are not transposed. This wrapper was removed for performance reasons.
+    - Renamed and restructured files and functions for clarity.
+    - Editted the POWER10 document to reflect new changes.
+
+commit aaa10c87e19449674a4ca30fa3b6392bb22c3a66
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Jun 21 17:53:52 2021 -0500
+
+    Skip clearing temp microtile in gemmlike sandbox.
+    
+    Details:
+    - Removed code from gemmlike sandbox files bls_gemm_bp_var1.c and
+      bls_gemm_bp_var2.c that initializes the elements of the temporary
+      microtile to zero. This code, introduced recently in 7f7d726, did
+      not actually fix any bug (despite that commit's log entry). The
+      microtile does not need to be initialized because it is completely
+      overwritten by a "beta = 0" invocation of gemm prior to it being
+      read. Any NaNs or Infs present at the outset would have no impact
+      on the output matrix C. Thanks to Devin Matthews for reminding me
+      of this.
+
+commit bc10a3f2ff518360c32bea825b3eb62a9e4c8a77
+Merge: bf727636 6548ceba
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jun 18 19:01:08 2021 -0500
+
+    Merge pull request #492 from flame/thunderx2-clang
+    
+    Allow clang for ThunderX2 config
+
+commit bf727636632a368f3247dc8ab1d4b6119e9c511a
+Merge: e28f2a2d 5fc93e28
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Fri Jun 18 18:59:43 2021 -0500
+
+    Merge pull request #506 from xrq-phys/arm64-mac
+    
+    BLIS on Darwin_Aarch64
+
+commit e28f2a2dfcff14e7094fce0b279b3a917b3ab98c
+Merge: d10e05bb 56ffca6a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Jun 15 19:35:07 2021 -0500
+
+    Merge pull request #513 from nicholaiTukanov/asm_warning_p9_fix
+    
+    Fix assembler warning in POWER9 DGEMM
+
+commit 56ffca6a9bc67432a7894298739895f406e5f467
+Author: nicholai <nicholai@ibm.com>
+Date:   Tue Jun 15 18:17:39 2021 -0500
+
+    Fix asm warning
+
+commit 689fa0f40399bde1acc5367d6dd4e8fc4eb6f3ea
+Merge: b683d01b d10e05bb
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jun 13 19:44:14 2021 -0500
+
+    Merge branch 'master' into dev
+
+commit d10e05bbd1ce45ce2c0dfe5c64daae2633357b3f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Jun 13 19:36:16 2021 -0500
+
+    Sandbox header edits trigger full library rebuild.
+    
+    Details:
+    - Adjusted the top-level Makefile so that any change to a sandbox header
+      file will result in blis.h being regenerated along with a full
+      recompilation of the library. Previously, sandbox files were omitted
+      from the list of header files that, when touched, could trigger a full
+      rebuild. Why was it like that previously? Because originally we only
+      envisioned using sandboxes to *replace* gemm, not augment the library
+      with new functionality. When replacing gemm, blis.h does not need to
+      contain any local sandbox defintions in order for the user to be able
+      to (indirectly) use that sandbox. But if you are adding functions to
+      the library, those functions need to be prototyped so the compiler
+      can perform type checking against the user's invocation of those new
+      functions. Thanks to Jeff Diamond for helping us discover this
+      deficiency in the build system.
+
+commit 7c3eb44efaa762088c190bb820ef6a3c87db8f65
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Jun 2 11:28:22 2021 -0500
+
+    Add vhsubpd/vhsubpd.
+    
+    Horizontal subtraction instructions added to bli_x86_asm_macros.h, currently unused [ci skip].
+
+commit 7f7d72610c25f511ba8cd2a53be7b59bdb80f3f3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon May 31 16:50:18 2021 -0500
+
+    Fixed bugs in cpackm kernels, gemmlike code.
+    
+    Details:
+    - Fixed intermittent bugs in bli_packm_haswell_asm_c3xk.c and
+      bli_packm_haswell_asm_c8xk.c whereby the imaginary component of the
+      kappa scalar was incorrectly loaded at an offset of 8 bytes (instead
+      of 4 bytes) from the real component. This was almost certainly a copy-
+      paste bug carried over from the corresonding zpackm kernels. Thanks to
+      Devin Matthews for bringing this to my attention.
+    - Added missing code to gemmlike sandbox files bls_gemm_bp_var1.c and
+      bls_gemm_bp_var2.c that initializes the elements of the temporary
+      microtile to zero. (This bug was never observed in output but rather
+      noticed analytically. It probably would have also manifested as
+      intermittent failures, this time involving edge cases.)
+    - Minor commented-out/disabled changes to testsuite/src/test_gemm.c
+      relating to debugging.
+
+commit 5fc93e280614b4a21a9cff36cf873b4b9407285b
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 18:44:47 2021 +0900
+
+    Armv8A Rename Regs for Safe Darwin Compile
+    
+    Avoid x18 use in FP32 kernel:
+    - C address lines x[18-26] renamed to x[19-27] (reg index +1)
+    - Original role of x27 fulfilled by x5 which is free after k-loop pert.
+    
+    FP64 does not require changing since x18 is not used there.
+
+commit 9f4a4a3cfb2244e4024445e127dafd2a11f39fc5
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 17:21:28 2021 +0900
+
+    Armv8A Rename Regs for Clang Compile: FP32 Part
+    
+    Roughly the same as 916e1fa , additionally with x15 clobbering removed.
+    - x15: Not used at all.
+    
+    Compilation w/ Clang shows warning about x18 reservation, but
+    compilation itself is OK and all tests got passed.
+
+commit 916e1fa8be3cea0e3e2a4a7e8b00027ac2ee7780
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 16:46:52 2021 +0900
+
+    Armv8A Rename Regs for Clang Compile: FP64 Part
+    
+    - x7, x8: Used to store address for Alpha and Beta.
+      As Alpha & Beta was not used in k-loops, use x0, x1 to load
+      Alpha & Beta's addresses after k-loops are completed, since A & B's
+      addresses are no longer needed there.
+      This "ldr [addr]; -> ldr val, [addr]" would not cause much performance
+      drawback since it is done outside k-loops and there are plenty of
+      instructions between Alpha & Beta's loading and usage.
+    - x9: Used to store cs_c. x9 is multiplied by 8 into x10 and not used
+      any longer. Directly loading cs_c and into x10 and scale by 8 spares
+      x9 straightforwardly.
+    - x11, x12: Not used at all. Simply remove from clobber list.
+    - x13: Alike x9, loaded and scaled by 8 into x14, except that x13 is
+      also used in a conditional branch so that "cmp x13, #1" needs to be
+      modified into "cmp x14, #8" to completely free x13.
+    - x3, x4: Used to store next_a & next_b. Untouched in k-loops. Load
+      these addresses into x0 and x1 after Alpha & Beta are both loaded,
+      since then neigher address of A/B nor address of Alpha/Beta is needed.
+
+commit 7fabd896af773623ed01820a71bbff432e8a7d25
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 29 16:28:03 2021 +0900
+
+    Asm Flag Mingling for Darwin_Aarch64
+    
+    Apple+Arm64 requires additional "tagging" of local symbols.
+
+commit 213dce32d2eed8b7a38c6a3f6112072b0a89ecd0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri May 28 14:49:57 2021 -0500
+
+    Added a new 'gemmlike' sandbox.
+    
+    Details:
+    - Added a new sandbox called 'gemmlike', which implements sequential and
+      multithreaded gemm in the style of gemmsup but also unconditionally
+      employs packing. The purpose of this sandbox is to
+      (1) avoid select abstractions, such as objects and control trees, in
+          order to allow readers to better understand how a real-world
+          implementation of high-performance gemm can be constructed;
+      (2) provide a starting point for expert users who wish to build
+          something that is gemm-like without "reinventing the wheel."
+      Thanks to Jeff Diamond, Tze Meng Low, Nicholai Tukanov, and Devangi
+      Parikh for requesting and inspiring this work.
+    - The functions defined in this sandbox currently use the "bls_" prefix
+      instead of "bli_" in order to avoid any symbol collisions in the main
+      library.
+    - The sandbox contains two variants, each of which implements gemm via a
+      block-panel algorithm. The only difference between the two is that
+      variant 1 calls the microkernel directly while variant 2 calls the
+      microkernel indirectly, via a function wrapper, which allows the edge
+      case handling to be abstracted away from the classic five loops.
+    - This sandbox implementation utilizes the conventional gemm microkernel
+      (not the skinny/unpacked gemmsup kernels).
+    - Updated some typos in the comments of a few files in the main
+      framework.
+
+commit 82af05f54c34526a60fd2ec46656f13e1ac8f719
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue May 25 15:25:08 2021 -0500
+
+    Updated Fugaku (a64fx) performance results.
+    
+    Details:
+    - Updated the performance graphs (pdfs and pngs) for the Fugaku/a64fx
+      entry within Performance.md, and also updated the experiment details
+      accordingly. Thanks to RuQing Xu for re-running the BLIS and SSL2
+      experiments reflected in this commit.
+    - In Performance.md, added an English translation of the project name
+      under which the Fugaku results were gathered, courtesy of RuQing Xu.
+
+commit e5c85da3763f73854ecd739ba3008bb467ed77c3
+Merge: cbd8d393 5feb04e2
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon May 24 16:56:22 2021 -0500
+
+    Merge pull request #503 from flame/windows-compiler-check
+    
+    Add explicit compiler check for Windows.
+
+commit cbd8d3932599485727204479fded66ac19186db4
+Merge: 6d4ab022 932dfe6a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Mon May 24 16:32:42 2021 -0500
+
+    Merge pull request #500 from xrq-phys/armsve+travis
+    
+    Upgrade Travis CI for Arm SVE
+
+commit 5feb04e233e1e6f81c727578ad9eae1367a2562f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun May 23 18:46:56 2021 -0500
+
+    Add explicit compiler check for Windows.
+    
+    Check the C compiler for a predefined macro `_WIN32` to indicate (cross-)compilation for Windows. Fixes #463.
+
+commit 6d4ab0223d9014ac2a66d66759536aa305be5867
+Merge: 61584ded 859fb77a
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun May 23 18:39:53 2021 -0500
+
+    Merge pull request #502 from flame/rm-rm-dupls
+    
+    Remove `rm-dupls` function in common.mk.
+
+commit 859fb77a320a3ace71d25a8885c23639b097a1b6
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Sun May 23 18:15:23 2021 -0500
+
+    Remove `rm-dupls` function in common.mk.
+    
+    AMD requested removal due to unclear licensing terms; original code was from stackoverflow. The function is unused but could easily be replaced by new implementation.
+
+commit 932dfe6abb9617223bd26a249e53447169033f8c
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu May 20 02:07:31 2021 +0900
+
+    Travis CI Revert Unnecessary Extras from 91d3636
+    
+    - Removed `V=1` in make line
+    - Removed `CFLAGS` in configure line
+    - Restored `pwd` surrounding OOT line
+
+commit bd156a210d347a073a6939cc4adab3d9256c2e2b
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sun May 16 02:56:14 2021 +0900
+
+    Adjust TravisCI
+    
+    - ArmSVE don't test gemmt (seems Qemu-only problem);
+    - Clang use TravisCI-provided version instead of fixing to clang-8
+      due to that clang-8 seems conflicting with TravisCI's clang-7.
+
+commit 91d3636031021af3712d14c9fcb1eb34b6fe2a31
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Sat May 15 17:05:16 2021 +0900
+
+    Travis Support Arm SVE
+    
+    - Updated distro to 20.04 focal aarch64-gcc-10.
+      This is minimal version required by aarch64-gcc-10.
+      SVE intrinsics would not compile without GCC >=10.
+    - x86 toolchains use official repo instead of ubuntu-toolchain-r/test.
+      20.04 focal is not supported by that PPA at the moment.
+    - Add extra configuration-time options to .travis.yml.
+    - Add Arm SVE entry to .travis.yml.
+
+commit 61584deddf9b3af6d11a811e6e04328d22390202
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Wed May 19 23:52:29 2021 +0900
+
+    Added 512b SVE-based a64fx subconfig + SVE kernels.
+    
+    Details:
+    - Added 512-bit specific 'a64fx' subconfiguration that uses empirically
+      tuned block size by Stepan Nassyr. This subconfig also sets the sector
+      cache size and enables memory-tagging code in SVE gemm kernels. This
+      subconfig utilizes (16, k) and (10, k) DPACKM kernels.
+    - Added a vector-length agnostic 'armsve' subconfiguration that computes
+      blocksizes according to the analytical model. This part is ported from
+      Stepan Nassyr's repository.
+    - Implemented vector-length-agnostic [d/s/sh] gemm kernels for Arm SVE
+      at size (2*VL, 10). These kernels use unindexed FMLA instructions
+      because indexed FMLA takes 2 FMA units in many implementations.
+      PS: There are indexed-FLMA kernels in Stepan Nassyr's repository.
+    - Implemented 512-bit SVE dpackm kernels with in-register transpose
+      support for sizes (16, k) and (10, k).
+    - Extended 256-bit SVE dpackm kernels by Linaro Ltd. to 512-bit for
+      size (12, k). This dpackm kernel is not currently used by any
+      subconfiguration.
+    - Implemented several experimental dgemmsup kernels which would
+      improve performance in a few cases. However, those dgemmsup kernels
+      generally underperform hence they are not currently used in any
+      subconfig.
+    - Note: This commit squashes several commits submitted by RuQing Xu via
+      PR #424.
+
+commit b683d01b9c4ea5f64c8031bda816beccfbf806a0
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 13 15:23:22 2021 -0500
+
+    Use extra #undef when including ba/ex API headers.
+    
+    Details:
+    - Inserted a "#include bli_xapi_undef.h" after each usage of the basic
+      and expert API macro setup headers: bli_oapi_ba.h, bli_oapi_ex.h,
+      bli_tapi_ba.h, and bli_tapi_ex.h. This is functionally equivalent to
+      the previous status quo, in which each header made minimal #undef
+      prior to its own definitions and then a single instance of
+      "#include bli_xapi_undef.h" cleaned up any remaining macro defs after
+      all other headers were used. This commit will guarantee that macro
+      defs from the setup of one header (say, bli_oapi_ex.h) don't "infect"
+      the definitions made in a subsequent header. As with this previous
+      commit, this change does not fix any issue but rather attempts to
+      avoid creating orphaned macro definitions that are only needed within
+      a very limited scope.
+    - Removed minimal #undef from bli_?api_[ba|ex].h.
+    - Removed old commented-out lines from bli_?api_[ba|ex].h.
+
+commit d4427a5b2f5cab5d2a64c58d87416628867c2b4a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Thu May 13 13:55:11 2021 -0500
+
+    Minor preprocessor/header cleanup.
+    
+    Details:
+    - Added frame/include/bli_xapi_undef.h, which explicitly undefines all
+      macros defined in bli_oapi_ba.h, bli_oapi_ex.h, bli_tapi_ba.h, and
+      bli_tapi_ex.h. (This is for safety and good cpp coding practice, not
+      because it fixes anything.)
+    - Added #include "bli_xapi_undef.h" to bli_l1v.h, bli_l1d.h, bli_l1f.h,
+      bli_l1m.h, bli_l2.h, bli_l3.h, and bli_util.h.
+    - Comment updates to bli_oapi_ba.h, bli_oapi_ex.h, bli_tapi_ba.h, and
+      bli_tapi_ex.h.
+    - Moved frame/3/bli_l3_ft_ex.h to local 'old' directory after realizing
+      that nothing in BLIS used those function pointer types. Also commented
+      out the "#include bli_l3_ft_ex.h" directive in frame/3/bli_l3.h.
+
+commit 5aa63cd927b22a04e581b07d0b68ef391f4f9b1f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 12 19:53:35 2021 -0500
+
+    Fixed typo in cpp guard in bli_util_ft.h.
+    
+    Details:
+    - Changed #ifdef BLIS_OAPI_BASIC to #ifdef BLIS_TAPI_BASIC in
+      bli_util_ft.h. This typo was causing some types to be redefined when
+      they weren't supposed to be.
+
+commit f0e8634775094584e89f1b03811ee192f2aaf67f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed May 12 18:45:32 2021 -0500
+
+    Defined eqsc, eqv, eqm to test object equality.
+    
+    Details:
+    - Defined eqsc, eqv, and eqm operations, which set a bool depending on
+      whether the two scalars, two vectors, or two matrix operands are equal
+      (element-wise). eqsc and eqv support implicit conjugation and eqm
+      supports diagonal offset, diag, uplo, and trans parameters (in a
+      manner consistent with other level-1m operations). These operations
+      are currently housed under frame/util, at least for now, because they
+      are not computational in nature.
+    - Redefined bli_obj_equals() in terms of eqsc, eqv, and eqm.
+    - Documented eqsc, eqv, and eqm in BLISObjectAPI.md and BLISTypedAPI.md.
+      Also:
+      - Documented getsc and setsc in both docs.
+      - Reordered entry for setijv in BLISTypedAPI.md, and added separator
+        bars to both docs.
+      - Added missing "Observed object properties" clauses to various
+        levle-1v entries in BLISObjectAPI.md.
+    - Defined bli_apply_trans() in bli_param_macro_defs.h.
+    - Defined supporting _check() function, bli_l0_xxbsc_check(), in
+      bli_l0_check.c for eqsc.
+    - Programming style and whitespace updates to bli_l1m_unb_var1.c.
+    - Whitespace updates to bli_l0_oapi.c, bli_l1m_oapi.c
+    - Consolidated redundant macro redefinition for copym function pointer
+      type in bli_l1m_ft.h.
+    - Added macros to bli_oapi_ba.h, _ex.h, and bli_tapi_ba.h, _ex.h that
+      allow oapi and tapi source files to forego defining certain expert
+      functions. (Certain operations such as printv and printm do not need
+      to have both basic expert interfaces. This also includes eqsc, eqv,
+      and eqm.)
+
+commit 5d46dbee4a06ba5a422e19817836976f8574cb4f
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed May 12 18:42:09 2021 -0500
+
+    Replace bli_dlamch with something less archaic (#498)
+    
+    Details:
+    - Added new implementations of bli_slamch() and bli_dlamch() that use
+      constants from the standard C library in lieu of dynamically-computed
+      values (via code inherited from netlib). The previous implementation
+      is still available when the cpp macro BLIS_ENABLE_LEGACY_LAMCH is
+      defined by the subconfiguration at compile-time. Thanks to Devin
+      Matthews for providing this patch, and to Stefano Zampini for
+      reporting the issue (#497) that prompted Devin to propose the patch.
+
+commit 6a89c7d8f9ac3f51b5b4d8ccb2630d908d951e6f
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat May 1 18:54:48 2021 -0500
+
+    Defined setijv, getijv to set/get vector elements.
+    
+    Details:
+    - Defined getijv, setijv operations to get and set elements of a vector,
+      in bli_setgetijv.c and .h.
+    - Renamed bli_setgetij.c and .h to bli_setgetijm.c and .h, respectively.
+    - Added additional bounds checking to getijm and setijm to prevent
+      actions with negative indices.
+    - Added documentation to BLISObjectAPI.md and BLISTypedAPI.md for getijv
+      and setijv.
+    - Added documentation to BLISTypedAPI.md for getijm and setijm, which
+      were inadvertently missing.
+    - Added a new entry to the FAQ titled "Why does BLIS have vector
+      (level-1v) and matrix (level-1m) variations of most level-1
+      operations?"
+    - Comment updates.
+
+commit 4534daffd13ed7a8983c681d3f5e9de17c9f0b96
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 27 18:16:44 2021 -0500
+
+    Minor API breakage in bli_pack API.
+    
+    Details:
+    - Changed bli_pack_get_pack_a() and bli_pack_get_pack_b() so that
+      instead of returning a bool, they set a bool that is passed in by
+      address. This does break the public exported API, but I expect very
+      few users actually use this function. (This change is being made in
+      preparation for a much more extensive commit relating to error
+      checking.)
+
+commit 6a4aa986ffc060d3e64ed230afe318b82630f8b2
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 23 13:10:01 2021 -0500
+
+    Fixed typo in Table of Contents.
+
+commit f6424b5b82160d346a09a0fbb526981ecf66cdb3
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Fri Apr 23 13:08:06 2021 -0500
+
+    Added dedicated Performance section to README.md.
+    
+    Details:
+    - Spun off the Performance.md and PerformanceSmall.md links in the
+      Documentation section into a new Performance section dedicated to
+      those two links. (The previous entries remain redundantly listed
+      within Documentation section.) Thanks to Robert van de Geijn for
+      suggesting this change.
+
+commit 40ce5fd241b9ad140bf57278d440f0598d7f15d8
+Merge: 6280757b 1f3461a5
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Apr 21 09:54:25 2021 -0500
+
+    Merge pull request #493 from cassiersg/patch-1
+    
+    Fix typo in FAQ.md
+
+commit 1f3461a5a5a88510f913451a93e3190ec1556f39
+Author: Gaëtan Cassiers <cassiersg@users.noreply.github.com>
+Date:   Wed Apr 21 16:49:05 2021 +0200
+
+    Fix typo in FAQ.md
+
+commit 6548cebaf55a1f9bdb8417cc89dd0444d8f9c2e4
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Wed Apr 14 13:00:42 2021 -0500
+
+    Allow clang for ThunderX2 config
+    
+    Needed for compiling on e.g. Mac M1. AFAIK clang supports the same -mcpu flag for ThunderX2 as gcc.
+
+commit 6280757be32f90fd77d8dd9357b07d9306e6f80d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Apr 7 13:03:56 2021 -0500
+
+    Minor updates to a64fx section of Performance.md.
+
+commit 1e6ed823c6cd11f9b671779f3c8bdbd2bbb40f34
+Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
+Date:   Thu Apr 8 02:59:26 2021 +0900
+
+    Additional A64fx Comments (#490)
+    
+    * Performance.md Update A64fx Comments
+    
+    - Reason for ARMPL's missing data;
+    - Additional envs / flags for kernel selection;
+    - Update BLIS SRC commit.
+    
+    * Include Another Fix in armsve-cfg-vendor
+    
+    A prototype was forgotten, causing that void* pointer was not fully returned.
+
+commit 2688f21a5b073950f6f187c95917fdbb5aac234a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 6 19:02:37 2021 -0500
+
+    Added Fujitsu A64fx (512-bit SVE) perf results.
+    
+    Details:
+    - Added single-threaded and multithreaded performance results to
+      docs/Performance.md. These results were gathered on the "Fugaku"
+      Fujitsu A64fx supercomputer at the RIKEN Center for Computational
+      Science in Kobe, Japan. Special thanks to RuQing Xu and Stepan
+      Nassyr for their work in developing and optimizing A64fx support in
+      BLIS and RuQing for gathering the performance data that is reflected
+      in these new graphs.
+
+commit ba3ba8da83d48397162139e11337c036a631ba79
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Tue Apr 6 18:39:58 2021 -0500
+
+    Minor updates and fixes to test/3/octave scripts.
+    
+    Details:
+    - Fixed an issue where the wrong string was being passed in for the
+      vendor legend string.
+    - Changed the graph in which the legends appear.
+    - Updates to runthese.m.
+
+commit 09bd4f4f12311131938baa9f75d27e92b664d681
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 31 17:09:36 2021 -0500
+
+    Add err_t* "return" parameter to malloc functions.
+    
+    Details:
+    - Added an err_t* parameter to memory allocation functions including
+      bli_malloc_intl(), bli_calloc_intl(), bli_malloc_user(),
+      bli_fmalloc_align(), and bli_fmalloc_noalign(). Since these functions
+      already use the return value to return the allocated memory address,
+      they can't communicate errors to the caller through the return value.
+      This commit does not employ any error checking within these functions
+      or their callers, but this sets up BLIS for a more comprehensive
+      commit that moves in that direction.
+    - Moved the typedefs for malloc_ft and free_ft from bli_malloc.h to
+      bli_type_defs.h. This was done so that what remains of bli_malloc.h
+      can be included after the definition of the err_t enum. (This ordering
+      was needed because bli_malloc.h now contains function prototypes that
+      use err_t.)
+    - Defined bli_is_success() and bli_is_failure() static functions in
+      bli_param_macro_defs.h. These functions provide easy checks for error
+      codes and will be used more heavily in future commits.
+    - Unfortunately, the additional err_t* argument discussed above breaks
+      the API for bli_malloc_user(), which is an exported symbol in the
+      shared library. However, it's quite possible that the only application
+      that calls bli_malloc_user()--indeed, the reason it is was marked for
+      symbol exporting to begin with--is the BLIS testsuite. And if that's
+      the case, this breakage won't affect anyone. Nonetheless, the "major"
+      part of the so_version file has been updated accordingly to 4.0.0.
+
+commit f9ad55ce7e12f59930605753959fcfd41a218d8d
+Merge: 04502492 90508192
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 31 14:20:19 2021 -0500
+
+    Merge branch 'master' into dev
+
+commit 90508192f2d6ae95adc2a3ba9f4e5bad2c8d6fd2
+Author: Devin Matthews <damatthews@smu.edu>
+Date:   Tue Mar 30 21:16:44 2021 -0500
+
+    Update do_sde.sh (#489)
+    
+    Update to a newer version of SDE, and do a direct download as it seems you don't have to click-through the license anymore.
+
+commit 22c6b5dc4c9cc21942f8ccc30891f9b4385a9504
+Author: Nicholai Tukanov <nicholaitukanov@gmail.com>
+Date:   Tue Mar 30 19:07:42 2021 -0500
+
+    Fixed bug in power10 microkernel I/O. (#488)
+    
+    Details:
+    - Fixed a bug in the POWER10 DGEMM kernel whereby the microkernel did
+      not store the microtile result correctly due to incorrect indices
+      calculations. (The error was introduced when I reorganized the
+      'kernels/power10/3' directory.)
+
+commit 04502492671456b94bcdee60b9de347b6763a32d
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sun Mar 28 19:11:43 2021 -0500
+
+    Always stay initialized after BLAS compat calls.
+    
+    Details:
+    - Removed the option to finalize BLIS after every BLAS call, which also
+      means that BLIS would initialize at the beginning of every BLAS call.
+      This option never really made sense and wasn't even implemented
+      properly to begin with. (Because bli_init_auto() and _finalize_auto()
+      were implemented in terms of bli_init_once() and _finalize_once(),
+      respectively, the application would have only been able to call one
+      BLAS routine before BLIS would find itself in a unusable, permanently
+      uninitialized state.) Because this option was never meant for regular
+      use, it never made it into configure as an actual configure-time
+      option, and therefore this commit only removes parts of the code
+      affected by the cpp macro guard BLIS_ENABLE_STAY_AUTO_INITIALIZED.
+
+commit 3a6f41afb8197e831b6ce2f1ae7f63735685fa0a
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 27 17:22:14 2021 -0500
+
+    Renamed membrk files/vars/functions to pba.
+    
+    Details:
+    - Renamed the files, variables, and functions relating to the packing
+      block allocator from its legacy name (membrk) to its current name
+      (pba). This more clearly contrasts the packing block allocator with
+      the small block allocator (sba).
+    - Fixed a typo in bli_pack_set_pack_b(), defined in bli_pack.c, that
+      caused the function to erroneously change the value of the pack_a
+      field of the global rntm_t instead of the pack_b field. (Apparently
+      nobody has used this API yet.)
+    - Comment updates.
+
+commit 36cb4116d15cfef2d42ec4a834efd4a958f261b5
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Sat Mar 27 15:15:09 2021 -0500
+
+    Switch allocator mutexes to static initialization.
+    
+    Details:
+    - Switched the small block allocator (sba), as defined in bli_sba.c and
+      bli_apool.c, to static initialization of its internal mutex. Did a
+      similar thing for the packing block allocator (pba), which appears as
+      global_membrk in bli_membrk.c.
+    - Commented out bli_membrk_init_mutex() and bli_membrk_finalize_mutex()
+      to ensure they won't be used in the future.
+    - In bli_thrcomm_pthreads.c and .h, removed old, commented-out cpp
+      blocks guarded by BLIS_USE_PTHREAD_MUTEX.
+
+commit 159ca6f01a5f91b93513134c9470b69ff78f5354
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Wed Mar 24 15:57:32 2021 -0500
+
+    Made test/3/octave scripts robust to missing data.
+    
+    Details:
+    - Modified the octave scripts in test/3 so that the script does not
+      choke when one or more of the expected OpenBLAS, Eigen, or vendor data
+      files is missing. (The BLIS data set, however, must be complete.) When
+      a file is missing, that data series is simply not included on that
+      particular graph. Also factored out a lot of the redundant logic from
+      plot_panel_4x5.m into a separate function in read_data.m.
+
+commit 545e6c2f6d09d023b353002a9a43b11aa0c1d701
+Author: Field G. Van Zee <field@cs.utexas.edu>
+Date:   Mon Mar 22 17:42:33 2021 -0500
+
+    CHANGELOG update (0.8.1)
+
+commit 8535b3e11d2297854991c4272932ce4974dda629 (tag: 0.8.1)
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Mar 22 17:42:33 2021 -0500
 
     Version file update (0.8.1)
 
-commit e56d9f2d94ed247696dda2cbf94d2ca05c7fc089 (origin/master, origin/HEAD)
+commit e56d9f2d94ed247696dda2cbf94d2ca05c7fc089
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Mon Mar 22 17:40:50 2021 -0500
 
@@ -163,7 +3041,7 @@ Date:   Fri Mar 5 13:53:43 2021 -0600
       information, refer to the POWER10.md document that is included in
       'sandbox/power10'.
 
-commit b8dcc5bc75a746807d6f8fa22dc2123c98396bf5 (origin/dev, origin/amd, dev, amd)
+commit b8dcc5bc75a746807d6f8fa22dc2123c98396bf5
 Author: RuQing Xu <r-xu@g.ecc.u-tokyo.ac.jp>
 Date:   Tue Mar 2 06:58:24 2021 +0800
 
@@ -6796,7 +9674,7 @@ Date:   Mon Oct 15 16:37:39 2018 -0500
     - Updated frame/include/bli_x86_asm_macros.h with additional macros
       (courtsey of Devin Matthews).
 
-commit 3612ecac98a9d36c3fcd64154121d420bb69febd (origin/nested-omp-patch)
+commit 3612ecac98a9d36c3fcd64154121d420bb69febd
 Author: Field G. Van Zee <field@cs.utexas.edu>
 Date:   Thu Oct 11 15:16:41 2018 -0500
 

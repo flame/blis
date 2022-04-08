@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,48 +33,57 @@
 
 */
 
-#ifndef BLIS_SET0S_EDGE_H
-#define BLIS_SET0S_EDGE_H
+#ifdef BLIS_ENABLE_BLAS
 
-// set0s_mxn
-
-// Notes:
-// - The first char encodes the type of x.
-// - The second char encodes the type of y.
-
-#define GENTFUNC(ctype,ch,op) \
-\
-BLIS_INLINE void PASTEMAC(ch,op) \
-     ( \
-       const dim_t     i, \
-       const dim_t     m, \
-       const dim_t     j, \
-       const dim_t     n, \
-       ctype* restrict p, \
-       const inc_t     ldp \
-     ) \
+#define bla_gemm3m_check( dt_str, op_str, transa, transb, m, n, k, lda, ldb, ldc ) \
 { \
-	if ( i < m ) \
-	{ \
-		PASTEMAC(ch,set0s_mxn) \
-		( \
-		  m - i, \
-		  j, \
-		  p + i*1, 1, ldp \
-		); \
-	} \
+	f77_int info = 0; \
+	f77_int nota,  notb; \
+	f77_int conja, conjb; \
+	f77_int ta,    tb; \
+	f77_int nrowa, nrowb; \
 \
-	if ( j < n ) \
+	nota  = PASTEF770(lsame)( transa, "N", (ftnlen)1, (ftnlen)1 ); \
+	notb  = PASTEF770(lsame)( transb, "N", (ftnlen)1, (ftnlen)1 ); \
+	conja = PASTEF770(lsame)( transa, "C", (ftnlen)1, (ftnlen)1 ); \
+	conjb = PASTEF770(lsame)( transb, "C", (ftnlen)1, (ftnlen)1 ); \
+	ta    = PASTEF770(lsame)( transa, "T", (ftnlen)1, (ftnlen)1 ); \
+	tb    = PASTEF770(lsame)( transb, "T", (ftnlen)1, (ftnlen)1 ); \
+\
+	if ( nota ) { nrowa = *m; } \
+	else        { nrowa = *k; } \
+	if ( notb ) { nrowb = *k; } \
+	else        { nrowb = *n; } \
+\
+	if      ( !nota && !conja && !ta ) \
+		info = 1; \
+	else if ( !notb && !conjb && !tb ) \
+		info = 2; \
+	else if ( *m < 0 ) \
+		info = 3; \
+	else if ( *n < 0 ) \
+		info = 4; \
+	else if ( *k < 0 ) \
+		info = 5; \
+	else if ( *lda < bli_max( 1, nrowa ) ) \
+		info = 8; \
+	else if ( *ldb < bli_max( 1, nrowb ) ) \
+		info = 10; \
+	else if ( *ldc < bli_max( 1, *m    ) ) \
+		info = 13; \
+\
+	if ( info != 0 ) \
 	{ \
-		PASTEMAC(ch,set0s_mxn) \
-		( \
-		  m, \
-		  n - j, \
-		  p + j*ldp, 1, ldp \
-		); \
+		char func_str[ BLIS_MAX_BLAS_FUNC_STR_LENGTH ]; \
+\
+		sprintf( func_str, "%s%-5s", dt_str, op_str ); \
+\
+		bli_string_mkupper( func_str ); \
+\
+		PASTEF770(xerbla)( func_str, &info, (ftnlen)6 ); \
+\
+		return; \
 	} \
 }
-
-INSERT_GENTFUNC_BASIC0(set0s_edge)
 
 #endif

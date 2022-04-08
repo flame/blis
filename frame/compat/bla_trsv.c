@@ -57,7 +57,6 @@ void PASTEF77(ch,blasname) \
 	dim_t   m0; \
 	ftype*  x0; \
 	inc_t   incx0; \
-	inc_t   rs_a, cs_a; \
 	ftype*  one_p; \
 \
 	/* Initialize BLIS. */ \
@@ -89,8 +88,8 @@ void PASTEF77(ch,blasname) \
 	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
 \
 	/* Set the row and column strides of A. */ \
-	rs_a = 1; \
-	cs_a = *lda; \
+	const inc_t rs_a = 1; \
+	const inc_t cs_a = *lda; \
 \
 	/* Acquire a pointer to the global scalar constant BLIS_ONE. */ \
 	one_p = PASTEMAC(ch,1); \

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -73,6 +73,7 @@ SCALV_KER_PROT( double,   d, scalv_zen_int )
 // scalv (intrinsics unrolled x10)
 SCALV_KER_PROT( float,    s, scalv_zen_int10 )
 SCALV_KER_PROT( double,   d, scalv_zen_int10 )
+SCALV_KER_PROT( scomplex, c, scalv_zen_int10 )
 
 // swapv (intrinsics)
 SWAPV_KER_PROT(float,    s, swapv_zen_int8 )
@@ -86,11 +87,21 @@ COPYV_KER_PROT( double,   d, copyv_zen_int )
 SETV_KER_PROT(float,    s, setv_zen_int)
 SETV_KER_PROT(double,   d, setv_zen_int)
 
+// swapv (intrinsics)
+SWAPV_KER_PROT(float, 	s, swapv_zen_int8 )
+SWAPV_KER_PROT(double,	d, swapv_zen_int8 )
+
+
 // -- level-1f --
 
 // axpyf (intrinsics)
 AXPYF_KER_PROT( float,    s, axpyf_zen_int_8 )
 AXPYF_KER_PROT( double,   d, axpyf_zen_int_8 )
+AXPYF_KER_PROT( float,    s, axpyf_zen_int_5 )
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_5 )
+
+AXPYF_KER_PROT( double,   d, axpyf_zen_int_16x4 )
+AXPYF_KER_PROT( scomplex, c, axpyf_zen_int_4 )
 
 // dotxf (intrinsics)
 DOTXF_KER_PROT( float,    s, dotxf_zen_int_8 )
@@ -199,3 +210,4 @@ GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_2x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_1x4n )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x2 )
 GEMMSUP_KER_PROT( dcomplex,   z, gemmsup_rv_zen_asm_3x1 )
+

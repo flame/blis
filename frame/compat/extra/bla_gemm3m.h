@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -32,87 +32,28 @@
 
 */
 
-#include "blis.h"
-
 
 //
-// Define BLAS-to-BLIS interfaces.
+// Prototype BLAS-to-BLIS interfaces.
 //
-#undef  GENTFUNC
-#define GENTFUNC( ftype, ch, blasname, blisname ) \
+#undef  GENTPROTCO
+#define GENTPROTCO( ftype, ftype_r, ch, chr, blasname ) \
 \
-void PASTEF77(ch,blasname) \
+BLIS_EXPORT_BLAS void PASTEF77(ch,blasname) \
      ( \
-       const f77_char* uploa, \
        const f77_char* transa, \
-       const f77_char* diaga, \
+       const f77_char* transb, \
        const f77_int*  m, \
+       const f77_int*  n, \
+       const f77_int*  k, \
+       const ftype*    alpha, \
        const ftype*    a, const f77_int* lda, \
-             ftype*    x, const f77_int* incx  \
-     ) \
-{ \
-	uplo_t  blis_uploa; \
-	trans_t blis_transa; \
-	diag_t  blis_diaga; \
-	dim_t   m0; \
-	ftype*  x0; \
-	inc_t   incx0; \
-	ftype*  one_p; \
-\
-	/* Initialize BLIS. */ \
-	bli_init_auto(); \
-\
-	/* Perform BLAS parameter checking. */ \
-	PASTEBLACHK(blasname) \
-	( \
-	  MKSTR(ch), \
-	  MKSTR(blasname), \
-	  uploa, \
-	  transa, \
-	  diaga, \
-	  m, \
-	  lda, \
-	  incx  \
-	); \
-\
-	/* Map BLAS chars to their corresponding BLIS enumerated type value. */ \
-	bli_param_map_netlib_to_blis_uplo( *uploa, &blis_uploa ); \
-	bli_param_map_netlib_to_blis_trans( *transa, &blis_transa ); \
-	bli_param_map_netlib_to_blis_diag( *diaga, &blis_diaga ); \
-\
-	/* Convert/typecast negative values of m to zero. */ \
-	bli_convert_blas_dim1( *m, m0 ); \
-\
-	/* If the input increments are negative, adjust the pointers so we can
-	   use positive increments instead. */ \
-	bli_convert_blas_incv( m0, (ftype*)x, *incx, x0, incx0 ); \
-\
-	/* Set the row and column strides of A. */ \
-	const inc_t rs_a = 1; \
-	const inc_t cs_a = *lda; \
-\
-	/* Acquire a pointer to the global scalar constant BLIS_ONE. */ \
-	one_p = PASTEMAC(ch,1); \
-\
-	/* Call BLIS interface. */ \
-	PASTEMAC2(ch,blisname,BLIS_TAPI_EX_SUF) \
-	( \
-	  blis_uploa, \
-	  blis_transa, \
-	  blis_diaga, \
-	  m0, \
-	  one_p, \
-	  (ftype*)a,  rs_a, cs_a, \
-	  x0, incx0, \
-	  NULL, \
-	  NULL  \
-	); \
-\
-	/* Finalize BLIS. */ \
-	bli_finalize_auto(); \
-}
+       const ftype*    b, const f77_int* ldb, \
+       const ftype*    beta, \
+             ftype*    c, const f77_int* ldc  \
+     );
 
 #ifdef BLIS_ENABLE_BLAS
-INSERT_GENTFUNC_BLAS( trmv, trmv )
+INSERT_GENTPROTCO_BLAS( gemm3m )
 #endif
 

@@ -67,7 +67,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	const dim_t     mnr        = PASTECH2(mnr0, _, ch); \
-    const num_t     dt         = PASTEMAC(ch,type); \
+	const num_t     dt         = PASTEMAC(ch,type); \
 	const dim_t     cdim_max   = bli_cntx_get_blksz_def_dt( dt, mnr0, cntx ); \
 	const dim_t     dfac       = PASTECH2(bb0, _, ch); \
 \
@@ -80,18 +80,18 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		if ( inca == 1 ) \
 		{ \
 			if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2js ); \
-            else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2s ); \
+			else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, 1, scal2s ); \
 		} \
 		else \
 		{ \
 			if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2js ); \
-            else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2s ); \
+			else                        PACKM_BODY( ctype, ch, PRAGMA_SIMD, mnr, inca, scal2s ); \
 		} \
 	} \
 	else /* if ( cdim < mnr ) */ \
 	{ \
 		if ( bli_is_conj( conja ) ) PACKM_BODY( ctype, ch, , cdim, inca, scal2js ); \
-        else                        PACKM_BODY( ctype, ch, , cdim, inca, scal2s ); \
+		else                        PACKM_BODY( ctype, ch, , cdim, inca, scal2s ); \
 	} \
 \
 	PASTEMAC(ch,set0s_edge) \

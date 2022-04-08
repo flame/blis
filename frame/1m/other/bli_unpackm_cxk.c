@@ -50,7 +50,8 @@ void PASTEMAC(ch,opname) \
      ) \
 { \
 	num_t dt     = PASTEMAC(ch,type); \
-	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER : BLIS_UNPACKM_MRXK_KER; \
+	ukr_t ker_id = bli_is_col_packed( schema ) ? BLIS_UNPACKM_NRXK_KER \
+	                                           : BLIS_UNPACKM_MRXK_KER; \
 \
 	PASTECH2(ch,opname,_ker_ft) f; \
 \

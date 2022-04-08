@@ -86,8 +86,14 @@ PASTEMAC(d,fprintm)( stdout, "gemmtrsm_ukr: b11", mr, 2*nr, \
 	ctype           ct[ BLIS_STACK_BUF_MAX_SIZE \
 	                    / sizeof( ctype ) ] \
 	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	/* FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
-	   instead? */ \
+	/* to FGVZ: Should we be querying the preference of BLIS_GEMMTRSM_?_UKR
+	   instead?
+
+	   to DAM: Given that this reference kernel is implemented in terms of gemm,
+	   I think that is the preference we want to query. There might be other
+	   circumstances where we would want the gemmtrsm_? operations to have
+	   and exercise their own IO preferences -- I'd have to think about it --
+	   but this doesn't seem to be one of them. */ \
 	const bool      col_pref    = bli_cntx_ukr_prefers_cols_dt( dt, BLIS_GEMM_VIR_UKR, cntx ); \
 	const inc_t     rs_ct       = ( col_pref ? 1 : nr ); \
 	const inc_t     cs_ct       = ( col_pref ? mr : 1 ); \

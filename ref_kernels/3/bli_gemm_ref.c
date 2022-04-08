@@ -180,7 +180,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	} \
 \
 	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
-                        / sizeof( ctype ) ] \
+	                / sizeof( ctype ) ] \
 	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 	const inc_t rs_ab  = nr; \
 	const inc_t cs_ab  = 1; \

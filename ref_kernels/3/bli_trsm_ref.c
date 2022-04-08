@@ -111,8 +111,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
 \
 			/* Store the local value back to b11. */ \
-		    for ( dim_t d = 0; d < cs_b; ++d ) \
-			    PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
+			for ( dim_t d = 0; d < cs_b; ++d ) \
+				PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
 		} \
 	} \
 }
@@ -195,8 +195,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			PASTEMAC(ch,copys)( beta11c, *gamma11 ); \
 \
 			/* Store the local value back to b11. */ \
-		    for ( dim_t d = 0; d < cs_b; ++d ) \
-			    PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
+			for ( dim_t d = 0; d < cs_b; ++d ) \
+				PASTEMAC(ch,copys)( beta11c, *(beta11 + d) ); \
 		} \
 	} \
 }
