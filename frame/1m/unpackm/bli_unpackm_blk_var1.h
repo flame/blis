@@ -59,7 +59,7 @@ void PASTEMAC(ch,varname) \
        void*   p, inc_t rs_p, inc_t cs_p, \
                   dim_t pd_p, inc_t ps_p, \
        void*   c, inc_t rs_c, inc_t cs_c, \
-       const cntx_t* cntx  \
+       cntx_t* cntx  \
      );
 
 INSERT_GENTPROT_BASIC0( unpackm_blk_var1 )

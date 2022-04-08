@@ -122,7 +122,7 @@ void bli_unpackm_blk_var1
 	  buf_p, rs_p, cs_p,
 	         pd_p, ps_p,
 	  buf_c, rs_c, cs_c,
-	  cntx
+	  ( cntx_t* )cntx
 	);
 }
 
@@ -144,7 +144,7 @@ void PASTEMAC(ch,varname) \
        void*   p, inc_t rs_p, inc_t cs_p, \
                   dim_t pd_p, inc_t ps_p, \
        void*   c, inc_t rs_c, inc_t cs_c, \
-       const cntx_t* cntx  \
+       cntx_t* cntx  \
      ) \
 { \
 	ctype* one    = PASTEMAC(ch,1); \
