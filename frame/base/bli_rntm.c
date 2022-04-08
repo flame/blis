@@ -631,13 +631,22 @@ void bli_nthreads_optimum(
 	  else
 	    n_threads_ideal = n_threads;
 	}
-	else if( family == BLIS_TRSM && bli_obj_is_double(c))
+	else if( family == BLIS_TRSM && bli_obj_is_double(c) )
 	{
 	  dim_t m = bli_obj_length(c);
 	  dim_t n = bli_obj_width(c);
 
-	  if(m<=512 && n<=512)
-	    n_threads_ideal = 4;
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+          if ( (m <= 300) && (n <= 300) )
+              n_threads_ideal = 8;
+          else if ( (m <= 400) && (n <= 400) )
+              n_threads_ideal = 16;
+          else if ( (m <= 900) && (n <= 900) )
+              n_threads_ideal = 32;
+#else
+          if ( (m <= 512) && (n <= 512) )
+              n_threads_ideal = 4;
+#endif
 	}
 	else if( family == BLIS_TRSM && bli_obj_is_dcomplex(c))
         {

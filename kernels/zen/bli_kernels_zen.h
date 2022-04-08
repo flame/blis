@@ -321,7 +321,7 @@ void bli_dgemm_ref_k1_nn
       double* c, const inc_t ldc
      );
 
- err_t bli_trsm_small
+err_t bli_trsm_small
      (
        side_t  side,
        obj_t*  alpha,
@@ -330,6 +330,18 @@ void bli_dgemm_ref_k1_nn
        cntx_t* cntx,
        cntl_t* cntl
      );
+
+#ifdef BLIS_ENABLE_OPENMP
+err_t bli_trsm_small_mt
+     (
+       side_t  side,
+       obj_t*  alpha,
+       obj_t*  a,
+       obj_t*  b,
+       cntx_t* cntx,
+       cntl_t* cntl
+     );
+#endif
 
 // threshold functions
 bool bli_cntx_gemmtsup_thresh_is_met_zen
