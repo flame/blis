@@ -170,7 +170,6 @@ void PASTEMAC(ch,varname) \
 	dim_t* n_panel_full; \
 	pack_t schema; \
 \
-\
 	/* If c needs a transposition, induce it so that we can more simply
 	   express the remaining parameters and code. */ \
 	if ( bli_does_trans( transc ) ) \
