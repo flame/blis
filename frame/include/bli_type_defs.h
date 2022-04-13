@@ -89,9 +89,13 @@ typedef unsigned long int guint_t;
 // -- Boolean type --
 
 // NOTE: bool_t is no longer used and has been replaced with C99's bool type.
+// Not defining the bool type for C++ code in windows platform to avoid
+// duplicate definition build error.
 #ifdef _WIN32
+#ifndef __cplusplus
 #undef bool
 typedef  gint_t  bool;
+#endif
 #endif
 // BLIS uses TRUE and FALSE macro constants as possible boolean values, but we
 // define these macros in terms of true and false, respectively, which are
