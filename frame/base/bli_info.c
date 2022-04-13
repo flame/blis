@@ -43,9 +43,8 @@
 static const char* bli_version_str       = BLIS_VERSION_STRING;
 static const char* bli_int_type_size_str = STRINGIFY_INT( BLIS_INT_TYPE_SIZE );
 
-const char* bli_info_get_version_str( void )                { return bli_version_str; }
-const char* bli_info_get_int_type_size_str( void )          { return bli_int_type_size_str; }
-
+const char* bli_info_get_version_str( void )          { return bli_version_str; }
+const char* bli_info_get_int_type_size_str( void )    { return bli_int_type_size_str; }
 
 
 // -- General configuration-related --------------------------------------------
@@ -158,7 +157,6 @@ gint_t bli_info_get_enable_sandbox( void )
 }
 
 
-
 // -- Kernel implementation-related --------------------------------------------
 
 
@@ -174,7 +172,6 @@ const char* bli_info_get_trsm_l_ukr_impl_string( ind_t method, num_t dt )
 { bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_L_UKR,     method, dt ); }
 const char* bli_info_get_trsm_u_ukr_impl_string( ind_t method, num_t dt )
 { bli_init_once(); return bli_gks_l3_ukr_impl_string( BLIS_TRSM_U_UKR,     method, dt ); }
-
 
 
 // -- BLIS implementation query (level-3) --------------------------------------

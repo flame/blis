@@ -112,8 +112,8 @@ void bli_gemmt_l_ker_var2
 	// Index into the type combination array to extract the correct
 	// function pointer.
 	ftypes[dt_exec]
-    (
-      diagoffc,
+	(
+	  diagoffc,
 	  schema_a,
 	  schema_b,
 	  m,

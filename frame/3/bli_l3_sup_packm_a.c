@@ -40,14 +40,14 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
+             bool       will_pack, \
+             packbuf_t  pack_buf_type, \
+             dim_t      m, \
+             dim_t      k, \
+             dim_t      mr, \
        const cntx_t*    cntx, \
-       rntm_t*          rntm, \
-       mem_t*           mem, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
        const thrinfo_t* thread  \
      ) \
 { \
@@ -174,9 +174,9 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             did_pack, \
-       rntm_t*          rntm, \
-       mem_t*           mem, \
+             bool       did_pack, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
        const thrinfo_t* thread  \
      ) \
 { \
@@ -212,17 +212,17 @@ INSERT_GENTFUNC_BASIC0( packm_sup_finalize_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       stor3_t          stor_id, \
+       bool    will_pack, \
+       stor3_t stor_id, \
        pack_t* schema, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
+       dim_t   m, \
+       dim_t   k, \
+       dim_t   mr, \
        dim_t*  m_max, \
        dim_t*  k_max, \
-       ctype*           x, inc_t           rs_x, inc_t           cs_x, \
-       ctype**          p, inc_t* rs_p, inc_t* cs_p, \
-                           dim_t* pd_p, inc_t* ps_p, \
+       ctype*  a, inc_t  rs_a, inc_t  cs_a, \
+       ctype** p, inc_t* rs_p, inc_t* cs_p, \
+                  dim_t* pd_p, inc_t* ps_p, \
        cntx_t* cntx, \
        mem_t*  mem, \
        thrinfo_t* thread  \
@@ -238,11 +238,11 @@ void PASTEMAC(ch,opname) \
 		   source matrix A directly). */ \
 		{ \
 			/* Use the strides of the source matrix as the final values. */ \
-			*rs_p = rs_x; \
-			*cs_p = cs_x; \
+			*rs_p = rs_a; \
+			*cs_p = cs_a; \
 \
 			*pd_p = mr; \
-			*ps_p = mr * rs_x; \
+			*ps_p = mr * rs_a; \
 \
 			/* Set the schema to "not packed" to indicate that packing will be
 			   skipped. */ \
@@ -251,7 +251,7 @@ void PASTEMAC(ch,opname) \
 \
 		/* Since we won't be packing, simply update the buffer address provided
 		   by the caller to point to source matrix. */ \
-		*p = x; \
+		*p = a; \
 	} \
 	else /* if ( will_pack == TRUE ) */ \
 	{ \
@@ -311,22 +311,22 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       stor3_t          stor_id, \
-       trans_t          transc, \
-       dim_t            m_alloc, \
-       dim_t            k_alloc, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
-       ctype*  kappa, \
-       ctype*  a, inc_t           rs_a, inc_t           cs_a, \
-       ctype** p, inc_t* rs_p, inc_t* cs_p, \
-                                                 inc_t* ps_p, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       mem_t*  mem, \
+       bool      will_pack, \
+       packbuf_t pack_buf_type, \
+       stor3_t   stor_id, \
+       trans_t   transc, \
+       dim_t     m_alloc, \
+       dim_t     k_alloc, \
+       dim_t     m, \
+       dim_t     k, \
+       dim_t     mr, \
+       ctype*    kappa, \
+       ctype*    a, inc_t  rs_a, inc_t  cs_a, \
+       ctype**   p, inc_t* rs_p, inc_t* cs_p, \
+                                 inc_t* ps_p, \
+       cntx_t*   cntx, \
+       rntm_t*   rntm, \
+       mem_t*    mem, \
        thrinfo_t* thread  \
      ) \
 { \

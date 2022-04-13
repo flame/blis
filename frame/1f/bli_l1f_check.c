@@ -40,11 +40,11 @@
 
 void bli_axpy2v_check
      (
-       const obj_t*  alphax,
-       const obj_t*  alphay,
-       const obj_t*  x,
-       const obj_t*  y,
-       const obj_t*  z
+       const obj_t* alphax,
+       const obj_t* alphay,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* z
      )
 {
 	err_t e_val;
@@ -118,10 +118,10 @@ void bli_axpy2v_check
 
 void bli_axpyf_check
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  x,
-       const obj_t*  y
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;
@@ -186,12 +186,12 @@ void bli_axpyf_check
 
 void bli_dotaxpyv_check
      (
-       const obj_t*  alpha,
-       const obj_t*  xt,
-       const obj_t*  x,
-       const obj_t*  y,
-       const obj_t*  rho,
-       const obj_t*  z
+       const obj_t* alpha,
+       const obj_t* xt,
+       const obj_t* x,
+       const obj_t* y,
+       const obj_t* rho,
+       const obj_t* z
      )
 {
 	err_t e_val;
@@ -288,14 +288,14 @@ void bli_dotaxpyv_check
 
 void bli_dotxaxpyf_check
      (
-       const obj_t*  alpha,
-       const obj_t*  at,
-       const obj_t*  a,
-       const obj_t*  w,
-       const obj_t*  x,
-       const obj_t*  beta,
-       const obj_t*  y,
-       const obj_t*  z
+       const obj_t* alpha,
+       const obj_t* at,
+       const obj_t* a,
+       const obj_t* w,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y,
+       const obj_t* z
      )
 {
 	err_t e_val;
@@ -425,11 +425,11 @@ void bli_dotxaxpyf_check
 
 void bli_dotxf_check
      (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  x,
-       const obj_t*  beta,
-       const obj_t*  y
+       const obj_t* alpha,
+       const obj_t* a,
+       const obj_t* x,
+       const obj_t* beta,
+       const obj_t* y
      )
 {
 	err_t e_val;

@@ -42,8 +42,8 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  asum  \
+       const obj_t* x, \
+       const obj_t* asum  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -55,7 +55,7 @@ GENPROT( asumv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  a  \
+       const obj_t* a  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -69,8 +69,8 @@ GENPROT( mktrim )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -84,8 +84,8 @@ GENPROT( normiv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -99,7 +99,7 @@ GENPROT( normim )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -112,7 +112,7 @@ GENPROT( randnv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -125,9 +125,9 @@ GENPROT( randnm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  scale, \
-       const obj_t*  sumsq  \
+       const obj_t* x, \
+       const obj_t* scale, \
+       const obj_t* sumsq  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -176,10 +176,10 @@ GENPROT( fprintm )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       const char*   s1, \
-       const obj_t*  x, \
-       const char*   format, \
-       const char*   s2  \
+       const char*  s1, \
+       const obj_t* x, \
+       const char*  format, \
+       const char*  s2  \
      );
 
 GENPROT( printv )

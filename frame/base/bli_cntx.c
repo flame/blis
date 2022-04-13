@@ -262,7 +262,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ]; break;
 			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ]; break;
 			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ]; break;
-		    default:                  ukrs = NULL; break;
+			default:                  ukrs = NULL; break;
 		};
 
 		if ( ukrs )

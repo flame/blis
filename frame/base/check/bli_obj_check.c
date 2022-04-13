@@ -109,8 +109,7 @@ void bli_obj_attach_buffer_check( const void*  p,
 	bli_check_error_code( e_val );
 }
 
-void bli_obj_create_scalar_check(       num_t  dt,
-                                  const obj_t* obj )
+void bli_obj_create_scalar_check( num_t dt, const obj_t* obj )
 {
 	err_t e_val;
 

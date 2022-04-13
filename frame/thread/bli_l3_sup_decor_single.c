@@ -136,7 +136,6 @@ err_t bli_l3_sup_thread_decorator
 	bli_sba_checkin_array( array );
 
 	return BLIS_SUCCESS;
-
 }
 
 #endif

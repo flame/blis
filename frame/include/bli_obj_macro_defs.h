@@ -352,14 +352,14 @@ BLIS_INLINE bool bli_obj_is_row_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_ROWS    ) );
+	                                               BLIS_BITVAL_PACKED_ROWS    ) );
 }
 
 BLIS_INLINE bool bli_obj_is_col_packed( const obj_t* obj )
 {
 	return ( bool )
 	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_COLUMNS ) );
+	                                               BLIS_BITVAL_PACKED_COLUMNS ) );
 }
 
 BLIS_INLINE bool bli_obj_is_panel_packed( const obj_t* obj )
@@ -1332,7 +1332,7 @@ BLIS_INLINE void* bli_obj_buffer_at_off( const obj_t* obj )
 
 BLIS_INLINE const void* bli_obj_buffer_for_const( num_t dt, const obj_t* obj )
 {
-    void* p;
+	void* p;
 
 	if      ( dt == BLIS_FLOAT    ) p = &((( constdata_t* )bli_obj_buffer( obj ))->s);
 	else if ( dt == BLIS_DOUBLE   ) p = &((( constdata_t* )bli_obj_buffer( obj ))->d);
@@ -1360,8 +1360,8 @@ BLIS_INLINE void* bli_obj_buffer_for_1x1( num_t dt, const obj_t* obj )
 
 BLIS_INLINE void bli_obj_reset_origin( obj_t* obj )
 {
-    bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
-    bli_obj_set_offs( 0, 0, obj );
+	bli_obj_set_buffer( bli_obj_buffer_at_off( obj ), obj );
+	bli_obj_set_offs( 0, 0, obj );
 	bli_obj_set_as_root( obj );
 }
 

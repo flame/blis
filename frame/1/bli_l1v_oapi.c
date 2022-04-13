@@ -64,7 +64,7 @@ void PASTEMAC(opname,EX_SUF) \
 	inc_t     inc_y     = bli_obj_vector_inc( y ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, y ); \
+		PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -110,7 +110,7 @@ void PASTEMAC(opname,EX_SUF) \
 	void*     buf_index = bli_obj_buffer_at_off( index ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, index ); \
+		PASTEMAC(opname,_check)( x, index ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -119,11 +119,11 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   buf_x, incx, \
-	   buf_index, \
-	   cntx, \
-	   rntm  \
+	  n, \
+	  buf_x, incx, \
+	  buf_index, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -162,7 +162,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x, beta, y ); \
+		PASTEMAC(opname,_check)( alpha, x, beta, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -180,14 +180,14 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, inc_x, \
-	   buf_beta, \
-	   buf_y, inc_y, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, inc_x, \
+	  buf_beta, \
+	  buf_y, inc_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -223,7 +223,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x, y ); \
+		PASTEMAC(opname,_check)( alpha, x, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -238,13 +238,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, inc_x, \
-	   buf_y, inc_y, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, inc_x, \
+	  buf_y, inc_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -279,7 +279,7 @@ void PASTEMAC(opname,EX_SUF) \
 	void*     buf_rho   = bli_obj_buffer_at_off( rho ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, y, rho ); \
+		PASTEMAC(opname,_check)( x, y, rho ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -288,14 +288,14 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   buf_x, inc_x, \
-	   buf_y, inc_y, \
-	   buf_rho, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  buf_x, inc_x, \
+	  buf_y, inc_y, \
+	  buf_rho, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -337,7 +337,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x, y, beta, rho ); \
+		PASTEMAC(opname,_check)( alpha, x, y, beta, rho ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -355,16 +355,16 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   conjy, \
-	   n, \
-	   buf_alpha, \
-	   buf_x, inc_x, \
-	   buf_y, inc_y, \
-	   buf_beta, \
-	   buf_rho, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  conjy, \
+	  n, \
+	  buf_alpha, \
+	  buf_x, inc_x, \
+	  buf_y, inc_y, \
+	  buf_beta, \
+	  buf_rho, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -391,7 +391,7 @@ void PASTEMAC(opname,EX_SUF) \
 	inc_t     inc_x     = bli_obj_vector_inc( x ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x ); \
+		PASTEMAC(opname,_check)( x ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -400,10 +400,10 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   buf_x, inc_x, \
-	   cntx, \
-	   rntm  \
+	  n, \
+	  buf_x, inc_x, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -436,7 +436,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     alpha_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( alpha, x ); \
+		PASTEMAC(opname,_check)( alpha, x ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -451,12 +451,12 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
-	   n, \
-	   buf_alpha, \
-	   buf_x, inc_x, \
-	   cntx, \
-	   rntm  \
+	  BLIS_NO_CONJUGATE, /* internal conjugation applied during copy-cast. */ \
+	  n, \
+	  buf_alpha, \
+	  buf_x, inc_x, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -487,7 +487,7 @@ void PASTEMAC(opname,EX_SUF) \
 	inc_t     inc_y     = bli_obj_vector_inc( y ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, y ); \
+		PASTEMAC(opname,_check)( x, y ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -496,11 +496,11 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   n, \
-	   buf_x, inc_x, \
-	   buf_y, inc_y, \
-	   cntx, \
-	   rntm  \
+	  n, \
+	  buf_x, inc_x, \
+	  buf_y, inc_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 
@@ -536,7 +536,7 @@ void PASTEMAC(opname,EX_SUF) \
 	obj_t     beta_local; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( x, beta, y ); \
+		PASTEMAC(opname,_check)( x, beta, y ); \
 \
 	/* Create local copy-casts of scalars (and apply internal conjugation
 	   as needed). */ \
@@ -551,13 +551,13 @@ void PASTEMAC(opname,EX_SUF) \
 \
 	f \
 	( \
-	   conjx, \
-	   n, \
-	   buf_x, inc_x, \
-	   buf_beta, \
-	   buf_y, inc_y, \
-	   cntx, \
-	   rntm  \
+	  conjx, \
+	  n, \
+	  buf_x, inc_x, \
+	  buf_beta, \
+	  buf_y, inc_y, \
+	  cntx, \
+	  rntm  \
 	); \
 }
 

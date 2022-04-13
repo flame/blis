@@ -118,7 +118,7 @@ void bli_herk_check
      )
 {
 	err_t e_val;
-    obj_t ah;
+	obj_t ah;
 
 	// Alias A to A^H so we can perform dimension checks.
 	bli_obj_alias_with_trans( BLIS_CONJ_TRANSPOSE, a, &ah );

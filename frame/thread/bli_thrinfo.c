@@ -51,9 +51,9 @@ thrinfo_t* bli_thrinfo_create
 	printf( "bli_thrinfo_create(): " );
 	#endif
 
-    thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
+	thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
 
-    bli_thrinfo_init
+	bli_thrinfo_init
 	(
 	  thread,
 	  ocomm, ocomm_id,

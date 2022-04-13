@@ -108,14 +108,14 @@ INSERT_GENTDEF( scal2m )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             conj_t  conjalpha, \
-             doff_t  diagoffx, \
-             diag_t  diagx, \
-             uplo_t  uplox, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t rs_x, inc_t cs_x  \
+             conj_t conjalpha, \
+             doff_t diagoffx, \
+             diag_t diagx, \
+             uplo_t uplox, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+             ctype* x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      );
 

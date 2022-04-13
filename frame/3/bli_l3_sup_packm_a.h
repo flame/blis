@@ -38,14 +38,14 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
+             bool       will_pack, \
+             packbuf_t  pack_buf_type, \
+             dim_t      m, \
+             dim_t      k, \
+             dim_t      mr, \
        const cntx_t*    cntx, \
-       rntm_t*          rntm, \
-       mem_t*           mem, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
        const thrinfo_t* thread  \
      ); \
 
@@ -57,9 +57,9 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             did_pack, \
-       rntm_t*          rntm, \
-       mem_t*           mem, \
+             bool       did_pack, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
        const thrinfo_t* thread  \
      ); \
 
@@ -71,17 +71,17 @@ INSERT_GENTPROT_BASIC0( packm_sup_finalize_mem_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       stor3_t          stor_id, \
+       bool    will_pack, \
+       stor3_t stor_id, \
        pack_t* schema, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
+       dim_t   m, \
+       dim_t   k, \
+       dim_t   mr, \
        dim_t*  m_max, \
        dim_t*  k_max, \
-       ctype*           a, inc_t           rs_a, inc_t           cs_a, \
-       ctype**          p, inc_t* rs_p, inc_t* cs_p, \
-                           dim_t* pd_p, inc_t* ps_p, \
+       ctype*  a, inc_t  rs_a, inc_t  cs_a, \
+       ctype** p, inc_t* rs_p, inc_t* cs_p, \
+                  dim_t* pd_p, inc_t* ps_p, \
        cntx_t* cntx, \
        mem_t*  mem, \
        thrinfo_t* thread  \
@@ -95,22 +95,22 @@ INSERT_GENTPROT_BASIC0( packm_sup_init_a )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       stor3_t          stor_id, \
-       trans_t          transc, \
-       dim_t            m_alloc, \
-       dim_t            k_alloc, \
-       dim_t            m, \
-       dim_t            k, \
-       dim_t            mr, \
-       ctype*  kappa, \
-       ctype*  a, inc_t           rs_a, inc_t           cs_a, \
-       ctype** p, inc_t* rs_p, inc_t* cs_p, \
-                                                 inc_t* ps_p, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       mem_t*  mem, \
+       bool      will_pack, \
+       packbuf_t pack_buf_type, \
+       stor3_t   stor_id, \
+       trans_t   transc, \
+       dim_t     m_alloc, \
+       dim_t     k_alloc, \
+       dim_t     m, \
+       dim_t     k, \
+       dim_t     mr, \
+       ctype*    kappa, \
+       ctype*    a, inc_t  rs_a, inc_t  cs_a, \
+       ctype**   p, inc_t* rs_p, inc_t* cs_p, \
+                                 inc_t* ps_p, \
+       cntx_t*   cntx, \
+       rntm_t*   rntm, \
+       mem_t*    mem, \
        thrinfo_t* thread  \
      ); \
 

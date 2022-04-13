@@ -269,7 +269,7 @@ void bli_gemm_front
 	// If we created a temporary matrix conformal to C for whatever reason,
 	// we copy/accumulate the result back to C and then release the object.
 	if ( use_ct )
-    {
+	{
 		obj_t beta_local;
 
 		bli_obj_scalar_detach( &c_local, &beta_local );

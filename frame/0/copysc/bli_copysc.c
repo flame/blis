@@ -69,12 +69,12 @@ void PASTEMAC0(opname) \
 	void*  buf_psi = bli_obj_buffer_at_off( psi ); \
 \
 	num_t  dt_chi; \
-    void*  buf_chi; \
+	void*  buf_chi; \
 \
 	FUNCPTR_T f; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, psi ); \
+		PASTEMAC(opname,_check)( chi, psi ); \
 \
 	/* If chi is a scalar constant, use dt_psi to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded

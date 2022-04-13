@@ -258,10 +258,10 @@ dim_t bli_determine_blocksize_f
        const cntx_t* cntx
      )
 {
-	num_t    dt;
+	num_t          dt;
 	const blksz_t* bsize;
-	dim_t    b_alg, b_max;
-	dim_t    b_use;
+	dim_t          b_alg, b_max;
+	dim_t          b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
@@ -284,10 +284,10 @@ dim_t bli_determine_blocksize_b
        const cntx_t* cntx
      )
 {
-	num_t    dt;
+	num_t          dt;
 	const blksz_t* bsize;
-	dim_t    b_alg, b_max;
-	dim_t    b_use;
+	dim_t          b_alg, b_max;
+	dim_t          b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.

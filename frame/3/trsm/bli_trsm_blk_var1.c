@@ -140,7 +140,7 @@ void bli_trsm_blk_var1
 	bli_thread_range_mdim
 	(
 	  direct, thread, &ax1, b, &cx1, cntl, cntx,
-      &my_start, &my_end
+	  &my_start, &my_end
 	);
 
 #ifdef PRINT

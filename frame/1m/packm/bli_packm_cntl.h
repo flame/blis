@@ -35,14 +35,14 @@
 
 struct packm_params_s
 {
-	uint64_t      size; // size field must be present and come first.
-	bszid_t       bmid_m;
-	bszid_t       bmid_n;
-	bool          does_invert_diag;
-	bool          rev_iter_if_upper;
-	bool          rev_iter_if_lower;
-	pack_t        pack_schema;
-	packbuf_t     pack_buf_type;
+	uint64_t  size; // size field must be present and come first.
+	bszid_t   bmid_m;
+	bszid_t   bmid_n;
+	bool      does_invert_diag;
+	bool      rev_iter_if_upper;
+	bool      rev_iter_if_lower;
+	pack_t    pack_schema;
+	packbuf_t pack_buf_type;
 };
 typedef struct packm_params_s packm_params_t;
 

@@ -634,8 +634,8 @@ void bli_gks_init_ref_cntx
 
 bool bli_gks_cntx_l3_nat_ukr_is_ref
      (
-       num_t         dt,
-       ukr_t         ukr_id,
+             num_t   dt,
+             ukr_t   ukr_id,
        const cntx_t* cntx
      )
 {

@@ -65,14 +65,14 @@ INSERT_GENTDEF( gemv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  a, inc_t rs_a, inc_t cs_a  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -85,15 +85,15 @@ INSERT_GENTDEF( ger )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             uplo_t  uploa, \
-             conj_t  conja, \
-             conj_t  conjx, \
-             dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t rs_a, inc_t cs_a, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy  \
+             uplo_t uploa, \
+             conj_t conja, \
+             conj_t conjx, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* a, inc_t rs_a, inc_t cs_a, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -143,14 +143,14 @@ INSERT_GENTDEF( syr )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-             uplo_t  uploa, \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  a, inc_t rs_a, inc_t cs_a  \
+             uplo_t uploa, \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      );
 

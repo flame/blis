@@ -86,9 +86,9 @@ INSERT_GENTFUNCR_BASIC0( asumv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t  uploa, \
-       dim_t   m, \
-       ctype*  a, inc_t rs_a, inc_t cs_a  \
+       uplo_t uploa, \
+       dim_t  m, \
+       ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -218,8 +218,8 @@ INSERT_GENTFUNCR_BASIC0( normim )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx  \
+       dim_t  n, \
+       ctype* x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -274,11 +274,11 @@ INSERT_GENTFUNCR_BASIC0( randnv )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       uplo_t  uplox, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       doff_t diagoffx, \
+       uplo_t uplox, \
+       dim_t  m, \
+       dim_t  n, \
+       ctype* x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \

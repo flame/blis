@@ -151,8 +151,8 @@ bool bli_ind_oper_is_impl( opid_t oper, ind_t method )
 		// All other operations should be reported as not implemented,
 		// unless the requested check was for BLIS_NAT, in which case
 		// all operations are implemented.
-	    if ( method == BLIS_NAT ) is_impl = TRUE;
-	    else                      is_impl = FALSE;
+		if ( method == BLIS_NAT ) is_impl = TRUE;
+		else                      is_impl = FALSE;
 	}
 
 	return is_impl;

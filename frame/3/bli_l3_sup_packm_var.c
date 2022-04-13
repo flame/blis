@@ -44,16 +44,16 @@
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            m_max, \
-       dim_t            n_max, \
+       trans_t transc, \
+       pack_t  schema, \
+       dim_t   m, \
+       dim_t   n, \
+       dim_t   m_max, \
+       dim_t   n_max, \
        ctype*  kappa, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
        ctype*  p, inc_t rs_p, inc_t cs_p, \
-                           dim_t pd_p, inc_t ps_p, \
+                  dim_t pd_p, inc_t ps_p, \
        cntx_t* cntx, \
        thrinfo_t* thread  \
      ) \
@@ -62,21 +62,21 @@ void PASTEMAC(ch,varname) \
 	ctype* c_cast     = c; \
 	ctype* p_cast     = p; \
 \
-	dim_t           iter_dim; \
-	dim_t           n_iter; \
-	dim_t           it, ic; \
-	dim_t           ic0; \
-	doff_t          ic_inc; \
-	dim_t           panel_len_full; \
-	dim_t           panel_len_i; \
-	dim_t           panel_len_max; \
-	dim_t           panel_len_max_i; \
-	dim_t           panel_dim_i; \
-	dim_t           panel_dim_max; \
-	inc_t           vs_c; \
-	inc_t           ldc; \
-	inc_t           ldp, p_inc; \
-	conj_t          conjc; \
+	dim_t  iter_dim; \
+	dim_t  n_iter; \
+	dim_t  it, ic; \
+	dim_t  ic0; \
+	doff_t ic_inc; \
+	dim_t  panel_len_full; \
+	dim_t  panel_len_i; \
+	dim_t  panel_len_max; \
+	dim_t  panel_len_max_i; \
+	dim_t  panel_dim_i; \
+	dim_t  panel_dim_max; \
+	inc_t  vs_c; \
+	inc_t  ldc; \
+	inc_t  ldp, p_inc; \
+	conj_t conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
@@ -317,10 +317,10 @@ bli_thread_barrier( thread ); \
 \
 void PASTEMAC(ch,varname) \
      ( \
-       trans_t          transc, \
-       pack_t           schema, \
-       dim_t            m, \
-       dim_t            n, \
+       trans_t transc, \
+       pack_t  schema, \
+       dim_t   m, \
+       dim_t   n, \
        ctype*  kappa, \
        ctype*  c, inc_t rs_c, inc_t cs_c, \
        ctype*  p, inc_t rs_p, inc_t cs_p, \
@@ -332,13 +332,13 @@ void PASTEMAC(ch,varname) \
 	ctype* c_cast     = c; \
 	ctype* p_cast     = p; \
 \
-	dim_t           iter_dim; \
-	dim_t           n_iter; \
-	dim_t           it; \
-	dim_t           vector_len; \
-	inc_t           incc, ldc; \
-	inc_t           incp, ldp; \
-	conj_t          conjc; \
+	dim_t  iter_dim; \
+	dim_t  n_iter; \
+	dim_t  it; \
+	dim_t  vector_len; \
+	inc_t  incc, ldc; \
+	inc_t  incp, ldp; \
+	conj_t conjc; \
 \
 \
 	/* Extract the conjugation bit from the transposition argument. */ \
