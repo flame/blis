@@ -41,10 +41,10 @@
 
 typedef void (*FUNCPTR_T)
      (
-       conj_t         conjx,
-       dim_t          n,
-       void* restrict x, inc_t inc_x,
-       void* restrict y, inc_t inc_y
+             conj_t conjx,
+             dim_t  n,
+       const void*  x, inc_t inc_x,
+             void*  y, inc_t inc_y
      );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,castv);
@@ -55,24 +55,22 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,castv);
 
 void bli_castv
      (
-       obj_t* x,
-       obj_t* y
+       const obj_t* x,
+       const obj_t* y
      )
 {
-	num_t     dt_x     = bli_obj_dt( x );
-	num_t     dt_y     = bli_obj_dt( y );
+	const num_t  dt_x  = bli_obj_dt( x );
+	const num_t  dt_y  = bli_obj_dt( y );
 
-	conj_t    conjx    = bli_obj_conj_status( x );
+	const conj_t conjx = bli_obj_conj_status( x );
 
-	dim_t     n        = bli_obj_vector_dim( x );
+	const dim_t  n     = bli_obj_vector_dim( x );
 
-	void*     buf_x    = bli_obj_buffer_at_off( x );
-	inc_t     inc_x    = bli_obj_vector_inc( x );
+	const void*  buf_x = bli_obj_buffer_at_off( x );
+	const inc_t  inc_x = bli_obj_vector_inc( x );
 
-	void*     buf_y    = bli_obj_buffer_at_off( y );
-	inc_t     inc_y    = bli_obj_vector_inc( y );
-
-	FUNCPTR_T f;
+	      void*  buf_y = bli_obj_buffer_at_off( y );
+	const inc_t  inc_y = bli_obj_vector_inc( y );
 
 	// Check parameters.
 	if ( bli_error_checking_is_enabled() )
@@ -89,10 +87,7 @@ void bli_castv
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_x][dt_y];
-
-	// Invoke the void pointer-based function.
-	f
+	ftypes[dt_x][dt_y]
 	(
 	  conjx,
 	  n,
@@ -112,15 +107,15 @@ void bli_castv
 \
 void PASTEMAC2(chx,chy,opname) \
      ( \
-       conj_t         conjx, \
-       dim_t          n, \
-       void* restrict x, inc_t incx, \
-       void* restrict y, inc_t incy  \
+             conj_t conjx, \
+             dim_t  n, \
+       const void*  x, inc_t incx, \
+             void*  y, inc_t incy  \
      ) \
 { \
-	ctype_x* restrict x1 = x; \
-	ctype_y* restrict y1 = y; \
-	dim_t             i; \
+	const ctype_x* restrict x1 = x; \
+	      ctype_y* restrict y1 = y; \
+	      dim_t             i; \
 \
 	if ( bli_is_conj( conjx ) ) \
 	{ \
@@ -175,8 +170,8 @@ INSERT_GENTFUNC2_MIXDP0( castv )
 
 void bli_castv_check
      (
-       obj_t* x,
-       obj_t* y
+       const obj_t* x,
+       const obj_t* y
      )
 {
 	err_t e_val;

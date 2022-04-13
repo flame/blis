@@ -47,8 +47,8 @@ void bli_sgemm_penryn_asm_8x4
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -522,8 +522,8 @@ void bli_dgemm_penryn_asm_4x4
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   a_next = bli_auxinfo_next_a( data );

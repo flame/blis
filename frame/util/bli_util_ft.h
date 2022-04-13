@@ -44,9 +44,9 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_r* asum  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* asum  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -76,9 +76,9 @@ INSERT_GENTDEF( mktrim )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_r* norm  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* norm  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -93,13 +93,13 @@ INSERT_GENTDEFR( normiv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       doff_t   diagoffx, \
-       diag_t   diagx, \
-       uplo_t   uplox, \
-       dim_t    m, \
-       dim_t    n, \
-       ctype*   x, inc_t rs_x, inc_t cs_x, \
-       ctype_r* norm  \
+             doff_t   diagoffx, \
+             diag_t   diagx, \
+             uplo_t   uplox, \
+             dim_t    m, \
+             dim_t    n, \
+       const ctype*   x, inc_t rs_x, inc_t cs_x, \
+             ctype_r* norm  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -114,12 +114,12 @@ INSERT_GENTDEFR( normim )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  n, \
-       ctype* x, inc_t incx, \
-       char*  format, \
-       char*  s2  \
+             FILE*  file, \
+       const char*  s1, \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+       const char*  format, \
+       const char*  s2  \
      );
 
 INSERT_GENTDEF( fprintv )
@@ -131,13 +131,13 @@ INSERT_GENTDEF( fprintv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       dim_t  m, \
-       dim_t  n, \
-       ctype* x, inc_t rs_x, inc_t cs_x, \
-       char*  format, \
-       char*  s2  \
+             FILE*  file, \
+       const char*  s1, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* x, inc_t rs_x, inc_t cs_x, \
+       const char*  format, \
+       const char*  s2  \
      );
 
 INSERT_GENTDEF( fprintm )
@@ -182,10 +182,10 @@ INSERT_GENTDEF( randnm )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       dim_t    n, \
-       ctype*   x, inc_t incx, \
-       ctype_r* scale, \
-       ctype_r* sumsq  \
+             dim_t    n, \
+       const ctype*   x, inc_t incx, \
+             ctype_r* scale, \
+             ctype_r* sumsq  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -204,10 +204,10 @@ INSERT_GENTDEFR( sumsqv )
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi, \
-       ctype*  psi, \
-       bool*   is_eq  \
+             conj_t conjchi, \
+       const ctype* chi, \
+       const ctype* psi, \
+             bool*  is_eq  \
      );
 
 INSERT_GENTDEF( eqsc )
@@ -219,11 +219,11 @@ INSERT_GENTDEF( eqsc )
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       conj_t  conjx, \
-       dim_t   n, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       bool*   is_eq  \
+             conj_t conjx, \
+             dim_t  n, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             bool*  is_eq  \
      );
 
 INSERT_GENTDEF( eqv )
@@ -235,15 +235,15 @@ INSERT_GENTDEF( eqv )
 \
 typedef void (*PASTECH2(ch,opname,tsuf)) \
      ( \
-       doff_t  diagoffx, \
-       diag_t  diagx, \
-       uplo_t  uplox, \
-       trans_t transx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x, \
-       ctype*  y, inc_t rs_y, inc_t cs_y, \
-       bool*   is_eq  \
+             doff_t  diagoffx, \
+             diag_t  diagx, \
+             uplo_t  uplox, \
+             trans_t transx, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  x, inc_t rs_x, inc_t cs_x, \
+       const ctype*  y, inc_t rs_y, inc_t cs_y, \
+             bool*   is_eq  \
      );
 
 INSERT_GENTDEF( eqm )

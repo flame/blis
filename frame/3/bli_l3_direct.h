@@ -34,10 +34,10 @@
 
 dir_t bli_l3_direct
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntl_t* cntl
      );
 
 // -----------------------------------------------------------------------------
@@ -47,9 +47,9 @@ dir_t bli_l3_direct
 \
 dir_t PASTEMAC0(opname) \
       ( \
-         obj_t*  a, \
-         obj_t*  b, \
-         obj_t*  c  \
+         const obj_t* a, \
+         const obj_t* b, \
+         const obj_t* c  \
       );
 
 GENPROT( gemm_direct )

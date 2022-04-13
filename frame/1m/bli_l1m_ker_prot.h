@@ -51,7 +51,7 @@ void PASTEMAC(ch,varname) \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      );
 
 
@@ -68,7 +68,7 @@ void PASTEMAC(ch,varname) \
        ctype*  restrict kappa, \
        ctype*  restrict p,             inc_t ldp, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
-       cntx_t* restrict cntx \
+       cntx_t*          cntx \
      );
 
 
@@ -89,6 +89,6 @@ void PASTEMAC(ch,varname) \
        ctype*  restrict kappa, \
        ctype*  restrict a, inc_t inca, inc_t lda, \
        ctype*  restrict p,             inc_t ldp, \
-       cntx_t* restrict cntx \
+       cntx_t*          cntx \
      );
 

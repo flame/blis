@@ -40,15 +40,15 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       dim_t            k, \
-       dim_t            n, \
-       dim_t            nr, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+             bool       will_pack, \
+             packbuf_t  pack_buf_type, \
+             dim_t      k, \
+             dim_t      n, \
+             dim_t      nr, \
+       const cntx_t*    cntx, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
+       const thrinfo_t* thread  \
      ) \
 { \
 	/* Inspect whether we are going to be packing matrix B. */ \
@@ -174,10 +174,10 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             did_pack, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+             bool       did_pack, \
+             rntm_t*    rntm, \
+             mem_t*     mem, \
+       const thrinfo_t* thread  \
      ) \
 { \
 	/* Inspect whether we previously packed matrix A. */ \
@@ -212,20 +212,20 @@ INSERT_GENTFUNC_BASIC0( packm_sup_finalize_mem_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       stor3_t          stor_id, \
-       pack_t* restrict schema, \
-       dim_t            k, \
-       dim_t            n, \
-       dim_t            nr, \
-       dim_t*  restrict k_max, \
-       dim_t*  restrict n_max, \
-       ctype*           x, inc_t           rs_x, inc_t           cs_x, \
-       ctype**          p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
-                           dim_t* restrict pd_p, inc_t* restrict ps_p, \
-       cntx_t* restrict cntx, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+       bool    will_pack, \
+       stor3_t stor_id, \
+       pack_t* schema, \
+       dim_t   k, \
+       dim_t   n, \
+       dim_t   nr, \
+       dim_t*  k_max, \
+       dim_t*  n_max, \
+       ctype*  b, inc_t  rs_b, inc_t  cs_b, \
+       ctype** p, inc_t* rs_p, inc_t* cs_p, \
+                  dim_t* pd_p, inc_t* ps_p, \
+       cntx_t* cntx, \
+       mem_t*  mem, \
+       thrinfo_t* thread  \
      ) \
 { \
 	/* Inspect whether we are going to be packing matrix B. */ \
@@ -238,11 +238,11 @@ void PASTEMAC(ch,opname) \
 		   source matrix B directly). */ \
 		{ \
 			/* Use the strides of the source matrix as the final values. */ \
-			*rs_p = rs_x; \
-			*cs_p = cs_x; \
+			*rs_p = rs_b; \
+			*cs_p = cs_b; \
 \
 			*pd_p = nr; \
-			*ps_p = nr * cs_x; \
+			*ps_p = nr * cs_b; \
 \
 			/* Set the schema to "not packed" to indicate that packing will be
 			   skipped. */ \
@@ -251,7 +251,7 @@ void PASTEMAC(ch,opname) \
 \
 		/* Since we won't be packing, simply update the buffer address provided
 		   by the caller to point to source matrix. */ \
-		*p = x; \
+		*p = b; \
 	} \
 	else /* if ( will_pack == TRUE ) */ \
 	{ \
@@ -311,23 +311,23 @@ INSERT_GENTFUNC_BASIC0( packm_sup_init_b )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       bool             will_pack, \
-       packbuf_t        pack_buf_type, \
-       stor3_t          stor_id, \
-       trans_t          transc, \
-       dim_t            k_alloc, \
-       dim_t            n_alloc, \
-       dim_t            k, \
-       dim_t            n, \
-       dim_t            nr, \
-       ctype*  restrict kappa, \
-       ctype*  restrict b, inc_t           rs_b, inc_t           cs_b, \
-       ctype** restrict p, inc_t* restrict rs_p, inc_t* restrict cs_p, \
-                                                 inc_t* restrict ps_p, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       mem_t*  restrict mem, \
-       thrinfo_t* restrict thread  \
+       bool      will_pack, \
+       packbuf_t pack_buf_type, \
+       stor3_t   stor_id, \
+       trans_t   transc, \
+       dim_t     k_alloc, \
+       dim_t     n_alloc, \
+       dim_t     k, \
+       dim_t     n, \
+       dim_t     nr, \
+       ctype*    kappa, \
+       ctype*    b, inc_t  rs_b, inc_t  cs_b, \
+       ctype**   p, inc_t* rs_p, inc_t* cs_p, \
+                                 inc_t* ps_p, \
+       cntx_t*   cntx, \
+       rntm_t*   rntm, \
+       mem_t*    mem, \
+       thrinfo_t* thread  \
      ) \
 { \
 	pack_t schema; \

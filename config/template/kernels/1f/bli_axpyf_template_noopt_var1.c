@@ -45,7 +45,7 @@ void bli_zaxpyf_template_noopt
        dcomplex* restrict a, inc_t inca, inc_t lda,
        dcomplex* restrict x, inc_t incx,
        dcomplex* restrict y, inc_t incy,
-       cntx_t*   restrict cntx
+       cntx_t*            cntx
      )
 {
 /*

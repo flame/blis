@@ -44,7 +44,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*  restrict alpha, \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ) \
 { \
 	if ( bli_zero_dim1( n ) ) return; \

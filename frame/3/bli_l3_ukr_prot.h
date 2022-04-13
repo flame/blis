@@ -50,8 +50,8 @@ void PASTEMAC(ch,opname) \
        ctype_in*  restrict b, \
        ctype_out* restrict beta, \
        ctype_out* restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      );
 
 
@@ -68,8 +68,8 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict bx1, \
        ctype*     restrict b11, \
        ctype*     restrict c11, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      );
 
 
@@ -80,7 +80,7 @@ void PASTEMAC(ch,opname) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      );
 

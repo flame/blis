@@ -40,12 +40,12 @@
 
 void bli_acquire_mpart
      (
-       dim_t     i,
-       dim_t     j,
-       dim_t     bm,
-       dim_t     bn,
-       obj_t*    parent,
-       obj_t*    child
+             dim_t  i,
+             dim_t  j,
+             dim_t  bm,
+             dim_t  bn,
+       const obj_t* parent,
+             obj_t* child
      )
 {
 	// Query the dimensions of the parent object.
@@ -83,11 +83,11 @@ void bli_acquire_mpart
 
 void bli_acquire_mpart_t2b
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -96,11 +96,11 @@ void bli_acquire_mpart_t2b
 
 void bli_acquire_mpart_b2t
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mdim( BLIS_BWD, req_part, i, b, obj, sub_obj );
@@ -109,12 +109,12 @@ void bli_acquire_mpart_b2t
 
 void bli_acquire_mpart_mdim
      (
-       dir_t     direct,
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -123,7 +123,6 @@ void bli_acquire_mpart_mdim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -235,7 +234,7 @@ void bli_acquire_mpart_mdim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -307,24 +306,24 @@ void bli_acquire_mpart_mdim
 
 void bli_acquire_mpart_l2r
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
-	bli_acquire_mpart_ndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
+	bli_acquire_mpart_ndim( BLIS_FWD, req_part, j, b, obj, sub_obj );
 }
 
 
 void bli_acquire_mpart_r2l
      (
-       subpart_t req_part,
-       dim_t     j,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_ndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -333,12 +332,12 @@ void bli_acquire_mpart_r2l
 
 void bli_acquire_mpart_ndim
      (
-       dir_t     direct,
-       subpart_t req_part,
-       dim_t     j,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -347,7 +346,6 @@ void bli_acquire_mpart_ndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -459,7 +457,7 @@ void bli_acquire_mpart_ndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -530,11 +528,11 @@ void bli_acquire_mpart_ndim
 
 void bli_acquire_mpart_tl2br
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_FWD, req_part, i, b, obj, sub_obj );
@@ -543,11 +541,11 @@ void bli_acquire_mpart_tl2br
 
 void bli_acquire_mpart_br2tl
      (
-       subpart_t req_part,
-       dim_t     j,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     j,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	bli_acquire_mpart_mndim( BLIS_BWD, req_part, j, b, obj, sub_obj );
@@ -556,12 +554,12 @@ void bli_acquire_mpart_br2tl
 
 void bli_acquire_mpart_mndim
      (
-       dir_t     direct,
-       subpart_t req_part,
-       dim_t     ij,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dir_t     direct,
+             subpart_t req_part,
+             dim_t     ij,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	dim_t  m;
@@ -571,7 +569,6 @@ void bli_acquire_mpart_mndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -712,7 +709,7 @@ void bli_acquire_mpart_mndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -798,11 +795,11 @@ void bli_acquire_mpart_mndim
 
 void bli_acquire_vpart_f2b
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -814,11 +811,11 @@ void bli_acquire_vpart_f2b
 
 void bli_acquire_vpart_b2f
      (
-       subpart_t req_part,
-       dim_t     i,
-       dim_t     b,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             subpart_t req_part,
+             dim_t     i,
+             dim_t     b,
+       const obj_t*    obj,
+             obj_t*    sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )
@@ -833,10 +830,10 @@ void bli_acquire_vpart_b2f
 
 void bli_acquire_mij
      (
-       dim_t     i,
-       dim_t     j,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dim_t  i,
+             dim_t  j,
+       const obj_t* obj,
+             obj_t* sub_obj
      )
 {
 	obj_t tmp_obj;
@@ -848,9 +845,9 @@ void bli_acquire_mij
 
 void bli_acquire_vi
      (
-       dim_t     i,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dim_t  i,
+       const obj_t* obj,
+             obj_t* sub_obj
      )
 {
 	if ( bli_obj_is_col_vector( obj ) )

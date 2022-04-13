@@ -36,7 +36,7 @@
 #include "blis.h"
 
 // Internal array to hold error strings.
-static char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
+static const char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 {
 	[-BLIS_INVALID_ERROR_CHECKING_LEVEL]         = "Invalid error checking level.",
 	[-BLIS_UNDEFINED_ERROR_CODE]                 = "Undefined error code.",
@@ -116,7 +116,7 @@ static char *bli_error_string[-BLIS_ERROR_CODE_MAX] =
 
 // -----------------------------------------------------------------------------
 
-void bli_print_msg( char* str, char* file, guint_t line )
+void bli_print_msg( const char* str, const char* file, guint_t line )
 {
 	fprintf( stderr, "\n" );
 	fprintf( stderr, "libblis: %s (line %lu):\n", file, ( long unsigned int )line );
@@ -156,7 +156,7 @@ bool bli_error_checking_is_enabled( void )
 	return bli_error_checking_level() != BLIS_NO_ERROR_CHECKING;
 }
 
-char* bli_error_string_for_code( gint_t code )
+const char* bli_error_string_for_code( gint_t code )
 {
 	return bli_error_string[-code];
 }

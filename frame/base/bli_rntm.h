@@ -61,56 +61,56 @@ typedef struct rntm_s
 // -- rntm_t query (public API) ------------------------------------------------
 //
 
-BLIS_INLINE bool bli_rntm_auto_factor( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_auto_factor( const rntm_t* rntm )
 {
 	return rntm->auto_factor;
 }
 
-BLIS_INLINE dim_t bli_rntm_num_threads( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_num_threads( const rntm_t* rntm )
 {
 	return rntm->num_threads;
 }
 
-BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, const rntm_t* rntm )
 {
 	return rntm->thrloop[ bszid ];
 }
 
-BLIS_INLINE dim_t bli_rntm_jc_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_jc_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_NC, rntm );
 }
-BLIS_INLINE dim_t bli_rntm_pc_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_pc_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KC, rntm );
 }
-BLIS_INLINE dim_t bli_rntm_ic_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ic_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_MC, rntm );
 }
-BLIS_INLINE dim_t bli_rntm_jr_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_jr_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_NR, rntm );
 }
-BLIS_INLINE dim_t bli_rntm_ir_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_ir_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_MR, rntm );
 }
-BLIS_INLINE dim_t bli_rntm_pr_ways( rntm_t* rntm )
+BLIS_INLINE dim_t bli_rntm_pr_ways( const rntm_t* rntm )
 {
 	return bli_rntm_ways_for( BLIS_KR, rntm );
 }
 
-BLIS_INLINE bool bli_rntm_pack_a( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_a( const rntm_t* rntm )
 {
 	return ( bool )( rntm->pack_a );
 }
-BLIS_INLINE bool bli_rntm_pack_b( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_pack_b( const rntm_t* rntm )
 {
 	return ( bool )( rntm->pack_b );
 }
 
-BLIS_INLINE bool bli_rntm_l3_sup( rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_l3_sup( const rntm_t* rntm )
 {
 	return rntm->l3_sup;
 }
@@ -119,12 +119,12 @@ BLIS_INLINE bool bli_rntm_l3_sup( rntm_t* rntm )
 // -- rntm_t query (internal use only) -----------------------------------------
 //
 
-BLIS_INLINE pool_t* bli_rntm_sba_pool( rntm_t* rntm )
+BLIS_INLINE pool_t* bli_rntm_sba_pool( const rntm_t* rntm )
 {
 	return rntm->sba_pool;
 }
 
-BLIS_INLINE pba_t* bli_rntm_pba( rntm_t* rntm )
+BLIS_INLINE pba_t* bli_rntm_pba( const rntm_t* rntm )
 {
 	return rntm->pba;
 }
@@ -334,7 +334,7 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 
 BLIS_INLINE dim_t bli_rntm_calc_num_threads
      (
-       rntm_t*  restrict rntm
+       const rntm_t* rntm
      )
 {
 	dim_t n_threads;
@@ -382,13 +382,13 @@ void bli_rntm_set_ways_from_rntm_sup
 
 void bli_rntm_print
      (
-       rntm_t* rntm
+       const rntm_t* rntm
      );
 
 dim_t bli_rntm_calc_num_threads_in
      (
-       bszid_t* restrict bszid_cur,
-       rntm_t*  restrict rntm
+       const bszid_t* bszid_cur,
+       const rntm_t*  rntm
      );
 
 #endif

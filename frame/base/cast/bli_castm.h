@@ -38,8 +38,8 @@
 
 BLIS_EXPORT_BLIS void bli_castm
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      );
 
 //
@@ -51,11 +51,11 @@ BLIS_EXPORT_BLIS void bli_castm
 \
 BLIS_EXPORT_BLIS void PASTEMAC2(cha,chb,opname) \
      ( \
-       trans_t transa, \
-       dim_t   m, \
-       dim_t   n, \
-       void*   a, inc_t rs_a, inc_t cs_a, \
-       void*   b, inc_t rs_b, inc_t cs_b  \
+             trans_t transa, \
+             dim_t   m, \
+             dim_t   n, \
+       const void*   a, inc_t rs_a, inc_t cs_a, \
+             void*   b, inc_t rs_b, inc_t cs_b  \
      );
 
 INSERT_GENTPROT2_BASIC0( castm )
@@ -67,7 +67,7 @@ INSERT_GENTPROT2_MIXDP0( castm )
 
 void bli_castm_check
      (
-       obj_t* a,
-       obj_t* b
+       const obj_t* a,
+       const obj_t* b
      );
 

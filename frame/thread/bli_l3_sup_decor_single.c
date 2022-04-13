@@ -41,17 +41,15 @@
 
 err_t bli_l3_sup_thread_decorator
      (
-       l3supint_t func,
-       opid_t     family,
-       //pack_t     schema_a,
-       //pack_t     schema_b,
-       obj_t*     alpha,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     beta,
-       obj_t*     c,
-       cntx_t*    cntx,
-       rntm_t*    rntm
+             l3supint_t func,
+             opid_t     family,
+       const obj_t*     alpha,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     beta,
+       const obj_t*     c,
+       const cntx_t*    cntx,
+             rntm_t*    rntm
      )
 {
 	// For sequential execution, we use only one thread.
@@ -63,7 +61,7 @@ err_t bli_l3_sup_thread_decorator
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* restrict array = bli_sba_checkout_array( n_threads );
+	array_t* array = bli_sba_checkout_array( n_threads );
 
 	// Access the pool_t* for thread 0 and embed it into the rntm.
 	bli_sba_rntm_set_pool( 0, array, rntm );
@@ -73,14 +71,14 @@ err_t bli_l3_sup_thread_decorator
 
 #ifndef SKIP_THRINFO_TREE
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* restrict gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
 #endif
 
 
 	{
 		// NOTE: We don't need to create another copy of the rntm_t since
 		// it was already copied in one of the high-level oapi functions.
-		rntm_t* restrict rntm_p = rntm;
+		rntm_t* rntm_p = rntm;
 
 		// There is only one thread id (for the thief thread).
 		const dim_t tid = 0;
@@ -138,7 +136,6 @@ err_t bli_l3_sup_thread_decorator
 	bli_sba_checkin_array( array );
 
 	return BLIS_SUCCESS;
-
 }
 
 #endif

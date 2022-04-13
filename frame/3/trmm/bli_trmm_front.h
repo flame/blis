@@ -34,11 +34,11 @@
 
 void bli_trmm_front
      (
-       side_t  side,
-       obj_t*  alpha,
-       obj_t*  a,
-       obj_t*  b,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl
+             side_t  side,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl
      );

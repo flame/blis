@@ -45,12 +45,12 @@ void bli_getopt_init_state( int opterr, getopt_t* state )
 	state->optopt = 0;
 }
 
-int bli_getopt( int argc, char** const argv, const char* optstring, getopt_t* state )
+int bli_getopt( int argc, const char* const * argv, const char* optstring, getopt_t* state )
 {
-	static char* nextchar = NULL;
+	static const char* nextchar = NULL;
 
-	char*        elem_str;
-	char*        optstr_char;
+	const char* elem_str;
+	const char* optstr_char;
 
 	// If argv contains no more arguments to process, return.
 	if ( state->optind == argc ) return -1;

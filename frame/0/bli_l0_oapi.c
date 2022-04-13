@@ -43,25 +43,25 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  absq  \
+       const obj_t* chi, \
+       const obj_t* absq  \
      ) \
 { \
 	bli_init_once(); \
 \
-	num_t     dt_chi; \
-	num_t     dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
+	num_t       dt_chi; \
+	num_t       dt_absq_c  = bli_obj_dt_proj_to_complex( absq ); \
 \
-	void*     buf_chi; \
-	void*     buf_absq   = bli_obj_buffer_at_off( absq ); \
+	const void* buf_chi; \
+	void*       buf_absq   = bli_obj_buffer_at_off( absq ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, absq ); \
+		PASTEMAC(opname,_check)( chi, absq ); \
 \
 	/* If chi is a scalar constant, use dt_absq_c to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
 	   within the chi object and extract the buffer at the chi offset. */ \
-	bli_obj_scalar_set_dt_buffer( chi, dt_absq_c, &dt_chi, &buf_chi ); \
+	bli_obj_scalar_set_dt_buffer( chi, dt_absq_c, &dt_chi, ( void** )&buf_chi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -83,8 +83,8 @@ GENFRONT( normfsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -97,7 +97,7 @@ void PASTEMAC0(opname) \
 	void*     buf_psi   = bli_obj_buffer_at_off( psi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, psi ); \
+		PASTEMAC(opname,_check)( chi, psi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -122,7 +122,7 @@ GENFRONT( subsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi  \
+       const obj_t* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -134,7 +134,7 @@ void PASTEMAC0(opname) \
 	void*     buf_chi   = bli_obj_buffer_for_1x1( dt, chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi ); \
+		PASTEMAC(opname,_check)( chi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -155,8 +155,8 @@ GENFRONT( invertsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -167,7 +167,7 @@ void PASTEMAC0(opname) \
 	void*     buf_psi   = bli_obj_buffer_at_off( psi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, psi ); \
+		PASTEMAC(opname,_check)( chi, psi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -188,9 +188,9 @@ GENFRONT( sqrtsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const obj_t*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -205,7 +205,7 @@ void PASTEMAC0(opname) \
 	void*     buf_chi   = bli_obj_buffer_for_1x1( dt_def, chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
+		PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
 \
 	/* The _check() routine prevents integer types, so we know that chi
 	   is either a constant or an actual floating-point type. */ \
@@ -232,9 +232,9 @@ GENFRONT( getsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       obj_t*  chi  \
+             double zeta_r, \
+             double zeta_i, \
+       const obj_t* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -244,7 +244,7 @@ void PASTEMAC0(opname) \
 	void*     buf_chi   = bli_obj_buffer_at_off( chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( zeta_r, zeta_i, chi ); \
+		PASTEMAC(opname,_check)( zeta_r, zeta_i, chi ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \
@@ -266,9 +266,9 @@ GENFRONT( setsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i  \
+       const obj_t* chi, \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -282,7 +282,7 @@ void PASTEMAC0(opname) \
 	void*     buf_zeta_i  = bli_obj_buffer_at_off( zeta_i ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
+		PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
 \
 	/* If chi is a scalar constant, use dt_zeta_c to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
@@ -309,9 +309,9 @@ GENFRONT( unzipsc )
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i, \
-       obj_t*  chi  \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i, \
+       const obj_t* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -324,7 +324,7 @@ void PASTEMAC0(opname) \
 	void*     buf_chi     = bli_obj_buffer_at_off( chi ); \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
+		PASTEMAC(opname,_check)( chi, zeta_r, zeta_i ); \
 \
 	/* Query a type-specific function pointer, except one that uses
 	   void* for function arguments instead of typed pointers. */ \

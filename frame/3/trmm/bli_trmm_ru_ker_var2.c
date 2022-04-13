@@ -60,77 +60,70 @@ static FUNCPTR_T GENARRAY(ftypes,trmm_ru_ker_var2);
 
 void bli_trmm_ru_ker_var2
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx,
-       rntm_t* rntm,
-       cntl_t* cntl,
-       thrinfo_t* thread
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  c,
+       const cntx_t* cntx,
+             rntm_t* rntm,
+             cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
-	num_t     dt_exec   = bli_obj_exec_dt( c );
+	const num_t     dt_exec   = bli_obj_exec_dt( c );
 
-	doff_t    diagoffb  = bli_obj_diag_offset( b );
+	const doff_t    diagoffb  = bli_obj_diag_offset( b );
 
-	pack_t    schema_a  = bli_obj_pack_schema( a );
-	pack_t    schema_b  = bli_obj_pack_schema( b );
+	const pack_t    schema_a  = bli_obj_pack_schema( a );
+	const pack_t    schema_b  = bli_obj_pack_schema( b );
 
-	dim_t     m         = bli_obj_length( c );
-	dim_t     n         = bli_obj_width( c );
-	dim_t     k         = bli_obj_width( a );
+	const dim_t     m         = bli_obj_length( c );
+	const dim_t     n         = bli_obj_width( c );
+	const dim_t     k         = bli_obj_width( a );
 
-	void*     buf_a     = bli_obj_buffer_at_off( a );
-	inc_t     cs_a      = bli_obj_col_stride( a );
-	dim_t     pd_a      = bli_obj_panel_dim( a );
-	inc_t     ps_a      = bli_obj_panel_stride( a );
+	const void*     buf_a     = bli_obj_buffer_at_off( a );
+	const inc_t     cs_a      = bli_obj_col_stride( a );
+	const dim_t     pd_a      = bli_obj_panel_dim( a );
+	const inc_t     ps_a      = bli_obj_panel_stride( a );
 
-	void*     buf_b     = bli_obj_buffer_at_off( b );
-	inc_t     rs_b      = bli_obj_row_stride( b );
-	dim_t     pd_b      = bli_obj_panel_dim( b );
-	inc_t     ps_b      = bli_obj_panel_stride( b );
+	const void*     buf_b     = bli_obj_buffer_at_off( b );
+	const inc_t     rs_b      = bli_obj_row_stride( b );
+	const dim_t     pd_b      = bli_obj_panel_dim( b );
+	const inc_t     ps_b      = bli_obj_panel_stride( b );
 
-	void*     buf_c     = bli_obj_buffer_at_off( c );
-	inc_t     rs_c      = bli_obj_row_stride( c );
-	inc_t     cs_c      = bli_obj_col_stride( c );
-
-	obj_t     scalar_a;
-	obj_t     scalar_b;
-
-	void*     buf_alpha;
-	void*     buf_beta;
-
-	FUNCPTR_T f;
+	      void*     buf_c     = bli_obj_buffer_at_off( c );
+	const inc_t     rs_c      = bli_obj_row_stride( c );
+	const inc_t     cs_c      = bli_obj_col_stride( c );
 
 	// Detach and multiply the scalars attached to A and B.
+	obj_t scalar_a, scalar_b;
 	bli_obj_scalar_detach( a, &scalar_a );
 	bli_obj_scalar_detach( b, &scalar_b );
 	bli_mulsc( &scalar_a, &scalar_b );
 
 	// Grab the addresses of the internal scalar buffers for the scalar
 	// merged above and the scalar attached to C.
-	buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
-	buf_beta  = bli_obj_internal_scalar_buffer( c );
+	const void* buf_alpha = bli_obj_internal_scalar_buffer( &scalar_b );
+	const void* buf_beta  = bli_obj_internal_scalar_buffer( c );
 
 	// Index into the type combination array to extract the correct
 	// function pointer.
-	f = ftypes[dt_exec];
-
-	// Invoke the function.
-	f( diagoffb,
-	   schema_a,
-	   schema_b,
-	   m,
-	   n,
-	   k,
-	   buf_alpha,
-	   buf_a, cs_a, pd_a, ps_a,
-	   buf_b, rs_b, pd_b, ps_b,
-	   buf_beta,
-	   buf_c, rs_c, cs_c,
-	   cntx,
-	   rntm,
-	   thread );
+	ftypes[dt_exec]
+	(
+	  diagoffb,
+	  schema_a,
+	  schema_b,
+	  m,
+	  n,
+	  k,
+	  ( void* )buf_alpha,
+	  ( void* )buf_a, cs_a, pd_a, ps_a,
+	  ( void* )buf_b, rs_b, pd_b, ps_b,
+	  ( void* )buf_beta,
+	           buf_c, rs_c, cs_c,
+	  ( cntx_t* )cntx,
+	  rntm,
+	  thread
+	);
 }
 
 

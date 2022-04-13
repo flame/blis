@@ -36,10 +36,10 @@
 
 void bli_l3_set_schemas
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntx_t* cntx
+             obj_t*  a,
+             obj_t*  b,
+       const obj_t*  c,
+       const cntx_t* cntx
      )
 {
 	// Begin with pack schemas for native execution.

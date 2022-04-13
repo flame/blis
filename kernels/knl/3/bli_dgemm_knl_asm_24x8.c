@@ -193,8 +193,8 @@ void bli_dgemm_knl_asm_24x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c_, inc_t cs_c_,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     (void)data;

@@ -57,7 +57,7 @@ void bli_spackm_armv8a_int_8xk
        float*     restrict kappa,
        float*     restrict a, inc_t inca0, inc_t lda0,
        float*     restrict p,              inc_t ldp0,
-       cntx_t*    restrict cntx
+       cntx_t*             cntx
      )
 {
   // This is the panel dimension assumed by the packm kernel.
@@ -348,7 +348,7 @@ void bli_spackm_armv8a_int_8xk
       (
         m_edge,
         n_edge,
-        p_edge, 1, ldp 
+        p_edge, 1, ldp
       );
     }
   }
@@ -366,7 +366,7 @@ void bli_spackm_armv8a_int_8xk
     (
       m_edge,
       n_edge,
-      p_edge, 1, ldp 
+      p_edge, 1, ldp
     );
   }
 }

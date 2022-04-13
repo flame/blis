@@ -78,8 +78,8 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	uint64_t m_left = m0 % 6;
@@ -223,7 +223,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	begin_asm()
 
 	//vzeroall()                         // zero all xmm/ymm registers.
-	
+
 	//mov(var(a), rdx)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
@@ -241,7 +241,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
 	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
-	
+
 
 	//mov(var(c), r12)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
@@ -317,18 +317,18 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
-	
 
-	
+
+
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKITER4)                 // if i == 0, jump to code that
 	                                   // contains the k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER16)               // MAIN LOOP
-	
-	
+
+
 	// ---------------------------------- iteration 0
 
 #if 1
@@ -362,7 +362,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	// ---------------------------------- iteration 1
 
 #if 1
@@ -398,7 +398,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 
 	// ---------------------------------- iteration 2
-	
+
 #if 1
 	prefetch(0, mem(r10,         8*8)) // prefetch rbx + 4*cs_b + 8*rs_b
 	prefetch(0, mem(r10, r11, 1, 8*8)) // prefetch rbx + 5*cs_b + 8*rs_b
@@ -465,32 +465,32 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER16)                 // iterate again if i != 0.
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	label(.DCONSIDKITER4)
-	
+
 	mov(var(k_iter4), rsi)             // i = k_iter4;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKLEFT1)                 // if i == 0, jump to code that
 	                                   // considers k_left1 loop.
 	                                   // else, we prepare to enter k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER4)                // EDGE LOOP (ymm)
-	
+
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
-	
+
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -512,21 +512,21 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER4)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 	label(.DCONSIDKLEFT1)
-	
+
 	mov(var(k_left1), rsi)             // i = k_left1;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left1 loop.
-	
-	
+
+
 
 
 	label(.DLOOPKLEFT1)                // EDGE LOOP (scalar)
@@ -534,12 +534,12 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	                                   // using the xmm registers would zero out the
 	                                   // high bits of the destination registers,
 	                                   // which would destory intermediate results.
-	
+
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
 	vmovsd(mem(rax, r8, 2), xmm2)
 	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
-	
+
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -561,22 +561,22 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT1)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 
 
 
 	label(.DPOSTACCUM)
-	
-	                                   // ymm4  ymm7  ymm10 ymm13  
+
+	                                   // ymm4  ymm7  ymm10 ymm13
 	                                   // ymm5  ymm8  ymm11 ymm14
 	                                   // ymm6  ymm9  ymm12 ymm15
-	
+
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
 	vaddpd( xmm0, xmm1, xmm0 )
@@ -615,7 +615,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 
 
-	
+
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
@@ -623,73 +623,73 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
-	
+
 	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulpd(ymm0, ymm5, ymm5)
 	vmulpd(ymm0, ymm6, ymm6)
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	//mov(var(cs_c), rsi)                // load cs_c
 	//lea(mem(, rsi, 8), rsi)            // rsi = cs_c * sizeof(double)
-	
-	
-	
+
+
+
 	                                   // now avoid loading C if beta == 0
-	
+
 	vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.DBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-	
 
-	
+
+
 	label(.DROWSTORED)
-	
-	
+
+
 	vfmadd231pd(mem(rcx), ymm3, ymm4)
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vfmadd231pd(mem(rcx), ymm3, ymm5)
 	vmovupd(ymm5, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vfmadd231pd(mem(rcx), ymm3, ymm6)
 	vmovupd(ymm6, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	jmp(.DDONE)                        // jump to end.
-	
-	
-	
-	
-	label(.DBETAZERO)
-	
 
-	
+
+
+	jmp(.DDONE)                        // jump to end.
+
+
+
+
+	label(.DBETAZERO)
+
+
+
 	label(.DROWSTORBZ)
-	
-	
+
+
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vmovupd(ymm5, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vmovupd(ymm6, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	
+
+
+
+
 	label(.DDONE)
-	
-	
+
+
 
 
 	add(imm(4*8), r12)                 // c_jj = r12 += 4*cs_c
@@ -711,7 +711,7 @@ void bli_dgemmsup_rd_haswell_asm_6x8n
 
 	label(.DRETURN)
 
-	
+
 
     end_asm(
 	: // output operands (none)
@@ -804,8 +804,8 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -835,7 +835,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	begin_asm()
 
 	//vzeroall()                         // zero all xmm/ymm registers.
-	
+
 	mov(var(a), rdx)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
@@ -853,7 +853,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
 	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
-	
+
 
 	mov(var(c), r12)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
@@ -909,18 +909,18 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
-	
 
-	
+
+
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKITER4)                 // if i == 0, jump to code that
 	                                   // contains the k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER16)               // MAIN LOOP
-	
-	
+
+
 	// ---------------------------------- iteration 0
 
 #if 1
@@ -954,7 +954,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	// ---------------------------------- iteration 1
 
 #if 1
@@ -990,7 +990,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 
 	// ---------------------------------- iteration 2
-	
+
 #if 1
 	prefetch(0, mem(r10,         8*8)) // prefetch rbx + 4*cs_b + 8*rs_b
 	prefetch(0, mem(r10, r11, 1, 8*8)) // prefetch rbx + 5*cs_b + 8*rs_b
@@ -1057,32 +1057,32 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER16)                 // iterate again if i != 0.
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	label(.DCONSIDKITER4)
-	
+
 	mov(var(k_iter4), rsi)             // i = k_iter4;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKLEFT1)                 // if i == 0, jump to code that
 	                                   // considers k_left1 loop.
 	                                   // else, we prepare to enter k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER4)                // EDGE LOOP (ymm)
-	
+
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	vmovupd(mem(rax, r8, 2), ymm2)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
-	
+
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -1104,21 +1104,21 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER4)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 	label(.DCONSIDKLEFT1)
-	
+
 	mov(var(k_left1), rsi)             // i = k_left1;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left1 loop.
-	
-	
+
+
 
 
 	label(.DLOOPKLEFT1)                // EDGE LOOP (scalar)
@@ -1126,12 +1126,12 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	                                   // using the xmm registers would zero out the
 	                                   // high bits of the destination registers,
 	                                   // which would destory intermediate results.
-	
+
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
 	vmovsd(mem(rax, r8, 2), xmm2)
 	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
-	
+
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -1153,22 +1153,22 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	vfmadd231pd(ymm1, ymm3, ymm14)
 	vfmadd231pd(ymm2, ymm3, ymm15)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT1)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 
 
 
 	label(.DPOSTACCUM)
-	
-	                                   // ymm4  ymm7  ymm10 ymm13  
+
+	                                   // ymm4  ymm7  ymm10 ymm13
 	                                   // ymm5  ymm8  ymm11 ymm14
 	                                   // ymm6  ymm9  ymm12 ymm15
-	
+
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
 	vaddpd( xmm0, xmm1, xmm0 )
@@ -1206,7 +1206,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	                                   // ymm6[2] = sum(ymm12); ymm6[3] = sum(ymm15)
 
 
-	
+
 
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
@@ -1215,73 +1215,73 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
-	
+
 	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulpd(ymm0, ymm5, ymm5)
 	vmulpd(ymm0, ymm6, ymm6)
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	//mov(var(cs_c), rsi)                // load cs_c
 	//lea(mem(, rsi, 8), rsi)            // rsi = cs_c * sizeof(double)
-	
-	
-	
+
+
+
 	                                   // now avoid loading C if beta == 0
-	
+
 	vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.DBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-	
 
-	
+
+
 	label(.DROWSTORED)
-	
-	
+
+
 	vfmadd231pd(mem(rcx), ymm3, ymm4)
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vfmadd231pd(mem(rcx), ymm3, ymm5)
 	vmovupd(ymm5, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vfmadd231pd(mem(rcx), ymm3, ymm6)
 	vmovupd(ymm6, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	jmp(.DDONE)                        // jump to end.
-	
-	
-	
-	
-	label(.DBETAZERO)
-	
 
-	
+
+
+	jmp(.DDONE)                        // jump to end.
+
+
+
+
+	label(.DBETAZERO)
+
+
+
 	label(.DROWSTORBZ)
-	
-	
+
+
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vmovupd(ymm5, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vmovupd(ymm6, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	
+
+
+
+
 	label(.DDONE)
-	
-	
+
+
 
 
 	add(imm(4*8), r12)                 // c_jj = r12 += 4*cs_c
@@ -1297,7 +1297,7 @@ void bli_dgemmsup_rd_haswell_asm_3x8n
 
 	label(.DRETURN)
 
-	
+
 
     end_asm(
 	: // output operands (none)
@@ -1391,8 +1391,8 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1422,7 +1422,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	begin_asm()
 
 	//vzeroall()                         // zero all xmm/ymm registers.
-	
+
 	mov(var(a), rdx)                   // load address of a.
 	mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
@@ -1440,7 +1440,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
 	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
-	
+
 
 	mov(var(c), r12)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
@@ -1491,18 +1491,18 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
-	
 
-	
+
+
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKITER4)                 // if i == 0, jump to code that
 	                                   // contains the k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER16)               // MAIN LOOP
-	
-	
+
+
 	// ---------------------------------- iteration 0
 
 #if 1
@@ -1531,7 +1531,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vfmadd231pd(ymm0, ymm3, ymm13)
 	vfmadd231pd(ymm1, ymm3, ymm14)
 
-	
+
 	// ---------------------------------- iteration 1
 
 #if 1
@@ -1562,7 +1562,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 
 	// ---------------------------------- iteration 2
-	
+
 #if 1
 	prefetch(0, mem(r10,         8*8)) // prefetch rbx + 4*cs_b + 8*rs_b
 	prefetch(0, mem(r10, r11, 1, 8*8)) // prefetch rbx + 5*cs_b + 8*rs_b
@@ -1619,31 +1619,31 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vfmadd231pd(ymm0, ymm3, ymm13)
 	vfmadd231pd(ymm1, ymm3, ymm14)
 
-	
+
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER16)                 // iterate again if i != 0.
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	label(.DCONSIDKITER4)
-	
+
 	mov(var(k_iter4), rsi)             // i = k_iter4;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKLEFT1)                 // if i == 0, jump to code that
 	                                   // considers k_left1 loop.
 	                                   // else, we prepare to enter k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER4)                // EDGE LOOP (ymm)
-	
+
 	vmovupd(mem(rax       ), ymm0)
 	vmovupd(mem(rax, r8, 1), ymm1)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
-	
+
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -1661,21 +1661,21 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vfmadd231pd(ymm0, ymm3, ymm13)
 	vfmadd231pd(ymm1, ymm3, ymm14)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER4)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 	label(.DCONSIDKLEFT1)
-	
+
 	mov(var(k_left1), rsi)             // i = k_left1;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left1 loop.
-	
-	
+
+
 
 
 	label(.DLOOPKLEFT1)                // EDGE LOOP (scalar)
@@ -1683,11 +1683,11 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	                                   // using the xmm registers would zero out the
 	                                   // high bits of the destination registers,
 	                                   // which would destory intermediate results.
-	
+
 	vmovsd(mem(rax       ), xmm0)
 	vmovsd(mem(rax, r8, 1), xmm1)
 	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
-	
+
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 	vfmadd231pd(ymm1, ymm3, ymm5)
@@ -1705,21 +1705,21 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	vfmadd231pd(ymm0, ymm3, ymm13)
 	vfmadd231pd(ymm1, ymm3, ymm14)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT1)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 
 
 
 	label(.DPOSTACCUM)
-	
-	                                   // ymm4  ymm7  ymm10 ymm13  
+
+	                                   // ymm4  ymm7  ymm10 ymm13
 	                                   // ymm5  ymm8  ymm11 ymm14
-	
+
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
 	vaddpd( xmm0, xmm1, xmm0 )
@@ -1746,7 +1746,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 
 
-	
+
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
@@ -1754,65 +1754,65 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
-	
+
 	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
 	vmulpd(ymm0, ymm5, ymm5)
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	//mov(var(cs_c), rsi)                // load cs_c
 	//lea(mem(, rsi, 8), rsi)            // rsi = cs_c * sizeof(double)
-	
-	
-	
+
+
+
 	                                   // now avoid loading C if beta == 0
-	
+
 	vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.DBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-	
 
-	
+
+
 	label(.DROWSTORED)
-	
-	
+
+
 	vfmadd231pd(mem(rcx), ymm3, ymm4)
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vfmadd231pd(mem(rcx), ymm3, ymm5)
 	vmovupd(ymm5, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	jmp(.DDONE)                        // jump to end.
-	
-	
-	
-	
-	label(.DBETAZERO)
-	
 
-	
+
+
+	jmp(.DDONE)                        // jump to end.
+
+
+
+
+	label(.DBETAZERO)
+
+
+
 	label(.DROWSTORBZ)
-	
-	
+
+
 	vmovupd(ymm4, mem(rcx))
 	add(rdi, rcx)
-	
+
 	vmovupd(ymm5, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	
+
+
+
+
 	label(.DDONE)
-	
-	
+
+
 
 
 	add(imm(4*8), r12)                 // c_jj = r12 += 4*cs_c
@@ -1828,7 +1828,7 @@ void bli_dgemmsup_rd_haswell_asm_2x8n
 
 	label(.DRETURN)
 
-	
+
 
     end_asm(
 	: // output operands (none)
@@ -1921,8 +1921,8 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*    a_next = bli_auxinfo_next_a( data );
@@ -1952,7 +1952,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	begin_asm()
 
 	//vzeroall()                         // zero all xmm/ymm registers.
-	
+
 	mov(var(a), rdx)                   // load address of a.
 	//mov(var(rs_a), r8)                 // load rs_a
 	//mov(var(cs_a), r9)                 // load cs_a
@@ -1970,7 +1970,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 	lea(mem(r11, r11, 2), r13)         // r13 = 3*cs_b
 	//lea(mem(r8,  r8,  2), r10)         // r10 = 3*rs_a
-	
+
 
 	mov(var(c), r12)                   // load address of c
 	mov(var(rs_c), rdi)                // load rs_c
@@ -2016,18 +2016,18 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	//lea(mem(r8,  r8,  4), rbp)         // rbp = 5*rs_a
 	lea(mem(rbx, r11, 4), r10)         // r10 = rbx + 4*cs_b
 
-	
 
-	
+
+
 	mov(var(k_iter16), rsi)            // i = k_iter16;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKITER4)                 // if i == 0, jump to code that
 	                                   // contains the k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER16)               // MAIN LOOP
-	
-	
+
+
 	// ---------------------------------- iteration 0
 
 #if 1
@@ -2051,7 +2051,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	add(imm(4*8), rbx)                 // b += 4*rs_b = 4*8;
 	vfmadd231pd(ymm0, ymm3, ymm13)
 
-	
+
 	// ---------------------------------- iteration 1
 
 #if 1
@@ -2077,7 +2077,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 
 	// ---------------------------------- iteration 2
-	
+
 #if 1
 	prefetch(0, mem(r10,         8*8)) // prefetch rbx + 4*cs_b + 8*rs_b
 	prefetch(0, mem(r10, r11, 1, 8*8)) // prefetch rbx + 5*cs_b + 8*rs_b
@@ -2124,30 +2124,30 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	add(imm(4*8), rbx)                 // b += 4*rs_b = 4*8;
 	vfmadd231pd(ymm0, ymm3, ymm13)
 
-	
+
 
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER16)                 // iterate again if i != 0.
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	label(.DCONSIDKITER4)
-	
+
 	mov(var(k_iter4), rsi)             // i = k_iter4;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DCONSIDKLEFT1)                 // if i == 0, jump to code that
 	                                   // considers k_left1 loop.
 	                                   // else, we prepare to enter k_iter4 loop.
-	
-	
+
+
 	label(.DLOOPKITER4)                // EDGE LOOP (ymm)
-	
+
 	vmovupd(mem(rax       ), ymm0)
 	add(imm(4*8), rax)                 // a += 4*cs_a = 4*8;
-	
+
 	vmovupd(mem(rbx        ), ymm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 
@@ -2161,21 +2161,21 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	add(imm(4*8), rbx)                 // b += 4*rs_b = 4*8;
 	vfmadd231pd(ymm0, ymm3, ymm13)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKITER4)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 	label(.DCONSIDKLEFT1)
-	
+
 	mov(var(k_left1), rsi)             // i = k_left1;
 	test(rsi, rsi)                     // check i via logical AND.
 	je(.DPOSTACCUM)                    // if i == 0, we're done; jump to end.
 	                                   // else, we prepare to enter k_left1 loop.
-	
-	
+
+
 
 
 	label(.DLOOPKLEFT1)                // EDGE LOOP (scalar)
@@ -2183,10 +2183,10 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	                                   // using the xmm registers would zero out the
 	                                   // high bits of the destination registers,
 	                                   // which would destory intermediate results.
-	
+
 	vmovsd(mem(rax       ), xmm0)
 	add(imm(1*8), rax)                 // a += 1*cs_a = 1*8;
-	
+
 	vmovsd(mem(rbx        ), xmm3)
 	vfmadd231pd(ymm0, ymm3, ymm4)
 
@@ -2200,20 +2200,20 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	add(imm(1*8), rbx)                 // b += 1*rs_b = 1*8;
 	vfmadd231pd(ymm0, ymm3, ymm13)
 
-	
+
 	dec(rsi)                           // i -= 1;
 	jne(.DLOOPKLEFT1)                  // iterate again if i != 0.
-	
-	
-	
+
+
+
 
 
 
 
 	label(.DPOSTACCUM)
-	
-	                                   // ymm4  ymm7  ymm10 ymm13  
-	
+
+	                                   // ymm4  ymm7  ymm10 ymm13
+
 	vhaddpd( ymm7, ymm4, ymm0 )
 	vextractf128(imm(1), ymm0, xmm1 )
 	vaddpd( xmm0, xmm1, xmm0 )
@@ -2228,7 +2228,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 
 
-	
+
 	//mov(var(rs_c), rdi)                // load rs_c
 	//lea(mem(, rdi, 8), rdi)            // rs_c *= sizeof(double)
 
@@ -2236,57 +2236,57 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 	mov(var(beta), rbx)                // load address of beta
 	vbroadcastsd(mem(rax), ymm0)       // load alpha and duplicate
 	vbroadcastsd(mem(rbx), ymm3)       // load beta and duplicate
-	
+
 	vmulpd(ymm0, ymm4, ymm4)           // scale by alpha
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
 	//mov(var(cs_c), rsi)                // load cs_c
 	//lea(mem(, rsi, 8), rsi)            // rsi = cs_c * sizeof(double)
-	
-	
-	
+
+
+
 	                                   // now avoid loading C if beta == 0
-	
+
 	vxorpd(ymm0, ymm0, ymm0)           // set ymm0 to zero.
 	vucomisd(xmm0, xmm3)               // set ZF if beta == 0.
 	je(.DBETAZERO)                     // if ZF = 1, jump to beta == 0 case
-	
 
-	
+
+
 	label(.DROWSTORED)
-	
-	
+
+
 	vfmadd231pd(mem(rcx), ymm3, ymm4)
 	vmovupd(ymm4, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	jmp(.DDONE)                        // jump to end.
-	
-	
-	
-	
-	label(.DBETAZERO)
-	
 
-	
+
+
+	jmp(.DDONE)                        // jump to end.
+
+
+
+
+	label(.DBETAZERO)
+
+
+
 	label(.DROWSTORBZ)
-	
-	
+
+
 	vmovupd(ymm4, mem(rcx))
 	//add(rdi, rcx)
-	
-	
-	
-	
+
+
+
+
 	label(.DDONE)
-	
-	
+
+
 
 
 	add(imm(4*8), r12)                 // c_jj = r12 += 4*cs_c
@@ -2302,7 +2302,7 @@ void bli_dgemmsup_rd_haswell_asm_1x8n
 
 	label(.DRETURN)
 
-	
+
 
     end_asm(
 	: // output operands (none)

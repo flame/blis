@@ -38,11 +38,11 @@
 
 BLIS_INLINE void_fp bli_func_get_dt
      (
-       num_t   dt,
-       func_t* func
+             num_t   dt,
+       const func_t* func
      )
 {
-    return func->ptr[ dt ];
+	return func->ptr[ dt ];
 }
 
 // func_t modification
@@ -54,13 +54,13 @@ BLIS_INLINE void bli_func_set_dt
        func_t* func
      )
 {
-    func->ptr[ dt ] = fp;
+	func->ptr[ dt ] = fp;
 }
 
 BLIS_INLINE void bli_func_copy_dt
      (
-       num_t dt_src, func_t* func_src,
-       num_t dt_dst, func_t* func_dst
+       num_t dt_src, const func_t* func_src,
+       num_t dt_dst,       func_t* func_dst
      )
 {
 	void_fp fp = bli_func_get_dt( dt_src, func_src );
@@ -96,7 +96,7 @@ void bli_func_free( func_t* f );
 
 // -----------------------------------------------------------------------------
 
-bool bli_func_is_null_dt( num_t   dt,
-                          func_t* f );
-bool bli_func_is_null( func_t* f );
+bool bli_func_is_null_dt(       num_t   dt,
+                          const func_t* f );
+bool bli_func_is_null( const func_t* f );
 

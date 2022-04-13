@@ -43,7 +43,7 @@ void bli_scopyv_zen_int
        dim_t            n,
        float*  restrict x, inc_t incx,
        float*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t num_elem_per_reg = 8;
@@ -192,7 +192,7 @@ void bli_dcopyv_zen_int
        dim_t            n,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t num_elem_per_reg = 4;

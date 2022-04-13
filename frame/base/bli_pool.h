@@ -70,12 +70,12 @@ typedef struct
 
 // Pool block query
 
-BLIS_INLINE void* bli_pblk_buf( pblk_t* pblk )
+BLIS_INLINE void* bli_pblk_buf( const pblk_t* pblk )
 {
 	return pblk->buf;
 }
 
-BLIS_INLINE siz_t bli_pblk_block_size( pblk_t* pblk )
+BLIS_INLINE siz_t bli_pblk_block_size( const pblk_t* pblk )
 {
 	return pblk->block_size;
 }
@@ -115,52 +115,52 @@ BLIS_INLINE void bli_pblk_clear( pblk_t* pblk )
 
 // Pool entry query
 
-BLIS_INLINE void* bli_pool_block_ptrs( pool_t* pool )
+BLIS_INLINE void* bli_pool_block_ptrs( const pool_t* pool )
 {
 	return pool->block_ptrs;
 }
 
-BLIS_INLINE siz_t bli_pool_block_ptrs_len( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_ptrs_len( const pool_t* pool )
 {
 	return pool->block_ptrs_len;
 }
 
-BLIS_INLINE siz_t bli_pool_num_blocks( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_num_blocks( const pool_t* pool )
 {
 	return pool->num_blocks;
 }
 
-BLIS_INLINE siz_t bli_pool_block_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_block_size( const pool_t* pool )
 {
 	return pool->block_size;
 }
 
-BLIS_INLINE siz_t bli_pool_align_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_align_size( const pool_t* pool )
 {
 	return pool->align_size;
 }
 
-BLIS_INLINE siz_t bli_pool_offset_size( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_offset_size( const pool_t* pool )
 {
 	return pool->offset_size;
 }
 
-BLIS_INLINE malloc_ft bli_pool_malloc_fp( pool_t* pool )
+BLIS_INLINE malloc_ft bli_pool_malloc_fp( const pool_t* pool )
 {
 	return pool->malloc_fp;
 }
 
-BLIS_INLINE free_ft bli_pool_free_fp( pool_t* pool )
+BLIS_INLINE free_ft bli_pool_free_fp( const pool_t* pool )
 {
 	return pool->free_fp;
 }
 
-BLIS_INLINE siz_t bli_pool_top_index( pool_t* pool )
+BLIS_INLINE siz_t bli_pool_top_index( const pool_t* pool )
 {
 	return pool->top_index;
 }
 
-BLIS_INLINE bool bli_pool_is_exhausted( pool_t* pool )
+BLIS_INLINE bool bli_pool_is_exhausted( const pool_t* pool )
 {
 	return ( bool )
 	       ( bli_pool_top_index( pool ) == bli_pool_num_blocks( pool ) );
@@ -217,74 +217,74 @@ BLIS_INLINE void bli_pool_set_top_index( siz_t top_index, pool_t* pool ) \
 
 void bli_pool_init
      (
-       siz_t            num_blocks,
-       siz_t            block_ptrs_len,
-       siz_t            block_size,
-       siz_t            align_size,
-       siz_t            offset_size,
-       malloc_ft        malloc_fp,
-       free_ft          free_fp,
-       pool_t* restrict pool
+       siz_t     num_blocks,
+       siz_t     block_ptrs_len,
+       siz_t     block_size,
+       siz_t     align_size,
+       siz_t     offset_size,
+       malloc_ft malloc_fp,
+       free_ft   free_fp,
+       pool_t*   pool
      );
 void bli_pool_finalize
      (
-       pool_t* restrict pool
+       pool_t* pool
      );
 void bli_pool_reinit
      (
-       siz_t            num_blocks_new,
-       siz_t            block_ptrs_len_new,
-       siz_t            block_size_new,
-       siz_t            align_size_new,
-       siz_t            offset_size_new,
-       pool_t* restrict pool
+       siz_t   num_blocks_new,
+       siz_t   block_ptrs_len_new,
+       siz_t   block_size_new,
+       siz_t   align_size_new,
+       siz_t   offset_size_new,
+       pool_t* pool
      );
 
 void bli_pool_checkout_block
      (
-       siz_t            req_size,
-       pblk_t* restrict block,
-       pool_t* restrict pool
+       siz_t   req_size,
+       pblk_t* block,
+       pool_t* pool
      );
 void bli_pool_checkin_block
      (
-       pblk_t* restrict block,
-       pool_t* restrict pool
+       pblk_t* block,
+       pool_t* pool
      );
 
 void bli_pool_grow
      (
-       siz_t            num_blocks_add,
-       pool_t* restrict pool
+       siz_t   num_blocks_add,
+       pool_t* pool
      );
 void bli_pool_shrink
      (
-       siz_t            num_blocks_sub,
-       pool_t* restrict pool
+       siz_t   num_blocks_sub,
+       pool_t* pool
      );
 
 void bli_pool_alloc_block
      (
-       siz_t            block_size,
-       siz_t            align_size,
-       siz_t            offset_size,
-       malloc_ft        malloc_fp,
-       pblk_t* restrict block
+       siz_t     block_size,
+       siz_t     align_size,
+       siz_t     offset_size,
+       malloc_ft malloc_fp,
+       pblk_t*   block
      );
 void bli_pool_free_block
      (
-       siz_t            offset_size,
-       free_ft          free_fp,
-       pblk_t* restrict block
+       siz_t   offset_size,
+       free_ft free_fp,
+       pblk_t* block
      );
 
 void bli_pool_print
      (
-       pool_t* restrict pool
+       const pool_t* pool
      );
 void bli_pblk_print
      (
-       pblk_t* restrict pblk
+       const pblk_t* pblk
      );
 
 #endif

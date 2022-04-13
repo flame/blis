@@ -45,8 +45,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
@@ -74,10 +74,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		i        = iter; \
 		n_behind = i; \
 \
-		ctype* restrict alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
-		ctype* restrict a10t     = a + (i  )*rs_a + (0  )*cs_a; \
-		ctype* restrict B0       = b + (0  )*rs_b + (0  )*cs_b; \
-		ctype* restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
+		ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
+		ctype* restrict a10t    = a + (i  )*rs_a + (0  )*cs_a; \
+		ctype* restrict B0      = b + (0  )*rs_b + (0  )*cs_b; \
+		ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a10t * B0; */ \
 		/* b1 = b1 / alpha11; */ \
@@ -132,8 +132,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t     dt     = PASTEMAC(ch,type); \
@@ -158,10 +158,10 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		dim_t i        = m - iter - 1; \
 		dim_t n_behind = iter; \
 \
-		ctype* restrict alpha11  = a + (i  )*rs_a + (i  )*cs_a; \
-		ctype* restrict a12t     = a + (i  )*rs_a + (i+1)*cs_a; \
-		ctype* restrict b1       = b + (i  )*rs_b + (0  )*cs_b; \
-		ctype* restrict B2       = b + (i+1)*rs_b + (0  )*cs_b; \
+		ctype* restrict alpha11 = a + (i  )*rs_a + (i  )*cs_a; \
+		ctype* restrict a12t    = a + (i  )*rs_a + (i+1)*cs_a; \
+		ctype* restrict b1      = b + (i  )*rs_b + (0  )*cs_b; \
+		ctype* restrict B2      = b + (i+1)*rs_b + (0  )*cs_b; \
 \
 		/* b1 = b1 - a12t * B2; */ \
 		/* b1 = b1 / alpha11; */ \

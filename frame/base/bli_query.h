@@ -32,8 +32,8 @@
 
 */
 
-BLIS_EXPORT_BLIS bool bli_obj_equals( obj_t* a, obj_t* b );
+BLIS_EXPORT_BLIS bool bli_obj_equals( const obj_t* a, const obj_t* b );
 
-BLIS_EXPORT_BLIS bool bli_obj_imag_equals( obj_t* a, obj_t* b );
+BLIS_EXPORT_BLIS bool bli_obj_imag_equals( const obj_t* a, const obj_t* b );
 
-BLIS_EXPORT_BLIS bool bli_obj_imag_is_zero( obj_t* a );
+BLIS_EXPORT_BLIS bool bli_obj_imag_is_zero( const obj_t* a );

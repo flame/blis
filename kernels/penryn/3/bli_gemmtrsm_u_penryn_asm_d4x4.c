@@ -47,8 +47,8 @@ void bli_sgemmtrsm_u_penryn_asm_8x4
        float*     restrict b21,
        float*     restrict b11,
        float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 }
@@ -65,8 +65,8 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
        double*    restrict b21,
        double*    restrict b11,
        double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void*   b_next  = bli_auxinfo_next_b( data );
@@ -81,23 +81,23 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 	GEMMTRSM_UKR_SETUP_CT( d, 4, 4, false );
 
 	begin_asm()
-		
+
 		mov(var(a12), rax) // load address of a12.
 		mov(var(b21), rbx) // load address of b21.
 		//mov(var(b_next), r9) // load address of b_next.
-		
+
 		add(imm(8*16), rax) // increment pointers to allow byte
 		add(imm(8*16), rbx) // offsets in the unrolled iterations.
-		
+
 		movaps(mem(rax, -8*16), xmm0) // initialize loop by pre-loading elements
 		movaps(mem(rax, -7*16), xmm1) // of a and b.
 		movaps(mem(rbx, -8*16), xmm2)
-		
+
 		xorpd(xmm3, xmm3)
 		xorpd(xmm4, xmm4)
 		xorpd(xmm5, xmm5)
 		xorpd(xmm6, xmm6)
-		
+
 		xorpd(xmm8, xmm8)
 		movaps(xmm8, xmm9)
 		movaps(xmm8, xmm10)
@@ -106,19 +106,19 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(xmm8, xmm13)
 		movaps(xmm8, xmm14)
 		movaps(xmm8, xmm15)
-		
-		
-		
+
+
+
 		mov(var(k_iter), rsi) // i = k_iter;
 		test(rsi, rsi) // check i via logical AND.
 		je(.CONSIDERKLEFT) // if i == 0, jump to code that
 		 // contains the k_left loop.
-		
-		
+
+
 		label(.LOOPKITER) // MAIN LOOP
-		
+
 		prefetch(0, mem(rax, 1264))
-		
+
 		addpd(xmm3, xmm11) // iteration 0
 		movaps(mem(rbx, -7*16), xmm3)
 		addpd(xmm4, xmm15)
@@ -126,13 +126,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm2, xmm7)
 		mulpd(xmm0, xmm2)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
 		movaps(xmm7, xmm6)
 		mulpd(xmm0, xmm7)
 		mulpd(xmm1, xmm6)
-		
+
 		addpd(xmm2, xmm9)
 		movaps(mem(rbx, -6*16), xmm2)
 		addpd(xmm4, xmm13)
@@ -140,7 +140,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm3, xmm5)
 		mulpd(xmm0, xmm3)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm7, xmm8)
 		addpd(xmm6, xmm12)
 		movaps(xmm5, xmm6)
@@ -148,8 +148,8 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rax, -6*16), xmm0)
 		mulpd(xmm1, xmm6)
 		movaps(mem(rax, -5*16), xmm1)
-		
-		
+
+
 		addpd(xmm3, xmm11) // iteration 1
 		movaps(mem(rbx, -5*16), xmm3)
 		addpd(xmm4, xmm15)
@@ -157,13 +157,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm2, xmm7)
 		mulpd(xmm0, xmm2)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
 		movaps(xmm7, xmm6)
 		mulpd(xmm0, xmm7)
 		mulpd(xmm1, xmm6)
-		
+
 		addpd(xmm2, xmm9)
 		movaps(mem(rbx, -4*16), xmm2)
 		addpd(xmm4, xmm13)
@@ -171,7 +171,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm3, xmm5)
 		mulpd(xmm0, xmm3)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm7, xmm8)
 		addpd(xmm6, xmm12)
 		movaps(xmm5, xmm6)
@@ -179,9 +179,9 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rax, -4*16), xmm0)
 		mulpd(xmm1, xmm6)
 		movaps(mem(rax, -3*16), xmm1)
-		
+
 		prefetch(0, mem(rax, 1328))
-		
+
 		addpd(xmm3, xmm11) // iteration 2
 		movaps(mem(rbx, -3*16), xmm3)
 		addpd(xmm4, xmm15)
@@ -189,13 +189,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm2, xmm7)
 		mulpd(xmm0, xmm2)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
 		movaps(xmm7, xmm6)
 		mulpd(xmm0, xmm7)
 		mulpd(xmm1, xmm6)
-		
+
 		addpd(xmm2, xmm9)
 		movaps(mem(rbx, -2*16), xmm2)
 		addpd(xmm4, xmm13)
@@ -203,7 +203,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm3, xmm5)
 		mulpd(xmm0, xmm3)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm7, xmm8)
 		addpd(xmm6, xmm12)
 		movaps(xmm5, xmm6)
@@ -211,8 +211,8 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rax, -2*16), xmm0)
 		mulpd(xmm1, xmm6)
 		movaps(mem(rax, -1*16), xmm1)
-		
-		
+
+
 		addpd(xmm3, xmm11) // iteration 3
 		movaps(mem(rbx, -1*16), xmm3)
 		addpd(xmm4, xmm15)
@@ -220,15 +220,15 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm2, xmm7)
 		mulpd(xmm0, xmm2)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
 		movaps(xmm7, xmm6)
 		mulpd(xmm0, xmm7)
 		mulpd(xmm1, xmm6)
-		
+
 		add(imm(4*4*8), rax) // a += 4*4 (unroll x mr)
-		
+
 		addpd(xmm2, xmm9)
 		movaps(mem(rbx, 0*16), xmm2)
 		addpd(xmm4, xmm13)
@@ -236,9 +236,9 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm3, xmm5)
 		mulpd(xmm0, xmm3)
 		mulpd(xmm1, xmm4)
-		
+
 		add(imm(4*4*8), rbx) // b += 4*4 (unroll x nr)
-		
+
 		addpd(xmm7, xmm8)
 		addpd(xmm6, xmm12)
 		movaps(xmm5, xmm6)
@@ -246,24 +246,24 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rax, -8*16), xmm0)
 		mulpd(xmm1, xmm6)
 		movaps(mem(rax, -7*16), xmm1)
-		
-		
-		
+
+
+
 		dec(rsi) // i -= 1;
 		jne(.LOOPKITER) // iterate again if i != 0.
-		
-		
-		
+
+
+
 		label(.CONSIDERKLEFT)
-		
+
 		mov(var(k_left), rsi) // i = k_left;
 		test(rsi, rsi) // check i via logical AND.
 		je(.POSTACCUM) // if i == 0, we're done; jump to end.
 		 // else, we prepare to enter k_left loop.
-		
-		
+
+
 		label(.LOOPKLEFT) // EDGE LOOP
-		
+
 		addpd(xmm3, xmm11) // iteration 0
 		movaps(mem(rbx, -7*16), xmm3)
 		addpd(xmm4, xmm15)
@@ -271,13 +271,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm2, xmm7)
 		mulpd(xmm0, xmm2)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
 		movaps(xmm7, xmm6)
 		mulpd(xmm0, xmm7)
 		mulpd(xmm1, xmm6)
-		
+
 		addpd(xmm2, xmm9)
 		movaps(mem(rbx, -6*16), xmm2)
 		addpd(xmm4, xmm13)
@@ -285,7 +285,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		pshufd(imm(0x4e), xmm3, xmm5)
 		mulpd(xmm0, xmm3)
 		mulpd(xmm1, xmm4)
-		
+
 		addpd(xmm7, xmm8)
 		addpd(xmm6, xmm12)
 		movaps(xmm5, xmm6)
@@ -293,28 +293,28 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rax, -6*16), xmm0)
 		mulpd(xmm1, xmm6)
 		movaps(mem(rax, -5*16), xmm1)
-		
-		
+
+
 		add(imm(4*1*8), rax) // a += 4 (1 x mr)
 		add(imm(4*1*8), rbx) // b += 4 (1 x nr)
-		
-		
+
+
 		dec(rsi) // i -= 1;
 		jne(.LOOPKLEFT) // iterate again if i != 0.
-		
-		
-		
+
+
+
 		label(.POSTACCUM)
-		
+
 		addpd(xmm3, xmm11)
 		addpd(xmm4, xmm15)
 		addpd(xmm5, xmm10)
 		addpd(xmm6, xmm14)
-		
-		
-		
+
+
+
 		mov(var(b11), rbx) // load address of b11.
-		
+
 		 // xmm8:   xmm9:   xmm10:  xmm11:
 		 // ( ab01  ( ab00  ( ab03  ( ab02
 		 //   ab10 )  ab11 )  ab12 )  ab13 )
@@ -326,30 +326,30 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(xmm8, xmm1)
 		unpcklpd(xmm8, xmm0)
 		unpckhpd(xmm9, xmm1)
-		
+
 		movaps(xmm11, xmm4)
 		movaps(xmm10, xmm5)
 		unpcklpd(xmm10, xmm4)
 		unpckhpd(xmm11, xmm5)
-		
+
 		movaps(xmm13, xmm2)
 		movaps(xmm12, xmm3)
 		unpcklpd(xmm12, xmm2)
 		unpckhpd(xmm13, xmm3)
-		
+
 		movaps(xmm15, xmm6)
 		movaps(xmm14, xmm7)
 		unpcklpd(xmm14, xmm6)
 		unpckhpd(xmm15, xmm7)
-		
+
 		 // xmm0: ( ab00 ab01 ) xmm4: ( ab02 ab03 )
 		 // xmm1: ( ab10 ab11 ) xmm5: ( ab12 ab13 )
 		 // xmm2: ( ab20 ab21 ) xmm6: ( ab22 ab23 )
 		 // xmm3: ( ab30 ab31 ) xmm7: ( ab32 ab33 )
-		
+
 		mov(var(alpha), rax) // load address of alpha
 		movddup(mem(rax), xmm15) // load alpha and duplicate
-		
+
 		movaps(mem(rbx, 0*16), xmm8)
 		movaps(mem(rbx, 1*16), xmm12)
 		mulpd(xmm15, xmm8) // xmm8  = alpha * ( beta00 beta01 )
@@ -365,13 +365,13 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movaps(mem(rbx, 6*16), xmm11)
 		mulpd(xmm15, xmm11) // xmm11 = alpha * ( beta30 beta31 )
 		mulpd(mem(rbx, 7*16), xmm15) // xmm15 = alpha * ( beta32 beta33 )
-		
+
 		 // (Now scaled by alpha:)
 		 // xmm8:  ( beta00 beta01 ) xmm12: ( beta02 beta03 )
 		 // xmm9:  ( beta10 beta11 ) xmm13: ( beta12 beta13 )
 		 // xmm10: ( beta20 beta21 ) xmm14: ( beta22 beta23 )
 		 // xmm11: ( beta30 beta31 ) xmm15: ( beta32 beta33 )
-		
+
 		subpd(xmm0, xmm8) // xmm8  -= xmm0
 		subpd(xmm1, xmm9) // xmm9  -= xmm1
 		subpd(xmm2, xmm10) // xmm10 -= xmm2
@@ -380,31 +380,31 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		subpd(xmm5, xmm13) // xmm13 -= xmm5
 		subpd(xmm6, xmm14) // xmm14 -= xmm6
 		subpd(xmm7, xmm15) // xmm15 -= xmm7
-		
-		
-		
+
+
+
 		label(.TRSM)
-		
-		
+
+
 		mov(var(a11), rax) // load address of a11
 		mov(var(c11), rcx) // load address of c11
-		
+
 		mov(var(rs_c), rsi) // load rs_c
 		mov(var(cs_c), rdi) // load cs_c
 		sal(imm(3), rsi) // rs_c *= sizeof( double )
 		sal(imm(3), rdi) // cs_c *= sizeof( double )
-		
+
 		add(rsi, rcx) // c11 += (4-1)*rs_c
 		add(rsi, rcx)
 		add(rsi, rcx)
 		lea(mem(rcx, rdi, 2), rdx) // c11_2 = c11 + 2*cs_c;
-		
-		
-		
+
+
+
 		 // iteration 0
-		
+
 		movddup(mem(3+3*4)*8(rax), xmm3) // load xmm3 = (1/alpha33)
-		
+
 #ifdef BLIS_ENABLE_TRSM_PREINVERSION
 		mulpd(xmm3, xmm11) // xmm11 *= (1/alpha33);
 		mulpd(xmm3, xmm15) // xmm15 *= (1/alpha33);
@@ -412,7 +412,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		divpd(xmm3, xmm11) // xmm11 /= alpha33;
 		divpd(xmm3, xmm15) // xmm15 /= alpha33;
 #endif
-		
+
 		movaps(xmm11, mem(rbx, 6*16)) // store ( beta30 beta31 ) = xmm11
 		movaps(xmm15, mem(rbx, 7*16)) // store ( beta32 beta33 ) = xmm15
 		movlpd(xmm11, mem(rcx)) // store ( gamma30 ) = xmm11[0]
@@ -421,14 +421,14 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movhpd(xmm15, mem(rdx, rdi, 1)) // store ( gamma33 ) = xmm15[1]
 		sub(rsi, rcx) // c11   -= rs_c
 		sub(rsi, rdx) // c11_2 -= rs_c
-		
-		
-		
+
+
+
 		 // iteration 1
-		
+
 		movddup(mem(2+2*4)*8(rax), xmm2) // load xmm2 = (1/alpha22)
 		movddup(mem(2+3*4)*8(rax), xmm3) // load xmm3 = alpha23
-		
+
 		movaps(xmm3, xmm7) // xmm7 = xmm3
 		mulpd(xmm11, xmm3) // xmm3 = alpha23 * ( beta30 beta31 )
 		mulpd(xmm15, xmm7) // xmm7 = alpha23 * ( beta32 beta33 )
@@ -441,7 +441,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		divpd(xmm2, xmm10) // xmm10 /= alpha22;
 		divpd(xmm2, xmm14) // xmm14 /= alpha22;
 #endif
-		
+
 		movaps(xmm10, mem(rbx, 4*16)) // store ( beta20 beta21 ) = xmm10
 		movaps(xmm14, mem(rbx, 5*16)) // store ( beta22 beta23 ) = xmm14
 		movlpd(xmm10, mem(rcx)) // store ( gamma20 ) = xmm10[0]
@@ -450,15 +450,15 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movhpd(xmm14, mem(rdx, rdi, 1)) // store ( gamma23 ) = xmm14[1]
 		sub(rsi, rcx) // c11   -= rs_c
 		sub(rsi, rdx) // c11_2 -= rs_c
-		
-		
-		
+
+
+
 		 // iteration 2
-		
+
 		movddup(mem(1+1*4)*8(rax), xmm1) // load xmm1 = (1/alpha11)
 		movddup(mem(1+2*4)*8(rax), xmm2) // load xmm2 = alpha12
 		movddup(mem(1+3*4)*8(rax), xmm3) // load xmm3 = alpha13
-		
+
 		movaps(xmm2, xmm6) // xmm6 = xmm2
 		movaps(xmm3, xmm7) // xmm7 = xmm3
 		mulpd(xmm10, xmm2) // xmm2 = alpha12 * ( beta20 beta21 )
@@ -476,7 +476,7 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		divpd(xmm1, xmm9)  // xmm9  /= alpha11;
 		divpd(xmm1, xmm13) // xmm13 /= alpha11;
 #endif
-		
+
 		movaps(xmm9, mem(rbx, 2*16)) // store ( beta10 beta11 ) = xmm9
 		movaps(xmm13, mem(rbx, 3*16)) // store ( beta12 beta13 ) = xmm13
 		movlpd(xmm9, mem(rcx)) // store ( gamma10 ) = xmm9[0]
@@ -485,16 +485,16 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		movhpd(xmm13, mem(rdx, rdi, 1)) // store ( gamma13 ) = xmm13[1]
 		sub(rsi, rcx) // c11   -= rs_c
 		sub(rsi, rdx) // c11_2 -= rs_c
-		
-		
-		
+
+
+
 		 // iteration 3
-		
+
 		movddup(mem(0+0*4)*8(rax), xmm0) // load xmm0 = (1/alpha00)
 		movddup(mem(0+1*4)*8(rax), xmm1) // load xmm1 = alpha01
 		movddup(mem(0+2*4)*8(rax), xmm2) // load xmm2 = alpha02
 		movddup(mem(0+3*4)*8(rax), xmm3) // load xmm3 = alpha03
-		
+
 		movaps(xmm1, xmm5) // xmm5 = xmm1
 		movaps(xmm2, xmm6) // xmm6 = xmm2
 		movaps(xmm3, xmm7) // xmm7 = xmm3
@@ -517,16 +517,16 @@ void bli_dgemmtrsm_u_penryn_asm_4x4
 		divpd(xmm0, xmm8)  // xmm8  /= alpha00;
 		divpd(xmm0, xmm12) // xmm12 /= alpha00;
 #endif
-		
+
 		movaps(xmm8, mem(rbx, 0*16)) // store ( beta00 beta01 ) = xmm8
 		movaps(xmm12, mem(rbx, 1*16)) // store ( beta02 beta03 ) = xmm12
 		movlpd(xmm8, mem(rcx)) // store ( gamma00 ) = xmm8[0]
 		movhpd(xmm8, mem(rcx, rdi, 1)) // store ( gamma01 ) = xmm8[1]
 		movlpd(xmm12, mem(rdx)) // store ( gamma02 ) = xmm12[0]
 		movhpd(xmm12, mem(rdx, rdi, 1)) // store ( gamma03 ) = xmm12[1]
-		
-		
-		
+
+
+
     end_asm(
 		: // output operands (none)
 		: // input operands

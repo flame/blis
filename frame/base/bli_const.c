@@ -44,11 +44,11 @@ static constdata_t bli_mtwo_buffer = bli_obj_init_constdata( -2.0 );
 
 // Statically initialize global scalar constants, attaching the addresses
 // of the corresponding structs above.
-obj_t BLIS_TWO       = bli_obj_init_const( &bli_two_buffer );
-obj_t BLIS_ONE       = bli_obj_init_const( &bli_one_buffer );
-obj_t BLIS_ZERO      = bli_obj_init_const( &bli_zero_buffer );
-obj_t BLIS_MINUS_ONE = bli_obj_init_const( &bli_mone_buffer );
-obj_t BLIS_MINUS_TWO = bli_obj_init_const( &bli_mtwo_buffer );
+const obj_t BLIS_TWO       = bli_obj_init_const( &bli_two_buffer );
+const obj_t BLIS_ONE       = bli_obj_init_const( &bli_one_buffer );
+const obj_t BLIS_ZERO      = bli_obj_init_const( &bli_zero_buffer );
+const obj_t BLIS_MINUS_ONE = bli_obj_init_const( &bli_mone_buffer );
+const obj_t BLIS_MINUS_TWO = bli_obj_init_const( &bli_mtwo_buffer );
 
 #if 0
 obj_t BLIS_TWO = {};

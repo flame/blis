@@ -41,9 +41,9 @@
 
 typedef void (*FUNCPTR_T)
      (
-       conj_t conjchi,
-       void*  chi,
-       void*  psi
+             conj_t conjchi,
+       const void*  chi,
+             void*  psi
      );
 
 static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
@@ -57,24 +57,24 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 \
 void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      ) \
 { \
 	bli_init_once(); \
 \
-	conj_t    conjchi   = bli_obj_conj_status( chi ); \
+	conj_t conjchi = bli_obj_conj_status( chi ); \
 \
-	num_t     dt_psi    = bli_obj_dt( psi ); \
-	void*     buf_psi   = bli_obj_buffer_at_off( psi ); \
+	num_t  dt_psi  = bli_obj_dt( psi ); \
+	void*  buf_psi = bli_obj_buffer_at_off( psi ); \
 \
-	num_t     dt_chi; \
-	void*     buf_chi; \
+	num_t  dt_chi; \
+	void*  buf_chi; \
 \
 	FUNCPTR_T f; \
 \
 	if ( bli_error_checking_is_enabled() ) \
-	    PASTEMAC(opname,_check)( chi, psi ); \
+		PASTEMAC(opname,_check)( chi, psi ); \
 \
 	/* If chi is a scalar constant, use dt_psi to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
@@ -105,15 +105,15 @@ GENFRONT( copysc )
 \
 void PASTEMAC2(chx,chy,varname) \
      ( \
-       conj_t conjchi, \
-       void*  chi, \
-       void*  psi \
+             conj_t conjchi, \
+       const void*  chi, \
+             void*  psi \
      ) \
 { \
 	bli_init_once(); \
 \
-	ctype_x* chi_cast = chi; \
-	ctype_y* psi_cast = psi; \
+	const ctype_x* chi_cast = chi; \
+	      ctype_y* psi_cast = psi; \
 \
 	if ( bli_is_conj( conjchi ) ) \
 	{ \

@@ -37,9 +37,9 @@
 
 void bli_packm_init_check
      (
-       obj_t*  a,
-       obj_t*  p,
-       cntx_t* cntx
+       const obj_t*  a,
+       const obj_t*  p,
+       const cntx_t* cntx
      )
 {
 	err_t e_val;
@@ -59,9 +59,9 @@ void bli_packm_init_check
 
 void bli_packm_int_check
      (
-       obj_t*  a,
-       obj_t*  p,
-       cntx_t* cntx
+       const obj_t*  a,
+       const obj_t*  p,
+       const cntx_t* cntx
      )
 {
 	err_t e_val;

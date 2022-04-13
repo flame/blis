@@ -82,16 +82,13 @@ void bli_obj_create_without_buffer
        obj_t* obj
      )
 {
-	siz_t  elem_size;
-	void*  s;
-
 	bli_init_once();
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_create_without_buffer_check( dt, m, n, obj );
 
 	// Query the size of one element of the object's pre-set datatype.
-	elem_size = bli_dt_size( dt );
+	siz_t elem_size = bli_dt_size( dt );
 
 	// Set any default properties that are appropriate.
 	bli_obj_set_defaults( obj );
@@ -125,7 +122,7 @@ void bli_obj_create_without_buffer
 
 	// Set the internal scalar to 1.0.
 	bli_obj_set_scalar_dt( dt, obj );
-	s = bli_obj_internal_scalar_buffer( obj );
+	void* s = bli_obj_internal_scalar_buffer( obj );
 
 	// Always writing the imaginary component is needed in mixed-domain
 	// scenarios. Failing to do this can lead to reading uninitialized
@@ -147,21 +144,17 @@ void bli_obj_alloc_buffer
        obj_t* obj
      )
 {
-	dim_t  n_elem = 0;
-	dim_t  m, n;
-	siz_t  elem_size;
-	siz_t  buffer_size;
-	void*  p;
-	err_t  r_val;
+	dim_t n_elem = 0;
+	err_t r_val;
 
 	bli_init_once();
 
 	// Query the dimensions of the object we are allocating.
-	m = bli_obj_length( obj );
-	n = bli_obj_width( obj );
+	dim_t m = bli_obj_length( obj );
+	dim_t n = bli_obj_width( obj );
 
 	// Query the size of one element.
-	elem_size = bli_obj_elem_size( obj );
+	siz_t elem_size = bli_obj_elem_size( obj );
 
 	// Adjust the strides, if needed, before doing anything else
 	// (particularly, before doing any error checking).
@@ -198,10 +191,10 @@ void bli_obj_alloc_buffer
 
 	// Compute the size of the total buffer to be allocated, which includes
 	// padding if the leading dimension was increased for alignment purposes.
-	buffer_size = ( siz_t )n_elem * elem_size;
+	siz_t buffer_size = ( siz_t )n_elem * elem_size;
 
 	// Allocate the buffer.
-	p = bli_malloc_user( buffer_size, &r_val );
+	void* p = bli_malloc_user( buffer_size, &r_val );
 
 	// Set individual fields.
 	bli_obj_set_buffer( p, obj );
@@ -264,8 +257,8 @@ void bli_obj_create_1x1_with_attached_buffer
 
 void bli_obj_create_conf_to
      (
-       obj_t* s,
-       obj_t* d
+       const obj_t* s,
+             obj_t* d
      )
 {
 	const num_t dt = bli_obj_dt( s );
@@ -552,7 +545,7 @@ static char* dt_names[ BLIS_NUM_FP_TYPES+1 ] =
 	"int"
 };
 
-char* bli_dt_string
+const char* bli_dt_string
      (
        num_t dt
      )
@@ -600,15 +593,13 @@ dim_t bli_align_dim_to_size
 
 dim_t bli_align_ptr_to_size
      (
-       void*  p,
-       size_t align_size
+       const void*  p,
+             size_t align_size
      )
 {
-	dim_t dim;
-
-	dim = ( ( ( uintptr_t )p + align_size - 1 ) /
-	        align_size
-	      ) * align_size;
+	dim_t dim = ( ( ( uintptr_t )p + align_size - 1 ) /
+	              align_size
+	            ) * align_size;
 
 	return dim;
 }
@@ -634,13 +625,13 @@ num_t bli_dt_union( num_t dt1, num_t dt2 )
 
 void bli_obj_print
      (
-       char*  label,
-       obj_t* obj
+       const char*  label,
+       const obj_t* obj
      )
 {
 	bli_init_once();
 
-	FILE*  file     = stdout;
+	FILE* file = stdout;
 
 	if ( bli_error_checking_is_enabled() )
 		bli_obj_print_check( label, obj );

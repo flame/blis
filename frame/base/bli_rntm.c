@@ -410,7 +410,7 @@ void bli_rntm_set_ways_from_rntm_sup
 
 void bli_rntm_print
      (
-       rntm_t* rntm
+       const rntm_t* rntm
      )
 {
 	dim_t af = bli_rntm_auto_factor( rntm );
@@ -433,8 +433,8 @@ void bli_rntm_print
 
 dim_t bli_rntm_calc_num_threads_in
      (
-       bszid_t* restrict bszid_cur,
-       rntm_t*  restrict rntm
+       const bszid_t* bszid_cur,
+       const rntm_t*  rntm
      )
 {
 	/*                                     // bp algorithm:
