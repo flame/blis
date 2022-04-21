@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021-2022, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -39,6 +39,7 @@
 // Setting these macros to 1 will force JR and IR inner loops
 // to be not paralleized.
 //
+
 #define BLIS_THREAD_MAX_IR 1
 #define BLIS_THREAD_MAX_JR 1
 
@@ -54,12 +55,5 @@
 #define BLIS_SMALL_MATRIX_A_THRES_N_SYRK 128
 
 //#define BLIS_ENABLE_FAST_MATH
-
-// -- SIMD config  --------------------------------------------------------
-
-#define BLIS_SIMD_ALIGN_SIZE             64
-
-#define BLIS_SIMD_SIZE                   64
-#define BLIS_SIMD_NUM_REGISTERS          32
 
 #endif
