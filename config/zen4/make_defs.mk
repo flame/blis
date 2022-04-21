@@ -128,7 +128,7 @@ endif # gcc
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
 
-# Disable AVX-512 for reference kernels
+# Disable AVX-512 for reference kernels.
 CRVECFLAGS     += -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
 
 # Store all of the variables here to new variables containing the
