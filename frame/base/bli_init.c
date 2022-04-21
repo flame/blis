@@ -34,6 +34,9 @@
 */
 
 #include "blis.h"
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+#include "bli_offloader.h"
+#endif
 
 // -----------------------------------------------------------------------------
 
@@ -91,6 +94,10 @@ void bli_init_apis( void )
 	bli_pack_init();
 	bli_memsys_init();
 
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+        bli_offloader_init();
+#endif
+
 	// Reset the control variable that will allow finalization.
 	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
 	// contents to the static control variable because some implementations of
@@ -109,6 +116,10 @@ void bli_finalize_apis( void )
 	bli_thread_finalize();
 	bli_ind_finalize();
 	bli_gks_finalize();
+
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+        bli_offloader_finalize();
+#endif
 
 	// Reset the control variable that will allow (re-)initialization.
 	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the

@@ -183,5 +183,10 @@
 #define BLIS_DISABLE_COMPLEX_RETURN_INTEL
 #endif
 
+#if @enable_amd_offload@
+#define BLIS_ENABLE_AMD_OFFLOAD
+#else
+#define BLIS_DISABLE_AMD_OFFLOAD
+#endif
 
 #endif

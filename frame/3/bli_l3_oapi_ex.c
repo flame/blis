@@ -33,6 +33,9 @@
 */
 
 #include "blis.h"
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+#include "../base/bli_offloader.h"
+#endif
 
 //
 // Define object-based interfaces (expert).
@@ -73,6 +76,21 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 			return;
 		}
 	}
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+	// check if we should offload - since attempting to offload and fail
+	// incurrs a non-trivial cost, we only want to fail and fall through
+	// in rare cases
+	const bool do_offload = bli_do_offload_gemmex( alpha, a, b, beta, c);
+	if ( do_offload )
+	{
+		// attempts to offload
+		const err_t result = bli_offload_gemmex( alpha, a, b, beta, c);
+		if ( result == BLIS_SUCCESS )
+		{
+			return;
+		}
+	}
+#endif
 
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.

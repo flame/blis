@@ -53,7 +53,9 @@ typedef struct rntm_s
 
 	pool_t*   sba_pool;
 	pba_t*    pba;
-
+#ifdef BLIS_ENABLE_AMD_OFFLOAD
+        bli_offloader_t* offloader_state;
+#endif
 } rntm_t;
 */
 
@@ -304,6 +306,7 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 // of the public "set" accessors, each of which guarantees that the rntm_t
 // will be in a good state upon return.
 
+#ifndef BLIS_ENABLE_AMD_OFFLOAD
 #define BLIS_RNTM_INITIALIZER \
         { \
           .auto_factor = TRUE, \
@@ -314,7 +317,24 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .l3_sup      = TRUE, \
           .sba_pool    = NULL, \
           .pba         = NULL, \
+        } \
+
+#else
+
+#define BLIS_RNTM_INITIALIZER \
+        { \
+          .auto_factor = TRUE, \
+          .num_threads = -1, \
+          .thrloop     = { -1, -1, -1, -1, -1, -1 }, \
+          .pack_a      = FALSE, \
+          .pack_b      = FALSE, \
+          .l3_sup      = TRUE, \
+          .sba_pool    = NULL, \
+          .pba         = NULL, \
+          .offloader_state = NULL, \
         }  \
+
+#endif
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 {

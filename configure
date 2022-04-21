@@ -285,6 +285,15 @@ print_usage()
 	echo "                 which are determined by the BLIS subconfiguration used at"
 	echo "                 runtime.) By default, these customized files are disabled."
 	echo " "
+	echo "   --enable-amd-offload, --disable-amd-offload"
+	echo " "
+	echo "                 Enable conditional offloading of some Level-3 BLAS calls"
+	echo "                 to AMD accelerators such as MI100, MI200."
+	echo "                 Enabling this option requires ROCm to be installed and"
+	echo "                 uses rocBLAS as a backend."
+	echo "                 Introduces rocblas-dev and hip-dev as dependencies."
+	echo "                 By default, the offloading path are disabled."
+	echo " "
 	echo "   -a NAME --enable-addon=NAME"
 	echo " "
 	echo "                 Enable the code provided by an addon. An addon consists"
@@ -2469,6 +2478,7 @@ main()
 	enable_mixed_dt_extra_mem='yes'
 	enable_sup_handling='yes'
 	enable_amd_frame_tweaks='no'
+	enable_amd_offload='no'
 	enable_memkind='' # The default memkind value is determined later on.
 	enable_trsm_preinversion='yes'
 	force_version='no'
@@ -2686,6 +2696,12 @@ main()
 							;;
 						disable-amd-frame-tweaks)
 							enable_amd_frame_tweaks='no'
+							;;
+						enable-amd-offload)
+							enable_amd_offload='yes'
+							;;
+						disable-amd-offload)
+							enable_amd_offload='no'
 							;;
 						with-memkind)
 							enable_memkind='yes'
@@ -3612,6 +3628,29 @@ main()
 		echo "${script_name}: AMD-specific framework files will not be considered."
 	fi
 
+	# Check whether anything should be offloaded to AMD accelerators
+	enable_amd_offload_01=0
+	if [ "x${enable_amd_offload}" = "xyes" ]; then
+		echo "${script_name}: Offloading to AMD accelerators will be considered."
+		echo "${script_name}:   checking for ROCm installation and availability."
+
+		# Make sure there's a ROCm installation present
+		# use rocm_agent_enumerator to see if there's a gfx != gfx000
+		gfxs=`rocm_agent_enumerator`
+		if [ -z "$gfxs" ]; then
+			echo "${script_name}:   rocm_agent_enumerator returns no agents."
+			enable_amd_offload='no'
+		elif [[ "$gfxs" =~ "gfx9" ]] || [[ "$gfxs" =~ "gfx10" ]]; then
+			echo "${script_name}:   found AMD accelerator(s)."
+			enable_amd_offload_01=1
+		else
+			echo "${script_name}:   Illegal rocm_agent_enumerator output. $gfsx"
+			enable_amd_offload='no'
+		fi
+	else
+		echo "${script_name}: Offloading to AMD accelerators will not be considered."
+	fi
+
 	# Check if addons were given.
 	if [ -n "${addon_flag}" ]; then
 
@@ -3866,6 +3905,7 @@ main()
 		| sed -e "s/@enable_blas@/${enable_blas}/g" \
 		| sed -e "s/@enable_cblas@/${enable_cblas}/g" \
 		| sed -e "s/@enable_amd_frame_tweaks@/${enable_amd_frame_tweaks}/g" \
+		| sed -e "s/@enable_amd_offload@/${enable_amd_offload}/g" \
 		| sed -e "s/@enable_memkind@/${enable_memkind}/g" \
 		| sed -e "s/@pragma_omp_simd@/${pragma_omp_simd}/g" \
 		| sed -e "s/@addon_list@/${addon_list}/g" \
@@ -3905,6 +3945,7 @@ main()
 		| sed   -e "s/@enable_sandbox@/${enable_sandbox_01}/g" \
 		| sed   -e "s/@enable_shared@/${enable_shared_01}/g" \
 		| sed   -e "s/@complex_return_intel@/${complex_return_intel01}/g" \
+		| sed   -e "s/@enable_amd_offload@/${enable_amd_offload_01}/g" \
 		> "${bli_config_h_out_path}"
 
 	# -- Instantiate bli_addon.h file from template ----------------------------
