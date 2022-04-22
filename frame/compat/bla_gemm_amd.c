@@ -560,7 +560,7 @@ void dgemm_
     if( ( ( (m0 + n0 -k0) < 2000) && ((m0 + k0-n0) < 2000) && ((n0 + k0-m0) < 2000) ) ||
       ((n0 <= 10) && (k0 <=10)) )
       {
-    err_t status;
+    err_t status = BLIS_FAILURE;
     if (bli_is_notrans(blis_transa))
       {
         status =  bli_dgemm_small( &alphao,
@@ -754,50 +754,14 @@ void zgemm_
     }
 #endif
 
-    // The code below will be called when number of threads = 1.
-#if 0//ENABLE_INDUCED_METHOD
-    /* 3m_sqp is optimal for certain matrix shapes.
-       Initial study that it works well for square sizes and sizes closer to square shape.
-
-       * Usage of 3m_sqp is restricted to sizes, where it is found efficient compared to native, sup and other induced method.
-       * Further investigation is necessary to make the usage choices more generic.  */
-    bool sqp_on = false;
-    if( (m0 == n0 ) && ( n0 == k0 ) && ( m0 == 128 ) )
+    err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    if(status==BLIS_SUCCESS)
     {
-        sqp_on = true;
+	 AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
     }
 
-    // current range of sizes used for 3m_sqp to be expaned after evaluation.
-    if( ( m0 >= 4200) && ( m0 <= 4600 ) && ( ( n0 >= 326 ) || (n0 <= 1600 ) )
-     && ( k0 == 1120 ) ) //to be tuned further.
-    {
-        sqp_on = true;
-    }
-
-    if( ( blis_transb == BLIS_NO_TRANSPOSE) && ( sqp_on == true ) )
-    {
-        //sqp algo is found better for n > 40
-        if(bli_gemm_sqp(&alphao, &ao, &bo, &betao, &co, NULL, NULL)==BLIS_SUCCESS)
-        {
-            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-            return;
-        }
-    }
-#endif//ENABLE_INDUCED_METHOD
-
-// sup has been disabled. 
-    if(0)
-    {
-            err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-            if(status==BLIS_SUCCESS)
-            {
-                AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-                    return;
-            }
-
-    }
     // fall back on native path when zgemm is not handled in sup path.
     bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
