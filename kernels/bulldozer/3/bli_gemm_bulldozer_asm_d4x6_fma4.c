@@ -98,8 +98,8 @@ void bli_sgemm_bulldozer_asm_8x8_fma4
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -590,8 +590,8 @@ void bli_dgemm_bulldozer_asm_4x6_fma4
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -810,8 +810,8 @@ void bli_cgemm_bulldozer_asm_8x4_fma4
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -1334,8 +1334,8 @@ void bli_zgemm_bulldozer_asm_4x4_fma4
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );

@@ -43,8 +43,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t       dt     = PASTEMAC(ch,type); \
@@ -92,13 +92,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 			i         = iter; \
 			n_behind  = i; \
 \
-			ctype_r* restrict alpha11_r  = a_r  + (i  )*rs_a2 + (i  )*cs_a2; \
-			ctype_r* restrict alpha11_i  = a_i  + (i  )*rs_a2 + (i  )*cs_a2; \
-			ctype_r* restrict a10t_r     = a_r  + (i  )*rs_a2 + (0  )*cs_a2; \
-			ctype_r* restrict a10t_i     = a_i  + (i  )*rs_a2 + (0  )*cs_a2; \
-			ctype_r* restrict b1_ri      = b_ri + (i  )*rs_b2 + (0  )*cs_b2; \
-			ctype_r* restrict b1_ir      = b_ir + (i  )*rs_b2 + (0  )*cs_b2; \
-			ctype_r* restrict B0_ri      = b_ri + (0  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict alpha11_r = a_r  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict alpha11_i = a_i  + (i  )*rs_a2 + (i  )*cs_a2; \
+			ctype_r* restrict a10t_r    = a_r  + (i  )*rs_a2 + (0  )*cs_a2; \
+			ctype_r* restrict a10t_i    = a_i  + (i  )*rs_a2 + (0  )*cs_a2; \
+			ctype_r* restrict b1_ri     = b_ri + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict b1_ir     = b_ir + (i  )*rs_b2 + (0  )*cs_b2; \
+			ctype_r* restrict B0_ri     = b_ri + (0  )*rs_b2 + (0  )*cs_b2; \
 \
 			/* b1 = b1 - a10t * B0; */ \
 			/* b1 = b1 / alpha11; */ \
@@ -261,8 +261,8 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict a, \
        ctype*     restrict b, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 	const num_t       dt     = PASTEMAC(ch,type); \

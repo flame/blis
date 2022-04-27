@@ -264,8 +264,8 @@ void bli_sgemm_knc_asm_30x16
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
     float * a_next = bli_auxinfo_next_a( data );

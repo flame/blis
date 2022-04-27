@@ -46,7 +46,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        dim_t            n, \
        ctype*  restrict x, inc_t incx, \
        dim_t*  restrict i_max, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ) \
 { \
 	ctype_r* minus_one = PASTEMAC(chr,m1); \

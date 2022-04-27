@@ -70,8 +70,8 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	// Query the context for the addresses of:
 	// - the blocksize object array
 	// - the blocksize multiple array
-	blksz_t* cntx_blkszs = bli_cntx_blkszs_buf( cntx );
-	bszid_t* cntx_bmults = bli_cntx_bmults_buf( cntx );
+	blksz_t* cntx_blkszs = cntx->blkszs;
+	bszid_t* cntx_bmults = cntx->bmults;
 
 	// Initialize variable argument environment.
 	va_list args;
@@ -165,7 +165,7 @@ void bli_cntx_set_ind_blkszs( ind_t method, num_t dt, cntx_t* cntx, ... )
 		// Query the context for the blksz_t object assoicated with the
 		// current blocksize id, and also query the object corresponding
 		// to the blocksize multiple.
-		blksz_t* cntx_blksz = bli_cntx_get_blksz( bs_id, cntx );
+		blksz_t* cntx_blksz = ( blksz_t* )bli_cntx_get_blksz( bs_id, cntx );
 
 		// Copy the real domain value of the blksz_t object into the
 		// corresponding complex domain slot of the same object.
@@ -218,7 +218,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 	*/
 
 	// Query the context for the address of the ukernel func_t array
-	func_t*  cntx_ukrs = bli_cntx_ukrs_buf( cntx );
+	func_t*  cntx_ukrs = cntx->ukrs;
 
 	// Initialize variable argument environment.
 	va_list   args;
@@ -262,7 +262,7 @@ void bli_cntx_set_ukrs( cntx_t* cntx , ... )
 			case BLIS_GEMMTRSM_U_UKR: ukrs = &cntx_ukrs[ BLIS_GEMMTRSM_U_VIR_UKR ]; break;
 			case BLIS_TRSM_L_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_L_VIR_UKR ]; break;
 			case BLIS_TRSM_U_UKR:     ukrs = &cntx_ukrs[ BLIS_TRSM_U_VIR_UKR ]; break;
-		    default:                  ukrs = NULL; break;
+			default:                  ukrs = NULL; break;
 		};
 
 		if ( ukrs )
@@ -297,7 +297,7 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 	*/
 
 	// Query the context for the address of the ukernel preference mbool_t array
-	mbool_t* cntx_ukr_prefs = bli_cntx_ukr_prefs_buf( cntx );
+	mbool_t* cntx_ukr_prefs = cntx->ukr_prefs;
 
 	// Initialize variable argument environment.
 	va_list   args;
@@ -355,7 +355,7 @@ void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... )
 	*/
 
 	// Query the context for the address of the l3 sup handlers array.
-	void_fp* cntx_l3_sup_handlers = bli_cntx_l3_sup_handlers_buf( cntx );
+	void_fp* cntx_l3_sup_handlers = cntx->l3_sup_handlers;
 
 	// Initialize variable argument environment.
 	va_list   args;
@@ -386,7 +386,7 @@ void bli_cntx_set_l3_sup_handlers( cntx_t* cntx, ... )
 
 // -----------------------------------------------------------------------------
 
-void bli_cntx_print( cntx_t* cntx )
+void bli_cntx_print( const cntx_t* cntx )
 {
 	dim_t i;
 
@@ -410,7 +410,7 @@ void bli_cntx_print( cntx_t* cntx )
 
 	for ( i = 0; i < BLIS_NUM_UKRS; ++i )
 	{
-		func_t* ukr = bli_cntx_get_ukrs( i, cntx );
+		const func_t* ukr = bli_cntx_get_ukrs( i, cntx );
 
 		printf( "ukr %2lu:  %16p %16p %16p %16p\n",
 		        ( unsigned long )i,
@@ -423,7 +423,7 @@ void bli_cntx_print( cntx_t* cntx )
 
 	for ( i = 0; i < BLIS_NUM_UKR_PREFS; ++i )
 	{
-		mbool_t* ukr_pref = bli_cntx_get_ukr_prefs( i, cntx );
+		const mbool_t* ukr_pref = bli_cntx_get_ukr_prefs( i, cntx );
 
 		printf( "ukr pref %2lu:  %d %d %d %d\n",
 		        ( unsigned long )i,

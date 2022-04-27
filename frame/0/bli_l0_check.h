@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      );
 
 GENTPROT( addsc )
@@ -59,7 +59,7 @@ GENTPROT( subsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi  \
+       const obj_t* chi  \
      );
 
 GENTPROT( invertsc )
@@ -70,8 +70,8 @@ GENTPROT( invertsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi, \
-       obj_t*  absq  \
+       const obj_t* chi, \
+       const obj_t* absq  \
      );
 
 GENTPROT( absqsc )
@@ -83,9 +83,9 @@ GENTPROT( normfsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const obj_t*  chi, \
+       const double* zeta_r, \
+       const double* zeta_i  \
      );
 
 GENTPROT( getsc )
@@ -96,9 +96,9 @@ GENTPROT( getsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       obj_t*  chi  \
+             double zeta_r, \
+             double zeta_i, \
+       const obj_t* chi  \
      );
 
 GENTPROT( setsc )
@@ -109,9 +109,9 @@ GENTPROT( setsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi, \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i  \
+       const obj_t* chi, \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i  \
      );
 
 GENTPROT( unzipsc )
@@ -122,9 +122,9 @@ GENTPROT( unzipsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i, \
-       obj_t*  chi  \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i, \
+       const obj_t* chi  \
      );
 
 GENTPROT( zipsc )
@@ -133,24 +133,24 @@ GENTPROT( zipsc )
 
 void bli_l0_xsc_check
      (
-       obj_t*  chi
+       const obj_t* chi
      );
 
 void bli_l0_xxsc_check
      (
-       obj_t*  chi,
-       obj_t*  psi 
+       const obj_t* chi,
+       const obj_t* psi
      );
 
 void bli_l0_xx2sc_check
      (
-       obj_t*  chi,
-       obj_t*  norm 
+       const obj_t* chi,
+       const obj_t* norm
      );
 
 void bli_l0_xxbsc_check
      (
-       obj_t*  chi,
-       obj_t*  psi,
-       bool*   is_eq
+       const obj_t* chi,
+       const obj_t* psi,
+       const bool*  is_eq
      );

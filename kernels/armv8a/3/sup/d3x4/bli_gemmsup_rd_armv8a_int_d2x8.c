@@ -69,8 +69,8 @@ void bli_dgemmsup_rd_armv8a_int_2x8
        double*    restrict b, inc_t rs_b, inc_t cs_b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   assert( m0 <= 2 );
@@ -114,10 +114,10 @@ void bli_dgemmsup_rd_armv8a_int_2x8
   PRAGMA_UNROLL
   for ( ; k_mker > 0; --k_mker )
   {
-    // if ( m0 > 0 ) 
+    // if ( m0 > 0 )
                   va_0 = vld1q_f64( a_loc + rs_a * 0 );
     if ( m0 > 1 ) va_1 = vld1q_f64( a_loc + rs_a * 1 );
-    // if ( n0 > 0 ) 
+    // if ( n0 > 0 )
                   vb_0 = vld1q_f64( b_loc + cs_b * 0 );
     if ( n0 > 1 ) vb_1 = vld1q_f64( b_loc + cs_b * 1 );
     if ( n0 > 2 ) vb_2 = vld1q_f64( b_loc + cs_b * 2 );
@@ -174,10 +174,10 @@ void bli_dgemmsup_rd_armv8a_int_2x8
   PRAGMA_NOUNROLL
   for ( ; k_left > 0; --k_left )
   {
-    // if ( m0 > 0 ) 
+    // if ( m0 > 0 )
                   va_0 = vld1q_lane_f64( a_loc + rs_a * 0, va_0, 0 );
     if ( m0 > 1 ) va_1 = vld1q_lane_f64( a_loc + rs_a * 1, va_1, 0 );
-    // if ( n0 > 0 ) 
+    // if ( n0 > 0 )
                   vb_0 = vld1q_lane_f64( b_loc + cs_b * 0, vb_0, 0 );
     if ( n0 > 1 ) vb_1 = vld1q_lane_f64( b_loc + cs_b * 1, vb_1, 0 );
     if ( n0 > 2 ) vb_2 = vld1q_lane_f64( b_loc + cs_b * 2, vb_2, 0 );

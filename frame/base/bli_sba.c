@@ -57,8 +57,8 @@ void bli_sba_finalize( void )
 
 void* bli_sba_acquire
      (
-       rntm_t* restrict rntm,
-       siz_t            req_size
+       rntm_t* rntm,
+       siz_t   req_size
      )
 {
 	void* block;
@@ -74,7 +74,7 @@ void* bli_sba_acquire
 		pblk_t pblk;
 
 		// Query the small block pool from the rntm.
-		pool_t* restrict pool = bli_rntm_sba_pool( rntm );
+		pool_t* pool = bli_rntm_sba_pool( rntm );
 
 		// We don't expect NULL sba_pool pointers in the normal course of BLIS
 		// operation. However, there are rare instances where it is convenient
@@ -122,8 +122,8 @@ void* bli_sba_acquire
 
 void bli_sba_release
      (
-       rntm_t* restrict rntm,
-       void*   restrict block
+       rntm_t* rntm,
+       void*   block
      )
 {
 #ifdef BLIS_ENABLE_SBA_POOLS
@@ -136,7 +136,7 @@ void bli_sba_release
 		pblk_t pblk;
 
 		// Query the small block pool from the rntm.
-		pool_t* restrict pool = bli_rntm_sba_pool( rntm );
+		pool_t* pool = bli_rntm_sba_pool( rntm );
 
 		if ( pool == NULL )
 		{
@@ -182,7 +182,7 @@ array_t* bli_sba_checkout_array
 
 void bli_sba_checkin_array
      (
-       array_t* restrict array
+       array_t* array
      )
 {
 	#ifndef BLIS_ENABLE_SBA_POOLS
@@ -194,9 +194,9 @@ void bli_sba_checkin_array
 
 void bli_sba_rntm_set_pool
      (
-       siz_t             index,
-       array_t* restrict array,
-       rntm_t*  restrict rntm
+       siz_t    index,
+       array_t* array,
+       rntm_t*  rntm
      )
 {
 	#ifndef BLIS_ENABLE_SBA_POOLS
@@ -205,7 +205,7 @@ void bli_sba_rntm_set_pool
 	#endif
 
 	// Query the pool_t* in the array_t corresponding to index.
-	pool_t* restrict pool = bli_apool_array_elem( index, array );
+	pool_t* pool = bli_apool_array_elem( index, array );
 
 	// Embed the pool_t* into the rntm_t.
 	bli_rntm_set_sba_pool( pool, rntm );

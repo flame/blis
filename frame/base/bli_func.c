@@ -93,13 +93,13 @@ void bli_func_free( func_t* f )
 
 // -----------------------------------------------------------------------------
 
-bool bli_func_is_null_dt( num_t   dt,
-                          func_t* f )
+bool bli_func_is_null_dt(       num_t   dt,
+                          const func_t* f )
 {
 	return ( bli_func_get_dt( dt, f ) == NULL );
 }
 
-bool bli_func_is_null( func_t* f )
+bool bli_func_is_null( const func_t* f )
 {
 	bool  r_val = TRUE;
 	num_t dt;

@@ -42,16 +42,16 @@
 \
 void PASTEMAC0(opname) \
      ( \
-       trans_t trans, \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  beta, \
-       obj_t*  c, \
-       stor3_t eff_id, \
-       cntx_t* cntx, \
-       rntm_t* rntm, \
-       thrinfo_t* thread  \
+             trans_t    trans, \
+       const obj_t*     alpha, \
+       const obj_t*     a, \
+       const obj_t*     b, \
+       const obj_t*     beta, \
+       const obj_t*     c, \
+             stor3_t    eff_id, \
+       const cntx_t*    cntx, \
+             rntm_t*    rntm, \
+             thrinfo_t* thread  \
      );
 
 GENPROT( gemmsup_ref_var1 )
@@ -70,20 +70,20 @@ GENPROT( gemmsup_ref_var2m )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       conj_t           conja, \
-       conj_t           conjb, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
-       stor3_t          eff_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       thrinfo_t* restrict thread  \
+       conj_t     conja, \
+       conj_t     conjb, \
+       dim_t      m, \
+       dim_t      n, \
+       dim_t      k, \
+       void*      alpha, \
+       void*      a, inc_t rs_a, inc_t cs_a, \
+       void*      b, inc_t rs_b, inc_t cs_b, \
+       void*      beta, \
+       void*      c, inc_t rs_c, inc_t cs_c, \
+       stor3_t    eff_id, \
+       cntx_t*    cntx, \
+       rntm_t*    rntm, \
+       thrinfo_t* thread  \
      );
 
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1 )
@@ -94,22 +94,22 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2 )
 \
 void PASTEMAC(ch,varname) \
      ( \
-       bool             packa, \
-       bool             packb, \
-       conj_t           conja, \
-       conj_t           conjb, \
-       dim_t            m, \
-       dim_t            n, \
-       dim_t            k, \
-       void*   restrict alpha, \
-       void*   restrict a, inc_t rs_a, inc_t cs_a, \
-       void*   restrict b, inc_t rs_b, inc_t cs_b, \
-       void*   restrict beta, \
-       void*   restrict c, inc_t rs_c, inc_t cs_c, \
-       stor3_t          eff_id, \
-       cntx_t* restrict cntx, \
-       rntm_t* restrict rntm, \
-       thrinfo_t* restrict thread  \
+       bool       packa, \
+       bool       packb, \
+       conj_t     conja, \
+       conj_t     conjb, \
+       dim_t      m, \
+       dim_t      n, \
+       dim_t      k, \
+       void*      alpha, \
+       void*      a, inc_t rs_a, inc_t cs_a, \
+       void*      b, inc_t rs_b, inc_t cs_b, \
+       void*      beta, \
+       void*      c, inc_t rs_c, inc_t cs_c, \
+       stor3_t    eff_id, \
+       cntx_t*    cntx, \
+       rntm_t*    rntm, \
+       thrinfo_t* thread  \
      );
 
 INSERT_GENTPROT_BASIC0( gemmsup_ref_var1n )
@@ -119,12 +119,12 @@ INSERT_GENTPROT_BASIC0( gemmsup_ref_var2m )
 
 BLIS_INLINE void bli_gemmsup_ref_var1n2m_opt_cases
      (
-       num_t    dt,
-       trans_t* trans,
-       bool     packa,
-       bool     packb,
-       stor3_t* eff_id,
-       cntx_t*  cntx
+             num_t    dt,
+             trans_t* trans,
+             bool     packa,
+             bool     packb,
+             stor3_t* eff_id,
+       const cntx_t*  cntx
      )
 {
 	const bool row_pref = bli_cntx_ukr_prefers_rows_dt( dt, bli_stor3_ukr( *eff_id ), cntx );

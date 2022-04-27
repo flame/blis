@@ -67,12 +67,12 @@ void bli_thread_finalize( void )
 
 void bli_thread_range_sub
      (
-       thrinfo_t* thread,
-       dim_t      n,
-       dim_t      bf,
-       bool       handle_edge_low,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thread,
+             dim_t      n,
+             dim_t      bf,
+             bool       handle_edge_low,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	dim_t      n_way      = bli_thread_n_way( thread );
@@ -211,11 +211,11 @@ void bli_thread_range_sub
 
 siz_t bli_thread_range_l2r
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -231,11 +231,11 @@ siz_t bli_thread_range_l2r
 
 siz_t bli_thread_range_r2l
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -251,11 +251,11 @@ siz_t bli_thread_range_r2l
 
 siz_t bli_thread_range_t2b
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -271,11 +271,11 @@ siz_t bli_thread_range_t2b
 
 siz_t bli_thread_range_b2t
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	num_t dt = bli_obj_dt( a );
@@ -504,15 +504,15 @@ siz_t bli_find_area_trap_l
 
 siz_t bli_thread_range_weighted_sub
      (
-       thrinfo_t* restrict thread,
-       doff_t              diagoff,
-       uplo_t              uplo,
-       dim_t               m,
-       dim_t               n,
-       dim_t               bf,
-       bool                handle_edge_low,
-       dim_t*     restrict j_start_thr,
-       dim_t*     restrict j_end_thr
+       const thrinfo_t* thread,
+             doff_t     diagoff,
+             uplo_t     uplo,
+             dim_t      m,
+             dim_t      n,
+             dim_t      bf,
+             bool       handle_edge_low,
+             dim_t*     j_start_thr,
+             dim_t*     j_end_thr
      )
 {
 	dim_t      n_way   = bli_thread_n_way( thread );
@@ -641,15 +641,15 @@ siz_t bli_thread_range_weighted_sub
 
 siz_t bli_thread_range_mdim
      (
-       dir_t      direct,
-       thrinfo_t* thr,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     c,
-       cntl_t*    cntl,
-       cntx_t*    cntx,
-       dim_t*     start,
-       dim_t*     end
+             dir_t      direct,
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntl_t*    cntl,
+       const cntx_t*    cntx,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
@@ -665,8 +665,8 @@ siz_t bli_thread_range_mdim
 		else                                   bszid = BLIS_NR;
 	}
 
-	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
-	obj_t*   x;
+	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	const obj_t*   x;
 	bool     use_weighted;
 
 	// Use the operation family to choose the one of the two matrices
@@ -700,15 +700,15 @@ siz_t bli_thread_range_mdim
 
 siz_t bli_thread_range_ndim
      (
-       dir_t      direct,
-       thrinfo_t* thr,
-       obj_t*     a,
-       obj_t*     b,
-       obj_t*     c,
-       cntl_t*    cntl,
-       cntx_t*    cntx,
-       dim_t*     start,
-       dim_t*     end
+             dir_t      direct,
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const obj_t*     b,
+       const obj_t*     c,
+       const cntl_t*    cntl,
+       const cntx_t*    cntx,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	bszid_t  bszid  = bli_cntl_bszid( cntl );
@@ -724,8 +724,8 @@ siz_t bli_thread_range_ndim
 		else                                   bszid = BLIS_NR;
 	}
 
-	blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
-	obj_t*   x;
+	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	const obj_t*   x;
 	bool     use_weighted;
 
 	// Use the operation family to choose the one of the two matrices
@@ -759,11 +759,11 @@ siz_t bli_thread_range_ndim
 
 siz_t bli_thread_range_weighted_l2r
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -809,11 +809,11 @@ siz_t bli_thread_range_weighted_l2r
 
 siz_t bli_thread_range_weighted_r2l
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -861,11 +861,11 @@ siz_t bli_thread_range_weighted_r2l
 
 siz_t bli_thread_range_weighted_t2b
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -913,11 +913,11 @@ siz_t bli_thread_range_weighted_t2b
 
 siz_t bli_thread_range_weighted_b2t
      (
-       thrinfo_t* thr,
-       obj_t*     a,
-       blksz_t*   bmult,
-       dim_t*     start,
-       dim_t*     end
+       const thrinfo_t* thr,
+       const obj_t*     a,
+       const blksz_t*   bmult,
+             dim_t*     start,
+             dim_t*     end
      )
 {
 	siz_t area;
@@ -1295,31 +1295,31 @@ void bli_thread_partition_2x2_orig
 	dim_t tn1; // = *nt1;
 	dim_t tn2; // = *nt2;
 
-    // Partition a number of threads into two factors nt1 and nt2 such that
-    // nt1/nt2 ~= work1/work2. There is a fast heuristic algorithm and a
-    // slower optimal algorithm (which minimizes |nt1*work2 - nt2*work1|).
+	// Partition a number of threads into two factors nt1 and nt2 such that
+	// nt1/nt2 ~= work1/work2. There is a fast heuristic algorithm and a
+	// slower optimal algorithm (which minimizes |nt1*work2 - nt2*work1|).
 
-    // Return early small prime numbers of threads.
-    if ( n_thread < 4 )
-    {
-        tn1 = ( work1 >= work2 ? n_thread : 1 );
-        tn2 = ( work1 <  work2 ? n_thread : 1 );
+	// Return early small prime numbers of threads.
+	if ( n_thread < 4 )
+	{
+		tn1 = ( work1 >= work2 ? n_thread : 1 );
+		tn2 = ( work1 <  work2 ? n_thread : 1 );
 
 		return;
-    }
+	}
 
-    tn1 = 1;
-    tn2 = 1;
+	tn1 = 1;
+	tn2 = 1;
 
-    // Both algorithms need the prime factorization of n_thread.
-    bli_prime_factors_t factors;
-    bli_prime_factorization( n_thread, &factors );
+	// Both algorithms need the prime factorization of n_thread.
+	bli_prime_factors_t factors;
+	bli_prime_factorization( n_thread, &factors );
 
 #if 1
 
-    // Fast algorithm: assign prime factors in increasing order to whichever
-    // partition has more work to do. The work is divided by the number of
-    // threads assigned at each iteration. This algorithm is sub-optimal in
+	// Fast algorithm: assign prime factors in increasing order to whichever
+	// partition has more work to do. The work is divided by the number of
+	// threads assigned at each iteration. This algorithm is sub-optimal in
 	// some cases. We attempt to mitigate the cases that involve at least one
 	// factor of 2. For example, in the partitioning of 12 with equal work
 	// this algorithm tentatively finds 6x2. This factorization involves a
@@ -1330,22 +1330,22 @@ void bli_thread_partition_2x2_orig
 
 	//printf( "w1 w2 = %d %d (initial)\n", (int)work1, (int)work2 );
 
-    dim_t f;
-    while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
-    {
+	dim_t f;
+	while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
+	{
 		//printf( "w1 w2 = %4d %4d nt1 nt2 = %d %d ... f = %d\n", (int)work1, (int)work2, (int)tn1, (int)tn2, (int)f );
 
-        if ( work1 > work2 )
-        {
-            work1 /= f;
-            tn1 *= f;
-        }
-        else
-        {
-            work2 /= f;
-            tn2 *= f;
-        }
-    }
+		if ( work1 > work2 )
+		{
+			work1 /= f;
+			tn1 *= f;
+		}
+		else
+		{
+			work2 /= f;
+			tn2 *= f;
+		}
+	}
 
 	//printf( "w1 w2 = %4d %4d nt1 nt2 = %d %d\n", (int)work1, (int)work2, (int)tn1, (int)tn2 );
 
@@ -1391,78 +1391,78 @@ void bli_thread_partition_2x2_orig
 
 #else
 
-    // Slow algorithm: exhaustively constructs all factor pairs of n_thread and
-    // chooses the best one.
+	// Slow algorithm: exhaustively constructs all factor pairs of n_thread and
+	// chooses the best one.
 
-    // Eight prime factors handles n_thread up to 223092870.
-    dim_t fact[8];
-    dim_t mult[8];
+	// Eight prime factors handles n_thread up to 223092870.
+	dim_t fact[8];
+	dim_t mult[8];
 
-    // There is always at least one prime factor, so use if for initialization.
-    dim_t nfact = 1;
-    fact[0] = bli_next_prime_factor( &factors );
-    mult[0] = 1;
+	// There is always at least one prime factor, so use if for initialization.
+	dim_t nfact = 1;
+	fact[0] = bli_next_prime_factor( &factors );
+	mult[0] = 1;
 
-    // Collect the remaining prime factors, accounting for multiplicity of
-    // repeated factors.
-    dim_t f;
-    while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
-    {
-        if ( f == fact[nfact-1] )
-        {
-            mult[nfact-1]++;
-        }
-        else
-        {
-            nfact++;
-            fact[nfact-1] = f;
-            mult[nfact-1] = 1;
-        }
-    }
+	// Collect the remaining prime factors, accounting for multiplicity of
+	// repeated factors.
+	dim_t f;
+	while ( ( f = bli_next_prime_factor( &factors ) ) > 1 )
+	{
+		if ( f == fact[nfact-1] )
+		{
+			mult[nfact-1]++;
+		}
+		else
+		{
+			nfact++;
+			fact[nfact-1] = f;
+			mult[nfact-1] = 1;
+		}
+	}
 
-    // Now loop over all factor pairs. A single factor pair is denoted by how
-    // many of each prime factor are included in the first factor (ntaken).
-    dim_t ntake[8] = {0};
-    dim_t min_diff = INT_MAX;
+	// Now loop over all factor pairs. A single factor pair is denoted by how
+	// many of each prime factor are included in the first factor (ntaken).
+	dim_t ntake[8] = {0};
+	dim_t min_diff = INT_MAX;
 
-    // Loop over how many prime factors to assign to the first factor in the
-    // pair, for each prime factor. The total number of iterations is
-    // \Prod_{i=0}^{nfact-1} mult[i].
-    bool   done = FALSE;
-    while ( !done )
-    {
-        dim_t x = 1;
-        dim_t y = 1;
+	// Loop over how many prime factors to assign to the first factor in the
+	// pair, for each prime factor. The total number of iterations is
+	// \Prod_{i=0}^{nfact-1} mult[i].
+	bool   done = FALSE;
+	while ( !done )
+	{
+		dim_t x = 1;
+		dim_t y = 1;
 
-        // Form the factors by integer exponentiation and accumulation.
-        for  (dim_t i = 0 ; i < nfact ; i++ )
-        {
-            x *= bli_ipow( fact[i], ntake[i] );
-            y *= bli_ipow( fact[i], mult[i]-ntake[i] );
-        }
+		// Form the factors by integer exponentiation and accumulation.
+		for  (dim_t i = 0 ; i < nfact ; i++ )
+		{
+			x *= bli_ipow( fact[i], ntake[i] );
+			y *= bli_ipow( fact[i], mult[i]-ntake[i] );
+		}
 
-        // Check if this factor pair is optimal by checking
-        // |nt1*work2 - nt2*work1|.
-        dim_t diff = llabs( x*work2 - y*work1 );
-        if ( diff < min_diff )
-        {
-            min_diff = diff;
-            tn1 = x;
-            tn2 = y;
-        }
+		// Check if this factor pair is optimal by checking
+		// |nt1*work2 - nt2*work1|.
+		dim_t diff = llabs( x*work2 - y*work1 );
+		if ( diff < min_diff )
+		{
+			min_diff = diff;
+			tn1 = x;
+			tn2 = y;
+		}
 
-        // Go to the next factor pair by doing an "odometer loop".
-        for ( dim_t i = 0 ; i < nfact ; i++ )
-        {
-            if ( ++ntake[i] > mult[i] )
-            {
-                ntake[i] = 0;
-                if ( i == nfact-1 ) done = TRUE;
-                else continue;
-            }
-            break;
-        }
-    }
+		// Go to the next factor pair by doing an "odometer loop".
+		for ( dim_t i = 0 ; i < nfact ; i++ )
+		{
+			if ( ++ntake[i] > mult[i] )
+			{
+				ntake[i] = 0;
+				if ( i == nfact-1 ) done = TRUE;
+				else continue;
+			}
+			break;
+		}
+	}
 
 #endif
 

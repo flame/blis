@@ -235,12 +235,12 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-       dir_t   direct,
-       dim_t   i,
-       dim_t   dim,
-       obj_t*  obj,
-       bszid_t bszid,
-       cntx_t* cntx
+             dir_t   direct,
+             dim_t   i,
+             dim_t   dim,
+       const obj_t*  obj,
+             bszid_t bszid,
+       const cntx_t* cntx
      )
 {
 	if ( direct == BLIS_FWD )
@@ -251,17 +251,17 @@ dim_t bli_determine_blocksize
 
 dim_t bli_determine_blocksize_f
      (
-       dim_t   i,
-       dim_t   dim,
-       obj_t*  obj,
-       bszid_t bszid,
-       cntx_t* cntx
+             dim_t   i,
+             dim_t   dim,
+       const obj_t*  obj,
+             bszid_t bszid,
+       const cntx_t* cntx
      )
 {
-	num_t    dt;
-	blksz_t* bsize;
-	dim_t    b_alg, b_max;
-	dim_t    b_use;
+	num_t          dt;
+	const blksz_t* bsize;
+	dim_t          b_alg, b_max;
+	dim_t          b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
@@ -277,17 +277,17 @@ dim_t bli_determine_blocksize_f
 
 dim_t bli_determine_blocksize_b
      (
-       dim_t   i,
-       dim_t   dim,
-       obj_t*  obj,
-       bszid_t bszid,
-       cntx_t* cntx
+             dim_t   i,
+             dim_t   dim,
+       const obj_t*  obj,
+             bszid_t bszid,
+       const cntx_t* cntx
      )
 {
-	num_t    dt;
-	blksz_t* bsize;
-	dim_t    b_alg, b_max;
-	dim_t    b_use;
+	num_t          dt;
+	const blksz_t* bsize;
+	dim_t          b_alg, b_max;
+	dim_t          b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.

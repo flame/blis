@@ -42,8 +42,8 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  absq  \
+       const obj_t* chi, \
+       const obj_t* absq  \
      );
 
 GENPROT( absqsc )
@@ -55,8 +55,8 @@ GENPROT( normfsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi  \
+       const obj_t* chi, \
+       const obj_t* psi  \
      );
 
 GENPROT( addsc )
@@ -71,7 +71,7 @@ GENPROT( subsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi  \
+       const obj_t* chi  \
      );
 
 GENPROT( invertsc )
@@ -82,9 +82,9 @@ GENPROT( invertsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const obj_t*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      );
 
 GENPROT( getsc )
@@ -95,9 +95,9 @@ GENPROT( getsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       obj_t*  chi  \
+             double zeta_r, \
+             double zeta_i, \
+       const obj_t* chi  \
      );
 
 GENPROT( setsc )
@@ -108,9 +108,9 @@ GENPROT( setsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  chi, \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i  \
+       const obj_t* chi, \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i  \
      );
 
 GENPROT( unzipsc )
@@ -121,9 +121,9 @@ GENPROT( unzipsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0(opname) \
      ( \
-       obj_t*  zeta_r, \
-       obj_t*  zeta_i, \
-       obj_t*  chi  \
+       const obj_t* zeta_r, \
+       const obj_t* zeta_i, \
+       const obj_t* chi  \
      );
 
 GENPROT( zipsc )

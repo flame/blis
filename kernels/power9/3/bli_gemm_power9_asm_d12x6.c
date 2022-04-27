@@ -45,8 +45,8 @@ void bli_dgemm_power9_asm_12x6
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a

@@ -95,8 +95,8 @@ BLIS_EXPORT_BLIS void bli_obj_create_1x1_with_attached_buffer
 
 BLIS_EXPORT_BLIS void bli_obj_create_conf_to
      (
-       obj_t* s,
-       obj_t* d
+       const obj_t* s,
+             obj_t* d
      );
 
 BLIS_EXPORT_BLIS void bli_obj_free
@@ -119,7 +119,7 @@ BLIS_EXPORT_BLIS siz_t bli_dt_size
        num_t dt
      );
 
-BLIS_EXPORT_BLIS char* bli_dt_string
+BLIS_EXPORT_BLIS const char* bli_dt_string
      (
        num_t dt
      );
@@ -139,13 +139,13 @@ BLIS_EXPORT_BLIS dim_t bli_align_dim_to_size
 
 BLIS_EXPORT_BLIS dim_t bli_align_ptr_to_size
      (
-       void*  p,
-       size_t align_size
+       const void*  p,
+             size_t align_size
      );
 
 BLIS_EXPORT_BLIS void bli_obj_print
      (
-       char*  label,
-       obj_t* obj
+       const char*  label,
+       const obj_t* obj
      );
 

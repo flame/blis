@@ -42,11 +42,11 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alphax, \
-       obj_t*  alphay, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t* alphax, \
+       const obj_t* alphay, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -58,10 +58,10 @@ GENTPROT( axpy2v )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -73,12 +73,12 @@ GENTPROT( axpyf )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  xt, \
-       obj_t*  x, \
-       obj_t*  y, \
-       obj_t*  rho, \
-       obj_t*  z  \
+       const obj_t* alpha, \
+       const obj_t* xt, \
+       const obj_t* x, \
+       const obj_t* y, \
+       const obj_t* rho, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -90,14 +90,14 @@ GENTPROT( dotaxpyv )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  at, \
-       obj_t*  a, \
-       obj_t*  w, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y, \
-       obj_t*  z  \
+       const obj_t* alpha, \
+       const obj_t* at, \
+       const obj_t* a, \
+       const obj_t* w, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y, \
+       const obj_t* z  \
        BLIS_OAPI_EX_PARAMS  \
      );
 
@@ -109,11 +109,11 @@ GENTPROT( dotxaxpyf )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(opname,EX_SUF) \
      ( \
-       obj_t*  alpha, \
-       obj_t*  a, \
-       obj_t*  x, \
-       obj_t*  beta, \
-       obj_t*  y  \
+       const obj_t* alpha, \
+       const obj_t* a, \
+       const obj_t* x, \
+       const obj_t* beta, \
+       const obj_t* y  \
        BLIS_OAPI_EX_PARAMS  \
      );
 

@@ -39,8 +39,8 @@
 
 typedef struct
 {
-    //                   Type of C          Type of P
-    packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+	//                   Type of C          Type of P
+	packm_ker_vft ukr_fn[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
 } packm_blk_var1_params_t;
 
 //
@@ -49,11 +49,11 @@ typedef struct
 
 BLIS_EXPORT_BLIS void bli_packm_blk_var1
      (
-       obj_t*   c,
-       obj_t*   p,
-       cntx_t*  cntx,
-       rntm_t*  rntm,
-       cntl_t*  cntl,
-       thrinfo_t* t
+       const obj_t*   c,
+             obj_t*   p,
+       const cntx_t*  cntx,
+             rntm_t*  rntm,
+             cntl_t*  cntl,
+       const thrinfo_t* t
      );
 

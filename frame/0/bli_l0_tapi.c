@@ -43,9 +43,9 @@
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi, \
-       ctype*  psi  \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -66,8 +66,8 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi  \
+       conj_t conjchi, \
+       ctype* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -87,9 +87,9 @@ INSERT_GENTFUNC_BASIC( invertsc, inverts )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi, \
-       ctype*  psi  \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -116,8 +116,8 @@ INSERT_GENTFUNC_BASIC( mulsc, scals )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*   chi, \
-       ctype_r* absq  \
+       const ctype*   chi, \
+             ctype_r* absq  \
      ) \
 { \
 	bli_init_once(); \
@@ -145,8 +145,8 @@ INSERT_GENTFUNCR_BASIC0( absqsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*   chi, \
-       ctype_r* norm  \
+       const ctype*   chi, \
+             ctype_r* norm  \
      ) \
 { \
 	bli_init_once(); \
@@ -163,8 +163,8 @@ INSERT_GENTFUNCR_BASIC0( normfsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*  chi, \
-       ctype*  psi  \
+       const ctype* chi, \
+             ctype* psi  \
      ) \
 { \
 	bli_init_once(); \
@@ -181,9 +181,9 @@ INSERT_GENTFUNC_BASIC0( sqrtsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*  chi, \
-       double* zeta_r, \
-       double* zeta_i  \
+       const ctype*  chi, \
+             double* zeta_r, \
+             double* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -199,9 +199,9 @@ INSERT_GENTFUNC_BASIC0( getsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       ctype*  chi  \
+       double zeta_r, \
+       double zeta_i, \
+       ctype* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -217,9 +217,9 @@ INSERT_GENTFUNC_BASIC0( setsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype*   chi, \
-       ctype_r* zeta_r, \
-       ctype_r* zeta_i  \
+       const ctype*   chi, \
+             ctype_r* zeta_r, \
+             ctype_r* zeta_i  \
      ) \
 { \
 	bli_init_once(); \
@@ -235,9 +235,9 @@ INSERT_GENTFUNCR_BASIC0( unzipsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       ctype_r* zeta_r, \
-       ctype_r* zeta_i, \
-       ctype*   chi  \
+       const ctype_r* zeta_r, \
+       const ctype_r* zeta_i, \
+             ctype*   chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -251,9 +251,9 @@ INSERT_GENTFUNCR_BASIC0( zipsc )
 
 void bli_igetsc
      (
-       dim_t*  chi,
-       double* zeta_r,
-       double* zeta_i
+       const dim_t*  chi,
+             double* zeta_r,
+             double* zeta_i
      )
 {
 	bli_init_once();
@@ -263,9 +263,9 @@ void bli_igetsc
 
 void bli_isetsc
      (
-       double  zeta_r,
-       double  zeta_i,
-       dim_t*  chi
+       double zeta_r,
+       double zeta_i,
+       dim_t* chi
      )
 {
 	bli_init_once();

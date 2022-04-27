@@ -44,14 +44,14 @@
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   n, \
-       ctype*  alpha1, \
-       ctype*  alpha2, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  n, \
+       const ctype* alpha1, \
+       const ctype* alpha2, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -64,14 +64,14 @@ INSERT_GENTDEF( axpy2v )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t  conja, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy  \
+             conj_t conja, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* x, inc_t incx, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -84,15 +84,15 @@ INSERT_GENTDEF( axpyf )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t  conjxt, \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   m, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  rho, \
-       ctype*  z, inc_t incz  \
+             conj_t conjxt, \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* rho, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -105,15 +105,15 @@ INSERT_GENTDEF( dotaxpyv )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t  conjat, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             conj_t conjat, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      );
 
@@ -126,19 +126,19 @@ INSERT_GENTDEF( dotxf )
 \
 typedef void (*PASTECH3(ch,opname,EX_SUF,tsuf)) \
      ( \
-       conj_t  conjat, \
-       conj_t  conja, \
-       conj_t  conjw, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   b_n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t inca, inc_t lda, \
-       ctype*  w, inc_t incw, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy, \
-       ctype*  z, inc_t incz  \
+             conj_t conjat, \
+             conj_t conja, \
+             conj_t conjw, \
+             conj_t conjx, \
+             dim_t  m, \
+             dim_t  b_n, \
+       const ctype* alpha, \
+       const ctype* a, inc_t inca, inc_t lda, \
+       const ctype* w, inc_t incw, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy, \
+             ctype* z, inc_t incz  \
        BLIS_TAPI_EX_PARAMS  \
      );
 

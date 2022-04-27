@@ -52,7 +52,7 @@ void bli_dpackm_armsve256_int_8xk
        double* restrict kappa,
        double* restrict a, inc_t inca_, inc_t lda_,
        double* restrict p,              inc_t ldp_,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const int64_t cdim  = cdim_;

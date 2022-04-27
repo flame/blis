@@ -50,31 +50,31 @@ static void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
-	const num_t     dt     = PASTEMAC(ch,type); \
+	const num_t dt     = PASTEMAC(ch,type); \
 \
-	const inc_t     packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
-	const inc_t     packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
+	const inc_t packmr = bli_cntx_get_blksz_max_dt( dt, BLIS_MR, cntx ); \
+	const inc_t packnr = bli_cntx_get_blksz_max_dt( dt, BLIS_NR, cntx ); \
 \
-	const inc_t     rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
-	const inc_t     cs_a   = packmr; \
+	const inc_t rs_a   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBM, cntx ); \
+	const inc_t cs_a   = packmr; \
 \
-	const inc_t     rs_b   = packnr; \
-	const inc_t     cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
+	const inc_t rs_b   = packnr; \
+	const inc_t cs_b   = bli_cntx_get_blksz_def_dt( dt, BLIS_BBN, cntx ); \
 \
-	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ab  = 1; \
-	const inc_t     cs_ab  = m; \
+	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
+	const inc_t rs_ab  = 1; \
+	const inc_t cs_ab  = m; \
 \
-	dim_t           l, j, i; \
+	dim_t       l, j, i; \
 \
-	ctype           ai; \
-	ctype           bj; \
+	ctype       ai; \
+	ctype       bj; \
 \
 \
 	/* Initialize the accumulator elements in ab to zero. */ \
@@ -118,18 +118,24 @@ static void PASTEMAC3(ch,opname,arch,suf) \
 	   scale by beta and then add the scaled redult in ab. */ \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
 	{ \
-		PASTEMAC(ch,copys_mxn)( m, \
-		                        n, \
-		                        ab, rs_ab, cs_ab, \
-		                        c,  rs_c,  cs_c ); \
+		PASTEMAC(ch,copys_mxn) \
+		( \
+		  m, \
+		  n, \
+		  ab, rs_ab, cs_ab, \
+		  c,  rs_c,  cs_c \
+		); \
 	} \
 	else \
 	{ \
-		PASTEMAC(ch,xpbys_mxn)( m, \
-		                        n, \
-		                        ab, rs_ab, cs_ab, \
-		                        beta, \
-		                        c,  rs_c,  cs_c ); \
+		PASTEMAC(ch,xpbys_mxn) \
+		( \
+		  m, \
+		  n, \
+		  ab, rs_ab, cs_ab, \
+		  beta, \
+		  c,  rs_c,  cs_c \
+		); \
 	} \
 }
 
@@ -153,13 +159,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*     restrict b, \
        ctype*     restrict beta, \
        ctype*     restrict c, inc_t rs_c, inc_t cs_c, \
-       auxinfo_t* restrict data, \
-       cntx_t*    restrict cntx  \
+       auxinfo_t*          data, \
+       cntx_t*             cntx  \
      ) \
 { \
 \
-	const dim_t     mr = PASTECH(BLIS_MR_,ch); \
-	const dim_t     nr = PASTECH(BLIS_NR_,ch); \
+	const dim_t mr = PASTECH(BLIS_MR_,ch); \
+	const dim_t nr = PASTECH(BLIS_NR_,ch); \
 \
 	if ( mr == -1 || nr == -1 ) \
 	{ \

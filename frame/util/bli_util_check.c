@@ -43,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  asum  \
+       const obj_t* x, \
+       const obj_t* asum  \
      ) \
 { \
 	bli_utilv_xa_check( x, asum ); \
@@ -58,7 +58,7 @@ GENFRONT( asumv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
      ) \
 { \
 	bli_utilm_mkhst_check( x ); \
@@ -74,8 +74,8 @@ GENFRONT( mktrim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      ) \
 { \
 	bli_utilv_norm_check( x, norm ); \
@@ -91,8 +91,8 @@ GENFRONT( normiv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      ) \
 { \
 	bli_utilm_norm_check( x, norm ); \
@@ -108,7 +108,7 @@ GENFRONT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x  \
+       const obj_t* x  \
      ) \
 { \
 	bli_utilm_rand_check( x ); \
@@ -125,9 +125,9 @@ GENFRONT( randnm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  scale, \
-       obj_t*  sumsq  \
+       const obj_t* x, \
+       const obj_t* scale, \
+       const obj_t* sumsq  \
      ) \
 { \
 	bli_utilv_sumsqv_check( x, scale, sumsq ); \
@@ -142,9 +142,9 @@ GENFRONT( sumsqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  chi, \
-       obj_t*  psi, \
-       bool*   is_eq  \
+       const obj_t* chi, \
+       const obj_t* psi, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l0_xxbsc_check( chi, psi, is_eq ); \
@@ -158,9 +158,9 @@ GENFRONT( eqsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l1v_xy_check( x, y ); \
@@ -174,9 +174,9 @@ GENFRONT( eqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       obj_t*  x, \
-       obj_t*  y, \
-       bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l1m_xy_check( x, y ); \
@@ -190,11 +190,11 @@ GENFRONT( eqm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       FILE*  file, \
-       char*  s1, \
-       obj_t* x, \
-       char*  format, \
-       char*  s2  \
+       const FILE*  file, \
+       const char*  s1, \
+       const obj_t* x, \
+       const char*  format, \
+       const char*  s2  \
      ) \
 { \
 	bli_utilm_fprint_check( file, s1, x, format, s2 ); \
@@ -207,8 +207,8 @@ GENFRONT( fprintm )
 
 void bli_utilv_xa_check
      (
-       obj_t*  x,
-       obj_t*  asum
+       const obj_t* x,
+       const obj_t* asum
      )
 {
 	err_t e_val;
@@ -240,7 +240,7 @@ void bli_utilv_xa_check
 
 void bli_utilm_mkhst_check
      (
-       obj_t*  a
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -277,8 +277,8 @@ void bli_utilm_mkhst_check
 
 void bli_utilv_norm_check
      (
-       obj_t*  x,
-       obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      )
 {
 	err_t e_val;
@@ -317,8 +317,8 @@ void bli_utilv_norm_check
 
 void bli_utilm_norm_check
      (
-       obj_t*  x,
-       obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      )
 {
 	err_t e_val;
@@ -356,35 +356,35 @@ void bli_utilm_norm_check
 
 void bli_utilm_fprint_check
      (
-       FILE*  file,
-       char*  s1,
-       obj_t* x,
-       char*  format,
-       char*  s2
+       const FILE*  file,
+       const char*  s1,
+       const obj_t* x,
+       const char*  format,
+       const char*  s2
      )
 {
 	err_t e_val;
 
 	// Check argument pointers.
-	
+
 	e_val = bli_check_null_pointer( file );
 	bli_check_error_code( e_val );
 
 	e_val = bli_check_null_pointer( s1 );
 	bli_check_error_code( e_val );
 
-	e_val = bli_check_null_pointer( s2 ); 
+	e_val = bli_check_null_pointer( s2 );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
-	e_val = bli_check_object_buffer( x ); 
+	e_val = bli_check_object_buffer( x );
 	bli_check_error_code( e_val );
 }
 
 void bli_utilm_rand_check
      (
-       obj_t* x
+       const obj_t* x
      )
 {
 	err_t e_val;
@@ -405,9 +405,9 @@ void bli_utilm_rand_check
 
 void bli_utilv_sumsqv_check
      (
-       obj_t*  x,
-       obj_t*  scale,
-       obj_t*  sumsq
+       const obj_t* x,
+       const obj_t* scale,
+       const obj_t* sumsq
      )
 {
 	err_t e_val;
@@ -430,15 +430,15 @@ void bli_utilv_sumsqv_check
 
 	e_val = bli_check_scalar_object( scale );
 	bli_check_error_code( e_val );
-	
+
 	e_val = bli_check_scalar_object( sumsq );
 	bli_check_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
-	
+
 	e_val = bli_check_object_buffer( x );
 	bli_check_error_code( e_val );
-	
+
 	e_val = bli_check_object_buffer( scale );
 	bli_check_error_code( e_val );
 

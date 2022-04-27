@@ -49,7 +49,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
        ctype*  restrict x, inc_t incx, \
        ctype*  restrict beta, \
        ctype*  restrict y, inc_t incy, \
-       cntx_t* restrict cntx  \
+       cntx_t*          cntx  \
      ) \
 { \
 	if ( inca == 1 && incx == 1 && incy == 1 && b_n == ff ) \

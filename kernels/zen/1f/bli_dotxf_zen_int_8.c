@@ -65,7 +65,7 @@ void bli_sdotxf_zen_int_8
        float*  restrict x, inc_t incx,
        float*  restrict beta,
        float*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t fuse_fac       = 8;
@@ -455,7 +455,7 @@ void bli_ddotxf_zen_int_8
        double* restrict x, inc_t incx,
        double* restrict beta,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	const dim_t      fuse_fac       = 8;

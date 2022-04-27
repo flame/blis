@@ -45,8 +45,8 @@ void bli_sgemm_armv7a_int_4x4
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a
@@ -251,8 +251,8 @@ void bli_dgemm_armv7a_int_4x4
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	// Typecast local copies of integers in case dim_t and inc_t are a

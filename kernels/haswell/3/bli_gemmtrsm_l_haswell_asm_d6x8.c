@@ -67,8 +67,8 @@ void bli_sgemmtrsm_l_haswell_asm_6x16
        float*     restrict b01,
        float*     restrict b11,
        float*     restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );
@@ -858,8 +858,8 @@ void bli_dgemmtrsm_l_haswell_asm_6x8
        double*    restrict b01,
        double*    restrict b11,
        double*    restrict c11, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	//void*   a_next = bli_auxinfo_next_a( data );

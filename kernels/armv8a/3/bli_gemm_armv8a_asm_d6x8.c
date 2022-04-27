@@ -61,8 +61,8 @@ void bli_sgemm_armv8a_asm_8x12
        float*     restrict b,
        float*     restrict beta,
        float*     restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -740,8 +740,8 @@ void bli_dgemm_armv8a_asm_6x8
        double*    restrict b,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 	void* a_next = bli_auxinfo_next_a( data );
@@ -1462,8 +1462,8 @@ void bli_cgemm_armv8a_opt_4x4
        scomplex*  restrict b,
        scomplex*  restrict beta,
        scomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 }
@@ -1478,8 +1478,8 @@ void bli_zgemm_armv8a_opt_4x4
        dcomplex*  restrict b,
        dcomplex*  restrict beta,
        dcomplex*  restrict c, inc_t rs_c, inc_t cs_c,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
 }

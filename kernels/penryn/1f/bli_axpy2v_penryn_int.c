@@ -53,7 +53,7 @@ void bli_daxpy2v_penryn_int
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
        double* restrict z, inc_t incz,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
 	double*  restrict alpha_cast  = alpha;

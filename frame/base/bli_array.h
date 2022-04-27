@@ -51,17 +51,17 @@ typedef struct
 
 // Array entry query
 
-BLIS_INLINE void* bli_array_buf( array_t* array )
+BLIS_INLINE void* bli_array_buf( const array_t* array )
 {
 	return array->buf;
 }
 
-BLIS_INLINE siz_t bli_array_num_elem( array_t* array )
+BLIS_INLINE siz_t bli_array_num_elem( const array_t* array )
 {
 	return array->num_elem;
 }
 
-BLIS_INLINE siz_t bli_array_elem_size( array_t* array )
+BLIS_INLINE siz_t bli_array_elem_size( const array_t* array )
 {
 	return array->elem_size;
 }
@@ -87,30 +87,30 @@ BLIS_INLINE void bli_array_set_elem_size( siz_t elem_size, array_t* array ) \
 
 void bli_array_init
      (
-       const siz_t       num_elem,
-       const siz_t       elem_size,
-       array_t* restrict array
+       siz_t    num_elem,
+       siz_t    elem_size,
+       array_t* array
      );
 void bli_array_resize
      (
-       const siz_t       num_elem_new,
-       array_t* restrict array
+       siz_t    num_elem_new,
+       array_t* array
      );
 void bli_array_finalize
      (
-       array_t* restrict array
+       array_t* array
      );
 
 void* bli_array_elem
      (
-       const siz_t       index,
-       array_t* restrict array
+             siz_t    index,
+       const array_t* array
      );
 void bli_array_set_elem
      (
-       void*    restrict elem,
-       const siz_t       index,
-       array_t* restrict array
+       void*    elem,
+       siz_t    index,
+       array_t* array
      );
 
 #endif

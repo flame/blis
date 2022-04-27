@@ -38,15 +38,15 @@
 
 void bli_l3_cntl_create_if
      (
-       opid_t   family,
-       pack_t   schema_a,
-       pack_t   schema_b,
-       obj_t*   a,
-       obj_t*   b,
-       obj_t*   c,
-       rntm_t*  rntm,
-       cntl_t*  cntl_orig,
-       cntl_t** cntl_use
+             opid_t   family,
+             pack_t   schema_a,
+             pack_t   schema_b,
+       const obj_t*   a,
+       const obj_t*   b,
+       const obj_t*   c,
+             rntm_t*  rntm,
+             cntl_t*  cntl_orig,
+             cntl_t** cntl_use
      )
 {
 	// If the control tree pointer is NULL, we construct a default

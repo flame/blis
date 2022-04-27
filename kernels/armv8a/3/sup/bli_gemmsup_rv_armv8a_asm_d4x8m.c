@@ -98,7 +98,7 @@ GEMMSUP_KER_PROT( double, d, gemmsup_r_armv8a_ref2 )
 /*
  * 4x8 dgemmsup kernel with extending 1st dimension.
  *
- * Recommanded usage case: 
+ * Recommanded usage case:
  * o 16 < (L1 cache latency) * (Num. FPU) < 25.
  * o L1 cache has a bandwidth not too low (true in most cases).
  * o (FMLA latency) * (Num. FPU) < 32 cycles (true in almost all cases).
@@ -115,8 +115,8 @@ void bli_dgemmsup_rv_armv8a_asm_4x8m
        double*    restrict b, inc_t rs_b0, inc_t cs_b0,
        double*    restrict beta,
        double*    restrict c, inc_t rs_c0, inc_t cs_c0,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      )
 {
   // Fixme: This uker has no dispatching for unalighed sizes.

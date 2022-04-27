@@ -39,14 +39,14 @@
 
 void bli_pool_init
      (
-       siz_t            num_blocks,
-       siz_t            block_ptrs_len,
-       siz_t            block_size,
-       siz_t            align_size,
-       siz_t            offset_size,
-       malloc_ft        malloc_fp,
-       free_ft          free_fp,
-       pool_t* restrict pool
+       siz_t     num_blocks,
+       siz_t     block_ptrs_len,
+       siz_t     block_size,
+       siz_t     align_size,
+       siz_t     offset_size,
+       malloc_ft malloc_fp,
+       free_ft   free_fp,
+       pool_t*   pool
      )
 {
 	err_t r_val;
@@ -67,7 +67,7 @@ void bli_pool_init
 	// Allocate the block_ptrs array.
 	// FGVZ: Do we want to call malloc_fp() for internal data structures as
 	// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
-	pblk_t* restrict block_ptrs
+	pblk_t* block_ptrs
 	=
 	bli_malloc_intl( block_ptrs_len * sizeof( pblk_t ), &r_val );
 
@@ -115,7 +115,7 @@ void bli_pool_init
 
 void bli_pool_finalize
      (
-       pool_t* restrict pool
+       pool_t* pool
      )
 {
 	// NOTE: This implementation assumes that either:
@@ -124,7 +124,7 @@ void bli_pool_finalize
 	//   is bli_pool_reinit().
 
 	// Query the block_ptrs array.
-	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
+	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the total number of blocks currently allocated.
 	const siz_t num_blocks = bli_pool_num_blocks( pool );
@@ -196,12 +196,12 @@ void bli_pool_finalize
 
 void bli_pool_reinit
      (
-       siz_t            num_blocks_new,
-       siz_t            block_ptrs_len_new,
-       siz_t            block_size_new,
-       siz_t            align_size_new,
-       siz_t            offset_size_new,
-       pool_t* restrict pool
+       siz_t   num_blocks_new,
+       siz_t   block_ptrs_len_new,
+       siz_t   block_size_new,
+       siz_t   align_size_new,
+       siz_t   offset_size_new,
+       pool_t* pool
      )
 {
 	// Preserve the pointers to malloc() and free() provided when the pool
@@ -234,9 +234,9 @@ void bli_pool_reinit
 
 void bli_pool_checkout_block
      (
-       siz_t            req_size,
-       pblk_t* restrict block,
-       pool_t* restrict pool
+       siz_t   req_size,
+       pblk_t* block,
+       pool_t* pool
      )
 {
 	// If the requested block size is smaller than what the pool was
@@ -282,7 +282,7 @@ void bli_pool_checkout_block
 	// At this point, at least one block is guaranteed to be available.
 
 	// Query the block_ptrs array.
-	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
+	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
@@ -309,8 +309,8 @@ void bli_pool_checkout_block
 
 void bli_pool_checkin_block
      (
-       pblk_t* restrict block,
-       pool_t* restrict pool
+       pblk_t* block,
+       pool_t* pool
      )
 {
 	// If the pblk_t being checked in was allocated with a different block
@@ -330,7 +330,7 @@ void bli_pool_checkin_block
 	}
 
 	// Query the block_ptrs array.
-	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
+	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the top_index of the pool.
 	const siz_t top_index = bli_pool_top_index( pool );
@@ -353,8 +353,8 @@ void bli_pool_checkin_block
 
 void bli_pool_grow
      (
-       siz_t            num_blocks_add,
-       pool_t* restrict pool
+       siz_t   num_blocks_add,
+       pool_t* pool
      )
 {
 	err_t r_val;
@@ -394,12 +394,12 @@ void bli_pool_grow
 		#endif
 
 		// Query the current block_ptrs array.
-		pblk_t* restrict block_ptrs_cur = bli_pool_block_ptrs( pool );
+		pblk_t* block_ptrs_cur = bli_pool_block_ptrs( pool );
 
 		// Allocate a new block_ptrs array.
 		// FGVZ: Do we want to call malloc_fp() for internal data structures as
 		// well as pool blocks? If so, don't forget to s/bli_free_intl/free_fp/g.
-		pblk_t* restrict block_ptrs_new
+		pblk_t* block_ptrs_new
 		=
 		bli_malloc_intl( block_ptrs_len_new * sizeof( pblk_t ), &r_val );
 
@@ -433,7 +433,7 @@ void bli_pool_grow
 	// blocks.
 
 	// Query the current block_ptrs array (which was mabye just resized).
-	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
+	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Query the block size and alignment size of the pool.
 	const siz_t block_size  = bli_pool_block_size( pool );
@@ -470,8 +470,8 @@ void bli_pool_grow
 
 void bli_pool_shrink
      (
-       siz_t            num_blocks_sub,
-       pool_t* restrict pool
+       siz_t   num_blocks_sub,
+       pool_t* pool
      )
 {
 	// If the requested decrease is zero, return early.
@@ -493,7 +493,7 @@ void bli_pool_shrink
 	num_blocks_sub = bli_min( num_blocks_sub, num_blocks_avail );
 
 	// Query the block_ptrs array.
-	pblk_t* restrict block_ptrs = bli_pool_block_ptrs( pool );
+	pblk_t* block_ptrs = bli_pool_block_ptrs( pool );
 
 	// Compute the new total number of blocks.
 	const siz_t num_blocks_new = num_blocks - num_blocks_sub;
@@ -520,11 +520,11 @@ void bli_pool_shrink
 
 void bli_pool_alloc_block
      (
-       siz_t            block_size,
-       siz_t            align_size,
-       siz_t            offset_size,
-       malloc_ft        malloc_fp,
-       pblk_t* restrict block
+       siz_t     block_size,
+       siz_t     align_size,
+       siz_t     offset_size,
+       malloc_ft malloc_fp,
+       pblk_t*   block
      )
 {
 	err_t r_val;
@@ -540,7 +540,7 @@ void bli_pool_alloc_block
 	// be recovered when it's time to free the block. Note that we have to
 	// add offset_size to the number of bytes requested since we will skip
 	// that many bytes at the beginning of the allocated memory.
-	void* restrict buf
+	void* buf
 	=
 	bli_fmalloc_align( malloc_fp, block_size + offset_size, align_size, &r_val );
 
@@ -579,7 +579,7 @@ void bli_pool_free_block
      (
        siz_t            offset_size,
        free_ft          free_fp,
-       pblk_t* restrict block
+       pblk_t* block
      )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
@@ -590,7 +590,7 @@ void bli_pool_free_block
 
 	// Extract the pblk_t buffer, which is the aligned address returned from
 	// bli_fmalloc_align() when the block was allocated.
-	void* restrict buf = bli_pblk_buf( block );
+	void* buf = bli_pblk_buf( block );
 
 	// Undo the pointer advancement by offset_size bytes performed previously
 	// by bli_pool_alloc_block().
@@ -604,7 +604,7 @@ void bli_pool_free_block
 
 void bli_pool_print
      (
-       pool_t* restrict pool
+       const pool_t* pool
      )
 {
 	pblk_t* block_ptrs     = bli_pool_block_ptrs( pool );
@@ -633,7 +633,7 @@ void bli_pool_print
 
 void bli_pblk_print
      (
-       pblk_t* restrict pblk
+       const pblk_t* pblk
      )
 {
 	void* buf = bli_pblk_buf( pblk );

@@ -45,15 +45,15 @@
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       trans_t transa, \
-       conj_t  conjx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             trans_t transa, \
+             conj_t  conjx, \
+             dim_t   m, \
+             dim_t   n, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+       const ctype*  x, inc_t incx, \
+       const ctype*  beta, \
+             ctype*  y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -111,12 +111,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  m, \
 	  n, \
-	  alpha, \
-	  a, rs_a, cs_a, \
-	  x, incx, \
-	  beta, \
-	  y, incy, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, rs_a, cs_a, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )beta, \
+	            y, incy, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -128,14 +128,14 @@ INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -164,11 +164,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjy, \
 	  m, \
 	  n, \
-	  alpha, \
-	  x, incx, \
-	  y, incy, \
-	  a, rs_a, cs_a, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )y, incy, \
+	            a, rs_a, cs_a, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -180,15 +180,15 @@ INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t  uploa, \
-       conj_t  conja, \
-       conj_t  conjx, \
-       dim_t   m, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx, \
-       ctype*  beta, \
-       ctype*  y, inc_t incy  \
+             uplo_t uploa, \
+             conj_t conja, \
+             conj_t conjx, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* a, inc_t rs_a, inc_t cs_a, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -239,12 +239,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  conjh, /* used by variants to distinguish hemv from symv */ \
 	  m, \
-	  alpha, \
-	  a, rs_a, cs_a, \
-	  x, incx, \
-	  beta, \
-	  y, incy, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, rs_a, cs_a, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )beta, \
+	            y, incy, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -257,12 +257,12 @@ INSERT_GENTFUNC_BASIC4( symv, hemv, BLIS_NO_CONJUGATE, hemv_unf_var1, hemv_unf_v
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t   uploa, \
-       conj_t   conjx, \
-       dim_t    m, \
-       ctype_r* alpha, \
-       ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a  \
+             uplo_t   uploa, \
+             conj_t   conjx, \
+             dim_t    m, \
+       const ctype_r* alpha, \
+       const ctype*   x, inc_t incx, \
+             ctype*   a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -306,10 +306,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  conjh, /* used by variants to distinguish her from syr */ \
 	  m, \
-	  &alpha_local, \
-	  x, incx, \
-	  a, rs_a, cs_a, \
-	  cntx \
+	  ( ctype* )&alpha_local, \
+	  ( ctype* )x, incx, \
+	            a, rs_a, cs_a, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -321,12 +321,12 @@ INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t   uploa, \
-       conj_t   conjx, \
-       dim_t    m, \
-       ctype*   alpha, \
-       ctype*   x, inc_t incx, \
-       ctype*   a, inc_t rs_a, inc_t cs_a  \
+             uplo_t uploa, \
+             conj_t conjx, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -363,10 +363,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjx, \
 	  conjh, /* used by variants to distinguish her2 from syr2 */ \
 	  m, \
-	  alpha, \
-	  x, incx, \
-	  a, rs_a, cs_a, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )x, incx, \
+	            a, rs_a, cs_a, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -378,14 +378,14 @@ INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t  uploa, \
-       conj_t  conjx, \
-       conj_t  conjy, \
-       dim_t   m, \
-       ctype*  alpha, \
-       ctype*  x, inc_t incx, \
-       ctype*  y, inc_t incy, \
-       ctype*  a, inc_t rs_a, inc_t cs_a  \
+             uplo_t uploa, \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -423,11 +423,11 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  conjy, \
 	  conjh, \
 	  m, \
-	  alpha, \
-	  x, incx, \
-	  y, incy, \
-	  a, rs_a, cs_a, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )x, incx, \
+	  ( ctype* )y, incy, \
+	            a, rs_a, cs_a, \
+	  ( cntx_t* )cntx \
 	); \
 }
 
@@ -440,13 +440,13 @@ INSERT_GENTFUNC_BASIC4( syr2, her2, BLIS_NO_CONJUGATE, her2_unf_var1, her2_unf_v
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       uplo_t  uploa, \
-       trans_t transa, \
-       diag_t  diaga, \
-       dim_t   m, \
-       ctype*  alpha, \
-       ctype*  a, inc_t rs_a, inc_t cs_a, \
-       ctype*  x, inc_t incx  \
+             uplo_t  uploa, \
+             trans_t transa, \
+             diag_t  diaga, \
+             dim_t   m, \
+       const ctype*  alpha, \
+       const ctype*  a, inc_t rs_a, inc_t cs_a, \
+             ctype*  x, inc_t incx  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -498,10 +498,10 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	  transa, \
 	  diaga, \
 	  m, \
-	  alpha, \
-	  a, rs_a, cs_a, \
-	  x, incx, \
-	  cntx \
+	  ( ctype* )alpha, \
+	  ( ctype* )a, rs_a, cs_a, \
+	            x, incx, \
+	  ( cntx_t* )cntx \
 	); \
 }
 

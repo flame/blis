@@ -38,12 +38,12 @@
 
 BLIS_EXPORT_BLIS void bli_acquire_mpart
      (
-       dim_t     i,
-       dim_t     j,
-       dim_t     m,
-       dim_t     n,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dim_t  i,
+             dim_t  j,
+             dim_t  m,
+             dim_t  n,
+       const obj_t* obj,
+             obj_t* sub_obj
      );
 
 #undef  GENPROT
@@ -51,11 +51,11 @@ BLIS_EXPORT_BLIS void bli_acquire_mpart
 \
 BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
-       subpart_t req_part, \
-       dim_t     i, \
-       dim_t     b, \
-       obj_t*    obj, \
-       obj_t*    sub_obj \
+             subpart_t req_part, \
+             dim_t     i, \
+             dim_t     b, \
+       const obj_t*    obj, \
+             obj_t*    sub_obj \
      );
 
 GENPROT( acquire_mpart_t2b )
@@ -71,12 +71,12 @@ GENPROT( acquire_mpart_br2tl )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
-       dir_t     direct, \
-       subpart_t req_part, \
-       dim_t     i, \
-       dim_t     b, \
-       obj_t*    obj, \
-       obj_t*    sub_obj \
+             dir_t     direct, \
+             subpart_t req_part, \
+             dim_t     i, \
+             dim_t     b, \
+       const obj_t*    obj, \
+             obj_t*    sub_obj \
      );
 
 GENPROT( acquire_mpart_mdim )
@@ -91,11 +91,11 @@ GENPROT( acquire_mpart_mndim )
 \
 BLIS_EXPORT_BLIS void PASTEMAC0( opname ) \
      ( \
-       subpart_t req_part, \
-       dim_t     i, \
-       dim_t     b, \
-       obj_t*    obj, \
-       obj_t*    sub_obj \
+             subpart_t req_part, \
+             dim_t     i, \
+             dim_t     b, \
+       const obj_t*    obj, \
+             obj_t*    sub_obj \
      );
 
 GENPROT( acquire_vpart_f2b )
@@ -105,16 +105,16 @@ GENPROT( acquire_vpart_b2f )
 
 BLIS_EXPORT_BLIS void bli_acquire_mij
      (
-       dim_t     i,
-       dim_t     j,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dim_t  i,
+             dim_t  j,
+       const obj_t* obj,
+             obj_t* sub_obj
      );
 
 BLIS_EXPORT_BLIS void bli_acquire_vi
      (
-       dim_t     i,
-       obj_t*    obj,
-       obj_t*    sub_obj
+             dim_t  i,
+       const obj_t* obj,
+             obj_t* sub_obj
      );
 

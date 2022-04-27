@@ -174,7 +174,7 @@ void libblis_test_axpyf_experiment
 
 
 	// Query a context.
-	cntx = bli_gks_query_cntx();
+	cntx = ( cntx_t* )bli_gks_query_cntx();
 
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
@@ -223,7 +223,7 @@ void libblis_test_axpyf_experiment
 	bli_obj_set_conj( conja, &a );
 	bli_obj_set_conj( conjx, &x );
 
-	// Repeat the experiment n_repeats times and record results. 
+	// Repeat the experiment n_repeats times and record results.
 	for ( i = 0; i < n_repeats; ++i )
 	{
 		bli_copyv( &y_save, &y );

@@ -34,174 +34,106 @@
 
 #include "blis.h"
 
-/*
+
 void bli_l3_prune_unref_mparts_m
      (
-       obj_t*  a,
-       obj_t*  b,
-       obj_t*  c,
-       cntl_t* cntl
+             obj_t*  a,
+       const obj_t*  b,
+             obj_t*  c,
+       const cntl_t* cntl
      )
 {
-	// Query the operation family.
+	/* Query the operation family. */
 	opid_t family = bli_cntl_family( cntl );
 
-	if      ( family == BLIS_GEMM ) return; // No pruning is necessary for gemm.
-	else if ( family == BLIS_GEMMT ) bli_gemmt_prune_unref_mparts_m( a, b, c );
-	else if ( family == BLIS_TRMM ) bli_trmm_prune_unref_mparts_m( a, b, c );
-	else if ( family == BLIS_TRSM ) bli_trsm_prune_unref_mparts_m( a, b, c );
-}
-*/
-
-#undef  GENFRONT
-#define GENFRONT( dim ) \
-\
-void PASTEMAC(l3_prune_unref_mparts_,dim) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c, \
-       cntl_t* cntl  \
-     ) \
-{ \
-	/* Query the operation family. */ \
-	opid_t family = bli_cntl_family( cntl ); \
-\
-	if      ( family == BLIS_GEMM ) return; /* No pruning is necessary for gemm. */ \
-	else if ( family == BLIS_GEMMT ) PASTEMAC(gemmt_prune_unref_mparts_,dim)( a, b, c ); \
-	else if ( family == BLIS_TRMM ) PASTEMAC(trmm_prune_unref_mparts_,dim)( a, b, c ); \
-	else if ( family == BLIS_TRSM ) PASTEMAC(trsm_prune_unref_mparts_,dim)( a, b, c ); \
+	if      ( family == BLIS_GEMM )
+	{
+		/* No pruning is necessary for gemm. */
+		return;
+	}
+	else if ( family == BLIS_GEMMT )
+	{
+		/* Prune any unreferenced part from the subpartition of C (that would
+		   be encountered from partitioning in the m dimension) and adjust the
+		   subpartition of A accordingly. */
+		bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M );
+	}
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRSM )
+	{
+		/* Prune any unreferenced part from the subpartition of A (that would
+		   be encountered from partitioning in the m dimension) and adjust the
+		   subpartition of C accordingly. */
+		bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M );
+	}
 }
 
-GENFRONT( m )
-GENFRONT( n )
-GENFRONT( k )
+void bli_l3_prune_unref_mparts_n
+     (
+       const obj_t*  a,
+             obj_t*  b,
+             obj_t*  c,
+       const cntl_t* cntl
+     )
+{
+	/* Query the operation family. */
+	opid_t family = bli_cntl_family( cntl );
 
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_prune_unref_mparts_m) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* No pruning is necessary for gemm. */ \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_n) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* No pruning is necessary for gemm. */ \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_k) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* No pruning is necessary for gemm. */ \
+	if      ( family == BLIS_GEMM )
+	{
+		/* No pruning is necessary for gemm. */
+		return;
+	}
+	else if ( family == BLIS_GEMMT )
+	{
+		/* Prune any unreferenced part from the subpartition of C (that would
+		   be encountered from partitioning in the m dimension) and adjust the
+		   subpartition of B accordingly. */
+		bli_prune_unref_mparts( c, BLIS_N, b, BLIS_N );
+	}
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRSM )
+	{
+		/* Prune any unreferenced part from the subpartition of B (that would
+		   be encountered from partitioning in the m dimension) and adjust the
+		   subpartition of C accordingly. */
+		bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N );
+	}
 }
 
-GENFRONT( gemm )
+void bli_l3_prune_unref_mparts_k
+     (
+             obj_t*  a,
+             obj_t*  b,
+       const obj_t*  c,
+       const cntl_t* cntl
+     )
+{
+	/* Query the operation family. */
+	opid_t family = bli_cntl_family( cntl );
 
-// -----------------------------------------------------------------------------
+	if      ( family == BLIS_GEMM )
+	{
+		/* No pruning is necessary for gemm. */
+		return;
+	}
+	else if ( family == BLIS_GEMMT )
+	{
+		/* No pruning is necessary for gemmt. */
+		return;
+	}
+	else if ( family == BLIS_TRMM ||
+	          family == BLIS_TRSM )
+	{
+		/* Prune any unreferenced part from the subpartition of A (that would
+		   be encountered from partitioning in the k dimension) and adjust the
+		   subpartition of B accordingly. */
+		bli_prune_unref_mparts( a, BLIS_N, b, BLIS_M );
 
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_prune_unref_mparts_m) \
-     ( \
-       obj_t*  a, \
-       obj_t*  ah, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* Prune any unreferenced part from the subpartition of C (that would
-	   be encountered from partitioning in the m dimension) and adjust the
-	   subpartition of A accordingly. */ \
-	bli_prune_unref_mparts( c, BLIS_M, a, BLIS_M ); \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_n) \
-     ( \
-       obj_t*  a, \
-       obj_t*  ah, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* Prune any unreferenced part from the subpartition of C (that would
-	   be encountered from partitioning in the n dimension) and adjust the
-	   subpartition of Ah accordingly. */ \
-	bli_prune_unref_mparts( c, BLIS_N, ah, BLIS_N ); \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_k) \
-     ( \
-       obj_t*  a, \
-       obj_t*  ah, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* As long as A and Ah are general in structure, no pruning should be
-	   for the k dimension. */ \
+		/* Prune any unreferenced part from the subpartition of B (that would
+		   be encountered from partitioning in the k dimension) and adjust the
+		   subpartition of A accordingly. */
+		bli_prune_unref_mparts( b, BLIS_M, a, BLIS_N );
+	}
 }
-
-GENFRONT( gemmt )
-
-// -----------------------------------------------------------------------------
-
-#undef  GENFRONT
-#define GENFRONT( opname ) \
-\
-void PASTEMAC(opname,_prune_unref_mparts_m) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* Prune any unreferenced part from the subpartition of A (that would
-	   be encountered from partitioning in the m dimension) and adjust the
-	   subpartition of C accordingly. */ \
-	bli_prune_unref_mparts( a, BLIS_M, c, BLIS_M ); \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_n) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* Prune any unreferenced part from the subpartition of B (that would
-	   be encountered from partitioning in the n dimension) and adjust the
-	   subpartition of C accordingly. */ \
-	bli_prune_unref_mparts( b, BLIS_N, c, BLIS_N ); \
-} \
-void PASTEMAC(opname,_prune_unref_mparts_k) \
-     ( \
-       obj_t*  a, \
-       obj_t*  b, \
-       obj_t*  c  \
-     ) \
-{ \
-	/* Prune any unreferenced part from the subpartition of A (that would
-	   be encountered from partitioning in the k dimension) and adjust the
-	   subpartition of B accordingly. */ \
-	bli_prune_unref_mparts( a, BLIS_N, b, BLIS_M ); \
-\
-	/* Prune any unreferenced part from the subpartition of B (that would
-	   be encountered from partitioning in the k dimension) and adjust the
-	   subpartition of A accordingly. */ \
-	bli_prune_unref_mparts( b, BLIS_M, a, BLIS_N ); \
-}
-
-GENFRONT( trmm )
-GENFRONT( trsm )
-
 
