@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2021-22, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -66,7 +66,6 @@ int main( int argc, char** argv )
     dim_t p_inc = 0; // to keep track of number of inputs
     num_t dt;
     char  dt_ch;
-    char stor_scheme;
     int   r, n_repeats;
 
     double   dtime;
@@ -75,6 +74,10 @@ int main( int argc, char** argv )
 
     FILE* fin  = NULL;
     FILE* fout = NULL;
+
+#ifdef CBLAS
+    char stor_scheme;
+#endif	
 
     n_repeats = N_REPEAT;  // This macro will get from Makefile.
 
@@ -108,7 +111,9 @@ int main( int argc, char** argv )
     inc_t incy;
     char tmp[256]; // to store function name, line no present in logs.
 
+#ifdef CBLAS
     stor_scheme = 'C';
+#endif
 
     // {S,D,C,Z} {transa m n alpha incx incy lda}
 

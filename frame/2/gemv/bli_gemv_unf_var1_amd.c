@@ -412,10 +412,11 @@ void bli_sgemv_var1_smart_threading
     }
   }
 
+
   // When the number of threads calculated is greater than the user provided value
   // Choose the user provided value
-  if(*nt > nt_max)
-    *nt = nt_max;
+  if(*nt > nt_max ) *nt = nt_max;
+  if(*nt <=0 ) *nt = 1;
 }
 
 void bli_sgemv_unf_var1
@@ -434,7 +435,6 @@ void bli_sgemv_unf_var1
 {
 
     float*  A1;
-    float*  x1;
     float*  y1;
     dim_t   i;
     dim_t   b_fuse, f;
@@ -537,6 +537,7 @@ void bli_sgemv_unf_var1
 
     for ( i = 0; i < n_iter; i += f )
     {
+		float*  x1;
         f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
 
         A1 = a + (i  )*rs_at + (0  )*cs_at;

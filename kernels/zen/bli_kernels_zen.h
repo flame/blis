@@ -341,6 +341,22 @@ err_t bli_trsm_small_mt
        cntx_t* cntx,
        cntl_t* cntl
      );
+
+void bli_multi_sgemv_4x2
+    (
+       conj_t           conjat,
+       conj_t           conjx,
+       dim_t            m,
+       dim_t            b_n,
+       float*  restrict alpha,
+       float*  restrict a, inc_t inca, inc_t lda,
+       float*  restrict x, inc_t incx,
+       float*  restrict beta,
+       float*  restrict y, inc_t incy,
+       cntx_t* restrict cntx,
+       dim_t            n_threads
+     );
+
 #endif
 
 // threshold functions
@@ -369,3 +385,4 @@ void bli_dnorm2fv_unb_var1
        cntx_t*  cntx
      );
 #endif
+

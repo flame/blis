@@ -325,7 +325,6 @@ void bli_daxpyf_zen_int_5
     const dim_t      fuse_fac       = 5;
 
     const dim_t      n_elem_per_reg = 4;
-    const dim_t      n_iter_unroll  = 2;
 
     dim_t            i;
 
