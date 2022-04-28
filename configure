@@ -1791,8 +1791,8 @@ check_compiler_version_ranges()
 	#   [5] https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/x86-Options.html#x86-Options
 	#   [6] https://gcc.gnu.org/onlinedocs/gcc-9.4.0/gcc/x86-Options.html#x86-Options
 	#
-	# range: gcc < 10.1 (ie: 9.4 or older)
-	# variable: gcc_older_than_10_1_0
+	# range: gcc < 10.3 (ie: 9.4 or older)
+	# variable: gcc_older_than_10_3_0
 	# comments:
 	#   These older versions of gcc do not explicitly support the Zen3
 	#   microarchitecture; the newest microarchitectural value understood by
@@ -1806,7 +1806,7 @@ check_compiler_version_ranges()
 	gcc_older_than_4_9_0='no'
 	gcc_older_than_6_1_0='no'
 	gcc_older_than_9_1_0='no'
-	gcc_older_than_10_1_0='no'
+	gcc_older_than_10_3_0='no'
 
 	clang_older_than_9_0_0='no'
 	clang_older_than_12_0_0='no'
@@ -1839,10 +1839,10 @@ check_compiler_version_ranges()
 			gcc_older_than_9_1_0='yes'
 		fi
 
-		# Check for gcc < 10.1.0 (ie: 9.4 or older).
-		if [ ${cc_major} -lt 10 ]; then
-			echo "${script_name}: note: found ${cc} version older than 10.1."
-			gcc_older_than_10_1_0='yes'
+		# Check for gcc < 10.3.0 (ie: 10.2 or older).
+		if [[ ( ${cc_major} -lt 10 ) || ( ${cc_major} -eq 10 && ${cc_minor} -lt 3 ) ]]; then
+			echo "${script_name}: note: found ${cc} version older than 10.3."
+			gcc_older_than_10_3_0='yes'
 		fi
 	fi
 
@@ -3835,7 +3835,7 @@ main()
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
 		| sed -e "s/@gcc_older_than_6_1_0@/${gcc_older_than_6_1_0}/g" \
 		| sed -e "s/@gcc_older_than_9_1_0@/${gcc_older_than_9_1_0}/g" \
-		| sed -e "s/@gcc_older_than_10_1_0@/${gcc_older_than_10_1_0}/g" \
+		| sed -e "s/@gcc_older_than_10_3_0@/${gcc_older_than_10_3_0}/g" \
 		| sed -e "s/@clang_older_than_9_0_0@/${clang_older_than_9_0_0}/g" \
 		| sed -e "s/@clang_older_than_12_0_0@/${clang_older_than_12_0_0}/g" \
 		| sed -e "s/@aocc_older_than_2_0_0@/${aocc_older_than_2_0_0}/g" \
