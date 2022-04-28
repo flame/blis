@@ -287,7 +287,8 @@ bool bli_cpuid_is_zen4
                                 FEATURE_AVX512DQ |
                                 FEATURE_AVX512CD |
                                 FEATURE_AVX512BW |
-                                FEATURE_AVX512VL ;
+                                FEATURE_AVX512VL |
+                                FEATURE_AVX512VNNI;
 
 	if ( !bli_cpuid_has_features( features, expected ) ) return FALSE;
 
@@ -558,6 +559,62 @@ bool bli_cpuid_is_avx_supported( void )
 	return is_avx_supported;
 }
 
+
+// Check (at runtime) if AVX512_VNNI is supported on the current platform, this
+// is to ensure that AVX512_VNNI kernels are not used on legacy platforms which
+// results in crash.
+
+// The support for AVX512_VNNI is checked only once (when this API is called
+// first time). On subsequent calls the cached value is returned.
+static bool is_avx512vnni_supported = FALSE;
+
+// Determine if the CPU has support for AVX512_VNNI.
+void bli_cpuid_check_avx512vnni_support( void )
+{
+	uint32_t family, model, features;
+
+	// Call the CPUID instruction and parse its results into a family id,
+	// model id, and a feature bit field.
+	bli_cpuid_query( &family, &model, &features );
+
+	// Check for expected CPU features.
+	const uint32_t expected =	FEATURE_AVX        |
+								FEATURE_FMA3       |
+								FEATURE_AVX2       |
+								FEATURE_AVX512F    |
+								FEATURE_AVX512DQ   |
+								FEATURE_AVX512BW   |
+								FEATURE_AVX512VL   |
+								FEATURE_AVX512VNNI;
+
+	if ( !bli_cpuid_has_features( features, expected ) )
+	{
+		is_avx512vnni_supported = FALSE;
+	}
+	else
+	{
+		is_avx512vnni_supported = TRUE;
+	}
+}
+
+static bli_pthread_once_t once_check_avx512vnni_support = BLIS_PTHREAD_ONCE_INIT;
+
+// Ensure that actual support determination happens only once
+void bli_cpuid_check_avx512vnni_support_once( void )
+{
+#ifndef BLIS_CONFIGURETIME_CPUID
+	bli_pthread_once( &once_check_avx512vnni_support,  bli_cpuid_check_avx512vnni_support );
+#endif
+}
+
+// API to check if AVX512_VNNI is supported or not on the current platform.
+bool bli_cpuid_is_avx512vnni_supported( void )
+{
+	bli_cpuid_check_avx512vnni_support_once();
+
+	return is_avx512vnni_supported;
+}
+
 #elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
 
 arch_t bli_cpuid_query_id( void )
@@ -758,6 +815,7 @@ enum
 	FEATURE_MASK_AVX512CD = (1u<<28), // cpuid[eax=7,ecx=0]   :ebx[28]
 	FEATURE_MASK_AVX512BW = (1u<<30), // cpuid[eax=7,ecx=0]   :ebx[30]
 	FEATURE_MASK_AVX512VL = (1u<<31), // cpuid[eax=7,ecx=0]   :ebx[31]
+	FEATURE_MASK_AVX512VNNI = (1u<<11), // cpuid[eax=7,ecx=0]   :ecx[11]
 	FEATURE_MASK_XGETBV   = (1u<<26)|
                             (1u<<27), // cpuid[eax=1]         :ecx[27:26]
 	XGETBV_MASK_XMM       = 0x02u,    // xcr0[1]
@@ -824,6 +882,8 @@ uint32_t bli_cpuid_query
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512CD ) ) *features |= FEATURE_AVX512CD;
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512BW ) ) *features |= FEATURE_AVX512BW;
 		if ( bli_cpuid_has_features( ebx, FEATURE_MASK_AVX512VL ) ) *features |= FEATURE_AVX512VL;
+
+		if ( bli_cpuid_has_features( ecx, FEATURE_MASK_AVX512VNNI ) ) *features |= FEATURE_AVX512VNNI;
 	}
 
 	// Check extended processor info / features bits for AMD-specific features.

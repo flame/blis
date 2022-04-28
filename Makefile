@@ -598,10 +598,12 @@ endef
 define make-c99-addon-rule
 $(BASE_OBJ_ADDON_PATH)/%.o: $(ADDON_PATH)/%.$(2) $(BLIS_H_FLAT) $(ADDON_H99_FILES) $(MAKE_DEFS_MK_PATHS)
 ifeq ($(ENABLE_VERBOSE),yes)
-	$(CC) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
+	$$(if $$(findstring _amd512vnni,$$<),$$(eval LPGEMM_MARCH_VAR=icelake-server),$$(eval LPGEMM_MARCH_VAR=znver3))
+	$(CC) -march=$$(LPGEMM_MARCH_VAR) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
 else
 	@echo "Compiling $$@" $(call get-addon-c99text-for,$(1))
-	@$(CC) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
+	$$(if $$(findstring _amd512vnni,$$<),$$(eval LPGEMM_MARCH_VAR=icelake-server),$$(eval LPGEMM_MARCH_VAR=znver3))
+	@$(CC) -march=$$(LPGEMM_MARCH_VAR) $(call get-addon-c99flags-for,$(1)) -c $$< -o $$@
 endif
 endef
 

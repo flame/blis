@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018-2021, Advanced Micro Devices, Inc.
+   Copyright (C) 2018-2022, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -134,6 +134,7 @@ BLIS_INLINE bool bli_cpuid_has_features( uint32_t have, uint32_t want )
 void get_cpu_name( char *cpu_name );
 int  vpu_count( void );
 bool bli_cpuid_is_avx_supported(void);
+bool bli_cpuid_is_avx512vnni_supported(void);
 
 enum
 {
@@ -157,7 +158,8 @@ enum
 	FEATURE_AVX512ER = 0x0800,
 	FEATURE_AVX512CD = 0x1000,
 	FEATURE_AVX512BW = 0x2000,
-	FEATURE_AVX512VL = 0x4000
+	FEATURE_AVX512VL = 0x4000,
+	FEATURE_AVX512VNNI = 0x8000
 };
 
 
