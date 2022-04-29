@@ -121,23 +121,27 @@ void bli_offloader_finalize_rntm_from_env ( rntm_t* rntm )
 	free ( rntm->offloader_state );
 }
 
-bool bli_do_offload_gemmex ( const obj_t*  alpha,
-                             const obj_t*  a,
-                             const obj_t*  b,
-                             const obj_t*  beta,
-                             const obj_t*  c
-                           )
+bool bli_do_offload_gemmex
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+     )
 {
 	return bli_do_offload_gemmex_rntm_from_env ( &global_rntm, alpha, a, b, beta, c );
 }
 
-bool bli_do_offload_gemmex_rntm_from_env ( rntm_t* rntm,
-        const obj_t*  alpha,
-        const obj_t*  a,
-        const obj_t*  b,
-        const obj_t*  beta,
-        const obj_t*  c
-                                         )
+bool bli_do_offload_gemmex_rntm_from_env
+     (
+       rntm_t* rntm,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+     )
 {
 
 	offload_t* config = rntm->offloader_state;
@@ -189,24 +193,28 @@ bool bli_do_offload_gemmex_rntm_from_env ( rntm_t* rntm,
 }
 
 
-err_t bli_offload_gemmex ( const obj_t*  alpha,
-                           const obj_t*  a,
-                           const obj_t*  b,
-                           const obj_t*  beta,
-                           const obj_t*  c
-                         )
+err_t bli_offload_gemmex
+     (
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+     )
 {
 	return bli_offload_gemmex_rntm_from_env ( &global_rntm, alpha, a, b, beta, c );
 
 }
 
-err_t bli_offload_gemmex_rntm_from_env ( rntm_t* rntm,
-        const obj_t*  alpha,
-        const obj_t*  a,
-        const obj_t*  b,
-        const obj_t*  beta,
-        const obj_t*  c
-                                       )
+err_t bli_offload_gemmex_rntm_from_env
+     (
+       rntm_t* rntm,
+       const obj_t*  alpha,
+       const obj_t*  a,
+       const obj_t*  b,
+       const obj_t*  beta,
+       const obj_t*  c
+     )
 {
 
 	offload_t* config = rntm->offloader_state;
