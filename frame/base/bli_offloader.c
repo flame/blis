@@ -28,7 +28,7 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 
 	char* s_eng = getenv ( "BLIS_OFFLOAD" );
 	s_eng = ( s_eng == NULL ) ? "never" : s_eng;
-	if ( strcmp ( s_eng, "never" ) )
+	if ( strcmp ( s_eng, "never" ) == 0 )
 	{
 		fprintf ( stdout, "Never attempting to offload.\n" );
 		config->never_offload_dgemm = true;
@@ -37,7 +37,7 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 		config->offload_dgemm_thresh = LLONG_MAX;
 		return;
 	}
-	else if ( strcmp ( s_eng, "always" ) )
+	else if ( strcmp ( s_eng, "always" ) == 0 )
 	{
 		fprintf ( stdout, "Always attempting to offload.\n" );
 		config->never_offload_dgemm = false;
@@ -46,7 +46,7 @@ void bli_offloader_init_rntm_from_env ( rntm_t* rntm )
 		config->offload_dgemm_thresh = 0;
 		// still initialize rocBLAS handle
 	}
-	else if ( strcmp ( s_eng, "threshold" ) )
+	else if ( strcmp ( s_eng, "threshold" ) == 0 )
 	{
 		const char* s_sgemm = getenv ( "BLIS_OFFLOAD_SGEMM_THRESH" );
 		const int64_t offload_after_s = ( s_sgemm == NULL ) ? LLONG_MAX : atol ( s_sgemm );
@@ -274,10 +274,8 @@ err_t bli_offload_gemmex_rntm_from_env ( rntm_t* rntm,
 	const bool is_trans_a = bli_obj_has_trans ( a );
 	const bool is_trans_b = bli_obj_has_trans ( b );
 
-	const size_t ka = is_trans_a ? n_a : m_a;
-	const size_t kb = is_trans_b ? n_b : m_b;
-	const size_t buff_size_a = lda * ka * bli_obj_elem_size ( a );
-	const size_t buff_size_b = ldb * kb * bli_obj_elem_size ( b );
+	const size_t buff_size_a = lda * n_a * bli_obj_elem_size ( a );
+	const size_t buff_size_b = ldb * n_b * bli_obj_elem_size ( b );
 	const size_t buff_size_c = ldc * n_c *  bli_obj_elem_size ( c );
 
 	// allocate buffers on device
@@ -333,8 +331,8 @@ err_t bli_offload_gemmex_rntm_from_env ( rntm_t* rntm,
 	}
 
 	// call rocblas
-	const rocblas_operation trans_a = is_trans_a ? rocblas_operation_none : rocblas_operation_transpose;
-	const rocblas_operation trans_b = is_trans_b ? rocblas_operation_none : rocblas_operation_transpose;
+	const rocblas_operation trans_a = is_trans_a ? rocblas_operation_transpose : rocblas_operation_none;
+	const rocblas_operation trans_b = is_trans_b ? rocblas_operation_transpose : rocblas_operation_none;
 
 	const rocblas_datatype a_type = ( is_float_a ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
 	const rocblas_datatype b_type = ( is_float_b ) ? rocblas_datatype_f32_r : rocblas_datatype_f64_r;
@@ -346,6 +344,8 @@ err_t bli_offload_gemmex_rntm_from_env ( rntm_t* rntm,
 	void* restrict alpha_f = bli_obj_buffer_for_1x1 ( dt_exec, alpha );
 	void* restrict beta_f  = bli_obj_buffer_for_1x1 ( dt_exec, beta );
 
+
+	const size_t k = is_trans_a ? m_a : n_a;
 	const rocblas_gemm_algo algo = rocblas_gemm_algo_standard;
 	const int32_t solution_index = 0;
 	const uint32_t flags = 0;
@@ -354,7 +354,7 @@ err_t bli_offload_gemmex_rntm_from_env ( rntm_t* rntm,
 	                               trans_b,
 	                               m_c,
 	                               n_c,
-	                               m_a,
+	                               k,
 	                               alpha_f,
 	                               dev_buff_a,
 	                               a_type,
