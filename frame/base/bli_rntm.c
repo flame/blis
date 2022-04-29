@@ -682,6 +682,99 @@ void bli_nthreads_optimum(
 			n_threads_ideal = n_threads;
 		}
 	}
+	else if( family == BLIS_TRMM && bli_obj_is_double(c))
+	{
+		dim_t m = bli_obj_length(c);
+		dim_t n = bli_obj_width(c);
+
+		if(( n <= 32) && (m <= 32))
+		{
+			n_threads_ideal=1;
+		/*If Side is Left*/
+		}else
+		{
+			//Left Side
+			if(bli_obj_is_triangular(a))
+			{
+				if((m < 300))
+				{
+					if (n < 1000)
+					{
+						n_threads_ideal=8;
+					}else if (n < 2000)
+					{
+						n_threads_ideal=16;
+					}else if (n < 3000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}else if(m < 600)
+				{
+					if (n < 2000)
+					{
+						n_threads_ideal=16;
+					}else if (n < 3000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}else
+				{
+					if(n < 1000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}
+			}else//Right Side
+			{
+				if((n < 300))
+				{
+					if (m < 1000)
+					{
+						n_threads_ideal=8;
+					}else if (m < 2000)
+					{
+						n_threads_ideal=16;
+					}else if (m < 3000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}else if(n < 600)
+				{
+					if (m < 2000)
+					{
+						n_threads_ideal=16;
+					}else if (m < 3000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}else
+				{
+					if(m < 1000)
+					{
+						n_threads_ideal=32;
+					}else
+					{
+						n_threads_ideal=64;
+					}
+				}
+			}
+		}
+	}
 
 	dim_t n_threads_opt = bli_min(n_threads, n_threads_ideal);
 
