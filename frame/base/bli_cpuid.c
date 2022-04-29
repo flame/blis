@@ -328,8 +328,13 @@ bool bli_cpuid_is_zen3
 	// we check for all of them.
 	const bool is_arch
 	=
-	(( model <= 0x0f ) ||
-	(0x30 <= model && model <= 0x3f ));
+	(
+		( model <= 0x0f ) ||                  // EPYC and ThreadRipper
+		( 0x20 <= model && model <= 0x2f ) || // Ryzen 5000 Desktop
+		( 0x30 <= model && model <= 0x3f ) || // Trento
+		( 0x40 <= model && model <= 0x4f ) || // RMB
+		( 0x50 <= model && model <= 0x5f )    // Ryzen 5000 APU
+	);
 
 	if ( !is_arch ) return FALSE;
 
