@@ -74,6 +74,17 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 	float buf4[16];
 	float buf5[16];
 
+	dim_t value;
+
+	if(k_full_pieces > 40)
+	{
+		value = 40;
+	}
+	else
+	{
+		value = 0;
+	}
+
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
 		// Registers to use for accumulating C.
@@ -89,7 +100,7 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 
 		__m512 c_float_5p0 = _mm512_setzero_ps();
 
-		for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+		for ( dim_t kr = 0; kr < k_full_pieces - value; kr += 1 )
 		{
 			// Load 2 rows with 16 extended elements each from B to 1 ZMM
 			// registers. It is to be noted that the B matrix is packed for use
@@ -99,48 +110,124 @@ LPGEMM_N_LT_NR0_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6xlt16)
 			b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 			
 			// Broadcast a[1,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 			
 			// Broadcast a[2,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 			
 			// Broadcast a[3,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 			
 			// Broadcast a[4,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 			
 			// Broadcast a[5,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[5,0-15] = a[5,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_5p0 = _mm512_dpbf16_ps( c_float_5p0, a_bf16_0, b0 );
 		}
-        
+
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (0 * 16), _MM_HINT_T1);
+
+		for (dim_t kr = k_full_pieces - value; kr < k_full_pieces; kr += 1)
+		{
+			// Load 2 rows with 16 extended elements each from B to 1 ZMM
+			// registers. It is to be noted that the B matrix is packed for use
+			// in bf16 instructions and each load to ZMM register will have 2
+			// elements along k direction and 16 elements across n directions,
+			// so 2x16 elements to a ZMM register.
+			b0 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 0));
+
+			// Broadcast a[0,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 0) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_0p0 = _mm512_dpbf16_ps(c_float_0p0, a_bf16_0, b0);
+
+			// Broadcast a[1,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 1) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_1p0 = _mm512_dpbf16_ps(c_float_1p0, a_bf16_0, b0);
+
+			// Broadcast a[2,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 2) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_2p0 = _mm512_dpbf16_ps(c_float_2p0, a_bf16_0, b0);
+
+			// Broadcast a[3,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 3) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_3p0 = _mm512_dpbf16_ps(c_float_3p0, a_bf16_0, b0);
+
+			// Broadcast a[4,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 4) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_4p0 = _mm512_dpbf16_ps(c_float_4p0, a_bf16_0, b0);
+
+			// Broadcast a[5,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 5) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[5,0-15] = a[5,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_5p0 = _mm512_dpbf16_ps(c_float_5p0, a_bf16_0, b0);
+		}
+
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
@@ -580,6 +667,17 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x16)
 	// A matrix storage bfloat type
 	__m512bh a_bf16_0;
 
+	dim_t value;
+
+	if(k_full_pieces > 40)
+	{
+		value = 40;
+	}
+	else
+	{
+		value = 0;
+	}
+
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
 		// Registers to use for accumulating C.
@@ -595,7 +693,7 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x16)
 
 		__m512 c_float_5p0 = _mm512_setzero_ps();
 
-		for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+		for ( dim_t kr = 0; kr < k_full_pieces - value; kr += 1 )
 		{
 			// Load 2 rows with 16 elements each from B to 1 ZMM registers. It
 			// is to be noted that the B matrix is packed for use in bf16
@@ -605,49 +703,125 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x16)
 		    b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 0 ) );
 
 			// Broadcast a[0,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_0p0 = _mm512_dpbf16_ps( c_float_0p0, a_bf16_0, b0 );
 			
 			// Broadcast a[1,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_1p0 = _mm512_dpbf16_ps( c_float_1p0, a_bf16_0, b0 );
 			
 			// Broadcast a[2,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_2p0 = _mm512_dpbf16_ps( c_float_2p0, a_bf16_0, b0 );
 			
 			// Broadcast a[3,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_3p0 = _mm512_dpbf16_ps( c_float_3p0, a_bf16_0, b0 );
 			
 			// Broadcast a[4,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_4p0 = _mm512_dpbf16_ps( c_float_4p0, a_bf16_0, b0 );
 			
 			// Broadcast a[5,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[5,0-15] = a[5,kr:kr+2]*b[kr:kr+2,0-15]
 			c_float_5p0 = _mm512_dpbf16_ps( c_float_5p0, a_bf16_0, b0 );
 		}
+
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (0 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (0 * 16), _MM_HINT_T1);
+
+		for (dim_t kr = k_full_pieces - value; kr < k_full_pieces; kr += 1)
+		{
+			// Load 2 rows with 16 elements each from B to 1 ZMM registers. It
+			// is to be noted that the B matrix is packed for use in bf16
+			// instructions and each load to ZMM register will have 2 elements
+			// along k direction and 16 elements across n directions, so 2x16
+			// elements to a ZMM register.
+			b0 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 0));
+
+			// Broadcast a[0,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 0) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[0,0-15] = a[0,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_0p0 = _mm512_dpbf16_ps(c_float_0p0, a_bf16_0, b0);
+
+			// Broadcast a[1,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 1) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[1,0-15] = a[1,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_1p0 = _mm512_dpbf16_ps(c_float_1p0, a_bf16_0, b0);
+
+			// Broadcast a[2,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 2) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[2,0-15] = a[2,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_2p0 = _mm512_dpbf16_ps(c_float_2p0, a_bf16_0, b0);
+
+			// Broadcast a[3,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 3) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[3,0-15] = a[3,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_3p0 = _mm512_dpbf16_ps(c_float_3p0, a_bf16_0, b0);
+
+			// Broadcast a[4,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 4) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[4,0-15] = a[4,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_4p0 = _mm512_dpbf16_ps(c_float_4p0, a_bf16_0, b0);
+
+			// Broadcast a[5,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 5) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[5,0-15] = a[5,kr:kr+2]*b[kr:kr+2,0-15]
+			c_float_5p0 = _mm512_dpbf16_ps(c_float_5p0, a_bf16_0, b0);
+		}
+
 		// Handle k remainder.
-		
 		if ( k_partial_pieces > 0 )
 		{
 			b0 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
@@ -1060,6 +1234,17 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 
 	// A matrix storage bfloat type
 	__m512bh a_bf16_0;
+	
+	dim_t value;
+
+	if(k_full_pieces > 40)
+	{
+		value = 40;
+	}
+	else
+	{
+		value = 0;
+	}
 
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
@@ -1082,7 +1267,7 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 		__m512 c_float_5p0 = _mm512_setzero_ps();
 		__m512 c_float_5p1 = _mm512_setzero_ps();
 
-		for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+		for ( dim_t kr = 0; kr < k_full_pieces - value; kr += 1 )
 		{
 			// Load 2 rows with 32 elements each from B to 2 ZMM registers. It
 			// is to be noted that the B matrix is packed for use in bf16
@@ -1093,7 +1278,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			b1 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 			// Broadcast a[0,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
@@ -1101,7 +1287,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			c_float_0p1 = _mm512_dpbf16_ps( c_float_0p1, a_bf16_0, b1 );
 			
 			// Broadcast a[1,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
@@ -1109,7 +1296,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			c_float_1p1 = _mm512_dpbf16_ps( c_float_1p1, a_bf16_0, b1 );
 			
 			// Broadcast a[2,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
@@ -1117,7 +1305,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			c_float_2p1 = _mm512_dpbf16_ps( c_float_2p1, a_bf16_0, b1 );
 			
 			// Broadcast a[3,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[3,0-31] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
@@ -1125,7 +1314,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			c_float_3p1 = _mm512_dpbf16_ps( c_float_3p1, a_bf16_0, b1 );
 			
 			// Broadcast a[4,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[4,0-31] = a[4,kr:kr+2]*b[kr:kr+2,0-31]
@@ -1133,13 +1323,98 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x32)
 			c_float_4p1 = _mm512_dpbf16_ps( c_float_4p1, a_bf16_0, b1 );
 			
 			// Broadcast a[5,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[5,0-31] = a[5,kr:kr+2]*b[kr:kr+2,0-31]
 			c_float_5p0 = _mm512_dpbf16_ps( c_float_5p0, a_bf16_0, b0 );
 			c_float_5p1 = _mm512_dpbf16_ps( c_float_5p1, a_bf16_0, b1 );
-		}		
+		}
+
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (1 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (1 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (1 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (1 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (1 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (1 * 16), _MM_HINT_T1);
+
+		for (dim_t kr = k_full_pieces - value; kr < k_full_pieces; kr += 1)
+		{
+			// Load 2 rows with 32 elements each from B to 2 ZMM registers. It
+			// is to be noted that the B matrix is packed for use in bf16
+			// instructions and each load to ZMM register will have 2 elements
+			// along k direction and 32 elements across n directions, so 2x16
+			// elements to a ZMM register.
+			b0 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 0));
+			b1 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 1));
+
+			// Broadcast a[0,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 0) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[0,0-31] = a[0,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_0p0 = _mm512_dpbf16_ps(c_float_0p0, a_bf16_0, b0);
+			c_float_0p1 = _mm512_dpbf16_ps(c_float_0p1, a_bf16_0, b1);
+
+			// Broadcast a[1,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 1) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[1,0-31] = a[1,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_1p0 = _mm512_dpbf16_ps(c_float_1p0, a_bf16_0, b0);
+			c_float_1p1 = _mm512_dpbf16_ps(c_float_1p1, a_bf16_0, b1);
+
+			// Broadcast a[2,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 2) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[2,0-31] = a[2,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_2p0 = _mm512_dpbf16_ps(c_float_2p0, a_bf16_0, b0);
+			c_float_2p1 = _mm512_dpbf16_ps(c_float_2p1, a_bf16_0, b1);
+
+			// Broadcast a[3,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 3) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[3,0-31] = a[3,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_3p0 = _mm512_dpbf16_ps(c_float_3p0, a_bf16_0, b0);
+			c_float_3p1 = _mm512_dpbf16_ps(c_float_3p1, a_bf16_0, b1);
+
+			// Broadcast a[4,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 4) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[4,0-31] = a[4,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_4p0 = _mm512_dpbf16_ps(c_float_4p0, a_bf16_0, b0);
+			c_float_4p1 = _mm512_dpbf16_ps(c_float_4p1, a_bf16_0, b1);
+
+			// Broadcast a[5,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 5) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[5,0-31] = a[5,kr:kr+2]*b[kr:kr+2,0-31]
+			c_float_5p0 = _mm512_dpbf16_ps(c_float_5p0, a_bf16_0, b0);
+			c_float_5p1 = _mm512_dpbf16_ps(c_float_5p1, a_bf16_0, b1);
+		}
+
 		// Handle k remainder.
 		if ( k_partial_pieces > 0 )
 		{
@@ -1707,6 +1982,17 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 
 	// A matrix storage bfloat type
 	__m512bh a_bf16_0;
+	
+	dim_t value;
+
+	if(k_full_pieces > 40)
+	{
+		value = 40;
+	}
+	else
+	{
+		value = 0;
+	}
     
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
@@ -1735,7 +2021,7 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 		__m512 c_float_5p1 = _mm512_setzero_ps();
 		__m512 c_float_5p2 = _mm512_setzero_ps();
 
-		for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
+		for ( dim_t kr = 0; kr < k_full_pieces - value; kr += 1 )
 		{
 			
 			// Load 2 rows with 48 elements each from B to 3 ZMM registers. It
@@ -1748,7 +2034,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			b2 = (__m512bh)_mm512_loadu_epi16( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 			// Broadcast a[0,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[0,0-47] = a[0,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1757,7 +2044,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_0p2 = _mm512_dpbf16_ps( c_float_0p2, a_bf16_0, b2 );
 			
 			// Broadcast a[1,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 1 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[1,0-47] = a[1,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1766,7 +2054,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_1p2 = _mm512_dpbf16_ps( c_float_1p2, a_bf16_0, b2 );
 			
 			// Broadcast a[2,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 2 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[2,0-47] = a[2,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1775,7 +2064,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_2p2 = _mm512_dpbf16_ps( c_float_2p2, a_bf16_0, b2 );
 			
 			// Broadcast a[3,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 3 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[3,0-47] = a[3,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1784,7 +2074,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_3p2 = _mm512_dpbf16_ps( c_float_3p2, a_bf16_0, b2 );
 			
 			// Broadcast a[4,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 4 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[4,0-47] = a[4,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1793,7 +2084,8 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_4p2 = _mm512_dpbf16_ps( c_float_4p2, a_bf16_0, b2 );
 			
 			// Broadcast a[5,kr:kr+2].
-			a_bf16_0 = (__m512bh)_mm512_set1_epi32( *( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32( 
+					*( int32_t* )( a + ( rs_a * 5 ) + ( cs_a * kr ) ) );
 
 			// Perform column direction mat-mul with k = 2.
 			// c[5,0-47] = a[5,kr:kr+2]*b[kr:kr+2,0-47]
@@ -1802,6 +2094,104 @@ LPGEMM_N_FRINGE_KERN(bfloat16, bfloat16, float, bf16bf16f32of32_6x48)
 			c_float_5p2 = _mm512_dpbf16_ps( c_float_5p2, a_bf16_0, b2 );
 
 		}
+
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 0)) + (2 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 1)) + (2 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 2)) + (2 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 3)) + (2 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 4)) + (2 * 16), _MM_HINT_T1);
+
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (0 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (1 * 16), _MM_HINT_T1);
+		_mm_prefetch(c + (rs_c * (ir + 5)) + (2 * 16), _MM_HINT_T1);
+
+		for (dim_t kr = k_full_pieces - value; kr < k_full_pieces; kr += 1)
+		{
+
+			// Load 2 rows with 48 elements each from B to 3 ZMM registers. It
+			// is to be noted that the B matrix is packed for use in bf16
+			// instructions and each load to ZMM register will have 2 elements
+			// along k direction and 16 elements across n directions, so 2x16
+			// elements to a ZMM register.
+			b0 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 0));
+			b1 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 1));
+			b2 = (__m512bh)_mm512_loadu_epi16(b + (rs_b * kr) + (cs_b * 2));
+
+			// Broadcast a[0,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 0) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[0,0-47] = a[0,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_0p0 = _mm512_dpbf16_ps(c_float_0p0, a_bf16_0, b0);
+			c_float_0p1 = _mm512_dpbf16_ps(c_float_0p1, a_bf16_0, b1);
+			c_float_0p2 = _mm512_dpbf16_ps(c_float_0p2, a_bf16_0, b2);
+
+			// Broadcast a[1,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 1) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[1,0-47] = a[1,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_1p0 = _mm512_dpbf16_ps(c_float_1p0, a_bf16_0, b0);
+			c_float_1p1 = _mm512_dpbf16_ps(c_float_1p1, a_bf16_0, b1);
+			c_float_1p2 = _mm512_dpbf16_ps(c_float_1p2, a_bf16_0, b2);
+
+			// Broadcast a[2,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 2) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[2,0-47] = a[2,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_2p0 = _mm512_dpbf16_ps(c_float_2p0, a_bf16_0, b0);
+			c_float_2p1 = _mm512_dpbf16_ps(c_float_2p1, a_bf16_0, b1);
+			c_float_2p2 = _mm512_dpbf16_ps(c_float_2p2, a_bf16_0, b2);
+
+			// Broadcast a[3,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 3) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[3,0-47] = a[3,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_3p0 = _mm512_dpbf16_ps(c_float_3p0, a_bf16_0, b0);
+			c_float_3p1 = _mm512_dpbf16_ps(c_float_3p1, a_bf16_0, b1);
+			c_float_3p2 = _mm512_dpbf16_ps(c_float_3p2, a_bf16_0, b2);
+
+			// Broadcast a[4,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 4) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[4,0-47] = a[4,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_4p0 = _mm512_dpbf16_ps(c_float_4p0, a_bf16_0, b0);
+			c_float_4p1 = _mm512_dpbf16_ps(c_float_4p1, a_bf16_0, b1);
+			c_float_4p2 = _mm512_dpbf16_ps(c_float_4p2, a_bf16_0, b2);
+
+			// Broadcast a[5,kr:kr+2].
+			a_bf16_0 = (__m512bh)_mm512_set1_epi32(
+				*(int32_t *)(a + (rs_a * 5) + (cs_a * kr)));
+
+			// Perform column direction mat-mul with k = 2.
+			// c[5,0-47] = a[5,kr:kr+2]*b[kr:kr+2,0-47]
+			c_float_5p0 = _mm512_dpbf16_ps(c_float_5p0, a_bf16_0, b0);
+			c_float_5p1 = _mm512_dpbf16_ps(c_float_5p1, a_bf16_0, b1);
+			c_float_5p2 = _mm512_dpbf16_ps(c_float_5p2, a_bf16_0, b2);
+		}
+
 		// Handle k remainder.		
 		if ( k_partial_pieces > 0 )
 		{
