@@ -260,6 +260,7 @@ void bli_l3_thread_decorator_thread_check
                 bli_print_msg( "The affinity mask on this process does not have "
                                "enough HW threads for your requested SW threads.",
                                __FILE__, __LINE__ );
+                bli_abort();
 
 		bli_thrcomm_init( n_threads_hwmask, gl_comm );
 		bli_rntm_set_num_threads_only( n_threads_hwmask, rntm );
