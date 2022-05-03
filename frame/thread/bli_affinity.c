@@ -45,7 +45,7 @@
 
 #include "bli_affinity.h"
 
-#ifndef BLIS_ENABLE_AFFINITY
+#ifndef BLIS_OS_LINUX
 
 // define the symbol for platforms like Windows and MacOS that do not support the Linux affinity API
 
@@ -56,7 +56,7 @@ dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
     return (dim_t)1024;
 }
 
-#else
+#else // BLIS_OS_LINUX
 
 // this macro has to come before any other headers
 #define _GNU_SOURCE
@@ -102,4 +102,4 @@ dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
     return active_cpus;
 }
 
-#endif // BLIS_ENABLE_AFFINITY
+#endif // BLIS_OS_LINUX
