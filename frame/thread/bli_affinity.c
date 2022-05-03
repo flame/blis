@@ -43,9 +43,9 @@
 //    https://github.com/flame/blis/issues/604
 //    https://github.com/flame/blis/issues/603 
 
-#include "bli_affinity.h"
-
 #ifndef BLIS_OS_LINUX
+
+#include "bli_affinity.h"
 
 // define the symbol for platforms like Windows and MacOS that do not support the Linux affinity API
 
@@ -63,6 +63,8 @@ dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
 
 #include <sched.h>
 #include <unistd.h>
+
+#include "bli_affinity.h"
 
 // scope is either the calling process or the calling thread:
 //  0 = calling process
