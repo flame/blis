@@ -32,6 +32,12 @@
 
 */
 
+// this macro has to come before any other headers.
+// i hate this but cannot figure out any other way to solve it.
+#define _GNU_SOURCE
+
+#include "bli_affinity.h"
+
 // we need a way to detect oversubscription of the kind where
 // hierarchical parallelism is used and the affinity mask within
 // which BLIS runs does not have enough hardware threads to support
@@ -45,8 +51,6 @@
 
 #ifndef BLIS_OS_LINUX
 
-#include "bli_affinity.h"
-
 // define the symbol for platforms like Windows and MacOS that do not support the Linux affinity API
 
 dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
@@ -58,13 +62,8 @@ dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
 
 #else // BLIS_OS_LINUX
 
-// this macro has to come before any other headers
-#define _GNU_SOURCE
-
 #include <sched.h>
 #include <unistd.h>
-
-#include "bli_affinity.h"
 
 // scope is either the calling process or the calling thread:
 //  0 = calling process
@@ -77,7 +76,7 @@ dim_t bli_affinity_get_hw_size(bli_affinity_scope_t scope)
     pid_t pid;
     cpu_set_t mask;
 
-    if (scope == 0) {
+    if (scope == process) {
         pid = getpid();
     } else {
         // this means the current thread
