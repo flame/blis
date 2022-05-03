@@ -199,6 +199,12 @@ void bli_l3_thread_decorator_thread_check
      )
 {
 	dim_t n_threads_real = omp_get_num_threads();
+        dim_t n_threads_hwmask;
+        if ( omp_in_parallel() ) {
+            n_threads_hwmask = bli_affinity_get_hw_size(thread);
+        } else {
+            n_threads_hwmask = bli_affinity_get_hw_size(process);
+        }
 
 	// Check if the number of OpenMP threads created within this parallel
 	// region is different from the number of threads that were requested
@@ -238,6 +244,26 @@ void bli_l3_thread_decorator_thread_check
 			bli_rntm_set_num_threads_only( 1, rntm );
 			bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 		//}
+
+		// Synchronize all threads and continue.
+		_Pragma( "omp barrier" )
+
+                return;
+	}
+
+	// Check if the number of OpenMP threads created within this parallel
+	// region is different from the number of threads that are available
+	// to BLIS in the calling context.
+	if ( n_threads_hwmask < n_threads || n_threads_hwmask < n_threads_real)
+	{
+                bli_print_msg( "The affinity mask on this process does not have "
+                               "enough HW threads for your requested SW threads.",
+                               __FILE__, __LINE__ );
+
+		bli_thrcomm_init( n_threads_hwmask, gl_comm );
+		bli_rntm_set_num_threads_only( n_threads_hwmask, rntm );
+#warning HELP ME HERE
+		bli_rntm_set_ways_only( 1, 1, 1, 1, 1, rntm );
 
 		// Synchronize all threads and continue.
 		_Pragma( "omp barrier" )
