@@ -594,10 +594,11 @@ void strsm_
 
     bli_obj_set_struc( struca, &ao );
 
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
     // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
-#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
+    if (bli_cpuid_is_avx_supported() == TRUE)
+    {
 	    /* bli_strsm_small is performing better existing native
 	     * implementations for [m,n]<=1000 for single thread.
 	     * In case of multithread when [m,n]<=128 sinlge thread implemenation
@@ -624,8 +625,9 @@ void strsm_
 			    return;
 		    }
 	    }
-#endif
     }
+#endif
+
     bli_trsmnat
     (
         blis_side,
@@ -854,76 +856,72 @@ void dtrsm_
     bli_obj_set_conjtrans( blis_transa, &ao );
 
     bli_obj_set_struc( struca, &ao );
-
+    
+#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
     // This function is invoked on all architectures including ‘generic’.
     // Non-AVX platforms will use the kernels derived from the context.
-    if (bli_cpuid_is_avx_supported() == TRUE) {
-
-#ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-	    /* bli_dtrsm_small is performing better existing native
-	     * implementations for [m,n]<=1000 for single thread.
-	     * In case of multithread when [m,n]<=128 sinlge thread implemenation
-	     * is doing better than native multithread */
-	    bool nt = bli_thread_get_is_parallel();
-	    if((nt==0 && m0<=1000 && n0<=1000) ||
-			    (nt && (m0+n0)<320) )
-	    {
-		    err_t status;
-		    status = bli_trsm_small
-			    (
-			     blis_side,
-			     &alphao,
-			     &ao,
-			     &bo,
-			     NULL,
-			     NULL
-			    );
-		    if (status == BLIS_SUCCESS)
-		    {
-			    AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-			    /* Finalize BLIS. */
-			    bli_finalize_auto();
-			    return;
-		    }
-	    }
-
-    //bli_trsm_small_mt is performing better than native multithread
-    //for certain sizes of m & n.
-#ifdef BLIS_ENABLE_OPENMP
-    rntm_t rntm;
-    bli_rntm_init_from_global( &rntm );
-
-    // Query the total number of threads from the rntm_t object.
-    dim_t n_threads = bli_rntm_num_threads( &rntm );
-    if ( ( (n_threads  >  1) && (m0 <= 1500) && (n0 <= 1500) ) ||
-         ( (n_threads == 32) && (m0 <= 2300) && (n0 <= 2300) ) ||
-         ( (n_threads == 16) && (m0 <= 3800) && (n0 <= 3800) ) ||
-         ( (n_threads ==  8) && (m0 <= 2800) && (n0 <= 2800) ) ||
-         ( (n_threads ==  4) && (m0 <= 2000) && (n0 <= 2000) ) ||
-         ( (n_threads ==  2) && (m0 <= 2000) && (n0 <= 2000) ) )
+    if (bli_cpuid_is_avx_supported() == TRUE)
     {
-        err_t status;
-        status = bli_trsm_small_mt
-                (
-                   blis_side,
-                   &alphao,
-                   &ao,
-                   &bo,
-                   NULL,
-                   NULL
-                );
-
-	if ( status == BLIS_SUCCESS )
+        /* bli_dtrsm_small is performing better existing native
+         * implementations for [m,n]<=1000 for single thread.
+         * In case of multithread when [m,n]<=128 sinlge thread implemenation
+         * is doing better than native multithread */
+        bool nt = bli_thread_get_is_parallel();
+        if ((nt == 0 && m0 <= 1000 && n0 <= 1000) ||
+            (nt && (m0 + n0) < 320))
         {
-		AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+            err_t status;
+            status = bli_trsm_small(
+                blis_side,
+                &alphao,
+                &ao,
+                &bo,
+                NULL,
+                NULL);
+            if (status == BLIS_SUCCESS)
+            {
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
                 /* Finalize BLIS. */
                 bli_finalize_auto();
                 return;
+            }
         }
-    }
+
+        // bli_trsm_small_mt is performing better than native multithread
+        // for certain sizes of m & n.
+#ifdef BLIS_ENABLE_OPENMP
+        rntm_t rntm;
+        bli_rntm_init_from_global( &rntm );
+
+        // Query the total number of threads from the rntm_t object.
+        dim_t n_threads = bli_rntm_num_threads( &rntm );
+        if ( ( (n_threads  >  1) && (m0 <= 1500) && (n0 <= 1500) ) ||
+            ( (n_threads == 32) && (m0 <= 2300) && (n0 <= 2300) ) ||
+            ( (n_threads == 16) && (m0 <= 3800) && (n0 <= 3800) ) ||
+            ( (n_threads ==  8) && (m0 <= 2800) && (n0 <= 2800) ) ||
+            ( (n_threads ==  4) && (m0 <= 2000) && (n0 <= 2000) ) ||
+            ( (n_threads ==  2) && (m0 <= 2000) && (n0 <= 2000) ) )
+        {
+            err_t status;
+            status = bli_trsm_small_mt(
+                    blis_side,
+                    &alphao,
+                    &ao,
+                    &bo,
+                    NULL,
+                    NULL);
+
+            if ( status == BLIS_SUCCESS )
+            {
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                /* Finalize BLIS. */
+                bli_finalize_auto();
+                return;
+            }
+        }
 #endif// BLIS_ENABLE_OPENMP
+    } // bli_cpuid_is_avx_supported
 #endif// END of BLIS_ENABLE_SMALL_MATRIX_TRSM
-    }
 
     bli_trsmnat
     (
@@ -1217,33 +1215,38 @@ void ztrsm_
     bli_obj_set_struc( struca, &ao );
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    /* bli_ztrsm_small is performing better existing native
-     * implementations for [m,n]<=1000 for single thread.
-     * In case of multithread when [m,n]<=128 sinlge thread implemenation
-     * is doing better than native multithread */
-    bool nt = bli_thread_get_is_parallel();
-
-    if(((nt==0) && (m0<=500) && (n0<=500)) ||
-       (nt && ((m0+n0)<128)))
+    // This function is invoked on all architectures including ‘generic’.
+    // Non-AVX platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx_supported() == TRUE)
     {
-        err_t status;
-        status = bli_trsm_small
-                 (
-                     blis_side,
-                     &alphao,
-                     &ao,
-                     &bo,
-                     NULL,
-                     NULL
-                 );
-        if (status == BLIS_SUCCESS)
+        /* bli_ztrsm_small is performing better existing native
+        * implementations for [m,n]<=1000 for single thread.
+        * In case of multithread when [m,n]<=128 sinlge thread implemenation
+        * is doing better than native multithread */
+        bool nt = bli_thread_get_is_parallel();
+
+        if(((nt==0) && (m0<=500) && (n0<=500)) ||
+        (nt && ((m0+n0)<128)))
         {
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
+            err_t status;
+            status = bli_trsm_small
+                    (
+                        blis_side,
+                        &alphao,
+                        &ao,
+                        &bo,
+                        NULL,
+                        NULL
+                    );
+            if (status == BLIS_SUCCESS)
+            {
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                /* Finalize BLIS. */
+                bli_finalize_auto();
+                return;
+            }
         }
-    }
+    } // bli_cpuid_is_avx_supported}
 #endif
 
     bli_trsmnat
@@ -1535,34 +1538,41 @@ void ctrsm_
     bli_obj_set_conjtrans( blis_transa, &ao );
 
     bli_obj_set_struc( struca, &ao );
+
 #ifdef BLIS_ENABLE_SMALL_MATRIX_TRSM
-    /* bli_ztrsm_small is performing better existing native
-     * implementations for [m,n]<=1000 for single thread.
-     * In case of multithread when [m,n]<=128 sinlge thread implemenation
-     * is doing better than native multithread */
-    bool nt = bli_thread_get_is_parallel();
-    if((nt==0 && m0<=1000 && n0<=1000) ||
-       (nt && (m0+n0)<320) )
+    // This function is invoked on all architectures including ‘generic’.
+    // Non-AVX platforms will use the kernels derived from the context.
+    if (bli_cpuid_is_avx_supported() == TRUE)
     {
-        err_t status;
-        status = bli_trsm_small
-                 (
-                     blis_side,
-                     &alphao,
-                     &ao,
-                     &bo,
-                     NULL,
-                     NULL
-                 );
-        if (status == BLIS_SUCCESS)
+        /* bli_ztrsm_small is performing better existing native
+        * implementations for [m,n]<=1000 for single thread.
+        * In case of multithread when [m,n]<=128 sinlge thread implemenation
+        * is doing better than native multithread */
+        bool nt = bli_thread_get_is_parallel();
+        if((nt==0 && m0<=1000 && n0<=1000) ||
+        (nt && (m0+n0)<320) )
         {
-            AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
-            /* Finalize BLIS. */
-            bli_finalize_auto();
-            return;
+            err_t status;
+            status = bli_trsm_small
+                    (
+                        blis_side,
+                        &alphao,
+                        &ao,
+                        &bo,
+                        NULL,
+                        NULL
+                    );
+            if (status == BLIS_SUCCESS)
+            {
+                AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_INFO);
+                /* Finalize BLIS. */
+                bli_finalize_auto();
+                return;
+            }
         }
-    }
+    } // bli_cpuid_is_avx_supported
 #endif
+
     bli_trsmnat
     (
         blis_side,
