@@ -495,72 +495,77 @@ void bli_sgemv_unf_var1
 
 // If both multithreading and OpenMP are enabled, GEMV will multithread
 #if defined(BLIS_ENABLE_MULTITHREADING) && defined(BLIS_ENABLE_OPENMP)
-    dim_t nt, nt_max;
-    
+    bool is_omp_mt_enabled = TRUE;
+#else
+    bool is_omp_mt_enabled = FALSE;
+#endif
+
+    dim_t nt_max;
+
     rntm_t rnmt_obj;
-
-    b_fuse = 4;
-
     // Initialize a local runtime with global settings.
     bli_rntm_init_from_global( &rnmt_obj );
 
     // Query the total number of threads from the rntm_t object.
     nt_max = bli_rntm_num_threads( &rnmt_obj );
-    
-    //Setting the thread count to the maximum number of threads provided
-    nt = nt_max;
-    
-    // Enable smart threading when AOCL dynamic is enabled
-    #ifdef AOCL_DYNAMIC
-      bli_sgemv_var1_smart_threading(n_elem, n_iter, b_fuse, &nt, nt_max);
-    #endif
 
-    // Pass the input paramaters along with the number of threads to be used
-    bli_multi_sgemv_4x2
-    (
-      conja,
-      conjx,
-      n_elem,
-      n_iter,
-      alpha,
-      a, cs_at, rs_at,
-      x, incx,
-      beta,
-      y, incy,
-      cntx,
-      nt
-    );
-  
-#else
-
-    b_fuse = 8;
-
-    for ( i = 0; i < n_iter; i += f )
+    if ( ( nt_max > 1 ) & ( is_omp_mt_enabled == TRUE ) )
     {
-		float*  x1;
-        f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+        b_fuse = 4;
 
-        A1 = a + (i  )*rs_at + (0  )*cs_at;
-        x1 = x + (0  )*incy;
-        y1 = y + (i  )*incy;
+        //Setting the thread count to the maximum number of threads provided
+        dim_t nt = nt_max;
 
-        /* y1 = beta * y1 + alpha * A1 * x; */
-        bli_sdotxf_zen_int_8
+        // Enable smart threading when AOCL dynamic is enabled
+        #ifdef AOCL_DYNAMIC
+          bli_sgemv_var1_smart_threading(n_elem, n_iter, b_fuse, &nt, nt_max);
+        #endif
+
+        // Pass the input paramaters along with the number of threads to be used
+        bli_multi_sgemv_4x2
         (
           conja,
           conjx,
           n_elem,
-          f,
+          n_iter,
           alpha,
-          A1,   cs_at, rs_at,
-          x1,   incx,
+          a, cs_at, rs_at,
+          x, incx,
           beta,
-          y1,   incy,
-          cntx
+          y, incy,
+          cntx,
+          nt
         );
-
     }
-#endif
+    else
+    {
+        b_fuse = 8;
+
+        for ( i = 0; i < n_iter; i += f )
+        {
+            float*  x1;
+            f  = bli_determine_blocksize_dim_f( i, n_iter, b_fuse );
+
+            A1 = a + (i  )*rs_at + (0  )*cs_at;
+            x1 = x + (0  )*incy;
+            y1 = y + (i  )*incy;
+
+            /* y1 = beta * y1 + alpha * A1 * x; */
+            bli_sdotxf_zen_int_8
+            (
+              conja,
+              conjx,
+              n_elem,
+              f,
+              alpha,
+              A1,   cs_at, rs_at,
+              x1,   incx,
+              beta,
+              y1,   incy,
+              cntx
+            );
+        }
+    }
 }
 
 INSERT_GENTFUNC_BASIC0_CZ( gemv_unf_var1 )
