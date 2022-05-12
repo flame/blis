@@ -219,6 +219,11 @@ void bli_rntm_set_ways_from_rntm
 		if ( ic < 1 ) ic = 1;
 		if ( jr < 1 ) jr = 1;
 		if ( ir < 1 ) ir = 1;
+
+		// auto factorization is to be disabled if BLIS_IC_NT/BLIS_JC_NT env
+		// variables are set irrespective of whether num_threads is modified
+		// or not. This ensures that preset factorization is prioritized.
+		auto_factor = FALSE;
 	}
 
 	// Now we use the values of nt_set and ways_set to determine how to
@@ -340,6 +345,11 @@ void bli_rntm_set_ways_from_rntm_sup
 		if ( ic < 1 ) ic = 1;
 		if ( jr < 1 ) jr = 1;
 		if ( ir < 1 ) ir = 1;
+
+		// auto factorization is to be disabled if BLIS_IC_NT/BLIS_JC_NT env
+		// variables are set irrespective of whether num_threads is modified
+		// or not. This ensures that preset factorization is prioritized.
+		auto_factor = FALSE;
 	}
 
 	// Now we use the values of nt_set and ways_set to determine how to

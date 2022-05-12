@@ -1604,10 +1604,22 @@ void bli_thread_set_num_threads( dim_t n_threads )
 	// We must ensure that global_rntm has been initialized.
 	bli_init_once();
 
+	if ( n_threads <= 0 )
+	{
+		n_threads = 1;
+	}
+
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
 
 	bli_rntm_set_num_threads_only( n_threads, &global_rntm );
+
+#ifdef BLIS_ENABLE_OPENMP
+	// In the function bli_rntm_init_from_global() we extract n_threads
+	// using the API omp_get_max_threads(). Following step ensures that
+	// omp_get_max_threads returns the same value as set here.
+	omp_set_num_threads( n_threads );
+#endif
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
