@@ -79,6 +79,20 @@
 #define BLIS_DISABLE_SBA_POOLS
 #endif
 
+#if @enable_error_checking@
+#define BLIS_ENABLE_ERROR_CHECKING
+#else
+#define BLIS_DISABLE_ERROR_CHECKING
+#endif
+
+#if @enable_error_return@
+#define BLIS_ENABLE_ERROR_RETURN
+#endif
+
+#if @enable_error_abort@
+#define BLIS_ENABLE_ERROR_ABORT
+#endif
+
 #if @enable_mem_tracing@
 #define BLIS_ENABLE_MEM_TRACING
 #else
