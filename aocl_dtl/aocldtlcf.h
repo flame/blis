@@ -20,21 +20,9 @@
    enable this macro by making it to 1 else 0 */
 #define AOCL_DTL_DUMP_ENABLE        0
 
-/*
- * Logging of inputs can be enabled by two methods:
- *
- * 1. Using environment variable AOCL_VERBOSE.
- * 2. APIs AOCL_DTL_Enable_Logs(), AOCL_DTL_Disable_Logs()
- * 
- * The API takes precedence over environment variable.
- * 
- * The global flag is maintain in the code to track the final
- * state of the logging feature.
- * 
- * Setting AOCL_DTL_LOG_ENABLE = 0 will disable this feature
- * completely and it is not recommended.
- */
-#define AOCL_DTL_LOG_ENABLE         1
+/* Macro for dumping the log If the user wants to enable input logs he has to
+   enable this macro by making it to 1 else 0 */
+#define AOCL_DTL_LOG_ENABLE         0
 
 /* Select the trace level till which you want to log the data */
 /* By default it will log for all levels */

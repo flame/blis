@@ -59,7 +59,7 @@ AOCL_FLIST_Node *gpLogFileList = NULL;
 
 
 /* Global flag to check if logging is enabled or not */
-Bool gbIsLoggingEnabled = FALSE;
+Bool gbIsLoggingEnabled = TRUE;
 #endif
 
 #if AOCL_DTL_AUTO_TRACE_ENABLE
@@ -130,7 +130,7 @@ void DTL_Initialize(
 #if (AOCL_DTL_LOG_ENABLE || AOCL_DTL_DUMP_ENABLE)
     
     /* Check if DTL logging is requested via envoronment variable */ 
-    gbIsLoggingEnabled = bli_env_get_var( "AOCL_VERBOSE", FALSE );
+    gbIsLoggingEnabled = bli_env_get_var( "AOCL_VERBOSE", TRUE );
 #endif
 
 #if AOCL_DTL_AUTO_TRACE_ENABLE
