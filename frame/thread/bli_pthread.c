@@ -697,6 +697,30 @@ int bli_pthread_barrier_wait
 
 // -- pthread_switch --
 
+//
+// Note that bli_pthread_switch_t has the following properties:
+//
+// 1. Access to a switch is protected by a mutex specific to that switch, and
+//    therefore state changes and thread-safe.
+//
+// 2. An initialized switch always starts in the "off" state.
+//
+// 3. Calling _switch_on() when the switch is already "on" results in an early
+//    return (no action); similar for _switch_off() when it is already "off".
+//
+// 4. The _switch_on() and _switch_off() functions each return an error code
+//    that is equal to the return value of their user-supplied functions,
+//    provided the function in question was actually called rather than being
+//    skipped. When a function call is skipped (as in (3) above), the return
+//    value from _switch_on() and/or _switch_off() is 0 (success).
+//
+//    Note that the user-supplied functions must abide by the convention that a
+//    return value of 0 indicates success and all other values indicate failure
+//    (of some kind). The switch and the user-supplied function must agree on
+//    how "success" is conveyed because the switch must know whether to toggle
+//    its state after inspecting the return value of the user-supplied function.
+//
+
 int bli_pthread_switch_on
      (
        bli_pthread_switch_t* sw,
