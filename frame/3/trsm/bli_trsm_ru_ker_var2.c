@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -179,6 +179,25 @@ void PASTEMAC(ch,varname) \
 	               gemmtrsm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMMTRSM_L_UKR, cntx ); \
 	PASTECH(ch,gemm_ukr_ft) \
 	                   gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_UKR, cntx ); \
+\
+	/* Zen4 TRSM Fixme:
+	 *
+	 * On Zen4 we want to use AVX-512 kernels for GEMM and AVX2 kernels
+	 * for TRSM (Till we implemente TRSM AVX-512 kernels)
+	 *
+	 * The AVX2 kernels for TRSM are enabled in the context, but they
+	 * are compatible with only AVX2 version of GEMM kernels.
+	 *
+	 * Here we force the GEMM kernels to the AVX2 varients for float and double.
+	 * For scomplex and dcomplex reference path is retained as is.
+	 *
+	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
+	 */ \
+	if ((bli_arch_query_id() == BLIS_ARCH_ZEN4) && \
+		(dt == BLIS_FLOAT || dt == BLIS_DOUBLE)) \
+	{ \
+		gemm_ukr = bli_cntx_get_l3_vir_ukr_dt( dt, BLIS_GEMM_AVX2_UKR, cntx ); \
+	} \
 \
 	/* Temporary C buffer for edge cases. Note that the strides of this
 	   temporary buffer are set so that they match the storage of the

@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2020, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 
 #include "blis.h"
 //#define PRINT_SMALL_TRSM_INFO
+
 
 void bli_trsm_front
      (
@@ -151,6 +152,24 @@ void bli_trsm_front
 	// in bli_packm_init().
 	if ( bli_cntx_method( cntx ) == BLIS_NAT )
 	{
+#if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
+		/* Zen4 TRSM Fixme:
+		 *
+		 * On Zen4 we want to use AVX-512 kernels for GEMM and AVX2 kernels 
+		 * for TRSM (Till we implemente TRSM AVX-512 kernels)
+		 * 
+		 * The AVX2 kernels use different block sizes then AVX512 kernels
+		 * Here we override the default block sizes in the context with AVX2 
+		 * specific block size used in  GEMMTRSM kernerls.
+		 * 
+		 * We need to revisit this when TRSM AVX-512 kernels are implemented.
+		 */
+		if ( (bli_arch_query_id() == BLIS_ARCH_ZEN4)  &&
+			 (bli_obj_dt(a) == BLIS_FLOAT || bli_obj_dt(a) == BLIS_DOUBLE) )
+		{
+			bli_zen4_override_trsm_blkszs(cntx);
+		}
+#endif
 		bli_obj_set_pack_schema( BLIS_PACKED_ROW_PANELS, &a_local );
 		bli_obj_set_pack_schema( BLIS_PACKED_COL_PANELS, &b_local );
 	}
@@ -177,6 +196,20 @@ void bli_trsm_front
 	  rntm,
 	  cntl
 	);
+	
+#if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
+		/* Zen4 TRSM Fixme:
+		 *
+		 * We have overrding the block sizes at the start of this function
+		 * Since the context is created only once we need to ensure that the 
+		 * default block sizes are restored for the subsequent operations.
+		 */
+		if ( (bli_arch_query_id() == BLIS_ARCH_ZEN4)  &&
+			 (bli_obj_dt(a) == BLIS_FLOAT || bli_obj_dt(a) == BLIS_DOUBLE) )
+		{
+			bli_zen4_restore_default_blkszs(cntx);
+		}
+#endif
 	AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_3);
 }
 

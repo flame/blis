@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -209,13 +209,32 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// Query a context.
 	cntx = bli_gks_query_cntx();
 
+#if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
+	/* Zen4 TRSM Fixme:
+	 *
+	 * TRSM and GEMM used different values of MR and NR, we need to ensure that 
+	 * Values used for packing are as per the MR and NR values expected by the kernels
+	 * For now this issue exists only for zen4 hence override the values here if
+	 * the family is BLIS_TRSM and architecture is zen4
+	 * 
+	 * We need to override the values here as well as the packing and compute
+	 * kernels are invoked directly from here (instead of BLIS/BLAS call.)
+	 * 
+	 * We need to revisit this when TRSM AVX-512 kernels are implemented.
+	 */  
+	if (bli_arch_query_id() == BLIS_ARCH_ZEN4)
+	{
+		bli_zen4_override_trsm_blkszs(cntx);
+	}
+#endif
+
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );
 
 	// Map the dimension specifier to actual dimensions.
 	k = libblis_test_get_dim_from_prob_size( op->dim_spec[0], p_cur );
 
-	// Fix m and n to MR and NR, respectively.
+
 	m = bli_cntx_get_blksz_def_dt( datatype, BLIS_MR, cntx );
 	n = bli_cntx_get_blksz_def_dt( datatype, BLIS_NR, cntx );
 
@@ -223,6 +242,7 @@ void libblis_test_gemmtrsm_ukr_experiment
 	// respectively.
 	ldap = bli_cntx_get_blksz_max_dt( datatype, BLIS_MR, cntx );
 	ldbp = bli_cntx_get_blksz_max_dt( datatype, BLIS_NR, cntx );
+
 
 	// Store the register blocksizes so that the driver can retrieve the
 	// values later when printing results.
@@ -433,6 +453,7 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	bli_cntl_free( cntl_b, &BLIS_PACKM_SINGLE_THREADED );
 #endif
 
+	
 	// Free the packed objects.
 	bli_obj_free( &ap );
 	bli_obj_free( &bp );
@@ -442,6 +463,20 @@ bli_printm( "ap", &ap, "%5.2f", "" );
 	bli_obj_free( &b );
 	bli_obj_free( &c11 );
 	bli_obj_free( &c11_save );
+
+#if defined(BLIS_FAMILY_AMDZEN) ||  defined(BLIS_FAMILY_ZEN4) 
+	/* Zen4 TRSM Fixme:
+	 *
+	 * We have overrding the block sizes at the start of this function
+	 * Since the context is created only once we need to ensure that the 
+	 * default block sizes are restored for the subsequent operations.
+	 */  
+	if (bli_arch_query_id() == BLIS_ARCH_ZEN4)
+	{
+		bli_zen4_restore_default_blkszs(cntx);
+	}
+#endif
+
 }
 
 

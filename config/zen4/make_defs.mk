@@ -73,11 +73,11 @@ GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 # gcc or clang version must be atleast 4.0
 # gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
-CKVECFLAGS     +=  -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CKVECFLAGS     +=  -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver3
 else
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
-CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver2
 else
 # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
@@ -107,12 +107,12 @@ CRVECFLAGS += -march=znver4
 else
 # for version 3x we will enable znver3
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
-CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS += -march=znver3
 else
 # for version 2x we will enable znver2
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
-CKVECFLAGS += -march=znver2  -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CKVECFLAGS += -march=znver2  -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS += -march=znver2
 else
 #if compiling with clang

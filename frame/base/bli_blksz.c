@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020 - 2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020 - 2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -272,7 +272,7 @@ dim_t bli_determine_blocksize_f
 		b_alg = bli_blksz_get_def( dt, bsize );
 		b_max = bli_blksz_get_max( dt, bsize );
 
-		// If b_use != 0, this means that trsm blocksizes are set
+		// If b_alg != 0, this means that trsm blocksizes are set
 		// and we continue with trsm-specific blocksizes.
 		// Else, we query L3 blocksizes and use them for TRSM execution.
 		if( b_alg > 0 ) return bli_determine_blocksize_f_sub( i, dim, b_alg, b_max);
@@ -313,10 +313,10 @@ dim_t bli_determine_blocksize_b
 		b_alg = bli_blksz_get_def( dt, bsize );
 		b_max = bli_blksz_get_max( dt, bsize );
 
-		// If b_use != 0, this means that trsm blocksizes are set
+		// If b_alg != 0, this means that trsm blocksizes are set
 		// and we continue with trsm-specific blocksizes.
 		// Else, we query L3 blocksizes and use them for TRSM execution.
-		if( b_alg > 0 ) bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
+		if( b_alg > 0 ) return bli_determine_blocksize_b_sub( i, dim, b_alg, b_max );
 
 	}
 
