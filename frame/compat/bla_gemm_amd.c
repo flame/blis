@@ -753,15 +753,6 @@ void zgemm_
         }
     }
 #endif
-
-    err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
-    if(status==BLIS_SUCCESS)
-    {
-	 AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
-        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
-        return;
-    }
-
     // fall back on native path when zgemm is not handled in sup path.
     bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
