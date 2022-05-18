@@ -32,7 +32,7 @@
 #
 #
 
-# FLAGS that are specific to the 'zen3' architecture are added here.
+# FLAGS that are specific to the 'zen4' architecture are added here.
 # FLAGS that are common for all the AMD architectures are present in
 # config/zen/amd_config.mk.
 
@@ -73,15 +73,17 @@ GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 # gcc or clang version must be atleast 4.0
 # gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
-CKVECFLAGS     += -march=znver3
+CKVECFLAGS     +=  -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CRVECFLAGS     +=  -march=znver3
 else
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
-CKVECFLAGS     += -march=znver2
+CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CRVECFLAGS     +=  -march=znver2
 else
 # If gcc is older than 9.1.0 but at least 6.1.0, then we can use -march=znver1
 # as the fallback option.
-CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
+CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 endif # GCC 9
 endif # GCC 11
 else
@@ -99,11 +101,13 @@ ifeq ($(CC_VENDOR),clang)
 
 # for version 3x we will enable znver3
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
-CKVECFLAGS += -march=znver3
+CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CRVECFLAGS += -march=znver3
 else
 # for version 2x we will enable znver2
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC.LLVM.2\|AOCC_2')),1)
-CKVECFLAGS += -march=znver2
+CKVECFLAGS += -march=znver2  -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CRVECFLAGS += -march=znver2
 else
 #if compiling with clang
 VENDOR_STRING := $(strip $(shell ${CC_VENDOR} --version | egrep -o '[0-9]+\.[0-9]+\.?[0-9]*'))
@@ -111,8 +115,10 @@ CC_MAJOR := $(shell (echo ${VENDOR_STRING} | cut -d. -f1))
 #clang 9.0 or later:
 ifeq ($(shell test $(CC_MAJOR) -ge 9; echo $$?),0)
 CKVECFLAGS += -march=znver2
+CRVECFLAGS += -march=znver2
 else
 CKVECFLAGS += -march=znver1
+CRVECFLAGS += -march=znver1
 endif # ge 9
 endif # aocc 2
 endif # aocc 3
@@ -121,7 +127,12 @@ endif # gcc
 
 # Flags specific to reference kernels.
 CROPTFLAGS     := $(CKOPTFLAGS)
-CRVECFLAGS     := $(CKVECFLAGS)
+
+# Flags specific to reference kernels.
+# Note: We use AVX2 for reference kernels because, as Jeff Hammond says,
+# reference kernel code "is not going to achieve high enough SIMD utilization
+# to overcome the AVX-512 frequency drop". (Issue #187)
+CRVECFLAGS     += -mno-avx512f -mno-avx512vl -mno-avx512bw -mno-avx512dq -mno-avx512cd -funsafe-math-optimizations -ffp-contract=fast
 
 # Store all of the variables here to new variables containing the
 # configuration name.

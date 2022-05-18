@@ -26,7 +26,7 @@ sandybridge: sandybridge
 penryn:      penryn
 
 # AMD architectures.
-zen4:        zen4/zen4/zen3/zen2/zen/haswell
+zen4:        zen4/zen4/skx/zen3/zen2/zen/haswell
 zen3:        zen3/zen3/zen2/zen/haswell
 zen2:        zen2/zen2/zen/haswell
 zen:         zen/zen/haswell

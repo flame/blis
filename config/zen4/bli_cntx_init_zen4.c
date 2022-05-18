@@ -47,18 +47,20 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     // their storage preferences.
     bli_cntx_set_l3_nat_ukrs
     (
-      8,
+      4,
       // gemm
-      BLIS_GEMM_UKR,       BLIS_FLOAT,    bli_sgemm_haswell_asm_6x16,       TRUE,
-      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_haswell_asm_6x8,        TRUE,
+      BLIS_GEMM_UKR,       BLIS_FLOAT ,   bli_sgemm_skx_asm_32x12_l2,   FALSE,
+      BLIS_GEMM_UKR,       BLIS_DOUBLE,   bli_dgemm_skx_asm_16x14,      FALSE,
       BLIS_GEMM_UKR,       BLIS_SCOMPLEX, bli_cgemm_haswell_asm_3x8,        TRUE,
       BLIS_GEMM_UKR,       BLIS_DCOMPLEX, bli_zgemm_haswell_asm_3x4,        TRUE,
+#if 0 // GENOA TODO: TRSM AVX-512 implementation
       // gemmtrsm_l
       BLIS_GEMMTRSM_L_UKR, BLIS_FLOAT,    bli_sgemmtrsm_l_haswell_asm_6x16, TRUE,
       BLIS_GEMMTRSM_L_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_l_haswell_asm_6x8,  TRUE,
       // gemmtrsm_u
       BLIS_GEMMTRSM_U_UKR, BLIS_FLOAT,    bli_sgemmtrsm_u_haswell_asm_6x16, TRUE,
       BLIS_GEMMTRSM_U_UKR, BLIS_DOUBLE,   bli_dgemmtrsm_u_haswell_asm_6x8,  TRUE,
+#endif
       cntx
     );
 
@@ -160,14 +162,16 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     //
     // These are reference block sizes and may be overridden based on
     // number of threads used at runtime.
-    //                                           s      d      c      z
-    bli_blksz_init_easy( &blkszs[ BLIS_MR ],     6,     6,     3,     3 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    16,     8,     8,     4 );
-    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   144,    72,   144,    18 );
-    bli_blksz_init_easy( &blkszs[ BLIS_KC ],   256,   256,   256,   566 );
-    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  4080,  4080,  4080,  256 );
 
-    bli_blksz_init_easy( &blkszs[ BLIS_AF ],     5,     5,    -1,    -1 );
+    //                                           s      d      c      z
+    bli_blksz_init_easy( &blkszs[ BLIS_MR ],    32,    16,     3,     3 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NR ],    12,    14,     8,     4 );
+    bli_blksz_init_easy( &blkszs[ BLIS_MC ],   480,   240,   144,    18 );
+    bli_blksz_init     ( &blkszs[ BLIS_KC ],   384,   256,   256,   566,
+                                               480,   320,   256,   566 );
+    bli_blksz_init_easy( &blkszs[ BLIS_NC ],  3072,  3752,  4080,   256 );
+     
+    bli_blksz_init_easy( &blkszs[ BLIS_AF ],     8,     8,    -1,    -1 );
     bli_blksz_init_easy( &blkszs[ BLIS_DF ],     8,     8,    -1,    -1 );
 
     // Update the context with the current architecture's register and cache
@@ -188,6 +192,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
     );
     // -------------------------------------------------------------------------
 
+#if 0  // GENOA TODO: TRSM AVX-512 implementation
     //Initialize TRSM blocksize objects with architecture-specific values.
     //Using different cache block sizes for TRSM instead of common level-3 block sizes.
     //Tuning is done for double-precision only.
@@ -208,6 +213,7 @@ void bli_cntx_init_zen4( cntx_t* cntx )
       BLIS_MR, &blkszs[ BLIS_MR ],
       cntx
     );
+#endif
 
     // Initialize sup thresholds with architecture-appropriate values. s d c z
     bli_blksz_init_easy( &thresh[ BLIS_MT ],   512,  256,   380,   110 );

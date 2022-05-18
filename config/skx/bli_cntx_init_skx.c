@@ -73,8 +73,8 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	  10,
 #if 1
 	  // amaxv
-	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int_avx512,
-	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int_avx512,
+	  BLIS_AMAXV_KER,  BLIS_FLOAT,  bli_samaxv_zen_int,
+	  BLIS_AMAXV_KER,  BLIS_DOUBLE, bli_damaxv_zen_int,
 #endif
 	  // axpyv
 #if 0
