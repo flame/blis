@@ -729,7 +729,7 @@ int bli_pthread_switch_on
 
 			// If the init() function succeeded, turn the switch on;
 			// otherwise, leave the switch off.
-			if ( r_val != 0 )
+			if ( r_val == 0 )
 				sw->status = 1;
 		}
 
@@ -772,7 +772,7 @@ int bli_pthread_switch_off
 
 			// If the deinit() function succeeded, turn the switch off;
 			// otherwise, leave the switch on.
-			if ( r_val != 0 )
+			if ( r_val == 0 )
 				sw->status = 0;
 		}
 
