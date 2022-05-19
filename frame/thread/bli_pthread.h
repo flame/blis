@@ -270,4 +270,29 @@ BLIS_EXPORT_BLIS int bli_pthread_barrier_wait
        bli_pthread_barrier_t* barrier
      );
 
+// -- Non-standard extensions --------------------------------------------------
+
+// -- pthread_switch --
+
+typedef struct
+{
+    int                 status;
+    bli_pthread_mutex_t mutex;
+} bli_pthread_switch_t;
+
+#define BLIS_PTHREAD_SWITCH_INIT { .status = 0, \
+                                   .mutex  = BLIS_PTHREAD_MUTEX_INITIALIZER }
+
+int bli_pthread_switch_on
+     (
+       bli_pthread_switch_t* sw,
+       int                 (*init)(void)
+     );
+
+int bli_pthread_switch_off
+     (
+       bli_pthread_switch_t* sw,
+       int                 (*deinit)(void)
+     );
+
 #endif // BLIS_PTHREAD_H
