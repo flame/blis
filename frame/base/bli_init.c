@@ -64,25 +64,21 @@ void bli_finalize_auto( void )
 
 // -----------------------------------------------------------------------------
 
-// A pthread_once_t variable is a pthread structure used in pthread_once().
-// pthread_once() is guaranteed to execute exactly once among all threads that
-// pass in this control object (until/unless the variable is reset).
-static bli_pthread_once_t once_init     = BLIS_PTHREAD_ONCE_INIT;
-static bli_pthread_once_t once_finalize = BLIS_PTHREAD_ONCE_INIT;
+static bli_pthread_switch_t lib_state = BLIS_PTHREAD_SWITCH_INIT;
 
 void bli_init_once( void )
 {
-	bli_pthread_once( &once_init, bli_init_apis );
+	bli_pthread_switch_on( &lib_state, bli_init_apis );
 }
 
 void bli_finalize_once( void )
 {
-	bli_pthread_once( &once_finalize, bli_finalize_apis );
+	bli_pthread_switch_off( &lib_state, bli_finalize_apis );
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_init_apis( void )
+int bli_init_apis( void )
 {
 	// Initialize various sub-APIs.
 	bli_gks_init();
@@ -91,17 +87,10 @@ void bli_init_apis( void )
 	bli_pack_init();
 	bli_memsys_init();
 
-	// Reset the control variable that will allow finalization.
-	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
-	// contents to the static control variable because some implementations of
-	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
-	// a struct initializer expression (i.e. { ... }), which cannot be used in
-	// post-declaration struct assignment in strict C99.
-	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
-	once_finalize = once_new;
+	return 0;
 }
 
-void bli_finalize_apis( void )
+int bli_finalize_apis( void )
 {
 	// Finalize various sub-APIs.
 	bli_memsys_finalize();
@@ -110,13 +99,6 @@ void bli_finalize_apis( void )
 	bli_ind_finalize();
 	bli_gks_finalize();
 
-	// Reset the control variable that will allow (re-)initialization.
-	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
-	// contents to the static control variable because some implementations of
-	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
-	// a struct initializer expression (i.e. { ... }), which cannot be used in
-	// post-declaration struct assignment in strict C99.
-	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
-	once_init = once_new;
+	return 0;
 }
 
