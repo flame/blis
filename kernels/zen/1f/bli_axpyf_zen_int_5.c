@@ -108,8 +108,6 @@ void bli_saxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
-
         saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -360,8 +358,6 @@ void bli_daxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
-
         daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )
@@ -603,7 +599,7 @@ void bli_daxpyf_zen_int_16x2
 
     v2df_t           a40v, a41v;
 
-    v2df_t           y4v; 
+    v2df_t           y4v;
     // If either dimension is zero, or if alpha is zero, return early.
     if ( bli_zero_dim2( m, b_n ) || bli_deq0( *alpha ) ) return;
 
@@ -899,8 +895,6 @@ void bli_daxpyf_zen_int_16x4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = bli_gks_query_cntx();
-
         daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )

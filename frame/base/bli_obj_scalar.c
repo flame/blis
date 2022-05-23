@@ -103,16 +103,13 @@ void bli_obj_scalar_detach
 
 void bli_obj_scalar_attach
      (
+             num_t  dt_targ,
              conj_t conj,
        const obj_t* alpha,
              obj_t* a
      )
 {
 	obj_t alpha_cast;
-
-	// Use the target datatype of A as the datatype to which we cast
-	// alpha locally.
-	const num_t dt_targ = bli_obj_target_dt( a );
 
 	// Make a copy-cast of alpha to the target datatype of A, queried
 	// above. This step gives us the opportunity to conjugate and/or

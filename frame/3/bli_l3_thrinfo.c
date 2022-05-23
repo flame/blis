@@ -36,137 +36,101 @@
 #include "blis.h"
 #include "assert.h"
 
-void bli_l3_thrinfo_init_single
+thrinfo_t* bli_l3_thrinfo_create
      (
-       thrinfo_t* thread
+             dim_t       id,
+             thrcomm_t*  gl_comm,
+             array_t*    array,
+       const rntm_t*     rntm,
+       const cntl_t*     cntl
      )
 {
-	bli_thrinfo_init_single( thread );
-}
-
-void bli_l3_thrinfo_free
-     (
-       rntm_t*    rntm,
-       thrinfo_t* thread
-     )
-{
-	bli_thrinfo_free( rntm, thread );
-}
-
-void bli_l3_sup_thrinfo_free
-     (
-       rntm_t*    rntm,
-       thrinfo_t* thread
-     )
-{
-	bli_thrinfo_free( rntm, thread );
-}
-
-// -----------------------------------------------------------------------------
-
-void bli_l3_thrinfo_create_root
-     (
-       dim_t       id,
-       thrcomm_t*  gl_comm,
-       rntm_t*     rntm,
-       cntl_t*     cntl,
-       thrinfo_t** thread
-     )
-{
-	// Query the global communicator for the total number of threads to use.
-	dim_t   n_threads  = bli_thrcomm_num_threads( gl_comm );
-
-	// Use the thread id passed in as the global communicator id.
-	dim_t   gl_comm_id = id;
-
-	// Use the blocksize id of the current (root) control tree node to
-	// query the top-most ways of parallelism to obtain.
-	bszid_t bszid      = bli_cntl_bszid( cntl );
-	dim_t   xx_way     = bli_rntm_ways_for( bszid, rntm );
-
-	// Determine the work id for this thrinfo_t node.
-	dim_t   work_id    = gl_comm_id / ( n_threads / xx_way );
-
 	// Create the root thrinfo_t node.
-	*thread = bli_thrinfo_create
+	thrinfo_t* root = bli_thrinfo_create_root
 	(
-	  rntm,
 	  gl_comm,
-	  gl_comm_id,
-	  xx_way,
-	  work_id,
-	  TRUE,
-	  bszid,
-	  NULL
+	  id,
+      bli_apool_array_elem( id, array ),
+      bli_pba_query()
 	);
+
+    thrinfo_t* thread = bli_l3_thrinfo_grow( root, rntm, cntl );
+    bli_thrinfo_set_sub_node( root, thread );
+
+    return root;
+}
+
+thrinfo_t* bli_l3_thrinfo_grow
+     (
+             thrinfo_t*  thread_par,
+       const rntm_t*     rntm,
+       const cntl_t*     cntl
+     )
+{
+    const cntl_t* sub_prenode = bli_cntl_sub_prenode( cntl );
+    const cntl_t* sub_node    = bli_cntl_sub_node( cntl );
+    const bszid_t bszid       = bli_cntl_part( cntl );
+    const dim_t   n_way       = bli_rntm_ways_for( bszid, rntm );
+
+    thrinfo_t* thread_cur = bli_thrinfo_split( n_way, thread_par );
+
+    if ( sub_prenode != NULL )
+    {
+        thrinfo_t* thread_chl = bli_l3_thrinfo_grow( thread_cur, rntm, sub_prenode );
+        bli_thrinfo_set_sub_prenode( thread_chl, thread_cur );
+    }
+
+    if ( sub_node != NULL )
+    {
+        thrinfo_t* thread_chl = bli_l3_thrinfo_grow( thread_cur, rntm, sub_node );
+        bli_thrinfo_set_sub_node( thread_chl, thread_cur );
+    }
+
+    return thread_cur;
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_sup_thrinfo_create_root
+thrinfo_t* bli_l3_sup_thrinfo_create
      (
-       dim_t       id,
-       thrcomm_t*  gl_comm,
-       rntm_t*     rntm,
-       thrinfo_t** thread
+             dim_t       id,
+             thrcomm_t*  gl_comm,
+             array_t*    array,
+       const rntm_t*     rntm
      )
 {
-	// Query the global communicator for the total number of threads to use.
-	dim_t   n_threads  = bli_thrcomm_num_threads( gl_comm );
-
-	// Use the thread id passed in as the global communicator id.
-	dim_t   gl_comm_id = id;
-
-	// Use the BLIS_NC blocksize id to query the top-most ways of parallelism
-	// to obtain. Note that hard-coding BLIS_NC like this is a little bit of a
-	// hack, but it works fine since both of the sup algorithms (bp and pb) use
-	// the cache blocksizes down to the 3rd loop. (See the definitions of
-	// bli_rntm_calc_num_threads_bp() and bli_rntm_calc_num_threads_pb() for
-	// a concise enumeration of these bszid_t ids.)
-	const bszid_t bszid  = BLIS_NC;
-	dim_t         xx_way = bli_rntm_ways_for( BLIS_NC, rntm );
-
-	// Determine the work id for this thrinfo_t node.
-	dim_t   work_id    = gl_comm_id / ( n_threads / xx_way );
-
 	// Create the root thrinfo_t node.
-	*thread = bli_thrinfo_create
+	thrinfo_t* root = bli_thrinfo_create_root
 	(
-	  rntm,
 	  gl_comm,
-	  gl_comm_id,
-	  xx_way,
-	  work_id,
-	  TRUE,
-	  bszid,
-	  NULL
+	  id,
+      bli_apool_array_elem( id, array ),
+      bli_pba_query()
 	);
-}
 
-// -----------------------------------------------------------------------------
+    const dim_t n_way_jc = bli_rntm_ways_for( BLIS_NC, rntm );
+    const dim_t n_way_pc = bli_rntm_ways_for( BLIS_KC, rntm );
+    const dim_t n_way_ic = bli_rntm_ways_for( BLIS_MC, rntm );
+    const dim_t n_way_jr = bli_rntm_ways_for( BLIS_NR, rntm );
+    const dim_t n_way_ir = bli_rntm_ways_for( BLIS_MR, rntm );
 
-void bli_l3_sup_thrinfo_update_root
-     (
-       rntm_t*    rntm,
-       thrinfo_t* thread
-     )
-{
-	// Query the current root for the total number of threads to use.
-	const dim_t n_threads  = bli_thread_num_threads( thread );
+    thrinfo_t* thread_jc = bli_thrinfo_split( n_way_jc,      root );
+    thrinfo_t* thread_pc = bli_thrinfo_split( n_way_pc, thread_jc );
+    thrinfo_t* thread_pb = bli_thrinfo_split(        1, thread_pc );
+    thrinfo_t* thread_ic = bli_thrinfo_split( n_way_ic, thread_pb );
+    thrinfo_t* thread_pa = bli_thrinfo_split(        1, thread_ic );
+    thrinfo_t* thread_jr = bli_thrinfo_split( n_way_jr, thread_pa );
+    thrinfo_t* thread_ir = bli_thrinfo_split( n_way_ir, thread_jr );
 
-	// Query the current root for the (global) comm id.
-	const dim_t gl_comm_id = bli_thread_ocomm_id( thread );
+    bli_thrinfo_set_sub_node( thread_jc,      root );
+    bli_thrinfo_set_sub_node( thread_pc, thread_jc );
+    bli_thrinfo_set_sub_node( thread_pb, thread_pc );
+    bli_thrinfo_set_sub_node( thread_ic, thread_pb );
+    bli_thrinfo_set_sub_node( thread_pa, thread_ic );
+    bli_thrinfo_set_sub_node( thread_jr, thread_pa );
+    bli_thrinfo_set_sub_node( thread_ir, thread_jr );
 
-	// Query the rntm_t for the updated number of ways of parallelism.
-	const dim_t xx_way     = bli_rntm_ways_for( BLIS_NC, rntm );
-
-	// Recompute the work id for this thrinfo_t node using the updated
-	// number of ways of parallelism.
-	dim_t       work_id    = gl_comm_id / ( n_threads / xx_way );
-
-	// Save the updated ways of parallelism and work id to the thrinfo_t node.
-	bli_thrinfo_set_n_way( xx_way, thread );
-	bli_thrinfo_set_work_id( work_id, thread );
+    return root;
 }
 
 // -----------------------------------------------------------------------------
@@ -283,43 +247,43 @@ void bli_l3_thrinfo_print_gemm_paths
 
 		if ( !jc_info ) goto print_thrinfo;
 
-		jc_comm_id = bli_thread_ocomm_id( jc_info );
+		jc_comm_id = bli_thread_thread_id( jc_info );
 		jc_work_id = bli_thread_work_id( jc_info );
 		pc_info    = bli_thrinfo_sub_node( jc_info );
 
 		if ( !pc_info ) goto print_thrinfo;
 
-		pc_comm_id = bli_thread_ocomm_id( pc_info );
+		pc_comm_id = bli_thread_thread_id( pc_info );
 		pc_work_id = bli_thread_work_id( pc_info );
 		pb_info    = bli_thrinfo_sub_node( pc_info );
 
 		if ( !pb_info ) goto print_thrinfo;
 
-		pb_comm_id = bli_thread_ocomm_id( pb_info );
+		pb_comm_id = bli_thread_thread_id( pb_info );
 		pb_work_id = bli_thread_work_id( pb_info );
 		ic_info    = bli_thrinfo_sub_node( pb_info );
 
 		if ( !ic_info ) goto print_thrinfo;
 
-		ic_comm_id = bli_thread_ocomm_id( ic_info );
+		ic_comm_id = bli_thread_thread_id( ic_info );
 		ic_work_id = bli_thread_work_id( ic_info );
 		pa_info    = bli_thrinfo_sub_node( ic_info );
 
 		if ( !pa_info ) goto print_thrinfo;
 
-		pa_comm_id = bli_thread_ocomm_id( pa_info );
+		pa_comm_id = bli_thread_thread_id( pa_info );
 		pa_work_id = bli_thread_work_id( pa_info );
 		jr_info    = bli_thrinfo_sub_node( pa_info );
 
 		if ( !jr_info ) goto print_thrinfo;
 
-		jr_comm_id = bli_thread_ocomm_id( jr_info );
+		jr_comm_id = bli_thread_thread_id( jr_info );
 		jr_work_id = bli_thread_work_id( jr_info );
 		ir_info    = bli_thrinfo_sub_node( jr_info );
 
 		if ( !ir_info ) goto print_thrinfo;
 
-		ir_comm_id = bli_thread_ocomm_id( ir_info );
+		ir_comm_id = bli_thread_thread_id( ir_info );
 		ir_work_id = bli_thread_work_id( ir_info );
 
 		print_thrinfo:
@@ -493,25 +457,25 @@ void bli_l3_thrinfo_print_trsm_paths
 
 		if ( !jc_info ) goto print_thrinfo;
 
-		jc_comm_id = bli_thread_ocomm_id( jc_info );
+		jc_comm_id = bli_thread_thread_id( jc_info );
 		jc_work_id = bli_thread_work_id( jc_info );
 		pc_info    = bli_thrinfo_sub_node( jc_info );
 
 		if ( !pc_info ) goto print_thrinfo;
 
-		pc_comm_id = bli_thread_ocomm_id( pc_info );
+		pc_comm_id = bli_thread_thread_id( pc_info );
 		pc_work_id = bli_thread_work_id( pc_info );
 		pb_info    = bli_thrinfo_sub_node( pc_info );
 
 		if ( !pb_info ) goto print_thrinfo;
 
-		pb_comm_id = bli_thread_ocomm_id( pb_info );
+		pb_comm_id = bli_thread_thread_id( pb_info );
 		pb_work_id = bli_thread_work_id( pb_info );
 		ic_info    = bli_thrinfo_sub_node( pb_info );
 
 		if ( !ic_info ) goto print_thrinfo;
 
-		ic_comm_id = bli_thread_ocomm_id( ic_info );
+		ic_comm_id = bli_thread_thread_id( ic_info );
 		ic_work_id = bli_thread_work_id( ic_info );
 		pa_info    = bli_thrinfo_sub_node( ic_info );
 		pa_info0   = bli_thrinfo_sub_prenode( ic_info );
@@ -520,38 +484,38 @@ void bli_l3_thrinfo_print_trsm_paths
 
 		if ( !pa_info0 ) goto check_thrinfo_node;
 
-		pa_comm_id0 = bli_thread_ocomm_id( pa_info0 );
+		pa_comm_id0 = bli_thread_thread_id( pa_info0 );
 		pa_work_id0 = bli_thread_work_id( pa_info0 );
 		jr_info0    = bli_thrinfo_sub_node( pa_info0 );
 
 		if ( !jr_info0 ) goto check_thrinfo_node;
 
-		jr_comm_id0 = bli_thread_ocomm_id( jr_info0 );
+		jr_comm_id0 = bli_thread_thread_id( jr_info0 );
 		jr_work_id0 = bli_thread_work_id( jr_info0 );
 		ir_info0    = bli_thrinfo_sub_node( jr_info0 );
 
 		if ( !ir_info0 ) goto check_thrinfo_node;
 
-		ir_comm_id0 = bli_thread_ocomm_id( ir_info0 );
+		ir_comm_id0 = bli_thread_thread_id( ir_info0 );
 		ir_work_id0 = bli_thread_work_id( ir_info0 );
 
 		check_thrinfo_node:
 
 		if ( !pa_info ) goto print_thrinfo;
 
-		pa_comm_id = bli_thread_ocomm_id( pa_info );
+		pa_comm_id = bli_thread_thread_id( pa_info );
 		pa_work_id = bli_thread_work_id( pa_info );
 		jr_info    = bli_thrinfo_sub_node( pa_info );
 
 		if ( !jr_info ) goto print_thrinfo;
 
-		jr_comm_id = bli_thread_ocomm_id( jr_info );
+		jr_comm_id = bli_thread_thread_id( jr_info );
 		jr_work_id = bli_thread_work_id( jr_info );
 		ir_info    = bli_thrinfo_sub_node( jr_info );
 
 		if ( !ir_info ) goto print_thrinfo;
 
-		ir_comm_id = bli_thread_ocomm_id( ir_info );
+		ir_comm_id = bli_thread_thread_id( ir_info );
 		ir_work_id = bli_thread_work_id( ir_info );
 
 		print_thrinfo:
@@ -584,7 +548,7 @@ void bli_l3_thrinfo_print_trsm_paths
 		}
 		else
 		{
-			jc_comm_id = bli_thread_ocomm_id( jc_info );
+			jc_comm_id = bli_thread_thread_id( jc_info );
 			jc_work_id = bli_thread_work_id( jc_info );
 			pc_info = bli_thrinfo_sub_node( jc_info );
 
@@ -595,7 +559,7 @@ void bli_l3_thrinfo_print_trsm_paths
 			}
 			else
 			{
-				pc_comm_id = bli_thread_ocomm_id( pc_info );
+				pc_comm_id = bli_thread_thread_id( pc_info );
 				pc_work_id = bli_thread_work_id( pc_info );
 				pb_info = bli_thrinfo_sub_node( pc_info );
 
@@ -606,7 +570,7 @@ void bli_l3_thrinfo_print_trsm_paths
 				}
 				else
 				{
-					pb_comm_id = bli_thread_ocomm_id( pb_info );
+					pb_comm_id = bli_thread_thread_id( pb_info );
 					pb_work_id = bli_thread_work_id( pb_info );
 					ic_info = bli_thrinfo_sub_node( pb_info );
 
@@ -617,7 +581,7 @@ void bli_l3_thrinfo_print_trsm_paths
 					}
 					else
 					{
-						ic_comm_id = bli_thread_ocomm_id( ic_info );
+						ic_comm_id = bli_thread_thread_id( ic_info );
 						ic_work_id = bli_thread_work_id( ic_info );
 						pa_info0 = bli_thrinfo_sub_prenode( ic_info );
 						pa_info = bli_thrinfo_sub_node( ic_info );
@@ -630,7 +594,7 @@ void bli_l3_thrinfo_print_trsm_paths
 						}
 						else
 						{
-							pa_comm_id0 = bli_thread_ocomm_id( pa_info0 );
+							pa_comm_id0 = bli_thread_thread_id( pa_info0 );
 							pa_work_id0 = bli_thread_work_id( pa_info0 );
 							jr_info0 = bli_thrinfo_sub_node( pa_info0 );
 
@@ -641,7 +605,7 @@ void bli_l3_thrinfo_print_trsm_paths
 							}
 							else
 							{
-								jr_comm_id0 = bli_thread_ocomm_id( jr_info0 );
+								jr_comm_id0 = bli_thread_thread_id( jr_info0 );
 								jr_work_id0 = bli_thread_work_id( jr_info0 );
 								ir_info0 = bli_thrinfo_sub_node( jr_info0 );
 
@@ -652,7 +616,7 @@ void bli_l3_thrinfo_print_trsm_paths
 								}
 								else
 								{
-									ir_comm_id0 = bli_thread_ocomm_id( ir_info0 );
+									ir_comm_id0 = bli_thread_thread_id( ir_info0 );
 									ir_work_id0 = bli_thread_work_id( ir_info0 );
 								}
 							}
@@ -666,7 +630,7 @@ void bli_l3_thrinfo_print_trsm_paths
 						}
 						else
 						{
-							pa_comm_id = bli_thread_ocomm_id( pa_info );
+							pa_comm_id = bli_thread_thread_id( pa_info );
 							pa_work_id = bli_thread_work_id( pa_info );
 							jr_info = bli_thrinfo_sub_node( pa_info );
 
@@ -677,7 +641,7 @@ void bli_l3_thrinfo_print_trsm_paths
 							}
 							else
 							{
-								jr_comm_id = bli_thread_ocomm_id( jr_info );
+								jr_comm_id = bli_thread_thread_id( jr_info );
 								jr_work_id = bli_thread_work_id( jr_info );
 								ir_info = bli_thrinfo_sub_node( jr_info );
 
@@ -688,7 +652,7 @@ void bli_l3_thrinfo_print_trsm_paths
 								}
 								else
 								{
-									ir_comm_id = bli_thread_ocomm_id( ir_info );
+									ir_comm_id = bli_thread_thread_id( ir_info );
 									ir_work_id = bli_thread_work_id( ir_info );
 								}
 							}
@@ -732,7 +696,7 @@ void bli_l3_thrinfo_free_paths
 	dim_t i;
 
 	for ( i = 0; i < n_threads; ++i )
-		bli_l3_thrinfo_free( rntm, threads[i] );
+		bli_thrinfo_free( threads[i] );
 
 	bli_free_intl( threads );
 }

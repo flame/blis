@@ -33,6 +33,7 @@
 
 */
 
+#include "bli_type_defs.h"
 #include "blis.h"
 
 void bli_obj_create
@@ -578,6 +579,27 @@ dim_t bli_align_dim_to_mult
 	        dim_mult;
 
 	return dim;
+}
+
+void bli_align_blksz_to_mult
+     (
+             blksz_t* dim,
+       const blksz_t* dim_mult
+     )
+{
+    for ( int i = BLIS_DT_LO; i <= BLIS_DT_HI; i++ )
+    {
+        num_t dt          = i;
+        dim_t dim_dt      = bli_blksz_get_def( dt, dim );
+        dim_t dim_max_dt  = bli_blksz_get_max( dt, dim );
+        dim_t dim_mult_dt = bli_blksz_get_def( dt, dim_mult );
+
+        dim_dt     = bli_align_dim_to_mult( dim_dt, dim_mult_dt );
+        dim_max_dt = bli_align_dim_to_mult( dim_max_dt, dim_mult_dt );
+
+        bli_blksz_set_def( dim_dt, dt, dim );
+        bli_blksz_set_max( dim_max_dt, dt, dim );
+    }
 }
 
 dim_t bli_align_dim_to_size

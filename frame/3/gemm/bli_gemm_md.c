@@ -37,18 +37,59 @@
 
 #ifdef BLIS_ENABLE_GEMM_MD
 
-void bli_gemm_md
+num_t bli_gemm_md_comp_dt
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*  a,
+             obj_t*  b,
+       const obj_t*  beta,
+             obj_t*  c,
+       const rntm_t* rntm
      )
 {
-	mddm_t doms;
+    //TODO: get comp dt from combination of A, B, C
+    num_t comp_dt = bli_obj_dt( c );
 
+    if ( bli_gemm_md_is_crr( a, b, c ) ||
+         bli_gemm_md_is_ccr( a, b, c ) ||
+         bli_gemm_md_is_crc( a, b, c ) )
+    {
+        comp_dt = bli_dt_proj_to_real( comp_dt );
+    }
+
+    if ( bli_gemm_md_is_rcc( a, b, c ) &&
+         beta is real )
+    {
+        comp_dt = bli_dt_proj_to_real( comp_dt );
+    }
+
+    if ( bli_gemm_md_is_ccc( a, b, c ) )
+    {
+    	// Find the highest priority induced method that is both enabled and
+    	// available for the current operation. (If an induced method is
+    	// available but not enabled, or simply unavailable, BLIS_NAT will
+    	// be returned here.)
+    	ind_t im = bli_gemmind_find_avail( bli_obj_dt( c ) );
+
+        if ( im == BLIS_1M && bli_rntm_ind( BLIS_1M, rntm ) )
+        {
+            comp_dt = bli_dt_proj_to_real( comp_dt );
+        }
+    }
+
+    return dt_comp;
+}
+
+void bli_gemm_md
+     (
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
+     )
+{
 	const bool a_is_real = bli_obj_is_real( a );
 	const bool a_is_comp = bli_obj_is_complex( a );
 	const bool b_is_real = bli_obj_is_real( b );
@@ -59,105 +100,59 @@ void bli_gemm_md
 	if      ( c_is_real && a_is_real && b_is_real )
 	{
 		// C_real += A_real * B_real
-		doms = bli_gemm_md_rrr( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_rrr( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_comp && a_is_comp && b_is_comp )
 	{
 		// C_complex += A_complex * B_complex
-		doms = bli_gemm_md_ccc( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_ccc( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_comp && a_is_comp && b_is_real )
 	{
 		// C_complex += A_complex * B_real
-		doms = bli_gemm_md_ccr( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_ccr( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_comp && a_is_real && b_is_comp )
 	{
 		// C_complex += A_real * B_complex
-		doms = bli_gemm_md_crc( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_crc( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_real && a_is_comp && b_is_comp )
 	{
 		// C_real += A_complex * B_complex
-		doms = bli_gemm_md_rcc( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_rcc( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_comp && a_is_real && b_is_real )
 	{
 		// C_complex += A_real * B_real
-		doms = bli_gemm_md_crr( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_crr( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_real && a_is_comp && b_is_real )
 	{
 		// C_real += A_complex * B_real
-		doms = bli_gemm_md_rcr( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_rcr( a, b, beta, c, rntm, cntx, cntl );
 	}
 	else if ( c_is_real && a_is_real && b_is_comp )
 	{
 		// C_real += A_real * B_complex
-		doms = bli_gemm_md_rrc( a, b, beta, c, cntx_local, cntx );
+		bli_gemm_md_rrc( a, b, beta, c, rntm, cntx, cntl );
 	}
-	else
-	{
-		doms.comp = BLIS_REAL;
-		doms.exec = BLIS_REAL;
-
-		// This should never execute.
-		bli_abort();
-	}
-
-	// Extract the computation and execution domains from the struct
-	// returned above.
-	dom_t dom_comp = doms.comp;
-	dom_t dom_exec = doms.exec;
-
-	// Inspect the computation precision of C. (The user may have set
-	// this explicitly to request the precision in which the computation
-	// should take place.)
-	prec_t prec_comp = bli_obj_comp_prec( c );
-
-	// The computation precision tells us the target precision of A and B.
-	// NOTE: We don't set the target domain here. The target domain would
-	// either be unchanged, or would have been changed in one of the eight
-	// domain cases above.
-	bli_obj_set_target_prec( prec_comp, a );
-	bli_obj_set_target_prec( prec_comp, b );
-
-	// Combine the execution domain with the computation precision to form
-	// the execution datatype. (The computation precision and execution
-	// precision are always equal.)
-	num_t dt_exec = dom_exec | prec_comp;
-
-	// Set the execution datatypes of A, B, and C.
-	bli_obj_set_exec_dt( dt_exec, a );
-	bli_obj_set_exec_dt( dt_exec, b );
-	bli_obj_set_exec_dt( dt_exec, c );
-
-	// Combine the computation precision and computation domain to form the
-	// computation datatype.
-	num_t dt_comp = dom_comp | prec_comp;
-
-	// Set the computation datatypes of A, B, and C.
-	bli_obj_set_comp_dt( dt_comp, a );
-	bli_obj_set_comp_dt( dt_comp, b );
-	bli_obj_set_comp_dt( dt_comp, c );
-
 }
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_ccr
+//               cab
+void bli_gemm_md_ccr
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
-
 	// We assume that the requested computation domain is complex.
 	//dom_t dom_comp_in = bli_obj_comp_domain( c );
 	//dom_t dom_comp_in = BLIS_COMPLEX;
@@ -253,19 +248,18 @@ mddm_t bli_gemm_md_ccr
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_crc
+//               cab
+void bli_gemm_md_crc
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
-
 	// We assume that the requested computation domain is complex.
 	//dom_t dom_comp_in = bli_obj_comp_domain( c );
 	//dom_t dom_comp_in = BLIS_COMPLEX;
@@ -361,19 +355,18 @@ mddm_t bli_gemm_md_crc
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_rcc
+//               cab
+void bli_gemm_md_rcc
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
-
 	// We assume that the requested computation domain is complex.
 	//dom_t dom_comp_in = bli_obj_comp_domain( c );
 	//dom_t dom_comp_in = BLIS_COMPLEX;
@@ -454,18 +447,19 @@ mddm_t bli_gemm_md_rcc
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_crr
+//               cab
+void bli_gemm_md_crr
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
+	void doms;
 #ifndef BLIS_ENABLE_GEMM_MD_EXTRA_MEM
 	obj_t  c_real;
 #endif
@@ -511,18 +505,19 @@ mddm_t bli_gemm_md_crr
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_rcr
+//               cab
+void bli_gemm_md_rcr
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
+	void doms;
 	obj_t  a_real;
 
 	// We assume that the requested computation domain is real.
@@ -549,18 +544,19 @@ mddm_t bli_gemm_md_rcr
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_rrc
+//               cab
+void bli_gemm_md_rrc
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
+	void doms;
 	obj_t  b_real;
 
 	// We assume that the requested computation domain is real.
@@ -587,57 +583,56 @@ mddm_t bli_gemm_md_rrc
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_rrr
+//               cab
+void bli_gemm_md_rrr
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
-
-	// We assume that the requested computation domain is real.
-	//dom_t dom_comp_in = bli_obj_comp_domain( c );
-	//dom_t dom_comp_in = BLIS_REAL;
-
-	// For rrr, the computation (ukernel) and execution domains are both
-	// real.
-	doms.comp = BLIS_REAL;
-	doms.exec = BLIS_REAL;
-
-	// Use the default pack schemas in the objects.
-
-	// Return the computation and execution domains.
-	return doms;
+	// Nothing to do.
 }
 
 // -----------------------------------------------------------------------------
 
-//                 cab
-mddm_t bli_gemm_md_ccc
+//               cab
+void bli_gemm_md_ccc
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
+             obj_t*       a,
+             obj_t*       b,
+       const obj_t*       beta,
+             obj_t*       c,
+       const rntm_t*      rntm,
+       const cntx_t*      cntx,
+             goto_cntl_t* cntl
      )
 {
-	mddm_t doms;
+	// Find the highest priority induced method that is both enabled and
+	// available for the current operation. (If an induced method is
+	// available but not enabled, or simply unavailable, BLIS_NAT will
+	// be returned here.)
+	ind_t im = bli_gemmind_find_avail( dt );
 
-	// We assume that the requested computation domain is complex.
-	//dom_t dom_comp_in = bli_obj_comp_domain( c );
-	//dom_t dom_comp_in = BLIS_COMPLEX;
-
-	// For ccc, the computation (ukernel) and execution domains are both
-	// complex.
-	doms.comp = BLIS_COMPLEX;
-	doms.exec = BLIS_COMPLEX;
+    if ( im == BLIS_1M && bli_rntm_ind( BLIS_1M, rntm ) )
+    {
+		// Set the pack schemas based on the row preference of the real-domain
+        // microkernel
+		if ( cntl->ker_params.row_pref )
+		{
+			cntl->packa_params.pack_schema = BLIS_PACKED_ROW_PANELS_1R;
+			cntl->packb_params.pack_schema = BLIS_PACKED_COL_PANELS_1E;
+		}
+		else
+		{
+			cntl->packa_params.pack_schema = BLIS_PACKED_ROW_PANELS_1E;
+			cntl->packb_params.pack_schema = BLIS_PACKED_COL_PANELS_1R;
+		}
+    }
 
 	// Use the default pack schemas in the objects.
 

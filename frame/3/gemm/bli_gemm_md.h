@@ -32,58 +32,38 @@
 
 */
 
-#include "bli_gemm_md_c2r_ref.h"
-
-// Define a local struct type that makes returning two values easier.
-typedef struct mddm_s
-{
-	dom_t comp;
-	dom_t exec;
-} mddm_t;
-
-void bli_gemm_md
+num_t bli_gemm_md_comp_dt
      (
-             obj_t*   a,
-             obj_t*   b,
-       const obj_t*   beta,
-             obj_t*   c,
-             cntx_t*  cntx_local,
-       const cntx_t** cntx
-     );
-mddm_t bli_gemm_md_ccc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_ccr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_crc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rcc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rrc( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rcr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_crr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-mddm_t bli_gemm_md_rrr( obj_t* a, obj_t* b, const obj_t* beta, obj_t* c, cntx_t* cntx_l, const cntx_t** cntx );
-
-// -----------------------------------------------------------------------------
-
-void bli_gemm_md_front
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
+             obj_t*  a,
+             obj_t*  b,
        const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             obj_t*  c,
+       const rntm_t* rntm
      );
 
-void bli_gemm_md_zgemm
-     (
-       const obj_t*  alpha,
-       const obj_t*  a,
-       const obj_t*  b,
-       const obj_t*  beta,
-       const obj_t*  c,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+#undef GENTFUNC
+#define GENTFUNC( opname ) \
+\
+void PASTEMAC0( opname ) \
+     ( \
+             obj_t*       a, \
+             obj_t*       b, \
+       const obj_t*       beta, \
+             obj_t*       c, \
+       const rntm_t*      rntm, \
+       const cntx_t*      cntx, \
+             goto_cntl_t* cntl \
      );
+
+GENTFUNC( gemm_md );
+GENTFUNC( gemm_md_rrr );
+GENTFUNC( gemm_md_rrc );
+GENTFUNC( gemm_md_rcr );
+GENTFUNC( gemm_md_rcc );
+GENTFUNC( gemm_md_crr );
+GENTFUNC( gemm_md_crc );
+GENTFUNC( gemm_md_ccr );
+GENTFUNC( gemm_md_ccc );
 
 // -----------------------------------------------------------------------------
 
@@ -100,8 +80,7 @@ BLIS_INLINE bool bli_gemm_md_is_crr( const obj_t* a, const obj_t* b, const obj_t
 	// execution domain of BLIS_REAL.)
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_real( a )    &&
-	     bli_obj_is_real( b )    &&
-	     bli_obj_exec_domain( c ) == BLIS_REAL )
+	     bli_obj_is_real( b ) )
 		r_val = TRUE;
 
 	return r_val;
@@ -120,8 +99,7 @@ BLIS_INLINE bool bli_gemm_md_is_ccr( const obj_t* a, const obj_t* b, const obj_t
 	// execution domain of BLIS_COMPLEX.)
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_complex( a ) &&
-	     bli_obj_is_real( b )    &&
-	     bli_obj_exec_domain( c ) == BLIS_COMPLEX )
+	     bli_obj_is_real( b ) )
 		r_val = TRUE;
 
 	return r_val;
@@ -140,8 +118,7 @@ BLIS_INLINE bool bli_gemm_md_is_crc( const obj_t* a, const obj_t* b, const obj_t
 	// execution domain of BLIS_COMPLEX.)
 	if ( bli_obj_is_complex( c ) &&
 	     bli_obj_is_real( a )    &&
-	     bli_obj_is_complex( b ) &&
-	     bli_obj_exec_domain( c ) == BLIS_COMPLEX )
+	     bli_obj_is_complex( b ) )
 		r_val = TRUE;
 
 	return r_val;

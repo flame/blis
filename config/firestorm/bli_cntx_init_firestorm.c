@@ -123,23 +123,23 @@ void bli_cntx_init_firestorm( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
 
 	  // sup thresholds
-	  BLIS_MT, &blkszs[ BLIS_MT ], BLIS_MT,
-	  BLIS_NT, &blkszs[ BLIS_NT ], BLIS_NT,
-	  BLIS_KT, &blkszs[ BLIS_KT ], BLIS_KT,
+	  BLIS_MT, &blkszs[ BLIS_MT ],
+	  BLIS_NT, &blkszs[ BLIS_NT ],
+	  BLIS_KT, &blkszs[ BLIS_KT ],
 
 	  // level-3 sup
-	  BLIS_NC_SUP, &blkszs[ BLIS_NC_SUP ], BLIS_NR_SUP,
-	  BLIS_KC_SUP, &blkszs[ BLIS_KC_SUP ], BLIS_KR_SUP,
-	  BLIS_MC_SUP, &blkszs[ BLIS_MC_SUP ], BLIS_MR_SUP,
-	  BLIS_NR_SUP, &blkszs[ BLIS_NR_SUP ], BLIS_NR_SUP,
-	  BLIS_MR_SUP, &blkszs[ BLIS_MR_SUP ], BLIS_MR_SUP,
+	  BLIS_NC_SUP, &blkszs[ BLIS_NC_SUP ],
+	  BLIS_KC_SUP, &blkszs[ BLIS_KC_SUP ],
+	  BLIS_MC_SUP, &blkszs[ BLIS_MC_SUP ],
+	  BLIS_NR_SUP, &blkszs[ BLIS_NR_SUP ],
+	  BLIS_MR_SUP, &blkszs[ BLIS_MR_SUP ],
 
 	  BLIS_VA_END
 	);

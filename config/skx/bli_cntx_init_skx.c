@@ -125,15 +125,15 @@ void bli_cntx_init_skx( cntx_t* cntx )
 	  cntx,
 
 	  // level-3
-	  BLIS_NC, &blkszs[ BLIS_NC ], BLIS_NR,
-	  BLIS_KC, &blkszs[ BLIS_KC ], BLIS_KR,
-	  BLIS_MC, &blkszs[ BLIS_MC ], BLIS_MR,
-	  BLIS_NR, &blkszs[ BLIS_NR ], BLIS_NR,
-	  BLIS_MR, &blkszs[ BLIS_MR ], BLIS_MR,
+	  BLIS_NC, &blkszs[ BLIS_NC ],
+	  BLIS_KC, &blkszs[ BLIS_KC ],
+	  BLIS_MC, &blkszs[ BLIS_MC ],
+	  BLIS_NR, &blkszs[ BLIS_NR ],
+	  BLIS_MR, &blkszs[ BLIS_MR ],
 
 	  // level-1f
-	  BLIS_AF, &blkszs[ BLIS_AF ], BLIS_AF,
-	  BLIS_DF, &blkszs[ BLIS_DF ], BLIS_DF,
+	  BLIS_AF, &blkszs[ BLIS_AF ],
+	  BLIS_DF, &blkszs[ BLIS_DF ],
 
 	  BLIS_VA_END
 	);

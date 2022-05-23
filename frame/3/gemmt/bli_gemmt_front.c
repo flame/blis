@@ -43,8 +43,7 @@ void bli_gemmt_front
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -68,6 +67,10 @@ void bli_gemmt_front
 		bli_scalm( beta, c );
 		return;
 	}
+
+    // Create an initial control tree, assuming native execution.
+    goto_cntl_t gemm_cntl;
+    cntl_t* cntl = bli_gemm_cntl_create( &gemm_cntl, BLIS_GEMMT, dt_comp, a, b, c, cntx );
 
 	// Alias A, B, and C in case we need to apply transformations.
 	bli_obj_alias_to( a, &a_local );

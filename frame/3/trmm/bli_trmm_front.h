@@ -38,7 +38,5 @@ void bli_trmm_front
        const obj_t*  alpha,
        const obj_t*  a,
        const obj_t*  b,
-       const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const cntx_t* cntx
      );

@@ -54,6 +54,7 @@ BLIS_EXPORT_BLIS void bli_obj_scalar_detach
 
 BLIS_EXPORT_BLIS void bli_obj_scalar_attach
      (
+             num_t  dt_targ,
              conj_t conj,
        const obj_t* alpha,
              obj_t* a

@@ -56,9 +56,9 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	   void bli_cntx_set_blkszs
 	   (
 	     cntx_t* cntx,
-	     bszid_t bs0_id, blksz_t* blksz0, bszid_t bm0_id,
-	     bszid_t bs1_id, blksz_t* blksz1, bszid_t bm1_id,
-	     bszid_t bs2_id, blksz_t* blksz2, bszid_t bm2_id,
+	     bszid_t bs0_id, blksz_t* blksz0,
+	     bszid_t bs1_id, blksz_t* blksz1,
+	     bszid_t bs2_id, blksz_t* blksz2,
 	     ...,
 	     BLIS_VA_END
 	   );
@@ -71,7 +71,6 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 	// - the blocksize object array
 	// - the blocksize multiple array
 	blksz_t* cntx_blkszs = cntx->blkszs;
-	bszid_t* cntx_bmults = cntx->bmults;
 
 	// Initialize variable argument environment.
 	va_list args;
@@ -92,7 +91,6 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 		//   the blksz_t object.
 		bszid_t  bs_id = ( bszid_t  )bs_id0;
 		blksz_t* blksz = ( blksz_t* )va_arg( args, blksz_t* );
-		bszid_t  bm_id = ( bszid_t  )va_arg( args, bszid_t  );
 
 		// Copy the blksz_t object contents into the appropriate
 		// location within the context's blksz_t array. Do the same
@@ -101,9 +99,6 @@ void bli_cntx_set_blkszs( cntx_t* cntx, ... )
 		//bli_blksz_copy( blksz, cntx_blksz );
 		blksz_t* cntx_blksz = &cntx_blkszs[ bs_id ];
 		bli_blksz_copy_if_pos( blksz, cntx_blksz );
-
-		// Copy the blocksize multiple id into the context.
-		cntx_bmults[ bs_id ] = bm_id;
 	}
 
 	// Shutdown variable argument environment and clean up stack.

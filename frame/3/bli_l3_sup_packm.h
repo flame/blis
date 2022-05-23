@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2018, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,43 +33,57 @@
 
 */
 
-#include "blis.h"
 
-void bli_packm_thrinfo_init
+void bli_packm_sup_init_mem
      (
-       thrinfo_t* thread,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       bszid_t    bszid,
-       thrinfo_t* sub_node
-     )
-{
-	bli_thrinfo_init
-	(
-	  thread,
-	  ocomm, ocomm_id,
-	  n_way, work_id,
-	  FALSE,
-	  BLIS_NO_PART,
-	  sub_node
-	);
-}
+         bool       will_pack,
+         packbuf_t  pack_buf_type,
+         num_t      dt,
+         dim_t      m,
+         dim_t      k,
+         dim_t      mr,
+         thrinfo_t* thread
+     );
 
-void bli_packm_thrinfo_init_single
+void bli_packm_sup_finalize_mem
      (
+       bool       did_pack,
        thrinfo_t* thread
-     )
-{
-	bli_packm_thrinfo_init
-	(
-	  thread,
-	  &BLIS_SINGLE_COMM, 0,
-	  1,
-	  0,
-	  BLIS_NO_PART,
-	  NULL
-	);
-}
+     );
+
+void bli_packm_sup_init
+     (
+             bool       will_pack,
+             stor3_t    stor_id,
+             pack_t*    schema,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+             dim_t*     m_max,
+             dim_t*     k_max,
+       const void*      x, inc_t  rs_x, inc_t  cs_x,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           dim_t* pd_p, inc_t* ps_p,
+             thrinfo_t* thread
+     );
+
+void bli_packm_sup
+     (
+             bool       will_pack,
+             packbuf_t  pack_buf_type,
+             stor3_t    stor_id,
+             trans_t    transc,
+             num_t      dt,
+             dim_t      m_alloc,
+             dim_t      k_alloc,
+             dim_t      m,
+             dim_t      k,
+             dim_t      mr,
+       const void*      kappa,
+       const void*      a, inc_t  rs_a, inc_t  cs_a,
+             void**     p, inc_t* rs_p, inc_t* cs_p,
+                           inc_t* ps_p,
+       const cntx_t*    cntx,
+             thrinfo_t* thread
+     );
 

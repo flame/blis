@@ -42,11 +42,8 @@
 
 // Include thread info (thrinfo_t) object definitions and prototypes.
 #include "bli_thrinfo.h"
-#include "bli_thrinfo_sup.h"
 
 // Include some operation-specific thrinfo_t prototypes.
-// Note that the bli_packm_thrinfo.h must be included before the others!
-#include "bli_packm_thrinfo.h"
 #include "bli_l3_thrinfo.h"
 
 // Include the level-3 thread decorator and related definitions and prototypes
@@ -85,7 +82,6 @@ siz_t PASTEMAC0( opname ) \
        const obj_t*     b, \
        const obj_t*     c, \
        const cntl_t*    cntl, \
-       const cntx_t*    cntx, \
              dim_t*     start, \
              dim_t*     end  \
      );

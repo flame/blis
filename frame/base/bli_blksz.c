@@ -235,38 +235,34 @@ void bli_blksz_reduce_max_to
 
 dim_t bli_determine_blocksize
      (
-             dir_t   direct,
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+             dir_t    direct,
+             dim_t    i,
+             dim_t    dim,
+       const obj_t*   obj,
+       const blksz_t* bsize
      )
 {
 	if ( direct == BLIS_FWD )
-		return bli_determine_blocksize_f( i, dim, obj, bszid, cntx );
+		return bli_determine_blocksize_f( i, dim, obj, bsize );
 	else
-		return bli_determine_blocksize_b( i, dim, obj, bszid, cntx );
+		return bli_determine_blocksize_b( i, dim, obj, bsize );
 }
 
 dim_t bli_determine_blocksize_f
      (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+             dim_t    i,
+             dim_t    dim,
+       const obj_t*   obj,
+       const blksz_t* bsize
      )
 {
 	num_t    dt;
-	const blksz_t* bsize;
 	dim_t    b_alg, b_max;
 	dim_t    b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_exec_dt( obj );
-	bsize = bli_cntx_get_blksz( bszid, cntx );
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );
 
@@ -277,22 +273,19 @@ dim_t bli_determine_blocksize_f
 
 dim_t bli_determine_blocksize_b
      (
-             dim_t   i,
-             dim_t   dim,
-       const obj_t*  obj,
-             bszid_t bszid,
-       const cntx_t* cntx
+             dim_t    i,
+             dim_t    dim,
+       const obj_t*   obj,
+       const blksz_t* bsize
      )
 {
 	num_t    dt;
-	const blksz_t* bsize;
 	dim_t    b_alg, b_max;
 	dim_t    b_use;
 
 	// Extract the execution datatype and use it to query the corresponding
 	// blocksize and blocksize maximum values from the blksz_t object.
 	dt    = bli_obj_exec_dt( obj );
-	bsize = bli_cntx_get_blksz( bszid, cntx );
 	b_alg = bli_blksz_get_def( dt, bsize );
 	b_max = bli_blksz_get_max( dt, bsize );
 

@@ -92,7 +92,7 @@ void bli_pba_finalize
 
 void bli_pba_acquire_m
      (
-       rntm_t*   rntm,
+       pba_t*    pba,
        siz_t     req_size,
        packbuf_t buf_type,
        mem_t*    mem
@@ -114,10 +114,6 @@ void bli_pba_acquire_m
 	        ( long )req_size );
 	#endif
 #endif
-
-	// Query the memory broker from the runtime.
-	pba_t* pba = bli_rntm_pba( rntm );
-
 
 	if ( buf_type == BLIS_BUFFER_FOR_GEN_USE )
 	{
@@ -197,16 +193,13 @@ void bli_pba_acquire_m
 
 void bli_pba_release
      (
-       rntm_t* rntm,
-       mem_t*  mem
+       pba_t* pba,
+       mem_t* mem
      )
 {
 	packbuf_t buf_type;
 	pool_t*   pool;
 	pblk_t*   pblk;
-
-	// Query the memory broker from the runtime.
-	pba_t* pba = bli_rntm_pba( rntm );
 
 	// Extract the buffer type so we know what kind of memory was allocated.
 	buf_type = bli_mem_buf_type( mem );

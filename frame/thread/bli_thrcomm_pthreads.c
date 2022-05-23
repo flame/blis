@@ -37,20 +37,20 @@
 
 #ifdef BLIS_ENABLE_PTHREADS
 
-thrcomm_t* bli_thrcomm_create( rntm_t* rntm, dim_t n_threads )
+thrcomm_t* bli_thrcomm_create( pool_t* sba_pool, dim_t n_threads )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrcomm_create(): " );
 	#endif
 
-	thrcomm_t* comm = bli_sba_acquire( rntm, sizeof(thrcomm_t) );
+	thrcomm_t* comm = bli_sba_acquire( sba_pool, sizeof(thrcomm_t) );
 
 	bli_thrcomm_init( n_threads, comm );
 
 	return comm;
 }
 
-void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
+void bli_thrcomm_free( pool_t* sba_pool, thrcomm_t* comm )
 {
 	if ( comm == NULL ) return;
 
@@ -60,7 +60,7 @@ void bli_thrcomm_free( rntm_t* rntm, thrcomm_t* comm )
 	printf( "bli_thrcomm_free(): " );
 	#endif
 
-	bli_sba_release( rntm, comm );
+	bli_sba_release( sba_pool, comm );
 }
 
 #ifdef BLIS_USE_PTHREAD_BARRIER

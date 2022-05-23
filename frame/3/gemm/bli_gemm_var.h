@@ -35,16 +35,6 @@
 
 
 //
-// gemm kernel parameter struct.
-//
-
-typedef struct
-{
-	gemm_ukr_vft ukr;
-} gemm_ker_params_t;
-
-
-//
 // Prototype object-based interfaces.
 //
 
@@ -57,8 +47,7 @@ void PASTEMAC0(opname) \
        const obj_t*  b, \
        const obj_t*  c, \
        const cntx_t* cntx, \
-             rntm_t* rntm, \
-             cntl_t* cntl, \
+       const cntl_t* cntl, \
              thrinfo_t* thread  \
      );
 

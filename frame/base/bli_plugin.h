@@ -4,8 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2018 - 2019, Advanced Micro Devices, Inc.
+   Copyright (C) 2022, Southern Methodist University
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -33,34 +32,41 @@
 
 */
 
-#ifndef BLIS_THRINFO_SUP_H
-#define BLIS_THRINFO_SUP_H
+#ifndef BLIS_PLUGIN_H
+#define BLIS_PLUGIN_H
+
+typedef struct plugin_s
+{
+	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
+	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
+
+	func_t* ukrs[ BLIS_NUM_UKRS ];
+	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
+
+	void_fp   l3_sup_handlers[ BLIS_NUM_ARCHS ];
+
+	ind_t     method;
+
+} arch_func_t;
+
+// -----------------------------------------------------------------------------
 
 //
-// Prototypes for level-3 thrinfo sup functions.
+// -- cntx_t query (complex) ---------------------------------------------------
 //
 
-void bli_thrinfo_sup_grow
-     (
-             rntm_t*    rntm,
-       const bszid_t*   bszid_par,
-             thrinfo_t* thread
-     );
+BLIS_INLINE const blksz_t* bli_cntx_get_blksz( bszid_t bs_id, const cntx_t* cntx )
+{
+	// Return the address of the blksz_t identified by bs_id.
+	return &cntx->blkszs[ bs_id ];
+}
 
-thrinfo_t* bli_thrinfo_sup_rgrow
-     (
-             rntm_t*    rntm,
-       const bszid_t*   bszid_par,
-       const bszid_t*   bszid_cur,
-             thrinfo_t* thread_par
-     );
+// -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_sup_create_for_cntl
-     (
-             rntm_t*    rntm,
-       const bszid_t*   bszid_par,
-       const bszid_t*   bszid_chl,
-             thrinfo_t* thread_par
-     );
+// Function prototypes
+
+BLIS_EXPORT_BLIS void bli_cntx_clear( cntx_t* cntx );
+
 
 #endif
+

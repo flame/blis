@@ -51,8 +51,7 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       cntx_t* cntx \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -168,8 +167,7 @@ void PASTEMAC(ch,opname) \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       cntx_t* cntx \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -286,8 +284,7 @@ void PASTEMAC(ch,opname) \
        dim_t   n, \
        ctype*  alpha, \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       cntx_t* cntx \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -394,8 +391,7 @@ void PASTEMAC(ch,opname) \
        ctype*  x, inc_t rs_x, inc_t cs_x, \
        ctype*  beta, \
        ctype*  y, inc_t rs_y, inc_t cs_y, \
-       cntx_t* cntx, \
-       rntm_t* rntm  \
+       cntx_t* cntx \
      ) \
 { \
 	const num_t dt = PASTEMAC(ch,type); \
@@ -512,8 +508,7 @@ void PASTEMAC2(chx,chy,opname) \
        ctype_x* x, inc_t rs_x, inc_t cs_x, \
        ctype_y* beta, \
        ctype_y* y, inc_t rs_y, inc_t cs_y, \
-       cntx_t*  cntx, \
-       rntm_t*  rntm  \
+       cntx_t*  cntx \
      ) \
 { \
 	uplo_t uplox_eff; \

@@ -47,8 +47,7 @@ typedef void (*l3int_t)
        const obj_t*     beta,
        const obj_t*     c,
        const cntx_t*    cntx,
-             rntm_t*    rntm,
-             cntl_t*    cntl,
+       const cntl_t*    cntl,
              thrinfo_t* thread
      );
 
@@ -63,8 +62,8 @@ void bli_l3_thread_decorator
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+       const rntm_t* rntm,
+       const cntl_t* cntl
      );
 
 // Include definitions specific to the method of multithreading for the

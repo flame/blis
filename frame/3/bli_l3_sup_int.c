@@ -145,7 +145,7 @@ err_t bli_gemmsup_int
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
@@ -156,7 +156,7 @@ err_t bli_gemmsup_int
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
@@ -210,7 +210,7 @@ err_t bli_gemmsup_int
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m non-primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
@@ -221,7 +221,7 @@ err_t bli_gemmsup_int
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n non-primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans
@@ -319,7 +319,7 @@ err_t bli_gemmtsup_int
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc, mr; n -> nc, nr: var2()
@@ -332,7 +332,7 @@ err_t bli_gemmtsup_int
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc*,mr; n -> mc*,nr: var1()
@@ -388,7 +388,7 @@ err_t bli_gemmtsup_int
 		if ( use_bp )
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var2m non-primary\n" );
 			#endif
 			// panel-block macrokernel; m -> nc, nr; n -> mc, mr: var2() + trans
@@ -401,7 +401,7 @@ err_t bli_gemmtsup_int
 		else // use_pb
 		{
 			#ifdef TRACEVAR
-			if ( bli_thread_am_ochief( thread ) )
+			if ( bli_thread_am_chief( thread ) )
 			printf( "bli_l3_sup_int(): var1n non-primary\n" );
 			#endif
 			// block-panel macrokernel; m -> mc*,nr; n -> nc*,mr: var1() + trans

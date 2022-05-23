@@ -35,65 +35,72 @@
 
 struct packm_params_s
 {
-	uint64_t      size; // size field must be present and come first.
-	bszid_t       bmid_m;
-	bszid_t       bmid_n;
-	bool          does_invert_diag;
-	bool          rev_iter_if_upper;
-	bool          rev_iter_if_lower;
-	pack_t        pack_schema;
-	packbuf_t     pack_buf_type;
+    func2_t ukr;
 };
 typedef struct packm_params_s packm_params_t;
 
-BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_m( const cntl_t* cntl )
+struct packm_cntl_s
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_m;
+	      bool      does_invert_diag;
+	      bool      rev_iter_if_upper;
+	      bool      rev_iter_if_lower;
+	      pack_t    pack_schema;
+	      packbuf_t pack_buf_type;
+          num_t     dt_pack;
+          dim_t     mr;
+          dim_t     nr;
+          dim_t     kr;
+    const void*     params;
+};
+typedef struct packm_cntl_s packm_cntl_t;
+
+BLIS_INLINE const blksz_t* bli_cntl_packm_mr( const cntl_t* cntl )
+{
+	const packm_params_t* ppp = ( ( packm_cntl_t* )cntl->params )->params; return &ppp->mr;
 }
 
-BLIS_INLINE bszid_t bli_cntl_packm_params_bmid_n( const cntl_t* cntl )
+BLIS_INLINE const blksz_t* bli_cntl_packm_nr( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->bmid_n;
+	const packm_params_t* ppp = ( ( packm_cntl_t* )cntl->params )->params; return &ppp->nr;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_does_invert_diag( const cntl_t* cntl )
+BLIS_INLINE const blksz_t* bli_cntl_packm_kr( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->does_invert_diag;
+	const packm_params_t* ppp = ( ( packm_cntl_t* )cntl->params )->params; return &ppp->kr;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_upper( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_does_invert_diag( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_upper;
+	packm_cntl_t* ppp = ( packm_cntl_t* )cntl->params; return ppp->does_invert_diag;
 }
 
-BLIS_INLINE bool bli_cntl_packm_params_rev_iter_if_lower( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_rev_iter_if_upper( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->rev_iter_if_lower;
+	packm_cntl_t* ppp = ( packm_cntl_t* )cntl->params; return ppp->rev_iter_if_upper;
 }
 
-BLIS_INLINE pack_t bli_cntl_packm_params_pack_schema( const cntl_t* cntl )
+BLIS_INLINE bool bli_cntl_packm_rev_iter_if_lower( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_schema;
+	packm_cntl_t* ppp = ( packm_cntl_t* )cntl->params; return ppp->rev_iter_if_lower;
 }
 
-BLIS_INLINE packbuf_t bli_cntl_packm_params_pack_buf_type( const cntl_t* cntl )
+BLIS_INLINE pack_t bli_cntl_packm_pack_schema( const cntl_t* cntl )
 {
-	packm_params_t* ppp = ( packm_params_t* )cntl->params; return ppp->pack_buf_type;
+	packm_cntl_t* ppp = ( packm_cntl_t* )cntl->params; return ppp->pack_schema;
 }
 
-// -----------------------------------------------------------------------------
+BLIS_INLINE packbuf_t bli_cntl_packm_pack_buf_type( const cntl_t* cntl )
+{
+	packm_cntl_t* ppp = ( packm_cntl_t* )cntl->params; return ppp->pack_buf_type;
+}
 
-cntl_t* bli_packm_cntl_create_node
-     (
-       rntm_t*   rntm,
-       void_fp   var_func,
-       bszid_t   bmid_m,
-       bszid_t   bmid_n,
-       bool      does_invert_diag,
-       bool      rev_iter_if_upper,
-       bool      rev_iter_if_lower,
-       pack_t    pack_schema,
-       packbuf_t pack_buf_type,
-       cntl_t*   sub_node
-     );
+BLIS_INLINE packm_ker_vft bli_cntl_packm_ukr_mr( num_t dt_c, num_t dt_p, const cntl_t* cntl )
+{
+	const packm_params_t* ppp = ( ( packm_cntl_t* )cntl->params )->params; return ppp->ukr_mr[ dt_c ][ dt_p ];
+}
+
+BLIS_INLINE packm_ker_vft bli_cntl_packm_ukr_nr( num_t dt_c, num_t dt_p, const cntl_t* cntl )
+{
+	const packm_params_t* ppp = ( ( packm_cntl_t* )cntl->params )->params; return ppp->ukr_nr[ dt_c ][ dt_p ];
+}
 

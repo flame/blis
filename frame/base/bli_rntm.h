@@ -50,10 +50,6 @@ typedef struct rntm_s
 	bool      pack_a;
 	bool      pack_b;
 	bool      l3_sup;
-
-	pool_t*   sba_pool;
-	pba_t*    pba;
-
 } rntm_t;
 */
 
@@ -73,7 +69,7 @@ BLIS_INLINE dim_t bli_rntm_num_threads( const rntm_t* rntm )
 
 BLIS_INLINE dim_t bli_rntm_ways_for( bszid_t bszid, const rntm_t* rntm )
 {
-	return rntm->thrloop[ bszid ];
+	return bszid == BLIS_NO_PART ? 1 : rntm->thrloop[ bszid ];
 }
 
 BLIS_INLINE dim_t bli_rntm_jc_ways( const rntm_t* rntm )
@@ -109,41 +105,14 @@ BLIS_INLINE bool bli_rntm_pack_b( const rntm_t* rntm )
 {
 	return ( bool )( rntm->pack_b );
 }
-
 BLIS_INLINE bool bli_rntm_l3_sup( const rntm_t* rntm )
 {
 	return rntm->l3_sup;
 }
-
-//
-// -- rntm_t query (internal use only) -----------------------------------------
-//
-
-BLIS_INLINE pool_t* bli_rntm_sba_pool( const rntm_t* rntm )
+BLIS_INLINE bool bli_rntm_ind( ind_t im, const rntm_t* rntm )
 {
-	return rntm->sba_pool;
+	return rntm->enable_ind[ im ];
 }
-
-BLIS_INLINE pba_t* bli_rntm_pba( const rntm_t* rntm )
-{
-	return rntm->pba;
-}
-
-#if 0
-BLIS_INLINE dim_t bli_rntm_equals( rntm_t* rntm1, rntm_t* rntm2 )
-{
-	const bool nt = bli_rntm_num_threads( rntm1 ) == bli_rntm_num_threads( rntm2 );
-	const bool jc = bli_rntm_jc_ways( rntm1 ) == bli_rntm_jc_ways( rntm2 );
-	const bool pc = bli_rntm_pc_ways( rntm1 ) == bli_rntm_pc_ways( rntm2 );
-	const bool ic = bli_rntm_ic_ways( rntm1 ) == bli_rntm_ic_ways( rntm2 );
-	const bool jr = bli_rntm_jr_ways( rntm1 ) == bli_rntm_jr_ways( rntm2 );
-	const bool ir = bli_rntm_ir_ways( rntm1 ) == bli_rntm_ir_ways( rntm2 );
-	const bool pr = bli_rntm_pr_ways( rntm1 ) == bli_rntm_pr_ways( rntm2 );
-
-	if ( nt && jc && pc && ic && jr && ir && pr ) return TRUE;
-	else                                          return FALSE;
-}
-#endif
 
 //
 // -- rntm_t modification (internal use only) ----------------------------------
@@ -200,16 +169,6 @@ BLIS_INLINE void bli_rntm_set_ways_only( dim_t jc, dim_t pc, dim_t ic, dim_t jr,
 	bli_rntm_set_pr_ways_only(  1, rntm );
 }
 
-BLIS_INLINE void bli_rntm_set_sba_pool( pool_t* sba_pool, rntm_t* rntm )
-{
-	rntm->sba_pool = sba_pool;
-}
-
-BLIS_INLINE void bli_rntm_set_pba( pba_t* pba, rntm_t* rntm )
-{
-	rntm->pba = pba;
-}
-
 BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 {
 	bli_rntm_set_num_threads_only( -1, rntm );
@@ -217,14 +176,6 @@ BLIS_INLINE void bli_rntm_clear_num_threads_only( rntm_t* rntm )
 BLIS_INLINE void bli_rntm_clear_ways_only( rntm_t* rntm )
 {
 	bli_rntm_set_ways_only( -1, -1, -1, -1, -1, rntm );
-}
-BLIS_INLINE void bli_rntm_clear_sba_pool( rntm_t* rntm )
-{
-	bli_rntm_set_sba_pool( NULL, rntm );
-}
-BLIS_INLINE void bli_rntm_clear_pba( rntm_t* rntm )
-{
-	bli_rntm_set_pba( NULL, rntm );
 }
 
 //
@@ -264,12 +215,17 @@ BLIS_INLINE void bli_rntm_set_pack_b( bool pack_b, rntm_t* rntm )
 	// Set the bool indicating whether matrix B should be packed.
 	rntm->pack_b = pack_b;
 }
-
 BLIS_INLINE void bli_rntm_set_l3_sup( bool l3_sup, rntm_t* rntm )
 {
 	// Set the bool indicating whether level-3 sup handling is enabled.
 	rntm->l3_sup = l3_sup;
 }
+BLIS_INLINE void bli_rntm_set_ind( bool enable_ind, ind_t im, rntm_t* rntm )
+{
+	// Set the bools indicating whether induced methods are enabled
+	rntm->enable_ind[ im ] = enable_ind;
+}
+
 BLIS_INLINE void bli_rntm_enable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( TRUE, rntm );
@@ -277,6 +233,10 @@ BLIS_INLINE void bli_rntm_enable_l3_sup( rntm_t* rntm )
 BLIS_INLINE void bli_rntm_disable_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( FALSE, rntm );
+}
+BLIS_INLINE void bli_rntm_disable_ind( ind_t im, rntm_t* rntm )
+{
+	bli_rntm_set_ind( FALSE, im, rntm );
 }
 
 //
@@ -295,6 +255,11 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
 {
 	bli_rntm_set_l3_sup( TRUE, rntm );
 }
+BLIS_INLINE void bli_rntm_clear_ind( rntm_t* rntm )
+{
+	bli_rntm_set_ind( TRUE, BLIS_NAT, rntm );
+	bli_rntm_set_ind( TRUE, BLIS_1M, rntm );
+}
 
 //
 // -- rntm_t initialization ----------------------------------------------------
@@ -312,8 +277,7 @@ BLIS_INLINE void bli_rntm_clear_l3_sup( rntm_t* rntm )
           .pack_a      = FALSE, \
           .pack_b      = FALSE, \
           .l3_sup      = TRUE, \
-          .sba_pool    = NULL, \
-          .pba         = NULL, \
+          .enable_ind  = { TRUE, TRUE }, \
         }  \
 
 BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
@@ -325,9 +289,6 @@ BLIS_INLINE void bli_rntm_init( rntm_t* rntm )
 	bli_rntm_clear_pack_a( rntm );
 	bli_rntm_clear_pack_b( rntm );
 	bli_rntm_clear_l3_sup( rntm );
-
-	bli_rntm_clear_sba_pool( rntm );
-	bli_rntm_clear_pba( rntm );
 }
 
 // -- rntm_t total thread calculation ------------------------------------------

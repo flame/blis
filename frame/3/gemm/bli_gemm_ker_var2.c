@@ -69,10 +69,10 @@ void PASTEMAC2(chx,chy,op) \
 	); \
 }
 
-INSERT_GENTFUNC2_BASIC0(xbpys_mxn_fn);
-INSERT_GENTFUNC2_MIXDP0(xbpys_mxn_fn);
+INSERT_GENTFUNC2_BASIC0(xpbys_mxn_fn);
+INSERT_GENTFUNC2_MIXDP0(xpbys_mxn_fn);
 
-static xpbys_mxn_vft GENARRAY2_ALL(xbpys_mxn, xbpys_mxn_fn);
+static xpbys_mxn_vft GENARRAY2_ALL(xpbys_mxn, xpbys_mxn_fn);
 
 
 void bli_gemm_ker_var2
@@ -81,8 +81,7 @@ void bli_gemm_ker_var2
        const obj_t*  b,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
+       const cntl_t* cntl,
              thrinfo_t* thread
      )
 {
@@ -189,7 +188,7 @@ void bli_gemm_ker_var2
 	// field of the params struct. If that function pointer is non-NULL, use it
 	// as our microkernel instead of the default microkernel queried from the
 	// cntx above.
-	const gemm_ker_params_t* params = bli_obj_ker_params( c );
+	const gemm_params_t* params = bli_obj_ker_params( c );
 	gemm_ukr_vft user_ukr = params ? params->ukr : NULL;
 	if ( user_ukr ) gemm_ukr = user_ukr;
 
@@ -345,7 +344,7 @@ void bli_gemm_ker_var2
 				);
 
 				// Accumulate to C with type-casting.
-				xbpys_mxn[ dt_exec ][ dt_c ]
+				xpbys_mxn[ dt_exec ][ dt_c ]
 				(
 				    m_cur, n_cur,
 				    &ct, rs_ct, cs_ct,

@@ -146,60 +146,6 @@ BLIS_INLINE num_t bli_obj_dt_proj_to_complex( const obj_t* obj )
 	       ( bli_obj_dt( obj ) | BLIS_BITVAL_COMPLEX );
 }
 
-BLIS_INLINE num_t bli_obj_target_dt( const obj_t* obj )
-{
-	return ( num_t )
-	       ( ( obj->info & BLIS_TARGET_DT_BITS ) >> BLIS_TARGET_DT_SHIFT );
-}
-
-BLIS_INLINE dom_t bli_obj_target_domain( const obj_t* obj )
-{
-	return ( dom_t )
-	       ( ( obj->info & BLIS_TARGET_DOMAIN_BIT ) >> BLIS_TARGET_DT_SHIFT );
-}
-
-BLIS_INLINE prec_t bli_obj_target_prec( const obj_t* obj )
-{
-	return ( prec_t )
-	       ( ( obj->info & BLIS_TARGET_PREC_BIT ) >> BLIS_TARGET_DT_SHIFT );
-}
-
-BLIS_INLINE num_t bli_obj_exec_dt( const obj_t* obj )
-{
-	return ( num_t )
-	       ( ( obj->info & BLIS_EXEC_DT_BITS ) >> BLIS_EXEC_DT_SHIFT );
-}
-
-BLIS_INLINE dom_t bli_obj_exec_domain( const obj_t* obj )
-{
-	return ( dom_t )
-	       ( ( obj->info & BLIS_EXEC_DOMAIN_BIT ) >> BLIS_EXEC_DT_SHIFT );
-}
-
-BLIS_INLINE prec_t bli_obj_exec_prec( const obj_t* obj )
-{
-	return ( prec_t )
-	       ( ( obj->info & BLIS_EXEC_PREC_BIT ) >> BLIS_EXEC_DT_SHIFT );
-}
-
-BLIS_INLINE num_t bli_obj_comp_dt( const obj_t* obj )
-{
-	return ( num_t )
-	       ( ( obj->info & BLIS_COMP_DT_BITS ) >> BLIS_COMP_DT_SHIFT );
-}
-
-BLIS_INLINE dom_t bli_obj_comp_domain( const obj_t* obj )
-{
-	return ( dom_t )
-	       ( ( obj->info & BLIS_COMP_DOMAIN_BIT ) >> BLIS_COMP_DT_SHIFT );
-}
-
-BLIS_INLINE prec_t bli_obj_comp_prec( const obj_t* obj )
-{
-	return ( prec_t )
-	       ( ( obj->info & BLIS_COMP_PREC_BIT ) >> BLIS_COMP_DT_SHIFT );
-}
-
 // NOTE: This function queries info2.
 BLIS_INLINE num_t bli_obj_scalar_dt( const obj_t* obj )
 {
@@ -318,62 +264,6 @@ BLIS_INLINE bool bli_obj_has_unit_diag( const obj_t* obj )
 	       ( bli_obj_diag( obj ) == BLIS_BITVAL_UNIT_DIAG );
 }
 
-BLIS_INLINE bool bli_obj_has_inverted_diag( const obj_t* obj )
-{
-	return ( bool )
-	       ( ( obj->info & BLIS_INVERT_DIAG_BIT ) == BLIS_BITVAL_INVERT_DIAG );
-}
-
-BLIS_INLINE bool bli_obj_is_pack_rev_if_upper( const obj_t* obj )
-{
-	return ( bool )
-	       ( ( obj->info & BLIS_PACK_REV_IF_UPPER_BIT ) == BLIS_BITVAL_PACK_REV_IF_UPPER );
-}
-
-BLIS_INLINE bool bli_obj_is_pack_rev_if_lower( const obj_t* obj )
-{
-	return ( bool )
-	       ( ( obj->info & BLIS_PACK_REV_IF_LOWER_BIT ) == BLIS_BITVAL_PACK_REV_IF_LOWER );
-}
-
-BLIS_INLINE pack_t bli_obj_pack_schema( const obj_t* obj )
-{
-	return ( pack_t )
-	       ( obj->info & BLIS_PACK_SCHEMA_BITS );
-}
-
-BLIS_INLINE bool bli_obj_is_packed( const obj_t* obj )
-{
-	return ( bool )
-	       ( obj->info & BLIS_PACK_BIT );
-}
-
-BLIS_INLINE bool bli_obj_is_row_packed( const obj_t* obj )
-{
-	return ( bool )
-	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_ROWS    ) );
-}
-
-BLIS_INLINE bool bli_obj_is_col_packed( const obj_t* obj )
-{
-	return ( bool )
-	       ( ( obj->info & BLIS_PACK_RC_BIT ) == ( BLIS_BITVAL_PACKED_UNSPEC ^
-                                                   BLIS_BITVAL_PACKED_COLUMNS ) );
-}
-
-BLIS_INLINE bool bli_obj_is_panel_packed( const obj_t* obj )
-{
-	return ( bool )
-	       ( obj->info & BLIS_PACK_PANEL_BIT );
-}
-
-BLIS_INLINE packbuf_t bli_obj_pack_buffer_type( const obj_t* obj )
-{
-	return ( packbuf_t )
-	       ( obj->info & BLIS_PACK_BUFFER_BITS );
-}
-
 BLIS_INLINE struc_t bli_obj_struc( const obj_t* obj )
 {
 	return ( struc_t )
@@ -448,79 +338,10 @@ BLIS_INLINE void bli_obj_set_diag( diag_t diag, obj_t* obj )
 	            ( ( obj->info & ~BLIS_UNIT_DIAG_BIT ) | diag );
 }
 
-BLIS_INLINE void bli_obj_set_invert_diag( invdiag_t invdiag, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_INVERT_DIAG_BIT ) | invdiag );
-}
-
 BLIS_INLINE void bli_obj_set_dt( num_t dt, obj_t* obj )
 {
 	obj->info = ( objbits_t )
 	            ( ( obj->info & ~BLIS_DATATYPE_BITS ) | dt );
-}
-
-BLIS_INLINE void bli_obj_set_target_dt( num_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_TARGET_DT_BITS ) |
-	              ( dt << BLIS_TARGET_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_target_domain( dom_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_TARGET_DOMAIN_BIT ) |
-	              ( dt << BLIS_TARGET_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_target_prec( prec_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_TARGET_PREC_BIT ) |
-	              ( dt << BLIS_TARGET_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_exec_dt( num_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_EXEC_DT_BITS ) |
-	              ( dt << BLIS_EXEC_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_exec_domain( dom_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_EXEC_DOMAIN_BIT ) |
-	              ( dt << BLIS_EXEC_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_exec_prec( prec_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_EXEC_PREC_BIT ) |
-	              ( dt << BLIS_EXEC_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_comp_dt( num_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_COMP_DT_BITS ) |
-	              ( dt << BLIS_COMP_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_comp_domain( dom_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_COMP_DOMAIN_BIT ) |
-	              ( dt << BLIS_COMP_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_comp_prec( prec_t dt, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_COMP_PREC_BIT ) |
-	              ( dt << BLIS_COMP_DT_SHIFT ) );
 }
 
 // NOTE: This function queries and modifies info2.
@@ -545,34 +366,6 @@ BLIS_INLINE void bli_obj_set_scalar_prec( prec_t dt, obj_t* obj )
 	obj->info2 = ( objbits_t )
 	             ( ( obj->info2 & ~BLIS_SCALAR_PREC_BIT ) |
 	               ( dt << BLIS_SCALAR_DT_SHIFT ) );
-}
-
-BLIS_INLINE void bli_obj_set_pack_schema( pack_t schema, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_PACK_SCHEMA_BITS ) | schema );
-}
-
-BLIS_INLINE void bli_obj_set_pack_order_if_upper( packord_t ordif, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_PACK_REV_IF_UPPER_BIT ) | ordif );
-}
-
-BLIS_INLINE void bli_obj_set_pack_order_if_lower( packord_t ordif, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_PACK_REV_IF_LOWER_BIT ) | ordif );
-}
-
-// NOTE: The packbuf_t bitfield in the obj_t is currently unused. Instead,
-// packbuf_t is stored/used from the context in order to support various
-// induced methods. (Though ideally the packbuf_t field would only be
-// present in the control tree).
-BLIS_INLINE void bli_obj_set_pack_buffer_type( packbuf_t buf_type, obj_t* obj )
-{
-	obj->info = ( objbits_t )
-	            ( ( obj->info & ~BLIS_PACK_BUFFER_BITS ) | buf_type );
 }
 
 BLIS_INLINE void bli_obj_set_struc( struc_t struc, obj_t* obj )
@@ -1246,9 +1039,6 @@ BLIS_INLINE void bli_obj_init_finish( num_t dt, dim_t m, dim_t n, void* p, inc_t
 	bli_obj_set_as_root( obj );
 
 	bli_obj_set_dt( dt, obj );
-	bli_obj_set_target_dt( dt, obj );
-	bli_obj_set_exec_dt( dt, obj );
-	bli_obj_set_comp_dt( dt, obj );
 
 	bli_obj_set_dims( m, n, obj );
 	bli_obj_set_strides( rs, cs, obj );
@@ -1407,14 +1197,8 @@ BLIS_INLINE void bli_obj_real_part( const obj_t* c, obj_t* r )
 	if ( bli_obj_is_complex( c ) )
 	{
 		// Change the datatypes.
-		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
-		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
-		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
-		const num_t dt_comp_r = bli_dt_proj_to_real( bli_obj_comp_dt( c )   );
-		bli_obj_set_dt(        dt_stor_r, r );
-		bli_obj_set_target_dt( dt_targ_r, r );
-		bli_obj_set_exec_dt(   dt_exec_r, r );
-		bli_obj_set_comp_dt(   dt_comp_r, r );
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c ) );
+		bli_obj_set_dt( dt_stor_r, r );
 
 		// Don't touch the attached scalar datatype.
 
@@ -1440,14 +1224,8 @@ BLIS_INLINE void bli_obj_imag_part( const obj_t* c, obj_t* i )
 		bli_obj_alias_to( c, i );
 
 		// Change the datatype.
-		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c )        );
-		const num_t dt_targ_r = bli_dt_proj_to_real( bli_obj_target_dt( c ) );
-		const num_t dt_exec_r = bli_dt_proj_to_real( bli_obj_exec_dt( c )   );
-		const num_t dt_comp_r = bli_dt_proj_to_real( bli_obj_comp_dt( c )   );
-		bli_obj_set_dt(        dt_stor_r, i );
-		bli_obj_set_target_dt( dt_targ_r, i );
-		bli_obj_set_exec_dt(   dt_exec_r, i );
-		bli_obj_set_comp_dt(   dt_comp_r, i );
+		const num_t dt_stor_r = bli_dt_proj_to_real( bli_obj_dt( c ) );
+		bli_obj_set_dt( dt_stor_r, i );
 
 		// Don't touch the attached scalar datatype.
 
@@ -1497,17 +1275,6 @@ BLIS_INLINE void bli_obj_swap( obj_t* a, obj_t* b )
 
 	if ( a_root_is_self ) bli_obj_set_as_root( b );
 	if ( b_root_is_self ) bli_obj_set_as_root( a );
-}
-
-// Swap object pack schemas.
-
-BLIS_INLINE void bli_obj_swap_pack_schemas( obj_t* a, obj_t* b )
-{
-	const pack_t schema_a = bli_obj_pack_schema( a );
-	const pack_t schema_b = bli_obj_pack_schema( b );
-
-	bli_obj_set_pack_schema( schema_b, a );
-	bli_obj_set_pack_schema( schema_a, b );
 }
 
 // Induce a transposition on an object: swap dimensions, increments, and

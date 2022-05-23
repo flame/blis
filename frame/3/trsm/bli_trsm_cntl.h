@@ -33,46 +33,52 @@
 
 */
 
+typedef struct
+{
+    cntl_t loop5;
+    cntl_t loop4;
+    cntl_t packb;
+    cntl_t loop3;
+    cntl_t gemm_packa;
+    cntl_t gemm_loop2;
+    cntl_t gemm_loop1;
+    cntl_t trsm_packa;
+    cntl_t trsm_loop2;
+    cntl_t trsm_loop1;
+    part_params_t nc;
+    part_params_t kc;
+    part_params_t mc;
+    packm_params_t gemm_packa_params;
+    packm_params_t trsm_packa_params;
+    packm_params_t packb_params;
+    gemm_params_t ker_params;
+} trsm_cntl_t;
+
 cntl_t* bli_trsm_cntl_create
      (
-       rntm_t* rntm,
-       side_t  side,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+             trsm_cntl_t* cntl,
+             side_t       side,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+       const cntx_t*      cntx
      );
 
 cntl_t* bli_trsm_l_cntl_create
      (
-       rntm_t* rntm,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
+             trsm_cntl_t* cntl,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+       const cntx_t*      cntx
      );
 
 cntl_t* bli_trsm_r_cntl_create
      (
-       rntm_t* rntm,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
-     );
-
-void bli_trsm_cntl_free
-     (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_trsm_cntl_create_node
-     (
-       rntm_t* rntm,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
+             trsm_cntl_t* cntl,
+       const obj_t*       a,
+       const obj_t*       b,
+       const obj_t*       c,
+       const cntx_t*      cntx
      );
 

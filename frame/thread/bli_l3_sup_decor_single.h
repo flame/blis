@@ -40,5 +40,12 @@
 
 #endif
 
+void bli_l3_sup_thrinfo_init_single
+     (
+       pool_t*    sba_pool,
+       pba_t*     pba,
+       thrinfo_t* thread
+     );
+
 #endif
 

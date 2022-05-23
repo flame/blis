@@ -33,50 +33,69 @@
 
 */
 
+typedef struct
+{
+    dim_t blksz;
+    dim_t blksz_max;
+    dim_t bmult;
+} part_cntl_t;
+
+typedef struct
+{
+    blksz_t mr, nr;
+	func_t ukr;
+    mbool_t ukr_row_pref;
+} gemm_params_t;
+
+typedef struct
+{
+    const gemm_params_t* params;
+    num_t dt_comp;
+    bool ukr_row_pref;
+} gemm_ker_cntl_t;
+
+typedef struct
+{
+    cntl_t loop5;
+    cntl_t loop4;
+    cntl_t loop3;
+    cntl_t loop2;
+    cntl_t loop1;
+    cntl_t packa;
+    cntl_t packb;
+    part_cntl_t mc;
+    part_cntl_t nc;
+    part_cntl_t kc;
+    packm_cntl_t packa_params;
+    packm_cntl_t packb_params;
+    gemm_ker_cntl_t ker_params;
+} goto_cntl_t;
+
+BLIS_INLINE dim_t bli_cntl_part_blksz_def( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl->params; return ppp->blksz;
+}
+
+BLIS_INLINE dim_t bli_cntl_part_blksz_max( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl->params; return ppp->blksz_max;
+}
+
+BLIS_INLINE dim_t bli_cntl_part_bmult( const cntl_t* cntl )
+{
+	part_cntl_t* ppp = ( part_cntl_t* )cntl->params; return ppp->bmult;
+}
+
+// -----------------------------------------------------------------------------
+
 cntl_t* bli_gemm_cntl_create
      (
-       rntm_t* rntm,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_gemmbp_cntl_create
-     (
-       rntm_t* rntm,
-       opid_t  family,
-       pack_t  schema_a,
-       pack_t  schema_b,
-       void_fp ker
-     );
-
-#if 0
-cntl_t* bli_gemmpb_cntl_create
-     (
-       opid_t family,
-     );
-#endif
-
-// -----------------------------------------------------------------------------
-
-void bli_gemm_cntl_free
-     (
-       rntm_t*    rntm,
-       cntl_t*    cntl,
-       thrinfo_t* thread
-     );
-
-// -----------------------------------------------------------------------------
-
-cntl_t* bli_gemm_cntl_create_node
-     (
-       rntm_t* rntm,
-       opid_t  family,
-       bszid_t bszid,
-       void_fp var_func,
-       cntl_t* sub_node
+             goto_cntl_t* cntl,
+             opid_t       family,
+             num_t        dt_comp,
+             obj_t*       a,
+             obj_t*       b,
+             obj_t*       c,
+       const cntx_t*      cntx
      );
 

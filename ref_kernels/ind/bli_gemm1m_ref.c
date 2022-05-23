@@ -56,7 +56,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	PASTECH(chr,gemm_ukr_ft) \
 	                  rgemm_ukr = bli_cntx_get_ukr_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
-	const bool        col_pref  = bli_cntx_ukr_prefers_cols_dt( dt_r, BLIS_GEMM_UKR, cntx ); \
+	const bool        col_pref  = bli_cntx_get_ukr_prefs_dt( dt_r, BLIS_GEMM_UKR_ROW_PREF, cntx ); \
 	const bool        row_pref  = !col_pref; \
 \
 	const dim_t       mr        = bli_cntx_get_blksz_def_dt( dt, BLIS_MR, cntx ); \
@@ -77,13 +77,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 \
 	ctype_r* restrict b_r       = ( ctype_r* )b; \
 \
-	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
-\
 	ctype_r* restrict alpha_r   = &PASTEMAC(ch,real)( *alpha ); \
 	ctype_r* restrict alpha_i   = &PASTEMAC(ch,imag)( *alpha ); \
 \
 	ctype_r* restrict beta_r    = &PASTEMAC(ch,real)( *beta ); \
 	ctype_r* restrict beta_i    = &PASTEMAC(ch,imag)( *beta ); \
+\
+	ctype_r* restrict zero_r    = PASTEMAC(chr,0); \
 \
 	ctype_r*          c_use; \
 	inc_t             rs_c_use; \
@@ -122,11 +122,6 @@ void PASTEMAC3(ch,opname,arch,suf) \
 	else if ( bli_is_row_stored( rs_c, cs_c ) && col_pref ) using_ct = TRUE; \
 	else if ( bli_is_gen_stored( rs_c, cs_c ) )             using_ct = TRUE; \
 	else                                                    using_ct = FALSE; \
-\
-\
-	/* If we are not computing a full micro-tile, then we must write to
-	   ct and then accumulate to c afterwards. */ \
-	if ( mr != m || nr != n ) using_ct = TRUE; \
 \
 \
 	if ( using_ct ) \
@@ -171,37 +166,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
 		  cntx  \
 		); \
 \
-		dim_t i, j; \
-\
-		/* Accumulate the final result in ct back to c. */ \
-		if ( PASTEMAC(ch,eq1)( *beta ) ) \
-		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
-			{ \
-				PASTEMAC(ch,adds)( *(ct + i*rs_ct + j*cs_ct), \
-				                   *(c  + i*rs_c  + j*cs_c ) ); \
-			} \
-		} \
-		else if ( PASTEMAC(ch,eq0)( *beta ) ) \
-		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
-			{ \
-				PASTEMAC(ch,copys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
-			} \
-		} \
-		else \
-		{ \
-			for ( j = 0; j < n; ++j ) \
-			for ( i = 0; i < m; ++i ) \
-			{ \
-				PASTEMAC(ch,xpbys)( *(ct + i*rs_ct + j*cs_ct), \
-				                    *beta, \
-				                    *(c  + i*rs_c  + j*cs_c ) ); \
-			} \
-		} \
+    	PASTEMAC3(ch,ch,ch,xpbys_mxn) \
+    	( \
+    	  m, n, \
+    	  ct, rs_ct, cs_ct, \
+    	  beta, \
+    	  c, rs_c,  cs_c \
+    	); \
 	} \
 	else \
 	{ \

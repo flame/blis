@@ -59,28 +59,6 @@ typedef struct cntx_s
 // -----------------------------------------------------------------------------
 
 //
-// -- cntx_t query (fields only) -----------------------------------------------
-//
-
-BLIS_INLINE ind_t bli_cntx_method( const cntx_t* cntx )
-{
-	return cntx->method;
-}
-
-// -----------------------------------------------------------------------------
-
-//
-// -- cntx_t modification (fields only) ----------------------------------------
-//
-
-BLIS_INLINE void bli_cntx_set_method( ind_t method, cntx_t* cntx )
-{
-	cntx->method = method;
-}
-
-// -----------------------------------------------------------------------------
-
-//
 // -- cntx_t query (complex) ---------------------------------------------------
 //
 
@@ -108,27 +86,6 @@ BLIS_INLINE dim_t bli_cntx_get_blksz_max_dt( num_t dt, bszid_t bs_id, const cntx
 	return bs_dt;
 }
 
-BLIS_INLINE bszid_t bli_cntx_get_bmult_id( bszid_t bs_id, const cntx_t* cntx )
-{
-	return cntx->bmults[ bs_id ];
-}
-
-BLIS_INLINE const blksz_t* bli_cntx_get_bmult( bszid_t bs_id, const cntx_t* cntx )
-{
-	bszid_t        bm_id  = bli_cntx_get_bmult_id( bs_id, cntx );
-	const blksz_t* bmult  = bli_cntx_get_blksz( bm_id, cntx );
-
-	return bmult;
-}
-
-BLIS_INLINE dim_t bli_cntx_get_bmult_dt( num_t dt, bszid_t bs_id, const cntx_t* cntx )
-{
-	const blksz_t* bmult  = bli_cntx_get_bmult( bs_id, cntx );
-	dim_t          bm_dt  = bli_blksz_get_def( dt, bmult );
-
-	return bm_dt;
-}
-
 // -----------------------------------------------------------------------------
 
 BLIS_INLINE const func_t* bli_cntx_get_ukrs( ukr_t ukr_id, const cntx_t* cntx )
@@ -141,21 +98,6 @@ BLIS_INLINE void_fp bli_cntx_get_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* c
 	const func_t* func = bli_cntx_get_ukrs( ukr_id, cntx );
 
 	return bli_func_get_dt( dt, func );
-}
-
-BLIS_INLINE void_fp bli_cntx_get_l3_vir_ukr_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
-{
-	switch ( ukr_id )
-	{
-		case BLIS_GEMM_UKR:       ukr_id = BLIS_GEMM_VIR_UKR; break;
-		case BLIS_TRSM_L_UKR:     ukr_id = BLIS_TRSM_L_VIR_UKR; break;
-		case BLIS_TRSM_U_UKR:     ukr_id = BLIS_TRSM_U_VIR_UKR; break;
-		case BLIS_GEMMTRSM_L_UKR: ukr_id = BLIS_GEMMTRSM_L_VIR_UKR; break;
-		case BLIS_GEMMTRSM_U_UKR: ukr_id = BLIS_GEMMTRSM_U_VIR_UKR; break;
-		default: break;
-	};
-
-	return bli_cntx_get_ukr_dt( dt, ukr_id, cntx );
 }
 
 // -----------------------------------------------------------------------------
@@ -192,77 +134,6 @@ BLIS_INLINE void_fp bli_cntx_get_l3_sup_handler( opid_t op, const cntx_t* cntx )
 
 // -----------------------------------------------------------------------------
 
-BLIS_INLINE bool bli_cntx_ukr_prefers_rows_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
-{
-	// This initial value will get overwritten during the switch statement below.
-	ukr_pref_t ukr_pref_id = BLIS_GEMM_UKR_ROW_PREF;
-
-	// Get the correct preference from the kernel ID.
-	switch ( ukr_id )
-	{
-		case BLIS_GEMM_VIR_UKR: // fallthrough
-		case BLIS_GEMM_UKR: ukr_pref_id = BLIS_GEMM_UKR_ROW_PREF; break;
-		case BLIS_TRSM_L_VIR_UKR: // fallthrough
-		case BLIS_TRSM_L_UKR: ukr_pref_id = BLIS_TRSM_L_UKR_ROW_PREF; break;
-		case BLIS_TRSM_U_VIR_UKR: // fallthrough
-		case BLIS_TRSM_U_UKR: ukr_pref_id = BLIS_TRSM_U_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
-		case BLIS_GEMMTRSM_L_UKR: ukr_pref_id = BLIS_GEMMTRSM_L_UKR_ROW_PREF; break;
-		case BLIS_GEMMTRSM_U_VIR_UKR: // fallthrough
-		case BLIS_GEMMTRSM_U_UKR: ukr_pref_id = BLIS_GEMMTRSM_U_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RRR_UKR: ukr_pref_id = BLIS_GEMMSUP_RRR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RRC_UKR: ukr_pref_id = BLIS_GEMMSUP_RRC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RCR_UKR: ukr_pref_id = BLIS_GEMMSUP_RCR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_RCC_UKR: ukr_pref_id = BLIS_GEMMSUP_RCC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CRR_UKR: ukr_pref_id = BLIS_GEMMSUP_CRR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CRC_UKR: ukr_pref_id = BLIS_GEMMSUP_CRC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CCR_UKR: ukr_pref_id = BLIS_GEMMSUP_CCR_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_CCC_UKR: ukr_pref_id = BLIS_GEMMSUP_CCC_UKR_ROW_PREF; break;
-		case BLIS_GEMMSUP_XXX_UKR: ukr_pref_id = BLIS_GEMMSUP_XXX_UKR_ROW_PREF; break;
-		default: break; // TODO: should be an error condition
-	}
-
-	// For virtual ukernels during non-native execution, use the real projection of
-	// the datatype.
-	if ( bli_cntx_method( cntx ) != BLIS_NAT )
-	{
-		switch ( ukr_id )
-		{
-			case BLIS_GEMM_VIR_UKR: // fallthrough
-			case BLIS_TRSM_L_VIR_UKR: // fallthrough
-			case BLIS_TRSM_U_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_L_VIR_UKR: // fallthrough
-			case BLIS_GEMMTRSM_U_VIR_UKR: dt = bli_dt_proj_to_real( dt ); break;
-			default: break;
-		}
-	}
-
-	return bli_cntx_get_ukr_prefs_dt( dt, ukr_pref_id, cntx );
-}
-
-BLIS_INLINE bool bli_cntx_ukr_prefers_cols_dt( num_t dt, ukr_t ukr_id, const cntx_t* cntx )
-{
-	return ! bli_cntx_ukr_prefers_rows_dt( dt, ukr_id, cntx );
-}
-
-BLIS_INLINE bool bli_cntx_prefers_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
-{
-	const bool ukr_prefers_rows
-		= bli_cntx_ukr_prefers_rows_dt( bli_obj_dt( obj ), ukr_id, cntx );
-
-	if      ( bli_obj_is_row_stored( obj ) &&  ukr_prefers_rows ) return TRUE;
-	else if ( bli_obj_is_col_stored( obj ) && !ukr_prefers_rows ) return TRUE;
-
-	return FALSE;
-}
-
-BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, const cntx_t* cntx )
-{
-	return ! bli_cntx_prefers_storage_of( obj, ukr_id, cntx );
-}
-
-// -----------------------------------------------------------------------------
-
 //
 // -- cntx_t modification (complex) --------------------------------------------
 //
@@ -270,10 +141,9 @@ BLIS_INLINE bool bli_cntx_dislikes_storage_of( const obj_t* obj, ukr_t ukr_id, c
 // NOTE: The framework does not use any of the following functions. We provide
 // them in order to facilitate creating/modifying custom contexts.
 
-BLIS_INLINE void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, bszid_t mult_id, cntx_t* cntx )
+BLIS_INLINE void bli_cntx_set_blksz( bszid_t bs_id, blksz_t* blksz, cntx_t* cntx )
 {
 	cntx->blkszs[ bs_id ] = *blksz;
-	cntx->bmults[ bs_id ] = mult_id;
 }
 
 BLIS_INLINE void bli_cntx_set_blksz_def_dt( num_t dt, bszid_t bs_id, dim_t bs, cntx_t* cntx )

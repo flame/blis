@@ -596,12 +596,13 @@ typedef enum
 	BLIS_MACH_RMIN,
 	BLIS_MACH_EMAX,
 	BLIS_MACH_RMAX,
-	BLIS_MACH_EPS2
-} machval_t;
+	BLIS_MACH_EPS2,
 
-#define BLIS_NUM_MACH_PARAMS   11
-#define BLIS_MACH_PARAM_FIRST  BLIS_MACH_EPS
-#define BLIS_MACH_PARAM_LAST   BLIS_MACH_EPS2
+    BLIS_NUM_MACH_PARAMS,
+
+    BLIS_MACH_PARAM_FIRST = BLIS_MACH_EPS,
+    BLIS_MACH_PARAM_LAST  = BLIS_MACH_EPS2,
+} machval_t;
 
 
 // -- Induced method types --
@@ -610,11 +611,12 @@ typedef enum
 {
 	BLIS_1M        = 0,
 	BLIS_NAT,
+
+    BLIS_NUM_IND_METHODS,
+
 	BLIS_IND_FIRST = 0,
 	BLIS_IND_LAST  = BLIS_NAT
 } ind_t;
-
-#define BLIS_NUM_IND_METHODS (BLIS_NAT+1)
 
 // These are used in bli_l3_*_oapi.c to construct the ind_t values from
 // the induced method substrings that go into function names.
@@ -670,12 +672,12 @@ typedef enum
 	BLIS_TRSM_L_UKR,
 	BLIS_TRSM_U_UKR,
 
-	// l3 virtual kernels
-	BLIS_GEMM_VIR_UKR,
-	BLIS_GEMMTRSM_L_VIR_UKR,
-	BLIS_GEMMTRSM_U_VIR_UKR,
-	BLIS_TRSM_L_VIR_UKR,
-	BLIS_TRSM_U_VIR_UKR,
+	// l3 induced method kernels
+	BLIS_GEMM1M_UKR,
+	BLIS_GEMMTRSM1M_L_UKR,
+	BLIS_GEMMTRSM1M_U_UKR,
+	BLIS_TRSM1M_L_UKR,
+	BLIS_TRSM1M_U_UKR,
 
 	// gemmsup kernels
 	BLIS_GEMMSUP_RRR_UKR,
@@ -723,10 +725,10 @@ typedef enum
 	BLIS_REFERENCE_UKERNEL = 0,
 	BLIS_VIRTUAL_UKERNEL,
 	BLIS_OPTIMIZED_UKERNEL,
-	BLIS_NOTAPPLIC_UKERNEL
-} kimpl_t;
+	BLIS_NOTAPPLIC_UKERNEL,
 
-#define BLIS_NUM_UKR_IMPL_TYPES 4
+    BLIS_NUM_UKR_IMPL_TYPES
+} kimpl_t;
 
 
 #if 0
@@ -797,10 +799,9 @@ typedef enum
 	BLIS_GGC,
 	BLIS_GGG,
 #endif
-} stor3_t;
 
-#define BLIS_NUM_3OP_RC_COMBOS 9
-//#define BLIS_NUM_3OP_RCG_COMBOS 27
+	BLIS_NUM_3OP_RC_COMBOS
+} stor3_t;
 
 
 #if 0
@@ -1047,20 +1048,12 @@ typedef struct mem_s
 
 struct cntl_s
 {
-	// Basic fields (usually required).
 	opid_t         family;
-	bszid_t        bszid;
+    bszid_t        bszid;
 	void_fp        var_func;
 	struct cntl_s* sub_prenode;
 	struct cntl_s* sub_node;
-
-	// Optional fields (needed only by some operations such as packm).
-	// NOTE: first field of params must be a uint64_t containing the size
-	// of the struct.
-	void*          params;
-
-	// Internal fields that track "cached" data.
-	mem_t          pack_mem;
+	const void*    params;
 };
 typedef struct cntl_s cntl_t;
 
@@ -1087,6 +1080,13 @@ typedef struct func_s
 
 } func_t;
 
+typedef struct func2_s
+{
+	// Kernel function address.
+	void_fp ptr[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+
+} func2_t;
+
 
 // -- Multi-boolean object type --
 
@@ -1095,6 +1095,12 @@ typedef struct mbool_s
 	bool v[BLIS_NUM_FP_TYPES];
 
 } mbool_t;
+
+typedef struct mbool2_s
+{
+	bool v[BLIS_NUM_FP_TYPES][BLIS_NUM_FP_TYPES];
+
+} mbool2_t;
 
 
 // -- Auxiliary kernel info type --
@@ -1165,9 +1171,8 @@ typedef void (*obj_pack_fn_t)
       const struct obj_s*     a,
             struct obj_s*     ap,
       const struct cntx_s*    cntx,
-            struct rntm_s*    rntm,
-            struct cntl_s*    cntl,
-      const struct thrinfo_s* thread
+      const struct cntl_s*    cntl,
+            struct thrinfo_s* thread
     );
 
 typedef void (*obj_ker_fn_t)
@@ -1176,9 +1181,8 @@ typedef void (*obj_ker_fn_t)
       const struct obj_s*     b,
       const struct obj_s*     c,
       const struct cntx_s*    cntx,
-            struct rntm_s*    rntm,
-            struct cntl_s*    cntl,
-      const struct thrinfo_s* thread
+      const struct cntl_s*    cntl,
+            struct thrinfo_s* thread
     );
 
 typedef struct obj_s
@@ -1409,14 +1413,11 @@ BLIS_INLINE void bli_obj_init_subpart_from( const obj_t* a, obj_t* b )
 typedef struct cntx_s
 {
 	blksz_t   blkszs[ BLIS_NUM_BLKSZS ];
-	bszid_t   bmults[ BLIS_NUM_BLKSZS ];
 
 	func_t    ukrs[ BLIS_NUM_UKRS ];
 	mbool_t   ukr_prefs[ BLIS_NUM_UKR_PREFS ];
 
 	void_fp   l3_sup_handlers[ BLIS_NUM_LEVEL3_OPS ];
-
-	ind_t     method;
 
 } cntx_t;
 
@@ -1430,21 +1431,13 @@ typedef struct rntm_s
 {
 	// "External" fields: these may be queried by the end-user.
 	bool      auto_factor;
-
 	dim_t     num_threads;
 	dim_t     thrloop[ BLIS_NUM_LOOPS ];
+
 	bool      pack_a; // enable/disable packing of left-hand matrix A.
 	bool      pack_b; // enable/disable packing of right-hand matrix B.
 	bool      l3_sup; // enable/disable small matrix handling in level-3 ops.
-
-	// "Internal" fields: these should not be exposed to the end-user.
-
-	// The small block pool, which is attached in the l3 thread decorator.
-	pool_t*   sba_pool;
-
-	// The packing block allocator, which is attached in the l3 thread decorator.
-	pba_t*    pba;
-
+    bool      enable_ind[ BLIS_NUM_IND_METHODS ];
 } rntm_t;
 
 

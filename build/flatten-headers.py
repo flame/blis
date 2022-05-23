@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  BLIS    
+#  BLIS
 #  An object-based framework for developing high-performance BLAS-like
 #  libraries.
 #
@@ -216,7 +216,9 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 	ifile = open( inputfile, "r" )
 
 	# Iterate over the lines in the file.
+	lineno = 0
 	while True:
+		lineno += 1
 
 		# Read a line in the file.
 		line = ifile.readline()
@@ -268,12 +270,14 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 
 				# Mark the beginning of the header being inserted.
 				ostring += "%s%s%c" % ( beginstr, header, '\n' )
+				ostring += "#line %d \"%s\"%c\n" % ( 1, header_path, '\n' )
 
 				# Recurse on the header, accumulating the string.
 				ostring += flatten_header( header_path, header_dirpaths, cursp + "  " )
 
 				# Mark the end of the header being inserted.
 				ostring += "%s%s%c" % ( endstr, header, '\n' )
+				ostring += "#line %d \"%s\"%c\n" % ( lineno+1, inputfile, '\n' )
 
 				echov2( "%sheader file '%s' fully processed." \
 				        % ( cursp, header_path ) )
@@ -300,7 +304,7 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 		# endif
 
 	# endwhile
-	
+
 	# Close the input file.
 	ifile.close()
 
@@ -330,7 +334,7 @@ def find_header_dirs( dirpath ):
 	#endfor
 
 	return header_dirpaths
-	
+
 
 # ------------------------------------------------------------------------------
 

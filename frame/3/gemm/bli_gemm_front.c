@@ -43,8 +43,7 @@ void bli_gemm_front
        const obj_t*  beta,
        const obj_t*  c,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl
+             rntm_t* rntm
      )
 {
 	bli_init_once();
@@ -95,55 +94,77 @@ void bli_gemm_front
 	bli_obj_reset_origin( &b_local );
 	bli_obj_reset_origin( &c_local );
 
+    num_t dt_comp = bli_gemm_md_comp_dt
+    (
+      &a_local,
+      &b_local,
+      beta,
+      &c_local,
+      rntm
+    );
+
+    goto_cntl_t goto_cntl;
+    cntl_t* cntl = bli_gemm_cntl_create
+    (
+      &goto_cntl,
+      BLIS_GEMM,
+      dt_comp,
+      &a_local,
+      &b_local,
+      &c_local,
+      cntx
+    );
+
+    // Adjust the perceived row storage of C based on which operand is complex
+    // in an CCR/CRC operation. This ensures that the real microkernel will output
+    // complex elements with unit imaginary stride.
+    bool row_stored = bli_obj_is_col_stored( c );
+    if ( bli_gemm_md_is_ccr( a, b, c ) ) row_stored = FALSE;
+    if ( bli_gemm_md_is_crc( a, b, c ) ) row_stored = TRUE;
+
 	// An optimization: If C is stored by rows and the micro-kernel prefers
 	// contiguous columns, or if C is stored by columns and the micro-kernel
 	// prefers contiguous rows, transpose the entire operation to allow the
 	// micro-kernel to access elements of C in its preferred manner.
-	if ( bli_cntx_dislikes_storage_of( &c_local, BLIS_GEMM_VIR_UKR, cntx ) )
+	if ( row_stored != goto_cntl.ker_params.ukr_row_pref )
 	{
 		bli_obj_swap( &a_local, &b_local );
 
 		bli_obj_induce_trans( &a_local );
 		bli_obj_induce_trans( &b_local );
 		bli_obj_induce_trans( &c_local );
+
+        const packm_params_t* tmp = goto_cntl.packa_params.params;
+        goto_cntl.packa_params.params = goto_cntl.packb_params.params;
+        goto_cntl.packb_params.params = tmp;
 	}
 
-	// Set the pack schemas within the objects.
-	bli_l3_set_schemas( &a_local, &b_local, &c_local, cntx );
-
-#ifdef BLIS_ENABLE_GEMM_MD
-	cntx_t cntx_local;
-
-	// If any of the storage datatypes differ, or if the computation precision
-	// differs from the storage precision of C, utilize the mixed datatype
-	// code path.
-	// NOTE: If we ever want to support the caller setting the computation
-	// domain explicitly, we will need to check the computation dt against the
-	// storage dt of C (instead of the computation precision against the
-	// storage precision of C).
-	if ( bli_obj_dt( &c_local ) != bli_obj_dt( &a_local ) ||
-	     bli_obj_dt( &c_local ) != bli_obj_dt( &b_local ) ||
-	     bli_obj_comp_prec( &c_local ) != bli_obj_prec( &c_local ) )
-	{
-		// Handle mixed datatype cases in bli_gemm_md(), which may modify
-		// the objects or the context. (If the context is modified, cntx
-		// is adjusted to point to cntx_local.)
-		bli_gemm_md( &a_local, &b_local, beta, &c_local, &cntx_local, &cntx );
-	}
-#endif
+	// Handle mixed datatype cases in bli_gemm_md(), which may modify
+	// the objects.
+	bli_gemm_md( &a_local, &b_local, beta, &c_local, rntm, cntx, &goto_cntl );
 
 	// Next, we handle the possibility of needing to typecast alpha to the
 	// computation datatype and/or beta to the storage datatype of C.
 
-	// Attach alpha to B, and in the process typecast alpha to the target
+	// Attach alpha to A or B, and in the process typecast alpha to the target
 	// datatype of the matrix (which in this case is equal to the computation
 	// datatype).
-	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, alpha, &b_local );
+    // Attach to A if it is the only complex input matrix, just in case
+    // the scalar is also complex.
+    if (  bli_obj_is_complex( &a_local ) &&
+         !bli_obj_is_complex( &b_local ) )
+    {
+	    bli_obj_scalar_attach( dt_comp | bli_obj_domain( a ), BLIS_NO_CONJUGATE, alpha, &a_local );
+    }
+    else
+    {
+	    bli_obj_scalar_attach( dt_comp | bli_obj_domain( b ), BLIS_NO_CONJUGATE, alpha, &b_local );
+    }
 
 	// Attach beta to C, and in the process typecast beta to the target
 	// datatype of the matrix (which in this case is equal to the storage
 	// datatype of C).
-	bli_obj_scalar_attach( BLIS_NO_CONJUGATE, beta,  &c_local );
+	bli_obj_scalar_attach( bli_obj_dt( c ), BLIS_NO_CONJUGATE, beta,  &c_local );
 
 	// Change the alpha and beta pointers to BLIS_ONE since the values have
 	// now been typecast and attached to the matrices above.
@@ -191,7 +212,7 @@ void bli_gemm_front
 	// constant like 2. And don't forget to use the same conditional for the
 	// castm() and free() at the end.
 	if (
-	     bli_obj_prec( &c_local ) != bli_obj_comp_prec( &c_local ) ||
+	     bli_obj_prec( &c_local ) != bli_dt_prec( dt_comp ) ||
 	     bli_gemm_md_is_crr( &a_local, &b_local, &c_local ) ||
 	     is_ccr_mismatch ||
 	     is_crc_mismatch
@@ -209,14 +230,13 @@ void bli_gemm_front
 		      inc_t rs    = bli_obj_row_stride( &c_local );
 		      inc_t cs    = bli_obj_col_stride( &c_local );
 
-		      num_t dt_ct = bli_obj_domain( &c_local ) |
-		                    bli_obj_comp_prec( &c_local );
+		      num_t dt_ct = bli_obj_domain( &c_local ) | dt_comp;
 
 		// When performing the crr case, accumulate to a contiguously-stored
 		// real matrix so we do not have to repeatedly update C with general
 		// stride.
 		if ( bli_gemm_md_is_crr( &a_local, &b_local, &c_local ) )
-			dt_ct = BLIS_REAL | bli_obj_comp_prec( &c_local );
+			dt_ct = dt_comp;
 
 		// When performing the mismatched ccr or crc cases, now is the time
 		// to specify the appropriate storage so the gemm_md_c2r_ref() virtual
@@ -226,9 +246,6 @@ void bli_gemm_front
 		else if ( is_crc_mismatch ) { rs = n; cs = 1; }
 
 		bli_obj_create( dt_ct, m, n, rs, cs, &ct );
-
-		const num_t dt_exec = bli_obj_exec_dt( &c_local );
-		const num_t dt_comp = bli_obj_comp_dt( &c_local );
 
 		bli_obj_set_target_dt( dt_ct, &ct );
 		bli_obj_set_exec_dt( dt_exec, &ct );

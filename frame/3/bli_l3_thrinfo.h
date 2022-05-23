@@ -68,60 +68,30 @@
 \
 	( index % thread->n_way == thread->work_id % thread->n_way )
 
-//
-// thrinfo_t APIs specific to level-3 operations.
-//
-
-void bli_l3_thrinfo_init
-     (
-       thrinfo_t* thread,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       thrinfo_t* sub_node
-     );
-
-void bli_l3_thrinfo_init_single
-     (
-       thrinfo_t* thread
-     );
-
-void bli_l3_thrinfo_free
-     (
-       rntm_t*    rntm,
-       thrinfo_t* thread
-     );
-
-void bli_l3_sup_thrinfo_free
-     (
-       rntm_t*    rntm,
-       thrinfo_t* thread
-     );
-
 // -----------------------------------------------------------------------------
 
-void bli_l3_thrinfo_create_root
+thrinfo_t* bli_l3_thrinfo_create
      (
-       dim_t       id,
-       thrcomm_t*  gl_comm,
-       rntm_t*     rntm,
-       cntl_t*     cntl,
-       thrinfo_t** thread
+             dim_t       id,
+             thrcomm_t*  gl_comm,
+             array_t*    array,
+       const rntm_t*     rntm,
+       const cntl_t*     cntl
      );
 
-void bli_l3_sup_thrinfo_create_root
+thrinfo_t* bli_l3_thrinfo_grow
      (
-       dim_t       id,
-       thrcomm_t*  gl_comm,
-       rntm_t*     rntm,
-       thrinfo_t** thread
+             thrinfo_t*  thread_par,
+       const rntm_t*     rntm,
+       const cntl_t*     cntl
      );
 
-void bli_l3_sup_thrinfo_update_root
+thrinfo_t* bli_l3_sup_thrinfo_create
      (
-       rntm_t*    rntm,
-       thrinfo_t* thread
+             dim_t       id,
+             thrcomm_t*  gl_comm,
+             array_t*    array,
+       const rntm_t*     rntm
      );
 
 void bli_l3_thrinfo_print_gemm_paths

@@ -57,9 +57,8 @@ void bli_packm_blk_var1
        const obj_t*   c,
              obj_t*   p,
        const cntx_t*  cntx,
-             rntm_t*  rntm,
-             cntl_t*  cntl,
-       const thrinfo_t* thread
+       const cntl_t*  cntl,
+             thrinfo_t* thread
      )
 {
 	// Extract various fields from the control tree.
@@ -71,7 +70,7 @@ void bli_packm_blk_var1
 	// Every thread initializes p and determines the size of memory
 	// block needed (which gets embedded into the otherwise "blank" mem_t
 	// entry in the control tree node). Return early if no packing is required.
-	if ( !bli_packm_init( c, p, cntx, rntm, cntl, thread ) )
+	if ( !bli_packm_init( c, p, cntx, cntl, thread ) )
 		return;
 
 	// Check parameters.
@@ -111,29 +110,25 @@ void bli_packm_blk_var1
 	obj_t   kappa_local;
 	char*   kappa_cast     = bli_packm_scalar( &kappa_local, p );
 
-	// we use the default lookup table to determine the right func_t
-	// for the current schema.
-	func_t* packm_kers = &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ];
-
 	// Query the datatype-specific function pointer from the func_t object.
-	packm_ker_vft packm_ker_cast = bli_func_get_dt( dt_p, packm_kers );
+	packm_ker_vft packm_ker_cast = bli_cntl_packm_params_ukr( dt_c, dt_p, cntl );
 
-	// For mixed-precision gemm, select the proper kernel (only dense panels).
-	if ( dt_c != dt_p )
-	{
-		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
-	}
+    if ( packm_ker_cast == NULL )
+    {
+        if ( dt_c == dt_p )
+        {
+        	// we use the default lookup table to determine the right func_t
+        	// for the current schema.
+        	func_t* packm_kers = &packm_struc_cxk_kers[ bli_pack_schema_index( schema ) ];
 
-	// Query the address of the packm params field of the obj_t. The user might
-	// have set this field in order to specify a custom packm kernel.
-	packm_blk_var1_params_t* params = bli_obj_pack_params( c );
-
-	if ( params && params->ukr_fn[ dt_c ][ dt_p ] )
-	{
-		// Query the user-provided packing kernel from the obj_t. If provided,
-		// this overrides the kernel determined above.
-		packm_ker_cast = params->ukr_fn[ dt_c ][ dt_p ];
-	}
+            bli_func_get_dt( dt_p, packm_kers );
+        }
+    	// For mixed-precision gemm, select the proper kernel (only dense panels).
+    	else
+    	{
+    		packm_ker_cast = packm_struc_cxk_md[ dt_c ][ dt_p ];
+    	}
+    }
 
 	/* Compute the total number of iterations we'll need. */
 	dim_t n_iter = iter_dim / panel_dim_max + ( iter_dim % panel_dim_max ? 1 : 0 );
@@ -272,7 +267,7 @@ void bli_packm_blk_var1
 				                p_use,       ldp,
 				                       is_p_use,
 				                ( cntx_t* )cntx,
-				                params );
+				                bli_cntl_params( cntl ) );
 			}
 
 			// NOTE: This value is usually LESS than ps_p because triangular
@@ -304,7 +299,7 @@ void bli_packm_blk_var1
 				                c_begin, incc, ldc,
 				                p_begin,       ldp, is_p,
 				                ( cntx_t* )cntx,
-				                params );
+				                bli_cntl_params( cntl ) );
 			}
 		}
 

@@ -40,9 +40,8 @@ bool bli_packm_init
        const obj_t*  c,
              obj_t*  p,
        const cntx_t* cntx,
-             rntm_t* rntm,
-             cntl_t* cntl,
-       const thrinfo_t* thread
+       const cntl_t* cntl,
+             thrinfo_t* thread
      )
 {
 	bli_init_once();
@@ -66,14 +65,14 @@ bool bli_packm_init
 		return false;
 
 	// Extract various fields from the control tree.
-	bszid_t bmult_id_m   = bli_cntl_packm_params_bmid_m( cntl );
-	bszid_t bmult_id_n   = bli_cntl_packm_params_bmid_n( cntl );
-	pack_t  schema       = bli_cntl_packm_params_pack_schema( cntl );
-	num_t   dt_tar       = bli_obj_target_dt( c );
-	num_t   dt_scalar    = bli_obj_scalar_dt( c );
-	dim_t   bmult_m_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_m_pack = bli_cntx_get_blksz_max_dt( dt_tar, bmult_id_m, cntx );
-	dim_t   bmult_n_def  = bli_cntx_get_blksz_def_dt( dt_tar, bmult_id_n, cntx );
+	const blksz_t* bmult_m      = bli_cntl_packm_params_mr( cntl );
+	const blksz_t* bmult_n      = bli_cntl_packm_params_kr( cntl );
+	      pack_t   schema       = bli_cntl_packm_params_pack_schema( cntl );
+	      num_t    dt_tar       = bli_obj_target_dt( c );
+	      num_t    dt_scalar    = bli_obj_scalar_dt( c );
+	      dim_t    bmult_m_def  = bli_blksz_get_def( dt_tar, bmult_m );
+	      dim_t    bmult_m_pack = bli_blksz_get_max( dt_tar, bmult_m );
+	      dim_t    bmult_n_def  = bli_blksz_get_def( dt_tar, bmult_n );
 
 	// Typecast the internal scalar value to the target datatype.
 	// Note that if the typecasting is needed, this must happen BEFORE we
@@ -179,7 +178,7 @@ bool bli_packm_init
 	// Update the buffer address in p to point to the buffer associated
 	// with the mem_t entry acquired from the memory broker (now cached in
 	// the control tree node).
-	void* buffer = bli_packm_alloc( size_p, rntm, cntl, thread );
+	void* buffer = bli_packm_alloc( size_p, cntl, thread );
 	bli_obj_set_buffer( buffer, p );
 
 	return true;

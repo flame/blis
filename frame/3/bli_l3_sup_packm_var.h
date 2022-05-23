@@ -48,9 +48,9 @@ void PASTEMAC(ch,varname) \
        dim_t            n, \
        dim_t            m_max, \
        dim_t            n_max, \
-       ctype*  kappa, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       ctype*  p, inc_t rs_p, inc_t cs_p, \
+       void*  kappa, \
+       void*  c, inc_t rs_c, inc_t cs_c, \
+       void*  p, inc_t rs_p, inc_t cs_p, \
                            dim_t pd_p, inc_t ps_p, \
        cntx_t* cntx, \
        thrinfo_t* thread  \
@@ -67,9 +67,9 @@ void PASTEMAC(ch,varname) \
        pack_t           schema, \
        dim_t            m, \
        dim_t            n, \
-       ctype*  kappa, \
-       ctype*  c, inc_t rs_c, inc_t cs_c, \
-       ctype*  p, inc_t rs_p, inc_t cs_p, \
+       void*  kappa, \
+       void*  c, inc_t rs_c, inc_t cs_c, \
+       void*  p, inc_t rs_p, inc_t cs_p, \
        cntx_t* cntx, \
        thrinfo_t* thread  \
      );

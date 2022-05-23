@@ -130,6 +130,12 @@ BLIS_EXPORT_BLIS dim_t bli_align_dim_to_mult
        dim_t dim_mult
      );
 
+BLIS_EXPORT_BLIS void bli_align_blksz_to_mult
+     (
+             blksz_t* dim,
+       const blksz_t* dim_mult
+     );
+
 BLIS_EXPORT_BLIS dim_t bli_align_dim_to_size
      (
        dim_t dim,

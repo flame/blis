@@ -35,9 +35,7 @@
 
 #include "blis.h"
 
-thrinfo_t BLIS_PACKM_SINGLE_THREADED = {};
-thrinfo_t BLIS_GEMM_SINGLE_THREADED  = {};
-thrcomm_t BLIS_SINGLE_COMM           = {};
+thrcomm_t BLIS_SINGLE_COMM = {};
 
 // The global rntm_t structure. (The definition resides in bli_rntm.c.)
 extern rntm_t global_rntm;
@@ -51,8 +49,6 @@ extern bli_pthread_mutex_t global_rntm_mutex;
 void bli_thread_init( void )
 {
 	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
-	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
-	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
 
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
@@ -647,25 +643,12 @@ siz_t bli_thread_range_mdim
        const obj_t*     b,
        const obj_t*     c,
        const cntl_t*    cntl,
-       const cntx_t*    cntx,
              dim_t*     start,
              dim_t*     end
      )
 {
-	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntl_family( cntl );
-
-	// This is part of trsm's current implementation, whereby right side
-	// cases are implemented in left-side micro-kernels, which requires
-	// we swap the usage of the register blocksizes for the purposes of
-	// packing A and B.
-	if ( family == BLIS_TRSM )
-	{
-		if ( bli_obj_root_is_triangular( a ) ) bszid = BLIS_MR;
-		else                                   bszid = BLIS_NR;
-	}
-
-	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	      opid_t   family = bli_cntl_family( cntl );
+	const blksz_t* bmult  = bli_cntl_part_params_bmult( cntl );
 	const obj_t*   x;
 	bool     use_weighted;
 
@@ -706,27 +689,14 @@ siz_t bli_thread_range_ndim
        const obj_t*     b,
        const obj_t*     c,
        const cntl_t*    cntl,
-       const cntx_t*    cntx,
              dim_t*     start,
              dim_t*     end
      )
 {
-	bszid_t  bszid  = bli_cntl_bszid( cntl );
-	opid_t   family = bli_cntl_family( cntl );
-
-	// This is part of trsm's current implementation, whereby right side
-	// cases are implemented in left-side micro-kernels, which requires
-	// we swap the usage of the register blocksizes for the purposes of
-	// packing A and B.
-	if ( family == BLIS_TRSM )
-	{
-		if ( bli_obj_root_is_triangular( b ) ) bszid = BLIS_MR;
-		else                                   bszid = BLIS_NR;
-	}
-
-	const blksz_t* bmult  = bli_cntx_get_bmult( bszid, cntx );
+	      opid_t   family = bli_cntl_family( cntl );
+	const blksz_t* bmult  = bli_cntl_part_params_bmult( cntl );
 	const obj_t*   x;
-	bool     use_weighted;
+	      bool     use_weighted;
 
 	// Use the operation family to choose the one of the two matrices
 	// being partitioned that potentially has structure, and also to
