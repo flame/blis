@@ -693,3 +693,117 @@ int bli_pthread_barrier_wait
 
 #endif
 
+// -- Non-standard extensions --------------------------------------------------
+
+// -- pthread_switch --
+
+//
+// Note that bli_pthread_switch_t has the following properties:
+//
+// 1. Access to a switch is protected by a mutex specific to that switch, and
+//    therefore state changes and thread-safe.
+//
+// 2. An initialized switch always starts in the "off" state.
+//
+// 3. Calling _switch_on() when the switch is already "on" results in an early
+//    return (no action); similar for _switch_off() when it is already "off".
+//
+// 4. The _switch_on() and _switch_off() functions each return an error code
+//    that is equal to the return value of their user-supplied functions,
+//    provided the function in question was actually called rather than being
+//    skipped. When a function call is skipped (as in (3) above), the return
+//    value from _switch_on() and/or _switch_off() is 0 (success).
+//
+//    Note that the user-supplied functions must abide by the convention that a
+//    return value of 0 indicates success and all other values indicate failure
+//    (of some kind). The switch and the user-supplied function must agree on
+//    how "success" is conveyed because the switch must know whether to toggle
+//    its state after inspecting the return value of the user-supplied function.
+//
+
+int bli_pthread_switch_on
+     (
+       bli_pthread_switch_t* sw,
+       int                 (*init)(void)
+     )
+{
+	// NOTE: This function assumes that init() will return 0 on success;
+	// otherwise, it will return some other integer. If the function
+	// partially succeeds (in such a way that it must be called again in
+	// order to complete), it should treat that outcome as failure and
+	// return a non-zero value.
+
+	// Initialize the return value with the error code for success.
+	int r_val = 0;
+
+	// Proceed only if the switch is currently off; otherwise, we return with
+	// an error code of 0.
+	if ( sw->status == 0 )
+	{
+		// Wait for and acquire the switch's lock.
+		bli_pthread_mutex_lock( &sw->mutex );
+
+		// Check the status of the switch once more now that we've acquired the
+		// lock. Proceed with calling the init() function only if the switch
+		// is still off; otherwise, release the lock with an error code of 0.
+		if ( sw->status == 0 )
+		{
+			// Call the init() function and catch its return value in r_val.
+			r_val = init();
+
+			// If the init() function succeeded, turn the switch on;
+			// otherwise, leave the switch off.
+			if ( r_val == 0 )
+				sw->status = 1;
+		}
+
+		// Release the switch's lock.
+		bli_pthread_mutex_unlock( &sw->mutex );
+	}
+
+	return r_val;
+}
+
+int bli_pthread_switch_off
+     (
+       bli_pthread_switch_t* sw,
+       int                 (*deinit)(void)
+     )
+{
+	// NOTE: This function assumes that deinit() will return 0 on success;
+	// otherwise, it will return some other integer. If the function
+	// partially succeeds (in such a way that it must be called again in
+	// order to complete), it should treat that outcome as failure and
+	// return a non-zero value.
+
+	// Initialize the return value with the error code for success.
+	int r_val = 0;
+
+	// Proceed only if the switch is currently on; otherwise, we return with
+	// an error code of 0.
+	if ( sw->status == 1 )
+	{
+		// Wait for and acquire the switch's lock.
+		bli_pthread_mutex_lock( &sw->mutex );
+
+		// Check the status of the switch once more now that we've acquired the
+		// lock. Proceed with calling the deinit() function only if the switch
+		// is still on; otherwise, release the lock with an error code of 0.
+		if ( sw->status == 1 )
+		{
+			// Call the deinit() function and catch its return value in r_val.
+			r_val = deinit();
+
+			// If the deinit() function succeeded, turn the switch off;
+			// otherwise, leave the switch on.
+			if ( r_val == 0 )
+				sw->status = 0;
+		}
+
+		// Release the switch's lock.
+		bli_pthread_mutex_unlock( &sw->mutex );
+	}
+
+	return r_val;
+}
+

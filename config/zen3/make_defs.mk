@@ -71,7 +71,7 @@ ifeq ($(CC_VENDOR),gcc)
   ifeq ($(GCC_OT_9_1_0),yes)  # gcc versions older than 9.1.
     CVECFLAGS_VER  := -march=znver1 -mno-avx256-split-unaligned-store
   else
-  ifeq ($(GCC_OT_10_1_0),yes) # gcc versions 9.1 or newer, but older than 10.1.
+  ifeq ($(GCC_OT_10_3_0),yes) # gcc versions 9.1 or newer, but older than 10.3.
     CVECFLAGS_VER  := -march=znver2
   else                        # gcc versions 10.1 or newer.
     CVECFLAGS_VER  := -march=znver3
@@ -84,8 +84,12 @@ ifeq ($(CC_VENDOR),clang)
   else
   ifeq ($(CLANG_OT_12_0_0),yes) # clang versions 9.0 or newer, but older than 12.0.
     CVECFLAGS_VER  := -march=znver2
+  else
+  ifeq ($(OS_NAME),Darwin)      # clang version 12.0 on OSX lacks znver3 support
+    CVECFLAGS_VER  := -march=znver2
   else                          # clang versions 12.0 or newer.
     CVECFLAGS_VER  := -march=znver3
+  endif
   endif
   endif
 else
