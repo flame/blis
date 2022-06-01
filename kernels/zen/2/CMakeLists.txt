@@ -18,5 +18,3 @@ ${TARGET_ARCH} STREQUAL amdzen)
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_her_zen_int_amd.c
      )
 endif()
-
-    add_subdirectory(ind)

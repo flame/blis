@@ -23,5 +23,3 @@ else()
      ${CMAKE_CURRENT_SOURCE_DIR}/bli_her_unb_var2.c
      )
 endif()
-
-    add_subdirectory(ind)
