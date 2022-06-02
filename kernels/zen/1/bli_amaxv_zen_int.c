@@ -57,15 +57,6 @@ typedef union
 #endif
 
 /* Union data structure to access AVX registers
-   One 512-bit AVX register holds 8 DP elements. */
-typedef union
-{
-	__m512d v;
-	double d[8] __attribute__((aligned(64)));
-} v8df_t;
-
-
-/* Union data structure to access AVX registers
    One 256-bit AVX register holds 8 SP elements. */
 typedef union
 {
