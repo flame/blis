@@ -162,13 +162,15 @@ f77_int isamax_
     // Non-AVX platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx_supported() == TRUE)
     {
+        cntx_t* cntx = bli_gks_query_cntx();
+        samaxv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_FLOAT, BLIS_AMAXV_KER, cntx );
         /* Call BLIS kernel */
-        bli_samaxv_zen_int
+        f
         (
-          n0,
-          x0, incx0,
-          &bli_index,
-          NULL
+            n0,
+            x0, incx0,
+            &bli_index,
+            NULL
         );
     }
     else
@@ -258,13 +260,15 @@ f77_int idamax_
     // Non-AVX platforms will use the kernels derived from the context.
     if (bli_cpuid_is_avx_supported() == TRUE)
     {
+        cntx_t* cntx = bli_gks_query_cntx();
+        damaxv_ker_ft f = bli_cntx_get_l1v_ker_dt(BLIS_DOUBLE, BLIS_AMAXV_KER, cntx );
         /* Call BLIS kernel */
-        bli_damaxv_zen_int
+        f
         (
-          n0,
-          x0, incx0,
-          &bli_index,
-          NULL
+            n0,
+            x0, incx0,
+            &bli_index,
+            NULL
         );
     }
     else

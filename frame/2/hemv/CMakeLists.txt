@@ -14,7 +14,8 @@ target_sources("${PROJECT_NAME}"
 # Select AMD specific sources for AMD configurations.
 if(${TARGET_ARCH} STREQUAL zen OR 
    ${TARGET_ARCH} STREQUAL zen2 OR 
-   ${TARGET_ARCH} STREQUAL zen3 OR 
+   ${TARGET_ARCH} STREQUAL zen3 OR
+   ${TARGET_ARCH} STREQUAL zen4 OR
    ${TARGET_ARCH} STREQUAL amdzen)
      target_sources("${PROJECT_NAME}"
      PRIVATE
