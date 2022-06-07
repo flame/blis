@@ -94,15 +94,7 @@ int bli_init_apis( void )
         bli_offloader_init();
 #endif
 
-	// Reset the control variable that will allow finalization.
-	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
-	// contents to the static control variable because some implementations of
-	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
-	// a struct initializer expression (i.e. { ... }), which cannot be used in
-	// post-declaration struct assignment in strict C99.
-	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
-	once_finalize = once_new;
-  return 0;
+        return 0;
 }
 
 int bli_finalize_apis( void )
@@ -118,14 +110,6 @@ int bli_finalize_apis( void )
         bli_offloader_finalize();
 #endif
 
-	// Reset the control variable that will allow (re-)initialization.
-	// NOTE: We must initialize a fresh pthread_once_t object and THEN copy the
-	// contents to the static control variable because some implementations of
-	// pthreads define pthread_once_t as a struct and BLIS_PTHREAD_ONCE_INIT as
-	// a struct initializer expression (i.e. { ... }), which cannot be used in
-	// post-declaration struct assignment in strict C99.
-	const bli_pthread_once_t once_new = BLIS_PTHREAD_ONCE_INIT;
-	once_init = once_new;
 	return 0;
 }
 
