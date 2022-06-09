@@ -318,7 +318,9 @@ endif()
 
 if(${TARGET_ARCH} STREQUAL zen4 OR 
    ${TARGET_ARCH} STREQUAL amdzen)
-  add_definitions(/arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/zen4/1/bli_amaxv_zen_int_avx512.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_dgemm_skx_asm_16x14.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/kernels/skx/3/bli_sgemm_skx_asm_32x12_l2.c PROPERTIES COMPILE_FLAGS /arch:AVX512)
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W0 ")
