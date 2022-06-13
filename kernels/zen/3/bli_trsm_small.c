@@ -3908,7 +3908,6 @@ err_t bli_trsm_small_mt
     cntl_t* cntl
 )
 {
-    rntm_t rntm;
     gint_t m = bli_obj_length( b ); // number of rows of matrix b
     gint_t n = bli_obj_width( b );  // number of columns of Matrix b
     dim_t d_mr = 8,d_nr = 6;
@@ -3928,6 +3927,9 @@ err_t bli_trsm_small_mt
         }
     }
 
+    rntm_t rntm;
+    bli_rntm_init_from_global( &rntm );
+
     #ifdef AOCL_DYNAMIC
     // If dynamic-threading is enabled, calculate optimum number
     //  of threads.
@@ -3937,8 +3939,6 @@ err_t bli_trsm_small_mt
         bli_nthreads_optimum(a, b, b, BLIS_TRSM, &rntm);
     }
     #endif
-
-    bli_rntm_init_from_global( &rntm );
 
     // Query the total number of threads from the rntm_t object.
     dim_t n_threads = bli_rntm_num_threads( &rntm );
@@ -6727,25 +6727,19 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
             ymm13 = DTRSM_SMALL_DIV_OR_SCALE(ymm13, ymm0);
 
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));      //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));    //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x07);
+            _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+            _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
-            _mm256_storeu_pd((double *)b11, ymm3);
-            _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-            _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-            _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-            _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-            _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+            _mm_storel_pd((double *)b11 + 2, _mm256_extractf128_pd(ymm3,1));
+            _mm_storel_pd((double *)(b11 + cs_b + 2), _mm256_extractf128_pd(ymm5,1));
+            _mm_storel_pd((double *)(b11 + cs_b*2 + 2), _mm256_extractf128_pd(ymm7,1));
+            _mm_storel_pd((double *)(b11 + cs_b*3 + 2), _mm256_extractf128_pd(ymm9,1));
+            _mm_storel_pd((double *)(b11 + cs_b*4 + 2), _mm256_extractf128_pd(ymm11,1));
+            _mm_storel_pd((double *)(b11 + cs_b*5 + 2), _mm256_extractf128_pd(ymm13,1));
 
             m_remainder -= 3;
             i += 3;
@@ -6857,25 +6851,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
             ymm13 = DTRSM_SMALL_DIV_OR_SCALE(ymm13, ymm0);
 
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x03);
-
-            _mm256_storeu_pd((double *)b11, ymm3);
-            _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-            _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-            _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-            _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-            _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+            _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+            _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
             m_remainder -= 2;
             i += 2;
@@ -6987,25 +6968,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
             ymm13 = DTRSM_SMALL_DIV_OR_SCALE(ymm13, ymm0);
 
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x01);
-
-            _mm256_storeu_pd((double *)b11, ymm3);
-            _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-            _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-            _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-            _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-            _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+            _mm_storel_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+            _mm_storel_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+            _mm_storel_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+            _mm_storel_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+            _mm_storel_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+            _mm_storel_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
             m_remainder -= 1;
             i += 1;
@@ -7397,23 +7365,15 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
             ymm9 = DTRSM_SMALL_DIV_OR_SCALE(ymm9, ymm0);
 
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x07);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x07);
-            xmm5 = _mm_loadu_pd((double const*)(b11 + cs_b * 3));
-            ymm0 = _mm256_broadcast_sd((double const *)(b11 + cs_b*3 + 2));
-            ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);                      //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x07);
+            _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+            _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
 
-            _mm256_storeu_pd((double *)b11, ymm3);
-            _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-            _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-            xmm5 = _mm256_extractf128_pd(ymm9, 0);
-            _mm_storeu_pd((double *)(b11 + cs_b * 3),xmm5);
-            _mm_storel_pd((b11 + cs_b * 3 + 2), _mm256_extractf128_pd(ymm9, 1));
+            _mm_storel_pd((double *)b11 + 2, _mm256_extractf128_pd(ymm3,1));
+            _mm_storel_pd((double *)(b11 + cs_b + 2), _mm256_extractf128_pd(ymm5,1));
+            _mm_storel_pd((double *)(b11 + cs_b*2 + 2), _mm256_extractf128_pd(ymm7,1));
+            _mm_storel_pd((double *)(b11 + cs_b*3 + 2), _mm256_extractf128_pd(ymm9,1));
 
             m_remainder -= 3;
             i += 3;
@@ -7494,21 +7454,10 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
 
             ymm9 = DTRSM_SMALL_DIV_OR_SCALE(ymm9, ymm0);
 
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x03);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x03);
-            xmm5 = _mm_loadu_pd((double const*)(b11 + cs_b * 3));
-            ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x03);
-
-            _mm256_storeu_pd((double *)b11, ymm3);
-            _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-            _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-            xmm5 = _mm256_extractf128_pd(ymm9, 0);
-            _mm_storeu_pd((double *)(b11 + cs_b * 3),xmm5);
+            _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+            _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+            _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
 
             m_remainder -= 2;
             i += 2;
@@ -7587,15 +7536,6 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAltB_XAuB
             ymm9 = _mm256_fnmadd_pd(ymm1, ymm7, ymm9);
 
             ymm9 = DTRSM_SMALL_DIV_OR_SCALE(ymm9, ymm0);
-
-            ymm0 = _mm256_loadu_pd((double const *)b11);
-            ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x01);
-            ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-            ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x01);
 
             _mm_storel_pd((b11 + cs_b * 0), _mm256_extractf128_pd(ymm3, 0));
             _mm_storel_pd((b11 + cs_b * 1), _mm256_extractf128_pd(ymm5, 0));
@@ -9165,25 +9105,19 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
                 ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-                ymm0 = _mm256_loadu_pd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x07);
+                _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+                _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
-                _mm256_storeu_pd((double *)b11, ymm3);
-                _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-                _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-                _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-                _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-                _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+                _mm_storel_pd((double *)b11 + 2, _mm256_extractf128_pd(ymm3,1));
+                _mm_storel_pd((double *)(b11 + cs_b + 2), _mm256_extractf128_pd(ymm5,1));
+                _mm_storel_pd((double *)(b11 + cs_b*2 + 2), _mm256_extractf128_pd(ymm7,1));
+                _mm_storel_pd((double *)(b11 + cs_b*3 + 2), _mm256_extractf128_pd(ymm9,1));
+                _mm_storel_pd((double *)(b11 + cs_b*4 + 2), _mm256_extractf128_pd(ymm11,1));
+                _mm_storel_pd((double *)(b11 + cs_b*5 + 2), _mm256_extractf128_pd(ymm13,1));
 
                 m_remainder -=3;
             }
@@ -9286,25 +9220,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
                 ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-                ymm0 = _mm256_loadu_pd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x03);
-
-                _mm256_storeu_pd((double *)b11, ymm3);
-                _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-                _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-                _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-                _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-                _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+                _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+                _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
                 m_remainder -=2;
             }
@@ -9407,25 +9328,12 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
                 ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-                ymm0 = _mm256_loadu_pd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x01);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x01);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x01);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x01);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*4));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm11 = _mm256_blend_pd(ymm0, ymm11, 0x01);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*5));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm13 = _mm256_blend_pd(ymm0, ymm13, 0x01);
-
-                _mm256_storeu_pd((double *)b11, ymm3);
-                _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-                _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-                _mm256_storeu_pd((double *)(b11 + cs_b*3), ymm9);
-                _mm256_storeu_pd((double *)(b11 + cs_b*4), ymm11);
-                _mm256_storeu_pd((double *)(b11 + cs_b*5), ymm13);
+                _mm_storel_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+                _mm_storel_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+                _mm_storel_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+                _mm_storel_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
+                _mm_storel_pd((double *)(b11 + cs_b*4), _mm256_extractf128_pd(ymm11,0));
+                _mm_storel_pd((double *)(b11 + cs_b*5), _mm256_extractf128_pd(ymm13,0));
 
                 m_remainder -=1;
             }
@@ -9806,23 +9714,15 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
                 ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-                ymm0 = _mm256_loadu_pd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x07);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x07);
-                xmm5 = _mm_loadu_pd((double const*)(b11 + cs_b * 3));
-                ymm0 = _mm256_broadcast_sd((double const *)(b11 + cs_b*3 + 2));
-                ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);                      //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x07);
+                _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+                _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
 
-                _mm256_storeu_pd((double *)b11, ymm3);
-                _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-                _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-                xmm5 = _mm256_extractf128_pd(ymm9, 0);
-                _mm_storeu_pd((double *)(b11 + cs_b * 3),xmm5);
-                _mm_storel_pd((b11 + cs_b * 3 + 2), _mm256_extractf128_pd(ymm9, 1));
+                _mm_storel_pd((double *)b11 + 2, _mm256_extractf128_pd(ymm3,1));
+                _mm_storel_pd((double *)(b11 + cs_b + 2), _mm256_extractf128_pd(ymm5,1));
+                _mm_storel_pd((double *)(b11 + cs_b*2 + 2), _mm256_extractf128_pd(ymm7,1));
+                _mm_storel_pd((double *)(b11 + cs_b*3 + 2), _mm256_extractf128_pd(ymm9,1));
 
                 m_remainder -=3;
             }
@@ -9898,21 +9798,10 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
 
                 ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
-                ymm0 = _mm256_loadu_pd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x03);
-                ymm0 = _mm256_loadu_pd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x03);
-                xmm5 = _mm_loadu_pd((double const*)(b11 + cs_b * 3));
-                ymm0 = _mm256_insertf128_pd(ymm0, xmm5, 0);
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x03);
-
-                _mm256_storeu_pd((double *)b11, ymm3);
-                _mm256_storeu_pd((double *)(b11 + cs_b), ymm5);
-                _mm256_storeu_pd((double *)(b11 + cs_b*2), ymm7);
-                xmm5 = _mm256_extractf128_pd(ymm9, 0);
-                _mm_storeu_pd((double *)(b11 + cs_b * 3),xmm5);
+                _mm_storeu_pd((double *)b11, _mm256_extractf128_pd(ymm3,0));
+                _mm_storeu_pd((double *)(b11 + cs_b), _mm256_extractf128_pd(ymm5,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*2), _mm256_extractf128_pd(ymm7,0));
+                _mm_storeu_pd((double *)(b11 + cs_b*3), _mm256_extractf128_pd(ymm9,0));
 
                 m_remainder -=2;
             }
@@ -9985,15 +9874,7 @@ BLIS_INLINE  err_t bli_dtrsm_small_XAutB_XAlB
                 ymm1 = _mm256_broadcast_sd((double const *)(a11 + cs_a));
                 ymm3 = _mm256_fnmadd_pd(ymm1, ymm5, ymm3);
 
-                ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
-                ymm0 = _mm256_broadcast_sd((double const *)b11);
-                ymm3 = _mm256_blend_pd(ymm0, ymm3, 0x01);
-                ymm0 = _mm256_broadcast_sd((double const *)(b11 + cs_b));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm5 = _mm256_blend_pd(ymm0, ymm5, 0x01);
-                ymm0 = _mm256_broadcast_sd((double const *)(b11 + cs_b*2));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm7 = _mm256_blend_pd(ymm0, ymm7, 0x01);
-                ymm0 = _mm256_broadcast_sd((double const *)(b11 + cs_b*3));                   //B11[0][1] B11[1][1] B11[2][1] B11[3][1]
-                ymm9 = _mm256_blend_pd(ymm0, ymm9, 0x01);
+		ymm3 = DTRSM_SMALL_DIV_OR_SCALE(ymm3, ymm0);
 
                 _mm_storel_pd((b11 + cs_b * 0), _mm256_extractf128_pd(ymm3, 0));
                 _mm_storel_pd((b11 + cs_b * 1), _mm256_extractf128_pd(ymm5, 0));
