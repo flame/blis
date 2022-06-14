@@ -6,7 +6,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-2021, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -138,6 +138,8 @@ void bli_cgemmsup_rv_zen_asm_3x8n
 	for (n_iter = 0; n_iter < n0 / 8; n_iter++)
 	{
 		// clear scratch registers.
+		xmm0 = _mm_setzero_ps();
+		xmm3 = _mm_setzero_ps();
 		ymm4 = _mm256_setzero_ps();
 		ymm5 = _mm256_setzero_ps();
 		ymm6 = _mm256_setzero_ps();
@@ -572,6 +574,8 @@ void bli_cgemmsup_rv_zen_asm_2x8n
 	for (n_iter = 0; n_iter < n0 / 8; n_iter++)
 	{
 		// clear scratch registers.
+		xmm0 = _mm_setzero_ps();
+		xmm3 = _mm_setzero_ps();
 		ymm4 = _mm256_setzero_ps();
 		ymm5 = _mm256_setzero_ps();
 		ymm6 = _mm256_setzero_ps();
@@ -919,6 +923,8 @@ void bli_cgemmsup_rv_zen_asm_1x8n
 	for (n_iter = 0; n_iter < n0 / 8; n_iter++)
 	{
 		// clear scratch registers.
+		xmm0 = _mm_setzero_ps();
+		xmm3 = _mm_setzero_ps();
 		ymm4 = _mm256_setzero_ps();
 		ymm5 = _mm256_setzero_ps();
 		ymm6 = _mm256_setzero_ps();
