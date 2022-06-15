@@ -311,7 +311,7 @@ void bli_gemm_ker_var2
 			// object.
 			bli_auxinfo_set_next_a( a2, &aux );
 			bli_auxinfo_set_next_b( b2, &aux );
-			bli_auxinfo_set_next_b( c2, &aux );
+			bli_auxinfo_set_next_c( c2, &aux );
 
 			// Edge case handling now occurs within the microkernel itself, but
 			// we must still explicitly accumulate to a temporary microtile in
