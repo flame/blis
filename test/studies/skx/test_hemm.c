@@ -93,7 +93,7 @@ int main( int argc, char** argv )
 	if ( ind == BLIS_3M1 ) ind_mod = BLIS_1M;
 
 	// Initialize a context for the current induced method and datatype.
-	cntx = bli_gks_query_ind_cntx( ind_mod, dt );
+	cntx = bli_gks_query_ind_cntx( ind_mod );
 
 	// Set k to the kc blocksize for the current datatype.
 	k_input = bli_cntx_get_blksz_def_dt( dt, BLIS_KC, cntx );
