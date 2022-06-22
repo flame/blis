@@ -4,7 +4,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
 
-   Copyright (C) 2020-21, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-22, Advanced Micro Devices, Inc. All rights reserved.
 
    modification, are permitted provided that the following conditions are
    met:
@@ -122,7 +122,7 @@ int main( int argc, char** argv )
     stor_scheme = 'C'; // since logs are collected at BLAS APIs
 
     // {S,D,C,Z} {triangC : l or u} {n k lda ldb ldc transa transb alpha_real alpha_imaginary beta_real, beta_imaginary}
-    while (fscanf(fin,"%s %c %c %ld %ld %lu %lu %lu %c %c %lf %lf %lf %lf\n",\
+    while (fscanf(fin,"%s %c %c " INT_FS INT_FS UINT_FS UINT_FS UINT_FS " %c %c %lf %lf %lf %lf\n",\
 			tmp, &dt_ch, &uplo_c, &n, &k,\
 			&lda, &ldb, &ldc, &transA_c, &transB_c, \
 			&alpha_r, &alpha_i, &beta_r, &beta_i) == 14)

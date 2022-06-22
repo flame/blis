@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020-2021, Advanced Micro Devices, Inc. All rights reserved.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -129,8 +129,7 @@ int main( int argc, char** argv )
     //             beta_real, beta_imag, ldc,
     //
     //             number of threads, execution time, gflops ---> ignored by bench
-
-    while (fscanf(fin, "%s %c %c %c %ld %ld %ld %lf %lf %ld %ld %lf %lf %ld[^\n]",
+    while (fscanf(fin, "%s %c %c %c " INT_FS INT_FS INT_FS " %lf %lf " INT_FS INT_FS " %lf %lf " INT_FS"[^\n]",
 	          api_name, &dt_ch, &transA_c, &transB_c, &m, &n, &k, &alpha_r, &alpha_i,
             &lda, &ldb, &beta_r, &beta_i, &ldc) == 14)
     {
