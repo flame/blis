@@ -343,6 +343,14 @@ void bli_sgemv_var1_smart_threading
   // Calculate the amount data processed per iteration
   dim_t n_per_loop = n / fuse;
   double data_per_iter =  n_per_loop* m;
+
+  // Exception handling when m-dimenstion or n-dimension is zero
+  if (bli_zero_dim2(m,n))
+  {
+    *nt = 1;
+    return;
+  }
+
   double m_n_ratio = m/n;
 
   // When the input value is less than the fuse factor
