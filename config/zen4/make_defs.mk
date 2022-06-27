@@ -97,8 +97,13 @@ ifeq ($(CC_VENDOR),clang)
 # AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
 # AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
 
-# For our prupose we just want to know if it version 2x or 3x
+# For our prupose we just want to know if it version 2x or 3x or 4x
 
+# for version 4x we will enable znver4
+ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_4')),1)
+CKVECFLAGS += -march=znver4 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
+CRVECFLAGS += -march=znver4
+else
 # for version 3x we will enable znver3
 ifeq ($(strip $(shell $(CC) -v |&head -1 |grep -c 'AOCC_3')),1)
 CKVECFLAGS += -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mfpmath=sse
