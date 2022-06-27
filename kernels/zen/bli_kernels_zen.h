@@ -313,6 +313,18 @@ void bli_dgemm_ref_k1_nn
       double* c, const inc_t ldc
      );
 
+void bli_zgemm_ref_k1_nn
+    (
+      dim_t m,
+      dim_t n,
+      dim_t k,
+      dcomplex* alpha,
+      dcomplex* a, const inc_t lda,
+      dcomplex* b, const inc_t ldb,
+      dcomplex* beta,
+      dcomplex* c, const inc_t ldc
+     );
+
 err_t bli_trsm_small
      (
        side_t  side,

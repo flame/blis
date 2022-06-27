@@ -712,6 +712,21 @@ void zgemm_
 
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
     bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+    if((nt==0) && (k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+    {
+        bli_zgemm_ref_k1_nn( m0, n0, k0,
+                            alpha,
+                            a, *lda,
+                            b, *ldb,
+                            beta,
+                            c, *ldc);
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
+        /* Finalize BLIS */
+        bli_finalize_auto();
+
+        return;
+    }
 
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 

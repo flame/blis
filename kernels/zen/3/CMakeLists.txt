@@ -1,4 +1,4 @@
-##Copyright (C) 2020, Advanced Micro Devices, Inc. All rights reserved.##
+##Copyright (C) 2020-2022, Advanced Micro Devices, Inc. All rights reserved.##
 
 target_sources("${PROJECT_NAME}"
      PRIVATE
@@ -7,6 +7,7 @@ target_sources("${PROJECT_NAME}"
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_dgemm_ref_k1.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_sqp_kernels.c
     ${CMAKE_CURRENT_SOURCE_DIR}/bli_gemm_sqp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/bli_zgemm_ref_k1.c
     )
 
 add_subdirectory(sup)
