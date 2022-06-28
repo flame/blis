@@ -73,6 +73,7 @@ OS_NAME           := @os_name@
 
 # Check for whether the operating system is Windows.
 IS_WIN            := @is_win@
+IS_MSVC           := @is_msvc@
 
 # The directory path to the top level of the source distribution. When
 # building in-tree, this path is ".". When building out-of-tree, this path
