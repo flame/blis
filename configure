@@ -1170,7 +1170,7 @@ auto_detect()
 	# Set the linker flags. We typically need pthreads (or BLIS's homerolled
 	# equiavlent) because it is needed for parts of bli_arch.c unrelated to
 	# bli_arch_string(), which is called by the main() function in ${main_c}.
-	if [[ "$is_win" == "no" || "$cc_vendor" != "clang" ]]; then
+	if [[ "$is_msvc" == "no" ]]; then
 		ldflags="${LIBPTHREAD--lpthread}"
 	fi
 
@@ -2828,6 +2828,10 @@ main()
 	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _WIN32; then
 		is_win=yes
 	fi
+	is_msvc=no
+	if ${found_cc} -dM -E - < /dev/null 2> /dev/null | grep -q _MSC_VER; then
+		is_msvc=yes
+	fi
 
 
 	# -- Check the compiler version --------------------------------------------
@@ -3830,6 +3834,7 @@ main()
 		| sed -e "s/@kconfig_map@/${kconfig_map}/g" \
 		| sed -e "s/@os_name@/${os_name_esc}/g" \
 		| sed -e "s/@is_win@/${is_win}/g" \
+		| sed -e "s/@is_msvc@/${is_msvc}/g" \
 		| sed -e "s/@dist_path@/${dist_path_esc}/g" \
 		| sed -e "s/@CC_VENDOR@/${cc_vendor}/g" \
 		| sed -e "s/@gcc_older_than_4_9_0@/${gcc_older_than_4_9_0}/g" \
