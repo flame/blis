@@ -96,6 +96,7 @@ ifeq ($(CC_VENDOR),clang)
 # AMD clang version 10.0.0 (CLANG: AOCC_2.2.0-Build#93 2020_06_25) (based on LLVM Mirror.Version.10.0.0)
 # AMD clang version 11.0.0 (CLANG: AOCC_2.3.0-Build#85 2020_11_10) (based on LLVM Mirror.Version.11.0.0)
 # AMD clang version 12.0.0 (CLANG: AOCC_3.0.0-Build#2 2020_11_05) (based on LLVM Mirror.Version.12.0.0)
+# AMD clang version 14.0.0 (CLANG: AOCC_4.0.0-Build#98 2022_06_15) (based on LLVM Mirror.Version.14.0.0)
 
 # For our prupose we just want to know if it version 2x or 3x or 4x
 
@@ -127,6 +128,7 @@ CRVECFLAGS += -march=znver1
 endif # ge 9
 endif # aocc 2
 endif # aocc 3
+endif # aocc 4
 endif # clang
 endif # gcc
 
