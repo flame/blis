@@ -112,6 +112,25 @@
 #undef  packm_nrxk_ker_name
 #define packm_nrxk_ker_name  GENARNAME(packm_nrxk)
 
+// Hack in the old packm microkernels by mapping the new names to those old
+// functions.
+#define bli_spackm_mrxk_thunderx2_ref bli_spackm_8xk_thunderx2_ref
+#define bli_spackm_nrxk_thunderx2_ref bli_spackm_12xk_thunderx2_ref
+#define bli_dpackm_mrxk_thunderx2_ref bli_dpackm_6xk_thunderx2_ref
+#define bli_dpackm_nrxk_thunderx2_ref bli_dpackm_8xk_thunderx2_ref
+#define bli_cpackm_mrxk_thunderx2_ref bli_cpackm_4xk_thunderx2_ref
+#define bli_cpackm_nrxk_thunderx2_ref bli_cpackm_8xk_thunderx2_ref
+#define bli_zpackm_mrxk_thunderx2_ref bli_zpackm_4xk_thunderx2_ref
+#define bli_zpackm_nrxk_thunderx2_ref bli_zpackm_4xk_thunderx2_ref
+#define bli_spackm_mrxk_haswell_ref bli_spackm_6xk_haswell_ref
+#define bli_spackm_nrxk_haswell_ref bli_spackm_16xk_haswell_ref
+#define bli_dpackm_mrxk_haswell_ref bli_dpackm_6xk_haswell_ref
+#define bli_dpackm_nrxk_haswell_ref bli_dpackm_8xk_haswell_ref
+#define bli_cpackm_mrxk_haswell_ref bli_cpackm_3xk_haswell_ref
+#define bli_cpackm_nrxk_haswell_ref bli_cpackm_8xk_haswell_ref
+#define bli_zpackm_mrxk_haswell_ref bli_zpackm_3xk_haswell_ref
+#define bli_zpackm_nrxk_haswell_ref bli_zpackm_4xk_haswell_ref
+
 #undef  packm_mrxk_1er_ker_name
 #define packm_mrxk_1er_ker_name  GENARNAME(packm_mrxk_1er)
 #undef  packm_nrxk_1er_ker_name
