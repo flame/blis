@@ -63,8 +63,7 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 	bool enable_sup = TRUE;
 	if ( rntm != NULL ) enable_sup = bli_rntm_l3_sup( rntm );
 
-	printf("HERE!\n");
-	if ( false )
+	if ( enable_sup )
 	{
 		// Execute the small/unpacked oapi handler. If it finds that the problem
 		// does not fall within the thresholds that define "small", or for some
@@ -77,7 +76,6 @@ void PASTEMAC(gemm,BLIS_OAPI_EX_SUF)
 			return;
 		}
 	}
-	printf("STILL HERE!\n");
 #ifdef BLIS_ENABLE_AMD_OFFLOAD
 	// check if we should offload - since attempting to offload and fail
 	// incurrs a non-trivial cost, we only want to fail and fall through
