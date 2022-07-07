@@ -316,7 +316,7 @@ void bli_cntx_set_ukr_prefs( cntx_t* cntx , ... )
 		// - the datatype of the kernel, and
 		// - the kernel function pointer
 		const ukr_pref_t ukr_pref_id = ( ukr_pref_t )ukr_pref_id0;
-		const bool       ukr_pref_dt = ( num_t      )va_arg( args, num_t   );
+		const num_t      ukr_pref_dt = ( num_t      )va_arg( args, num_t );
 		const bool       ukr_pref    = ( bool       )va_arg( args, int );
 
 		// Index into the func_t and mbool_t for the current kernel id
