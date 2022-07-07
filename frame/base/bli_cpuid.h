@@ -161,19 +161,23 @@ enum
 	FEATURE_AVX512VL = 0x4000
 };
 
-#elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM)
+#elif defined(__aarch64__) || defined(__arm__) || defined(_M_ARM) || defined(_ARCH_PPC)
 
 char* find_string_in( char* target, char* buffer, size_t buf_len, char* filepath );
 
 enum
 {
 	VENDOR_ARM = 0,
+	VENDOR_IBM,
 	VENDOR_UNKNOWN
 };
 enum
 {
 	MODEL_ARMV7 = 0,
 	MODEL_ARMV8,
+	MODEL_POWER7,
+	MODEL_POWER9,
+	MODEL_POWER10,
 	MODEL_UNKNOWN
 };
 enum
