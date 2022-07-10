@@ -179,7 +179,7 @@ err_t bli_thrinfo_sup_create_for_cntl
 		  FALSE,              // free_comm
 		  BLIS_NO_PART,       // bszid
 		  NULL,               // sub_node
-		  thread_chl         // node
+		  thread_chl          // node
 		);
 		bli_check_return_if_failure( r_val );
 
@@ -211,8 +211,6 @@ err_t bli_thrinfo_sup_create_for_cntl
 
 		// All threads create a new thrinfo_t node using the communicator
 		// that was created by their chief, as identified by parent_work_id.
-		thrinfo_t* thread_chl;
-
 		r_val = bli_thrinfo_create
 		(
 		  rntm,                        // rntm
@@ -223,7 +221,7 @@ err_t bli_thrinfo_sup_create_for_cntl
 		  TRUE,                        // free_comm
 		  *bszid_chl,                  // bszid
 		  NULL,                        // sub_node
-		  &thread_chl                  // node
+		  thread_chl                   // node
 		);
 		bli_check_return_if_failure( r_val );
 
