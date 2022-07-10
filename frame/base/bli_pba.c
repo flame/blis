@@ -66,6 +66,18 @@ pba_t* bli_pba_query( void )
     return &pba;
 }
 
+void bli_pba_rntm_set_pba
+     (
+       rntm_t* rntm
+     )
+{
+	pba_t* pba = bli_pba_query();
+
+	bli_rntm_set_pba( pba, rntm );
+}
+
+// -----------------------------------------------------------------------------
+
 err_t bli_pba_init
      (
        void
