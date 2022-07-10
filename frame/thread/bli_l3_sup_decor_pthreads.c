@@ -147,7 +147,8 @@ err_t bli_l3_sup_thread_decorator
 	bli_pba_rntm_set_pba( rntm );
 
 	// Allocate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm;
+	bli_thrcomm_create( rntm, n_threads, &gl_comm );
 
 	// Allocate an array of pthread objects and auxiliary data structs to pass
 	// to the thread entry functions.

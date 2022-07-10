@@ -80,7 +80,8 @@ err_t bli_l3_sup_thread_decorator
 	bli_pba_rntm_set_pba( rntm );
 
 	// Allcoate a global communicator for the root thrinfo_t structures.
-	thrcomm_t* gl_comm = bli_thrcomm_create( rntm, n_threads );
+	thrcomm_t* gl_comm;
+	bli_thrcomm_create( rntm, n_threads, &gl_comm );
 
 
 	_Pragma( "omp parallel num_threads(n_threads)" )

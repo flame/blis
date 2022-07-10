@@ -169,8 +169,6 @@ err_t bli_thrinfo_sup_create_for_cntl
 	// and simplified to this.
 	if ( bli_rntm_calc_num_threads( rntm ) == 1 )
 	{
-		thrinfo_t* thread_chl;
-
 		r_val = bli_thrinfo_create
 		(
 		  rntm,               // rntm
@@ -181,7 +179,7 @@ err_t bli_thrinfo_sup_create_for_cntl
 		  FALSE,              // free_comm
 		  BLIS_NO_PART,       // bszid
 		  NULL,               // sub_node
-		  &thread_chl         // node
+		  thread_chl         // node
 		);
 		bli_check_return_if_failure( r_val );
 
