@@ -40,7 +40,7 @@
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
              conj_t conjchi, \
        const ctype* chi, \
@@ -56,7 +56,7 @@ INSERT_GENTPROT_BASIC0( subsc )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        conj_t conjchi, \
        ctype* chi  \
@@ -68,7 +68,7 @@ INSERT_GENTPROT_BASIC0( invertsc )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*   chi, \
              ctype_r* absq  \
@@ -81,7 +81,7 @@ INSERT_GENTPROTR_BASIC0( normfsc )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        const ctype* chi, \
              ctype* psi  \
@@ -93,7 +93,7 @@ INSERT_GENTPROT_BASIC0( sqrtsc )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*  chi, \
              double* zeta_r, \
@@ -106,7 +106,7 @@ INSERT_GENTPROT_BASIC0( getsc )
 #undef  GENTPROT
 #define GENTPROT( ctype, ch, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        double zeta_r, \
        double zeta_i, \
@@ -119,7 +119,7 @@ INSERT_GENTPROT_BASIC0( setsc )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        const ctype*   chi, \
              ctype_r* zeta_r, \
@@ -132,7 +132,7 @@ INSERT_GENTPROTR_BASIC0( unzipsc )
 #undef  GENTPROTR
 #define GENTPROTR( ctype, ctype_r, ch, chr, opname ) \
 \
-BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
+BLIS_EXPORT_BLIS err_t PASTEMAC(ch,opname) \
      ( \
        const ctype_r* zeta_r, \
        const ctype_r* zeta_i, \
@@ -143,14 +143,14 @@ INSERT_GENTPROTR_BASIC0( zipsc )
 
 // -----------------------------------------------------------------------------
 
-BLIS_EXPORT_BLIS void bli_igetsc
+BLIS_EXPORT_BLIS err_t bli_igetsc
      (
        const dim_t*  chi,
              double* zeta_r,
              double* zeta_i
      );
 
-BLIS_EXPORT_BLIS void bli_isetsc
+BLIS_EXPORT_BLIS err_t bli_isetsc
      (
        double zeta_r,
        double zeta_i,

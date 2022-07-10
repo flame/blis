@@ -38,6 +38,28 @@
 // Note that the sba is an apool_t of array_t of pool_t.
 static apool_t sba = { .mutex = BLIS_PTHREAD_MUTEX_INITIALIZER };
 
+// A boolean that tracks whether bli_sba_init() has completed successfully.
+static bool sba_is_init = FALSE;
+
+// -----------------------------------------------------------------------------
+
+bool bli_sba_is_init( void )
+{
+	return sba_is_init;
+}
+
+void bli_sba_mark_init( void )
+{
+	sba_is_init = TRUE;
+}
+
+void bli_sba_mark_uninit( void )
+{
+	sba_is_init = FALSE;
+}
+
+// -----------------------------------------------------------------------------
+
 apool_t* bli_sba_query( void )
 {
 	return &sba;
@@ -45,29 +67,56 @@ apool_t* bli_sba_query( void )
 
 // -----------------------------------------------------------------------------
 
-void bli_sba_init( void )
+err_t bli_sba_init( void )
 {
-	bli_apool_init( &sba );
+	err_t r_val;
+
+	// Sanity check: Return early if the API is already initialized.
+	if ( bli_sba_is_init() ) return BLIS_SUCCESS;
+
+	// Initialize the small block allocator.
+	r_val = bli_apool_init( &sba );
+	bli_check_return_if_failure( r_val );
+
+	// Mark the API as initialized.
+	bli_sba_mark_init();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_sba_finalize( void )
+err_t bli_sba_finalize( void )
 {
-	bli_apool_finalize( &sba );
+	err_t r_val;
+
+	// Sanity check: Return early if the API is uninitialized.
+	if ( !bli_sba_is_init() ) return BLIS_SUCCESS;
+
+	// Finalize the small block allocator.
+	r_val = bli_apool_finalize( &sba );
+	bli_check_return_if_failure( r_val );
+
+	// Mark the API as uninitialized.
+	bli_sba_mark_uninit();
+
+	return BLIS_SUCCESS;
 }
 
-void* bli_sba_acquire
+// -----------------------------------------------------------------------------
+
+err_t bli_sba_acquire
      (
        rntm_t* rntm,
-       siz_t   req_size
+       siz_t   req_size,
+       void**  block
      )
 {
-	void* block;
 	err_t r_val;
 
 #ifdef BLIS_ENABLE_SBA_POOLS
 	if ( rntm == NULL )
 	{
-		block = bli_malloc_intl( req_size, &r_val );
+		*block = bli_malloc_intl( req_size, &r_val );
+		bli_check_return_if_failure( r_val );
 	}
 	else
 	{
@@ -86,7 +135,8 @@ void* bli_sba_acquire
 		// would be timed.)
 		if ( pool == NULL )
 		{
-		    block = bli_malloc_intl( req_size, &r_val );
+		    *block = bli_malloc_intl( req_size, &r_val );
+			bli_check_return_if_failure( r_val );
 		}
 		else
 		{
@@ -104,20 +154,22 @@ void* bli_sba_acquire
 			}
 
 			// Check out a block using the block_size queried above.
-			bli_pool_checkout_block( block_size, &pblk, pool );
+			r_val = bli_pool_checkout_block( block_size, &pblk, pool );
+			bli_check_return_if_failure( r_val );
 
 			// The block address is stored within the pblk_t.
-			block = bli_pblk_buf( &pblk );
+			*block = bli_pblk_buf( &pblk );
 		}
 	}
 #else
 
-	block = bli_malloc_intl( req_size, &r_val );
+	*block = bli_malloc_intl( req_size, &r_val );
+	bli_check_return_if_failure( r_val );
 
 #endif
 
 	// Return the address obtained from the pblk_t.
-	return block;
+	return BLIS_SUCCESS;
 }
 
 void bli_sba_release
@@ -133,8 +185,6 @@ void bli_sba_release
 	}
 	else
 	{
-		pblk_t pblk;
-
 		// Query the small block pool from the rntm.
 		pool_t* pool = bli_rntm_sba_pool( rntm );
 
@@ -144,6 +194,8 @@ void bli_sba_release
 		}
 		else
 		{
+			pblk_t pblk;
+
 			// Query the block_size field from the pool. This is not super-important
 			// for this particular application of the pool_t (that is, the "leaf"
 			// component of the sba), but it seems like good housekeeping to maintain
@@ -168,16 +220,24 @@ void bli_sba_release
 #endif
 }
 
-array_t* bli_sba_checkout_array
+// -----------------------------------------------------------------------------
+
+err_t bli_sba_checkout_array
      (
-       const siz_t n_threads
+             siz_t     n_threads,
+       const array_t** array
      )
 {
+	err_t r_val;
+
 	#ifndef BLIS_ENABLE_SBA_POOLS
-	return NULL;
+	*array = NULL; return BLIS_SUCCESS;
 	#endif
 
-	return bli_apool_checkout_array( n_threads, &sba );
+	r_val = bli_apool_checkout_array( n_threads, array, &sba );
+	bli_check_return_if_failure( r_val );
+
+	return BLIS_SUCCESS;
 }
 
 void bli_sba_checkin_array
@@ -192,7 +252,9 @@ void bli_sba_checkin_array
 	bli_apool_checkin_array( array, &sba );
 }
 
-void bli_sba_rntm_set_pool
+// -----------------------------------------------------------------------------
+
+err_t bli_sba_rntm_set_pool
      (
        siz_t    index,
        array_t* array,
@@ -204,11 +266,16 @@ void bli_sba_rntm_set_pool
 	return;
 	#endif
 
+	pool_t* pool;
+
 	// Query the pool_t* in the array_t corresponding to index.
-	pool_t* pool = bli_apool_array_elem( index, array );
+	err_t r_val = bli_apool_array_elem( index, array, &pool );
+	bli_check_return_if_failure( r_val );
 
 	// Embed the pool_t* into the rntm_t.
 	bli_rntm_set_sba_pool( pool, rntm );
+
+	return BLIS_SUCCESS;
 }
 
 

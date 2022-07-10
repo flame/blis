@@ -57,7 +57,7 @@ void bli_rntm_init_from_global( rntm_t* rntm )
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 void bli_rntm_set_ways_for_op
      (

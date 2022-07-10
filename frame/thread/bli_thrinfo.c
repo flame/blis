@@ -35,23 +35,28 @@
 
 #include "blis.h"
 
-thrinfo_t* bli_thrinfo_create
+err_t bli_thrinfo_create
      (
-       rntm_t*    rntm,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       bool       free_comm,
-       bszid_t    bszid,
-       thrinfo_t* sub_node
+       rntm_t*     rntm,
+       thrcomm_t*  ocomm,
+       dim_t       ocomm_id,
+       dim_t       n_way,
+       dim_t       work_id,
+       bool        free_comm,
+       bszid_t     bszid,
+       thrinfo_t*  sub_node,
+       thrinfo_t** node
      )
 {
 	#ifdef BLIS_ENABLE_MEM_TRACING
 	printf( "bli_thrinfo_create(): " );
 	#endif
 
-	thrinfo_t* thread = bli_sba_acquire( rntm, sizeof( thrinfo_t ) );
+	err_t      r_val;
+    thrinfo_t* thread;
+
+	r_val = bli_sba_acquire( rntm, sizeof( thrinfo_t ), ( void** )&thread );
+	bli_check_return_if_failure( r_val );
 
 	bli_thrinfo_init
 	(
@@ -63,7 +68,10 @@ thrinfo_t* bli_thrinfo_create
 	  sub_node
 	);
 
-    return thread;
+	// Set the thrinfo_t pointer.
+	*node = thread;
+
+    return BLIS_SUCCESS;
 }
 
 void bli_thrinfo_init
@@ -153,13 +161,15 @@ void bli_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-void bli_thrinfo_grow
+err_t bli_thrinfo_grow
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      )
 {
+	err_t r_val;
+
 	// First, consider the prenode branch of the thrinfo_t tree, which should be
 	// expanded only if there exists a prenode branch in the cntl_t tree.
 
@@ -169,26 +179,23 @@ void bli_thrinfo_grow
 		// is non-NULL, then it has already been created and we'll use it as-is.
 		if ( bli_thrinfo_sub_prenode( thread ) == NULL )
 		{
-			// Assertion / sanity check.
-			if ( bli_cntl_bszid( cntl ) != BLIS_MC )
-			{
-				printf( "Assertion failed: Expanding prenode for non-IC loop?\n" );
-				bli_abort();
-			}
-
 			// Now we must create the packa, jr, and ir nodes that make up
 			// the prenode branch of current cntl_t node.
+
+			thrinfo_t* thread_prenode;
 
 			// Create a new node (or, if needed, multiple nodes) along the
 			// prenode branch of the tree and return the pointer to the
 			// (highest) child.
-			thrinfo_t* thread_prenode = bli_thrinfo_rgrow_prenode
+			r_val = bli_thrinfo_rgrow_prenode
 			(
 			  rntm,
 			  cntl,
 			  bli_cntl_sub_prenode( cntl ),
-			  thread
+			  thread,
+			  &thread_prenode
 			);
+			bli_check_return_if_failure( r_val );
 
 			// Attach the child thrinfo_t node for the secondary branch to its
 			// parent structure.
@@ -206,35 +213,42 @@ void bli_thrinfo_grow
 		// is non-NULL, then it has already been created and we'll use it as-is.
 		if ( bli_thrinfo_sub_node( thread ) == NULL )
 		{
+			thrinfo_t* thread_child;
+
 			// Create a new node (or, if needed, multiple nodes) along the
 			// main sub-node branch of the tree and return the pointer to the
 			// (highest) child.
-			thrinfo_t* thread_child = bli_thrinfo_rgrow
+			r_val = bli_thrinfo_rgrow
 			(
 			  rntm,
 			  cntl,
 			  bli_cntl_sub_node( cntl ),
-			  thread
+			  thread,
+			  &thread_child
 			);
+			bli_check_return_if_failure( r_val );
 
 			// Attach the child thrinfo_t node for the primary branch to its
 			// parent structure.
 			bli_thrinfo_set_sub_node( thread_child, thread );
 		}
 	}
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_rgrow
+err_t bli_thrinfo_rgrow
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_cur,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_cur,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_cur
      )
 {
-	thrinfo_t* thread_cur;
+	err_t r_val;
 
 	// We must handle two cases: those where the next node in the
 	// control tree is a partitioning node, and those where it is
@@ -243,25 +257,31 @@ thrinfo_t* bli_thrinfo_rgrow
 	{
 		// Create the child thrinfo_t node corresponding to cntl_cur,
 		// with cntl_par being the parent.
-		thread_cur = bli_thrinfo_create_for_cntl
+		r_val = bli_thrinfo_create_for_cntl
 		(
 		  rntm,
 		  cntl_par,
 		  cntl_cur,
-		  thread_par
+		  thread_par,
+		  thread_cur
 		);
+		bli_check_return_if_failure( r_val );
 	}
 	else // if ( bli_cntl_bszid( cntl_cur ) == BLIS_NO_PART )
 	{
+		thrinfo_t* thread_seg;
+
 		// Recursively grow the thread structure and return the top-most
 		// thrinfo_t node of that segment.
-		thrinfo_t* thread_seg = bli_thrinfo_rgrow
+		r_val = bli_thrinfo_rgrow
 		(
 		  rntm,
 		  cntl_par,
 		  bli_cntl_sub_node( cntl_cur ),
-		  thread_par
+		  thread_par,
+		  &thread_seg
 		);
+		bli_check_return_if_failure( r_val );
 
 		// Create a thrinfo_t node corresponding to cntl_cur. Since the
 		// corresponding cntl node, cntl_cur, is a non-partitioning node
@@ -272,7 +292,7 @@ thrinfo_t* bli_thrinfo_rgrow
 		// to FALSE since cntl_cur is a non-partitioning node. The reason:
 		// the communicator used here will be freed when thread_seg, or one
 		// of its descendents, is freed.
-		thread_cur = bli_thrinfo_create
+		r_val = bli_thrinfo_create
 		(
 		  rntm,                                           // rntm
 		  bli_thrinfo_ocomm( thread_seg ),                // ocomm
@@ -281,28 +301,33 @@ thrinfo_t* bli_thrinfo_rgrow
 		  bli_thread_ocomm_id( thread_seg ),              // work_id
 		  FALSE,                                          // free_comm
 		  BLIS_NO_PART,                                   // bszid
-		  thread_seg                                      // sub_node
+		  thread_seg,                                     // sub_node
+		  thread_cur                                      // node
 		);
+		bli_check_return_if_failure( r_val );
 	}
 
-	return thread_cur;
+	return BLIS_SUCCESS;
 }
 
 #define BLIS_NUM_STATIC_COMMS 80
 
-thrinfo_t* bli_thrinfo_create_for_cntl
+err_t bli_thrinfo_create_for_cntl
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_chl,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_chl,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_chl
      )
 {
+	err_t r_val;
+
 	// If we are running with a single thread, all of the code can be reduced
 	// and simplified to this.
 	if ( bli_rntm_calc_num_threads( rntm ) == 1 )
 	{
-		thrinfo_t* thread_chl = bli_thrinfo_create
+		r_val = bli_thrinfo_create
 		(
 		  rntm,                        // rntm
 		  &BLIS_SINGLE_COMM,           // ocomm
@@ -311,9 +336,12 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 		  0,                           // work_id
 		  FALSE,                       // free_comm
 		  BLIS_NO_PART,                // bszid
-		  NULL                         // sub_node
+		  NULL,                        // sub_node
+		  thread_chl                   // node
 		);
-		return thread_chl;
+		bli_check_return_if_failure( r_val );
+
+		return BLIS_SUCCESS;
 	}
 
 	thrcomm_t*  static_comms[ BLIS_NUM_STATIC_COMMS ];
@@ -321,18 +349,20 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 
 	const bszid_t bszid_chl = bli_cntl_bszid( cntl_chl );
 
-	const dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
+	//const dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
 	const dim_t parent_n_way   = bli_thread_n_way( thread_par );
 	const dim_t parent_comm_id = bli_thread_ocomm_id( thread_par );
 	const dim_t parent_work_id = bli_thread_work_id( thread_par );
 
+#if 0
 	// Sanity check: make sure the number of threads in the parent's
 	// communicator is divisible by the number of new sub-groups.
 	if ( parent_nt_in % parent_n_way != 0 )
 	{
 		printf( "Assertion failed: parent_nt_in <mod> parent_n_way != 0\n" );
-		bli_abort();
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
+#endif
 
 	// Compute:
 	// - the number of threads inside the new child comm,
@@ -350,13 +380,23 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	// pointers.
 	if ( bli_thread_am_ochief( thread_par ) )
 	{
-		err_t r_val;
-
 		if ( parent_n_way > BLIS_NUM_STATIC_COMMS )
+		{
 			new_comms = bli_malloc_intl( parent_n_way * sizeof( thrcomm_t* ), &r_val );
+		}
 		else
-			new_comms = static_comms;
+		{
+			new_comms = static_comms; r_val = BLIS_SUCCESS;
+		}
 	}
+	else
+	{
+		r_val = BLIS_SUCCESS;
+	}
+
+	// If the master thread generated an error, all threads return immediately.
+	if ( bli_error_checking_is_enabled() )
+		bli_check_thread0_return_if_failure( &r_val, thread_par );
 
 	// Broadcast the temporary array to all threads in the parent's
 	// communicator.
@@ -366,13 +406,23 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	// object and store it in the array element corresponding to the
 	// parent's work id.
 	if ( child_comm_id == 0 )
-		new_comms[ parent_work_id ] = bli_thrcomm_create( rntm, child_nt_in );
+	{
+		r_val = bli_thrcomm_create( rntm, child_nt_in, &new_comms[ parent_work_id ] );
+	}
+	else
+	{
+		r_val = BLIS_SUCCESS;
+	}
+
+	// If any thread generated an error, all threads return immediately.
+	if ( bli_error_checking_is_enabled() )
+		bli_check_threads_return_if_failure( &r_val, thread_par );
 
 	bli_thread_barrier( thread_par );
 
 	// All threads create a new thrinfo_t node using the communicator
 	// that was created by their chief, as identified by parent_work_id.
-	thrinfo_t* thread_chl = bli_thrinfo_create
+	r_val = bli_thrinfo_create
 	(
 	  rntm,                        // rntm
 	  new_comms[ parent_work_id ], // ocomm
@@ -381,8 +431,13 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 	  child_work_id,               // work_id
 	  TRUE,                        // free_comm
 	  bszid_chl,                   // bszid
-	  NULL                         // sub_node
+	  NULL,                        // sub_node
+	  thread_chl                   // node
 	);
+
+	// If any thread generated an error, all threads return immediately.
+	if ( bli_error_checking_is_enabled() )
+		bli_check_threads_return_if_failure( &r_val, thread_par );
 
 	bli_thread_barrier( thread_par );
 
@@ -394,20 +449,21 @@ thrinfo_t* bli_thrinfo_create_for_cntl
 			bli_free_intl( new_comms );
 	}
 
-	return thread_chl;
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
 
-thrinfo_t* bli_thrinfo_rgrow_prenode
+err_t bli_thrinfo_rgrow_prenode
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_cur,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_cur,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_cur
      )
 {
-	thrinfo_t* thread_cur;
+	err_t r_val;
 
 	// We must handle two cases: those where the next node in the
 	// control tree is a partitioning node, and those where it is
@@ -416,25 +472,31 @@ thrinfo_t* bli_thrinfo_rgrow_prenode
 	{
 		// Create the child thrinfo_t node corresponding to cntl_cur,
 		// with cntl_par being the parent.
-		thread_cur = bli_thrinfo_create_for_cntl_prenode
+		r_val = bli_thrinfo_create_for_cntl_prenode
 		(
 		  rntm,
 		  cntl_par,
 		  cntl_cur,
-		  thread_par
+		  thread_par,
+		  thread_cur
 		);
+		bli_check_return_if_failure( r_val );
 	}
 	else // if ( bli_cntl_bszid( cntl_cur ) == BLIS_NO_PART )
 	{
+		thrinfo_t* thread_seg;
+
 		// Recursively grow the thread structure and return the top-most
 		// thrinfo_t node of that segment.
-		thrinfo_t* thread_seg = bli_thrinfo_rgrow_prenode
+		r_val = bli_thrinfo_rgrow_prenode
 		(
 		  rntm,
 		  cntl_par,
 		  bli_cntl_sub_node( cntl_cur ),
-		  thread_par
+		  thread_par,
+		  &thread_seg
 		);
+		bli_check_return_if_failure( r_val );
 
 		// Create a thrinfo_t node corresponding to cntl_cur. Since the
 		// corresponding cntl node, cntl_cur, is a non-partitioning node
@@ -445,7 +507,7 @@ thrinfo_t* bli_thrinfo_rgrow_prenode
 		// to FALSE since cntl_cur is a non-partitioning node. The reason:
 		// the communicator used here will be freed when thread_seg, or one
 		// of its descendents, is freed.
-		thread_cur = bli_thrinfo_create
+		r_val = bli_thrinfo_create
 		(
 		  rntm,                                           // rntm
 		  bli_thrinfo_ocomm( thread_seg ),                // ocomm
@@ -454,19 +516,22 @@ thrinfo_t* bli_thrinfo_rgrow_prenode
 		  bli_thread_ocomm_id( thread_seg ),              // work_id
 		  FALSE,                                          // free_comm
 		  BLIS_NO_PART,                                   // bszid
-		  thread_seg                                      // sub_node
+		  thread_seg,                                     // sub_node
+		  thread_cur                                      // node
 		);
+		bli_check_return_if_failure( r_val );
 	}
 
-	return thread_cur;
+	return BLIS_SUCCESS;
 }
 
-thrinfo_t* bli_thrinfo_create_for_cntl_prenode
+err_t bli_thrinfo_create_for_cntl_prenode
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_chl,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_chl,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread
      )
 {
 	// NOTE: This function only has to work for the ic -> (pa -> jr)
@@ -474,21 +539,25 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 	// bli_thrinfo_create_for_cntl() will be called for the last jr->ir
 	// branch extension.
 
+	err_t r_val;
+
 	const bszid_t bszid_chl = bli_cntl_bszid( cntl_chl );
 
 	const dim_t parent_nt_in   = bli_thread_num_threads( thread_par );
-	const dim_t parent_n_way   = bli_thread_n_way( thread_par );
+	//const dim_t parent_n_way   = bli_thread_n_way( thread_par );
 	const dim_t parent_comm_id = bli_thread_ocomm_id( thread_par );
 	//const dim_t parent_work_id = bli_thread_work_id( thread_par );
 
+#if 0
 	// Sanity check: make sure the number of threads in the parent's
 	// communicator is divisible by the number of new sub-groups.
 	if ( parent_nt_in % parent_n_way != 0 )
 	{
 		printf( "Assertion failed: parent_nt_in (%d) <mod> parent_n_way (%d) != 0\n",
 		        ( int )parent_nt_in, ( int )parent_n_way );
-		bli_abort();
+		bli_check_error_code( BLIS_NOT_YET_IMPLEMENTED );
 	}
+#endif
 
 	//dim_t child_nt_in   = bli_cntl_calc_num_threads_in( rntm, cntl_chl );
 	//dim_t child_n_way   = bli_rntm_ways_for( bszid_chl, rntm );
@@ -503,16 +572,25 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 	// parent's chief-ness is equivalent to checking for chief-ness in the new
 	// about-to-be-created communicator group.
 	thrcomm_t* new_comm = NULL;
+
 	if ( bli_thread_am_ochief( thread_par ) )
-		new_comm = bli_thrcomm_create( rntm, child_nt_in );
+		r_val = bli_thrcomm_create( rntm, child_nt_in, &new_comm );
+	else
+		r_val = BLIS_SUCCESS;
+
+	// If the master thread generated an error, all threads return immediately.
+	if ( bli_error_checking_is_enabled() )
+		bli_check_thread0_return_if_failure( &r_val, thread_par );
 
 	// Broadcast the new thrcomm_t address to the other threads in the
 	// parent's group.
 	new_comm = bli_thread_broadcast( thread_par, new_comm );
 
+	thrinfo_t* thread_chl = NULL;
+
 	// All threads create a new thrinfo_t node using the communicator
 	// that was created by their chief, as identified by parent_work_id.
-	thrinfo_t* thread_chl = bli_thrinfo_create
+	r_val = bli_thrinfo_create
 	(
 	  rntm,          // rntm
 	  new_comm,      // ocomm
@@ -521,12 +599,20 @@ thrinfo_t* bli_thrinfo_create_for_cntl_prenode
 	  child_work_id, // work_id
 	  TRUE,          // free_comm
 	  bszid_chl,     // bszid
-	  NULL           // sub_node
+	  NULL,          // sub_node
+	  &thread_chl    // node
 	);
+
+	// If any thread generated an error, all threads return immediately.
+	if ( bli_error_checking_is_enabled() )
+		bli_check_threads_return_if_failure( &r_val, thread_par );
 
 	bli_thread_barrier( thread_par );
 
-	return thread_chl;
+	// Set the thrinfo_t pointer.
+	*thread = thread_chl;
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------

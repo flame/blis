@@ -69,7 +69,7 @@ void bli_saxpyf_zen_int_5
        float* restrict a, inc_t inca, inc_t lda,
        float* restrict x, inc_t incx,
        float* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const dim_t      fuse_fac       = 5;
@@ -108,7 +108,7 @@ void bli_saxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+        bli_gks_query_cntx_if_null( ( const cntx_t** )&cntx );
 
         saxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_AXPYV_KER, cntx );
 
@@ -321,7 +321,7 @@ void bli_daxpyf_zen_int_5
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const dim_t      fuse_fac       = 5;
@@ -360,7 +360,7 @@ void bli_daxpyf_zen_int_5
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+        bli_gks_query_cntx_if_null( ( const cntx_t** )&cntx );
 
         daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 
@@ -572,7 +572,7 @@ void bli_daxpyf_zen_int_16x2
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const dim_t      fuse_fac       = 2;
@@ -857,7 +857,7 @@ void bli_daxpyf_zen_int_16x4
        double* restrict a, inc_t inca, inc_t lda,
        double* restrict x, inc_t incx,
        double* restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 {
     const dim_t      fuse_fac       = 4;
@@ -899,7 +899,7 @@ void bli_daxpyf_zen_int_16x4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
-        if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+        bli_gks_query_cntx_if_null( ( const cntx_t** )&cntx );
 
         daxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_AXPYV_KER, cntx );
 

@@ -190,10 +190,10 @@ void libblis_test_gemmtrsm_ukr_experiment
 	dim_t        m, n, k;
 	inc_t        ldap, ldbp;
 
-	char         sc_a = 'c';
-	char         sc_b = 'r';
+	char         sc_a      = 'c';
+	char         sc_b      = 'r';
 
-	side_t       side = BLIS_LEFT;
+	side_t       side      = BLIS_LEFT;
 	uplo_t       uploa;
 
 	obj_t        alpha;
@@ -203,11 +203,11 @@ void libblis_test_gemmtrsm_ukr_experiment
 	obj_t        a1xp, a11p, bx1p, b11p;
 	obj_t        c11_save;
 
-	cntx_t*      cntx;
+	cntx_t*      cntx      = NULL;
 
 
 	// Query a context.
-	cntx = ( cntx_t* )bli_gks_query_cntx();
+	bli_gks_query_cntx( ( const cntx_t** )&cntx ); \
 
 	// Use the datatype of the first char in the datatype combination string.
 	bli_param_map_char_to_blis_dt( dc_str[0], &datatype );

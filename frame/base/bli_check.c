@@ -37,6 +37,7 @@
 
 // -- General stuff ------------------------------------------------------------
 
+#if 1
 err_t bli_check_error_code_helper( gint_t code, const char* file, guint_t line )
 {
 	if ( code == BLIS_SUCCESS ) return code;
@@ -56,6 +57,7 @@ err_t bli_check_error_code_helper( gint_t code, const char* file, guint_t line )
 
 	return code;
 }
+#endif
 
 err_t bli_check_valid_error_level( errlev_t level )
 {
@@ -64,6 +66,17 @@ err_t bli_check_valid_error_level( errlev_t level )
 	if ( level != BLIS_NO_ERROR_CHECKING &&
 	     level != BLIS_FULL_ERROR_CHECKING )
 		e_val = BLIS_INVALID_ERROR_CHECKING_LEVEL;
+
+	return e_val;
+}
+
+err_t bli_check_valid_error_mode( errmode_t mode )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( mode != BLIS_ERROR_RETURN &&
+	     mode != BLIS_ERROR_ABORT )
+		e_val = BLIS_INVALID_ERROR_HANDLING_MODE;
 
 	return e_val;
 }
@@ -677,7 +690,31 @@ err_t bli_check_upper_or_lower_object( const obj_t* a )
 	return e_val;
 }
 
+// -- Induced method-related checks --------------------------------------------
+
+err_t bli_check_valid_ind( ind_t im )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bli_is_1m( im ) &&
+	     !bli_is_nat( im ) )
+		e_val = BLIS_INVALID_IND;
+
+	return e_val;
+}
+
 // -- Partitioning-related checks ----------------------------------------------
+
+err_t bli_check_valid_direct( dir_t direct )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( !bli_is_fwd( direct ) &&
+	     !bli_is_bwd( direct ) )
+		e_val = BLIS_INVALID_DIRECTION;
+
+	return e_val;
+}
 
 err_t bli_check_valid_3x1_subpart( subpart_t part )
 {
@@ -725,6 +762,42 @@ err_t bli_check_valid_3x3_subpart( subpart_t part )
 	     part != BLIS_SUBPART12 &&
 	     part != BLIS_SUBPART22 )
 		e_val = BLIS_INVALID_3x3_SUBPART;
+
+	return e_val;
+}
+
+err_t bli_check_valid_row_offset( dim_t i, obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	const dim_t m = bli_obj_length( a );
+
+	if      ( i < 0  ) e_val = BLIS_ROW_OFFSET_LESS_THAN_ZERO;
+	else if ( m <= i ) e_val = BLIS_ROW_OFFSET_EXCEEDS_NUM_ROWS;
+
+	return e_val;
+}
+
+err_t bli_check_valid_col_offset( dim_t j, obj_t* a )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	const dim_t n = bli_obj_width( a );
+
+	if      ( j < 0  ) e_val = BLIS_COL_OFFSET_LESS_THAN_ZERO;
+	else if ( n <= j ) e_val = BLIS_COL_OFFSET_EXCEEDS_NUM_COLS;
+
+	return e_val;
+}
+
+err_t bli_check_valid_vector_offset( dim_t i, obj_t* x )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	const dim_t n = bli_obj_vector_dim( x );
+
+	if      ( i < 0  ) e_val = BLIS_VECTOR_OFFSET_LESS_THAN_ZERO;
+	else if ( n <= i ) e_val = BLIS_VECTOR_OFFSET_EXCEEDS_NUM_ELEM;
 
 	return e_val;
 }
@@ -871,6 +944,18 @@ err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size )
 	return e_val;
 }
 
+err_t bli_check_outstanding_mem_pool_blocks( siz_t top_index )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	// This function returns an error code if the top_index is not zero.
+
+	if ( top_index != 0 )
+		e_val = BLIS_MEM_POOL_BLOCKS_OUTSTANDING;
+
+	return e_val;
+}
+
 // -- Object-related errors ----------------------------------------------------
 
 err_t bli_check_object_alias_of( const obj_t* a, const obj_t* b )
@@ -956,5 +1041,18 @@ err_t bli_check_valid_kc_mod_mult( const blksz_t* kc, const blksz_t* kr )
 	}
 
 	return BLIS_SUCCESS;
+}
+
+// -- Thread-related errors ----------------------------------------------------
+
+err_t bli_check_num_threads_created( dim_t nt_req, dim_t nt_actual )
+{
+	err_t e_val = BLIS_SUCCESS;
+
+	if ( nt_req != nt_actual )
+		if ( nt_actual != 1 )
+			e_val = BLIS_EXPECTED_DIFF_NUM_THREADS;
+
+	return e_val;
 }
 

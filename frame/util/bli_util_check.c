@@ -147,7 +147,7 @@ void PASTEMAC(opname,_check) \
        const bool*  is_eq  \
      ) \
 { \
-	bli_l0_xxbsc_check( chi, psi, is_eq ); \
+	bli_l0_xxbool_check( chi, psi, is_eq ); \
 }
 
 GENFRONT( eqsc )

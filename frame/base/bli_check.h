@@ -37,6 +37,7 @@
 BLIS_EXPORT_BLIS err_t bli_check_error_code_helper( gint_t code, const char* file, guint_t line );
 
 err_t bli_check_valid_error_level( errlev_t level );
+err_t bli_check_valid_error_mode( errmode_t mode );
 
 err_t bli_check_null_pointer( const void* ptr );
 
@@ -88,9 +89,15 @@ err_t bli_check_object_struc( const obj_t* a, struc_t struc );
 
 err_t bli_check_upper_or_lower_object( const obj_t* a );
 
+err_t bli_check_valid_ind( ind_t im );
+
+err_t bli_check_valid_direct( dir_t direct );
 err_t bli_check_valid_3x1_subpart( subpart_t part );
 err_t bli_check_valid_1x3_subpart( subpart_t part );
 err_t bli_check_valid_3x3_subpart( subpart_t part );
+err_t bli_check_valid_row_offset( dim_t i, obj_t* a );
+err_t bli_check_valid_col_offset( dim_t j, obj_t* a );
+err_t bli_check_valid_vector_offset( dim_t i, obj_t* x );
 
 err_t bli_check_valid_cntl( const void* cntl );
 
@@ -106,6 +113,7 @@ err_t bli_check_if_exhausted_pool( const pool_t* pool );
 err_t bli_check_sufficient_stack_buf_size( const cntx_t* cntx );
 err_t bli_check_alignment_is_power_of_two( size_t align_size );
 err_t bli_check_alignment_is_mult_of_ptr_size( size_t align_size );
+err_t bli_check_outstanding_mem_pool_blocks( siz_t top_index );
 
 err_t bli_check_object_alias_of( const obj_t* a, const obj_t* b );
 
@@ -115,4 +123,6 @@ err_t bli_check_initialized_gks_cntx( const cntx_t* const * cntx );
 err_t bli_check_valid_mc_mod_mult( const blksz_t* mc, const blksz_t* mr );
 err_t bli_check_valid_nc_mod_mult( const blksz_t* nc, const blksz_t* nr );
 err_t bli_check_valid_kc_mod_mult( const blksz_t* kc, const blksz_t* kr );
+
+err_t bli_check_num_threads_created( dim_t nt_req, dim_t nt_actual );
 

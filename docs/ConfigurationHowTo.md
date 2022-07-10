@@ -595,7 +595,7 @@ Adding support for a new umbrella configuration family in BLIS is fairly straigh
       ```
       The `BLIS_FAMILY_INTELAVX` will automatically be defined by the build system whenever the family was targeted by `configure` is `intelavx`. (In general, if the user runs `./configure foobar`, the C preprocessor macro `BLIS_FAMILY_FOOBAR` will be defined.)
 
-   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` microarchitecture ID value to the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
+   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` determines the correct `arch_t` microarchitecture ID value for the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. For x86_64 architectures, this is supported via the `CPUID` instruction, as implemented via `bli_cpuid_query_id()`. Thus, you can simply mimic what is done for the `intel64` family by inserting lines such as:
       ```c
       #ifdef BLIS_FAMILY_INTELAVX
           id = bli_cpuid_query_id();
@@ -718,13 +718,13 @@ Adding support for a new-subconfiguration to BLIS is similar to adding support f
 
 
 
-   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` returns the correct `arch_t` architecture ID value to the caller. `bli_arch_query_id()` is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
+   * **`frame/base/bli_arch.c`**. This file must be updated so that `bli_arch_query_id()` determines the correct `arch_t` architecture ID value for the caller. This function is called when the framework is trying to choose which sub-configuration to use at runtime. When adding support for a sub-configuration as a singleton family, this amounts to adding a block of code such as:
       ```c
       #ifdef BLIS_FAMILY_KNL
           id = BLIS_ARCH_KNL;
       #endif
       ```
-      The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will return the `arch_t` ID value via the lines similar to the following:
+      The `BLIS_FAMILY_KNL` macro is automatically `#defined` by the build system if the `knl` sub-configuration was targeted directly (as a singleton family) at configure-time. Other ID values are returned only if their respective family macros are defined. (Recall that only one family is ever enabled at time.) If, however, the `knl` sub-configuration was enabled indirectly via an umbrella family, `bli_arch_query_id()` will provide the `arch_t` ID value via the lines similar to the following:
       ```c
       #ifdef BLIS_FAMILY_INTEL64
           id = bli_cpuid_query_id();

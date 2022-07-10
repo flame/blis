@@ -118,29 +118,15 @@ not already available in your current scope, a default context for the hardware
 for which BLIS was configured (or, in the case of multi-configuration builds, the
 hardware on which BLIS is currently running) may be queried via:
 ```c
-cntx_t* bli_gks_query_cntx( void );
+err_t bli_gks_query_cntx( const cntx_t** cntx );
 ```
-Once this `cntx_t*` pointer is obtained, you may call one of three functions to query any of the computation kernels described in this document:
+Once this `cntx_t*` pointer is obtained, you may call the following function to query any of the computation kernels described in this document:
 ```c
-void* bli_cntx_get_l3_nat_ukr_dt
+void_fp bli_cntx_get_ukr_dt
      (
-       num_t   dt,
-       l3ukr_t ker_id,
-       cntx_t* cntx
-     );
-
-void* bli_cntx_get_l1f_ker_dt
-     (
-       num_t   dt,
-       l1fkr_t ker_id,
-       cntx_t* cntx
-     );
-
-void* bli_cntx_get_l1v_ker_dt
-     (
-       num_t   dt,
-       l1vkr_t ker_id,
-       cntx_t* cntx
+             num_t   dt,
+             ukr_t   ker_id,
+       const cntx_t* cntx
      );
 ```
 The `dt` and `ker_id` parameters specify the floating-point datatype and the
@@ -152,30 +138,26 @@ Valid values for `ker_id` are given in the tables below.
 
 Also, note that the return values of `bli_cntx_get_l1v_ker_dt`
 `bli_cntx_get_l1f_ker_dt()`, and `bli_cntx_get_l3_nat_ukr_dt()`,
-will be `void*` and must be typecast to typed function pointers before being called.
+will be `void_fp` and must be typecast to typed function pointers before being called.
 As a convenience, BLIS defines function pointer types appropriate for usage in these
 situations. The function pointer type for each operation is given in the third
 columns of each table, with the `?` taking the place of one of the supported
 datatype characters.
 
-| kernel operation |  l3ukr_t              | function pointer type |
+| kernel operation |  ukr_t                | function pointer type |
 |:-----------------|:----------------------|:----------------------|
 | gemm             | `BLIS_GEMM`           | `?gemm_ukr_ft`        |
 | trsm_l           | `BLIS_TRSM_L_UKR`     | `?trsm_ukr_ft`        |
 | trsm_u           | `BLIS_TRSM_U_UKR`     | `?trsm_ukr_ft`        |
 | gemmtrsm_l       | `BLIS_GEMMTRSM_L_UKR` | `?gemmtrsm_ukr_ft`    |
 | gemmtrsm_u       | `BLIS_GEMMTRSM_U_UKR` | `?gemmtrsm_ukr_ft`    |
-
-| kernel operation |  l1fkr_t              | function pointer type |
-|:-----------------|:----------------------|:----------------------|
+|                  |                       |                       |
 | axpy2v           | `BLIS_AXPY2V_KER`     | `?axpy2v_ft`          |
 | dotaxpyv         | `BLIS_DOTAXPYV_KER`   | `?dotaxpyv_ft`        |
 | axpyf            | `BLIS_AXPYF_KER`      | `?axpyf_ft`           |
 | dotxf            | `BLIS_DOTXF_KER`      | `?dotxf_ft`           |
 | dotxaxpyf        | `BLIS_DOTXAXPYF_KER`  | `?dotxaxpyf_ft`       |
-
-| kernel operation |  l1vkr_t              | function pointer type |
-|:-----------------|:----------------------|:----------------------|
+|                  |                       |                       |
 | addv             | `BLIS_ADDV_KER`       | `?addv_ft`            |
 | amaxv            | `BLIS_AMAXV_KER`      | `?amaxv_ft`           |
 | axpyv            | `BLIS_AXPYV_KER`      | `?axpyv_ft`           |
@@ -256,8 +238,8 @@ void bli_?gemm_<suffix>
        ctype*     restrict b1,
        ctype*     restrict beta,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 
@@ -274,8 +256,8 @@ void bli_?gemm_ukernel
        ctype*     restrict b1,
        ctype*     restrict beta,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 This function simply queries a microkernel function pointer from the context specified by `cntx`. Note that in the case of either method of calling the microkernel, `cntx` must be a valid pointer. (Passing in `NULL` will *not* result in a default context being used.)
@@ -373,8 +355,8 @@ void bli_?trsm_l_<suffix>
        ctype*     restrict a11,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 
 void bli_?trsm_u_<suffix>
@@ -382,8 +364,8 @@ void bli_?trsm_u_<suffix>
        ctype*     restrict a11,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 
@@ -395,8 +377,8 @@ void bli_?trsm_l_ukernel
        ctype*     restrict a11,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 
 void bli_?trsm_u_ukernel
@@ -404,8 +386,8 @@ void bli_?trsm_u_ukernel
        ctype*     restrict a11,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 
@@ -473,8 +455,8 @@ void bli_?gemmtrsm_l_<suffix>
        ctype*     restrict b01,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 
 void bli_?gemmtrsm_u_<suffix>
@@ -488,8 +470,8 @@ void bli_?gemmtrsm_u_<suffix>
        ctype*     restrict b21,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 
@@ -507,8 +489,8 @@ void bli_?gemmtrsm_l_ukernel
        ctype*     restrict b01,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 
 void bli_?gemmtrsm_u_ukernel
@@ -522,8 +504,8 @@ void bli_?gemmtrsm_u_ukernel
        ctype*     restrict b21,
        ctype*     restrict b11,
        ctype*     restrict c11, inc_t rsc, inc_t csc,
-       auxinfo_t* restrict data,
-       cntx_t*    restrict cntx
+       auxinfo_t*          data,
+       cntx_t*             cntx
      );
 ```
 
@@ -655,7 +637,7 @@ void bli_?axpy2v_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        ctype*  restrict z, inc_t incz,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -679,7 +661,7 @@ void bli_?dotaxpyv_<suffix>
        ctype*  restrict y, inc_t incy,
        ctype*  restrict rho,
        ctype*  restrict z, inc_t incz,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -703,7 +685,7 @@ void bli_?axpyf_<suffix>
        ctype*  restrict a, inc_t inca, inc_t lda,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -727,7 +709,7 @@ void bli_?dotxf_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -757,7 +739,7 @@ void bli_?dotxaxpyf_<suffix>
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
        ctype*  restrict z, inc_t incz,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -785,7 +767,7 @@ void bli_?addv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -803,7 +785,7 @@ void bli_?amaxv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        dim_t*  restrict index,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 Given a vector of length _n_, this kernel returns the zero-based index `index` of the element of vector `x` that contains the largest absolute value (or, in the complex domain, the largest complex modulus).
@@ -821,7 +803,7 @@ void bli_?axpyv_<suffix>
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -842,7 +824,7 @@ void bli_?axpbyv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -861,7 +843,7 @@ void bli_?copyv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -882,7 +864,7 @@ void bli_?dotv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
        ctype*  restrict rho,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -905,7 +887,7 @@ void bli_?dotxv_<suffix>
        ctype*  restrict y, inc_t incy,
        ctype*  restrict beta,
        ctype*  restrict rho,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -922,7 +904,7 @@ void bli_?invertv_<suffix>
      (
        dim_t            n,
        ctype*  restrict x, inc_t incx,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel inverts all elements of an _n_-length vector `x`.
@@ -937,7 +919,7 @@ void bli_?scalv_<suffix>
        dim_t            n,
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -957,7 +939,7 @@ void bli_?scal2v_<suffix>
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -976,7 +958,7 @@ void bli_?setv_<suffix>
        dim_t            n,
        ctype*  restrict alpha,
        ctype*  restrict x, inc_t incx,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -995,7 +977,7 @@ void bli_?subv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:
@@ -1013,7 +995,7 @@ void bli_?swapv_<suffix>
        dim_t            n,
        ctype*  restrict x, inc_t incx,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel swaps corresponding elements of two _n_-length vectors `x` and `y` stored with strides `incx` and `incy`, respectively.
@@ -1029,7 +1011,7 @@ void bli_?xpbyv_<suffix>
        ctype*  restrict x, inc_t incx,
        ctype*  restrict beta,
        ctype*  restrict y, inc_t incy,
-       cntx_t* restrict cntx
+       cntx_t*          cntx
      )
 ```
 This kernel performs the following operation:

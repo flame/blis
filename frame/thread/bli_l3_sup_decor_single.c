@@ -61,7 +61,8 @@ err_t bli_l3_sup_thread_decorator
 	// with an internal lock to ensure only one application thread accesses
 	// the sba at a time. bli_sba_checkout_array() will also automatically
 	// resize the array_t, if necessary.
-	array_t* array = bli_sba_checkout_array( n_threads );
+	array_t* array;
+	bli_sba_checkout_array( n_threads, ( const array_t** )&array );
 
 	// Access the pool_t* for thread 0 and embed it into the rntm.
 	bli_sba_rntm_set_pool( 0, array, rntm );

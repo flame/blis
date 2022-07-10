@@ -186,16 +186,17 @@ BLIS_INLINE void bli_thread_barrier( const thrinfo_t* t )
 // Prototypes for level-3 thrinfo functions not specific to any operation.
 //
 
-thrinfo_t* bli_thrinfo_create
+err_t bli_thrinfo_create
      (
-       rntm_t*    rntm,
-       thrcomm_t* ocomm,
-       dim_t      ocomm_id,
-       dim_t      n_way,
-       dim_t      work_id,
-       bool       free_comm,
-       bszid_t    bszid,
-       thrinfo_t* sub_node
+       rntm_t*     rntm,
+       thrcomm_t*  ocomm,
+       dim_t       ocomm_id,
+       dim_t       n_way,
+       dim_t       work_id,
+       bool        free_comm,
+       bszid_t     bszid,
+       thrinfo_t*  sub_node,
+       thrinfo_t** node
      );
 
 void bli_thrinfo_init
@@ -223,43 +224,47 @@ void bli_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-void bli_thrinfo_grow
+err_t bli_thrinfo_grow
      (
        rntm_t*    rntm,
        cntl_t*    cntl,
        thrinfo_t* thread
      );
 
-thrinfo_t* bli_thrinfo_rgrow
+err_t bli_thrinfo_rgrow
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_cur,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_cur,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_cur
      );
 
-thrinfo_t* bli_thrinfo_create_for_cntl
+err_t bli_thrinfo_create_for_cntl
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_chl,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_chl,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_chl
      );
 
-thrinfo_t* bli_thrinfo_rgrow_prenode
+err_t bli_thrinfo_rgrow_prenode
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_cur,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_cur,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_cur
      );
 
-thrinfo_t* bli_thrinfo_create_for_cntl_prenode
+err_t bli_thrinfo_create_for_cntl_prenode
      (
-       rntm_t*    rntm,
-       cntl_t*    cntl_par,
-       cntl_t*    cntl_chl,
-       thrinfo_t* thread_par
+       rntm_t*     rntm,
+       cntl_t*     cntl_par,
+       cntl_t*     cntl_chl,
+       thrinfo_t*  thread_par,
+       thrinfo_t** thread_chl
      );
 
 // -----------------------------------------------------------------------------

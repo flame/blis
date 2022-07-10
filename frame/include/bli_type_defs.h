@@ -471,6 +471,10 @@ typedef enum
 
 // -- Data type --
 
+// NOTE: There are bits of code in BLIS that implicitly assume that we can
+// index from BLIS_DT_LO (BLIS_FLOAT) to BLIS_DT_HI (BLIS_DCOMPLEX). Thus,
+// those types need to be kept together / adjacent / contiguous.
+
 typedef enum
 {
 	BLIS_FLOAT             = BLIS_BITVAL_FLOAT_TYPE,
@@ -831,8 +835,9 @@ typedef enum
 //   index 0, implement something like a BLIS_OPID_LEVEL3_RANGE_START
 //   value that can be subtracted from the opid_t value to map it
 //   to a zero-based range.
-// This is needed because these level-3 opid_t values are used in
-// bli_l3_ind.c to index into arrays.
+// This is needed because some code in BLIS indexes with opid_t values,
+// such as through an array, hence why starting at 0 is important
+// (example: bli_l3_ind.c).
 //
 	BLIS_GEMM = 0,
 	BLIS_GEMMT,
@@ -955,6 +960,15 @@ typedef enum
 	// list of enums since its definition assumes that the previous enum
 	// value (BLIS_ARCH_GENERIC) is given index num_archs-1.
 	BLIS_NUM_ARCHS
+
+# if 0
+	// The maximum number of chars (including null terminator '\0') that we
+	// would ever need to store the name of a configuration as a string. This
+	// is used very infrequently, but there are times when we want to allocate
+	// enough bytes for all arch_t strings (as defined in bli_arch.c) without
+	// searching for the longest string at runtime.
+	BLIS_ARCH_MAX_STR_LEN = 20
+#endif
 
 } arch_t;
 
@@ -1462,17 +1476,25 @@ typedef enum
 
 typedef enum
 {
+	BLIS_ERROR_RETURN = 0,
+	BLIS_ERROR_ABORT
+} errmode_t;
+
+typedef enum
+{
 	// Generic error codes
-	BLIS_SUCCESS                               = (  -1),
-	BLIS_FAILURE                               = (  -2),
+	BLIS_SUCCESS                               = (   0),
+	BLIS_FAILURE                               = (  -1),
 
 	BLIS_ERROR_CODE_MIN                        = (  -9),
 
 	// General errors
 	BLIS_INVALID_ERROR_CHECKING_LEVEL          = ( -10),
-	BLIS_UNDEFINED_ERROR_CODE                  = ( -11),
-	BLIS_NULL_POINTER                          = ( -12),
-	BLIS_NOT_YET_IMPLEMENTED                   = ( -13),
+	BLIS_INVALID_ERROR_HANDLING_MODE           = ( -11),
+	BLIS_UNDEFINED_ERROR_CODE                  = ( -12),
+	BLIS_NULL_POINTER                          = ( -13),
+	BLIS_NOT_YET_IMPLEMENTED                   = ( -14),
+	BLIS_REJECT_EXEC                           = ( -15),
 
 	// Parameter-specific errors
 	BLIS_INVALID_SIDE                          = ( -20),
@@ -1521,47 +1543,61 @@ typedef enum
 	// Storage-specific errors
 	BLIS_EXPECTED_UPPER_OR_LOWER_OBJECT        = ( -70),
 
+	// Induced method-specific errors
+	BLIS_INVALID_IND                           = ( -80),
+
 	// Partitioning-specific errors
-	BLIS_INVALID_3x1_SUBPART                   = ( -80),
-	BLIS_INVALID_1x3_SUBPART                   = ( -81),
-	BLIS_INVALID_3x3_SUBPART                   = ( -82),
+	BLIS_INVALID_DIRECTION                     = ( -90),
+	BLIS_INVALID_3x1_SUBPART                   = ( -91),
+	BLIS_INVALID_1x3_SUBPART                   = ( -92),
+	BLIS_INVALID_3x3_SUBPART                   = ( -93),
+	BLIS_ROW_OFFSET_LESS_THAN_ZERO             = ( -94),
+	BLIS_ROW_OFFSET_EXCEEDS_NUM_ROWS           = ( -95),
+	BLIS_COL_OFFSET_LESS_THAN_ZERO             = ( -96),
+	BLIS_COL_OFFSET_EXCEEDS_NUM_COLS           = ( -97),
+	BLIS_VECTOR_OFFSET_LESS_THAN_ZERO          = ( -98),
+	BLIS_VECTOR_OFFSET_EXCEEDS_NUM_ELEM        = ( -99),
 
 	// Control tree-specific errors
-	BLIS_UNEXPECTED_NULL_CONTROL_TREE          = ( -90),
+	BLIS_UNEXPECTED_NULL_CONTROL_TREE          = (-100),
 
 	// Packing-specific errors
-	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-100),
+	BLIS_PACK_SCHEMA_NOT_SUPPORTED_FOR_UNPACK  = (-110),
 
 	// Buffer-specific errors
-	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-110),
+	BLIS_EXPECTED_NONNULL_OBJECT_BUFFER        = (-120),
 
 	// Memory errors
-	BLIS_MALLOC_RETURNED_NULL                  = (-120),
+	BLIS_MALLOC_RETURNED_NULL                  = (-130),
 
 	// Internal memory pool errors
-	BLIS_INVALID_PACKBUF                       = (-130),
-	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-131),
-	BLIS_INSUFFICIENT_STACK_BUF_SIZE           = (-132),
-	BLIS_ALIGNMENT_NOT_POWER_OF_TWO            = (-133),
-	BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE        = (-134),
+	BLIS_INVALID_PACKBUF                       = (-140),
+	BLIS_EXHAUSTED_CONTIG_MEMORY_POOL          = (-141),
+	BLIS_INSUFFICIENT_STACK_BUF_SIZE           = (-142),
+	BLIS_ALIGNMENT_NOT_POWER_OF_TWO            = (-143),
+	BLIS_ALIGNMENT_NOT_MULT_OF_PTR_SIZE        = (-144),
+	BLIS_MEM_POOL_BLOCKS_OUTSTANDING           = (-145),
 
 	// Object-related errors
-	BLIS_EXPECTED_OBJECT_ALIAS                 = (-140),
+	BLIS_EXPECTED_OBJECT_ALIAS                 = (-150),
 
 	// Architecture-related errors
-	BLIS_INVALID_ARCH_ID                       = (-150),
-	BLIS_UNINITIALIZED_GKS_CNTX                = (-151),
-	BLIS_INVALID_UKR_ID                        = (-152),
+	BLIS_INVALID_ARCH_ID                       = (-160),
+	BLIS_UNINITIALIZED_GKS_CNTX                = (-161),
+	BLIS_INVALID_UKR_ID                        = (-162),
 
 	// Blocksize-related errors
-	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-160),
-	BLIS_MC_MAX_NONMULTIPLE_OF_MR              = (-161),
-	BLIS_NC_DEF_NONMULTIPLE_OF_NR              = (-162),
-	BLIS_NC_MAX_NONMULTIPLE_OF_NR              = (-163),
-	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-164),
-	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-165),
+	BLIS_MC_DEF_NONMULTIPLE_OF_MR              = (-170),
+	BLIS_MC_MAX_NONMULTIPLE_OF_MR              = (-171),
+	BLIS_NC_DEF_NONMULTIPLE_OF_NR              = (-172),
+	BLIS_NC_MAX_NONMULTIPLE_OF_NR              = (-173),
+	BLIS_KC_DEF_NONMULTIPLE_OF_KR              = (-174),
+	BLIS_KC_MAX_NONMULTIPLE_OF_KR              = (-175),
 
-	BLIS_ERROR_CODE_MAX                        = (-170)
+	// Thread-related errors
+	BLIS_EXPECTED_DIFF_NUM_THREADS             = (-180),
+
+	BLIS_ERROR_CODE_MAX                        = (-190)
 } err_t;
 
 #endif

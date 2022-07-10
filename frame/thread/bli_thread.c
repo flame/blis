@@ -46,10 +46,34 @@ extern rntm_t global_rntm;
 // resides in bli_rntm.c.)
 extern bli_pthread_mutex_t global_rntm_mutex;
 
+// A boolean that tracks whether bli_thread_init() has completed successfully.
+static bool thread_is_init = FALSE;
+
 // -----------------------------------------------------------------------------
 
-void bli_thread_init( void )
+bool bli_thread_is_init( void )
 {
+	return thread_is_init;
+}
+
+void bli_thread_mark_init( void )
+{
+	thread_is_init = TRUE;
+}
+
+void bli_thread_mark_uninit( void )
+{
+	thread_is_init = FALSE;
+}
+
+// -----------------------------------------------------------------------------
+
+err_t bli_thread_init( void )
+{
+	// Sanity check: Return early if the API is already initialized.
+	if ( bli_thread_is_init() ) return BLIS_SUCCESS;
+
+	// Initialize some global communicators.
 	bli_thrcomm_init( 1, &BLIS_SINGLE_COMM );
 	bli_packm_thrinfo_init_single( &BLIS_PACKM_SINGLE_THREADED );
 	bli_l3_thrinfo_init_single( &BLIS_GEMM_SINGLE_THREADED );
@@ -57,10 +81,22 @@ void bli_thread_init( void )
 	// Read the environment variables and use them to initialize the
 	// global runtime object.
 	bli_thread_init_rntm_from_env( &global_rntm );
+
+	// Mark the API as initialized.
+	bli_thread_mark_init();
+
+	return BLIS_SUCCESS;
 }
 
-void bli_thread_finalize( void )
+err_t bli_thread_finalize( void )
 {
+	// Sanity check: Return early if the API is uninitialized.
+	if ( !bli_thread_is_init() ) return BLIS_SUCCESS;
+
+	// Mark the API as uninitialized.
+	bli_thread_mark_uninit();
+
+	return BLIS_SUCCESS;
 }
 
 // -----------------------------------------------------------------------------
@@ -1509,7 +1545,7 @@ dim_t bli_ipow( dim_t base, dim_t power )
 dim_t bli_thread_get_jc_nt( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_jc_ways( &global_rntm );
 }
@@ -1517,7 +1553,7 @@ dim_t bli_thread_get_jc_nt( void )
 dim_t bli_thread_get_pc_nt( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_pc_ways( &global_rntm );
 }
@@ -1525,7 +1561,7 @@ dim_t bli_thread_get_pc_nt( void )
 dim_t bli_thread_get_ic_nt( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_ic_ways( &global_rntm );
 }
@@ -1533,7 +1569,7 @@ dim_t bli_thread_get_ic_nt( void )
 dim_t bli_thread_get_jr_nt( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_jr_ways( &global_rntm );
 }
@@ -1541,7 +1577,7 @@ dim_t bli_thread_get_jr_nt( void )
 dim_t bli_thread_get_ir_nt( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_ir_ways( &global_rntm );
 }
@@ -1549,17 +1585,17 @@ dim_t bli_thread_get_ir_nt( void )
 dim_t bli_thread_get_num_threads( void )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	return bli_rntm_num_threads( &global_rntm );
 }
 
 // ----------------------------------------------------------------------------
 
-void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
+err_t bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
@@ -1568,12 +1604,14 @@ void bli_thread_set_ways( dim_t jc, dim_t pc, dim_t ic, dim_t jr, dim_t ir )
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_thread_set_num_threads( dim_t n_threads )
+err_t bli_thread_set_num_threads( dim_t n_threads )
 {
 	// We must ensure that global_rntm has been initialized.
-	bli_init_once();
+	BLIS_INIT_ONCE();
 
 	// Acquire the mutex protecting global_rntm.
 	bli_pthread_mutex_lock( &global_rntm_mutex );
@@ -1582,6 +1620,8 @@ void bli_thread_set_num_threads( dim_t n_threads )
 
 	// Release the mutex protecting global_rntm.
 	bli_pthread_mutex_unlock( &global_rntm_mutex );
+
+	return BLIS_SUCCESS;
 }
 
 // ----------------------------------------------------------------------------

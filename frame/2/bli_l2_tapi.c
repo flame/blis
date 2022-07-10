@@ -70,7 +70,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( m_y ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -147,7 +147,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_unb_ft) f; \
@@ -197,7 +197,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	BLIS_TAPI_EX_DECLS \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If x has zero elements, or if alpha is zero, scale y by beta and
 	   return early. */ \
@@ -281,7 +281,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	PASTEMAC2(chr,ch,copys)( *alpha, alpha_local ); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_unb_ft) f; \
@@ -338,7 +338,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_unb_ft) f; \
@@ -397,7 +397,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( m ) || PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Declare a void function pointer for the current operation. */ \
 	PASTECH2(ch,ftname,_unb_ft) f; \
@@ -458,7 +458,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim1( m ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If alpha is zero, set x to zero and return early. */ \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) \

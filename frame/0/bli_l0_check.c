@@ -41,13 +41,13 @@
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* psi  \
      ) \
 { \
-	bli_l0_xxsc_check( chi, psi ); \
+	return bli_l0_xx_check( chi, psi ); \
 }
 
 GENFRONT( addsc )
@@ -61,12 +61,12 @@ GENFRONT( subsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi  \
      ) \
 { \
-	bli_l0_xsc_check( chi ); \
+	return bli_l0_x_check( chi ); \
 }
 
 GENFRONT( invertsc )
@@ -75,13 +75,13 @@ GENFRONT( invertsc )
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC(opname,_check) \
+err_t PASTEMAC(opname,_check) \
      ( \
        const obj_t* chi, \
        const obj_t* norm  \
      ) \
 { \
-	bli_l0_xx2sc_check( chi, norm ); \
+	return bli_l0_xx2_check( chi, norm ); \
 }
 
 GENFRONT( absqsc )
@@ -89,7 +89,7 @@ GENFRONT( normfsc )
 
 // -----------------------------------------------------------------------------
 
-void bli_getsc_check
+err_t bli_getsc_check
      (
        const obj_t*  chi,
        const double* zeta_r,
@@ -101,21 +101,23 @@ void bli_getsc_check
 	// Check object datatypes.
 
 	//e_val = bli_check_noninteger_object( chi );
-	//bli_check_error_code( e_val );
+	//bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
 
-void bli_setsc_check
+err_t bli_setsc_check
      (
        double       zeta_r,
        double       zeta_i,
@@ -127,21 +129,23 @@ void bli_setsc_check
 	// Check object datatypes.
 
 	//e_val = bli_check_floating_object( chi );
-	//bli_check_error_code( e_val );
+	//bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
 
-void bli_unzipsc_check
+err_t bli_unzipsc_check
      (
        const obj_t* chi,
        const obj_t* zeta_r,
@@ -152,52 +156,54 @@ void bli_unzipsc_check
 
 	// Check object datatypes.
 
-    e_val = bli_check_noninteger_object( chi );
-    bli_check_error_code( e_val );
+	e_val = bli_check_noninteger_object( chi );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_real_object( zeta_r );
-    bli_check_error_code( e_val );
+	e_val = bli_check_real_object( zeta_r );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_real_object( zeta_i );
-    bli_check_error_code( e_val );
+	e_val = bli_check_real_object( zeta_i );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_nonconstant_object( zeta_r );
-    bli_check_error_code( e_val );
+	e_val = bli_check_nonconstant_object( zeta_r );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_nonconstant_object( zeta_i );
-    bli_check_error_code( e_val );
+	e_val = bli_check_nonconstant_object( zeta_i );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_object_real_proj_of( chi, zeta_r );
-    bli_check_error_code( e_val );
+	e_val = bli_check_object_real_proj_of( chi, zeta_r );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_object_real_proj_of( chi, zeta_i );
-    bli_check_error_code( e_val );
+	e_val = bli_check_object_real_proj_of( chi, zeta_i );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( zeta_r );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( zeta_i );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( zeta_r );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( zeta_i );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
 
-void bli_zipsc_check
+err_t bli_zipsc_check
      (
        const obj_t* zeta_r,
        const obj_t* zeta_i,
@@ -208,51 +214,53 @@ void bli_zipsc_check
 
 	// Check object datatypes.
 
-    e_val = bli_check_real_object( zeta_r );
-    bli_check_error_code( e_val );
+	e_val = bli_check_real_object( zeta_r );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_real_object( zeta_i );
-    bli_check_error_code( e_val );
+	e_val = bli_check_real_object( zeta_i );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_noninteger_object( chi );
-    bli_check_error_code( e_val );
+	e_val = bli_check_noninteger_object( chi );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_nonconstant_object( chi );
-    bli_check_error_code( e_val );
+	e_val = bli_check_nonconstant_object( chi );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_object_real_proj_of( chi, zeta_r );
-    bli_check_error_code( e_val );
+	e_val = bli_check_object_real_proj_of( chi, zeta_r );
+	bli_check_return_error_code( e_val );
 
-    e_val = bli_check_object_real_proj_of( chi, zeta_i );
-    bli_check_error_code( e_val );
+	e_val = bli_check_object_real_proj_of( chi, zeta_i );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( zeta_r );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( zeta_i );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( zeta_r );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( zeta_i );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
 
 // -----------------------------------------------------------------------------
 
-void bli_l0_xsc_check
+err_t bli_l0_x_check
      (
        const obj_t* chi
      )
@@ -262,23 +270,25 @@ void bli_l0_xsc_check
 	// Check object datatypes.
 
 	e_val = bli_check_noninteger_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_nonconstant_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_l0_xxsc_check
+err_t bli_l0_xx_check
      (
        const obj_t* chi,
        const obj_t* psi
@@ -289,32 +299,34 @@ void bli_l0_xxsc_check
 	// Check object datatypes.
 
 	e_val = bli_check_noninteger_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_noninteger_object( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_nonconstant_object( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_l0_xx2sc_check
+err_t bli_l0_xx2_check
      (
        const obj_t* chi,
        const obj_t* absq
@@ -325,35 +337,37 @@ void bli_l0_xx2sc_check
 	// Check object datatypes.
 
 	e_val = bli_check_noninteger_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_nonconstant_object( absq );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_real_object( absq );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_real_proj_of( chi, absq );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( absq );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( absq );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 
-void bli_l0_xxbsc_check
+err_t bli_l0_xxbool_check
      (
        const obj_t* chi,
        const obj_t* psi,
@@ -365,25 +379,27 @@ void bli_l0_xxbsc_check
 	// Check object datatypes.
 
 	e_val = bli_check_noninteger_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_noninteger_object( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object dimensions.
 
 	e_val = bli_check_scalar_object( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_scalar_object( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	// Check object buffers (for non-NULLness).
 
 	e_val = bli_check_object_buffer( chi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
 
 	e_val = bli_check_object_buffer( psi );
-	bli_check_error_code( e_val );
+	bli_check_return_error_code( e_val );
+
+	return BLIS_SUCCESS;
 }
 

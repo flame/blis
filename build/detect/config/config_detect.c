@@ -69,8 +69,10 @@
 
 int main( int argc, char** argv )
 {
-	arch_t id     = bli_cpuid_query_id();
-	const char* s = bli_arch_string( id );
+	const char* s;
+
+	arch_t id    = bli_cpuid_query_id();
+	err_t  r_val = bli_arch_string( id, &s );
 
 	printf( "%s\n", s );
 

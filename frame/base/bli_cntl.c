@@ -53,7 +53,7 @@ cntl_t* bli_cntl_create_node
 	#endif
 
 	// Allocate the cntl_t struct.
-	cntl = bli_sba_acquire( rntm, sizeof( cntl_t ) );
+	bli_sba_acquire( rntm, sizeof( cntl_t ), ( void** )&cntl );
 
 	bli_cntl_set_family( family, cntl );
 	bli_cntl_set_bszid( bszid, cntl );
@@ -273,7 +273,8 @@ cntl_t* bli_cntl_copy
 		// struct.
 		uint64_t params_size = bli_cntl_params_size( cntl );
 		void*    params_orig = bli_cntl_params( cntl );
-		void*    params_copy = bli_sba_acquire( rntm, ( size_t )params_size );
+		void*    params_copy;
+		bli_sba_acquire( rntm, ( size_t )params_size, ( void** )&params_copy );
 
 		// Copy the original params struct to the new memory region.
 		memcpy( params_copy, params_orig, params_size );

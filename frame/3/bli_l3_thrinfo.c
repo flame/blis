@@ -64,7 +64,7 @@ void bli_l3_sup_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_thrinfo_create_root
+err_t bli_l3_thrinfo_create_root
      (
        dim_t       id,
        thrcomm_t*  gl_comm,
@@ -88,7 +88,8 @@ void bli_l3_thrinfo_create_root
 	dim_t   work_id    = gl_comm_id / ( n_threads / xx_way );
 
 	// Create the root thrinfo_t node.
-	*thread = bli_thrinfo_create
+	return
+	bli_thrinfo_create
 	(
 	  rntm,
 	  gl_comm,
@@ -97,13 +98,14 @@ void bli_l3_thrinfo_create_root
 	  work_id,
 	  TRUE,
 	  bszid,
-	  NULL
+	  NULL,
+	  thread
 	);
 }
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_sup_thrinfo_create_root
+err_t bli_l3_sup_thrinfo_create_root
      (
        dim_t       id,
        thrcomm_t*  gl_comm,
@@ -130,7 +132,8 @@ void bli_l3_sup_thrinfo_create_root
 	dim_t   work_id    = gl_comm_id / ( n_threads / xx_way );
 
 	// Create the root thrinfo_t node.
-	*thread = bli_thrinfo_create
+	return
+	bli_thrinfo_create
 	(
 	  rntm,
 	  gl_comm,
@@ -139,7 +142,8 @@ void bli_l3_sup_thrinfo_create_root
 	  work_id,
 	  TRUE,
 	  bszid,
-	  NULL
+	  NULL,
+	  thread
 	);
 }
 

@@ -63,7 +63,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
@@ -107,7 +107,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
@@ -152,7 +152,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
@@ -202,7 +202,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \
@@ -252,7 +252,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	const num_t dt = PASTEMAC(ch,type); \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	PASTECH2(ch,opname,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
 \

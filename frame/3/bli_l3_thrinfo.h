@@ -101,7 +101,7 @@ void bli_l3_sup_thrinfo_free
 
 // -----------------------------------------------------------------------------
 
-void bli_l3_thrinfo_create_root
+err_t bli_l3_thrinfo_create_root
      (
        dim_t       id,
        thrcomm_t*  gl_comm,
@@ -110,7 +110,7 @@ void bli_l3_thrinfo_create_root
        thrinfo_t** thread
      );
 
-void bli_l3_sup_thrinfo_create_root
+err_t bli_l3_sup_thrinfo_create_root
      (
        dim_t       id,
        thrcomm_t*  gl_comm,

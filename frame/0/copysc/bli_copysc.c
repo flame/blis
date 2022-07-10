@@ -39,7 +39,7 @@
 // an operation that can be used to typecast (copy-cast) a scalar
 // of one datatype to a scalar of another datatype.
 
-typedef void (*FUNCPTR_T)
+typedef err_t (*FUNCPTR_T)
      (
              conj_t conjchi,
        const void*  chi,
@@ -55,13 +55,13 @@ static FUNCPTR_T GENARRAY2_ALL(ftypes,copysc);
 #undef  GENFRONT
 #define GENFRONT( opname ) \
 \
-void PASTEMAC0(opname) \
+err_t PASTEMAC0(opname) \
      ( \
        const obj_t* chi, \
        const obj_t* psi  \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	conj_t conjchi = bli_obj_conj_status( chi ); \
 \
@@ -73,8 +73,13 @@ void PASTEMAC0(opname) \
 \
 	FUNCPTR_T f; \
 \
+	err_t     r_val; \
+\
 	if ( bli_error_checking_is_enabled() ) \
-		PASTEMAC(opname,_check)( chi, psi ); \
+	{ \
+	    r_val = PASTEMAC(opname,_check)( chi, psi ); \
+		bli_check_return_if_failure( r_val ); \
+	} \
 \
 	/* If chi is a scalar constant, use dt_psi to extract the address of the
 	   corresponding constant value; otherwise, use the datatype encoded
@@ -86,11 +91,13 @@ void PASTEMAC0(opname) \
 	f = ftypes[dt_chi][dt_psi]; \
 \
 	/* Invoke the void pointer-based function. */ \
-	f( \
-	   conjchi, \
-	   buf_chi, \
-	   buf_psi  \
-	 ); \
+	return \
+	f \
+	( \
+	  conjchi, \
+	  buf_chi, \
+	  buf_psi  \
+	); \
 }
 
 GENFRONT( copysc )
@@ -103,14 +110,14 @@ GENFRONT( copysc )
 #undef  GENTFUNC2
 #define GENTFUNC2( ctype_x, ctype_y, chx, chy, varname ) \
 \
-void PASTEMAC2(chx,chy,varname) \
+err_t PASTEMAC2(chx,chy,varname) \
      ( \
              conj_t conjchi, \
        const void*  chi, \
              void*  psi \
      ) \
 { \
-	bli_init_once(); \
+	BLIS_INIT_ONCE(); \
 \
 	const ctype_x* chi_cast = chi; \
 	      ctype_y* psi_cast = psi; \
@@ -123,6 +130,8 @@ void PASTEMAC2(chx,chy,varname) \
 	{ \
 		PASTEMAC2(chx,chy,copys)( *chi_cast, *psi_cast ); \
 	} \
+\
+	return BLIS_SUCCESS; \
 }
 
 INSERT_GENTFUNC2_BASIC0( copysc )

@@ -63,7 +63,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -128,7 +128,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -201,7 +201,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( PASTEMAC(ch,eq0)( *alpha ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -268,7 +268,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If alpha is zero, then we set the output matrix to zero. This
 	   seemingly minor optimization is important because it will clear
@@ -359,7 +359,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Invoke the helper variant, which loops over the appropriate kernel
 	   to implement the current operation. */ \
@@ -406,7 +406,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If beta is zero, then the operation reduces to copym. */ \
 	if ( PASTEMAC(ch,eq0)( *beta ) ) \
@@ -493,7 +493,7 @@ void PASTEMAC3(chx,chy,opname,EX_SUF) \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* If beta is zero, then the operation reduces to copym. */ \
 	if ( PASTEMAC(chy,eq0)( *beta ) ) \

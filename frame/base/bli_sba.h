@@ -35,34 +35,28 @@
 #ifndef BLIS_SBA_H
 #define BLIS_SBA_H
 
+// -----------------------------------------------------------------------------
+
+bool bli_sba_is_init( void );
+void bli_sba_mark_init( void );
+void bli_sba_mark_uninit( void );
+
+// -----------------------------------------------------------------------------
+
 apool_t* bli_sba_query( void );
 
 // -----------------------------------------------------------------------------
 
-void bli_sba_init( void );
-void bli_sba_finalize( void );
+err_t bli_sba_init( void );
+err_t bli_sba_finalize( void );
 
-array_t* bli_sba_checkout_array
-     (
-       siz_t n_threads
-     );
+// -----------------------------------------------------------------------------
 
-void bli_sba_checkin_array
-     (
-       array_t* array
-     );
-
-void bli_sba_rntm_set_pool
-     (
-       siz_t    index,
-       array_t* array,
-       rntm_t*  rntm
-     );
-
-void* bli_sba_acquire
+err_t bli_sba_acquire
      (
        rntm_t* rntm,
-       siz_t   req_size
+       siz_t   req_size,
+       void**  block
      );
 void bli_sba_release
      (
@@ -70,6 +64,27 @@ void bli_sba_release
        void*   block
      );
 
+// -----------------------------------------------------------------------------
+
+err_t bli_sba_checkout_array
+     (
+             siz_t     n_threads,
+       const array_t** array
+     );
+
+void bli_sba_checkin_array
+     (
+       array_t* array
+     );
+
+// -----------------------------------------------------------------------------
+
+err_t bli_sba_rntm_set_pool
+     (
+       siz_t    index,
+       array_t* array,
+       rntm_t*  rntm
+     );
 
 #endif
 

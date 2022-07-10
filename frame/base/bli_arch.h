@@ -35,16 +35,16 @@
 #ifndef BLIS_ARCH_H
 #define BLIS_ARCH_H
 
-BLIS_EXPORT_BLIS arch_t bli_arch_query_id( void );
+BLIS_EXPORT_BLIS err_t bli_arch_query_id( arch_t* id );
 
-void bli_arch_set_id_once( void );
-void bli_arch_set_id( void );
+err_t                  bli_arch_set_id_once( void );
+err_t                  bli_arch_set_id( void );
 
-BLIS_EXPORT_BLIS const char*  bli_arch_string( arch_t id );
+BLIS_EXPORT_BLIS err_t bli_arch_string( arch_t id, const char** str );
 
-void bli_arch_set_logging( bool dolog );
-bool bli_arch_get_logging( void );
-void bli_arch_log( const char*, ... );
+void                   bli_arch_set_logging( bool dolog );
+bool                   bli_arch_get_logging( void );
+void                   bli_arch_log( const char*, ... );
 
 #endif
 

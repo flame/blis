@@ -427,6 +427,21 @@ BLIS_INLINE bool bli_is_unit_diag( diag_t diag )
 }
 
 
+// ind_t
+
+BLIS_INLINE bool bli_is_1m( ind_t im )
+{
+	return ( bool )
+	       ( im == BLIS_1M );
+}
+
+BLIS_INLINE bool bli_is_nat( ind_t im )
+{
+	return ( bool )
+	       ( im == BLIS_NAT );
+}
+
+
 // err_t-related
 
 BLIS_INLINE bool bli_is_success( err_t err )
@@ -510,6 +525,21 @@ BLIS_INLINE void bli_set_dims_incs_with_trans( trans_t trans,
 {
 	if ( bli_does_notrans( trans ) ) { *mt = m; *nt = n; *rst = rs; *cst = cs; }
 	else                             { *mt = n; *nt = m; *rst = cs; *cst = rs; }
+}
+
+
+// direction-related
+
+BLIS_INLINE bool bli_is_fwd( dir_t direct )
+{
+	return ( bool )
+	       ( direct == BLIS_FWD );
+}
+
+BLIS_INLINE bool bli_is_bwd( dir_t direct )
+{
+	return ( bool )
+	       ( direct == BLIS_BWD );
 }
 
 

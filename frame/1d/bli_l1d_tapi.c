@@ -98,7 +98,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
@@ -178,7 +178,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
@@ -238,7 +238,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
@@ -296,7 +296,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
@@ -373,7 +373,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	incx = 2*incx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(chr,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt_r, kerid, cntx ); \
@@ -432,7 +432,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	x1 = x + offx; \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
@@ -510,7 +510,7 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 	} \
 \
 	/* Obtain a valid context from the gks if necessary. */ \
-	if ( cntx == NULL ) cntx = bli_gks_query_cntx(); \
+	bli_gks_query_cntx_if_null( &cntx ); \
 \
 	/* Query the context for the operation's kernel address. */ \
 	PASTECH2(ch,kername,_ker_ft) f = bli_cntx_get_ukr_dt( dt, kerid, cntx ); \
