@@ -53,3 +53,6 @@ out.*
 GPATH
 GRTAGS
 GTAGS
+
+# Mac DS.store files
+.DS_Store
