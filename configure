@@ -3688,9 +3688,9 @@ main()
 			# Query the compiler "vendor" (ie: the compiler's simple name).
 			# The last part ({ read first rest ; echo $first ; }) is a workaround
 			# to OS X's egrep only returning the first match.
-			fc_vendor=$(echo "${vendor_string}" | egrep -o 'ifort|GNU' | { read first rest ; echo $first ; })
+			fc_vendor=$(echo "${vendor_string}" | egrep -o 'IFORT|GNU' | { read first rest ; echo $first ; })
 
-			if [ "x${fc_vendor}" = "xifort" ]; then
+			if [ "x${fc_vendor}" = "xIFORT" ]; then
 				complex_return='intel'
 			elif [ "x${fc_vendor}" = "xGNU" ]; then
 				complex_return='gnu'
