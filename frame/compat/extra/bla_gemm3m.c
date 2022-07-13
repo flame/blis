@@ -103,7 +103,7 @@ void PASTEF77(ch,blasname) \
 	   abbreviated version of bli_gemm_ex() so that we can bypass
 	   consideration of sup, which doesn't make sense in this context. */ \
 	{ \
-		cntx_t* cntx = ( cntx_t* )bli_gks_query_ind_cntx( BLIS_1M, dt ); \
+		cntx_t* cntx = ( cntx_t* )bli_gks_query_ind_cntx( BLIS_1M ); \
 \
 		rntm_t  rntm_l; \
 		rntm_t* rntm = &rntm_l; \
@@ -222,7 +222,7 @@ void PASTEF77(ch,blasname) \
 	   abbreviated version of bli_gemm_ex() so that we can bypass
 	   consideration of sup, which doesn't make sense in this context. */ \
 	{ \
-		cntx_t* cntx = ( cntx_t* )bli_gks_query_ind_cntx( BLIS_1M, dt ); \
+		cntx_t* cntx = ( cntx_t* )bli_gks_query_ind_cntx( BLIS_1M ); \
 \
 		rntm_t  rntm_l; \
 		rntm_t* rntm = &rntm_l; \

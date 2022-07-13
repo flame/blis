@@ -459,12 +459,24 @@ static doublereal c_b52 = 0.;
     integer lenx, leny;
     extern /* Subroutine */ int ctest_(integer *, doublecomplex *, 
 	    doublecomplex *, doublecomplex *, doublereal *);
-    extern /* Double Complex */ doublecomplex zdotc_(integer *, 
+    extern /* Double Complex */
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+ void zdotc_(doublecomplex *,
+#else
+doublecomplex zdotc_(
+#endif
+ integer *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
     integer ksize;
     extern /* Subroutine */ int zcopy_(integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *);
-    extern /* Double Complex */ doublecomplex zdotu_(integer *, 
+    extern /* Double Complex */
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+ void zdotu_(doublecomplex *,
+#else
+doublecomplex zdotu_(
+#endif
+ integer *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
     extern /* Subroutine */ int zswap_(integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *), zaxpy_(integer *, doublecomplex *, 
@@ -508,14 +520,26 @@ static doublereal c_b52 = 0.;
 	    }
 	    if (combla_1.icase == 1) {
 /*              .. ZDOTC .. */
-		z__1 = zdotc_(&combla_1.n, cx, &combla_1.incx, cy, &
+
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+		zdotc_(&z__1,
+#else
+		z__1 = zdotc_(
+#endif
+		 &combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 		cdot[0].r = z__1.r, cdot[0].i = z__1.i;
 		ctest_(&c__1, cdot, &ct6[kn + (ki << 2) - 5], &csize1[kn - 1],
 			 sfac);
 	    } else if (combla_1.icase == 2) {
 /*              .. ZDOTU .. */
-		z__1 = zdotu_(&combla_1.n, cx, &combla_1.incx, cy, &
+
+#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL
+		zdotu_(&z__1,
+#else
+		z__1 = zdotu_(
+#endif
+		 &combla_1.n, cx, &combla_1.incx, cy, &
 			combla_1.incy);
 		cdot[0].r = z__1.r, cdot[0].i = z__1.i;
 		ctest_(&c__1, cdot, &ct7[kn + (ki << 2) - 5], &csize1[kn - 1],

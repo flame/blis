@@ -50,13 +50,15 @@ recursive-sed.sh -c "s/-4.f };/-4.f }};/g" -p "s*1.c"
 
 # Convert from brain-dead f2c complex calling conventions to normal
 # return-based conventions.
-recursive-sed.sh -c "s/void cdotc_(complex \*, /complex cdotc_(/g" -p "c*1.c"
-recursive-sed.sh -c "s/void cdotu_(complex \*, /complex cdotu_(/g" -p "c*1.c"
-recursive-sed.sh -c "s/cdotc_(&q__1, /q__1 = cdotc_(/g" -p "c*1.c"
-recursive-sed.sh -c "s/cdotu_(&q__1, /q__1 = cdotu_(/g" -p "c*1.c"
+subst1='\n#ifdef BLIS_ENABLE_COMPLEX_RETURN_INTEL\n&\n#else\n'
+subst2='\n#endif\n'
+recursive-sed.sh -c "s/ void cdotc_(complex \*,/${subst1}complex cdotc_(${subst2}/g" -p "c*1.c"
+recursive-sed.sh -c "s/ void cdotu_(complex \*,/${subst1}complex cdotu_(${subst2}/g" -p "c*1.c"
+recursive-sed.sh -c "s/\(.*\)cdotc_(&q__1,/${subst1}\1q__1 = cdotc_(${subst2}\1/g" -p "c*1.c"
+recursive-sed.sh -c "s/\(.*\)cdotu_(&q__1,/${subst1}\1q__1 = cdotu_(${subst2}\1/g" -p "c*1.c"
 
-recursive-sed.sh -c "s/void zdotc_(doublecomplex \*, /doublecomplex zdotc_(/g" -p "z*1.c"
-recursive-sed.sh -c "s/void zdotu_(doublecomplex \*, /doublecomplex zdotu_(/g" -p "z*1.c"
-recursive-sed.sh -c "s/zdotc_(\&z__1, /z__1 = zdotc_(/g" -p "z*1.c"
-recursive-sed.sh -c "s/zdotu_(\&z__1, /z__1 = zdotu_(/g" -p "z*1.c"
+recursive-sed.sh -c "s/ void zdotc_(doublecomplex \*,/${subst1}doublecomplex zdotc_(${subst2}/g" -p "z*1.c"
+recursive-sed.sh -c "s/ void zdotu_(doublecomplex \*,/${subst1}doublecomplex zdotu_(${subst2}/g" -p "z*1.c"
+recursive-sed.sh -c "s/\(.*\)zdotc_(\&z__1,/${subst1}\1z__1 = zdotc_(${subst2}\1/g" -p "z*1.c"
+recursive-sed.sh -c "s/\(.*\)zdotu_(\&z__1,/${subst1}\1z__1 = zdotu_(${subst2}\1/g" -p "z*1.c"
 
