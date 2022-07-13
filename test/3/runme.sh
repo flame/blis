@@ -5,12 +5,12 @@ exec_root="test"
 out_root="output"
 delay=0.1
 
-#sys="blis"
+sys="blis"
 #sys="stampede2"
 #sys="lonestar5"
 #sys="ul252"
 #sys="ul264"
-sys="ul2128"
+#sys="ul2128"
 
 # Bind threads to processors.
 #export OMP_PROC_BIND=true
@@ -22,9 +22,9 @@ if [ ${sys} = "blis" ]; then
 	export GOMP_CPU_AFFINITY="0-3"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic3jr2_6000
-	         jc4ic3jr2_8000"
+	threads="jc1ic1jr1_st
+	         jc2ic1jr1_1s
+	         jc2ic2jr1_2s"
 
 elif [ ${sys} = "stampede2" ]; then
 
@@ -32,9 +32,9 @@ elif [ ${sys} = "stampede2" ]; then
 	exit 1
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc4ic6jr1_6000
-	         jc4ic12jr1_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic6jr1_1s
+	         jc4ic12jr1_2s"
 
 elif [ ${sys} = "lonestar5" ]; then
 
@@ -44,9 +44,9 @@ elif [ ${sys} = "lonestar5" ]; then
 	#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/apps/intel/16.0.1.150/compilers_and_libraries_2016.1.150/linux/compiler/lib/intel64"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic3jr2_6000
-	         jc4ic3jr2_8000"
+	threads="jc1ic1jr1_st
+	         jc2ic3jr2_1s
+	         jc4ic3jr2_2s"
 
 elif [ ${sys} = "ul252" ]; then
 
@@ -54,9 +54,9 @@ elif [ ${sys} = "ul252" ]; then
 	export GOMP_CPU_AFFINITY="0-51"
 
 	numactl=""
-	threads="jc1ic1jr1_2400
-	         jc2ic13jr1_6000
-	         jc4ic13jr1_8000"
+	threads="jc1ic1jr1_st
+	         jc2ic13jr1_1s
+	         jc4ic13jr1_2s"
 
 elif [ ${sys} = "ul264" ]; then
 
@@ -64,9 +64,9 @@ elif [ ${sys} = "ul264" ]; then
 	export GOMP_CPU_AFFINITY="0-63"
 
 	numactl="numactl --interleave=all"
-	threads="jc1ic1jr1_2400
-	         jc1ic8jr4_6000
-	         jc2ic8jr4_8000"
+	threads="jc1ic1jr1_st
+	         jc1ic8jr4_1s
+	         jc2ic8jr4_2s"
 
 elif [ ${sys} = "ul2128" ]; then
 
@@ -74,14 +74,14 @@ elif [ ${sys} = "ul2128" ]; then
 	export GOMP_CPU_AFFINITY="0-127"
 
 	numactl="numactl --interleave=all"
-	threads="jc1ic1jr1_2400
-	         jc4ic4jr4_6000
-	         jc8ic4jr4_8000"
-	#threads="jc4ic4jr4_6000
-	#         jc8ic4jr4_8000"
-	#threads="jc1ic1jr1_2400"
-	#threads="jc4ic4jr4_6000"
-	#threads="jc8ic4jr4_8000"
+	threads="jc1ic1jr1_st
+	         jc4ic4jr4_1s
+	         jc8ic4jr4_2s"
+	#threads="jc4ic4jr4_1s
+	#         jc8ic4jr4_2s"
+	#threads="jc1ic1jr1_st"
+	#threads="jc4ic4jr4_1s"
+	#threads="jc8ic4jr4_2s"
 fi
 
 # Datatypes to test.
@@ -93,12 +93,12 @@ test_ops="gemm hemm herk trmm trsm"
 #test_ops="herk"
 
 # Implementations to test.
-#impls="blis"
+impls="blis"
 #impls="openblas"
 #impls="vendor"
 #impls="other"
 #impls="eigen"
-impls="all"
+#impls="all"
 
 if [ "${impls}" = "blis" ]; then
 
@@ -129,7 +129,7 @@ fi
 GOMP_CPU_AFFINITYsave=${GOMP_CPU_AFFINITY}
 
 
-# First perform real test cases.
+# Iterate over the threading configs.
 for th in ${threads}; do
 
 	# Start with one way of parallelism in each loop. We will now begin
@@ -139,7 +139,8 @@ for th in ${threads}; do
 
 	# Strip everything before and after the underscore so that what remains
 	# is the problem size and threading parameter string, respectively.
-	psize=${th##*_}; thinfo=${th%%_*}
+	#psize=${th##*_}; thinfo=${th%%_*}
+	tsuf=${th##*_}; thinfo=${th%%_*}
 
 	# Identify each threading parameter and insert a space before it.
 	thsep=$(echo -e ${thinfo} | sed -e "s/\([jip][cr]\)/ \1/g" )
@@ -166,13 +167,32 @@ for th in ${threads}; do
 
 	done
 
+	# Find a binary using the test driver prefix and the threading suffix.
+	# Then strip everything before and after the max problem size that's
+	# encoded into the name of the binary.
+	binname=$(ls -1 ${exec_root}_*_${tsuf}.x | head -n1)
+	temp1=${binname#${exec_root}_*_}
+	psize=${temp1%%_*}
+
+	# Sanity check: If 'ls' couldn't find any binaries, then the user
+	# probably didn't build them. Inform the user and proceed to the next
+	# threading config.
+	if [ "${binname}" = "" ]; then
+
+		echo "Could not find binaries corresponding to '${tsuf}' threading config. Skipping."
+		continue
+	fi
+
+	# Let the user know what threading config we are working on.
 	echo "Switching to: jc${jc_nt} pc${pc_nt} ic${ic_nt} jr${jr_nt} ir${ir_nt} (nt = ${nt}) p_max${psize}"
 
-
+	# Iterate over the datatypes.
 	for dt in ${test_dts}; do
 
+		# Iterate over the implementations.
 		for im in ${test_impls}; do
 
+			# Iterate over the operations.
 			for op in ${test_ops}; do
 
 				# Eigen does not support multithreading for hemm, herk, trmm,
@@ -185,14 +205,12 @@ for th in ${threads}; do
 				fi
 
 				# Find the threading suffix by probing the executable.
-				binname=$(ls ${exec_root}_${dt}${op}_${psize}_${im}_*.x)
-				suf_ext=${binname##*_}
-				suf=${suf_ext%%.*}
+				binname=$(ls ${exec_root}_${dt}${op}_*_${im}_${tsuf}.x)
 
 				#echo "found file: ${binname} with suffix ${suf}"
 
 				# Set the number of threads according to th.
-				if [ "${suf}" = "1s" ] || [ "${suf}" = "2s" ]; then
+				if [ "${tsuf}" = "1s" ] || [ "${tsuf}" = "2s" ]; then
 
 					# Set the threading parameters based on the implementation
 					# that we are preparing to run.
@@ -237,10 +255,10 @@ for th in ${threads}; do
 				fi
 
 				# Construct the name of the test executable.
-				exec_name="${exec_root}_${dt}${op}_${psize}_${im}_${suf}.x"
+				exec_name="${exec_root}_${dt}${op}_${psize}_${im}_${tsuf}.x"
 
 				# Construct the name of the output file.
-				out_file="${out_root}_${suf}_${dt}${op}_${im}.m"
+				out_file="${out_root}_${tsuf}_${dt}${op}_${im}.m"
 
 				#echo "Running (nt = ${nt_use}) ./${exec_name} > ${out_file}"
 				echo "Running ${numactl} ./${exec_name} > ${out_file}"
