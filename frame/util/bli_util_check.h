@@ -42,8 +42,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  asum  \
+       const obj_t* x, \
+       const obj_t* asum  \
      );
 
 GENPROT( asumv )
@@ -54,7 +54,7 @@ GENPROT( asumv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
      );
 
 GENPROT( mkherm )
@@ -67,8 +67,8 @@ GENPROT( mktrim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      );
 
 GENPROT( norm1v )
@@ -81,8 +81,8 @@ GENPROT( normiv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      );
 
 GENPROT( norm1m )
@@ -95,7 +95,7 @@ GENPROT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
      );
 
 GENPROT( randv )
@@ -109,9 +109,9 @@ GENPROT( randnm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  scale, \
-       const obj_t*  sumsq  \
+       const obj_t* x, \
+       const obj_t* scale, \
+       const obj_t* sumsq  \
      );
 
 GENPROT( sumsqv )
@@ -123,9 +123,9 @@ GENPROT( sumsqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  chi, \
-       const obj_t*  psi, \
-       const bool*   is_eq  \
+       const obj_t* chi, \
+       const obj_t* psi, \
+       const bool*  is_eq  \
      );
 
 GENTPROT( eqsc )
@@ -136,9 +136,9 @@ GENTPROT( eqsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  y, \
-       const bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const bool*  is_eq  \
     );
 
 GENPROT( eqv )
@@ -164,31 +164,31 @@ GENPROT( fprintm )
 
 void bli_utilv_xi_check
      (
-       const obj_t*  x,
-       const obj_t*  index
+       const obj_t* x,
+       const obj_t* index
      );
 
 void bli_utilv_xa_check
      (
-       const obj_t*  x,
-       const obj_t*  asum
+       const obj_t* x,
+       const obj_t* asum
      );
 
 void bli_utilm_mkhst_check
      (
-       const obj_t*  a
+       const obj_t* a
      );
 
 void bli_utilv_norm_check
      (
-       const obj_t*  x,
-       const obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      );
 
 void bli_utilm_norm_check
      (
-       const obj_t*  x,
-       const obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      );
 
 void bli_utilm_fprint_check
@@ -207,8 +207,8 @@ void bli_utilm_rand_check
 
 void bli_utilv_sumsqv_check
      (
-       const obj_t*  x,
-       const obj_t*  scale,
-       const obj_t*  sumsq
+       const obj_t* x,
+       const obj_t* scale,
+       const obj_t* sumsq
      );
 

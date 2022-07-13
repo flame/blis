@@ -128,14 +128,14 @@ INSERT_GENTFUNC_BASIC3( gemv, gemv, gemv_unf_var1, gemv_unf_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  a, inc_t rs_a, inc_t cs_a  \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -180,15 +180,15 @@ INSERT_GENTFUNC_BASIC3( ger, ger, ger_unb_var1, ger_unb_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             uplo_t  uploa, \
-             conj_t  conja, \
-             conj_t  conjx, \
-             dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  a, inc_t rs_a, inc_t cs_a, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  beta, \
-             ctype*  y, inc_t incy  \
+             uplo_t uploa, \
+             conj_t conja, \
+             conj_t conjx, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* a, inc_t rs_a, inc_t cs_a, \
+       const ctype* x, inc_t incx, \
+       const ctype* beta, \
+             ctype* y, inc_t incy  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -321,12 +321,12 @@ INSERT_GENTFUNCR_BASIC4( her, her, BLIS_CONJUGATE, her_unb_var1, her_unb_var2 )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             uplo_t   uploa, \
-             conj_t   conjx, \
-             dim_t    m, \
-       const ctype*   alpha, \
-       const ctype*   x, inc_t incx, \
-             ctype*   a, inc_t rs_a, inc_t cs_a  \
+             uplo_t uploa, \
+             conj_t conjx, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -378,14 +378,14 @@ INSERT_GENTFUNC_BASIC4( syr, her, BLIS_NO_CONJUGATE, her_unb_var1, her_unb_var2 
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             uplo_t  uploa, \
-             conj_t  conjx, \
-             conj_t  conjy, \
-             dim_t   m, \
-       const ctype*  alpha, \
-       const ctype*  x, inc_t incx, \
-       const ctype*  y, inc_t incy, \
-             ctype*  a, inc_t rs_a, inc_t cs_a  \
+             uplo_t uploa, \
+             conj_t conjx, \
+             conj_t conjy, \
+             dim_t  m, \
+       const ctype* alpha, \
+       const ctype* x, inc_t incx, \
+       const ctype* y, inc_t incy, \
+             ctype* a, inc_t rs_a, inc_t cs_a  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \

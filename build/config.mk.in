@@ -73,6 +73,7 @@ OS_NAME           := @os_name@
 
 # Check for whether the operating system is Windows.
 IS_WIN            := @is_win@
+IS_MSVC           := @is_msvc@
 
 # The directory path to the top level of the source distribution. When
 # building in-tree, this path is ".". When building out-of-tree, this path
@@ -94,7 +95,7 @@ CC                := @CC@
 GCC_OT_4_9_0      := @gcc_older_than_4_9_0@
 GCC_OT_6_1_0      := @gcc_older_than_6_1_0@
 GCC_OT_9_1_0      := @gcc_older_than_9_1_0@
-GCC_OT_10_1_0     := @gcc_older_than_10_1_0@
+GCC_OT_10_3_0     := @gcc_older_than_10_3_0@
 CLANG_OT_9_0_0    := @clang_older_than_9_0_0@
 CLANG_OT_12_0_0   := @clang_older_than_12_0_0@
 AOCC_OT_2_0_0     := @aocc_older_than_2_0_0@

@@ -58,7 +58,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	/* NOTE: This microkernel can actually handle arbitrarily large
-       values of m, n, and k. */ \
+	   values of m, n, and k. */ \
 \
 	if ( bli_is_noconj( conja ) && bli_is_noconj( conjb ) ) \
 	{ \
@@ -263,7 +263,7 @@ void PASTEMAC3(ch,opname,arch,suf) \
      ) \
 { \
 	/* NOTE: This microkernel can actually handle arbitrarily large
-       values of m, n, and k. */ \
+	   values of m, n, and k. */ \
 \
 	if ( bli_is_noconj( conja ) && bli_is_noconj( conjb ) ) \
 	{ \
@@ -482,13 +482,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t*             cntx  \
      ) \
 { \
-	const dim_t     mn     = m * n; \
+	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
-	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ab  = n; \
-	const inc_t     cs_ab  = 1; \
+	const dim_t mn    = m * n; \
+	const inc_t rs_ab = n; \
+	const inc_t cs_ab = 1; \
 \
 \
 	/* Assumptions: m <= mr, n <= nr so that the temporary array ab is
@@ -606,13 +606,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t*             cntx  \
      ) \
 { \
-	const dim_t     mn     = m * n; \
+	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
-	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ab  = 1; \
-	const inc_t     cs_ab  = m; \
+	const dim_t mn    = m * n; \
+	const inc_t rs_ab = 1; \
+	const inc_t cs_ab = m; \
 \
 \
 	/* Assumptions: m <= mr, n <= nr so that the temporary array ab is
@@ -729,13 +729,13 @@ void PASTEMAC3(ch,opname,arch,suf) \
        cntx_t*             cntx  \
      ) \
 { \
-	const dim_t     mn     = m * n; \
+	ctype       ab[ BLIS_STACK_BUF_MAX_SIZE \
+	                / sizeof( ctype ) ] \
+	                __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
 \
-	ctype           ab[ BLIS_STACK_BUF_MAX_SIZE \
-	                    / sizeof( ctype ) ] \
-	                    __attribute__((aligned(BLIS_STACK_BUF_ALIGN_SIZE))); \
-	const inc_t     rs_ab  = 1; \
-	const inc_t     cs_ab  = m; \
+	const dim_t mn    = m * n; \
+	const inc_t rs_ab = 1; \
+	const inc_t cs_ab = m; \
 \
 \
 	/* Assumptions: m <= mr, n <= nr so that the temporary array ab is

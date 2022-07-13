@@ -61,12 +61,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	const ctype*      x1; \
-	ctype*      y1; \
-	conj_t      conjx; \
-	dim_t       n_elem; \
-	dim_t       offx, offy; \
-	inc_t       incx, incy; \
+	const ctype* x1; \
+	ctype*       y1; \
+	conj_t       conjx; \
+	dim_t        n_elem; \
+	dim_t        offx, offy; \
+	inc_t        incx, incy; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -141,12 +141,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	const ctype*      x1; \
-	ctype*      y1; \
-	conj_t      conjx; \
-	dim_t       n_elem; \
-	dim_t       offx, offy; \
-	inc_t       incx, incy; \
+	const ctype* x1; \
+	ctype*       y1; \
+	conj_t       conjx; \
+	dim_t        n_elem; \
+	dim_t        offx, offy; \
+	inc_t        incx, incy; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \
@@ -204,10 +204,10 @@ INSERT_GENTFUNC_BASIC2( scal2d, scal2v, BLIS_SCAL2V_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-       doff_t  diagoffx, \
-       dim_t   m, \
-       dim_t   n, \
-       ctype*  x, inc_t rs_x, inc_t cs_x  \
+       doff_t diagoffx, \
+       dim_t  m, \
+       dim_t  n, \
+       ctype* x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -260,12 +260,12 @@ INSERT_GENTFUNC_BASIC2( invertd, invertv, BLIS_INVERTV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             conj_t  conjalpha, \
-             doff_t  diagoffx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t rs_x, inc_t cs_x  \
+             conj_t conjalpha, \
+             doff_t diagoffx, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+             ctype* x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -397,11 +397,11 @@ INSERT_GENTFUNCR_BASIC2( setid, setv, BLIS_SETV_KER )
 \
 void PASTEMAC2(ch,opname,EX_SUF) \
      ( \
-             doff_t  diagoffx, \
-             dim_t   m, \
-             dim_t   n, \
-       const ctype*  alpha, \
-             ctype*  x, inc_t rs_x, inc_t cs_x  \
+             doff_t diagoffx, \
+             dim_t  m, \
+             dim_t  n, \
+       const ctype* alpha, \
+             ctype* x, inc_t rs_x, inc_t cs_x  \
        BLIS_TAPI_EX_PARAMS  \
      ) \
 { \
@@ -473,12 +473,12 @@ void PASTEMAC2(ch,opname,EX_SUF) \
 \
 	const num_t dt = PASTEMAC(ch,type); \
 \
-	const ctype*      x1; \
-	ctype*      y1; \
-	conj_t      conjx; \
-	dim_t       n_elem; \
-	dim_t       offx, offy; \
-	inc_t       incx, incy; \
+	const ctype* x1; \
+	ctype*       y1; \
+	conj_t       conjx; \
+	dim_t        n_elem; \
+	dim_t        offx, offy; \
+	inc_t        incx, incy; \
 \
 	if ( bli_zero_dim2( m, n ) ) return; \
 \

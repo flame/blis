@@ -79,6 +79,8 @@ void bli_caxpyf_zen_int_4
     // operation as a loop over axpyv.
     if ( b_n != fuse_fac )
     {
+	if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+
         caxpyv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_SCOMPLEX, BLIS_AXPYV_KER, cntx );
 
         for ( i = 0; i < b_n; ++i )

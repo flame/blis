@@ -41,15 +41,13 @@ void bli_obj_scalar_init_detached
        obj_t* beta
      )
 {
-	void* p;
-
 	// Initialize beta without a buffer and then attach its internal buffer.
 	// NOTE: This initializes both the storage datatype and scalar datatype
 	// bitfields within beta to dt.
 	bli_obj_create_without_buffer( dt, 1, 1, beta );
 
 	// Query the address of the object's internal scalar buffer.
-	p = bli_obj_internal_scalar_buffer( beta );
+	void* p = bli_obj_internal_scalar_buffer( beta );
 
 	// Update the object.
 	bli_obj_set_buffer( p, beta );
@@ -208,9 +206,9 @@ bool bli_obj_scalar_has_nonzero_imag
        obj_t* a
      )
 {
-	bool   r_val     = FALSE;
-	num_t  dt        = bli_obj_scalar_dt( a );
-	void*  scalar_a  = bli_obj_internal_scalar_buffer( a );
+	bool  r_val    = FALSE;
+	num_t dt       = bli_obj_scalar_dt( a );
+	void* scalar_a = bli_obj_internal_scalar_buffer( a );
 
 	// FGVZ: Reimplement by using bli_obj_imag_part() and then
 	// bli_obj_equals( &BLIS_ZERO, ... ).
@@ -238,11 +236,10 @@ bool bli_obj_scalar_equals
      )
 {
 	obj_t scalar_a;
-	bool  r_val;
 
 	bli_obj_scalar_detach( a, &scalar_a );
 
-	r_val = bli_obj_equals( &scalar_a, beta );
+	bool r_val = bli_obj_equals( &scalar_a, beta );
 
 	return r_val;
 }

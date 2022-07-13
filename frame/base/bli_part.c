@@ -123,7 +123,6 @@ void bli_acquire_mpart_mdim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -235,7 +234,7 @@ void bli_acquire_mpart_mdim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -347,7 +346,6 @@ void bli_acquire_mpart_ndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -459,7 +457,7 @@ void bli_acquire_mpart_ndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column
@@ -571,7 +569,6 @@ void bli_acquire_mpart_mndim
 	dim_t  n_part   = 0;
 	inc_t  offm_inc = 0;
 	inc_t  offn_inc = 0;
-	doff_t diag_off_inc;
 
 
 	// Call a special function for partitioning packed objects. (By only
@@ -712,7 +709,7 @@ void bli_acquire_mpart_mndim
 
 
 	// Compute the diagonal offset based on the m and n offsets.
-	diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
+	doff_t diag_off_inc = ( doff_t )offm_inc - ( doff_t )offn_inc;
 
 
 	// Begin by copying the info, elem size, buffer, row stride, and column

@@ -66,8 +66,8 @@ INSERT_GENTFUNC_BASIC( subsc, subs )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi  \
+       conj_t conjchi, \
+       ctype* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -199,9 +199,9 @@ INSERT_GENTFUNC_BASIC0( getsc )
 \
 void PASTEMAC(ch,opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       ctype*  chi  \
+       double zeta_r, \
+       double zeta_i, \
+       ctype* chi  \
      ) \
 { \
 	bli_init_once(); \
@@ -263,9 +263,9 @@ void bli_igetsc
 
 void bli_isetsc
      (
-       double  zeta_r,
-       double  zeta_i,
-       dim_t*  chi
+       double zeta_r,
+       double zeta_i,
+       dim_t* chi
      )
 {
 	bli_init_once();

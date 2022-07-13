@@ -46,11 +46,11 @@ static setijm_fp GENARRAY(ftypes_setijm,setijm);
 
 err_t bli_setijm
      (
-             double  ar,
-             double  ai,
-             dim_t   i,
-             dim_t   j,
-       const obj_t*  b
+             double ar,
+             double ai,
+             dim_t  i,
+             dim_t  j,
+       const obj_t* b
      )
 {
 	dim_t m  = bli_obj_length( b );

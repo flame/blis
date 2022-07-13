@@ -67,7 +67,7 @@
 
 gint_t bli_env_get_var( const char* env, gint_t fallback )
 {
-	gint_t r_val;
+	      gint_t r_val;
 	const char*  str;
 
 	// Query the environment variable and store the result in str.

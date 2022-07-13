@@ -34,8 +34,8 @@
 
 */
 
-#ifndef BLIS_MEMBRK_H
-#define BLIS_MEMBRK_H
+#ifndef BLIS_PBA_H
+#define BLIS_PBA_H
 
 // Packing block allocator (formerly memory broker)
 

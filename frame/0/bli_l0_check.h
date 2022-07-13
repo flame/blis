@@ -96,8 +96,8 @@ GENTPROT( getsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       double       zeta_r, \
-       double       zeta_i, \
+             double zeta_r, \
+             double zeta_i, \
        const obj_t* chi  \
      );
 

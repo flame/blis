@@ -42,9 +42,9 @@
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-             conj_t  conjchi, \
-       const ctype*  chi, \
-             ctype*  psi  \
+             conj_t conjchi, \
+       const ctype* chi, \
+             ctype* psi  \
      );
 
 INSERT_GENTPROT_BASIC0( addsc )
@@ -58,8 +58,8 @@ INSERT_GENTPROT_BASIC0( subsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       conj_t  conjchi, \
-       ctype*  chi  \
+       conj_t conjchi, \
+       ctype* chi  \
      );
 
 INSERT_GENTPROT_BASIC0( invertsc )
@@ -108,9 +108,9 @@ INSERT_GENTPROT_BASIC0( getsc )
 \
 BLIS_EXPORT_BLIS void PASTEMAC(ch,opname) \
      ( \
-       double  zeta_r, \
-       double  zeta_i, \
-       ctype*  chi  \
+       double zeta_r, \
+       double zeta_i, \
+       ctype* chi  \
      );
 
 INSERT_GENTPROT_BASIC0( setsc )
@@ -152,8 +152,8 @@ BLIS_EXPORT_BLIS void bli_igetsc
 
 BLIS_EXPORT_BLIS void bli_isetsc
      (
-       double  zeta_r,
-       double  zeta_i,
-       dim_t*  chi
+       double zeta_r,
+       double zeta_i,
+       dim_t* chi
      );
 

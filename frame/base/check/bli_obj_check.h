@@ -55,8 +55,7 @@ void bli_obj_attach_buffer_check( const void*  p,
                                         inc_t  is,
                                   const obj_t* obj );
 
-void bli_obj_create_scalar_check(       num_t  dt,
-                                  const obj_t* obj );
+void bli_obj_create_scalar_check( num_t dt, const obj_t* obj );
 
 void bli_obj_free_check( const obj_t* obj );
 

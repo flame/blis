@@ -82,6 +82,8 @@ void bli_sscalv_zen_int10
 	{
 		float* zero = bli_s0;
 
+		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
+
 		ssetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_FLOAT, BLIS_SETV_KER, cntx );
 
 		f
@@ -273,6 +275,8 @@ void bli_dscalv_zen_int10
 	if ( PASTEMAC(d,eq0)( *alpha ) )
 	{
 		double* zero = bli_d0;
+
+		if ( cntx == NULL ) cntx = ( cntx_t* )bli_gks_query_cntx();
 
 		dsetv_ker_ft f = bli_cntx_get_ukr_dt( BLIS_DOUBLE, BLIS_SETV_KER, cntx );
 

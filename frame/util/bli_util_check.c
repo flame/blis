@@ -43,8 +43,8 @@
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  asum  \
+       const obj_t* x, \
+       const obj_t* asum  \
      ) \
 { \
 	bli_utilv_xa_check( x, asum ); \
@@ -58,7 +58,7 @@ GENFRONT( asumv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
      ) \
 { \
 	bli_utilm_mkhst_check( x ); \
@@ -74,8 +74,8 @@ GENFRONT( mktrim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      ) \
 { \
 	bli_utilv_norm_check( x, norm ); \
@@ -91,8 +91,8 @@ GENFRONT( normiv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  norm  \
+       const obj_t* x, \
+       const obj_t* norm  \
      ) \
 { \
 	bli_utilm_norm_check( x, norm ); \
@@ -108,7 +108,7 @@ GENFRONT( normim )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x  \
+       const obj_t* x  \
      ) \
 { \
 	bli_utilm_rand_check( x ); \
@@ -125,9 +125,9 @@ GENFRONT( randnm )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  scale, \
-       const obj_t*  sumsq  \
+       const obj_t* x, \
+       const obj_t* scale, \
+       const obj_t* sumsq  \
      ) \
 { \
 	bli_utilv_sumsqv_check( x, scale, sumsq ); \
@@ -142,9 +142,9 @@ GENFRONT( sumsqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  chi, \
-       const obj_t*  psi, \
-       const bool*   is_eq  \
+       const obj_t* chi, \
+       const obj_t* psi, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l0_xxbsc_check( chi, psi, is_eq ); \
@@ -158,9 +158,9 @@ GENFRONT( eqsc )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  y, \
-       const bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l1v_xy_check( x, y ); \
@@ -174,9 +174,9 @@ GENFRONT( eqv )
 \
 void PASTEMAC(opname,_check) \
      ( \
-       const obj_t*  x, \
-       const obj_t*  y, \
-       const bool*   is_eq  \
+       const obj_t* x, \
+       const obj_t* y, \
+       const bool*  is_eq  \
      ) \
 { \
 	bli_l1m_xy_check( x, y ); \
@@ -207,8 +207,8 @@ GENFRONT( fprintm )
 
 void bli_utilv_xa_check
      (
-       const obj_t*  x,
-       const obj_t*  asum
+       const obj_t* x,
+       const obj_t* asum
      )
 {
 	err_t e_val;
@@ -240,7 +240,7 @@ void bli_utilv_xa_check
 
 void bli_utilm_mkhst_check
      (
-       const obj_t*  a
+       const obj_t* a
      )
 {
 	err_t e_val;
@@ -277,8 +277,8 @@ void bli_utilm_mkhst_check
 
 void bli_utilv_norm_check
      (
-       const obj_t*  x,
-       const obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      )
 {
 	err_t e_val;
@@ -317,8 +317,8 @@ void bli_utilv_norm_check
 
 void bli_utilm_norm_check
      (
-       const obj_t*  x,
-       const obj_t*  norm
+       const obj_t* x,
+       const obj_t* norm
      )
 {
 	err_t e_val;
@@ -405,9 +405,9 @@ void bli_utilm_rand_check
 
 void bli_utilv_sumsqv_check
      (
-       const obj_t*  x,
-       const obj_t*  scale,
-       const obj_t*  sumsq
+       const obj_t* x,
+       const obj_t* scale,
+       const obj_t* sumsq
      )
 {
 	err_t e_val;

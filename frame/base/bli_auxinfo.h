@@ -76,11 +76,11 @@ BLIS_INLINE inc_t bli_auxinfo_ps_b( const auxinfo_t* ai )
 
 BLIS_INLINE void_fp bli_auxinfo_ukr( const auxinfo_t* ai )
 {
-    return ai->ukr;
+	return ai->ukr;
 }
 BLIS_INLINE const void* bli_auxinfo_params( const auxinfo_t* ai )
 {
-    return ai->params;
+	return ai->params;
 }
 
 
@@ -129,11 +129,11 @@ BLIS_INLINE void bli_auxinfo_set_ps_b( inc_t ps, auxinfo_t* ai )
 
 BLIS_INLINE void bli_auxinfo_set_ukr( void_fp ukr, auxinfo_t* ai )
 {
-    ai->ukr = ukr;
+	ai->ukr = ukr;
 }
 BLIS_INLINE void bli_auxinfo_set_params( const void* params, auxinfo_t* ai )
 {
-    ai->params = params;
+	ai->params = params;
 }
 
 #endif
