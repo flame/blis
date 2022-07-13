@@ -680,15 +680,34 @@ void bli_nthreads_optimum(
 		dim_t n = bli_obj_length(c);
 		dim_t k = bli_obj_width_after_trans(a);
 
-		if ( n < 32 )
+		if ( n < 8 )
+		{
+			if ( k <= 512)
+			{
+				n_threads_ideal = 1;
+			}
+			else if ( k <= 1024 )
+			{
+				n_threads_ideal = 4;
+			}
+		}
+		else if ( n < 32 )
 		{
 			if ( k < 128 )
 			{
 				n_threads_ideal = 1;
 			}
-			else if ( k == 128 )
+			else if ( k <= 512 )
 			{
 				n_threads_ideal = 4;
+			}
+			else if ( k <= 1024 )
+			{
+				n_threads_ideal = 6;
+			}
+			else if ( k <= 1600 )
+			{
+				n_threads_ideal = 10;
 			}
 		}
 		else if ( n <= 40 )
@@ -722,6 +741,17 @@ void bli_nthreads_optimum(
 			if ( k <= 132 )
 			{
 				n_threads_ideal = 8;
+			}
+		}
+		else if ( n < 176 )
+		{
+			if ( k < 128 )
+			{
+				n_threads_ideal = 8;
+			}
+			else if ( k <= 512 )
+			{
+				n_threads_ideal = 14;
 			}
 		}
 		else if ( n <= 220 )
