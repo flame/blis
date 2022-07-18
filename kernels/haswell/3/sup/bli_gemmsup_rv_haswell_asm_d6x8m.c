@@ -274,17 +274,17 @@ void bli_dgemmsup_rv_haswell_asm_6x8m
 	                                   // a latency of 1 cycle, while vzeroall
 	                                   // has a latency of 12 cycles.
 	vxorpd(ymm4,  ymm4,  ymm4)
-	vxorpd(ymm5,  ymm5,  ymm5)
-	vxorpd(ymm6,  ymm6,  ymm6)
-	vxorpd(ymm7,  ymm7,  ymm7)
-	vxorpd(ymm8,  ymm8,  ymm8)
-	vxorpd(ymm9,  ymm9,  ymm9)
-	vxorpd(ymm10, ymm10, ymm10)
-	vxorpd(ymm11, ymm11, ymm11)
-	vxorpd(ymm12, ymm12, ymm12)
-	vxorpd(ymm13, ymm13, ymm13)
-	vxorpd(ymm14, ymm14, ymm14)
-	vxorpd(ymm15, ymm15, ymm15)
+	vmovapd( ymm4, ymm5)
+	vmovapd( ymm4, ymm6)
+	vmovapd( ymm4, ymm7)
+	vmovapd( ymm4, ymm8)
+	vmovapd( ymm4, ymm9)
+	vmovapd( ymm4, ymm10)
+	vmovapd( ymm4, ymm11)
+	vmovapd( ymm4, ymm12)
+	vmovapd( ymm4, ymm13)
+	vmovapd( ymm4, ymm14)
+	vmovapd( ymm4, ymm15)
 #endif
 
 	mov(var(b), rbx)                   // load address of b.
@@ -1077,18 +1077,18 @@ void bli_dgemmsup_rv_haswell_asm_6x6m
 	                                   // a latency of 1 cycle, while vzeroall
 	                                   // has a latency of 12 cycles.
 	vxorpd(ymm1,  ymm1,  ymm1)         // zero ymm1 since we only use the lower
-	vxorpd(ymm4,  ymm4,  ymm4)         // half (xmm1), and nans/infs may slow us
-	vxorpd(ymm5,  ymm5,  ymm5)         // down.
-	vxorpd(ymm6,  ymm6,  ymm6)
-	vxorpd(ymm7,  ymm7,  ymm7)
-	vxorpd(ymm8,  ymm8,  ymm8)
-	vxorpd(ymm9,  ymm9,  ymm9)
-	vxorpd(ymm10, ymm10, ymm10)
-	vxorpd(ymm11, ymm11, ymm11)
-	vxorpd(ymm12, ymm12, ymm12)
-	vxorpd(ymm13, ymm13, ymm13)
-	vxorpd(ymm14, ymm14, ymm14)
-	vxorpd(ymm15, ymm15, ymm15)
+	vmovapd(ymm1,  ymm4)               // half (xmm1), and nans/infs may slow us
+	vmovapd(ymm1,  ymm5)               // down.
+	vmovapd(ymm1,  ymm6)
+	vmovapd(ymm1,  ymm7)
+	vmovapd(ymm1,  ymm8)
+	vmovapd(ymm1,  ymm9)
+	vmovapd(ymm1, ymm10)
+	vmovapd(ymm1, ymm11)
+	vmovapd(ymm1, ymm12)
+	vmovapd(ymm1, ymm13)
+	vmovapd(ymm1, ymm14)
+	vmovapd(ymm1, ymm15)
 #endif
 
 	mov(var(b), rbx)                   // load address of b.
@@ -1858,11 +1858,11 @@ void bli_dgemmsup_rv_haswell_asm_6x4m
 	                                   // a latency of 1 cycle, while vzeroall
 	                                   // has a latency of 12 cycles.
 	vxorpd(ymm4,  ymm4,  ymm4)
-	vxorpd(ymm6,  ymm6,  ymm6)
-	vxorpd(ymm8,  ymm8,  ymm8)
-	vxorpd(ymm10, ymm10, ymm10)
-	vxorpd(ymm12, ymm12, ymm12)
-	vxorpd(ymm14, ymm14, ymm14)
+	vmovapd(ymm4,  ymm6)
+	vmovapd(ymm4,  ymm8)
+	vmovapd(ymm4, ymm10)
+	vmovapd(ymm4, ymm12)
+	vmovapd(ymm4, ymm14)
 #endif
 
 	mov(var(b), rbx)                   // load address of b.

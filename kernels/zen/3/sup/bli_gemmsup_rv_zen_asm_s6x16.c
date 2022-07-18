@@ -113,17 +113,19 @@ void bli_sgemmsup_rv_zen_asm_5x16
     begin_asm()
     
     vxorps(ymm4,  ymm4,  ymm4)
-    vxorps(ymm5,  ymm5,  ymm5)
-    vxorps(ymm6,  ymm6,  ymm6)
-    vxorps(ymm7,  ymm7,  ymm7)
-    vxorps(ymm8,  ymm8,  ymm8)
-    vxorps(ymm9,  ymm9,  ymm9)
-    vxorps(ymm10, ymm10, ymm10)
-    vxorps(ymm11, ymm11, ymm11)
-    vxorps(ymm12, ymm12, ymm12)
-    vxorps(ymm13, ymm13, ymm13)
-    vxorps(ymm14, ymm14, ymm14)
-    vxorps(ymm15, ymm15, ymm15)
+	vmovaps(ymm4, ymm5)
+	vmovaps(ymm4, ymm6)
+	vmovaps(ymm4, ymm7)
+	vmovaps(ymm4, ymm8)
+	vmovaps(ymm4, ymm9)
+	vmovaps(ymm4, ymm10)
+	vmovaps(ymm4, ymm11)
+	vmovaps(ymm4, ymm12)
+	vmovaps(ymm4, ymm13)
+	vmovaps(ymm4, ymm14)
+	vmovaps(ymm4, ymm15)
+
+
     mov(var(a), rax)                   // load address of a.
     mov(var(rs_a), r8)                 // load rs_a
     mov(var(cs_a), r9)                 // load cs_a
@@ -694,6 +696,7 @@ void bli_sgemmsup_rv_zen_asm_5x16
     vmovss(xmm14, mem(rdx, rax, 1))
 
     label(.SDONE)
+	vzeroupper()
 
     end_asm(
     : // output operands (none)
@@ -758,19 +761,20 @@ void bli_sgemmsup_rv_zen_asm_4x16
     // -------------------------------------------------------------------------
 
     begin_asm()
-    
-    vxorps(ymm4,  ymm4,  ymm4)
-    vxorps(ymm5,  ymm5,  ymm5)
-    vxorps(ymm6,  ymm6,  ymm6)
-    vxorps(ymm7,  ymm7,  ymm7)
-    vxorps(ymm8,  ymm8,  ymm8)
-    vxorps(ymm9,  ymm9,  ymm9)
-    vxorps(ymm10, ymm10, ymm10)
-    vxorps(ymm11, ymm11, ymm11)
-    vxorps(ymm12, ymm12, ymm12)
-    vxorps(ymm13, ymm13, ymm13)
-    vxorps(ymm14, ymm14, ymm14)
-    vxorps(ymm15, ymm15, ymm15)
+
+	  vxorps(ymm4,  ymm4,  ymm4)
+	  vmovaps(ymm4, ymm5)
+	  vmovaps(ymm4, ymm6)
+	  vmovaps(ymm4, ymm7)
+	  vmovaps(ymm4, ymm8)
+	  vmovaps(ymm4, ymm9)
+	  vmovaps(ymm4, ymm10)
+	  vmovaps(ymm4, ymm11)
+	  vmovaps(ymm4, ymm12)
+	  vmovaps(ymm4, ymm13)
+	  vmovaps(ymm4, ymm14)
+	  vmovaps(ymm4, ymm15)
+
     mov(var(a), rax)                   // load address of a.
     mov(var(rs_a), r8)                 // load rs_a
     mov(var(cs_a), r9)                 // load cs_a
@@ -822,14 +826,14 @@ void bli_sgemmsup_rv_zen_asm_4x16
     prefetch(0, mem(rdx, rsi, 2, 3*8)) // prefetch c + 7*cs_c
 
     label(.SPOSTPFETCH)                // done prefetching c
-    
+
     mov(var(k_iter), rsi)              // i = k_iter;
     test(rsi, rsi)                     // check i via logical AND.
     je(.SCONSIDKLEFT)                  // if i == 0, jump to code that
                                       // contains the k_left loop.
-        
+
     label(.SLOOPKITER)                 // MAIN LOOP
-        
+
     // ---------------------------------- iteration 0
     vmovups(mem(rbx, 0*32), ymm0)
     vmovups(mem(rbx, 1*32), ymm1)
@@ -1188,7 +1192,8 @@ void bli_sgemmsup_rv_zen_asm_4x16
     vmovups(xmm2, mem(rcx, rsi, 4)) // store ( gamma07..gamma37 )
     
     label(.SDONE)
-    
+	vzeroupper()
+  
     end_asm(
     : // output operands (none)
     : // input operands
@@ -1252,19 +1257,20 @@ void bli_sgemmsup_rv_zen_asm_3x16
     // -------------------------------------------------------------------------
 
     begin_asm()
-    
-    vxorps(ymm4,  ymm4,  ymm4)
-    vxorps(ymm5,  ymm5,  ymm5)
-    vxorps(ymm6,  ymm6,  ymm6)
-    vxorps(ymm7,  ymm7,  ymm7)
-    vxorps(ymm8,  ymm8,  ymm8)
-    vxorps(ymm9,  ymm9,  ymm9)
-    vxorps(ymm10, ymm10, ymm10)
-    vxorps(ymm11, ymm11, ymm11)
-    vxorps(ymm12, ymm12, ymm12)
-    vxorps(ymm13, ymm13, ymm13)
-    vxorps(ymm14, ymm14, ymm14)
-    vxorps(ymm15, ymm15, ymm15)
+
+	  vxorps(ymm4,  ymm4,  ymm4)
+	  vmovaps(ymm4, ymm5)
+	  vmovaps(ymm4, ymm6)
+	  vmovaps(ymm4, ymm7)
+	  vmovaps(ymm4, ymm8)
+	  vmovaps(ymm4, ymm9)
+	  vmovaps(ymm4, ymm10)
+	  vmovaps(ymm4, ymm11)
+	  vmovaps(ymm4, ymm12)
+	  vmovaps(ymm4, ymm13)
+	  vmovaps(ymm4, ymm14)
+	  vmovaps(ymm4, ymm15)
+  
     mov(var(a), rax)                   // load address of a.
     mov(var(rs_a), r8)                 // load rs_a
     mov(var(cs_a), r9)                 // load cs_a
@@ -1746,6 +1752,7 @@ void bli_sgemmsup_rv_zen_asm_3x16
     vmovss(xmm14, mem(rdx, rax, 1))        
 
     label(.SDONE)
+	vzeroupper()
     
     end_asm(
     : // output operands (none)

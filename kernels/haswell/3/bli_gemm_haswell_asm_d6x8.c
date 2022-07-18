@@ -950,7 +950,21 @@ void bli_dgemm_haswell_asm_6x8
 
 	begin_asm()
 	
-	vzeroall() // zero all xmm/ymm registers.
+		//vzeroall() // zero all xmm/ymm registers.
+
+	vxorpd( ymm4, ymm4, ymm4)  // vzeroall is expensive
+	vmovapd( ymm4, ymm5)
+	vmovapd( ymm4, ymm6)
+	vmovapd( ymm4, ymm7)
+	vmovapd( ymm4, ymm8)
+	vmovapd( ymm4, ymm9)
+	vmovapd( ymm4, ymm10)
+	vmovapd( ymm4, ymm11)
+	vmovapd( ymm4, ymm12)
+	vmovapd( ymm4, ymm13)
+	vmovapd( ymm4, ymm14)
+	vmovapd( ymm4, ymm15)
+
 	
 	
 	mov(var(a), rax) // load address of a.
@@ -1610,7 +1624,7 @@ void bli_dgemm_haswell_asm_6x8
 	
 	
 	label(.DDONE)
-	
+	vzeroupper()
 	
 
     end_asm(

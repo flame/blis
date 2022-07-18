@@ -5,6 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
+   Copyright (C) 2022, Advanced Micro Devices, Inc.All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -175,33 +176,33 @@ void bli_dgemm_skx_asm_16x14(
     BEGIN_ASM()
 
     VXORPD(YMM( 4), YMM( 4), YMM( 4)) //clear out registers
-    VXORPD(YMM( 5), YMM( 5), YMM( 5))
-    VXORPD(YMM( 6), YMM( 6), YMM( 6))
-    VXORPD(YMM( 7), YMM( 7), YMM( 7))
-    VXORPD(YMM( 8), YMM( 8), YMM( 8))
-    VXORPD(YMM( 9), YMM( 9), YMM( 9))
-    VXORPD(YMM(10), YMM(10), YMM(10))
-    VXORPD(YMM(11), YMM(11), YMM(11))
-    VXORPD(YMM(12), YMM(12), YMM(12))
-    VXORPD(YMM(13), YMM(13), YMM(13))
-    VXORPD(YMM(14), YMM(14), YMM(14))
-    VXORPD(YMM(15), YMM(15), YMM(15))
-    VXORPD(YMM(16), YMM(16), YMM(16))
-    VXORPD(YMM(17), YMM(17), YMM(17))
-    VXORPD(YMM(18), YMM(18), YMM(18))
-    VXORPD(YMM(19), YMM(19), YMM(19))
-    VXORPD(YMM(20), YMM(20), YMM(20))
-    VXORPD(YMM(21), YMM(21), YMM(21))
-    VXORPD(YMM(22), YMM(22), YMM(22))
-    VXORPD(YMM(23), YMM(23), YMM(23))
-    VXORPD(YMM(24), YMM(24), YMM(24))
-    VXORPD(YMM(25), YMM(25), YMM(25))
-    VXORPD(YMM(26), YMM(26), YMM(26))
-    VXORPD(YMM(27), YMM(27), YMM(27))
-    VXORPD(YMM(28), YMM(28), YMM(28))
-    VXORPD(YMM(29), YMM(29), YMM(29))
-    VXORPD(YMM(30), YMM(30), YMM(30))
-    VXORPD(YMM(31), YMM(31), YMM(31))
+    VMOVAPD(YMM(4), YMM( 5))
+    VMOVAPD(YMM(4), YMM( 6))
+    VMOVAPD(YMM(4), YMM( 7))
+    VMOVAPD(YMM(4), YMM( 8))
+    VMOVAPD(YMM(4), YMM( 9))
+    VMOVAPD(YMM(4), YMM(10))
+    VMOVAPD(YMM(4), YMM(11))
+    VMOVAPD(YMM(4), YMM(12))
+    VMOVAPD(YMM(4), YMM(13))
+    VMOVAPD(YMM(4), YMM(14))
+    VMOVAPD(YMM(4), YMM(15))
+    VMOVAPD(YMM(4), YMM(16))
+    VMOVAPD(YMM(4), YMM(17))
+    VMOVAPD(YMM(4), YMM(18))
+    VMOVAPD(YMM(4), YMM(19))
+    VMOVAPD(YMM(4), YMM(20))
+    VMOVAPD(YMM(4), YMM(21))
+    VMOVAPD(YMM(4), YMM(22))
+    VMOVAPD(YMM(4), YMM(23))
+    VMOVAPD(YMM(4), YMM(24))
+    VMOVAPD(YMM(4), YMM(25))
+    VMOVAPD(YMM(4), YMM(26))
+    VMOVAPD(YMM(4), YMM(27))
+    VMOVAPD(YMM(4), YMM(28))
+    VMOVAPD(YMM(4), YMM(29))
+    VMOVAPD(YMM(4), YMM(30))
+    VMOVAPD(YMM(4), YMM(31))
 
     MOV(RSI, VAR(k)) //loop index
     MOV(RAX, VAR(a)) //load address of a
