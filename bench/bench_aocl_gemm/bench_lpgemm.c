@@ -6,7 +6,7 @@
 #include <float.h>
 #include <unistd.h>
 
-#include "blis/blis.h"
+#include "blis.h"
 
 // Mode can be one of the follwoing:
 // 	1. p - performance, used for benchmarks.
@@ -129,7 +129,6 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        dim_t   ldc \
      ) \
 { \
-	double gflops; \
 	double min_time_diff = DBL_MAX; \
 	for ( int32_t nr = 0; nr < n_repeats; ++nr ) \
 	{ \
@@ -425,7 +424,9 @@ int main( int argc, char** argv )
 			// number of cores. This helps uncover any bugs related to over
 			// subscription or varying thread factorizations.
 			// Set current number of cores.
+#ifdef BLIS_ENABLE_OPENMP
 			omp_set_num_threads( list_omp_cores_for_testing[core_index] );
+#endif
 			printf( "Accuracy test using %ld threads.\n", 
 							list_omp_cores_for_testing[core_index] );
 

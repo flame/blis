@@ -154,15 +154,14 @@ void aocl_gemm_f32f32f32of32
 	// Setting pack A by default for non open mp case.
 	bli_rntm_set_pack_a( 1, &rntm_g );
 
-	lpgemm_rowvar_f32f32f32of32
+	lpgemm_f32f32f32of32_thread_decorator
 	(
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g,
-	  NULL
+	  &rntm_g
 	);
 #endif
 

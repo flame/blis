@@ -444,4 +444,69 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 GEN_LPGEMM_OPENMP_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR(float,float,float,f32f32f32of32)
 
+#else
+
+#define GEN_LPGEMM_DECORATOR(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+       const AOCL_MEMORY_TAG mtag_b, \
+       C_type*               c, \
+       const dim_t           rs_c, \
+       C_type                alpha, \
+       C_type                beta, \
+       rntm_t*               rntm_g \
+     ) \
+{ \
+	dim_t n_threads = 1; \
+ \
+	/* Factorization of threads along m and n dimension respectively.*/ \
+	dim_t ic_ways = 1; \
+	dim_t jc_ways = 1; \
+ \
+	/* Set the packing block allocator field of the rntm. This will be
+	 * inherited by all of the child threads when they make local copies of
+	 * the rntm below.*/ \
+	bli_membrk_rntm_set_membrk( rntm_g ); \
+ \
+	thrcomm_t static_lpgemm_comm; \
+	thrcomm_t* cur_lpgemm_comm = &static_lpgemm_comm; \
+ \
+	bli_thrcomm_init( ic_ways, cur_lpgemm_comm ); \
+ \
+	/* lpgemm_thrinfo_t object will be used to generate thrinfo_t objects
+	 * for use in blis mt framework inside the respective mat mul driver
+	 * functions.*/ \
+	lpgemm_thrinfo_t thread; \
+	thread.n_threads = n_threads; \
+	thread.tid = 0; \
+	thread.ic_ways = ic_ways; \
+	thread.jc_ways = jc_ways; \
+	thread.comm = cur_lpgemm_comm; \
+ \
+	lpgemm_rowvar_ ## LPGEMM_SFX \
+	( \
+	  m, n, k, \
+	  a, rs_a, cs_a, mtag_a, \
+	  b, rs_b, cs_b, mtag_b, \
+	  c, rs_c, \
+	  alpha, \
+	  beta, \
+	  rntm_g, \
+	  &thread \
+	); \
+} \
+
+GEN_LPGEMM_DECORATOR(uint8_t,int8_t,int32_t,u8s8s32o32)
+GEN_LPGEMM_DECORATOR(float,float,float,f32f32f32of32)
+
 #endif

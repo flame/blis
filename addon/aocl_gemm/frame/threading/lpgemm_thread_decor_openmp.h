@@ -35,9 +35,9 @@
 #ifndef LPGEMM_THREAD_DECOR_OPENMP_H
 #define LPGEMM_THREAD_DECOR_OPENMP_H
 
-#ifdef BLIS_ENABLE_OPENMP
-
 #include "lpgemm_types.h"
+
+#ifdef BLIS_ENABLE_OPENMP
 
 #define GEN_LPGEMM_OPENMP_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
 void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
@@ -62,6 +62,32 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 
 GEN_LPGEMM_OPENMP_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s32o32)
 GEN_LPGEMM_OPENMP_DECORATOR_FN(float,float,float,f32f32f32of32)
+
+#else
+
+#define GEN_LPGEMM_DECORATOR_FN(A_type,B_type,C_type,LPGEMM_SFX) \
+void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
+     ( \
+       const dim_t           m, \
+       const dim_t           n, \
+       const dim_t           k, \
+       const A_type*         a, \
+       const dim_t           rs_a, \
+       const dim_t           cs_a, \
+       const AOCL_MEMORY_TAG mtag_a, \
+       const B_type*         b, \
+       const dim_t           rs_b, \
+       const dim_t           cs_b, \
+       const AOCL_MEMORY_TAG mtag_b, \
+       C_type*               c, \
+       const dim_t           rs_c, \
+       C_type                alpha, \
+       C_type                beta, \
+       rntm_t*               rntm_g \
+     ); \
+
+GEN_LPGEMM_DECORATOR_FN(uint8_t,int8_t,int32_t,u8s8s32o32)
+GEN_LPGEMM_DECORATOR_FN(float,float,float,f32f32f32of32)
 
 #endif
 

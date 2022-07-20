@@ -150,15 +150,14 @@ void aocl_gemm_u8s8s32os32
 	  &rntm_g
 	);
 #else
-	lpgemm_rowvar_u8s8s32o32
+	lpgemm_u8s8s32o32_thread_decorator
 	(
 	  m, n, k,
 	  a, rs_a, cs_a, mtag_a,
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g,
-	  NULL
+	  &rntm_g
 	);
 #endif
 }
