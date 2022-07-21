@@ -32,14 +32,16 @@
 
 */
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#ifndef BLIS_GEMM_INT16_PACKB
+#define BLIS_GEMM_INT16_PACKB
 
-#include "aocl_gemm_u8s8s16os16.h"
-#include "aocl_gemm_u8s8s32os32.h"
-#include "aocl_gemm_f32f32f32of32.h"
-#include "aocl_gemm_u8s8s16os16_utils.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+void packb_nr32_u8s8s16o16(
+    int8_t *pack_b_buffer_u8s8s16o16,
+    const int8_t *b,
+    const dim_t ldb,
+    const dim_t cols,
+    const dim_t rows,
+    dim_t *rs_b,
+    dim_t *cs_b);
 
-#endif // BLIS_ADDON_LPGEMM
+#endif // BLIS_GEMM_INT16_PACKB

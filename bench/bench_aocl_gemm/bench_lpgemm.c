@@ -78,6 +78,7 @@ void mat_mul_ ## BLAS_SFX \
 					c, ldc ); \
 } \
 
+GEN_BLIS_MAT_MUL_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
 GEN_BLIS_MAT_MUL_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
 GEN_BLIS_MAT_MUL_FUNC(float,float,float,f32f32f32of32)
 
@@ -107,7 +108,7 @@ void print_result
 {
 	double gflops = get_gflops( m, n, k, runtime );
 	printf("%s m: %ld, n: %ld, k: %ld, lda: %ld, ldb: %ld, ldc: %ld," \
-					" GFlops: %f, n_repeats: %d\n", 
+					" Gops: %f, n_repeats: %d\n", 
 			msg, m, n, k, lda, ldb, ldc, gflops, n_repeats);
 }
 
@@ -134,7 +135,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	{ \
 		if ( bench_mode == 'a' ) \
 		{ \
-			memset( ( void* ) c, 0, sizeof( float ) * m * n ); \
+			memset( ( void* ) c, 0, sizeof( C_type ) * m * n ); \
 		} \
  \
 		struct timespec tstart={0,0}, tend={0,0}; \
@@ -161,6 +162,7 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 	print_result( XSTR(BLAS_SFX), n_repeats, m, n, k, lda, ldb, ldc, min_time_diff); \
 } \
 
+GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
 GEN_MAT_MUL_BENCH_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_BENCH_DRV_FUNC(float,float,float,f32f32f32of32)
 
@@ -214,6 +216,7 @@ cleanup_acc: \
 	return; \
 } \
 
+GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,f32f32f32of32)
 
@@ -338,6 +341,7 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	} \
 } \
 
+GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_BENCH_MAIN_FUNC(float,float,float,f32f32f32of32)
 
@@ -459,6 +463,14 @@ int main( int argc, char** argv )
 				(
 				  fin, fout, op_t,
 				  m, n, k, stride_a, stride_b, stride_c
+				);
+			}
+			else if ((op_type_char == 's') || (op_type_char == 'S'))
+			{
+				GEN_FUNC_NAME(mat_mul_bench_main_, u8s8s16os16)
+				(
+					fin, fout, op_t,
+					m, n, k, stride_a, stride_b, stride_c
 				);
 			}
 		}

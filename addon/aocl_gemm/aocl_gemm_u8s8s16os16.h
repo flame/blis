@@ -32,14 +32,26 @@
 
 */
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#ifndef AOCL_GEMM_U8S8S16OS16_H
+#define AOCL_GEMM_U8S8S16OS16_H
 
-#include "aocl_gemm_u8s8s16os16.h"
-#include "aocl_gemm_u8s8s32os32.h"
-#include "aocl_gemm_f32f32f32of32.h"
-#include "aocl_gemm_u8s8s16os16_utils.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+// Only supports matrices in row major format
+// Limitations: Supports mem_format_b = 'Reorder'
+BLIS_EXPORT_ADDON void aocl_gemm_u8s8s16os16(
+    const char transa,
+    const char transb,
+    const dim_t m,
+    const dim_t n,
+    const dim_t k,
+    const int16_t alpha,
+    const uint8_t *a,
+    const dim_t lda,
+    const char mem_format_a,
+    const int8_t *b,
+    const dim_t ldb,
+    const char mem_format_b,
+    const int16_t beta,
+    int16_t *c,
+    const dim_t ldc);
 
-#endif // BLIS_ADDON_LPGEMM
+#endif // AOCL_GEMM_U8S8S16OS16_H

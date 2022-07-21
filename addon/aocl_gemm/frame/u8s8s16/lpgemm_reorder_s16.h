@@ -31,15 +31,15 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
+#ifndef LPGEMM_REORDER_S16_H
+#define LPGEMM_REORDER_S16_H
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#include "lpgemm_types.h"
 
-#include "aocl_gemm_u8s8s16os16.h"
-#include "aocl_gemm_u8s8s32os32.h"
-#include "aocl_gemm_f32f32f32of32.h"
-#include "aocl_gemm_u8s8s16os16_utils.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+void aocl_reorderb_nr32_u8s8s16o16
+  (
+    lpgemm_obj_t *b,
+    lpgemm_obj_t *b_reorder
+  );
 
-#endif // BLIS_ADDON_LPGEMM
+#endif // LPGEMM_REORDER_H

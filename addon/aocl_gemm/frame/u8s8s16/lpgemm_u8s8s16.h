@@ -32,14 +32,27 @@
 
 */
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#ifndef LPGEMM_U8S8S16_H
+#define LPGEMM_U8S8S16_H
 
-#include "aocl_gemm_u8s8s16os16.h"
-#include "aocl_gemm_u8s8s32os32.h"
-#include "aocl_gemm_f32f32f32of32.h"
-#include "aocl_gemm_u8s8s16os16_utils.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+#include "blis.h"
+#include "lpgemm_types.h"
 
-#endif // BLIS_ADDON_LPGEMM
+void lpgemm_rowvar_u8s8s16o16
+  (
+    const dim_t m,
+    const dim_t n,
+    const dim_t k,
+    const uint8_t *a,
+    const dim_t rs_a,
+    const dim_t cs_a,
+    const int8_t *b,
+    const dim_t rs_b,
+    const dim_t cs_b,
+    int16_t *c,
+    const dim_t rs_c,
+    int16_t alpha,
+    int16_t beta
+  );
+
+#endif // LPGEMM_U8S8S16_H

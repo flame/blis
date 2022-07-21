@@ -32,14 +32,20 @@
 
 */
 
-#ifndef BLIS_ADDON_LPGEMM
-#define BLIS_ADDON_LPGEMM
+#ifndef AOCL_GEMM_U8S8S16OS16_UTILS_H
+#define AOCL_GEMM_U8S8S16OS16_UTILS_H
 
-#include "aocl_gemm_u8s8s16os16.h"
-#include "aocl_gemm_u8s8s32os32.h"
-#include "aocl_gemm_f32f32f32of32.h"
-#include "aocl_gemm_u8s8s16os16_utils.h"
-#include "aocl_gemm_u8s8s32os32_utils.h"
-#include "aocl_gemm_f32f32f32of32_utils.h"
+BLIS_EXPORT_ADDON siz_t aocl_get_reorder_buf_size_u8s8s16os16(
+    const char mat_type,
+    const dim_t k,
+    const dim_t n);
 
-#endif // BLIS_ADDON_LPGEMM
+BLIS_EXPORT_ADDON void aocl_reorder_u8s8s16os16(
+    const char mat_type,
+    const int8_t *input_buf_addr,
+    int8_t *reorder_buf_addr,
+    const dim_t k,
+    const dim_t n,
+    const dim_t ldb);
+
+#endif // AOCL_GEMM_U8S8S16OS16_UTILS_H
