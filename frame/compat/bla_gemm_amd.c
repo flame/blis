@@ -712,13 +712,20 @@ void zgemm_
 
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
     bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
-    if((nt==0) && (k0 == 1) && bli_is_notrans(blis_transa) && bli_is_notrans(blis_transb))
+    /*
+    Invoking the API for input sizes with k=1.
+    - For single thread, the API has no constraints before invoking.
+    - For multiple threads, the constraint is that m and n should individually be less than 128.
+    */
+    if((k0==1) && ((nt==0) || ((nt==1) && (m0 < 128) && (n0 < 128)))
+        && bli_is_notrans(blis_transa)
+        && bli_is_notrans(blis_transb))
     {
         bli_zgemm_ref_k1_nn( m0, n0, k0,
-                            alpha,
-                            a, *lda,
-                            b, *ldb,
-                            beta,
+                            (dcomplex*)alpha,
+                            (dcomplex*)a, *lda,
+                            (dcomplex*)b, *ldb,
+                            (dcomplex*)beta,
                             c, *ldc);
         AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
         AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1);
