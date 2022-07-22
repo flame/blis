@@ -71,11 +71,17 @@ CKOPTFLAGS     := $(COPTFLAGS) -fomit-frame-pointer
 ifeq ($(CC_VENDOR),gcc)
 GCC_VERSION := $(strip $(shell $(CC) -dumpversion | cut -d. -f1))
 # gcc or clang version must be atleast 4.0
-# gcc 9.0 or later:
+# gcc 12.0 or later:
+ifeq ($(shell test $(GCC_VERSION) -ge 12; echo $$?),0)
+CKVECFLAGS     +=  -march=znver4 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
+CRVECFLAGS     +=  -march=znver4
+else
+# gcc 11.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 11; echo $$?),0)
 CKVECFLAGS     +=  -march=znver3 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver3
 else
+# gcc 9.0 or later:
 ifeq ($(shell test $(GCC_VERSION) -ge 9; echo $$?),0)
 CKVECFLAGS     +=  -march=znver2 -mavx512f -mavx512dq -mavx512bw -mavx512vl -mavx512vnni -mfpmath=sse
 CRVECFLAGS     +=  -march=znver2
@@ -86,6 +92,7 @@ CKVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 CRVECFLAGS += -march=znver1 -mno-avx256-split-unaligned-store
 endif # GCC 9
 endif # GCC 11
+endif # GCC 12
 else
 ifeq ($(CC_VENDOR),clang)
 
