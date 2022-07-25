@@ -62,7 +62,7 @@ int main( int argc, char** argv )
     dim_t  p_inc = 0; // to keep track of number of inputs
     num_t dt = BLIS_DOUBLE;
     dim_t   r, n_repeats;
-    f77_char side;
+    side_t side;
     uplo_t uploa;
     trans_t transa;
     diag_t diaga;
@@ -191,7 +191,7 @@ int main( int argc, char** argv )
 #endif
             dtime = bli_clock();
 #ifdef BLIS
-            bli_trsm( &side,
+            bli_trsm( side,
                       &alpha,
                       &a,
                       &b );
