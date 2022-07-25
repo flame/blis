@@ -215,9 +215,17 @@ def flatten_header( inputfile, header_dirpaths, cursp ):
 	# Open the input file to process.
 	ifile = open( inputfile, "r" )
 
-	# Iterate over the lines in the file.
+	# A counter to track the line number being parsed within the current file.
+	# This counter, when selectively encoded into the flattened header via #line
+	# directives, facilitates easier debugging. (When the compiler finds an
+	# issue, it will be able to refer to the line number within the constituent
+	# header file rather than the flattened one.)
 	lineno = 0
+
+	# Iterate over the lines in the file.
 	while True:
+
+		# Increment the line number.
 		lineno += 1
 
 		# Read a line in the file.
@@ -334,7 +342,6 @@ def find_header_dirs( dirpath ):
 	#endfor
 
 	return header_dirpaths
-
 
 # ------------------------------------------------------------------------------
 
