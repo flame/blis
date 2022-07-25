@@ -56,9 +56,20 @@ void lpgemm_rowvar_u8s8s32o32_6x64
        const dim_t    rs_c,
        const dim_t    cs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_6x64_DISABLE,
+						  &&POST_OPS_BIAS_6x64,
+						  &&POST_OPS_RELU_6x64
+						};
+
 	dim_t MR = 6;
 	dim_t NR = 64;
 
@@ -99,11 +110,15 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a, ps_a,
 			  b, ( ( rs_b / 4 ) * 3 ), cs_b,
 			  c, rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 
 			b = b + ( 48 * k0_updated ); // k0x48 packed contiguosly.
 			c = c + 48;
+			post_op_c_j += 48;
 		}
 		else if ( n0_32 == 1 )
 		{
@@ -113,11 +128,15 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a, ps_a,
 			  b, ( ( rs_b / 4 ) * 2 ), cs_b,
 			  c, rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 
 			b = b + ( 32 * k0_updated ); // k0x32 packed contiguosly.
 			c = c + 32;
+			post_op_c_j += 32;
 		}
 		else if ( n0_16 == 1 )
 		{
@@ -127,11 +146,15 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a, ps_a,
 			  b, ( ( rs_b / 4 ) * 1 ), cs_b,
 			  c, rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 
 			b = b + ( 16 * k0_updated ); // k0x16 packed contiguosly.
 			c = c + 16;
+			post_op_c_j += 16;
 		}
 
 		if ( n0_rem > 0 )
@@ -142,15 +165,18 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a, ps_a,
 			  b, ( ( rs_b / 4 ) * 1 ), cs_b,
 			  c, rs_c,
-			  alpha, beta, n0_rem
+			  alpha, beta, n0_rem,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 
 			// No leftover fringe after this point.
 		}
-		
+
 		return;
 	}
-	
+
 	// B matrix storage.
 	__m512i b0;
 	__m512i b1;
@@ -160,7 +186,7 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 	// A matrix storage.
 	__m512i a_int32_0;
 	__m512i a_int32_1;
-	
+
 	for ( dim_t ir = 0; ir < m_full_pieces_loop_limit; ir += MR )
 	{
 		// Registers to use for accumulating C.
@@ -544,7 +570,180 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_5p3 = _mm512_add_epi32( selector1, c_int32_5p3 );
 		}
-		
+
+		// Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_6x64:
+		{
+			selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+			selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+			a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+			a_int32_1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 3 * 16 ) );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			// c[0, 16-31]
+			c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+			// c[0,32-47]
+			c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+			// c[0,48-63]
+			c_int32_0p3 = _mm512_add_epi32( a_int32_1, c_int32_0p3 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+			// c[1, 16-31]
+			c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+			// c[1,32-47]
+			c_int32_1p2 = _mm512_add_epi32( a_int32_0, c_int32_1p2 );
+
+			// c[1,48-63]
+			c_int32_1p3 = _mm512_add_epi32( a_int32_1, c_int32_1p3 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+			// c[2, 16-31]
+			c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+			// c[2,32-47]
+			c_int32_2p2 = _mm512_add_epi32( a_int32_0, c_int32_2p2 );
+
+			// c[2,48-63]
+			c_int32_2p3 = _mm512_add_epi32( a_int32_1, c_int32_2p3 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+			// c[3, 16-31]
+			c_int32_3p1 = _mm512_add_epi32( selector2, c_int32_3p1 );
+
+			// c[3,32-47]
+			c_int32_3p2 = _mm512_add_epi32( a_int32_0, c_int32_3p2 );
+
+			// c[3,48-63]
+			c_int32_3p3 = _mm512_add_epi32( a_int32_1, c_int32_3p3 );
+
+			// c[4,0-15]
+			c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
+
+			// c[4, 16-31]
+			c_int32_4p1 = _mm512_add_epi32( selector2, c_int32_4p1 );
+
+			// c[4,32-47]
+			c_int32_4p2 = _mm512_add_epi32( a_int32_0, c_int32_4p2 );
+
+			// c[4,48-63]
+			c_int32_4p3 = _mm512_add_epi32( a_int32_1, c_int32_4p3 );
+
+			// c[5,0-15]
+			c_int32_5p0 = _mm512_add_epi32( selector1, c_int32_5p0 );
+
+			// c[5, 16-31]
+			c_int32_5p1 = _mm512_add_epi32( selector2, c_int32_5p1 );
+
+			// c[5,32-47]
+			c_int32_5p2 = _mm512_add_epi32( a_int32_0, c_int32_5p2 );
+
+			// c[5,48-63]
+			c_int32_5p3 = _mm512_add_epi32( a_int32_1, c_int32_5p3 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_6x64:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			// c[0, 16-31]
+			c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+			// c[0,32-47]
+			c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+			// c[0,48-63]
+			c_int32_0p3 = _mm512_max_epi32( selector1, c_int32_0p3 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+			// c[1,16-31]
+			c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+			// c[1,32-47]
+			c_int32_1p2 = _mm512_max_epi32( selector1, c_int32_1p2 );
+
+			// c[1,48-63]
+			c_int32_1p3 = _mm512_max_epi32( selector1, c_int32_1p3 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+			// c[2,16-31]
+			c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+			// c[2,32-47]
+			c_int32_2p2 = _mm512_max_epi32( selector1, c_int32_2p2 );
+
+			// c[2,48-63]
+			c_int32_2p3 = _mm512_max_epi32( selector1, c_int32_2p3 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+			// c[3,16-31]
+			c_int32_3p1 = _mm512_max_epi32( selector1, c_int32_3p1 );
+
+			// c[3,32-47]
+			c_int32_3p2 = _mm512_max_epi32( selector1, c_int32_3p2 );
+
+			// c[3,48-63]
+			c_int32_3p3 = _mm512_max_epi32( selector1, c_int32_3p3 );
+
+			// c[4,0-15]
+			c_int32_4p0 = _mm512_max_epi32( selector1, c_int32_4p0 );
+
+			// c[4,16-31]
+			c_int32_4p1 = _mm512_max_epi32( selector1, c_int32_4p1 );
+
+			// c[4,32-47]
+			c_int32_4p2 = _mm512_max_epi32( selector1, c_int32_4p2 );
+
+			// c[4,48-63]
+			c_int32_4p3 = _mm512_max_epi32( selector1, c_int32_4p3 );
+
+			// c[5,0-15]
+			c_int32_5p0 = _mm512_max_epi32( selector1, c_int32_5p0 );
+
+			// c[5,16-31]
+			c_int32_5p1 = _mm512_max_epi32( selector1, c_int32_5p1 );
+
+			// c[5,32-47]
+			c_int32_5p2 = _mm512_max_epi32( selector1, c_int32_5p2 );
+
+			// c[5,48-63]
+			c_int32_5p3 = _mm512_max_epi32( selector1, c_int32_5p3 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_6x64_DISABLE:
+		;
+
 		// Store the results.
 		// c[0,0-15]
 		_mm512_storeu_epi32( c + ( rs_c * ( ir + 0 ) ) + ( 0*16 ), c_int32_0p0 );
@@ -619,6 +818,7 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 		_mm512_storeu_epi32( c + ( rs_c * ( ir + 5 ) ) + ( 3*16 ), c_int32_5p3 );
 		
 		a = a + ( MR * ps_a );
+		post_op_c_i += MR;
 	}
 
 	if ( m_partial_pieces > 0 )
@@ -638,7 +838,10 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a_use,
 			  b, rs_b, cs_b,
 			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 		}
 		else if ( m_partial_pieces == 4 )
@@ -650,7 +853,10 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a_use,
 			  b, rs_b, cs_b,
 			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 		}
 		else if ( m_partial_pieces == 3 )
@@ -662,7 +868,10 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a_use,
 			  b, rs_b, cs_b,
 			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 		}
 		else if ( m_partial_pieces == 2 )
@@ -674,7 +883,10 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a_use,
 			  b, rs_b, cs_b,
 			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 		}
 		else if ( m_partial_pieces == 1 )
@@ -686,7 +898,10 @@ void lpgemm_rowvar_u8s8s32o32_6x64
 			  a, rs_a, cs_a_use,
 			  b, rs_b, cs_b,
 			  ( c + ( rs_c * m_full_pieces_loop_limit ) ), rs_c,
-			  alpha, beta
+			  alpha, beta,
+			  is_last_k,
+			  post_op_c_i, post_op_c_j,
+			  post_ops_list
 			);
 		}
 	}

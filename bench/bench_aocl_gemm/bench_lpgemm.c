@@ -34,6 +34,21 @@ void fill_array_ ## ctype ( void* arr, dim_t size ) \
 GEN_FILL_ARRAY_FUNC(uint8_t)
 GEN_FILL_ARRAY_FUNC(int8_t)
 GEN_FILL_ARRAY_FUNC(float)
+GEN_FILL_ARRAY_FUNC(int32_t)
+
+#define GEN_FILL_ARRAY_POST_OPS_FUNC(ctype) \
+void fill_array_post_ops_ ## ctype ( void* arr, dim_t size ) \
+{ \
+	ctype* temp_arr = ( ctype* ) arr; \
+	for ( dim_t i = 0; i < size; ++i ) \
+	{ \
+		temp_arr[i] = ( ctype )( i % 20 ); \
+	} \
+} \
+
+GEN_FILL_ARRAY_POST_OPS_FUNC(int16_t)
+GEN_FILL_ARRAY_POST_OPS_FUNC(int32_t)
+GEN_FILL_ARRAY_POST_OPS_FUNC(float)
 
 #define GEN_BLIS_MAT_MUL_FUNC(A_type,B_type,C_type,BLAS_SFX) \
 void mat_mul_ ## BLAS_SFX \
@@ -49,7 +64,8 @@ void mat_mul_ ## BLAS_SFX \
        dim_t   ldb, \
        C_type  beta, \
        C_type* c, \
-       dim_t   ldc \
+       dim_t   ldc, \
+       aocl_post_op*  post_op\
      ) \
 { \
 	char transa = 'n'; \
@@ -75,7 +91,62 @@ void mat_mul_ ## BLAS_SFX \
 					a, lda, reordera, \
 					b, ldb, reorderb, \
 					beta, \
-					c, ldc ); \
+					c, ldc, post_op ); \
+ \
+	/*dim_t MR = 6; \
+	dim_t NR = 16; \
+ \
+	__m512i selector1; \
+	__m512i all_zero = _mm512_setzero_epi32(); \
+	__m512i c0; \
+	__m512i c1; \
+	__m512i c2; \
+	__m512i c3; \
+	__m512i c4; \
+	__m512i c5; \
+ \
+	for ( dim_t i = 0; i < m; i += MR ) \
+	{ \
+		if ( ( i + MR ) > m ) \
+		{ \
+			break; \
+		} \
+		for ( dim_t j = 0; j < n; j += NR ) \
+		{ \
+			if ( ( j + NR ) > n ) \
+			{ \
+				break; \
+			} \
+			selector1 = _mm512_loadu_epi32( (int32_t*)post_op->bias.bias + j ); \
+			c0 = _mm512_loadu_epi32( c + ( ( i + 0 ) * ldc ) + j ); \
+			c1 = _mm512_loadu_epi32( c + ( ( i + 1 ) * ldc ) + j ); \
+			c2 = _mm512_loadu_epi32( c + ( ( i + 2 ) * ldc ) + j ); \
+			c3 = _mm512_loadu_epi32( c + ( ( i + 3 ) * ldc ) + j ); \
+			c4 = _mm512_loadu_epi32( c + ( ( i + 4 ) * ldc ) + j ); \
+			c5 = _mm512_loadu_epi32( c + ( ( i + 5 ) * ldc ) + j ); \
+ \
+			c0 = _mm512_add_epi32( selector1, c0 ); \
+			c1 = _mm512_add_epi32( selector1, c1 ); \
+			c2 = _mm512_add_epi32( selector1, c2 ); \
+			c3 = _mm512_add_epi32( selector1, c3 ); \
+			c4 = _mm512_add_epi32( selector1, c4 ); \
+			c5 = _mm512_add_epi32( selector1, c5 ); \
+ \
+			c0 = _mm512_max_epi32( all_zero, c0 ); \
+			c1 = _mm512_max_epi32( all_zero, c1 ); \
+			c2 = _mm512_max_epi32( all_zero, c2 ); \
+			c3 = _mm512_max_epi32( all_zero, c3 ); \
+			c4 = _mm512_max_epi32( all_zero, c4 ); \
+			c5 = _mm512_max_epi32( all_zero, c5 ); \
+ \
+			_mm512_storeu_epi32( c + ( ( i + 0 ) * ldc ) + j, c0 ); \
+			_mm512_storeu_epi32( c + ( ( i + 1 ) * ldc ) + j, c1 ); \
+			_mm512_storeu_epi32( c + ( ( i + 2 ) * ldc ) + j, c2 ); \
+			_mm512_storeu_epi32( c + ( ( i + 3 ) * ldc ) + j, c3 ); \
+			_mm512_storeu_epi32( c + ( ( i + 4 ) * ldc ) + j, c4 ); \
+			_mm512_storeu_epi32( c + ( ( i + 5 ) * ldc ) + j, c5 ); \
+		} \
+	} */\
 } \
 
 GEN_BLIS_MAT_MUL_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
@@ -127,7 +198,8 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
        dim_t   ldb, \
        C_type  beta, \
        C_type* c, \
-       dim_t   ldc \
+       dim_t   ldc, \
+       aocl_post_op*  post_op\
      ) \
 { \
 	double min_time_diff = DBL_MAX; \
@@ -148,7 +220,8 @@ void mat_mul_bench_driver_ ## BLAS_SFX \
 		  a, lda, \
 		  b, ldb, \
 		  beta, \
-		  c, ldc \
+		  c, ldc, \
+		  post_op \
 		); \
  \
 		clock_gettime(CLOCK_MONOTONIC, &tend); \
@@ -182,7 +255,8 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
        C_type* c, \
        dim_t   ldc, \
        C_type* c_ref, \
-       dim_t   ldc_ref \
+       dim_t   ldc_ref, \
+       aocl_post_op*  post_op\
      ) \
 { \
 	for ( dim_t i = 0; i < m; ++i ) \
@@ -198,6 +272,34 @@ void mat_mul_accuracy_check_driver_ ## BLAS_SFX \
  \
 			temp_accum = ( beta * ( * (c_ref + ( ldc_ref * i ) + j ) ) ) \
 			             + ( alpha * temp_accum ); \
+ \
+			if ( post_op != NULL ) \
+			{ \
+				/* Apply bias followed by relu. */ \
+				if ( post_op->seq_vector[0] == BIAS ) \
+				{ \
+					if ( post_op->seq_length >= 1 ) \
+					{ \
+						temp_accum += ( *( ( int32_t* )post_op->bias.bias + j ) ); \
+					} \
+					if ( post_op->seq_length > 1 ) \
+					{ \
+						temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
+					} \
+				} \
+				else if ( post_op->seq_vector[0] == ELTWISE ) \
+				{ \
+					if ( post_op->seq_length >= 1 ) \
+					{ \
+						temp_accum = ( temp_accum > 0 ) ? temp_accum : 0 ; \
+					} \
+					if ( post_op->seq_length > 1 ) \
+					{ \
+						temp_accum += ( *( ( int32_t* )post_op->bias.bias + j ) ); \
+					} \
+				} \
+			} \
+ \
 			if ( *( c + ( ldc * i ) + j ) != temp_accum ) \
 			{ \
 				if ( fout ) \
@@ -219,6 +321,100 @@ cleanup_acc: \
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t, int8_t, int16_t, u8s8s16os16)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(uint8_t,int8_t,int32_t,u8s8s32os32)
 GEN_MAT_MUL_ACC_CHK_DRV_FUNC(float,float,float,f32f32f32of32)
+	
+/* Only supports bias followed by RELU and vice versa for now.*/ \
+#define GEN_MAT_MUL_POST_OPS_CREATOR(C_type,BLAS_SFX) \
+aocl_post_op* lpgemm_create_post_ops_struct_ ## BLAS_SFX \
+     ( \
+       dim_t m, \
+       dim_t n, \
+       char* post_ops_str \
+     ) \
+{ \
+	aocl_post_op* post_ops = NULL; \
+	post_ops = ( aocl_post_op* ) malloc( sizeof( aocl_post_op ) ); \
+ \
+	if ( post_ops == NULL ) \
+	{ \
+		return NULL; \
+	} \
+ \
+	/* Only supporting 2 post ops at max for now.*/ \
+	dim_t max_post_ops_seq_length = 2; \
+	post_ops->seq_vector = ( AOCL_POST_OP_TYPE* ) \
+							malloc \
+							( \
+							  max_post_ops_seq_length * \
+							  sizeof( AOCL_POST_OP_TYPE ) \
+							); \
+ \
+	if ( post_ops->seq_vector == NULL ) \
+	{ \
+		free( post_ops ); \
+		return NULL; \
+	} \
+ \
+	/* Parse post ops list.*/ \
+	char* ops_tok = strtok(post_ops_str, ", " ); \
+	dim_t cur_op_index = 0; \
+	while ( ops_tok ) \
+	{ \
+		if ( strcmp( ops_tok, "bias") == 0 ) \
+		{ \
+			post_ops->seq_vector[cur_op_index] = BIAS; \
+		} \
+		else if ( strcmp( ops_tok, "relu") == 0 ) \
+		{ \
+			post_ops->seq_vector[cur_op_index] = ELTWISE; \
+		} \
+		ops_tok = strtok( NULL, ", " ); \
+		cur_op_index++; \
+	} \
+	post_ops->seq_length = cur_op_index; \
+ \
+	/* Allocate bias buffer, return early if alloc fails.*/ \
+	post_ops->bias.bias = malloc( n * sizeof( C_type ) ); \
+	if ( post_ops->bias.bias == NULL ) \
+	{ \
+		free( post_ops->seq_vector ); \
+		free( post_ops ); \
+		return NULL; \
+	} \
+ \
+	GEN_FUNC_NAME(fill_array_post_ops_,C_type)( post_ops->bias.bias, n ); \
+ \
+	post_ops->eltwise.is_power_of_2 = FALSE; \
+	post_ops->eltwise.scale_factor = NULL; \
+	post_ops->eltwise.algo.alpha = NULL; \
+	post_ops->eltwise.algo.beta = NULL; \
+	post_ops->eltwise.algo.algo_type = RELU; \
+ \
+	return post_ops; \
+} \
+
+GEN_MAT_MUL_POST_OPS_CREATOR(int16_t,u8s8s16os16)
+GEN_MAT_MUL_POST_OPS_CREATOR(int32_t,u8s8s32os32)
+GEN_MAT_MUL_POST_OPS_CREATOR(float,f32f32f32of32)
+
+void lpgemm_destroy_post_ops_struct( aocl_post_op* post_ops )
+{
+	if ( post_ops == NULL )
+	{
+		return;
+	}
+ 
+	if ( post_ops->bias.bias != NULL )
+	{
+		free( post_ops->bias.bias );
+	}
+
+	if( post_ops->seq_vector != NULL )
+	{
+		free( post_ops->seq_vector );
+	}
+
+	free( post_ops );
+}
 
 #define GEN_MAT_MUL_BENCH_MAIN_FUNC(A_type,B_type,C_type,BLAS_SFX) \
 void mat_mul_bench_main_ ## BLAS_SFX \
@@ -231,7 +427,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
        int32_t k, \
        int32_t stride_a, \
        int32_t stride_b, \
-       int32_t stride_c \
+       int32_t stride_c, \
+	   char*   post_ops_str \
      ) \
 { \
 	if ( ( op_t != 'p' ) && ( op_t != 'P' ) && ( op_t != 'r' ) && ( op_t != 'R' ) ) \
@@ -273,6 +470,17 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 	GEN_FUNC_NAME(fill_array_,A_type)( a, ( m * k ) ); \
 	GEN_FUNC_NAME(fill_array_,B_type)( b, ( k * n ) ); \
  \
+	aocl_post_op* post_op = NULL; \
+	if ( post_ops_str != NULL ) \
+	{ \
+		post_op = GEN_FUNC_NAME(lpgemm_create_post_ops_struct_,BLAS_SFX)( m, n, post_ops_str ); \
+		if ( post_op == NULL ) \
+		{ \
+			printf(" post op struct allocation failure, returning.\n"); \
+			return; \
+		} \
+	} \
+ \
 	if ( ( op_t == 'p' ) || ( op_t == 'P' ) ) \
 	{ \
 		/* No reordering of B.*/ \
@@ -283,7 +491,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		  a, stride_a, \
 		  b, stride_b, \
 		  beta, \
-		  c, stride_c \
+		  c, stride_c, \
+		  post_op \
 		); \
 	} \
 	else if ( ( op_t == 'r' ) || ( op_t == 'R' ) ) \
@@ -302,7 +511,8 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		  a, stride_a, \
 		  b_reorder, stride_b, \
 		  beta, \
-		  c, stride_c \
+		  c, stride_c, \
+		  post_op \
 		); \
  \
 		bli_free_user( b_reorder ); \
@@ -319,9 +529,12 @@ void mat_mul_bench_main_ ## BLAS_SFX \
 		  b, stride_b, \
 		  beta, \
 		  c, stride_c, \
-		  c_ref, stride_c \
+		  c_ref, stride_c, \
+		  post_op \
 		); \
 	} \
+ \
+	lpgemm_destroy_post_ops_struct( post_op ); \
  \
 	if ( a != NULL ) \
 	{ \
@@ -350,19 +563,24 @@ int main( int argc, char** argv )
 	FILE* fin  = NULL;
 	if ( argc < 5 )
 	{
-		printf( "Usage: ./mat_mul -i input.txt -m mode < -n 1000 >\nMode is either a or p." \
-				" a is used for accuracy test, whereas p is used for" \
-				" performance benchmarking.\nn_repeats can be set" \
-				" optionally using -n argument.\n" );
+		printf( "Usage: ./mat_mul -i input.txt -m mode < -n 1000 -o op1,op2.. >" \
+						"\nMode is either a or p. a is used for accuracy test, " \
+						" whereas p is used for performance benchmarking." \
+						"\nn_repeats can be set optionally using -n arg." \
+						"\nPost ops can be executed optionaly by providing a " \
+						"coma separated list of ops after -o arg.\n Currently " \
+						"bias,relu and relu,bias is supported.\n" );
 		exit( 1 );
 	}
 
 	char* file_name = NULL;
+	char* post_ops_str = NULL;
+	char* post_ops_str_dest = NULL; //Strtok is used to parse, need to maintain a copy.
 
 	// Parse CLI arguments.
 	opterr = 0;
 	int opt_val;
-	while ( ( opt_val = getopt( argc, argv, "i:m:n:" ) ) != -1 )
+	while ( ( opt_val = getopt( argc, argv, "i:m:n:o:" ) ) != -1 )
 	{
 		switch ( opt_val )
 		{
@@ -375,9 +593,17 @@ int main( int argc, char** argv )
 			case 'n':
 					global_n_repeat = ( atoi( optarg ) > 0 ) ? atoi( optarg ) : 0;
 					break;
+			case 'o':
+					post_ops_str = optarg;
+					break;
 			default:
 					break;
 		}
+	}
+
+	if ( post_ops_str != NULL )
+	{
+		post_ops_str_dest = strdup( post_ops_str );
 	}
 
 	if ( bench_mode == 'p' )
@@ -411,8 +637,8 @@ int main( int argc, char** argv )
 	int32_t m, n, k;
 	int32_t stride_a, stride_b, stride_c;
 
-	const dim_t len_list_omp_cores_for_testing = 6;
-	const dim_t list_omp_cores_for_testing[6] = { 100, 80, 64, 24, 8, 1 };
+	const dim_t len_list_omp_cores_for_testing = 2;
+	const dim_t list_omp_cores_for_testing[2] = { 80, 1 };
 
 	dim_t core_index = 0;
 	bool can_run = TRUE;
@@ -454,7 +680,8 @@ int main( int argc, char** argv )
 				GEN_FUNC_NAME(mat_mul_bench_main_,u8s8s32os32)
 				(
 				  fin, fout, op_t,
-				  m, n, k, stride_a, stride_b, stride_c
+				  m, n, k, stride_a, stride_b, stride_c,
+				  post_ops_str_dest
 				);
 			}
 			else if ( ( op_type_char == 'f' ) || ( op_type_char == 'F' ) )
@@ -462,7 +689,8 @@ int main( int argc, char** argv )
 				GEN_FUNC_NAME(mat_mul_bench_main_,f32f32f32of32)
 				(
 				  fin, fout, op_t,
-				  m, n, k, stride_a, stride_b, stride_c
+				  m, n, k, stride_a, stride_b, stride_c,
+				  NULL
 				);
 			}
 			else if ((op_type_char == 's') || (op_type_char == 'S'))
@@ -470,12 +698,21 @@ int main( int argc, char** argv )
 				GEN_FUNC_NAME(mat_mul_bench_main_, u8s8s16os16)
 				(
 					fin, fout, op_t,
-					m, n, k, stride_a, stride_b, stride_c
+					m, n, k, stride_a, stride_b, stride_c,
+					NULL
 				);
+			}
+			if ( post_ops_str != NULL )
+			{
+				strcpy( post_ops_str_dest, post_ops_str );
 			}
 		}
 	}
 
+	if ( post_ops_str_dest != NULL )
+	{
+		free( post_ops_str_dest );
+	}
 	if ( fin )
 	{
 		fclose( fin );

@@ -39,22 +39,25 @@
 #include "lpgemm_config.h"
 #include "lpgemm_utils.h"
 
-void aocl_gemm_u8s8s16os16(
-	const char transa,
-	const char transb,
-	const dim_t m,
-	const dim_t n,
-	const dim_t k,
-	const int16_t alpha,
-	const uint8_t *a,
-	const dim_t lda,
-	const char mem_format_a,
-	const int8_t *b,
-	const dim_t ldb,
-	const char mem_format_b,
-	const int16_t beta,
-	int16_t *c,
-	const dim_t ldc)
+void aocl_gemm_u8s8s16os16
+     (
+       const char     transa,
+       const char     transb,
+       const dim_t    m,
+       const dim_t    n,
+       const dim_t    k,
+       const int16_t  alpha,
+       const uint8_t* a,
+       const dim_t    lda,
+       const char     mem_format_a,
+       const int8_t*  b,
+       const dim_t    ldb,
+       const char     mem_format_b,
+       const int16_t  beta,
+       int16_t*       c,
+       const dim_t    ldc,
+       aocl_post_op*  post_op_unparsed
+     )
 {
 	trans_t blis_transa;
 	trans_t blis_transb;

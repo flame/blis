@@ -69,7 +69,8 @@ void lpgemm_rowvar_f32f32f32of32
        float                 alpha,
        float                 beta,
        rntm_t*               rntm,
-       lpgemm_thrinfo_t*     thread
+       lpgemm_thrinfo_t*     thread,
+       lpgemm_post_op*       post_op_list
      )
 {
 	// Query the global cntx.

@@ -35,6 +35,7 @@
 #ifndef BLIS_ADDON_LPGEMM
 #define BLIS_ADDON_LPGEMM
 
+#include "aocl_gemm_post_ops.h"
 #include "aocl_gemm_u8s8s16os16.h"
 #include "aocl_gemm_u8s8s32os32.h"
 #include "aocl_gemm_f32f32f32of32.h"

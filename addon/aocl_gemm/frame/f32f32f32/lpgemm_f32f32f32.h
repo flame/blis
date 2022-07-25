@@ -36,6 +36,7 @@
 #define LPGEMM_F32F32F32_H
 
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 
 void lpgemm_rowvar_f32f32f32of32
      (
@@ -55,7 +56,8 @@ void lpgemm_rowvar_f32f32f32of32
        float                 alpha,
        float                 beta,
        rntm_t*               rntm,
-       lpgemm_thrinfo_t*     thread
+       lpgemm_thrinfo_t*     thread,
+       lpgemm_post_op*       post_op_list
      );
 
 #endif //LPGEMM_F32F32F32_H

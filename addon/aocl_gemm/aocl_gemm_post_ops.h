@@ -32,31 +32,65 @@
 
 */
 
-#ifndef AOCL_GEMM_U8S8S32OS32_H
-#define AOCL_GEMM_U8S8S32OS32_H
+#ifndef AOCL_GEMM_POST_OPS_H
+#define AOCL_GEMM_POST_OPS_H
 
-#include "aocl_gemm_post_ops.h"
+#define AOCL_MAX_POST_OPS 5
 
-// Only supports matrices in row major format. Currenlty only mem_format_b
-// is configurable to reorder.
-BLIS_EXPORT_ADDON void aocl_gemm_u8s8s32os32
-     (
-       const char     transa,
-       const char     transb,
-       const dim_t    m,
-       const dim_t    n,
-       const dim_t    k,
-       const int32_t  alpha,
-       const uint8_t* a,
-       const dim_t    lda,
-       const char     mem_format_a,
-       const int8_t*  b,
-       const dim_t    ldb,
-       const char     mem_format_b,
-       const int32_t  beta,
-       int32_t*       c,
-       const dim_t    ldc,
-       aocl_post_op*  post_op_unparsed
-     );
+typedef enum
+{
+	LINEAR = 0,
+	RELU = 1,
+	GELU = 2,
+	CLIP = 3,
+} AOCL_ELT_ALGO_TYPE;
 
-#endif //AOCL_GEMM_U8S8S32OS32_H
+typedef enum
+{
+	SUM = 1,
+	ELTWISE = 2,
+	BIAS = 3,
+} AOCL_POST_OP_TYPE;
+
+typedef struct
+{
+	void* alpha;
+	void* beta;
+	AOCL_ELT_ALGO_TYPE algo_type;
+} aocl_eltwise_algo;
+
+typedef struct
+{
+	bool is_power_of_2;
+	void* scale_factor;
+	void* buff;
+	void* zero_point;
+} aocl_post_op_sum;
+
+typedef struct
+{
+	bool is_power_of_2;
+	void* scale_factor;
+	aocl_eltwise_algo algo;
+} aocl_post_op_eltwise;
+
+typedef struct
+{
+	void* bias;
+} aocl_post_op_bias;
+
+typedef struct
+{
+	aocl_post_op_sum sum;
+	aocl_post_op_eltwise eltwise;
+	aocl_post_op_bias bias;
+
+	// eg: seq_length = 2
+	dim_t seq_length;
+
+	// eg: seq_vector[0] = BIAS, seq_vector[1] = ELTWISE means bias followed
+	// by eltwise(relu, if AOCL_ELT_ALGO_TYPE = 1).
+	AOCL_POST_OP_TYPE* seq_vector;
+} aocl_post_op;
+
+#endif //AOCL_GEMM_POST_OPS_H

@@ -35,6 +35,8 @@
 #ifndef BLIS_GEMM_INT8_MFRINGE
 #define BLIS_GEMM_INT8_MFRINGE
 
+#include "lpgemm_post_ops.h"
+
 // 5x64 int8o32 kernel
 void lpgemm_rowvar_u8s8s32o32_5x64
      (
@@ -48,7 +50,11 @@ void lpgemm_rowvar_u8s8s32o32_5x64
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 4x64 int8o32 kernel
@@ -64,7 +70,11 @@ void lpgemm_rowvar_u8s8s32o32_4x64
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 3x64 int8o32 kernel
@@ -80,7 +90,11 @@ void lpgemm_rowvar_u8s8s32o32_3x64
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 2x64 int8o32 kernel
@@ -96,7 +110,11 @@ void lpgemm_rowvar_u8s8s32o32_2x64
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 1x64 int8o32 kernel
@@ -112,7 +130,11 @@ void lpgemm_rowvar_u8s8s32o32_1x64
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 #endif //BLIS_GEMM_INT8_MFRINGE

@@ -52,9 +52,19 @@ void lpgemm_rowvar_u8s8s32o32_5xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_5xLT16_DISABLE,
+						  &&POST_OPS_BIAS_5xLT16,
+						  &&POST_OPS_RELU_5xLT16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -213,6 +223,56 @@ void lpgemm_rowvar_u8s8s32o32_5xlt16
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
 		}
+
+        // Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_5xLT16:
+		{
+			selector1 =
+					_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+									post_op_c_j );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+			// c[4,0-15]
+			c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_5xLT16:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+			// c[4,0-15]
+			c_int32_4p0 = _mm512_max_epi32( selector1, c_int32_4p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_5xLT16_DISABLE:
+		;
 		
 		// Store the results.
 		// c[0,0-15]
@@ -262,9 +322,19 @@ void lpgemm_rowvar_u8s8s32o32_4xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_4xLT16_DISABLE,
+						  &&POST_OPS_BIAS_4xLT16,
+						  &&POST_OPS_RELU_4xLT16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -398,6 +468,50 @@ void lpgemm_rowvar_u8s8s32o32_4xlt16
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
 		}
+
+        // Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4xLT16:
+		{
+			selector1 =
+					_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+									post_op_c_j );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_4xLT16:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+			// c[3,0-15]
+			c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_4xLT16_DISABLE:
+		;
 		
 		// Store the results.
 		// c[0,0-15]
@@ -441,9 +555,19 @@ void lpgemm_rowvar_u8s8s32o32_3xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_3xLT16_DISABLE,
+						  &&POST_OPS_BIAS_3xLT16,
+						  &&POST_OPS_RELU_3xLT16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -550,6 +674,44 @@ void lpgemm_rowvar_u8s8s32o32_3xlt16
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
 		}
+
+        // Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_3xLT16:
+		{
+			selector1 =
+					_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+									post_op_c_j );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_3xLT16:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+			// c[2,0-15]
+			c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_3xLT16_DISABLE:
+		;
 		
 		// Store the results.
 		// c[0,0-15]
@@ -587,9 +749,19 @@ void lpgemm_rowvar_u8s8s32o32_2xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_2xLT16_DISABLE,
+						  &&POST_OPS_BIAS_2xLT16,
+						  &&POST_OPS_RELU_2xLT16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -670,6 +842,38 @@ void lpgemm_rowvar_u8s8s32o32_2xlt16
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
 		}
+
+        // Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2xLT16:
+		{
+			selector1 =
+					_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+									post_op_c_j );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_2xLT16:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			// c[1,0-15]
+			c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_2xLT16_DISABLE:
+		;
 		
 		// Store the results.
 		// c[0,0-15]
@@ -701,9 +905,19 @@ void lpgemm_rowvar_u8s8s32o32_1xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_1xLT16_DISABLE,
+						  &&POST_OPS_BIAS_1xLT16,
+						  &&POST_OPS_RELU_1xLT16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -758,6 +972,32 @@ void lpgemm_rowvar_u8s8s32o32_1xlt16
 			selector1 = _mm512_mullo_epi32( selector2, selector1 );
 			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
 		}
+
+        // Post Ops
+		lpgemm_post_op* post_ops_list_temp = post_ops_list;
+		POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1xLT16:
+		{
+			selector1 =
+					_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+									post_op_c_j );
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_RELU_1xLT16:
+		{
+			selector1 = _mm512_setzero_epi32();
+
+			// c[0,0-15]
+			c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+			POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+		}
+POST_OPS_1xLT16_DISABLE:
+		;
 		
 		// Store the results.
 		// c[0,0-15]
@@ -782,9 +1022,19 @@ void lpgemm_rowvar_u8s8s32o32_5x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_5x16_DISABLE,
+						  &&POST_OPS_BIAS_5x16,
+						  &&POST_OPS_RELU_5x16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -929,7 +1179,57 @@ void lpgemm_rowvar_u8s8s32o32_5x16
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
 	}
-	
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_5x16:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_5x16:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_max_epi32( selector1, c_int32_4p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_5x16_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_epi32( c + ( rs_c * 0 ) + ( 0*16 ), c_int32_0p0 );
@@ -960,9 +1260,19 @@ void lpgemm_rowvar_u8s8s32o32_4x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_4x16_DISABLE,
+						  &&POST_OPS_BIAS_4x16,
+						  &&POST_OPS_RELU_4x16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -1083,6 +1393,50 @@ void lpgemm_rowvar_u8s8s32o32_4x16
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4x16:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_4x16:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_4x16_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -1111,9 +1465,19 @@ void lpgemm_rowvar_u8s8s32o32_3x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_3x16_DISABLE,
+						  &&POST_OPS_BIAS_3x16,
+						  &&POST_OPS_RELU_3x16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -1210,6 +1574,44 @@ void lpgemm_rowvar_u8s8s32o32_3x16
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_3x16:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_3x16:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_3x16_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -1235,9 +1637,19 @@ void lpgemm_rowvar_u8s8s32o32_2x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_2x16_DISABLE,
+						  &&POST_OPS_BIAS_2x16,
+						  &&POST_OPS_RELU_2x16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -1310,6 +1722,38 @@ void lpgemm_rowvar_u8s8s32o32_2x16
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2x16:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_2x16:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_2x16_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -1332,9 +1776,19 @@ void lpgemm_rowvar_u8s8s32o32_1x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_1x16_DISABLE,
+						  &&POST_OPS_BIAS_1x16,
+						  &&POST_OPS_RELU_1x16
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
@@ -1383,6 +1837,32 @@ void lpgemm_rowvar_u8s8s32o32_1x16
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1x16:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_1x16:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_1x16_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -1402,13 +1882,30 @@ void lpgemm_rowvar_u8s8s32o32_5x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_5x32_DISABLE,
+						  &&POST_OPS_BIAS_5x32,
+						  &&POST_OPS_RELU_5x32
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -1428,11 +1925,11 @@ void lpgemm_rowvar_u8s8s32o32_5x32
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1474,12 +1971,12 @@ void lpgemm_rowvar_u8s8s32o32_5x32
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1596,7 +2093,90 @@ void lpgemm_rowvar_u8s8s32o32_5x32
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_4p1 = _mm512_add_epi32( selector1, c_int32_4p1 );
 	}
-	
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_5x32:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		// c[3, 16-31]
+		c_int32_3p1 = _mm512_add_epi32( selector2, c_int32_3p1 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
+
+		// c[4, 16-31]
+		c_int32_4p1 = _mm512_add_epi32( selector2, c_int32_4p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_5x32:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		// c[3,16-31]
+		c_int32_3p1 = _mm512_max_epi32( selector1, c_int32_3p1 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_max_epi32( selector1, c_int32_4p0 );
+
+		// c[4,16-31]
+		c_int32_4p1 = _mm512_max_epi32( selector1, c_int32_4p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_5x32_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_epi32( c + ( rs_c * 0 ) + ( 0*16 ), c_int32_0p0 );
@@ -1642,13 +2222,30 @@ void lpgemm_rowvar_u8s8s32o32_4x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_4x32_DISABLE,
+						  &&POST_OPS_BIAS_4x32,
+						  &&POST_OPS_RELU_4x32
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -1665,11 +2262,11 @@ void lpgemm_rowvar_u8s8s32o32_4x32
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1703,12 +2300,12 @@ void lpgemm_rowvar_u8s8s32o32_4x32
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1803,6 +2400,77 @@ void lpgemm_rowvar_u8s8s32o32_4x32
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_3p1 = _mm512_add_epi32( selector1, c_int32_3p1 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4x32:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		// c[3, 16-31]
+		c_int32_3p1 = _mm512_add_epi32( selector2, c_int32_3p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_4x32:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		// c[3,16-31]
+		c_int32_3p1 = _mm512_max_epi32( selector1, c_int32_3p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_4x32_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -1843,13 +2511,30 @@ void lpgemm_rowvar_u8s8s32o32_3x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_3x32_DISABLE,
+						  &&POST_OPS_BIAS_3x32,
+						  &&POST_OPS_RELU_3x32
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -1863,11 +2548,11 @@ void lpgemm_rowvar_u8s8s32o32_3x32
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1893,12 +2578,12 @@ void lpgemm_rowvar_u8s8s32o32_3x32
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -1971,6 +2656,65 @@ void lpgemm_rowvar_u8s8s32o32_3x32
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_2p1 = _mm512_add_epi32( selector1, c_int32_2p1 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_3x32:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_3x32:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_3x32_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -2005,13 +2749,30 @@ void lpgemm_rowvar_u8s8s32o32_2x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_2x32_DISABLE,
+						  &&POST_OPS_BIAS_2x32,
+						  &&POST_OPS_RELU_2x32
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2022,11 +2783,11 @@ void lpgemm_rowvar_u8s8s32o32_2x32
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2044,12 +2805,12 @@ void lpgemm_rowvar_u8s8s32o32_2x32
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2100,6 +2861,53 @@ void lpgemm_rowvar_u8s8s32o32_2x32
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_1p1 = _mm512_add_epi32( selector1, c_int32_1p1 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2x32:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_2x32:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_2x32_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -2128,13 +2936,30 @@ void lpgemm_rowvar_u8s8s32o32_1x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_1x32_DISABLE,
+						  &&POST_OPS_BIAS_1x32,
+						  &&POST_OPS_RELU_1x32
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2142,11 +2967,11 @@ void lpgemm_rowvar_u8s8s32o32_1x32
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2156,12 +2981,12 @@ void lpgemm_rowvar_u8s8s32o32_1x32
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-31] = a[0,kr:kr+4]*b[kr:kr+4,0-31]
@@ -2190,6 +3015,41 @@ void lpgemm_rowvar_u8s8s32o32_1x32
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_0p1 = _mm512_add_epi32( selector1, c_int32_0p1 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1x32:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_1x32:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_1x32_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -2212,13 +3072,31 @@ void lpgemm_rowvar_u8s8s32o32_5x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_5x48_DISABLE,
+						  &&POST_OPS_BIAS_5x48,
+						  &&POST_OPS_RELU_5x48
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+	__m512i b2;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2243,12 +3121,12 @@ void lpgemm_rowvar_u8s8s32o32_5x48
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2295,13 +3173,13 @@ void lpgemm_rowvar_u8s8s32o32_5x48
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2453,7 +3331,123 @@ void lpgemm_rowvar_u8s8s32o32_5x48
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_4p2 = _mm512_add_epi32( selector1, c_int32_4p2 );
 	}
-	
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_5x48:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_add_epi32( a_int32_0, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_add_epi32( a_int32_0, c_int32_2p2 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		// c[3, 16-31]
+		c_int32_3p1 = _mm512_add_epi32( selector2, c_int32_3p1 );
+
+		// c[3,32-47]
+		c_int32_3p2 = _mm512_add_epi32( a_int32_0, c_int32_3p2 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_add_epi32( selector1, c_int32_4p0 );
+
+		// c[4, 16-31]
+		c_int32_4p1 = _mm512_add_epi32( selector2, c_int32_4p1 );
+
+		// c[4,32-47]
+		c_int32_4p2 = _mm512_add_epi32( a_int32_0, c_int32_4p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_5x48:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_max_epi32( selector1, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_max_epi32( selector1, c_int32_2p2 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		// c[3,16-31]
+		c_int32_3p1 = _mm512_max_epi32( selector1, c_int32_3p1 );
+
+		// c[3,32-47]
+		c_int32_3p2 = _mm512_max_epi32( selector1, c_int32_3p2 );
+
+		// c[4,0-15]
+		c_int32_4p0 = _mm512_max_epi32( selector1, c_int32_4p0 );
+
+		// c[4,16-31]
+		c_int32_4p1 = _mm512_max_epi32( selector1, c_int32_4p1 );
+
+		// c[4,32-47]
+		c_int32_4p2 = _mm512_max_epi32( selector1, c_int32_4p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_5x48_DISABLE:
+	;
+
 	// Store the results.
 	// c[0,0-15]
 	_mm512_storeu_epi32( c + ( rs_c * 0 ) + ( 0*16 ), c_int32_0p0 );
@@ -2514,13 +3508,31 @@ void lpgemm_rowvar_u8s8s32o32_4x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_4x48_DISABLE,
+						  &&POST_OPS_BIAS_4x48,
+						  &&POST_OPS_RELU_4x48
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+	__m512i b2;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2541,12 +3553,12 @@ void lpgemm_rowvar_u8s8s32o32_4x48
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2584,13 +3596,13 @@ void lpgemm_rowvar_u8s8s32o32_4x48
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2713,6 +3725,104 @@ void lpgemm_rowvar_u8s8s32o32_4x48
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_3p2 = _mm512_add_epi32( selector1, c_int32_3p2 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_4x48:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_add_epi32( a_int32_0, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_add_epi32( a_int32_0, c_int32_2p2 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_add_epi32( selector1, c_int32_3p0 );
+
+		// c[3, 16-31]
+		c_int32_3p1 = _mm512_add_epi32( selector2, c_int32_3p1 );
+
+		// c[3,32-47]
+		c_int32_3p2 = _mm512_add_epi32( a_int32_0, c_int32_3p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_4x48:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_max_epi32( selector1, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_max_epi32( selector1, c_int32_2p2 );
+
+		// c[3,0-15]
+		c_int32_3p0 = _mm512_max_epi32( selector1, c_int32_3p0 );
+
+		// c[3,16-31]
+		c_int32_3p1 = _mm512_max_epi32( selector1, c_int32_3p1 );
+
+		// c[3,32-47]
+		c_int32_3p2 = _mm512_max_epi32( selector1, c_int32_3p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_4x48_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -2765,13 +3875,31 @@ void lpgemm_rowvar_u8s8s32o32_3x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_3x48_DISABLE,
+						  &&POST_OPS_BIAS_3x48,
+						  &&POST_OPS_RELU_3x48
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+	__m512i b2;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2788,12 +3916,12 @@ void lpgemm_rowvar_u8s8s32o32_3x48
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2822,13 +3950,13 @@ void lpgemm_rowvar_u8s8s32o32_3x48
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -2922,6 +4050,86 @@ void lpgemm_rowvar_u8s8s32o32_3x48
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_2p2 = _mm512_add_epi32( selector1, c_int32_2p2 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_3x48:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_add_epi32( a_int32_0, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_add_epi32( selector1, c_int32_2p0 );
+
+		// c[2, 16-31]
+		c_int32_2p1 = _mm512_add_epi32( selector2, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_add_epi32( a_int32_0, c_int32_2p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_3x48:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_max_epi32( selector1, c_int32_1p2 );
+
+		// c[2,0-15]
+		c_int32_2p0 = _mm512_max_epi32( selector1, c_int32_2p0 );
+
+		// c[2,16-31]
+		c_int32_2p1 = _mm512_max_epi32( selector1, c_int32_2p1 );
+
+		// c[2,32-47]
+		c_int32_2p2 = _mm512_max_epi32( selector1, c_int32_2p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_3x48_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -2965,13 +4173,31 @@ void lpgemm_rowvar_u8s8s32o32_2x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_2x48_DISABLE,
+						  &&POST_OPS_BIAS_2x48,
+						  &&POST_OPS_RELU_2x48
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+	__m512i b2;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -2984,12 +4210,12 @@ void lpgemm_rowvar_u8s8s32o32_2x48
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -3009,13 +4235,13 @@ void lpgemm_rowvar_u8s8s32o32_2x48
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -3080,6 +4306,68 @@ void lpgemm_rowvar_u8s8s32o32_2x48
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_1p2 = _mm512_add_epi32( selector1, c_int32_1p2 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_2x48:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_add_epi32( selector1, c_int32_1p0 );
+
+		// c[1, 16-31]
+		c_int32_1p1 = _mm512_add_epi32( selector2, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_add_epi32( a_int32_0, c_int32_1p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_2x48:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+		// c[1,0-15]
+		c_int32_1p0 = _mm512_max_epi32( selector1, c_int32_1p0 );
+
+		// c[1,16-31]
+		c_int32_1p1 = _mm512_max_epi32( selector1, c_int32_1p1 );
+
+		// c[1,32-47]
+		c_int32_1p2 = _mm512_max_epi32( selector1, c_int32_1p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_2x48_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]
@@ -3114,13 +4402,31 @@ void lpgemm_rowvar_u8s8s32o32_1x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      )
 {
+	static void* post_ops_labels[] =
+						{
+						  &&POST_OPS_1x48_DISABLE,
+						  &&POST_OPS_BIAS_1x48,
+						  &&POST_OPS_RELU_1x48
+						};
 	dim_t k_full_pieces = k0 / 4;
 	dim_t k_partial_pieces = k0 % 4;
 
 	uint32_t a_kfringe_buf = 0;
+
+	// B matrix storage.
+	__m512i b0;
+	__m512i b1;
+	__m512i b2;
+
+	// A matrix storage.
+	__m512i a_int32_0;
 
 	// Registers to use for accumulating C.
 	__m512i c_int32_0p0 = _mm512_setzero_epi32();
@@ -3129,12 +4435,12 @@ void lpgemm_rowvar_u8s8s32o32_1x48
 
 	for ( dim_t kr = 0; kr < k_full_pieces; kr += 1 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * kr ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
-		__m512i a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
+		a_int32_0 = _mm512_set1_epi32( *( uint32_t* )( a + ( rs_a * 0 ) + ( cs_a * kr ) ) );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -3145,13 +4451,13 @@ void lpgemm_rowvar_u8s8s32o32_1x48
 	// Handle k remainder.
 	if ( k_partial_pieces > 0 )
 	{
-		__m512i b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
-		__m512i b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
-		__m512i b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
+		b0 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 0 ) );
+		b1 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 1 ) );
+		b2 = _mm512_loadu_epi8( b + ( rs_b * k_full_pieces ) + ( cs_b * 2 ) );
 
 		// Broadcast a[0,kr:kr+4].
 		memcpy( &a_kfringe_buf, ( a + ( rs_a * 0 ) + ( cs_a * k_full_pieces ) ), ( k_partial_pieces * sizeof( uint8_t ) ) );
-		__m512i a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
+		a_int32_0 = _mm512_set1_epi32( a_kfringe_buf );
 
 		// Perform column direction mat-mul with k = 4.
 		// c[0,0-47] = a[0,kr:kr+4]*b[kr:kr+4,0-47]
@@ -3187,6 +4493,50 @@ void lpgemm_rowvar_u8s8s32o32_1x48
 		selector1 = _mm512_mullo_epi32( selector2, selector1 );
 		c_int32_0p2 = _mm512_add_epi32( selector1, c_int32_0p2 );
 	}
+
+	// Post Ops
+	lpgemm_post_op* post_ops_list_temp = post_ops_list;
+	POST_OP_LABEL_LASTK_SAFE_JUMP
+POST_OPS_BIAS_1x48:
+	{
+		selector1 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 0 * 16 ) );
+		selector2 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 1 * 16 ) );
+		a_int32_0 =
+				_mm512_loadu_epi32( ( int32_t* )post_ops_list_temp->op_args1 +
+								post_op_c_j + ( 2 * 16 ) );
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_add_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_add_epi32( selector2, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_add_epi32( a_int32_0, c_int32_0p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_RELU_1x48:
+	{
+		selector1 = _mm512_setzero_epi32();
+
+		// c[0,0-15]
+		c_int32_0p0 = _mm512_max_epi32( selector1, c_int32_0p0 );
+
+		// c[0, 16-31]
+		c_int32_0p1 = _mm512_max_epi32( selector1, c_int32_0p1 );
+
+		// c[0,32-47]
+		c_int32_0p2 = _mm512_max_epi32( selector1, c_int32_0p2 );
+
+		POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR
+	}
+POST_OPS_1x48_DISABLE:
+	;
 	
 	// Store the results.
 	// c[0,0-15]

@@ -35,6 +35,8 @@
 #ifndef BLIS_GEMM_INT8_NFRINGE
 #define BLIS_GEMM_INT8_NFRINGE
 
+#include "lpgemm_post_ops.h"
+
 // 6xlt16 int8o32 fringe kernel
 void lpgemm_rowvar_u8s8s32o32_6xlt16
      (
@@ -51,7 +53,11 @@ void lpgemm_rowvar_u8s8s32o32_6xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 6x16 int8o32 fringe kernel
@@ -69,7 +75,11 @@ void lpgemm_rowvar_u8s8s32o32_6x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 6x32 int8o32 fringe kernel
@@ -87,7 +97,11 @@ void lpgemm_rowvar_u8s8s32o32_6x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 6x48 int8o32 fringe kernel
@@ -105,7 +119,11 @@ void lpgemm_rowvar_u8s8s32o32_6x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 #endif //BLIS_GEMM_INT8_NFRINGE

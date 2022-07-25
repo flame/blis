@@ -35,6 +35,8 @@
 #ifndef BLIS_GEMM_INT8_MNROW
 #define BLIS_GEMM_INT8_MNROW
 
+#include "lpgemm_post_ops.h"
+
 // 6x64 int8o32 kernel
 void lpgemm_rowvar_u8s8s32o32_6x64
      (
@@ -52,7 +54,11 @@ void lpgemm_rowvar_u8s8s32o32_6x64
        const dim_t    rs_c,
        const dim_t    cs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 #endif //BLIS_GEMM_INT8_MNROW

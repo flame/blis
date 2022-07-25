@@ -37,21 +37,24 @@
 
 // Only supports matrices in row major format
 // Limitations: Supports mem_format_b = 'Reorder'
-BLIS_EXPORT_ADDON void aocl_gemm_u8s8s16os16(
-    const char transa,
-    const char transb,
-    const dim_t m,
-    const dim_t n,
-    const dim_t k,
-    const int16_t alpha,
-    const uint8_t *a,
-    const dim_t lda,
-    const char mem_format_a,
-    const int8_t *b,
-    const dim_t ldb,
-    const char mem_format_b,
-    const int16_t beta,
-    int16_t *c,
-    const dim_t ldc);
+BLIS_EXPORT_ADDON void aocl_gemm_u8s8s16os16
+     (
+       const char     transa,
+       const char     transb,
+       const dim_t    m,
+       const dim_t    n,
+       const dim_t    k,
+       const int16_t  alpha,
+       const uint8_t* a,
+       const dim_t    lda,
+       const char     mem_format_a,
+       const int8_t*  b,
+       const dim_t    ldb,
+       const char     mem_format_b,
+       const int16_t  beta,
+       int16_t*       c,
+       const dim_t    ldc,
+       aocl_post_op*  post_op_unparsed
+     );
 
 #endif // AOCL_GEMM_U8S8S16OS16_H

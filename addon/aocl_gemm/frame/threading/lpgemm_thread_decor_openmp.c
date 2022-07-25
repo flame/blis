@@ -373,7 +373,8 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
        const dim_t           rs_c, \
        C_type                alpha, \
        C_type                beta, \
-       rntm_t*               rntm_g \
+       rntm_t*               rntm_g, \
+       lpgemm_post_op*       post_op_list \
      ) \
 { \
 	dim_t n_threads; \
@@ -432,7 +433,8 @@ void lpgemm_ ## LPGEMM_SFX ## _openmp_thread_decorator \
 		  alpha, \
 		  beta, \
 		  &rntm_l, \
-		  &thread \
+		  &thread, \
+		  post_op_list \
 		); \
 	} \
 	if ( jc_ways > BLIS_LPGEMM_NUM_STATIC_COMMS ) \
@@ -464,7 +466,8 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
        const dim_t           rs_c, \
        C_type                alpha, \
        C_type                beta, \
-       rntm_t*               rntm_g \
+       rntm_t*               rntm_g, \
+       lpgemm_post_op*       post_op_list \
      ) \
 { \
 	dim_t n_threads = 1; \
@@ -502,7 +505,8 @@ void lpgemm_ ## LPGEMM_SFX ## _thread_decorator \
 	  alpha, \
 	  beta, \
 	  rntm_g, \
-	  &thread \
+	  &thread, \
+	  post_op_list \
 	); \
 } \
 

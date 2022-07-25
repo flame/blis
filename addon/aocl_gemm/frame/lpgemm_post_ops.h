@@ -32,31 +32,57 @@
 
 */
 
-#ifndef AOCL_GEMM_U8S8S32OS32_H
-#define AOCL_GEMM_U8S8S32OS32_H
+#ifndef LPGEMM_POST_OPS_H
+#define LPGEMM_POST_OPS_H
 
-#include "aocl_gemm_post_ops.h"
+typedef enum
+{
+	POST_OPS_DISABLE = 0,
+	POST_OPS_BIAS = 1,
+	POST_OPS_RELU = 2,
+	POST_OPS_SUM = 3,
+	POST_OPS_LINEAR = 4,
+	POST_OPS_GELU = 5,
+	POST_OPS_CLIP = 6,
+} LPGEMM_POST_OP_CODE;
 
-// Only supports matrices in row major format. Currenlty only mem_format_b
-// is configurable to reorder.
-BLIS_EXPORT_ADDON void aocl_gemm_u8s8s32os32
+// Used as an internal structure.
+typedef struct lpgemm_post_op_t
+{
+	LPGEMM_POST_OP_CODE op_code;
+	void* op_args1;
+	void* op_args2; // alpha, zero_point
+	void* op_args3; // beta
+	void* scale_factor;
+	bool is_power_of_2;
+	struct lpgemm_post_op_t* next;
+} lpgemm_post_op;
+
+void lpgemm_translate_to_post_ops_list
      (
-       const char     transa,
-       const char     transb,
-       const dim_t    m,
-       const dim_t    n,
-       const dim_t    k,
-       const int32_t  alpha,
-       const uint8_t* a,
-       const dim_t    lda,
-       const char     mem_format_a,
-       const int8_t*  b,
-       const dim_t    ldb,
-       const char     mem_format_b,
-       const int32_t  beta,
-       int32_t*       c,
-       const dim_t    ldc,
-       aocl_post_op*  post_op_unparsed
+       aocl_post_op*   post_op_unparsed,
+       lpgemm_post_op* post_op_list
      );
 
-#endif //AOCL_GEMM_U8S8S32OS32_H
+#define POST_OP_LABEL_LASTK_SAFE_JUMP \
+		if ( ( is_last_k == TRUE ) && ( post_ops_list_temp != NULL ) ) \
+		{ \
+			goto *post_ops_labels[post_ops_list_temp->op_code]; \
+		} \
+		else \
+		{ \
+			goto *post_ops_labels[0]; \
+		}
+
+#define POST_OP_LABEL_LASTK_SAFE_JUMP_WITH_NEXT_PTR \
+		post_ops_list_temp = post_ops_list_temp->next; \
+		if ( post_ops_list_temp != NULL ) \
+		{ \
+			goto *post_ops_labels[post_ops_list_temp->op_code]; \
+		} \
+		else \
+		{ \
+			goto *post_ops_labels[0]; \
+		}
+
+#endif //LPGEMM_POST_OPS_H

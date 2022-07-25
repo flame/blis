@@ -60,7 +60,8 @@ void lpgemm_rowvar_u8s8s32o32
        int32_t               alpha,
        int32_t               beta,
        rntm_t*               rntm,
-       lpgemm_thrinfo_t*     thread
+       lpgemm_thrinfo_t*     thread,
+       lpgemm_post_op*       post_op_list
      )
 {
 	dim_t NC = lpgemm_get_block_size_NC_global_cntx( U8S8S32OS32 );
@@ -105,6 +106,9 @@ void lpgemm_rowvar_u8s8s32o32
 	// buffer needs to be updated.
 	dim_t k_updated = make_multiple_of_n( k, 4 );
 
+	// Is required to decide whether to apply post ops or not.
+	bool is_last_k = FALSE;
+
 	// Generate thrinfo objects for jc and ic loops from lpgemm_thrinfo_t.
 	thrinfo_t thread_jc;
 	thrinfo_t thread_ic;
@@ -145,6 +149,8 @@ void lpgemm_rowvar_u8s8s32o32
 			// the kc0 offsets used for packed/reordered buffers
 			// needs to be updated.
 			dim_t kc0_updated = make_multiple_of_n( kc0, 4 );
+
+			is_last_k = ( ( pc + KC ) >= k ) ? ( TRUE ) : ( FALSE );
 
 			if ( mtag_b == PACK )
 			{
@@ -300,7 +306,8 @@ void lpgemm_rowvar_u8s8s32o32
 					  a_use, rs_a_use, cs_a_use, a_block_stride,
 					  ( b_use + ( jr * kc0_updated ) ), rs_b_use, cs_b_use,
 					  ( c_use_ic + jr ), rs_c, 1,
-					  alpha, beta0
+					  alpha, beta0,
+					  is_last_k, ic, ( jc + jr ), post_op_list
 					);
 				}
 			}

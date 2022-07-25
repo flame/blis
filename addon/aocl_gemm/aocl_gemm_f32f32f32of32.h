@@ -35,6 +35,8 @@
 #ifndef AOCL_GEMM_F32F32F32OF32_H
 #define AOCL_GEMM_F32F32F32OF32_H
 
+#include "aocl_gemm_post_ops.h"
+
 // Only supports matrices in row major format. This api can perform gemm with
 // both normal as well as reordered B matrix as opposesd to sgemm (only
 // supports former). This api can be considered analogous to packed sgemm api.
@@ -54,7 +56,8 @@ BLIS_EXPORT_ADDON void aocl_gemm_f32f32f32of32
        const char   mem_format_b,
        const float  beta,
        float*       c,
-       const dim_t  ldc
+       const dim_t  ldc,
+       aocl_post_op*  post_op_unparsed
      );
 
 #endif //AOCL_GEMM_F32F32F32OF32_H

@@ -35,6 +35,8 @@
 #ifndef BLIS_GEMM_INT8_MNFRINGE
 #define BLIS_GEMM_INT8_MNFRINGE
 
+#include "lpgemm_post_ops.h"
+
 // 5xlt16 int8o32 fringe kernel
 void lpgemm_rowvar_u8s8s32o32_5xlt16
      (
@@ -49,7 +51,11 @@ void lpgemm_rowvar_u8s8s32o32_5xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 4xlt16 int8o32 fringe kernel
@@ -66,7 +72,11 @@ void lpgemm_rowvar_u8s8s32o32_4xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 3xlt16 int8o32 fringe kernel
@@ -83,7 +93,11 @@ void lpgemm_rowvar_u8s8s32o32_3xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 2xlt16 int8o32 fringe kernel
@@ -100,7 +114,11 @@ void lpgemm_rowvar_u8s8s32o32_2xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 1xlt16 int8o32 fringe kernel
@@ -117,7 +135,11 @@ void lpgemm_rowvar_u8s8s32o32_1xlt16
        const dim_t    rs_c,
        const int32_t  alpha,
        const int32_t  beta,
-       const dim_t    n0_rem
+       const dim_t    n0_rem,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 5x16 int8o32 kernel
@@ -133,7 +155,11 @@ void lpgemm_rowvar_u8s8s32o32_5x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 4x16 int8o32 kernel
@@ -149,7 +175,11 @@ void lpgemm_rowvar_u8s8s32o32_4x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 3x16 int8o32 kernel
@@ -165,7 +195,11 @@ void lpgemm_rowvar_u8s8s32o32_3x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 2x16 int8o32 kernel
@@ -181,7 +215,11 @@ void lpgemm_rowvar_u8s8s32o32_2x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 1x16 int8o32 kernel
@@ -197,7 +235,11 @@ void lpgemm_rowvar_u8s8s32o32_1x16
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 5x32 int8o32 kernel
@@ -213,7 +255,11 @@ void lpgemm_rowvar_u8s8s32o32_5x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 4x32 int8o32 kernel
@@ -229,7 +275,11 @@ void lpgemm_rowvar_u8s8s32o32_4x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 3x32 int8o32 kernel
@@ -245,7 +295,11 @@ void lpgemm_rowvar_u8s8s32o32_3x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 2x32 int8o32 kernel
@@ -261,7 +315,11 @@ void lpgemm_rowvar_u8s8s32o32_2x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 1x32 int8o32 kernel
@@ -277,7 +335,11 @@ void lpgemm_rowvar_u8s8s32o32_1x32
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 5x48 int8o32 kernel
@@ -293,7 +355,11 @@ void lpgemm_rowvar_u8s8s32o32_5x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 4x48 int8o32 kernel
@@ -309,7 +375,11 @@ void lpgemm_rowvar_u8s8s32o32_4x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 3x48 int8o32 kernel
@@ -325,7 +395,11 @@ void lpgemm_rowvar_u8s8s32o32_3x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 2x48 int8o32 kernel
@@ -341,7 +415,11 @@ void lpgemm_rowvar_u8s8s32o32_2x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 // 1x48 int8o32 kernel
@@ -357,7 +435,11 @@ void lpgemm_rowvar_u8s8s32o32_1x48
        int32_t*       c,
        const dim_t    rs_c,
        const int32_t  alpha,
-       const int32_t  beta
+       const int32_t  beta,
+       bool           is_last_k,
+       dim_t          post_op_c_i,
+       dim_t          post_op_c_j,
+       lpgemm_post_op*       post_ops_list
      );
 
 #endif //BLIS_GEMM_INT8_MNFRINGE

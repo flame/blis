@@ -35,6 +35,7 @@
 #include "blis.h"
 #include "aocl_gemm_f32f32f32of32.h"
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_utils.h"
 #include "lpgemm_f32f32f32.h"
@@ -55,7 +56,8 @@ void aocl_gemm_f32f32f32of32
        const char   mem_format_b,
        const float  beta,
        float*       c,
-       const dim_t  ldc
+       const dim_t  ldc,
+       aocl_post_op*  post_op_unparsed
      )
 {
 	trans_t blis_transa;
@@ -134,6 +136,10 @@ void aocl_gemm_f32f32f32of32
 		return; // Error.
 	}
 
+	// Convert post op struct to post op linked list format.
+	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
+	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list );
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
@@ -148,7 +154,8 @@ void aocl_gemm_f32f32f32of32
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g
+	  &rntm_g,
+	  post_op_list
 	);
 #else
 	// Setting pack A by default for non open mp case.
@@ -161,7 +168,8 @@ void aocl_gemm_f32f32f32of32
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g
+	  &rntm_g,
+	  post_op_list
 	);
 #endif
 

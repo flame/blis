@@ -35,6 +35,7 @@
 #include "blis.h"
 #include "aocl_gemm_u8s8s32os32.h"
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 #include "lpgemm_thread_decor_openmp.h"
 #include "lpgemm_u8s8s32.h"
 #include "lpgemm_config.h"
@@ -56,7 +57,8 @@ void aocl_gemm_u8s8s32os32
        const char     mem_format_b,
        const int32_t  beta,
        int32_t*       c,
-       const dim_t    ldc
+       const dim_t    ldc,
+       aocl_post_op*  post_op_unparsed
      )
 {
 	trans_t blis_transa;
@@ -133,6 +135,10 @@ void aocl_gemm_u8s8s32os32
 		return; // Error.
 	}
 
+	// Convert post op struct to post op linked list format.
+	lpgemm_post_op post_op_list[AOCL_MAX_POST_OPS];
+	lpgemm_translate_to_post_ops_list( post_op_unparsed, post_op_list );
+
 	// Initialize a local runtime with global settings if necessary. Note
 	// that in the case that a runtime is passed in, we make a local copy.
 	rntm_t rntm_g;
@@ -147,7 +153,8 @@ void aocl_gemm_u8s8s32os32
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g
+	  &rntm_g,
+	  post_op_list
 	);
 #else
 	lpgemm_u8s8s32o32_thread_decorator
@@ -157,7 +164,8 @@ void aocl_gemm_u8s8s32os32
 	  b, rs_b, cs_b, mtag_b,
 	  c, rs_c,
 	  alpha, beta,
-	  &rntm_g
+	  &rntm_g,
+	  post_op_list
 	);
 #endif
 }

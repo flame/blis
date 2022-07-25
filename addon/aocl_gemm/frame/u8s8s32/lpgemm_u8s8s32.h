@@ -36,6 +36,7 @@
 #define LPGEMM_U8S8S32_H
 
 #include "lpgemm_types.h"
+#include "lpgemm_post_ops.h"
 
 // B should always be packed.
 void lpgemm_rowvar_u8s8s32o32
@@ -56,7 +57,8 @@ void lpgemm_rowvar_u8s8s32o32
        int32_t               alpha,
        int32_t               beta,
        rntm_t*               rntm,
-       lpgemm_thrinfo_t*     thread
+       lpgemm_thrinfo_t*     thread,
+       lpgemm_post_op*       post_op_list
      );
 
 #endif //LPGEMM_U8S8S32_H
