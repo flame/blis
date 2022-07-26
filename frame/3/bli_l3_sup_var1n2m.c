@@ -295,6 +295,9 @@ void PASTEMAC(ch,varname) \
 	const dim_t MC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
 	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
 \
+	/* Disable modification of KC since it seems to negatively impact certain operations (#644). */ \
+	dim_t KC = KC0; \
+	/* \
 	dim_t KC; \
 	if      ( packa && packb ) \
 	{ \
@@ -320,7 +323,7 @@ void PASTEMAC(ch,varname) \
 		          stor_id == BLIS_CCR    ) KC = (( KC0 / 4 ) / 4 ) * 4; \
 		else                               KC = KC0; \
 	} \
-	else /* if ( !packa && !packb ) */ \
+	else *//* if ( !packa && !packb ) *//* \
 	{ \
 		if      ( FALSE                  ) KC = KC0; \
 		else if ( stor_id == BLIS_RRC || \
@@ -330,7 +333,7 @@ void PASTEMAC(ch,varname) \
 		else if ( m <= 3*MR && n <= 3*NR ) KC = (( KC0 / 3 ) / 4 ) * 4; \
 		else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4; \
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
-	} \
+	}*/ \
 \
 	/* Nudge NC up to a multiple of MR and MC up to a multiple of NR.
 	   NOTE: This is unique to variant 1 (ie: not performed in variant 2)
@@ -932,6 +935,9 @@ void PASTEMAC(ch,varname) \
 	const dim_t MC  = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_MC, cntx ); \
 	const dim_t KC0 = bli_cntx_get_l3_sup_blksz_def_dt( dt, BLIS_KC, cntx ); \
 \
+	/* Disable modification of KC since it seems to negatively impact certain operations (#644). */ \
+	dim_t KC = KC0; \
+	/* \
 	dim_t KC; \
 	if      ( packa && packb ) \
 	{ \
@@ -957,7 +963,7 @@ void PASTEMAC(ch,varname) \
 		          stor_id == BLIS_CCR    ) KC = (( KC0 / 4 ) / 4 ) * 4; \
 		else                               KC = KC0; \
 	} \
-	else /* if ( !packa && !packb ) */ \
+	else *//* if ( !packa && !packb ) *//* \
 	{ \
 		if      ( stor_id == BLIS_RRR || \
 				  stor_id == BLIS_CCC    ) KC = KC0; \
@@ -968,7 +974,7 @@ void PASTEMAC(ch,varname) \
 		else if ( m <= 3*MR && n <= 3*NR ) KC = (( KC0 / 3 ) / 4 ) * 4; \
 		else if ( m <= 4*MR && n <= 4*NR ) KC = KC0 / 4; \
 		else                               KC = (( KC0 / 5 ) / 4 ) * 4; \
-	} \
+	}*/ \
 \
 	/* Query the maximum blocksize for NR, which implies a maximum blocksize
 	   extension for the final iteration. */ \
