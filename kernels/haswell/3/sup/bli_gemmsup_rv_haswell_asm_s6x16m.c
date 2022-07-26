@@ -4477,32 +4477,38 @@ void bli_sgemmsup_rv_haswell_asm_6x2m
 	label(.SROWSTORED)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm4)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovsd(xmm4, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm6)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm6)
 	vmovsd(xmm6, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm8)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm8)
 	vmovsd(xmm8, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm10)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm10)
 	vmovsd(xmm10, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm12)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm12)
 	vmovsd(xmm12, mem(rcx, 0*32))
 	add(rdi, rcx)
 
 
-	vfmadd231ps(mem(rcx, 0*32), xmm3, xmm14)
+	vmovsd(mem(rcx, 0*32), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm14)
 	vmovsd(xmm14, mem(rcx, 0*32))
 	//add(rdi, rcx)
 
