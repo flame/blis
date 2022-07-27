@@ -119,6 +119,13 @@ err_t bli_gemmsup_int
 	          bli_rntm_set_pack_b( 1, rntm );
 	  }
 
+	  /*Enable packing of B matrix for complex data type*/
+	  if (bli_is_dcomplex(dt) && (n_threads == 1))
+	  {
+		  if ((m > 55) && (k > 55) && (n > 55))
+			  bli_rntm_set_pack_b(1, rntm);
+	  }
+
 	  bli_gemmsup_ref_var2m( BLIS_NO_TRANSPOSE,
 				 alpha, a, b, beta, c,
 				 stor_id, cntx, rntm, thread );
@@ -150,6 +157,13 @@ err_t bli_gemmsup_int
 	  if(bli_is_float(dt) && (n_threads==1)) {
               if((m > 240) &&  (k > 240) && (n > 240))
 	          bli_rntm_set_pack_a( 1, rntm );
+	  }
+
+	  /*Enable packing of A matrix for complex data type*/
+	  if (bli_is_dcomplex(dt) && (n_threads == 1))
+	  {
+		  if ((m > 55) && (k > 55) && (n > 55))
+			  bli_rntm_set_pack_a(1, rntm);
 	  }
 
 	  bli_gemmsup_ref_var2m( BLIS_TRANSPOSE,

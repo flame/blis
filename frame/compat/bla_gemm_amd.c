@@ -712,6 +712,7 @@ void zgemm_
 
     //dim_t nt = bli_thread_get_num_threads(); // get number of threads
     bool nt = bli_thread_get_is_parallel(); // Check if parallel zgemm is invoked.
+
     /*
     Invoking the API for input sizes with k=1.
     - For single thread, the API has no constraints before invoking.
@@ -735,11 +736,83 @@ void zgemm_
         return;
     }
 
+    /* Call Gemv when m/n=1 */
+    if (n0 == 1)
+    {
+        if (bli_is_notrans(blis_transa))
+        {
+            bli_zgemv_unf_var2(
+                BLIS_NO_TRANSPOSE,
+                bli_extract_conj(blis_transb),
+                m0, k0,
+                (dcomplex *)alpha,
+                (dcomplex *)a, rs_a, cs_a,
+                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+                (dcomplex *)beta,
+                c, rs_c,
+                ((void *)0));
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+
+            return;
+        }
+#if 0
+/*** Code is disabled as bli_zgemv_unf_var1 not optimised ***
+     Calling below unoptimised variant causes regression  ***/
+        else
+        {
+            bli_zgemv_unf_var1(
+                blis_transa,
+                bli_extract_conj(blis_transb),
+                k0, m0,
+                (dcomplex *)alpha,
+                (dcomplex *)a, rs_a, cs_a,
+                (dcomplex *)b, bli_is_notrans(blis_transb) ? rs_b : cs_b,
+                (dcomplex *)beta,
+                c, rs_c,
+                ((void *)0));
+        }
+#endif
+    }
+    else if (m0 == 1)
+    {
+        if (bli_is_trans(blis_transb))
+        {
+            bli_zgemv_unf_var2(
+                blis_transb,
+                bli_extract_conj(blis_transa),
+                k0, n0,
+                (dcomplex *)alpha,
+                (dcomplex *)b, cs_b, rs_b,
+                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+                (dcomplex *)beta,
+                c, cs_c,
+                ((void *)0));
+            AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+            return;
+        }
+#if 0
+/*** Code is disabled as bli_zgemv_unf_var1 not optimised ***
+     Calling below unoptimised variant causes regression  ***/
+
+        else
+        {
+            bli_zgemv_unf_var1(
+                blis_transb,
+                bli_extract_conj(blis_transa),
+                n0, k0,
+                (dcomplex *)alpha,
+                (dcomplex *)b, cs_b, rs_b,
+                (dcomplex *)a, bli_is_notrans(blis_transa) ? cs_a : rs_a,
+                (dcomplex *)beta,
+                c, cs_c,
+                ((void *)0));
+        }
+#endif
+    }
 #ifdef BLIS_ENABLE_SMALL_MATRIX
 
-    if( ( (nt == 0) && (m0 <= 512 ) && ( n0 <= 512 ) && ( k0 <= 512 ) ) ||
-        ( (nt == 1) && ((( m0 <= 32)||(n0 <= 32)||(k0 <=32)) && ((m0+n0+k0)<=100)) )
-      )
+    if (((nt == 0) && (m0 <= 40) && (n0 <= 40) && (k0 <= 512)) ||
+        ((nt == 1) && (((m0 <= 32) || (n0 <= 32) || (k0 <= 32)) && ((m0 + n0 + k0) <= 100))))
     {
         err_t status = BLIS_NOT_YET_IMPLEMENTED;
         if (bli_is_notrans(blis_transa))
@@ -775,6 +848,15 @@ void zgemm_
         }
     }
 #endif
+
+    err_t status = bli_gemmsup(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
+    if (status == BLIS_SUCCESS)
+    {
+        AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
+        AOCL_DTL_TRACE_EXIT(AOCL_DTL_LEVEL_TRACE_1)
+        return;
+    }
+
     // fall back on native path when zgemm is not handled in sup path.
     bli_gemmnat(&alphao, &ao, &bo, &betao, &co, NULL, NULL);
     AOCL_DTL_LOG_GEMM_STATS(AOCL_DTL_LEVEL_TRACE_1, *m, *n, *k);
