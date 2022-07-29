@@ -40,7 +40,7 @@
 
 // This string gets defined via -D on the command line when BLIS is compiled.
 // This string is (or rather, should be) only used here.
-static char* bli_version_str       = "4.0"; //BLIS_VERSION_STRING;
+static char* bli_version_str       = "3.2.1"; //BLIS_VERSION_STRING;
 static char* bli_int_type_size_str = STRINGIFY_INT( BLIS_INT_TYPE_SIZE );
 
 char* bli_info_get_version_str( void )                { return bli_version_str; }
