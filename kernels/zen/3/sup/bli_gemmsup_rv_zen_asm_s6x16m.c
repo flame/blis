@@ -5,7 +5,7 @@
    libraries.
 
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020-2022, Advanced Micro Devices, Inc.
 
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
@@ -2231,22 +2231,28 @@ void bli_sgemmsup_rv_zen_asm_6x2m
 
 	label(.SROWSTORED)
 		
-	vfmadd231ps(mem(rcx), xmm3, xmm4)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm4)
 	vmovlpd(xmm4, mem(rcx))
 	add(rdi, rcx)	
-	vfmadd231ps(mem(rcx), xmm3, xmm6)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm6)
 	vmovlpd(xmm6, mem(rcx))
 	add(rdi, rcx)	
-	vfmadd231ps(mem(rcx), xmm3, xmm8)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm8)
 	vmovlpd(xmm8, mem(rcx))
 	add(rdi, rcx)	
-	vfmadd231ps(mem(rcx), xmm3, xmm10)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm10)
 	vmovlpd(xmm10, mem(rcx))
 	add(rdi, rcx)	
-	vfmadd231ps(mem(rcx), xmm3, xmm12)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm12)
 	vmovlpd(xmm12, mem(rcx))
 	add(rdi, rcx)	
-	vfmadd231ps(mem(rcx), xmm3, xmm14)
+	vmovsd(mem(rcx), xmm0)
+	vfmadd231ps(xmm0, xmm3, xmm14)
 	vmovlpd(xmm14, mem(rcx))
 		
 	jmp(.SDONE)                        // jump to end.

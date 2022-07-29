@@ -3,7 +3,7 @@
    An object-based framework for developing high-performance BLAS-like
    libraries.
    Copyright (C) 2014, The University of Texas at Austin
-   Copyright (C) 2020, Advanced Micro Devices, Inc.
+   Copyright (C) 2020 - 2022 , Advanced Micro Devices, Inc.
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -516,7 +516,8 @@ void bli_sgemmsup_rd_zen_asm_1x16
     je(.SBETAZERO)                     // if ZF = 1, jump to beta == 0 case
 
     label(.SROWSTORED)    
-    vfmadd231ps(mem(rcx), ymm3, ymm4)
+    vmovups(mem(rcx), xmm0)
+    vfmadd231ps(xmm0, xmm3, xmm4)
     vmovups(xmm4, mem(rcx))
     jmp(.SDONE)                        // jump to end.
 
